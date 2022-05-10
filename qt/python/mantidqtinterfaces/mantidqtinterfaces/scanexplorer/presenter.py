@@ -113,6 +113,7 @@ class ScanExplorerPresenter:
         @param files: the list of the path to each file selected
         """
         self.view.file_line_edit.setText(', '.join(files))
+        self.on_line_edited()
 
     def on_line_edited(self):
         """
