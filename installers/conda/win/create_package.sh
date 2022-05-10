@@ -204,7 +204,7 @@ NOTEBOOK_ICON="$SCRIPT_DRIVE_LETTER:${NOTEBOOK_ICON:2}"
 LICENSE_PATH=$THIS_SCRIPT_DIR/../../../LICENSE.txt
 LICENSE_PATH=${LICENSE_PATH////\\}
 LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
-echo Workebench Icon: $WORKBENCH_ICON
+echo Workbench Icon: $WORKBENCH_ICON
 
 # Generate uninstall commands to make sure to only remove files that are copied by the installer
 echo Generating uninstaller helper files
