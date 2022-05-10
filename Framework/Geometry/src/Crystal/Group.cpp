@@ -74,6 +74,7 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   result.reserve(m_allOperations.size());
   std::transform(m_allOperations.cbegin(), m_allOperations.cend(), std::back_inserter(result),
                  [&vector](const auto &operation) { return Geometry::getWrappedVector(operation * vector); });
+
   std::sort(result.begin(), result.end(), AtomPositionsLessThan());
   result.erase(std::unique(result.begin(), result.end()), result.end());
 

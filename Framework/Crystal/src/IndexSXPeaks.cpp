@@ -182,7 +182,7 @@ void IndexSXPeaks::exec() {
     V3D Qs = peak.getQSampleFrame() / (2.0 * M_PI);
     peaks.emplace_back(Qs[0], Qs[1], Qs[2]);
   }
-  assert(peaks.size() == npeaks);
+  assert(peaks.size() >= 2);
 
   // Sanity check the generated peaks.
   validateNotColinear(peaks);

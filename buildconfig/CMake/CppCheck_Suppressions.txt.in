@@ -276,9 +276,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:6
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ConventionalCell.cpp:143
-duplicateAssignExpression:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:2651
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:2819
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:396
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Detector.cpp:114
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/DetectorGroup.cpp:155
