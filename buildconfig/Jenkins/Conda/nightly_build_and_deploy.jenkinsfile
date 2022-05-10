@@ -1,5 +1,6 @@
 // This script expects the following environment variables to be set by the Jenkins job:
-// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes whilst updating it.
+// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes
+// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from conda-recipes
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 // ANACONDA_CHANNEL - The channel to publish to on Anaconda.org
