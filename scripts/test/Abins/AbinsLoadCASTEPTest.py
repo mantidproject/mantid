@@ -11,18 +11,16 @@ import abins.input
 import abins.test_helpers
 from abins.input import CASTEPLoader
 
-try:
-    import euphonic  # noqa: F401
-    euphonic_available = True
-except ModuleNotFoundError:
-    euphonic_available = False
 
-
-@unittest.skipUnless(euphonic_available, "Euphonic library could not be imported")
 class LoadCastepUsingEuphonicTest(unittest.TestCase):
-    from euphonic import QpointPhononModes
-    from_castep = Mock(wraps=QpointPhononModes.from_castep)
+    try:
+        from euphonic import QpointPhononModes
+        from_castep = Mock(wraps=QpointPhononModes.from_castep)
+        euphonic_available = True
+    except ModuleNotFoundError:
+        euphonic_available = False
 
+    @unittest.skipUnless(euphonic_available, "Euphonic library could not be imported")
     @patch('euphonic.QpointPhononModes.from_castep')
     def test_euphonic_castep_call(self, from_castep):
         # We mostly trust Euphonic to read the file, so just check the right
