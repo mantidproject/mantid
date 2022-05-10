@@ -4,23 +4,20 @@ from matplotlib.widgets import RectangleSelector
 from matplotlib.patches import Rectangle
 import numpy as np
 
-from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, cursor_info, RectangleSelectionLinePlot
+from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, KeyHandler, cursor_info
+from mantid.simpleapi import CreateWorkspace
 
 
-class MultipleRectanglesSelectorMtd(RectangleSelector):
-    pass
+class MultipleRectangleSelectionLinePlot(KeyHandler):
 
-
-class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
-
-    STATUS_MESSAGE = "Keys: arrow keys control mouse pointer, workspace cuts: c=both cuts, x=X, y=Y."
-    SELECTION_KEYS = ('c', 'x', 'y', 'control')
+    STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
+    SELECTION_KEYS = ('c', 'x', 'y')
 
     def __init__(self, plotter: LinePlots, exporter: Any):
         super().__init__(plotter, exporter)
 
         ax = plotter.image_axes
-        self._selector = MultipleRectanglesSelectorMtd(ax, self._on_rectangle_selected)
+        self._selector = RectangleSelector(ax, self._on_rectangle_selected)
 
         self._rectangles = []
 
@@ -56,8 +53,24 @@ class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
 
     def _update_plot_values(self, window_range: tuple):
         """
+        Update the line plots with the new values.
+        @param window_range: the range of the window, in the form (xmin, xmax, ymin, ymax)
+        """
+
+        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes(window_range)
+
+        # transmit the new plot values and update
+        self.plotter.plot_x_line(x_line_x_axis, x_line_y_values)
+        self.plotter.plot_y_line(y_line_x_axis, y_line_y_values)
+
+        self.plotter.update_line_plot_limits()
+        self.plotter.redraw()
+
+    def _compute_plot_axes(self, window_range: tuple) -> (tuple, tuple):
+        """
         Compute values for the line plots and redraw them. It sums the values from every patch currently drawn.
-        @param window_range: the range of the window, in the form [xmin, xmax, ymin, ymax]
+        @param window_range: the range of the window, in the form (xmin, xmax, ymin, ymax)
+        @return the x and y plots, with the x axis and the associated y values, as a tuple of lists.
         """
         xmin, xmax = window_range[0], window_range[1]
         ymin, ymax = window_range[2], window_range[3]
@@ -67,14 +80,14 @@ class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
         x_line_x_axis = np.linspace(xmin, xmax, arr.shape[1])
         y_line_x_axis = np.linspace(ymin, ymax, arr.shape[0])
 
-        x_line_y_axis = np.zeros(arr.shape[1])
-        y_line_y_axis = np.zeros(arr.shape[0])
+        x_line_y_values = np.zeros(arr.shape[1])
+        y_line_y_values = np.zeros(arr.shape[0])
 
         x_step = (xmax - xmin) / arr.shape[1]
         y_step = (ymax - ymin) / arr.shape[0]
 
         # sum the values inside every patch
-        # TODO stop summing things multiple times when
+        # TODO stop summing things multiple times when overlaps
         for rect in self._rectangles:
             # get rectangle position in the image
             x0, y0 = rect.get_xy()
@@ -96,17 +109,12 @@ class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
 
             # add the results to the yaxis
             for x_ind in range(x0_ind, x1_ind):
-                x_line_y_axis[x_ind] += rect_x_sum[x_ind - x0_ind]
+                x_line_y_values[x_ind] += rect_x_sum[x_ind - x0_ind]
 
             for y_ind in range(y0_ind, y1_ind):
-                y_line_y_axis[y_ind] += rect_y_sum[y_ind - y0_ind]
+                y_line_y_values[y_ind] += rect_y_sum[y_ind - y0_ind]
 
-        # transmit the new plot values and update
-        self.plotter.plot_x_line(x_line_x_axis, x_line_y_axis)
-        self.plotter.plot_y_line(y_line_x_axis, y_line_y_axis)
-
-        self.plotter.update_line_plot_limits()
-        self.plotter.redraw()
+        return (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values)
 
     def clear(self):
         """
@@ -117,3 +125,16 @@ class MultipleRectangleSelectionLinePlot(RectangleSelectionLinePlot):
         self._rectangles = []
         self.plotter.update_line_plot_limits()
         self.plotter.redraw()
+
+    def handle_key(self, key: str):
+        """
+        Handle user key inputs, if they are supported keys. For now, create cuts only.
+        @param key: the character pressed by the user
+        """
+        if key not in self.SELECTION_KEYS:
+            return
+        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes(self.plotter.image.get_extent())
+        if key in ('c', 'x'):
+            CreateWorkspace(DataX=x_line_x_axis, DataY=x_line_y_values, OutputWorkspace="x_cut")
+        if key in ('c', 'y'):
+            CreateWorkspace(DataX=y_line_x_axis, DataY=y_line_y_values, OutputWorkspace="y_cut")
