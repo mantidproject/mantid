@@ -149,7 +149,7 @@ pipeline {
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps{
         // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
-        copyArtifacts filter: '*.tar.bz2',
+        copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
           selector: specific('${BUILD_NUMBER}')
