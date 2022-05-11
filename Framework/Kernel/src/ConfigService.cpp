@@ -146,6 +146,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   m_configPaths.insert("icatDownload.directory");
   m_configPaths.insert("datasearch.directories");
   m_configPaths.insert("python.plugins.manifest");
+  m_configPaths.insert("python.templates.directory");
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
