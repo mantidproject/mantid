@@ -59,15 +59,6 @@ void initTypeLookup(PyTypeIndex &index) {
   using AsciiStrHandler = TypedPropertyValueHandler<std::string>;
   // Both versions have unicode objects
   index.emplace(&PyUnicode_Type, std::make_shared<AsciiStrHandler>());
-
-#if PY_MAJOR_VERSION < 3
-  // Version < 3 had separate fixed-precision long and arbitrary precision
-  // long objects. Handle these too
-  index.emplace(&PyInt_Type, std::make_shared<IntHandler>());
-  // Version 2 also has the PyString_Type
-  index.emplace(&PyString_Type, std::make_shared<AsciiStrHandler>());
-#endif
-
   // Handle a dictionary type
   index.emplace(&PyDict_Type, std::make_shared<MappingTypeHandler>());
 }
@@ -100,12 +91,6 @@ void initArrayLookup(PyArrayIndex &index) {
 
   using LongIntArrayHandler = SequenceTypeHandler<std::vector<long>>;
   index.emplace("LongIntArray", std::make_shared<LongIntArrayHandler>());
-
-#if PY_MAJOR_VERSION < 3
-  // Backwards compatible behaviour
-  using IntArrayHandler = SequenceTypeHandler<std::vector<int>>;
-  index.emplace("IntArray", std::make_shared<IntArrayHandler>());
-#endif
 }
 
 /**
@@ -240,21 +225,12 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
       return std::string("LongIntArray");
     }
     GNU_DIAG_ON("parentheses-equality")
-
-#if PY_MAJOR_VERSION < 3
-    // In python 2 ints & longs are separate
-    if (PyInt_Check(item)) {
-      return std::string("IntArray");
-    }
-#endif
     if (PyFloat_Check(item)) {
       return std::string("FloatArray");
     }
-#if PY_MAJOR_VERSION >= 3
     if (PyUnicode_Check(item)) {
       return std::string("StringArray");
     }
-#endif
     if (PyBytes_Check(item)) {
       return std::string("StringArray");
     }

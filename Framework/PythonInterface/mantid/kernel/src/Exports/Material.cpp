@@ -74,11 +74,7 @@ void export_Material() {
       .add_property("temperature", make_function(&Material::temperature), "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
       .add_property("totalAtoms", make_function(&Material::totalAtoms), "Total number of atoms")
-#if PY_MAJOR_VERSION >= 3
       .def("__bool__", &toBool, "Returns True if any of the scattering values are non-zero")
-#else
-      .def("__nonzero__", &toBool, "Returns True if any of the scattering values are non-zero")
-#endif
       .def("cohScatterXSection", (double (Material::*)() const)(&Material::cohScatterXSection), (arg("self")),
            "Coherent Scattering Cross-Section for the given wavelength in "
            "barns")
