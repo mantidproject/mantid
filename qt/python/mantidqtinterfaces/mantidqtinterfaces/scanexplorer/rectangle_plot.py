@@ -76,18 +76,16 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         ymin, ymax = window_range[2], window_range[3]
         arr = self.plotter.image.get_array()
 
-        # prepare axes for data
+        mask_array = np.zeros(arr.shape)
+
+        # prepare x axes
         x_line_x_axis = np.linspace(xmin, xmax, arr.shape[1])
         y_line_x_axis = np.linspace(ymin, ymax, arr.shape[0])
-
-        x_line_y_values = np.zeros(arr.shape[1])
-        y_line_y_values = np.zeros(arr.shape[0])
 
         x_step = (xmax - xmin) / arr.shape[1]
         y_step = (ymax - ymin) / arr.shape[0]
 
-        # sum the values inside every patch
-        # TODO stop summing things multiple times when overlaps
+        # add every rectangle to the mask
         for rect in self._rectangles:
             # get rectangle position in the image
             x0, y0 = rect.get_xy()
@@ -101,18 +99,15 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             x1_ind = int(np.ceil((x1 - xmin) / x_step))
             y1_ind = int(np.ceil((y1 - ymin) / y_step))
 
-            # sum over the relevant slice
-            slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
+            # TODO find a more efficient / pythonic way for that
+            for x in range(x0_ind, x1_ind):
+                for y in range(y0_ind, y1_ind):
+                    mask_array[y][x] = 1
 
-            rect_x_sum = np.sum(slice_cut, axis=0)
-            rect_y_sum = np.sum(slice_cut, axis=1)
+        masked_array = np.ma.masked_where(condition=mask_array == 0, a=arr, copy=True)
 
-            # add the results to the yaxis
-            for x_ind in range(x0_ind, x1_ind):
-                x_line_y_values[x_ind] += rect_x_sum[x_ind - x0_ind]
-
-            for y_ind in range(y0_ind, y1_ind):
-                y_line_y_values[y_ind] += rect_y_sum[y_ind - y0_ind]
+        x_line_y_values = np.sum(masked_array, axis=0)
+        y_line_y_values = np.sum(masked_array, axis=1)
 
         return (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values)
 
