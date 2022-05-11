@@ -74,7 +74,7 @@ def handle_suite(suite):
 def convert_xml(filename):
     """Convert a single XML file to SQL db"""
     # Parse the xml
-    print "Reading", filename
+    print("Reading", filename)
     doc = parse(filename)
     suites = doc.getElementsByTagName("testsuite")
     for suite in suites:
