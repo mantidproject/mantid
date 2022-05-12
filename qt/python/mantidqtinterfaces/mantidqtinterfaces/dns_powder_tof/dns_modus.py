@@ -18,6 +18,14 @@ from mantidqtinterfaces.dns_powder_tof.plot.tof_powder_plot_widget import DNSTof
 from mantidqtinterfaces.dns_powder_tof.script_generator.tof_powder_script_generator_widget import DNSTofPowderScriptGeneratorWidget
 from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_widget import DNSXMLDumpWidget
 
+# powder elastic
+from mantidqtinterfaces.dns_powder_elastic.options.elastic_powder_options_widget import \
+    DNSElasticPowderOptionsWidget
+from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_widget import \
+    DNSElasticPowderPlotWidget
+from mantidqtinterfaces.dns_powder_elastic.script_generator.elastic_powder_script_generator_widget import \
+    DNSElasticPowderScriptGeneratorWidget
+
 
 class DNSModus:
     """
@@ -32,16 +40,30 @@ class DNSModus:
         self.widgets = OrderedDict()
 
         self._mode_map = {
-            "powder_tof": ["paths", "file_selector", "tof_powder_options", "tof_powder_script_generator", "xml_dump", "plot_tof_powder"]
+            'powder_tof': [
+                'paths', 'file_selector', 'tof_powder_options',
+                'tof_powder_script_generator', 'xml_dump', 'plot_tof_powder'
+            ],
+            'powder_elastic': [
+                'paths', 'file_selector', 'elastic_powder_options',
+                'elastic_powder_script_generator', 'xml_dump',
+                'plot_elastic_powder'
+            ],
         }
         # Yapf: disable
         self._widget_map = {
-            "paths": DNSPathWidget,
-            "file_selector": DNSFileSelectorWidget,
-            "tof_powder_options": DNSTofPowderOptionsWidget,
-            "tof_powder_script_generator": DNSTofPowderScriptGeneratorWidget,
-            "xml_dump": DNSXMLDumpWidget,
-            "plot_tof_powder": DNSTofPowderPlotWidget,
+            'paths': DNSPathWidget,
+            'file_selector': DNSFileSelectorWidget,
+            'tof_powder_options': DNSTofPowderOptionsWidget,
+            'tof_powder_script_generator': DNSTofPowderScriptGeneratorWidget,
+            'xml_dump': DNSXMLDumpWidget,
+            'plot_tof_powder': DNSTofPowderPlotWidget,
+
+            # powder elastic
+            'elastic_powder_options': DNSElasticPowderOptionsWidget,
+            'elastic_powder_script_generator':
+                DNSElasticPowderScriptGeneratorWidget,
+            'plot_elastic_powder': DNSElasticPowderPlotWidget,
         }
         # Yapf: enable
 

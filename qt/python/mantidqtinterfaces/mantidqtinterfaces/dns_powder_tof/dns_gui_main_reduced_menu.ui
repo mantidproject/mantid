@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>701</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">
@@ -52,6 +52,7 @@
       <string>Change Mode</string>
      </property>
      <addaction name="actionPowder_TOF"/>
+     <addaction name="actionPowder_elastic"/>
     </widget>
     <addaction name="menuChange_Mode"/>
    </widget>
