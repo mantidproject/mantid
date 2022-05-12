@@ -1010,10 +1010,15 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           lambda = acosh(-D / 2.0);
         }
         if (std::abs(D) > 2.0) {
-          m_rawData[i][j] *= static_cast<T>(cosh((k + 1 - iMinusj) * lambda) -
-                                            cosh((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
-                                                                                  // are 1-based in the paper
-          m_rawData[i][j] /= static_cast<T>(2 * sinh(lambda) * sinh((k + 1) * lambda));
+          long double a = cosh((k + 1 - iMinusj) * lambda);
+          long double b = cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
+          long double c = 2 * sinh(lambda) * sinh((k + 1) * lambda);
+          long double inf = std::numeric_limits<long double>::infinity();
+          if (a == inf || b == inf || c == inf)
+            throw std::runtime_error("Overflow during matrix inversion");
+          long double value = m_rawData[i][j];
+          value *= (a - b) / c;
+          m_rawData[i][j] = static_cast<T>(value);
         } else if (std::abs(D) == 2.0) {
           m_rawData[i][j] *= static_cast<T>((2 * k + 2 - iMinusj - iPlusj - 2) * (iPlusj + 2 - iMinusj));
           m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
