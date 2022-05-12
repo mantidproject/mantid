@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -15,6 +16,7 @@
 
 using namespace Mantid::API;
 using Mantid::PythonInterface::AlgorithmIDProxy;
+using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
 using namespace boost::python;
 
 namespace {
@@ -38,6 +40,21 @@ AlgorithmManagerImpl &instance() {
   return mgr;
 }
 
+IAlgorithm_sptr create(AlgorithmManagerImpl *self, const std::string &algName, const int &version = -1) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  return self->create(algName, version);
+}
+
+void clear(AlgorithmManagerImpl *self) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  return self->clear();
+}
+
+void cancelAll(AlgorithmManagerImpl *self) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  return self->cancelAll();
+}
+
 /**
  * Return the algorithm identified by the given ID. A wrapper version that takes
  * a
@@ -46,6 +63,7 @@ AlgorithmManagerImpl &instance() {
  * @param id An algorithm ID
  */
 IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl const *const self, AlgorithmIDProxy idHolder) {
+  ReleaseGlobalInterpreterLock releaseGIL;
   return self->getAlgorithm(idHolder.id);
 }
 
@@ -56,7 +74,10 @@ IAlgorithm_sptr getAlgorithm(AlgorithmManagerImpl const *const self, AlgorithmID
  * @param self The calling object
  * @param id An algorithm ID
  */
-void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) { return self.removeById(idHolder.id); }
+void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  return self.removeById(idHolder.id);
+}
 
 /**
  * @param self A reference to the calling object
@@ -64,6 +85,7 @@ void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) { return 
  * @return A python list of managed algorithms that are currently running
  */
 boost::python::list runningInstancesOf(AlgorithmManagerImpl const *const self, const std::string &algName) {
+  ReleaseGlobalInterpreterLock releaseGIL;
   boost::python::list algs;
   auto mgrAlgs = self->runningInstancesOf(algName);
   for (auto &mgrAlg : mgrAlgs) {
@@ -80,7 +102,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 // Seen with GCC 7.1.1 and Boost 1.63.0
 GNU_DIAG_OFF("conversion")
 /// Define overload generators
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads, AlgorithmManagerImpl::create, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(create_overloads, create, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads, AlgorithmManagerImpl::createUnmanaged, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
@@ -90,8 +112,7 @@ GNU_DIAG_ON("unused-local-typedef")
 void export_AlgorithmManager() {
 
   class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl", no_init)
-      .def("create", &AlgorithmManagerImpl::create,
-           create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
+      .def("create", &create, create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
       .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
            createUnmanaged_overloads((arg("name"), arg("version")), "Creates an unmanaged algorithm."))
       .def("size", &AlgorithmManagerImpl::size, arg("self"), "Returns the number of managed algorithms")
@@ -101,9 +122,8 @@ void export_AlgorithmManager() {
       .def("runningInstancesOf", &runningInstancesOf, (arg("self"), arg("algorithm_name")),
            "Returns a list of managed algorithm instances that are "
            "currently executing")
-      .def("clear", &AlgorithmManagerImpl::clear, arg("self"), "Clears the current list of managed algorithms")
-      .def("cancelAll", &AlgorithmManagerImpl::cancelAll, arg("self"),
-           "Requests that all currently running algorithms be cancelled")
+      .def("clear", &clear, arg("self"), "Clears the current list of managed algorithms")
+      .def("cancelAll", &cancelAll, arg("self"), "Requests that all currently running algorithms be cancelled")
       .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
       .staticmethod("Instance");
