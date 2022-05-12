@@ -161,10 +161,9 @@ pipeline {
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
-        script { deletion_script = "${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh" }
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
       }
     }
   }
