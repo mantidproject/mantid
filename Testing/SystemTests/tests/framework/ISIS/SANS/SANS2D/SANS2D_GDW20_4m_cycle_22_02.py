@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import os
-import sys
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
@@ -39,9 +37,6 @@ class SANS2D_GDW20_4m_22_02_2D_M3(systemtesting.MantidSystemTest):
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2D_GDW20_4m_22_02_2D_M4(systemtesting.MantidSystemTest):
-    def skipTests(self):
-        return sys.platform == 'win32' and 'CONDA_PREFIX' in os.environ
-
     def requiredMemoryMB(self):
         return 2000
 
@@ -55,9 +50,9 @@ class SANS2D_GDW20_4m_22_02_2D_M4(systemtesting.MantidSystemTest):
         self.returned = WavRangeReduction()
 
     def validate(self):
-        self.tolerance = 7e-5  # Tolerance added to handle conda float rounding differences.
+        self.tolerance = 3e-8  # Required for slightly differing error results on Windows conda builds.
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('SpectraMap')
 
-        return self.returned, "SANS2D_GDW20_4m_cycle_22_02_2D_M4_ref.nxs"
+        return self.returned, "SANS2D_GDW20_4m_cycle_22_02_2D_M4_v3_ref.nxs"
