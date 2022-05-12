@@ -38,6 +38,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param click_event: the event corresponding to the moment the user clicked and started drawing the rectangle
         @param release_event: the event corresponding to the moment the user released the mouse button
         """
+        print("rectangle selected")
         cinfo_click = cursor_info(self.plotter.image, click_event.xdata, click_event.ydata)
         if cinfo_click is None:
             return
@@ -54,11 +55,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
                                  release_event.ydata - click_event.ydata)
 
         elif interaction == UserInteraction.RECTANGLE_SELECTED:
-            pass
-        elif interaction == UserInteraction.RECTANGLE_MOVED:
-            pass
-        elif interaction == UserInteraction.RECTANGLE_RESHAPED:
-            pass
+            self._select_rectangle(click_event.xdata, click_event.ydata)
+
+        elif interaction == UserInteraction.RECTANGLE_MOVED or interaction == UserInteraction.RECTANGLE_RESHAPED:
+            self._move_selected_rectangle((click_event.xdata, click_event.ydata),
+                                          release_event.xdata - click_event.xdata,
+                                          release_event.ydata - click_event.ydata)
 
         self._update_plot_values(cinfo_click.extent)
 
@@ -67,14 +69,15 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         Determine if the user drew another rectangle, moved the currently selected one, changed it, or deselected.
         A bit heuristical since RectangleSelector does not bother telling us what kind of event triggered
          _on_rectangle_selected, only the end result.
-        TODO
+        @param click_event: the event triggered by the user clicking
+        @param release_event: the event triggered by the user releasing the mouse button.
         """
 
         # if the start and end points are the same, it's a click
         if click_event.xdata == release_event.xdata and click_event.ydata == release_event.ydata:
-            print("click")
             return UserInteraction.RECTANGLE_SELECTED
 
+        # if there is no rectangle on screen, we are creating one
         if not self._current_rectangle:
             return UserInteraction.RECTANGLE_CREATED
 
@@ -83,15 +86,34 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         y1 = y0 + self._current_rectangle.get_height()
 
         # TODO float equality is a bad idea, change to epsilon
+        # if one corner didn't change from the currently selected rectangle, we assume it has been reshaped
         if x0 == click_event.xdata or x0 == release_event.xdata or x1 == click_event.xdata or x1 == release_event.xdata:
             if y0 == click_event.ydata or y0 == release_event.ydata or y1 == click_event.ydata or y1 == release_event.ydata:
                 return UserInteraction.RECTANGLE_RESHAPED
 
+        # if the shape didn't change from the currently selected rectangle, we assume it has been moved
         if self._current_rectangle.get_width() == abs(click_event.xdata - release_event.xdata) and \
            self._current_rectangle.get_height() == abs(click_event.ydata - release_event.ydata):
             return UserInteraction.RECTANGLE_MOVED
 
         return UserInteraction.RECTANGLE_CREATED
+
+    def _select_rectangle(self, xpos: float, ypos: float):
+        """
+        Select the rectangle at position (xpos, ypos), if there is one. The rectangle selected is the first one found,
+        i.e. the oldest one, normally.
+        @param xpos: x axis position of the click.
+        @param ypos: y axis position of the click
+        """
+        for rect in self._rectangles:
+            x0, y0 = rect.get_xy()
+            x1 = x0 + rect.get_width()
+            y1 = y0 + rect.get_height()
+
+            if x0 <= xpos <= x1 and y0 <= ypos <= y1:
+                self._current_rectangle = rect
+                self._selector.extents = (x0, x1, y0, y1)
+                return
 
     def _draw_rectangle(self, point: tuple, width: float, height: float):
         """
@@ -104,6 +126,20 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self.plotter.image_axes.add_patch(rectangle_patch)
         self._rectangles.append(rectangle_patch)
         self._current_rectangle = rectangle_patch
+
+    def _move_selected_rectangle(self, new_point: tuple, new_width: float, new_height: float):
+        """
+        Move or reshape the currently selected rectangle.
+        @param new_point: the new starting corner of the rectangle
+        @param new_width: the new width
+        @param new_height: the new height
+        """
+        rectangle_patch = Rectangle(new_point, new_width, new_height, edgecolor="black", facecolor='none', alpha=0.7)
+        self.plotter.image_axes.add_patch(rectangle_patch)
+        self._current_rectangle.remove()
+        self._current_rectangle = rectangle_patch
+        self._rectangles.pop()
+        self._rectangles.append(rectangle_patch)
 
     def _update_plot_values(self, window_range: tuple):
         """
