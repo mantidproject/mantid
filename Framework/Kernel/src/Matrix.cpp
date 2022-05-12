@@ -988,29 +988,29 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     // use analytic expression as described in G Y Hu and R F O'Connell (1996)
     T scalefactor = numRows() > 1 ? m_rawData[1][0] : 1;
     *this /= scalefactor;
-    T D = m_rawData[0][0];
-    auto k = static_cast<T>(numRows());
+    long double D = m_rawData[0][0];
+    long double k = numRows();
     for (size_t i = 0; i < numRows(); i++) {
       for (size_t j = 0; j < numCols(); j++) {
-        T lambda;
-        auto iMinusj = static_cast<T>(i) - static_cast<T>(j);
-        auto iPlusj = static_cast<T>(i) + static_cast<T>(j);
+        long double lambda;
+        long double iMinusj = static_cast<long double>(i) - static_cast<long double>(j);
+        long double iPlusj = static_cast<long double>(i) + static_cast<long double>(j);
         if (D >= 2) {
-          m_rawData[i][j] = static_cast<T>(pow(-1.0, static_cast<double>(i + j)));
-          lambda = static_cast<T>(acosh(D / 2));
-        } else if (D > -2) {
-          m_rawData[i][j] = 1;                   // use +1 here instead of the -1 in the paper
-          lambda = static_cast<T>(acos(-D / 2)); // extra minus sign here compared to paper
+          m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
+          lambda = acosh(D / 2.0);
+        } else if (D > -2.0) {
+          m_rawData[i][j] = 1;     // use +1 here instead of the -1 in the paper
+          lambda = acos(-D / 2.0); // extra minus sign here compared to paper
         } else {
           m_rawData[i][j] = -1;
-          lambda = static_cast<T>(acosh(-D / 2));
+          lambda = acosh(-D / 2.0);
         }
-        if (std::abs(D) > 2) {
+        if (std::abs(D) > 2.0) {
           m_rawData[i][j] *= static_cast<T>(cosh((k + 1 - std::abs(iMinusj)) * lambda) -
                                             cosh((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
                                                                                   // are 1-based in the paper
           m_rawData[i][j] /= static_cast<T>(2 * sinh(lambda) * sinh((k + 1) * lambda));
-        } else if (std::abs(D) == 2) {
+        } else if (std::abs(D) == 2.0) {
           m_rawData[i][j] *=
               static_cast<T>((2 * k + 2 - std::abs(iMinusj) - iPlusj - 2) * (iPlusj + 2 - std::abs(iMinusj)));
           m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
