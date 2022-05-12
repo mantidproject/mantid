@@ -994,7 +994,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
       for (size_t j = 0; j < numCols(); j++) {
         long double lambda;
         long double iMinusj = static_cast<long double>(i) - static_cast<long double>(j);
-        long double iPlusj = static_cast<long double>(i) + static_cast<long double>(j);
+        long double iPlusj = i + j;
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
           lambda = acosh(D / 2.0);
