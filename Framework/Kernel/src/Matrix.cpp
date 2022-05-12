@@ -993,7 +993,11 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     for (size_t i = 0; i < numRows(); i++) {
       for (size_t j = 0; j < numCols(); j++) {
         long double lambda;
-        long double iMinusj = static_cast<long double>(i) - static_cast<long double>(j);
+        long double iMinusj;
+        if (i > j)
+          iMinusj = i - j;
+        else
+          iMinusj = j - i;
         long double iPlusj = i + j;
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
@@ -1006,16 +1010,15 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           lambda = acosh(-D / 2.0);
         }
         if (std::abs(D) > 2.0) {
-          m_rawData[i][j] *= static_cast<T>(cosh((k + 1 - std::abs(iMinusj)) * lambda) -
+          m_rawData[i][j] *= static_cast<T>(cosh((k + 1 - iMinusj) * lambda) -
                                             cosh((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
                                                                                   // are 1-based in the paper
           m_rawData[i][j] /= static_cast<T>(2 * sinh(lambda) * sinh((k + 1) * lambda));
         } else if (std::abs(D) == 2.0) {
-          m_rawData[i][j] *=
-              static_cast<T>((2 * k + 2 - std::abs(iMinusj) - iPlusj - 2) * (iPlusj + 2 - std::abs(iMinusj)));
+          m_rawData[i][j] *= static_cast<T>((2 * k + 2 - iMinusj - iPlusj - 2) * (iPlusj + 2 - iMinusj));
           m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
         } else {
-          m_rawData[i][j] *= static_cast<T>(cos((k + 1 - std::abs(iMinusj)) * lambda) -
+          m_rawData[i][j] *= static_cast<T>(cos((k + 1 - iMinusj) * lambda) -
                                             cos((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
                                                                                  // are 1-based in the paper
           m_rawData[i][j] /= static_cast<T>(2 * sin(lambda) * sin((k + 1) * lambda));
