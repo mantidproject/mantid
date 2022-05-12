@@ -161,7 +161,8 @@ class SuperplotViewSide(QDockWidget):
         ws_list.setMinimumSize(QSize(size0 + size1, 0))
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
                                                   "WorkspaceGroup",
-                                                  "EventWorkspace"])
+                                                  "EventWorkspace",
+                                                  "RebinnedOutput"])
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
