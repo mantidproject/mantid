@@ -187,15 +187,13 @@ Section "-Core installation"
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
         CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "${WORKBENCH_ICON}"
-        # Mantid Notebook shortcuts are temporarily disabled because they are not working!
-        # CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "${NOTEBOOK_ICON}"
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
     !insertmacro MUI_STARTMENU_WRITE_END
 
     # Create desktop shortcuts
     CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "${WORKBENCH_ICON}"
-    # Mantid Notebook shortcuts are temporarily disabled because they are not working!
-    # CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "cmd.exe" "/C $\"call $INSTDIR\bin\pythonw.exe -m notebook --notebook-dir=%userprofile%$\"" "${NOTEBOOK_ICON}"
+    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "${NOTEBOOK_ICON}"
 
 SectionEnd
 
@@ -226,4 +224,3 @@ Section "Uninstall"
     DeleteRegKey HKCU "Software\${PACKAGE_VENDOR}\${PACKAGE_NAME}"
 
 SectionEnd
-
