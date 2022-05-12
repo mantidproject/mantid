@@ -1,5 +1,5 @@
 # Mantid NSIS script
-# Assumes you have passed /DVERSION, /DOUTFILE_NAME, /DPACKAGE_DIR, /DPACKAGE_SUFFIX, /DMANTID_ICON, /DWORKBENCH_ICON, /DNOTEBOOK_ICON, /DMUI_PAGE_LICENSE_PATH as arguments
+# Assumes you have passed /DVERSION, /DOUTFILE_NAME, /DPACKAGE_DIR, /DPACKAGE_SUFFIX, /DMANTID_ICON, /DMUI_PAGE_LICENSE_PATH as arguments
 
 # This must be set for long paths to work properly.
 # Unicode only defaults to true in NSIS 3.07 onwards.
@@ -186,14 +186,14 @@ Section "-Core installation"
     # Create shortucts for start menu
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
         CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "${WORKBENCH_ICON}"
-        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "${NOTEBOOK_ICON}"
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "$INSTDIR\bin\mantid_workbench.ico"
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
     !insertmacro MUI_STARTMENU_WRITE_END
 
     # Create desktop shortcuts
-    CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "${WORKBENCH_ICON}"
-    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "${NOTEBOOK_ICON}"
+    CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "$INSTDIR\bin\mantid_workbench.ico"
+    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
 
 SectionEnd
 
