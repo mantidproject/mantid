@@ -463,12 +463,12 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
       double lat, lon;
       std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
       const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
-      if (spatiallyInterpHisto.size() > 1) {
+      if ((spatiallyInterpHisto.size() > 1) && (spatiallyInterpHisto.size() != targetWS.getNumberBins(i))) {
         auto targetHisto = targetWS.histogram(i);
         interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
         targetWS.setHistogram(i, targetHisto);
       } else {
-        targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+        targetWS.mutableY(i) = spatiallyInterpHisto.y();
       }
     }
     PARALLEL_END_INTERRUPT_REGION
