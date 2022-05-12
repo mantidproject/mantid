@@ -1020,13 +1020,16 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           value *= (a - b) / c;
           m_rawData[i][j] = static_cast<T>(value);
         } else if (std::abs(D) == 2.0) {
-          m_rawData[i][j] *= static_cast<T>((2 * k + 2 - iMinusj - iPlusj - 2) * (iPlusj + 2 - iMinusj));
-          m_rawData[i][j] /= static_cast<T>((4 * (k + 1)));
+          long double value = m_rawData[i][j];
+          value *= (2 * k + 2 - iMinusj - iPlusj - 2) * (iPlusj + 2 - iMinusj);
+          value /= (4 * (k + 1));
+          m_rawData[i][j] = static_cast<T>(value);
         } else {
-          m_rawData[i][j] *= static_cast<T>(cos((k + 1 - iMinusj) * lambda) -
-                                            cos((k + 1 - iPlusj - 2) * lambda)); // extra -2 because i and j
-                                                                                 // are 1-based in the paper
-          m_rawData[i][j] /= static_cast<T>(2 * sin(lambda) * sin((k + 1) * lambda));
+          long double value = m_rawData[i][j];
+          value *= cos((k + 1 - iMinusj) * lambda) -
+                   cos((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
+          value /= 2 * sin(lambda) * sin((k + 1) * lambda);
+          m_rawData[i][j] = static_cast<T>(value);
         }
       }
     }
