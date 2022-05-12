@@ -7,6 +7,7 @@ import numpy as np
 
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, KeyHandler, cursor_info
 from mantid.simpleapi import CreateWorkspace
+from mantid.kernel import logger
 
 
 class UserInteraction(Enum):
@@ -19,7 +20,7 @@ class UserInteraction(Enum):
 class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
-    SELECTION_KEYS = ('c', 'x', 'y')
+    SELECTION_KEYS = ('c', 'x', 'y', 'f')
     EPSILON = 1e-5
 
     def __init__(self, plotter: LinePlots, exporter: Any):
@@ -38,7 +39,6 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param click_event: the event corresponding to the moment the user clicked and started drawing the rectangle
         @param release_event: the event corresponding to the moment the user released the mouse button
         """
-        print("rectangle selected")
         cinfo_click = cursor_info(self.plotter.image, click_event.xdata, click_event.ydata)
         if cinfo_click is None:
             return
@@ -201,6 +201,51 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         return (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values)
 
+    def _place_interpolated_rectangles(self):
+        """
+        Place new rectangles based on those already placed by the user. Only linearly interpolate new positions
+        from the center of the drawn rectangles. Only supports 2 rectangles.
+        """
+        if len(self._rectangles) != 2:
+            logger.warning("Cannot place more peak regions : current number of regions invalid "
+                           "(2 expected, {} found".format(len(self._rectangles)))
+            return
+
+        rect_0, rect_1 = self._rectangles
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        new_height = (rect_0.get_height() + rect_1.get_height()) / 2
+        new_width = (rect_0.get_width() + rect_1.get_width()) / 2
+
+        center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
+        center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
+
+        def rectangle_fit_on_image(center):
+            """
+            Check if the rectangle with center at center fits in the image boundaries.
+            @param center: the center of the rectangle
+            """
+            return xmin <= center[0] + new_width / 2 <= xmax and xmin <= center[0] - new_width <= xmax and \
+                ymin <= center[1] + new_height / 2 <= ymax and ymin <= center[1] - new_height <= ymax
+
+        def move(seed: np.array, offset: np.array):
+            """
+            Starting at seed, place a rectangle every offset
+            @param seed: the center of the first rectangle to place
+            @param offset: the offset between each rectangle, in both x and y.
+            """
+            while rectangle_fit_on_image(seed):
+                self._draw_rectangle((seed[0] - new_width / 2, seed[1] - new_height / 2), new_width, new_height)
+                seed += offset
+
+        first_center = 2 * center_1 - center_0
+        move(first_center, center_1 - center_0)
+
+        first_center = 2 * center_0 - center_1
+        move(first_center, center_0 - center_1)
+
+        self._update_plot_values((xmin, xmax, ymin, ymax))
+
     def clear(self):
         """
         Clear all the rectangles currently shown
@@ -223,6 +268,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             CreateWorkspace(DataX=x_line_x_axis, DataY=x_line_y_values, OutputWorkspace="x_cut")
         if key in ('c', 'y'):
             CreateWorkspace(DataX=y_line_x_axis, DataY=y_line_y_values, OutputWorkspace="y_cut")
+        if key == 'f':
+            self._place_interpolated_rectangles()
 
 
 def is_the_same(point_a, point_b, epsilon):
