@@ -50,6 +50,7 @@ void ReplaceSpecialValues::defineProperties() {
   declareProperty("SmallNumberValue", 0.0, "The value with which to replace occurrences of 'small' numbers.");
   declareProperty("SmallNumberError", 0.0, "The error value used when replacing a 'small' number");
   declareProperty("CheckErrorAxis", false, "Whether or not to also check the error axis values.");
+  declareProperty("UseAbsolute", true, "Whether large and small comparisons should be done on absolute values.");
 }
 
 void ReplaceSpecialValues::retrieveProperties() {
@@ -64,6 +65,7 @@ void ReplaceSpecialValues::retrieveProperties() {
   m_smallValue = getProperty("SmallNumberValue");
   m_smallError = getProperty("SmallNumberError");
   m_checkErrors = getProperty("CheckErrorAxis");
+  m_useAbsolute = getProperty("UseAbsolute");
 
   m_performNaNCheck = !checkifPropertyEmpty(m_NaNValue);
   m_performInfiniteCheck = !checkifPropertyEmpty(m_InfiniteValue);
@@ -103,9 +105,13 @@ bool ReplaceSpecialValues::checkIfNan(const double value) const { return (std::i
 
 bool ReplaceSpecialValues::checkIfInfinite(const double value) const { return (std::isinf(value)); }
 
-bool ReplaceSpecialValues::checkIfBig(const double value) const { return (std::abs(value) > m_bigThreshold); }
+bool ReplaceSpecialValues::checkIfBig(const double value) const {
+  return m_useAbsolute ? std::abs(value) > m_bigThreshold : value > m_bigThreshold;
+}
 
-bool ReplaceSpecialValues::checkIfSmall(const double value) const { return (std::abs(value) < m_smallThreshold); }
+bool ReplaceSpecialValues::checkIfSmall(const double value) const {
+  return m_useAbsolute ? std::abs(value) < m_smallThreshold : value < m_smallThreshold;
+}
 
 bool ReplaceSpecialValues::checkifPropertyEmpty(const double value) const {
   return (std::abs(value - Mantid::EMPTY_DBL()) < 1e-08);
