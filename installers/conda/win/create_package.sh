@@ -87,6 +87,7 @@ echo "jq removed from conda env"
 $CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
+mkdir $COPY_DIR/bin
 cp $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/ -r
 cp $CONDA_ENV_PATH/Lib $COPY_DIR/bin/ -r
 cp $CONDA_ENV_PATH/Scripts $COPY_DIR/bin/ -r
@@ -95,11 +96,6 @@ cp $CONDA_ENV_PATH/python*.* $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/msvc*.* $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 
-echo "Copying mantid python files into bin"
-cp $CONDA_ENV_PATH/Lib/site-packages/mantid* $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/Lib/site-packages/ $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/Lib/site-packages/workbench $COPY_DIR/bin/workbench -r
-
 echo "Copy all DLLs from env/Library/bin to package/bin"
 cp $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
@@ -107,14 +103,10 @@ echo "Copy Mantid specific files from env/Library/bin to package/bin"
 cp $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/Library/bin/MantidWorkbench.exe $COPY_DIR/bin/
 
 echo "Copy Mantid icon files from source to package/bin"
 cp $THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_workbench.ico
 cp $THIS_SCRIPT_DIR/../../../images/mantid_notebook$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_notebook.ico
-
-echo "Copy env/includes to the package/includes"
-cp $CONDA_ENV_PATH/Library/include/eigen3 $COPY_DIR/include/ -r
 
 echo "Copy Instrument details to the package"
 cp $CONDA_ENV_PATH/Library/instrument $COPY_DIR/ -r
@@ -144,10 +136,10 @@ cp $CONDA_ENV_PATH/Library/scripts $COPY_DIR/ -r
 
 echo "Copy share files (includes mantid docs) to the package"
 cp $CONDA_ENV_PATH/Library/share/doc $COPY_DIR/share/ -r
-cp $CONDA_ENV_PATH/Library/share/eigen3 $COPY_DIR/share/ -r
 
-echo "Copy executable file and executable script into package"
-cp $THIS_SCRIPT_DIR/MantidWorkbench.exe $COPY_DIR/bin/ -f
+echo "Copy executable launcher"
+# MantidWorkbench-script.pyw is created by project.nsi on creation of the package
+cp $THIS_SCRIPT_DIR/MantidWorkbench.exe $COPY_DIR/bin/
 
 # Cleanup pdb files and remove them from bin
 echo "Performing some cleanup.... deleting files"
