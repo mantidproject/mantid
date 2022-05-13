@@ -195,6 +195,20 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.view.set_plot_type.assert_called_once_with(FIELD_X_LABEL)
         self.presenter.handle_maxent_data_updated.assert_called_once_with("unit test")
 
+    def test_update_pane_none(self):
+        self.context.frequency_context.unit = mock.Mock(return_value="Gauss")
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
+        self.presenter._maxent_ws_name = None
+        self.presenter.handle_maxent_data_updated = mock.Mock()
+
+        self.presenter._update_pane()
+
+        self.context._frequency_context.switch_units_in_name.assert_not_called()
+        self.figure_presenter.set_plot_range.assert_called_once_with([1, 3])
+        self.view.set_plot_type.assert_called_once_with(FIELD_X_LABEL)
+        self.presenter.handle_maxent_data_updated.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
