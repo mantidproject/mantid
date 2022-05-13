@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 # Update the https://github.com/mantidproject/conda-recipes repository with the latest changes from the currently
 # checked out branch.
@@ -9,6 +9,7 @@
 
 GITHUB_ACCESS_TOKEN=$1
 GITHUB_USER_NAME=$2
+GITHUB_USER_EMAIL=$3
 
 # Generate the latest version number
 LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
@@ -54,20 +55,19 @@ git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidpr
 
 cd conda-recipes
 
-function input_data(){
+function replace_version_data() {
     sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' $1
     sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' $1
     sed -i '/  sha256: /c\  sha256: '$SHA256'' $1
 }
 
-input_data recipes/mantid/meta.yaml
-input_data recipes/mantidqt/meta.yaml
-input_data recipes/mantidworkbench/meta.yaml
+replace_version_data recipes/mantid/meta.yaml
+replace_version_data recipes/mantidqt/meta.yaml
+replace_version_data recipes/mantidworkbench/meta.yaml
 
-git diff --exit-code
-if [ $? -ne 0 ]; then
+if ! git diff --quiet --exit-code; then
     git config user.name ${GITHUB_USER_NAME}
-    git config user.email ${GITHUB_USER_NAME}@mantidproject.org
+    git config user.email ${GITHUB_USER_EMAIL}
     git add recipes/*/meta.yaml
     git commit -m "Update version and git sha" --no-verify --signoff
     git pull --ff
@@ -75,9 +75,3 @@ if [ $? -ne 0 ]; then
 else
     echo "No changes to commit"
 fi
-
-# Cleanup cloned repository
-cd ..
-rm -rf conda-recipes
-
-exit 0

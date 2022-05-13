@@ -55,6 +55,7 @@ function add_resources() {
   local bundle_root=$1
   local bundle_icon=$2
   echo "Adding additional required resources"
+  cp "$HERE"/qt.conf "$bundle_root"/bin/qt.conf
   mkdir -p "$bundle_root"/share/pixmaps
   cp "$bundle_icon" "$bundle_root"/share/pixmaps
 }

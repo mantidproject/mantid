@@ -1,5 +1,6 @@
 // This script expects the following environment variables to be set by the Jenkins job:
-// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes whilst updating it.
+// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes
+// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from conda-recipes
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 // ANACONDA_CHANNEL - The channel to publish to on Anaconda.org
@@ -30,28 +31,28 @@ def conda_build_win(arch) {
 }
 
 def archive_conda_build(arch) {
-  archiveArtifacts artifacts: "conda-bld/${arch}/*.tar.bz2",
+  archiveArtifacts artifacts: "**/conda-bld/${arch}/*.tar.bz2",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
 }
 
 def create_standalone_package_linux() {
-  archiveArtifacts artifacts: "${WORKSPACE}/*.xz",
+  archiveArtifacts artifacts: "*.xz",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
 }
 
 def create_standalone_package_osx() {
-  archiveArtifacts artifacts: "${WORKSPACE}/*.dmg",
+  archiveArtifacts artifacts: "*.dmg",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
 }
 
 def create_standalone_package_win() {
-  archiveArtifacts artifacts: "${WORKSPACE_UNIX_PATH}/*.exe",
+  archiveArtifacts artifacts: "*.exe",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
@@ -67,6 +68,7 @@ pipeline {
       parallel {
         stage('platform: linux') {
           agent { label 'conda-build-linux' }
+          options { timestamps () }
           steps {
             build_and_test_unix("linux-ci")
           }
@@ -78,6 +80,7 @@ pipeline {
         }
         stage('platform: windows') {
           agent { label 'conda-build-win' }
+          options { timestamps () }
           steps {
             script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
             build_and_test_win("win")
@@ -90,6 +93,7 @@ pipeline {
         }
         stage('platform: macos') {
           agent { label 'conda-build-osx' }
+          options { timestamps () }
           steps {
             build_and_test_unix("osx-ci")
           }
@@ -105,13 +109,14 @@ pipeline {
       agent { label 'conda-build-linux' }
       environment { GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
       steps {
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL'
       }
     }
     stage('Packaging') {
       parallel {
         stage('platform: linux-64') {
           agent { label 'conda-build-linux' }
+          options { timestamps () }
           steps {
             conda_build_unix("linux-64")
             create_standalone_package_linux()
@@ -119,6 +124,7 @@ pipeline {
         }
         stage('platform: win-64') {
           agent { label 'conda-build-win' }
+          options { timestamps () }
           steps {
             script {
               WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
@@ -129,6 +135,7 @@ pipeline {
         }
         stage('platform: osx-64') {
           agent { label 'conda-build-osx' }
+          options { timestamps () }
           steps {
             conda_build_unix("osx-64")
             create_standalone_package_osx()
@@ -138,10 +145,11 @@ pipeline {
     }
     stage ('Publish Conda packages to Anaconda') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+      options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps{
         // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
-        copyArtifacts filter: '*.tar.bz2',
+        copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
           selector: specific('${BUILD_NUMBER}')
@@ -150,12 +158,12 @@ pipeline {
     }
     stage ('Delete old Conda nightly packages from Anaconda') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
+      options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
-        script { deletion_script = "${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh" }
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
-        sh '${deletion_script} ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantid --label nightly'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidqt --label nightly'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} $ANACONDA_TOKEN --channel mantid --package mantidworkbench --label nightly'
       }
     }
   }
