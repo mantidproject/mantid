@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from enum import Enum
+from os import path
 
 from qtpy.QtCore import QObject, Signal
 
@@ -119,8 +120,11 @@ class ScanExplorerPresenter:
         """
         Slot triggered by the line edit being validated.
         """
-        files = self.view.file_line_edit.text()
-        self.model.process_files(files)
+        file = self.view.file_line_edit.text()
+        if path.isfile(file):
+            self.model.process_file(file)
+        else:
+            logger.warning("Path {} does not point to a valid file.".format(file))
 
     def on_dialog_accepted(self):
         """

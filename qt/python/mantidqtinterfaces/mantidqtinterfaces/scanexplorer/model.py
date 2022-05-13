@@ -14,6 +14,6 @@ class ScanExplorerModel:
     def __init__(self, presenter=None):
         self.presenter = presenter
 
-    def process_files(self, files):
-        out = SANSILLParameterScan(SampleRuns=files, OutputWorkspace="out", NormaliseBy="None")
+    def process_file(self, file):
+        out = SANSILLParameterScan(SampleRuns=file, OutputWorkspace="out", NormaliseBy="None")
         self.presenter.create_slice_viewer(out)

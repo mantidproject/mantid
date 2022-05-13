@@ -124,8 +124,8 @@ class ScanExplorerView(QMainWindow):
                                               caption="Open file",
                                               directory=base_directory,
                                               filter=self.FILE_EXTENSION_FILTER)
-
-        self.sig_files_selected.emit(file_path)
+        if file_path:
+            self.sig_files_selected.emit(file_path)
 
     def open_alg_dialog(self):
         """
