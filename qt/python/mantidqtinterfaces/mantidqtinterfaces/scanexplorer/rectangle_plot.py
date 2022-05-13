@@ -20,7 +20,7 @@ class UserInteraction(Enum):
 class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
-    SELECTION_KEYS = ('c', 'x', 'y', 'f')
+    SELECTION_KEYS = ('c', 'x', 'y', 'f', "delete")
     EPSILON = 1e-5
 
     def __init__(self, plotter: LinePlots, exporter: Any):
@@ -62,7 +62,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
                                           release_event.xdata - click_event.xdata,
                                           release_event.ydata - click_event.ydata)
 
-        self._update_plot_values(cinfo_click.extent)
+        self._update_plot_values()
 
     def _determine_behaviour(self, click_event, release_event) -> UserInteraction:
         """
@@ -141,13 +141,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self._rectangles.pop()
         self._rectangles.append(rectangle_patch)
 
-    def _update_plot_values(self, window_range: tuple):
+    def _update_plot_values(self):
         """
         Update the line plots with the new values.
-        @param window_range: the range of the window, in the form (xmin, xmax, ymin, ymax)
         """
 
-        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes(window_range)
+        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes()
 
         # transmit the new plot values and update
         self.plotter.plot_x_line(x_line_x_axis, x_line_y_values)
@@ -156,14 +155,13 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self.plotter.update_line_plot_limits()
         self.plotter.redraw()
 
-    def _compute_plot_axes(self, window_range: tuple) -> (tuple, tuple):
+    def _compute_plot_axes(self) -> (tuple, tuple):
         """
         Compute values for the line plots and redraw them. It sums the values from every patch currently drawn.
-        @param window_range: the range of the window, in the form (xmin, xmax, ymin, ymax)
         @return the x and y plots, with the x axis and the associated y values, as a tuple of lists.
         """
-        xmin, xmax = window_range[0], window_range[1]
-        ymin, ymax = window_range[2], window_range[3]
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
         arr = self.plotter.image.get_array()
 
         mask_array = np.zeros(arr.shape)
@@ -244,7 +242,20 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         first_center = 2 * center_0 - center_1
         move(first_center, center_0 - center_1)
 
-        self._update_plot_values((xmin, xmax, ymin, ymax))
+        self._update_plot_values()
+
+    def _delete_current(self):
+        """
+        Delete currently selected rectangle.
+        """
+        if not self._current_rectangle:
+            return
+
+        self._rectangles.remove(self._current_rectangle)
+        self._current_rectangle.remove()
+        self._current_rectangle = None
+        self._update_plot_values()
+        self._selector.set_visible(False)
 
     def clear(self):
         """
@@ -253,23 +264,25 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         for rect in self._rectangles:
             rect.remove()
         self._rectangles = []
-        self.plotter.update_line_plot_limits()
-        self.plotter.redraw()
+        self._update_plot_values()
 
     def handle_key(self, key: str):
         """
-        Handle user key inputs, if they are supported keys. For now, create cuts only.
+        Handle user key inputs, if they are supported keys.
         @param key: the character pressed by the user
         """
         if key not in self.SELECTION_KEYS:
             return
-        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes(self.plotter.image.get_extent())
+        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes()
+
         if key in ('c', 'x'):
             CreateWorkspace(DataX=x_line_x_axis, DataY=x_line_y_values, OutputWorkspace="x_cut")
         if key in ('c', 'y'):
             CreateWorkspace(DataX=y_line_x_axis, DataY=y_line_y_values, OutputWorkspace="y_cut")
         if key == 'f':
             self._place_interpolated_rectangles()
+        if key == 'delete':
+            self._delete_current()
 
 
 def is_the_same(point_a, point_b, epsilon):
