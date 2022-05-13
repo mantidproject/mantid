@@ -119,6 +119,7 @@ set(INC_FILES
     inc/MantidPythonInterface/api/BinaryOperations.h
     inc/MantidPythonInterface/api/CloneMatrixWorkspace.h
     inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h
+    inc/MantidPythonInterface/api/RegisterFunctionPtrToPython.h
     inc/MantidPythonInterface/api/RegisterWorkspacePtrToPython.h
     inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
 )

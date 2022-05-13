@@ -11,9 +11,8 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidPythonInterface/api/RegisterFunctionPtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -25,6 +24,7 @@
 using Mantid::API::IFunction;
 using Mantid::API::IFunction_sptr;
 using Mantid::PythonInterface::IFunctionAdapter;
+using Mantid::PythonInterface::Registry::RegisterFunctionPtrToPython;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
@@ -291,5 +291,5 @@ void export_IFunction() {
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"), "Return a string representation of the function");
 
-  TypeRegistry::subscribe<TypedPropertyValueHandler<IFunction_sptr>>();
+  RegisterFunctionPtrToPython<IFunction>();
 }
