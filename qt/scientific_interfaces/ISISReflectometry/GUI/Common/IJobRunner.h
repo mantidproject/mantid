@@ -10,6 +10,7 @@
 
 #include <deque>
 #include <memory>
+#include <string>
 
 namespace MantidQt::API {
 class IConfiguredAlgorithm;

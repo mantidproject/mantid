@@ -8,6 +8,7 @@
 
 #include "MantidKernel/System.h"
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {

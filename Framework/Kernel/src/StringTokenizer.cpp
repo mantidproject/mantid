@@ -7,6 +7,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
 #include <iterator> //cbegin,cend
+#include <stdexcept>
 
 namespace {
 
