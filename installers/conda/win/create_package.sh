@@ -64,6 +64,7 @@ COPY_DIR=$THIS_SCRIPT_DIR/_package_build
 CONDA_EXE=mamba
 PACKAGE_PREFIX=MantidWorkbench
 PACKAGE_NAME="$PACKAGE_PREFIX${SUFFIX}"
+LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
 
 echo "Cleaning up left over old directories"
 rm -rf $COPY_DIR
@@ -191,8 +192,6 @@ MAKENSIS_COMMAND=$NSIS_CONDA_ENV_PATH/NSIS/makensis
 MAKENSIS_COMMAND=${MAKENSIS_COMMAND////\\}
 MAKENSIS_COMMAND="$SCRIPT_DRIVE_LETTER:${MAKENSIS_COMMAND:2}"
 
-LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
-
 MANTID_ICON=$THIS_SCRIPT_DIR/../../../images/mantidplot$LOWER_CASE_SUFFIX.ico
 MANTID_ICON=${MANTID_ICON////\\}
 MANTID_ICON="$SCRIPT_DRIVE_LETTER:${MANTID_ICON:2}"
@@ -200,7 +199,6 @@ MANTID_ICON="$SCRIPT_DRIVE_LETTER:${MANTID_ICON:2}"
 LICENSE_PATH=$THIS_SCRIPT_DIR/../../../LICENSE.txt
 LICENSE_PATH=${LICENSE_PATH////\\}
 LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
-echo Workbench Icon: $WORKBENCH_ICON
 
 # Generate uninstall commands to make sure to only remove files that are copied by the installer
 echo Generating uninstaller helper files

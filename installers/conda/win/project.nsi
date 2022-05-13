@@ -187,13 +187,17 @@ Section "-Core installation"
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
         CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "$INSTDIR\bin\mantid_workbench.ico"
-        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
+        SetOutPath "$INSTDIR\bin" # Notebook needs to be run from the bin directory
+        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe" "-m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
+        SetOutPath "$INSTDIR" # needs to revert back to original SetOutPath
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
     !insertmacro MUI_STARTMENU_WRITE_END
 
     # Create desktop shortcuts
     CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "$INSTDIR\bin\mantid_workbench.ico"
-    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe -m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
+    SetOutPath "$INSTDIR\bin" # Notebook needs to be run from the bin directory
+    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe" "-m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
+    SetOutPath "$INSTDIR" # needs to revert back to original SetOutPath
 
 SectionEnd
 
