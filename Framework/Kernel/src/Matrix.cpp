@@ -1000,7 +1000,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           iMinusj = j - i;
         long double iPlusj = i + j;
         if (D >= 2) {
-          m_rawData[i][j] = static_cast<T>(pow(-1.0, i + j));
+          m_rawData[i][j] = static_cast<T>(pow(-1.0, iPlusj));
           lambda = acosh(D / 2.0);
         } else if (D > -2.0) {
           m_rawData[i][j] = 1;     // use +1 here instead of the -1 in the paper
