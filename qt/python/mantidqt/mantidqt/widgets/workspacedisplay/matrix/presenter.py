@@ -63,6 +63,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         # connect to replace_signal signal to handle replacement of the workspace
         self.container.replace_signal.connect(self.action_replace_workspace)
+        self.container.rename_signal.connect(self.action_rename_workspace)
 
     def show_view(self):
         self.container.show()
@@ -71,6 +72,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         if self.model.workspace_equals(workspace_name):
             self.model = MatrixWorkspaceDisplayModel(workspace)
             self.setup_tables()
+
+    def action_rename_workspace(self, workspace_name):
+        self.model.set_name(workspace_name)
 
     @classmethod
     def supports(cls, ws):
