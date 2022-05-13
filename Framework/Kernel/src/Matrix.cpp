@@ -12,6 +12,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <sstream>
 
