@@ -34,7 +34,7 @@ class ScanExplorerPresenter:
         self.view = ScanExplorerView(presenter=self)
         self.model = ScanExplorerModel(presenter=self)
 
-        self.view.sig_files_selected.connect(self.on_files_selected)
+        self.view.sig_files_selected.connect(self.on_file_selected)
         self.view.file_line_edit.returnPressed.connect(self.on_line_edited)
 
         self.observer = ScanAlgorithmObserver()
@@ -107,12 +107,12 @@ class ScanExplorerPresenter:
         self.view.data_view.track_cursor.setChecked(False)
         self.view.data_view.track_cursor.setChecked(True)
 
-    def on_files_selected(self, files: list):
+    def on_file_selected(self, file: str):
         """
-        Slot triggered by the user selecting files through the browser
-        @param files: the list of the path to each file selected
+        Slot triggered by the user selecting a file through the browser
+        @param file: the path to the file selected
         """
-        self.view.file_line_edit.setText(', '.join(files))
+        self.view.file_line_edit.setText(file)
         self.on_line_edited()
 
     def on_line_edited(self):

@@ -20,8 +20,11 @@ class ScanExplorerView(QMainWindow):
     """Index of the slice viewer widget in the splitter. Used to replace it when needed."""
     SLICE_VIEWER_SPLITTER_INDEX = 1
 
+    """Allowed file extensions"""
+    FILE_EXTENSION_FILTER = "*.nxs"
+
     """Signal sent when files are selected in the file dialog."""
-    sig_files_selected = Signal(list)
+    sig_files_selected = Signal(str)
 
     def __init__(self, parent=None, presenter=None):
         super().__init__(parent)
@@ -93,12 +96,11 @@ class ScanExplorerView(QMainWindow):
         Set visual options for the slice viewer and display it.
         @param workspace: the workspace to display
         """
-        # self._data_view.create_axes_orthogonal(redraw_on_zoom=not False)
-
         if self.splitter.count() == 1:
             self.splitter.addWidget(self._data_view)
         else:
             self.splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
+
         self.plot_workspace(workspace)
 
     def new_plot(self):
@@ -116,16 +118,14 @@ class ScanExplorerView(QMainWindow):
         """
         base_directory = "/users/tillet/data/d16_omega/new_proto"
 
-        name_filter = "*.nxs"
-
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFiles)
-        files_path, _ = dialog.getOpenFileNames(parent=self,
-                                                caption="Open files",
-                                                directory=base_directory,
-                                                filter=name_filter)
+        file_path, _ = dialog.getOpenFileName(parent=self,
+                                              caption="Open file",
+                                              directory=base_directory,
+                                              filter=self.FILE_EXTENSION_FILTER)
 
-        self.sig_files_selected.emit(files_path)
+        self.sig_files_selected.emit(file_path)
 
     def open_alg_dialog(self):
         """
