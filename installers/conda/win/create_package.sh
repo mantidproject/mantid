@@ -141,6 +141,11 @@ echo "Copy executable launcher"
 # MantidWorkbench-script.pyw is created by project.nsi on creation of the package
 cp $THIS_SCRIPT_DIR/MantidWorkbench.exe $COPY_DIR/bin/
 
+echo "Copy site customization module"
+# Adds a sitecustomize module to ensure the bin directory
+# is added to the DLL load PATH
+cp $THIS_SCRIPT_DIR/sitecustomize.py $COPY_DIR/bin/Lib/site-packages/
+
 # Cleanup pdb files and remove them from bin
 echo "Performing some cleanup.... deleting files"
 rm -rf $COPY_DIR/bin/*.pdb
