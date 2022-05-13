@@ -1,0 +1,1 @@
+- The Muon Analysis and Frequency Domain Analysis GUI's have had a bug fixed that caused a crash when changing instrument.
