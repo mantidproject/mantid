@@ -112,7 +112,11 @@ if [[ -d conda-recipes ]]; then
 fi
 git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIPES_TAG
 
-# Run conda build on framework
+# Run conda build. Use shortest path possible for Windows
+export CONDA_BLD_PATH=$WORKSPACE/conda-bld
+if [[ -d $CONDA_BLD_PATH ]]; then
+    rm -rf $CONDA_BLD_PATH
+fi
 cd $RECIPES_DIR/recipes/
 
 if [[ $OSTYPE == "msys" ]]; then
@@ -123,11 +127,9 @@ if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
 
-
 if [[ $ENABLE_BUILD_QT == true ]]; then
     conda mambabuild ./mantidqt/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
-
 
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
@@ -135,12 +137,18 @@ fi
 
 # Build the standalone packages, currently only for Windows and macOS
 PACKAGE_SUFFIX=Nightly # Hard code this for now while testing.
+# Jenkins Pipeline expects packages in the root workspace directory
+cd $WORKSPACE
 # Set our local conda channel to find our locally build mantidworkbench package.
-LOCAL_CHANNEL=file://$CONDA_PREFIX/conda-bld
+LOCAL_CHANNEL=file://$CONDA_BLD_PATH
+
 if [[ $OSTYPE == 'msys'* ]]; then
+    rm -fr *.exe
     ${WORKSPACE}/installers/conda/win/create_package.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 elif [[ $OSTYPE == 'darwin'* ]]; then
+    rm -fr *.dmg
     ${WORKSPACE}/installers/conda/osx/create_bundle.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 else
+    rm -fr *.xz
     ${WORKSPACE}/installers/conda/linux/create_tarball.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 fi
