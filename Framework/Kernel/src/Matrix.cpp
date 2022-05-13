@@ -1001,19 +1001,19 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           iMinusj = j - i;
         long double iPlusj = i + j;
         if (D >= 2) {
-          m_rawData[i][j] = static_cast<T>(pow(-1.0, iPlusj));
-          lambda = acosh(D / 2.0);
+          m_rawData[i][j] = static_cast<T>(std::pow(-1.0, iPlusj));
+          lambda = std::acosh(D / 2.0);
         } else if (D > -2.0) {
-          m_rawData[i][j] = 1;     // use +1 here instead of the -1 in the paper
-          lambda = acos(-D / 2.0); // extra minus sign here compared to paper
+          m_rawData[i][j] = 1;          // use +1 here instead of the -1 in the paper
+          lambda = std::acos(-D / 2.0); // extra minus sign here compared to paper
         } else {
           m_rawData[i][j] = -1;
-          lambda = acosh(-D / 2.0);
+          lambda = std::acosh(-D / 2.0);
         }
         if (std::abs(D) > 2.0) {
-          long double a = cosh((k + 1 - iMinusj) * lambda);
-          long double b = cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
-          long double c = 2 * sinh(lambda) * sinh((k + 1) * lambda);
+          long double a = std::cosh((k + 1 - iMinusj) * lambda);
+          long double b = std::cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
+          long double c = 2 * std::sinh(lambda) * std::sinh((k + 1) * lambda);
           long double inf = std::numeric_limits<long double>::infinity();
           if (a == inf || b == inf || c == inf)
             throw std::runtime_error("Overflow during matrix inversion");
@@ -1027,9 +1027,9 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           m_rawData[i][j] = static_cast<T>(value);
         } else {
           long double value = m_rawData[i][j];
-          value *= cos((k + 1 - iMinusj) * lambda) -
-                   cos((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
-          value /= 2 * sin(lambda) * sin((k + 1) * lambda);
+          value *= std::cos((k + 1 - iMinusj) * lambda) -
+                   std::cos((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
+          value /= 2 * std::sin(lambda) * std::sin((k + 1) * lambda);
           m_rawData[i][j] = static_cast<T>(value);
         }
       }
