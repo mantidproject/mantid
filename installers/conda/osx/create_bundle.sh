@@ -1,4 +1,11 @@
 #!/bin/bash
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
 
 # Construct a standalone macOS MantidWorkbench .dmg bundle.
 # The bundle is created from a pre-packaged conda version
@@ -76,6 +83,12 @@ function trim_conda() {
   mv "$bundle_conda_prefix"/share "$bundle_conda_prefix"/share_tmp
   mkdir "$bundle_conda_prefix"/share
   mv "$bundle_conda_prefix"/share_tmp/doc "$bundle_conda_prefix"/share/
+  # Heavily cut down translations
+  mv "$bundle_conda_prefix"/translations "$bundle_conda_prefix"/translations_tmp
+  mkdir -p "$bundle_conda_prefix"/translations/qtwebengine_locales
+  mv "$bundle_conda_prefix"/translations_tmp/qtwebengine_locales/en*.pak \
+    "$bundle_conda_prefix"/translations/qtwebengine_locales/
+
   # Removals
   rm -rf "$bundle_conda_prefix"/bin_tmp \
     "$bundle_conda_prefix"/include \
@@ -85,7 +98,8 @@ function trim_conda() {
     "$bundle_conda_prefix"/qml \
     "$bundle_conda_prefix"/qsci \
     "$bundle_conda_prefix"/share_tmp \
-    "$bundle_conda_prefix"/translations
+    "$bundle_conda_prefix"/translations_tmp
+
   find "$bundle_conda_prefix" -name 'qt.conf' -delete
   find "$bundle_conda_prefix" -name '*.a' -delete
   find "$bundle_conda_prefix" -name "*.pyc" -type f -delete
@@ -103,7 +117,11 @@ function add_resources() {
   local bundle_icon=$3
   cp "$HERE"/BundleExecutable "$bundle_contents"/MacOS/"$bundle_name"
   chmod +x "$bundle_contents"/MacOS/"$bundle_name"
+  # Copy qt.conf files to locations with executables. The relative
+  # paths required to find the Qt resources mean the file is the same
+  # in both locations
   cp "$HERE"/qt.conf "$bundle_contents"/Resources/bin/qt.conf
+  cp "$HERE"/qt.conf "$bundle_contents"/Resources/libexec/qt.conf
   cp "$bundle_icon" "$bundle_contents"/Resources
 }
 
