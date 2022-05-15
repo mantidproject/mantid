@@ -1,4 +1,11 @@
 #!/bin/bash
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
 
 # Construct a standalone tarball for any modern linux system (2010+)
 # The tarball is created from a pre-packaged conda version
@@ -14,39 +21,8 @@ CONDA_PACKAGE=mantidworkbench
 BUNDLE_PREFIX=mantidworkbench
 ICON_DIR="$HERE/../../../images"
 
-function trim_conda() {
-  local bundle_conda_prefix=$1
-  echo "Purging '$bundle_conda_prefix' of unnecessary items"
-  # Heavily cut down everything in bin
-  mv "$bundle_conda_prefix"/bin "$bundle_conda_prefix"/bin_tmp
-  mkdir "$bundle_conda_prefix"/bin
-  cp "$bundle_conda_prefix"/bin_tmp/Mantid.properties "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/mantid-scripts.pth "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/workbench "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/mantidworkbench "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/python* "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/pip "$bundle_conda_prefix"/bin/
-  sed -i -e '1s|.*|#!/usr/bin/env python|' "$bundle_conda_prefix"/bin/pip
-  # Heavily cut down share
-  mv "$bundle_conda_prefix"/share "$bundle_conda_prefix"/share_tmp
-  mkdir "$bundle_conda_prefix"/share
-  mv "$bundle_conda_prefix"/share_tmp/doc "$bundle_conda_prefix"/share/
-  # Removals
-  rm -rf "$bundle_conda_prefix"/bin_tmp \
-    "$bundle_conda_prefix"/include \
-    "$bundle_conda_prefix"/man \
-    "$bundle_conda_prefix"/mkspecs \
-    "$bundle_conda_prefix"/phrasebooks \
-    "$bundle_conda_prefix"/qml \
-    "$bundle_conda_prefix"/qsci \
-    "$bundle_conda_prefix"/share_tmp \
-    "$bundle_conda_prefix"/translations
-  find "$bundle_conda_prefix" -name 'qt.conf' -delete
-  find "$bundle_conda_prefix" -name '*.a' -delete
-  find "$bundle_conda_prefix" -name "*.pyc" -type f -delete
-  find "$bundle_conda_prefix" -path "*/__pycache__/*" -delete
-  find "$bundle_contents" -name '*.plist' -delete
-}
+# Common routines
+source $HERE/../common/common.sh
 
 # Add required resources into bundle
 #   $1 - Location of bundle root
@@ -55,7 +31,6 @@ function add_resources() {
   local bundle_root=$1
   local bundle_icon=$2
   echo "Adding additional required resources"
-  cp "$HERE"/qt.conf "$bundle_root"/bin/qt.conf
   mkdir -p "$bundle_root"/share/pixmaps
   cp "$bundle_icon" "$bundle_root"/share/pixmaps
 }
@@ -64,9 +39,9 @@ function add_resources() {
 #  $1 - Root directory of the bundle
 function fixup_bundle() {
   local bundle_root_absolute=$(readlink -f "$1")
-  echo "Fixing up bundle to be self contained"
-  # Startup script contains absolute paths to installed conda prefix,
-  # replace with relative path to INSTALLDIR defined in the script itself
+  echo "Fixing up bundle so it is self contained"
+  # Fix absolute paths in Qt and our own startup script
+  fixup_qt()
   sed -i -e "s@$bundle_root_absolute/@\$INSTALLDIR/@" $bundle_root_absolute/bin/mantidworkbench
 }
 
@@ -102,24 +77,24 @@ conda_channel=mantid
 suffix=
 while [ ! $# -eq 0 ]
 do
-    case "$1" in
-        -c)
-            conda_channel="$2"
-            shift
-            ;;
-        -s)
-            suffix="$2"
-            shift
-            ;;
-        -h)
-            usage 0
-            ;;
-        *)
-            if [ ! -z "$2" ]
-            then
-              usage 1
-            fi
-            ;;
+  case "$1" in
+    -c)
+        conda_channel="$2"
+        shift
+        ;;
+    -s)
+        suffix="$2"
+        shift
+        ;;
+    -h)
+        usage 0
+        ;;
+    *)
+        if [ ! -z "$2" ]
+        then
+          usage 1
+        fi
+        ;;
   esac
   shift
 done
@@ -172,14 +147,9 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
-# Fixup bundle
-fixup_bundle "$bundle_contents" "$bundle_icon"
-
-# Conda bundles pretty much everything with each of its packages and much of this is
-# unnecessary in this type of bundle - trim the fat.
+# Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
-
-# Add any additional resources
+fixup_bundle "$bundle_contents" "$bundle_icon"
 add_resources "$bundle_contents" "$bundle_icon"
 
 # Create tarball and compress
