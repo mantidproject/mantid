@@ -26,11 +26,15 @@ function trim_conda() {
     cp "$bundle_conda_prefix"/bin_tmp/workbench "$bundle_conda_prefix"/bin/
     cp "$bundle_conda_prefix"/bin_tmp/mantidworkbench "$bundle_conda_prefix"/bin/
   fi
-
   # Heavily cut down share
   mv "$bundle_conda_prefix"/share "$bundle_conda_prefix"/share_tmp
   mkdir "$bundle_conda_prefix"/share
   mv "$bundle_conda_prefix"/share_tmp/doc "$bundle_conda_prefix"/share/
+  # Heavily cut down translations
+  mv "$bundle_conda_prefix"/translations "$bundle_conda_prefix"/translations_tmp
+  mkdir -p "$bundle_conda_prefix"/translations/qtwebengine_locales
+  mv "$bundle_conda_prefix"/translations_tmp/qtwebengine_locales/en*.pak \
+    "$bundle_conda_prefix"/translations/qtwebengine_locales/
 
   # Removals
   rm -rf "$bundle_conda_prefix"/bin_tmp \
@@ -41,9 +45,8 @@ function trim_conda() {
     "$bundle_conda_prefix"/qml \
     "$bundle_conda_prefix"/qsci \
     "$bundle_conda_prefix"/share_tmp \
-    "$bundle_conda_prefix"/translations
+    "$bundle_conda_prefix"/translations_tmp
 
-  find "$bundle_conda_prefix" -name 'qt.conf' -delete
   find "$bundle_conda_prefix" -name '*.a' -delete
   find "$bundle_conda_prefix" -name "*.pyc" -type f -delete
   find "$bundle_conda_prefix" -path "*/__pycache__/*" -delete
@@ -61,5 +64,7 @@ function fixup_qt() {
   local qt_conf=$2
   echo "Fixing Qt installation"
 
+  find "$bundle_conda_prefix" -name 'qt.conf' -delete
   cp "$qt_conf" "$bundle_conda_prefix"/bin/qt.conf
+  cp "$qt_conf" "$bundle_conda_prefix"/libexec/qt.conf
 }

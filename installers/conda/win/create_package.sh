@@ -112,12 +112,12 @@ echo "Copy Instrument details to the package"
 cp $CONDA_ENV_PATH/Library/instrument $COPY_DIR/ -r
 
 echo "Constructing package/lib/qt5"
-mkdir $COPY_DIR/lib
-mkdir $COPY_DIR/lib/qt5
-mkdir $COPY_DIR/lib/qt5/bin
+mkdir -p $COPY_DIR/lib/qt5/bin
 cp $CONDA_ENV_PATH/Library/bin/QtWebEngineProcess.exe $COPY_DIR/lib/qt5/bin
-cp $CONDA_ENV_PATH/Library/bin/qt.conf $COPY_DIR/lib/qt5/bin
+cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
 cp $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/ -r
+mkdir -p $COPY_DIR/lib/qt5/translations/qtwebengine_locales
+cp $CONDA_ENV_PATH/Library/translations/qtwebengine_locales/en*.pak $COPY_DIR/lib/qt5/translations/qtwebengine_locales/
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins

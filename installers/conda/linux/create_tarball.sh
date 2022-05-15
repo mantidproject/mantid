@@ -38,11 +38,12 @@ function add_resources() {
 # Fixup bundle so it is self-contained
 #  $1 - Root directory of the bundle
 function fixup_bundle() {
-  local bundle_root_absolute=$(readlink -f "$1")
+  local bundle_conda_prefix=$1
+  local bundle_prefix_absolute=$(readlink -f "$1")
   echo "Fixing up bundle so it is self contained"
   # Fix absolute paths in Qt and our own startup script
-  fixup_qt()
-  sed -i -e "s@$bundle_root_absolute/@\$INSTALLDIR/@" $bundle_root_absolute/bin/mantidworkbench
+  fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
+  sed -i -e "s@$bundle_prefix_absolute/@\$INSTALLDIR/@" $bundle_prefix_absolute/bin/mantidworkbench
 }
 
 # Create a tarball out of the installed conda environment
@@ -149,8 +150,8 @@ echo
 
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
-fixup_bundle "$bundle_contents" "$bundle_icon"
-add_resources "$bundle_contents" "$bundle_icon"
+fixup_bundle "$bundle_conda_prefix" "$bundle_icon"
+add_resources "$bundle_conda_prefix" "$bundle_icon"
 
 # Create tarball and compress
 version_name="$bundle_name"-"$version"
