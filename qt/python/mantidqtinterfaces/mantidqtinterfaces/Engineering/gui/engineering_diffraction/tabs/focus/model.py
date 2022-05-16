@@ -26,4 +26,4 @@ class FocusModel(object):
         full_calib = load_full_instrument_calibration()
         focused_files = EnggUtils.focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir,
                                             full_calib)
-        self._last_focused_files.extend(focused_files)
+        self._last_focused_files = focused_files
