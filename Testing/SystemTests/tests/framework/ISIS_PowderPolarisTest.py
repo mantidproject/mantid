@@ -252,7 +252,8 @@ class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
         for ws in self.focus_results:
             self.assertEqual(ws.sample().getMaterial().name(), 'Si')
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-6
+        self.tolerance = 1e-5
+        # MayersSampleCorrection involves a fit that may give slightly different results on different OS
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
 
     def cleanup(self):
