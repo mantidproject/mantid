@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, FileProperty, FileAction
+from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, ApplyDiffCal,\
     ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, Scale, CreateWorkspace
 
@@ -653,7 +654,7 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
                             NSpec=mtd[wsName].getNumberHistograms(),
                             UnitX='dSpacing',
                             ParentWorkspace=mtd[wsName])
-            mtd[wsName].setDistribution(True)
+            ADS.retrieve(wsName).setDistribution(True)
 
     def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, useVanaEmpty, vanaEmptyWsName, addMinimum,
                           resetValue, addMinimumVana, resetValueVana):
