@@ -1441,16 +1441,19 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
   size_t nspectra = data.dim0();
   // process optional spectrum parameters, if set
   checkOptionalProperties(nspectra);
-  // Actual number of spectra in output workspace (if only a range was going
-  // to be loaded)
+  // Actual number of spectra in output workspace (if only a range was going to be loaded)
   size_t total_specs = calculateWorkspaceSize(nspectra);
 
   //// Create the 2D workspace for the output
+
+  if (nchannels == 1 && nspectra == 1)
+    // if there is only one value, it is a WorkspaceSingleValue
+    workspaceType = "WorkspaceSingleValue";
+
   bool hasFracArea = false;
   if (wksp_cls.isValid("frac_area")) {
     // frac_area entry is the signal for a RebinnedOutput workspace
     hasFracArea = true;
-    workspaceType.clear();
     workspaceType = "RebinnedOutput";
   }
 
