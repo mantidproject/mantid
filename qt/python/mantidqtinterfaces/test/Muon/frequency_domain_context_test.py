@@ -298,6 +298,9 @@ class MuonFreqContextTest(unittest.TestCase):
     def test_switch_units_in_name_field_to_freq(self):
         self.assertEqual(self.context.switch_units_in_name(f"unit {GAUSS} test"), f"unit {MHz} test")
 
+    def test_switch_units_in_name_with_None(self):
+        self.assertEqual(self.context.switch_units_in_name(None), None)
+
     def test_range(self):
         self.context.x_label = FIELD
         self.assertEqual(self.context.range(), [0.0, 1000.0])

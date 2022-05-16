@@ -51,6 +51,8 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
         self._model.set_period(period)
 
     def handle_maxent_data_updated(self, name):
+        if name is None:
+            return
         self._maxent_ws_name = name
         self._model.set_run_from_name(name)
         self.add_data_to_plots()

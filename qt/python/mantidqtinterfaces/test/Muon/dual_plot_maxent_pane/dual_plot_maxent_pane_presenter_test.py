@@ -61,6 +61,15 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.model.set_run_from_name.assert_called_once_with(name)
         self.presenter.add_data_to_plots.assert_called_once_with()
 
+    def test_handle_maxent_data_updated_None(self):
+        self.presenter.add_data_to_plots = mock.Mock()
+        name = None
+
+        self.presenter.handle_maxent_data_updated(name)
+        self.assertEqual(self.presenter._maxent_ws_name, name)
+        self.model.set_run_from_name.assert_not_called()
+        self.presenter.add_data_to_plots.assert_not_called()
+
     def test_add_data_to_plots(self):
         ws = ["unit", "test"]
         indices = [1,3]
