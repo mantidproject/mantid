@@ -138,6 +138,11 @@ class DrillTest(unittest.TestCase):
     ###########################################################################
 
     def setUp(self):
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        config['default.facility'] = "ILL"
+        config['default.instrument'] = "D11"
+
         # avoid popup messages
         patch = mock.patch('mantidqtinterfaces.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
@@ -167,11 +172,6 @@ class DrillTest(unittest.TestCase):
         # shown window
         self.view.isHidden = mock.Mock()
         self.view.isHidden.return_value = False
-
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D11"
 
     def tearDown(self):
         config['default.facility'] = self.facility
