@@ -414,9 +414,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._peaks_presenter.clear_observer()
 
     def canvas_clicked(self, event):
-        if self._peaks_presenter is not None:
-            if event.inaxes:
-                sliceinfo = self.get_sliceinfo()
+        if self._peaks_presenter is not None and event.inaxes:
+            sliceinfo = self.get_sliceinfo()
+            if sliceinfo.can_support_peak_overlay():
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
