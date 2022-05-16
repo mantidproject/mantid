@@ -1,4 +1,11 @@
 #!/bin/bash
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
 
 # Construct a standalone macOS MantidWorkbench .dmg bundle.
 # The bundle is created from a pre-packaged conda version
@@ -18,10 +25,13 @@ CONDA_PACKAGE=mantidworkbench
 BUNDLE_PREFIX=MantidWorkbench
 ICON_DIR="$HERE/../../../images"
 
+# Common routines
+source $HERE/../common/common.sh
+
 # Cleanup on script exit
 # Remove temporary work files and ensure volumes are detached
 #   $1 - The name of the mounted volume that, if it still exists, should be detached
-function cleanup() {
+function on_exit() {
   ensure_volume_detached "$1"
   rm -f "$TEMP_OSA_SCPT"
   rm -f "$TEMP_IMAGE"
@@ -47,6 +57,17 @@ function ensure_volume_detached() {
   done
 }
 
+# Certain packages use LC_REEXPORT_DYLIB rather than LC_LOAD_DYLIB for their dependents
+# See http://blog.darlinghq.org/2018/07/mach-o-linking-and-loading-tricks.html for details.
+# Conda install rewrites these LC_REEXPORT_DYLIB links with absolute links and breaks relocation
+# This can easily be remedied by switching to use the @rpath identifier
+# We avoid scanning the whole bundle as this potentially very expensive and instead fixup the libraries
+# we know have issues
+function fixup_reexport_paths() {
+  local bundle_conda_prefix=$1
+  fixup_reexport_dependent_path "$(find "$bundle_conda_prefix" -name 'libncurses.*' -type f)"
+}
+
 # Use otool/install_name_tool to change a dependent path
 # to a reexported library. The original is assumed to contain
 # an absolute path
@@ -60,39 +81,6 @@ function fixup_reexport_dependent_path() {
   install_name_tool -change "${dependent_path}" @rpath/"${dependent_fname}" "${libpath}"
 }
 
-function trim_conda() {
-  local bundle_conda_prefix=$1
-  echo "Purging '$bundle_conda_prefix' of unnecessary items"
-  # Heavily cut down everything in bin
-  mv "$bundle_conda_prefix"/bin "$bundle_conda_prefix"/bin_tmp
-  mkdir "$bundle_conda_prefix"/bin
-  cp "$bundle_conda_prefix"/bin_tmp/Mantid.properties "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/mantid-scripts.pth "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/MantidWorkbench "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/python "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/pip "$bundle_conda_prefix"/bin/
-  sed -i "" '1s|.*|#!/usr/bin/env python|' "$bundle_conda_prefix"/bin/pip
-  # Heavily cut down share
-  mv "$bundle_conda_prefix"/share "$bundle_conda_prefix"/share_tmp
-  mkdir "$bundle_conda_prefix"/share
-  mv "$bundle_conda_prefix"/share_tmp/doc "$bundle_conda_prefix"/share/
-  # Removals
-  rm -rf "$bundle_conda_prefix"/bin_tmp \
-    "$bundle_conda_prefix"/include \
-    "$bundle_conda_prefix"/man \
-    "$bundle_conda_prefix"/mkspecs \
-    "$bundle_conda_prefix"/phrasebooks \
-    "$bundle_conda_prefix"/qml \
-    "$bundle_conda_prefix"/qsci \
-    "$bundle_conda_prefix"/share_tmp \
-    "$bundle_conda_prefix"/translations
-  find "$bundle_conda_prefix" -name 'qt.conf' -delete
-  find "$bundle_conda_prefix" -name '*.a' -delete
-  find "$bundle_conda_prefix" -name "*.pyc" -type f -delete
-  find "$bundle_conda_prefix" -path "*/__pycache__/*" -delete
-  find "$bundle_contents" -name '*.plist' -delete
-}
-
 # Add required resources into bundle
 #   $1 - Location of bundle contents directory
 #   $2 - Name of the bundle (part before .app)
@@ -103,7 +91,6 @@ function add_resources() {
   local bundle_icon=$3
   cp "$HERE"/BundleExecutable "$bundle_contents"/MacOS/"$bundle_name"
   chmod +x "$bundle_contents"/MacOS/"$bundle_name"
-  cp "$HERE"/qt.conf "$bundle_contents"/Resources/bin/qt.conf
   cp "$bundle_icon" "$bundle_contents"/Resources
 }
 
@@ -154,7 +141,7 @@ function create_disk_image() {
   # Set Finder background
   hdiutil create -ov -srcfolder "$BUILD_DIR" -volname "$version_name" -fs HFS+ -format UDRW "$TEMP_IMAGE"
   volume_name=$(hdiutil attach "$TEMP_IMAGE" | perl -n -e '/\/Volumes\/(.+)/ && print $1')
-  trap "cleanup $volume_name" RETURN
+  trap "on_exit $volume_name" RETURN
   volume_path=/Volumes/"$volume_name"
   rm "$volume_path"/"$padding_filename"
   sed -e "s/@BUNDLE_NAME@/$bundle_name/" "$HERE/dmg_setup.scpt.in" > "$TEMP_OSA_SCPT"
@@ -188,24 +175,24 @@ conda_channel=mantid
 suffix=
 while [ ! $# -eq 0 ]
 do
-    case "$1" in
-        -c)
-            conda_channel="$2"
-            shift
-            ;;
-        -s)
-            suffix="$2"
-            shift
-            ;;
-        -h)
-            usage 0
-            ;;
-        *)
-            if [ ! -z "$2" ]
-            then
-              usage 1
-            fi
-            ;;
+  case "$1" in
+    -c)
+        conda_channel="$2"
+        shift
+        ;;
+    -s)
+        suffix="$2"
+        shift
+        ;;
+    -h)
+        usage 0
+        ;;
+    *)
+        if [ ! -z "$2" ]
+        then
+          usage 1
+        fi
+        ;;
   esac
   shift
 done
@@ -257,22 +244,11 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
-# Certain packages use LC_REEXPORT_DYLIB rather than LC_LOAD_DYLIB for their dependents
-# See http://blog.darlinghq.org/2018/07/mach-o-linking-and-loading-tricks.html for details.
-# Conda install rewrites these LC_REEXPORT_DYLIB links with absolute links and breaks relocation
-# This can easily be remedied by switching to use the @rpath identifier
-# We avoid scanning the whole bundle as this potentially very expensive and instead fixup the libraries
-# we know have issues
-fixup_reexport_dependent_path "$(find "$bundle_conda_prefix" -name 'libncurses.*' -type f)"
-
-# Conda bundles pretty much everything with each of its packages and much of this is
-# unnecessary in this type of bundle - trim the fat.
+# Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
-
-# Add required resources
+fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
+fixup_reexport_paths "$bundle_conda_prefix"
 add_resources "$bundle_contents" "$bundle_name" "$bundle_icon"
-
-# Create a plist from base version
 create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 
 # Create DMG, including custom background and /Applications link
