@@ -120,6 +120,8 @@ class FrequencyContext(object):
         return int(run) == int(fft_run) and (fft_group_or_pair in group or fft_group_or_pair in pair)
 
     def switch_units_in_name(self, name):
+        if name is None:
+            return None
         if MHz in name:
             return name.replace(MHz, GAUSS)
         elif GAUSS in name:
