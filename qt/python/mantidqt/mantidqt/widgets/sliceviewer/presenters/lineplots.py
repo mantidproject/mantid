@@ -342,7 +342,6 @@ class RectangleSelectionLinePlot(KeyHandler):
         self._selector = RectangleSelectorMtd(
             ax,
             self._on_rectangle_selected,
-            drawtype='box',
             useblit=False,  # rectangle persists on button release
             button=[1],
             minspanx=5,
