@@ -469,6 +469,7 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
         targetWS.setHistogram(i, targetHisto);
       } else {
         targetWS.mutableY(i) = spatiallyInterpHisto.y();
+        targetWS.mutableE(i) = spatiallyInterpHisto.e();
       }
     }
     PARALLEL_END_INTERRUPT_REGION
