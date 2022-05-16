@@ -81,15 +81,14 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         :param painter: A reference to the object that will draw to the screen
         :param frame: coordinate system of workspace
         """
-        frame_to_slice_fn = self._frame_to_slice_fn(frame)
-
         representations = []
-        for peak in self.ws:
-            peak_origin = getattr(peak, frame_to_slice_fn)()
-            peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info,
-                                                 painter, self.fg_color, self.bg_color)
-            representations.append(peak_repr)
-
+        if slice_info.can_support_peak_overlay():
+            frame_to_slice_fn = self._frame_to_slice_fn(frame)
+            for peak in self.ws:
+                peak_origin = getattr(peak, frame_to_slice_fn)()
+                peak_repr = draw_peak_representation(peak_origin, peak.getPeakShape(), slice_info,
+                                                     painter, self.fg_color, self.bg_color)
+                representations.append(peak_repr)
         self._representations = representations
 
     def add_peak(self, pos, frame):
@@ -133,13 +132,14 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         that slice point has been updated so it contains this peak
         :param index: Index of peak in list
         """
-        rep = self._representations[index]
-
         # Sometimes the integration volume may not intersect the slices of data
-        if rep is None:
+        if not self.has_representations_drawn() or self._representations[index] is None:
             return ((None, None), (None, None))
 
-        return rep.viewlimits()
+        return self._representations[index].viewlimits()
+
+    def has_representations_drawn(self) -> bool:
+        return bool(self._representations)
 
     def _frame_to_slice_fn(self, frame):
         """

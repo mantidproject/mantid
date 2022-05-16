@@ -76,6 +76,9 @@ class SliceInfo:
         """
         return self._nonorthogonal_axes_supported
 
+    def can_support_peak_overlay(self) -> bool:
+        return self._peak_overlay_supported
+
     def get_northogonal_transform(self) -> NonOrthogonalTransform:
         return self._transform
 
@@ -85,8 +88,10 @@ class SliceInfo:
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        return np.array((*self._transform.tr(point[self._display_x], point[self._display_y]),
-                         point[self._display_z]))
+        px = point[self._display_x]
+        py = point[self._display_y]
+        pz = point[self._display_z]
+        return np.array((*self._transform.tr(px, py), pz))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
         """Does the inverse transform (inverse of self.transform) from slice
@@ -137,8 +142,9 @@ class SliceInfo:
             self._slicewidth_z = z_range[1] - z_range[0]
 
     def _init_transform(self, qflags: Sequence[bool], axes_angles: Optional[np.ndarray] = None):
+        self._peak_overlay_supported = qflags[self._display_x] and qflags[self._display_y]
         # find transform for the chosen display indices
-        if isinstance(axes_angles, np.ndarray) and qflags[self._display_x] and qflags[self._display_y]:
+        if isinstance(axes_angles, np.ndarray) and self._peak_overlay_supported:
             # adjust index if non-Q dimension is before a Q the displayed axes
             # force array to have dtype=bool otherwise ~ operator throws error on empty array when index is zero
             ix = self._display_x - np.sum(~np.array(qflags[:self._display_x], dtype=bool))
