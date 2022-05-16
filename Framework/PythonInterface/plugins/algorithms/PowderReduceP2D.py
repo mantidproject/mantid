@@ -227,13 +227,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.setPropertyGroup('EndWorkspaceIndex', grp7)
             self.setPropertyGroup('ComponentList', grp7)
 
-        #def loadApplyDiffCal():
-            # Input for ApplyDiffCal
-        #    self.copyProperties('ApplyDiffCal', ['CalibrationWorkspace', 'OffsetsWorkspace'])
-        #    grp8 = 'ApplyDiffCal'
-        #    self.setPropertyGroup('CalibrationWorkspace', grp8)
-        #    self.setPropertyGroup('OffsetsWorkspace', grp8)
-
         def loadCylinderAbsorption():
             # Input for CylinderAbsorption
             self.declareProperty(
@@ -397,7 +390,6 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         loadRemovePromptPulse()
         loadLoadDiffCal()
         loadMaskDetectors()
-        #loadApplyDiffCal ()
         loadCylinderAbsorption()
         loadBin2DPowderDiffraction()
         loadStripVanadiumPeaks()
