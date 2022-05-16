@@ -89,10 +89,6 @@ class SliceInfo:
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        print("self._display_x, self._display_y, self._display_z", self._display_x, self._display_y, self._display_z)
-        print('adjusted', self.adjust_index_for_preceding_nonq_dims(self._display_x),
-              self.adjust_index_for_preceding_nonq_dims(self._display_y),
-              self.adjust_index_for_preceding_nonq_dims(self._display_z))
         px = point[self.adjust_index_for_preceding_nonq_dims(self._display_x)]
         py = point[self.adjust_index_for_preceding_nonq_dims(self._display_y)]
         pz = point[self.adjust_index_for_preceding_nonq_dims(self._display_z)]
@@ -104,13 +100,13 @@ class SliceInfo:
 
         :param point: A 3D point in the slice frame
         """
-        transform = np.zeros((3, 3))
-        transform[0][self._display_x] = 1
-        transform[1][self._display_y] = 1
-        transform[2][self._display_z] = 1
-        inv_trans = np.linalg.inv(transform)
-        point = np.dot(inv_trans, point)
-        return np.array((*self._transform.inv_tr(point[0], point[1]), point[2]))
+        x, y = self._transform.inv_tr(point[0], point[1])
+
+        data_point = np.zeros(3)
+        data_point[self.adjust_index_for_preceding_nonq_dims(self._display_x)] = x
+        data_point[self.adjust_index_for_preceding_nonq_dims(self._display_y)] = y
+        data_point[self.adjust_index_for_preceding_nonq_dims(self._display_z)] = point[2]
+        return data_point
 
     # private api
     def _init_display_indices(self, transpose: bool, qflags: Sequence[bool]):
