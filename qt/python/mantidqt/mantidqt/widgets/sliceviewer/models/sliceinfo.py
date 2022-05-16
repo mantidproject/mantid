@@ -50,6 +50,7 @@ class SliceInfo:
         self.range = range
         self._slicevalue_z, self._slicewidth_z = (None,) * 2
         self._display_x, self._display_y, self._display_z = (None,) * 3
+        self.i_non_q = np.array([idim for idim, qflag in enumerate(qflags) if not qflag])
 
         # initialise attributes
         self._init_display_indices(transpose, qflags)
@@ -88,9 +89,13 @@ class SliceInfo:
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        px = point[self._display_x]
-        py = point[self._display_y]
-        pz = point[self._display_z]
+        print("self._display_x, self._display_y, self._display_z", self._display_x, self._display_y, self._display_z)
+        print('adjusted', self.adjust_index_for_preceding_nonq_dims(self._display_x),
+              self.adjust_index_for_preceding_nonq_dims(self._display_y),
+              self.adjust_index_for_preceding_nonq_dims(self._display_z))
+        px = point[self.adjust_index_for_preceding_nonq_dims(self._display_x)]
+        py = point[self.adjust_index_for_preceding_nonq_dims(self._display_y)]
+        pz = point[self.adjust_index_for_preceding_nonq_dims(self._display_z)]
         return np.array((*self._transform.tr(px, py), pz))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
@@ -147,8 +152,8 @@ class SliceInfo:
         if isinstance(axes_angles, np.ndarray) and self._peak_overlay_supported:
             # adjust index if non-Q dimension is before a Q the displayed axes
             # force array to have dtype=bool otherwise ~ operator throws error on empty array when index is zero
-            ix = self._display_x - np.sum(~np.array(qflags[:self._display_x], dtype=bool))
-            iy = self._display_y - np.sum(~np.array(qflags[:self._display_y], dtype=bool))
+            ix = self.adjust_index_for_preceding_nonq_dims(self._display_x)
+            iy = self.adjust_index_for_preceding_nonq_dims(self._display_y)
             angle = axes_angles[ix, iy]
             if abs(angle-(np.pi/2)) < 1e-5:
                 self._transform = OrthogonalTransform()  # use OrthogonalTransform for performance
@@ -158,3 +163,6 @@ class SliceInfo:
         else:
             self._transform = OrthogonalTransform()
             self._nonorthogonal_axes_supported = False
+
+    def adjust_index_for_preceding_nonq_dims(self, index):
+        return int(index - np.sum(self.i_non_q < index))
