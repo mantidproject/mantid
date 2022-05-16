@@ -56,16 +56,12 @@ class FocusModelTest(unittest.TestCase):
         mock_foc_run.assert_called_once()
         mock_plot.assert_called_once_with(["foc_name"])
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        self.assertEqual(len(self.model._last_focused_files), 1)
         self.assertEqual(self.model._last_focused_files[0], "nxs_path")
         mock_del_ws.assert_called_once_with("van_ws_foc_rb")
 
         # no plotting
         mock_plot.reset_mock()
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=None, calibration=self.calibration)
-
-        self.assertEqual(len(self.model._last_focused_files), 1)
-        self.assertEqual(self.model._last_focused_files[0], "nxs_path")
 
         mock_plot.assert_not_called()
 
