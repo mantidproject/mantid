@@ -366,8 +366,17 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
   // Set peak and background ranges
   const auto ranges = getRangesFromInstrument();
 
-  QFileInfo fi(m_lastCalPlotFilename);
+  QString filename = m_uiForm.leRunNo->getFirstFilename();
+  if (filename.isEmpty())
+    return;
+  QFileInfo fi(filename);
   QString wsname = fi.baseName();
+  if (!loadFile(filename, wsname, spectraMin, spectraMax)) {
+    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
+                        "and matches the selected instrument in the Energy "
+                        "Transfer tab.");
+    return;
+  }
 
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
     const auto input =
@@ -390,6 +399,9 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
   m_uiForm.ckCreateResolution->setEnabled(hasResolution);
   if (!hasResolution)
     m_uiForm.ckCreateResolution->setChecked(false);
+
+  // plot energy to correctly set the res plot
+  calPlotEnergy();
 }
 
 /**
