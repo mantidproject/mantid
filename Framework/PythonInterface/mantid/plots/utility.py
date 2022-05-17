@@ -130,7 +130,8 @@ def row_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().rowspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().rowspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
         # An 'inset' axes does not have a rowNum, so return None
         return ax.rowNum if hasattr(ax, 'rowNum') else None
@@ -142,7 +143,8 @@ def col_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().colspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().colspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
         # An 'inset' axes does not have a colNum, so return None
         return ax.colNum if hasattr(ax, 'colNum') else None
