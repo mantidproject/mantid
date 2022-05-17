@@ -1,2 +1,2 @@
 - The Muon Analysis and Frequency Domain Analysis GUI's have had a bug fixed that caused a crash when changing instrument.
- - The Muon Analysis and Frequency Domain Analysis GUI's have had a bug fixed that caused a crash when undoing a fit.
+- The Muon Analysis and Frequency Domain Analysis GUI's have had a bug fixed that caused a crash when undoing a fit.
