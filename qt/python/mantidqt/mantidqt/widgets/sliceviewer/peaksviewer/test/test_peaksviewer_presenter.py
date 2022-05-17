@@ -108,6 +108,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
     def test_single_peak_selection(self, mock_peaks_list_presenter):
         name = 'ws1'
         mock_model = create_mock_model(name)
+        mock_model.has_representations_drawn.return_value = True
         viewlimits = (-1, 1), (-2, 2)
         mock_model.viewlimits.return_value = viewlimits
         self.mock_view.selected_index = 0
@@ -117,6 +118,19 @@ class PeaksViewerPresenterTest(unittest.TestCase):
 
         mock_model.viewlimits.assert_called_once_with(0)
         self.mock_view.set_axes_limits.assert_called_once_with(*viewlimits, auto_transform=False)
+
+    def test_single_peak_selection_if_peaks_not_drawn(self, mock_peaks_list_presenter):
+        # peaks not drawn if one fo viewing axes non-Q
+        name = 'ws1'
+        mock_model = create_mock_model(name)
+        mock_model.has_representations_drawn.return_value = False
+        self.mock_view.selected_index = 0
+        presenter = PeaksViewerPresenter(mock_model, self.mock_view)
+
+        presenter.notify(PeaksViewerPresenter.Event.PeakSelected)
+
+        mock_model.viewlimits.assert_not_called()
+        self.mock_view.set_axes_limits.assert_not_called()
 
     def test_add_delete_peaks(self, mock_peaks_list_presenter):
         name = 'ws1'

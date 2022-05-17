@@ -80,6 +80,7 @@ class PeaksViewerModelTest(unittest.TestCase):
         slice_info = MagicMock()
         slice_info.slicepoint = [0.5, None, None]
         slice_info.z_index = 0
+        slice_info.adjust_index_for_preceding_nonq_dims.side_effect = lambda index: index
 
         slicepoint = model.slicepoint(0, slice_info, SpecialCoordinateSystem.QSample)
 
