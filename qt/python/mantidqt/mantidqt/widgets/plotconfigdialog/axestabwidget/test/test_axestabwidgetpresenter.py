@@ -70,13 +70,13 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                     ax_mock.set_xlabel.assert_called_once_with(
                         presenter.current_view_props.xlabel)
                     ax_mock.set_xscale.assert_called_once_with(
-                        presenter.current_view_props.xscale)
+                        presenter.current_view_props.xscale.lower())
                     ax_mock.set_ylim.assert_called_once_with(
                         presenter.current_view_props.ylim)
                     ax_mock.set_ylabel.assert_called_once_with(
                         presenter.current_view_props.ylabel)
                     ax_mock.set_yscale.assert_called_once_with(
-                        presenter.current_view_props.yscale)
+                        presenter.current_view_props.yscale.lower())
                     ax_mock.minorticks_on.assert_called_once()
                     ax_mock.set_facecolor.assert_called_once_with(
                         presenter.current_view_props.canvas_color)
@@ -101,13 +101,13 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                     ax_mock.set_xlabel.assert_called_once_with(
                         presenter.current_view_props.xlabel)
                     ax_mock.set_xscale.assert_called_once_with(
-                        presenter.current_view_props.xscale)
+                        presenter.current_view_props.xscale.lower())
                     ax_mock.autoscale.assert_has_calls(
                         [mock.call(True, axis="y")])
                     ax_mock.set_ylabel.assert_called_once_with(
                         presenter.current_view_props.ylabel)
                     ax_mock.set_yscale.assert_called_once_with(
-                        presenter.current_view_props.yscale)
+                        presenter.current_view_props.yscale.lower())
                     ax_mock.minorticks_on.assert_called_once()
                     ax_mock.set_facecolor.assert_called_once_with(
                         presenter.current_view_props.canvas_color)
@@ -137,13 +137,13 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                         ax_mock.set_xlabel.assert_called_once_with(
                             presenter.current_view_props.xlabel)
                         ax_mock.set_xscale.assert_called_once_with(
-                            presenter.current_view_props.xscale)
+                            presenter.current_view_props.xscale.lower())
                         ax_mock.set_ylim.assert_called_once_with(
                             presenter.current_view_props.ylim)
                         ax_mock.set_ylabel.assert_called_once_with(
                             presenter.current_view_props.ylabel)
                         ax_mock.set_yscale.assert_called_once_with(
-                            presenter.current_view_props.yscale)
+                            presenter.current_view_props.yscale.lower())
                         ax_mock.set_facecolor.assert_called_once_with(
                             presenter.current_view_props.canvas_color)
 
@@ -168,13 +168,13 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                         ax_mock.set_xlabel.assert_called_once_with(
                             presenter.current_view_props.xlabel)
                         ax_mock.set_xscale.assert_called_once_with(
-                            presenter.current_view_props.xscale)
+                            presenter.current_view_props.xscale.lower())
                         ax_mock.autoscale.assert_has_calls(
                             [mock.call(True, axis="y")])
                         ax_mock.set_ylabel.assert_called_once_with(
                             presenter.current_view_props.ylabel)
                         ax_mock.set_yscale.assert_called_once_with(
-                            presenter.current_view_props.yscale)
+                            presenter.current_view_props.yscale.lower())
                         ax_mock.set_facecolor.assert_called_once_with(
                             presenter.current_view_props.canvas_color)
                         ax_mock.set_xlim.assert_not_called()
