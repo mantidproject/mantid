@@ -35,12 +35,12 @@ import secureemail
 #====================================================================================
 def run(args):
     """ Execute the program """
-    print
-    print "=============== Checking For Performance Loss ====================="
+    print()
+    print("=============== Checking For Performance Loss =====================")
     dbfile = args.db[0]
 
     if not os.path.exists(dbfile):
-        print "Database file %s not found."
+        print("Database file %s not found.")
         sys.exit(1)
 
     # Set the database to the one given
@@ -51,7 +51,7 @@ def run(args):
     tol = float(args.tol)
     rev = sqlresults.get_latest_revison()
 
-    print "Comparing the average of the %d revisions before rev. %d. Tolerance of %g %%." % (avg, rev, tol)
+    print("Comparing the average of the %d revisions before rev. %d. Tolerance of %g %%." % (avg, rev, tol))
     if args.verbose: print
 
     # For limiting the results
@@ -59,7 +59,7 @@ def run(args):
 
     names = sqlresults.get_all_test_names("revision = %d" % rev)
     if len(names) == 0:
-        print "Error! No tests found at revision number %d.\n" % rev
+        print("Error! No tests found at revision number %d.\n" % rev)
         sys.exit(1)
 
     bad_results = ""
