@@ -354,8 +354,8 @@ void ISISCalibration::setDefaultInstDetails() {
 
 void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails) {
   auto const instrument = getInstrumentDetail(instrumentDetails, "instrument");
-  auto const spectraMin = getInstrumentDetail(instrumentDetails, "spectra-min").toDouble();
-  auto const spectraMax = getInstrumentDetail(instrumentDetails, "spectra-max").toDouble();
+  auto const spectraMin = getInstrumentDetail(instrumentDetails, "spectra-min").toInt();
+  auto const spectraMax = getInstrumentDetail(instrumentDetails, "spectra-max").toInt();
 
   // Set the search instrument for runs
   m_uiForm.leRunNo->setInstrumentOverride(instrument);
