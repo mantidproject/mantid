@@ -371,25 +371,16 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
     return;
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
-  if (!loadFile(filename, wsname, spectraMin, spectraMax)) {
-    emit showMessageBox("Unable to load file.\nCheck whether your file exists "
-                        "and matches the selected instrument in the Energy "
-                        "Transfer tab.");
-    return;
+  if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
+    loadFile(filename, wsname, spectraMin, spectraMax);
   }
-
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
-    const auto input =
-        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
-    const auto &dataX = input->x(0);
-    if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
-        dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
-      setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
-      setBackgroundRange(dataX.front(), (7.0 * dataX.front() + dataX.back()) / 8.0);
-    } else {
-      setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
-      setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
-    }
+  const auto input =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+  const auto &dataX = input->x(0);
+  if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
+      dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
+    setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
+    setBackgroundRange(dataX.front(), (7.0 * dataX.front() + dataX.back()) / 8.0);
   } else {
     setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
     setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
