@@ -1,0 +1,19 @@
+name: Merge release-next to main
+on:
+  push:
+    branches:
+      - 'release-next'
+
+jobs:
+  sync-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Merge release_next -> main
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: release-next
+          target_branch: main
+          github_token: ${{ github.token }}
