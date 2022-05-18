@@ -1021,9 +1021,6 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           long double a = std::cosh((k + 1 - iMinusj) * lambda);
           long double b = std::cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
           long double c = 2 * std::sinh(lambda) * std::sinh((k + 1) * lambda);
-          long double inf = std::numeric_limits<long double>::infinity();
-          if (a == inf || b == inf || c == inf)
-            throw std::runtime_error("Overflow during matrix inversion");
           long double value = m_rawData[i][j];
           value *= (a - b) / c;
           m_rawData[i][j] = static_cast<T>(value);
