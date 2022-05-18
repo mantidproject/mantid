@@ -65,6 +65,20 @@ class SofQWMoments(DataProcessorAlgorithm):
             scale_alg.execute()
             logger.information('y(q,w) scaled by %f' % self._factor)
 
+        # calculate delta x
+        x_data = np.asarray(mtd[input_ws].readX(0))
+        y_data = (x_data[1:] + x_data[:-1]) / 2.0
+        workflow_prog.report('Creating temporary data workspace')
+        x_workspace = "__temp_sqw_moments_x"
+        create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
+        create_alg.setProperty("DataX", x_data)
+        create_alg.setProperty("DataY", y_data)
+        create_alg.setProperty("UnitX", "DeltaE")
+        create_alg.setProperty("OutputWorkspace", x_workspace)
+        create_alg.execute()
+        mtd.addOrReplace(x_workspace, create_alg.getProperty("OutputWorkspace").value)
+
+        # calculate moments
         workflow_prog.report('Integrating result')
         moments_0 = self._output_ws + '_M0'
         integration_alg = self.createChildAlgorithm("Integration", enableLogging=False)
@@ -73,29 +87,9 @@ class SofQWMoments(DataProcessorAlgorithm):
         integration_alg.execute()
         mtd.addOrReplace(moments_0, integration_alg.getProperty("OutputWorkspace").value)
 
-        # calculate delta x
-        workflow_prog.report('Converting to point data')
-        convert_point_alg = self.createChildAlgorithm("ConvertToPointData", enableLogging=False)
-        convert_point_alg.setProperty("InputWorkspace", input_ws)
-        convert_point_alg.setProperty("OutputWorkspace", input_ws)
-        convert_point_alg.execute()
-        mtd.addOrReplace(input_ws, convert_point_alg.getProperty("OutputWorkspace").value)
-        x_data = np.asarray(mtd[input_ws].readX(0))
-        workflow_prog.report('Creating temporary data workspace')
-        x_workspace = "__temp_sqw_moments_x"
-        create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
-        create_alg.setProperty("DataX", x_data)
-        create_alg.setProperty("DataY", x_data)
-        create_alg.setProperty("UnitX", "DeltaE")
-        create_alg.setProperty("OutputWorkspace", x_workspace)
-        create_alg.execute()
-        mtd.addOrReplace(x_workspace, create_alg.getProperty("OutputWorkspace").value)
-
-        # calculate moments
         multiply_alg = self.createChildAlgorithm("Multiply", enableLogging=False)
 
         workflow_prog.report('Multiplying Workspaces by moments')
-        moments_0 = self._output_ws + '_M0'
         moments_1 = self._output_ws + '_M1'
         multiply_alg.setProperty("LHSWorkspace", x_workspace)
         multiply_alg.setProperty("RHSWorkspace", input_ws)
@@ -124,16 +118,11 @@ class SofQWMoments(DataProcessorAlgorithm):
         multiply_alg.execute()
         mtd.addOrReplace(moments_4, multiply_alg.getProperty("OutputWorkspace").value)
 
-        workflow_prog.report('Converting to Histogram')
         convert_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
-        convert_hist_alg.setProperty("InputWorkspace", input_ws)
-        convert_hist_alg.setProperty("OutputWorkspace", input_ws)
-        convert_hist_alg.execute()
-
         moments = [moments_1, moments_2, moments_3, moments_4]
         divide_alg = self.createChildAlgorithm("Divide", enableLogging=False)
         for moment_ws in moments:
-            workflow_prog.report('Processing workspace %s' % moment_ws)
+            workflow_prog.report('Processing Workspace %s' % moment_ws)
             convert_hist_alg.setProperty("InputWorkspace", moment_ws)
             convert_hist_alg.setProperty("OutputWorkspace", moment_ws)
             convert_hist_alg.execute()
