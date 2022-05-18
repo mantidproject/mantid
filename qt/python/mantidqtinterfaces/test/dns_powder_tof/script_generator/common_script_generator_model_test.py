@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 import unittest
 from unittest import mock
 
@@ -48,13 +49,10 @@ class DNSScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_filename('', []), 'script.py')
         self.assertEqual(self.model.get_filename('txt', []), 'txt.py')
         self.assertEqual(self.model.get_filename('a.py', []), 'a.py')
-        fulldata_test = [{'sample_name': '_abc', 'file_number': 4},
-                         {'sample_name': '_abc', 'file_number': 5}]
+        full_data_test = [{'sample_name': '_abc', 'file_number': 4},
+                          {'sample_name': '_abc', 'file_number': 5}]
         self.assertEqual(self.model.get_filename(
-            'a.py', fulldata_test, auto=True), 'script_abc_from_4_to_5.py')
-
-    # def test_save_script():
-    # just an alias, testes in file_processing helpers
+            'a.py', full_data_test, auto=True), 'script_abc_from_4_to_5.py')
 
 
 if __name__ == '__main__':

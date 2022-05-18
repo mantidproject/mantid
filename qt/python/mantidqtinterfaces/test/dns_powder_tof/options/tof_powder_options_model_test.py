@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS TOF powder Options Presenter - Tab of DNS Reduction GUI
+DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
 """
+
 import unittest
 from unittest import mock
 
@@ -35,17 +37,17 @@ class DNSTofPowderOptionsModelTest(unittest.TestCase):
         self.assertIsInstance(self.model, DNSCommonOptionsModel)
         self.assertIsInstance(self.model, DNSObsModel)
 
-    def test_get_channelwidths(self):
+    def test_get_channel_widths(self):
         testv = tof_powder_options_model.get_channel_widths(self.fulldata)
         self.assertEqual(testv[0], [2.0, 1.6])
         self.assertEqual(testv[1], True)
 
-    def test_channelwidth_varies(self):
+    def test_channel_width_varies(self):
         self.assertTrue(tof_powder_options_model.channel_width_varies([0, 1]))
         self.assertFalse(tof_powder_options_model.channel_width_varies([1, 1]))
         self.assertFalse(tof_powder_options_model.channel_width_varies([0]))
 
-    def test_get_tofchannels(self):
+    def test_get_tof_channels(self):
         testv = tof_powder_options_model.get_tof_channels(self.fulldata)
         self.assertEqual(testv[0], [1, 1000])
         self.assertEqual(testv[1], True)

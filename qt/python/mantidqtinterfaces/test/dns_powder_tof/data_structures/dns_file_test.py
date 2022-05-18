@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Class which loads and stores a single DNS datafile in a dictionary
+Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import unittest

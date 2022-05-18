@@ -36,7 +36,7 @@ class DNSTofPowderPlotModelTest(unittest.TestCase):
         self.assertIsInstance(testv, MatrixWorkspace)
         testv = self.model.get_plot_workspace()
         self.assertIsInstance(testv, MatrixWorkspace)
-        # Create two workspaces
+        # create two workspaces
         GroupWorkspaces([data1_sqw, ws2], OutputWorkspace='testv')
         testv = self.model.get_plot_workspace()
         self.assertIsInstance(testv, MatrixWorkspace)

@@ -63,18 +63,6 @@ class DNSObserverTest(unittest.TestCase):
         self.observer.raise_error('123', critical=True, doraise=True)
         self.view.raise_error.assert_called_once_with('123', True, False)
 
-    # def test_process_request(self):
-    # pass
-
-    # def test_tab_got_focus(self):
-    # pass
-
-    # def test_on_modus_change(self):
-    # pass
-
-    # def test_process_commandline_request(self):
-    # pass
-
 
 if __name__ == '__main__':
     unittest.main()

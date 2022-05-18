@@ -23,10 +23,10 @@ class DNSconvertersTest(unittest.TestCase):
             lambda_to_energy(0)
 
     def test_two_theta_to_q(self):
-        qabs = two_theta_to_q(120, 4.74, 0)
-        self.assertAlmostEqual(qabs, 2.29594856)
-        qabs = two_theta_to_q(120, 4.74, 3)
-        self.assertAlmostEqual(qabs, 1.67443094)
+        q_abs = two_theta_to_q(120, 4.74, 0)
+        self.assertAlmostEqual(q_abs, 2.29594856)
+        q_abs = two_theta_to_q(120, 4.74, 3)
+        self.assertAlmostEqual(q_abs, 1.67443094)
         with self.assertRaises(ZeroDivisionError):
             two_theta_to_q(120, 0, 0)
 

@@ -22,7 +22,6 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
 
 class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
     # pylint: disable=protected-access, too-many-public-methods
-
     parent = None
     model = None
 

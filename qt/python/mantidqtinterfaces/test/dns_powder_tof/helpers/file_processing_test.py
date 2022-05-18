@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS file helpers
+DNS file helpers.
 """
 
 import unittest
@@ -109,24 +110,24 @@ class DNSfile_processingTest(unittest.TestCase):
     @patch('mantidqtinterfaces.dns_powder_tof.helpers.file_processing.'
            'open')
     def test_save_txt(self, mock_open):
-        mockwrite = mock_open.return_value.__enter__.return_value.write
+        mock_write = mock_open.return_value.__enter__.return_value.write
         testv = save_txt(txt='abc', filename='123.dat', current_dir=None)
         self.assertEqual(testv, ['123.dat', '123.dat'])
         mock_open.assert_called_once_with('123.dat', 'w', encoding='utf8')
-        mockwrite.assert_called_once_with('abc')
+        mock_write.assert_called_once_with('abc')
         testv = save_txt(txt='abc', filename='123.dat', current_dir='d')
         self.assertEqual(testv, ['123.dat', 'd/123.dat'])
 
     @patch('mantidqtinterfaces.dns_powder_tof.helpers.file_processing.'
            'open')
     def test_load_txt(self, mock_open):
-        mockread = mock_open.return_value.__enter__.return_value.readlines
-        mockread.return_value = 'hzu'
+        mock_read = mock_open.return_value.__enter__.return_value.readlines
+        mock_read.return_value = 'hzu'
         testv = load_txt(filename='123.dat', current_dir=None)
         mock_open.assert_called_once_with('123.dat', 'r', encoding='utf8')
-        mockread.assert_called_once()
+        mock_read.assert_called_once()
         mock_open.reset_mock()
-        mockread.rset_mock()
+        mock_read.rset_mock()
         testv = load_txt(filename='123.dat', current_dir='d')
         mock_open.assert_called_once_with('d/123.dat', 'r', encoding='utf8')
         self.assertEqual(testv, 'hzu')

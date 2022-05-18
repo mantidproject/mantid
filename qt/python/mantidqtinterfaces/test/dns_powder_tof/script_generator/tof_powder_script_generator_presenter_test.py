@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script generator for TOF powder data
+DNS script generator for TOF powder data.
 """
+
 import unittest
 from unittest import mock
 
@@ -20,8 +22,6 @@ from mantidqtinterfaces.dns_powder_tof.script_generator.\
 from mantidqtinterfaces.dns_powder_tof.script_generator.\
     tof_powder_script_generator_presenter import \
     DNSTofPowderScriptGeneratorPresenter
-
-# yapf: enable
 
 
 class DNSTofPowderScriptGenerator_presenterTest(unittest.TestCase):

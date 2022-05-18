@@ -20,7 +20,6 @@ app, within_mantid = get_qapplication()
 
 class DNSReductionGUIPresenterTest(unittest.TestCase):
     # pylint: disable=protected-access, too-many-public-methods
-
     modus = None
     widget = None
     parameter_abo = None

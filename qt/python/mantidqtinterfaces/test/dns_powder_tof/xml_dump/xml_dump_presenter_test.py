@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
- dns xml data dump presenter
+DNS xml data dump presenter.
 """
+
 import unittest
 from collections import OrderedDict
 from unittest import mock
@@ -87,9 +89,6 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.model.dic_to_xml_file(OrderedDict(), 'te.xml',
                                    {'manitd_version': 1.0})
         self.view.show_status_message.assert_called_once()
-
-    # def test_set_view_from_param(self):
-    # pass
 
     def test_get_xml_file_path_for_loading(self):
         self.view.open_load_filename.return_value = ['test.xml', 2]

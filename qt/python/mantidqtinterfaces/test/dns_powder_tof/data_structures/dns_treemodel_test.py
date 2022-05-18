@@ -224,17 +224,17 @@ class DNSTreeModelTest(unittest.TestCase):
         # has children
         self.model.set_checked_from_index(index)
         item = self.model._item_from_index(index)
-        childindex = self.model.index(0, 0, index)
+        child_index = self.model.index(0, 0, index)
         item.child(0).setChecked(0)
         self.model._item_checked(index)
         self.assertTrue(item.child(0).isChecked())
         # no children check
         item.setChecked(0)
         item.child(0).setChecked(2)
-        self.model._item_checked(childindex)
+        self.model._item_checked(child_index)
         self.assertTrue(item.isChecked())
         item.child(0).setChecked(0)
-        self.model._item_checked(childindex)
+        self.model._item_checked(child_index)
         self.assertFalse(item.isChecked())
 
     def test_uncheck_all_scans(self):

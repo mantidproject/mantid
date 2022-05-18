@@ -15,6 +15,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
 
 
 class DNSScriptsTof(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         pass
