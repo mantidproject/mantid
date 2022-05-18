@@ -199,7 +199,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         # plot it twice
         for i in [0, 1]:
             fig = plot([ws], spectrum_nums=[1])
-            fig.canvas.get_window_title = Mock(return_value=ws_window_names[i])
+            fig.canvas.manager.get_window_title = Mock(return_value=ws_window_names[i])
             browser = self._create_widget(canvas=fig.canvas)
             # don't want the widget to actually show in test
             QDockWidget.show = Mock()
