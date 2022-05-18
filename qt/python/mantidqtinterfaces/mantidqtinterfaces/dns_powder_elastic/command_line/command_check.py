@@ -5,8 +5,10 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import Object
 
 
 class CommandLineReader(ObjectDict):
-    """allows running data reduction with command line arguments
-       accepts the same syntax as dnsplot"""
+    """
+    Allows running data reduction with command line arguments
+    accepts the same syntax as dnsplot.
+    """
     def __init__(self):
         super().__init__()
         self.files = []
@@ -45,23 +47,23 @@ class CommandLineReader(ObjectDict):
             'oof', 0)
         self['hkl1'] = self.pop('nx', '1,0,0')
         self['hkl2'] = self.pop('ny', '0,1,0')
-        self['det_efficency'] = self.pop('v', False)
+        self['det_efficiency'] = self.pop('v', False)
         self['flipping_ratio'] = self.pop('fr', False)
         self['separation_xyz'] = self.pop('xyz', False)
         self['separation_coh_inc'] = self.pop('sep-nonmag', False)
 
     def _parse_old_filenumbers(self, ffnmb, prefix, postfix, path):
-        first_filen = prefix + ffnmb + postfix
-        first_file = DNSFile(path, first_filen)
-        real_fn = first_file['filenumber']
-        pre, post = first_filen.split(real_fn)
+        first_file_n = prefix + ffnmb + postfix
+        first_file = DNSFile(path, first_file_n)
+        real_fn = first_file['file_number']
+        pre, post = first_file_n.split(real_fn)
         fn_part_prefix = prefix[len(pre):]
         fn_part_postfix = postfix[:-len(post)]
         return [fn_part_prefix, fn_part_postfix]
 
-    def _get_fixpart_fnb(self, ffnmb, prefix, postfix, path):
-        first_filen = prefix + ffnmb + postfix
-        if os.path.isfile(os.path.join(path, first_filen)):
+    def _get_fix_part_fnb(self, ffnmb, prefix, postfix, path):
+        first_file_n = prefix + ffnmb + postfix
+        if os.path.isfile(os.path.join(path, first_file_n)):
             return self._parse_old_filenumbers(ffnmb, prefix, postfix, path)
         return [prefix.split('_')[-1], postfix.split('.d_dat')[0]]
 
@@ -77,7 +79,7 @@ class CommandLineReader(ObjectDict):
         ffnmb = arguments[3]
         lfnmb = arguments[4]
         postfix = arguments[5]
-        fn_pre, fn_post = self._get_fixpart_fnb(ffnmb, prefix, postfix, path)
+        fn_pre, fn_post = self._get_fix_part_fnb(ffnmb, prefix, postfix, path)
         ffnmb = (fn_pre + ffnmb + fn_post)
         lfnmb = (fn_pre + lfnmb + fn_post)
         return [ffnmb, lfnmb, oof]

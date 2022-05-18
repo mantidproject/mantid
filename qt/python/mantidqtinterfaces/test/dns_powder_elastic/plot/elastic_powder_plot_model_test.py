@@ -119,11 +119,11 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         self.assertEqual(testv[2][0], 3)
 
     def test__datalist_updated(self):
-        testv = self.model._datalist_updated(['mat_a', 'mat_b'], ['a', 'b'], 0)
+        testv = self.model._data_list_updated(['mat_a', 'mat_b'], ['a', 'b'], 0)
         self.assertFalse(testv)
-        testv = self.model._datalist_updated(['mat_a', 'mat_b'], ['a'], 0)
+        testv = self.model._data_list_updated(['mat_a', 'mat_b'], ['a'], 0)
         self.assertTrue(testv)
-        testv = self.model._datalist_updated(['mat_a', 'mat_b'], ['a', 'b'], 1)
+        testv = self.model._data_list_updated(['mat_a', 'mat_b'], ['a', 'b'], 1)
         self.assertTrue(testv)
 
     @patch('mantidqtinterfaces.dns_powder_elastic.plot.'

@@ -42,7 +42,7 @@ class DNSElasticPowderScriptGeneratorPresenterTest(unittest.TestCase):
             'automatic_filename': False
         }
         cls.model = mock.create_autospec(DNSElasticPowderScriptGeneratorModel)
-        cls.model.get_plotlist.return_value = [1, 2, 3]
+        cls.model.get_plot_list.return_value = [1, 2, 3]
         cls.presenter = DNSElasticPowderScriptGeneratorPresenter(
             view=cls.view,
             model=cls.model,
@@ -58,18 +58,18 @@ class DNSElasticPowderScriptGeneratorPresenterTest(unittest.TestCase):
                               DNSElasticPowderScriptGeneratorPresenter)
         self.assertIsInstance(self.presenter, DNSScriptGeneratorPresenter)
         self.assertIsInstance(self.presenter, DNSObserver)
-        self.assertTrue(hasattr(self.presenter, '_plotlist'))
+        self.assertTrue(hasattr(self.presenter, '_plot_list'))
 
     def test_get_option_dict(self):
-        testv = self.presenter.get_option_dict()
+        test_v = self.presenter.get_option_dict()
         self.view.get_state.assert_called_once()
-        self.assertEqual(len(testv), 6)
+        self.assertEqual(len(test_v), 6)
 
     def test_finish_script_run(self):
-        self.model._plotlist = None
+        self.model._plot_list = None
         self.presenter._finish_script_run()
-        self.model.get_plotlist.assert_called_once()
-        self.assertEqual(self.presenter._plotlist, [1, 2, 3])
+        self.model.get_plot_list.assert_called_once()
+        self.assertEqual(self.presenter._plot_list, [1, 2, 3])
 
 
 if __name__ == '__main__':

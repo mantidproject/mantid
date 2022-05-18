@@ -30,7 +30,7 @@ class CommandLineReaderTest(unittest.TestCase):
         self.assertEqual(self.colire.omega_offset, '100')
         self.assertEqual(self.colire.hkl1, '1,1,0')
         self.assertEqual(self.colire.hkl2, '1,-1,0')
-        self.assertEqual(self.colire.det_efficency, True)
+        self.assertEqual(self.colire.det_efficiency, True)
         self.assertEqual(self.colire.flipping_ratio, True)
         self.assertEqual(self.colire.separation_xyz, False)
         self.assertEqual(self.colire.separation_coh_inc, False)
@@ -63,7 +63,7 @@ class CommandLineReaderTest(unittest.TestCase):
 
     @patch('mantidqtinterfaces.dns_powder_elastic.command_line.command_check.DNSFile')
     def test__parse_old_filenumbers(self, mock_dnsfile):
-        mock_dnsfile.return_value = {'filenumber': '1230'}
+        mock_dnsfile.return_value = {'file_number': '1230'}
         testv = self.colire._parse_old_filenumbers('23', 'p151', '0_1', 'a')
         self.assertEqual(testv, ['1', '0'])
 
@@ -76,14 +76,14 @@ class CommandLineReaderTest(unittest.TestCase):
         # there is no way to test for this, has to be avoided by user
         mock_isfile.return_value = False
         mock_parse.return_value = ['1', '2']
-        testv = self.colire._get_fixpart_fnb('54858', 'p123_2', '3.d_dat', 'b')
+        testv = self.colire._get_fix_part_fnb('54858', 'p123_2', '3.d_dat', 'b')
         self.assertEqual(testv, ['2', '3'])
         mock_isfile.return_value = True
-        testv = self.colire._get_fixpart_fnb('54858', 'p123_2', '3.d_dat', 'b')
+        testv = self.colire._get_fix_part_fnb('54858', 'p123_2', '3.d_dat', 'b')
         self.assertEqual(testv, ['1', '2'])
 
     @patch('mantidqtinterfaces.dns_powder_elastic.command_line.command_check.'
-           'CommandLineReader._get_fixpart_fnb')
+           'CommandLineReader._get_fix_part_fnb')
     def test__parse_file_command(self, mock_get_fix_fnb):
         mock_get_fix_fnb.return_value = ['00002', '1']
         cla = '-files p164260002 100 2 786359 788058 14p1K_map.d_dat'.split(

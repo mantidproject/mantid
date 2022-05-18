@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Class which loads and stores a single DNS datafile in a dictionary
+Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import unittest
@@ -32,26 +33,26 @@ class DNSDatasetTest(unittest.TestCase):
     def setUpClass(cls):
         cls.fulldata = get_file_selector_fulldat()['full_data']
         cls.standarddata = get_file_selector_fulldat()['standard_data']
-        cls.ds = DNSDataset(data=cls.fulldata, path='C:/123', issample=True)
+        cls.ds = DNSDataset(data=cls.fulldata, path='C:/123', is_sample=True)
         cls.datadic = {'4p1K_map': {'path': 'C:/123\\service',
                                     'z_nsf': [788058]}}
 
     def setUp(self):
-        self.ds.datadic = {'4p1K_map': {'path': 'C:/123\\service',
-                                        'z_nsf': [788058]}}
+        self.ds.data_dic = {'4p1K_map': {'path': 'C:/123\\service',
+                                         'z_nsf': [788058]}}
 
     def test___init__(self):
         self.assertIsInstance(self.ds, DNSDataset)
         self.assertIsInstance(self.ds, ObjectDict)
-        self.assertTrue(self.ds.issample)
+        self.assertTrue(self.ds.is_sample)
         self.assertTrue(hasattr(self.ds, 'banks'))
-        self.assertTrue(hasattr(self.ds, 'issample'))
-        self.assertTrue(hasattr(self.ds, 'scriptname'))
+        self.assertTrue(hasattr(self.ds, 'is_sample'))
+        self.assertTrue(hasattr(self.ds, 'script_name'))
         self.assertTrue(hasattr(self.ds, 'fields'))
         self.assertTrue(hasattr(self.ds, 'ttheta'))
         self.assertTrue(hasattr(self.ds, 'omega'))
-        self.assertTrue(hasattr(self.ds, 'datadic'))
-        self.assertIsInstance(self.ds.datadic, dict)
+        self.assertTrue(hasattr(self.ds, 'data_dic'))
+        self.assertIsInstance(self.ds.data_dic, dict)
 
     #
     def test_format_dataset(self):
@@ -60,8 +61,8 @@ class DNSDatasetTest(unittest.TestCase):
                                 "ice',\n                  'z_nsf' : [788058]}"
                                 ",\n}")
 
-    def test_create_plotlist(self):
-        testv = self.ds.create_plotlist()
+    def test_create_subtract(self):
+        testv = self.ds.create_subtract()
         self.assertEqual(testv, ['4p1K_map_z_nsf'])
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset.'
@@ -70,7 +71,7 @@ class DNSDatasetTest(unittest.TestCase):
         mock_ip.return_value = {}, False
         mock_parent = mock.Mock()
         self.ds.interpolate_standard([-9], '123', mock_parent)
-        self.assertEqual(self.ds.datadic, {})
+        self.assertEqual(self.ds.data_dic, {})
 
         mock_ip.assert_called_once_with(self.datadic, [-9], '123')
         mock_parent.raise_error.assert_not_called()
@@ -79,7 +80,7 @@ class DNSDatasetTest(unittest.TestCase):
         mock_parent.raise_error.assert_called_once()
 
     def test_get_nb_banks(self):
-        testv = self.ds.get_nb_banks(sampletype='4p1K_map')
+        testv = self.ds.get_nb_banks(sample_type='4p1K_map')
         self.assertEqual(testv, 1)
         testv = self.ds.get_nb_banks()
         self.assertEqual(testv, 0)

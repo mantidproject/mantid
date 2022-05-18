@@ -4,15 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-List of workspaces for Plotting
+List of workspaces for Plotting.
 """
+
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 
 class DNSPlotListModel(QStandardItemModel):
     """
-    QT Model to store DNS mantid workspace names for plotting
+    QT Model to store DNS mantid workspace names for plotting.
     """
     def get_checked_item_names(self):
         return [item.text() for item in self.get_items() if item.checkState()]
@@ -45,8 +47,8 @@ class DNSPlotListModel(QStandardItemModel):
 
     def down(self):
         """
-        checking the item below the the previously checked item
-        taking care of borders
+        Checking the item below the previously checked item
+        taking care of borders.
         """
         numbers = self.get_checked_item_numbers()
         if len(numbers) == 1:
@@ -61,8 +63,8 @@ class DNSPlotListModel(QStandardItemModel):
 
     def up(self):
         """
-        checking the item above the previously checked item
-        taking care of borders
+        Checking the item above the previously checked item
+        taking care of borders.
         """
         numbers = self.get_checked_item_numbers()
         if len(numbers) == 1:
@@ -78,9 +80,9 @@ class DNSPlotListModel(QStandardItemModel):
     def check_first(self):
         self.item(0).setCheckState(2)
 
-    def check_seperated(self):
+    def check_separated(self):
         """
-        Cheing data speparated using sum rules
+        Checking data separated using sum rules.
         """
         self.uncheck_items()
         items = self.get_items()
@@ -92,7 +94,7 @@ class DNSPlotListModel(QStandardItemModel):
 
     def check_raw(self):
         """
-        Checking the processed but not seperated data
+        Checking the processed but not separated data.
         """
         self.uncheck_items()
         items = self.get_items()

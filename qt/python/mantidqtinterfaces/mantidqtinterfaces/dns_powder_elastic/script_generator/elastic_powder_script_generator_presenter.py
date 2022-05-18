@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script generator for elastic powder data
+DNS script generator for elastic powder data.
 """
 
 from mantidqtinterfaces.dns_powder_tof.script_generator.\
@@ -15,7 +16,7 @@ from mantidqtinterfaces.dns_powder_tof.script_generator.\
 class DNSElasticPowderScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
-        self._plotlist = []
+        self._plot_list = []
 
     def get_option_dict(self):
         if self.view is not None:
@@ -23,8 +24,8 @@ class DNSElasticPowderScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
         self.own_dict['script_path'] = self._script_path
         self.own_dict['script_number'] = self._script_number
         self.own_dict['script_text'] = self._script_text
-        self.own_dict['plotlist'] = self._plotlist
+        self.own_dict['subtract'] = self._plot_list
         return self.own_dict
 
     def _finish_script_run(self):
-        self._plotlist = self.model.get_plotlist()
+        self._plot_list = self.model.get_plot_list()

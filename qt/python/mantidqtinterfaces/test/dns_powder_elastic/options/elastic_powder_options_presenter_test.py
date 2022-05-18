@@ -76,9 +76,9 @@ class DNSElasticPowderOptionsPresenterTest(unittest.TestCase):
 
     def test_process_commandline_request(self):
         self.view.reset_mock()
-        self.presenter.process_commandline_request({'det_efficency': 1})
+        self.presenter.process_commandline_request({'det_efficiency': 1})
         self.view.set_single_state_by_name.assert_called_with(
-            'det_efficency', 1)
+            'det_efficiency', 1)
 
 
 if __name__ == '__main__':

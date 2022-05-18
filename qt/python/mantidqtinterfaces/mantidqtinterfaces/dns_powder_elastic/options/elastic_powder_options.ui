@@ -143,7 +143,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
       <item row="2" column="0" colspan="4">
-       <widget class="QCheckBox" name="cB_det_efficency">
+       <widget class="QCheckBox" name="cB_det_efficiency">
         <property name="text">
          <string>Detector efficiency correction</string>
         </property>
@@ -183,7 +183,7 @@
        </spacer>
       </item>
       <item row="14" column="0" colspan="4">
-       <widget class="QCheckBox" name="cB_substract_background_from_sample">
+       <widget class="QCheckBox" name="cB_subtract_background_from_sample">
         <property name="text">
          <string>Subtract instrument background from sample</string>
         </property>

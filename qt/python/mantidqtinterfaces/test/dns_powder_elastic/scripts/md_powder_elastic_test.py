@@ -4,15 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script helpers for elastic powder reduction
+DNS script helpers for elastic powder reduction.
 """
+
 import unittest
 from unittest.mock import patch
 from unittest.mock import call
 
 from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import \
-    background_substraction, fliping_ratio_correction, \
+    background_subtraction, flipping_ratio_correction, \
     load_all, load_binned, raise_error, vanadium_correction
 
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
@@ -29,39 +31,39 @@ class MDPowderElasticTest(unittest.TestCase):
     def setUp(self):
         mtd.clear()
 
-    def test_background_substraction(self):
+    def test_background_subtraction(self):
         get_fake_MD_workspace_unique(name='vana_x_sf', factor=5.2)
         get_fake_MD_workspace_unique(name='vana_x_sf_norm', factor=0.7)
-        testv = background_substraction('empty_x_sf')
-        self.assertIsNone(testv)
+        test_v = background_subtraction('empty_x_sf')
+        self.assertIsNone(test_v)
         with self.assertRaises(DNSError) as context:
-            background_substraction('vana_x_sf')
+            background_subtraction('vana_x_sf')
         self.assertTrue('No background file ' in str(context.exception))
 
         get_fake_MD_workspace_unique(name='empty_x_sf', factor=2)
         get_fake_MD_workspace_unique(name='empty_x_sf_norm', factor=1)
-        testv = background_substraction('vana_x_sf')
-        self.assertIsInstance(testv, IMDHistoWorkspace)
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = background_subtraction('vana_x_sf')
+        self.assertIsInstance(test_v, IMDHistoWorkspace)
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 236.44444444444446)
         self.assertAlmostEqual(error[0, 0, 0], 620.9163237311386)
 
-    def test_fliping_ratio_correction(self):
+    def test_flipping_ratio_correction(self):
         get_fake_MD_workspace_unique(name='vana_x_sf', factor=5.2)
         get_fake_MD_workspace_unique(name='vana_x_sf_norm', factor=0.7)
-        testv = fliping_ratio_correction('vana_x_nsf')
-        self.assertFalse(testv)
+        test_v = flipping_ratio_correction('vana_x_nsf')
+        self.assertFalse(test_v)
         with self.assertRaises(DNSError) as context:
-            fliping_ratio_correction('vana_x_sf')
+            flipping_ratio_correction('vana_x_sf')
         self.assertTrue('no matching nsf workspace found '
                         'for' in str(context.exception))
 
         get_fake_MD_workspace_unique(name='vana_x_nsf', factor=100)
         get_fake_MD_workspace_unique(name='vana_x_nsf_norm', factor=1)
         with self.assertRaises(DNSError) as context:
-            fliping_ratio_correction('vana_x_sf')
+            flipping_ratio_correction('vana_x_sf')
         self.assertTrue('no matching NiCr workspace found '
                         'for ' in str(context.exception))
 
@@ -69,18 +71,18 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='nicr_x_sf_norm', factor=1)
         get_fake_MD_workspace_unique(name='nicr_x_nsf', factor=2)
         get_fake_MD_workspace_unique(name='nicr_x_nsf_norm', factor=1)
-        testv = fliping_ratio_correction('vana_x_sf')
-        self.assertTrue(testv)
-        testv = mtd['vana_x_sf']
-        self.assertIsInstance(testv, IMDHistoWorkspace)
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = flipping_ratio_correction('vana_x_sf')
+        self.assertTrue(test_v)
+        test_v = mtd['vana_x_sf']
+        self.assertIsInstance(test_v, IMDHistoWorkspace)
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 4261.127439724454)
         self.assertAlmostEqual(error[0, 0, 0], 445089.2989742403)
-        testv = mtd['vana_x_nsf']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = mtd['vana_x_nsf']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 272.87256027554577)
         self.assertAlmostEqual(error[0, 0, 0], 448979.2989742403)
@@ -90,7 +92,7 @@ class MDPowderElasticTest(unittest.TestCase):
            'md_powder_elastic.load_binned')
     def test_load_all(mock_load_binned):
         data_dict = get_fake_elastic_datadic()
-        load_all(data_dict, [0, 1, 2], normalizeto='monitor')
+        load_all(data_dict, [0, 1, 2], normalize_to='monitor')
         calls = [call('knso_x_nsf', [0, 1, 2], 'C:/data',
                       range(554574, 554634, 6), 'monitor'),
                  call('knso_x_sf', [0, 1, 2], 'C:/data',
@@ -112,8 +114,8 @@ class MDPowderElasticTest(unittest.TestCase):
     @patch('mantidqtinterfaces.dns_powder_elastic.scripts.'
            'md_powder_elastic.LoadDNSSCD')
     def test_load_binned(self, mock_load, mock_binmd, mock_mtd):
-        testv = load_binned('knso_x_nsf', [0, 1, 2], 'C:/data',
-                            range(554574, 554578, 2), 'monitor')
+        test_v = load_binned('knso_x_nsf', [0, 1, 2], 'C:/data',
+                             range(554574, 554578, 2), 'monitor')
         mock_load.assert_called_once_with(
             'C:/data_554574.d_dat,'
             ' C:/data_554576.d_dat',
@@ -133,7 +135,7 @@ class MDPowderElasticTest(unittest.TestCase):
                  AlignedDim2='TOF,424.0,2000.0,1')]
         mock_binmd.assert_has_calls(calls)
         mock_mtd.__getitem__.assert_called_once_with('knso_x_nsf')
-        self.assertEqual(testv, mock_mtd.__getitem__.return_value)
+        self.assertEqual(test_v, mock_mtd.__getitem__.return_value)
 
     def test_raise_error(self):
         with self.assertRaises(DNSError):
@@ -150,20 +152,20 @@ class MDPowderElasticTest(unittest.TestCase):
         self.assertTrue('No vanadium file for' in str(context.exception))
         get_fake_MD_workspace_unique(name='vana_x_sf', factor=1.3)
         get_fake_MD_workspace_unique(name='vana_x_sf_norm', factor=1.1)
-        testv = vanadium_correction('sample_x_sf',
-                                    vanaset=None,
-                                    ignore_vana_fields=False,
-                                    sum_vana_sf_nsf=False)
-        self.assertIsInstance(testv, IMDHistoWorkspace)
-        testv = mtd['sample_x_sf']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = vanadium_correction('sample_x_sf',
+                                     vanaset=None,
+                                     ignore_vana_fields=False,
+                                     sum_vana_sf_nsf=False)
+        self.assertIsInstance(test_v, IMDHistoWorkspace)
+        test_v = mtd['sample_x_sf']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 5.373219373219373)
         self.assertAlmostEqual(error[0, 0, 0], 1.5231536880603584)
-        testv = mtd['sample_x_sf_norm']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = mtd['sample_x_sf_norm']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 59.92682926829268)
         self.assertAlmostEqual(error[0, 0, 0], 178.30697465213797)
@@ -187,21 +189,21 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='vana_x_sf_norm', factor=1.1)
         get_fake_MD_workspace_unique(name='vana_x_nsf', factor=30.3)
         get_fake_MD_workspace_unique(name='vana_x_nsf_norm', factor=0.5)
-        testv = vanadium_correction('sample_x_sf',
-                                    vanaset={'x_sf': 1, 'x_nsf': 2},
-                                    ignore_vana_fields=True,
-                                    sum_vana_sf_nsf=False)
-        self.assertIsInstance(testv, IMDHistoWorkspace)
+        test_v = vanadium_correction('sample_x_sf',
+                                     vanaset={'x_sf': 1, 'x_nsf': 2},
+                                     ignore_vana_fields=True,
+                                     sum_vana_sf_nsf=False)
+        self.assertIsInstance(test_v, IMDHistoWorkspace)
 
-        testv = mtd['sample_x_sf']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = mtd['sample_x_sf']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 5.697161388240037)
         self.assertAlmostEqual(error[0, 0, 0], 1.0518834373279087)
-        testv = mtd['sample_x_sf_norm']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = mtd['sample_x_sf_norm']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 56.51937483545152)
         self.assertAlmostEqual(error[0, 0, 0], 93.60438736358742)
@@ -225,20 +227,20 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='sample_x_sf_norm', factor=0.7)
         get_fake_MD_workspace_unique(name='vana_x_nsf', factor=30.3)
         get_fake_MD_workspace_unique(name='vana_x_nsf_norm', factor=0.5)
-        testv = vanadium_correction('sample_x_sf',
-                                    vanaset=None,
-                                    ignore_vana_fields=False,
-                                    sum_vana_sf_nsf=True)
-        self.assertIsInstance(testv, IMDHistoWorkspace)
-        testv = mtd['sample_x_sf']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = vanadium_correction('sample_x_sf',
+                                     vanaset=None,
+                                     ignore_vana_fields=False,
+                                     sum_vana_sf_nsf=True)
+        self.assertIsInstance(test_v, IMDHistoWorkspace)
+        test_v = mtd['sample_x_sf']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 5.697161388240037)
         self.assertAlmostEqual(error[0, 0, 0], 1.0518834373279087)
-        testv = mtd['sample_x_sf_norm']
-        value = testv.getSignalArray()
-        error = testv.getErrorSquaredArray()
+        test_v = mtd['sample_x_sf_norm']
+        value = test_v.getSignalArray()
+        error = test_v.getErrorSquaredArray()
         self.assertEqual(value.shape, (5, 5, 1))
         self.assertAlmostEqual(value[0, 0, 0], 56.51937483545152)
         self.assertAlmostEqual(error[0, 0, 0], 93.60438736358742)

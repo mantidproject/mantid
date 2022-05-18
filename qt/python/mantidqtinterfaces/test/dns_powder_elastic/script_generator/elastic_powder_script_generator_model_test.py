@@ -38,8 +38,8 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.error_raised = cls.model.raise_error
         cls.sample_data = mock.create_autospec(DNSDataset)
         cls.model._sample_data = cls.sample_data
-        cls.sample_data.datadic = get_fake_elastic_datadic()
-        cls.sample_data.create_plotlist.return_value = ['knso_x_sf']
+        cls.sample_data.data_dic = get_fake_elastic_datadic()
+        cls.sample_data.create_subtract.return_value = ['knso_x_sf']
         cls.sample_data.format_dataset.return_value = '12345'
         cls.sample_data.fields = []
         cls.sample_data.ttheta = mock.Mock()
@@ -47,10 +47,10 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.sample_data.ttheta.bin_edge_max = 6
         cls.sample_data.ttheta.nbins = 5
         cls.sample_data.banks = [1, 2, 3]
-        cls.sample_data.scriptname = '123.txt'
+        cls.sample_data.script_name = '123.txt'
         cls.standard_data = mock.create_autospec(DNSDataset)
         cls.model._standard_data = cls.standard_data
-        cls.standard_data.datadic = get_elastic_standard_datadic()
+        cls.standard_data.data_dic = get_elastic_standard_datadic()
         cls.standard_data.format_dataset.return_value = '123456'
         cls.standard_data.fields = []
         cls.standard_data.ttheta = mock.Mock()
@@ -58,7 +58,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.standard_data.ttheta.bin_edge_max = 6
         cls.standard_data.ttheta.nbins = 5
         cls.standard_data.banks = [1, 2, 3]
-        cls.standard_data.scriptname = '123.txt'
+        cls.standard_data.script_name = '123.txt'
 
     def setUp(self):
         self.error_raised.reset_mock()
@@ -83,7 +83,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         testv = self.model._get_xyz_field_string('a1')
         self.assertEqual(testv, [
             "# do xyz polarization analysis for magnetic powders \na1_nuclear"
-            "_coh, a1_magnetic, a1_spin_incoh= xyz_seperation(\n    x_sf='a1_"
+            "_coh, a1_magnetic, a1_spin_incoh= xyz_separation(\n    x_sf='a1_"
             "x_sf', y_sf='a1_y_sf', z_sf='a1_z_sf', z_nsf='a1_z_nsf')"
         ])
 
@@ -121,7 +121,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(
             testv[0],
             "# do xyz polarization analysis for magnetic powders \nknso_nuc"
-            "lear_coh, knso_magnetic, knso_spin_incoh= xyz_seperation(\n   "
+            "lear_coh, knso_magnetic, knso_spin_incoh= xyz_separation(\n   "
             " x_sf='knso_x_sf', y_sf='knso_y_sf', z_sf='knso_z_sf', z_nsf='"
             "knso_z_nsf')")
         self.assertEqual(
@@ -227,7 +227,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         mock_dns_dataset.return_value = self.sample_data
         self.model._setup_sample_data({'data_dir': '123'}, {'full_data': []})
         self.assertEqual(self.model._sample_data, self.sample_data)
-        self.assertEqual(self.model._plotlist, ['mat_knso_x_sf'])
+        self.assertEqual(self.model._plot_list, ['mat_knso_x_sf'])
 
     @patch('mantidqtinterfaces.dns_powder_elastic.script_generator.'
            'elastic_powder_script_generator_mod'
@@ -252,15 +252,15 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(
             testv[0], "from mantidqtinterfaces.dns_powder_elastic.scripts."
                       "md_powder_elastic import "
-                      "load_all, background_substraction")
+                      "load_all, background_subtraction")
         self.assertEqual(
             testv[1], "from mantidqtinterfaces.dns_powder_elastic.scripts."
                       "md_powder_elastic import "
-                      "vanadium_correction, fliping_ratio_correction")
+                      "vanadium_correction, flipping_ratio_correction")
         self.assertEqual(
             testv[2], "from mantidqtinterfaces.dns_powder_elastic.scripts."
                       "md_powder_elastic import "
-                      "non_mag_sep, xyz_seperation")
+                      "non_mag_sep, xyz_separation")
         self.assertEqual(
             testv[3],
             "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd"
@@ -290,14 +290,14 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.model._norm = 'time'
         testv = self.model._get_load_data_lines()
         self.assertEqual(testv, [
-            "wss_sample = load_all(sample_data, binning, normalizeto='time')",
-            "wss_standard = load_all(standard_data, binning, normalizeto='"
+            "wss_sample = load_all(sample_data, binning, normalize_to='time')",
+            "wss_standard = load_all(standard_data, binning, normalize_to='"
             "time')"
         ])
         self.model._corrections = False
         testv = self.model._get_load_data_lines()
         self.assertEqual(testv, [
-            "wss_sample = load_all(sample_data, binning, normalizeto='time')"
+            "wss_sample = load_all(sample_data, binning, normalize_to='time')"
         ])
 
     def test_set_loop(self):
@@ -316,41 +316,41 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(self.model._spac, "\n" + " " * 4)
         self.model._sample_data = self.sample_data
 
-    def test_get_substract_bg_from_standa_lines(self):
+    def test_get_subtract_bg_from_standa_lines(self):
         self.model._vanac = True
-        testv = self.model._get_substract_bg_from_standa_lines()
+        testv = self.model._get_subtract_bg_from_standard_lines()
         self.assertEqual(testv, [
-            '', '# substract background from vanadium and nicr',
+            '', '# subtract background from vanadium and nicr',
             'for sample, workspacelist in wss_standard.items(): \n    '
             'for workspace in workspacelist:\n        background_substr'
             'action(workspace)'
         ])
         self.model._vanac = False
         self.model._nicrc = False
-        testv = self.model._get_substract_bg_from_standa_lines()
+        testv = self.model._get_subtract_bg_from_standard_lines()
         self.assertEqual(testv, [])
 
     def test_get_backgroundstring(self):
         self.model._backfac = '1'
         self.model._sampb = False
-        testv = self.model._get_backgroundstring()
+        testv = self.model._get_background_string()
         self.assertEqual(testv, "")
         self.model._sampb = True
-        testv = self.model._get_backgroundstring()
+        testv = self.model._get_background_string()
         self.assertEqual(testv,
-                         '    background_substraction(workspace, factor=1)')
+                         '    background_subtraction(workspace, factor=1)')
 
     def test_get_vanacstring(self):
         self.model._ign_vana = 'True'
         self.model._sum_sfnsf = 'True'
         self.model._vanac = False
-        testv = self.model._get_vanacstring()
+        testv = self.model._get_vana_cstring()
         self.assertEqual(testv, "")
         self.model._vanac = True
-        testv = self.model._get_vanacstring()
+        testv = self.model._get_vana_cstring()
         self.assertEqual(
             testv,
-            "    vanadium_correction(workspace, vanaset=sta"
+            "    vanadium_correction(workspace, vana_set=sta"
             "ndard_data['vana'], ignore_vana_fields=True, sum_vana_sf_nsf=Tr"
             "ue)")
 
@@ -360,12 +360,12 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.model._backfac = '1'
         self.model._vanac = False
         self.model._sampb = False
-        testv = self.model._get_samp_corrections_lines()
+        testv = self.model._get_sample_corrections_lines()
         self.assertEqual(testv, [])
         self.model._sampb = True
-        testv = self.model._get_samp_corrections_lines()
+        testv = self.model._get_sample_corrections_lines()
         self.assertEqual(testv, [
-            '', '# correct sample data', '123    background_substraction'
+            '', '# correct sample data', '123    background_subtraction'
                                          '(workspace, factor=1)'
         ])
 
@@ -375,7 +375,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(testv, [])
         self.model._nicrc = True
         testv = self.model._get_nicr_cor_lines()
-        self.assertEqual(testv, ["123    fliping_ratio_correction(workspace)"])
+        self.assertEqual(testv, ["123    flipping_ratio_correction(workspace)"])
 
     def test_get_ascii_save_string(self):
         self.model._ascii = False
@@ -427,9 +427,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         mock_dns_dataset.return_value = self.standard_data
         options = {
             'corrections': 1,
-            'det_efficency': 1,
+            'det_efficiency': 1,
             'flipping_ratio': 1,
-            'substract_background_from_sample': 1,
+            'subtract_background_from_sample': 1,
             'background_factor': 1,
             'ignore_vana_fields': 1,
             'sum_vana_sf_nsf': 1,
@@ -469,9 +469,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
 
         options = {
             'corrections': 0,
-            'det_efficency': 0,
+            'det_efficiency': 0,
             'flipping_ratio': 0,
-            'substract_background_from_sample': 0,
+            'subtract_background_from_sample': 0,
             'background_factor': 0,
             'ignore_vana_fields': 0,
             'sum_vana_sf_nsf': 0,
@@ -493,9 +493,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(len(testv[0]), 13)
         options = {
             'corrections': 0,
-            'det_efficency': 0,
+            'det_efficiency': 0,
             'flipping_ratio': 0,
-            'substract_background_from_sample': 0,
+            'subtract_background_from_sample': 0,
             'background_factor': 0,
             'ignore_vana_fields': 0,
             'sum_vana_sf_nsf': 0,
@@ -520,9 +520,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(self.model._norm, 'time')
         options = {
             'corrections': 1,
-            'det_efficency': 0,
+            'det_efficiency': 0,
             'flipping_ratio': 0,
-            'substract_background_from_sample': 0,
+            'subtract_background_from_sample': 0,
             'background_factor': 1,
             'ignore_vana_fields': 1,
             'sum_vana_sf_nsf': 1,
@@ -552,9 +552,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertFalse(self.model._nexus)
         options = {
             'corrections': 0,
-            'det_efficency': 1,
+            'det_efficiency': 1,
             'flipping_ratio': 1,
-            'substract_background_from_sample': 1,
+            'subtract_background_from_sample': 1,
             'background_factor': 1,
             'ignore_vana_fields': 1,
             'sum_vana_sf_nsf': 1,
@@ -594,9 +594,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertFalse(self.model._nexus)
         self.assertEqual(len(testv[0]), 13)
 
-    def test_get_plotlist(self):
-        self.model._plotlist = ['123']
-        testv = self.model.get_plotlist()
+    def test_get_subtract(self):
+        self.model._plot_list = ['123']
+        testv = self.model.get_plot_list()
         self.assertEqual(testv, ['123'])
 
 

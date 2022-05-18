@@ -107,10 +107,10 @@ class DNSPlotListModelTest(unittest.TestCase):
         self.assertTrue(self.item.checkState())
         self.assertFalse(self.item2.checkState())
 
-    def test_check_seperated(self):
+    def test_check_separated(self):
         self.item.setCheckState(0)
         self.item2.setCheckState(1)
-        self.plm.check_seperated()
+        self.plm.check_separated()
         self.assertTrue(self.item.checkState())
         self.assertFalse(self.item2.checkState())
 

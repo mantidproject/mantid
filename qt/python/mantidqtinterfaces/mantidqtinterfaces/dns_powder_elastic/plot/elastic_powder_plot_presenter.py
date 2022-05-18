@@ -5,8 +5,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS elastic powder plot presenter
+DNS elastic powder plot presenter.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
@@ -17,14 +18,14 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.view.sig_plot.connect(self._plot)
-        self.view.sig_gridstate_change.connect(self._change_gridstate)
-        self.view.sig_errorbar_change.connect(self._change_errorbar)
-        self.view.sig_linestyle_change.connect(self._change_linestyle)
+        self.view.sig_grid_state_change.connect(self._change_grid_state)
+        self.view.sig_error_bar_change.connect(self._change_error_bar)
+        self.view.sig_linestyle_change.connect(self._change_line_style)
         self.view.sig_log_change.connect(self._change_log)
 
-        self._errorbar = 0
-        self._gridstate = 0
-        self._linestyle = 0
+        self._error_bar = 0
+        self._grid_state = 0
+        self._line_style = 0
 
     def _change_log(self, log):
         if log:
@@ -32,20 +33,20 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
         else:
             self.view.set_yscale('linear')
 
-    def _change_linestyle(self):
-        self._linestyle = (self._linestyle + 1) % 3
+    def _change_line_style(self):
+        self._line_style = (self._line_style + 1) % 3
         self._plot()
 
-    def _change_errorbar(self):
-        self._errorbar = (self._errorbar + 1) % 3
+    def _change_error_bar(self):
+        self._error_bar = (self._error_bar + 1) % 3
         self._plot()
 
-    def _change_gridstate(self, draw):
+    def _change_grid_state(self, draw):
         if draw:
-            self._gridstate = (self._gridstate + 1) % 3
-        if self._gridstate == 1:
+            self._grid_state = (self._grid_state + 1) % 3
+        if self._grid_state == 1:
             self.view.set_major_grid()
-        elif self._gridstate == 2:
+        elif self._grid_state == 2:
             self.view.set_major_minor_grid()
         else:
             self.view.set_no_grid()
@@ -56,33 +57,33 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
         checked_workspaces = self.view.get_check_plots()
         wavelength = self._get_wavelength()
         norm = self._get_norm()
-        xaxis = self.view.get_xaxis()
+        xaxis = self.view.get_x_axis()
         xaxis_label = self.model.get_x_axis_label(xaxis)
         self.view.create_plot(norm=self.model.get_y_norm_label(norm))
         max_int = self.model.get_max_int_of_workspaces(checked_workspaces)
         for ws in checked_workspaces:
-            x, y, yerr = self.model.get_x_y_yerr(ws, xaxis, max_int,
-                                                 wavelength)
-            self._single_plot(ws, x, y, yerr)
+            x, y, y_err = self.model.get_x_y_yerr(ws, xaxis, max_int,
+                                                  wavelength)
+            self._single_plot(ws, x, y, y_err)
         self.view.finish_plot(xaxis_label)
 
-    def _single_plot(self, ws, x, y, yerr):
-        if self._errorbar:
+    def _single_plot(self, ws, x, y, y_err):
+        if self._error_bar:
             self.view.single_error_plot(x,
                                         y,
-                                        yerr,
+                                        y_err,
                                         label=f'{ws}'.strip(' _'),
-                                        capsize=(self._errorbar - 1) * 3,
-                                        linestyle=self._linestyle)
+                                        capsize=(self._error_bar - 1) * 3,
+                                        linestyle=self._line_style)
         else:
             self.view.single_plot(x,
                                   y,
                                   label=f'{ws}'.strip(' _'),
-                                  linestyle=self._linestyle)
+                                  linestyle=self._line_style)
 
     def _auto_select_curve(self):
         if self.param_dict['elastic_powder_options']["separation"]:
-            self.view.check_seperated()
+            self.view.check_separated()
         else:
             self.view.check_first()
 
@@ -94,7 +95,7 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
         return self.param_dict['elastic_powder_options']['norm_monitor']
 
     def _get_workspaces(self):
-        return self.param_dict['elastic_powder_script_generator']['plotlist']
+        return self.param_dict['elastic_powder_script_generator']['subtract']
 
     def _get_scriptnumber(self):
         return self.param_dict['elastic_powder_script_generator'][
@@ -102,11 +103,11 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
 
     def tab_got_focus(self):
         workspaces = self._get_workspaces()
-        datalist = self.view.get_datalist()
-        scriptnumber = self._get_scriptnumber()
-        ws = self.model.get_updated_ws_list(workspaces, datalist, scriptnumber)
+        data_list = self.view.get_data_list()
+        script_number = self._get_scriptnumber()
+        ws = self.model.get_updated_ws_list(workspaces, data_list, script_number)
         if ws[1]:
-            self.view.set_datalist([x[4:] for x in ws[0]])
+            self.view.set_data_list([x[4:] for x in ws[0]])
             self._auto_select_curve()
             self.view.start_timer()
             # wait for plot draw, the reset to tight layout

@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Powder Plot widget
+DNS Powder Plot widget.
 """
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
     DNSWidget
 from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model \

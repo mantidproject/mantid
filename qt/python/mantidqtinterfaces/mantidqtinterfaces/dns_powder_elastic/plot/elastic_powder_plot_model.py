@@ -5,9 +5,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS elastic powder plot model
+DNS elastic powder plot model.
 """
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
     DNSObsModel
 from mantidqtinterfaces.dns_powder_elastic.helpers.converters import \
@@ -32,25 +34,25 @@ class DNSElasticPowderPlotModel(DNSObsModel):
         return 1
 
     @staticmethod
-    def get_x_y_yerr(ws, xaxis, max_int, wavelength):
+    def get_x_y_yerr(ws, x_axis, max_int, wavelength):
         x = _get_x(ws)
         y = _get_y(ws)
-        yerr = _get_yerr(ws)
+        y_err = _get_yerr(ws)
         x, y = _scale_simulation(ws, x, y, max_int)
-        x = _convert_x_axis(x, xaxis, wavelength)
-        return [x, y, yerr]
+        x = _convert_x_axis(x, x_axis, wavelength)
+        return [x, y, y_err]
 
-    def _datalist_updated(self, workspaces, datalist, scriptnumer):
-        compare = [f'mat_{x}' for x in datalist]
-        return (scriptnumer != self._plotted_script_number
-                or workspaces != compare)  # check is nesesary for simulation
+    def _data_list_updated(self, workspaces, data_list, script_number):
+        compare = [f'mat_{x}' for x in data_list]
+        return (script_number != self._plotted_script_number
+                or workspaces != compare)  # check is necessary for simulation
 
-    def get_updated_ws_list(self, workspaces, datalist, scriptnumer):
+    def get_updated_ws_list(self, workspaces, data_list, script_number):
         workspaces = sorted(workspaces)
         workspaces = _add_simulation_to_ws_list(workspaces)
-        updated = self._datalist_updated(workspaces, datalist, scriptnumer)
+        updated = self._data_list_updated(workspaces, data_list, script_number)
         if updated:
-            self._set_script_number(scriptnumer)
+            self._set_script_number(script_number)
         return [workspaces, updated]
 
     @staticmethod
@@ -60,15 +62,15 @@ class DNSElasticPowderPlotModel(DNSObsModel):
         return 'Counts/s'
 
     @staticmethod
-    def get_x_axis_label(xaxis):
-        if xaxis == 'q':
+    def get_x_axis_label(x_axis):
+        if x_axis == 'q':
             return r'$q (\AA^{-1})$'
-        if xaxis == 'd':
+        if x_axis == 'd':
             return r'$d (\AA)$'
         return '2 theta (degree)'
 
-    def _set_script_number(self, scriptnumber):
-        self._plotted_script_number = scriptnumber
+    def _set_script_number(self, script_number):
+        self._plotted_script_number = script_number
 
 
 def _get_x(ws):
@@ -85,10 +87,10 @@ def _get_yerr(ws):
     return mtd[f'mat_{ws}'].extractE()[0]
 
 
-def _convert_x_axis(x, xaxis, wavelength):
-    if xaxis == 'd':
+def _convert_x_axis(x, x_axis, wavelength):
+    if x_axis == 'd':
         return el_twotheta_to_d(x, wavelength)
-    if xaxis == 'q':
+    if x_axis == 'q':
         return el_twotheta_to_q(x, wavelength)
     return x
 

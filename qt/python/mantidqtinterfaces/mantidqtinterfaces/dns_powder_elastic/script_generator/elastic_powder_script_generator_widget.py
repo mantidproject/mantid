@@ -4,10 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
 DNS Elastic Powder Script Generator widget
 """
-# yapf: disable
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
     DNSWidget
 from mantidqtinterfaces.dns_powder_tof.script_generator.\
@@ -18,7 +19,6 @@ from mantidqtinterfaces.dns_powder_elastic.script_generator.\
 from mantidqtinterfaces.dns_powder_elastic.script_generator.\
     elastic_powder_script_generator_presenter \
     import DNSElasticPowderScriptGeneratorPresenter
-# yapf: enable
 
 
 class DNSElasticPowderScriptGeneratorWidget(DNSWidget):

@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Options Presenter - Tab of DNS Reduction GUI
+DNS Options Presenter - Tab of DNS Reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter\
@@ -23,11 +24,11 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
         if own_options['get_wavelength']:
             self._determine_wavelength()
 
-    def process_commandline_request(self, cloptions):
+    def process_commandline_request(self, cl_options):
         self.view.set_single_state_by_name('use_dx_dy', True)
         for command in [
-                'det_efficency', 'flipping_ratio', 'separation_xyz',
+                'det_efficiency', 'flipping_ratio', 'separation_xyz',
                 'separation_coh_inc'
         ]:
-            if command in cloptions:
-                self.view.set_single_state_by_name(command, cloptions[command])
+            if command in cl_options:
+                self.view.set_single_state_by_name(command, cl_options[command])

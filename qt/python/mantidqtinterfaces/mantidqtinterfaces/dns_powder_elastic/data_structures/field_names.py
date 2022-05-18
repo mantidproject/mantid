@@ -5,8 +5,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Field names for DNS instrument at MLZ
+Field names for DNS instrument at MLZ.
 """
 
 field_dict = {

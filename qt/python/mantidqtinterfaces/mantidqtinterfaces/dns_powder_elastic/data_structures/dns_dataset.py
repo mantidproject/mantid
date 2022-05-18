@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Class which loads and stores a single DNS datafile in a dictionary
+Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import os
@@ -25,74 +26,78 @@ from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
 
 class DNSDataset(ObjectDict):
     """
-    class for storing data of a multiple dns datafiles
-    this is a dictionary  but can also be accessed like atributes
+    Class for storing data of a multiple dns datafiles
+    this is a dictionary  but can also be accessed like attributes.
     """
 
-    def __init__(self, data, path, issample=True, fields=None):
+    def __init__(self, data, path, is_sample=True, fields=None):
         super().__init__()
-        self.issample = issample
-        if not issample and fields is not None:
+        self.is_sample = is_sample
+        if not is_sample and fields is not None:
             data = remove_non_measured_fields(data, fields)
-        self.scriptname = create_script_name(data)
+        self.script_name = create_script_name(data)
         self.banks = get_bank_positions(data)
         self.fields = get_sample_fields(data)
         self.ttheta = automatic_ttheta_binning(data)
         self.omega = automatic_omega_binning(data)
-        self.datadic = create_dataset(data, path)
+        self.data_dic = create_dataset(data, path)
 
     def format_dataset(self):
-        """Formating the dictionary to a nicely indented string"""
-        for fields in self.datadic.values():
-            for field, filenumbers in fields.items():
+        """
+        Formatting the dictionary to a nicely indented string.
+        """
+        for fields in self.data_dic.values():
+            for field, file_numbers in fields.items():
                 if field != 'path':
-                    fields[field] = list_to_multirange(filenumbers)
+                    fields[field] = list_to_multirange(file_numbers)
 
-        llens = max([len(a) for a in self.datadic]) + 6 + 4
+        l_lens = max([len(a) for a in self.data_dic]) + 6 + 4
         dataset_string = '{\n'
-        for samplename, fields in self.datadic.items():
+        for sample_name, fields in self.data_dic.items():
             lmax = max([len(key) for key in fields] + [0])
 
-            dataset_string += f"'{samplename:s}' : {{".rjust(llens)
+            dataset_string += f"'{sample_name:s}' : {{".rjust(l_lens)
 
             dataset_string += f"{' ' * (lmax - 4)}'path' : " \
                               f"'{fields.pop('path')}" \
                               f"',\n"
             dataset_string += ",\n".join([
-                f"{' ' * (lmax - len(key) + llens)}'{key:s}' : {value}"
+                f"{' ' * (lmax - len(key) + l_lens)}'{key:s}' : {value}"
                 for key, value in sorted(fields.items())
             ])
             dataset_string += "},\n"
         dataset_string += "}"
         return dataset_string
 
-    def create_plotlist(self):
-        plotlist = []
-        for sample, workspacelist in self.datadic.items():
-            for workspace in workspacelist:
+    def create_subtract(self):
+        subtract = []
+        for sample, workspace_list in self.data_dic.items():
+            for workspace in workspace_list:
                 if workspace != 'path':
-                    plotlist.append(f"{sample}_{workspace}")
-        return plotlist
+                    subtract.append(f"{sample}_{workspace}")
+        return subtract
 
-    def interpolate_standard(self, banks, scriptname, parent):
-        self.datadic, nerror = interpolate_standard(self.datadic, banks,
-                                                    scriptname)
-        if nerror:
+    def interpolate_standard(self, banks, script_name, parent):
+        self.data_dic, n_error = interpolate_standard(self.data_dic, banks,
+                                                      script_name)
+        if n_error:
             parent.raise_error(
                 'Error: Interpolation of standard data with '
                 'different counting times for the same sample '
                 'type and field is not supported.',
                 critical=True)
 
-    def get_nb_banks(self, sampletype=None):
-        """ returns dict with sample names and number of banks, can be
-        0 or the same for all samples """
-        if self.datadic.get(sampletype, 0):
+    def get_nb_banks(self, sample_type=None):
+        """
+        Returns dict with sample names and number of banks, can be
+        0 or the same for all samples.
+        """
+        if self.data_dic.get(sample_type, 0):
             return len(self.banks)
         return 0
 
 
-# Helper functions
+# helper functions
 def create_script_name(sample_data):
     lowest_fn = min([entry['file_number'] for entry in sample_data])
     highest_fn = max([entry['file_number'] for entry in sample_data])
@@ -151,18 +156,20 @@ def get_omega_step(angles, rounding_limit=0.05):
     return min_step
 
 
-def list_to_set(banklist, rounding_limit=0.05):
-    # finds set of bank positions not further apart than rounding_limit
-    # group starts with smallest bank position,
-    # which is also the returned value, average would not be unique
-    sortedbanks = sorted(banklist)
-    if not sortedbanks:
+def list_to_set(bank_list, rounding_limit=0.05):
+    '''
+    Finds set of bank positions not further apart than rounding_limit
+    group starts with the smallest bank position,
+    which is also the returned value, average would not be unique.
+    '''
+    sorted_banks = sorted(bank_list)
+    if not sorted_banks:
         return []
-    maxbank = [sortedbanks[0]]
-    for bank in sortedbanks[1:]:
-        if abs(maxbank[-1] - bank) > rounding_limit:
-            maxbank.append(bank)
-    return maxbank
+    max_bank = [sorted_banks[0]]
+    for bank in sorted_banks[1:]:
+        if abs(max_bank[-1] - bank) > rounding_limit:
+            max_bank.append(bank)
+    return max_bank
 
 
 def automatic_omega_binning(sample_data):
@@ -174,8 +181,8 @@ def automatic_omega_binning(sample_data):
     return DNSBinning(omega_min, omega_max, omega_step)
 
 
-def get_proposal_from_filname(filename, filenumber):
-    return filename.replace(f'_{filenumber:06d}.d_dat', '')
+def get_proposal_from_filename(filename, file_number):
+    return filename.replace(f'_{file_number:06d}.d_dat', '')
 
 
 def get_sample_fields(sample_data):
@@ -183,14 +190,16 @@ def get_sample_fields(sample_data):
 
 
 def create_dataset(data, path):
-    """Converting data from fileselector to a smaller dictionary """
+    """
+    Converting data from fileselector to a smaller dictionary.
+    """
     dataset = {}
     for entry in data:
-        datatype = get_datatype_from_samplename(entry['sample_name'])
+        datatype = get_datatype_from_sample_name(entry['sample_name'])
         field = field_dict.get(entry['field'], entry['field'])
-        proposal = get_proposal_from_filname(entry['filename'],
-                                             entry['file_number'])
-        datapath = os.path.join(path, proposal)
+        proposal = get_proposal_from_filename(entry['filename'],
+                                              entry['file_number'])
+        data_path = os.path.join(path, proposal)
         if datatype in dataset:
             if field in dataset[datatype].keys():
                 dataset[datatype][field].append(entry['file_number'])
@@ -199,14 +208,14 @@ def create_dataset(data, path):
         else:
             dataset[datatype] = {}
             dataset[datatype][field] = [entry['file_number']]
-            dataset[datatype]['path'] = datapath
+            dataset[datatype]['path'] = data_path
     return dataset
 
 
-def get_datatype_from_samplename(samplename):
-    datatype = samplename.strip('_')
+def get_datatype_from_sample_name(sample_name):
+    datatype = sample_name.strip('_')
     datatype = datatype.replace(' ', '')
-    if samplename == 'leer':  # compatibility with old names
+    if sample_name == 'leer':  # compatibility with old names
         datatype = 'empty'
     return datatype
 

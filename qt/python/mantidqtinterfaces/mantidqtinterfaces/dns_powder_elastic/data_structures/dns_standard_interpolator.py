@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Class which interpolates DNS standard data to bank positions
+Class which interpolates DNS standard data to bank positions.
 """
+
 import os
 import numpy as np
 
@@ -18,22 +20,22 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import \
 def read_standard_file(path, number):
     path, prefix = get_path_and_prefix(path)
     filename = f'{prefix}_{number:06d}.d_dat'
-    dnsfile = DNSFile(path, filename)
-    int_arr = np.array([dnsfile.det_rot, dnsfile.timer, dnsfile.monitor])
-    int_arr = np.append(int_arr, dnsfile.counts[:, 0])
+    dns_file = DNSFile(path, filename)
+    int_arr = np.array([dns_file.det_rot, dns_file.timer, dns_file.monitor])
+    int_arr = np.append(int_arr, dns_file.counts[:, 0])
     return int_arr
 
 
-def create_array(path, filenumbers):
+def create_array(path, file_numbers):
     arr = np.asarray([])
-    filenumb_dict = {}
-    for number in filenumbers:
+    file_numb_dict = {}
+    for number in file_numbers:
         new = read_standard_file(path, number)
-        filenumb_dict[new[0]] = number  # det_rot dictionary
+        file_numb_dict[new[0]] = number  # det_rot dictionary
         arr = np.append(arr, new)
     arr = np.reshape(np.asarray(arr), (-1, 27))
     arr = np.sort(arr, axis=0)
-    return [arr, filenumb_dict]
+    return [arr, file_numb_dict]
 
 
 def average_array(arr, rounding_limit=0.05):
@@ -64,54 +66,54 @@ def interp(arr, x):
     return new
 
 
-def closest_filenumber(x, filenumb_dict):
-    res = filenumb_dict.get(x) or filenumb_dict[min(
-        filenumb_dict.keys(), key=lambda key: abs(key - x))]
+def closest_file_number(x, file_numb_dict):
+    res = file_numb_dict.get(x) or file_numb_dict[min(
+        file_numb_dict.keys(), key=lambda key: abs(key - x))]
     return res
 
 
-def write_inp_file(arr, path, filenumb_dict, filenumber, prefix):
-    filenumbers = []
+def write_inp_file(arr, path, file_numb_dict, file_number, prefix):
+    file_numbers = []
     for line in arr:
         number = int(line[0])
-        number = closest_filenumber(number, filenumb_dict)
-        dirname, propnb = get_path_and_prefix(path)
-        filename = f'{propnb}_{number:06d}.d_dat'
-        dnsfile = DNSFile(dirname, filename)
-        countarray = np.zeros((24, 1), dtype=int)
-        countarray[:, 0] = line[3:]
-        dnsfile.counts = countarray
-        dnsfile.det_rot = line[0]
-        dnsfile.timer = line[1]
-        dnsfile.monitor = int(line[2])
-        newfilename = f'{prefix}_{filenumber:06d}.d_dat'
-        dnsfile.write(dirname + '/interp/', newfilename)
-        filenumbers.append(filenumber)
-        filenumber += 1
-    return filenumbers
+        number = closest_file_number(number, file_numb_dict)
+        dir_name, prop_nb = get_path_and_prefix(path)
+        filename = f'{prop_nb}_{number:06d}.d_dat'
+        dns_file = DNSFile(dir_name, filename)
+        count_array = np.zeros((24, 1), dtype=int)
+        count_array[:, 0] = line[3:]
+        dns_file.counts = count_array
+        dns_file.det_rot = line[0]
+        dns_file.timer = line[1]
+        dns_file.monitor = int(line[2])
+        new_filename = f'{prefix}_{file_number:06d}.d_dat'
+        dns_file.write(dir_name + '/interp/', new_filename)
+        file_numbers.append(file_number)
+        file_number += 1
+    return file_numbers
 
 
-def interpolate_standard(standard_data, bank_positions, scriptname):
+def interpolate_standard(standard_data, bank_positions, script_name):
     new_dict = {}
     error = False
     for sample_type in standard_data.keys():
         path = standard_data[sample_type]['path']
-        newpath = os.path.dirname(path).rstrip("/\\") + '/interp/'
-        prefix = scriptname[0:-3] + '_ip_' + sample_type
+        new_path = os.path.dirname(path).rstrip("/\\") + '/interp/'
+        prefix = script_name[0:-3] + '_ip_' + sample_type
         new_dict[sample_type] = {}
-        new_dict[sample_type]['path'] = newpath + prefix
-        filenumber = 0
-        create_dir(newpath)
+        new_dict[sample_type]['path'] = new_path + prefix
+        file_number = 0
+        create_dir(new_path)
         for field in [
             x for x in standard_data[sample_type].keys() if x != 'path'
         ]:
             numbers = standard_data[sample_type][field]
-            arr, filenumb_dict = (create_array(path, numbers))
+            arr, file_numb_dict = (create_array(path, numbers))
             arr = average_array(arr)
             intp = interp(arr, bank_positions)
-            filenumbers = write_inp_file(intp, path, filenumb_dict, filenumber,
-                                         prefix)
-            filenumber = filenumbers[-1]
-            new_dict[sample_type][field] = filenumbers
-            filenumber += 1
+            file_numbers = write_inp_file(intp, path, file_numb_dict, file_number,
+                                          prefix)
+            file_number = file_numbers[-1]
+            new_dict[sample_type][field] = file_numbers
+            file_number += 1
     return [new_dict, error]

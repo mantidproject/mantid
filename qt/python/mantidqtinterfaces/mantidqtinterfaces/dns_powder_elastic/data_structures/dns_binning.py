@@ -6,8 +6,8 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
 
 class DNSBinning(ObjectDict):
     """
-    stores DNSBinning information, if the number of bins is not given
-    it is calculated from the step size, also defines bin_edges
+    Stores DNSBinning information, if the number of bins is not given
+    it is calculated from the step size, also defines bin_edges.
     """
 
     def __init__(self, xmin, xmax, step, number_of_bins=None):
