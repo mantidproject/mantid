@@ -991,7 +991,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     T scalefactor = numRows() > 1 ? m_rawData[1][0] : 1;
     *this /= scalefactor;
     long double D = m_rawData[0][0];
-    long double k = numRows();
+    long double k = static_cast<long double>(numRows());
     if ((std::abs(D) >= 2.0) && ((k * std::acosh(D / 2.0)) > std::acosh(std::numeric_limits<long double>::max()))) {
       *this *= scalefactor;
       Invert();
@@ -1003,10 +1003,10 @@ yes invert the matrix using analytic formula. If not then use standard Invert
         long double lambda;
         long double iMinusj;
         if (i > j)
-          iMinusj = i - j;
+          iMinusj = static_cast<long double>(i - j);
         else
-          iMinusj = j - i;
-        long double iPlusj = i + j;
+          iMinusj = static_cast<long double>(j - i);
+        long double iPlusj = static_cast<long double>(i + j);
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(std::pow(-1.0, iPlusj));
           lambda = std::acosh(D / 2.0);
