@@ -9,7 +9,7 @@
 import os
 
 from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
-from qtpy.QtCore import Signal, QObject, QEventLoop
+from qtpy.QtCore import Signal, QObject, QEventLoop, Qt
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, WorkspaceGroup
 from mantid.kernel import ConfigService
@@ -37,7 +37,7 @@ class Project(AnalysisDataServiceObserver):
         self.__is_loading = False
 
         self.signals = ProjectSignals()
-        self.signals.sig_open_big_project_dialog.connect(self._offer_large_size_confirmation)
+        self.loop = QEventLoop()
 
         self.big_project_dialog_answer = None
 
@@ -145,12 +145,13 @@ class Project(AnalysisDataServiceObserver):
             # If a project is > the value in the properties file, question the user if they want to continue.
             result = None
             if project_size > warning_size:
+                self.signals.sig_open_big_project_dialog.connect(self._offer_large_size_confirmation, Qt.UniqueConnection)
+
                 # we cannot create a widget outside of the main thread, so we send a signal for its creation and
                 # wait for a signal indicating completion
-                loop = QEventLoop()
-                self.signals.sig_big_project_dialog_answer.connect(loop.quit)
+                self.signals.sig_big_project_dialog_answer.connect(self.loop.quit)
                 self.signals.sig_open_big_project_dialog.emit()
-                loop.exec()
+                self.loop.exec()
 
                 # the loop has ended, so the result has been updated
                 result = self.big_project_dialog_answer

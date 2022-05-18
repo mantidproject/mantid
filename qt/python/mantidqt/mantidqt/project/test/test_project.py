@@ -194,6 +194,7 @@ class ProjectTest(unittest.TestCase):
         self.project._get_project_size = mock.MagicMock(return_value=
                                                         int(ConfigService.getString("projectSaving.warningSize")) + 1)
         self.project._offer_large_size_confirmation = mock.MagicMock()
+        self.project.loop = mock.MagicMock()
         self.project._save()
         self.assertEqual(self.project._offer_large_size_confirmation.call_count, 1)
 
