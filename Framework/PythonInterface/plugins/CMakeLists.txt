@@ -147,6 +147,7 @@ set(PYTHON_PLUGINS
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
     algorithms/PelicanReduction.py
+    algorithms/PelicanCrystalProcessing.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
