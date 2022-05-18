@@ -84,7 +84,7 @@ class SliceInfo:
         return self._transform
 
     def transform(self, point: Sequence) -> np.ndarray:
-        """Transform a point to the slice frame.
+        """Transform a 3-vector point (e.g. HLK, Qxyz) to the slice frame/display coordinates xy (z = slicepoint)
         It returns a ndarray(X,Y,Z) where X,Y are coordinates of X,Y of the display
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
@@ -95,13 +95,12 @@ class SliceInfo:
         return np.array((*self._transform.tr(px, py), pz))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
-        """Does the inverse transform (inverse of self.transform) from slice
-        frame to data frame
-
-        :param point: A 3D point in the slice frame
         """
-        x, y = self._transform.inv_tr(point[0], point[1])
-
+        Does the inverse transform (inverse of self.transform) from slice/display frame to data frame
+        :param point: A 3D point in the data frame
+        """
+        x, y = self._transform.inv_tr(point[0], point[1])  # apply inverse transform to get x,y in data frame
+        # populate data point accounting for order of axes displayed
         data_point = np.zeros(3)
         data_point[self.adjust_index_for_preceding_nonq_dims(self._display_x)] = x
         data_point[self.adjust_index_for_preceding_nonq_dims(self._display_y)] = y
@@ -146,8 +145,6 @@ class SliceInfo:
         self._peak_overlay_supported = qflags[self._display_x] and qflags[self._display_y]
         # find transform for the chosen display indices
         if isinstance(axes_angles, np.ndarray) and self._peak_overlay_supported:
-            # adjust index if non-Q dimension is before a Q the displayed axes
-            # force array to have dtype=bool otherwise ~ operator throws error on empty array when index is zero
             ix = self.adjust_index_for_preceding_nonq_dims(self._display_x)
             iy = self.adjust_index_for_preceding_nonq_dims(self._display_y)
             angle = axes_angles[ix, iy]
@@ -160,5 +157,10 @@ class SliceInfo:
             self._transform = OrthogonalTransform()
             self._nonorthogonal_axes_supported = False
 
-    def adjust_index_for_preceding_nonq_dims(self, index):
-        return int(index - np.sum(self.i_non_q < index))
+    def adjust_index_for_preceding_nonq_dims(self, display_index: int) -> int:
+        """
+        Get index of q dimension corresponding to display index - i.e. ignoring non q dims.
+        :param display_index: index of dimension displayed
+        :return: index of q dim ignoring non q dims - i.e. index in range(0,3)
+        """
+        return int(display_index - np.sum(self.i_non_q < display_index))  # cast to int from numpy int32 type
