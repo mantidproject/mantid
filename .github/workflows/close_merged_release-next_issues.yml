@@ -1,0 +1,18 @@
+name: Close issues related to pull requests merged to release-next
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - release-next
+
+jobs:
+  closeIssueOnReleaseNextMerge:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Closes issues related to a merged pull request on release-next
+        uses: ldez/gha-mjolnir@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
