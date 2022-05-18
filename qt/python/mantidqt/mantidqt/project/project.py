@@ -9,6 +9,7 @@
 import os
 
 from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
+from qtpy.QtCore import Signal, QObject, QEventLoop
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, WorkspaceGroup
 from mantid.kernel import ConfigService
@@ -21,6 +22,7 @@ from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresen
 
 
 class Project(AnalysisDataServiceObserver):
+
     def __init__(self, globalfiguremanager_instance, interface_populating_function):
         """
         :param globalfiguremanager_instance: The global figure manager instance used in this project.
@@ -33,6 +35,11 @@ class Project(AnalysisDataServiceObserver):
 
         self.__is_saving = False
         self.__is_loading = False
+
+        self.signals = ProjectSignals()
+        self.signals.sig_open_big_project_dialog.connect(self._offer_large_size_confirmation)
+
+        self.big_project_dialog_answer = None
 
         # Last save locations
         self.last_project_location = None
@@ -138,7 +145,16 @@ class Project(AnalysisDataServiceObserver):
             # If a project is > the value in the properties file, question the user if they want to continue.
             result = None
             if project_size > warning_size:
-                result = self._offer_large_size_confirmation()
+                # we cannot create a widget outside of the main thread, so we send a signal for its creation and
+                # wait for a signal indicating completion
+                loop = QEventLoop()
+                self.signals.sig_big_project_dialog_answer.connect(loop.quit)
+                self.signals.sig_open_big_project_dialog.emit()
+                loop.exec()
+
+                # the loop has ended, so the result has been updated
+                result = self.big_project_dialog_answer
+
             if result is None or result != QMessageBox.Cancel:
                 plots_to_save = self.plot_gfm.figs
 
@@ -279,15 +295,16 @@ class Project(AnalysisDataServiceObserver):
         else:
             return QMessageBox.No
 
-    @staticmethod
-    def _offer_large_size_confirmation():
+    def _offer_large_size_confirmation(self):
         """
         Asks the user to confirm that they want to save a large project.
-        :return: QMessageBox; The response from the user. Default is Yes.
+        Store the result and signals when ended.
         """
-        return QMessageBox.question(None, "You are trying to save a large project.",
-                                    "The project may take a long time to save. Would you like to continue?",
-                                    QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+        message = QMessageBox.question(None, "You are trying to save a large project.",
+                                       "The project may take a long time to save. Would you like to continue?",
+                                       QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+        self.big_project_dialog_answer = message
+        self.signals.sig_big_project_dialog_answer.emit()
 
     def modified_project(self):
         self.__saved = False
@@ -304,3 +321,13 @@ class Project(AnalysisDataServiceObserver):
         The method that will trigger when a plot is added, destroyed, or changed in the global figure manager.
         """
         self.modified_project()
+
+
+class ProjectSignals(QObject):
+    """Observer class to hold signals for the project"""
+
+    """Signal emitted when a dialog asking for user confirmation when trying to save a big project is needed"""
+    sig_open_big_project_dialog = Signal()
+
+    """Signal emitted when that dialog had an answer from the user"""
+    sig_big_project_dialog_answer = Signal()
