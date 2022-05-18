@@ -16,6 +16,7 @@ from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
+from matplotlib.image import AxesImage
 from matplotlib import cm
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
@@ -349,20 +350,38 @@ class ColorbarWidget(QWidget):
 
     def _validate_mappable(self, mappable):
         """Disable the Log option if no positive value can be found from given data (image)"""
-        index = NORM_OPTS.index("Log")
-        if mappable.get_array() is not None:
-            if np.all(mappable.get_array() <= 0) or mappable.get_array().all() is np.ma.masked:
-                self.norm.model().item(index, 0).setEnabled(False)
-                self.norm.setItemData(index, "Log scale is disabled for non-positive data",
-                                      Qt.ToolTipRole)
-                if isinstance(mappable.norm, LogNorm):
-                    mappable.norm = self._create_linear_normalize_object()
-                    self.norm.blockSignals(True)
-                    self.norm.setCurrentIndex(0)
-                    self.norm.blockSignals(False)
+        data_array = mappable.get_array()
+        if data_array is not None:
+            log_index, symmetric_log_index = NORM_OPTS.index("Log"), NORM_OPTS.index("SymmetricLog10")
+            if np.all(data_array <= 0):
+                self._disable_normalisation_option(mappable, log_index, LogNorm,
+                                                   "Log scale is disabled for non-positive data")
+            elif data_array.all() is np.ma.masked:
+                self._disable_normalisation_option(mappable, log_index, LogNorm,
+                                                   "Log scale is disabled for masked data")
+                self._disable_normalisation_option(mappable, symmetric_log_index, SymLogNorm,
+                                                   "SymmetricLog10 scale is disabled for masked data")
             else:
-                if not self.norm.model().item(index, 0).isEnabled():
-                    self.norm.model().item(index, 0).setEnabled(True)
-                    self.norm.setItemData(index, "", Qt.ToolTipRole)
+                self._enable_normalisation_option(log_index)
+                self._enable_normalisation_option(symmetric_log_index)
 
         return mappable
+
+    def _disable_normalisation_option(self, mappable: AxesImage, option_index: int, norm_type: Normalize,
+                                      tooltip: str) -> None:
+        """Disables a non-linear normalisation option and sets the new normalisation to Linear."""
+        if option_index == 0:
+            raise ValueError("The Linear normalisation option cannot be disabled.")
+        self.norm.model().item(option_index, 0).setEnabled(False)
+        self.norm.setItemData(option_index, tooltip, Qt.ToolTipRole)
+        if isinstance(mappable.norm, norm_type):
+            mappable.norm = self._create_linear_normalize_object()
+            self.norm.blockSignals(True)
+            self.norm.setCurrentIndex(0)
+            self.norm.blockSignals(False)
+
+    def _enable_normalisation_option(self, option_index: int) -> None:
+        """Enables a normalisation option."""
+        if not self.norm.model().item(option_index, 0).isEnabled():
+            self.norm.model().item(option_index, 0).setEnabled(True)
+            self.norm.setItemData(option_index, "", Qt.ToolTipRole)
