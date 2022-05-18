@@ -8,7 +8,13 @@
 
 def list_to_range(value_list):
     """
+<<<<<<< HEAD
     Converting a list of file numbers to a string with a python range command.
+||||||| parent of 1991efce314 (Add minor style changes)
+    Converting a list of filenumbers to a string with a python range command
+=======
+    Converting a list of file_numbers to a string with a python range command
+>>>>>>> 1991efce314 (Add minor style changes)
     """
     if len(value_list) > 3:
         increment = value_list[1] - value_list[0]

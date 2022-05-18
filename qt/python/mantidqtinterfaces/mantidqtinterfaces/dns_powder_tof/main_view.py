@@ -51,7 +51,7 @@ class DNSReductionGUIView(QMainWindow):
         }
         self.modus_titles = {
             # 'simulation': 'DNS Reduction - Simulation',
-            'powder_elastic': 'DNS Reduction - Powder elastic',
+            'powder_elastic': 'DNS Reduction - Powder Elastic',
             'powder_tof': 'DNS Reduction - Powder TOF',
             # 'sc_elastic': 'DNS Reduction - Single Crystal elastic',
             # 'sc_tof': 'DNS Reduction - Single Crystal TOF',

@@ -105,7 +105,7 @@
   </action>
   <action name="actionPowder_elastic">
    <property name="text">
-    <string>Powder elastic</string>
+    <string>Powder Elastic</string>
    </property>
   </action>
   <action name="actionPowder_TOF">

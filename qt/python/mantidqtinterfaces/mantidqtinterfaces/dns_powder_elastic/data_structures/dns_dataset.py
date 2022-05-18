@@ -27,9 +27,8 @@ from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
 class DNSDataset(ObjectDict):
     """
     Class for storing data of a multiple dns datafiles
-    this is a dictionary  but can also be accessed like attributes.
+    this is a dictionary but can also be accessed like attributes.
     """
-
     def __init__(self, data, path, is_sample=True, fields=None):
         super().__init__()
         self.is_sample = is_sample
@@ -51,7 +50,7 @@ class DNSDataset(ObjectDict):
                 if field != 'path':
                     fields[field] = list_to_multirange(file_numbers)
 
-        l_lens = max([len(a) for a in self.data_dic]) + 6 + 4
+        l_lens = max(len(a) for a in self.data_dic) + 6 + 4
         dataset_string = '{\n'
         for sample_name, fields in self.data_dic.items():
             lmax = max([len(key) for key in fields] + [0])

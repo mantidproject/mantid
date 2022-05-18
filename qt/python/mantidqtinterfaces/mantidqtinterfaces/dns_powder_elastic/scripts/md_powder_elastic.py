@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS script helpers for elastic powder reduction
+DNS script helpers for elastic powder reduction.
 """
 
 import numpy as np
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import \
     DNSError
-
 from mantid.simpleapi import (BinMD, CreateSingleValuedWorkspace, DivideMD,
                               GroupWorkspaces, IntegrateMDHistoWorkspace,
                               LoadDNSSCD, MinusMD, MultiplyMD, PlusMD, mtd)
@@ -45,7 +44,9 @@ def background_subtraction(workspace_name, factor=1):
 
 
 def flipping_ratio_correction(workspace):
-    """Given SF channel, SF and NSF are corrected for finite flipping ratio """
+    """
+    Given SF channel, SF and NSF are corrected for finite flipping ratio.
+    """
     if workspace.endswith('_nsf'):
         return False
     nsf_workspace = ''.join((workspace[:-2], 'nsf'))
