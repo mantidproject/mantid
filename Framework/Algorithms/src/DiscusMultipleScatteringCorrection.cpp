@@ -1373,16 +1373,33 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const std
   } else {
     auto wValues = dynamic_cast<NumericAxis *>(/*m_logSQ*/ materialWSIt->SQ->getAxis(1))->getValues();
     // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
-    auto iW = rng.nextInt(0, wValues.size() - 1);
+    // Note - Discus took different approach where it sampled q,w from kinematically accessible range only but it
+    // only calculated for double scattering and easier to normalise in that case
+    double wRange;
+    /*// the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
+    // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
+    double wMax = fromWaveVector(kinc);
+    // find largest w bin centre that is < wmax and then sample w up to the next bin edge
+    auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
+    int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);*/
+    if (wValues.size() == 1) {
+      iW = 0;
+      wRange = 1;
+    } else {
+      std::vector<double> wBinEdges;
+      wBinEdges.reserve(wValues.size() + 1);
+      VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+      // w bins not necessarily equal so don't just sample w index
+      wRange = /*std::min(wMax, wBinEdges[iWMax + 1])*/ wBinEdges.back() - wBinEdges.front();
+      double w = wBinEdges.front() + rng.nextValue() * wRange;
+      iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
+    }
+
     // if w inaccessible return (ie treat as zero weight) rather than retry so that integration stays over full w range
-    // Note - Discus retried here which I believe is incorrect
     if (fromWaveVector(kinc) - wValues[iW] <= 0)
       return false;
     k = toWaveVector(fromWaveVector(kinc) - wValues[iW]);
     double maxkf = toWaveVector(fromWaveVector(kinc) - wValues.front());
-    std::vector<double> wBinEdges;
-    VectorHelper::convertToBinBoundary(wValues, wBinEdges);
-    double wRange = wBinEdges.back() - wBinEdges.front();
     double qrange = kinc + maxkf;
     QQ = qrange * rng.nextValue();
     SQ = interpolateFlat /* interpolateGaussian(m_logSQ->getSpectrum(iW)*/ (materialWSIt->SQ->getSpectrum(iW), QQ);
