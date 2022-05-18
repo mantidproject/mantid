@@ -351,7 +351,7 @@ class ColorbarWidget(QWidget):
         """Disable the Log option if no positive value can be found from given data (image)"""
         index = NORM_OPTS.index("Log")
         if mappable.get_array() is not None:
-            if np.all(mappable.get_array() <= 0):
+            if np.all(mappable.get_array() <= 0) or mappable.get_array().all() is np.ma.masked:
                 self.norm.model().item(index, 0).setEnabled(False)
                 self.norm.setItemData(index, "Log scale is disabled for non-positive data",
                                       Qt.ToolTipRole)
