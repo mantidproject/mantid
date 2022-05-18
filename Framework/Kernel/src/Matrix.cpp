@@ -992,6 +992,12 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     *this /= scalefactor;
     long double D = m_rawData[0][0];
     long double k = numRows();
+    if ((k * std::acosh(D / 2.0)) > std::acosh(std::numeric_limits<long double>::max())) {
+      *this *= scalefactor;
+      Invert();
+      return;
+    }
+
     for (size_t i = 0; i < numRows(); i++) {
       for (size_t j = 0; j < numCols(); j++) {
         long double lambda;
