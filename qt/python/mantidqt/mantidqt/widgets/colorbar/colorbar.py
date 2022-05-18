@@ -231,6 +231,9 @@ class ColorbarWidget(QWidget):
                               vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "Log":
             cmin = MIN_LOG_VALUE if cmin is not None and cmin <= 0 else cmin
+            if cmin is None and cmax is None:
+                climits = self._calculate_clim()
+                cmin, cmax = climits if climits is not None else (cmin, cmax)
             return LogNorm(vmin=cmin, vmax=cmax)
         else:
             return Normalize(vmin=cmin, vmax=cmax)
@@ -294,35 +297,33 @@ class ColorbarWidget(QWidget):
             self.cmax.setValidator(self.linear_validator)
 
     def _autoscale_clim(self):
-        """Update stored colorbar limits
-        The new limits are found from the colobar data """
-        if hasattr(self.colorbar.mappable, "get_array_clipped_to_bounds"):
-            data = self.colorbar.mappable.get_array_clipped_to_bounds()
-        else:
-            # in nonorthog view get passed a QuadMesh that doesn't have the above method
-            # however the data from get_array for MDEvent ws is already clipped (not for MDHisto)
-            data = self.colorbar.mappable.get_array()
-        norm = NORM_OPTS[self.norm.currentIndex()]
+        """Update stored colorbar limits. The new limits are found from the colobar data """
+        climits = self._calculate_clim()
+        if climits is not None:
+            self.cmin_value, self.cmax_value = climits
+        self.update_clim_text()
+
+    def _calculate_clim(self) -> tuple:
+        """Calculate the colorbar limits to use when autoscale is turned on."""
+        axes = self.colorbar.mappable
+        data = axes.get_array_clipped_to_bounds() if hasattr(axes, "get_array_clipped_to_bounds") else axes.get_array()
+
+        log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
         try:
             try:
                 masked_data = data[~data.mask]
-                # use the smallest positive value as vmin when using log scale,
-                # matplotlib will take care of the data skipping part.
-                masked_data = masked_data[masked_data > 0] if norm == "Log" else masked_data
-
+                # Use smallest positive value as vmin for log scale, matplotlib takes care of the data skipping part
+                masked_data = masked_data[masked_data > 0] if log_normalisation else masked_data
                 # If any dimension is zero then we have no data in the display area
                 data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
 
-                self.cmin_value = 0. if data_is_empty else masked_data.min()
-                self.cmax_value = 0. if data_is_empty else masked_data.max()
+                return (0.0, 0.0) if data_is_empty else (masked_data.min(), masked_data.max())
             except (AttributeError, IndexError):
-                data = data[np.nonzero(data)] if norm == "Log" else data
-                self.cmin_value = np.nanmin(data)
-                self.cmax_value = np.nanmax(data)
+                data = data[np.nonzero(data)] if log_normalisation else data
+                return np.nanmin(data), np.nanmax(data)
         except (ValueError, RuntimeWarning):
-            # all values mask
-            pass
-        self.update_clim_text()
+            # All values are masked
+            return None
 
     def _manual_clim(self):
         """Update stored colorbar limits
