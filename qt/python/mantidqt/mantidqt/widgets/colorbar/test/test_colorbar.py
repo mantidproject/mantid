@@ -32,10 +32,16 @@ class ColorbarWidgetTest(TestCase):
         plt.close('all')
         self.fig, self.widget = None, None
 
+    def test_that_an_integer_vmax_will_not_cause_an_error_when_the_clim_gets_updated(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1))
+
+        # The clim gets updated here
+        self.widget.set_mappable(image)
+
     def test_that_masked_data_in_log_mode_will_cause_a_switch_back_to_linear_normalisation(self):
         normalisation_index = 1  # Log
-        image = plt.imshow(self.data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1))
-        masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1))
+        image = plt.imshow(self.data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1.0))
+        masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1.0))
 
         self.widget.set_mappable(image)
         self.widget.norm.setCurrentIndex(normalisation_index)
@@ -46,8 +52,8 @@ class ColorbarWidgetTest(TestCase):
 
     def test_that_masked_data_in_symmetric_log_mode_will_cause_a_switch_back_to_linear_normalisation(self):
         normalisation_index = 2  # SymmetricLog10
-        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1))
-        masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1))
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1.0))
+        masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1.0))
 
         self.widget.set_mappable(image)
         self.widget.norm.setCurrentIndex(normalisation_index)

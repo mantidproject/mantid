@@ -276,8 +276,8 @@ class ColorbarWidget(QWidget):
         """
         Update displayed limit values based on stored ones
         """
-        self.cmin.setText("{:.4}".format(self.cmin_value))
-        self.cmax.setText("{:.4}".format(self.cmax_value))
+        self.cmin.setText(f"{float(self.cmin_value):.4}")
+        self.cmax.setText(f"{float(self.cmax_value):.4}")
 
     def redraw(self):
         """
