@@ -36,7 +36,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.view.set_slot_for_selected_x_changed(self.handle_selected_x_changed)
         self.view.set_slot_for_selected_y_changed(self.handle_selected_y_changed)
 
-        self.clear_observer = GenericObserverWithArgPassing(self.clear)
+        self.clear_observer = GenericObserver(self.clear)
         self.remove_observer = GenericObserverWithArgPassing(self.remove)
         self.replace_observer = GenericObserverWithArgPassing(self.replaced)
 
