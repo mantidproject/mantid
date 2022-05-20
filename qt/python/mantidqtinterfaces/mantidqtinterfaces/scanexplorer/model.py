@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from mantid.simpleapi import SANSILLParameterScan
+from os.path import basename
 
 
 class ScanExplorerModel:
@@ -15,5 +16,6 @@ class ScanExplorerModel:
         self.presenter = presenter
 
     def process_file(self, file):
-        out = SANSILLParameterScan(SampleRuns=file, OutputWorkspace="out", NormaliseBy="None")
+        name = basename(file)[:-4] + "_scan"
+        out = SANSILLParameterScan(SampleRuns=file, OutputWorkspace=name, NormaliseBy="None")
         self.presenter.create_slice_viewer(out)
