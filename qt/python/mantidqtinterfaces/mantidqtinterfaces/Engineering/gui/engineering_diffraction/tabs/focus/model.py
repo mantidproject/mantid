@@ -22,7 +22,9 @@ class FocusModel(object):
         return self._last_focused_files
 
     def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, rb_num: str,
-                  calibration: CalibrationInfo, save_dir: Optional[str] = output_settings.get_output_path()) -> None:
+                  calibration: CalibrationInfo, save_dir: Optional[str] = None) -> None:
+        if save_dir is None:
+            save_dir = output_settings.get_output_path()
         full_calib = load_full_instrument_calibration()
         focused_files = EnggUtils.focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir,
                                             full_calib)
