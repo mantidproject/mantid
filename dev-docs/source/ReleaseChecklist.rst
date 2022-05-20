@@ -126,8 +126,8 @@ Beta Testing Ends - Prepare for Smoke Testing
 * Liaise with the technical release manager and project manager to decide on an appropriate time for Smoke Testing.
 * Send an invite to developers for 1.5 hours maximum Smoke Testing. Include an introduction message to assign all testers to a certain operating system.
   Link to the release pipeline builds where the release packages *WILL* be. Encourage testers to download
-  in the 30 mins before smoke testing. Inform that ticking on a testing issue means that someone has assigned themselves and will tackle that task.
-* The QA manager should pre-setup 3 ISIS IDAaaS mantid dev instances and manually install the release package before testing
+  in the 30 minutes before smoke testing. Inform that ticking on a testing issue means that someone has assigned themselves and will tackle that task.
+* The QA manager should pre-setup 3 ISIS IDAaaS Mantid dev instances and manually install the release package before testing
   so the 1.5 hours is clear for testing time. Then share the instances with the relevant testers from the IDAaaS workspace settings.
 
 Smoke Testing
