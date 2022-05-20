@@ -16,6 +16,7 @@ from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot  # , RectangleSelectionLinePlot
 from mantid.kernel import logger
 from mantid.api import mtd
+# from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationTool
 
 
 from .model import ScanExplorerModel
@@ -103,6 +104,9 @@ class ScanExplorerPresenter:
         self.view.data_view = presenter._data_view
         self.view.show_slice_viewer(workspace)
         self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
+
+        self.view.multiple_action = self.view.data_view.mpl_toolbar.addAction("MULT", self.view.start_multiple_rect_mode)
+        self.view.multiple_action.setCheckable(True)
 
         # TODO find a better way to activate the cursor tracking
         self.view.data_view.track_cursor.setChecked(False)
