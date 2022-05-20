@@ -156,18 +156,18 @@ pipeline {
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}',
+          selector: specific('${BUILD_NUMBER}'),
           target: 'conda-packages',
-          flatten: true)
+          flatten: true
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
         // Standalone packages next
         sh 'rm -fr ${WORKSPACE}/standalone-packages'
         copyArtifacts filter: '*.exe, *.dmg, *.xz',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}',
+          selector: specific('${BUILD_NUMBER}'),
           target: 'standalone-packages',
-          flatten: true)
+          flatten: true
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${WORKSPACE}/standalone-packages/*'
       }
     }
