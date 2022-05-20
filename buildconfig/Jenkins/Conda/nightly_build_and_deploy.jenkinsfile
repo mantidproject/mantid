@@ -64,7 +64,7 @@ pipeline {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
   }
   stages {
-/*     stage('Build and test') {
+    stage('Build and test') {
       parallel {
         stage('platform: linux') {
           agent { label 'conda-build-linux' }
@@ -104,7 +104,7 @@ pipeline {
           }
         }
       }
-    } */
+    }
     stage('Update conda-recipes repository') {
       agent { label 'conda-build-linux' }
       environment { GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
