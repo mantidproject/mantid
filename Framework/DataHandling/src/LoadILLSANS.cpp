@@ -128,7 +128,7 @@ void LoadILLSANS::exec() {
     try {
       distance = firstEntry.getFloat(instrumentPath + "/Det/value") / 1000; // mm to metre
     } catch (...) {
-      distance = 1;
+      distance = 0;
     }
     const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
     placeD16(-angle, distance, "detector");
