@@ -107,9 +107,9 @@ pipeline {
     }
     stage('Update conda-recipes repository') {
       agent { label 'conda-build-linux' }
-      environment { GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
+      environment { GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
       steps {
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL'
       }
     }
     stage('Packaging') {
@@ -143,17 +143,32 @@ pipeline {
         }
       }
     }
-    stage ('Publish Conda packages to Anaconda') {
+    stage ('Publishing') {
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       options { timestamps () }
-      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
-      steps{
-        // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
+      environment {
+        ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
+        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
+      }
+      steps {
+        // Conda first
+        sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}')
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} $ANACONDA_TOKEN $ANACONDA_CHANNEL $ANACONDA_CHANNEL_LABEL ${WORKSPACE}/conda-bld/linux-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidworkbench-*.tar.bz2'
+          selector: specific('${BUILD_NUMBER}'),
+          target: 'conda-packages',
+          flatten: true
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
+        // Standalone packages next
+        sh 'rm -fr ${WORKSPACE}/standalone-packages'
+        copyArtifacts filter: '*.exe, *.dmg, *.xz',
+          fingerprintArtifacts: true,
+          projectName: '${JOB_NAME}',
+          selector: specific('${BUILD_NUMBER}'),
+          target: 'standalone-packages',
+          flatten: true
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${WORKSPACE}/standalone-packages/*'
       }
     }
     stage ('Delete old Conda nightly packages from Anaconda') {
