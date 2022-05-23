@@ -54,6 +54,10 @@
     <value val="12"/>
   </parameter>
 
+  <parameter name="TransmissionScaleRHS">
+    <value val="0"/>
+  </parameter>
+
 
    <!-- parameters for efficiency correction -->
   <parameter name="correction" type="string">
