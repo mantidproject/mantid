@@ -43,6 +43,7 @@ Bugfixes
   completing execution. This ensures a more prompt removal of the memory it holds when replacing the input workspace
   with the same name.
 - the x unit validation on the parameter ScatteringCrossSection in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` has been corrected to check for Momentum
+- Fixed :ref:`algm-Rebin2D` to allow input of :ref:`EventWorkspace <EventWorkspace>` without crashing.
 
 Data Objects
 ------------
