@@ -779,6 +779,14 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
   }
 }
 
+/**
+ * Integrate QSQ over Q and w over the kinematic range accessible for a given kinc
+ * @param kinc The incident wavenumber
+ * @param QSQ A workspace containing Q.S(Q,w) with each spectra S(Q) at a particular w
+ * @return a tuple containing a cumulative integral as a function of a pseudo variable based on the q values
+ * for each w concatenated into a single 1D sequence, the q values corresponding to each value of the pseudo
+ * variable, the w values correspodning to each value of the pseudo variable
+ */
 std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
 DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc) {
   std::vector<double> IOfQYFull, qValuesFull, wIndices;
@@ -889,7 +897,8 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
     kValues.erase(std::remove_if(kValues.begin(), kValues.end(), [](const double x) { return x == 0; }), kValues.end());
     for (auto k : kValues) {
       std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(QSQWS, k);
-      double normalisedIntegral = IOfQYFull.back() / (2 * k * k);
+      auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+      double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
       QSQIntegrals.push_back(normalisedIntegral);
     }
     auto QSQIntegral = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
@@ -1405,7 +1414,9 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const std
     SQ = interpolateFlat /* interpolateGaussian(m_logSQ->getSpectrum(iW)*/ (materialWSIt->SQ->getSpectrum(iW), QQ);
     double integralQSQ = getQSQIntegral(materialName, kinc);
     // integrate over rectangular area of qw space
-    weight = weight * scatteringXSection * SQ * QQ * qrange * wRange / integralQSQ;
+    weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
+    if (SQ > 0)
+      weight = weight / integralQSQ;
   }
   // T = 2theta
   const double cosT = (kinc * kinc + k * k - QQ * QQ) / (2 * kinc * k);
