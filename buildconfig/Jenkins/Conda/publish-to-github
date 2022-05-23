@@ -1,0 +1,48 @@
+#!/bin/bash -ex
+# This script expects
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#                 (mantid repo). Windows Caveat: Only use / for this argument do
+#                 not use \\ or \ in the path.
+#   2. TOKEN: Token for uploading to github.com
+#   3. RELEASES_REPO: Name, in owner/reponame format, of repository to publish to
+#   4. RELEASES_TAG GitHub tag to store assets
+#   Remainder PACKAGES: A list of args that will be uploaded to github release cloud.
+#
+
+# Parse arguments
+WORKSPACE=$1
+shift
+GITHUB_TOKEN=$1
+shift
+RELEASES_REPO=$1
+shift
+RELEASES_TAG=$1
+shift
+
+EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
+if [[ $OSTYPE == "msys" ]]; then
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
+else
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+fi
+CONDA_ENV_NAME=mantid-github-upload
+SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
+
+# Setup Mambaforge if not already installed
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH false
+
+# Remove conda env if it exists
+$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
+
+# Create env with the gh github client installed
+$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME gh -y
+
+# Activate Conda environment
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
+conda activate $CONDA_ENV_NAME
+
+# Export token for use by gh to authenticate
+export GITHUB_TOKEN
+gh release -R $RELEASES_REPO upload $RELEASES_TAG "$@"
