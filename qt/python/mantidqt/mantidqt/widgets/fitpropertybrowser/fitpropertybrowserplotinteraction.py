@@ -276,10 +276,8 @@ class FitPropertyBrowserPlotInteraction(QObject):
         legend = ax.get_legend()
 
         # Setting distribution=True prevents the guess being normalised
-        ax.autoscale(enable=False, axis='both')
-        line = ax.plot(out_ws, wkspIndex=1, label=output_workspace_name, distribution=True, update_axes_labels=False,
-                       **plotkwargs)[0]
-        ax.autoscale(enable=True, axis='both')
+        line = ax.plot(out_ws, wkspIndex=1, label=output_workspace_name, distribution=True,
+                       update_axes_labels=False, autoscale_on_update=False, **plotkwargs)[0]
         if legend:
             ax.make_legend()
 

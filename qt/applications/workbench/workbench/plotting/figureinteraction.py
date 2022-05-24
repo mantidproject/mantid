@@ -814,7 +814,7 @@ class FigureInteraction(object):
                 arg_set_copy = copy(arg_set)
                 [
                     arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'norm']
+                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
                     if key in arg_set_copy.keys()
                 ]
                 if 'specNum' not in arg_set:
