@@ -1,8 +1,8 @@
 .. _NewStarterPython:
 
-=====================
+==================
 New Starter Python
-=====================
+==================
 
 .. contents::
    :local:
@@ -45,9 +45,9 @@ Now you are ready to code the solution to the exercise in your chosen native bui
 -  When you think you have completed the exercise you can use the continuous integration build servers to check your work. To do this you first need to create a pull-request. See `create a pull request <https://help.github.com/articles/creating-a-pull-request/>`__ for your branch so that it can be reviewed by a senior developer.
 -  The pull request will kick-off builds on Red Hat and Windows platforms and GitHub will mark up the results of these builds on the pull requests. Try and get each build to a green status before saying it is ready for review. As you push further commits to your branch the PR will update and new builds will kick off to check your work. Continue in this pattern until the builds pass. If you're not sure how to resolve some errors check with another member of the team.
 
-----------
+-------------
 Python Basics
-----------
+-------------
 
 Feel free to skim read sections that you understand, just pay attention to anything that is new to you.
 
@@ -86,9 +86,9 @@ Write a command line program that will:
    photograph      21
    ...
 
---------------------------
+-----------------------------
 Object Oriented Python Basics
---------------------------
+-----------------------------
 
 Reading
 ^^^^^^^
