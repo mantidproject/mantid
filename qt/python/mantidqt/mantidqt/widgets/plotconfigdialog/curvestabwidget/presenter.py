@@ -70,12 +70,6 @@ class CurvesTabWidgetPresenter:
         if view_props == self.current_view_properties:
             return
 
-        if isinstance(ax, MantidAxes):
-            was_waterfall = ax.is_waterfall()
-            if was_waterfall:
-                x_offset, y_offset = ax.waterfall_x_offset, ax.waterfall_y_offset
-                ax.set_waterfall(False)
-
         plot_kwargs = view_props.get_plot_kwargs()
         # Re-plot curve
         self._replot_current_curve(plot_kwargs)
@@ -84,10 +78,6 @@ class CurvesTabWidgetPresenter:
         self.set_new_curve_name_in_dict_and_list(curve, view_props.label)
         FigureErrorsManager.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
-
-        if isinstance(ax, MantidAxes):
-            if was_waterfall:
-                ax.set_waterfall(True, x_offset, y_offset)
 
         FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
 
@@ -129,6 +119,12 @@ class CurvesTabWidgetPresenter:
         """Replot the selected curve with the given plot kwargs"""
         ax = self.get_selected_ax()
         curve = self.get_current_curve()
+
+        if isinstance(ax, MantidAxes):
+            was_waterfall = ax.is_waterfall()
+            if was_waterfall:
+                x_offset, y_offset = ax.waterfall_x_offset, ax.waterfall_y_offset
+                ax.set_waterfall(False)
 
         waterfall = False
         if isinstance(ax, MantidAxes):
@@ -182,6 +178,10 @@ class CurvesTabWidgetPresenter:
 
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
+
+        if isinstance(ax, MantidAxes):
+            if was_waterfall:
+                ax.set_waterfall(True, x_offset, y_offset)
 
     def populate_select_axes_combo_box(self):
         """
