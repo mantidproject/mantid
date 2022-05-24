@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
-from mantid.kernel import logger
-import os
 
 from isis_powder.routines import common, common_enums, sample_details
 
@@ -116,18 +114,8 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
     return ws_to_correct
 
 
-def apply_paalmanpings_absorb_and_subtract_empty(workspace, instrument, summed_empty, sample_details, run_number):
-    expected_filename = "PaalmanPingsCorrections_" + instrument.get_instrument_prefix() + str(run_number) \
-                        + "_" + instrument._get_input_batching_mode() + ".nxs"
-    save_directory = instrument._inst_settings.output_dir
-    force_recalculate_paalman_pings = instrument._inst_settings.force_recalculate_paalman_pings
-    corrections_file_found = False
-    try:
-        if expected_filename in os.listdir(save_directory):
-            corrections_file_found = True
-    except FileNotFoundError:
-        pass
-
+def apply_paalmanpings_absorb_and_subtract_empty(workspace, summed_empty, sample_details,
+                                                 paalman_pings_events_per_point=None):
     container_geometry = sample_details.generate_container_geometry()
     container_material = sample_details.generate_container_material()
     if container_geometry and container_material:
@@ -139,24 +127,14 @@ def apply_paalmanpings_absorb_and_subtract_empty(workspace, instrument, summed_e
         mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
                          Material=sample_details.generate_sample_material())
 
-    if force_recalculate_paalman_pings or not corrections_file_found:
-        events_per_point_string = instrument._inst_settings.paalman_pings_events_per_point
-        if events_per_point_string:
-            events_per_point = int(events_per_point_string)
-        else:
-            events_per_point = 1000
-        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
-                                                              EventsPerPoint=events_per_point)
-        mantid.SaveNexus(corrections, os.path.join(save_directory, expected_filename))
+    if paalman_pings_events_per_point:
+        events_per_point = int(paalman_pings_events_per_point)
     else:
-        expected_path = os.path.join(save_directory, expected_filename)
-        logger.warning(f'Loading pre-calculated corrections file found at {expected_path} \n'
-                       f' To recalculate with new sample + container values,'
-                       f' set "force_recalculate_paalman_pings = True" in the config file.')
-        corrections = mantid.LoadNexus(expected_path)
-        corrections = corrections.OutputWorkspace
-
+        events_per_point = 1000
+    corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
+                                                          EventsPerPoint=events_per_point)
     workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
                                                    CorrectionsWorkspace=corrections,
                                                    CanWorkspace=summed_empty)
+
     return workspace

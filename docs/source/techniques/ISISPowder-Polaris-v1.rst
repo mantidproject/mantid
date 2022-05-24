@@ -113,6 +113,8 @@ The following parameters may also be optionally set:
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
 - :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
+- :ref:`absorb_method_isis-powder-diffraction-ref`
+- :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref`
 
 
 Example
@@ -272,6 +274,20 @@ Parameters
 -----------
 The following parameters for POLARIS are intended for regular use
 when using the ISIS Powder scripts.
+
+.. _absorb_method_isis-powder-diffraction-ref:
+
+absorb_method
+^^^^^^^^^^^^^
+Sets the absorption method used in the :ref:`focus_polaris_isis-powder-diffraction-ref` method. This parameter
+is optional and can be set to either ``"Mayers"`` (default) or ``"PaalmanPings"``. In ``"PaalmanPings"`` mode
+the :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref` parameter can be utilised.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(absorb_method="PaalmanPings", ...)
 
 .. _calibration_directory_polaris_isis-powder-diffraction-ref:
 
@@ -508,6 +524,21 @@ Example Input:
 ..  code-block:: python
 
   polaris_example = Polaris(output_directory=r"C:\path\to\output_dir", ...)
+
+.. _paalman_pings_events_per_point_isis-powder-diffraction-ref:
+
+paalman_pings_events_per_point
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sets the number of EventsPerPoint to use in the
+:ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`. The default value is 1000.
+This parameter is only used when :ref:`absorb_method_isis-powder-diffraction-ref` is set to ``"PaalmanPings"``.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(paalman_pings_events_per_point=10, ...)
 
 .. _run_number_polaris_isis_powder-diffraction-ref:
 

@@ -67,7 +67,9 @@ class AbstractInst(object):
                run_number_string,
                do_van_normalisation,
                do_absorb_corrections,
-               sample_details=None):
+               sample_details=None,
+               absorb_method="Mayers",
+               paalman_pings_events_per_point=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -79,7 +81,9 @@ class AbstractInst(object):
                            perform_vanadium_norm=do_van_normalisation,
                            instrument=self,
                            absorb=do_absorb_corrections,
-                           sample_details=sample_details)
+                           sample_details=sample_details,
+                           absorb_method=absorb_method,
+                           paalman_pings_events_per_point=paalman_pings_events_per_point)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -141,7 +145,8 @@ class AbstractInst(object):
         raise NotImplementedError(
             "apply_absorb_corrections Not implemented for this instrument yet")
 
-    def apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details, run_number):
+    def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details,
+                                                      paalman_pings_events_per_point=None):
         """
                 Generates absorption corrections to compensate for the container.
                 :param workspace: the workspace to correct
