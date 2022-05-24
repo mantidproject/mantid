@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mock import call
+from unittest.mock import call
 
 from unittest import mock
 from sans.common.enums import (OutputMode, RowState)
