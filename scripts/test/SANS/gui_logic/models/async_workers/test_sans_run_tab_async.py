@@ -75,6 +75,34 @@ class SansRunTabAsyncTest(unittest.TestCase):
             self.assertEqual(RowState.ERROR, row.state)
             self.assertEqual("failure", row.tool_tip)
 
+    def test_that_process_states_emits_row_failed_information_when_get_states_returns_error(self):
+        get_states_mock = mock.MagicMock()
+        states = {}
+        errors = {row[0]: "error message" for row in self._mock_rows}
+        get_states_mock.return_value = states, errors
+
+        self.async_worker.process_states_on_thread(row_index_pairs=self._mock_rows,
+                                                   get_states_func=get_states_mock,
+                                                   use_optimizations=False, output_mode=OutputMode.BOTH,
+                                                   plot_results=False, output_graph='')
+
+        for row, _ in self._mock_rows:
+            self.assertEqual(RowState.ERROR, row.state)
+            self.assertEqual("error message", row.tool_tip)
+
+    def test_that_process_states_emits_row_failed_information_when_get_states_throws(self):
+        get_states_mock = mock.MagicMock()
+        get_states_mock.side_effect = Exception('failure')
+
+        self.async_worker.process_states_on_thread(row_index_pairs=self._mock_rows,
+                                                   get_states_func=get_states_mock,
+                                                   use_optimizations=False, output_mode=OutputMode.BOTH,
+                                                   plot_results=False, output_graph='')
+
+        for row, _ in self._mock_rows:
+            self.assertEqual(RowState.ERROR, row.state)
+            self.assertEqual("failure", row.tool_tip)
+
     @mock.patch('sans.gui_logic.models.async_workers.sans_run_tab_async.load_workspaces_from_states')
     def test_that_load_workspaces_sets_row_to_processed(self, mocked_loader):
         states = {0: mock.MagicMock()}
