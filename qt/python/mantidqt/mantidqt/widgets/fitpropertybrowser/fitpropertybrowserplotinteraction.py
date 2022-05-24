@@ -269,7 +269,7 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         try:
             out_ws = self.evaluate_function(workspace_name, function, output_workspace_name)
-        except RuntimeError:
+        except (ValueError, RuntimeError):
             return
 
         ax = self.get_axes()

@@ -114,6 +114,16 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.browser_plot_interaction.evaluate_function.assert_called_once_with(workspace_name, FUNCTION_2,
                                                                                 prefix + '.' + FUNCTION_2.name())
 
+    def test_plot_current_guess_handles_invalid_function(self):
+        workspace_name = "test_workspace"
+        prefix = 'f1'
+        self.setup_mock_fit_browser(self.create_workspace2D, workspace_name, FUNCTION_2, prefix)
+        self.browser_plot_interaction.evaluate_function = Mock()
+        self.browser_plot_interaction.evaluate_function.side_effect = ValueError()
+
+        self.browser_plot_interaction.plot_current_guess()
+        self.axes.plot.assert_not_called()
+
     def test_plot_current_guess_correctly_calls_plot(self):
         workspace_name = "test_workspace"
         prefix = 'f1'
