@@ -66,20 +66,20 @@ Bug Fixes
 Deprecated
 ##########
 
-- :ref:`AbortRemoteJob	 <algm-AbortRemoteJob>` is deprecated in favour of v2.
-- :ref:`Authenticate	 <algm-Authenticate>`  is deprecated in favour of v2.
+- ``AbortRemoteJob`` is deprecated in favour of v2.
+- ``Authenticate``  is deprecated in favour of v2.
 - :ref:`CentroidPeaksMD	 <algm-CentroidPeaksMD>`  is deprecated in favour of v2.
 - :ref:`ConvertEmptyToTof	 <algm-ConvertEmptyToTof>`.
 - :ref:`ConvertUnitsUsingDetectorTable	 <algm-ConvertUnitsUsingDetectorTable>`.
-- :ref:`DownloadRemoteFile	 <algm-DownloadRemoteFile>` is deprecated in favour of v2.
+- ``DownloadRemoteFile`` is deprecated in favour of v2.
 - :ref:`FFTSmooth	 <algm-FFTSmooth>` is deprecated in favour of v2.
 - OneStepMDEW.
-- :ref:`QueryAllRemoteJobs	 <algm-QueryAllRemoteJobs>` is deprecated in favour of v2.
+- ``QueryAllRemoteJobs`` is deprecated in favour of v2.
 - :ref:`RefinePowderInstrumentParameters	 <algm-RefinePowderInstrumentParameters>` is deprecated in favour of v2.
-- :ref:`StartRemoteTransaction	 <algm-StartRemoteTransaction>` is deprecated in favour of v2.
+- ``StartRemoteTransaction`` is deprecated in favour of v2.
 - :ref:`LoadILLAscii	 <algm-LoadILLDiffraction>`.
-- :ref:`StopRemoteTransaction	 <algm-StopRemoteTransaction>` is deprecated in favour of v2.
-- :ref:`SubmitRemoteJob	 <algm-SubmitRemoteJob>` is deprecated in favour of v2.
+- ``StopRemoteTransaction`` is deprecated in favour of v2.
+- ``SubmitRemoteJob`` is deprecated in favour of v2.
 - :ref:`Transpose3D	 <algm-Transpose3D>` is deprecated in favour :ref:`TransposeMD <algm-TransposeMD>`.
 - The Python function `IMDDimension.getName()` has been deprecated in favour of `IMDDimension.name`.
 - The duplicate Python function `Workspace.getName()` has been deprecated in favour of `Workspace.name()`.
