@@ -21,7 +21,6 @@ using API::Progress;
 using API::WorkspaceFactory;
 using API::WorkspaceProperty;
 using DataObjects::RebinnedOutput;
-using DataObjects::RebinnedOutput_const_sptr;
 using DataObjects::RebinnedOutput_sptr;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
@@ -67,9 +66,8 @@ void XDataConverter::exec() {
     outputWS->replaceAxis(1, std::unique_ptr<API::Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
   bool isRebinnedWorkspace = inputWS->id() == "RebinnedOutput";
-  RebinnedOutput_const_sptr inRB = std::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   RebinnedOutput_sptr outRB = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
-  // Force fractions to unity
+  // Force fractions to unity (converting from histo to point discards bin info).
   MantidVecPtr outF;
   outF.access().resize(inputWS->getNumberBins(0), 1.0);
 
