@@ -172,11 +172,7 @@ class AxisEditor(PropertiesEditorBase):
             self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
 
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
-
-        if LooseVersion(matplotlib_version) < LooseVersion("3.3.1"):
-            self.nonposkw = 'nonpos' + axis_id
-        else:
-            self.nonposkw = 'nonpositive'
+        self.nonposkw = 'nonpos' + axis_id if LooseVersion(matplotlib_version) < LooseVersion("3.3.1") else 'nonpositive'
 
         # Store the axis for attributes that can't be directly accessed
         # from axes object (e.g. grid and tick parameters).
