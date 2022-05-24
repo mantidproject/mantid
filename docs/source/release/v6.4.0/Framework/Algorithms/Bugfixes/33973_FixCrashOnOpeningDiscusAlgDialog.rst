@@ -1,0 +1,1 @@
+- fix crash when opening the algorithm dialog for :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` if a group workspace is present in the Analysis Data Service
