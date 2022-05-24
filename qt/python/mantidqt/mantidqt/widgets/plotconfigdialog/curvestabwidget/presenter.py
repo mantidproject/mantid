@@ -69,6 +69,13 @@ class CurvesTabWidgetPresenter:
         view_props = self.get_view_properties()
         if view_props == self.current_view_properties:
             return
+
+        if isinstance(ax, MantidAxes):
+            was_waterfall = ax.is_waterfall()
+            if was_waterfall:
+                x_offset, y_offset = ax.waterfall_x_offset, ax.waterfall_y_offset
+                ax.set_waterfall(False)
+
         plot_kwargs = view_props.get_plot_kwargs()
         # Re-plot curve
         self._replot_current_curve(plot_kwargs)
@@ -77,6 +84,10 @@ class CurvesTabWidgetPresenter:
         self.set_new_curve_name_in_dict_and_list(curve, view_props.label)
         FigureErrorsManager.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
+
+        if isinstance(ax, MantidAxes):
+            if was_waterfall:
+                ax.set_waterfall(True, x_offset, y_offset)
 
         FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
 
@@ -151,11 +162,6 @@ class CurvesTabWidgetPresenter:
             errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
         else:
             errorbar_cap_lines = []
-
-        # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
-        # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
-        # also just makes sense for the curve order to remain unchanged.
-        ax.lines.insert(curve_index, ax.lines.pop())
 
         if waterfall:
             # Set the waterfall offsets to what they were previously.
