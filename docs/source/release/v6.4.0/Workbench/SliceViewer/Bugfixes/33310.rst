@@ -1,0 +1,1 @@
+- Using the Region of Interest tool when the colorscale is set to Power will no longer cause a position related error.

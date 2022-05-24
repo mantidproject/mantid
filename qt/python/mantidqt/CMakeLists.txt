@@ -109,6 +109,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/codeeditor/test/test_scriptcompatibility.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
+    mantidqt/widgets/colorbar/test/test_colorbar.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
