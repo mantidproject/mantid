@@ -1001,11 +1001,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     for (size_t i = 0; i < numRows(); i++) {
       for (size_t j = 0; j < numCols(); j++) {
         long double lambda;
-        long double iMinusj;
-        if (i > j)
-          iMinusj = static_cast<long double>(i - j);
-        else
-          iMinusj = static_cast<long double>(j - i);
+        auto iMinusj = std::abs(static_cast<long double>(i) - static_cast<long double>(j));
         auto iPlusj = static_cast<long double>(i + j);
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(std::pow(-1.0, iPlusj));
