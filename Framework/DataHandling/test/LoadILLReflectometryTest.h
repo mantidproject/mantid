@@ -311,7 +311,7 @@ public:
     const double centre = run.getPropertyValueAsType<double>("reduction.line_position");
     TS_ASSERT_DELTA(centre, 62.589, 0.001);
     const double centreAngle =
-        spectrumInfo.twoTheta(62) + 0.589 * (spectrumInfo.twoTheta(63) - spectrumInfo.twoTheta(63));
+        spectrumInfo.twoTheta(62) + 0.589 * (spectrumInfo.twoTheta(63) - spectrumInfo.twoTheta(62));
     TS_ASSERT_DELTA(centreAngle * 180 / M_PI, 0., 0.1);
   }
 
