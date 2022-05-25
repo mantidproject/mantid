@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::Geometry;
@@ -18,6 +19,12 @@ using namespace boost::python;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 
 GET_POINTER_SPECIALIZATION(Instrument)
+
+namespace {
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Instrument_getNumberDetectors, Instrument::getNumberDetectors, 0, 1)
+
+} // namespace
 
 void export_Instrument() {
   register_ptr_to_python<std::shared_ptr<Instrument>>();
@@ -39,6 +46,9 @@ void export_Instrument() {
       .def("getDetector",
            (std::shared_ptr<const IDetector>(Instrument::*)(const detid_t &) const) & Instrument::getDetector,
            (arg("self"), arg("detector_id")), "Returns the :class:`~mantid.geometry.Detector` with the given ID")
+
+      .def("getNumberDetectors", &Instrument::getNumberDetectors,
+           Instrument_getNumberDetectors((arg("self"), arg("skipMonitors") = false)))
 
       .def("getReferenceFrame",
            (std::shared_ptr<const ReferenceFrame>(Instrument::*)()) & Instrument::getReferenceFrame, arg("self"),
