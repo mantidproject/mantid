@@ -9,12 +9,15 @@
 #
 
 # 3rdparty imports
+from distutils.version import LooseVersion
+
 from mantid.plots.datafunctions import update_colorbar_scale, get_images_from_figure
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.ticker import ScalarFormatter, LogFormatterSciNotation
+from matplotlib import __version__ as matplotlib_version
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
@@ -169,7 +172,8 @@ class AxisEditor(PropertiesEditorBase):
             self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
 
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
-        self.nonposkw = 'nonpos' + axis_id
+        self.nonposkw = 'nonpos' + axis_id if LooseVersion(matplotlib_version) < LooseVersion("3.3.1") else 'nonpositive'
+
         # Store the axis for attributes that can't be directly accessed
         # from axes object (e.g. grid and tick parameters).
         self.axis = getattr(axes, '{}axis'.format(axis_id))
