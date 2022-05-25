@@ -1235,11 +1235,12 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
                                             const double kinc, const std::vector<double> &wValues,
                                             const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
-  double numberDensity = m_sampleShape->material().numberDensityEffective();
 
   auto track = start_point(rng);
-  auto materialWithScatter = updateWeightAndPosition(track, weight, kinc, rng, specialSingleScatterCalc);
-  auto [sigma_total, scatteringXSection] = new_vector(materialWithScatter, kinc, specialSingleScatterCalc);
+  auto shapeObjectWithScatter = updateWeightAndPosition(track, weight, kinc, rng, specialSingleScatterCalc);
+  double scatteringXSection;
+  std::tie(std::ignore, scatteringXSection) =
+      new_vector(shapeObjectWithScatter->material(), kinc, specialSingleScatterCalc);
 
   auto currentMaterialWorkspaces = materialWorkspaces;
   double k = kinc;
@@ -1253,8 +1254,8 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
         currentMaterialWorkspaces = newMaterialWorkspaces;
       }
     }
-    auto trackStillAlive =
-        q_dir(track, materialWithScatter.name(), currentMaterialWorkspaces, k, scatteringXSection, rng, weight);
+    auto trackStillAlive = q_dir(track, shapeObjectWithScatter->material().name(), currentMaterialWorkspaces, k,
+                                 scatteringXSection, rng, weight);
     if (!trackStillAlive)
       return {true, std::vector<double>(wValues.size(), 0.)};
     int nlinks = m_sampleShape->interceptSurface(track);
@@ -1266,8 +1267,9 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
     if (nlinks == 0) {
       return {false, {0.}};
     }
-    materialWithScatter = updateWeightAndPosition(track, weight, k, rng, specialSingleScatterCalc);
-    auto [sigma_total, scatteringXSection] = new_vector(materialWithScatter, k, specialSingleScatterCalc);
+    shapeObjectWithScatter = updateWeightAndPosition(track, weight, k, rng, specialSingleScatterCalc);
+    std::tie(std::ignore, scatteringXSection) =
+        new_vector(shapeObjectWithScatter->material(), k, specialSingleScatterCalc);
   }
 
   Kernel::V3D directionToDetector = detPos - track.startPoint();
@@ -1287,8 +1289,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
     return {false, {0.}};
   }
   std::vector<double> weights;
-  const double dl = track.front().distInsideObject;
-  auto scatteringXSectionFull = m_sampleShape->material().totalScatterXSection();
+  auto scatteringXSectionFull = shapeObjectWithScatter->material().totalScatterXSection();
   // Step through required overall energy transfer (w) values and work out what
   // w that means for the final scatter. There will be a single w value for elastic
   // Slightly different approach to original DISCUS code. It stepped through the w values
@@ -1304,15 +1305,22 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
       const double q = qVector.norm();
       const double finalW = fromWaveVector(k) - finalE;
       auto SQWSIt =
-          std::find_if(m_SQWSs.begin(), m_SQWSs.end(), [materialWithScatter](const MaterialWorkspaceMapping &SQWS) {
-            return SQWS.materialName == materialWithScatter.name();
+          std::find_if(m_SQWSs.begin(), m_SQWSs.end(), [shapeObjectWithScatter](const MaterialWorkspaceMapping &SQWS) {
+            return SQWS.materialName == shapeObjectWithScatter->material().name();
           });
       double SQ = Interpolate2D(SQWSIt->SQ, finalW, q);
-      auto [sigma_total, scatteringXSection] = new_vector(m_sampleShape->material(), kout, specialSingleScatterCalc);
-      double vmu = 100 * numberDensity * sigma_total;
-      if (specialSingleScatterCalc)
-        vmu = 0;
-      const auto AT2 = exp(-dl * vmu);
+      double AT2 = 1;
+      for (auto it = track.cbegin(); it != track.cend(); it++) {
+        double sigma_total;
+        auto &materialPassingThrough = it->object->material();
+        std::tie(sigma_total, std::ignore) = new_vector(materialPassingThrough, kout, specialSingleScatterCalc);
+        double numberDensity = materialPassingThrough.numberDensityEffective();
+        double vmu = 100 * numberDensity * sigma_total;
+        if (specialSingleScatterCalc)
+          vmu = 0;
+        const double dl = it->distInsideObject;
+        AT2 *= exp(-dl * vmu);
+      }
       weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
     } else {
       weights.emplace_back(0.);
@@ -1513,33 +1521,32 @@ Geometry::Track DiscusMultipleScatteringCorrection::start_point(Kernel::PseudoRa
  * @param weight The weight for the current path that is about to be updated
  * @param k The wavevector of the track
  * @param rng Random number generator
- * @param specialSingleScatterCalc Boolean indicating whether special single
- * scatter calculation should be performed
- * @return the scattering cross section of the component where the scatter occurs - for use later on
+ * @param specialSingleScatterCalc Boolean indicating whether special single scatter calculation should be performed
+ * @return the shape object for the component where the scatter occurred
  */
 
-Kernel::Material DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track &track, double &weight,
-                                                                             const double k,
-                                                                             Kernel::PseudoRandomNumberGenerator &rng,
-                                                                             bool specialSingleScatterCalc) {
-  // work out maximum distance to next scatter point dl
+const Geometry::IObject *
+DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
+                                                            Kernel::PseudoRandomNumberGenerator &rng,
+                                                            bool specialSingleScatterCalc) {
+  // Work out maximum distance to next scatter point dl
   // At the moment this doesn't cope if sample shape is concave eg if track has more than one segment inside the
   // sample with segment outside sample in between
   double totalMuL = 0.;
-  std::vector<double> muLs, vmus, scatterXs;
-  std::vector<Kernel::Material> compMaterials;
+  auto nlinks = track.count();
+  // Ideally want vector of ptrs to materials but Material class doesn't expose the pointer so use IObject ptr
+  // Set default size to 5 (same as in LineIntersectVisit.h)
+  boost::container::small_vector<std::tuple<const Geometry::IObject *, double, double>, 5> geometryObjects;
+  geometryObjects.reserve(nlinks);
   double newWeight = 0.;
   for (auto it = track.cbegin(); it != track.cend(); it++) {
     const double trackSegLength = it->distInsideObject;
-    const auto &segObj = *(it->object);
-    auto [sigma_total, scatteringXSection] = new_vector(segObj.material(), k, specialSingleScatterCalc);
-    scatterXs.push_back(scatteringXSection);
-    double vmu = 100 * segObj.material().numberDensityEffective() * sigma_total;
-    vmus.push_back(vmu);
+    const auto geometryObj = it->object;
+    auto [sigma_total, scatteringXSection] = new_vector(geometryObj->material(), k, specialSingleScatterCalc);
+    double vmu = 100 * geometryObj->material().numberDensityEffective() * sigma_total;
     double muL = trackSegLength * vmu;
-    muLs.push_back(muL);
     totalMuL += muL;
-    compMaterials.push_back(segObj.material());
+    geometryObjects.push_back(std::make_tuple(geometryObj, vmu, muL));
     double b4 = (1.0 - exp(-muL));
     newWeight += b4 / sigma_total;
   }
@@ -1550,21 +1557,22 @@ Kernel::Material DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geo
   double muL = -log(1 - rng.nextValue() * b4Overall);
   double vl = 0.;
   double scatterXsection = 0.;
-  Kernel::Material materialWithScatter;
-  for (size_t i = 0; i < muLs.size(); i++) {
-    if (muL - muLs[i] > 0) {
-      vl += muLs[i] / vmus[i];
-      muL = muL - muLs[i];
+  std::tuple<const Geometry::IObject *, double, double> geometryObject;
+  for (size_t i = 0; i < geometryObjects.size(); i++) {
+    geometryObject = geometryObjects[i];
+    auto muL_i = std::get<2>(geometryObject);
+    auto vmu_i = std::get<1>(geometryObject);
+    if (muL - muL_i > 0) {
+      vl += muL_i / vmu_i;
+      muL = muL - muL_i;
     } else {
-      scatterXsection = scatterXs[i];
-      materialWithScatter = compMaterials[i];
-      vl += muL / vmus[i];
+      vl += muL / vmu_i;
       break;
     }
   }
-  assert(scatterXsection > 0.);
+  // Note - this clears the track intersections but the sample\environment shapes live on
   inc_xyz(track, vl);
-  return materialWithScatter;
+  return std::get<0>(geometryObject);
 }
 
 /**

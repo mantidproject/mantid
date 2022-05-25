@@ -91,8 +91,9 @@ private:
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
-  Kernel::Material updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
-                                           Kernel::PseudoRandomNumberGenerator &rng, bool specialSingleScatterCalc);
+  const Geometry::IObject *updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
+                                                   Kernel::PseudoRandomNumberGenerator &rng,
+                                                   bool specialSingleScatterCalc);
   bool q_dir(Geometry::Track &track, const std::string &materialName,
              const std::vector<MaterialWorkspaceMapping> &invPOfQs, double &k, const double scatteringXSection,
              Kernel::PseudoRandomNumberGenerator &rng, double &weight);
