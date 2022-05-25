@@ -1006,7 +1006,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           iMinusj = static_cast<long double>(i - j);
         else
           iMinusj = static_cast<long double>(j - i);
-        long double iPlusj = static_cast<long double>(i + j);
+        auto iPlusj = static_cast<long double>(i + j);
         if (D >= 2) {
           m_rawData[i][j] = static_cast<T>(std::pow(-1.0, iPlusj));
           lambda = std::acosh(D / 2.0);
