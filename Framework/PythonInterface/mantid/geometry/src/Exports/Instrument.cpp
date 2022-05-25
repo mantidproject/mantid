@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/RemoveConst.h"
 
@@ -22,7 +23,13 @@ GET_POINTER_SPECIALIZATION(Instrument)
 
 namespace {
 
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Instrument_getNumberDetectors, Instrument::getNumberDetectors, 0, 1)
+
+GNU_DIAG_ON("conversion")
 
 } // namespace
 
