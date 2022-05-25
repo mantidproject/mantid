@@ -133,15 +133,7 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
 
   // Update property map when a range selector is moved
-  connect(calPeak, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-  connect(calPeak, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-  connect(calBackground, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-  connect(calBackground, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-  connect(resPeak, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-  connect(resPeak, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-  connect(resBackground, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
-  connect(resBackground, SIGNAL(maxValueChanged(double)), this, SLOT(calMaxChanged(double)));
-
+  connectRangeSelectors();
   // Update range selector positions when a value in the double manager changes
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(calUpdateRS(QtProperty *, double)));
   // Plot miniplots after a file has loaded
@@ -173,6 +165,44 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
 ISISCalibration::~ISISCalibration() {
   m_propTrees["CalPropTree"]->unsetFactoryForManager(m_dblManager);
   m_propTrees["ResPropTree"]->unsetFactoryForManager(m_dblManager);
+}
+
+void ISISCalibration::connectRangeSelectors() {
+  connect(m_uiForm.ppCalibration->getRangeSelector("CalPeak"), SIGNAL(minValueChanged(double)), this,
+          SLOT(calMinChanged(double)));
+  connect(m_uiForm.ppCalibration->getRangeSelector("CalPeak"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(calMaxChanged(double)));
+  connect(m_uiForm.ppCalibration->getRangeSelector("CalBackground"), SIGNAL(minValueChanged(double)), this,
+          SLOT(calMinChanged(double)));
+  connect(m_uiForm.ppCalibration->getRangeSelector("CalBackground"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(calMaxChanged(double)));
+  connect(m_uiForm.ppResolution->getRangeSelector("ResPeak"), SIGNAL(minValueChanged(double)), this,
+          SLOT(calMinChanged(double)));
+  connect(m_uiForm.ppResolution->getRangeSelector("ResPeak"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(calMaxChanged(double)));
+  connect(m_uiForm.ppResolution->getRangeSelector("ResBackground"), SIGNAL(minValueChanged(double)), this,
+          SLOT(calMinChanged(double)));
+  connect(m_uiForm.ppResolution->getRangeSelector("ResBackground"), SIGNAL(maxValueChanged(double)), this,
+          SLOT(calMaxChanged(double)));
+}
+
+void ISISCalibration::disconnectRangeSelectors() {
+  disconnect(m_uiForm.ppCalibration->getRangeSelector("CalPeak"), SIGNAL(minValueChanged(double)), this,
+             SLOT(calMinChanged(double)));
+  disconnect(m_uiForm.ppCalibration->getRangeSelector("CalPeak"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(calMaxChanged(double)));
+  disconnect(m_uiForm.ppCalibration->getRangeSelector("CalBackground"), SIGNAL(minValueChanged(double)), this,
+             SLOT(calMinChanged(double)));
+  disconnect(m_uiForm.ppCalibration->getRangeSelector("CalBackground"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(calMaxChanged(double)));
+  disconnect(m_uiForm.ppResolution->getRangeSelector("ResPeak"), SIGNAL(minValueChanged(double)), this,
+             SLOT(calMinChanged(double)));
+  disconnect(m_uiForm.ppResolution->getRangeSelector("ResPeak"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(calMaxChanged(double)));
+  disconnect(m_uiForm.ppResolution->getRangeSelector("ResBackground"), SIGNAL(minValueChanged(double)), this,
+             SLOT(calMinChanged(double)));
+  disconnect(m_uiForm.ppResolution->getRangeSelector("ResBackground"), SIGNAL(maxValueChanged(double)), this,
+             SLOT(calMaxChanged(double)));
 }
 
 std::pair<double, double> ISISCalibration::peakRange() const {
@@ -377,6 +407,9 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
   const auto input =
       std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
   const auto &dataX = input->x(0);
+
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(calUpdateRS(QtProperty *, double)));
+  disconnectRangeSelectors();
   if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
       dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
     setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
@@ -391,6 +424,8 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
   if (!hasResolution)
     m_uiForm.ckCreateResolution->setChecked(false);
 
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(calUpdateRS(QtProperty *, double)));
+  connectRangeSelectors();
   // plot energy to correctly set the res plot
   calPlotEnergy();
 }
