@@ -16,7 +16,7 @@ New Features
 
 - The :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been improved.
 
-  - The algorithm now supports inelastic instruments (direct and indirect). Note that this improvement has involved several breaking changes:
+  - The algorithm now supports inelastic instruments (direct and indirect). **Please Note:** This improvement has involved several breaking changes:
 
     - The parameter ``SofqWorkspace`` has been renamed to ``StructureFactorWorkspace``.
     - The parameter ``NumberOfWavelengthPoints`` has been renamed ``NumberOfSimulationPoints``.
