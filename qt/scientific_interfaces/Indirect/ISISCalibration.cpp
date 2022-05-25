@@ -620,8 +620,7 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
   auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
   auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(calUpdateRS(QtProperty *, double)));
-
+  disconnectRangeSelectors();
   if (prop == m_properties["CalPeakMin"]) {
     setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalPeakMax"], calPeak, val);
   } else if (prop == m_properties["CalPeakMax"]) {
@@ -639,8 +638,7 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
   } else if (prop == m_properties["ResEHigh"]) {
     setRangeSelectorMax(m_properties["ResELow"], m_properties["ResEHigh"], resPeak, val);
   }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(calUpdateRS(QtProperty *, double)));
+  connectRangeSelectors();
 }
 
 /**
