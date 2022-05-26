@@ -339,6 +339,20 @@ public:
     }
   }
 
+  void test_workspace_containing_spectra_without_detectors() {
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+    inputWorkspace->getSpectrum(0).clearDetectorIDs();
+    auto alg = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+  }
+
   void test_interpolateGaussian() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const int NBINS = 10;
