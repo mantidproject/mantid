@@ -68,14 +68,14 @@ Fit Functions
 New Features
 ############
 
-- An :ref:`AsymmetricPearsonVII  <func-AsymmetricPearsonVII>` fit function has been implemented in order to improve description of the peaks that have an asymmetric shape.
+- An :ref:`AsymmetricPearsonVII  <func-AsymmetricPearsonVII>` fit function has been implemented in order to improve the description of peaks that have an asymmetric shape.
 
 - Functions have been extended to allow for Function Attribute Validators. This feature further extends to the ``FitPropertyBrowser``.
   This allows the value of attributes to be restricted in numerous ways, using validators already available in the Mantid Kernel. Examples of validation include (but are not limited to):
 
-  - A numeric value being bound by a numeric min/max.
-  - A string value having to be be selected from a list of possible values.
-  - A string value being required to contain specific sub-strings.
+  - A numeric value that is bound by a numeric min/max.
+  - A string value that must be one of a list of possible values.
+  - A string value that is required to contain specific sub-strings.
 
 
 Bugfixes
