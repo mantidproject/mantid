@@ -38,6 +38,10 @@ class InstrumentTest(unittest.TestCase):
         comp = self.__testws.getInstrument().getDetector(1)
         self.assertTrue(isinstance(comp, Detector))
 
+    def test_getNumberDetectors(self):
+        num_detectors = self.__testws.getInstrument().getNumberDetectors()
+        self.assertEqual(num_detectors, 1)
+
     def test_getReferenceFrame(self):
         frame = self.__testws.getInstrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))
