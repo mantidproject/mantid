@@ -94,8 +94,8 @@ class GuiStateDirector(object):
             # Has a custom user file so ignore any settings from GUI
             user_file_path = FileFinder.getFullPath(row_user_file)
             if not os.path.exists(user_file_path):
-                raise ValueError(f"The user path {user_file_path}\n"
-                                 " does not exist. Make sure a valid user file has been specified.")
+                raise ValueError(f"The user file '{row_user_file}'"
+                                 " cannot be found. Make sure a valid user file has been specified.")
             state = FileLoading.load_user_file(user_file_path, file_information=file_information)
             gui_state = StateGuiModel(state)
         else:
