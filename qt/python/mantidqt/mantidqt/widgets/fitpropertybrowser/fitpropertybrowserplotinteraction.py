@@ -232,7 +232,8 @@ class FitPropertyBrowserPlotInteraction(QObject):
             pass
 
         line = self._plot_guess_workspace(ws_name, fun, out_ws_name, color=color)
-        self.guess_all_line = line
+        if line is not None:
+            self.guess_all_line = line
 
     def update_legend(self):
         """
