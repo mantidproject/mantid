@@ -1,0 +1,1 @@
+- `getNumberDetectors` from the Instrument class is now exposed to the Python API
