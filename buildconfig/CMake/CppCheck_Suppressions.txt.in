@@ -523,8 +523,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/UserInputValidator.cpp
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Batch/JobTreeView.cpp:434
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1142
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1546
-redundantInitialization:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:585
-shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:340
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:276
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:114
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/Mpl/ContourPreviewPlot.cpp:83
@@ -532,10 +530,10 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/Mpl/PreviewPlot.cpp:6
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankRenderingHelpers.cpp:172
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ObserverPattern.h:65
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:186
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1638
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1671
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1597
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1630
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:248
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:244
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadDialog.cpp:137
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:201
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:178
@@ -550,9 +548,8 @@ unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:292
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:321
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/PlotAsymmetryByLogValueDialog.cpp:160
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:608
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:610
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:697
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:599
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:115
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:343
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:168
