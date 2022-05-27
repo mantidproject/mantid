@@ -64,6 +64,7 @@ protected:
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, const double xmin, const double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY);
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
+  void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
 
 private:
   void init() override;
@@ -92,7 +93,6 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   API::MatrixWorkspace_sptr createInvPOfQ(size_t expectedSize);
   void prepareCumulativeProbForQ(double kinc, const API::MatrixWorkspace_sptr &PInvOfQ);
-  void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   API::MatrixWorkspace_uptr prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
   std::tuple<double, int> sampleKW(const std::vector<double> &wValues, Kernel::PseudoRandomNumberGenerator &rng,

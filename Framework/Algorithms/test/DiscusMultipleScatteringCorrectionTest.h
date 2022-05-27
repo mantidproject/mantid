@@ -43,6 +43,9 @@ public:
                            std::vector<double> &resultX, std::vector<double> &resultY) {
     DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
   }
+  void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) {
+    DiscusMultipleScatteringCorrection::getXMinMax(ws, xmin, xmax);
+  }
 };
 
 class DiscusMultipleScatteringCorrectionTest : public CxxTest::TestSuite {
@@ -666,6 +669,21 @@ public:
   void test_indirect_on_realistic_structure_factor_with_deltaE_interpolation() {
     // only run simulation on half of the deltaE bins (even indices) and interpolate the rest (odd indices)
     run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00023, 0.00021);
+  }
+
+  void test_getxminmax() {
+    const double x0 = 0.5;
+    const double deltax = 1.0;
+    const int nbins = 3;
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(1, 2, 1.0, nbins, x0, deltax);
+    double xmin, xmax;
+    DiscusMultipleScatteringCorrectionHelper alg;
+    alg.getXMinMax(*ws, xmin, xmax);
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 3.0);
+    for (size_t i = 0; i < ws->getNumberHistograms(); i++)
+      ws->getSpectrum(i).clearDetectorIDs();
+    TS_ASSERT_THROWS(alg.getXMinMax(*ws, xmin, xmax), const std::runtime_error &);
   }
 
   //---------------------------------------------------------------------------
