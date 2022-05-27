@@ -11,7 +11,12 @@ the Indirect scripts depending on platform and numpy package version.
 We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 from contextlib import contextmanager
-import numpy.core.setup_common as numpy_cfg
+try:
+    from numpy.core.setup_common import C_ABI_VERSION
+except (ImportError, FileNotFoundError):
+    # the import doesn't work in particular linux python environments
+    # this doesn't match with anything
+    C_ABI_VERSION = None
 import platform
 import os
 import importlib
@@ -80,7 +85,7 @@ def _numpy_abi_ver():
 
     @return The C ABI version
     """
-    return numpy_cfg.C_ABI_VERSION
+    return C_ABI_VERSION
 
 
 def unsupported_message():
