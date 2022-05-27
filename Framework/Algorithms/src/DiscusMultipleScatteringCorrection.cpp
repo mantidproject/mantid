@@ -759,8 +759,9 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
       }
       // add some extra points to help the Q.S(Q) integral get the right answer
       for (size_t i = 1; i < qValues.size(); i++) {
-        if (std::abs(SQValues[i] - SQValues[i - 1]) > std::numeric_limits<double>::epsilon()) {
-          qValues.insert(qValues.begin() + i, qValues[i] - std::numeric_limits<double>::epsilon());
+        if (std::abs(SQValues[i] - SQValues[i - 1]) >
+            std::numeric_limits<double>::epsilon() * std::min(SQValues[i - 1], SQValues[i])) {
+          qValues.insert(qValues.begin() + i, std::nextafter(qValues[i], -DBL_MAX));
           SQValues.insert(SQValues.begin() + i, SQValues[i - 1]);
           i++;
         }
@@ -888,22 +889,26 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
   for (auto &SQWSMapping : m_SQWSs) {
     auto &QSQWS = SQWSMapping.QSQ;
     std::vector<double> IOfQYFull;
-    std::vector<double> kValues, QSQIntegrals;
+    std::vector<double> kValues, finalkValues, QSQIntegrals;
     // Calculate the integral for a range of k values. Not massively important which k values but choose them here
     // based on the q points in the QS(Q) profile. For each q point calculate the integral for k=q/2
-    std::vector<double> qValues = QSQWS->histogram(0).readX();
-    std::transform(qValues.begin(), qValues.end(), std::back_inserter(kValues),
-                   [](double d) -> double { return d / 2; });
-    kValues.erase(std::remove_if(kValues.begin(), kValues.end(), [](const double x) { return x == 0; }), kValues.end());
-    for (auto k : kValues) {
-      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(QSQWS, k);
-      auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
-      double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
-      QSQIntegrals.push_back(normalisedIntegral);
+    const std::vector<double> qValues = QSQWS->histogram(0).readX();
+    double lastq = -1;
+    for (auto q : qValues) {
+      // extra points were added to make QSQ integral more accurate but don't need a separate QSQ integral at these
+      if (q > 0 && q > std::nextafter(lastq, DBL_MAX)) {
+        double k = q / 2;
+        std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(QSQWS, k);
+        auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+        double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
+        finalkValues.push_back(k);
+        QSQIntegrals.push_back(normalisedIntegral);
+      }
+      lastq = q;
     }
     auto QSQIntegral = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
                                                                   HistogramData::Histogram::YMode::Frequencies);
-    QSQIntegral->dataX() = kValues;
+    QSQIntegral->dataX() = finalkValues;
     QSQIntegral->dataY() = QSQIntegrals;
     SQWSMapping.QSQIntegral = QSQIntegral;
   }
@@ -982,8 +987,10 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     yToUse = isPoints ? 0.5 * (yValues[iRight] + yValues[iRight - 1]) : yValues[iRight - 1];
     sum += yToUse * (xValues[iRight] - xValues[iRight - 1]);
-    resultX.emplace_back(xValues[iRight]);
-    resultY.emplace_back(sum);
+    if (xValues[iRight] > std::nextafter(xValues[iRight - 1], DBL_MAX)) {
+      resultX.emplace_back(xValues[iRight]);
+      resultY.emplace_back(sum);
+    }
   }
 
   // integrate a partial final interval if xmax is between points
