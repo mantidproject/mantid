@@ -1,2 +1,1 @@
 - Workbench will no longer throw on plots with error bar caps when the offset of a waterfall plot is adjusted.
-- The fill must now be manually re-enabled after changing settings on waterfall plots. This is due to deprecated methods in new versions of matplotlib.

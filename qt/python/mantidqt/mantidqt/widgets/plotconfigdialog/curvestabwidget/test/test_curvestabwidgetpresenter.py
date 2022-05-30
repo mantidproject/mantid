@@ -15,7 +15,8 @@ from matplotlib.pyplot import figure, subplots
 from numpy import array_equal
 
 from mantid.simpleapi import CreateWorkspace
-from mantid.plots.utility import MantidAxType
+from mantid.plots import datafunctions
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 from unittest.mock import Mock, patch, call
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (
@@ -324,6 +325,46 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(presenter.view.errorbars.set_cap_thickness.call_count, 0)
         self.assertEqual(presenter.view.errorbars.set_error_every.call_count, 0)
         self.assertEqual(mock_apply_properties.call_count, 3)
+
+    def test_hiding_a_curve_on_a_waterfall_plot_also_hides_its_filled_area(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        ax.set_waterfall(True)
+        ax.set_waterfall_fill(True)
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+
+        new_plot_kwargs = {'visible': False}
+        presenter._replot_current_curve(new_plot_kwargs)
+
+        self.assertEqual(datafunctions.get_waterfall_fill_for_curve(ax, 0).get_visible(), False)
+
+    def test_changing_line_colour_on_a_waterfall_plot_with_filled_areas_changes_fill_colour_to_match(self):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_current_curve_name=lambda: "Workspace")
+
+        ax = fig.get_axes()[0]
+        ax.lines[0].set_color('#ff9900')
+        ax.lines[1].set_color('#008fff')
+        ax.lines[2].set_color('#42ff00')
+
+        # Create waterfall plot and add filled areas.
+        ax.set_waterfall(True)
+        ax.set_waterfall_fill(True)
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        # Change the colour of one of the lines.
+        new_plot_kwargs = {'color': '#ffff00'}
+        presenter._replot_current_curve(new_plot_kwargs)
+
+        # The fill for that line should be the new colour.
+        self.assertEqual(convert_color_to_hex(ax.collections[0].get_facecolor()[0]), ax.lines[0].get_color())
 
     def test_adding_errorbars_to_waterfall_plot_maintains_waterfall(self):
         fig = self.make_figure_with_multiple_curves()
