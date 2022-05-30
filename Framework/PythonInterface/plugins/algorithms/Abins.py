@@ -194,8 +194,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             partial_wrk_names = []
 
             for n in range(dim):
-                seed = "quantum_event_%s" % (n + 1)
-                wrk_name = workspace + "_" + seed
+                wrk_name = f"{workspace}_quantum_event_{n + 1}"
                 partial_wrk_names.append(wrk_name)
 
                 self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,

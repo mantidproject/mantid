@@ -1,4 +1,3 @@
-from __future__ import (absolute_import, division, print_function)
 import math
 from typing import Tuple
 
@@ -127,8 +126,6 @@ class DirectInstrument(Instrument):
 
         cos_angle = math.cos(math.radians(angle))
         return k2_i + k2_f - 2 * cos_angle * np.sqrt(k2_i * k2_f)
-
-        return result
 
     def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto'):
         """

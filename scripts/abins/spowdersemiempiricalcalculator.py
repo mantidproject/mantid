@@ -431,10 +431,6 @@ class SPowderSemiEmpiricalCalculator:
         Returns:
             SData
         """
-        # Initialize the main data container
-        # sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
-        #                               max_order=self._quantum_order_num)
-
         q2 = (self._q_bin_centres**2)[:, np.newaxis]
 
         sdata = self._calculate_s_isotropic(q2, broaden=True)
@@ -504,6 +500,7 @@ class SPowderSemiEmpiricalCalculator:
             coth = 1.
         else:
             coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * temperature * K_2_HARTREE))
+
         return np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
     def _get_empty_sdata(self, use_fine_bins: bool = False,

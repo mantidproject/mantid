@@ -197,9 +197,6 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             for order_key, order_data in correct_data[f"atom_{i}"]["s"].items():
                 correct_data[f"atom_{i}"]["s"][order_key] = np.asarray(order_data)
 
-            # correct_data[f"atom_{i}"]["s"]["order_1"] = np.asarray(
-            #     correct_data[f"atom_{i}"]["s"]["order_1"])
-
         return correct_data
 
     def _check_data(self, good_data=None, data=None):

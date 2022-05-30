@@ -192,8 +192,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
             partial_wrk_names = []
 
             for n in range(dim):
-                seed = "quantum_event_%s" % (n + 1)
-                wrk_name = workspace + "_" + seed
+                wrk_name = f"{workspace}_quantum_event_{n + 1}"
                 partial_wrk_names.append(wrk_name)
 
                 self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
@@ -229,9 +228,6 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=n_freq_bins, XLength=n_q_bins, YLength=n_q_values)
 
         freq_axis = NumericAxis.create(n_freq_bins)
-
-        # q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
-
         freq_offset = (energy_bins[1] - energy_bins[0]) / 2
         for i, freq in enumerate(energy_bins[1:]):
             wrk.setX(i, self._q_bins)
