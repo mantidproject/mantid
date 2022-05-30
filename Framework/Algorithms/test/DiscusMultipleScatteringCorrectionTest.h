@@ -658,6 +658,31 @@ public:
   // Failure cases
   //---------------------------------------------------------------------------
 
+  void test_validateInputsWithInputWorkspaceSetToGroup() {
+    // Test motivated by ensuring alg dialog opens in workbench UI in all cases
+    // Workbench calls InterfaceManager::createdialogfromname when opening algorithm dialog. This calls
+    // setPropertyValue on all inputs and if they're all OK it then calls validateInputs - this is separate to and
+    // before the call to validateInputs that happens inside alg->execute()
+    auto alg = createAlgorithm();
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
+                                                  DeltaEMode::Elastic);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWorkspace", inputWorkspace);
+    auto inputWorkspaceGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWSGroup", inputWorkspaceGroup);
+    inputWorkspaceGroup->add(inputWorkspace->getName());
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", inputWorkspaceGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NumberScatterings", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsSingle", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsMultiple", "1"));
+    std::map<std::string, std::string> errs;
+    // Note: if validateInputs causes an access violation (as opposed to throwing an exception) then
+    // TS_ASSERT_THROWS_NOTHING won't catch it
+    TS_ASSERT_THROWS_NOTHING(errs = alg->validateInputs());
+    TS_ASSERT(!errs.empty());
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
   void test_invalidSOfQ() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
