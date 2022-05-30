@@ -202,7 +202,7 @@ class SData(collections.abc.Sequence):
         Args:
             q_bins: 1-D set of q-point bin edges surrounding rows in S data
                 (e.g. for q-bins=[1., 2., 3.], S arrays will have two rows
-                 corresponding to q=1-2 Å^-1, q=2-3 Å^-1; typically these
+                 corresponding to q =1 to 2 Å^-1, q =2 to 3 Å^-1; typically these
                  are evaluated at the bin centres 1.5, 2.5 Å^-1.)
             """
         self._q_bins = q_bins
