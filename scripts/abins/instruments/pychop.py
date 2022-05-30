@@ -15,7 +15,7 @@ class PyChopInstrument(DirectInstrument):
     PyChop is used to compute energy resolution as a function of energy for
     given instrument settings.
 
-    The "tthlims" data from PyChop is used to determine sampling angles.
+    The "tthlims" (2θ limits) data from PyChop is used to determine sampling angles.
     """
     def __init__(self,
                  name: str = 'MAPS',
@@ -31,6 +31,8 @@ class PyChopInstrument(DirectInstrument):
 
         self._pychop_instrument = pychop_instruments.Instrument(
                 self._name, chopper=setting, freq=chopper_frequency)
+
+        # Get detector 2θ limits from Pychop dataset
         self._tthlims = self._pychop_instrument.detector.tthlims
 
     def _check_chopper_frequency(
