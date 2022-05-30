@@ -4,7 +4,7 @@
 Mantid 6.4.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/SliceViewer_CutViewer.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -16,7 +16,30 @@ Mantid 6.4.0 Release Notes
 
 We are proud to announce version 6.4.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Many of the updates in this version have focused on improvements for users, building on existing algorithms and interfaces.
+Our method of packaging has also changed. Windows and macOS users should not notice any difference,
+but our linux users should begin using the conda distributions (detailed :ref:`below <6.4_packaging>`).
+
+In addition to many improvements we are delighted to announce some new features including:
+
+- A new :ref:`cut viewer tool <sliceviewer_nonaxiscuts>` for non-axis aligned cuts has been added to the :ref:`SliceViewer`.
+- Workbench has been updated to be compatible with matplotlib v3.5.
+- In the :ref:`ISIS Reflectometry <interface-isis-refl>` interface, :ref:`Experiment Settings <refl_exp_instrument_settings>`
+  can now be set according to both the angle and the sample title.
+- Fit functions have been extended to allow for the addition of :ref:`Function Attribute Validators <attribute_validators>`.
+- The :ref:`ISIS SANS TOML <sans_toml_v1-ref>` format has been upgraded to V1. All V1 files will continue to be supported in future versions without changes.
+
+**<Conda Stuff: Ask martyn about this when he isn't so swamped>**
+
+.. _6.4_packaging:
+
+Packaging
+---------
+
+<Further Packaging Instructions>
+
+Further Information
+-------------------
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
