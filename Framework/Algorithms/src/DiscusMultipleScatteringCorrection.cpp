@@ -328,6 +328,8 @@ void DiscusMultipleScatteringCorrection::prepareStructureFactor() {
       newAxis->setUnit("DeltaE");
       SQWS->replaceAxis(1, std::move(newAxis));
     }
+    SQWSMapping.logSQ = SQWSMapping.SQ->clone();
+    convertToLogWorkspace(SQWSMapping.logSQ);
   }
 }
 
@@ -520,7 +522,7 @@ void DiscusMultipleScatteringCorrection::exec() {
       const auto detPos = spectrumInfo.position(i);
 
       // create copy of the SQ workspaces vector
-      std::vector<MaterialWorkspaceMapping> materialWorkspaces = m_SQWSs;
+      auto materialWorkspaces = m_SQWSs;
 
       if (m_importanceSampling)
         // prep invPOfQ outside the bin loop to avoid costly construction\destruction
@@ -537,10 +539,6 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, materialWorkspaces);
-        // if (!m_importanceSampling){
-        //  m_logSQs = m_SQWS->clone();
-        //  convertToLogWorkspace(m_logSQs);
-        //}
 
         auto weights = simulatePaths(nSingleScatterEvents, 1, rng, materialWorkspaces, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
@@ -834,7 +832,7 @@ DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr
  * cumulative probability distribution which is updated by this method
  */
 void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(
-    double kinc, const std::vector<MaterialWorkspaceMapping> &materialWorkspaces) {
+    double kinc, const MaterialWorkspaceMappings &materialWorkspaces) {
   for (size_t i = 0; i < materialWorkspaces.size(); i++) {
     auto QSQ = materialWorkspaces[i].QSQ;
     auto [IOfQYFull, qValuesFull, wIndices] = integrateQSQ(QSQ, kinc);
@@ -859,21 +857,19 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(
   }
 }
 
-void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const std::vector<API::MatrixWorkspace_sptr> &SOfQs) {
+void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const API::MatrixWorkspace_sptr &SOfQ) {
   // generate log of the structure factor to support gaussian interpolation
 
-  for (auto &SOfQ : SOfQs) {
-    for (size_t i = 0; i < SOfQ->getNumberHistograms(); i++) {
-      auto &ySQ = SOfQ->mutableY(i);
+  for (size_t i = 0; i < SOfQ->getNumberHistograms(); i++) {
+    auto &ySQ = SOfQ->mutableY(i);
 
-      std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), [](double d) -> double {
-        const double exp_that_gives_close_to_zero = -20.0;
-        if (d == 0.)
-          return exp_that_gives_close_to_zero;
-        else
-          return std::log(d);
-      });
-    }
+    std::transform(ySQ.begin(), ySQ.end(), ySQ.begin(), [](double d) -> double {
+      const double exp_that_gives_close_to_zero = -20.0;
+      if (d == 0.)
+        return exp_that_gives_close_to_zero;
+      else
+        return std::log(d);
+    });
   }
 }
 
@@ -1153,10 +1149,11 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
  * @param q The momentum transfer (q) value to interpolate at
  * @return The interpolated S(Q,w) value
  */
-double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SOfQ, double w, double q) {
+double DiscusMultipleScatteringCorrection::Interpolate2D(const MaterialWorkspaceMapping &SQWSMapping, double w,
+                                                         double q) {
   double SQ = 0.;
   int iW = -1;
-  auto wAxis = dynamic_cast<NumericAxis *>(SOfQ->getAxis(1));
+  auto wAxis = dynamic_cast<NumericAxis *>(SQWSMapping.SQ->getAxis(1));
   if (!wAxis)
     throw std::invalid_argument("Cannot perform 2D interpolation on S(Q,w) that doesn't have a numeric w axis");
   auto &wValues = wAxis->getValues();
@@ -1169,9 +1166,10 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
     if (m_importanceSampling)
       // the square root interpolation used to look up Q, w in InvPOfQ is based on flat interpolation of S(Q) so use
       // same interpolation here for consistency
-      SQ = interpolateFlat(SOfQ->getSpectrum(iW), q);
+      SQ = interpolateFlat(SQWSMapping.SQ->getSpectrum(iW), q);
     else
-      SQ = /* interpolateGaussian(m_logSQ->getSpectrum(iW)*/ interpolateFlat(SOfQ->getSpectrum(iW), q);
+      SQ = interpolateGaussian(SQWSMapping.logSQ->getSpectrum(iW) /* interpolateFlat(SQWSMapping.SQ->getSpectrum(iW)*/,
+                               q);
   }
 
   return SQ;
@@ -1196,8 +1194,8 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(MatrixWorkspace_sptr SO
  */
 std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-    const std::vector<MaterialWorkspaceMapping> &materialWorkspaces, const double kinc,
-    const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    const MaterialWorkspaceMappings &materialWorkspaces, const double kinc, const std::vector<double> &wValues,
+    const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   std::vector<double> sumOfWeights(wValues.size(), 0.);
   int countZeroWeights = 0; // for debugging and analysis of where importance sampling may help
 
@@ -1236,11 +1234,9 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  * @return A tuple containing a success/fail boolean and the calculated weights
  * across the n-1 multiple scatters
  */
-std::tuple<bool, std::vector<double>>
-DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                            const std::vector<MaterialWorkspaceMapping> &materialWorkspaces,
-                                            const double kinc, const std::vector<double> &wValues,
-                                            const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatter(
+    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, const MaterialWorkspaceMappings &materialWorkspaces,
+    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   double weight = 1;
 
   auto track = start_point(rng);
@@ -1254,7 +1250,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
   for (int iScat = 0; iScat < nScatters - 1; iScat++) {
     if ((k != kinc)) {
       if (m_importanceSampling) {
-        std::vector<MaterialWorkspaceMapping> newMaterialWorkspaces = materialWorkspaces;
+        auto newMaterialWorkspaces = materialWorkspaces;
         for (auto &SQWSMapping : currentMaterialWorkspaces)
           SQWSMapping.InvPOfQ = SQWSMapping.InvPOfQ->clone();
         prepareCumulativeProbForQ(k, newMaterialWorkspaces);
@@ -1304,7 +1300,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
   // this resulted in an overall w that equalled one of the required w values it was output.
   // That approach implicitly assumed S(Q,w)=0 where not specified and that no interpolation
   // on w would be needed - this may be what's required but seems possible it might not always be
-  for (auto w : wValues) {
+  for (auto &w : wValues) {
     const double finalE = fromWaveVector(kinc) - w;
     if (finalE > 0) {
       const double kout = toWaveVector(finalE);
@@ -1315,7 +1311,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
           std::find_if(m_SQWSs.begin(), m_SQWSs.end(), [shapeObjectWithScatter](const MaterialWorkspaceMapping &SQWS) {
             return SQWS.materialName == shapeObjectWithScatter->material().name();
           });
-      double SQ = Interpolate2D(SQWSIt->SQ, finalW, q);
+      double SQ = Interpolate2D(*SQWSIt, finalW, q);
       double AT2 = 1;
       for (auto it = track.cbegin(); it != track.cend(); it++) {
         double sigma_total;
@@ -1368,19 +1364,15 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   return {qmin, qrange};
 }
 
-double DiscusMultipleScatteringCorrection::getQSQIntegral(const std::string &materialName, double k) {
-  auto materialIt =
-      std::find_if(m_SQWSs.begin(), m_SQWSs.end(), [materialName](const MaterialWorkspaceMapping &matWSMapping) {
-        return matWSMapping.materialName == materialName;
-      });
+double DiscusMultipleScatteringCorrection::getQSQIntegral(const ISpectrum &QSQIntegral, double k) {
   // the QSQIntegrals were divided by k^2 so in theory they should be ~flat
-  return interpolateFlat(*materialIt->QSQIntegral, k) * 2 * k * k;
+  return interpolateFlat(QSQIntegral, k) * 2 * k * k;
 }
 
 // update track direction and weight
 bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const std::string &materialName,
-                                               const std::vector<MaterialWorkspaceMapping> &materialWorkspaces,
-                                               double &k, const double scatteringXSection,
+                                               const MaterialWorkspaceMappings &materialWorkspaces, double &k,
+                                               const double scatteringXSection,
                                                Kernel::PseudoRandomNumberGenerator &rng, double &weight) {
   const double kinc = k;
   double QQ, SQ;
@@ -1395,7 +1387,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const std
     SQ = interpolateFlat(materialWSIt->SQ->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
-    auto wValues = dynamic_cast<NumericAxis *>(/*m_logSQ*/ materialWSIt->SQ->getAxis(1))->getValues();
+    auto &wValues = dynamic_cast<NumericAxis *>(/*m_logSQ*/ materialWSIt->SQ->getAxis(1))->getValues();
     // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
     // Note - Discus took different approach where it sampled q,w from kinematically accessible range only but it
     // only calculated for double scattering and easier to normalise in that case
@@ -1427,7 +1419,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const std
     double qrange = kinc + maxkf;
     QQ = qrange * rng.nextValue();
     SQ = interpolateFlat /* interpolateGaussian(m_logSQ->getSpectrum(iW)*/ (materialWSIt->SQ->getSpectrum(iW), QQ);
-    double integralQSQ = getQSQIntegral(materialName, kinc);
+    double integralQSQ = getQSQIntegral(*materialWSIt->QSQIntegral, kinc);
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
     if (SQ > 0)
@@ -1643,8 +1635,7 @@ DiscusMultipleScatteringCorrection::createSparseWorkspace(const API::MatrixWorks
   return sparseWS;
 }
 
-void DiscusMultipleScatteringCorrection::createInvPOfQWorkspaces(std::vector<MaterialWorkspaceMapping> &matWSs,
-                                                                 size_t nhists) {
+void DiscusMultipleScatteringCorrection::createInvPOfQWorkspaces(MaterialWorkspaceMappings &matWSs, size_t nhists) {
   for (auto &SQWSMapping : matWSs) {
     auto &QSQ = SQWSMapping.QSQ;
     size_t expectedMaxSize = QSQ->size();
