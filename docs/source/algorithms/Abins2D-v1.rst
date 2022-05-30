@@ -21,7 +21,7 @@ The intensity is calculated in the "almost-isotropic" incoherent powder-averagin
 Different 2-D INS instruments may be selected, along with instrument parameters (incident energy, chopper settings) that determine the accessible :math:`(|\mathbf{q}|,\omega)` region and energy resolution.
 More information about the implemented working equations can be found :ref:`here <DynamicalStructureFactorFromAbInitio>`.
 
-Abins requires data from existing lattice dynamics calculations to determine the phonon mode frequencies and displacements. These are used to compute INS intensities; higher-order phonons may approximated as combinations of fundamental modes.
+Abins requires data from existing lattice dynamics calculations to determine the phonon mode frequencies and displacements. These are used to compute INS intensities; higher-order phonons may be approximated as combinations of fundamental modes.
 Several file formats are supported for frequency and displacement data at given :math:`\mathbf{q}`-points: CASTEP (.phonon), CRYSTAL (.out), GAUSSIAN (.log), DMOL3 (.outmol) or VASP (.xml).
 For VASP XML inputs, it is also permitted to use a "selective dynamics" in which some atoms are frozen.
 These would typically form a rigid substrate (e.g. a noble metal surface) for an adsorbed molecule of lightweight atoms, and are omitted from the calculated spectrum.
@@ -35,7 +35,7 @@ The user can also request contributions from individual atoms (e.g. 'atom_1', th
 data) or types of atom (for example for benzene two element symbols: C, H).
 
 Abins2D is under active development; please direct feature requests and bug reports to Dr. Sanghamitra Mukhopadhyay and Dr. Adam Jackson.
-If you are developing or hacking on Abins(2D), see the :ref:`AbinsImplementation` notes which outline some of the key conventions, practices and pitfalls.
+If you are developing or modifying Abins(2D), see the :ref:`AbinsImplementation` notes which outline some of the key conventions, practices and pitfalls.
 
 If Abins is used as part of your data analysis routines, please cite the relevant reference [1]_.
 

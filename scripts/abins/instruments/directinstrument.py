@@ -126,7 +126,7 @@ class DirectInstrument(Instrument):
         k2_i[conservation_indx] = e_init * WAVENUMBER_TO_INVERSE_A
 
         cos_angle = math.cos(math.radians(angle))
-        result = k2_i + k2_f - 2 * cos_angle * (k2_i * k2_f) ** 0.5
+        return k2_i + k2_f - 2 * cos_angle * np.sqrt(k2_i * k2_f)
 
         return result
 
