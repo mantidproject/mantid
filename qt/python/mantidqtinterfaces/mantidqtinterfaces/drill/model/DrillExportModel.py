@@ -287,31 +287,7 @@ class DrillExportModel:
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
-                filename = os.path.join(
-                        exportPath,
-                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
-                name = wsName + ":" + filename
-                if wsName not in self._exports:
-                    self._exports[wsName] = set()
-                self._exports[wsName].add(filename)
-                kwargs = {}
-                if 'Ascii' in algo:
-                    log_list = mtd[wsName].getInstrument().getStringParameter('log_list_to_save')
-                    if log_list:
-                        log_list = log_list[0].split(',')
-                        kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
-                    if 'Reflectometry' in algo:
-                        kwargs['WriteHeader'] = True
-                        kwargs['FileExtension'] = 'custom'
-                    else:
-                        kwargs['WriteXError'] = True
-                task = DrillTask(name, algo, InputWorkspace=wsName,
-                                 FileName=filename, **kwargs)
-                task.addSuccessCallback(lambda wsName=wsName, filename=filename:
-                                        self._onTaskSuccess(wsName, filename))
-                task.addErrorCallback(lambda msg, wsName=wsName,
-                                             filename=filename:
-                                      self._onTaskError(wsName, filename, msg))
-                tasks.append(task)
+                extension = RundexSettings.EXPORT_ALGO_EXTENSION[algo]
+                tasks.extend(self._createTasks(wsName, algo, exportPath, extension))
 
         self._pool.addProcesses(tasks)

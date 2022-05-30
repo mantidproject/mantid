@@ -252,12 +252,10 @@ void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
   }
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
   if (m_instrument == Supported::D17) {
-    m_detectorAngleName = "dan.value";
     m_offsetFrom = "VirtualChopper";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
-    m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
@@ -641,7 +639,7 @@ double LoadILLReflectometry::detectorRotation() {
   m_localWorkspace->mutableRun().addProperty("reduction.line_position", peakCentre, true);
   const double detectorCentre = getProperty("DetectorCentreFractionalIndex");
   const std::string measurement = getPropertyValue("Measurement");
-  double two_theta = -offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
+  double two_theta = offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
   if (measurement == "ReflectedBeam") {
     if (isDefault("BraggAngle")) {
       if (m_sampleAngle == 0.) {
@@ -701,7 +699,6 @@ void LoadILLReflectometry::initPixelWidth() {
 void LoadILLReflectometry::placeDetector() {
   m_detectorDistance = sampleDetectorDistance();
   m_localWorkspace->mutableRun().addProperty<double>("L2", m_detectorDistance, true);
-  m_detectorAngle = detectorAngle();
   const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = m_instrument == Supported::D17 ? RotationPlane::horizontal : RotationPlane::vertical;
@@ -767,19 +764,6 @@ double LoadILLReflectometry::collimationAngle() const {
   return m_instrument == Supported::FIGARO ? doubleFromRun(m_sampleAngleName) : 0.;
 }
 
-/// Return the detector center angle.
-double LoadILLReflectometry::detectorAngle() const {
-  if (m_instrument == Supported::D17) {
-    return doubleFromRun(m_detectorAngleName);
-  } else {
-    const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
-    const double DH2Y = mmToMeter(doubleFromRun("DH2.value"));
-    const double DH1Z = m_localWorkspace->getInstrument()->getNumberParameter("DH1Z")[0];
-    const double DH2Z = m_localWorkspace->getInstrument()->getNumberParameter("DH2Z")[0];
-    return radToDeg(std::atan2(DH2Y - DH1Y, DH2Z - DH1Z));
-  }
-}
-
 /** Calculate the offset angle between detector center and peak.
  *  @param peakCentre peak centre in pixels.
  *  @param detectorCentre detector centre in pixels.
@@ -788,10 +772,10 @@ double LoadILLReflectometry::detectorAngle() const {
  */
 double LoadILLReflectometry::offsetAngle(const double peakCentre, const double detectorCentre,
                                          const double detectorDistance) const {
-  // Sign depends on the definition of detector angle and which way
-  // spectrum numbers increase.
-  const auto sign = m_instrument == Supported::D17 ? 1. : -1.;
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
+  // Sign depends on the definition of detector angle and which way
+  // spectrum numbers increase. Negative convention is used for D17 and positive for FIGARO.
+  auto const sign = m_instrument == Supported::FIGARO ? 1 : -1;
   return sign * radToDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
@@ -799,13 +783,13 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre, const double d
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  double sampleDetectorDistance;
+  std::string distanceEntry;
   if (m_instrument == Supported::D17) {
-    sampleDetectorDistance = mmToMeter(doubleFromRun("det.value"));
+    distanceEntry = "det.value";
   } else {
-    sampleDetectorDistance = mmToMeter(doubleFromRun("Distance.Sample_CenterOfDetector_distance"));
+    distanceEntry = "Distance.Sample_CenterOfDetector_distance";
   }
-  return sampleDetectorDistance;
+  return mmToMeter(doubleFromRun(distanceEntry));
 }
 
 /// Return the horizontal offset along the z axis.
