@@ -42,6 +42,7 @@ completed much faster than they were in MantidPlot.
       and fitting.
     * *Workspace data views*: Display data from ``MatrixWorkspace`` / ``TableWorkspace`` and edit ``TableWorkspace``
     * :ref:`InstrumentViewer`: Visualize an instrument attached to a workspace
+    * :ref:`SliceViewer`: View 2D slices of multi-dimensional workspaces
     * *Sample log viewer*: Display information, plots and statistics about the sample logs in a workspace
     * :ref:`WorkbenchWorkspaceHistoryWindow` displays the algorithms that have been applied to a workspace
     * :ref:`Plotting <plotting>` describes how mantid workspaces have been integrated with the matplotlib framework and
