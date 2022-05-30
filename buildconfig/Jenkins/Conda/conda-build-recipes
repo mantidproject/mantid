@@ -24,7 +24,7 @@
 # Possible parameters:
 #   --clobber-yml: clobber the meta yaml files of each package build with conda-build, provide an absolute path to the uteyml file
 #   --recipes-tag: a branch or tag that should be used for cloning the recipes from conda-build-recipes
-#
+#   --build-current-branch: build the packages from the latest commit in the currently checkout out branch
 
 # Setup expected variables
 WORKSPACE=$1
@@ -59,6 +59,7 @@ SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
+BUILD_CURRENT_BRANCH=false
 RECIPES_TAG=main
 
 # Handle flag inputs
@@ -68,6 +69,7 @@ do
         --build-mantid) ENABLE_BUILD_MANTID=true ;;
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
+        --build-current-branch) BUILD_CURRENT_BRANCH=true ;;
         --clobber-yml)
             CLOBBER_FILE="--clobber-file $2"
             shift ;;
@@ -111,6 +113,11 @@ if [[ -d conda-recipes ]]; then
     rm -rf conda-recipes
 fi
 git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIPES_TAG
+
+# Update the git sha and version number when building packages from the current branch.
+if [[ BUILD_CURRENT_BRANCH == true ]]; then
+    $SCRIPT_DIR/update-conda-recipes.sh dummy_token dummy_name dummy_email --local-only
+fi
 
 # Run conda build. Use shortest path possible for Windows
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld

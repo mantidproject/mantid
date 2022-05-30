@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 # Update the https://github.com/mantidproject/conda-recipes repository with the latest changes from the currently
-# checked out branch.
+# checked out branch of mantid.
 #
 # Expected args:
 #   1. GITHUB_ACCESS_TOKEN: The token required to push to a https cloned mantidproject/conda-recipes repository
@@ -9,7 +9,8 @@
 #   3. GITHUB_USER_EMAIL: The email address associated with the user
 #
 # Possible flags:
-#   --local-only: update a local copy of the repository only, and do not push the changes to github
+#   --local-only: update a local copy of the conda-recipes repository only without cloning, and do not push the changes
+#     to github.
 
 GITHUB_ACCESS_TOKEN=$1
 shift
