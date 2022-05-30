@@ -5,7 +5,7 @@ channels:
 
 dependencies:
   # Common packages
-  - boost=1.75.* # Also pulls in boost-cpp
+  - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
   - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - doxygen>=1.9.*
   - eigen=3.4.*
@@ -22,7 +22,7 @@ dependencies:
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy>=1.20.2
+  - numpy>=1.20.2, <1.22.4
   - occt>=7.4.0
   - pip>=21.0.1
   - poco=1.10.*

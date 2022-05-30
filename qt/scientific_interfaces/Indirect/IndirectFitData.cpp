@@ -38,10 +38,9 @@ std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace, const 
   if (axis_ptr) {
     const std::shared_ptr<Mantid::Kernel::Unit> &unit_ptr = axis_ptr->unit();
     if (unit_ptr->unitID() == "MomentumTransfer") {
-      for (auto spectrum : spectra) {
-        qs.emplace_back(axis_ptr->operator()(spectrum.value));
-        // qs = axis_ptr->getValues();
-      }
+      qs.reserve(spectra.size().value);
+      std::transform(spectra.begin(), spectra.end(), std::back_inserter(qs),
+                     [&axis_ptr](const auto &spectrum) { return axis_ptr->operator()(spectrum.value); });
     }
   }
   // ...otherwise, compute the momentum transfer for each spectrum, if possible
@@ -157,8 +156,8 @@ std::string orderExcludeRegionString(std::vector<double> &bounds) {
 std::vector<double> getBoundsAsDoubleVector(std::vector<std::string> const &boundStrings) {
   std::vector<double> bounds;
   bounds.reserve(boundStrings.size());
-  for (auto bound : boundStrings)
-    bounds.emplace_back(convertBoundToDoubleAndFormat(bound));
+  std::transform(boundStrings.cbegin(), boundStrings.cend(), std::back_inserter(bounds),
+                 [](const auto &bound) { return convertBoundToDoubleAndFormat(bound); });
   return bounds;
 }
 

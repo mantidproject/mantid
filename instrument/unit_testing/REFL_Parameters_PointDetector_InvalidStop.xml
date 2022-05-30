@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+    <component-link name="REFL" >
+
+        <parameter name="AnalysisMode" type="string">
+            <value val="PointDetectorAnalysis"/>
+        </parameter>
+
+        <parameter name="PointDetectorStart">
+            <value val="2"/>
+        </parameter>
+
+        <parameter name="PointDetectorStop">
+            <!--This is greater than the max workspace index-->
+            <value val="5"/>
+        </parameter>
+
+    </component-link>
+
+</parameter-file>

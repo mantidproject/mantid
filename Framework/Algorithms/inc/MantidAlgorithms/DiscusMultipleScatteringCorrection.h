@@ -61,8 +61,9 @@ protected:
   double interpolateGaussian(const API::ISpectrum &histToInterpolate, double x);
   double Interpolate2D(API::MatrixWorkspace_sptr SOfQ, double w, double q);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
-  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
+  void integrateCumulative(const Mantid::HistogramData::Histogram &h, const double xmin, const double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY);
+  API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
 
 private:
   void init() override;

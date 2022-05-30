@@ -1,0 +1,2 @@
+- On first time start up of the Engineering Diffraction interface, the default save location is now utilised for
+  calibration and focus files

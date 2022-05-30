@@ -111,7 +111,7 @@ make sure you have access to the data archive.
 
 .. code-block:: python
 
-    from mantid.simpleapi import (GroupWorkspace, LoadMuonNexus, MuonGroupingAsymmetry, MuonPreProcess, RenameWorkspace)
+    from mantid.simpleapi import *
 
     LoadMuonNexus(Filename=r'\\isis.cclrc.ac.uk\inst$\ndxmusr\instrument\data\cycle_16_5\MUSR00062260.nxs', OutputWorkspace='MUSR00062260.nxs', DeadTimeTable='MUSR00062260.nxs_deadtime_table', DetectorGroupingTable='__notUsed')
     RenameWorkspace(InputWorkspace='MUSR00062260.nxs_deadtime_table', OutputWorkspace='MUSR62260_deadtime MA')
@@ -125,7 +125,7 @@ make sure you have access to the data archive.
 
 1. Open the Fit Script Generator interface.
 
-2. Click ``Add Domains`` and select each of the loaded workspaces in turn.
+2. Click ``Add Domains`` and select each of the loaded Asymmetry workspaces in turn.
 
 3. Double click the ``EndX`` cells and change each of them to 15.0.
 
@@ -152,7 +152,7 @@ make sure you have access to the data archive. This will add a background to the
 .. code-block:: python
 
     from mantid.api import AnalysisDataService
-    from mantid.simpleapi import (CreateWorkspace, GroupWorkspace, LoadMuonNexus, MuonGroupingAsymmetry, MuonPreProcess, Plus, RenameWorkspace)
+    from mantid.simpleapi import *
 
     LoadMuonNexus(Filename=r'\\isis.cclrc.ac.uk\inst$\ndxmusr\instrument\data\cycle_16_5\MUSR00062260.nxs', OutputWorkspace='MUSR00062260.nxs', DeadTimeTable='MUSR00062260.nxs_deadtime_table', DetectorGroupingTable='__notUsed')
     RenameWorkspace(InputWorkspace='MUSR00062260.nxs_deadtime_table', OutputWorkspace='MUSR62260_deadtime MA')
@@ -170,7 +170,7 @@ make sure you have access to the data archive. This will add a background to the
 
 1. Open the Fit Script Generator interface.
 
-2. Click ``Add Domains`` and select each of the loaded workspaces in turn. For this example, add the 'MUSR62260; Group; bkwd; Asymmetry; MA' domain first.
+2. Click ``Add Domains`` and select each of the loaded Asymmetry workspaces in turn. For this example, add the 'MUSR62260; Group; bkwd; Asymmetry; MA' domain first.
 
 3. Double click the ``EndX`` cells and change each of them to 15.0.
 

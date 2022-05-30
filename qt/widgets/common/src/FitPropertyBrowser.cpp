@@ -1305,14 +1305,16 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     }
     m_oldWorkspaceIndex = allowedIndex;
   } else if (prop->propertyName() == "Workspace Index") {
+    // Property field from Settings. Note the white space.
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
     h->setFunctionWorkspace();
   } else if (prop->propertyName() == "WorkspaceIndex") {
+    // Property field from functions. In a word.
     PropertyHandler *h = getHandler()->findHandler(prop);
     auto const index = prop->valueText().toInt();
-    if (h && index != workspaceIndex()) {
+    if (h) {
       h->setAttribute(prop);
       setWorkspaceIndex(index);
       emit workspaceIndexChanged(index);
@@ -1866,14 +1868,11 @@ double FitPropertyBrowser::endX() const { return m_doubleManager->value(m_endX);
 void FitPropertyBrowser::setEndX(double value) { m_doubleManager->setValue(m_endX, value); }
 
 void FitPropertyBrowser::setXRange(double start, double end) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
-#endif
 
   m_doubleManager->setValue(m_startX, start);
   m_doubleManager->setValue(m_endX, end);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   setWorkspace(m_compositeFunction);
   m_doubleManager->setMinimum(m_endX, start);
   m_doubleManager->setMaximum(m_startX, end);
@@ -1882,7 +1881,6 @@ void FitPropertyBrowser::setXRange(double start, double end) {
   getHandler()->setAttribute("EndX", end);
 
   connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(doubleChanged(QtProperty *)));
-#endif
 }
 
 QVector<double> FitPropertyBrowser::getXRange() {

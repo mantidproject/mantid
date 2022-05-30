@@ -220,7 +220,7 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedRounding() {
+  void testNotifyRowModelChangedRounding() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithInputQRangeModelMixedPrecision());
     auto precision = 2;
     presenter.setTablePrecision(precision);
@@ -231,9 +231,10 @@ public:
          MantidQt::MantidWidgets::Batch::Cell("Trans A"), MantidQt::MantidWidgets::Batch::Cell("Trans B"),
          MantidQt::MantidWidgets::Batch::Cell("0.56"), MantidQt::MantidWidgets::Batch::Cell("0.90"),
          MantidQt::MantidWidgets::Batch::Cell("0.01"), MantidQt::MantidWidgets::Batch::Cell(""),
-         MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap()))});
+         MantidQt::MantidWidgets::Batch::Cell(MantidQt::MantidWidgets::optionsToString(ReductionOptionsMap())),
+         MantidQt::MantidWidgets::Batch::Cell("")});
     EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
 
     verifyAndClearExpectations();
   }
@@ -242,6 +243,37 @@ public:
     auto presenter = makePresenter(m_view, twoGroupsWithMixedRowsModel());
     EXPECT_CALL(m_view, jobs()).Times(1);
     presenter.notifyBatchLoaded();
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyBatchRowCellChanged() {
+    auto constexpr groupIndex = 1;
+    auto constexpr rowIndex = 1;
+    auto constexpr cellIndex = 1;
+    auto reductionJobs = twoGroupsWithMixedRowsModel();
+    auto presenter = makePresenter(m_view, reductionJobs);
+    auto const rowLocation = location(groupIndex, rowIndex);
+    ON_CALL(m_jobs, cellAt(rowLocation, cellIndex)).WillByDefault(Return(Cell("")));
+    // This extra call is needed to sort out some row states that get changed by calls to Update Row. That's not what
+    // we're testing here, so just get the state in line before checking notify is called correctly.
+    presenter.notifyCellTextChanged(rowLocation, cellIndex, "", "");
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(presenter.mutableRunsTable()
+                                                             .mutableReductionJobs()
+                                                             .mutableGroups()[groupIndex]
+                                                             .mutableRows()[rowIndex]
+                                                             .get()))
+        .Times(1);
+    presenter.notifyCellTextChanged(rowLocation, cellIndex, "", "");
+    verifyAndClearExpectations();
+  }
+
+  void testMainPresenterBatchThatGroupNameChanged() {
+    auto reductionJobs = twoGroupsWithMixedRowsModel();
+    auto presenter = makePresenter(m_view, reductionJobs);
+    auto const groupLocation = location(0);
+    ON_CALL(m_jobs, cellAt(groupLocation, 0)).WillByDefault(Return(Cell("")));
+    EXPECT_CALL(m_mainPresenter, notifyGroupNameChanged(_)).Times(1);
+    presenter.notifyCellTextChanged(groupLocation, 0, "old", "new");
     verifyAndClearExpectations();
   }
 

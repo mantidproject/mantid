@@ -1,0 +1,1 @@
+- New cut viewer tool for non-axis aligned cuts in slice viewer (currently only supports 3D MD workspaces where all dimensions are Q).

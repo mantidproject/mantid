@@ -54,9 +54,9 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
 
         output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
                                                            is_vanadium_run=False, grouping_file_name=grouping_filename,
-                                                           empty_run_number=empty_runs, vanadium_string=vanadium_runs)
+                                                           empty_inst_run_number=empty_runs, vanadium_string=vanadium_runs)
 
-        self.assertEqual(output_obj.empty_runs, expected_empty_runs)
+        self.assertEqual(output_obj.empty_inst_runs, expected_empty_runs)
         self.assertEqual(output_obj.grouping_file_path,
                          os.path.join(mock_inst.calibration_dir, mock_inst.grouping_file_name))
         expected_file_ext = mock_inst.file_extension
@@ -68,7 +68,7 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         self.assertEqual(output_obj.output_run_string, run_number_string)
         self.assertEqual(output_obj.run_number, 17)
         self.assertEqual(output_obj.vanadium_run_numbers, expected_vanadium_runs)
-        self.assertEqual(output_obj.summed_empty_file_path,
+        self.assertEqual(output_obj.summed_empty_inst_file_path,
                          os.path.join(mock_inst.calibration_dir, expected_label,
                                       common.generate_summed_empty_name(expected_empty_runs,
                                                                         expected_offset_file_name)))
@@ -89,7 +89,7 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
 
         output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
                                                            is_vanadium_run=True, grouping_file_name=grouping_filename,
-                                                           empty_run_number=empty_runs, vanadium_string=vanadium_runs)
+                                                           empty_inst_run_number=empty_runs, vanadium_string=vanadium_runs)
 
         self.assertEqual(expected_vanadium_runs, output_obj.run_number)
         self.assertEqual(output_obj.vanadium_run_numbers, output_obj.run_number)
@@ -111,7 +111,7 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         output_obj = run_details.create_run_details_object(run_number_string, inst_settings=mock_inst,
                                                            is_vanadium_run=False, splined_name_list=splined_name_list,
                                                            grouping_file_name=grouping_filename,
-                                                           empty_run_number=empty_runs, vanadium_string=vanadium_runs)
+                                                           empty_inst_run_number=empty_runs, vanadium_string=vanadium_runs)
 
         expected_splined_out_str = ''.join('_' + val for val in splined_name_list)
         expected_output_name = "VanSplined_" + expected_vanadium_runs + expected_splined_out_str

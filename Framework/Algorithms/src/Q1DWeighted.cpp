@@ -30,6 +30,8 @@
 
 #include <boost/algorithm/string/split.hpp>
 
+#include <algorithm>
+
 constexpr double deg2rad = M_PI / 180.0;
 
 namespace Mantid::Algorithms {
@@ -317,12 +319,8 @@ void Q1DWeighted::getWedgeParams(const std::vector<std::string> &params,
  * @return true if a symetrical wedge already exists
  */
 bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::Wedge &wedge) {
-
-  for (Q1DWeighted::Wedge params : m_wedgesParameters) {
-    if (wedge.isSymmetric(params))
-      return true;
-  }
-  return false;
+  return std::any_of(m_wedgesParameters.cbegin(), m_wedgesParameters.cend(),
+                     [&wedge](const auto &params) { return wedge.isSymmetric(params); });
 }
 
 /**

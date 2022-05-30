@@ -26,8 +26,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <algorithm>
 #include <cmath>
 #include <ctime>
+#include <iterator>
 #include <numeric>
 #include <stdexcept>
 
@@ -103,9 +105,8 @@ void CreateSampleWorkspace::init() {
   m_preDefinedFunctionmap.emplace("User Defined", "");
   std::vector<std::string> functionOptions;
   functionOptions.reserve(m_preDefinedFunctionmap.size());
-  for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
-    functionOptions.emplace_back(preDefinedFunction.first);
-  }
+  std::transform(m_preDefinedFunctionmap.cbegin(), m_preDefinedFunctionmap.cend(), std::back_inserter(functionOptions),
+                 [](const auto &preDefinedFunction) { return preDefinedFunction.first; });
   declareProperty("Function", "One Peak", std::make_shared<StringListValidator>(functionOptions),
                   "Preset options of the data to fill the workspace with");
   declareProperty("UserDefinedFunction", "", "Parameters defining the fitting function and its initial values");

@@ -1,0 +1,2 @@
+- A bug has been fixed in the CASTEP .phonon file import for the Indirect/Simulation/DensityOfStates interface and SimulatedDensityOfStates algorithm.
+  The bug was causing some q-points to be misidentified as duplicate Gamma-points and removed.

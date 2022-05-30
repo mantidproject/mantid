@@ -1,0 +1,2 @@
+- Allow the user to put the same values in the `WorkspaceIndex` and `Workspace Index` fields
+when creating a composite function in the fitting browser.

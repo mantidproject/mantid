@@ -1,0 +1,1 @@
+- `setAutoTrim` and `getAutoTrim` from Property class are now exposed to Python API

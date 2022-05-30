@@ -26,8 +26,8 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         self.assertFalse(ads.doesExist("Prefix_btm_Suffix"))
         self.assertFalse(ads.doesExist("Prefix_mid_Suffix"))
         self.assertFalse(ads.doesExist("Prefix_top_Suffix"))
-        self.assertTrue(ads.doesExist("Prefix_none_Suffix"))
-        ads.remove("Prefix_none_Suffix")
+        self.assertTrue(ads.doesExist("Prefix_Suffix"))
+        ads.remove("Prefix_Suffix")
 
     def test_group_with_sample_position(self):
         """
@@ -44,7 +44,7 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         self.assertTrue(ads.doesExist("Prefix_btm_Suffix"))
         self.assertTrue(ads.doesExist("Prefix_mid_Suffix"))
         self.assertTrue(ads.doesExist("Prefix_top_Suffix"))
-        self.assertFalse(ads.doesExist("Prefix_none_Suffix"))
+        self.assertFalse(ads.doesExist("Prefix_Suffix"))
         ads.remove("Prefix_btm_Suffix")
         ads.remove("Prefix_mid_Suffix")
         ads.remove("Prefix_top_Suffix")

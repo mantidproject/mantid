@@ -569,8 +569,8 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
 
     # Configure fit settings
     polynomial_order = polynomial_order if polynomial_order is not None else 0
-    fit_command = NParameterCommand(command_id=NParameterCommandId.CENTRE, values=[fit_data, lambdamin, lambdamax,
-                                                                                   fit_type, polynomial_order])
+    fit_command = NParameterCommand(command_id=NParameterCommandId.TRANS_FIT, values=[fit_data, lambdamin, lambdamax,
+                                                                                      fit_type, polynomial_order])
     director.add_command(fit_command)
 
 

@@ -7,6 +7,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <algorithm>
+#include <iterator>
 #include <utility>
 
 #include "MantidAPI/CompositeFunction.h"
@@ -1453,18 +1455,16 @@ void FitPeak::setupOutput(const std::map<std::string, double> &m_fitErrorPeakFun
   // Parameter vector
   vector<double> vec_fitpeak;
   vec_fitpeak.reserve(m_peakParameterNames.size());
-  for (const auto &peakParameterName : m_peakParameterNames) {
-    vec_fitpeak.emplace_back(m_peakFunc->getParameter(peakParameterName));
-  }
+  std::transform(m_peakParameterNames.cbegin(), m_peakParameterNames.cend(), std::back_inserter(vec_fitpeak),
+                 [this](const auto &peakParameterName) { return m_peakFunc->getParameter(peakParameterName); });
 
   setProperty("FittedPeakParameterValues", vec_fitpeak);
 
   // Background
   vector<double> vec_fitbkgd;
-  vec_fitpeak.reserve(m_bkgdParameterNames.size());
-  for (auto &bkgdParameterName : m_bkgdParameterNames) {
-    vec_fitbkgd.emplace_back(m_bkgdFunc->getParameter(bkgdParameterName));
-  }
+  vec_fitbkgd.reserve(m_bkgdParameterNames.size());
+  std::transform(m_bkgdParameterNames.cbegin(), m_bkgdParameterNames.cend(), std::back_inserter(vec_fitbkgd),
+                 [this](const auto &bkgdParameterName) { return m_bkgdFunc->getParameter(bkgdParameterName); });
 
   setProperty("FittedBackgroundParameterValues", vec_fitbkgd);
 

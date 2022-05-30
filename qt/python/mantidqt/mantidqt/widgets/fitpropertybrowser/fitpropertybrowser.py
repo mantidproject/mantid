@@ -220,16 +220,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.setPeakToolOn(True)
         self.canvas.draw()
         self.set_output_window_names()
-        # Turn off autoscaling in the future
-        for axes in self.canvas.figure.get_axes():
-            axes.autoscale(enable=False)
 
     def set_output_window_names(self):
         import matplotlib.pyplot as plt  # unfortunately need to import again
         """
         Change the output name if more than one plot of the same workspace
         """
-        window_title = self.canvas.get_window_title()
+        window_title = self.canvas.manager.get_window_title()
         workspace_name = window_title.rsplit('-', 1)[0]
         for open_figures in plt.get_figlabels():
             if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
@@ -384,10 +381,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         # Keep local copy of the original lines
         original_lines = self.get_lines()
 
-        ax.autoscale(enable=False, axis='both')
-        ax.plot(ws, wkspIndex=1, **plot_kwargs)
+        ax.plot(ws, wkspIndex=1, autoscale_on_update=False, **plot_kwargs)
         if plot_diff:
-            ax.plot(ws, wkspIndex=2, **plot_kwargs)
+            ax.plot(ws, wkspIndex=2, autoscale_on_update=False, **plot_kwargs)
 
         self.addFitResultWorkspacesToTableWidget()
         # Add properties back to the lines

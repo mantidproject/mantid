@@ -41,7 +41,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
   } else {
     // Evaluates to True if multiperiod, that way algorithm will call the
     // overrriden processGroups.
-    return !useDefaultGroupingBehaviour;
+    return true;
   }
 }
 

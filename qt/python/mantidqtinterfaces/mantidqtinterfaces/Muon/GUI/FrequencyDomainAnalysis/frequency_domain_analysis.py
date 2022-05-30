@@ -518,4 +518,5 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.closeEvent(event)
         self.context.ads_observer.unsubscribe()
         self.grouping_tab_widget.group_tab_presenter.closePeriodInfoWidget()
+        self.results_context.ADS_observer.unsubscribe()
         super(FrequencyAnalysisGui, self).closeEvent(event)

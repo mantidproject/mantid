@@ -1,0 +1,1 @@
+- Workbench will no longer crash if ReflectometryBackgroundSubtraction is run with a group workspace when using the Algorithm dialog.

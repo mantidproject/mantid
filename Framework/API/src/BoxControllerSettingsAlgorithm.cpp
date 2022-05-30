@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
+#include <iterator>
 #include <utility>
 
 #include "MantidAPI/BoxControllerSettingsAlgorithm.h"
@@ -36,8 +38,7 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(const std::string &S
   tokenizer values(SplitInto, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   std::vector<int> valueVec;
   valueVec.reserve(values.count());
-  for (const auto &value : values)
-    valueVec.emplace_back(boost::lexical_cast<int>(value));
+  std::transform(values.cbegin(), values.cend(), std::back_inserter(valueVec), boost::lexical_cast<int, std::string>);
 
   declareProperty(std::make_unique<ArrayProperty<int>>("SplitInto", std::move(valueVec)),
                   "A comma separated list of into how many sub-grid elements each "

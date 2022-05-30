@@ -121,10 +121,10 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Specify options based on the run angle. Leave the angle empty to specify defaults for all runs.</string>
+        <string>Specify options based on the run angle and sample title. Leave the angle and title empty to specify defaults for all runs.</string>
        </property>
        <property name="whatsThis">
-        <string>This table allows you to specify default values for runs that do not have values specified on the Runs tab. You can specify these on a per-angle basis, where the angle from the Runs table will be looked up in the this table and those options will be used where a match is found. You may also leave the angle blank in this table to specify the default options that should be used for all runs.</string>
+        <string>This table allows you to specify default values for runs that do not have values specified on the Runs tab. You can specify these on a per-angle and per-sample title basis, where the angle from the Runs table will be looked up in the this table and those options will be used where a match is found. You may also leave the angle blank in this table to specify the default options that should be used for all runs.</string>
        </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
@@ -344,10 +344,10 @@
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Add another row to the per-angle options table</string>
+        <string>Add another row to the settings lookup table</string>
        </property>
        <property name="whatsThis">
-        <string>Adds another row to the per-angle options table so that additional angles can be added</string>
+        <string>Adds another row to the settings lookup table so that additional angles can be added</string>
        </property>
        <property name="text">
         <string>Add row</string>
@@ -422,7 +422,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Per-angle defaults</string>
+        <string>Settings Lookup</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

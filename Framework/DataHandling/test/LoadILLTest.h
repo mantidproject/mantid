@@ -108,4 +108,9 @@ public:
   void test_loadReflectometry_D17() { checkLoader("ILL/D17/317370", "LoadILLReflectometry"); }
 
   void test_loadReflectometry_FIGARO() { checkLoader("ILL/Figaro/000002", "LoadILLReflectometry"); }
+
+  void test_loadSALSA() {
+    checkLoader("ILL/SALSA/46430", "LoadILLSALSA");
+    checkLoader("ILL/SALSA/46508", "LoadILLSALSA");
+  }
 };

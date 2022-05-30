@@ -80,8 +80,8 @@ public:
   void notifyPauseReductionRequested() override;
   void notifyRowStateChanged() override;
   void notifyRowStateChanged(boost::optional<Item const &> item) override;
-  void notifyRowOutputsChanged() override;
-  void notifyRowOutputsChanged(boost::optional<Item const &> item) override;
+  void notifyRowModelChanged() override;
+  void notifyRowModelChanged(boost::optional<Item const &> item) override;
   void notifyBatchLoaded() override;
 
   void notifyReductionPaused() override;
@@ -96,6 +96,8 @@ public:
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyTableChanged() override;
+  void notifyRowContentChanged(Row &changedRow) override;
+  void notifyGroupNameChanged(Group &changedGroup) override;
   void settingsChanged() override;
   void notifyChangesSaved() override;
   bool hasUnsavedChanges() const override;

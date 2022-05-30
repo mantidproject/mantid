@@ -362,11 +362,8 @@ public:
 
   /// Checks all elements within the specified vector exist in the ADS
   bool doAllWsExist(const std::vector<std::string> &listOfNames) {
-    for (const auto &wsName : listOfNames) {
-      if (!doesExist(wsName))
-        return false;
-    }
-    return true;
+    return std::all_of(listOfNames.cbegin(), listOfNames.cend(),
+                       [this](auto const &name) { return this->doesExist(name); });
   }
 
   /// Check to see if a data object exists in the store
@@ -384,12 +381,8 @@ public:
     if (showingHiddenObjects()) {
       return datamap.size();
     } else {
-      size_t count = 0;
-      for (auto &it : datamap) {
-        if (!isHiddenDataServiceObject(it.first))
-          ++count;
-      }
-      return count;
+      return std::count_if(datamap.cbegin(), datamap.cend(),
+                           [](const auto &it) { return !isHiddenDataServiceObject(it.first); });
     }
   }
 

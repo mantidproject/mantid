@@ -25,7 +25,7 @@ For a longitudinal polarization use :ref:`DecoupAsymPowderMagLong<func-DecoupAsy
 Examples
 --------
 
-An example of when this might be used is for examining field dependence of :math:`\mu`SR signals in a polycrystalline magnet[1].
+An example of when this might be used is for examining field dependence of :math:`\mu` SR signals in a polycrystalline magnet[1].
 
 
 
@@ -35,7 +35,7 @@ An example of when this might be used is for examining field dependence of :math
 
 References
 ----------
-[1] Pratt, F.L. (2007). Field dependence of :math:`\mu`SR signals in a polycrystalline magnet. Journal of Physics:Condensed Matter, Vol. 19 No. 45, `https://iopscience.iop.org/article/10.1088/0953-8984/19/45/456207 <https://iopscience.iop.org/article/10.1088/0953-8984/19/45/456207>`_.
+[1] Pratt, F.L. (2007). Field dependence of :math:`\mu` SR signals in a polycrystalline magnet. Journal of Physics:Condensed Matter, Vol. 19 No. 45, doi:`10.1088/0953-8984/19/45/456207 <https://iopscience.iop.org/article/10.1088/0953-8984/19/45/456207>`_ .
 
 .. categories::
 

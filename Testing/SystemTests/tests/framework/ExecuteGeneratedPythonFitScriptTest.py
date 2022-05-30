@@ -34,11 +34,24 @@ class ExecuteGeneratedPythonFitScriptTest(MantidSystemTest):
                 "MUSR62260_Group_top_Asymmetry_MA.nxs", "MUSR62260_Group_bkwd_Asymmetry_MA.nxs"]
 
     def runTest(self):
+        single_fit_script_text = self._generate_single_fit_script()
+        self._run_fit_script(single_fit_script_text)
+
         sequential_script_text = self._generate_sequential_fit_script()
         self._run_fit_script(sequential_script_text)
 
         simultaneous_script_text = self._generate_simultaneous_fit_script()
         self._run_fit_script(simultaneous_script_text)
+
+    @staticmethod
+    def _generate_single_fit_script():
+        function = "name=GausOsc,A=0.2,Sigma=0.2,Frequency=1.3,Phi=0"
+
+        script_text = GeneratePythonFitScript(InputWorkspaces=["MUSR62260; Group; fwd; Asymmetry; MA"],
+                                              WorkspaceIndices=[0], StartXs=[0.1],
+                                              EndXs=[15.0], Function=function, MaxIterations=500,
+                                              Minimizer="Levenberg-Marquardt")
+        return script_text
 
     @staticmethod
     def _generate_sequential_fit_script():

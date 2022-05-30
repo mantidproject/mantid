@@ -400,6 +400,17 @@ class SliceViewerModelTest(unittest.TestCase):
                                                   coords=SpecialCoordinateSystem.HKL,
                                                   has_oriented_lattice=True)
 
+    def test_matrix_workspace_cannot_support_non_axis_aligned_cuts(self):
+        self._assert_supports_non_axis_aligned_cuts(False, ws_type=MatrixWorkspace)
+
+    def test_MDE_requires_3dims_to_support_non_axis_aligned_cuts(self):
+        self._assert_supports_non_axis_aligned_cuts(False, ws_type=IMDEventWorkspace,
+                                                    coords=SpecialCoordinateSystem.HKL, ndims=2)
+        self._assert_supports_non_axis_aligned_cuts(True, ws_type=IMDEventWorkspace,
+                                                    coords=SpecialCoordinateSystem.HKL, ndims=3)
+        self._assert_supports_non_axis_aligned_cuts(False, ws_type=IMDEventWorkspace,
+                                                    coords=SpecialCoordinateSystem.HKL, ndims=4)
+
     def test_MDE_workspace_in_hkl_supports_non_orthogonal_axes(self):
         self._assert_supports_non_orthogonal_axes(True,
                                                   ws_type=IMDEventWorkspace,
@@ -825,6 +836,10 @@ class SliceViewerModelTest(unittest.TestCase):
                                              has_oriented_lattice):
         model = SliceViewerModel(_create_mock_workspace(ws_type, coords, has_oriented_lattice))
         self.assertEqual(expectation, model.can_support_nonorthogonal_axes())
+
+    def _assert_supports_non_axis_aligned_cuts(self, expectation, ws_type, coords=SpecialCoordinateSystem.HKL, ndims=3):
+        model = SliceViewerModel(_create_mock_workspace(ws_type, coords, has_oriented_lattice=False, ndims=ndims))
+        self.assertEqual(expectation, model.can_support_non_axis_cuts())
 
     def _assert_supports_peaks_overlay(self, expectation, ws_type, ndims=2):
         ws = _create_mock_workspace(ws_type,

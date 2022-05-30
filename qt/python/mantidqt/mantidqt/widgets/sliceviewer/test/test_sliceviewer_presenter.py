@@ -20,7 +20,8 @@ matplotlib.use('Agg')
 sys.modules['mantid.simpleapi'] = mock.MagicMock()
 
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
-from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter, SliceViewer)  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter,
+                                                               SliceViewer)  # noqa: E402
 from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
@@ -263,6 +264,44 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.plot_MDH.assert_called_once()
         data_view_mock.enable_tool_button.assert_has_calls(
             (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
+
+    def test_cut_view_button_disabled_if_model_cannot_support_it(self):
+        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
+        self.model.can_support_non_axis_cuts.return_value = False
+
+        SliceViewer(None, model=self.model, view=self.view)
+
+        self.view.data_view.disable_tool_button.assert_has_calls([mock.call(ToolItemText.NONAXISALIGNEDCUTS)])
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerPresenter")
+    def test_cut_view_toggled_on(self, mock_cv_pres):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.view.data_view.track_cursor = mock.MagicMock()
+
+        presenter.non_axis_aligned_cut(True)
+
+        mock_cv_pres.assert_called_once_with(presenter, self.view.data_view.canvas)
+        # test correct buttons disabled
+        self.view.data_view.deactivate_and_disable_tool.assert_has_calls([mock.call(tool) for tool in
+                                                                          (ToolItemText.REGIONSELECTION,
+                                                                           ToolItemText.LINEPLOTS,
+                                                                           ToolItemText.NONORTHOGONAL_AXES)])
+        self.view.data_view.deactivate_tool.assert_called_once_with(ToolItemText.ZOOM)
+        self.view.data_view.track_cursor.setChecked.assert_called_once_with(False)
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_sliceinfo")
+    def test_cut_view_toggled_off(self, mock_get_sliceinfo):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter._cutviewer_presenter = mock.MagicMock()
+        mock_get_sliceinfo.return_value.can_support_nonorthogonal_axes.return_value = True
+
+        presenter.non_axis_aligned_cut(False)
+
+        presenter._cutviewer_presenter.hide_view.assert_called_once()
+        # test correct buttons disabled
+        self.view.data_view.enable_tool_button.assert_has_calls([mock.call(tool) for tool in
+                                                                 (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS,
+                                                                  ToolItemText.NONORTHOGONAL_AXES)])
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.new_plot_MDH")
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")

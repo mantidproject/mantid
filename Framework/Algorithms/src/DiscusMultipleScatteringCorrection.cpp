@@ -101,10 +101,9 @@ void DiscusMultipleScatteringCorrection::init() {
                   "will also include an additional workspace for a calculation with a "
                   "single scattering event where the absorption post scattering has been "
                   "set to zero");
-  auto wsQValidator = std::make_shared<CompositeValidator>();
-  wsQValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
+  auto wsKValidator = std::make_shared<WorkspaceUnitValidator>("Momentum");
   declareProperty(std::make_unique<WorkspaceProperty<>>("ScatteringCrossSection", "", Direction::Input,
-                                                        PropertyMode::Optional, wsQValidator),
+                                                        PropertyMode::Optional, wsKValidator),
                   "A workspace containing the scattering cross section as a function of k, :math:`\\sigma_s(k)`. Note "
                   "- this parameter would normally be left empty which results in the tabulated cross section data "
                   "being used instead which implies no wavelength dependence");
@@ -569,7 +568,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   if (AnalysisDataService::Instance().doesExist(outputGroupWSName))
     API::AnalysisDataService::Instance().deepRemoveGroup(outputGroupWSName);
 
-  const std::string wsNamePrefix = "Scatter_";
+  const std::string wsNamePrefix = outputGroupWSName + "_Scatter_";
   std::string wsName = wsNamePrefix + "1_NoAbs";
   setWorkspaceName(noAbsOutputWS, wsName);
   wsgroup->addWorkspace(noAbsOutputWS);
@@ -578,16 +577,49 @@ void DiscusMultipleScatteringCorrection::exec() {
     wsName = wsNamePrefix + std::to_string(i + 1);
     setWorkspaceName(outputWSs[i], wsName);
     wsgroup->addWorkspace(outputWSs[i]);
+
+    auto integratedWorkspace = integrateWS(outputWSs[i]);
+    setWorkspaceName(integratedWorkspace, wsName + "_Integrated");
+    wsgroup->addWorkspace(integratedWorkspace);
   }
 
   if (outputWSs.size() > 1) {
-    auto summedOutput = createOutputWorkspace(*inputWS);
+    // create sum of multiple scatter workspaces for use in subtraction method
+    auto summedMScatOutput = createOutputWorkspace(*inputWS);
     for (size_t i = 1; i < outputWSs.size(); i++) {
-      summedOutput = summedOutput + outputWSs[i];
+      summedMScatOutput = summedMScatOutput + outputWSs[i];
     }
-    wsName = "Scatter_2_" + std::to_string(outputWSs.size()) + "_Summed";
-    setWorkspaceName(summedOutput, wsName);
-    wsgroup->addWorkspace(summedOutput);
+    wsName = wsNamePrefix + "2_" + std::to_string(outputWSs.size()) + "_Summed";
+    setWorkspaceName(summedMScatOutput, wsName);
+    wsgroup->addWorkspace(summedMScatOutput);
+    // create sum of all scattering order workspaces for use in ratio method
+    auto summedAllScatOutput = createOutputWorkspace(*inputWS);
+    summedAllScatOutput = summedMScatOutput + outputWSs[0];
+    wsName = wsNamePrefix + "1_" + std::to_string(outputWSs.size()) + "_Summed";
+    setWorkspaceName(summedAllScatOutput, wsName);
+    wsgroup->addWorkspace(summedAllScatOutput);
+    // create ratio of single to all scatter
+    auto ratioOutput = createOutputWorkspace(*inputWS);
+    ratioOutput = outputWSs[0] / summedAllScatOutput;
+    wsName = outputGroupWSName + "_Ratio_Single_To_All";
+    setWorkspaceName(ratioOutput, wsName);
+    wsgroup->addWorkspace(ratioOutput);
+
+    // ConvFit method being investigated by Spencer for inelastic currently uses the opposite ratio
+    if (m_EMode != DeltaEMode::Elastic) {
+      auto invRatioOutput = 1 / ratioOutput;
+      auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+      replaceNans->setChild(true);
+      replaceNans->initialize();
+      replaceNans->setProperty("InputWorkspace", invRatioOutput);
+      replaceNans->setProperty("OutputWorkspace", invRatioOutput);
+      replaceNans->setProperty("NaNValue", 0.0);
+      replaceNans->setProperty("InfinityValue", 0.0);
+      replaceNans->execute();
+      wsName = outputGroupWSName + "_Ratio_All_To_Single";
+      setWorkspaceName(invRatioOutput, wsName);
+      wsgroup->addWorkspace(invRatioOutput);
+    }
   }
 
   // set the output property
@@ -704,6 +736,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
     throw std::invalid_argument("Cannot calculate cumulative probability for S(Q,w) without a numeric w axis");
   auto &wValues = wAxis->getValues();
   std::vector<double> wBinEdges;
+  wBinEdges.reserve(wValues.size() + 1);
   VectorHelper::convertToBinBoundary(wValues, wBinEdges);
 
   double wMax = fromWaveVector(kinc);
@@ -748,6 +781,8 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
 /**
  * Integrate a distribution between the supplied xmin and xmax values using trapezoid rule
  * without any extrapolation on either end of the distribution
+ * Return the integral for each x value between xmin and xmax. This is the main reason the Integration
+ * algorithm isn't used. The Integration algorithm also has some unexpected behaviour for points datasets
  * Return two vectors rather than a histogram for performance reasons and to make transposing it easier
  * @param h Histogram object containing the distribution to integrate
  * @param xmin The lower integration limit
@@ -755,18 +790,20 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(double kinc, 
  * @param resultX The x values at which the integral has been calculated
  * @param resultY the values of the integral at various x values up to xmax
  */
-void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin,
-                                                             double xmax, std::vector<double> &resultX,
+void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h,
+                                                             const double xmin, const double xmax,
+                                                             std::vector<double> &resultX,
                                                              std::vector<double> &resultY) {
   const std::vector<double> &xValues = h.readX();
   const std::vector<double> &yValues = h.readY();
+  bool isPoints = h.xMode() == HistogramData::Histogram::XMode::Points;
 
-  // set the integral to zero at x=0
+  // set the integral to zero at xmin
   resultX.emplace_back(xmin);
   resultY.emplace_back(0.);
   double sum = 0;
 
-  // ensure there's a point at x=0
+  // ensure there's a point at xmin
   if (xValues.front() > xmin)
     throw std::runtime_error("Distribution doesn't extend as far as lower integration limit, x=" +
                              std::to_string(xmin));
@@ -778,44 +815,67 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   auto iter = std::upper_bound(h.x().cbegin(), h.x().cend(), xmin);
   auto iRight = static_cast<size_t>(std::distance(h.x().cbegin(), iter));
 
+  auto linearInterp = [&xValues, &yValues](const double x, const size_t lIndex, const size_t rIndex) -> double {
+    return (yValues[lIndex] * (xValues[rIndex] - x) + yValues[rIndex] * (x - xValues[lIndex])) /
+           (xValues[rIndex] - xValues[lIndex]);
+  };
+  double yToUse;
+
   // deal with partial initial segments
-  if ((xmin > xValues[iRight - 1]) && (xmax >= xValues[iRight])) {
-    double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmin) + yValues[iRight] * (xmin - xValues[iRight - 1])) /
-                     (xValues[iRight] - xValues[iRight - 1]);
-    sum += 0.5 * (interpY + yValues[iRight]) * (xValues[iRight] - xmin);
-    resultX.push_back(xValues[iRight]);
-    resultY.push_back(sum);
-    iRight++;
-  }
-  if ((xmin > xValues[iRight - 1]) && (xmax < xValues[iRight])) {
-    double interpY1 =
-        (yValues[iRight - 1] * (xValues[iRight] - xmin) + yValues[iRight] * (xmin - xValues[iRight - 1])) /
-        (xValues[iRight] - xValues[iRight - 1]);
-    double interpY2 =
-        (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
-        (xValues[iRight] - xValues[iRight - 1]);
-    sum += 0.5 * (interpY1 + interpY2) * (xmax - xmin);
-    resultX.push_back(xmax);
-    resultY.push_back(sum);
-    iRight++;
+  if (xmin > xValues[iRight - 1]) {
+    if (xmax >= xValues[iRight]) {
+      if (isPoints) {
+        double interpY = linearInterp(xmin, iRight - 1, iRight);
+        yToUse = 0.5 * (interpY + yValues[iRight]);
+      } else
+        yToUse = yValues[iRight - 1];
+      sum += yToUse * (xValues[iRight] - xmin);
+      resultX.push_back(xValues[iRight]);
+      resultY.push_back(sum);
+      iRight++;
+    } else {
+      if (isPoints) {
+        double interpY1 = linearInterp(xmin, iRight - 1, iRight);
+        double interpY2 = linearInterp(xmax, iRight - 1, iRight);
+        yToUse = 0.5 * (interpY1 + interpY2);
+      } else
+        yToUse = yValues[iRight - 1];
+      sum += yToUse * (xmax - xmin);
+      resultX.push_back(xmax);
+      resultY.push_back(sum);
+      iRight++;
+    }
   }
 
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
-    sum += 0.5 * (yValues[iRight] + yValues[iRight - 1]) * (xValues[iRight] - xValues[iRight - 1]);
+    yToUse = isPoints ? 0.5 * (yValues[iRight] + yValues[iRight - 1]) : yValues[iRight - 1];
+    sum += yToUse * (xValues[iRight] - xValues[iRight - 1]);
     resultX.emplace_back(xValues[iRight]);
     resultY.emplace_back(sum);
   }
 
   // integrate a partial final interval if xmax is between points
   if ((xmax > xValues[iRight - 1]) && (xmin <= xValues[iRight - 1])) {
-    // use linear interpolation to calculate the y value at xmax
-    double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
-                     (xValues[iRight] - xValues[iRight - 1]);
-    sum += 0.5 * (yValues[iRight - 1] + interpY) * (xmax - xValues[iRight - 1]);
+    if (isPoints) {
+      double interpY = linearInterp(xmax, iRight - 1, iRight);
+      yToUse = 0.5 * (yValues[iRight - 1] + interpY);
+    } else
+      yToUse = yValues[iRight - 1];
+    sum += yToUse * (xmax - xValues[iRight - 1]);
     resultX.emplace_back(xmax);
     resultY.emplace_back(sum);
   }
+}
+
+API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const API::MatrixWorkspace_sptr &ws) {
+  auto wsIntegrals = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
+  for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
+    std::vector<double> IOfQX, IOfQY;
+    integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY);
+    wsIntegrals->mutableY(i) = IOfQY.back();
+  }
+  return wsIntegrals;
 }
 
 /**
@@ -847,6 +907,13 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
   return {sig_total, scatteringXSection};
 }
 
+/**
+ * Use importance sampling to choose a Q and w value for the scatter
+ * @param CumulativeProb The inverse of the cumulative probability distribution. Both spectra have x set to 0-1.
+ * The first spectrum has y set to Q values and the second spectrum as y set to w index values
+ * @param x A randomly chosen value between 0 and 1
+ * @return A tuple containing the sampled Q value and the index of the sampled w value in the S(Q,w) distribution
+ */
 std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb,
                                                                      double x) {
   return {interpolateSquareRoot(CumulativeProb->getSpectrum(0), x),
@@ -859,23 +926,24 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const Matri
  * for flat S(Q) will be a quadratic
  */
 double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const ISpectrum &histToInterpolate, double x) {
+  const auto &histx = histToInterpolate.x();
+  const auto &histy = histToInterpolate.y();
   assert(histToInterpolate.histogram().xMode() == HistogramData::Histogram::XMode::Points);
-  if (x > histToInterpolate.x().back()) {
-    return histToInterpolate.y().back();
+  if (x > histx.back()) {
+    return histy.back();
   }
-  if (x < histToInterpolate.x().front()) {
-    return histToInterpolate.y().front();
+  if (x < histx.front()) {
+    return histy.front();
   }
-  auto iter = std::upper_bound(histToInterpolate.x().cbegin(), histToInterpolate.x().cend(), x);
-  auto idx = static_cast<size_t>(std::distance(histToInterpolate.x().cbegin(), iter) - 1);
-  const auto &y = histToInterpolate.y();
-  double x0 = histToInterpolate.x()[idx];
-  double x1 = histToInterpolate.x()[idx + 1];
-  double asq = (pow(y[idx + 1], 2) - pow(y[idx], 2)) / (x1 - x0);
+  const auto iter = std::upper_bound(histx.cbegin(), histx.cend(), x);
+  const auto idx = static_cast<size_t>(std::distance(histx.cbegin(), iter) - 1);
+  const double x0 = histx[idx];
+  const double x1 = histx[idx + 1];
+  const double asq = (pow(histy[idx + 1], 2) - pow(histy[idx], 2)) / (x1 - x0);
   if (asq == 0.) {
     throw std::runtime_error("Cannot perform square root interpolation on supplied distribution");
   }
-  double b = x0 - pow(y[idx], 2) / asq;
+  const double b = x0 - pow(histy[idx], 2) / asq;
   return sqrt(asq * (x - b));
 }
 
@@ -1063,6 +1131,7 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
       return {false, {0.}, 0};
     }
     std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), k, specialSingleScatterCalc);
+    vmu = 100 * numberDensity * sigma_total;
     updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
   }
 
@@ -1080,9 +1149,6 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
   }
   std::vector<double> weights;
   const double dl = track.front().distInsideObject;
-  if (specialSingleScatterCalc)
-    vmu = 0;
-  const auto AT2 = exp(-dl * vmu);
   auto scatteringXSectionFull = m_sampleShape->material().totalScatterXSection();
   // Step through required overall energy transfer (w) values and work out what
   // w that means for the final scatter. There will be a single w value for elastic
@@ -1099,6 +1165,11 @@ std::tuple<bool, std::vector<double>, double> DiscusMultipleScatteringCorrection
       const double q = qVector.norm();
       const double finalW = fromWaveVector(k) - finalE;
       double SQ = Interpolate2D(m_SQWS, finalW, q);
+      std::tie(sigma_total, scatteringXSection) = new_vector(m_sampleShape->material(), kout, specialSingleScatterCalc);
+      vmu = 100 * numberDensity * sigma_total;
+      if (specialSingleScatterCalc)
+        vmu = 0;
+      const auto AT2 = exp(-dl * vmu);
       weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
     } else {
       weights.emplace_back(0.);
@@ -1147,15 +1218,36 @@ std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleKW(const std::
   // the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
   // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
   double wMax = fromWaveVector(kinc);
+  // find largest w bin centre that is < wmax and then sample w up to the next bin edge. w bins not necessarily equal
+  // so don't just sample w index
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
   int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);
   assert(iWMax >= 0);
-  auto iW = rng.nextInt(0, iWMax);
+  int iW;
+  if (iWMax == 0)
+    iW = 0;
+  else {
+    std::vector<double> wBinEdges;
+    wBinEdges.reserve(wValues.size() + 1);
+    VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+    double w = wBinEdges.front() + rng.nextValue() * (std::min(wMax, wBinEdges[iWMax + 1]) - wBinEdges.front());
+    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
+  }
   double kf = getKf(wValues[iW], kinc);
   return {kf, iW};
 }
 
-// update track direction, QSS and weight
+/**
+ * For scatters where outgoing direction is free, sample the new direction and calculate an updated weight
+ * This is done using importance sampling on S(Q,w) or uniform sampling across Q and w
+ * @param track The track whose direction will be updated
+ * @param invPOfQ The inverse probability distribution for S(Q,w)
+ * @param k The wavevector incident on this scatter
+ * @param scatteringXSection The scatter cross section applicable to this scatter
+ * @param rng Random number generator
+ * @param QSS Sum of Q.S(Q) - used to normalise when not importance sampling
+ * @param weight The weight for this track
+ */
 void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ, double &k,
                                                const double scatteringXSection,
                                                Kernel::PseudoRandomNumberGenerator &rng, double &QSS, double &weight) {
@@ -1398,6 +1490,12 @@ void DiscusMultipleScatteringCorrection::interpolateFromSparse(
   PARALLEL_CHECK_INTERRUPT_REGION
 }
 
+/**
+ * Adjust workspace name in case of clash in the ADS.
+ * Was mainly of value when member workspaces didn't have the group name as a prefix but
+ * have left this in place in case there is a clash for any reason
+ * @param wsName The name to set on the workspace
+ */
 void DiscusMultipleScatteringCorrection::correctForWorkspaceNameClash(std::string &wsName) {
   bool noClash(false);
 

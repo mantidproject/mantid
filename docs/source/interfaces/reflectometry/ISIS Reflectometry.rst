@@ -821,7 +821,7 @@ blank to create a wildcard row. Only one wildcard row may exist.
   :class: screenshot
   :width: 800px
   :align: center
-  :alt: The per-angle defaults table
+  :alt: The settings lookup table
 
   *The lookup table on the Experiment Settings tab*
 

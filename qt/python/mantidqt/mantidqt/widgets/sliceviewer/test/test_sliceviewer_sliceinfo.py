@@ -9,7 +9,7 @@
 import unittest
 
 # 3rd party
-from numpy import full, radians
+from numpy import full, radians, sin
 
 # local imports
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
@@ -70,6 +70,21 @@ class SliceInfoTest(unittest.TestCase):
         self.assertAlmostEqual(frame_point[0], slice_frame[2], delta=1e-6)
         self.assertEqual(slice_pt, info.z_value)
 
+    def test_transform_preceding_nonQdim_4D_MD_ws_nonortho_transform(self):
+        angles = full((3, 3), radians(90))
+        angles[0, 1] = radians(60)
+        angles[1, 0] = radians(60)
+        # dims: E,H,K,L - viewing (X,Y) = (K,H) with H,K non-orthog (angle=60 deg)
+        info = make_sliceinfo(point=(0., None, None, -1.), dimrange=[(-1., 1.), None, None, (-2., 2.)],
+                              qflags=(False, True, True, True), axes_angles=angles, transpose=True)
+        slice_pt = -1.
+        frame_point = (2.0, 0.0, slice_pt)
+        slice_frame = info.transform(frame_point)
+        self.assertAlmostEqual(slice_frame[0], 1.0, delta=1e-6)
+        self.assertAlmostEqual(slice_frame[1], 2*sin(angles[0, 1]), delta=1e-6)
+        self.assertAlmostEqual(slice_frame[2], slice_pt, delta=1e-6)
+        self.assertEqual(slice_pt, info.z_value)
+
     def test_inverse_transform_selects_dimensions_correctly_when_not_transposed(self):
         # Set slice info such that display(X,Y) = data(Y,Z)
         slice_pt = 0.5
@@ -94,6 +109,32 @@ class SliceInfoTest(unittest.TestCase):
         self.assertAlmostEqual(frame_point[0], slice_frame[2], delta=1e-6)
         self.assertAlmostEqual(frame_point[1], slice_frame[1], delta=1e-6)
         self.assertAlmostEqual(frame_point[2], slice_frame[0], delta=1e-6)
+        self.assertEqual(slice_pt, info.z_value)
+
+    def test_inverse_transform_preceding_nonQdim_4D_MD_ws(self):
+        info = make_sliceinfo(point=(0., None, None, -1.), dimrange=[(-1., 1.), None, None, (-2., 2.)],
+                              qflags=(False, True, True,True), transpose=True) # dims: E,H,K,L - viewing (X,Y) = (K,H)
+        slice_pt = -1.
+        frame_point = (1., 2., slice_pt)
+        slice_frame = info.inverse_transform(frame_point)
+        self.assertAlmostEqual(slice_frame[0], 2.0, delta=1e-6)
+        self.assertAlmostEqual(slice_frame[1], 1.0, delta=1e-6)
+        self.assertAlmostEqual(slice_frame[2], slice_pt, delta=1e-6)
+        self.assertEqual(slice_pt, info.z_value)
+
+    def test_inverse_transform_preceding_nonQdim_4D_MD_ws_nonortho_transform(self):
+        angles = full((3, 3), radians(90))
+        angles[0, 1] = radians(60)
+        angles[1, 0] = radians(60)
+        # dims: E,H,K,L - viewing (X,Y) = (K,H) with H,K non-orthog (angle=60 deg)
+        info = make_sliceinfo(point=(0., None, None, -1.), dimrange=[(-1., 1.), None, None, (-2., 2.)],
+                              qflags=(False, True, True, True), axes_angles=angles, transpose=True)
+        slice_pt = -1.
+        frame_point = (1., 2*sin(angles[0, 1]), slice_pt)
+        slice_frame = info.inverse_transform(frame_point)
+        self.assertAlmostEqual(slice_frame[0], 2.0, delta=1e-6)
+        self.assertAlmostEqual(slice_frame[1], 0.0, delta=1e-6)
+        self.assertAlmostEqual(slice_frame[2], slice_pt, delta=1e-6)
         self.assertEqual(slice_pt, info.z_value)
 
     def test_slicepoint_with_greater_than_three_qflags_true_raises_errors(self):
