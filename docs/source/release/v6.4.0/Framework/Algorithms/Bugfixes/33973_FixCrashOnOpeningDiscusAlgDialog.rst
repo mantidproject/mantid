@@ -1,0 +1,1 @@
+- Workbench will no longer crash if the algorithm dialog for :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` is opened while a group workspace is present in the Workspaces list.
