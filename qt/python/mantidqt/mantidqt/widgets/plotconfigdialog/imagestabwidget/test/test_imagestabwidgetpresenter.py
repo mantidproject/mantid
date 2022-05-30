@@ -16,7 +16,7 @@ from matplotlib.colors import LogNorm, Normalize
 from matplotlib.pyplot import figure
 from numpy import linspace, random
 
-from mantid.plots import MantidAxes  # register mantid projection  # noqa
+from mantid.plots import datafunctions, MantidAxes  # register mantid projection  # noqa
 from unittest.mock import Mock
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.functions import pcolormesh
@@ -203,6 +203,39 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         for ax in range(2):
             image = fig.axes[ax].images[0]
 
+            if image.colorbar:
+                self.assertEqual('New Label', image.colorbar.ax.get_ylabel())
+
+            self.assertEqual('jet', image.cmap.name)
+            self.assertEqual(0, image.norm.vmin)
+            self.assertEqual(2, image.norm.vmax)
+            self.assertTrue(isinstance(image.norm, Normalize))
+
+    def test_apply_properties_applies_to_all_images_if_mixed_colorfill_plots_and_one_colorbar(self):
+        # self.ws does not have common bins and has evenly spaced values on spectrum axis (gives Image)
+        # Also create ws with common bins, evenly spaced bin edges and uneven values on spectrum axis (gives QuadMesh)
+        ws = CreateWorkspace(DataX=list([0, 1, 2, 3, 4])*4, DataY=range(20), NSpec=4, OutputWorkspace='test_ws',
+                             VerticalAxisUnit='TOF', VerticalAxisValues=[1, 2, 4, 10])
+        fig = pcolormesh([self.ws, ws])
+        self.assertTrue(isinstance(fig.axes[0].images[0],matplotlib.image.AxesImage))
+        self.assertTrue(isinstance(fig.axes[1].collections[0], matplotlib.collections.QuadMesh))
+        props = {'label': 'New Label',
+                 'colormap': 'jet',
+                 'vmin': 0,
+                 'vmax': 2,
+                 'scale': 'Linear',
+                 'interpolation': 'None'}
+        if LooseVersion(matplotlib.__version__) > LooseVersion("3.1.3"):
+            mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - child0',
+                             get_properties=lambda: ImageProperties(props))
+        else:
+            mock_view = Mock(get_selected_image_name=lambda: 'ws: (0, 0) - image0',
+                             get_properties=lambda: ImageProperties(props))
+        presenter = self._generate_presenter(fig=fig, view=mock_view)
+        presenter.apply_properties()
+
+        images = datafunctions.get_images_from_figure(fig)
+        for image in images:
             if image.colorbar:
                 self.assertEqual('New Label', image.colorbar.ax.get_ylabel())
 
