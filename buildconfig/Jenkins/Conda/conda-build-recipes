@@ -149,13 +149,13 @@ cd $WORKSPACE
 # Set our local conda channel to find our locally build mantidworkbench package.
 LOCAL_CHANNEL=file://$CONDA_BLD_PATH
 
-#if [[ $OSTYPE == 'msys'* ]]; then
-#    rm -fr *.exe
-#    ${WORKSPACE}/installers/conda/win/create_package.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
-#elif [[ $OSTYPE == 'darwin'* ]]; then
-#    rm -fr *.dmg
-#    ${WORKSPACE}/installers/conda/osx/create_bundle.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
-#else
-#    rm -fr *.tar.xz
-#    ${WORKSPACE}/installers/conda/linux/create_tarball.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
-#fi
+if [[ $OSTYPE == 'msys'* ]]; then
+    rm -fr *.exe
+    ${WORKSPACE}/installers/conda/win/create_package.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    rm -fr *.dmg
+    ${WORKSPACE}/installers/conda/osx/create_bundle.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
+else
+    rm -fr *.tar.xz
+    ${WORKSPACE}/installers/conda/linux/create_tarball.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
+fi
