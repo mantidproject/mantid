@@ -158,7 +158,6 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value, 
   // return the same string. WorkspaceProperty<TYPE>::createHistory() then
   // records the correct workspace name for input into the final binary
   // operation rather than creating a temporary name.
-
   auto alg = API::AlgorithmManager::Instance().createUnmanaged("CreateSingleValuedWorkspace");
   alg->setChild(false);
   // we manually store the workspace as it's easier to retrieve the correct
