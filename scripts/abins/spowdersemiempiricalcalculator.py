@@ -408,10 +408,6 @@ class SPowderSemiEmpiricalCalculator:
                                   reporter=self.progress_reporter)
             iso_dw = self.calculate_isotropic_dw(q2=q2[order_expansion_slice[:-1]])
 
-            if len(iso_dw.shape) == 3:
-                # From q, atom, freq -> atom, q, freq
-                iso_dw = np.swapaxes(iso_dw, 0, 1)
-
             sdata.apply_dw(iso_dw, min_order=min_order, max_order=max_dw_order)
 
         return sdata
@@ -485,13 +481,25 @@ class SPowderSemiEmpiricalCalculator:
     def calculate_isotropic_dw(self, *, q2: np.ndarray) -> np.ndarray:
         """Compute Debye-Waller factor in isotropic approximation for current system
 
+        For 1-D data, q2 should be a row vector corresponding to frequency bin centres
+
+        For 2-D data, q2 should have shape (n_q, 1, 1) to support numpy
+        broadcasting over atoms and frequencies
+
         Returns an N_atoms x N_frequencies array.
         """
         average_a_traces = np.sum([self._powder_data.get_a_traces(k_index) * kpoint.weight
                                   for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
                                   axis=0)
-        return self._isotropic_dw(frequencies=self._bin_centres, q2=q2, a_trace=average_a_traces[:, np.newaxis],
-                                  temperature=self._temperature)
+        iso_dw = self._isotropic_dw(frequencies=self._bin_centres, q2=q2, a_trace=average_a_traces[:, np.newaxis],
+                                    temperature=self._temperature)
+
+        # For 2-D case we need to reshuffle axes after numpy broadcasting
+        if len(iso_dw.shape) == 3:
+            # From q, atom, freq -> atom, q, freq
+            iso_dw = np.swapaxes(iso_dw, 0, 1)
+
+        return iso_dw
 
     @staticmethod
     def _isotropic_dw(*, frequencies, q2, a_trace, temperature):
