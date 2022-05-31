@@ -507,7 +507,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
-        ax.lines.reverse()
+        # TODO: ax.lines is deprecated in matplotlib v3.5, and will be gone from v3.7. This will need re-writing.
+        # The built-in reverse method can't be used here as the double assignment doesn't work.
+        n = len(ax.lines)
+        for i in range(n//2):
+            line_1 = ax.lines.pop(i)
+            line_2 = ax.lines.pop(n-i-2)
+            ax.lines.insert(i, line_2)
+            ax.lines.insert(n-i-1, line_1)
+
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
         if LooseVersion("3.7") > LooseVersion(matplotlib.__version__) >= LooseVersion("3.2"):
