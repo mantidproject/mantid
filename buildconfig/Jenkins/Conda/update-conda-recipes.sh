@@ -82,9 +82,9 @@ fi
 cd conda-recipes
 
 function replace_version_data() {
-    sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' $1
-    sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' $1
-    sed -i '/  sha256: /c\  sha256: '$SHA256'' $1
+    sed -ie 's/{% set git_commit =.*/{% set git_commit = "'$LATEST_GIT_SHA'" %}/' $1
+    sed -ie 's/{% set version =.*/{% set version = "'$VERSION'" %}/' $1
+    sed -ie 's/  sha256: .*/  sha256: '$SHA256'/' $1
 }
 
 replace_version_data recipes/mantid/meta.yaml
