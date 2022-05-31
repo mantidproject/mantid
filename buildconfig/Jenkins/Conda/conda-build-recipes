@@ -149,6 +149,6 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
     rm -fr *.dmg
     ${WORKSPACE}/installers/conda/osx/create_bundle.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 else
-    rm -fr *.xz
+    rm -fr *.tar.xz
     ${WORKSPACE}/installers/conda/linux/create_tarball.sh -c "${LOCAL_CHANNEL}" -s ${PACKAGE_SUFFIX}
 fi

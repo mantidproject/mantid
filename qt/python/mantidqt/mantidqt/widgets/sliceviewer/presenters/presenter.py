@@ -371,7 +371,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self.refresh_view()
+            self.view.delayed_refresh()
         except ValueError as err:
             self._close_view_with_message(
                 f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")

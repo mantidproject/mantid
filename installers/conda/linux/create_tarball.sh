@@ -19,6 +19,7 @@ BUILD_DIR=_bundle_build
 CONDA_EXE=mamba
 CONDA_PACKAGE=mantidworkbench
 BUNDLE_PREFIX=mantidworkbench
+BUNDLE_EXTENSION=.tar.xz
 ICON_DIR="$HERE/../../../images"
 
 # Common routines
@@ -50,10 +51,10 @@ function fixup_bundle() {
 #  $1 - Name of the final file (without the suffix)
 #  $2 - Bundle name
 function create_tarball() {
-  local version_name=$1
+  local version_filename=$1$BUNDLE_EXTENSION
   local bundle_name=$2
-  echo "Creating tarball '$version_name.xz'"
-  tar --directory "$BUILD_DIR" --create --file "$version_name.xz" --xz "$bundle_name"
+  echo "Creating tarball '$version_filename'"
+  tar --directory "$BUILD_DIR" --create --file "$version_filename" --xz "$bundle_name"
 }
 
 # Print usage and exit
@@ -62,7 +63,7 @@ function usage() {
   echo "Usage: $0 [options]"
   echo
   echo "Create a tarball bundle out of a Conda package. The package is built in $BUILD_DIR."
-  echo "The final name will be '${BUNDLE_PREFIX}{suffix}.xz'"
+  echo "The final name will be '${BUNDLE_PREFIX}{suffix}${BUNDLE_EXTENSION}'"
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
   echo "Options:"
