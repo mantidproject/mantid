@@ -133,6 +133,12 @@ class DirectInstrument(Instrument):
 
         :param frequencies: DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         :param s_dft:  discrete S calculated directly from DFT
+
+        :returns:
+            (bin_centres, broadened_spectrum):
+            Resolution functions always create binned data on a regular mesh.
+            ``bin_centres`` and ``broadened_spectrum`` are a consistent set of
+            mesh frequencies and corresponding broadened intensity.
         """
 
         if scheme == 'auto':
@@ -145,9 +151,9 @@ class DirectInstrument(Instrument):
         sigma = np.full(frequencies.size, self.calculate_sigma(frequencies),
                         dtype=FLOAT_TYPE)
 
-        points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma,
+        bin_centres, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma,
                                                            scheme=scheme)
-        return points_freq, broadened_spectrum
+        return bin_centres, broadened_spectrum
 
     def calculate_sigma(self, frequencies):
         raise NotImplementedError()

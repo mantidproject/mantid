@@ -72,7 +72,11 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
             sampling bins. For 'legacy' broadening this step is desregarded and implemented elsewhere.
         :type prebin: str or bool
 
-        :returns: (points_freq, broadened_spectrum)
+        :returns:
+            (bin_centres, broadened_spectrum):
+            Resolution functions always create binned data on a regular mesh.
+            ``bin_centres`` and ``broadened_spectrum`` are a consistent set of
+            mesh frequencies and corresponding broadened intensity.
         """
 
         if scheme == 'auto':
@@ -102,6 +106,6 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
         sigma = self.get_sigma(frequencies)
 
-        points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft,
+        bin_centres, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft,
                                                            sigma, scheme=selected_scheme)
-        return points_freq, broadened_spectrum
+        return bin_centres, broadened_spectrum

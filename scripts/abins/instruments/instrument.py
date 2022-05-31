@@ -148,6 +148,12 @@ class Instrument:
             off between speed and accuracy. Not all schemes must (or should?) be implemented for all instruments, but
             'auto' should select something sensible.
         :type scheme: str
+
+        :returns:
+            (bin_centres, broadened_spectrum):
+            Resolution functions always create binned data on a regular mesh.
+            ``bin_centres`` and ``broadened_spectrum`` are a consistent set of
+            mesh frequencies and corresponding broadened intensity.
         """
         raise NotImplementedError()
 
