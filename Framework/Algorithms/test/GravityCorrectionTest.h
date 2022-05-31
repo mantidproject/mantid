@@ -257,10 +257,9 @@ public:
   // Real data tests
   // Use of slit1 and slit2 default values from sample logs
   // Example: FIGARO parameter file defines slit1 and slit2
-
   void testInputWorkspace2D_1() {
     TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec(
-        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/000002", "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");)
+        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/750662", "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");)
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("ws"));
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     GravityCorrection gc00;
@@ -268,7 +267,6 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr cws =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     this->noLossOfCounts(cws, corrected);
-    // this->notCommonBinCheck(cws, corrected);
     // TOF values, first spectrum
     const auto x1 = ws->x(0);
     const auto x2 = corrected->x(0);
@@ -277,7 +275,7 @@ public:
 
   void testInputWorkspace2D_2() {
     TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec("LoadILLReflectometry", 6, "Filename",
-                                                                            "ILL/Figaro/592724.nxs", "OutputWorkspace",
+                                                                            "ILL/Figaro/709886.nxs", "OutputWorkspace",
                                                                             "ws", "XUnit", "TimeOfFlight");)
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("ws"));
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("ws");
@@ -286,7 +284,6 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr cws =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     this->noLossOfCounts(cws, corrected);
-    // this->notCommonBinCheck(cws, corrected);
     // TOF values, first spectrum
     const auto x1 = cws->x(0);
     const auto x2 = corrected->x(0);
