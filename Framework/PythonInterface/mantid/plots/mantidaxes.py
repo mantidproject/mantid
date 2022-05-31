@@ -1214,6 +1214,9 @@ class MantidAxes(Axes):
             datafunctions.waterfall_remove_fill(self)
 
     def set_xscale(self, *args, **kwargs):
+        is_waterfall = self.is_waterfall()
+        if is_waterfall:
+            self.set_waterfall(False)
         has_minor_ticks = not isinstance(self.xaxis.minor.locator, NullLocator)
 
         super().set_xscale(*args, **kwargs)
@@ -1222,8 +1225,13 @@ class MantidAxes(Axes):
             self.minorticks_on()
         else:
             self.minorticks_off()
+        if is_waterfall:
+            self.set_waterfall(True)
 
     def set_yscale(self, *args, **kwargs):
+        is_waterfall = self.is_waterfall()
+        if is_waterfall:
+            self.set_waterfall(False)
         has_minor_ticks = not isinstance(self.yaxis.minor.locator, NullLocator)
 
         super().set_yscale(*args, **kwargs)
@@ -1232,6 +1240,8 @@ class MantidAxes(Axes):
             self.minorticks_on()
         else:
             self.minorticks_off()
+        if is_waterfall:
+            self.set_waterfall(True)
 
     def grid_on(self):
         return self.xaxis._major_tick_kw.get('gridOn', False) and self.yaxis._major_tick_kw.get('gridOn', False)
