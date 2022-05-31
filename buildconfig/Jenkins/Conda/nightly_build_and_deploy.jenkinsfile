@@ -38,7 +38,7 @@ def archive_conda_build(arch) {
 }
 
 def create_standalone_package_linux() {
-  archiveArtifacts artifacts: "*.xz",
+  archiveArtifacts artifacts: "*.tar.xz",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
@@ -162,7 +162,7 @@ pipeline {
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
         // Standalone packages next
         sh 'rm -fr ${WORKSPACE}/standalone-packages'
-        copyArtifacts filter: '*.exe, *.dmg, *.xz',
+        copyArtifacts filter: '*.exe, *.dmg, *.tar.xz',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
           selector: specific('${BUILD_NUMBER}'),
