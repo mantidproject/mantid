@@ -115,7 +115,7 @@ fi
 git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIPES_TAG
 
 # Update the git sha and version number when building packages from the current branch.
-if [[ BUILD_CURRENT_BRANCH == true ]]; then
+if [[ $BUILD_CURRENT_BRANCH == true ]]; then
     $SCRIPT_DIR/update-conda-recipes.sh dummy_token dummy_name dummy_email --local-only
 fi
 
