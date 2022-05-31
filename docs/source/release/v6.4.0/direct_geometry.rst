@@ -32,7 +32,7 @@ New Features
 
 - :ref:`DirectILLAutoProcess <algm-DirectILLAutoProcess>` now performs the full data reduction treatment for ILL direct geometry instruments for an empty container, vanadium, and sample, both for single crystal and powder.
 - :ref:`DirectILLCollectData <algm-DirectILLCollectData>` has two new properties: ``GroupDetHorizontallyBy`` and ``GroupDetVerticallyBy`` which allow for averaging pixel counts between the tubes and inside them, respectively, or for flat background calculations.
-- Autoscaling has been added to the :ref:`PelicanReduction <algm-PelicanReduction>` algorithm to ensure that the Q range to matches the energy transfer, as is default in the UI.
+- Autoscaling has been added to the :ref:`PelicanReduction <algm-PelicanReduction>` algorithm to ensure that the Q range matches the energy transfer, as is default in the UI.
 
 Bugfixes
 ########
@@ -46,7 +46,7 @@ New Features
 ############
 
 - The :ref:`Crystal Field Python interface <Crystal Field Python Interface>` has been extended to include functions to calculate the x, y, and z components of
-  the dipole transition matrix. ``getXDipoleMatrixComponent()``, ``getYDipoleMatrixComponent()`` and ``getZDipoleMatrixComponent()``.
+  the dipole transition matrix: ``getXDipoleMatrixComponent()``, ``getYDipoleMatrixComponent()`` and ``getZDipoleMatrixComponent()``.
 
 Bugfixes
 ########
@@ -59,17 +59,17 @@ MSlice
 New Features
 ############
 
-- The documentation has been improved.
+- The documentation has been improved to include more up-to-date screenshots and more information about cutting methods.
 - The programme is now available as a noarch conda package.
-- MSlice has been updated to matplotlib 3.5.
+- MSlice is now compatible with ``matplotlib 3.5.0``.
 - Slice plot font sizes can now be changed using the quick options.
-- The default cut algorithm has been changed to Integration.
+- The default cut algorithm has been changed to ``Integration``.
 
 Bugfixes
 ########
 
 - The Default Energy Unit menu is no longer empty.
-- The 'Show Legend' check boxes now appear with the correct state.
+- The ``Show Legend`` check boxes now appear with the correct state.
 
 
 :ref:`Release 6.4.0 <v6.4.0>`
