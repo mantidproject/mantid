@@ -39,6 +39,7 @@ dependencies:
   - requests>=2.25.1
   - scipy>=1.6.2
   - setuptools=48.0.0 # Pinned purposefully due to incompatibility with later versions
+  - sphinx >= 4.5.*
   - sphinx_bootstrap_theme<=0.7.1
   - tbb-devel=2020.2.*
   - tbb=2020.2.*
