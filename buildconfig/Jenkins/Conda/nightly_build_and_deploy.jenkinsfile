@@ -66,6 +66,10 @@ pipeline {
   }
   stages {
     stage('Build and test') {
+      when {
+        beforeAgent true
+        environment name: 'BUILD_AND_TEST', value: 'true'
+      }
       parallel {
         stage('platform: linux') {
           agent { label 'conda-build-linux' }
@@ -107,6 +111,10 @@ pipeline {
       }
     }
     stage('Update conda-recipes repository') {
+      when {
+        beforeAgent true
+        environment name: 'PUBLISH_PACKAGES', value: 'true'
+      }
       agent { label 'conda-build-linux' }
       environment { GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
       steps {
@@ -116,6 +124,10 @@ pipeline {
     stage('Packaging') {
       parallel {
         stage('platform: linux-64') {
+          when {
+            beforeAgent true
+            environment name: 'BUILD_PACKAGE_LINUX', value: 'true'
+          }
           agent { label 'conda-build-linux' }
           options { timestamps () }
           steps {
@@ -124,6 +136,10 @@ pipeline {
           }
         }
         stage('platform: win-64') {
+          when {
+            beforeAgent true
+            environment name: 'BUILD_PACKAGE_WIN', value: 'true'
+          }
           agent { label 'conda-build-win' }
           options { timestamps () }
           steps {
@@ -135,6 +151,10 @@ pipeline {
           }
         }
         stage('platform: osx-64') {
+          when {
+            beforeAgent true
+            environment name: 'BUILD_PACKAGE_OSX', value: 'true'
+          }
           agent { label 'conda-build-osx' }
           options { timestamps () }
           steps {
@@ -145,6 +165,10 @@ pipeline {
       }
     }
     stage ('Publishing') {
+      when {
+        beforeAgent true
+        environment name: 'PUBLISH_PACKAGES', value: 'true'
+      }
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       options { timestamps () }
       environment {
@@ -173,6 +197,10 @@ pipeline {
       }
     }
     stage ('Delete old Conda nightly packages from Anaconda') {
+      when {
+        beforeAgent true
+        environment name: 'PUBLISH_PACKAGES', value: 'true'
+      }
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
