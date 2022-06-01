@@ -68,14 +68,12 @@ void XDataConverter::exec() {
   bool isRebinnedWorkspace = inputWS->id() == "RebinnedOutput";
   RebinnedOutput_sptr outRB = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
   // Force fractions to unity (converting from histo to point discards bin info).
-  MantidVecPtr outF;
-  // need this line to prevent a hard crash
-  outF.access().resize(inputWS->getNumberBins(0), 1.0);
 
   Progress prog(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERRUPT_REGION
+    MantidVecPtr outF;
 
     outF.access().resize(inputWS->getNumberBins(i), 1.0);
     // Copy over the Y and E data
