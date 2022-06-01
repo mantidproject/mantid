@@ -8,6 +8,7 @@
 
 from enum import Enum
 from os import path
+from numpy import array
 
 from qtpy.QtCore import QObject, Signal
 
@@ -168,6 +169,13 @@ class ScanExplorerPresenter:
         @param new_algorithm: the algorithm that has been created
         """
         self.future_workspace = new_algorithm.getPropertyValue("OutputWorkspace")
+
+    def get_axes(self) -> (array, array):
+        """
+        Get the axes from the workspace
+        @return the x and y axes of the scan workspace
+        """
+        return self._ws.getAxis(0).extractValues(), self._ws.getAxis(1).extractValues()
 
     @property
     def ws(self):

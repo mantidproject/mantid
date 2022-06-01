@@ -1,5 +1,6 @@
 from typing import Any
 from enum import Enum
+from bisect import bisect_left
 
 from matplotlib.widgets import RectangleSelector
 from matplotlib.patches import Rectangle
@@ -49,18 +50,19 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         interaction = self._determine_behaviour(click_event, release_event)
 
+        click_event_pos = (click_event.xdata, click_event.ydata)
+        release_event_pos = (release_event.xdata, release_event.ydata)
+
         if interaction == UserInteraction.RECTANGLE_CREATED:
-            self._draw_rectangle((click_event.xdata, click_event.ydata),
-                                 release_event.xdata - click_event.xdata,
-                                 release_event.ydata - click_event.ydata)
+            point, width, height = self._snap_to_edges(click_event_pos, release_event_pos)
+            self._draw_rectangle(point, width, height)
 
         elif interaction == UserInteraction.RECTANGLE_SELECTED:
-            self._select_rectangle(click_event.xdata, click_event.ydata)
+            self._select_rectangle(click_event_pos)
 
         elif interaction == UserInteraction.RECTANGLE_MOVED or interaction == UserInteraction.RECTANGLE_RESHAPED:
-            self._move_selected_rectangle((click_event.xdata, click_event.ydata),
-                                          release_event.xdata - click_event.xdata,
-                                          release_event.ydata - click_event.ydata)
+            point, width, height = self._snap_to_edges(click_event_pos, release_event_pos)
+            self._move_selected_rectangle(point, width, height)
 
         self._update_plot_values()
 
@@ -98,13 +100,51 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         return UserInteraction.RECTANGLE_CREATED
 
-    def _select_rectangle(self, xpos: float, ypos: float):
+    def _snap_to_edges(self, point_1: tuple, point_2: tuple) -> (tuple, float, float):
         """
-        Select the rectangle at position (xpos, ypos), if there is one. The rectangle selected is the first one found,
+        Snap the boundaries of the drawn rectangle to the nearest edges
+        @param point_1: a corner of the rectangle
+        @param point_2: the opposing corner of the rectangle
+        @return a corner of the new rectangle and its width and height
+        """
+        x0, y0 = point_1
+        x1, y1 = point_2
+
+        x_axis_values, y_axis_values = self.exporter.get_axes()
+
+        def closest_value(axis, value):
+            """Find the closest edge to the given value along given axis"""
+            idx = bisect_left(axis, value)
+
+            # edges are at the middle point between axis values
+            edge = (axis[idx] + axis[idx - 1]) / 2
+            print(axis, idx, value)
+
+            # conditions to manage the weirdly cut limits of the plot. See slice viewer to understand better
+            if idx == len(axis) - 1 and value > (edge + axis[-1]) / 2:
+                return axis[-1]
+            if idx == 1 and value < (edge + axis[0]) / 2:
+                print(idx)
+                return axis[0]
+
+            return edge
+
+        x0 = closest_value(x_axis_values, x0)
+        y0 = closest_value(y_axis_values, y0)
+        x1 = closest_value(x_axis_values, x1)
+        y1 = closest_value(y_axis_values, y1)
+
+        self._selector.extents = (x0, x1, y0, y1)
+
+        return (x0, y0), x1 - x0, y1 - y0
+
+    def _select_rectangle(self, point: tuple):
+        """
+        Select the rectangle at position point, if there is one. The rectangle selected is the first one found,
         i.e. the oldest one, normally.
-        @param xpos: x axis position of the click.
-        @param ypos: y axis position of the click
+        @param point : the position of the click, as (x, y) coordinates
         """
+        xpos, ypos = point
         for rect in self._rectangles:
             x0, y0 = rect.get_xy()
             x1 = x0 + rect.get_width()
@@ -223,6 +263,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             Check if the rectangle with center at center fits in the image boundaries.
             @param center: the center of the rectangle
             """
+            # TODO why no / 2 on the second member ?
             return xmin <= center[0] + new_width / 2 <= xmax and xmin <= center[0] - new_width <= xmax and \
                 ymin <= center[1] + new_height / 2 <= ymax and ymin <= center[1] - new_height <= ymax
 
