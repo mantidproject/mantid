@@ -8,6 +8,7 @@
 from collections.abc import Iterable
 import copy
 from distutils.version import LooseVersion
+from functools import wraps
 
 import matplotlib
 import numpy as np
@@ -41,6 +42,7 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 
 
 def plot_decorator(func):
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
         func_name = func.__name__
