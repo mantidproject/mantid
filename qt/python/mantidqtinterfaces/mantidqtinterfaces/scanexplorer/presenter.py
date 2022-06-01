@@ -33,7 +33,7 @@ class WS_TYPE(Enum):
 class ScanExplorerPresenter:
 
     def __init__(self):
-        self._ws = None
+        self._ws: MatrixWorkspace = None
         self.view = ScanExplorerView(presenter=self)
         self.model = ScanExplorerModel(presenter=self)
 
@@ -183,6 +183,10 @@ class ScanExplorerPresenter:
 
     def show(self):
         self.view.show()
+
+    @property
+    def rectangles_manager(self):
+        return self.view.rectangles_manager
 
 
 class ScanAlgorithmObserverSignals(QObject):

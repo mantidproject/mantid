@@ -12,7 +12,9 @@ from qtpy.QtCore import *
 import mantid
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+
 from .rectangle_plot import MultipleRectangleSelectionLinePlot
+from .rectangle_controller import RectanglesManager
 
 
 class ScanExplorerView(QMainWindow):
@@ -58,6 +60,8 @@ class ScanExplorerView(QMainWindow):
         self.splitter.addWidget(interface_widget)
         self.setCentralWidget(self.splitter)
 
+        self._rectangles_manager = None
+
         # register startup
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "ScanExplorer", False)
 
@@ -65,6 +69,10 @@ class ScanExplorerView(QMainWindow):
         """
         Change to multiple rectangle mode.
         """
+        self._rectangles_manager = RectanglesManager(self)
+        self.splitter.addWidget(self._rectangles_manager)
+        self.splitter.setOrientation(Qt.Horizontal)
+
         tool = MultipleRectangleSelectionLinePlot
         self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, state=True, trigger=True)
         self._data_view.switch_line_plots_tool(tool, self.presenter)
@@ -148,3 +156,7 @@ class ScanExplorerView(QMainWindow):
     @data_view.setter
     def data_view(self, new_data_view):
         self._data_view = new_data_view
+
+    @property
+    def rectangles_manager(self):
+        return self._rectangles_manager

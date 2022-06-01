@@ -34,6 +34,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self._rectangles = []
         self._current_rectangle = None
 
+        self._manager = exporter.rectangles_manager
+
     def _on_rectangle_selected(self, click_event, release_event):
         """
         Called when a rectangle is selected by RectangleSelector. It draws the rectangle and update the plot.
@@ -166,6 +168,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self.plotter.image_axes.add_patch(rectangle_patch)
         self._rectangles.append(rectangle_patch)
         self._current_rectangle = rectangle_patch
+        self._manager.add_controller(point[0], point[1], point[0] + width, point[1] + height)
 
     def _move_selected_rectangle(self, new_point: tuple, new_width: float, new_height: float):
         """
