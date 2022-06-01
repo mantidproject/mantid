@@ -284,10 +284,10 @@ void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWor
           xmax = xback;
       }
     }
-    // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
-    if (xmin > xmax)
-      throw std::runtime_error("Unable to determine min and max x values for workspace");
   }
+  // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
+  if (xmin > xmax)
+    throw std::runtime_error("Unable to determine min and max x values for workspace");
 }
 
 void DiscusMultipleScatteringCorrection::prepareStructureFactor() {

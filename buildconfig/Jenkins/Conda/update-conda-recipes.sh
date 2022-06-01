@@ -1,15 +1,39 @@
 #!/bin/bash -ex
 
 # Update the https://github.com/mantidproject/conda-recipes repository with the latest changes from the currently
-# checked out branch.
+# checked out branch of mantid.
 #
 # Expected args:
 #   1. GITHUB_ACCESS_TOKEN: The token required to push to a https cloned mantidproject/conda-recipes repository
 #   2. GITHUB_USER_NAME: The user name of the mantidproject/conda-recipes repository for committing and pushing
+#   3. GITHUB_USER_EMAIL: The email address associated with the user
+#
+# Possible flags:
+#   --local-only: update a local copy of the conda-recipes repository only without cloning, and do not push the changes
+#     to github.
 
 GITHUB_ACCESS_TOKEN=$1
-GITHUB_USER_NAME=$2
-GITHUB_USER_EMAIL=$3
+shift
+GITHUB_USER_NAME=$1
+shift
+GITHUB_USER_EMAIL=$1
+shift
+
+# Optional flag to update a local repo without pushing the changes
+LOCAL_ONLY=false
+
+# Handle flag inputs
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --local-only) LOCAL_ONLY=true ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
 
 # Generate the latest version number
 LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
@@ -50,28 +74,32 @@ echo $SHA256
 rm -rf $SOURCE_FILE
 
 # Clone conda-recipes
-if [ -d "conda-recipes" ]; then rm -rf conda-recipes; fi
-git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git
+if [[ $LOCAL_ONLY  == false ]]; then
+    if [ -d "conda-recipes" ]; then rm -rf conda-recipes; fi
+    git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git
+fi
 
 cd conda-recipes
 
 function replace_version_data() {
-    sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' $1
-    sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' $1
-    sed -i '/  sha256: /c\  sha256: '$SHA256'' $1
+    sed -ie 's/{% set git_commit =.*/{% set git_commit = "'$LATEST_GIT_SHA'" %}/' $1
+    sed -ie 's/{% set version =.*/{% set version = "'$VERSION'" %}/' $1
+    sed -ie 's/  sha256: .*/  sha256: '$SHA256'/' $1
 }
 
 replace_version_data recipes/mantid/meta.yaml
 replace_version_data recipes/mantidqt/meta.yaml
 replace_version_data recipes/mantidworkbench/meta.yaml
 
-if ! git diff --quiet --exit-code; then
-    git config user.name ${GITHUB_USER_NAME}
-    git config user.email ${GITHUB_USER_EMAIL}
-    git add recipes/*/meta.yaml
-    git commit -m "Update version and git sha" --no-verify --signoff
-    git pull --ff
-    git push
-else
-    echo "No changes to commit"
+if [[ $LOCAL_ONLY  == false ]]; then
+    if ! git diff --quiet --exit-code; then
+        git config user.name ${GITHUB_USER_NAME}
+        git config user.email ${GITHUB_USER_EMAIL}
+        git add recipes/*/meta.yaml
+        git commit -m "Update version and git sha" --no-verify --signoff
+        git pull --ff
+        git push
+    else
+        echo "No changes to commit"
+    fi
 fi
