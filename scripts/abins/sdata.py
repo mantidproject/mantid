@@ -14,6 +14,7 @@ from scipy.signal import convolve
 from mantid.kernel import logger as mantid_logger
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
+from abins.instruments.directinstrument import DirectInstrument
 import abins.parameters
 
 # Type annotation for atom items e.g. data['atom_1']
@@ -29,6 +30,20 @@ class SData(collections.abc.Sequence):
 
     Indexing will return dict(s) of S by quantum order for atom(s)
     corresponding to index/slice.
+
+    Args:
+        data:
+            Scattering data as 1-D or 2-D arrays, arranged by atom and quantum order
+
+                    {'atom_0': {'s': {'order_1': array([[s11, s12, s13, ...]
+                                                  [s21, s22, s23, ...], ...])
+                                                  'order_2': ...}},
+                     'atom_1': ...}
+
+                where array rows correspond to q-points and columns correspond
+                to frequencies. If q-points and energies are not independent
+                (e.g. indirect-geometry spectrum at a given angle) 1-D arrays are used.
+
     """
 
     def __init__(self, *,
@@ -36,6 +51,7 @@ class SData(collections.abc.Sequence):
                  frequencies: np.ndarray,
                  temperature: Optional[float] = None,
                  sample_form: str = '',
+                 q_bins: Optional[np.ndarray] = None
                  ) -> None:
         super().__init__()
 
@@ -53,6 +69,12 @@ class SData(collections.abc.Sequence):
 
         self._frequencies = np.asarray(frequencies, dtype=FLOAT_TYPE)
         self._check_frequencies()
+
+        if q_bins is not None:
+            self._q_bins = np.asarray(q_bins, dtype=FLOAT_TYPE)
+        else:
+            self._q_bins = None
+        self._check_q_bins()
 
         self._data = data
         self._check_data()
@@ -114,6 +136,7 @@ class SData(collections.abc.Sequence):
                   frequencies: np.ndarray,
                   atom_keys: Sequence[str],
                   order_keys: Sequence[str],
+                  n_rows: Optional[int] = None,
                   **kwargs) -> SD:
         """Construct data container with zeroed arrays of appropriate dimensions
 
@@ -133,6 +156,10 @@ class SData(collections.abc.Sequence):
             order_keys:
                 keys for quantum order
 
+            n_rows:
+                If provided, SData is filled with 2-D arrays of dimensions
+                (n_rows, len(frequencies)).
+
             **kwargs:
                 remaining keyword arguments will be passed to class constructor
                 (Usually these would be ``temperature=`` and ``sample_form=``.)
@@ -142,8 +169,12 @@ class SData(collections.abc.Sequence):
         """
 
         n_frequencies = len(frequencies)
+        if n_rows is None:
+            shape = n_frequencies
+        else:
+            shape = (n_rows, n_frequencies)
 
-        data = {atom_key: {'s': {order_key: np.zeros(n_frequencies)
+        data = {atom_key: {'s': {order_key: np.zeros(shape)
                                  for order_key in order_keys}}
                 for atom_key in atom_keys}
 
@@ -151,6 +182,32 @@ class SData(collections.abc.Sequence):
 
     def get_frequencies(self) -> np.ndarray:
         return self._frequencies.copy()
+
+    def get_q_bins(self) -> np.ndarray:
+        if self._q_bins is None:
+            return None
+        else:
+            return self._q_bins.copy()
+
+    def get_q_bin_centres(self) -> np.ndarray:
+        q_bins = self.get_q_bins()
+        if q_bins is None:
+            raise ValueError("No q_bins on this SData")
+        else:
+            return (q_bins[1:] + q_bins[:-1]) / 2.
+
+    def set_q_bins(self, q_bins: np.ndarray) -> None:
+        """Update q-bins stored on SData
+
+        Args:
+            q_bins: 1-D set of q-point bin edges surrounding rows in S data
+                (e.g. for q-bins=[1., 2., 3.], S arrays will have two rows
+                 corresponding to q =1 to 2 Å^-1, q =2 to 3 Å^-1; typically these
+                 are evaluated at the bin centres 1.5, 2.5 Å^-1.)
+            """
+        self._q_bins = q_bins
+        self._check_q_bins()
+        self._check_data()
 
     def get_temperature(self) -> Union[float, None]:
         return self._temperature
@@ -174,7 +231,13 @@ class SData(collections.abc.Sequence):
     def get_total_intensity(self) -> np.ndarray:
         """Sum over all atoms and quantum orders to a single spectrum"""
 
-        total = np.zeros_like(self._frequencies)
+        # Find a spectrum to get initial shape
+        for atom_data in self:
+            for order_key, data in atom_data.items():
+                total = np.zeros_like(data)
+                break
+            break
+
         for atom_data in self:
             for order_key, data in atom_data.items():
                 total += data
@@ -199,10 +262,20 @@ class SData(collections.abc.Sequence):
                            self._frequencies):
             raise ValueError("Frequencies not sorted low to high")
 
+    def _check_q_bins(self):
+        if (self._q_bins is not None) and (len(self._q_bins.shape) != 1):
+            raise IndexError("Q-bins should be a 1-D array")
+
     def _check_data(self):
         """Check data set is consistent and has correct types"""
         if not isinstance(self._data, dict):
             raise ValueError("New value of S  should have a form of a dict.")
+
+        n_frequencies = self._frequencies.size
+        if self._q_bins is None:
+            expected_shapes = [(n_frequencies,), (1, n_frequencies)]
+        else:
+            expected_shapes = [(self._q_bins.size - 1, n_frequencies),]
 
         for key, item in self._data.items():
             if ATOM_LABEL in key:
@@ -215,6 +288,11 @@ class SData(collections.abc.Sequence):
                 for order in item[S_LABEL]:
                     if not isinstance(item[S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
+                    elif item[S_LABEL][order].shape not in expected_shapes:
+                        raise ValueError(f"SData not dimensionally consistent with frequencies / q-bins "
+                                         f"for {key}, {order}. "
+                                         f"Expected shape " + " or ".join(map(str, expected_shapes))
+                                         + f"; got shape {item[S_LABEL][order].shape}")
 
             elif item == "frequencies":
                 raise Exception("The Abins SData format is changed, do not put frequencies in this dict")
@@ -230,6 +308,8 @@ class SData(collections.abc.Sequence):
         # Use a shallow copy so that 'frequencies' is not added to self._data
         full_data = self._data.copy()
         full_data.update({'frequencies': self._frequencies})
+        if self._q_bins is not None:
+            full_data.update({'q_bins': self._q_bins})
         return full_data
 
     def rebin(self, bins: np.array) -> 'SData':
@@ -353,6 +433,27 @@ class SData(collections.abc.Sequence):
         else:
             return None
 
+    def apply_kinematic_constraints(self, instrument: DirectInstrument) -> None:
+        """Replace inaccessible intensity bins with NaN
+
+        This passes frequencies to instrument.get_abs_q_limits() method to get
+        accessible q-range at each energy, and masks out other bins with NaN.
+        Data must be 2-D and q_bins must be available.
+
+        Values will be modified in-place.
+
+        Args:
+            instrument - this must have the get_abs_q_limits() method
+                (i.e. inherit DirectInstrument).
+        """
+        q_lower, q_upper = instrument.get_abs_q_limits(self.get_frequencies())
+        q_values = self.get_q_bin_centres()
+        mask = np.logical_or(q_values[:, np.newaxis] < q_lower[np.newaxis, :],
+                             q_values[:, np.newaxis] > q_upper[np.newaxis, :])
+        for atom_data in self:
+            for _, order_data in atom_data.items():
+                order_data[mask] = float('nan')
+
     def __mul__(self, other: np.ndarray) -> 'SData':
         """Multiply S data by an array over energies and orders
 
@@ -364,7 +465,8 @@ class SData(collections.abc.Sequence):
         new_sdata = SData(data=deepcopy(self._data),
                           frequencies=self.get_frequencies(),
                           temperature=self.get_temperature(),
-                          sample_form=self.get_sample_form())
+                          sample_form=self.get_sample_form(),
+                          q_bins=self.get_q_bins())
         new_sdata *= other
 
         return new_sdata
@@ -385,7 +487,7 @@ class SData(collections.abc.Sequence):
 
         if isinstance(other, np.ndarray) and len(other.shape) == 1:
             other = other[np.newaxis, :]
-        elif isinstance(other, np.ndarray) and len(other.shape) == 2:
+        elif isinstance(other, np.ndarray) and len(other.shape) in (2, 3):
             pass
         else:
             raise IndexError(
@@ -393,7 +495,11 @@ class SData(collections.abc.Sequence):
 
         for order_index, order_multiplier in enumerate(other):
             for atom_data in self:
-                atom_data[f'order_{order_index + 1}'] *= order_multiplier
+                if (len(atom_data[f'order_{order_index + 1}'].shape) == 1
+                        and len(other.shape) == 3):
+                    atom_data[f'order_{order_index + 1}'] = atom_data[f'order_{order_index + 1}'][np.newaxis, :] * order_multiplier
+                else:
+                    atom_data[f'order_{order_index + 1}'] *= order_multiplier
 
         return self
 

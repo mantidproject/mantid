@@ -8,6 +8,7 @@
 from collections.abc import Iterable
 import copy
 from distutils.version import LooseVersion
+from functools import wraps
 
 import matplotlib
 import numpy as np
@@ -41,6 +42,7 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 
 
 def plot_decorator(func):
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
         func_name = func.__name__
@@ -1127,7 +1129,7 @@ class MantidAxes(Axes):
         self.waterfall_y_offset = y_offset
 
         for cap in errorbar_cap_lines:
-            self.lines.add_line(cap)
+            self.add_line(cap)
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
