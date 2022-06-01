@@ -540,14 +540,29 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
 
       const auto energyRange = getXRangeFromWorkspace(ws);
       // Set default rebinning bounds
+      double minScaleFactor = 10.0;
+      double maxScaleFactor = 10.0;
       const auto energyRangeMid = (energyRange.second + energyRange.first) / 2.0;
-      QPair<double, double> peakERange(-res * 10 + energyRangeMid, res * 10 + energyRangeMid);
+      double offset = energyRangeMid;
+      if (-res * minScaleFactor > energyRange.first && res * maxScaleFactor < energyRange.second) {
+        offset = 0.0;
+      }
+      QPair<double, double> peakERange(-res * minScaleFactor + offset, res * maxScaleFactor + offset);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
       setPlotPropertyRange(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], energyRange);
       setRangeSelector(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], peakERange);
 
       // Set default background bounds
-      QPair<double, double> backgroundERange(-res * 20 + energyRangeMid, -res * 15 + energyRangeMid);
+      minScaleFactor = 9.0;
+      maxScaleFactor = 8.0;
+      if (-res * minScaleFactor > energyRange.first && -res * maxScaleFactor < energyRange.second) {
+        offset = 0.0;
+      } else {
+        minScaleFactor = 20.;
+        maxScaleFactor = 15.;
+        offset = (energyRange.second + energyRange.first) / 2.0;
+      }
+      QPair<double, double> backgroundERange(-res * minScaleFactor + offset, -res * maxScaleFactor + offset);
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
     }
