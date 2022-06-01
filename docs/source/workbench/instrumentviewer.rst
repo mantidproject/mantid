@@ -76,7 +76,75 @@ The text box below the tool bar show textual information about selected detector
     :align: center
     :width: 635
 
-Documentation will be updated as additional features are added.
+Single detector selection
+#########################
+
+The |singlePixel| tool allows the user to click on detectors, which will update the mini-plot to display the spectrum of the workspace
+associated with the clicked detector. The user can keep curves of interest for longer by right clicking on the detector and selecting "Store curve"
+from the context menu.
+
+The context menu also gives the option to save the content of the mini-plot to a new workspace. There is no limit to the number of curves
+that can be added to the mini-plot. Curves can be removed by right-clicking on the mini-plot and selecting the line the user wishes to remove. The same
+menu allows for switching between linear and log scales for the Y axis.
+
+.. |singlePixel| image:: ../images/PickTabPickPixelButton.png
+
+Tube Selection
+##############
+
+The |tubeBank| tool allows the user to click a detector and have the mini-plot display the data from the immediate parent of the
+detector. Usually a tube or bank, depending on the instrument.
+
+When using this tool, the user can right-click on the mini-plot to select between a sum of the counts of all detectors in the bank/tube or counts integrated
+over the time bins vs the detector position in the tube.
+
+.. |tubeBank| image:: ../images/PickTabPickTubeButton.png
+
+.. image:: ../images/Workbench/InstrumentViewer/PickTubeContextMenu.png
+
+Create a Single Crystal Peak List
+#################################
+
+The |singleCrystal| tool allows the user to create a single crystal peak list and add a peak to it. First, select the tool and click a detector. Then
+click on the peak in the mini-plot. If it is the first peak Workbench will create a :ref:`PeaksWorkspace <PeaksWorkspace>` named ``SingleCrystalPeakTable``
+and add a peak to it. Peak markers will then be displayed over the instrument.
+
+.. |singleCrystal| image:: ../images/PickTabAddPeakButton.png
+
+.. image:: ../images/Workbench/InstrumentViewer/SingleCrystalPeakExample.png
+
+Single Crystal Peak Eraser
+##########################
+
+The |eraser| tool can be used to remove single crystal peaks by clicking on or dragging over the peak markers. The hatched rectangle indicates the
+area where peaks will be erased. The rows in the :ref:`PeaksWorkspace <PeaksWorkspace>` are then deleted with the markers. The size of the rectangle
+can be adjusted by scrolling.
+
+.. |eraser| image:: ../images/PickTabEraseButton.png
+
+Peak Comparison Tool
+####################
+
+The |peakComparison| tool can be used to calculate the reciprocal angle between two single crystal peaks. The hatched box indicates the area in which peaks
+will be selected. Click on a single peak marker to select it, then again on another marker. There will be a line drawn between the two peaks and the information
+box will show the list of peaks falling into this spectrum.
+
+.. |peakComparison| image:: ../images/PickTabCPCompare.png
+
+.. image:: ../images/Workbench/InstrumentViewer/PeakComparisonExample.png
+
+Peak Alignment Tool
+###################
+
+The |peakAlign| tool allows for the calculation of in-plane and out-of-plane angles between a user defined plane and an out-of-plane peak in Q-space. The plane
+must be defined first, by selecting two peaks. Clicking while they are within the hatched box will select them, and mark them with a blue circle. Subsequent peaks
+will be highlighted by green circles. The information box will contain the in-plane angles (phi) and out-of-plane angles (theta) for each green peak.
+
+Selections can be cleared by right-clicking the instrument view and selecting ``Clear alignment plane``.
+
+.. |peakAlign| image:: ../images/PickTabCPAlign.png
+
+.. image:: ../images/Workbench/InstrumentViewer/PeaksAlignmentExample.png
 
 
 .. _instrumentviewer_draw_tab:
