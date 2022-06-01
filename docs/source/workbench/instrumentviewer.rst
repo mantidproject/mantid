@@ -151,6 +151,14 @@ Selections can be cleared by right-clicking the instrument view and selecting ``
 
 Draw Tab
 --------
+
+.. |ellipse| image:: ../images/PickTabEllipseButton.png
+.. |rectangle| image:: ../images/PickTabRectButton.png
+.. |ellipseRing| image:: ../images/PickTabElRingButton.png
+.. |rectangleRing| image:: ../images/PickTabRectRingButton.png
+.. |sector| image:: ../images/PickTabSectorButton.png
+.. |arbitrary| image:: ../images/PickTabArbitraryShape.png
+
 The Draw tab contains tools for creating and editing geometrical shapes which can be used for selecting regions of interest (ROI), masking or grouping detectors.
 The tab contains a mini toolbar, a shape property browser and a set of buttons to use the shapes.
 
@@ -158,8 +166,59 @@ The tab contains a mini toolbar, a shape property browser and a set of buttons t
     :align: center
     :width: 635
 
-More doc will be migrated from MantidPlot as new features being consolidated.
+Masks are created by using six tools:
 
+- |ellipse| Ellipse
+- |rectangle| Rectangle
+- |ellipseRing| Ellipse Ring
+- |rectangleRing| Rectangle Ring
+- |sector| Sector
+- |arbitrary| Brush: This allows for drawing of masks arbitrarily. The size of the brush can be changed by scrolling.
+
+There is no limit on the number of shapes. The shapes can be selected and edited by selecting |edit|.
+Click on the shaded part of a shape and drag to move it around or move a control point to resize.
+
+.. |edit| image:: ../images/PickTabEditButton.png
+
+.. image:: ../images/Workbench/InstrumentViewer/DrawShapesExample.jpg
+
+The property browser displays the parameters of the selected shape. All sizes are given in the coordinates of the unwrapped surface the shapes are drawn on.
+For example, for a spherical surface it will be polar and azimuth angles in radians. The shapes are "attached" to the surface and move with it when the view is zoomed or moved.
+|zoom| can be used to zoom in and out from the render.
+
+.. |zoom| image:: ../images/PickTabZoomButton.png
+
+.. image:: ../images/Workbench/InstrumentViewer/DrawPropertyBrowser.png
+
+Using the Drawn Shapes
+######################
+
+If the shapes are being used for masking or selecting regions of interest (ROIs) they can be used in two ways:
+
+
+- To apply the shapes to the workspace press the ``Apply to Data`` button. The shapes will be applied into the underlying workspace and shown in the instrument display.
+- To see the effect of applying the changes, but without affecting the underlying workspace, click the ``Apply to View`` button.
+  This will change the view you are looking at, but not the underlying data in the workspace. Changes applied in this way can be reverted using ``ClearAll`` button.
+
+
+Masks and Regions of Interest (ROI's) can also be saved into a separate workspace or into a file, using the options in the ``Apply and Save`` drop-down.
+
+If the ``Group`` option is selected, the selected detectors can be extracted or summed into a workspace using the ``Save`` drop-down.
+
+
+Bin Masking
+###########
+
+When the ``Mask`` option is selected and the integration range is reduced, only bins within the selected range will be masked instead of whole detectors.
+The shapes created with the drawing tools now select the detectors for which the bins will be masked.
+
+Clicking the ``Apply bin mask to view`` button will use the :ref:`MaskBins <algm-MaskBins>` algorithm mask the selected bins in the data workspace.
+
+
+.. image:: ../images/Workbench/InstrumentViewer/DrawBinMask.png
+
+
+The ``Apply to Data`` button will apply all defined detector and bin masks using the relevant algorithms.
 
 Python Control
 --------------
