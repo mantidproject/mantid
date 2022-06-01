@@ -634,6 +634,34 @@ class MantidAxesTest(unittest.TestCase):
         self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
 
+    def test_converting_waterfall_plot_scale(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        # Plot the same line twice.
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        x_lin_1 = ax.get_lines()[1].get_xdata()[0]
+        y_lin_1 = ax.get_lines()[1].get_ydata()[0]
+
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        x_log = ax.get_lines()[1].get_xdata()[0]
+        y_log = ax.get_lines()[1].get_ydata()[0]
+
+        ax.set_xscale("linear")
+        ax.set_yscale("linear")
+        x_lin_2 = ax.get_lines()[1].get_xdata()[0]
+        y_lin_2 = ax.get_lines()[1].get_ydata()[0]
+
+        self.assertTrue(ax.is_waterfall())
+        # Check the lines' data are different now that it is a log scale waterfall plot.
+        self.assertNotEqual(x_lin_1, x_log)
+        self.assertNotEqual(y_lin_1, y_log)
+        self.assertEqual(x_lin_1, x_lin_2)
+        self.assertEqual(y_lin_1, y_lin_2)
+
     def test_create_fill_creates_fills_for_waterfall_plot(self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
