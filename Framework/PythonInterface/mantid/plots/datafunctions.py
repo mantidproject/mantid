@@ -979,7 +979,8 @@ def remove_and_return_errorbar_cap_lines(ax):
                         break
 
             if line_is_errorbar_cap:
-                errorbar_cap_lines.append(ax.lines.pop(ax.lines.index(line)))
+                errorbar_cap_lines.append(line)
+                line.remove()
 
     return errorbar_cap_lines
 

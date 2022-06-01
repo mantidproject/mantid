@@ -1127,7 +1127,7 @@ class MantidAxes(Axes):
         self.waterfall_y_offset = y_offset
 
         for cap in errorbar_cap_lines:
-            self.lines.add_line(cap)
+            self.add_line(cap)
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
