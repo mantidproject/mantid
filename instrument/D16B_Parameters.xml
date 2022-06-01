@@ -9,10 +9,10 @@
 
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations. -->
        <parameter name="x-pixel-size" type="number">
-        <value val="1"/>
+        <value val="1.5"/>
       </parameter>
       <parameter name="y-pixel-size" type="number">
-        <value val="1"/>
+        <value val="2"/>
       </parameter>
 
       <!-- The size of the detector (in mm or pixel) -->
