@@ -120,7 +120,6 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
             # edges are at the middle point between axis values
             edge = (axis[idx] + axis[idx - 1]) / 2
-            print(axis, idx, value)
 
             # conditions to manage the weirdly cut limits of the plot. See slice viewer to understand better
             if idx == len(axis) - 1 and value > (edge + axis[-1]) / 2:
@@ -178,6 +177,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_height: the new height
         """
         rectangle_patch = Rectangle(new_point, new_width, new_height, edgecolor="black", facecolor='none', alpha=0.7)
+        # self._manager.
         self.plotter.image_axes.add_patch(rectangle_patch)
         self._current_rectangle.remove()
         self._current_rectangle = rectangle_patch
@@ -296,9 +296,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             return
 
         self._rectangles.remove(self._current_rectangle)
-        rect = self._current_rectangle
-        self._manager.remove_controller(rect.get_x(), rect.get_y(), rect.get_x() + rect.get_width(),
-                                        rect.get_y() + rect.get_height())
+        self._manager.remove_current_controller()
         self._current_rectangle.remove()
         self._current_rectangle = None
         self._update_plot_values()

@@ -11,6 +11,8 @@ class RectanglesManager(QWidget):
     def __init__(self, parent=None):
         super(RectanglesManager, self).__init__(parent=parent)
         self.controllers = []  # list of all the controllers currently managed
+        self.current_controller_index = -1
+
         self.table = QTableWidget()
         self.table.setColumnCount(2)
         self.setLayout(QVBoxLayout())
@@ -27,6 +29,7 @@ class RectanglesManager(QWidget):
         controller = RectangleController(x0, y0, x1, y1)
         controller.insert_in(self.table)
         self.controllers.append(controller)
+        self.current_controller_index = len(self.controllers) - 1
 
     def remove_controller(self, x0: float, y0: float, x1: float, y1: float):
         """
@@ -41,8 +44,32 @@ class RectanglesManager(QWidget):
             if controller == expected_fields:
                 controller.remove_from(self.table)
                 self.controllers.pop(index)
+
+                if index < self.current_controller_index:
+                    self.current_controller_index -= 1
+                elif index == self.current_controller_index:
+                    self.current_controller_index = -1
+
                 return
         logger.debug('No controller found for deleted rectangle.')
+
+    def remove_current_controller(self):
+        """
+        Remove the currently active controller
+        """
+        if self.current_controller_index == -1:
+            logger.debug("No current controller, cannot delete it.")
+            return
+        controller = self.controllers.pop(self.current_controller_index)
+        controller.remove_from(self.table)
+        self.current_controller_index = -1
+
+    def find_controller(self, x0, y0, x1, y1):
+        expected_fields = RectangleController(x0, y0, x1, y1)
+        for index, controller in enumerate(self.controllers):
+            if controller == expected_fields:
+                return controller
+        return None
 
 
 class RectangleController:
