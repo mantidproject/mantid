@@ -201,7 +201,6 @@ public:
     // 11:11:13  CHANGE PERIOD 12",
     // now enabled after changing 12=> 1 (and added one more space character
     // before CHANGE).
-    std::cout << timeSeriesString;
     TS_ASSERT_EQUALS(timeSeriesString.substr(0, 38), "2008-Jun-17 11:11:13   CHANGE PERIOD 1");
 
     remove(outputFile.c_str());
