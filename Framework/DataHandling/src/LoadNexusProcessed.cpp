@@ -35,8 +35,8 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
-
 #include <nexus/NeXusException.hpp>
 
 #include <map>
@@ -1444,12 +1444,29 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
   // Actual number of spectra in output workspace (if only a range was going to be loaded)
   size_t total_specs = calculateWorkspaceSize(nspectra);
 
-  //// Create the 2D workspace for the output
-
-  if (nchannels == 1 && nspectra == 1)
-    // if there is only one value, it is a WorkspaceSingleValue
-    workspaceType = "WorkspaceSingleValue";
-
+  if (nchannels == 1 && nspectra == 1) {
+    // if there is only one value of channels and nspectra, it may be a WorkspaceSingleValue
+    // check for instrument
+    bool hasInstrument = mtd_entry.containsGroup("instrument");
+    if (hasInstrument) {
+      std::string inst_name = mtd_entry.getString("instrument/name");
+      boost::algorithm::trim(inst_name);
+      if (inst_name == "")
+        hasInstrument = false;
+    }
+    // check for metadata
+    bool hasMetadata = mtd_entry.containsGroup("logs");
+    if (hasMetadata) {
+      // if there is more than one log (called "goniometer") then it's not a single-valued ws
+      const auto nLogs = mtd_entry.openNXGroup("logs").groups().size();
+      if (nLogs < 1) { // only "goniometer" group is present, thus it's a single-valued ws
+        hasMetadata = false;
+      }
+    }
+    // a workspace with no instrument and no metadata, and only one entry is a single-valued ws
+    if (!hasInstrument && !hasMetadata)
+      workspaceType = "WorkspaceSingleValue";
+  }
   bool hasFracArea = false;
   if (wksp_cls.isValid("frac_area")) {
     // frac_area entry is the signal for a RebinnedOutput workspace
