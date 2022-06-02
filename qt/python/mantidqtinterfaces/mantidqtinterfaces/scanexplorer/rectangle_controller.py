@@ -64,14 +64,33 @@ class RectanglesManager(QWidget):
         controller.remove_from(self.table)
         self.current_controller_index = -1
 
-    def find_controller(self, x0, y0, x1, y1):
+    def find_controller(self, x0: float, y0: float, x1: float, y1: float) -> int:
+        """
+        Find the controller with given coordinates
+        @param x0: the x coordinate of a corner of the rectangle
+        @param y0: the y coordinate of that corner
+        @param x1: the x coordinate of the opposing corner
+        @param y1: the y coordinate of that opposing corner
+        @return the position of the controller in the list of held controllers, or -1 if not there
+        """
         expected_fields = RectangleController(x0, y0, x1, y1)
         for index, controller in enumerate(self.controllers):
             if controller == expected_fields:
-                return controller
-        return None
+                return index
+        return -1
 
-    def on_current_rectangle_modified(self, new_x0, new_y0, new_x1, new_y1):
+    def set_as_current_controller(self, x0: float, y0: float, x1: float, y1: float):
+        """
+        Set the controller at given coordinates as the current one.
+        @param x0: the x coordinate of a corner of the rectangle
+        @param y0: the y coordinate of that corner
+        @param x1: the x coordinate of the opposing corner
+        @param y1: the y coordinate of that opposing corner
+        """
+        index = self.find_controller(x0, y0, x1, y1)
+        self.current_controller_index = index
+
+    def on_current_rectangle_modified(self, new_x0: float, new_y0: float, new_x1: float, new_y1: float):
         """
         Called when the current rectangle is modified, so the table is updated to the new values
         @param new_x0: the x coordinate of a new corner of the rectangle

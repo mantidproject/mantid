@@ -154,6 +154,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             if x0 <= xpos <= x1 and y0 <= ypos <= y1:
                 self._current_rectangle = rect
                 self._selector.extents = (x0, x1, y0, y1)
+                self._manager.set_as_current_controller(x0, y0, x1, y1)
                 return
 
     def _draw_rectangle(self, point: tuple, width: float, height: float):
