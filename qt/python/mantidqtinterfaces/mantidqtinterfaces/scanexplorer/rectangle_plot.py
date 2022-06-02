@@ -296,6 +296,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             return
 
         self._rectangles.remove(self._current_rectangle)
+        rect = self._current_rectangle
+        self._manager.remove_controller(rect.get_x(), rect.get_y(), rect.get_x() + rect.get_width(),
+                                        rect.get_y() + rect.get_height())
         self._current_rectangle.remove()
         self._current_rectangle = None
         self._update_plot_values()
