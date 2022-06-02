@@ -1,4 +1,5 @@
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout
+from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
 
@@ -63,14 +64,23 @@ class RectangleController:
         """
         # add a header to separate the data from the previous one
         table.insertRow(table.rowCount())
-        table.setItem(table.rowCount() - 1, 0, QTableWidgetItem("Parameter"))
-        table.setItem(table.rowCount() - 1, 1, QTableWidgetItem("Value"))
+
+        item = QTableWidgetItem("Parameter")
+        item.setFlags(item.flags() & (~Qt.ItemIsEditable))
+        table.setItem(table.rowCount() - 1, 0, item)
+
+        item = QTableWidgetItem("Value")
+        item.setFlags(item.flags() & (~Qt.ItemIsEditable))
+        table.setItem(table.rowCount() - 1, 1, item)
 
         # add the data
         for field in self.fields:
             table.insertRow(table.rowCount())
+
             item = QTableWidgetItem(field.name)
+            item.setFlags(item.flags() & (~Qt.ItemIsEditable))
             table.setItem(table.rowCount() - 1, 0, item)
+
             item = QTableWidgetItem(field.value_as_string())
             table.setItem(table.rowCount() - 1, 1, item)
 
