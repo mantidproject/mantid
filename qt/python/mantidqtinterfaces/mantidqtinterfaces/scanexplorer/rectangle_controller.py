@@ -71,6 +71,21 @@ class RectanglesManager(QWidget):
                 return controller
         return None
 
+    def on_current_rectangle_modified(self, new_x0, new_y0, new_x1, new_y1):
+        """
+        Called when the current rectangle is modified, so the table is updated to the new values
+        @param new_x0: the x coordinate of a new corner of the rectangle
+        @param new_y0: the y coordinate of that corner
+        @param new_x1: the x coordinate of the new opposing corner
+        @param new_y1: the y coordinate of that opposing corner
+        """
+        # TODO call on signal ?
+        if self.current_controller_index == -1:
+            logger.warning("Update asked, but no workspace is currently selected.")
+            return
+
+        self.controllers[self.current_controller_index].update_values(new_x0, new_y0, new_x1, new_y1)
+
 
 class RectangleController:
     """
@@ -130,14 +145,24 @@ class RectangleController:
         for field in self.fields:
             table.removeRow(field.get_name_item().row())
 
+    def update_values(self, new_x0, new_y0, new_x1, new_y1):
+        """
+        Update fields values to the new ones
+        @param new_x0: the x coordinate of a new corner of the rectangle
+        @param new_y0: the y coordinate of that corner
+        @param new_x1: the x coordinate of the new opposing corner
+        @param new_y1: the y coordinate of that opposing corner
+        """
+        self.fields[0].value = new_x0
+        self.fields[1].value = new_y0
+        self.fields[2].value = new_x1
+        self.fields[3].value = new_y1
+
     def __eq__(self, other):
         for field_1, field_2 in zip(self.fields, other.fields):
             if field_1 != field_2:
                 return False
         return True
-
-    def update_values(self, new_x0, new_y0, new_x1, new_y1):
-        pass
 
 
 class DoubleProperty:
@@ -164,7 +189,6 @@ class DoubleProperty:
 
     @value.setter
     def value(self, new_value: float):
-        assert(type(new_value) == float)
         self._value.setText(self.value_as_string(new_value))
 
     def get_value_item(self) -> QTableWidgetItem:

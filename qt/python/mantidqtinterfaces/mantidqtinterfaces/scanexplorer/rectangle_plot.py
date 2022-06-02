@@ -177,7 +177,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_height: the new height
         """
         rectangle_patch = Rectangle(new_point, new_width, new_height, edgecolor="black", facecolor='none', alpha=0.7)
-        # self._manager.
+        self._manager.on_current_rectangle_modified(*get_opposing_corners(new_point, new_width, new_height))
         self.plotter.image_axes.add_patch(rectangle_patch)
         self._current_rectangle.remove()
         self._current_rectangle = rectangle_patch
@@ -333,3 +333,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 def is_the_same(point_a, point_b, epsilon):
     return ((point_a[0] == 0 and point_b[0] == 0) or abs(point_a[0] - point_b[0]) / max(abs(point_a[0]), abs(point_b[0])) < epsilon) \
             and ((point_a[1] == 0 and point_b[1] == 0) or abs(point_a[1] - point_b[1]) / max(abs(point_a[1]), abs(point_b[1])) < epsilon)
+
+
+def get_opposing_corners(point, width, height):
+    return point[0], point[1], point[0] + width, point[1] + height
