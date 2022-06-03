@@ -4,6 +4,8 @@ from bisect import bisect_left
 
 from matplotlib.widgets import RectangleSelector
 from matplotlib.patches import Rectangle
+from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QWidget
 import numpy as np
 
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, KeyHandler, cursor_info
@@ -33,7 +35,11 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self._selector = RectangleSelector(ax, self._on_rectangle_selected, drawtype='box', interactive=True,
                                            ignore_event_outside=False)
 
+        self.signals = MultipleRectangleSelectionLinePlotSignals()
         self._manager: RectanglesManager = exporter.rectangles_manager
+
+        self.signals.sig_current_updated.connect(self._manager.on_current_updated)
+        self._manager.sig_controller_updated.connect(self._on_controller_updated)
 
     def _on_rectangle_selected(self, click_event, release_event):
         """
@@ -180,11 +186,23 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_width: the new width
         @param new_height: the new height
         """
-        rectangle_patch = Rectangle(new_point, new_width, new_height, edgecolor="black", facecolor='none', alpha=0.7)
-        self.plotter.image_axes.add_patch(rectangle_patch)
+        self.current_rectangle.set_bounds(*new_point, new_width, new_height)
+        self.signals.sig_current_updated.emit()
 
-        self.current_rectangle.remove()
-        self._manager.move_current(rectangle_patch)
+    def _on_controller_updated(self, rectangle_patch: Rectangle, new_x0: float, new_y0: float,
+                               new_x1: float, new_y1: float):
+        """
+        Slot called when the controller associated to this patch is updated to these new values
+        @param rectangle_patch: the patch to update
+        @param new_x0: the x coordinate of a new corner of the rectangle
+        @param new_y0: the y coordinate of that corner
+        @param new_x1: the x coordinate of the new opposing corner
+        @param new_y1: the y coordinate of that opposing corner
+        """
+        rectangle_patch.set_bounds(new_x0, new_y0, new_x1 - new_x0, new_y1 - new_y0)
+
+        if self._manager.get_current_rectangle() == rectangle_patch:
+            self._selector.extents = (new_x0, new_x1, new_y0, new_y1)
 
     def _update_plot_values(self):
         """
@@ -342,9 +360,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         return a == b == 0 or abs(a - b) / max(abs(a), abs(b)) < cls.EPSILON
 
 
-def is_the_same(point_a, point_b, epsilon):
-    return ((point_a[0] == 0 and point_b[0] == 0) or abs(point_a[0] - point_b[0]) / max(abs(point_a[0]), abs(point_b[0])) < epsilon) \
-            and ((point_a[1] == 0 and point_b[1] == 0) or abs(point_a[1] - point_b[1]) / max(abs(point_a[1]), abs(point_b[1])) < epsilon)
+class MultipleRectangleSelectionLinePlotSignals(QWidget):
+    sig_current_updated = Signal()
 
 
 def get_opposing_corners(point, width, height):

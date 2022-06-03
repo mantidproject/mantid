@@ -1,5 +1,5 @@
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QVBoxLayout
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal
 
 from matplotlib import patches
 
@@ -10,6 +10,9 @@ class RectanglesManager(QWidget):
     """
     A widget holding all the rectangle controllers currently active
     """
+
+    sig_controller_updated = Signal(patches.Rectangle, float, float, float, float)
+
     def __init__(self, parent=None):
         super(RectanglesManager, self).__init__(parent=parent)
 
@@ -21,6 +24,8 @@ class RectanglesManager(QWidget):
 
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.table)
+
+        self.table.cellChanged.connect(self.on_field_changed)
 
     def add_rectangle(self, rectangle: patches.Rectangle):
         """
@@ -58,6 +63,15 @@ class RectanglesManager(QWidget):
                 return index
         return -1
 
+    @staticmethod
+    def find_rectangle_index_at_row(row: int) -> int:
+        """
+        Return the index of the rectangle which owns that row
+        @param row: the row of the item looked for
+        @return the index of the rectangle
+        """
+        return row // RectangleController.NUMBER_OF_ROWS
+
     def set_as_current_rectangle(self, rectangle: patches.Rectangle):
         """
         Set the controller at given coordinates as the current one.
@@ -66,18 +80,27 @@ class RectanglesManager(QWidget):
         index = self.find_controller(*get_rectangle_corners(rectangle))
         self.current_rectangle_index = index
 
-    def move_current(self, new_rectangle_patch: patches.Rectangle):
+    def on_current_updated(self):
         """
         Move the currently selected rectangle to the new position
-        @param new_rectangle_patch: the patch describing the new position
         """
         if self.current_rectangle_index == -1:
             return
 
         controller, rectangle = self.rectangles[self.current_rectangle_index]
-        controller.update_values(*get_rectangle_corners(new_rectangle_patch))
+        controller.update_values(*get_rectangle_corners(rectangle))
 
-        self.rectangles[self.current_rectangle_index][1] = new_rectangle_patch
+    def on_field_changed(self, row, _):
+        """
+        Slot triggered when a field of the table is changed. Updates the patch accordingly.
+        @param row: the row in which the item changed is
+        """
+        index = self.find_rectangle_index_at_row(row)
+        if index >= len(self.rectangles):
+            return
+
+        controller, rectangle = self.rectangles[index]
+        self.sig_controller_updated.emit(rectangle, *controller.get_values())
 
     def get_current_rectangle(self) -> patches.Rectangle:
         """
@@ -122,6 +145,8 @@ class RectangleController:
     """
     A table containing data that represents one of the shown rectangles
     """
+
+    NUMBER_OF_ROWS = 5
 
     def __init__(self, x0: float = 0, y0: float = 0, x1: float = 0, y1: float = 0):
 
@@ -188,6 +213,9 @@ class RectangleController:
         self.fields[1].value = new_y0
         self.fields[2].value = new_x1
         self.fields[3].value = new_y1
+
+    def get_values(self):
+        return (field.value for field in self.fields)
 
     def __eq__(self, other):
         for field_1, field_2 in zip(self.fields, other.fields):
