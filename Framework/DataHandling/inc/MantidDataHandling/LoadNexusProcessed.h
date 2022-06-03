@@ -137,7 +137,7 @@ private:
   void getWordsInString(const std::string &words4, std::string &w1, std::string &w2, std::string &w3, std::string &w4);
 
   /// Read the bin masking information
-  void readBinMasking(Mantid::NeXus::NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace);
+  void readBinMasking(const Mantid::NeXus::NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
   /// bins have already been cached

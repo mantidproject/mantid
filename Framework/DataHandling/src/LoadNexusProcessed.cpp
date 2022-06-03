@@ -88,7 +88,7 @@ using SpectraInfo_optional = boost::optional<SpectraInfo>;
  * @param logger
  * @return
  */
-SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
+SpectraInfo extractMappingInfo(const NXEntry &mtd_entry, Logger &logger) {
   SpectraInfo spectraInfo;
   // Instrument information
 
@@ -778,7 +778,7 @@ void LoadNexusProcessed::loadNumericColumn(const Mantid::NeXus::NXData &tableDat
 /**
  * Load a table
  */
-API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
+API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
   API::ITableWorkspace_sptr workspace;
   workspace = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
@@ -2019,7 +2019,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4, std::string
  * @param wksp_cls :: The data group
  * @param local_workspace :: The workspace to read into
  */
-void LoadNexusProcessed::readBinMasking(NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
+void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
   if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
     return;
   }
