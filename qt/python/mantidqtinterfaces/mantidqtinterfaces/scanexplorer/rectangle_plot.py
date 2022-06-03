@@ -10,6 +10,8 @@ from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, KeyHand
 from mantid.simpleapi import CreateWorkspace
 from mantid.kernel import logger
 
+from .rectangle_controller import RectanglesManager
+
 
 class UserInteraction(Enum):
     RECTANGLE_CREATED = 1
@@ -31,10 +33,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self._selector = RectangleSelector(ax, self._on_rectangle_selected, drawtype='box', interactive=True,
                                            ignore_event_outside=False)
 
-        self._rectangles = []
-        self._current_rectangle = None
-
-        self._manager = exporter.rectangles_manager
+        self._manager: RectanglesManager = exporter.rectangles_manager
 
     def _on_rectangle_selected(self, click_event, release_event):
         """
@@ -82,12 +81,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             return UserInteraction.RECTANGLE_SELECTED
 
         # if there is no rectangle on screen, we are creating one
-        if not self._current_rectangle:
+        if not self.current_rectangle:
             return UserInteraction.RECTANGLE_CREATED
 
-        x0, y0 = self._current_rectangle.get_xy()
-        x1 = x0 + self._current_rectangle.get_width()
-        y1 = y0 + self._current_rectangle.get_height()
+        x0, y0 = self.current_rectangle.get_xy()
+        x1 = x0 + self.current_rectangle.get_width()
+        y1 = y0 + self.current_rectangle.get_height()
 
         # TODO float equality is a bad idea, change to epsilon
         # if one corner didn't change from the currently selected rectangle, we assume it has been reshaped
@@ -96,8 +95,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
                 return UserInteraction.RECTANGLE_RESHAPED
 
         # if the shape didn't change from the currently selected rectangle, we assume it has been moved
-        if self._current_rectangle.get_width() == abs(click_event.xdata - release_event.xdata) and \
-           self._current_rectangle.get_height() == abs(click_event.ydata - release_event.ydata):
+        if self.current_rectangle.get_width() == abs(click_event.xdata - release_event.xdata) and \
+           self.current_rectangle.get_height() == abs(click_event.ydata - release_event.ydata):
             return UserInteraction.RECTANGLE_MOVED
 
         return UserInteraction.RECTANGLE_CREATED
@@ -146,15 +145,14 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param point : the position of the click, as (x, y) coordinates
         """
         xpos, ypos = point
-        for rect in self._rectangles:
+        for rect in self.get_rectangles():
             x0, y0 = rect.get_xy()
             x1 = x0 + rect.get_width()
             y1 = y0 + rect.get_height()
 
             if x0 <= xpos <= x1 and y0 <= ypos <= y1:
-                self._current_rectangle = rect
                 self._selector.extents = (x0, x1, y0, y1)
-                self._manager.set_as_current_controller(x0, y0, x1, y1)
+                self._manager.set_as_current_rectangle(rect)
                 return
 
     def _draw_rectangle(self, point: tuple, width: float, height: float):
@@ -166,9 +164,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         rectangle_patch = Rectangle(point, width, height, edgecolor="black", facecolor='none', alpha=.7)
         self.plotter.image_axes.add_patch(rectangle_patch)
-        self._rectangles.append(rectangle_patch)
-        self._current_rectangle = rectangle_patch
-        self._manager.add_controller(point[0], point[1], point[0] + width, point[1] + height)
+        self._manager.add_rectangle(rectangle_patch)
 
     def _move_selected_rectangle(self, new_point: tuple, new_width: float, new_height: float):
         """
@@ -178,12 +174,10 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_height: the new height
         """
         rectangle_patch = Rectangle(new_point, new_width, new_height, edgecolor="black", facecolor='none', alpha=0.7)
-        self._manager.on_current_rectangle_modified(*get_opposing_corners(new_point, new_width, new_height))
         self.plotter.image_axes.add_patch(rectangle_patch)
-        self._current_rectangle.remove()
-        self._current_rectangle = rectangle_patch
-        self._rectangles.pop()
-        self._rectangles.append(rectangle_patch)
+
+        self.current_rectangle.remove()
+        self._manager.move_current(rectangle_patch)
 
     def _update_plot_values(self):
         """
@@ -218,7 +212,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         y_step = (ymax - ymin) / arr.shape[0]
 
         # add every rectangle to the mask
-        for rect in self._rectangles:
+        for rect in self.get_rectangles():
             # get rectangle position in the image
             x0, y0 = rect.get_xy()
             x1 = x0 + rect.get_width()
@@ -248,12 +242,13 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         Place new rectangles based on those already placed by the user. Only linearly interpolate new positions
         from the center of the drawn rectangles. Only supports 2 rectangles.
         """
-        if len(self._rectangles) != 2:
+        rectangles = self.get_rectangles()
+        if len(rectangles) != 2:
             logger.warning("Cannot place more peak regions : current number of regions invalid "
-                           "(2 expected, {} found".format(len(self._rectangles)))
+                           "(2 expected, {} found)".format(len(rectangles)))
             return
 
-        rect_0, rect_1 = self._rectangles
+        rect_0, rect_1 = rectangles
         xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
 
         new_height = (rect_0.get_height() + rect_1.get_height()) / 2
@@ -293,13 +288,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         Delete currently selected rectangle.
         """
-        if not self._current_rectangle:
-            return
-
-        self._rectangles.remove(self._current_rectangle)
-        self._manager.remove_current_controller()
-        self._current_rectangle.remove()
-        self._current_rectangle = None
+        self._manager.delete_current()
         self._update_plot_values()
         self._selector.set_visible(False)
 
@@ -307,9 +296,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         Clear all the rectangles currently shown
         """
-        for rect in self._rectangles:
-            rect.remove()
-        self._rectangles = []
+        self._manager.clear()
         self._update_plot_values()
 
     def handle_key(self, key: str):
@@ -329,6 +316,16 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             self._place_interpolated_rectangles()
         if key == 'delete':
             self._delete_current()
+
+    @property
+    def current_rectangle(self):
+        """
+        Get the current rectangle patch
+        """
+        return self._manager.get_current_rectangle()
+
+    def get_rectangles(self):
+        return self._manager.get_rectangles()
 
 
 def is_the_same(point_a, point_b, epsilon):
