@@ -113,26 +113,32 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         x_axis_values, y_axis_values = self.exporter.get_axes()
 
-        def closest_value(axis, value):
+        def closest_value(axis, value, mini, maxi):
             """Find the closest edge to the given value along given axis"""
             idx = bisect_left(axis, value)
+
+            if idx == 0:
+                return mini
+            if idx == len(axis):
+                return maxi
 
             # edges are at the middle point between axis values
             edge = (axis[idx] + axis[idx - 1]) / 2
 
             # conditions to manage the weirdly cut limits of the plot. See slice viewer to understand better
-            if idx == len(axis) - 1 and value > (edge + axis[-1]) / 2:
-                return axis[-1]
-            if idx == 1 and value < (edge + axis[0]) / 2:
-                print(idx)
-                return axis[0]
+            if idx == len(axis) - 1 and value > (edge + maxi) / 2:
+                return maxi
+            if idx == 1 and value < (edge + mini) / 2:
+                return mini
 
             return edge
 
-        x0 = closest_value(x_axis_values, x0)
-        y0 = closest_value(y_axis_values, y0)
-        x1 = closest_value(x_axis_values, x1)
-        y1 = closest_value(y_axis_values, y1)
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        x0 = closest_value(x_axis_values, x0, xmin, xmax)
+        y0 = closest_value(y_axis_values, y0, ymin, ymax)
+        x1 = closest_value(x_axis_values, x1, xmin, xmax)
+        y1 = closest_value(y_axis_values, y1, ymin, ymax)
 
         self._selector.extents = (x0, x1, y0, y1)
 
@@ -219,11 +225,11 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             y1 = y0 + rect.get_height()
 
             # find the indices corresponding to the position in the array
-            x0_ind = int(np.floor((x0 - xmin) / x_step))
-            y0_ind = int(np.floor((y0 - ymin) / y_step))
+            x0_ind = max(int(np.ceil((x0 - xmin) / x_step)), 0)
+            y0_ind = max(int(np.ceil((y0 - ymin) / y_step)), 0)
 
-            x1_ind = int(np.ceil((x1 - xmin) / x_step))
-            y1_ind = int(np.ceil((y1 - ymin) / y_step))
+            x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
+            y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
 
             # TODO find a more efficient / pythonic way for that
             for x in range(x0_ind, x1_ind):
