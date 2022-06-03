@@ -1459,7 +1459,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
     if (hasMetadata) {
       // if there is more than one log (called "goniometer") then it's not a single-valued ws
       const auto nLogs = mtd_entry.openNXGroup("logs").groups().size();
-      if (nLogs < 1) { // only "goniometer" group is present, thus it's a single-valued ws
+      if (nLogs <= 1) { // only "goniometer" group is present, thus it's a single-valued ws
         hasMetadata = false;
       }
     }
