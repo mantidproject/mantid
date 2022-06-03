@@ -287,9 +287,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             Check if the rectangle with center at center fits in the image boundaries.
             @param center: the center of the rectangle
             """
-            # TODO why no / 2 on the second member ?
-            return xmin <= center[0] + new_width / 2 <= xmax and xmin <= center[0] - new_width <= xmax and \
-                ymin <= center[1] + new_height / 2 <= ymax and ymin <= center[1] - new_height <= ymax
+            return xmin <= center[0] + new_width / 2 <= xmax and xmin <= center[0] - new_width / 2 <= xmax and \
+                ymin <= center[1] + new_height / 2 <= ymax and ymin <= center[1] - new_height / 2 <= ymax
 
         def move(seed: np.array, offset: np.array):
             """
