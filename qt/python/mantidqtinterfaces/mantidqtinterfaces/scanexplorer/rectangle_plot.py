@@ -24,7 +24,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
     SELECTION_KEYS = ('c', 'x', 'y', 'f', "delete")
-    EPSILON = 1e-5
+    EPSILON = 1e-3
 
     def __init__(self, plotter: LinePlots, exporter: Any):
         super().__init__(plotter, exporter)
@@ -61,7 +61,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         elif interaction == UserInteraction.RECTANGLE_SELECTED:
             self._select_rectangle(click_event_pos)
 
-        elif interaction == UserInteraction.RECTANGLE_MOVED or interaction == UserInteraction.RECTANGLE_RESHAPED:
+        elif interaction in (UserInteraction.RECTANGLE_MOVED, UserInteraction.RECTANGLE_RESHAPED):
             point, width, height = self._snap_to_edges(click_event_pos, release_event_pos)
             self._move_selected_rectangle(point, width, height)
 
@@ -88,15 +88,16 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         x1 = x0 + self.current_rectangle.get_width()
         y1 = y0 + self.current_rectangle.get_height()
 
-        # TODO float equality is a bad idea, change to epsilon
         # if one corner didn't change from the currently selected rectangle, we assume it has been reshaped
-        if x0 == click_event.xdata or x0 == release_event.xdata or x1 == click_event.xdata or x1 == release_event.xdata:
-            if y0 == click_event.ydata or y0 == release_event.ydata or y1 == click_event.ydata or y1 == release_event.ydata:
+        if self.is_almost_equal(x0, click_event.xdata) or self.is_almost_equal(x0, release_event.xdata) or \
+                self.is_almost_equal(x1, click_event.xdata) or self.is_almost_equal(x1, release_event.xdata):
+            if self.is_almost_equal(y0, click_event.ydata) or self.is_almost_equal(y0, release_event.ydata) or \
+                    self.is_almost_equal(y1, click_event.ydata) or self.is_almost_equal(y1, release_event.ydata):
                 return UserInteraction.RECTANGLE_RESHAPED
 
         # if the shape didn't change from the currently selected rectangle, we assume it has been moved
-        if self.current_rectangle.get_width() == abs(click_event.xdata - release_event.xdata) and \
-           self.current_rectangle.get_height() == abs(click_event.ydata - release_event.ydata):
+        if self.is_almost_equal(self.current_rectangle.get_width(), abs(click_event.xdata - release_event.xdata)) and \
+           self.is_almost_equal(self.current_rectangle.get_height(), abs(click_event.ydata - release_event.ydata)):
             return UserInteraction.RECTANGLE_MOVED
 
         return UserInteraction.RECTANGLE_CREATED
@@ -332,6 +333,13 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     def get_rectangles(self):
         return self._manager.get_rectangles()
+
+    @classmethod
+    def is_almost_equal(cls, a, b):
+        """
+        Check if 2 numbers are within epsilon of relative distance
+        """
+        return a == b == 0 or abs(a - b) / max(abs(a), abs(b)) < cls.EPSILON
 
 
 def is_the_same(point_a, point_b, epsilon):
