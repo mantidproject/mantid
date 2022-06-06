@@ -1,5 +1,5 @@
 ============
-MuSR Changes
+Muon Changes
 ============
 
 .. contents:: Table of Contents
