@@ -1,0 +1,1 @@
+- Users are now prevented from overwriting previous versions of Mantid if the uninstaller is not present. Some antivirus software deletes the uninstaller. Installing over older versions without the uninstaller can cause Mantid not to function properly and for users to lose data.
