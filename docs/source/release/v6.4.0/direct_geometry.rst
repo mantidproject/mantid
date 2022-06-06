@@ -23,6 +23,7 @@ Bugfixes
 
 - The sign of the half-channel width in the :ref:`LoadILLTOF <algm-LoadILLTOF>` algorithm has been changed from negative to positive to ensure the TOF axis is always positive.
 - The :ref:`PyChop <PyChop>` interface has been adjusted to ensure that the command-line version functions as described in the documentation.
+- :ref:`DirectILLCollectData <algm-DirectILLCollectData` will now be able to load data with whitespaces in paths or file names.
 
 Algorithms
 ----------
@@ -30,9 +31,18 @@ Algorithms
 New Features
 ############
 
-- :ref:`DirectILLAutoProcess <algm-DirectILLAutoProcess>` now performs the full data reduction treatment for ILL direct geometry instruments for an empty container, vanadium, and sample, both for single crystal and powder.
-- :ref:`DirectILLCollectData <algm-DirectILLCollectData>` has two new properties: ``GroupDetHorizontallyBy`` and ``GroupDetVerticallyBy`` which allow for averaging pixel counts between the tubes and inside them, respectively, or for flat background calculations.
-- Autoscaling has been added to the :ref:`PelicanReduction <algm-PelicanReduction>` algorithm to ensure that the Q range matches the energy transfer, as is default in the UI.
+* A new :ref:`Abins2D <algm-Abins2D>` algorithm has been added for simulation of inelastic neutron scattering in direct-geometry
+
+  * This employs the same almost-isotropic analytic powder-averaging incoherent approximation as :ref:`Abins <algm-Abins>`.
+  * The ISIS MARI, MAPS, and MERLIN instruments are supported, alongside ILL-PANTHER and a ``TwoDMap`` ideal simulation. Please direct requests/specifications for additional instruments to Sanghamitra Mukhopadhyay and Adam Jackson.
+  * The algorithm produces workspaces in :math:`(Q,\omega)` space, best viewed interactively in :ref:`Sliceviewer <sliceviewer>`, or rendered as :ref:`colorfill plots <Colorfill_Plot>`.
+
+.. image::  ../../images/Abins2D_release_merlin.png
+	        :align: center
+
+* :ref:`DirectILLAutoProcess <algm-DirectILLAutoProcess>` now performs the full data reduction treatment for ILL direct geometry instruments for an empty container, vanadium, and sample, both for single crystal and powder.
+* :ref:`DirectILLCollectData <algm-DirectILLCollectData>` has two new properties: ``GroupDetHorizontallyBy`` and ``GroupDetVerticallyBy`` which allow for averaging pixel counts between the tubes and inside them, respectively, or for flat background calculations.
+* Autoscaling has been added to the :ref:`PelicanReduction <algm-PelicanReduction>` algorithm to ensure that the Q range matches the energy transfer, as is default in the UI.
 
 Bugfixes
 ########
@@ -64,12 +74,21 @@ New Features
 - MSlice is now compatible with ``matplotlib 3.5.0``.
 - Slice plot font sizes can now be changed using the quick options.
 - The default cut algorithm has been changed to ``Integration``.
+- Improved the error message for empty cut plot axes.
+- Modified the default Bragg peak size for interactive cut plots.
+- Improved zooming speed for slice plots with recoil lines.
+- Improved handling of default line widths.
 
 Bugfixes
 ########
 
 - The Default Energy Unit menu is no longer empty.
 - The ``Show Legend`` check boxes now appear with the correct state.
+- Fixed colorbar crash when changing scale to logarithmic with negative ``vmax`` value and/or negative/0 ``vmin`` value.
+- Fixed a bug that prevented ``vmin`` from updating when unticking logarithmic scale.
+- Fixed a problem with ignored Bragg peaks on interactive cut plots when flipping axes.
+- Fixed a bug that caused a runtime error when changing between workspaces from same dataset.
+- Fixed an issue with re-opening line dialog for cut plots.
 
 
 :ref:`Release 6.4.0 <v6.4.0>`
