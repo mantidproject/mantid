@@ -21,6 +21,12 @@ shift
 RELEASES_TAG=$1
 shift
 
+# The remaining arguments should be the packages to upload - is there anything?
+if [ $# -eq 0 ]; then
+    echo "Expected a list of packages to upload but none were found."
+    exit 1
+fi
+
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
 if [[ $OSTYPE == "msys" ]]; then
     EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
@@ -45,4 +51,18 @@ conda activate $CONDA_ENV_NAME
 
 # Export token for use by gh to authenticate
 export GITHUB_TOKEN
-gh release -R $RELEASES_REPO upload $RELEASES_TAG "$@"
+# We want to provide a custom label that is a fixed string that both
+#   - better describes which package users should select
+#   - automatically handles deleting old packages
+for asset in "$@"; do
+    if [[ $asset == *.exe ]]; then
+      label=MantidWorkbench-Windows
+    elif [[ $asset == *.dmg ]]; then
+      label=MantidWorkbench-macOS
+    elif [[ $asset == *.tar.xz ]]; then
+      label=MantidWorkbench-Linux
+    else
+      echo "Unknown asset type found. Uploading as unlabelled asset."
+    fi
+    gh release -R $RELEASES_REPO upload --clobber $RELEASES_TAG "$asset#$label"
+done
