@@ -90,9 +90,23 @@ FunctionEnd
 # Add functions needed for install and uninstall with the modern UI
 
 # On clicking install, uninstall any instance of mantid that exists in the target directory.
+# Some anti-virus software will remove the uninstaller. If this happens we check whether pythonw.exe, which is needed
+# to run Mantid, exists. If it does we stop the installation otherwise the installer attempts to overwrite any
+# exisiting files and users may lose data and their user proprties settings. In some instances this overwrite will
+# result in a version of Mantid that will not open at all.
 Function in.uninstallIfExistsInTargetDirectory
-    IfFileExists $INSTDIR\uninstall.exe 0 +2 ;If there is an uninstall.exe run it
-    ExecWait '"$INSTDIR\uninstall.exe" /UIS _?=$INSTDIR'
+    IfFileExists $INSTDIR\uninstall.exe uninstall_exists no_uninstall
+    uninstall_exists: ;If there is an uninstall.exe run it
+        ExecWait '"$INSTDIR\uninstall.exe" /UIS _?=$INSTDIR'
+    no_uninstall: ;If there is no uninstaller
+        IfFileExists $INSTDIR\bin\pythonw.exe 0 +3
+        !define msgLine1 "It looks like a previous version is installed in this location but the uninstaller has been deleted (possibly by antivirus) $\r$\n$\r$\n"
+        !define msgLine2 "In order to continue please either: $\r$\n"
+        !define msgLine3 "- backup the installation folder by renaming it or $\r$\n"
+        !define msgLine4 "- delete the installation folder if you are certain you do not need anything in it. $\r$\n $\r$\n "
+        !define msgLine5 "If you rename your installation folder you can restore your settings in the new version by copying bin\Mantid.user.properties from the renamed folder to new installation."
+        MessageBox MB_OK "${msgLine1}${msgLine2}${msgLine3}${msgLine4}${msgLine5}"
+        Quit
 FunctionEnd
 
 # Give the option to uninstall the currently installed version of the same package.
