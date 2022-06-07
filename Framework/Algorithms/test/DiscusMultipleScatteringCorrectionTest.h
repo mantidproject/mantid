@@ -596,14 +596,17 @@ public:
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     SofQWorkspace->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
 
-    std::vector<double> two_thetas = {20.0, 40.0, 60.0, 90.0};
     const double THICKNESS = 0.00065; // metres
 
+    // Discus calc was done at 20, 40, 60 and 90 degrees. Do it at every 10 degrees here so have access to the 4 Discus
+    // results
     const int NTHETA = 18;
     const double ang_inc = 180.0 / NTHETA;
     const double EInitial = 5.1;
+    // sample occupies +y,-z and -y,+z regions ie \ when looking along positive x direction
+    // the detectors are in a ring in the yz plane in positive y. All 4 Discus angles are on the same side of the sample
     auto inputWorkspace = SetupFlatPlateWorkspace(NTHETA, 1, ang_inc, nwpts, wmin - 0.5 * wwidth, wwidth, 0.05, 0.05,
-                                                  THICKNESS, 45.0, {1.0, 0.0, 0.0}, emode, EInitial);
+                                                  THICKNESS, -45.0, {1.0, 0.0, 0.0}, emode, EInitial);
     auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
 
     // override the material
@@ -663,12 +666,12 @@ public:
 
   void test_indirect_on_realistic_structure_factor_without_importance_sampling() {
     // results are not vastly different to the direct geometry
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00022, 0.00021);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00027, 0.00022);
   }
 
   void test_indirect_on_realistic_structure_factor_with_deltaE_interpolation() {
     // only run simulation on half of the deltaE bins (even indices) and interpolate the rest (odd indices)
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00023, 0.00021);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00027, 0.00022);
   }
 
   void test_getxminmax() {
