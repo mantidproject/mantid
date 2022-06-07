@@ -423,7 +423,6 @@ void DiscusMultipleScatteringCorrection::exec() {
     qmax = 2 * kmax;
   }
   prepareQSQ(qmax);
-  calculateQSQIntegralAsFunctionOfK();
 
   m_simulateEnergiesIndependently = getProperty("SimulateEnergiesIndependently");
   // call this function with dummy efixed to determine total possible simulation points
@@ -539,6 +538,7 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, materialWorkspaces);
+        calculateQSQIntegralAsFunctionOfK(materialWorkspaces, kinc);
 
         auto weights = simulatePaths(nSingleScatterEvents, 1, rng, materialWorkspaces, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
@@ -881,26 +881,35 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const API::Matrix
  * The approach here will cope with multiple scatters by calculating a sumQSS at multiple
  * kinc values. These will be interpolated as required later on
  */
-void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK() {
-  for (auto &SQWSMapping : m_SQWSs) {
+void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(MaterialWorkspaceMappings &matWSs,
+                                                                           const double specialK) {
+  for (auto &SQWSMapping : matWSs) {
     auto &QSQWS = SQWSMapping.QSQ;
     std::vector<double> IOfQYFull;
-    std::vector<double> kValues, finalkValues, QSQIntegrals;
+    std::vector<double> finalkValues, QSQIntegrals;
+    std::vector<double> kValues = {specialK};
     // Calculate the integral for a range of k values. Not massively important which k values but choose them here
-    // based on the q points in the QS(Q) profile. For each q point calculate the integral for k=q/2
+    // based on the q points in the QS(Q) profile and the initial k values incident on the sample
     const std::vector<double> qValues = QSQWS->histogram(0).readX();
     double lastq = -1;
     for (auto q : qValues) {
       // extra points were added to make QSQ integral more accurate but don't need a separate QSQ integral at these
       if (q > 0 && q > std::nextafter(lastq, DBL_MAX)) {
         double k = q / 2;
-        std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(QSQWS, k);
-        auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+        kValues.insert(std::upper_bound(kValues.begin(), kValues.end(), k), k);
+      }
+      lastq = q;
+    }
+    for (auto k : kValues) {
+      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(QSQWS, k);
+      auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+      // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
+      // into a k region where the integral is actually non-zero
+      if (IOfQYAtQMax > 0) {
         double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
         finalkValues.push_back(k);
         QSQIntegrals.push_back(normalisedIntegral);
       }
-      lastq = q;
     }
     auto QSQIntegral = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
                                                                   HistogramData::Histogram::YMode::Frequencies);
@@ -1419,11 +1428,14 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const std
     double qrange = kinc + maxkf;
     QQ = qrange * rng.nextValue();
     SQ = interpolateFlat /* interpolateGaussian(m_logSQ->getSpectrum(iW)*/ (materialWSIt->SQ->getSpectrum(iW), QQ);
-    double integralQSQ = getQSQIntegral(*materialWSIt->QSQIntegral, kinc);
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
-    if (SQ > 0)
+    if (SQ > 0) {
+      double integralQSQ = getQSQIntegral(*materialWSIt->QSQIntegral, kinc);
+      assert(integralQSQ != 0.);
       weight = weight / integralQSQ;
+    } else
+      return false;
   }
   // T = 2theta
   const double cosT = (kinc * kinc + k * k - QQ * QQ) / (2 * kinc * k);

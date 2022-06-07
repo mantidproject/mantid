@@ -108,7 +108,7 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   void createInvPOfQWorkspaces(MaterialWorkspaceMappings &matWSs, size_t nhists);
   void convertToLogWorkspace(const API::MatrixWorkspace_sptr &SOfQ);
-  void calculateQSQIntegralAsFunctionOfK();
+  void calculateQSQIntegralAsFunctionOfK(MaterialWorkspaceMappings &matWSs, const double specialK);
   void prepareCumulativeProbForQ(double kinc, const MaterialWorkspaceMappings &PInvOfQs);
   void prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
