@@ -29,6 +29,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
@@ -1453,6 +1454,22 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
       boost::algorithm::trim(inst_name);
       if (inst_name == "")
         hasInstrument = false;
+    } else {
+      // data saved with SaveNexusESS will have the instrument in a directory named after it
+      // check for special types of instrument: "basic_rect" and "unspecified_instrument":
+      if (mtd_entry.containsGroup("basic_rect") || mtd_entry.containsGroup("unspecified_instrument")) {
+        hasInstrument = true;
+      } else {
+        // check for other possible instruments
+        for (auto facility : ConfigService::Instance().getFacilities()) {
+          for (auto instrumentName : facility->instruments()) {
+            if (instrumentName.name() != "" && mtd_entry.containsGroup(instrumentName.name())) {
+              hasInstrument = true;
+              break;
+            }
+          }
+        }
+      }
     }
     // check for metadata
     bool hasMetadata = mtd_entry.containsGroup("logs");
