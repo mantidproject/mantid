@@ -1860,7 +1860,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry &mtd_entry, API::MatrixWork
   bool haveSpectraAxis = local_workspace.getAxis(1)->isSpectra();
 
   for (int i = 1; i <= spectraInfo.nSpectra; ++i) {
-    int spectrum(-1);
+    int spectrum;
     // prefer the spectra number from the instrument section
     // over anything else. If not there then use a spectra axis
     // number if we have one, else make one up as nothing was
