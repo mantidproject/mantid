@@ -400,8 +400,9 @@ void DiscusMultipleScatteringCorrection::exec() {
       MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
           *m_SQWSs[0].SQ, static_cast<size_t>(1),
           HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
-      m_SQWSs.push_back(
-          MaterialWorkspaceMapping{inputWS->sample().getEnvironment().getComponent(i).material().name(), isotropicSQ});
+      std::string_view matName = inputWS->sample().getEnvironment().getComponent(i).material().name();
+      g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
+      m_SQWSs.push_back(MaterialWorkspaceMapping{matName, isotropicSQ});
     }
   }
 
