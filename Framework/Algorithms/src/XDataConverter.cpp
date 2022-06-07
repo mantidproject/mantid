@@ -73,13 +73,13 @@ void XDataConverter::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    MantidVecPtr outF;
 
-    outF.access().resize(inputWS->getNumberBins(i), 1.0);
     // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
     if (isRebinnedWorkspace && outRB) {
+      MantidVecPtr outF;
+      outF.access().resize(inputWS->getNumberBins(i), 1.0);
       outRB->setF(i, outF);
     }
     setXData(outputWS, inputWS, i);
