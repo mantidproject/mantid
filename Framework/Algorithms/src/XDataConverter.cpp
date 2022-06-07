@@ -11,6 +11,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid::Algorithms {
 
@@ -19,6 +20,9 @@ using API::MatrixWorkspace_sptr;
 using API::Progress;
 using API::WorkspaceFactory;
 using API::WorkspaceProperty;
+using DataObjects::RebinnedOutput;
+using DataObjects::RebinnedOutput_sptr;
+using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
 //------------------------------------------------------------------------------
@@ -61,6 +65,10 @@ void XDataConverter::exec() {
   if (inputWS->axes() > 1)
     outputWS->replaceAxis(1, std::unique_ptr<API::Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
+  bool isRebinnedWorkspace = inputWS->id() == "RebinnedOutput";
+  RebinnedOutput_sptr outRB = std::dynamic_pointer_cast<RebinnedOutput>(outputWS);
+  // Force fractions to unity (converting from histo to point discards bin info).
+
   Progress prog(this, 0.0, 1.0, numSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
@@ -69,6 +77,11 @@ void XDataConverter::exec() {
     // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
+    if (isRebinnedWorkspace && outRB) {
+      MantidVecPtr outF;
+      outF.access().resize(inputWS->getNumberBins(i), 1.0);
+      outRB->setF(i, outF);
+    }
     setXData(outputWS, inputWS, i);
     if (inputWS->hasDx(i)) {
       outputWS->setSharedDx(i, inputWS->sharedDx(i));
