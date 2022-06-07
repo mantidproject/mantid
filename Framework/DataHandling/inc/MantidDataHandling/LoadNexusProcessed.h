@@ -100,7 +100,7 @@ private:
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root, const std::string &entry_name, const double &progressStart,
                                 const double &progressRange);
 
-  API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadTableEntry(const Mantid::NeXus::NXEntry &entry);
 
   /// Load a numeric column to the TableWorkspace.
   template <typename ColumnType, typename NexusType>
