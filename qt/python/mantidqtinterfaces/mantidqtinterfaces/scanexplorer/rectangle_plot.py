@@ -25,7 +25,7 @@ class UserInteraction(Enum):
 class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
-    SELECTION_KEYS = ('c', 'x', 'y', 'f', "delete")
+    SELECTION_KEYS = ('c', 'x', 'y', 'f', "delete", 'p')
     EPSILON = 1e-3
 
     def __init__(self, plotter: LinePlots, exporter: Any):
@@ -359,6 +359,41 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         self._update_plot_values()
 
+    def _find_peaks(self) -> list:
+        """
+        Find the peaks in the current rectangles, by searching the center of mass of the data there.
+        @return the list of the (x, y) positions of the peaks.
+        """
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        arr = self.plotter.image.get_array()
+
+        x_step = (xmax - xmin) / arr.shape[1]
+        y_step = (ymax - ymin) / arr.shape[0]
+
+        peaks = []
+        for rect in self.get_rectangles():
+            x0, y0 = rect.get_xy()
+            x1 = x0 + rect.get_width()
+            y1 = y0 + rect.get_height()
+
+            # find the indices corresponding to the position in the array
+            x0_ind = max(int(np.ceil((x0 - xmin) / x_step)), 0)
+            y0_ind = max(int(np.ceil((y0 - ymin) / y_step)), 0)
+
+            x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
+            y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
+
+            slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
+
+            total_sum = np.sum(slice_cut)
+
+            x_mean = np.dot(np.sum(slice_cut, axis=0), np.arange(len(slice_cut[0]))) / total_sum
+            y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
+
+            peaks.append(((x_mean + x0_ind) * x_step + xmin, (y_mean + y0_ind) * y_step + ymin))
+        return peaks
+
     def _delete_current(self):
         """
         Delete currently selected rectangle.
@@ -384,9 +419,10 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         if key in ('c', 'x', 'y'):
             self._extract_projections(extract_x=key in ('c', 'x'), extract_y=key in ('c', 'y'))
-
         if key == 'f':
             self._place_interpolated_rectangles()
+        if key == 'p':
+            self._find_peaks()
         if key == 'delete':
             self._delete_current()
 
