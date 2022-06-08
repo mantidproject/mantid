@@ -712,7 +712,7 @@ public:
     // TS_ASSERT_THROWS_NOTHING won't catch it
     TS_ASSERT_THROWS_NOTHING(errs = alg->validateInputs());
     TS_ASSERT(!errs.empty());
-    Mantid::API::AnalysisDataService::Instance().clear();
+    // Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test_invalidSOfQ() {
