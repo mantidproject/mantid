@@ -196,8 +196,7 @@ Usage
        SpectrumIDs=ids,
        L2=[2.0] * len(two_thetas),
        Polar=two_thetas,
-       #azimuthal angle=phi, phi=0 along x axis and increases as move towards vertical y axis
-       Azimuthal=[-90.0] * len(two_thetas),
+       Azimuthal=[90.0] * len(two_thetas),
        DetectorIDs=ids,
        InstrumentName="testinst")
 
@@ -303,7 +302,8 @@ The double scatter profile shows a similar shape to the analytic result calculat
        SpectrumIDs=ids,
        L2=[2.0] * len(two_thetas),
        Polar=two_thetas,
-       Azimuthal=[90.0] * len(two_thetas),
+       #azimuthal angle=phi, phi=0 along x axis and increases as move towards vertical y axis
+       Azimuthal=[-90.0] * len(two_thetas),
        DetectorIDs=ids,
        InstrumentName="testinst")
 
