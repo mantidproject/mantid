@@ -103,7 +103,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         # if the shape didn't change from the currently selected rectangle, we assume it has been moved
         if self.is_almost_equal(self.current_rectangle.get_width(), abs(click_event.xdata - release_event.xdata)) and \
-           self.is_almost_equal(self.current_rectangle.get_height(), abs(click_event.ydata - release_event.ydata)):
+                self.is_almost_equal(self.current_rectangle.get_height(), abs(click_event.ydata - release_event.ydata)):
             return UserInteraction.RECTANGLE_MOVED
 
         return UserInteraction.RECTANGLE_CREATED
@@ -262,6 +262,57 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         return (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values)
 
+    def _extract_projections(self, extract_x=True, extract_y=True):
+        """
+        Extract the projections of the roi, and then each rectangle projection in a different workspace.
+        Note that the sum of all rectangles' individual curves can be different from the sum computed
+        by _compute_plot_axis, because of possible intersections that are not counted twice by the later function.
+        @param extract_x: whether to extract x-axis projections
+        @param extract_y: whether to extract y-axis projections
+        """
+        if not extract_x and not extract_y:
+            return
+
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        arr = self.plotter.image.get_array()
+
+        x_step = (xmax - xmin) / arr.shape[1]
+        y_step = (ymax - ymin) / arr.shape[0]
+
+        for index, rect in enumerate(self.get_rectangles()):
+            # get rectangle position in the image
+            x0, y0 = rect.get_xy()
+            x1 = x0 + rect.get_width()
+            y1 = y0 + rect.get_height()
+
+            # find the indices corresponding to the position in the array
+            x0_ind = max(int(np.ceil((x0 - xmin) / x_step)), 0)
+            y0_ind = max(int(np.ceil((y0 - ymin) / y_step)), 0)
+
+            x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
+            y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
+
+            slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
+
+            if extract_x:
+                x_line_x_axis = np.linspace(x0, x1, x1_ind - x0_ind)
+                x_line_y_values = np.sum(slice_cut, axis=0)
+                CreateWorkspace(DataX=x_line_x_axis, DataY=x_line_y_values, OutputWorkspace="x_cut_{}".format(index))
+
+            if extract_y:
+                y_line_x_axis = np.linspace(y0, y1, y1_ind - y0_ind)
+                y_line_y_values = np.sum(slice_cut, axis=1)
+                CreateWorkspace(DataX=y_line_x_axis, DataY=y_line_y_values, OutputWorkspace="y_cut_{}".format(index))
+
+        # extract the complete projection (which is the line plot)
+        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes()
+
+        if extract_x:
+            CreateWorkspace(DataX=x_line_x_axis, DataY=x_line_y_values, OutputWorkspace="x_cut")
+        if extract_y:
+            CreateWorkspace(DataX=y_line_x_axis, DataY=y_line_y_values, OutputWorkspace="y_cut")
+
     def _place_interpolated_rectangles(self):
         """
         Place new rectangles based on those already placed by the user. Only linearly interpolate new positions
@@ -330,12 +381,10 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         if key not in self.SELECTION_KEYS:
             return
-        (x_line_x_axis, x_line_y_values), (y_line_x_axis, y_line_y_values) = self._compute_plot_axes()
 
-        if key in ('c', 'x'):
-            CreateWorkspace(DataX=x_line_x_axis, DataY=x_line_y_values, OutputWorkspace="x_cut")
-        if key in ('c', 'y'):
-            CreateWorkspace(DataX=y_line_x_axis, DataY=y_line_y_values, OutputWorkspace="y_cut")
+        if key in ('c', 'x', 'y'):
+            self._extract_projections(extract_x=key in ('c', 'x'), extract_y=key in ('c', 'y'))
+
         if key == 'f':
             self._place_interpolated_rectangles()
         if key == 'delete':
