@@ -147,7 +147,6 @@ set(MOC_FILES
     IndirectInterface.h
     IndirectMolDyn.h
     IndirectMoments.h
-    IndirectMomentsModel.h
     IndirectMomentsView.h
     IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
@@ -188,6 +187,7 @@ set(INC_FILES
     IndirectFittingModel.h
     IndirectFitOutput.h
     IndirectFunctionBrowser/ConvFunctionModel.h
+    IndirectMomentsModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
     IqtFitModel.h
