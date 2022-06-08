@@ -392,6 +392,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
 
             peaks.append(((x_mean + x0_ind) * x_step + xmin, (y_mean + y0_ind) * y_step + ymin))
+            self.plotter.image_axes.plot(*peaks[-1], marker='+', color='r')
+
+        self.plotter.redraw()
         return peaks
 
     def _delete_current(self):
