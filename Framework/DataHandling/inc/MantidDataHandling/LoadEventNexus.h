@@ -13,6 +13,7 @@
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/LoadGeometry.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
@@ -23,24 +24,19 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#ifdef _WIN32 // fixing windows issue causing conflict between
-// winnt char and nexus char
-#undef CHAR
-#endif
-
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
-
+#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_array.hpp>
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
+
+#include <cstdint>
 #include <functional>
-#include <random>
 #include <memory>
 #include <mutex>
 #include <numeric>
-#include <Poco/Path.h>
+#include <random>
+#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -314,7 +310,7 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std:
 
   // loop over spectra
   for (size_t wi = start_wi; wi < end_wi; ++wi) {
-    DataObjects::EventList &event_list = localWorkspace->getSpectrum(wi);
+    DataObjects::EventList &event_list = dynamic_cast<DataObjects::EventList &>(localWorkspace->getSpectrum(wi));
     if (event_list.empty())
       continue;
     // sort the events

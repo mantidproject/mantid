@@ -19,6 +19,9 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
+
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;
