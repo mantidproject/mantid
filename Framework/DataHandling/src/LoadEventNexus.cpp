@@ -1062,9 +1062,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   if ((!someBanks.empty()) && (!monitors)) {
     std::vector<std::string> eventedBanks;
     eventedBanks.reserve(someBanks.size());
-    for (const auto &bank : someBanks) {
-      eventedBanks.emplace_back(bank + "_events");
-    }
+    std::transform(someBanks.cbegin(), someBanks.cend(), std::back_inserter(eventedBanks),
+                   [](const auto &bank) { return bank + "_events"; });
+
     // check that all of the requested banks are in the file
     const auto invalidBank =
         std::find_if(eventedBanks.cbegin(), eventedBanks.cend(), [&bankNames](const auto &someBank) {

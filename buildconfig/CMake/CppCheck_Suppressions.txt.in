@@ -172,7 +172,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolari
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolarizationEfficienciesBase.cpp:73
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEventNexus.h:347
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/EventWorkspaceCollection.cpp:191
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:780
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:1988
@@ -192,7 +191,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:230
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:729
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexusIndexSetup.cpp:59
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexusIndexSetup.cpp:175
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexus.cpp:1064
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:668
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
