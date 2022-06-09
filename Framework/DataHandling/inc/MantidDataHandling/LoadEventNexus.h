@@ -343,9 +343,8 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace, const std:
         // spread the events uniformly inside the bin
         std::uniform_real_distribution<double> flat(left, right);
         std::vector<double> random_numbers(m);
-        for (double &random_number : random_numbers) {
-          random_number = flat(rng);
-        }
+        std::for_each(random_numbers.begin(), random_numbers.end(),
+                      [&flat, &rng](double &number) { number = flat(rng); });
         std::sort(random_numbers.begin(), random_numbers.end());
         auto it = random_numbers.begin();
         for (auto ev1 = ev - m; ev1 != ev; ++ev1, ++it) {

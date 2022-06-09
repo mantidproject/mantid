@@ -157,7 +157,6 @@ unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cp
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolarizationEfficiencies.cpp:119
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEventNexus.h:347
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/EventWorkspaceCollection.cpp:191
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:780
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:1988
