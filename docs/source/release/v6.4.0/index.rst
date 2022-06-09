@@ -12,31 +12,39 @@ Mantid 6.4.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.4.0 of Mantid.
 
 Many of the updates in this version have focused on improvements for users, building on existing algorithms and interfaces.
 Our method of packaging has also changed. Windows and macOS users should not notice any difference,
-but our linux users should begin using the conda distributions (detailed :ref:`below <6.4_packaging>`).
+but this will be the last release that uses the linux ``.rpm`` and ``.deb`` packages (more details :ref:`here <6.4_packaging>`).
 
 In addition to many improvements we are delighted to announce some new features including:
 
 - A new :ref:`cut viewer tool <sliceviewer_nonaxiscuts>` for non-axis aligned cuts has been added to the :ref:`SliceViewer`.
-- Workbench has been updated to be compatible with matplotlib v3.5.
+- Workbench (and mslice) have been updated to be compatible with matplotlib v3.5.
 - In the :ref:`ISIS Reflectometry <interface-isis-refl>` interface, :ref:`Experiment Settings <refl_exp_instrument_settings>`
-  can now be set according to both the angle and the sample title.
+  defaults can now be set according to both the angle and the sample title.
 - Fit functions have been extended to allow for the addition of :ref:`Function Attribute Validators <attribute_validators>`.
 - The :ref:`ISIS SANS TOML <sans_toml_v1-ref>` format has been upgraded to V1. All V1 files will continue to be supported in future versions without changes.
 
-**<Conda Stuff: Ask martyn about this when he isn't so swamped>**
-
 .. _6.4_packaging:
 
-Packaging
----------
+Packaging & Installation
+------------------------
 
-<Further Packaging Instructions>
+As advertised in :ref:`v6.3.0 <v6.3.0>` we have reworked our installer packages for this release. Changes include:
+
+- Windows and macOS packages are now named ``MantidWorkbench-6.4.0`` with the appropriate extension. Other than this they are used in the same manner.
+- A new linux package,``mantidworkbench-6.4.0.tar.xz``, now supports many Linux distributions and should work on any 2010+ distribution with ``glibc >= 2.17``.
+  It is a simple, flat tarball that can be unpacked anywhere and no longer has to reside in ``/opt``.
+- All of the above packages are built using our conda libraries to make future maintenance easier.
+
+Last Release of .rpm and .deb
+#############################
+
+This release will be the last time we provide an ``.rpm`` for Red Hat and a ``.deb`` for Ubuntu.
+The new Linux tarball provided above will work on both of these systems and has the advantage of not being tied to ancient system libraries that have held up internal updates.
+The new tarball can also be extracted and run anywhere, so does not require root permissions to install.
 
 Further Information
 -------------------
