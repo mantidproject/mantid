@@ -45,7 +45,7 @@ completed much faster than they were in MantidPlot.
     * :ref:`SliceViewer`: View 2D slices of multi-dimensional workspaces.
     * *Sample log viewer*: Display information, plots and statistics about the sample logs in a workspace.
     * :ref:`WorkbenchWorkspaceHistoryWindow`: Displays the algorithms that have been applied to a workspace.
-    * :ref:`Plotting <plotting>`: Describes how mantid workspaces have been integrated with the matplotlib framework and
+    * :ref:`Plotting <plotting>`: Describes how Mantid workspaces have been integrated with the matplotlib framework and
       how to create these plots via scripts.
     * :ref:`WorkbenchWorkspaceCalculator`: Describes, briefly, the workspace calculator plugin.
     * :ref:`WorkbenchSuperplot`: Decorator widget of the plot window that provides tools to overplot data.
