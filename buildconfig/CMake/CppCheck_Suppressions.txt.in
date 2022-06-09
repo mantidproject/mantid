@@ -296,8 +296,6 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDLeanEvent.h:344
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDLeanEvent.h:346
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDLeanEvent.h:347
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:692
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1417
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BoxControllerNeXusIO.cpp:40
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BoxControllerNeXusIO.cpp:363
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/VectorParameterParser.h:63
