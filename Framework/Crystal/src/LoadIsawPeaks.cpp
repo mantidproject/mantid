@@ -577,8 +577,7 @@ void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS, const std
 std::shared_ptr<const IComponent>
 LoadIsawPeaks::getCachedBankByName(const std::string &bankname,
                                    const std::shared_ptr<const Geometry::Instrument> &inst) {
-  if (m_banks.count(bankname) == 0)
-    m_banks[bankname] = inst->getComponentByName(bankname);
+  m_banks.try_emplace(bankname, inst->getComponentByName(bankname));
   return m_banks[bankname];
 }
 
