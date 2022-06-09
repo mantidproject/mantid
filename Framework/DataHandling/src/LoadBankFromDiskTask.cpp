@@ -12,7 +12,10 @@
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/NexusIOHelper.h"
 
+// clang-format off
+#include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <algorithm>
 #include <utility>
