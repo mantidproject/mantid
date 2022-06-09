@@ -154,7 +154,6 @@ identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
-stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreateChunkingFromInstrument.cpp:400
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreateChunkingFromInstrument.cpp:231
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreateChunkingFromInstrument.cpp:239
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolarizationEfficiencies.cpp:119

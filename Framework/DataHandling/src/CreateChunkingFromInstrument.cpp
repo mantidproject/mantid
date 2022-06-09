@@ -396,9 +396,7 @@ void CreateChunkingFromInstrument::exec() {
 
         // add it to the correct chunk
         if (!parent.empty()) {
-          if (grouping.count(parent) == 0)
-            grouping[parent] = vector<string>();
-
+          grouping.try_emplace(parent, vector<string>());
           grouping[parent].emplace_back(comp->getName());
         }
       }
