@@ -187,6 +187,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_height: the new height
         """
         self.current_rectangle.set_bounds(*new_point, new_width, new_height)
+        peak = self._find_peak(self.current_rectangle)
+        self._show_peak(self.current_rectangle, peak)
         self.signals.sig_current_updated.emit()
 
     def _on_controller_updated(self, rectangle_patch: Rectangle, new_x0: float, new_y0: float,
@@ -200,6 +202,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_y1: the y coordinate of that opposing corner
         """
         rectangle_patch.set_bounds(new_x0, new_y0, new_x1 - new_x0, new_y1 - new_y0)
+        peak = self._find_peak(self.current_rectangle)
+        self._show_peak(self.current_rectangle, peak)
 
         if self._manager.get_current_rectangle() == rectangle_patch:
             self._selector.extents = (new_x0, new_x1, new_y0, new_y1)
@@ -364,42 +368,60 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         Find the peaks in the current rectangles, by searching the center of mass of the data there.
         @return the list of the (x, y) positions of the peaks.
         """
+        peaks = []
+        for rect in self.get_rectangles():
+            peak = self._find_peak(rect)
+            peaks.append(peak)
+            self._show_peak(rect, peak)
+
+        self.plotter.redraw()
+        return peaks
+
+    def _find_peak(self, rect: Rectangle) -> (float, float):
+        """
+        Find the peak at the center of mass of the rectangle
+        @param rect: the relevant rectangle
+        @return the peak position
+        """
         xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
 
         arr = self.plotter.image.get_array()
 
         x_step = (xmax - xmin) / arr.shape[1]
         y_step = (ymax - ymin) / arr.shape[0]
+        x0, y0 = rect.get_xy()
+        x1 = x0 + rect.get_width()
+        y1 = y0 + rect.get_height()
 
-        peaks = []
-        for rect in self.get_rectangles():
-            x0, y0 = rect.get_xy()
-            x1 = x0 + rect.get_width()
-            y1 = y0 + rect.get_height()
+        # find the indices corresponding to the position in the array
+        x0_ind = max(int(np.ceil((x0 - xmin) / x_step)), 0)
+        y0_ind = max(int(np.ceil((y0 - ymin) / y_step)), 0)
 
-            # find the indices corresponding to the position in the array
-            x0_ind = max(int(np.ceil((x0 - xmin) / x_step)), 0)
-            y0_ind = max(int(np.ceil((y0 - ymin) / y_step)), 0)
+        x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
+        y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
 
-            x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
-            y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
+        slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
 
-            slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
+        total_sum = np.sum(slice_cut)
 
-            total_sum = np.sum(slice_cut)
+        x_mean = np.dot(np.sum(slice_cut, axis=0), np.arange(len(slice_cut[0]))) / total_sum
+        y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
 
-            x_mean = np.dot(np.sum(slice_cut, axis=0), np.arange(len(slice_cut[0]))) / total_sum
-            y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
+        x_peak_pos = (x_mean + x0_ind) * x_step + xmin
+        y_peak_pos = (y_mean + y0_ind) * y_step + ymin
 
-            peaks.append(((x_mean + x0_ind) * x_step + xmin, (y_mean + y0_ind) * y_step + ymin))
+        return x_peak_pos, y_peak_pos
 
-            plot = self.plotter.image_axes.plot(*peaks[-1], marker='+', color='r')[0]
-            index = self._manager.find_controller(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
-            controller = self._manager.rectangles[index][0]
-            controller.set_peak_plot(plot)
-
-        self.plotter.redraw()
-        return peaks
+    def _show_peak(self, rect: Rectangle, peak: (float, float)):
+        """
+        Display the peak on the figure, replacing previous one if needed
+        @param rect: the rectangle whose peak is shown
+        @param peak: the position of the peak to show
+        """
+        plot = self.plotter.image_axes.plot(*peak, marker='+', color='r')[0]
+        index = self._manager.find_controller(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
+        controller = self._manager.rectangles[index][0]
+        controller.set_peak_plot(plot)
 
     def _delete_current(self):
         """

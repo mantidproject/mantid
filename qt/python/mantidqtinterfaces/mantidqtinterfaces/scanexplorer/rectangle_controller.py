@@ -203,6 +203,8 @@ class RectangleController:
         for field in self.fields:
             table.removeRow(field.get_name_item().row())
 
+        self.set_peak_plot(None)
+
     def update_values(self, new_x0, new_y0, new_x1, new_y1):
         """
         Update fields values to the new ones
