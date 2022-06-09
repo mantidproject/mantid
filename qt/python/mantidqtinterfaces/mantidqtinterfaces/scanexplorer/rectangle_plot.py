@@ -392,7 +392,11 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
 
             peaks.append(((x_mean + x0_ind) * x_step + xmin, (y_mean + y0_ind) * y_step + ymin))
-            self.plotter.image_axes.plot(*peaks[-1], marker='+', color='r')
+
+            plot = self.plotter.image_axes.plot(*peaks[-1], marker='+', color='r')[0]
+            index = self._manager.find_controller(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
+            controller = self._manager.rectangles[index][0]
+            controller.set_peak_plot(plot)
 
         self.plotter.redraw()
         return peaks

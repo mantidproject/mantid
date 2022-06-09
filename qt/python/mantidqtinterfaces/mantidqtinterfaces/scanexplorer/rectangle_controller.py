@@ -158,6 +158,8 @@ class RectangleController:
                        DoubleProperty('x1', x1),
                        DoubleProperty('y1', y1)]
 
+        self.peak_plot = None
+
     def set_header_items(self):
         """
         Set the items defining the header of the rectangle controller
@@ -216,6 +218,15 @@ class RectangleController:
 
     def get_values(self):
         return (field.value for field in self.fields)
+
+    def set_peak_plot(self, peak_plot):
+        """
+        Store the peak plot object and remove the previous one from the figure if it exists
+        @param peak_plot: the new plot to store
+        """
+        if self.peak_plot:
+            self.peak_plot.remove()
+        self.peak_plot = peak_plot
 
     def __eq__(self, other):
         for field_1, field_2 in zip(self.fields, other.fields):
