@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from qtpy.QtWidgets import QWidget, QMainWindow, QHBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog
+from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
 from qtpy.QtCore import *
 
 import mantid
@@ -20,7 +20,7 @@ from .rectangle_controller import RectanglesManager
 class ScanExplorerView(QMainWindow):
 
     """Index of the slice viewer widget in the splitter. Used to replace it when needed."""
-    SLICE_VIEWER_SPLITTER_INDEX = 1
+    SLICE_VIEWER_SPLITTER_INDEX = 0
 
     """Allowed file extensions"""
     FILE_EXTENSION_FILTER = "*.nxs"
@@ -31,36 +31,41 @@ class ScanExplorerView(QMainWindow):
     def __init__(self, parent=None, presenter=None):
         super().__init__(parent)
         self.presenter = presenter
-        self._data_view = None
 
-        self.widget = QWidget()
+        self._data_view = None  # data_view object, lifted directly from the slice viewer.
+        # Needs data to be created, so it is added at runtime
 
-        self.splitter = QSplitter(orientation=Qt.Vertical, parent=self.widget)
+        self._rectangles_manager = None  # the object managing the multiple rectangles on the plot
 
-        self.interface_layout = QHBoxLayout(self)
+        # splitter managing the entire window
+        self.splitter = QSplitter(orientation=Qt.Vertical, parent=self)
+        self.setCentralWidget(self.splitter)
 
+        self.lower_splitter = None  # splitter for the lower part of the widget.
+        # Holds the data view and the rectangle table, as they are created. At startup, not shown.
+
+        # at start up, only the upper part: selecting data
+        # line edit to write path to file to open
         self.file_line_edit = QLineEdit()
 
+        # button to open a browser to select file to open
         self.browse_button = QPushButton(text="Browse")
         self.browse_button.clicked.connect(self.show_directory_manager)
 
-        self.multiple_action = None
-
-        self.advanced_button = QPushButton(text="Advanced")
+        # button to open the algorithm dialog for finer control
+        self.advanced_button = QPushButton(text="Advanced", toolTip="Open SANSILLParameterScan dialog")
         self.advanced_button.clicked.connect(self.open_alg_dialog)
 
-        self.interface_layout.addWidget(self.file_line_edit)
-        self.interface_layout.addWidget(self.browse_button)
-        # self.interface_layout.addWidget(self.multiple_button)
-        self.interface_layout.addWidget(self.advanced_button)
+        # setting the layout
+        upper_layout = QHBoxLayout(self)
+        upper_layout.addWidget(self.file_line_edit)
+        upper_layout.addWidget(self.browse_button)
+        upper_layout.addWidget(self.advanced_button)
 
-        interface_widget = QWidget()
-        interface_widget.setLayout(self.interface_layout)
+        bar_widget = QGroupBox()
+        bar_widget.setLayout(upper_layout)
 
-        self.splitter.addWidget(interface_widget)
-        self.setCentralWidget(self.splitter)
-
-        self._rectangles_manager = None
+        self.splitter.addWidget(bar_widget)
 
         # register startup
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "ScanExplorer", False)
@@ -70,8 +75,11 @@ class ScanExplorerView(QMainWindow):
         Change to multiple rectangle mode.
         """
         self._rectangles_manager = RectanglesManager(self)
-        self.splitter.addWidget(self._rectangles_manager)
-        self.splitter.setOrientation(Qt.Horizontal)
+
+        if self.lower_splitter.count() == 1:
+            self.lower_splitter.addWidget(self._rectangles_manager)
+        else:
+            self.lower_splitter.replaceWidget(1, self._rectangles_manager)
 
         tool = MultipleRectangleSelectionLinePlot
         self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, state=True, trigger=True)
@@ -102,9 +110,12 @@ class ScanExplorerView(QMainWindow):
         @param workspace: the workspace to display
         """
         if self.splitter.count() == 1:
-            self.splitter.addWidget(self._data_view)
+            self.lower_splitter = QSplitter()
+            self.lower_splitter.addWidget(self._data_view)
+
+            self.splitter.addWidget(self.lower_splitter)
         else:
-            self.splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
+            self.lower_splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
 
         self.plot_workspace(workspace)
 
