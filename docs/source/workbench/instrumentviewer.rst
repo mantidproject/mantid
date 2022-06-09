@@ -230,39 +230,39 @@ Clicking on a component moves the view of the instrument to centre on that compo
 Python Control
 --------------
 Many aspects of the instrument view can be controlled from Python.
-To use the Python interface for InstrumentViewer, use the following code to import the necessary libraries
+To use the Python interface for the InstrumentViewer, use the following code to import the necessary libraries:
 
 .. code-block:: python
 
   from mantidqt.widgets.instrumentview.api import get_instrumentview
 
-then load the Nexus data into a workspace
+Then, load the Nexus data into a workspace:
 
 .. code-block:: python
 
   ws = LoadEventNexus(Filename=nexus_path, NumberOfBins=10)
 
-Now we are done with the necesary preparation, time to get a handle to the window itself (this will create a fresh window)
+Now we are done with the necessary preparations, time to get a handle to the window itself (this will create a fresh window):
 
 .. code-block:: python
 
   myiv = get_instrumentview(ws)
   myiv.show_view()
 
-To set the integration range (time-of-flight), use
+To set the integration range (in time-of-flight), use:
 
 .. code-block:: python
 
   myiv.set_bin_range(1, 10000)
 
-To switch to a different tab, use
+To switch to a different tab, use:
 
 .. code-block:: python
 
   myiv.select_tab(0)  # TabIndex
                       # 0: Render, 1: Pick, 2: Draw, 3: Instrument
 
-To select the projection type (surface type), use
+To select the projection type (surface type), use:
 
 .. code-block:: python
 
@@ -272,13 +272,13 @@ To select the projection type (surface type), use
                               # 4: SPHERICAL_X,   5: SPHERICAL_Y,   6: SPHERICAL_Z,
                               # 7: SideBySide
 
-To switch to a different viewing axis, use
+To switch to a different viewing axis, use:
 
 .. code-block:: python
 
   myiv.set_axis("Y+")  # (Z+, Z-, Y+, Y-, X+, X-)
 
-To select the range for the data (intensity, color map legend), use
+To select the range for the data (intensity, color map legend), use:
 
 .. code-block:: python
 
@@ -289,7 +289,7 @@ To select the range for the data (intensity, color map legend), use
   myiv.set_color_scale(0)              # color legend scale type
                                        # 0: Linear, 1: SymmetricLog10, 2: Power
 
-To start the app outside ``MantidWorkbench``, use the following code snippet as a starting point
+To start the app outside ``MantidWorkbench``, use the following code snippet as a starting point:
 
 .. code-block:: python
 
@@ -326,5 +326,5 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
     myiv.reset_view()
     sys.exit(app.exec_())
 
-NOTE: If the instrument view app is launched outside ``MantidWorkbench`` on RHEL_7, the user need click on the viewing widget to get it rendered properly.
-For other OS, the instrument viewing widget should display the instrument properly upon launching.
+NOTE: If the Instrument Viewer is launched outside outside of Workbench on RHEL_7, the user will need to click on the viewing widget to allow it to render correctly.
+For other operating systems, the Instrument Viewer widget should display the instrument properly upon launching.
