@@ -57,6 +57,7 @@ class SliceViewerView(QWidget, ObservingView):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._splitter)
         self.setLayout(layout)
+        self.refresh_queued = False
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
@@ -114,7 +115,9 @@ class SliceViewerView(QWidget, ObservingView):
     def delayed_refresh(self):
         """Post an event to the event loop that causes the view to
         update on the next cycle"""
-        QTimer.singleShot(0, self.presenter.refresh_view)
+        if not self.refresh_queued:
+            self.refresh_queued = True
+            QTimer.singleShot(0, self.presenter.refresh_view)
 
     def close(self):
         self.presenter.notify_close()
