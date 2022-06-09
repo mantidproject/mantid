@@ -255,7 +255,11 @@ class DoubleProperty:
 
     @property
     def value(self) -> float:
-        return float(self._value.text())
+        try:
+            return float(self._value.text())
+        except ValueError:
+            # TODO return previous value ? no changes ?
+            return 0
 
     @value.setter
     def value(self, new_value: float):
