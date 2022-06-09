@@ -115,13 +115,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResetNegati
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeDomainMD.cpp:28
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/DetectorSearcher.cpp:172
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:65
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:57
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:66
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:78
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:90
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:102
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:114
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:137
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:483
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:492
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:501
