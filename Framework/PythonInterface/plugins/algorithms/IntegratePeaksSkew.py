@@ -15,6 +15,8 @@ from scipy.ndimage import label
 from scipy.stats import moment
 from mantid.geometry import RectangularDetector, GridDetector
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.colors import LogNorm
 
 
 class InstrumentArrayConverter:
@@ -226,8 +228,7 @@ def focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk):
 
 
 def find_peak_mask(signal, ixlo, ixhi, irow, icol, use_nearest):
-    _, ipeak2D = find_bg_pts_seed_skew(signal[:, :, ixlo:ixhi].sum(axis=2).flatten(),
-                                       np.arange(np.prod(signal.shape[0:2])))
+    _, ipeak2D = find_bg_pts_seed_skew(signal[:, :, ixlo:ixhi].sum(axis=2).flatten())
     non_bg_mask = np.zeros(signal.shape[0:2], dtype=bool)
     non_bg_mask[np.unravel_index(ipeak2D, signal.shape[0:2])] = True
     labeled_array, num_features = label(non_bg_mask)
@@ -326,7 +327,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("NPixPerVacancyMin", "Peak Mask Validation")
 
         # plotting
-        self.declareProperty(FileProperty("OutputFile", "", FileAction.Save, ".pdf"),
+        self.declareProperty(FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
                              "Optional file path in which to write diagnostic plots (note this will slow the "
                              "execution of algorithm).")
         self.setPropertyGroup("OutputFile", "Plotting")
@@ -370,6 +371,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         detids = pk_ws_int.column('DetID')
         bank_names = pk_ws_int.column('BankName')
         tofs = pk_ws_int.column('TOF')
+        if plot_filename:
+            fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
+            pdf = PdfPages(plot_filename)
         for ipk, pk in enumerate(pk_ws_int):
             # get data array in window of side length dpixel around peak region (truncated at edge pf detector)
             signal, error, irow, icol, ispec, detector_edges = array_converter.get_peak_array(pk, detids[ipk],
@@ -417,11 +421,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             pk.setIntensity(intens)
             pk.setSigmaIntensity(sig)
             if plot_filename:
-                fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
                 # 2D plot
                 image_data = signal[:, :, ixlo:ixhi].sum(axis=2)
-                vmax = 0.5 * (image_data.min() + image_data[peak_mask].mean())
-                img = ax[0].imshow(image_data, vmax=vmax)
+                img = ax[0].imshow(image_data, vmax=image_data[peak_mask].mean(), norm=LogNorm())
                 ax[0].plot(*np.where(peak_mask.T), 'xw')
                 ax[0].plot(icol, irow, 'or')
                 title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) lambda={np.round(pk.getWavelength(), 2)} Ang"
@@ -448,11 +450,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 # figure formatting
                 intens_over_sig = round(intens / sig, 2) if sig > 0 else 0
                 ax[1].set_title(f'I/sig = {intens_over_sig}')
-                fig.colorbar(img, orientation='horizontal', ax=ax[0])
+                cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0])
                 fig.tight_layout()
-                fig.show()
+                ax[1].relim()
+                ax[1].autoscale_view()
+                pdf.savefig(fig, rasterized=True)
+                [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
+                cbar.remove()
             # update progress
             prog_reporter.report("Integrating Peaks")
+        if plot_filename:
+            plt.close(fig)
+            pdf.close()
         # assign output
         self.setProperty("OutputWorkspace", pk_ws_int)
 
