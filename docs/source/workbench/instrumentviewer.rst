@@ -220,6 +220,13 @@ Clicking the ``Apply bin mask to view`` button will use the :ref:`MaskBins <algm
 
 The ``Apply to Data`` button will apply all defined detector and bin masks using the relevant algorithms.
 
+Instrument Tab
+--------------
+
+This contains a list of components and component assemblies as they are named and arranged in the :ref:`Instrument Definition File <InstrumentDefinitionFile>`.
+For example, in some instruments the detectors are arranged into banks, in others - a long list.
+Clicking on a component moves the view of the instrument to centre on that component.
+
 Python Control
 --------------
 Many aspects of the instrument view can be controlled from Python.
