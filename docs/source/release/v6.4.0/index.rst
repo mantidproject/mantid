@@ -21,7 +21,7 @@ but this will be the last release that uses the linux ``.rpm`` and ``.deb`` pack
 In addition to many improvements we are delighted to announce some new features including:
 
 - A new :ref:`cut viewer tool <sliceviewer_nonaxiscuts>` for non-axis aligned cuts has been added to the :ref:`SliceViewer`.
-- Workbench (and mslice) have been updated to be compatible with matplotlib v3.5.
+- Workbench and MSlice are now compatible with matplotlib v3.5.
 - In the :ref:`ISIS Reflectometry <interface-isis-refl>` interface, :ref:`Experiment Settings <refl_exp_instrument_settings>`
   defaults can now be set according to both the angle and the sample title.
 - Fit functions have been extended to allow for the addition of :ref:`Function Attribute Validators <attribute_validators>`.
@@ -37,7 +37,8 @@ As advertised in :ref:`v6.3.0 <v6.3.0>` we have reworked our installer packages 
 - Windows and macOS packages are now named ``MantidWorkbench-6.4.0`` with the appropriate extension. Other than this they are used in the same manner.
 - A new linux package,``mantidworkbench-6.4.0.tar.xz``, now supports many Linux distributions and should work on any 2010+ distribution with ``glibc >= 2.17``.
   It is a simple, flat tarball that can be unpacked anywhere and no longer has to reside in ``/opt``.
-- All of the above packages are built using our conda libraries to make future maintenance easier.
+
+These packages are built using our conda libraries to make future maintenance easier.
 
 Last Release of .rpm and .deb
 #############################
