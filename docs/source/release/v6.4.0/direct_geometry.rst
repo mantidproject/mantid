@@ -73,7 +73,6 @@ New Features
 - The programme is now available as a noarch conda package.
 - MSlice is now compatible with ``matplotlib 3.5.0``.
 - Slice plot font sizes can now be changed using the quick options.
-- The default cut algorithm has been changed to ``Integration``.
 - Improved the error message for empty cut plot axes.
 - Modified the default Bragg peak size for interactive cut plots.
 - Improved zooming speed for slice plots with recoil lines.
