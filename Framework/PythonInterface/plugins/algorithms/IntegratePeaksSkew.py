@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, MatrixWorkspaceProperty,
                         IPeaksWorkspaceProperty, FileProperty, FileAction, WorkspaceUnitValidator)
-from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty,
+                           PropertyCriterion)
 import numpy as np
 from mantid.simpleapi import *
 from scipy.signal import convolve2d
@@ -273,16 +274,22 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.declareProperty(name="NPixels", defaultValue=8, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=3),
                              doc="Length of window on detector in number of pixels")
+        self.declareProperty(name='TOFWindow', defaultValue=0, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=0))
+        condition_to_use_resn = EnabledWhenProperty('TOFWindow', PropertyCriterion.IsEqualTo, "0")
         self.declareProperty(name="BackscatteringTOFResolution", defaultValue=0.04, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0),
                              doc="Fractional TOF width of peaks at backscattering (resolution dominated by moderator "
                                  "contribution, dT0/T0, and uncertainty in path length dL/L which is assumed constant"
                                  "for all pixels).")
-        self.declareProperty(name="ThetaWidth", defaultValue=0.04, direction=Direction.Input,
+        self.setPropertySettings("BackscatteringTOFResolution", condition_to_use_resn)
+        self.declareProperty(name="ThetaWidth", defaultValue=0.015, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0),
                              doc="Theta resolution (estimated from width at forward scattering minus contribution "
                                  "from moderator, dT0/T0, and path length dL/L).")
+        self.setPropertySettings("ThetaWidth", condition_to_use_resn)
         self.setPropertyGroup("NPixels", "Integration Window Parameters")
+        self.setPropertyGroup('TOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
         # peak mask validators
@@ -336,6 +343,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         pk_ws = self.getProperty("PeaksWorkspace").value
         # peak window parameters
+        tof_window = self.getProperty("TOFWindow").value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = self.getProperty("ThetaWidth").value
         dpixel = self.getProperty("NPixels").value
@@ -371,7 +379,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             if len(xpk) > ws.blocksize():
                 xpk = 0.5 * (xpk[:-1] + xpk[1:])  # convert to bin centers - must be easier way!
             # get TOF window using resolution parameters
-            dTOF = tofs[ipk] * np.sqrt(dt0_over_t0 ** 2 + (dth / np.tan(pk.getScattering() / 2)) ** 2)
+            if tof_window > 0:
+                dTOF = tof_window
+            else:
+                dTOF = tofs[ipk] * np.sqrt(dt0_over_t0 ** 2 + (dth / np.tan(pk.getScattering() / 2)) ** 2)
             ixlo = np.argmin(abs(xpk - (tofs[ipk] - 0.5 * dTOF)))
             ixhi = np.argmin(abs(xpk - (tofs[ipk] + 0.5 * dTOF)))
             ixpk = np.argmin(abs(xpk - tofs[ipk]))
