@@ -249,7 +249,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.c
 wrongPrintfScanfArgNum:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:54
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSampleEnvironmentAndShape.cpp:170
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/AffineMatrixParameter.cpp:121
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/UpdateInstrumentFromFile.cpp:264
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:142
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1092
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1102
