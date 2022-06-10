@@ -506,11 +506,10 @@ template <class T1, class T2> void EventList::minusHelper(std::vector<T1> &event
    * Using it caused a segault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
-  for (const auto &ev : more_events) {
-    // We call the constructor for T1. In the case of WeightedEventNoTime, the
-    // pulse time will just be ignored.
-    events.emplace_back(ev.tof(), ev.pulseTime(), ev.weight() * (-1.0), ev.errorSquared());
-  }
+  // We call the constructor for T1. In the case of WeightedEventNoTime, the
+  // pulse time will just be ignored.
+  std::transform(more_events.cbegin(), more_events.cend(), std::back_inserter(events),
+                 [](const auto &ev) { return T1(ev.tof(), ev.pulseTime(), ev.weight() * (-1.0), ev.errorSquared()); });
 }
 
 // --------------------------------------------------------------------------

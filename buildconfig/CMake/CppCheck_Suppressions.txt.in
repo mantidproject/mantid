@@ -276,7 +276,6 @@ unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:2444
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:2526
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:2551
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:512
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:41
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:56
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:135
