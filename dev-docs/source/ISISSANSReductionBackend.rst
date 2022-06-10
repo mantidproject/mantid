@@ -763,7 +763,7 @@ Director for *ISISCommandInterface* (CLI)
 
 The *ISISCommandInterface* is used by some of the power users among the instrument scientists. It is
 an efficient way to customize reductions which require small tweaks between different reductions.
-Please consult the `scripting documentation <https://www.mantidproject.org/Scripting_SANS_Reductions>`_
+Please consult the :ref:`scripting documentation <ScriptingSANSReductions>`
 for the *ISISCommandInterface* for more information.
 
 The principal component which sets up the state behind the scene is *CommandInterfaceStateDirector*. It has to deal
