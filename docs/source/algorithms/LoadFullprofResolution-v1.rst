@@ -23,7 +23,7 @@ limitted to Fullprof:
    `CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_
 -  NPROF=9, back-to-back-exponential pseudo-Voigt translated into
    :ref:`BackToBackExponential <func-BackToBackExponential>` according to
-   `CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_
+   :ref:`CreateBackToBackParameters <CreateBackToBackParameters>`
 
 Note for NPROF=9 the translation is currently ignoring the Lorentzian
 part of the pseudo-Voigt.
