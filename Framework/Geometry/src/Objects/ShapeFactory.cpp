@@ -55,9 +55,8 @@ Logger g_log("ShapeFactory");
 namespace {
 std::vector<double> DegreesToRadians(const std::vector<double> &anglesDegrees) {
   std::vector<double> anglesRadians;
-  for (auto angle : anglesDegrees) {
-    anglesRadians.push_back(angle * M_PI / 180);
-  }
+  std::transform(anglesDegrees.cbegin(), anglesDegrees.cend(), std::back_inserter(anglesRadians),
+                 [](const auto angle) { return angle * M_PI / 180.0; });
   return anglesRadians;
 }
 } // namespace

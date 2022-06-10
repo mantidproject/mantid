@@ -320,7 +320,6 @@ accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:134
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1343
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/ShapeFactory.cpp:939
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/ShapeFactory.cpp:59
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:119
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:144
 invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
