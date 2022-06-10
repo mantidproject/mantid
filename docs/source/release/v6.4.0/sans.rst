@@ -23,5 +23,6 @@ Bugfixes
 - The ISIS SANS interface will now correctly find ``.txt``, ``.Txt``, ``.TXT``, ``.toml``, ``.Toml``, and ``.TOML`` extensions on case-sensitive platforms.
 - The copy, cut and paste functions for rows have been overhauled to fix numerous edge-cases in the ISIS SANS interface. These include: the paste order being reversed, unexpected rows appearing or clearing while pasting, and blank rows appearing randomly.
 - The :ref:`SANSILLMultiProcess <algm-SANSILLMultiProcess>` algorithm now properly handles the ``RuntimeError`` that occurs when a mask that does not exist is requested, and displays a relevant error message.
+- Fixed a bug handling invalid user files in the table. Previously the error reporter would appear, with a confusing error about a tuple index out of range. Now you get a sensible error message saying the file cannot be found.
 
 :ref:`Release 6.4.0 <v6.4.0>`
