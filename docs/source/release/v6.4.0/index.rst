@@ -16,7 +16,7 @@ We are proud to announce version 6.4.0 of Mantid.
 
 Many of the updates in this version have focused on improvements for users, building on existing algorithms and interfaces.
 Our method of packaging has also changed. Windows and macOS users should not notice any difference,
-but this will be the last release that uses the linux ``.rpm`` and ``.deb`` packages (more details :ref:`here <6.4_packaging>`).
+but this will be the last release where we provide ``.rpm`` and ``.deb`` packages for Linux (more details :ref:`here <6.4_packaging>`).
 
 In addition to many improvements we are delighted to announce some new features including:
 
