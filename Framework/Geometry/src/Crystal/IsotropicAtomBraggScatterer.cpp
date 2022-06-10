@@ -144,9 +144,8 @@ std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::operator()()
   Mantid::Kernel::StringTokenizer tokens(m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   std::vector<BraggScatterer_sptr> scatterers;
   scatterers.reserve(tokens.size());
-  for (const auto &token : tokens) {
-    scatterers.emplace_back(getScatterer(token));
-  }
+  std::transform(tokens.cbegin(), tokens.cend(), std::back_inserter(scatterers),
+                 [this](const auto &token) { return getScatterer(token); });
   return scatterers;
 }
 
