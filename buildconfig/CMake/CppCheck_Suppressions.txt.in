@@ -157,8 +157,6 @@ unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cp
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolarizationEfficiencies.cpp:119
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:780
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:1988
 stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp:604
 stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp:650
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadBBY.cpp:221
