@@ -1,7 +1,7 @@
 .. _CreateBackToBackParameters:
 
-CreateBackToBackParameters
-==========================
+Create Back To Back Parameters
+==============================
 
 .. contents:: Table of Contents
   :local:
