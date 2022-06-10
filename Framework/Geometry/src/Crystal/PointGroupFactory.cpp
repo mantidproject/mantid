@@ -56,9 +56,8 @@ bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
 std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
   pointGroups.reserve(m_generatorMap.size());
-  for (const auto &generator : m_generatorMap) {
-    pointGroups.emplace_back(generator.first);
-  }
+  std::transform(m_generatorMap.cbegin(), m_generatorMap.cend(), std::back_inserter(pointGroups),
+                 [](const auto &generator) { return generator.first; });
   return pointGroups;
 }
 
