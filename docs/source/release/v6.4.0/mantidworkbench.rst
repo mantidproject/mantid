@@ -14,8 +14,7 @@ New Features
 
 .. image::  ../../images/mantid_memory_bar.png
             :align: center
-
-
+|
 - The ``FitPropertyBrowser`` has been extended to allow for Function Attribute Validators. This allows the value of attributes to be restricted in numerous ways such as being bounded by a numeric min/max value or to be selected from a list of values using a drop down menu.
 - Add support for the new :ref:`SANSILLReduction <algm-SANSILLReduction>` algorithm in DrILL.
 - When loading and saving a project or a script, the working directory of the dialogs is now set to the current default save directory.
@@ -27,12 +26,16 @@ Bugfixes
 - Suppressed a spurious warning where ``matplotlib`` warns about creating a figure outside of the main thread when using the script window.
 - In the DrILL interface, scrolling down in the settings dialog no longer affects the combo boxes.
 - Cleaned up the appearance of the main window and the Indirect, Reflectometry, and Engineering GUIs on macOS.
-- Fixed a bug with the plotting status bar in Conda builds. The status bar no longer flickers when users move over the plot image or the z axis image.
+- Fixed a bug with the plotting status bar in conda builds. The status bar no longer flickers when users move over the plot image or the z axis image.
 - Fixed a memory leak whereby copies of workspaces were being retained even though the workspace had been deleted.
 - Removed the Load ILL tab from the interface in ``Indirect -> Tools``. Users should use the :ref:`LoadILLIndirect<algm-LoadILLIndirect>` algorithm or the ``Load`` button instead.
 - ``RebinnedOutput`` workspaces are now supported in the :ref:`Superplot <WorkbenchSuperplot>`.
 - Copying a spectrum in a ``MatrixWorkspace`` is now supported for ragged workspaces.
 - Opening the plot options for a figure containing an ``inset`` axes will no longer cause an error.
+- Workbench will no longer throw an error on plots with error bar caps when the offset of a waterfall plot is adjusted.
+- Fixed a crash that occurred when adding a user function to a plot that already has a guess plotted.
+- Fixed a bug where trying to save a large project would cause Mantid to crash.
+- Workbench no longer generates an error when you save the ``Figure Options`` on a colour fill plot containing two images of different types (e.g. QuadMesh and Image).
 
 Instrument Viewer
 -----------------
@@ -70,6 +73,7 @@ Bugfixes
 - Fixed a bug with peak selection causing a crash for 4D MD workspaces.
 - Peak addition now correctly assigns new peak ``HKL`` in nonorthogonal view.
 - The peak overlay is now disabled when a non-Q axis is viewed. The peak object does not have a position defined for a non-Q dimension.
+- Automatic refresh now works when a binary operation is applied to the underlying workspace.
 
 
 :ref:`Release 6.4.0 <v6.4.0>`
