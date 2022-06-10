@@ -20,7 +20,7 @@ limitted to Fullprof:
 
 -  NPROF=13, Ikeda-Carpender pseudo-Voigt translated into
    :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` according to
-   `CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_
+   :ref:`CreateIkedaCarpenterParameters <CreateIkedaCarpenterParameters>`
 -  NPROF=9, back-to-back-exponential pseudo-Voigt translated into
    :ref:`BackToBackExponential <func-BackToBackExponential>` according to
    :ref:`CreateBackToBackParameters <CreateBackToBackParameters>`
