@@ -48,6 +48,7 @@ Bugfixes
   with the same name.
 - The x unit validation on the parameter ``ScatteringCrossSection`` in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` has been corrected to check for momentum.
 - :ref:`algm-Rebin2D` can now take an :ref:`EventWorkspace <EventWorkspace>` as an input without crashing.
+- Workbench will no longer crash if the algorithm dialog for :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` is opened while a group workspace is present in the Workspaces list.
 
 Data Objects
 ------------
@@ -86,6 +87,15 @@ Bugfixes
 - It is now possible to use the same values for the ``WorkspaceIndex`` and ``Workspace Index`` fields when creating a composite function in the fitting browser.
 
 
+Kernel
+------
+
+Bugfixes
+########
+
+- Fixed a bug that prevented the correct inversion of large tridiagonal matrices.
+
+
 Python
 ------
 
@@ -93,7 +103,8 @@ New Features
 ############
 
 - Added possibility to forward log messages to Python using ``mantid.utils.logging.log_to_python``.
-- ``setAutoTrim`` and ``getAutoTrim`` from the ``Property`` class are now exposed to Python.
+- ``setAutoTrim`` and ``getAutoTrim`` from the :py:obj:`~mantid.kernel.Property` class are now exposed to Python.
+- ``getNumberDetectors`` from the :py:obj:`~mantid.geometry.Instrument` class is now exposed to the Python API.
 
 Bugfixes
 ########
