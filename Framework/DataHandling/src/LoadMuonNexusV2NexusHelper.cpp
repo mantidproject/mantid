@@ -101,9 +101,10 @@ LoadMuonNexusV2NexusHelper::loadDetectorGroupingFromNexus(const std::vector<deti
     NXInt groupingData = detectorGroup.openNXInt(NeXusEntry::GROUPING);
     groupingData.load();
     int groupingOffset = !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
-    for (auto detectorNumber : detectorsLoaded) {
-      grouping.emplace_back(groupingData[detectorNumber - 1 + groupingOffset]);
-    }
+    std::transform(detectorsLoaded.cbegin(), detectorsLoaded.cend(), std::back_inserter(grouping),
+                   [groupingData, groupingOffset](const auto detectorNumber) {
+                     return groupingData[detectorNumber - 1 + groupingOffset];
+                   });
   }
   return grouping;
 }
@@ -141,9 +142,10 @@ std::vector<double> LoadMuonNexusV2NexusHelper::loadDeadTimesFromNexus(const std
     // So if we are load the second period we need to offset our indexes by
     // (1*numDetectors)
     int deadTimeOffset = !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
-    for (auto detectorNumber : loadedDetectors) {
-      deadTimes.emplace_back(deadTimesData[detectorNumber - 1 + deadTimeOffset]);
-    }
+    std::transform(loadedDetectors.cbegin(), loadedDetectors.cend(), std::back_inserter(deadTimes),
+                   [deadTimesData, deadTimeOffset](const auto detectorNumber) {
+                     return deadTimesData[detectorNumber - 1 + deadTimeOffset];
+                   });
   }
   return deadTimes;
 }
