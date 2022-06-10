@@ -371,7 +371,6 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:179
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:334
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/LoadFlexiNexus.cpp:221
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiIndexKnownCompounds.cpp:219
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiUtilities/PoldiAutoCorrelationCore.cpp:534
