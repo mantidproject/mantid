@@ -9,7 +9,7 @@ Overview
 
 The Mantid visualisation system allows users to view the geometry of an instrument and also select and query individual detectors.
 An instrument is always shown in the context of a workspace, which contains data recorded with this instrument.
-The detectors are coloured according to the data in the corresponding spectra of the workspace.
+The detectors are colored according to the data in the corresponding spectra of the workspace.
 The user can select individual detectors by clicking on them and request to see the data recorded by this detector as a table or a graph.
 The instrument view also allows users to see close-ups of any component.
 
@@ -26,7 +26,7 @@ A 2D projection of the detector arrangement will be visible with each detector p
 It is possible to alter the view of the instrument by holding down either mouse button and moving (dragging) it within the window.
 There are other mouse and key board controls, which are listed at the bottom of the instrument view window.
 
-The control panel of the instrument view has four tabs: Render, Pick, Mask, and Instrument.
+The control panel of the instrument view has four tabs: ``Render``, ``Pick``, ``Mask``, and ``Instrument``.
 
 
 Render Tab
@@ -34,10 +34,10 @@ Render Tab
 The Render tab contains controls for managing the on-screen appearance of the instrument and collected data.
 The top-most combo-box control allows the user to select the way the instrument is projected onto the screen.
 The default setting is ``Full 3D`` which gives a 3D view of the instrument in an orthogonal projection.
-The other options are "unwrapped views" projecting the instrument onto a curved surface and then unwrapping it onto the screen.
+The other options are unwrapped views, which project the instrument onto a curved surface and unwrap it onto the view.
 There is a choice between cylinders and spheres.
 The unwrapped (or flat) views allow zooming by selecting a rectangular region with the mouse (left click and drag).
-Right-clicking resets the zoom back to showing the entire instrument.
+Right-clicking resets the zoom, which shows the entire instrument.
 
 .. figure:: ../images/Workbench/InstrumentViewer/RenderTab.png
     :align: center
@@ -56,8 +56,8 @@ This option can be useful if the instrument is viewed over a slow network connec
 
 The ``Save image`` button allows the image to be save into a file.
 
-The colour bar axis below maps the colours of the detectors to the integrated number of counts in their spectra.
-The axis also defines the minimum and maximum values, which can be edited using the text boxes below and above the colour bar.
+The color bar axis below maps the colors of the detectors to the integrated number of counts in their spectra.
+The axis also defines the minimum and maximum values, which can be edited using the text boxes below and above the color bar.
 Mantid comes with a number of color map files and these can be loaded by selecting the ``Display Settings`` -> ``Color Map``.
 
 
@@ -236,7 +236,7 @@ Clicking on a component moves the view of the instrument to centre on that compo
 Python Control
 --------------
 Many aspects of the instrument view can be controlled from Python.
-To use the Python interface for the InstrumentViewer, use the following code to import the necessary libraries:
+To use the Python interface for the Instrument Viewer, use the following code to import the necessary libraries:
 
 .. code-block:: python
 
@@ -332,5 +332,5 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
     myiv.reset_view()
     sys.exit(app.exec_())
 
-NOTE: If the Instrument Viewer is launched outside outside of Workbench on RHEL_7, the user will need to click on the viewing widget to allow it to render correctly.
+NOTE: If the Instrument Viewer is launched outside of Workbench on RHEL_7, the user will need to click on the viewing widget to allow it to render correctly.
 For other operating systems, the Instrument Viewer widget should display the instrument properly upon launching.
