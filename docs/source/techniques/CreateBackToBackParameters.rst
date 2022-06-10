@@ -127,3 +127,5 @@ This is entirely optional, but for fitting e.g. HRPD or GEM data this makes sens
 whereas ``S`` depends on the specific sample data is collected for on the beamline.
 
 In Fullprof: Sig-2, Sig-1, beta1, etc. carries units and the result-unit of ``S`` is TOF and the result-unit of ``A`` and ``B`` is 1/TOF.
+
+.. categories:: Techniques
