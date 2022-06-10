@@ -167,9 +167,8 @@ void LoadGSASInstrumentFile::exec() {
     } else {
       // Else, use all available banks
       bankIds.reserve(bankparammap.size());
-      for (const auto &bank : bankparammap) {
-        bankIds.emplace_back(static_cast<int>(bank.first));
-      }
+      std::transform(bankparammap.cbegin(), bankparammap.cend(), std::back_inserter(bankIds),
+                     [](const auto &bank) { return static_cast<int>(bank.first); });
     }
 
     // Generate workspaceOfBank

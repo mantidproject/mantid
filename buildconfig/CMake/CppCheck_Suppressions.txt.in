@@ -170,7 +170,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:729
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSASInstrumentFile.cpp:105
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSASInstrumentFile.cpp:171
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHelper.cpp:168
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHFIRSANS.cpp:440
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLReflectometry.cpp:238
