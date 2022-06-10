@@ -231,9 +231,8 @@ bool SpaceGroupFactoryImpl::isSubscribed(size_t number) const { return m_numberM
 std::vector<std::string> SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_generatorMap.size());
-  for (const auto &generator : m_generatorMap) {
-    symbols.emplace_back(generator.first);
-  }
+  std::transform(m_generatorMap.cbegin(), m_generatorMap.cend(), std::back_inserter(symbols),
+                 [](const auto &generator) { return generator.first; });
   return symbols;
 }
 
