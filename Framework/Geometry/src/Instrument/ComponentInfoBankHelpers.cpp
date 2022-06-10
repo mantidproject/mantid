@@ -63,9 +63,10 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo, 
   // banks containing monitors are not considered saveable as are not
   // NXDetectors
   auto detectors = compInfo.detectorsInSubtree(idx);
-  const auto it = std::find_if_not(detectors.cbegin(), detectors.cend(),
-                                   [detInfo](const auto det) { return detInfo.isMonitor(det); });
-  return it == detectors.cend();
+
+  const auto it = std::find_if(detectors.cbegin(), detectors.cend(),
+                               [&detInfo](const auto &det) { return detInfo.isMonitor(det); });
+  return it == detectors.cend(); // if not found: not a monitor
 }
 
 /** Finds all ancestors up to the root of a component
