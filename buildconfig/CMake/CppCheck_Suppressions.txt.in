@@ -161,8 +161,6 @@ stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp
 stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp:650
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadBBY.cpp:221
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCanSAS1D2.cpp:67
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCSNSNexus.cpp:150
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCSNSNexus.cpp:274
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/ISISJournalGetExperimentRuns.cpp:57
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/ISISJournalGetExperimentRuns.cpp:78
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDaveGrp.cpp:138
