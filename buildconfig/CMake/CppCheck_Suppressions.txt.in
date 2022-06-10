@@ -315,7 +315,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cp
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:306
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:490
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:500
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject2D.cpp:321
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1342
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1343
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
