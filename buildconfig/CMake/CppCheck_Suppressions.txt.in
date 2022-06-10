@@ -162,7 +162,6 @@ stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadBBY.cpp:221
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCanSAS1D2.cpp:67
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/ISISJournalGetExperimentRuns.cpp:57
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/ISISJournalGetExperimentRuns.cpp:78
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDaveGrp.cpp:138
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadANSTOEventFile.h:132
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:103
