@@ -111,7 +111,7 @@ function create_plist() {
   add_string_to_plist "$bundle_plist" CFBundleName "$bundle_name"
   add_string_to_plist "$bundle_plist" CFBundleIconFile "$(basename $bundle_icon)"
   add_string_to_plist "$bundle_plist" CFBundleVersion "$version"
-  add_string_to_plist "$bundle_plist" CFBundleLongVersionString "$version"
+  add_string_to_plist "$bundle_plist" CFBundleShortVersionString "$version"
 }
 
 # Add a key string-value pair to a plist

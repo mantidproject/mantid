@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
@@ -1019,7 +1020,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
+  HelpWindow::showPage(nullptr, std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
 }
 
 void InstrumentWidget::set3DAxesState(bool on) {

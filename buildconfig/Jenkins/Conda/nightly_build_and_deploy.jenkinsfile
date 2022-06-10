@@ -22,12 +22,12 @@ def publish_test_reports() {
 }
 
 def conda_build_unix(arch) {
-  sh "${WORKSPACE}/buildconfig/Jenkins/Conda/conda-build-recipes ${WORKSPACE} --build-mantid --build-qt --build-workbench ${PACKAGE_OPTIONS}"
+  sh "${WORKSPACE}/buildconfig/Jenkins/Conda/package ${WORKSPACE} --build-mantid --build-qt --build-workbench ${PACKAGE_OPTIONS}"
   archive_conda_build(arch)
 }
 
 def conda_build_win(arch) {
-  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/conda-build-recipes ${WORKSPACE_UNIX_PATH} --build-mantid --build-qt --build-workbench ${PACKAGE_OPTIONS}\""
+  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/package ${WORKSPACE_UNIX_PATH} --build-mantid --build-qt --build-workbench ${PACKAGE_OPTIONS}\""
   archive_conda_build(arch)
 }
 

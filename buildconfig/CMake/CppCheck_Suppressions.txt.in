@@ -437,7 +437,7 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Export
 constParameter:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeaksWorkspace.cpp:141
 constParameter:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeaksWorkspace.cpp:161
 constParameter:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeaksWorkspace.cpp:186
-redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/BinaryOperations.cpp:95
+redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/BinaryOperations.cpp:96
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Axis.cpp:44
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:80
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:244
