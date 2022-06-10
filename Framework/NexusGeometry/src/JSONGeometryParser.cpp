@@ -261,19 +261,18 @@ Json::Value getRoot(const std::string &jsonGeometry) {
 std::string extractInstrumentName(const Json::Value &instrument) {
   std::string name;
   const auto &children = instrument[CHILDREN];
-  for (const auto &child : children) {
-    if (child[NAME] == NAME)
-      name = child["values"].asString();
-  }
+  const auto it =
+      std::find_if(std::cbegin(children), std::cend(children), [](const auto child) { return child[NAME] == NAME; });
+  if (it != std::cend(children))
+    name = (*it)["values"].asString();
 
   return name;
 }
 
 std::vector<std::unique_ptr<Json::Value>> moveToUniquePtrVec(std::vector<Json::Value> &jsonVector) {
   std::vector<std::unique_ptr<Json::Value>> ret;
-  for (auto &val : jsonVector)
-    ret.emplace_back(std::make_unique<Json::Value>(std::move(val)));
-
+  std::transform(jsonVector.cbegin(), jsonVector.cend(), std::back_inserter(ret),
+                 [](const auto &val) { return std::move(std::make_unique<Json::Value>(std::move(val))); });
   return ret;
 }
 
