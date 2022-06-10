@@ -33,9 +33,9 @@ std::vector<Group_const_sptr>
 ProductOfCyclicGroups::getFactorGroups(const std::vector<SymmetryOperation> &symmetryOperations) const {
   std::vector<Group_const_sptr> groups;
   groups.reserve(symmetryOperations.size());
-  for (const auto &symmetryOperation : symmetryOperations) {
-    groups.emplace_back(GroupFactory::create<CyclicGroup>(symmetryOperation.identifier()));
-  }
+  std::transform(
+      symmetryOperations.cbegin(), symmetryOperations.cend(), std::back_inserter(groups),
+      [](const auto &symmetryOperation) { return GroupFactory::create<CyclicGroup>(symmetryOperation.identifier()); });
   return groups;
 }
 
