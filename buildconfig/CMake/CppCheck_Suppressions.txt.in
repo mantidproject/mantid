@@ -284,7 +284,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cp
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:520
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:1192
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDEventWorkspace.tcc:459
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:191
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
