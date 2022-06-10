@@ -187,10 +187,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:341
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:628
 unusedVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:670
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMcStasNexus.cpp:48
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:414
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:429
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:517
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:539
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:404
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexusV2NexusHelper.cpp:105
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexusV2NexusHelper.cpp:145
