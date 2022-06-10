@@ -756,7 +756,7 @@ interface method (*parse_line* which takes a single line to parse)
 needs to be provided.
 
 For an overview of the user file commands, please see the
-`user file documentation <https://www.mantidproject.org/SANS_User_File_Commands>`_ .
+:ref:`user file documentation <ISIS_SANS_User_File_QRes-ref>`.
 
 Director for *ISISCommandInterface* (CLI)
 *****************************************
