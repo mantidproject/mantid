@@ -276,9 +276,7 @@ unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:2444
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:2526
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:2551
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:41
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:56
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:135
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspaceMRU.cpp:133
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:86
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:163
 assignBoolToFloat:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:1058
