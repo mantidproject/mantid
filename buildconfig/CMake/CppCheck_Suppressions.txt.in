@@ -236,7 +236,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:220
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSampleEnvironment.cpp:255
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:737
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSwans.cpp:204
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/PatchBBY.cpp:74
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/ProcessBankData.cpp:203
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/RemoveLogs.cpp:67
