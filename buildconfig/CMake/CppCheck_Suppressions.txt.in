@@ -292,7 +292,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ConventionalCe
 duplicateAssignExpression:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:2651
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:2819
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:396
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:503
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:67
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Detector.cpp:114
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/DetectorGroup.cpp:155
