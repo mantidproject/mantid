@@ -288,8 +288,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:6
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Workspace2D.cpp:91
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Workspace2D.cpp:132
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ConventionalCell.cpp:143
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/Group.cpp:60
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/Group.cpp:73
