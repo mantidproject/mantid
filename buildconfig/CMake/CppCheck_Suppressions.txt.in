@@ -353,7 +353,6 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Expo
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Statistics.cpp:109
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Group.cpp:33
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/PointGroup.cpp:62
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/SymmetryElement.cpp:43
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:86

@@ -29,9 +29,8 @@ std::vector<std::string> getSymmetryOperationStrings(const Group &self) {
 
   std::vector<std::string> pythonSymOps;
   pythonSymOps.reserve(symOps.size());
-  for (const auto &symOp : symOps) {
-    pythonSymOps.emplace_back(symOp.identifier());
-  }
+  std::transform(symOps.cbegin(), symOps.cend(), std::back_inserter(pythonSymOps),
+                 [](const auto &symOp) { return symOp.identifier(); });
 
   return pythonSymOps;
 }
