@@ -914,10 +914,10 @@ private:
     if (m_mode == Mode::Append) {
       // Find by class and by name
       auto results = utilities::findGroups(parent, classType);
-      for (auto &result : results) {
-        if (utilities::isNamed(result, name))
-          return result;
-      }
+      const auto it = std::find_if(results.cbegin(), results.cend(),
+                                   [&name](const auto &result) { return utilities::isNamed(result, name); });
+      if (it != results.cend())
+        return *it;
     }
     // We can't find it, or we are writing from scratch anyway
     return tryCreateGroup(parent, name);

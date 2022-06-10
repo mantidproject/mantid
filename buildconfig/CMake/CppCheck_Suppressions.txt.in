@@ -346,7 +346,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/JSONGeometryParse
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:798
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:895
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:928
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:918
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:230
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:775
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:870
