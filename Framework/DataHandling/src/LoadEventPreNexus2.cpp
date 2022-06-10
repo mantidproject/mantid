@@ -662,10 +662,7 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
   }
 
   // determine maximum pixel id
-  detid_max = 0; // seems like a safe lower bound
-  for (const auto detID : detIDs)
-    if (detID > detid_max)
-      detid_max = detID;
+  detid_max = *(std::max_element(detIDs.cbegin(), detIDs.cend()));
 
   // For slight speed up
   loadOnlySomeSpectra = (!this->spectra_list.empty());
