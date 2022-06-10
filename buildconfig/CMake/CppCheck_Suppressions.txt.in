@@ -229,8 +229,6 @@ objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:6
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:659
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:677
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:678
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:151
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:175
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:521
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRawHelper.cpp:294
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:111
