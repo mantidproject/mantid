@@ -48,6 +48,8 @@ If defined in your class then you can use it to set a python attribute on your o
                 self._nloops = value
 
 
+.. _attribute_validators:
+
 ====================
 Attribute Validators
 ====================
