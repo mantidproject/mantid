@@ -310,11 +310,6 @@ invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/BnId.cpp:91
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:674
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:674
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:89
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:133
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:306
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:490
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:500
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1342
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1343
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
