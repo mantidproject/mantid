@@ -303,7 +303,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ObjCompAsse
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ParameterMap.cpp:361
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/StructuredDetector.cpp:297
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/StructuredDetector.cpp:299
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/MDGeometry/CompositeImplicitFunction.cpp:50
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/MDGeometry/MDHistoDimensionBuilder.cpp:95
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:913
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:948

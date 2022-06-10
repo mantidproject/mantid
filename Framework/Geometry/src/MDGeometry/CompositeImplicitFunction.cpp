@@ -45,10 +45,12 @@ std::string CompositeImplicitFunction::toXMLString() const {
   AutoPtr<Element> parameterListElement = pDoc->createElement("ParameterList");
   functionElement->appendChild(parameterListElement);
 
-  std::string functionXML;
-  for (const auto &Function : m_Functions) {
-    functionXML += Function->toXMLString();
-  }
+  // this temporary object and following lines are to be replaced by std::transform_reduce, when available
+  std::vector<std::string> tmpVec;
+  tmpVec.reserve(m_Functions.size());
+  std::transform(m_Functions.cbegin(), m_Functions.cend(), std::back_inserter(tmpVec),
+                 [](const auto &function) { return function->toXMLString(); });
+  std::string functionXML = std::accumulate(tmpVec.cbegin(), tmpVec.cend(), std::string());
   AutoPtr<Text> functionFormatText = pDoc->createTextNode("%s");
   functionElement->appendChild(functionFormatText);
 
