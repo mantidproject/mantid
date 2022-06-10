@@ -331,7 +331,6 @@ invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADA
 invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:679
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:280
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:280
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/FileEventDataListener.cpp:158
 unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:61
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:245
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:271
