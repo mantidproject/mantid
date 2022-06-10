@@ -106,7 +106,8 @@ over the time bins vs the detector position in the tube.
 
 .. |tubeBank| image:: ../images/PickTabPickTubeButton.png
 
-.. image:: ../images/Workbench/InstrumentViewer/PickTubeContextMenu.png
+.. figure:: ../images/Workbench/InstrumentViewer/PickTubeContextMenu.png
+    :align: center
 
 Create a Single Crystal Peak List
 #################################
@@ -117,7 +118,8 @@ and add a peak to it. Peak markers will then be displayed over the instrument.
 
 .. |singleCrystal| image:: ../images/PickTabAddPeakButton.png
 
-.. image:: ../images/Workbench/InstrumentViewer/SingleCrystalPeakExample.png
+.. figure:: ../images/Workbench/InstrumentViewer/SingleCrystalPeakExample.png
+    :align: center
 
 Single Crystal Peak Eraser
 ##########################
@@ -137,7 +139,8 @@ box will show the list of peaks falling into this spectrum.
 
 .. |peakComparison| image:: ../images/PickTabCPCompare.png
 
-.. image:: ../images/Workbench/InstrumentViewer/PeakComparisonExample.png
+.. figure:: ../images/Workbench/InstrumentViewer/PeakComparisonExample.png
+    :align: center
 
 Peak Alignment Tool
 ###################
@@ -150,7 +153,8 @@ Selections can be cleared by right-clicking the instrument view and selecting ``
 
 .. |peakAlign| image:: ../images/PickTabCPAlign.png
 
-.. image:: ../images/Workbench/InstrumentViewer/PeaksAlignmentExample.png
+.. figure:: ../images/Workbench/InstrumentViewer/PeaksAlignmentExample.png
+    :align: center
 
 
 .. _instrumentviewer_draw_tab:
@@ -186,7 +190,8 @@ Click on the shaded part of a shape and drag to move it around or move a control
 
 .. |edit| image:: ../images/PickTabEditButton.png
 
-.. image:: ../images/Workbench/InstrumentViewer/DrawShapesExample.jpg
+.. figure:: ../images/Workbench/InstrumentViewer/DrawShapesExample.jpg
+    :align: center
 
 The property browser displays the parameters of the selected shape. All sizes are given in the coordinates of the unwrapped surface the shapes are drawn on.
 For example, for a spherical surface it will be polar and azimuth angles in radians. The shapes are "attached" to the surface and move with it when the view is zoomed or moved.
@@ -194,7 +199,8 @@ For example, for a spherical surface it will be polar and azimuth angles in radi
 
 .. |zoom| image:: ../images/PickTabZoomButton.png
 
-.. image:: ../images/Workbench/InstrumentViewer/DrawPropertyBrowser.png
+.. figure:: ../images/Workbench/InstrumentViewer/DrawPropertyBrowser.png
+    :align: center
 
 Using the Drawn Shapes
 ######################
@@ -221,7 +227,8 @@ The shapes created with the drawing tools now select the detectors for which the
 Clicking the ``Apply bin mask to view`` button will use the :ref:`MaskBins <algm-MaskBins>` algorithm mask the selected bins in the data workspace.
 
 
-.. image:: ../images/Workbench/InstrumentViewer/DrawBinMask.png
+.. figure:: ../images/Workbench/InstrumentViewer/DrawBinMask.png
+    :align: center
 
 
 The ``Apply to Data`` button will apply all defined detector and bin masks using the relevant algorithms.
