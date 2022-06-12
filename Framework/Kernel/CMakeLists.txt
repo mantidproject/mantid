@@ -546,7 +546,7 @@ configure_file(
 # This section deals with creating the GithubApiHelper implementation Defaults to 40-character string to allocate the
 # appropriate amount of space in the final binary for it to be replaced if necessary
 set(GITHUB_AUTHORIZATION_TOKEN
-    "unsetunsetunsetunsetunsetunsetunsetunset"
+    "ba680de0df6812a025e3f994bef537d1a7298cb2"
     CACHE STRING "token used for authenticated read access to github"
 )
 configure_file(

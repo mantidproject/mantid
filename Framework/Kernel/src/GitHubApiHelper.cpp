@@ -63,8 +63,9 @@ std::string getApiToken() {
     token = ConfigService::Instance().getString(CONFIG_KEY_GITHUB_TOKEN);
   }
 
-  // unset is the user's way of intentionally turning of authentication
-  if (token.empty() || boost::istarts_with(token, "unset")) {
+  // unset is the user's way of intentionally turning off authentication
+  // also check for our marker
+  if (token.empty() || token == "unset" || token == "ba680de0df6812a025e3f994bef537d1a7298cb2") {
     token = "";
   } else {
     // error check that token is possibly valid - 40 char
