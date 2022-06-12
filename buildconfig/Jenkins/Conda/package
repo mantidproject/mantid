@@ -65,6 +65,7 @@ CLOBBER_FILE=
 RECIPES_TAG=main
 # defaults to unstable to avoid accidentally producing a release package with no suffix
 STANDALONE_PACKAGE_SUFFIX=Unstable
+MANTID_AUTH_TOKEN=
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -82,6 +83,9 @@ do
             shift ;;
         --package-suffix)
             STANDALONE_PACKAGE_SUFFIX="$2"
+            shift ;;
+        --token)
+            MANTID_AUTH_TOKEN="$2"
             shift ;;
         *)
             echo "Argument not accepted: $1"
@@ -151,10 +155,13 @@ fi
 
 # Build the standalone packages, currently only for Windows and macOS
 # Jenkins Pipeline expects packages in the root workspace directory
-cd $WORKSPACE
-# Set our local conda channel to find our locally build mantidworkbench package.
+# Construct packaging args
 LOCAL_CHANNEL=file://$CONDA_BLD_PATH
-PACKAGING_ARGS="-c ${LOCAL_CHANNEL} -s ${STANDALONE_PACKAGE_SUFFIX}"
+PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
+test -n "${STANDALONE_PACKAGE_SUFFIX}" && PACKAGING_ARGS="$PACKAGING_ARGS -s ${STANDALONE_PACKAGE_SUFFIX}"
+test -n "${MANTID_AUTH_TOKEN}" && PACKAGING_ARGS="$PACKAGING_ARGS -t ${MANTID_AUTH_TOKEN}"
+
+cd $WORKSPACE
 if [[ $OSTYPE == 'msys'* ]]; then
     rm -fr *.exe
     ${WORKSPACE}/installers/conda/win/create_package.sh $PACKAGING_ARGS

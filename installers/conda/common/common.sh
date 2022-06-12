@@ -68,3 +68,20 @@ function fixup_qt() {
   cp "$qt_conf" "$bundle_conda_prefix"/bin/qt.conf
   cp "$qt_conf" "$bundle_conda_prefix"/libexec/qt.conf
 }
+
+# Search for an unset token in a file and replace it with
+# a given token
+# Arguments:
+#   - $1 Path to file
+#   - $2 New token
+function replace_gh_token() {
+  local filename=$1
+  local new_token=$2
+  local marker="ba680de0df6812a025e3f994bef537d1a7298cb2"
+
+  if [ -n "$new_token" ]; then
+    mv "$filename" "$filename.tmp"
+    LC_ALL=C sed -e "s/$marker/$new_token/" "$filename.tmp" > "$filename"
+    rm -f "$filename.tmp"
+  fi
+}

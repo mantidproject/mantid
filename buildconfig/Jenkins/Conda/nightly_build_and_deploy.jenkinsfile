@@ -12,7 +12,8 @@ def build_and_test_unix(cmake_preset) {
 }
 
 def build_and_test_win(cmake_preset) {
-  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/conda-buildscript ${WORKSPACE_UNIX_PATH} ${cmake_preset} --enable-systemtests --clean-build --clean-external-projects\""
+  workspace_unix_path = "${WORKSPACE}".replaceAll("\\\\", "/")
+  bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_path}/buildconfig/Jenkins/Conda/conda-buildscript ${workspace_unix_path} ${cmake_preset} --enable-systemtests --clean-build --clean-external-projects\""
 }
 
 def publish_test_reports() {
@@ -22,12 +23,14 @@ def publish_test_reports() {
 }
 
 def conda_build_unix(arch) {
-  sh "${WORKSPACE}/buildconfig/Jenkins/Conda/package ${WORKSPACE} --build-mantid --build-qt --build-workbench ${PACKAGE_OPTIONS}"
+  sh '${WORKSPACE}/buildconfig/Jenkins/Conda/package ${WORKSPACE} --build-mantid --build-qt --build-workbench --token ${MANTID_TOKEN} ${PACKAGE_OPTIONS}'
   archive_conda_build(arch)
 }
 
 def conda_build_win(arch) {
-  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/package ${WORKSPACE_UNIX_PATH} --build-mantid --build-qt --build-workbench ${PACKAGE_OPTIONS}\""
+  workspace_unix_path = "${WORKSPACE}".replaceAll("\\\\", "/")
+  // Use single-quotes for masking token
+  bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_path}/buildconfig/Jenkins/Conda/package ${workspace_unix_path} --build-mantid --build-qt --build-workbench " + '--token %MANTID_TOKEN% %PACKAGE_OPTIONS%"'
   archive_conda_build(arch)
 }
 
@@ -87,7 +90,6 @@ pipeline {
           agent { label 'conda-build-win' }
           options { timestamps () }
           steps {
-            script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
             build_and_test_win("win")
           }
           post {
@@ -122,6 +124,7 @@ pipeline {
       }
     }
     stage('Packaging') {
+      environment { MANTID_TOKEN = credentials("${MANTID_AUTH_TOKEN_ID}") }
       parallel {
         stage('platform: linux-64') {
           when {
@@ -143,9 +146,6 @@ pipeline {
           agent { label 'conda-build-win' }
           options { timestamps () }
           steps {
-            script {
-              WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/")
-            }
             conda_build_win("win-64")
             create_standalone_package_win()
           }

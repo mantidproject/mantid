@@ -15,6 +15,8 @@ function usage() {
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
+  echo "  -t Optional token to inject"
+
   echo
   echo "Positional Arguments"
   echo "  package_name: The name of the package exe, i.e. the final name will be '${package_name}.exe'"
@@ -24,6 +26,7 @@ function usage() {
 # Optional arguments
 CONDA_CHANNEL=mantid
 SUFFIX=""
+MANTID_AUTH_TOKEN=
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -33,6 +36,10 @@ do
             ;;
         -s)
             SUFFIX="$2"
+            shift
+            ;;
+        -t)
+            MANTID_AUTH_TOKEN="$2"
             shift
             ;;
         -h)
@@ -65,6 +72,9 @@ CONDA_EXE=mamba
 PACKAGE_PREFIX=MantidWorkbench
 PACKAGE_NAME="$PACKAGE_PREFIX${SUFFIX}"
 LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
+
+# Common routines
+source $HERE/../common/common.sh
 
 echo "Cleaning up left over old directories"
 rm -rf $COPY_DIR
@@ -145,6 +155,9 @@ echo "Copy site customization module"
 # Adds a sitecustomize module to ensure the bin directory
 # is added to the DLL load PATH
 cp $THIS_SCRIPT_DIR/sitecustomize.py $COPY_DIR/bin/Lib/site-packages/
+
+echo "Fixing token in Kernel"
+replace_gh_token "$COPY_DIR/plugins/bin/MantidKernel.dll" "$MANTID_AUTH_TOKEN"
 
 # Cleanup pdb files and remove them from bin
 echo "Performing some cleanup.... deleting files"

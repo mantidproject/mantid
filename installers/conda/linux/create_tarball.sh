@@ -69,6 +69,7 @@ function usage() {
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
   echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
+  echo "  -t Optional token to inject"
   echo
   exit $exitcode
 }
@@ -77,6 +78,7 @@ function usage() {
 # Optional arguments
 conda_channel=mantid
 suffix=
+mantid_auth_token=
 while [ ! $# -eq 0 ]
 do
   case "$1" in
@@ -86,6 +88,10 @@ do
         ;;
     -s)
         suffix="$2"
+        shift
+        ;;
+    -t)
+        mantid_auth_token="$2"
         shift
         ;;
     -h)
@@ -149,7 +155,7 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
-# Trim and fixup bundle
+replace_gh_token "$bundle_conda_prefix/lib/libMantidKernel.so" "$mantid_auth_token"
 trim_conda "$bundle_conda_prefix"
 fixup_bundle "$bundle_conda_prefix" "$bundle_icon"
 add_resources "$bundle_conda_prefix" "$bundle_icon"
