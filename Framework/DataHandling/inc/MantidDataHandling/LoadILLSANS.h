@@ -66,6 +66,7 @@ private:
   void getDataDimensions(NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes, int &numberOfPixelsPerTube);
   size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
                               const MultichannelType type = MultichannelType::TOF);
+  size_t loadDataFromD16BMonitor(NeXus::NXEntry &firstEntry, size_t firstIndex, const std::vector<double> &binning);
   size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();

@@ -309,8 +309,11 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, binning, 0);
-  if (m_instrumentName != "D16B")
+  if (m_instrumentName != "D16B") {
     loadDataFromMonitors(firstEntry, nextIndex);
+  } else
+    loadDataFromD16BMonitor(firstEntry, nextIndex, binning);
+
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
@@ -591,6 +594,47 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
       firstIndex++;
     }
   }
+  return firstIndex;
+}
+
+/**
+ * @brief Load data from D16B's monitor. These data are not stored in the usual NXmonitor field, but rather in the
+ * scanned variables, so it uses a completely different logic.
+ * @param firstEntry: already opened first entry in nexus
+ * @param firstIndex: the workspace index to load the first monitor to
+ * @param binning: the binning to assign the monitor values
+ * @return the new workspace index on which to load next
+ */
+size_t LoadILLSANS::loadDataFromD16BMonitor(NeXus::NXEntry &firstEntry, size_t firstIndex,
+                                            const std::vector<double> &binning) {
+  std::string path = "/data_scan/scanned_variables/data";
+
+  // the monitor is the fourth scanned variable
+  uint32_t monitorIndex = 3;
+
+  NXData scannedVariablesData = firstEntry.openNXData(path);
+  NXDouble scannedVariables = scannedVariablesData.openDoubleData();
+  scannedVariables.load();
+
+  auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
+
+  const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
+  m_localWorkspace->setCounts(firstIndex, counts);
+  HistogramData::Points points = HistogramData::Points(binning);
+  m_localWorkspace->setPoints(firstIndex, points);
+
+  // Add average monitor counts to a property:
+  double averageMonitorCounts =
+      std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), 0) /
+      static_cast<double>(scannedVariables.dim1());
+
+  // make sure the monitor has values!
+  if (averageMonitorCounts > 0) {
+    API::Run &runDetails = m_localWorkspace->mutableRun();
+    runDetails.addProperty("monitor", averageMonitorCounts, true);
+  }
+
+  firstIndex++;
   return firstIndex;
 }
 
