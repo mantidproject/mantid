@@ -148,12 +148,11 @@ bool BatchJobManager::hasSelectedRowsRequiringProcessing(Group const &group) {
   // If the group itself is selected, consider its rows to also be selected
   auto processAllRowsInGroup = (m_processAll || isSelected(group));
 
-  for (auto const &row : group.rows()) {
-    if (row && (processAllRowsInGroup || isSelected(row.get())) && row->requiresProcessing(m_reprocessFailed))
-      return true;
-  }
-
-  return false;
+  const auto it =
+      std::find_if((group.rows()).cbegin(), (group.rows()).cend(), [this, &processAllRowsInGroup](const auto &row) {
+        return (row && (processAllRowsInGroup || isSelected(row.get())) && row->requiresProcessing(m_reprocessFailed));
+      });
+  return it != (group.rows()).cend();
 }
 
 /** Get algorithms and related properties for processing a batch of rows and
