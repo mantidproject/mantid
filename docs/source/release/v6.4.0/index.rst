@@ -26,6 +26,9 @@ In addition to many improvements we are delighted to announce some new features 
   defaults can now be set according to both the angle and the sample title.
 - Fit functions have been extended to allow for the addition of :ref:`Function Attribute Validators <attribute_validators>`.
 - The :ref:`ISIS SANS TOML <sans_toml_v1-ref>` format has been upgraded to V1. All V1 files will continue to be supported in future versions without changes.
+- An inelastic version of the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been implemented. This allows the multiple scattering effect to be simulated using a Monte Carlo integration for an arbitrary sample shape given an S(Q,w). The calculation can be run for a direct or indirect geometry instrument. The following figure shows the simulated first and second order scattering intensity as a function of energy for a direct geometry experiment on a water sample:
+.. figure:: /images/MultipleScatterIntensityDiscusDirect.png
+   :align: center
 
 .. _6.4_packaging:
 
