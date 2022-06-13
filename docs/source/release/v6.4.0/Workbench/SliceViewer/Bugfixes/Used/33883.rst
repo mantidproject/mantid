@@ -1,1 +1,0 @@
-- Using the Log or SymmetricLog10 colorbar normalisation options on masked data is now disabled to prevent an error.

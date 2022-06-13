@@ -1,1 +1,0 @@
-- Fix crash on adding a user function to a plot that already has a guess plotted

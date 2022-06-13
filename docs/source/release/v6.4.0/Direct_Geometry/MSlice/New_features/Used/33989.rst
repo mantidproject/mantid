@@ -1,6 +1,0 @@
-MSlice is now compatible with ``matplotlib v3.5.0``
-
-Improved error message for empty cut plot axes.
-Modified default Bragg peak size for interactive cut plots.
-Improved zooming speed for slice plots with recoil lines.
-Improved handling of default line widths.

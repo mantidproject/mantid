@@ -63,8 +63,7 @@ ENABLE_BUILD_WORKBENCH=false
 BUILD_CURRENT_BRANCH=false
 CLOBBER_FILE=
 RECIPES_TAG=main
-# defaults to unstable to avoid accidentally producing a release package with no suffix
-STANDALONE_PACKAGE_SUFFIX=Unstable
+STANDALONE_PACKAGE_SUFFIX=
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -154,7 +153,10 @@ fi
 cd $WORKSPACE
 # Set our local conda channel to find our locally build mantidworkbench package.
 LOCAL_CHANNEL=file://$CONDA_BLD_PATH
-PACKAGING_ARGS="-c ${LOCAL_CHANNEL} -s ${STANDALONE_PACKAGE_SUFFIX}"
+PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
+if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
+    PACKAGING_ARGS="${PACKAGING_ARGS} -s ${STANDALONE_PACKAGE_SUFFIX}"
+fi
 if [[ $OSTYPE == 'msys'* ]]; then
     rm -fr *.exe
     ${WORKSPACE}/installers/conda/win/create_package.sh $PACKAGING_ARGS
