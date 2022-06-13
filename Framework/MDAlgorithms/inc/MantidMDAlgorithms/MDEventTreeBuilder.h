@@ -297,8 +297,8 @@ void MDEventTreeBuilder<ND, MDEventType, EventIterator>::distributeEvents(Task &
   });
   std::vector<API::IMDNode *> boxes;
   boxes.reserve(childBoxCount);
-  for (auto &ch : children)
-    boxes.emplace_back(ch.box);
+  std::transform(std::cbegin(children), std::cend(children), std::back_inserter(boxes),
+                 [](const auto &ch) { return ch.box; });
   tsk.root->setChildren(boxes, 0, boxes.size());
 
   ++tsk.level;
