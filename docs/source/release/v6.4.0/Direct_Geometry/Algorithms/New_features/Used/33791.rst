@@ -1,1 +1,0 @@
-- :ref:`PelicanReduction <algm-PelicanReduction>` add autoscaling the Q range to match the energy transfer as default in the UI.

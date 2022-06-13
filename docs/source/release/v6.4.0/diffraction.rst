@@ -42,17 +42,5 @@ Bugfixes
   calibration and focus files.
 
 
-Single Crystal Diffraction
---------------------------
-
-New Features
-############
-
-
-
-Bugfixes
-########
-
-
 
 :ref:`Release 6.4.0 <v6.4.0>`

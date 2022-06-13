@@ -1,5 +1,0 @@
-Fixed colorbar crash when changing scale to logarithmic with negative vmax value and/or negative/0 vmin value.
-Fixed bug that prevented vmin from updating when unticking logarithmic scale.
-Fixed problem with ignored Bragg peaks on interactive cut plots when flipping axes.
-Fixed bug that caused a runtime error when changing between workspaces from same dataset.
-Fixed re-opening line dialog issue for cut plots.

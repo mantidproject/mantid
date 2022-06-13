@@ -1,1 +1,0 @@
-- Workbench will no longer throw on plots with error bar caps when the offset of a waterfall plot is adjusted.

@@ -16,7 +16,7 @@ if(CONDA_BUILD)
   message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 else()
   set(VERSION_MAJOR 6)
-  set(VERSION_MINOR 3)
+  set(VERSION_MINOR 4)
 endif()
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to a value (instead of using the count coming out of
