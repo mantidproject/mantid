@@ -397,7 +397,6 @@ constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:611
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FlowLayout.cpp:131
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:2006
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/LogValueFinder.cpp:44
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/pqHelpWindow.h:115
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtSignalChannel.h:51
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:183
