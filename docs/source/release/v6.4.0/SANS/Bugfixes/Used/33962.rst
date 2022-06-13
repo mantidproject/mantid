@@ -1,1 +1,0 @@
-- Fixed a bug handling invalid user files in the table. Previously the error reporter would appear, with a confusing error about a tuple index out of range. Now you get a sensible error message saying the file cannot be found.

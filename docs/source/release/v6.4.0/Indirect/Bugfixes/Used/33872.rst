@@ -1,1 +1,0 @@
-A bug has been fixed that caused the resolution data to not be updated when the reflection was changed in ISISCalibration in IndirectData Reduction

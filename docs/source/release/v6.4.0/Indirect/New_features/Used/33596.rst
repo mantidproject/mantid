@@ -1,1 +1,0 @@
-An option has been added to ISISEnergyTransfer that will group outputs by the position of the sample changer.

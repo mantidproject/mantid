@@ -1,1 +1,0 @@
-- The ``?`` button now opens the help documentation for Workbench, rather than a web-page containing the documentation for the interface in MantidPlot.

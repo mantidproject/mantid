@@ -1,1 +1,0 @@
-- Fixed a bug that prevented correct inversion of large tridiagonal matrices

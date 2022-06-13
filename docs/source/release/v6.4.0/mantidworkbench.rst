@@ -36,6 +36,7 @@ Bugfixes
 - Fixed a crash that occurred when adding a user function to a plot that already has a guess plotted.
 - Fixed a bug where trying to save a large project would cause Mantid to crash.
 - Workbench no longer generates an error when you save the ``Figure Options`` on a colour fill plot containing two images of different types (e.g. QuadMesh and Image).
+- Users are now prevented from overwriting previous versions of Mantid if the uninstaller is not present. Some antivirus software deletes the uninstaller. Installing over older versions without the uninstaller can cause Mantid not to function properly and for users to lose data.
 
 Instrument Viewer
 -----------------
@@ -49,7 +50,7 @@ New Features
 Bugfixes
 ########
 
-
+- The ``?`` button now opens the help documentation for Workbench, rather than a web-page containing the documentation for the interface in MantidPlot.
 
 
 Sliceviewer

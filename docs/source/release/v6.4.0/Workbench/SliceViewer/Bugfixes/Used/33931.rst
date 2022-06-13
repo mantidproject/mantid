@@ -1,3 +1,0 @@
-- Fixed a bug with peak selection causing crash for 4D MD workspaces
-- Peak addition now correctly assigns new peak HKL in nonorthogonal view
-- Peak overlay disabled when non-Q axis viewed (peak object does not have a position defined for non Q dimension)

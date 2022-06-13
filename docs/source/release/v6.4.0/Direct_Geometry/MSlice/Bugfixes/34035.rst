@@ -1,7 +1,0 @@
-- Fixed bug that caused an error when changing the scale to logarithmic for cut plots with Bragg peaks.
-- Prevent strings for max and min axes values.
-- Dialogue boxes for quick options and plot options now stay on top of the plot window.
-- Fixed bug causing error messages when loading OSIRIS data.
-- Fixed problem with deletion of overplotted lines.
-- Fix for duplicated Bragg peaks when overplotting cut plots.
-- Fixed scaling of Bragg peaks on plots with logarithmic scales.

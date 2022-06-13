@@ -1,1 +1,0 @@
-Copying a spectrum in a MatrixWorkspace is now supported for ragged workspaces.
