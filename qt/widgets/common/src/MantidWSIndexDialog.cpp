@@ -1162,12 +1162,9 @@ bool IntervalList::contains(const Interval &other) const {
 }
 
 bool IntervalList::contains(const IntervalList &other) const {
-  for (const auto &i : other.m_list) {
-    if (!IntervalList::contains(i))
-      return false;
-  }
-
-  return true;
+  const auto it = std::find_if((other.m_list).cbegin(), (other.m_list).cend(),
+                               [this](const auto &interval) { return !IntervalList::contains(interval); });
+  return it == (other.m_list).cend();
 }
 
 bool IntervalList::isParsable(const QString &input, const IntervalList &container) {
