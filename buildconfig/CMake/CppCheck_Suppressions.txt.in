@@ -377,7 +377,6 @@ nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ApplyDe
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ApplyDetailedBalanceMD.cpp:223
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:69
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompareMDWorkspaces.cpp:146
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvToMDEventsWSIndexing.cpp:21
 negativeContainerIndex:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWPDMDToSpectra.cpp:489
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWSDMDtoHKL.cpp:207
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWSDMDtoHKL.cpp:208

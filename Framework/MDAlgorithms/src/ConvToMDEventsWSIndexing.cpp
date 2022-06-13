@@ -16,9 +16,8 @@ size_t ConvToMDEventsWSIndexing::initialize(const MDWSDescription &WSD, std::sha
   const auto &split_into = m_OutWSWrapper->pWorkspace()->getBoxController()->getSplitIntoAll();
 
   if (!isSplitValid(split_into)) {
-    std::string arg;
-    for (auto &i : split_into)
-      arg += std::to_string(i) + " ";
+    std::string arg = std::accumulate(split_into.cbegin(), split_into.cend(), std::string(),
+                                      [](const auto &lhs, const auto &i) { return lhs + std::to_string(i) + " "; });
     throw std::invalid_argument("SplitInto can't be [" + arg + "]" +
                                 " ,all splits have to be the same and equal the power of 2.");
   }
