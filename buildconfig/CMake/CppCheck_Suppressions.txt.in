@@ -389,7 +389,6 @@ shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.
 deallocuse:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:118
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:437
 variableScope:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:1521
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:962
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:202
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:321
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:204
