@@ -36,9 +36,10 @@ boost::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const
   if (group->isEmpty())
     return "The group workspace " + group->getName() + " is empty.";
 
-  for (auto workspace : *group)
-    if (!workspace)
-      return "The group workspace " + group->getName() + " contains an invalid workspace.";
+  const auto it =
+      std::find_if(std::cbegin(*group), std::cend(*group), [](const auto &workspace) { return !workspace; });
+  if (it != std::cend(*group))
+    return "The group workspace " + group->getName() + " contains an invalid workspace.";
   return boost::none;
 }
 

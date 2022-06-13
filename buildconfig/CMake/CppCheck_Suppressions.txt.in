@@ -407,7 +407,6 @@ uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:104
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:105
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:106
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/UserInputValidator.cpp:40
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Batch/JobTreeView.cpp:434
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1142
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1546
