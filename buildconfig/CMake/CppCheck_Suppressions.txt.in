@@ -382,7 +382,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWSDMDtoHKL
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWSDMDtoHKL.cpp:208
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWSDMDtoHKL.cpp:234
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertCWSDMDtoHKL.cpp:235
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertToMD.cpp:373
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertToMDMinMaxLocal.cpp:138
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ImportMDHistoWorkspace.cpp:98
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateMDHistoWorkspace.cpp:217
