@@ -27,6 +27,7 @@ In addition to many improvements we are delighted to announce some new features 
 - Fit functions have been extended to allow for the addition of :ref:`Function Attribute Validators <attribute_validators>`.
 - The :ref:`ISIS SANS TOML <sans_toml_v1-ref>` format has been upgraded to V1. All V1 files will continue to be supported in future versions without changes.
 - An inelastic version of the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been implemented. This allows the multiple scattering effect to be simulated using a Monte Carlo integration for an arbitrary sample shape given an S(Q,w). The calculation can be run for a direct or indirect geometry instrument. The following figure shows the simulated first and second order scattering intensity as a function of energy for a direct geometry experiment on a water sample:
+
 .. figure:: /images/MultipleScatterIntensityDiscusDirect.png
    :align: center
 
@@ -38,7 +39,7 @@ Packaging & Installation
 As advertised in :ref:`v6.3.0 <v6.3.0>` we have reworked our installer packages for this release. Changes include:
 
 - Windows and macOS packages are now named ``MantidWorkbench-6.4.0`` with the appropriate extension. Other than this they are used in the same manner.
-- A new linux package,``mantidworkbench-6.4.0.tar.xz``, now supports many Linux distributions and should work on any 2010+ distribution with ``glibc >= 2.17``.
+- A new linux package, ``mantidworkbench-6.4.0.tar.xz``, now supports many Linux distributions and should work on any 2010+ distribution with ``glibc >= 2.17``.
   It is a simple, flat tarball that can be unpacked anywhere and no longer has to reside in ``/opt``.
 
 These packages are built using our conda libraries to make future maintenance easier.
