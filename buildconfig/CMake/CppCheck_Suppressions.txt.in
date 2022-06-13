@@ -381,13 +381,13 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateMDHistoWo
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.cpp:667
 deallocuse:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:118
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:437
-variableScope:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:1521
+variableScope:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:1520
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:202
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:321
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:204
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:128
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/DgsScatteredTransmissionCorrectionMD.cpp:163
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:408
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:405
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:125
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:862
@@ -395,7 +395,7 @@ shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/PropertyHandler.h:194
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:611
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FlowLayout.cpp:131
-shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:2006
+shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:2002
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/pqHelpWindow.h:115
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtSignalChannel.h:51
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:183
