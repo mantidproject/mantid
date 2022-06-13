@@ -435,7 +435,6 @@ shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/Plot
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:599
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:168
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:91
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:58
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/InstrumentPresenter.cpp:18
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
