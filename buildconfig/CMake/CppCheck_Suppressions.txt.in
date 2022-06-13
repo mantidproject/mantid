@@ -390,7 +390,6 @@ duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:1
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/DgsScatteredTransmissionCorrectionMD.cpp:163
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:408
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:97
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:125
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:862
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:512
