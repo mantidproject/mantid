@@ -88,6 +88,13 @@ Bugfixes
 - Fixed a problem with ignored Bragg peaks on interactive cut plots when flipping axes.
 - Fixed a bug that caused a runtime error when changing between workspaces from same dataset.
 - Fixed an issue with re-opening line dialog for cut plots.
+- Fixed bug that caused an error when changing the scale to logarithmic for cut plots with Bragg peaks.
+- Max and min axes values will no longer take strings or empty strings instead of doubles.
+- Dialogue boxes for quick options and plot options now stay on top of the plot window.
+- Fixed a bug causing error messages when loading OSIRIS data.
+- Fixed problem with the deletion of overplotted lines.
+- Included a fix for to prevent Bragg peaks being duplicated when overplotting cut plots.
+- Fixed the scaling of Bragg peaks on plots with logarithmic scales.
 
 
 :ref:`Release 6.4.0 <v6.4.0>`
