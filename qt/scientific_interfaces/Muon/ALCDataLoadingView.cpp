@@ -339,8 +339,8 @@ std::string ALCDataLoadingView::getRunsError() { return m_ui.runs->getFileProble
 std::vector<std::string> ALCDataLoadingView::getFiles() {
   const auto QFiles = m_ui.runs->getFilenames();
   std::vector<std::string> files;
-  for (const auto &file : QFiles)
-    files.emplace_back(file.toStdString());
+  std::transform(QFiles.cbegin(), QFiles.cend(), std::back_inserter(files),
+                 [](const auto &file) { return file.toStdString(); });
   return files;
 }
 
