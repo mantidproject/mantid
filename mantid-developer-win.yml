@@ -28,7 +28,7 @@ dependencies:
   - poco=1.10.*
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
-  - pyqt>=5.12.3,<6
+  - pyqt>=5.12.3,<5.15
   - python-dateutil>=2.8.1
   - python=3.8.*
   - pyyaml>=5.4.1
