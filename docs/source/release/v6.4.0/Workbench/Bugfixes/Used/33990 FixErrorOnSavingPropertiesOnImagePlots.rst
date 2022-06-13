@@ -1,1 +1,0 @@
-- Workbench no longer generates an error when you save the Figure Options on a colour fill plot containing two images of different types (eg QuadMesh and Image)

@@ -1,1 +1,0 @@
-- Changing the units on the frequency plot no longer causes a crash.

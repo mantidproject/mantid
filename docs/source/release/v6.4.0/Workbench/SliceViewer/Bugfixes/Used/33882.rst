@@ -1,1 +1,0 @@
-- Automatic refresh now works when a binary operation is applied to the underlying workspace.
