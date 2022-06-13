@@ -49,6 +49,7 @@ Bugfixes
 - The x unit validation on the parameter ``ScatteringCrossSection`` in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` has been corrected to check for momentum.
 - :ref:`algm-Rebin2D` can now take an :ref:`EventWorkspace <EventWorkspace>` as an input without crashing.
 - Workbench will no longer crash if the algorithm dialog for :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` is opened while a group workspace is present in the Workspaces list.
+- :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now handle bin fractions in ``RebinnedOutput`` workspaces by setting all fractions to unity instead of zero. This is because these workspaces are always created as histograms so conversion means discarding the bin information but setting them to zero gives ``NaN``\ s.
 
 Data Objects
 ------------
