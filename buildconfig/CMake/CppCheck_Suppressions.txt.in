@@ -363,8 +363,6 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:179
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/LoadFlexiNexus.cpp:221
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiUtilities/PoldiAutoCorrelationCore.cpp:534
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiUtilities/PoldiAutoCorrelationCore.cpp:631
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/PoldiUtilities/PoldiSpectrumDomainFunction.cpp:256
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:78
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:79
