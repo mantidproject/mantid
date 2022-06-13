@@ -414,7 +414,6 @@ unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtprope
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:114
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/Mpl/ContourPreviewPlot.cpp:83
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/Mpl/PreviewPlot.cpp:618
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankRenderingHelpers.cpp:172
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ObserverPattern.h:65
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:186
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1597

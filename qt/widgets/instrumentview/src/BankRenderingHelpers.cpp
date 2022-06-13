@@ -168,8 +168,7 @@ void rotateHexahedron(std::vector<V3D> &hex, const Quat &rotation) {
 }
 
 void offsetHexahedronPosition(std::vector<V3D> &hex, const V3D &offset) {
-  for (auto &pos : hex)
-    pos += offset;
+  std::transform(hex.cbegin(), hex.cend(), hex.begin(), [&offset](const auto &pos) { return pos + offset; });
 }
 
 void render2DTexture(const Corners &corners, size_t nX, size_t nY, const Mantid::Kernel::V3D &bottomLeftOffset,
