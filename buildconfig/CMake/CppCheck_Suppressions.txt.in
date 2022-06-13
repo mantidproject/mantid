@@ -404,7 +404,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexD
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:742
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:111
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:107
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MuonPeriodInfo.cpp:73
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:104
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:105
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:106
