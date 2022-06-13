@@ -134,7 +134,7 @@ void LoadDaveGrp::exec() {
   // Scale the x-axis if it is in micro-eV to get it to meV
   const bool isUeV = getProperty("IsMicroEV");
   if (isUeV)
-    std::transform(xAxis.cbegin(), xAxis.cend(), xAxis.begin(), [](auto &value) { return value / 1000.0; });
+    std::transform(xAxis.cbegin(), xAxis.cend(), xAxis.begin(), [](const auto &value) { return value / 1000.0; });
 
   setWorkspaceAxes(outputWorkspace, xAxis, yAxis);
 

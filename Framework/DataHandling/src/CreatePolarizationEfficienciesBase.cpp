@@ -68,7 +68,7 @@ std::vector<std::string>
 CreatePolarizationEfficienciesBase::getNonDefaultProperties(std::vector<std::string> const &labels) const {
   std::vector<std::string> outputLabels;
   std::copy_if(labels.cbegin(), labels.cend(), std::back_inserter(outputLabels),
-               [this](std::string label) { return !isDefault(label); });
+               [this](const std::string &label) { return !isDefault(label); });
   return outputLabels;
 }
 

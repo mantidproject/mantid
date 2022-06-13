@@ -59,7 +59,7 @@ Group Group::operator*(const Group &other) const {
   std::transform(
       m_allOperations.begin(), m_allOperations.end(), std::back_inserter(result), [&result, &other](auto &operation) {
         std::transform(other.m_allOperations.begin(), other.m_allOperations.end(), std::back_inserter(result),
-                       [&operation](auto &otherOp) { return operation * otherOp; });
+                       [&operation](const auto &otherOp) { return operation * otherOp; });
         return operation;
       });
   return Group(result);

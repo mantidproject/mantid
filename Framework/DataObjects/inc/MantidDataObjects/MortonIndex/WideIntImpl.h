@@ -691,7 +691,7 @@ private:
   template <typename T>
   constexpr static void divide(const T &lhserator, const T &denominator, T &quotient, T &remainder) {
     bool is_zero =
-        std::all_of(std::cbegin(denominator.m_arr), std::cend(denominator.m_arr), [](auto &c) { return c == 0; });
+        std::all_of(std::cbegin(denominator.m_arr), std::cend(denominator.m_arr), [](const auto &c) { return c == 0; });
 
     if (is_zero) {
       throw std::domain_error("divide by zero");

@@ -231,7 +231,7 @@ void LoadPSIMuonBin::exec() {
     for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
       auto &xData = outputWorkspace->mutableX(specNum);
       std::transform(xData.cbegin(), xData.cend(), xData.begin(),
-                     [absTimeZero](auto &xValue) { return xValue - absTimeZero; });
+                     [absTimeZero](const auto &xValue) { return xValue - absTimeZero; });
     }
   }
   setProperty("OutputWorkspace", extractSpectra(outputWorkspace));

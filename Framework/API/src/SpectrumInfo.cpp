@@ -137,7 +137,7 @@ std::pair<double, double> SpectrumInfo::geographicalAngles(const size_t index) c
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
   auto newPos = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), Kernel::V3D(),
-                                [this](Kernel::V3D x, const std::pair<size_t, size_t> &detIndex2) {
+                                [this](const auto &x, const std::pair<size_t, size_t> &detIndex2) {
                                   return x + m_detectorInfo.position(detIndex2);
                                 });
   return newPos / static_cast<double>(spectrumDefinition.size());
