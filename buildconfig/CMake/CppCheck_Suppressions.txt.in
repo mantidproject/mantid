@@ -386,7 +386,6 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:1521
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:202
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:321
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:204
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveIsawQvector.cpp:113
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:128
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/DgsScatteredTransmissionCorrectionMD.cpp:163
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:132

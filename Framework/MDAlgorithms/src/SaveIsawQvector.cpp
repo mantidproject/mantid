@@ -109,8 +109,9 @@ void SaveIsawQvector::exec() {
     coord_map[2] = 1;
   }
   if (this->getProperty("RightHanded")) {
-    for (double &coord_sign : coord_signs)
-      coord_sign *= -1.; // everything changes sign
+    // everything changes sign
+    std::transform(std::cbegin(coord_signs), std::cend(coord_signs), std::begin(coord_signs),
+                   [](const auto value) { return -value; });
   }
 
   // units conersion helper
