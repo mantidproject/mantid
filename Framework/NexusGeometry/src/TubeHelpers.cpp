@@ -62,11 +62,10 @@ std::vector<detail::TubeBuilder> findAndSortTubes(const Mantid::Geometry::IObjec
 std::vector<Mantid::detid_t> notInTubes(const std::vector<detail::TubeBuilder> &tubes,
                                         std::vector<Mantid::detid_t> detIDs) {
   std::vector<Mantid::detid_t> used;
-  for (const auto &tube : tubes) {
-    for (const auto &id : tube.detIDs()) {
-      used.emplace_back(id);
-    }
-  }
+  std::for_each(tubes.cbegin(), tubes.cend(), [&used](const auto &tube) {
+    std::transform((tube.detIDs()).cbegin(), (tube.detIDs()).cend(), std::back_inserter(used),
+                   [](const auto id) { return id; });
+  });
   std::vector<Mantid::detid_t> diff;
   std::sort(detIDs.begin(), detIDs.end());
   std::sort(used.begin(), used.end());
