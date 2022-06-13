@@ -226,14 +226,8 @@ void ALCInterface::exportResults() {
     results["Peaks_FitResults"] = peaksResults->clone();
 
   // Check if any of the above is not empty
-  bool nothingToExport = true;
-  for (auto &result : results) {
-
-    if (result.second) {
-      nothingToExport = false;
-      break;
-    }
-  }
+  const auto it = std::find_if(results.cbegin(), results.cend(), [](const auto &result) { return result.second; });
+  bool nothingToExport = (it == results.cend());
 
   // There is something to export
   if (!nothingToExport) {
