@@ -55,6 +55,7 @@ private:
   void exec() override;
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
+  void setNumberOfMonitors();
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
@@ -89,6 +90,8 @@ private:
   bool m_isTOF;                                    ///< TOF or monochromatic flag
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
   bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
+  size_t m_numberOfMonitors;                       ///< Number of monitors in this instrument
+
   void setFinalProperties(const std::string &filename);
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
                                              const NeXus::NXFloat &) const;

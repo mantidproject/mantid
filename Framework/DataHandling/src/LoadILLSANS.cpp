@@ -29,10 +29,6 @@
 
 namespace Mantid::DataHandling {
 
-namespace {
-static constexpr size_t N_MONITORS = 2;
-}
-
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
@@ -108,6 +104,7 @@ void LoadILLSANS::exec() {
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath = m_loadHelper.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+  setNumberOfMonitors();
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
   if (m_instrumentName == "D33") {
@@ -209,6 +206,7 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry, const std:
   m_instrumentName = m_loadHelper.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
   const auto inst = std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(), m_instrumentName);
 
+  // set alternative version name. Note that D16B is set later, because we need to open the data to distinguish with D16
   if ((m_instrumentName == "D11" || m_instrumentName == "D22") && firstEntry.containsGroup("data1")) {
     m_instrumentName += "B";
   }
@@ -241,6 +239,8 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
   pos >> g_log.debug();
   return pos;
 }
+
+void LoadILLSANS::setNumberOfMonitors() { m_numberOfMonitors = this->m_instrumentName == "D16B" ? 1 : 2; }
 
 /**
  * @brief LoadILLSANS::getDataDimensions
@@ -289,6 +289,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   if (m_instrumentName == "D16" && data.dim1() == 1152 && data.dim2() == 192) {
     m_instrumentName = "D16B";
     m_isD16Omega = true;
+    setNumberOfMonitors();
   }
 
   int numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
@@ -296,7 +297,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   MultichannelType type = (numberOfChannels != 1) ? MultichannelType::SCAN : MultichannelType::TOF;
 
-  numberOfHistograms = numberOfPixelsPerTubes * numberOfTubes + N_MONITORS;
+  numberOfHistograms = numberOfPixelsPerTubes * numberOfTubes + m_numberOfMonitors;
+
   createEmptyWorkspace(numberOfHistograms, numberOfChannels, type);
   loadMetaData(firstEntry, instrumentPath);
 
@@ -335,7 +337,7 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
   size_t numberOfHistograms =
       static_cast<size_t>(dataCenter.dim0() * dataCenter.dim1() + dataRight.dim0() * dataRight.dim1() +
                           dataLeft.dim0() * dataLeft.dim1()) +
-      N_MONITORS;
+      m_numberOfMonitors;
 
   int numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
   getDataDimensions(dataCenter, numberOfChannels, numberOfTubesCenter, numberOfPixelsPerTubeCenter);
@@ -392,7 +394,8 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
   data2_data.load();
 
   size_t numberOfHistograms =
-      static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) + N_MONITORS;
+      static_cast<size_t>(data2_data.dim0() * data2_data.dim1() + data1_data.dim0() * data1_data.dim1()) +
+      m_numberOfMonitors;
 
   int numberOfChannels, numberOfPixelsPerTubeCenter, numberOfTubesCenter;
   getDataDimensions(data1_data, numberOfChannels, numberOfTubesCenter, numberOfPixelsPerTubeCenter);
@@ -472,7 +475,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
       dataDown.dim0() * dataDown.dim1() + dataUp.dim0() * dataUp.dim1());
 
   g_log.debug("Creating empty workspace...");
-  createEmptyWorkspace(numberOfHistograms + N_MONITORS, static_cast<size_t>(dataRear.dim2()));
+  createEmptyWorkspace(numberOfHistograms + m_numberOfMonitors, static_cast<size_t>(dataRear.dim2()));
 
   loadMetaData(firstEntry, instrumentPath);
 
@@ -942,7 +945,7 @@ void LoadILLSANS::adjustTOF() {
   const double l1 = m_sourcePos;
   const size_t nHist = m_localWorkspace->getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int64_t index = 0; index < static_cast<int64_t>(nHist - N_MONITORS); ++index) {
+  for (int64_t index = 0; index < static_cast<int64_t>(nHist - m_numberOfMonitors); ++index) {
     const double l2 = specInfo.l2(index);
     const double z = specInfo.position(index).Z();
     auto &x = m_localWorkspace->mutableX(index);
@@ -950,10 +953,8 @@ void LoadILLSANS::adjustTOF() {
     std::transform(x.begin(), x.end(), x.begin(), [scale](double lambda) { return scale * lambda; });
   }
 
-  // Try to set sensible (but not strictly physical) wavelength axes for
-  // monitors
-  // Normalisation is done by acquisition time, so these axes should not be
-  // used
+  // Try to set sensible (but not strictly physical) wavelength axes for monitors
+  // Normalisation is done by acquisition time, so these axes should not be used
   auto firstPixel = m_localWorkspace->histogram(0).dataX();
   const double l2 = specInfo.l2(0);
   const double monitor2 = -specInfo.position(nHist - 1).Z();
@@ -961,7 +962,7 @@ void LoadILLSANS::adjustTOF() {
   const double monScale = (l1 + l2) / l1Monitor2;
   std::transform(firstPixel.begin(), firstPixel.end(), firstPixel.begin(),
                  [monScale](double lambda) { return monScale * lambda; });
-  for (size_t mIndex = nHist - N_MONITORS; mIndex < nHist; ++mIndex) {
+  for (size_t mIndex = nHist - m_numberOfMonitors; mIndex < nHist; ++mIndex) {
     const HistogramData::Counts counts = m_localWorkspace->histogram(mIndex).counts();
     const HistogramData::BinEdges binEdges(firstPixel);
     m_localWorkspace->setHistogram(mIndex, binEdges, counts);
@@ -985,7 +986,7 @@ void LoadILLSANS::moveSource() {
 
 /**
  * @brief LoadILLSANS::getOmegaBinning
- * Get the binnign for an omega scan for D16B files
+ * Get the binning for an omega scan for D16B files
  * @param entry opened root nexus entry
  * @param path path of the scanned variables entry
  * @return the omega binning vector
