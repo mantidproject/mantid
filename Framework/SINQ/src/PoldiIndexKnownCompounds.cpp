@@ -215,9 +215,8 @@ std::vector<std::string>
 PoldiIndexKnownCompounds::getWorkspaceNames(const std::vector<Workspace_sptr> &workspaces) const {
   std::vector<std::string> names;
   names.reserve(workspaces.size());
-  for (const auto &workspace : workspaces) {
-    names.emplace_back(workspace->getName());
-  }
+  std::transform(workspaces.cbegin(), workspaces.cend(), std::back_inserter(names),
+                 [](const auto &workspace) { return workspace->getName(); });
   return names;
 }
 
