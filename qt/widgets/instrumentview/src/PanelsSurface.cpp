@@ -172,12 +172,9 @@ void setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex, std::v
 }
 
 size_t findNumDetectors(const ComponentInfo &componentInfo, const std::vector<size_t> &components) {
-  size_t numDets = 0;
-  for (auto comp : components) {
-    if (componentInfo.isDetector(comp))
-      numDets++;
-  }
-  return numDets;
+  return std::accumulate(
+      components.cbegin(), components.cend(), size_t(),
+      [&componentInfo](size_t lhs, const auto &comp) { return componentInfo.isDetector(comp) ? lhs + 1 : lhs; });
 }
 
 void initialisePolygonWithTransformedBoundingBoxPoints(QPolygonF &panelPolygon, const ComponentInfo &componentInfo,
