@@ -388,8 +388,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:204
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:128
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/DgsScatteredTransmissionCorrectionMD.cpp:163
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:132
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:272
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SmoothMD.cpp:408
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitDomain.cpp:97
