@@ -51,19 +51,6 @@ Bugfixes
 - Workbench will no longer crash if the algorithm dialog for :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` is opened while a group workspace is present in the Workspaces list.
 - :ref:`ConvertToPointData <algm-ConvertToPointData>` and :ref:`ConvertToHistogram <algm-ConvertToHistogram>` now handle bin fractions in ``RebinnedOutput`` workspaces by setting all fractions to unity instead of zero. This is because these workspaces are always created as histograms so conversion means discarding the bin information but setting them to zero gives ``NaN``\ s.
 
-Data Objects
-------------
-
-New Features
-############
-
-
-
-Bugfixes
-########
-
-
-
 Fit Functions
 -------------
 

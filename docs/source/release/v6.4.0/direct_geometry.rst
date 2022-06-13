@@ -44,10 +44,6 @@ New Features
 * :ref:`DirectILLCollectData <algm-DirectILLCollectData>` has two new properties: ``GroupDetHorizontallyBy`` and ``GroupDetVerticallyBy`` which allow for averaging pixel counts between the tubes and inside them, respectively, or for flat background calculations.
 * Autoscaling has been added to the :ref:`PelicanReduction <algm-PelicanReduction>` algorithm to ensure that the Q range matches the energy transfer, as is default in the UI.
 
-Bugfixes
-########
-
-
 
 CrystalField
 ------------
@@ -57,10 +53,6 @@ New Features
 
 - The :ref:`Crystal Field Python interface <Crystal Field Python Interface>` has been extended to include functions to calculate the x, y, and z components of
   the dipole transition matrix: ``getXDipoleMatrixComponent()``, ``getYDipoleMatrixComponent()`` and ``getZDipoleMatrixComponent()``.
-
-Bugfixes
-########
-
 
 
 MSlice

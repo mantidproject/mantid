@@ -12,15 +12,6 @@ Bugfixes
 ########
 - Changing the units on the frequency plot no longer causes a crash.
 
-
-Muon Analysis
--------------
-
-Bugfixes
-########
-
-
-
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
 
@@ -32,29 +23,6 @@ Bugfixes
 ########
 - A bug has been fixed in both GUI's that caused a crash when changing instrument.
 - A bug that caused a crash when undoing a fit in either of these GUI's has been fixed.
-
-
-ALC
----
-
-Bugfixes
-########
-
-
-
-Elemental Analysis
-------------------
-
-Bugfixes
-########
-
-
-
-Algorithms
-----------
-
-Bugfixes
-########
 
 
 :ref:`Release 6.4.0 <v6.4.0>`
