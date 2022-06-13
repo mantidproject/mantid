@@ -402,8 +402,6 @@ unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/Qt
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:183
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:357
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:742
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:1016
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:1166
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:111
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:107
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MuonPeriodInfo.cpp:73
