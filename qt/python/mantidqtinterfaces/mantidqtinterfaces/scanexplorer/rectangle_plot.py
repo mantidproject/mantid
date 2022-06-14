@@ -120,7 +120,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         x_axis_values, y_axis_values = self.exporter.get_axes()
 
-        def closest_value(axis, value, mini, maxi):
+        def closest_edge(axis, value, mini, maxi):
             """Find the closest edge to the given value along given axis"""
             idx = bisect_left(axis, value)
 
@@ -140,12 +140,46 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
             return edge
 
+        def find_nearest_with_gap(axis, first_value, second_value, mini, maxi):
+            """
+            Find the nearest edges for each values so that they are not the same.
+            Most of the times it is just the closest one, but if both are closest to the same one,
+            it means finding the second closest for the value that is the most distant from the closest
+            """
+
+            closest_1 = closest_edge(axis, first_value, mini, maxi)
+            closest_2 = closest_edge(axis, second_value, mini, maxi)
+
+            # nice case, they snap to different edges
+            if closest_1 != closest_2:
+                return closest_1, closest_2
+
+            # they both snap to the bottom of the image: we take the edge just above
+            if closest_1 == mini:
+                edge = (axis[0] + axis[1]) / 2
+                return (mini, edge) if first_value < second_value else (edge, mini)
+
+            # they both snap to the top of the image: we take the edge just below
+            if closest_1 == maxi:
+                edge = (axis[-1] + axis[-2]) / 2
+                return (edge, maxi) if first_value < second_value else (maxi, edge)
+
+            # they both snap to the same edge: the one farthest from that edge snaps to the other side's edge
+            idx = bisect_left(axis, first_value)
+            edge = (axis[idx] + axis[idx - 1]) / 2
+
+            previous_edge = (axis[idx - 1] + axis[idx - 2]) / 2
+            next_edge = (axis[idx] + axis[idx + 1]) / 2
+
+            if abs(first_value - edge) < abs(second_value - edge):
+                return (edge, previous_edge) if second_value < edge else (edge, next_edge)
+            else:
+                return (previous_edge, edge) if first_value < edge else (next_edge, edge)
+
         xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
 
-        x0 = closest_value(x_axis_values, x0, xmin, xmax)
-        y0 = closest_value(y_axis_values, y0, ymin, ymax)
-        x1 = closest_value(x_axis_values, x1, xmin, xmax)
-        y1 = closest_value(y_axis_values, y1, ymin, ymax)
+        x0, x1 = find_nearest_with_gap(x_axis_values, x0, x1, xmin, xmax)
+        y0, y1 = find_nearest_with_gap(y_axis_values, y0, y1, ymin, ymax)
 
         self._selector.extents = (x0, x1, y0, y1)
 
