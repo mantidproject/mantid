@@ -67,6 +67,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   setInputController(PickTubeMode, pickController);
   setInputController(AddPeakMode, pickController);
   connect(pickController, SIGNAL(pickPointAt(int, int)), this, SLOT(pickComponentAt(int, int)));
+  connect(pickController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape *drawController = new InputControllerDrawShape(this);
@@ -139,9 +140,9 @@ ProjectionSurface::~ProjectionSurface() {
 void ProjectionSurface::toggleToolTip(bool activateToolTip) {
   for (auto controller : m_inputControllers) {
     if (activateToolTip) {
-      connect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
+      connect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(showToolTip(int, int)));
     } else
-      disconnect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
+      disconnect(controller, SIGNAL(touchPointAt(int, int)), this, SLOT(showToolTip(int, int)));
   }
 }
 /**
@@ -801,7 +802,7 @@ void ProjectionSurface::selectMultipleMasks(const QRect &rect) {
 }
 
 /**
- * Pick a detector at a pointe on the screen.
+ * Pick a detector at a point on the screen.
  */
 void ProjectionSurface::pickComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
@@ -814,6 +815,17 @@ void ProjectionSurface::pickComponentAt(int x, int y) {
 
 void ProjectionSurface::touchComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
+  emit singleComponentTouched(pickID);
+}
+
+/**
+ * @brief Show a tooltip with basic info on the surface
+ * @param x the x coordinate of the picked point on the screen
+ * @param y the y coordinate of the picked point on the screen
+ */
+void ProjectionSurface::showToolTip(int x, int y) {
+  size_t pickID = getPickID(x, y);
+
   const auto &componentInfo = m_instrActor->componentInfo();
 
   if (componentInfo.isDetector(pickID)) {
@@ -826,7 +838,6 @@ void ProjectionSurface::touchComponentAt(int x, int y) {
     text += "Counts: " + counts;
     QToolTip::showText(QCursor::pos(), text);
   }
-  emit singleComponentTouched(pickID);
 }
 
 void ProjectionSurface::erasePeaks(const QRect &rect) {
