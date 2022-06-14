@@ -127,7 +127,7 @@ if [[ $BUILD_CURRENT_BRANCH == true ]]; then
     if [[ -z "${STANDALONE_PACKAGE_SUFFIX}" ]]; then
         $RECIPE_UPDATE_ARGS="${RECIPE_UPDATE_ARGS} --release-version"
     fi
-    $SCRIPT_DIR/update-conda-recipes.sh RECIPE_UPDATE_ARGS
+    $SCRIPT_DIR/update-conda-recipes.sh $RECIPE_UPDATE_ARGS
 fi
 
 # Run conda build. Use shortest path possible for Windows
