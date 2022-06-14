@@ -1,0 +1,1 @@
+- The :ref:`Fit <algm-Fit>` algorithm now has a property allowing you to calculate the step size between each iteration using the square root of epsilon.

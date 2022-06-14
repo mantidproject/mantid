@@ -389,6 +389,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='An input run number (or a list thereof) or a filename.')
+        self.getProperty(common.PROP_INPUT_FILE).setAutoTrim(False)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_INPUT_WS,
             defaultValue='',

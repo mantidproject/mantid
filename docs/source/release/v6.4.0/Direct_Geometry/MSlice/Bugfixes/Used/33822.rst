@@ -1,0 +1,2 @@
+Fix for bug that left the menu for Default Energy Unit empty
+Fix for permanently enabled 'Show Legend' check boxes

@@ -238,7 +238,6 @@ void VesuvioL1ThetaResolution::exec() {
  */
 void VesuvioL1ThetaResolution::loadInstrument() {
   // Get the filename for the VESUVIO IDF
-  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   const std::string vesuvioIPF = InstrumentFileFinder::getInstrumentFilename("VESUVIO");
 
   // Load an empty VESUVIO instrument workspace

@@ -1,0 +1,1 @@
+- Updated instrument selector tooltips to clarify that changes to this setting apply across all of mantid.

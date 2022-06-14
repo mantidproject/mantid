@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+import warnings
+
 from matplotlib.lines import Line2D
 
 from mantid.plots.legend import LegendProperties
@@ -69,6 +71,7 @@ class CurvesTabWidgetPresenter:
         view_props = self.get_view_properties()
         if view_props == self.current_view_properties:
             return
+
         plot_kwargs = view_props.get_plot_kwargs()
         # Re-plot curve
         self._replot_current_curve(plot_kwargs)
@@ -152,10 +155,13 @@ class CurvesTabWidgetPresenter:
         else:
             errorbar_cap_lines = []
 
-        # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
-        # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
-        # also just makes sense for the curve order to remain unchanged.
-        ax.lines.insert(curve_index, ax.lines.pop())
+        # TODO: Accessing the ax.lines property is deprecated in mpl 3.5. It must be removed by mpl 3.7.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
+            # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
+            # also just makes sense for the curve order to remain unchanged.
+            ax.lines.insert(curve_index, ax.lines.pop())
 
         if waterfall:
             # Set the waterfall offsets to what they were previously.

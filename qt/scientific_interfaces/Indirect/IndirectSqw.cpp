@@ -67,12 +67,7 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent) : Indire
   connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
           SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
-  m_uiForm.rqwPlot2D->setYAxisLabel("Q (A-1)");
-#else
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
-#endif
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);

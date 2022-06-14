@@ -167,7 +167,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
     }
     if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
       // Rotate MeshObject by goniometer
-      std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)->rotate(rotationMatrix);
+      meshObj->rotate(rotationMatrix);
     }
 
     to.setShape(rhsObject);

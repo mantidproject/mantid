@@ -155,11 +155,10 @@ const LiveListenerInfo &InstrumentInfo::liveListenerInfo(std::string name) const
     return m_listeners.front();
 
   // Name specified, find requested connection
-  for (auto &listener : m_listeners) {
-    // Names are compared case insensitively
-    if (boost::iequals(listener.name(), name))
-      return listener;
-  }
+  auto it = std::find_if(m_listeners.cbegin(), m_listeners.cend(),
+                         [&name](const auto &listener) { return boost::iequals(listener.name(), name); });
+  if (it != m_listeners.end())
+    return *it;
 
   // The provided name was not valid / did not match any listeners
   throw std::runtime_error("Could not find connection " + name + " for instrument " + m_name);

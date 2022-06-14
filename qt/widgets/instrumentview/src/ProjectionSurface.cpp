@@ -6,9 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -968,69 +965,15 @@ QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
  * @param lines :: lines from the project file to load state from
  */
 void ProjectionSurface::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-
-  if (tsv.selectLine("BackgroundColor")) {
-    tsv >> m_backgroundColor;
-  }
-
-  if (tsv.selectSection("shapes")) {
-    std::string shapesLines;
-    tsv >> shapesLines;
-    m_maskShapes.loadFromProject(shapesLines);
-  }
-
-  // read alignment info
-  if (tsv.selectSection("AlignmentInfo")) {
-    std::string alignmentLines;
-    tsv >> alignmentLines;
-
-    API::TSVSerialiser alignmentInfo(alignmentLines);
-
-    auto parseV3D = [](API::TSVSerialiser &parser) {
-      double x, y, z;
-      parser >> x >> y >> z;
-      return Mantid::Kernel::V3D(x, y, z);
-    };
-
-    std::vector<QPointF> alignmentPoints;
-    std::vector<Mantid::Kernel::V3D> qValues;
-    alignmentInfo.parseLines("Marker", alignmentPoints);
-    alignmentInfo.parseLines("Qlab", qValues, parseV3D);
-
-    // make vector of pairs <V3D, QPointF>
-    std::transform(qValues.begin(), qValues.end(), alignmentPoints.begin(),
-                   std::back_inserter(m_selectedAlignmentPlane),
-                   [](Mantid::Kernel::V3D qValue, QPointF origin) { return std::make_pair(qValue, origin); });
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("ProjectionSurface::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 /** Save the state of the projection surface to a Mantid project file
  * @return a string representing the state of the projection surface
  */
 std::string ProjectionSurface::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv;
-  tsv.writeLine("BackgroundColor") << m_backgroundColor;
-  tsv.writeSection("shapes", m_maskShapes.saveToProject());
-
-  API::TSVSerialiser alignmentInfo;
-  for (const auto &item : m_selectedAlignmentPlane) {
-    const auto qLab = item.first;
-    alignmentInfo.writeLine("Qlab") << qLab.X() << qLab.Y() << qLab.Z();
-    alignmentInfo.writeLine("Marker") << item.second;
-  }
-
-  tsv.writeSection("AlignmentInfo", alignmentInfo.outputLines());
-  return tsv.outputLines();
-#else
   throw std::runtime_error("ProjectionSurface::loadsaveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidQt::MantidWidgets

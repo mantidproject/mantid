@@ -1,0 +1,1 @@
+`Asymmetric Pearson VII <https://docs.mantidproject.org/nightly/fitting/fitfunctions/AsymmetricPearsonVII.html>`_ fit function  can now be chosen as a "ProfileFunction" for the `PoldiDataAnalysis <https://docs.mantidproject.org/nightly/algorithms/PoldiDataAnalysis-v1.html>`_ algorithm.

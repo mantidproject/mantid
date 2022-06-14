@@ -63,4 +63,18 @@ void Batch::updateLookupIndexesOfTable() {
   }
 }
 
+bool Batch::isInSelection(const Item &item,
+                          const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
+}
+
+bool Batch::isInSelection(const Row &item, const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
+}
+
+bool Batch::isInSelection(const Group &item,
+                          const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

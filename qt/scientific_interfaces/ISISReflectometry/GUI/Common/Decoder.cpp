@@ -221,7 +221,8 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
        qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
        qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
-       MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions()))});
+       MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision))});
 }
 } // namespace
 
@@ -286,7 +287,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, Runs
 
   if (m_projectSave) {
     // Apply styling and restore completed state for output range values
-    presenter->notifyRowOutputsChanged();
+    presenter->notifyRowModelChanged();
     presenter->notifyRowStateChanged();
   }
   gui->m_ui.filterBox->setText(map[QString("filterBox")].toString());

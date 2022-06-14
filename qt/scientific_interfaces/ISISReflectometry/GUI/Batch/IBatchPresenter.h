@@ -9,6 +9,7 @@
 #include "GUI/Batch/RowProcessingAlgorithm.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+#include "Reduction/Group.h"
 
 #include <memory>
 #include <string>
@@ -50,6 +51,8 @@ public:
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyBatchLoaded() = 0;
+  virtual void notifyRowContentChanged(Row &changedRow) = 0;
+  virtual void notifyGroupNameChanged(Group &changedGroup) = 0;
 
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;

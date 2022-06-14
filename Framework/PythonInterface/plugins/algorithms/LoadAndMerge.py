@@ -46,14 +46,15 @@ class LoadAndMerge(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('Filename'), doc='List of input files')
+        self.getProperty('Filename').setAutoTrim(setting=False)
         self.declareProperty('LoaderName', defaultValue='Load', validator=StringContainsValidator(['Load']),
                              direction=Direction.InOut,
                              doc='The name of the specific loader. Generic Load by default.')
         self.declareProperty('LoaderVersion', defaultValue=-1, direction=Direction.InOut,
                              doc='The version of the specific loader')
-        self.declareProperty(PropertyManagerProperty('LoaderOptions',dict()),
+        self.declareProperty(PropertyManagerProperty('LoaderOptions', dict()),
                              doc='Options for the specific loader')
-        self.declareProperty(PropertyManagerProperty('MergeRunsOptions',dict()),
+        self.declareProperty(PropertyManagerProperty('MergeRunsOptions', dict()),
                              doc='Options for merging the metadata')
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace or workspace group.')

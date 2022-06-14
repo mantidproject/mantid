@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import numpy as np
 from typing import Dict
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress
@@ -19,26 +18,15 @@ from abins.abinsalgorithm import AbinsAlgorithm
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
-class Abins(PythonAlgorithm, AbinsAlgorithm):
-    _ab_initio_program = None
-    _vibrational_or_phonon_data_file = None
-    _experimental_file = None
-    _temperature = None
-    _bin_width = None
-    _scale = None
-    _sample_form = None
-    _instrument_name = None
-    _setting = None
-    _atoms = None
-    _sum_contributions = None
-    _save_ascii = None
-    _scale_by_cross_section = None
-    _calc_partial = None
-    _out_ws_name = None
-    _num_quantum_order_events = None
-    _max_event_order = None
-    _energy_units = None
-    _autoconvolution = None
+class Abins(AbinsAlgorithm, PythonAlgorithm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._sample_form = None
+
+        self._experimental_file = None
+        self._scale = None
+        self._setting = None
 
     def category(self) -> str:
         return "Simulation"
@@ -46,15 +34,25 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
     def summary(self) -> str:
         return "Calculates inelastic neutron scattering against 1-D ω axis."
 
+    def seeAlso(self):
+        return ["Abins2D"]
+
     def PyInit(self) -> None:
-        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+        from abins.constants import ALL_SAMPLE_FORMS, ONE_DIMENSIONAL_INSTRUMENTS
         # Declare properties for all Abins Algorithms
         self.declare_common_properties()
 
-        # Declare properties specific to 1D
-        self.declareProperty(name="Autoconvolution", defaultValue=False,
-                             doc="Estimate higher quantum orders by convolution with fundamental spectrum.")
+        # Soon-to-be-deprecated properties (i.e. already removed from 2D)
+        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0,
+                             doc="Width of bins used during rebinning.")
 
+        self.declareProperty(name="SampleForm",
+                             direction=Direction.Input,
+                             defaultValue="Powder",
+                             validator=StringListValidator(ALL_SAMPLE_FORMS),
+                             doc="Form of the sample: Powder.")
+
+        # Declare properties specific to 1D
         self.declareProperty(FileProperty("ExperimentalFile", "",
                                           action=FileAction.OptionalLoad,
                                           direction=Direction.Input,
@@ -63,12 +61,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
-
-        self.declareProperty(name="EnergyUnits",
-                             defaultValue="cm-1",
-                             direction=Direction.Input,
-                             validator=StringListValidator(["cm-1", "meV"]),
-                             doc="Energy units for output workspace and experimental file")
 
         # Declare Instrument-related properties
         self.declare_instrument_properties(
@@ -85,6 +77,10 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         scale = self.getProperty("Scale").value
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
+
+        bin_width = self.getProperty("BinWidthInWavenumber").value
+        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
+            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
         self._check_advanced_parameter()
 
@@ -116,8 +112,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                                                      abins_data=ab_initio_data,
                                                      instrument=self._instrument,
                                                      quantum_order_num=self._num_quantum_order_events,
-                                                     autoconvolution=self._autoconvolution,
-                                                     bin_width=self._bin_width)
+                                                     autoconvolution=self._autoconvolution)
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
 
@@ -199,8 +194,7 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
             partial_wrk_names = []
 
             for n in range(dim):
-                seed = "quantum_event_%s" % (n + 1)
-                wrk_name = workspace + "_" + seed
+                wrk_name = f"{workspace}_quantum_event_{n + 1}"
                 partial_wrk_names.append(wrk_name)
 
                 self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
@@ -290,25 +284,20 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         """
         Loads all properties to object's attributes.
         """
-        from abins.constants import FLOAT_TYPE
-
         self.get_common_properties()
+
+        self._bin_width = self.getProperty("BinWidthInWavenumber").value
+        self._sample_form = self.getProperty("SampleForm").value
+
         self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
         self.set_instrument()
 
         self._autoconvolution = self.getProperty("Autoconvolution").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
-        self._energy_units = self.getProperty("EnergyUnits").value
 
-        # Sampling mesh is determined by
-        # abins.parameters.sampling['min_wavenumber']
-        # abins.parameters.sampling['max_wavenumber']
-        # and abins.parameters.sampling['bin_width']
-        step = abins.parameters.sampling['bin_width'] = self._bin_width
-        start = abins.parameters.sampling['min_wavenumber']
-        stop = abins.parameters.sampling['max_wavenumber'] + step
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
+        abins.parameters.sampling['bin_width'] = self._bin_width
+        self._bins = self.get_instrument().get_energy_bins()
 
         # Increase max event order if using autoconvolution
         if self._autoconvolution:

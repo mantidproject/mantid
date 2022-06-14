@@ -14,8 +14,6 @@
 #include <string>
 #include <utility>
 
-#include <utility>
-
 namespace Mantid {
 namespace NeXus {
 namespace NeXusIOHelper {

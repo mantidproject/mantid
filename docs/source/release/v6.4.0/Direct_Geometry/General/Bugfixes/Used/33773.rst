@@ -1,0 +1,1 @@
+- Minor bugfixes in the :ref:`PyChop <PyChop>` interface, to make sure the command line version works according to documentation.

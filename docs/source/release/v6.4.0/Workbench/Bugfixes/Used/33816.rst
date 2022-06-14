@@ -1,0 +1,1 @@
+- Removed the load ILL tab from the interface in "Indirect" -> "Tools". Users should use LoadILLIndirect algorithm or the Load button instead.

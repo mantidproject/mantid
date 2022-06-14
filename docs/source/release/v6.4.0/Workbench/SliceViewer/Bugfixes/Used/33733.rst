@@ -1,0 +1,1 @@
+- Fixed a bug caused by moving to matplotlib 3.5 that prevented users from zooming in on a plot in SliceViewer.

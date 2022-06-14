@@ -43,6 +43,9 @@ public:
                            std::vector<double> &resultX, std::vector<double> &resultY) {
     DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
   }
+  void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) {
+    DiscusMultipleScatteringCorrection::getXMinMax(ws, xmin, xmax);
+  }
 };
 
 class DiscusMultipleScatteringCorrectionTest : public CxxTest::TestSuite {
@@ -94,7 +97,7 @@ public:
     alg->execute();
     Mantid::API::WorkspaceGroup_sptr output =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-    Mantid::API::Workspace_sptr wsPtr = output->getItem("Scatter_2");
+    Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
     auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
 
     // validate that the max scatter angle is ~120 degrees (peak is at 120.0 but slight tail)
@@ -144,10 +147,14 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      std::vector<std::string> wsNames = {"Scatter_1_NoAbs", "Scatter_1", "Scatter_2", "Scatter_3",
-                                          "Scatter_2_3_Summed"};
+      std::vector<std::string> wsNames = {"MuscatResults_Scatter_1_NoAbs",      "MuscatResults_Scatter_1",
+                                          "MuscatResults_Scatter_1_Integrated", "MuscatResults_Scatter_2",
+                                          "MuscatResults_Scatter_2_Integrated", "MuscatResults_Scatter_3",
+                                          "MuscatResults_Scatter_3_Integrated", "MuscatResults_Scatter_2_3_Summed",
+                                          "MuscatResults_Scatter_1_3_Summed",   "MuscatResults_Ratio_Single_To_All"};
       for (auto &name : wsNames) {
-        Mantid::API::Workspace_sptr wsPtr = output->getItem(name);
+        Mantid::API::Workspace_sptr wsPtr;
+        TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(name));
         auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
         TS_ASSERT(matrixWsPtr);
       }
@@ -173,7 +180,7 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr = output->getItem("Scatter_1");
+      Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
       // calculate result analytically
       const int SPECTRUMINDEXTOTEST = 1;
@@ -210,9 +217,9 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("Scatter_1");
+      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("Scatter_2");
+      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
       // check single scatter result still matches analytical result
       const int SPECTRUMINDEXTOTEST = 1;
@@ -261,9 +268,9 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("Scatter_1");
+      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("Scatter_2");
+      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
       // check single scatter result still matches analytical result
       const int SPECTRUMINDEXTOTEST = 1;
@@ -312,7 +319,7 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("Scatter_1");
+      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
       // check single scatter result still matches analytical result
       const auto &mat = inputWorkspace->sample().getMaterial();
@@ -333,6 +340,20 @@ public:
       TS_ASSERT(interpSingleScatterY > singleScatterYLatZero || interpSingleScatterY > singleScatterYLatTwo);
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
+  }
+
+  void test_workspace_containing_spectra_without_detectors() {
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+    inputWorkspace->getSpectrum(0).clearDetectorIDs();
+    auto alg = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
   }
 
   void test_interpolateGaussian() {
@@ -383,10 +404,10 @@ public:
   void test_integrateCumulative() {
     DiscusMultipleScatteringCorrectionHelper alg;
     Mantid::HistogramData::Histogram test(Mantid::HistogramData::Points({0., 1., 2., 3.}),
-                                          Mantid::HistogramData::Frequencies({1., 1., 1., 1.}));
+                                          Mantid::HistogramData::Frequencies({1., 1., 1., 2.}));
     std::vector<double> testResultX, testResultY;
     alg.integrateCumulative(test, 0., 2.2, testResultX, testResultY);
-    TS_ASSERT_EQUALS(testResultY[3], 2.2);
+    TS_ASSERT_EQUALS(testResultY[3], 2.22);
     testResultX.clear();
     testResultY.clear();
     TS_ASSERT_THROWS(alg.integrateCumulative(test, 0., 3.2, testResultX, testResultY), std::runtime_error &);
@@ -410,6 +431,17 @@ public:
     testResultY.clear();
     alg.integrateCumulative(test, 0.5, 0.9, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
+    // bin edges tests
+    testResultX.clear();
+    testResultY.clear();
+    Mantid::HistogramData::Histogram test_edges(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
+                                                Mantid::HistogramData::Frequencies({1., 1., 2.}));
+    alg.integrateCumulative(test_edges, 0., 2.2, testResultX, testResultY);
+    TS_ASSERT_DELTA(testResultY[3], 2.4, 1E-10);
+    testResultX.clear();
+    testResultY.clear();
+    alg.integrateCumulative(test_edges, 0., 2.0, testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[2], 2.0);
   }
 
   void test_inelastic_with_importance_sampling() {
@@ -479,7 +511,7 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr = output->getItem("Scatter_2");
+      Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
       // validate that the max scatter angle is ~61.5 degrees
       for (size_t i = 0; i < NTHETA; i++) {
@@ -599,9 +631,9 @@ public:
     if (alg->isExecuted()) {
       Mantid::API::WorkspaceGroup_sptr output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("Scatter_1");
+      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("Scatter_2");
+      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
 
       const double delta(1e-04);
@@ -639,9 +671,49 @@ public:
     run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00023, 0.00021);
   }
 
+  void test_getxminmax() {
+    const double x0 = 0.5;
+    const double deltax = 1.0;
+    const int nbins = 3;
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(1, 2, 1.0, nbins, x0, deltax);
+    double xmin, xmax;
+    DiscusMultipleScatteringCorrectionHelper alg;
+    alg.getXMinMax(*ws, xmin, xmax);
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 3.0);
+    for (size_t i = 0; i < ws->getNumberHistograms(); i++)
+      ws->getSpectrum(i).clearDetectorIDs();
+    TS_ASSERT_THROWS(alg.getXMinMax(*ws, xmin, xmax), const std::runtime_error &);
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
+
+  void test_validateInputsWithInputWorkspaceSetToGroup() {
+    // Test motivated by ensuring alg dialog opens in workbench UI in all cases
+    // Workbench calls InterfaceManager::createdialogfromname when opening algorithm dialog. This calls
+    // setPropertyValue on all inputs and if they're all OK it then calls validateInputs - this is separate to and
+    // before the call to validateInputs that happens inside alg->execute()
+    auto alg = createAlgorithm();
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
+                                                  DeltaEMode::Elastic);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWorkspace", inputWorkspace);
+    auto inputWorkspaceGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWSGroup", inputWorkspaceGroup);
+    inputWorkspaceGroup->add(inputWorkspace->getName());
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", inputWorkspaceGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NumberScatterings", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsSingle", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsMultiple", "1"));
+    std::map<std::string, std::string> errs;
+    // Note: if validateInputs causes an access violation (as opposed to throwing an exception) then
+    // TS_ASSERT_THROWS_NOTHING won't catch it
+    TS_ASSERT_THROWS_NOTHING(errs = alg->validateInputs());
+    TS_ASSERT(!errs.empty());
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
 
   void test_invalidSOfQ() {
     DiscusMultipleScatteringCorrectionHelper alg;

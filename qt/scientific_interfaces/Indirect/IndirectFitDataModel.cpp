@@ -101,9 +101,9 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataModel::getResolutions
     const auto resolutionWorkspace = m_resolutions->at(index).lock();
     const auto spectra = getSpectra(WorkspaceID{index});
     if (!resolutionWorkspace) {
-      for (auto &spectraIndex : spectra) {
-        resolutionVector.emplace_back("", spectraIndex.value);
-      }
+      resolutionVector.reserve(spectra.size().value);
+      std::transform(spectra.begin(), spectra.end(), std::back_inserter(resolutionVector),
+                     [](const auto &spectraIndex) { return std::make_pair("", spectraIndex.value); });
       continue;
     }
 
@@ -155,8 +155,8 @@ void IndirectFitDataModel::setSpectra(const FunctionModelSpectra &spectra, Works
 std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
   std::vector<std::string> names;
   names.reserve(m_fittingData->size());
-  for (const auto &fittingData : *m_fittingData)
-    names.emplace_back(fittingData.workspace()->getName());
+  std::transform(m_fittingData->cbegin(), m_fittingData->cend(), std::back_inserter(names),
+                 [](const auto &fittingData) { return fittingData.workspace()->getName(); });
   return names;
 }
 

@@ -1,0 +1,1 @@
+- Fix a bug where Mantid could hang when performing ADS updates from multiple python algorithms at the same time.

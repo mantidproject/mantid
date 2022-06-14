@@ -38,8 +38,8 @@ class AnalysisDataServiceTest(unittest.TestCase):
         """
             Run create workspace storing the output in the named workspace
         """
-        data = [1.0,2.0,3.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        data = [1.0, 2.0, 3.0]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         AnalysisDataService.addOrReplace(wsname, alg.getProperty("OutputWorkspace").value)
 
     def test_contains(self):
@@ -66,16 +66,16 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertEqual(len(AnalysisDataService), current_len - 1)
 
     def test_add_raises_error_if_name_exists(self):
-        data = [1.0,2.0,3.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        data = [1.0, 2.0, 3.0]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         name = "testws"
         ws = alg.getProperty("OutputWorkspace").value
         AnalysisDataService.addOrReplace(name, ws)
         self.assertRaises(RuntimeError, AnalysisDataService.add, name, ws)
 
     def test_addOrReplace_replaces_workspace_with_existing_name(self):
-        data = [1.0,2.0,3.0]
-        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        data = [1.0, 2.0, 3.0]
+        alg = run_algorithm('CreateWorkspace', DataX=data, DataY=data, NSpec=1, UnitX='Wavelength', child=True)
         name = "testws"
         ws = alg.getProperty("OutputWorkspace").value
         AnalysisDataService.add(name, ws)
@@ -136,7 +136,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         ws_handle = AnalysisDataService[wsname]
         succeeded = False
         try:
-            ws_handle.id() # Should be okay
+            ws_handle.id()  # Should be okay
             succeeded = True
         except RuntimeError:
             pass
@@ -200,6 +200,24 @@ class AnalysisDataServiceTest(unittest.TestCase):
 
         self.assertEqual(group.size(), 2)
         self.assertCountEqual(group.getNames(), ["ws1", "ws2"])
+
+    def test_retrieve_workspaces_uses_weak_ptrs(self):
+        ws_names = ["test_retrieve_workspaces_1", "test_retrieve_workspaces_2"]
+        for name in ws_names:
+            self._run_createws(name)
+        workspaces = AnalysisDataService.retrieveWorkspaces(ws_names)
+        self.assertEqual(len(workspaces), 2)
+
+        AnalysisDataService.remove(ws_names[0])
+        # even though workspace has been deleted this should not affect workspaces size
+        self.assertEqual(len(workspaces), 2)
+
+        # check that the second workspace pointer in workspaces exists and can be used
+        str(workspaces[1])
+
+        # if a weak pointer has been used we expect a RuntimeError. Any other pointer will result in a different error
+        with self.assertRaises(RuntimeError):
+            str(workspaces[0])
 
 
 if __name__ == '__main__':

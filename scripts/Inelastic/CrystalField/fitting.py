@@ -22,6 +22,12 @@ FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma. Multi-spectrum case.
 FN_MS_PATTERN = re.compile('f(\\d+)\\.f(\\d+)\\.(.+)')
 
+CONSTRAINTS_PATTERN = re.compile(r'constraints=\((.*?)\)')
+FWHM_PATTERN = re.compile(r'FWHM[X|Y]\d+=\(\),')
+PHYSICAL_PROPERTIES_PATTERN = re.compile(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)')
+TEMPERATURES_PATTERN = re.compile(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)')
+TIES_PATTERN = re.compile(r',ties=\((.*?)\)')
+
 
 def makeWorkspace(xArray, yArray):
     """Create a workspace that doesn't appear in the ADS"""
@@ -336,9 +342,9 @@ class CrystalField(object):
         return out
 
     def makeMultiSpectrumFunction(self):
-        fun = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
-        fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun)
-        fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+        fun = re.sub(FWHM_PATTERN, '', str(self.function))
+        fun = re.sub(TEMPERATURES_PATTERN, r'\1\3\2', fun)
+        fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
         return fun
 
     @property
@@ -1072,11 +1078,11 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search(r',ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search(TIES_PATTERN, str(self.crystalFieldFunction))
         return re.sub(FN_PATTERN, '', ties.group(1)).rstrip(',') if ties else ''
 
     def _getFieldConstraints(self):
-        constraints = re.search(r'constraints=\((.*?)\)', str(self.crystalFieldFunction))
+        constraints = re.search(CONSTRAINTS_PATTERN, str(self.crystalFieldFunction))
         return constraints.group(1) if constraints else ''
 
     def _getPhysProp(self, ppobj, workspace, ws_index):
@@ -1433,7 +1439,7 @@ class CrystalFieldFit(object):
         if 'CrystalFieldMultiSpectrum' in fun:
             # Hack to ensure that 'PhysicalProperties' attribute is first
             # otherwise it won't set up other attributes properly
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -1482,7 +1488,7 @@ class CrystalFieldFit(object):
             else:
                 fun = str(self._function)
         if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -1558,14 +1564,14 @@ class CrystalFieldFit(object):
             ws_kwargs['InputWorkspace'] = self._input_workspace[0]
             i = 1
             for workspace in self._input_workspace[1:]:
-                ws_kwargs['InputWorkspace_{}'.format(i)] = workspace
+                ws_kwargs[f'InputWorkspace_{i}'] = workspace
                 i += 1
             # clean up multispectrum function to prevent problems during evaluation
             # e.g. remove FWHMX0/FWHMY0 and FWHMX1/FWHMY1
-            fun_str = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(fun))
+            fun_str = re.sub(FWHM_PATTERN, '', str(fun))
             # move Temperature and PhysicalProperties settings to front
-            fun_str = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun_str)
-            fun_str = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun_str)
+            fun_str = re.sub(TEMPERATURES_PATTERN, r'\1\3\2', fun_str)
+            fun_str = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun_str)
             # remove peaks above MaxPeakCount
             fun_str = re.sub(r'f[0-9]+\.f(['+str(fun.getAttributeValue("MaxPeakCount"))+r'-9]|[1-9][0-9])\.\w+=.*?,','', fun_str)
             return CalculateChiSquared(fun_str, **ws_kwargs)[1]

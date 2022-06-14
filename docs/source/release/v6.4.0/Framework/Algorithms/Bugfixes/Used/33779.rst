@@ -1,0 +1,2 @@
+- `FileProperty` and `MultiFileProperty` in algorithms now trim whitespaces in the input only when requested (true by default)
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` now does not automatically trim whitespaces in the `Filename` property

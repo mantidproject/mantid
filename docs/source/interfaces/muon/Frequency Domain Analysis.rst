@@ -53,6 +53,7 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
 * :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
 * :ref:`Results Tab <muon_results_tab-ref>`
+* :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>`
 
 Feedback & Comments
 -------------------

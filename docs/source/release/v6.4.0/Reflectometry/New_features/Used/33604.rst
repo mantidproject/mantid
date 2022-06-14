@@ -1,0 +1,1 @@
+- Renamed the per-angle defaults table to the Settings Lookup table to better represent that lookups can now be done by both angle and by sample title.

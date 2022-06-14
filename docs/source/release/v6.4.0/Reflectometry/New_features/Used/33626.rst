@@ -1,0 +1,1 @@
+- The Runs Tab of the ISIS Reflectometry Interface now contains a Lookup Index column to indicate which of the rows from the Experiment Settings tab was used.

@@ -21,7 +21,7 @@ class SCalculatorFactory(object):
     def init(*, filename: str, temperature: float, sample_form: str,
              abins_data: abins.AbinsData, instrument: Instrument,
              quantum_order_num: int,
-             autoconvolution: bool = False, bin_width: float = 1.0):
+             autoconvolution: bool = False):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
@@ -30,7 +30,6 @@ class SCalculatorFactory(object):
         :param instrument: object of type Instrument for which simulation should be performed
         :param quantum_order_num: number of quantum order events taken into account during the simulation
         :param autoconvolution: Convolve results with fundamentals to obtain approximate spectra up to this order
-        :param bin_width: width of bins in wavenumber
         """
         if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
@@ -38,8 +37,7 @@ class SCalculatorFactory(object):
                 return abins.SPowderSemiEmpiricalCalculator(filename=filename, temperature=temperature,
                                                             abins_data=abins_data, instrument=instrument,
                                                             quantum_order_num=quantum_order_num,
-                                                            autoconvolution=autoconvolution,
-                                                            bin_width=bin_width)
+                                                            autoconvolution=autoconvolution)
                 # TODO: implement numerical powder averaging
 
             # elif sample == "SingleCrystal":  #TODO implement single crystal scenario

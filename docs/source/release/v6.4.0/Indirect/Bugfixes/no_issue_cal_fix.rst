@@ -1,0 +1,1 @@
+A bug has been fixed that sometimes caused a bad energy range selection for the resolution data in ISISCalibration (IndirectData Reduction).

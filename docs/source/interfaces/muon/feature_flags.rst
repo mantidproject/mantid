@@ -9,7 +9,7 @@ Muon Feature Flags
 Overview
 --------
 
-Muon Feature Flags provide advanced users with access to additional features such as raw plots and model analysis.
+Muon Feature Flags provide advanced users with access to additional features such as raw plots and the model fitting tab.
 
 
 How to set up
@@ -39,10 +39,10 @@ The options are a comma separated list of ``feature:setting`` where the feature 
 +-------------------+----------------+-----------------------------------------------------------------+
 | Feature           | Setting        | What it does                                                    |
 +===================+================+=================================================================+
-| model_analysis    | 1              | Adds the model analysis tab                                     |
+| model_analysis    | 1              | Adds the model fitting tab                                      |
 +-------------------+----------------+-----------------------------------------------------------------+
-| model_analysis    | 2              | Adds the model analysis tab and                                 |
-|                   |                | the model analysis plot pane                                    |
+| model_analysis    | 2              | Adds the model fitting tab and                                  |
+|                   |                | the model data plot pane                                        |
 +-------------------+----------------+-----------------------------------------------------------------+
 | raw_plots         | 1              | Adds the raw plot pane                                          |
 +-------------------+----------------+-----------------------------------------------------------------+
@@ -51,7 +51,7 @@ The options are a comma separated list of ``feature:setting`` where the feature 
 
 The setting is always a number and, setting it to any other value than those above will results in the feature not being added.
 
-One example of how to use this - if you want to have the model analysis tab and plotting pane in addition to the raw plots
+One example of how to use this - if you want to have the model fitting tab and plotting pane in addition to the raw plots
 you would need to add the following line to ``Mantid.user.properties`` file:
 
 ``muon.GUI = model_analysis:2, raw_plots:1``

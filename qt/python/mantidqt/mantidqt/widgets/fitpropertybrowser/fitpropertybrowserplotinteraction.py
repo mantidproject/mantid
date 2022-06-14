@@ -232,7 +232,8 @@ class FitPropertyBrowserPlotInteraction(QObject):
             pass
 
         line = self._plot_guess_workspace(ws_name, fun, out_ws_name, color=color)
-        self.guess_all_line = line
+        if line is not None:
+            self.guess_all_line = line
 
     def update_legend(self):
         """
@@ -269,17 +270,15 @@ class FitPropertyBrowserPlotInteraction(QObject):
         """
         try:
             out_ws = self.evaluate_function(workspace_name, function, output_workspace_name)
-        except RuntimeError:
+        except (ValueError, RuntimeError):
             return
 
         ax = self.get_axes()
         legend = ax.get_legend()
 
         # Setting distribution=True prevents the guess being normalised
-        ax.autoscale(enable=False, axis='both')
-        line = ax.plot(out_ws, wkspIndex=1, label=output_workspace_name, distribution=True, update_axes_labels=False,
-                       **plotkwargs)[0]
-        ax.autoscale(enable=True, axis='both')
+        line = ax.plot(out_ws, wkspIndex=1, label=output_workspace_name, distribution=True,
+                       update_axes_labels=False, autoscale_on_update=False, **plotkwargs)[0]
         if legend:
             ax.make_legend()
 

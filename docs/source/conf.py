@@ -268,6 +268,7 @@ intersphinx_mapping = {
 # for individual release notes files.
 exclude_patterns = [
     'release/templates/*.rst',
-    'release/v6.4.0/**/Bugfixes/*.rst',
-    'release/v6.4.0/**/New_features/*.rst'
+    'release/**/Bugfixes/*.rst',
+    'release/**/New_features/*.rst',
+    'release/**/Used/*.rst'
 ]

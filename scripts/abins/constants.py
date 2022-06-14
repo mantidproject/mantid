@@ -153,8 +153,11 @@ ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "V
 AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml", "yaml", "castep_bin", "hdf5"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA", "Lagrange"]
-TWO_DIMENSIONAL_INSTRUMENTS = []
+TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS = ["MAPS", "MARI", "MERLIN"]
+TWO_DIMENSIONAL_INSTRUMENTS = ["Ideal2D", "PANTHER"] + TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
 ALL_INSTRUMENTS = ONE_DIMENSIONAL_INSTRUMENTS + TWO_DIMENSIONAL_INSTRUMENTS
+
+ENERGY_BIN_PADDING = 1.05  # When bins are based on E_init
 
 ONE_DIMENSIONAL_SPECTRUM = 1
 
@@ -164,10 +167,6 @@ GAMMA_POINT = 0
 BUF = 65536
 
 CRYSTAL = False
-
-# Bin limits for q rebinning during semi-empirical powder sum
-Q_BEGIN = 0.7
-Q_END = 30.0
 
 # definition of momentum transfer range
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1

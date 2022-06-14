@@ -17,7 +17,8 @@ Overview
 PyChop is a tool to allow direct inelastic neutron scattering users to estimate
 the inelastic resolution and incident flux for a given spectrometer setting.
 Currently, the four direct geometry spectrometers at ISIS (LET, MAPS, MARI, and
-MERLIN) are supported.
+MERLIN) and the four direct geometry spectrometers at SNS (ARCS, CNCS, HYSPEC,
+SEQUOIA) are supported.
 
 For MERLIN and LET, in addition, PyChop will also calculate the allowed Ei's in
 multi-rep mode, and plot the time-distance diagrams for the desired setting.
@@ -78,10 +79,19 @@ Mantid, to do a single point calculation of the flux and resolution
 .. code:: python
 
     from mantidqtinterfaces.PyChop import PyChop2
-    resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
+    resolution, flux = PyChop2.calculate(inst='maps', package='a', frequency=500, ei=600, etrans=range(0,550,50))
 
 The parameters are in order, so ``PyChop2.calculate('maps','a',500,600,range(0,550,50))``
 also works.
+
+
+To further simplify the use of ``PyChop2`` for data modeling, the `calculate` function (only) allows for
+`etrans='polynomial'` parameter. If that is used, the energy transfer from `-Ei` to `Ei` with a step
+of `0.01Ei` is used, then fitted to a cubic polynomial. The resolutoion resturned by the function is an array
+with four elements, so the desired value can be recovered using
+
+.. math:: res = resolution[0] + resolution[1]\Delta E + resolution[2]\Delta E^2 + resolution[3]\Delta E^3
+
 
 In addition, an object orient interface is provided:
 
