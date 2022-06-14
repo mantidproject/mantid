@@ -27,8 +27,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed2)
 
 namespace {
 template <typename T> int countEntriesOfType(const T &entry, const std::string &nxClass) {
-  return std::count_if(entry.groups().cbegin(), entry.groups().cend(),
-                       [nxClass](const auto &group) { return group.nxclass == nxClass; });
+  return static_cast<int>(std::count_if(entry.groups().cbegin(), entry.groups().cend(),
+                                        [nxClass](const auto &group) { return group.nxclass == nxClass; }));
 }
 
 template <typename T>
