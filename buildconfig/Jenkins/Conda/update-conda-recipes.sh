@@ -11,6 +11,7 @@
 # Possible flags:
 #   --local-only: update a local copy of the conda-recipes repository only without cloning, and do not push the changes
 #     to github.
+#   --release-version: generate a version number for a release candidate, using the patch version rather than the date.
 
 GITHUB_ACCESS_TOKEN=$1
 shift
@@ -21,12 +22,14 @@ shift
 
 # Optional flag to update a local repo without pushing the changes
 LOCAL_ONLY=false
+RELEASE_VERSION=false
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
     case "$1" in
         --local-only) LOCAL_ONLY=true ;;
+        --release-version) RELEASE_VERSION=true ;;
         *)
             echo "Argument not accepted: $1"
             exit 1
@@ -35,20 +38,26 @@ do
   shift
 done
 
-# Generate the latest version number
-LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
-echo $LATEST_GIT_SHA_DATE
-YEAR=${LATEST_GIT_SHA_DATE:0:4}
-MONTH=${LATEST_GIT_SHA_DATE:5:2}
-DAY=${LATEST_GIT_SHA_DATE:8:2}
-HOUR=${LATEST_GIT_SHA_DATE:11:2}
-MINS=${LATEST_GIT_SHA_DATE:14:2}
-PATCH_VERSION=$YEAR$MONTH$DAY.$HOUR$MINS
-echo $PATCH_VERSION
+# Generate the version number
 MAJOR_VERSION=$(command perl -n -e '/set\(VERSION_MAJOR\s+(\d+)\)/ && print $1' < buildconfig/CMake/VersionNumber.cmake)
 echo $MAJOR_VERSION
 MINOR_VERSION=$(command perl -n -e '/set\(VERSION_MINOR\s+(\d+)\)/ && print $1' < buildconfig/CMake/VersionNumber.cmake)
 echo $MINOR_VERSION
+# Use patch version for release packages, otherwise use date and time of the latest git sha
+if [[ $RELEASE_VERSION  == true ]]; then
+    PATCH_VERSION=$(command perl -n -e '/set\(VERSION_PATCH\s+(\d+)\)/ && print $1' < buildconfig/CMake/VersionNumber.cmake)
+else
+    LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
+    echo $LATEST_GIT_SHA_DATE
+    YEAR=${LATEST_GIT_SHA_DATE:0:4}
+    MONTH=${LATEST_GIT_SHA_DATE:5:2}
+    DAY=${LATEST_GIT_SHA_DATE:8:2}
+    HOUR=${LATEST_GIT_SHA_DATE:11:2}
+    MINS=${LATEST_GIT_SHA_DATE:14:2}
+    PATCH_VERSION=$YEAR$MONTH$DAY.$HOUR$MINS
+fi
+echo $PATCH_VERSION
+
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION
 echo $VERSION
 
