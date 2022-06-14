@@ -163,6 +163,7 @@ class LinePlots:
         image_axes.set_position(gs[1].get_position(self._fig))
         image_axes.tick_params(labelleft=False, labelbottom=False)
         image_axes.xaxis.get_label().set_visible(False)
+        image_axes.yaxis.get_label().set_visible(False)
         self._axx = self._fig.add_subplot(gs[3], sharex=image_axes)
         self._axx.yaxis.tick_right()
         self._axy = self._fig.add_subplot(gs[0], sharey=image_axes)
@@ -190,6 +191,7 @@ class LinePlots:
         image_axes.set_position(gs[0].get_position(self._fig))
         image_axes.tick_params(labelleft=True, labelbottom=True)
         image_axes.xaxis.get_label().set_visible(True)
+        image_axes.yaxis.get_label().set_visible(True)
         self._axx, self._axy = None, None
 
         # self.mpl_toolbar.update()  # sync list of axes in navstack
