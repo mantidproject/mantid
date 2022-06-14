@@ -630,7 +630,7 @@ double PoldiAutoCorrelationCore::getSumOfCounts(int timeBinCount, const std::vec
   for (int t = 0; t < timeBinCount; ++t) {
     sum = std::accumulate(
         detectorElements.cbegin(), detectorElements.cend(), sum,
-        [this, t](const int detectorElement, const double lhs) { return lhs + getCounts(detectorElement, t); });
+        [this, t](auto lhs, const auto detectorElement) { return lhs + getCounts(detectorElement, t); });
   }
   return sum;
 }
