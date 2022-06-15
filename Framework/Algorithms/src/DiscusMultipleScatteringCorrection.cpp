@@ -397,12 +397,16 @@ void DiscusMultipleScatteringCorrection::exec() {
     m_SQWSs.push_back(MaterialWorkspaceMapping{inputWS->sample().getMaterial().name(),
                                                std::dynamic_pointer_cast<MatrixWorkspace>(SQWS)});
     for (size_t i = 0; i < nEnvComponents; i++) {
-      MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
-          *m_SQWSs[0].SQ, static_cast<size_t>(1),
-          HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
       std::string_view matName = inputWS->sample().getEnvironment().getComponent(i).material().name();
-      g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
-      m_SQWSs.push_back(MaterialWorkspaceMapping{matName, isotropicSQ});
+      if (std::find_if(m_SQWSs.begin(), m_SQWSs.end(), [matName](const MaterialWorkspaceMapping &materialWS) {
+            return materialWS.materialName == matName;
+          }) == m_SQWSs.end()) {
+        MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
+            *m_SQWSs[0].SQ, static_cast<size_t>(1),
+            HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
+        g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
+        m_SQWSs.push_back(MaterialWorkspaceMapping{matName, isotropicSQ});
+      }
     }
   }
 
