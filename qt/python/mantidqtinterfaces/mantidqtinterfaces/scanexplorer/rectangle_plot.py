@@ -9,7 +9,7 @@ from qtpy.QtWidgets import QWidget
 import numpy as np
 
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, KeyHandler, cursor_info
-from mantid.simpleapi import CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateEmptyTableWorkspace
 from mantid.kernel import logger
 
 from .rectangle_controller import RectanglesManager
@@ -397,19 +397,31 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         self._update_plot_values()
 
-    def _find_peaks(self) -> list:
+    def _extract_peaks(self):
         """
-        Find the peaks in the current rectangles, by searching the center of mass of the data there.
-        @return the list of the (x, y) positions of the peaks.
+        Extract the peaks to a table workspace
         """
-        peaks = []
-        for rect in self.get_rectangles():
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace='peaks')
+        table_ws.addColumn("int", "Peak")
+        table_ws.addColumn("float", "2Theta")
+        table_ws.addColumn("float", "Omega")
+        table_ws.addColumn("float", "I")
+
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        arr = self.plotter.image.get_array()
+        x_step = (xmax - xmin) / arr.shape[1]
+        y_step = (ymax - ymin) / arr.shape[0]
+
+        for index, rect in enumerate(self.get_rectangles()):
             peak = self._find_peak(rect)
-            peaks.append(peak)
             self._show_peak(rect, peak)
 
-        self.plotter.redraw()
-        return peaks
+            # find the indices corresponding to the position in the array
+            x_ind = max(int(np.ceil((peak[0] - xmin) / x_step)), 0)
+            y_ind = max(int(np.ceil((peak[1] - ymin) / y_step)), 0)
+
+            table_ws.addRow({"Peak": index, "2Theta": peak[0], "Omega": peak[1], "I": arr[y_ind, x_ind]})
 
     def _find_peak(self, rect: Rectangle) -> (float, float):
         """
@@ -440,6 +452,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
 
         total_sum = np.sum(slice_cut)
+
+        if total_sum == 0:
+            return (x0_ind + x1_ind) * x_step / 2 + xmin, (y0_ind + y1_ind) * y_step / 2 + ymin
 
         x_mean = np.dot(np.sum(slice_cut, axis=0), np.arange(len(slice_cut[0]))) / total_sum
         y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum
@@ -488,7 +503,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         if key == 'f':
             self._place_interpolated_rectangles()
         if key == 'p':
-            self._find_peaks()
+            self._extract_peaks()
         if key == 'delete':
             self._delete_current()
 
