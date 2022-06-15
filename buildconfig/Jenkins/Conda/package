@@ -122,7 +122,12 @@ git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIP
 
 # Update the git sha and version number when building packages from the current branch.
 if [[ $BUILD_CURRENT_BRANCH == true ]]; then
-    $SCRIPT_DIR/update-conda-recipes.sh dummy_token dummy_name dummy_email --local-only
+    RECIPE_UPDATE_ARGS="dummy_token dummy_name dummy_email --local-only"
+    #If it's a release version, pass an extra argument to use the patch version number
+    if [[ -z "${STANDALONE_PACKAGE_SUFFIX}" ]]; then
+        RECIPE_UPDATE_ARGS="${RECIPE_UPDATE_ARGS} --release-version"
+    fi
+    $SCRIPT_DIR/update-conda-recipes.sh $RECIPE_UPDATE_ARGS
 fi
 
 # Run conda build. Use shortest path possible for Windows
