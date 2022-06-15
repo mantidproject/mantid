@@ -327,8 +327,11 @@ void InstrumentActor::applyMaskWorkspace() {
   }
 
   // Mask bins
-  m_maskBinsData.mask(m_workspace);
-
+  try {
+    m_maskBinsData.mask(m_workspace);
+  } catch (std::logic_error &) {
+    m_messageHandler.giveUserWarning("An error occurred when applying the mask to bins.", "Mantid - Warning");
+  }
   clearMasks();
 }
 
