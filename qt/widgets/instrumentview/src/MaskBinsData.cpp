@@ -33,7 +33,7 @@ void MaskBinsData::mask(std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace
                    [](const size_t spec) -> int { return static_cast<int>(spec); });
     auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskBins", -1);
     alg->setProperty("InputWorkspace", workspace);
-    alg->setProperty("OutputWorkspace", workspace);
+    alg->setPropertyValue("OutputWorkspace", workspace->getName());
     alg->setProperty("InputWorkspaceIndexSet", spectraList);
     alg->setProperty("XMin", mask.start);
     alg->setProperty("XMax", mask.end);

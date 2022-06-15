@@ -37,6 +37,7 @@ Bugfixes
 - Fixed a bug where trying to save a large project would cause Mantid to crash.
 - Workbench no longer generates an error when you save the ``Figure Options`` on a colour fill plot containing two images of different types (e.g. QuadMesh and Image).
 - Users are now prevented from overwriting previous versions of Mantid if the uninstaller is not present. Some antivirus software deletes the uninstaller. Installing over older versions without the uninstaller can cause Mantid not to function properly and for users to lose data.
+- Removed Line Colour option from the toolbar in Contour Plots as it no longer works.
 
 Instrument Viewer
 -----------------
