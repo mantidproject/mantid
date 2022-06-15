@@ -427,12 +427,15 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         x1 = x0 + rect.get_width()
         y1 = y0 + rect.get_height()
 
-        # find the indices corresponding to the position in the array
-        x0_ind = max(int(np.ceil((x0 - xmin) / x_step)), 0)
-        y0_ind = max(int(np.ceil((y0 - ymin) / y_step)), 0)
+        x0, x1 = min(x0, x1), max(x0, x1)
+        y0, y1 = min(y0, y1), max(y0, y1)
 
-        x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
-        y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
+        # find the indices corresponding to the position in the array
+        x0_ind = max(int(np.floor((x0 - xmin) / x_step)), 0)
+        y0_ind = max(int(np.floor((y0 - ymin) / y_step)), 0)
+
+        x1_ind = min(int(np.ceil((x1 - xmin) / x_step)), len(arr[0]))
+        y1_ind = min(int(np.ceil((y1 - ymin) / y_step)), len(arr))
 
         slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
 
