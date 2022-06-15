@@ -763,6 +763,10 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
     } else {
       m_xIntegration->setRange(0, 0);
     }
+  } else {
+    if (minRange > 0 || maxRange > 0) {
+      m_xIntegration->setWholeRange();
+    }
   }
 
   m_xIntegration->setUnits(QString::fromStdString(ws->getAxis(0)->unit()->caption()));
