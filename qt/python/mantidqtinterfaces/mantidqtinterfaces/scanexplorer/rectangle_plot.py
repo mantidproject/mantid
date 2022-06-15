@@ -212,6 +212,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         rectangle_patch = Rectangle(point, width, height, edgecolor="black", facecolor='none', alpha=.7)
         self.plotter.image_axes.add_patch(rectangle_patch)
         self._manager.add_rectangle(rectangle_patch)
+        peak = self._find_peak(self.current_rectangle)
+        self._show_peak(self.current_rectangle, peak)
 
     def _move_selected_rectangle(self, new_point: tuple, new_width: float, new_height: float):
         """
