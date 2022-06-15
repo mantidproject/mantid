@@ -29,13 +29,15 @@ class Instrument;
 
 namespace Algorithms {
 
-struct MaterialWorkspaceMapping {
+struct ComponentWorkspaceMapping {
+  Geometry::IObject_const_sptr ComponentPtr;
   std::string_view materialName;
   API::MatrixWorkspace_sptr SQ;
   API::MatrixWorkspace_sptr logSQ;
   std::shared_ptr<DataObjects::Histogram1D> QSQIntegral;
   API::MatrixWorkspace_sptr QSQ;
   API::MatrixWorkspace_sptr InvPOfQ;
+  int scatterCount = 0;
 };
 
 /** Calculates a multiple scattering correction
@@ -47,7 +49,7 @@ struct MaterialWorkspaceMapping {
 class MANTID_ALGORITHMS_DLL DiscusMultipleScatteringCorrection : public API::Algorithm {
 public:
   // use small_vector to avoid performance hit from heap allocation of std::vector. Use size 5 in line with Track.h
-  using MaterialWorkspaceMappings = boost::container::small_vector<MaterialWorkspaceMapping, 5>;
+  using ComponentWorkspaceMappings = boost::container::small_vector<ComponentWorkspaceMapping, 5>;
   /// Algorithm's name
   const std::string name() const override { return "DiscusMultipleScatteringCorrection"; }
   /// Algorithm's version
@@ -72,7 +74,7 @@ protected:
   std::tuple<double, int> sampleQW(const API::MatrixWorkspace_sptr &CumulativeProb, double x);
   double interpolateSquareRoot(const API::ISpectrum &histToInterpolate, double x);
   double interpolateGaussian(const API::ISpectrum &histToInterpolate, double x);
-  double Interpolate2D(const MaterialWorkspaceMapping &SQWSMapping, double w, double q);
+  double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w, double q);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, const double xmin, const double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY);
@@ -85,13 +87,12 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double k, bool specialSingleScatterCalc);
-  std::vector<double>
-  simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                const boost::container::small_vector<MaterialWorkspaceMapping, 5> &materialWorkspaces,
-                const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos,
-                bool specialSingleScatterCalc);
+  std::vector<double> simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
+                                    ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
+                                    const std::vector<double> &wValues, const Kernel::V3D &detPos,
+                                    bool specialSingleScatterCalc);
   std::tuple<bool, std::vector<double>> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                                const MaterialWorkspaceMappings &materialWorkspaces, const double kinc,
+                                                ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
                                                 const std::vector<double> &wValues, const Kernel::V3D &detPos,
                                                 bool specialSingleScatterCalc);
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
@@ -99,17 +100,18 @@ private:
   void inc_xyz(Geometry::Track &track, double vl);
   const Geometry::IObject *updateWeightAndPosition(Geometry::Track &track, double &weight, const double k,
                                                    Kernel::PseudoRandomNumberGenerator &rng,
-                                                   bool specialSingleScatterCalc);
-  bool q_dir(Geometry::Track &track, const std::string &materialName, const MaterialWorkspaceMappings &invPOfQs,
+                                                   bool specialSingleScatterCalc,
+                                                   ComponentWorkspaceMappings &componentWorkspaces);
+  bool q_dir(Geometry::Track &track, const Geometry::IObject *shapePtr, const ComponentWorkspaceMappings &invPOfQs,
              double &k, const double scatteringXSection, Kernel::PseudoRandomNumberGenerator &rng, double &weight);
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
   void correctForWorkspaceNameClash(std::string &wsName);
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
-  void createInvPOfQWorkspaces(MaterialWorkspaceMappings &matWSs, size_t nhists);
+  void createInvPOfQWorkspaces(ComponentWorkspaceMappings &matWSs, size_t nhists);
   void convertToLogWorkspace(const API::MatrixWorkspace_sptr &SOfQ);
-  void calculateQSQIntegralAsFunctionOfK(MaterialWorkspaceMappings &matWSs, const double specialK);
-  void prepareCumulativeProbForQ(double kinc, const MaterialWorkspaceMappings &PInvOfQs);
+  void calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs, const double specialK);
+  void prepareCumulativeProbForQ(double kinc, const ComponentWorkspaceMappings &PInvOfQs);
   void prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
   void prepareStructureFactor();
@@ -125,7 +127,7 @@ private:
   int m_maxScatterPtAttempts{};
   std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k
   // vectors of S(Q,w) and derived quantities. One entry for sample and each environment component
-  MaterialWorkspaceMappings m_SQWSs;
+  ComponentWorkspaceMappings m_SQWSs;
   Geometry::IObject_const_sptr m_sampleShape;
   bool m_importanceSampling{};
   Kernel::DeltaEMode::Type m_EMode{Kernel::DeltaEMode::Undefined};
