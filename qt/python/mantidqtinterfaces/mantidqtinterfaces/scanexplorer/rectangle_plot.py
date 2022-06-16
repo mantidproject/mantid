@@ -359,13 +359,24 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         from the center of the drawn rectangles. Only supports 2 rectangles.
         """
         rectangles = self.get_rectangles()
-        if len(rectangles) != 2:
+        if len(rectangles) == 1:
+            self._place_interpolate_in_q()
+        elif len(rectangles) == 2:
+            self._place_interpolate_linear()
+        else:
             logger.warning("Cannot place more peak regions : current number of regions invalid "
                            "(2 expected, {} found)".format(len(rectangles)))
             return
 
+        self._update_plot_values()
+
+    def _place_interpolate_linear(self):
+        """
+        Interpolate linearly the positions and shapes of the 2 provided rectangles to place estimated ROI of peaks.
+        """
+        rectangles = self.get_rectangles()
+
         rect_0, rect_1 = rectangles
-        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
 
         new_height = (rect_0.get_height() + rect_1.get_height()) / 2
         new_width = (rect_0.get_width() + rect_1.get_width()) / 2
@@ -373,21 +384,13 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
         center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
 
-        def rectangle_fit_on_image(center):
-            """
-            Check if the rectangle with center at center fits in the image boundaries.
-            @param center: the center of the rectangle
-            """
-            return xmin <= center[0] + new_width / 2 <= xmax and xmin <= center[0] - new_width / 2 <= xmax and \
-                ymin <= center[1] + new_height / 2 <= ymax and ymin <= center[1] - new_height / 2 <= ymax
-
         def move(seed: np.array, offset: np.array):
             """
             Starting at seed, place a rectangle every offset
             @param seed: the center of the first rectangle to place
             @param offset: the offset between each rectangle, in both x and y.
             """
-            while rectangle_fit_on_image(seed):
+            while self.rectangle_fit_on_image(seed, new_width, new_height):
                 self._draw_rectangle((seed[0] - new_width / 2, seed[1] - new_height / 2), new_width, new_height)
                 seed += offset
 
@@ -397,7 +400,46 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         first_center = 2 * center_0 - center_1
         move(first_center, center_0 - center_1)
 
-        self._update_plot_values()
+    def _place_interpolate_in_q(self):
+        """
+        Interpolate the user-provided rectangle position to determine ROI around the other peaks.
+        This method assumes that:
+        1) the rectangle provided correspond to the first (non-zero theta) peak
+        2) peaks positions verify theta = omega
+        3) Qn = nQ1 for all peaks
+        """
+        rect = self.get_rectangles()[0]
+        peak = self._find_peak(rect)
+
+        sin_theta = np.sin(np.deg2rad(peak[0]))
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        i = 2
+        v = np.rad2deg(np.arcsin(i * sin_theta))
+        width = rect.get_width()
+        height = rect.get_height()
+
+        while xmin < v < xmax or xmin < -v < xmax:
+            if self.rectangle_fit_on_image((v, v), width, height):
+                self._draw_rectangle((v - width / 2, v - height / 2), width, height)
+            if self.rectangle_fit_on_image((- v, -v), width, height):
+                self._draw_rectangle((- v - width / 2, - v - height / 2), width, height)
+
+            i += 1
+            v = np.rad2deg(np.arcsin(i * sin_theta))
+
+    def rectangle_fit_on_image(self, center: tuple, width: float, height: float) -> bool:
+        """
+        Check if the rectangle with center at center fits in the image boundaries.
+        @param center: the center of the rectangle
+        @param width: the width of the rectangle
+        @param height: the height of the rectangle
+        @return whether the provided rectangle fits
+        """
+        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+
+        return xmin <= center[0] + width / 2 <= xmax and xmin <= center[0] - height / 2 <= xmax and \
+            ymin <= center[1] + height / 2 <= ymax and ymin <= center[1] - height / 2 <= ymax
 
     def _extract_peaks(self):
         """
