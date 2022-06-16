@@ -7,7 +7,7 @@
 import random
 import systemtesting
 
-from mantid.api import AlgorithmFactory
+from mantid.api import AlgorithmFactory, AlgorithmManager
 from mantid.simpleapi import CreateSampleWorkspace, CreateMDWorkspace, GroupWorkspaces
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
@@ -21,9 +21,16 @@ import sip
 WORKSPACE_TYPES = ["MatrixWorkspace", "MDWorkspace", "WorkspaceGroup"]
 
 # These algorithms currently fail to open due to an error when the given workspace types are auto-selected from the ADS
-EXCLUDE_ALGORITHM = {"MatrixWorkspace": [],
-                     "MDWorkspace": ["MaskAngle", "VesuvioResolution"],
-                     "WorkspaceGroup": ["CalculateDynamicRange", "SetMDFrame", "VesuvioResolution"]}
+EXCLUDE_ALGORITHM = {"MatrixWorkspace": ["HB2AReduce", "MuonPairingAsymmetry"],
+                     "MDWorkspace": ["HB2AReduce", "MaskAngle", "MuonPairingAsymmetry", "TOFTOFCropWorkspace",
+                                     "VesuvioResolution"],
+                     "WorkspaceGroup": ["AnvredCorrection", "CalculateDynamicRange", "CopyDataRange", "CreateEPP",
+                                        "CropToComponent", "CylinderPaalmanPingsCorrection",
+                                        "EnggEstimateFocussedBackground", "FlatPlatePaalmanPingsCorrection",
+                                        "GetDetectorOffsets", "HB2AReduce", "HB3APredictPeaks", "LorentzCorrection",
+                                        "MaskNonOverlappingBins", "MSDFit", "MuonPairingAsymmetry",
+                                        "PDConvertRealSpace", "RebinRagged", "SetMDFrame", "Stitch1D", "Symmetrise",
+                                        "TOFTOFCropWorkspace", "VesuvioResolution", "XrayAbsorptionCorrection"]}
 
 
 def create_workspace_in_ads(workspace_type: str) -> None:
@@ -77,7 +84,8 @@ class AlgorithmDialogsStartupTest(systemtesting.MantidSystemTest):
     def _attempt_to_open_algorithm_dialog(self, workspace_type: str, algorithm_name: str) -> None:
         """Attempt to open the most recent version of the algorithm provided."""
         try:
-            dialog = self._interface_manager.createDialogFromName(algorithm_name)
+            dialog = self._interface_manager.createDialogFromName(algorithm_name, -1, None, False,
+                                                                  self._get_algorithm_preset_values(algorithm_name))
             dialog.setAttribute(Qt.WA_DeleteOnClose, True)
             dialog.show()
             dialog.close()
@@ -88,3 +96,9 @@ class AlgorithmDialogsStartupTest(systemtesting.MantidSystemTest):
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the '{algorithm_name}' algorithm dialog with a "
                       f"'{workspace_type}' in the ADS: {ex}.")
+
+    @staticmethod
+    def _get_algorithm_preset_values(algorithm_name: str) -> dict:
+        """We want to set the OutputWorkspace on algorithms when possible so that validateInputs gets triggered."""
+        algorithm = AlgorithmManager.create(algorithm_name)
+        return {"OutputWorkspace": "test_output"} if algorithm.existsProperty("OutputWorkspace") else {}
