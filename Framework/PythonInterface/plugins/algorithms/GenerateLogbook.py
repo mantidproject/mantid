@@ -267,11 +267,11 @@ class GenerateLogbook(PythonAlgorithm):
             elif op == "*":
                 new_val = values[ind1] * values[ind2]
             elif op == "//":
-                if values[ind2] == 0:
-                    self.log().warning("Divisor is equal to 0.")
-                    new_val = 'N/A'
-                else:
+                try:
                     new_val = values[ind1] / values[ind2]
+                except (RuntimeWarning, TypeError) as e:
+                    self.log().warning("Division error: {}".format(str(e)))
+                    new_val = "N/A"
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
             if type(new_val) == str():
