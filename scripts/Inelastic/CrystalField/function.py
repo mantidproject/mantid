@@ -7,7 +7,7 @@
 import re
 from mantid import logger
 
-parNamePattern = re.compile(r'([a-zA-Z][\w.]+)')
+PARAMETER_NAME_PATTERN = re.compile(r'([a-zA-Z][\w.]+)')
 
 
 class FunctionParameters(object):
@@ -141,7 +141,7 @@ class Function(object):
                 constraints('A0 > 0', '0.1 < A1 < 0.9')
         """
         for arg in args:
-            constraint = re.sub(parNamePattern, '%s\\1' % self.prefix, arg)
+            constraint = re.sub(PARAMETER_NAME_PATTERN, '%s\\1' % self.prefix, arg)
             self.function.addConstraints(constraint)
 
     def toString(self):
@@ -208,7 +208,7 @@ class CompositeProperties(object):
                 tie({'A0': 0.1, 'A1': '2*A0'})
         """
         for param, tie in ties_dict.items():
-            tie = re.sub(parNamePattern, '%s\\1' % self.prefix, tie)
+            tie = re.sub(PARAMETER_NAME_PATTERN, '%s\\1' % self.prefix, tie)
             self.function.tie(self.prefix + param, tie)
 
     def constraints(self, *args):
@@ -219,7 +219,7 @@ class CompositeProperties(object):
                 constraints('A0 > 0', '0.1 < A1 < 0.9')
         """
         for arg in args:
-            constraint = re.sub(parNamePattern, '%s\\1' % self.prefix, arg)
+            constraint = re.sub(PARAMETER_NAME_PATTERN, '%s\\1' % self.prefix, arg)
             self.function.addConstraints(constraint)
 
 
@@ -317,7 +317,7 @@ class PeaksFunction(object):
             start = self._params.first_index
             end = iFirstN + self._params.first_index
 
-        pattern = re.sub(parNamePattern, 'f%s.\\1', constraint)
+        pattern = re.sub(PARAMETER_NAME_PATTERN, 'f%s.\\1', constraint)
         self.constraints(*[pattern % i for i in range(start, end)])
 
 

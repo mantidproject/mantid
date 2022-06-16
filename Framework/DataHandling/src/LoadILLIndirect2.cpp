@@ -154,7 +154,7 @@ void LoadILLIndirect2::setInstrumentName(const NeXus::NXEntry &firstEntry, const
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
-std::string LoadILLIndirect2::getDataPath(NeXus::NXEntry &entry) {
+std::string LoadILLIndirect2::getDataPath(const NeXus::NXEntry &entry) {
   NeXus::NXClass instrument = entry.openNXGroup("instrument");
   if (m_loadOption == "Diffractometer") {
 
@@ -430,7 +430,7 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName, double tw
  * They are moved according to some values in the nexus file.
  * @param entry : the nexus entry
  */
-void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
+void LoadILLIndirect2::moveSingleDetectors(const NeXus::NXEntry &entry) {
   std::string prefix("single_tube_");
   int index = 1;
   for (auto i : m_activeSDIndices) {

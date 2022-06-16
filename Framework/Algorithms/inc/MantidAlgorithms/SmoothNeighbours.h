@@ -12,9 +12,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/WeightingStrategy.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <boost/scoped_ptr.hpp>
+#include "MantidDataObjects/EventWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -85,7 +84,7 @@ private:
   void execWorkspace2D();
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws);
   void findNeighboursRectangular();
-  void findNeighboursUbiqutious();
+  void findNeighboursUbiquitous();
 
   /// Sets the weighting stragegy.
   void setWeightingStrategy(const std::string &strategyName, double &cutOff);
@@ -93,45 +92,35 @@ private:
   double translateToMeters(const std::string &radiusUnits, const double &enteredRadius) const;
 
   /// Build the instrument/detector setup in workspace
-  void setupNewInstrument(API::MatrixWorkspace &outws) const;
+  void setupNewInstrument(API::MatrixWorkspace &outWS) const;
 
   /// Build the instrument/detector setup in workspace
-  void spreadPixels(const API::MatrixWorkspace_sptr &outws);
+  void spreadPixels(const API::MatrixWorkspace_sptr &outWS);
 
-  /// Non rectangular detector group name
-  static const std::string NON_UNIFORM_GROUP;
-  /// Rectangular detector group name
-  static const std::string RECTANGULAR_GROUP;
-  /// Input workspace name
-  static const std::string INPUT_WORKSPACE;
   /// Number to sum
-  int AdjX;
+  int m_adjX = 0;
   /// Number to sum
-  int AdjY;
+  int m_adjY = 0;
   /// Edge pixels to ignore
-  int Edge;
+  int m_edge = 0;
   /// Radius to search nearest neighbours
-  double Radius;
+  double m_radius = 0.0;
   /// Number of neighbours
-  int nNeighbours;
+  int m_nNeighbours = 0;
   /// Weight the neighbours during summing
-  boost::scoped_ptr<WeightingStrategy> WeightedSum;
+  std::unique_ptr<WeightingStrategy> m_weightedSum;
   /// PreserveEvents
-  bool PreserveEvents;
+  bool m_preserveEvents = false;
   ///  expand by pixel IDs
-  bool expandSumAllPixels;
+  bool m_expandSumAllPixels = false;
   /// number of output workspace pixels
-  size_t outWI;
-
+  size_t m_outWI = 0;
   /// Input workspace
-  Mantid::API::MatrixWorkspace_sptr inWS;
-
+  Mantid::API::MatrixWorkspace_sptr m_inWS;
   /// Each neighbours is specified as a pair with workspace index, weight.
   using weightedNeighbour = std::pair<size_t, double>;
-
   /// Vector of list of neighbours (with weight) for each workspace index.
   std::vector<std::vector<weightedNeighbour>> m_neighbours;
-
   /// Progress reporter
   std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 };

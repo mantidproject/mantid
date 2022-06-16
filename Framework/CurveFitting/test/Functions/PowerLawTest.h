@@ -54,7 +54,7 @@ public:
     pl.function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_DELTA(yValues[i], constant + magnitude * pow(i, exponent), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], constant + magnitude * std::pow(i, exponent), 1e-12);
     }
   }
 };

@@ -54,11 +54,6 @@ IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
 }
 
 void IndirectDataAnalysisIqtFitTab::setupFitTab() {
-  // Create custom function groups
-  auto &functionFactory = FunctionFactory::Instance();
-  const auto exponential = functionFactory.createFunction("ExpDecay");
-  const auto stretchedExponential = functionFactory.createFunction("StretchExp");
-
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }

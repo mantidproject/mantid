@@ -30,7 +30,7 @@ class PreviewRow;
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobManager : public IBatchJobManager {
 public:
-  BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
+  BatchJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
 
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -63,8 +63,7 @@ public:
   bool getProcessAll() const override;
 
 protected:
-  Batch &m_batch;
-  // TODO use algFactory to wrap and test calls to createConfiguredAlgorithm
+  IBatch &m_batch;
   std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
   bool m_isProcessing;
   bool m_isAutoreducing;

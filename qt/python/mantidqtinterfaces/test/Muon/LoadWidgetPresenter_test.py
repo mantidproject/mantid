@@ -100,7 +100,7 @@ class LoadPresenterTest(unittest.TestCase):
 
     def test_last_loaded_run(self):
         self.presenter._current_run = 5
-        self.assertEquals(self.presenter.last_loaded_run(), 5)
+        self.assertEqual(self.presenter.last_loaded_run(), 5)
 
 
 if __name__ == "__main__":

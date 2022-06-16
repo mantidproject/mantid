@@ -244,12 +244,12 @@ void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceName
 /** Saves selected workspaces */
 void SavePresenter::saveSelectedWorkspaces() {
   // Check that at least one workspace has been selected for saving
-  auto workspaceNames = m_view->getSelectedWorkspaces();
-  if (workspaceNames.empty()) {
+  auto wkspNames = m_view->getSelectedWorkspaces();
+  if (wkspNames.empty()) {
     m_view->noWorkspacesSelected();
   } else {
     try {
-      saveWorkspaces(workspaceNames);
+      saveWorkspaces(wkspNames);
     } catch (std::exception &e) {
       m_view->cannotSaveWorkspaces(e.what());
     } catch (...) {

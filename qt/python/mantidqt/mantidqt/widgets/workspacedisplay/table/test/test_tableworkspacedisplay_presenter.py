@@ -808,12 +808,12 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     def test_replace(self, ws, view, presenter):
         # patch this out after the constructor of the presenter has finished,
         # so that we reset any calls it might have made
+        presenter.model.block_model_replace = False
         with patch(
                 'mantidqt.widgets.workspacedisplay.table.presenter.TableWorkspaceDataPresenterStandard.load_data'
         ) as mock_load_data:
             presenter.replace_workspace(ws.TEST_NAME, ws)
             mock_load_data.assert_called_once_with(view)
-            view.emit_repaint.assert_called_once_with()
 
 
 if __name__ == '__main__':

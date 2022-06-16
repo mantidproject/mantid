@@ -18,6 +18,7 @@ from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 class Project(AnalysisDataServiceObserver):
@@ -121,7 +122,8 @@ class Project(AnalysisDataServiceObserver):
     def _save_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave,
                                   file_mode=QFileDialog.AnyFile,
-                                  file_filter="Project files ( *" + self.project_file_ext + ")")
+                                  file_filter="Project files ( *" + self.project_file_ext + ")",
+                                  directory=ConfigService["defaultsave.directory"])
 
     def _save(self):
         self.__is_saving = True
@@ -137,7 +139,9 @@ class Project(AnalysisDataServiceObserver):
             # If a project is > the value in the properties file, question the user if they want to continue.
             result = None
             if project_size > warning_size:
-                result = self._offer_large_size_confirmation()
+                # we have to create the message box in the main thread
+                result = QAppThreadCall(self._offer_large_size_confirmation)()
+
             if result is None or result != QMessageBox.Cancel:
                 plots_to_save = self.plot_gfm.figs
 
@@ -245,7 +249,8 @@ class Project(AnalysisDataServiceObserver):
 
     def _load_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
-                                  file_filter="Project files ( *" + " *".join(self.valid_file_exts) + ")")
+                                  file_filter="Project files ( *" + " *".join(self.valid_file_exts) + ")",
+                                  directory=ConfigService["defaultsave.directory"])
 
     def offer_save(self, parent):
         """

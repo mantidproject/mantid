@@ -37,6 +37,7 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/Hint.h"
 #include "Reduction/PreviewRow.h"
@@ -84,6 +85,9 @@ public:
   MOCK_METHOD1(notifySetRoundPrecision, void(int &));
   MOCK_METHOD0(notifyResetRoundPrecision, void());
   MOCK_METHOD0(notifyBatchLoaded, void());
+  MOCK_METHOD1(notifyRowContentChanged, void(Row &));
+  MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
+
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
@@ -113,8 +117,8 @@ public:
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
   MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
-  MOCK_METHOD0(notifyRowOutputsChanged, void());
-  MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
+  MOCK_METHOD0(notifyRowModelChanged, void());
+  MOCK_METHOD1(notifyRowModelChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
@@ -127,6 +131,8 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(notifyTableChanged, void());
+  MOCK_METHOD1(notifyRowContentChanged, void(Row &));
+  MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyBatchLoaded, void());

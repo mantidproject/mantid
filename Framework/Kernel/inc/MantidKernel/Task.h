@@ -75,7 +75,7 @@ public:
   /** Set the mutex object for this Task
    * @param mutex :: Mutex pointer, or NULL
    */
-  void setMutex(std::shared_ptr<std::mutex> &mutex) { m_mutex = mutex; }
+  void setMutex(const std::shared_ptr<std::mutex> &mutex) { m_mutex = mutex; }
 
 protected:
   /// Cached computational cost for the thread.

@@ -195,12 +195,6 @@ void DoublePulseFit::execConcrete() {
     doublePulseFunction = getDoublePulseFunction(function, pulseOffset, firstPulseWeight, secondPulseWeight);
   }
 
-  auto newFunc = Mantid::API::FunctionFactory::Instance().createInitialized(doublePulseFunction->asString());
-  auto newFunc1 = Mantid::API::FunctionFactory::Instance().createInitialized(
-      "composite=Convolution,FixResolution=false,NumDeriv=true;name=GausOsc,A="
-      "0.2,Sigma=0.2,Frequency=1,Phi=0;(name=DeltaFunction,Height=1,Centre=-0."
-      "33,ties=(Height=1,Centre=-0.33);name=DeltaFunction,Height=1,Centre=0,"
-      "ties=(Height=1,Centre=0))");
   runFitAlgorith(fitAlg, doublePulseFunction, getProperty("MaxIterations"));
 
   createOutput(fitAlg, doublePulseFunction);
@@ -219,7 +213,6 @@ void DoublePulseFit::declareAdditionalProperties() {
     baseName = ws->getName();
   }
 
-  Mantid::API::IFunction_sptr function = getProperty("Function");
   if (m_makeOutput) {
     declareProperty(std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputNormalisedCovarianceMatrix",
                                                                                    "", Kernel::Direction::Output),

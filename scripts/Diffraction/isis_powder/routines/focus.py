@@ -34,17 +34,17 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
 
     # Subtract empty instrument runs, as long as this run isn't an empty, user hasn't turned empty subtraction off, or
     # The user has not supplied a sample empty
-    is_run_empty = common.runs_overlap(run_number, run_details.empty_runs)
+    is_run_empty = common.runs_overlap(run_number, run_details.empty_inst_runs)
     summed_empty = None
     if not is_run_empty and instrument.should_subtract_empty_inst() and not run_details.sample_empty:
-        if os.path.isfile(run_details.summed_empty_file_path):
-            logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_file_path)
-            summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_file_path)
+        if os.path.isfile(run_details.summed_empty_inst_file_path):
+            logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_inst_file_path)
+            summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_inst_file_path)
         else:
-            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_runs,
+            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_inst_runs,
                                                        instrument=instrument)
     elif run_details.sample_empty:
-        # Subtract a sample empty if specified
+        # Subtract a sample empty if specified ie empty can
         summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
                                                    instrument=instrument,
                                                    scale_factor=instrument._inst_settings.sample_empty_scale)

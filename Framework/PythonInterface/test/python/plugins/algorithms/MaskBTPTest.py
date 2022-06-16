@@ -227,21 +227,21 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(InstrumentName="d11")
         mask = MaskBTP(Workspace=ws, Pixel="0-10")
 
-        self.assertEquals(len(mask), 256*11)
+        self.assertEqual(len(mask), 256*11)
         self.checkConsistentMask(ws, mask)
 
     def test_d22(self):
         ws = LoadEmptyInstrument(InstrumentName="d22")
         mask = MaskBTP(Workspace=ws, Tube="2-5")
 
-        self.assertEquals(len(mask), 256*4)
+        self.assertEqual(len(mask), 256*4)
         self.checkConsistentMask(ws, mask)
 
     def test_d16(self):
         ws = LoadEmptyInstrument(InstrumentName="d16")
         mask = MaskBTP(Workspace=ws, Tube="319", Pixel="319")
 
-        self.assertEquals(len(mask), 1)
+        self.assertEqual(len(mask), 1)
         self.checkConsistentMask(ws, mask)
 
     def test_d11_lr(self):
@@ -250,7 +250,7 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Tube="127")
 
-        self.assertEquals(len(mask), 128)
+        self.assertEqual(len(mask), 128)
         self.checkConsistentMask(ws, mask)
 
     def test_d22lr(self):
@@ -259,7 +259,7 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Pixel="20-28")
 
-        self.assertEquals(len(mask), 9*128)
+        self.assertEqual(len(mask), 9*128)
         self.checkConsistentMask(ws, mask)
 
     def test_d22b(self):
@@ -267,7 +267,7 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Bank="2")
 
-        self.assertEquals(len(mask), 256*96)
+        self.assertEqual(len(mask), 256*96)
         self.checkConsistentMask(ws, mask)
 
     def test_d11b(self):
@@ -275,7 +275,7 @@ class MaskBTPTest(unittest.TestCase):
         ws = LoadEmptyInstrument(Filename=path)
         mask = MaskBTP(Workspace=ws, Components="detector_right, detector_left")
 
-        self.assertEquals(len(mask), 256*32*2)
+        self.assertEqual(len(mask), 256*32*2)
         self.checkConsistentMask(ws, mask)
 
 if __name__ == '__main__':

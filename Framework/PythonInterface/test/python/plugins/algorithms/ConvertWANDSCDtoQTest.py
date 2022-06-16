@@ -80,20 +80,20 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         d0 = ConvertWANDSCDtoQTest_out.getDimension(0)
         self.assertEqual(d0.name, 'Q_sample_x')
         self.assertEqual(d0.getNBins(), 101)
-        self.assertAlmostEquals(d0.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d0.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d0.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d0.getMaximum(), 8.08, 5)
 
         d1 = ConvertWANDSCDtoQTest_out.getDimension(1)
         self.assertEqual(d1.name, 'Q_sample_y')
         self.assertEqual(d1.getNBins(), 11)
-        self.assertAlmostEquals(d1.getMinimum(), -0.88, 5)
-        self.assertAlmostEquals(d1.getMaximum(), 0.88, 5)
+        self.assertAlmostEqual(d1.getMinimum(), -0.88, 5)
+        self.assertAlmostEqual(d1.getMaximum(), 0.88, 5)
 
         d2 = ConvertWANDSCDtoQTest_out.getDimension(2)
         self.assertEqual(d2.name, 'Q_sample_z')
         self.assertEqual(d2.getNBins(), 101)
-        self.assertAlmostEquals(d2.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d2.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d2.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d2.getMaximum(), 8.08, 5)
 
         self.assertEqual(ConvertWANDSCDtoQTest_out.getNumExperimentInfo(), 1)
 
@@ -136,7 +136,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         # Test whether Qy is scaled by ObliquityParallaxCoefficient correctly
         proportion = Test_cop_max_Qy/Test_out_max_Qy
 
-        self.assertAlmostEquals(proportion, 1.5, 5)
+        self.assertAlmostEqual(proportion, 1.5, 5)
 
         ConvertWANDSCDtoQTest_out.delete()
         ConvertWANDSCDtoQTest_cop.delete()
@@ -164,20 +164,20 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         d0 = ConvertWANDSCDtoQTest_out.getDimension(0)
         self.assertEqual(d0.name, '[H,H,0]')
         self.assertEqual(d0.getNBins(), 101)
-        self.assertAlmostEquals(d0.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d0.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d0.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d0.getMaximum(), 8.08, 5)
 
         d1 = ConvertWANDSCDtoQTest_out.getDimension(1)
         self.assertEqual(d1.name, '[H,-H,0]')
         self.assertEqual(d1.getNBins(), 101)
-        self.assertAlmostEquals(d1.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d1.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d1.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d1.getMaximum(), 8.08, 5)
 
         d2 = ConvertWANDSCDtoQTest_out.getDimension(2)
         self.assertEqual(d2.name, '[0,0,L]')
         self.assertEqual(d2.getNBins(), 101)
-        self.assertAlmostEquals(d2.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d2.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d2.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d2.getMaximum(), 8.08, 5)
 
         self.assertEqual(ConvertWANDSCDtoQTest_out.getNumExperimentInfo(), 1)
 

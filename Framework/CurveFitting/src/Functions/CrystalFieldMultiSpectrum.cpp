@@ -248,10 +248,9 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   }
   // Get the FWHMs from the attribute and check for consistency.
   m_FWHMs = getAttribute("FWHMs").asVector();
-  if (m_FWHMs.size() != m_temperatures.size()) {
-    if (m_FWHMs.empty()) {
-      throw std::runtime_error("Vector of FWHMs cannot be empty.");
-    }
+  if (m_FWHMs.empty()) {
+    throw std::runtime_error("Vector of FWHMs cannot be empty.");
+  } else if (m_FWHMs.size() != m_temperatures.size()) {
     if (m_FWHMs.size() == 1) {
       auto fwhm = m_FWHMs.front();
       m_FWHMs.resize(m_temperatures.size(), fwhm);
@@ -276,9 +275,9 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
     }
   } else {
     m_physprops.clear();
-    for (auto elem : physprops) {
-      m_physprops.emplace_back(static_cast<int>(elem));
-    }
+    m_physprops.reserve(physprops.size());
+    std::transform(physprops.cbegin(), physprops.cend(), std::back_inserter(m_physprops),
+                   [](auto elem) { return static_cast<int>(elem); });
   }
   // Create the single-spectrum functions.
   m_nPeaks.resize(nSpec);

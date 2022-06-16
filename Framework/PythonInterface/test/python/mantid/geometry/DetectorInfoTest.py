@@ -181,8 +181,8 @@ class DetectorInfoTest(unittest.TestCase):
         for i,item in enumerate(info):
             pos = item.position
             # See test helper for position construction
-            self.assertAlmostEquals(pos.X(), 0)
-            self.assertAlmostEquals(pos.Z(), 5)
+            self.assertAlmostEqual(pos.X(), 0)
+            self.assertAlmostEqual(pos.Z(), 5)
             if(lastY):
                 self.assertGreater(pos.Y(), lastY)
             lastY = pos.Y()

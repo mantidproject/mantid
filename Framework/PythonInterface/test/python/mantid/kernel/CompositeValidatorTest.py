@@ -36,7 +36,7 @@ class CompositeValidatorTest(unittest.TestCase):
         test_alg = self._create_test_algorithm(validation)
 
         prop = test_alg.getProperty("Input")
-        self.assertNotEquals(prop.isValid, "")
+        self.assertNotEqual(prop.isValid, "")
 
         test_alg.setProperty("Input", 6.8)
         self.assertEqual(prop.isValid, "")
@@ -53,7 +53,7 @@ class CompositeValidatorTest(unittest.TestCase):
         """Run the validator tests"""
         test_alg = self._create_test_algorithm(validation)
         prop = test_alg.getProperty("Input")
-        self.assertNotEquals(prop.isValid, "")
+        self.assertNotEqual(prop.isValid, "")
         test_alg.setProperty("Input", 6.8)
         self.assertEqual(prop.isValid, "")
         self.assertRaises(ValueError, test_alg.setProperty, "Input", 15)

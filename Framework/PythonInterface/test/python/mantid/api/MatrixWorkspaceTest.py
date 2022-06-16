@@ -109,9 +109,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_detector_two_theta(self):
         det = self._test_ws.getDetector(1)
         two_theta = self._test_ws.detectorTwoTheta(det)
-        self.assertAlmostEquals(two_theta, 0.01999733, places=8)
+        self.assertAlmostEqual(two_theta, 0.01999733, places=8)
         signed_two_theta = self._test_ws.detectorSignedTwoTheta(det)
-        self.assertAlmostEquals(signed_two_theta, 0.01999733, places=8)
+        self.assertAlmostEqual(signed_two_theta, 0.01999733, places=8)
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
         wsname = "MatrixWorkspaceTest_Property"
@@ -531,24 +531,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_findY(self):
         # Check that zero is not present
         idx = self._test_ws.findY(0.)
-        self.assertEquals(idx[0], -1)
-        self.assertEquals(idx[1], -1)
+        self.assertEqual(idx[0], -1)
+        self.assertEqual(idx[1], -1)
         # Check that 5. is the first element
         idx = self._test_ws.findY(5.)
-        self.assertEquals(idx[0], 0)
-        self.assertEquals(idx[1], 0)
+        self.assertEqual(idx[0], 0)
+        self.assertEqual(idx[1], 0)
         # Check that no other elements are 5
         idx = self._test_ws.findY(5., (0, 1))
-        self.assertEquals(idx[0], -1)
-        self.assertEquals(idx[1], -1)
+        self.assertEqual(idx[0], -1)
+        self.assertEqual(idx[1], -1)
         # Check that 2. is the next element
         idx = self._test_ws.findY(2.)
-        self.assertEquals(idx[0], 0)
-        self.assertEquals(idx[1], 1)
+        self.assertEqual(idx[0], 0)
+        self.assertEqual(idx[1], 1)
         # Check that 2. is the next element
         idx = self._test_ws.findY(2., (0, 2))
-        self.assertEquals(idx[0], 0)
-        self.assertEquals(idx[1], 2)
+        self.assertEqual(idx[0], 0)
+        self.assertEqual(idx[1], 2)
 
 
 if __name__ == '__main__':

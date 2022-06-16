@@ -125,11 +125,11 @@ def check_that_sets_to_zero(instance, workspace, state: AllStates, comp_name=Non
         position = component.getPos()
         position_base = base_component.getPos()
         for index in range(0, 3):
-            instance.assertAlmostEquals(position[index], position_base[index], delta=1e-4)
+            instance.assertAlmostEqual(position[index], position_base[index], delta=1e-4)
         rotation = component.getRotation()
         rotation_base = base_component.getRotation()
         for index in range(0, 4):
-            instance.assertAlmostEquals(rotation[index], rotation_base[index], delta=1e-4)
+            instance.assertAlmostEqual(rotation[index], rotation_base[index], delta=1e-4)
 
 
 def _get_state_obj(instrument, x_translation=None, z_translation=None):

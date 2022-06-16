@@ -106,6 +106,28 @@ public:
     C5.invertTridiagonal();
     DblMatrix expectedInverse5(expected5);
     TS_ASSERT(C5 == expectedInverse5);
+
+    DblMatrix C6(300, 300);
+    DblMatrix C6_(300, 300);
+    DblMatrix identity(300, 300);
+    C6.zeroMatrix();
+    C6_.zeroMatrix();
+    identity.identityMatrix();
+    for (size_t i = 0; i != C6.numRows(); i++) {
+      for (size_t j = 0; j != C6.numCols(); j++) {
+        if ((j > 0 && j == (i + 1)) || (i > 0 && j == (i - 1))) {
+          C6[i][j] = 5;
+          C6_[i][j] = 5;
+        }
+        if (i == j) {
+          C6[i][j] = 55;
+          C6_[i][j] = 55;
+        }
+      }
+    }
+    C6.invertTridiagonal();
+    C6 *= C6_;
+    TS_ASSERT(C6 == identity);
   }
 
   void testIdent() {

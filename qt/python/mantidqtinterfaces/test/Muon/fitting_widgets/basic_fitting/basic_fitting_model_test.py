@@ -594,9 +594,9 @@ class BasicFittingModelTest(unittest.TestCase):
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
         data_workspace = AnalysisDataService.retrieve(self.dataset_names[0])
-        self.assertEquals(guess_workspace.dataX(0).min(), 0.0)
-        self.assertEquals(guess_workspace.dataX(0).max(), 10.0)
-        self.assertEquals(guess_workspace.dataX(0).size, data_workspace.blocksize())
+        self.assertEqual(guess_workspace.dataX(0).min(), 0.0)
+        self.assertEqual(guess_workspace.dataX(0).max(), 10.0)
+        self.assertEqual(guess_workspace.dataX(0).size, data_workspace.blocksize())
 
     def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_data_points_type_is_selected(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
@@ -617,9 +617,9 @@ class BasicFittingModelTest(unittest.TestCase):
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
         data_workspace = AnalysisDataService.retrieve(self.dataset_names[0])
-        self.assertEquals(guess_workspace.dataX(0).min(), data_workspace.dataX(0).min())
-        self.assertEquals(guess_workspace.dataX(0).max(), data_workspace.dataX(0).max())
-        self.assertEquals(guess_workspace.dataX(0).size, 1000)
+        self.assertEqual(guess_workspace.dataX(0).min(), data_workspace.dataX(0).min())
+        self.assertEqual(guess_workspace.dataX(0).max(), data_workspace.dataX(0).max())
+        self.assertEqual(guess_workspace.dataX(0).size, 1000)
 
     def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_custom_type_is_selected(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
@@ -641,9 +641,9 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.update_plot_guess()
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
-        self.assertEquals(guess_workspace.dataX(0).min(), 2.0)
-        self.assertEquals(guess_workspace.dataX(0).max(), 12.0)
-        self.assertEquals(guess_workspace.dataX(0).size, 1000)
+        self.assertEqual(guess_workspace.dataX(0).min(), 2.0)
+        self.assertEqual(guess_workspace.dataX(0).max(), 12.0)
+        self.assertEqual(guess_workspace.dataX(0).size, 1000)
 
     def test_perform_fit_will_call_the_correct_function_for_a_single_fit(self):
         self.model.dataset_names = self.dataset_names

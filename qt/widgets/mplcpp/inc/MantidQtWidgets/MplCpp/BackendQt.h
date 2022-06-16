@@ -14,9 +14,7 @@
  * Defines constants relating to the matplotlib backend
  */
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#error "Qt >= 5 required"
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) && QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 
 /// Define PyQt version that matches the matplotlib backend
 constexpr static const char *PYQT_MODULE = "PyQt5";

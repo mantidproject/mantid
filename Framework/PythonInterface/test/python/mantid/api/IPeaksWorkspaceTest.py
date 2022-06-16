@@ -48,7 +48,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         qlab = V3D(1, 2, 3)
         p = pws.createPeak(qlab, 1.54)
         p.getQLabFrame()
-        self.assertAlmostEquals(p.getQLabFrame().X(), 1.0, 3)
+        self.assertAlmostEqual(p.getQLabFrame().X(), 1.0, 3)
 
         # Now try to add the peak back
         pws.addPeak(p)
@@ -56,7 +56,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
 
         # Check that it is what we added to it
         p = pws.getPeak(0)
-        self.assertAlmostEquals(p.getQLabFrame().X(), 1.0, 3)
+        self.assertAlmostEqual(p.getQLabFrame().X(), 1.0, 3)
 
         # Peaks workspace will not be integrated by default.
         self.assertTrue(not pws.hasIntegratedPeaks())
@@ -82,17 +82,17 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         except Exception:
             self.fail("Tried setQLabFrame with one V3D argument")
 
-        self.assertAlmostEquals(p.getQLabFrame().X(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQLabFrame().Y(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQLabFrame().Z(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQLabFrame().X(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQLabFrame().Y(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQLabFrame().Z(), 1.0, places=10)
 
         try:
             p.setQLabFrame(V3D(1, 1, 1), 1)
         except Exception:
             self.fail("Tried setQLabFrame with one V3D argument and a double distance")
-        self.assertAlmostEquals(p.getQLabFrame().X(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQLabFrame().Y(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQLabFrame().Z(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQLabFrame().X(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQLabFrame().Y(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQLabFrame().Z(), 1.0, places=10)
 
     def test_peak_setQSampleFrame(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)
@@ -103,17 +103,17 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         except Exception:
             self.fail("Tried setQSampleFrame with one V3D argument")
 
-        self.assertAlmostEquals(p.getQSampleFrame().X(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQSampleFrame().Y(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQSampleFrame().Z(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQSampleFrame().X(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQSampleFrame().Y(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQSampleFrame().Z(), 1.0, places=10)
 
         try:
             p.setQSampleFrame(V3D(1,1,1), 1)
         except Exception:
             self.fail("Tried setQSampleFrame with one V3D argument and a double distance")
-        self.assertAlmostEquals(p.getQSampleFrame().X(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQSampleFrame().Y(), 1.0, places=10)
-        self.assertAlmostEquals(p.getQSampleFrame().Z(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQSampleFrame().X(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQSampleFrame().Y(), 1.0, places=10)
+        self.assertAlmostEqual(p.getQSampleFrame().Z(), 1.0, places=10)
 
     def test_setCell_with_column_name(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(1, True)
@@ -141,7 +141,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
             self.assertTrue(isinstance(peak, IPeak))
             self.assertAlmostEqual(V3D(*hkls[index]), peak.getHKL())
 
-        self.assertEquals(len(hkls), count)
+        self.assertEqual(len(hkls), count)
 
     def test_col_rol(self):
         pws = WorkspaceCreationHelper.createPeaksWorkspace(0, True)
@@ -162,7 +162,7 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         pws.addPeak(peak)
         col, row = pws.row(0)['Col'], pws.row(0)['Row']
         self.assertAlmostEqual(col, 4)
-        self.assertAlmostEquals(row, 2)
+        self.assertAlmostEqual(row, 2)
 
 
 if __name__ == '__main__':

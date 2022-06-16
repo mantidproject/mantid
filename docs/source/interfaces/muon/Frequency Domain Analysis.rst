@@ -19,6 +19,8 @@ datasets, please visit `Muon - Downloads <https://sourceforge.net/projects/manti
 
 Analysis of the frequency spectrum can be achieved by clicking the fit function icon.
 
+Advanced users can access additional features such as model analysis, raw plots and the fit script generator using :ref:`Feature Flags <Muon_Feature_Flags-ref>`.
+
 Loading
 -------
 
@@ -51,6 +53,7 @@ All these tabs can be dragged away from the interface into their own window.
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
 * :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
 * :ref:`Results Tab <muon_results_tab-ref>`
+* :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>`
 
 Feedback & Comments
 -------------------

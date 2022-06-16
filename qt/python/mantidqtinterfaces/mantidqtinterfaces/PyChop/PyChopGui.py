@@ -22,7 +22,7 @@ import numpy as np
 import os
 import warnings
 import copy
-from .Instruments import Instrument
+from pychop.Instruments import Instrument
 from qtpy.QtCore import (QEventLoop, Qt, QProcess)  # noqa
 from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu, QLabel,
                             QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
@@ -70,7 +70,7 @@ class PyChopGui(QMainWindow):
         super(PyChopGui, self).__init__(parent)
         if window_flags:
             self.setWindowFlags(window_flags)
-        self.folder = os.path.dirname(sys.modules[self.__module__].__file__)
+        self.folder = os.path.dirname(sys.modules['pychop'].__file__)
         for fname in os.listdir(self.folder):
             if fname.endswith('.yaml'):
                 instobj = Instrument(os.path.join(self.folder, fname))
@@ -694,7 +694,8 @@ class PyChopGui(QMainWindow):
                     txt += self._gen_text_ei(ei, obj)
         return txt
 
-    def showText(self):
+    def showText(self, *args):
+        # The args are not used, but button clicked returns a bool for cheked state
         """
         Creates a dialog to show the generated text output.
         """
@@ -721,7 +722,8 @@ class PyChopGui(QMainWindow):
         self.txtloop = QEventLoop()
         self.txtloop.exec_()
 
-    def saveText(self):
+    def saveText(self, *args):
+        # The args are not used, but button clicked returns a bool for cheked state
         """
         Saves the generated text to a file (opens file dialog).
         """

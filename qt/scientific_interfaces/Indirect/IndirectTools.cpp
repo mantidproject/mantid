@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTools.h"
-#include "IndirectLoadILL.h"
 #include "IndirectTransmissionCalc.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -28,13 +27,10 @@ void IndirectTools::initLayout() {
 
   // Insert each tab into the interface on creation
   m_tabs.emplace(TRANSMISSION, new IndirectTransmissionCalc(m_uiForm.IndirectToolsTabs->widget(TRANSMISSION)));
-  m_tabs.emplace(LOAD_ILL, new IndirectLoadILL(m_uiForm.IndirectToolsTabs->widget(LOAD_ILL)));
 
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectToolsTab *>::iterator iter;
   for (iter = m_tabs.begin(); iter != m_tabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(executePythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
     iter->second->setupTab();
   }

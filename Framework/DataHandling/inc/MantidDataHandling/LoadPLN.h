@@ -92,11 +92,11 @@ protected:
                            std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks
-  void setupDetectorMasks(std::vector<bool> &roi);
+  void setupDetectorMasks(const std::vector<bool> &roi);
 
   // shared member variables
   DataObjects::EventWorkspace_sptr m_localWorkspace;
-  int32_t m_datasetIndex;
+  int32_t m_datasetIndex{0};
   std::string m_startRun;
   std::vector<double> m_detectorL2;
 };

@@ -164,7 +164,7 @@ class FFTPresenterTest(unittest.TestCase):
         index = self.view.ws.findText('MUSR22725; Group; top; Asymmetry; FD')
         self.view.ws.setCurrentIndex(index)
 
-        self.assertEquals(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
+        self.assertEqual(self.presenter.get_pre_inputs(), {'ApodizationFunction': 'Lorentz', 'DecayConstant': 4.4,
                                                             'InputWorkspace': 'MUSR22725; Group; top; Asymmetry; FD',
                                                             'NegativePadding': True, 'Padding': 1})
 
