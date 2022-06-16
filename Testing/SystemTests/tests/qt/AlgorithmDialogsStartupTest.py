@@ -28,7 +28,7 @@ EXCLUDE_ALGORITHM = {"MatrixWorkspace": ["HB2AReduce", "MuonPairingAsymmetry"],
                                         "CropToComponent", "CylinderPaalmanPingsCorrection",
                                         "EnggEstimateFocussedBackground", "FlatPlatePaalmanPingsCorrection",
                                         "GetDetectorOffsets", "HB2AReduce", "HB3APredictPeaks", "LorentzCorrection",
-                                        "MaskNonOverlappingBins", "MSDFit", "MuonPairingAsymmetry",
+                                        "MaskBinsIf", "MaskNonOverlappingBins", "MSDFit", "MuonPairingAsymmetry",
                                         "PDConvertRealSpace", "RebinRagged", "SetMDFrame", "Stitch1D", "Symmetrise",
                                         "TOFTOFCropWorkspace", "VesuvioResolution", "XrayAbsorptionCorrection"]}
 
