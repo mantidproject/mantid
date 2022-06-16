@@ -201,4 +201,4 @@ make sure you have access to the data archive. This will add a background to the
    :align: center
    :height: 300px
 
-.. categories:: Interfaces
+.. categories:: Interfaces General
