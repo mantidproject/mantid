@@ -136,7 +136,7 @@
 			      Tset:/entry0/sample/setpoint_temperature:f,
 			      NTubes:/entry0/instrument/Detector/num_tubes:d,
 			      Monsum:/entry0/monitor/monsum:d,
-			      Detrate:entry0/instrument/Detector/detrate:f" />
+			      Detrate:/entry0/instrument/Detector/detrate:f" />
 		</parameter>
 
         </component-link>
