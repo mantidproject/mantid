@@ -76,3 +76,5 @@ For example, if you are viewing ``binned_ws`` in the :ref:`sliceviewer`, you can
   workspace.
 
   - In this example, this would be the ``(H,K)`` coordinates.
+
+.. categories:: Techniques
