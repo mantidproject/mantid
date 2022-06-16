@@ -187,7 +187,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
   auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWSBase);
   if (SQWSGroup) {
     auto groupMembers = SQWSGroup->getAllItems();
-    int nEnvComponents = 0;
+    size_t nEnvComponents = 0;
     if (inputWS->sample().hasEnvironment())
       nEnvComponents = inputWS->sample().getEnvironment().nelements();
     std::set<std::string> materialNames;
@@ -385,7 +385,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   Workspace_sptr SQWS = getProperty("StructureFactorWorkspace");
   std::vector<MatrixWorkspace_sptr> SQWSs;
   auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWS);
-  auto nEnvComponents = 0;
+  size_t nEnvComponents = 0;
   if (inputWS->sample().hasEnvironment())
     nEnvComponents = inputWS->sample().getEnvironment().nelements();
   if (SQWSGroup) {
@@ -1567,16 +1567,12 @@ Geometry::Track DiscusMultipleScatteringCorrection::start_point(Kernel::PseudoRa
 const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosition(
     Geometry::Track &track, double &weight, const double k, Kernel::PseudoRandomNumberGenerator &rng,
     bool specialSingleScatterCalc, ComponentWorkspaceMappings &componentWorkspaces) {
-  // Work out maximum distance to next scatter point dl
-  // At the moment this doesn't cope if sample shape is concave eg if track has more than one segment inside the
-  // sample with segment outside sample in between
   double totalMuL = 0.;
   auto nlinks = track.count();
-  // Ideally want vector of ptrs to materials but Material class doesn't expose the pointer so use IObject ptr
   // Set default size to 5 (same as in LineIntersectVisit.h)
-  boost::container::small_vector<std::tuple<const Geometry::IObject *, double, double>, 5> geometryObjects;
+  boost::container::small_vector<std::tuple<const Geometry::IObject *, double, double, double>, 5> geometryObjects;
   geometryObjects.reserve(nlinks);
-  double newWeight = 0.;
+  // loop through all the track segments calculating some useful quantities for later
   for (auto it = track.cbegin(); it != track.cend(); it++) {
     const double trackSegLength = it->distInsideObject;
     const auto geometryObj = it->object;
@@ -1584,18 +1580,18 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
     double vmu = 100 * geometryObj->material().numberDensityEffective() * sigma_total;
     double muL = trackSegLength * vmu;
     totalMuL += muL;
-    geometryObjects.push_back(std::make_tuple(geometryObj, vmu, muL));
-    double b4 = (1.0 - exp(-muL));
-    newWeight += b4 / sigma_total;
+    // some overlap between the quantities stored here but since calculated them all may as well store them all
+    geometryObjects.push_back(std::make_tuple(geometryObj, vmu, muL, sigma_total));
   }
-  weight = weight * newWeight;
 
   // randomly sample distance travelled across a total muL and work out which component this sits in
   double b4Overall = (1.0 - exp(-totalMuL));
   double muL = -log(1 - rng.nextValue() * b4Overall);
   double vl = 0.;
   double scatterXsection = 0.;
-  std::tuple<const Geometry::IObject *, double, double> geometryObjectDetails;
+  double newWeight = 0.;
+  double prevExpTerms = 1.;
+  std::tuple<const Geometry::IObject *, double, double, double> geometryObjectDetails;
   for (size_t i = 0; i < geometryObjects.size(); i++) {
     geometryObjectDetails = geometryObjects[i];
     auto muL_i = std::get<2>(geometryObjectDetails);
@@ -1603,11 +1599,16 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
     if (muL - muL_i > 0) {
       vl += muL_i / vmu_i;
       muL = muL - muL_i;
+      prevExpTerms *= exp(-muL_i);
     } else {
       vl += muL / vmu_i;
+      double b4 = (1.0 - exp(-muL_i)) * prevExpTerms;
+      auto sigma_total = std::get<3>(geometryObjectDetails);
+      newWeight = b4 / sigma_total;
       break;
     }
   }
+  weight = weight * newWeight;
   // Note - this clears the track intersections but the sample\environment shapes live on
   inc_xyz(track, vl);
   auto geometryObject = std::get<0>(geometryObjectDetails);
