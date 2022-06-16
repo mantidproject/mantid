@@ -314,7 +314,7 @@ void FitScriptGeneratorView::onGenerateScriptToClipboardClicked() {
 }
 
 void FitScriptGeneratorView::onHelpClicked() {
-  MantidQt::API::HelpWindow::showCustomInterface(this, "Fit Script Generator", QString("utility"));
+  MantidQt::API::HelpWindow::showCustomInterface(this, "Fit Script Generator", QString("general"));
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
