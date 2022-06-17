@@ -8,7 +8,6 @@ from abc import ABCMeta, abstractmethod
 from systemtesting import MantidSystemTest
 
 from mantid.api import AlgorithmFactory, AlgorithmManager
-from mantid.simpleapi import CreateSampleWorkspace, CreateMDWorkspace, GroupWorkspaces
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
 
@@ -17,21 +16,6 @@ from qtpy.QtCore import Qt
 # located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
 # to the correct place
 import sip
-
-
-def create_workspace_in_ads(workspace_type: str) -> None:
-    """Creates a workspace in the ADS which can be auto-selected by an algorithm dialog."""
-    if workspace_type == "MatrixWorkspace":
-        CreateSampleWorkspace(OutputWorkspace="ws")
-    elif workspace_type == "MDWorkspace":
-        CreateMDWorkspace(Dimensions="3", EventType="MDEvent", Extents='-10,10,-5,5,-1,1',
-                          Names="Q_lab_x,Q_lab_y,Q_lab_z", Units="1\\A,1\\A,1\\A", OutputWorkspace="ws")
-    elif workspace_type == "WorkspaceGroup":
-        ws1 = CreateSampleWorkspace()
-        ws2 = CreateSampleWorkspace()
-        GroupWorkspaces(InputWorkspaces=[ws1, ws2], OutputWorkspace="group")
-    else:
-        raise RuntimeError("An unexpected workspace type was provided.")
 
 
 class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
@@ -60,10 +44,8 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
         if len(self._unique_algorithm_names) == 0:
             self.fail("Failed to find any of the Algorithms.")
 
-        create_workspace_in_ads(self._workspace_type)
-
-        print(f"Running the AlgorithmDialogsStartupTest with a '{self._workspace_type}' in the ADS")
-        print(f"Excluding the following algorithms from the test: '{str(self._exclude_algorithms)}'")
+        print(f"Running the AlgorithmDialog{self._workspace_type}StartupTest with a {self._workspace_type} in the ADS")
+        print(f"Excluding the following algorithms from the test: {str(self._exclude_algorithms)}")
 
         for algorithm_name in self._unique_algorithm_names:
             if algorithm_name not in self._exclude_algorithms:
@@ -91,41 +73,3 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
         """We want to set the OutputWorkspace on algorithms when possible so that validateInputs gets triggered."""
         algorithm = AlgorithmManager.create(algorithm_name)
         return {"OutputWorkspace": "test_output"} if algorithm.existsProperty("OutputWorkspace") else {}
-
-
-class AlgorithmDialogsStartupMatrixWorkspaceTest(AlgorithmDialogsStartupTestBase):
-    """
-    A system test for testing that the Algorithm Dialogs open ok with a MatrixWorkspace in the ADS.
-    """
-
-    def _setup_test(self):
-        self._workspace_type = "MatrixWorkspace"
-        # These algorithms currently fail to open when the given workspace type is auto-selected from the ADS
-        self._exclude_algorithms = ["HB2AReduce", "MaskBinsIf", "MuonPairingAsymmetry"]
-
-
-class AlgorithmDialogsStartupMDWorkspaceTest(AlgorithmDialogsStartupTestBase):
-    """
-    A system test for testing that the Algorithm Dialogs open ok with a MDWorkspace in the ADS.
-    """
-    def _setup_test(self):
-        self._workspace_type = "MDWorkspace"
-        # These algorithms currently fail to open when the given workspace type is auto-selected from the ADS
-        self._exclude_algorithms = ["HB2AReduce", "MaskAngle", "MuonPairingAsymmetry", "TOFTOFCropWorkspace",
-                                    "VesuvioResolution"]
-
-
-class AlgorithmDialogsStartupWorkspaceGroupTest(AlgorithmDialogsStartupTestBase):
-    """
-    A system test for testing that the Algorithm Dialogs open ok with a WorkspaceGroup in the ADS.
-    """
-    def _setup_test(self):
-        self._workspace_type = "WorkspaceGroup"
-        # These algorithms currently fail to open when the given workspace type is auto-selected from the ADS
-        self._exclude_algorithms = ["AnvredCorrection", "CalculateDynamicRange", "CopyDataRange", "CreateEPP",
-                                    "CropToComponent", "CylinderPaalmanPingsCorrection",
-                                    "EnggEstimateFocussedBackground", "FlatPlatePaalmanPingsCorrection",
-                                    "GetDetectorOffsets", "HB2AReduce", "HB3APredictPeaks", "LorentzCorrection",
-                                    "MaskBinsIf", "MaskNonOverlappingBins", "MSDFit", "MuonPairingAsymmetry",
-                                    "PDConvertRealSpace", "RebinRagged", "SetMDFrame", "Stitch1D", "Symmetrise",
-                                    "TOFTOFCropWorkspace", "VesuvioResolution", "XrayAbsorptionCorrection"]
