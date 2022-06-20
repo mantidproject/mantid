@@ -57,9 +57,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   std::vector<SpectrumDefinition> specDefs;
   specDefs.reserve(detIDs.size());
-  std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(specDefs), [&detectorInfo](const auto detID) {
-    return static_cast<SpectrumDefinition>(detectorInfo.indexOf(detID));
-  });
+  std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(specDefs),
+                 [&detectorInfo](const auto detID) { return SpectrumDefinition(detectorInfo.indexOf(detID)); });
   // We need to filter based on detector IDs, but use IndexInfo for filtering
   // for a unified filtering mechanism. Thus we set detector IDs as (temporary)
   // spectrum numbers.
