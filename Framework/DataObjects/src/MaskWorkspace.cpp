@@ -188,12 +188,9 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
     return false;
   }
 
-  bool masked(true);
   const auto it = std::find_if_not(detectorIDs.cbegin(), detectorIDs.cend(),
                                    [this](const auto detectorID) { return this->isMasked(detectorID); });
-  if (it != detectorIDs.cend())
-    masked = false;
-  return masked;
+  return it == detectorIDs.cend();
 }
 
 /**
