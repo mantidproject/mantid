@@ -27,8 +27,8 @@ size_t SpectrumInfo::size() const {
 
 /// Return count of all detectors used within spectrum
 size_t SpectrumInfo::detectorCount() const {
-  return std::accumulate(m_spectrumDefinition->begin(), m_spectrumDefinition->end(), size_t(),
-                         [](auto x, const Mantid::SpectrumDefinition &spec) { return x + spec.size(); });
+  return std::accumulate(m_spectrumDefinition->begin(), m_spectrumDefinition->end(), 0,
+                         [](size_t x, const Mantid::SpectrumDefinition &spec) { return x + spec.size(); });
 }
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
