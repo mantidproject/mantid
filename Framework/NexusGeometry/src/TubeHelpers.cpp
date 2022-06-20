@@ -63,8 +63,7 @@ std::vector<Mantid::detid_t> notInTubes(const std::vector<detail::TubeBuilder> &
                                         std::vector<Mantid::detid_t> detIDs) {
   std::vector<Mantid::detid_t> used;
   std::for_each(tubes.cbegin(), tubes.cend(), [&used](const auto &tube) {
-    std::transform((tube.detIDs()).cbegin(), (tube.detIDs()).cend(), std::back_inserter(used),
-                   [](const auto id) { return id; });
+    std::copy((tube.detIDs()).cbegin(), (tube.detIDs()).cend(), std::back_inserter(used));
   });
   std::vector<Mantid::detid_t> diff;
   std::sort(detIDs.begin(), detIDs.end());

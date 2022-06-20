@@ -89,8 +89,7 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
   auto result = std::vector<boost::optional<Row>>();
   std::for_each(subtrees().cbegin(), subtrees().cend(), [this, &result](const auto &subtree) {
     const auto rowsToAdd = createRowsForSubtree(subtree);
-    std::transform(rowsToAdd.cbegin(), rowsToAdd.cend(), std::back_inserter(result),
-                   [](const auto &row) { return row; });
+    std::copy(rowsToAdd.cbegin(), rowsToAdd.cend(), std::back_inserter(result));
   });
   return result;
 }
