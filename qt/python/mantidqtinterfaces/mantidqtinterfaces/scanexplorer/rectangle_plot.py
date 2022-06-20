@@ -2,7 +2,6 @@ from typing import Any
 from enum import Enum
 from bisect import bisect_left
 
-from matplotlib.widgets import RectangleSelector
 from matplotlib.patches import Rectangle
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QWidget
@@ -13,6 +12,7 @@ from mantid.simpleapi import CreateWorkspace, CreateEmptyTableWorkspace
 from mantid.kernel import logger
 
 from .rectangle_controller import RectanglesManager
+from .rectangle_selection import RectangleSelection
 
 
 class UserInteraction(Enum):
@@ -32,9 +32,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         super().__init__(plotter, exporter)
 
         ax = plotter.image_axes
-        self._selector = RectangleSelector(ax, self._on_rectangle_selected, drawtype='box', interactive=True,
-                                           ignore_event_outside=False)
-
+        self._selector = RectangleSelection(ax, self._on_rectangle_selected, drawtype='box', interactive=True, ignore_event_outside=False)
         self.signals = MultipleRectangleSelectionLinePlotSignals()
         self._manager: RectanglesManager = exporter.rectangles_manager
 
