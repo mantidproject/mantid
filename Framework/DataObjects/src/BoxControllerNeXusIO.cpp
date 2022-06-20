@@ -358,8 +358,7 @@ void BoxControllerNeXusIO::setEventDataVersion(const size_t &traitsCount) {
   auto edv = static_cast<EventDataVersion>(traitsCount);
   // sucks I couldn't create this list dynamically
   std::initializer_list<EDV> valid_versions = {EDV::EDVLean, EDV::EDVOriginal, EDV::EDVGoniometer};
-  const auto valid_edv = std::find_if(std::cbegin(valid_versions), std::cend(valid_versions),
-                                      [edv](const auto valid_edv) { return edv == valid_edv; });
+  const auto valid_edv = std::find(std::cbegin(valid_versions), std::cend(valid_versions), edv);
   if (valid_edv != std::cend(valid_versions)) {
     setEventDataVersion(*valid_edv);
     return;
