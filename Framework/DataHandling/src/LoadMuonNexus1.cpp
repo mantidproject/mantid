@@ -412,7 +412,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
         // Populate deadTimes
         deadTimes.reserve(specToLoad.size());
         std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(deadTimes),
-                       [deadTimesData](const auto &spectra) { return deadTimesData[spectra - 1]; });
+                       [&deadTimesData](const auto &spectra) { return deadTimesData[spectra - 1]; });
         // Load into table
         TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
         setProperty("DeadTimeTable", table);

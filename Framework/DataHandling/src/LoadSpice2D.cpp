@@ -425,7 +425,7 @@ void LoadSpice2D::setBeamTrapRunProperty(std::map<std::string, std::string> &met
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   std::transform(trapIndexInUse.cbegin(), trapIndexInUse.cend(), std::back_inserter(trapDiametersInUse),
-                 [trapDiameters](const auto index) { return trapDiameters[index]; });
+                 [&trapDiameters](const auto index) { return trapDiameters[index]; });
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size() << "\n";
 

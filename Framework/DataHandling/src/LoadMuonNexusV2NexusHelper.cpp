@@ -104,7 +104,7 @@ LoadMuonNexusV2NexusHelper::loadDetectorGroupingFromNexus(const std::vector<deti
     groupingData.load();
     int groupingOffset = !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
     std::transform(detectorsLoaded.cbegin(), detectorsLoaded.cend(), std::back_inserter(grouping),
-                   [groupingData, groupingOffset](const auto detectorNumber) {
+                   [&groupingData, groupingOffset](const auto detectorNumber) {
                      return groupingData[detectorNumber - 1 + groupingOffset];
                    });
   }

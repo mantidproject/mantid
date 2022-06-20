@@ -437,7 +437,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   std::transform(trapIndexInUse.cbegin(), trapIndexInUse.cend(), std::back_inserter(trapDiametersInUse),
-                 [trapDiameters](auto index) { return trapDiameters[index]; });
+                 [&trapDiameters](auto index) { return trapDiameters[index]; });
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size() << "\n";
 

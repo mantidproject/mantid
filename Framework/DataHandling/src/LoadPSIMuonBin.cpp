@@ -205,7 +205,7 @@ void LoadPSIMuonBin::exec() {
   if (timeZero > largestBinValue) {
     absTimeZero = outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))];
     std::transform(timeZeroList.cbegin(), timeZeroList.cend(), std::back_inserter(correctedTimeZeroList),
-                   [outputWorkspace](const auto timeZeroValue) {
+                   [&outputWorkspace](const auto timeZeroValue) {
                      return outputWorkspace->x(0)[static_cast<int>(std::floor(timeZeroValue))];
                    });
   } else {
