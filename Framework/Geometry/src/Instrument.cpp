@@ -500,9 +500,8 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  const auto it = std::find_if(detector_ids.cbegin(), detector_ids.cend(),
-                               [this](const auto detector_id) { return isMonitor(detector_id); });
-  return it != detector_ids.cend();
+  return std::any_of(detector_ids.cbegin(), detector_ids.cend(),
+                     [this](const auto detector_id) { return isMonitor(detector_id); });
 }
 
 /**
