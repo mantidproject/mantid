@@ -229,8 +229,7 @@ string parentName(const IComponent_const_sptr &comp, const string &prefix) {
 string parentName(const IComponent_const_sptr &comp, const vector<string> &names) {
   // handle the special case of the component has the name
   const auto compName = comp->getName();
-  auto it =
-      std::find_if(names.cbegin(), names.cend(), [&compName](const std::string &name) { return name == compName; });
+  auto it = std::find(names.cbegin(), names.cend(), compName);
   if (it != names.cend())
     return *it;
 
@@ -239,7 +238,7 @@ string parentName(const IComponent_const_sptr &comp, const vector<string> &names
   if (parent) {
     const auto parName = parent->getName();
     // see if this is the parent
-    it = std::find_if(names.cbegin(), names.cend(), [&parName](const std::string &name) { return name == parName; });
+    it = std::find(names.cbegin(), names.cend(), parName);
     if (it != names.cend())
       return *it;
     // or recurse
