@@ -151,9 +151,8 @@ void MainWindowPresenter::notifyUpdateInstrumentRequested() {
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
 bool MainWindowPresenter::isAnyBatchProcessing() const {
-  const auto it = std::find_if(m_batchPresenters.cbegin(), m_batchPresenters.cend(),
-                               [](const auto &batchPresenter) { return batchPresenter->isProcessing(); });
-  return it != m_batchPresenters.cend();
+  return std::any_of(m_batchPresenters.cbegin(), m_batchPresenters.cend(),
+                     [](const auto &batchPresenter) { return batchPresenter->isProcessing(); });
 }
 
 bool MainWindowPresenter::isAnyBatchAutoreducing() const {
