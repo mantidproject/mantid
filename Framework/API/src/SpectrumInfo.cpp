@@ -74,7 +74,7 @@ double SpectrumInfo::l2(const size_t index) const {
   const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
   auto l2 = std::accumulate(
       spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
-      [this](double x, const std::pair<size_t, size_t> &detIndex2) { return x + m_detectorInfo.l2(detIndex2); });
+      [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.l2(detIndex); });
   return l2 / static_cast<double>(spectrumDefinition.size());
 }
 
@@ -87,7 +87,7 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
   auto twoTheta = std::accumulate(
       spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
-      [this](double x, const std::pair<size_t, size_t> &detIndex2) { return x + m_detectorInfo.twoTheta(detIndex2); });
+      [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.twoTheta(detIndex); });
   return twoTheta / static_cast<double>(spectrumDefinition.size());
 }
 
@@ -99,8 +99,8 @@ double SpectrumInfo::twoTheta(const size_t index) const {
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
   const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
   auto signedTwoTheta = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
-                                        [this](double x, const std::pair<size_t, size_t> &detIndex2) {
-                                          return x + m_detectorInfo.signedTwoTheta(detIndex2);
+                                        [this](double x, const std::pair<size_t, size_t> &detIndex) {
+                                          return x + m_detectorInfo.signedTwoTheta(detIndex);
                                         });
   return signedTwoTheta / static_cast<double>(spectrumDefinition.size());
 }
@@ -114,7 +114,7 @@ double SpectrumInfo::azimuthal(const size_t index) const {
   const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
   auto phi = std::accumulate(
       spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
-      [this](double x, const std::pair<size_t, size_t> &detIndex2) { return x + m_detectorInfo.azimuthal(detIndex2); });
+      [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.azimuthal(detIndex); });
   return phi / static_cast<double>(spectrumDefinition.size());
 }
 
@@ -137,8 +137,8 @@ std::pair<double, double> SpectrumInfo::geographicalAngles(const size_t index) c
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
   auto newPos = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), Kernel::V3D(),
-                                [this](const auto &x, const std::pair<size_t, size_t> &detIndex2) {
-                                  return x + m_detectorInfo.position(detIndex2);
+                                [this](const auto &x, const std::pair<size_t, size_t> &detIndex) {
+                                  return x + m_detectorInfo.position(detIndex);
                                 });
   return newPos / static_cast<double>(spectrumDefinition.size());
 }
