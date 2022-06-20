@@ -149,7 +149,7 @@ bool LoadCSNSNexus::checkBanknames(const std::vector<std::string> &inputNames) {
     return false;
   else if (inputNames.size() > 1) {
     return std::all_of(inputNames.cbegin(), inputNames.cend(),
-                       [](std::string name) { return name.compare(0, 6, "module") == 0; });
+                       [](const auto &name) { return name.compare(0, 6, "module") == 0; });
   } else
     return true;
 }
