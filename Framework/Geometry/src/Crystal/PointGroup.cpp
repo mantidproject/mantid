@@ -98,7 +98,7 @@ std::vector<V3D> PointGroup::getAllEquivalents(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
   std::transform(m_allOperations.cbegin(), m_allOperations.cend(), std::back_inserter(equivalents),
-                 [hkl](const auto &operation) { return operation.transformHKL(hkl); });
+                 [&hkl](const auto &operation) { return operation.transformHKL(hkl); });
   return equivalents;
 }
 
