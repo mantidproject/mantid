@@ -88,7 +88,7 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
   // True if point is on surface
   const auto it = std::find_if(
       intersectionPoints.cbegin(), intersectionPoints.cend(),
-      [this, point](const auto &intersectionPoint) { return point.distance(intersectionPoint) < M_TOLERANCE; });
+      [this, &point](const auto &intersectionPoint) { return point.distance(intersectionPoint) < M_TOLERANCE; });
   if (it != intersectionPoints.cend())
     return true;
 
