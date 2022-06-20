@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 
-from testhelpers.AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
+from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
 
 
 class AlgorithmDialogsWorkspaceGroupStartupTest(AlgorithmDialogsStartupTestBase):
