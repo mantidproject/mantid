@@ -14,6 +14,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <algorithm>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 

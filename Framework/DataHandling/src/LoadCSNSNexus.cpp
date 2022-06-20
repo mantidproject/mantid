@@ -16,6 +16,8 @@
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <algorithm>
 /************************/
 
 namespace Mantid::DataHandling {

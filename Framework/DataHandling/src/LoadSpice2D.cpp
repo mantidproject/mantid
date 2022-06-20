@@ -23,7 +23,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
-#include <memory>
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>

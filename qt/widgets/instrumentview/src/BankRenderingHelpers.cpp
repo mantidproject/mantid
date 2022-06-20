@@ -14,6 +14,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 
+#include <algorithm>
 #include <cmath>
 
 using Mantid::Kernel::Quat;

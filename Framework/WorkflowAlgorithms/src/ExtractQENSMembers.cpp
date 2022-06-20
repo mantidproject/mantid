@@ -9,9 +9,9 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
-
 #include "MantidKernel/ArrayProperty.h"
 
+#include <algorithm>
 #include <boost/numeric/conversion/cast.hpp>
 
 namespace {

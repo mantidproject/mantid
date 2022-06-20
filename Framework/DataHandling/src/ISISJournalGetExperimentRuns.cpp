@@ -15,6 +15,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <algorithm>
+
 namespace Mantid::DataHandling {
 DECLARE_ALGORITHM(ISISJournalGetExperimentRuns)
 

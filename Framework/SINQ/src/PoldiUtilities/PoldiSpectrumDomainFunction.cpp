@@ -11,6 +11,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace Mantid::Poldi {

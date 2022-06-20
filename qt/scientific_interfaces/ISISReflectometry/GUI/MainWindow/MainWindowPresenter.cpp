@@ -20,6 +20,8 @@
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
 #include "Reduction/Batch.h"
 
+#include <algorithm>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using Mantid::API::AlgorithmManager;

@@ -28,6 +28,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <memory>

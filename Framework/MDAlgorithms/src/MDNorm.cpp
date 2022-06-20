@@ -29,6 +29,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid::MDAlgorithms {

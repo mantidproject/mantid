@@ -36,12 +36,13 @@
 // clang-format on
 
 #include <boost/iterator/counting_iterator.hpp>
-#include <memory>
 #include <boost/scoped_array.hpp>
 
 #include <Poco/Path.h>
 
+#include <algorithm>
 #include <cmath>
+#include <memory>
 #include <limits>
 
 namespace Mantid::DataHandling {

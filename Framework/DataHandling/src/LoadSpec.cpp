@@ -16,6 +16,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 

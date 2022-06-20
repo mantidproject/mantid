@@ -25,6 +25,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
+#include <algorithm>
 #include <fstream>
 
 namespace Mantid::DataHandling {

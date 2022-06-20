@@ -25,6 +25,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 
+#include <algorithm>
+
 using namespace Mantid::API;
 
 namespace {

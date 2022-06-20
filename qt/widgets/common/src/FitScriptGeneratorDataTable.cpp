@@ -16,6 +16,8 @@
 #include <QStringList>
 #include <QValidator>
 
+#include <algorithm>
+
 namespace {
 
 int WS_INDEX_MIN(0);

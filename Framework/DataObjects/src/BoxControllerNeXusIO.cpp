@@ -15,6 +15,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <H5Cpp.h>
+#include <algorithm>
 #include <string>
 
 namespace Mantid::DataObjects {

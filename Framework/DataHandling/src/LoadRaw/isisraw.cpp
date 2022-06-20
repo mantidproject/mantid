@@ -9,6 +9,7 @@
 #include "byte_rel_comp.h"
 #include "vms_convert.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <ostream>
 

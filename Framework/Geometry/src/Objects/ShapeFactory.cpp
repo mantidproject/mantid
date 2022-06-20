@@ -33,6 +33,8 @@
 
 #include "boost/make_shared.hpp"
 
+#include <algorithm>
+
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::DOMWriter;

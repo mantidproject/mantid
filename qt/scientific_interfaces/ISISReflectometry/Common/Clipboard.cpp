@@ -9,6 +9,8 @@
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 
+#include <algorithm>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}

@@ -27,6 +27,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 
+#include <algorithm>
 #include <fstream>
 
 using namespace Mantid;

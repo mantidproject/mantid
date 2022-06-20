@@ -12,6 +12,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <set>
 

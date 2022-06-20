@@ -14,6 +14,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
+#include <algorithm>
 #include <utility>
 
 namespace {

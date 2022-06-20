@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 
+#include <numeric>
+
 namespace Mantid::MDAlgorithms {
 
 size_t ConvToMDEventsWSIndexing::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,

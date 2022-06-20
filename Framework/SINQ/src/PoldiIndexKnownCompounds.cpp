@@ -14,6 +14,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 
+#include <algorithm>
 #include <numeric>
 
 #include <boost/math/distributions/normal.hpp>

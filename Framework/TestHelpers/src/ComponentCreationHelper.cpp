@@ -36,6 +36,7 @@
 #include "MantidKernel/V2D.h"
 
 #include <Poco/Path.h>
+#include <algorithm>
 #include <memory>
 
 using namespace Mantid::Geometry;

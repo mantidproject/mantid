@@ -22,6 +22,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
+#include <algorithm>
 #include <memory>
 #include <nexus/NeXusFile.hpp>
 #include <queue>

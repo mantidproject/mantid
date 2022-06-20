@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <memory>
 

@@ -20,7 +20,9 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
+
 #include <boost/algorithm/string/trim.hpp>
+#include <map>
 #include <utility>
 
 using Mantid::Kernel::Strings::getWord;
@@ -162,7 +164,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
 
   auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", C_Instrument);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loadInst->setProperty("RewriteSpectra", Mantid::Kernel::OptionalBool(true));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
   loadInst->executeAsChildAlg();
 

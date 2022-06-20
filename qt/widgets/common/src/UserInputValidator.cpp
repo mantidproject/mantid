@@ -13,6 +13,8 @@
 #include <QLineEdit>
 #include <QString>
 #include <QValidator>
+
+#include <algorithm>
 #include <cmath>
 
 using namespace Mantid::API;

@@ -23,6 +23,7 @@
 #pragma warning(default : 4180)
 #endif
 
+#include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <functional>

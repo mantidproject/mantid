@@ -19,6 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
+#include <algorithm>
 #include <cctype>
 #include <functional>
 #include <numeric>

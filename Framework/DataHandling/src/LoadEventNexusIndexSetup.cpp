@@ -17,6 +17,8 @@
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <algorithm>
+
 using namespace Mantid::API;
 using namespace Mantid::Indexing;
 

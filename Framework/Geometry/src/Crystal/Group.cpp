@@ -7,6 +7,8 @@
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
+#include <algorithm>
+
 namespace Mantid::Geometry {
 
 /// Default constructor. Creates a group with one symmetry operation (identity).

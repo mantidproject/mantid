@@ -5,17 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingView.h"
-
 #include "ALCLatestFileFinder.h"
+
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
+
 #include <Poco/File.h>
-
-#include "MantidKernel/ConfigService.h"
-
 #include <QMessageBox>
+#include <algorithm>
 
 using namespace Mantid::API;
 

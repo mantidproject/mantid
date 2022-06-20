@@ -11,6 +11,8 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <numeric>

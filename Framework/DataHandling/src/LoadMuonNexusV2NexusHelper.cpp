@@ -12,6 +12,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include <algorithm>
+
 namespace {
 template <typename type> std::string convertVectorToString(const std::vector<type> &vector) {
   std::string stringOfVector = "";

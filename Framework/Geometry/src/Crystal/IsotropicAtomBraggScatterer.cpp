@@ -5,20 +5,18 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
-#include "MantidKernel/Atom.h"
-#include <stdexcept>
-
+#include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidJson/Json.h"
+#include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
-#include "MantidGeometry/Crystal/BraggScattererFactory.h"
-
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
-#include <utility>
-
 #include <json/json.h>
+#include <stdexcept>
+#include <utility>
 
 namespace Mantid::Geometry {
 

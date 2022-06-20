@@ -7,6 +7,8 @@
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/System.h"
 
+#include <algorithm>
+
 namespace Mantid::DataObjects {
 
 EventWorkspaceMRU::~EventWorkspaceMRU() {

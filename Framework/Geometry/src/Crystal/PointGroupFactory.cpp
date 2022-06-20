@@ -5,10 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidKernel/LibraryManager.h"
+
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <utility>
 

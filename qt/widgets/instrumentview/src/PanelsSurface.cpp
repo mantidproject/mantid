@@ -24,6 +24,8 @@
 #include <QPainterPath>
 #include <QtDebug>
 
+#include <numeric>
+
 using namespace Mantid::Geometry;
 using Mantid::Beamline::ComponentType;
 using Mantid::Kernel::V3D;

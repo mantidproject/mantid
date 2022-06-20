@@ -8,6 +8,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/V3D.h"
+
+#include <algorithm>
 #include <cfloat>
 #include <iomanip>
 #include <ios>

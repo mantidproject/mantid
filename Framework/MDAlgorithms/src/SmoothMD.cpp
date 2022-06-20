@@ -17,6 +17,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
+
+#include <algorithm>
 #include <boost/tuple/tuple.hpp>
 #include <limits>
 #include <map>

@@ -8,9 +8,11 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Logger.h"
 
+#include <QString>
+
 #include "boost/algorithm/string.hpp"
 
-#include <QString>
+#include <algorithm>
 #include <bitset>
 
 namespace MantidQt::MantidWidgets {

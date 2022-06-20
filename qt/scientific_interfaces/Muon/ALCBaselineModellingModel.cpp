@@ -14,6 +14,7 @@
 
 #include "Poco/ActiveResult.h"
 #include <QApplication>
+#include <algorithm>
 #include <utility>
 
 using namespace Mantid::API;

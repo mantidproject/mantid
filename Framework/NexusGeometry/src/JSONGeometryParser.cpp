@@ -7,6 +7,8 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
+
+#include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <json/json.h>

@@ -8,6 +8,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+
+#include <algorithm>
 #include <ostream>
 #include <utility>
 

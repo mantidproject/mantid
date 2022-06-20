@@ -16,6 +16,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace Mantid::DataHandling {

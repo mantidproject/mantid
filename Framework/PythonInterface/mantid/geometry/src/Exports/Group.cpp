@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
+#include <algorithm>
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>

@@ -29,6 +29,8 @@
 #include <QRadioButton>
 #include <QString>
 
+#include <algorithm>
+
 namespace MantidQt::MantidWidgets {
 
 InstrumentWidgetDecoder::InstrumentWidgetDecoder() : m_projectPath(""), m_workspaceName(""), m_loadMask(true) {}

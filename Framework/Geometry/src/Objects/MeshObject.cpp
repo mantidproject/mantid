@@ -14,6 +14,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 

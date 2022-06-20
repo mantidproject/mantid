@@ -17,9 +17,12 @@
 #include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
+
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cstdlib>
 #include <exception>
+#include <numeric>
 #include <utility>
 
 namespace MantidQt::MantidWidgets {

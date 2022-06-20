@@ -5,15 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidKernel/System.h"
-
-#include <boost/algorithm/string.hpp>
-#include <memory>
-#include <set>
-
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidKernel/System.h"
+
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <memory>
+#include <set>
 
 namespace Mantid::Geometry {
 using Kernel::IntMatrix;

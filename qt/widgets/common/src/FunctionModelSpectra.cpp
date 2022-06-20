@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
 #include <numeric>
 
 namespace {

@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 
-#include <fstream>
-
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -15,6 +13,9 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
+
+#include <algorithm>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

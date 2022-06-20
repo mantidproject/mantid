@@ -15,6 +15,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <algorithm>
 #include <memory>
 #include <set>
 #include <unordered_set>

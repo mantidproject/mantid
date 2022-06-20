@@ -10,6 +10,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
+#include <algorithm>
+
 using Mantid::Beamline::ComponentType;
 
 namespace Mantid::Geometry::ComponentInfoBankHelpers {

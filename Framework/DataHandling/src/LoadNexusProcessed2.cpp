@@ -17,6 +17,8 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <H5Cpp.h>
+#include <algorithm>
+
 namespace Mantid::DataHandling {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;

@@ -12,6 +12,8 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
 
+#include <algorithm>
+
 namespace Mantid::DataObjects {
 using std::set;
 using std::size_t;

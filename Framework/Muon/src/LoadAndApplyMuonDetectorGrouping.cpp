@@ -21,6 +21,8 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
+
 namespace {
 
 // Convert the enum PlotType to a string to pass to ApplyMuonDetectorGrouping
