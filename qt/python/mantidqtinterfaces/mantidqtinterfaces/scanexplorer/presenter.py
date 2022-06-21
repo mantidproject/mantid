@@ -111,6 +111,10 @@ class ScanExplorerPresenter:
         self.view.show_slice_viewer(workspace)
         self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
 
+        self.view.data_view.image_info_widget.setVisible(False)
+        self.view.data_view.track_cursor.setVisible(False)
+        self.view.data_view.dimensions.setVisible(False)
+
         self.view.multiple_action = self.view.data_view.mpl_toolbar.addAction("MULT", self.view.start_multiple_rect_mode)
         self.view.multiple_action.setCheckable(True)
 
