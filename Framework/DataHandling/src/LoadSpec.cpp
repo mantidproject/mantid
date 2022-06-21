@@ -16,6 +16,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 
@@ -137,9 +138,8 @@ void LoadSpec::readLine(const std::string &line, std::vector<double> &buffer) co
     const std::string sep = " ";
     tokenizer tok(line, sep, Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     buffer.reserve(buffer.size() + tok.size());
-    for (const auto &beg : tok) {
-      buffer.emplace_back(std::stod(beg));
-    }
+    std::transform(tok.cbegin(), tok.cend(), std::back_inserter(buffer),
+                   [](const auto &beg) { return std::stod(beg); });
   }
 }
 

@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
 #include <numeric>
 
 namespace {
@@ -15,9 +16,8 @@ using MantidQt::MantidWidgets::WorkspaceIndex;
 std::vector<WorkspaceIndex> workspaceIndexVectorFromString(const std::string &listString) {
   auto const intVec = MantidQt::MantidWidgets::vectorFromString<std::size_t>(listString);
   std::vector<WorkspaceIndex> output;
-  for (auto const i : intVec) {
-    output.emplace_back(WorkspaceIndex{i});
-  }
+  std::transform(intVec.cbegin(), intVec.cend(), std::back_inserter(output),
+                 [](const auto i) { return WorkspaceIndex(i); });
   return output;
 }
 

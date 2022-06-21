@@ -28,6 +28,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -202,9 +204,10 @@ void LoadPSIMuonBin::exec() {
   std::vector<double> correctedTimeZeroList;
   if (timeZero > largestBinValue) {
     absTimeZero = outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))];
-    for (auto timeZeroValue : timeZeroList) {
-      correctedTimeZeroList.emplace_back(outputWorkspace->x(0)[static_cast<int>(std::floor(timeZeroValue))]);
-    }
+    std::transform(timeZeroList.cbegin(), timeZeroList.cend(), std::back_inserter(correctedTimeZeroList),
+                   [&outputWorkspace](const auto timeZeroValue) {
+                     return outputWorkspace->x(0)[static_cast<int>(std::floor(timeZeroValue))];
+                   });
   } else {
     correctedTimeZeroList = timeZeroList;
   }
@@ -229,9 +232,8 @@ void LoadPSIMuonBin::exec() {
   if (correctTime) {
     for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
       auto &xData = outputWorkspace->mutableX(specNum);
-      for (auto &xValue : xData) {
-        xValue -= absTimeZero;
-      }
+      std::transform(xData.cbegin(), xData.cend(), xData.begin(),
+                     [absTimeZero](const auto &xValue) { return xValue - absTimeZero; });
     }
   }
   setProperty("OutputWorkspace", extractSpectra(outputWorkspace));

@@ -159,9 +159,10 @@ size_t EventWorkspace::blocksize() const {
                            "therefore cannot determine blocksize (# of bins).");
   } else {
     size_t numBins = data[0]->histogram_size();
-    for (const auto &iter : data)
-      if (numBins != iter->histogram_size())
-        throw std::length_error("blocksize undefined because size of histograms is not equal");
+    const auto iterPos = std::find_if_not(data.cbegin(), data.cend(),
+                                          [numBins](const auto &iter) { return numBins == iter->histogram_size(); });
+    if (iterPos != data.cend())
+      throw std::length_error("blocksize undefined because size of histograms is not equal");
     return numBins;
   }
 }

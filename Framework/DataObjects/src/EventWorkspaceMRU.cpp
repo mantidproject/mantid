@@ -7,6 +7,8 @@
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/System.h"
 
+#include <algorithm>
+
 namespace Mantid::DataObjects {
 
 EventWorkspaceMRU::~EventWorkspaceMRU() {
@@ -36,10 +38,9 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
   Poco::ScopedWriteRWLock _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
     m_bufferedDataE.resize(thread_num + 1);
-    for (auto &data : m_bufferedDataE) {
-      if (!data)
-        data = std::make_unique<mru_listE>(50); // Create a MRU list with this many entries.
-    }
+    // Replaces empty data with an MRU list with this many entries.
+    std::transform(m_bufferedDataE.begin(), m_bufferedDataE.end(), m_bufferedDataE.begin(),
+                   [](auto &data) { return data ? std::move(data) : std::move(std::make_unique<mru_listE>(50)); });
   }
 }
 //---------------------------------------------------------------------------
@@ -51,10 +52,9 @@ void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
   Poco::ScopedWriteRWLock _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
     m_bufferedDataY.resize(thread_num + 1);
-    for (auto &data : m_bufferedDataY) {
-      if (!data)
-        data = std::make_unique<mru_listY>(50); // Create a MRU list with this many entries.
-    }
+    // Replaces empty data with an MRU list with this many entries.
+    std::transform(m_bufferedDataY.begin(), m_bufferedDataY.end(), m_bufferedDataY.begin(),
+                   [](auto &data) { return data ? std::move(data) : std::move(std::make_unique<mru_listY>(50)); });
   }
 }
 
