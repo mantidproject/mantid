@@ -71,7 +71,7 @@ std::vector<std::vector<std::string>> MuonPeriodInfo::makeCorrections(std::vecto
   // Find max size of logs and assume to be the correct size
   const auto it = std::max_element(logs.cbegin(), logs.cend(),
                                    [](const auto &log1, const auto &log2) { return log1.size() < log2.size(); });
-  size_t maxSize = (*it).size();
+  size_t maxSize = it == logs.cend() ? 0 : (*it).size();
   // Check size of each log and make corrections where needed
   for (size_t i = 0; i < logs.size(); ++i) {
     if (logs[i].empty()) {
