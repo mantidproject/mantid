@@ -1,7 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/images">
     <file alias="MantidSplashScreen.png">../../../images/MantidSplashScreen.png</file>
-    <file alias="MantidSplashScreen_4k.jpg">../../../images/MantidSplashScreen_4k.jpg</file>
+    <file alias="MantidSplashScreen_4k.png">../../../images/MantidSplashScreen_4k.png</file>
     <file alias="MantidIcon.ico">../../../images/mantid_workbench.ico</file>
     <file alias="CSNS_Logo_Short.png">../../../images/CSNS_Logo_Short.png</file>
     <file alias="download-icon-48x48.png">../../../images/download-icon-48x48.png</file>
