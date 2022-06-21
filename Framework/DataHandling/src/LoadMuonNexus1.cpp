@@ -513,7 +513,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
           // select
           // any periods but there is only one in the dataset
           std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(grouping),
-                         [groupingData](const auto spec) { return groupingData[spec - 1]; });
+                         [&groupingData](const auto spec) { return groupingData[spec - 1]; });
         } else {
           // User selected an entry number
           for (auto &spec : specToLoad) {
@@ -534,7 +534,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
           specToLoad.emplace_back(i);
         }
         std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(grouping),
-                       [groupingData](const auto spectrum) { return groupingData[spectrum - 1]; });
+                       [&groupingData](const auto spectrum) { return groupingData[spectrum - 1]; });
         // Load into table
         TableWorkspace_sptr table = createDetectorGroupingTable(specToLoad, grouping);
         if (table->rowCount() != 0)

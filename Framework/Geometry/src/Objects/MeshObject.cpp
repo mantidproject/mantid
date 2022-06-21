@@ -132,7 +132,7 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
 
     const auto it = std::find_if(
         intersectionPoints.cbegin(), intersectionPoints.cend(),
-        [this, point](const auto &intersectionPoint) { return point.distance(intersectionPoint) < M_TOLERANCE; });
+        [this, &point](const auto &intersectionPoint) { return point.distance(intersectionPoint) < M_TOLERANCE; });
     if (it != intersectionPoints.cend())
       return true;
   }
@@ -302,7 +302,7 @@ double MeshObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &sc
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),
-                 [scaleFactor](const auto &vertex) { return scaleFactor * vertex; });
+                 [&scaleFactor](const auto &vertex) { return scaleFactor * vertex; });
   MeshObject meshScaled(m_triangles, scaledVertices, m_material);
   return meshScaled.solidAngle(observer);
 }
