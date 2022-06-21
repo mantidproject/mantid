@@ -196,7 +196,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:2002
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:52
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:98
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:809
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:812
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:740
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:857
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
@@ -399,8 +399,8 @@ shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:20
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/pqHelpWindow.h:115
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/QtSignalChannel.h:51
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:183
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:354
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:735
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:360
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:745
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:110
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:114
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h:104
