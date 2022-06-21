@@ -163,21 +163,20 @@ void PeakHKLErrors::cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
  * Creates a new parameterized instrument for which the parameter values can be
  *changed
  *
- * @param Peaks - a PeaksWorkspace used to get the original instrument.  The
- *instrument from the 0th peak is
- *                the one that is used.
+ * @param peaksWs - a PeaksWorkspace used to get the original instrument.  The instrument from the 0th peak is the one
+ * that is used.
  *
  * NOTE: All the peaks in the PeaksWorkspace must use the same instrument.
  */
-std::shared_ptr<Geometry::Instrument> PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
-  Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
-  auto pmap = std::make_shared<Geometry::ParameterMap>();
+std::shared_ptr<Geometry::Instrument> PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &peaksWs) const {
+  Geometry::Instrument_const_sptr instSave = peaksWs->getPeak(0).getInstrument();
 
   if (!instSave) {
     g_log.error(" Peaks workspace does not have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
 
+  auto pmap = std::make_shared<Geometry::ParameterMap>();
   if (!hasParameterMap) {
     pmapSv = instSave->getParameterMap();
     hasParameterMap = true;
@@ -327,16 +326,16 @@ Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta, char
  * @param nData The size of the xValues and out arrays
  */
 void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t nData) const {
-  PeaksWorkspace_sptr Peaks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(PeakWorkspaceName);
+  PeaksWorkspace_sptr peaksWs = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(PeakWorkspaceName);
 
-  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
-
-  if (!Peaks)
+  if (!peaksWs)
     throw std::invalid_argument("Peaks not stored under the name " + PeakWorkspaceName);
 
+  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(peaksWs);
+
   std::map<int, Mantid::Kernel::Matrix<double>> RunNum2GonMatrixMap;
-  getRun2MatMap(Peaks, OptRuns, RunNum2GonMatrixMap);
-  const DblMatrix &UBx = Peaks->sample().getOrientedLattice().getUB();
+  getRun2MatMap(peaksWs, OptRuns, RunNum2GonMatrixMap);
+  const DblMatrix &UBx = peaksWs->sample().getOrientedLattice().getUB();
 
   DblMatrix UBinv(UBx);
   UBinv.Invert();
@@ -351,7 +350,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
-    Peak &peak_old = Peaks->getPeak(peakNum);
+    Peak &peak_old = peaksWs->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
@@ -402,10 +401,14 @@ void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t 
 }
 
 void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-  PeaksWorkspace_sptr Peaks = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(PeakWorkspaceName);
-  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(Peaks);
+  PeaksWorkspace_sptr peaksWs = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(PeakWorkspaceName);
 
-  const DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
+  if (!peaksWs)
+    throw std::invalid_argument("Peaks not stored under the name " + PeakWorkspaceName);
+
+  std::shared_ptr<Geometry::Instrument> instNew = getNewInstrument(peaksWs);
+
+  const DblMatrix &UB = peaksWs->sample().getOrientedLattice().getUB();
   DblMatrix UBinv(UB);
   UBinv.Invert();
   UBinv /= 2 * M_PI;
@@ -423,12 +426,12 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
   InvGonRotzMat.Invert();
 
   std::map<int, Kernel::Matrix<double>> RunNums2GonMatrix;
-  getRun2MatMap(Peaks, OptRuns, RunNums2GonMatrix);
+  getRun2MatMap(peaksWs, OptRuns, RunNums2GonMatrix);
 
   g_log.debug() << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
-  IPeak &ppeak = Peaks->getPeak(0);
+  IPeak &ppeak = peaksWs->getPeak(0);
   double L0 = ppeak.getL1();
   double velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
 
@@ -440,7 +443,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
 
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
-    Peak &peak_old = Peaks->getPeak(peakNum);
+    Peak &peak_old = peaksWs->getPeak(peakNum);
     Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();

@@ -189,7 +189,7 @@ public:
                                   Kernel::V3D &ModVec2, Kernel::V3D &ModVec3);
 
   static bool GetModulationVector(const Kernel::DblMatrix &UB, const Kernel::DblMatrix &ModUB, Kernel::V3D &ModVec,
-                                  int &j);
+                                  const int j);
 
   /// Get a formatted string listing the lattice parameters and cell volume
   static std::string GetLatticeParameterString(const Kernel::DblMatrix &UB);

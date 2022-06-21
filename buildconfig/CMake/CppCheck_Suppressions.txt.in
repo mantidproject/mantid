@@ -44,9 +44,6 @@ copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/VectorPara
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCat.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCatEntity.h
 
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IntegratePeakTimeSlices.h
-
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/CompAssembly.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/Container.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/ObjCompAssembly.h
@@ -120,15 +117,10 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:501
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:508
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:650
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h:104
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:210
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:218
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:100
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:126
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:192
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:193
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:388
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:173
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:387
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:53
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:149
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:190
@@ -150,7 +142,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalE
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:454
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:454
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:484
-identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:128
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
@@ -285,9 +276,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:6
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ConventionalCell.cpp:143
-duplicateAssignExpression:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:2651
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/IndexingUtils.cpp:2819
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:396
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Detector.cpp:114
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/DetectorGroup.cpp:155

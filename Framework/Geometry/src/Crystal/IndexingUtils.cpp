@@ -2649,7 +2649,7 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps, const Mantid::
   }
   // first get a vector perpendicular to axis
   double max_component = fabs(axis[0]);
-  double min_component = fabs(axis[0]);
+  double min_component = max_component;
   size_t min_index = 0;
   for (size_t i = 1; i < 3; i++) {
     if (fabs(axis[i]) < min_component) {
@@ -2816,7 +2816,7 @@ int IndexingUtils::GetModulationVectors(const DblMatrix &UB, const DblMatrix &Mo
   return ModDim;
 }
 
-bool IndexingUtils::GetModulationVector(const DblMatrix &UB, const DblMatrix &ModUB, V3D &ModVec, int &j) {
+bool IndexingUtils::GetModulationVector(const DblMatrix &UB, const DblMatrix &ModUB, V3D &ModVec, const int j) {
   OrientedLattice o_lattice;
   o_lattice.setUB(UB);
   o_lattice.setModUB(ModUB);
