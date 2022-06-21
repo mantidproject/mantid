@@ -66,8 +66,8 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo, 
   // NXDetectors
   auto detectors = compInfo.detectorsInSubtree(idx);
 
-  return std::any_of(detectors.cbegin(), detectors.cend(),
-                     [&detInfo](const auto &det) { return detInfo.isMonitor(det); });
+  return std::none_of(detectors.cbegin(), detectors.cend(),
+                      [&detInfo](const auto &det) { return detInfo.isMonitor(det); });
 }
 
 /** Finds all ancestors up to the root of a component
