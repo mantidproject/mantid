@@ -161,8 +161,9 @@ class LinePlots:
         # Create a new GridSpec and reposition the existing image Axes
         gs = GridSpec(2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
         image_axes.set_position(gs[1].get_position(self._fig))
-        image_axes.get_xaxis().set_visible(False)
-        image_axes.get_yaxis().set_visible(False)
+        image_axes.tick_params(labelleft=False, labelbottom=False)
+        image_axes.xaxis.get_label().set_visible(False)
+        image_axes.yaxis.get_label().set_visible(False)
         self._axx = self._fig.add_subplot(gs[3], sharex=image_axes)
         self._axx.yaxis.tick_right()
         self._axy = self._fig.add_subplot(gs[0], sharey=image_axes)
@@ -188,10 +189,9 @@ class LinePlots:
 
         gs = GridSpec(1, 1)
         image_axes.set_position(gs[0].get_position(self._fig))
-        image_axes.get_xaxis().set_visible(True)
-        image_axes.get_yaxis().set_visible(True)
-        image_axes.xaxis.tick_bottom()
-        image_axes.yaxis.tick_left()
+        image_axes.tick_params(labelleft=True, labelbottom=True)
+        image_axes.xaxis.get_label().set_visible(True)
+        image_axes.yaxis.get_label().set_visible(True)
         self._axx, self._axy = None, None
 
         # self.mpl_toolbar.update()  # sync list of axes in navstack
@@ -342,7 +342,6 @@ class RectangleSelectionLinePlot(KeyHandler):
         self._selector = RectangleSelectorMtd(
             ax,
             self._on_rectangle_selected,
-            drawtype='box',
             useblit=False,  # rectangle persists on button release
             button=[1],
             minspanx=5,

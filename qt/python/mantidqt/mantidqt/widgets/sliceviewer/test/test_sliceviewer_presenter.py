@@ -464,7 +464,7 @@ class SliceViewerTest(unittest.TestCase):
             presenter.replace_workspace('workspace', workspace)
 
             presenter.view.emit_close.assert_not_called()
-            presenter.view.data_view.plot_MDH.assert_called_once()
+            presenter.view.delayed_refresh.assert_called_once()  # leave it to QTimer to call refresh_view()
 
     def test_refresh_view(self):
         presenter, _ = _create_presenter(self.model,

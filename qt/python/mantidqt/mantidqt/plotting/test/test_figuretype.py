@@ -10,7 +10,6 @@
 from __future__  import absolute_import
 
 # std imports
-from distutils.version import LooseVersion
 from unittest import TestCase, main
 
 # thirdparty imports
@@ -64,10 +63,7 @@ class FigureTypeTest(TestCase):
         ax = plt.subplot(111)
         ax.imshow([[1], [1]])
         ax.contour([[1, 1], [1, 1]])
-        if LooseVersion("3.5") <= LooseVersion(matplotlib.__version__):
-            self.assertEqual(FigureType.Image, figure_type(ax.figure))
-        else:
-            self.assertEqual(FigureType.Contour, figure_type(ax.figure))
+        self.assertEqual(FigureType.Contour, figure_type(ax.figure))
 
     def test_mesh_plot_returns_mesh(self):
         a = np.array([[[1, 1, 1], [2, 2, 2], [3, 3, 3]]])

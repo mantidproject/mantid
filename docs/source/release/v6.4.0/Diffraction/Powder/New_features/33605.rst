@@ -1,1 +1,0 @@
-- Add in the capability to normalize data with collection time in :ref:`HB2AReduce <algm-HB2AReduce>`.

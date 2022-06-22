@@ -16,6 +16,7 @@ from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
 from matplotlib.colors import ListedColormap, Normalize, SymLogNorm, PowerNorm, LogNorm
+from matplotlib.image import AxesImage
 from matplotlib import cm
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
@@ -230,6 +231,9 @@ class ColorbarWidget(QWidget):
                               vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "Log":
             cmin = MIN_LOG_VALUE if cmin is not None and cmin <= 0 else cmin
+            if cmin is None and cmax is None:
+                climits = self._calculate_clim()
+                cmin, cmax = climits if climits is not None else (cmin, cmax)
             return LogNorm(vmin=cmin, vmax=cmax)
         else:
             return Normalize(vmin=cmin, vmax=cmax)
@@ -272,8 +276,8 @@ class ColorbarWidget(QWidget):
         """
         Update displayed limit values based on stored ones
         """
-        self.cmin.setText("{:.4}".format(self.cmin_value))
-        self.cmax.setText("{:.4}".format(self.cmax_value))
+        self.cmin.setText(f"{float(self.cmin_value):.4}")
+        self.cmax.setText(f"{float(self.cmax_value):.4}")
 
     def redraw(self):
         """
@@ -293,35 +297,33 @@ class ColorbarWidget(QWidget):
             self.cmax.setValidator(self.linear_validator)
 
     def _autoscale_clim(self):
-        """Update stored colorbar limits
-        The new limits are found from the colobar data """
-        if hasattr(self.colorbar.mappable, "get_array_clipped_to_bounds"):
-            data = self.colorbar.mappable.get_array_clipped_to_bounds()
-        else:
-            # in nonorthog view get passed a QuadMesh that doesn't have the above method
-            # however the data from get_array for MDEvent ws is already clipped (not for MDHisto)
-            data = self.colorbar.mappable.get_array()
-        norm = NORM_OPTS[self.norm.currentIndex()]
+        """Update stored colorbar limits. The new limits are found from the colobar data """
+        climits = self._calculate_clim()
+        if climits is not None:
+            self.cmin_value, self.cmax_value = climits
+        self.update_clim_text()
+
+    def _calculate_clim(self) -> tuple:
+        """Calculate the colorbar limits to use when autoscale is turned on."""
+        axes = self.colorbar.mappable
+        data = axes.get_array_clipped_to_bounds() if hasattr(axes, "get_array_clipped_to_bounds") else axes.get_array()
+
+        log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
         try:
             try:
                 masked_data = data[~data.mask]
-                # use the smallest positive value as vmin when using log scale,
-                # matplotlib will take care of the data skipping part.
-                masked_data = masked_data[masked_data > 0] if norm == "Log" else masked_data
-
+                # Use smallest positive value as vmin for log scale, matplotlib takes care of the data skipping part
+                masked_data = masked_data[masked_data > 0] if log_normalisation else masked_data
                 # If any dimension is zero then we have no data in the display area
                 data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
 
-                self.cmin_value = 0. if data_is_empty else masked_data.min()
-                self.cmax_value = 0. if data_is_empty else masked_data.max()
+                return (0.0, 0.0) if data_is_empty else (masked_data.min(), masked_data.max())
             except (AttributeError, IndexError):
-                data = data[np.nonzero(data)] if norm == "Log" else data
-                self.cmin_value = np.nanmin(data)
-                self.cmax_value = np.nanmax(data)
+                data = data[np.nonzero(data)] if log_normalisation else data
+                return np.nanmin(data), np.nanmax(data)
         except (ValueError, RuntimeWarning):
-            # all values mask
-            pass
-        self.update_clim_text()
+            # All values are masked
+            return None
 
     def _manual_clim(self):
         """Update stored colorbar limits
@@ -349,20 +351,38 @@ class ColorbarWidget(QWidget):
 
     def _validate_mappable(self, mappable):
         """Disable the Log option if no positive value can be found from given data (image)"""
-        index = NORM_OPTS.index("Log")
-        if mappable.get_array() is not None:
-            if np.all(mappable.get_array() <= 0):
-                self.norm.model().item(index, 0).setEnabled(False)
-                self.norm.setItemData(index, "Log scale is disabled for non-positive data",
-                                      Qt.ToolTipRole)
-                if isinstance(mappable.norm, LogNorm):
-                    mappable.norm = self._create_linear_normalize_object()
-                    self.norm.blockSignals(True)
-                    self.norm.setCurrentIndex(0)
-                    self.norm.blockSignals(False)
+        data_array = mappable.get_array()
+        if data_array is not None:
+            log_index, symmetric_log_index = NORM_OPTS.index("Log"), NORM_OPTS.index("SymmetricLog10")
+            if np.all(data_array <= 0):
+                self._disable_normalisation_option(mappable, log_index, LogNorm,
+                                                   "Log scale is disabled for non-positive data")
+            elif data_array.all() is np.ma.masked:
+                self._disable_normalisation_option(mappable, log_index, LogNorm,
+                                                   "Log scale is disabled for masked data")
+                self._disable_normalisation_option(mappable, symmetric_log_index, SymLogNorm,
+                                                   "SymmetricLog10 scale is disabled for masked data")
             else:
-                if not self.norm.model().item(index, 0).isEnabled():
-                    self.norm.model().item(index, 0).setEnabled(True)
-                    self.norm.setItemData(index, "", Qt.ToolTipRole)
+                self._enable_normalisation_option(log_index)
+                self._enable_normalisation_option(symmetric_log_index)
 
         return mappable
+
+    def _disable_normalisation_option(self, mappable: AxesImage, option_index: int, norm_type: Normalize,
+                                      tooltip: str) -> None:
+        """Disables a non-linear normalisation option and sets the new normalisation to Linear."""
+        if option_index == 0:
+            raise ValueError("The Linear normalisation option cannot be disabled.")
+        self.norm.model().item(option_index, 0).setEnabled(False)
+        self.norm.setItemData(option_index, tooltip, Qt.ToolTipRole)
+        if isinstance(mappable.norm, norm_type):
+            mappable.norm = self._create_linear_normalize_object()
+            self.norm.blockSignals(True)
+            self.norm.setCurrentIndex(0)
+            self.norm.blockSignals(False)
+
+    def _enable_normalisation_option(self, option_index: int) -> None:
+        """Enables a normalisation option."""
+        if not self.norm.model().item(option_index, 0).isEnabled():
+            self.norm.model().item(option_index, 0).setEnabled(True)
+            self.norm.setItemData(option_index, "", Qt.ToolTipRole)

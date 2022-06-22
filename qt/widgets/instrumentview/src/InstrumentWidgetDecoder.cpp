@@ -29,6 +29,8 @@
 #include <QRadioButton>
 #include <QString>
 
+#include <algorithm>
+
 namespace MantidQt::MantidWidgets {
 
 InstrumentWidgetDecoder::InstrumentWidgetDecoder() : m_projectPath(""), m_workspaceName(""), m_loadMask(true) {}
@@ -182,9 +184,8 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list, MaskBi
     const auto spectraList = itemMap["spectra"].toList();
     std::vector<size_t> spectra;
     spectra.reserve(static_cast<size_t>(spectraList.size()));
-    for (const auto &spec : spectraList) {
-      spectra.emplace_back(spec.value<size_t>());
-    }
+    std::transform(spectraList.cbegin(), spectraList.cend(), std::back_inserter(spectra),
+                   [](const auto &spec) { return spec.template value<size_t>(); });
     obj.addXRange(start, end, spectra);
   }
 }

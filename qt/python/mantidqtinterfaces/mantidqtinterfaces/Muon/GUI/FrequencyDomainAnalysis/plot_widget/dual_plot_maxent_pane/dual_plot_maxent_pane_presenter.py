@@ -51,6 +51,8 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
         self._model.set_period(period)
 
     def handle_maxent_data_updated(self, name):
+        if name is None:
+            return
         self._maxent_ws_name = name
         self._model.set_run_from_name(name)
         self.add_data_to_plots()
@@ -108,5 +110,7 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
         else:
             self._view.set_plot_type(FREQ_X_LABEL)
         self._figure_presenter.set_plot_range(self.context.frequency_context.range())
+        if self._maxent_ws_name is None:
+            return
         new_ws_name = self.context._frequency_context.switch_units_in_name(self._maxent_ws_name)
         self.handle_maxent_data_updated(new_ws_name)

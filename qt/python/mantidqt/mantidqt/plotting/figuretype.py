@@ -13,7 +13,7 @@ Provides facilities to check plot types
 # third party
 from enum import Enum
 from matplotlib.axes import Axes
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PathCollection
 from matplotlib.container import ErrorbarContainer
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
@@ -75,6 +75,8 @@ def axes_type(ax):
             axtype = FigureType.Wireframe
     elif len(ax.images) > 0 or len(ax.collections) > 0:
         if any(isinstance(col, LineCollection) for col in ax.collections):
+            axtype = FigureType.Contour
+        elif any(isinstance(col, PathCollection) for col in ax.collections):
             axtype = FigureType.Contour
         else:
             axtype = FigureType.Image

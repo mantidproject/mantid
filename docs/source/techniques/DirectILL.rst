@@ -158,21 +158,22 @@ The basic reduction for IN5 and PANTHER differs slightly with regards to the dia
 The same effect can be achieved by calling the :ref:`algm-DirectILLAutoProcess` algorithm, and the syntax is the same regardless of the instrument:
 
 .. code-block:: python
-    # Vanadium
-    DirectILLAutoProcess(
-        Runs='085801-085802',
-        OutputWorkspace='vanadium',
-        ProcessAs='Vanadium',
-        ClearCache=True
-    )
-    # Sample
-    DirectILLAutoProcess(
-        Runs='087294+087295',
-        OutputWorkspace='sample',
-        ProcessAs='Sample',
-        VanadiumWorkspace='vanadium',
-        ClearCache=True
-    )
+
+   # Vanadium
+   DirectILLAutoProcess(
+       Runs='085801-085802',
+       OutputWorkspace='vanadium',
+       ProcessAs='Vanadium',
+       ClearCache=True
+   )
+   # Sample
+   DirectILLAutoProcess(
+       Runs='087294+087295',
+       OutputWorkspace='sample',
+       ProcessAs='Sample',
+       VanadiumWorkspace='vanadium',
+       ClearCache=True
+   )
 
 
 Connecting inputs and outputs

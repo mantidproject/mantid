@@ -371,7 +371,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self.refresh_view()
+            self.view.delayed_refresh()
         except ValueError as err:
             self._close_view_with_message(
                 f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
@@ -414,9 +414,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._peaks_presenter.clear_observer()
 
     def canvas_clicked(self, event):
-        if self._peaks_presenter is not None:
-            if event.inaxes:
-                sliceinfo = self.get_sliceinfo()
+        if self._peaks_presenter is not None and event.inaxes:
+            sliceinfo = self.get_sliceinfo()
+            if sliceinfo.can_support_peak_overlay():
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")

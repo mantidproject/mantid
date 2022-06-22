@@ -507,7 +507,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
-        ax.lines.reverse()
+        self._reverse_axis_lines(ax)
+
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
         if LooseVersion("3.7") > LooseVersion(matplotlib.__version__) >= LooseVersion("3.2"):
@@ -544,6 +545,18 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 col.set_color(colour.name())
 
         self.canvas.draw()
+
+    @staticmethod
+    def _reverse_axis_lines(ax):
+        # The built-in reverse method can't be used here as the double assignment doesn't work.
+        lines = []
+        num_lines = len(ax.get_lines())
+        for i in range(num_lines):
+            line = ax.get_lines()[num_lines - i - 1]
+            lines.append(line)
+        for line in lines:
+            line.remove()
+            ax.add_line(line)
 
 
 # -----------------------------------------------------------------------------

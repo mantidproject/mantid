@@ -184,14 +184,11 @@ class GeneralSettingsTest(unittest.TestCase):
         # load current setting is called automatically in the constructor
         GeneralSettings(None)
 
-        # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
-        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                        call().__bool__(),
-                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                        call().__bool__(),
-                                        call(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value),
-                                        call().__bool__(),
-                                        call(GeneralProperties.COMPLETION_ENABLED.value)])
+        # 'any_order' is used to avoid having to assert call().__index__ is called due to 'get' returning a mock object
+        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool),
+                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool),
+                                        call(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool),
+                                        call(GeneralProperties.COMPLETION_ENABLED.value, type=bool)], any_order=True)
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
                                                        call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),

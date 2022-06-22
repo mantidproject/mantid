@@ -5,6 +5,7 @@
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 // ANACONDA_CHANNEL - The channel to publish to on Anaconda.org
 // ANACONDA_CHANNEL_LABEL - This will be used as the label for the channel, otherwise no label will be set.
+// PACKAGE_OPTIONS - additional options to pass to the packaging step.
 
 def build_and_test_unix(cmake_preset) {
   sh "${WORKSPACE}/buildconfig/Jenkins/Conda/conda-buildscript ${WORKSPACE} ${cmake_preset} --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
@@ -21,13 +22,29 @@ def publish_test_reports() {
 }
 
 def conda_build_unix(arch) {
-  sh "${WORKSPACE}/buildconfig/Jenkins/Conda/conda-build-recipes ${WORKSPACE} --build-mantid --build-qt --build-workbench"
+  sh "${WORKSPACE}/buildconfig/Jenkins/Conda/package ${WORKSPACE} --build-mantid --build-qt --build-workbench ${package_options()}"
   archive_conda_build(arch)
 }
 
 def conda_build_win(arch) {
-  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/conda-build-recipes ${WORKSPACE_UNIX_PATH} --build-mantid --build-qt --build-workbench\""
+  bat "\"${WIN_BASH}\" -ex -c \"${WORKSPACE_UNIX_PATH}/buildconfig/Jenkins/Conda/package ${WORKSPACE_UNIX_PATH} --build-mantid --build-qt --build-workbench ${package_options()}\""
   archive_conda_build(arch)
+}
+
+def package_options() {
+  package_options="${PACKAGE_OPTIONS.trim()}"
+  if(PACKAGE_SUFFIX.trim() != '') {
+      package_options += " --package-suffix ${PACKAGE_SUFFIX}"
+  }
+  return package_options.trim()
+}
+
+def recipe_update_options() {
+  recipe_options=""
+  if(PACKAGE_SUFFIX.trim() == '') {
+    recipe_options+=" --release_version"
+  }
+  return recipe_options
 }
 
 def archive_conda_build(arch) {
@@ -38,7 +55,7 @@ def archive_conda_build(arch) {
 }
 
 def create_standalone_package_linux() {
-  archiveArtifacts artifacts: "*.xz",
+  archiveArtifacts artifacts: "*.tar.xz",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
@@ -65,6 +82,10 @@ pipeline {
   }
   stages {
     stage('Build and test') {
+      when {
+        beforeAgent true
+        environment name: 'BUILD_AND_TEST', value: 'true'
+      }
       parallel {
         stage('platform: linux') {
           agent { label 'conda-build-linux' }
@@ -106,15 +127,23 @@ pipeline {
       }
     }
     stage('Update conda-recipes repository') {
+      when {
+        beforeAgent true
+        environment name: 'PUBLISH_PACKAGES', value: 'true'
+      }
       agent { label 'conda-build-linux' }
-      environment { GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
+      environment { GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
       steps {
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL ${recipe_update_options()}'
       }
     }
     stage('Packaging') {
       parallel {
         stage('platform: linux-64') {
+          when {
+            beforeAgent true
+            environment name: 'BUILD_PACKAGE_LINUX', value: 'true'
+          }
           agent { label 'conda-build-linux' }
           options { timestamps () }
           steps {
@@ -123,6 +152,10 @@ pipeline {
           }
         }
         stage('platform: win-64') {
+          when {
+            beforeAgent true
+            environment name: 'BUILD_PACKAGE_WIN', value: 'true'
+          }
           agent { label 'conda-build-win' }
           options { timestamps () }
           steps {
@@ -134,6 +167,10 @@ pipeline {
           }
         }
         stage('platform: osx-64') {
+          when {
+            beforeAgent true
+            environment name: 'BUILD_PACKAGE_OSX', value: 'true'
+          }
           agent { label 'conda-build-osx' }
           options { timestamps () }
           steps {
@@ -143,20 +180,43 @@ pipeline {
         }
       }
     }
-    stage ('Publish Conda packages to Anaconda') {
+    stage ('Publishing') {
+      when {
+        beforeAgent true
+        environment name: 'PUBLISH_PACKAGES', value: 'true'
+      }
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       options { timestamps () }
-      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
-      steps{
-        // Copy all artifacts into ${WORKSPACE} from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
+      environment {
+        ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
+        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
+      }
+      steps {
+        // Conda first
+        sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
           fingerprintArtifacts: true,
           projectName: '${JOB_NAME}',
-          selector: specific('${BUILD_NUMBER}')
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} $ANACONDA_TOKEN $ANACONDA_CHANNEL $ANACONDA_CHANNEL_LABEL ${WORKSPACE}/conda-bld/linux-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/linux-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/osx-64/mantidworkbench-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantid-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidqt-*.tar.bz2 ${WORKSPACE}/conda-bld/win-64/mantidworkbench-*.tar.bz2'
+          selector: specific('${BUILD_NUMBER}'),
+          target: 'conda-packages',
+          flatten: true
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
+        // Standalone packages next
+        sh 'rm -fr ${WORKSPACE}/standalone-packages'
+        copyArtifacts filter: '*.exe, *.dmg, *.tar.xz',
+          fingerprintArtifacts: true,
+          projectName: '${JOB_NAME}',
+          selector: specific('${BUILD_NUMBER}'),
+          target: 'standalone-packages',
+          flatten: true
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${WORKSPACE}/standalone-packages/*'
       }
     }
     stage ('Delete old Conda nightly packages from Anaconda') {
+      when {
+        beforeAgent true
+        environment name: 'PUBLISH_PACKAGES', value: 'true'
+      }
       agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }

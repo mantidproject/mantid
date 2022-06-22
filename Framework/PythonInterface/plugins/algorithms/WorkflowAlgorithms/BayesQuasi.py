@@ -9,7 +9,7 @@
 import os
 import numpy as np
 
-from IndirectImport import *
+from IndirectImport import is_supported_f2py_platform, import_f2py
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction

@@ -14,6 +14,7 @@
 
 #include "Poco/ActiveResult.h"
 #include <QApplication>
+#include <algorithm>
 #include <utility>
 
 using namespace Mantid::API;
@@ -111,11 +112,11 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   // Find points which are in at least one section, and exclude them from
   // disable list
   for (size_t i = 0; i < numBins; ++i) {
-    for (const auto &section : sections) {
-      if (ws->x(0)[i] >= section.first && ws->x(0)[i] <= section.second) {
-        toDisable[i] = false;
-        break; // No need to check other sections
-      }
+    const auto it = std::find_if(sections.cbegin(), sections.cend(), [&ws, i](const auto &section) {
+      return ws->x(0)[i] >= section.first && ws->x(0)[i] <= section.second;
+    });
+    if (it != sections.cend()) {
+      toDisable[i] = false;
     }
   }
 

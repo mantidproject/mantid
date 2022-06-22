@@ -127,7 +127,7 @@ class PeaksViewerPresenter:
         Respond to the selection change of a peak in the list
         """
         selected_index = self._view.selected_index
-        if selected_index is None:
+        if selected_index is None or not self.model.has_representations_drawn():
             return
 
         # Two step:

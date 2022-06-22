@@ -33,13 +33,8 @@ public:
   static PropertyWithValueFactoryTest *createSuite() { return new PropertyWithValueFactoryTest(); }
   static void destroySuite(PropertyWithValueFactoryTest *suite) { delete suite; }
 
-#if PY_MAJOR_VERSION >= 3
 #define FROM_INT PyLong_FromLong
 #define FROM_CSTRING PyUnicode_FromString
-#else
-#define FROM_INT PyInt_FromLong
-#define FROM_CSTRING PyString_FromString
-#endif
 
 #define CREATE_PROPERTY_TEST_BODY(CType, PythonCall)                                                                   \
                                                                                                                        \
@@ -76,11 +71,7 @@ public:
   }
 
   void test_builtin_type_create_int_array_from_list_type_property() {
-#if PY_MAJOR_VERSION < 3
-    testCreateArrayProperty<int>(Py_BuildValue("[ii]", -10, 4));
-#else
     testCreateArrayProperty<long>(Py_BuildValue("[ii]", -10, 4));
-#endif
   }
 
 private:

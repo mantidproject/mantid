@@ -1,1 +1,0 @@
-- RebinnedOutput workspaces are now supported in the Superplot

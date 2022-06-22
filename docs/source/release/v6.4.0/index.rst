@@ -4,7 +4,7 @@
 Mantid 6.4.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/SliceViewer_CutViewer.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -12,11 +12,47 @@ Mantid 6.4.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.4.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Many of the updates in this version have focused on improvements for users, building on existing algorithms and interfaces.
+Our method of packaging has also changed. Windows and macOS users should not notice any difference,
+but this will be the last release where we provide ``.rpm`` and ``.deb`` packages for Linux (more details :ref:`here <6.4_packaging>`).
+
+In addition to many improvements we are delighted to announce some new features including:
+
+- A new :ref:`cut viewer tool <sliceviewer_nonaxiscuts>` for non-axis aligned cuts has been added to the :ref:`SliceViewer`.
+- Workbench and MSlice are now compatible with matplotlib v3.5.
+- In the :ref:`ISIS Reflectometry <interface-isis-refl>` interface, :ref:`Experiment Settings <refl_exp_instrument_settings>`
+  defaults can now be set according to both the angle and the sample title.
+- Fit functions have been extended to allow for the addition of :ref:`Function Attribute Validators <attribute_validators>`.
+- The :ref:`ISIS SANS TOML <sans_toml_v1-ref>` format has been upgraded to V1. All V1 files will continue to be supported in future versions without changes.
+- An inelastic version of the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been implemented. This allows the multiple scattering effect to be simulated using a Monte Carlo integration for an arbitrary sample shape given an S(Q,w). The calculation can be run for a direct or indirect geometry instrument. The following figure shows the simulated first and second order scattering intensity as a function of energy for a direct geometry experiment on a water sample:
+
+.. figure:: /images/MultipleScatterIntensityDiscusDirect.png
+   :align: center
+
+.. _6.4_packaging:
+
+Packaging & Installation
+------------------------
+
+As advertised in :ref:`v6.3.0 <v6.3.0>` we have reworked our installer packages for this release. Changes include:
+
+- Windows and macOS packages are now named ``MantidWorkbench-6.4.0`` with the appropriate extension. Other than this they are used in the same manner.
+- A new linux package, ``mantidworkbench-6.4.0.tar.xz``, now supports many Linux distributions and should work on any 2010+ distribution with ``glibc >= 2.17``.
+  It is a simple, flat tarball that can be unpacked anywhere and no longer has to reside in ``/opt``.
+
+These packages are built using our conda libraries to make future maintenance easier.
+
+Last Release of .rpm and .deb
+#############################
+
+This release will be the last time we provide an ``.rpm`` for Red Hat and a ``.deb`` for Ubuntu.
+The new Linux tarball provided above will work on both of these systems and has the advantage of not being tied to ancient system libraries that have held up internal updates.
+The new tarball can also be extracted and run anywhere, so does not require root permissions to install.
+
+Further Information
+-------------------
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

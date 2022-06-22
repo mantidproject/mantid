@@ -17,6 +17,8 @@
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <algorithm>
+
 using namespace Mantid::API;
 using namespace Mantid::Indexing;
 
@@ -55,8 +57,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   std::vector<SpectrumDefinition> specDefs;
   specDefs.reserve(detIDs.size());
-  for (const auto detID : detIDs)
-    specDefs.emplace_back(detectorInfo.indexOf(detID));
+  std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(specDefs),
+                 [&detectorInfo](const auto detID) { return SpectrumDefinition(detectorInfo.indexOf(detID)); });
   // We need to filter based on detector IDs, but use IndexInfo for filtering
   // for a unified filtering mechanism. Thus we set detector IDs as (temporary)
   // spectrum numbers.
@@ -171,8 +173,8 @@ IndexInfo LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) 
     // Avoid adding non-existing indices (can happen if instrument has gaps in
     // its detector IDs). IndexInfo does the filtering for use.
     const auto indices = indexInfo.makeIndexSet(static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
-    for (const auto index : indices)
-      m_range.emplace_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
+    std::transform(indices.begin(), indices.end(), std::back_inserter(m_range),
+                   [indexInfo](const auto index) { return static_cast<int32_t>(indexInfo.spectrumNumber(index)); });
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {

@@ -4,6 +4,7 @@ default_language_version:
 exclude: ^$|instrument/
 
 ci:
+  autofix_prs: false
   skip: [clang-format]
 
 repos:
