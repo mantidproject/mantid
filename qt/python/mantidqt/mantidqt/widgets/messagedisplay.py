@@ -57,7 +57,7 @@ class MessageDisplay(MessageDisplay_cpp):
         """
         try:
             return qsettings.value(key, default, type=type)
-        except TypeError:
+        except (KeyError, TypeError):
             return default
 
     def writeSettings(self, qsettings):

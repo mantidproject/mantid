@@ -93,7 +93,7 @@ class GeneralSettings(object):
 
     def setup_general_group(self):
         self.view.window_behaviour.addItems(self.WINDOW_BEHAVIOUR)
-        window_behaviour = CONF.get(GeneralProperties.WINDOW_BEHAVIOUR.value)
+        window_behaviour = CONF.get(GeneralProperties.WINDOW_BEHAVIOUR.value, type=str)
         if window_behaviour in self.WINDOW_BEHAVIOUR:
             self.view.window_behaviour.setCurrentIndex(self.view.window_behaviour.findText(window_behaviour))
 
@@ -104,7 +104,7 @@ class GeneralSettings(object):
     def action_main_font_button_clicked(self):
         font = None
         if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value).split(',')
+            font_string = CONF.get(GeneralProperties.FONT.value, type=str).split(',')
             if len(font_string) > 2:
                 font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
         font_dialog = self.view.create_font_dialog(self.parent, font)
@@ -113,7 +113,7 @@ class GeneralSettings(object):
     def action_font_selected(self, font):
         font_string = ""
         if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value)
+            font_string = CONF.get(GeneralProperties.FONT.value, type=str)
         if font_string != font.toString():
             CONF.set(GeneralProperties.FONT.value, font.toString())
             if self.settings_presenter is not None:
@@ -231,8 +231,8 @@ class GeneralSettings(object):
 
     def get_layout_dict(self):
         try:
-            layout_list = CONF.get(GeneralProperties.USER_LAYOUT.value)
-        except KeyError:
+            layout_list = CONF.get(GeneralProperties.USER_LAYOUT.value, type=dict)
+        except (KeyError, TypeError):
             layout_list = {}
         return layout_list
 

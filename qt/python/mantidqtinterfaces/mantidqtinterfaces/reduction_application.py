@@ -84,6 +84,8 @@ class ReductionGUI(QMainWindow):
 
         # Recent files
         self._recent_files = settings.value("recent_files", [], type=list)
+        if self._recent_files is None:  # An empty list saved to QSettings comes back as 'None'
+            self._recent_files = []
 
         # Folder to open files in
         self._last_directory = settings.value("last_directory", '.', type=unicode)
