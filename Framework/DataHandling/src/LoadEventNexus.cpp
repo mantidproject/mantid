@@ -466,6 +466,10 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
   auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
+  // deal with no events
+  if (pulse_times.empty()) {
+    return std::make_pair(DateAndTime(0.0, 0.0), DateAndTime(0.0, 0.0));
+  }
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
   return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
@@ -982,7 +986,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
            * from our event_time_zero instead
            */
           auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
-          firstPulseT = std::min(firstPulseT, localFirstLast.first);
+          if (localFirstLast.first != DateAndTime(0.0, 0.0)) {
+            firstPulseT = std::min(firstPulseT, localFirstLast.first);
+          }
         }
         // get the number of events
         const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
