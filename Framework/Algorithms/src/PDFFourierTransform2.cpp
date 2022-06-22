@@ -173,7 +173,8 @@ size_t PDFFourierTransform2::determineMinIndex(double min, const std::vector<dou
 
   // get index for the min from the X-range, tightening the range if a partial x bin value is provided
   auto iter = std::lower_bound(X.begin(), X.end(), min);
-  size_t min_index = std::distance(X.begin(), iter);
+  // size_t min_index = std::distance(X.begin(), iter);
+  size_t min_index = 0;
 
   // go to first non-nan value
   auto iter_first_normal =
@@ -198,7 +199,8 @@ size_t PDFFourierTransform2::determineMaxIndex(double max, const std::vector<dou
 
   // get index for the max from the X-range, tightening the range if a partial x bin value is provided
   auto iter = std::upper_bound(X.begin(), X.end(), max) - 1;
-  size_t max_index = std::distance(X.begin(), iter);
+  // size_t max_index = std::distance(X.begin(), iter);
+  size_t max_index = X.size() - 1;
 
   // go to first non-nan value. This works for both histogram (bin edge) data and
   // point data, as the integration proceeds by calculating rectangles between pairs of X values.
@@ -417,23 +419,33 @@ void PDFFourierTransform2::exec() {
     }
   }
 
-  // determine input-range
-  size_t Xmin_index = determineMinIndex(inMin, inputX, inputY);
-  size_t Xmax_index = determineMaxIndex(inMax, inputX, inputY);
-  g_log.notice() << "Adjusting to data: input min = " << inputX[Xmin_index] << " input max = " << inputX[Xmax_index]
-                 << "\n";
-  for (size_t i = 0; i < Xmin_index; ++i)
-    inputY[i] = 0.;
-  for (size_t i = Xmax_index; i < inputY.size(); ++i)
-    // for points ws this will set the y[Xmax_index]=0
-    // This is OK since the integration is based on y value at LH edge of each segment
-    inputY[i] = 0.;
+  for (size_t i = 0; i < inputX.size(); ++i) {
+    if (inputWS->histogram(0).xMode() == HistogramData::Histogram::XMode::Points) {
+      if ((inputX[i] < inMin) || (inputX[i] > inMax))
+        inputY[i] = 0.;
+    } else {
+      // since the integration is based on LH segment edge we could in theory use this "edge"
+      // logic for points as well but perhaps better to be more verbose here
+      if ((inputX[i] < inMin) && (i < inputY.size()))
+        inputY[i] = 0.;
+      if (inputX[i] > inMax)
+        inputY[i - 1] = 0.;
+    }
+  }
+
   // convert to S(Q)-1 or g(R)+1
   if (direction == FORWARD) {
     convertToSQMinus1(inputY, inputX, inputDY, inputDX);
   } else if (direction == BACKWARD) {
     convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX);
   }
+
+  // determine input-range
+  size_t Xmin_index = determineMinIndex(inMin, inputX, inputY);
+  size_t Xmax_index = determineMaxIndex(inMax, inputX, inputY);
+  g_log.notice() << "Adjusting to data: input min = " << inputX[Xmin_index] << " input max = " << inputX[Xmax_index]
+                 << "\n";
+
   // determine r axis for result
   if (isEmpty(outDelta))
     outDelta = M_PI / inputX[Xmax_index];
@@ -478,7 +490,7 @@ void PDFFourierTransform2::exec() {
 
     double fs = 0;
     double error = 0;
-    for (size_t inXIndex = 0; inXIndex < inputX.size() - 1; inXIndex++) {
+    for (size_t inXIndex = Xmin_index; inXIndex < Xmax_index; inXIndex++) {
       const double inX1 = inputX[inXIndex];
       const double inX2 = inputX[inXIndex + 1];
       const double sinx1 = sin(inX1 * outX) - inX1 * outX * cos(inX1 * outX);
