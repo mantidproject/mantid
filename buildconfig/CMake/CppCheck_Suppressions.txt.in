@@ -181,10 +181,6 @@ unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMcStasNexu
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:404
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/VectorColumn.h:88
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed2.cpp:91
-redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:1834
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:91
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:781
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:2002
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:52
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:98
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:812
