@@ -1,0 +1,1 @@
+* Fixed bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` that causes Mantid to crash in some limited cases.
