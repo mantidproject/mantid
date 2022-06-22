@@ -455,9 +455,8 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t st
   this->getBox()->getBoxes(boxes, 1000, false);
   boxes_filtered.reserve(boxes.size());
 
-  for (const auto box : boxes) {
-    boxes_filtered.emplace_back(dynamic_cast<MDBoxBase<MDE, nd> *>(box));
-  }
+  std::transform(boxes.cbegin(), boxes.cend(), std::back_inserter(boxes_filtered),
+                 [](const auto box) { return dynamic_cast<MDBoxBase<MDE, nd> *>(box); });
 
   // Now sort by ID
   using ibox_t = MDBoxBase<MDE, nd> *;

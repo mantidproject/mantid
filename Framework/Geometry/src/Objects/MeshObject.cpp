@@ -14,6 +14,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -85,11 +86,11 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
   }
 
   // True if point is on surface
-  for (const auto &intersectionPoint : intersectionPoints) {
-    if (point.distance(intersectionPoint) < M_TOLERANCE) {
-      return true;
-    }
-  }
+  const auto it = std::find_if(
+      intersectionPoints.cbegin(), intersectionPoints.cend(),
+      [this, &point](const auto &intersectionPoint) { return point.distance(intersectionPoint) < M_TOLERANCE; });
+  if (it != intersectionPoints.cend())
+    return true;
 
   // Look for nearest point then check its entry-exit flag
   double nearestPointDistance = point.distance(intersectionPoints[0]);
@@ -129,11 +130,11 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
       return false;
     }
 
-    for (const auto &intersectionPoint : intersectionPoints) {
-      if (point.distance(intersectionPoint) < M_TOLERANCE) {
-        return true;
-      }
-    }
+    const auto it = std::find_if(
+        intersectionPoints.cbegin(), intersectionPoints.cend(),
+        [this, &point](const auto &intersectionPoint) { return point.distance(intersectionPoint) < M_TOLERANCE; });
+    if (it != intersectionPoints.cend())
+      return true;
   }
   return false;
 }
@@ -297,14 +298,11 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
  * @param scaleFactor :: Kernel::V3D giving scaling of the object
  * @return :: estimate of solid angle of object.
  */
-double MeshObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const
-
-{
+double MeshObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
-  for (const auto &vertex : m_vertices) {
-    scaledVertices.emplace_back(scaleFactor * vertex);
-  }
+  std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),
+                 [&scaleFactor](const auto &vertex) { return scaleFactor * vertex; });
   MeshObject meshScaled(m_triangles, scaledVertices, m_material);
   return meshScaled.solidAngle(observer);
 }
@@ -476,9 +474,8 @@ std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
  * @param rotationMatrix Rotation matrix to be applied
  */
 void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
-  for (Kernel::V3D &vertex : m_vertices) {
-    vertex.rotate(rotationMatrix);
-  }
+  std::for_each(m_vertices.begin(), m_vertices.end(),
+                [&rotationMatrix](auto &vertex) { vertex.rotate(rotationMatrix); });
 }
 
 /**
@@ -486,9 +483,8 @@ void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
  * @param translationVector Translation vector to be applied
  */
 void MeshObject::translate(const Kernel::V3D &translationVector) {
-  for (Kernel::V3D &vertex : m_vertices) {
-    vertex += translationVector;
-  }
+  std::transform(m_vertices.cbegin(), m_vertices.cend(), m_vertices.begin(),
+                 [&translationVector](const auto &vertex) { return vertex + translationVector; });
 }
 
 /**
@@ -496,9 +492,8 @@ void MeshObject::translate(const Kernel::V3D &translationVector) {
  * @param scaleFactor Scale factor
  */
 void MeshObject::scale(const double scaleFactor) {
-  for (Kernel::V3D &vertex : m_vertices) {
-    vertex *= scaleFactor;
-  }
+  std::transform(m_vertices.cbegin(), m_vertices.cend(), m_vertices.begin(),
+                 [&scaleFactor](const auto &vertex) { return vertex * scaleFactor; });
 }
 
 /**

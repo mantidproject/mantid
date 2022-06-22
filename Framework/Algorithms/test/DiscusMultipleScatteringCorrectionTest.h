@@ -43,6 +43,9 @@ public:
                            std::vector<double> &resultX, std::vector<double> &resultY) {
     DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
   }
+  void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) {
+    DiscusMultipleScatteringCorrection::getXMinMax(ws, xmin, xmax);
+  }
 };
 
 class DiscusMultipleScatteringCorrectionTest : public CxxTest::TestSuite {
@@ -339,6 +342,20 @@ public:
     }
   }
 
+  void test_workspace_containing_spectra_without_detectors() {
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+    inputWorkspace->getSpectrum(0).clearDetectorIDs();
+    auto alg = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+  }
+
   void test_interpolateGaussian() {
     DiscusMultipleScatteringCorrectionHelper alg;
     const int NBINS = 10;
@@ -579,14 +596,17 @@ public:
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     SofQWorkspace->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
 
-    std::vector<double> two_thetas = {20.0, 40.0, 60.0, 90.0};
     const double THICKNESS = 0.00065; // metres
 
+    // Discus calc was done at 20, 40, 60 and 90 degrees. Do it at every 10 degrees here so have access to the 4 Discus
+    // results
     const int NTHETA = 18;
     const double ang_inc = 180.0 / NTHETA;
     const double EInitial = 5.1;
+    // sample occupies +y,-z and -y,+z regions ie \ when looking along positive x direction
+    // the detectors are in a ring in the yz plane in positive y. All 4 Discus angles are on the same side of the sample
     auto inputWorkspace = SetupFlatPlateWorkspace(NTHETA, 1, ang_inc, nwpts, wmin - 0.5 * wwidth, wwidth, 0.05, 0.05,
-                                                  THICKNESS, 45.0, {1.0, 0.0, 0.0}, emode, EInitial);
+                                                  THICKNESS, -45.0, {1.0, 0.0, 0.0}, emode, EInitial);
     auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
 
     // override the material
@@ -646,17 +666,57 @@ public:
 
   void test_indirect_on_realistic_structure_factor_without_importance_sampling() {
     // results are not vastly different to the direct geometry
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00022, 0.00021);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00027, 0.00022);
   }
 
   void test_indirect_on_realistic_structure_factor_with_deltaE_interpolation() {
     // only run simulation on half of the deltaE bins (even indices) and interpolate the rest (odd indices)
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00023, 0.00021);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00027, 0.00022);
+  }
+
+  void test_getxminmax() {
+    const double x0 = 0.5;
+    const double deltax = 1.0;
+    const int nbins = 3;
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(1, 2, 1.0, nbins, x0, deltax);
+    double xmin, xmax;
+    DiscusMultipleScatteringCorrectionHelper alg;
+    alg.getXMinMax(*ws, xmin, xmax);
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 3.0);
+    for (size_t i = 0; i < ws->getNumberHistograms(); i++)
+      ws->getSpectrum(i).clearDetectorIDs();
+    TS_ASSERT_THROWS(alg.getXMinMax(*ws, xmin, xmax), const std::runtime_error &);
   }
 
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
+
+  void test_validateInputsWithInputWorkspaceSetToGroup() {
+    // Test motivated by ensuring alg dialog opens in workbench UI in all cases
+    // Workbench calls InterfaceManager::createdialogfromname when opening algorithm dialog. This calls
+    // setPropertyValue on all inputs and if they're all OK it then calls validateInputs - this is separate to and
+    // before the call to validateInputs that happens inside alg->execute()
+    auto alg = createAlgorithm();
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
+                                                  DeltaEMode::Elastic);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWorkspace", inputWorkspace);
+    auto inputWorkspaceGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWSGroup", inputWorkspaceGroup);
+    inputWorkspaceGroup->add(inputWorkspace->getName());
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", inputWorkspaceGroup->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NumberScatterings", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsSingle", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("NeutronPathsMultiple", "1"));
+    std::map<std::string, std::string> errs;
+    // Note: if validateInputs causes an access violation (as opposed to throwing an exception) then
+    // TS_ASSERT_THROWS_NOTHING won't catch it
+    TS_ASSERT_THROWS_NOTHING(errs = alg->validateInputs());
+    TS_ASSERT(!errs.empty());
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
 
   void test_invalidSOfQ() {
     DiscusMultipleScatteringCorrectionHelper alg;

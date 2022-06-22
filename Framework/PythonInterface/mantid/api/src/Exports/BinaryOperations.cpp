@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidPythonInterface/core/Policies/AsType.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>
@@ -101,6 +102,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs, const std::stri
   ResultType result;
   std::string error;
   try {
+    ReleaseGlobalInterpreterLock releaseGIL;
     if (reverse) {
       result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType, ResultType>(algoName, rhs, lhs, inplace,
                                                                                             false, name, true);
@@ -165,7 +167,10 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value, 
   alg->setProperty<double>("DataValue", value);
   const std::string tmpName("__python_binary_op_single_value");
   alg->setPropertyValue("OutputWorkspace", tmpName);
-  alg->execute();
+  { // instantiate releaseGIL in limited scope to allow for repeat in 'performBinaryOp'
+    ReleaseGlobalInterpreterLock releaseGIL;
+    alg->execute();
+  }
 
   MatrixWorkspace_sptr singleValue;
   if (alg->isExecuted()) {

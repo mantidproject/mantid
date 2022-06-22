@@ -24,7 +24,6 @@ function usage() {
 # Optional arguments
 CONDA_CHANNEL=mantid
 SUFFIX=""
-PACKAGE_NAME=${@: -1} # grab last argument
 while [ ! $# -eq 0 ]
 do
     case "$1" in
@@ -63,10 +62,9 @@ CONDA_ENV=_conda_env
 CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$CONDA_ENV
 COPY_DIR=$THIS_SCRIPT_DIR/_package_build
 CONDA_EXE=mamba
-
-# Sanity check arguments. Especially ensure that paths are not empty as we are removing
-# items and we don't want to accidentally clean out system paths
-test -n "$PACKAGE_NAME" || usage 1
+PACKAGE_PREFIX=MantidWorkbench
+PACKAGE_NAME="$PACKAGE_PREFIX${SUFFIX}"
+LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
 
 echo "Cleaning up left over old directories"
 rm -rf $COPY_DIR
@@ -89,6 +87,7 @@ echo "jq removed from conda env"
 $CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
+mkdir $COPY_DIR/bin
 cp $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/ -r
 cp $CONDA_ENV_PATH/Lib $COPY_DIR/bin/ -r
 cp $CONDA_ENV_PATH/Scripts $COPY_DIR/bin/ -r
@@ -97,11 +96,6 @@ cp $CONDA_ENV_PATH/python*.* $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/msvc*.* $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 
-echo "Copying mantid python files into bin"
-cp $CONDA_ENV_PATH/Lib/site-packages/mantid* $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/Lib/site-packages/ $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/Lib/site-packages/workbench $COPY_DIR/bin/workbench -r
-
 echo "Copy all DLLs from env/Library/bin to package/bin"
 cp $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
@@ -109,21 +103,21 @@ echo "Copy Mantid specific files from env/Library/bin to package/bin"
 cp $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
 cp $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/Library/bin/MantidWorkbench.exe $COPY_DIR/bin/
 
-echo "Copy env/includes to the package/includes"
-cp $CONDA_ENV_PATH/Library/include/eigen3 $COPY_DIR/include/ -r
+echo "Copy Mantid icon files from source to package/bin"
+cp $THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_workbench.ico
+cp $THIS_SCRIPT_DIR/../../../images/mantid_notebook$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_notebook.ico
 
 echo "Copy Instrument details to the package"
 cp $CONDA_ENV_PATH/Library/instrument $COPY_DIR/ -r
 
 echo "Constructing package/lib/qt5"
-mkdir $COPY_DIR/lib
-mkdir $COPY_DIR/lib/qt5
-mkdir $COPY_DIR/lib/qt5/bin
+mkdir -p $COPY_DIR/lib/qt5/bin
 cp $CONDA_ENV_PATH/Library/bin/QtWebEngineProcess.exe $COPY_DIR/lib/qt5/bin
-cp $CONDA_ENV_PATH/Library/bin/qt.conf $COPY_DIR/lib/qt5/bin
+cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
 cp $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/ -r
+mkdir -p $COPY_DIR/lib/qt5/translations/qtwebengine_locales
+cp $CONDA_ENV_PATH/Library/translations/qtwebengine_locales/en*.pak $COPY_DIR/lib/qt5/translations/qtwebengine_locales/
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins
@@ -133,6 +127,7 @@ cp $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/ -r
 cp $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/ -r
 cp $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/ -r
 cp $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/ -r
+cp $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5
 cp $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
 cp $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/ -r
 
@@ -141,10 +136,15 @@ cp $CONDA_ENV_PATH/Library/scripts $COPY_DIR/ -r
 
 echo "Copy share files (includes mantid docs) to the package"
 cp $CONDA_ENV_PATH/Library/share/doc $COPY_DIR/share/ -r
-cp $CONDA_ENV_PATH/Library/share/eigen3 $COPY_DIR/share/ -r
 
-echo "Copy executable file and executable script into package"
-cp $THIS_SCRIPT_DIR/MantidWorkbench.exe $COPY_DIR/bin/ -f
+echo "Copy executable launcher"
+# MantidWorkbench-script.pyw is created by project.nsi on creation of the package
+cp $THIS_SCRIPT_DIR/MantidWorkbench.exe $COPY_DIR/bin/
+
+echo "Copy site customization module"
+# Adds a sitecustomize module to ensure the bin directory
+# is added to the DLL load PATH
+cp $THIS_SCRIPT_DIR/sitecustomize.py $COPY_DIR/bin/Lib/site-packages/
 
 # Cleanup pdb files and remove them from bin
 echo "Performing some cleanup.... deleting files"
@@ -162,6 +162,10 @@ NSIS_CONDA_ENV=_nsis_conda_env
 NSIS_CONDA_ENV_PATH=$THIS_SCRIPT_DIR/$NSIS_CONDA_ENV
 # First remove existing environment if it exists
 rm -rf $NSIS_CONDA_ENV_PATH
+# Remove temporary nsis helper files
+rm -f $THIS_SCRIPT_DIR/uninstall_files.nsh
+rm -f $THIS_SCRIPT_DIR/uninstall_dirs.nsh
+
 echo "Creating nsis conda env"
 "$CONDA_EXE" create --prefix $NSIS_CONDA_ENV_PATH nsis -c conda-forge -y
 echo "Conda nsis env created"
@@ -176,7 +180,7 @@ COPY_DIR="$SCRIPT_DRIVE_LETTER:${COPY_DIR:2}"
 NSIS_SCRIPT=${NSIS_SCRIPT////\\}
 NSIS_SCRIPT="$SCRIPT_DRIVE_LETTER:${NSIS_SCRIPT:2}"
 
-NSIS_OUTPUT_LOG=$THIS_SCRIPT_DIR/nsis_log.txt
+NSIS_OUTPUT_LOG=$PWD/nsis_log.txt
 NSIS_OUTPUT_LOG=${NSIS_OUTPUT_LOG////\\}
 NSIS_OUTPUT_LOG="$SCRIPT_DRIVE_LETTER:${NSIS_OUTPUT_LOG:2}"
 
@@ -185,39 +189,28 @@ MAKENSIS_COMMAND=$NSIS_CONDA_ENV_PATH/NSIS/makensis
 MAKENSIS_COMMAND=${MAKENSIS_COMMAND////\\}
 MAKENSIS_COMMAND="$SCRIPT_DRIVE_LETTER:${MAKENSIS_COMMAND:2}"
 
-LOWER_CASE_SUFFIX="$(echo ${SUFFIX} | tr [:upper:] [:lower:])"
-
 MANTID_ICON=$THIS_SCRIPT_DIR/../../../images/mantidplot$LOWER_CASE_SUFFIX.ico
 MANTID_ICON=${MANTID_ICON////\\}
 MANTID_ICON="$SCRIPT_DRIVE_LETTER:${MANTID_ICON:2}"
 
-WORKBENCH_ICON=$THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico
-WORKBENCH_ICON=${WORKBENCH_ICON////\\}
-WORKBENCH_ICON="$SCRIPT_DRIVE_LETTER:${WORKBENCH_ICON:2}"
-
-NOTEBOOK_ICON=$THIS_SCRIPT_DIR/../../../images/mantid_notebook$LOWER_CASE_SUFFIX.ico
-NOTEBOOK_ICON=${NOTEBOOK_ICON////\\}
-NOTEBOOK_ICON="$SCRIPT_DRIVE_LETTER:${NOTEBOOK_ICON:2}"
-
 LICENSE_PATH=$THIS_SCRIPT_DIR/../../../LICENSE.txt
 LICENSE_PATH=${LICENSE_PATH////\\}
 LICENSE_PATH="$SCRIPT_DRIVE_LETTER:${LICENSE_PATH:2}"
-echo Workebench Icon: $WORKBENCH_ICON
 
 # Generate uninstall commands to make sure to only remove files that are copied by the installer
 echo Generating uninstaller helper files
 python $THIS_SCRIPT_DIR/create_uninstall_lists.py --package_dir=$COPY_DIR --output_dir=$THIS_SCRIPT_DIR
 
-# Run the makensis command from our nsis Conda environment
-echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$PACKAGE_NAME /DMANTID_ICON=$MANTID_ICON /DWORKBENCH_ICON=$WORKBENCH_ICON /DNOTEBOOK_ICON=$NOTEBOOK_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
-echo "Package packaged, find it here: $THIS_SCRIPT_DIR/$PACKAGE_NAME"
+# Add version info to the package name
+VERSION_NAME="$PACKAGE_NAME"-"$VERSION".exe
+# Give NSIS full path to the output package name so that it drops it in the current working directory.
+OUTFILE_NAME=$PWD/$VERSION_NAME
+OUTFILE_NAME=${OUTFILE_NAME////\\}
+OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
-echo "Cleaning up left over files"
-rm -rf $CONDA_ENV_PATH
-rm -rf $COPY_DIR
-rm -rf $NSIS_CONDA_ENV_PATH
-rm $THIS_SCRIPT_DIR/uninstall_files.nsh
-rm $THIS_SCRIPT_DIR/uninstall_dirs.nsh
+# Run the makensis command from our nsis Conda environment
+echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
+cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
+echo "Package packaged, find it here: $OUTFILE_NAME"
 
 echo "Done"

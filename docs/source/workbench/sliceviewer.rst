@@ -23,6 +23,7 @@ Some of the key features of the Sliceviewer provided are:
 - Overlay of peaks workspaces
 - Non-orthogonal axes view mode, including peaks workspace overlays
 - ROI preview and extraction
+- Non-axis aligned cutting tool
 - Cursor information widget that, for a MatrixWorkspace, includes quantities such as :math:`l1, l2, 2\theta` etc
 - Arrow keys can now be used to move the cursor a pixel at a time when single-pixel line plots are enabled
 
@@ -140,6 +141,26 @@ is now limited to the selected region:
 A new status bar has been added at the bottom to indicate that the cuts can be extracted
 to separate workspaces by using the relevant keys. Similar keys and status information is
 presented in the single-pixel line plots mode.
+
+.. _sliceviewer_nonaxiscuts:
+
+Non-axis aligned cutting tool
+-----------------------------
+
+The cut viewer tool allows the user to interactively make arbitrary 1D cuts to 2D slices of MD workspaces
+with 3 Q-dimensions. The cut viewer tool consists of a pane on the right with a table and the 1D plot of the
+chosen cut. The table stores the vectors defining the cut (u1 and u2 in the plane of the slice and u3 out of
+plane), start, stop, nbins and step size. A representation of the cut is plotted on the slice
+with end points and centre that can be dragged and an adjustable thickness, which will automatically update the values
+in the table.
+
+
+.. figure:: ../images/SliceViewer_CutViewer.png
+   :class: screenshot
+   :width: 75%
+   :align: center
+
+Note at present this tool cannot be used in non-orthogonal view, or for workspaces that contain non-Q dimensions.
 
 .. _sliceviewer_cursor:
 

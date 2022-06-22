@@ -132,7 +132,9 @@ def start_error_reporter():
     """
     Used to start the error reporter if the program has segfaulted.
     """
-    errorreports_main.main()
+
+    errorreports_main.main(["--application", APPNAME,
+                            "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN])
 
 
 def create_and_launch_workbench(app, command_line_options):

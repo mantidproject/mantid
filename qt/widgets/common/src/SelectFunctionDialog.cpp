@@ -66,9 +66,8 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
 
   // Set up the search box
   m_form->searchBox->completer()->setCompletionMode(QCompleter::PopupCompletion);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
-#endif
+
   connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this, SLOT(searchBoxChanged(const QString &)));
 
   // Construct the QTreeWidget based on the map information of categories and

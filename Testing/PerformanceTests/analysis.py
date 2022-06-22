@@ -468,7 +468,7 @@ def generate_html_subproject_report(path, last_num, x_field='revision', starts_w
 
     # -------- Report for each test ------------------------
     for name in test_names:
-        print "Plotting", name
+        print("Plotting", name)
         html += """<hr><h2>%s</h2>\n""" % name
         overview_html += """<hr><h2>%s</h2>\n""" % name
 
@@ -575,7 +575,7 @@ def generate_html_report(path, last_num, x_field='revision'):
     f.write(overview_html)
     f.close()
 
-    print "Report complete!"
+    print("Report complete!")
 
 
 # ============================================================================================

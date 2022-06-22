@@ -87,9 +87,8 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
 
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
-  for (auto &i : data) {
-    i = std::make_unique<Histogram1D>(spec);
-  }
+  std::transform(data.begin(), data.end(), data.begin(),
+                 [&spec](const auto &) { return std::move(std::make_unique<Histogram1D>(spec)); });
 
   // Add axes that reference the data
   m_axes.resize(2);
@@ -128,9 +127,10 @@ size_t Workspace2D::blocksize() const {
     return 0;
   } else {
     size_t numBins = data[0]->size();
-    for (const auto &iter : data)
-      if (numBins != iter->size())
-        throw std::length_error("blocksize undefined because size of histograms is not equal");
+    const auto it =
+        std::find_if_not(data.cbegin(), data.cend(), [numBins](const auto &iter) { return numBins == iter->size(); });
+    if (it != data.cend())
+      throw std::length_error("blocksize undefined because size of histograms is not equal");
     return numBins;
   }
 }

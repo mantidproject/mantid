@@ -446,7 +446,7 @@ def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=
 
 
 def boundaries_from_points(input_array):
-    """"
+    """
     The function tries to guess bin boundaries from bin centers
 
     :param input_array: a :class:`numpy.ndarray` of bin centers
@@ -979,7 +979,8 @@ def remove_and_return_errorbar_cap_lines(ax):
                         break
 
             if line_is_errorbar_cap:
-                errorbar_cap_lines.append(ax.lines.pop(ax.lines.index(line)))
+                errorbar_cap_lines.append(line)
+                line.remove()
 
     return errorbar_cap_lines
 

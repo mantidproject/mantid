@@ -20,6 +20,9 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+
+#include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <utility>
 
@@ -86,9 +89,8 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
-  for (const auto &property : properties) {
-    m_properties.emplace_back(std::make_shared<PropertyHistory>(property->createHistory()));
-  }
+  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(m_properties),
+                 [](const auto &property) { return std::make_shared<PropertyHistory>(property->createHistory()); });
 }
 
 /**

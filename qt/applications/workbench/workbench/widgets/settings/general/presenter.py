@@ -167,9 +167,11 @@ class GeneralSettings(object):
         ConfigService.setString(GeneralProperties.USE_NOTIFICATIONS.value, "On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value)))
-        self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value)))
-        self.view.prompt_deleting_workspaces.setChecked(bool(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value)))
+        self.view.prompt_save_on_close.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool))
+        self.view.prompt_save_editor_modified.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value,
+                                                                  type=bool))
+        self.view.prompt_deleting_workspaces.setChecked(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value,
+                                                                 type=bool))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
@@ -180,7 +182,7 @@ class GeneralSettings(object):
         crystallography_convention = ("Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value))
         use_open_gl = ("on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower())
         invisible_workspaces = ("true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
-        completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value)
+        completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value, type=bool)
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)

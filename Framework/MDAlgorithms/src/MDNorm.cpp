@@ -29,8 +29,9 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 
 namespace Mantid::MDAlgorithms {
 
@@ -958,11 +959,11 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
     }
     parametersIndex++;
   }
-  for (auto &idx : dimensionIndex) {
-    if (idx > numDimsTemp)
-      throw(std::invalid_argument("Cannot find at least one of QDimension0, "
-                                  "QDimension1, or QDimension2"));
-  }
+  const auto it = std::find_if(dimensionIndex.cbegin(), dimensionIndex.cend(),
+                               [numDimsTemp](const auto &idx) { return idx > numDimsTemp; });
+  if (it != dimensionIndex.cend())
+    throw(std::invalid_argument("Cannot find at least one of QDimension0, "
+                                "QDimension1, or QDimension2"));
 }
 
 /**
