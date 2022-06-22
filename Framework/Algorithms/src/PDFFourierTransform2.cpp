@@ -399,13 +399,6 @@ void PDFFourierTransform2::exec() {
     */
   }
 
-  // convert to S(Q)-1 or g(R)+1
-  if (direction == FORWARD) {
-    convertToSQMinus1(inputY, inputX, inputDY, inputDX);
-  } else if (direction == BACKWARD) {
-    convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX);
-  }
-
   double inMin, inMax, outDelta, outMax;
   inMin = getProperty("Qmin");
   inMax = getProperty("Qmax");
@@ -429,6 +422,18 @@ void PDFFourierTransform2::exec() {
   size_t Xmax_index = determineMaxIndex(inMax, inputX, inputY);
   g_log.notice() << "Adjusting to data: input min = " << inputX[Xmin_index] << " input max = " << inputX[Xmax_index]
                  << "\n";
+  for (size_t i = 0; i < Xmin_index; ++i)
+    inputY[i] = 0.;
+  for (size_t i = Xmax_index; i < inputY.size(); ++i)
+    // for points ws this will set the y[Xmax_index]=0
+    // This is OK since the integration is based on y value at LH edge of each segment
+    inputY[i] = 0.;
+  // convert to S(Q)-1 or g(R)+1
+  if (direction == FORWARD) {
+    convertToSQMinus1(inputY, inputX, inputDY, inputDX);
+  } else if (direction == BACKWARD) {
+    convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX);
+  }
   // determine r axis for result
   if (isEmpty(outDelta))
     outDelta = M_PI / inputX[Xmax_index];
@@ -473,7 +478,7 @@ void PDFFourierTransform2::exec() {
 
     double fs = 0;
     double error = 0;
-    for (size_t inXIndex = Xmin_index; inXIndex < Xmax_index; inXIndex++) {
+    for (size_t inXIndex = 0; inXIndex < inputX.size() - 1; inXIndex++) {
       const double inX1 = inputX[inXIndex];
       const double inX2 = inputX[inXIndex + 1];
       const double sinx1 = sin(inX1 * outX) - inX1 * outX * cos(inX1 * outX);
@@ -482,7 +487,7 @@ void PDFFourierTransform2::exec() {
 
       // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
       if (filter && inX1 != 0) {
-        const double lorchKernel = inX1 * M_PI / inputX[Xmax_index];
+        const double lorchKernel = inX1 * M_PI / inputX.back();
         sinus *= sin(lorchKernel) / lorchKernel;
       }
       fs += sinus * inputY[inXIndex];
