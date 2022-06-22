@@ -456,6 +456,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);
+    m_mainPresenter->notifySettingsChanged();
+    notifyRowModelChanged();
   }
 }
 
