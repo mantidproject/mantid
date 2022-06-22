@@ -24,7 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
+from qtpy.QtCore import (QByteArray, QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
                             QSplashScreen, QMessageBox)  # noqa
@@ -780,7 +780,7 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+            if not self.restoreState(settings.get('MainWindow/state', type=QByteArray), SAVE_STATE_VERSION):
                 logger.warning(
                     "The previous layout of workbench is not compatible with this version, reverting to default layout."
                 )
