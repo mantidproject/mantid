@@ -41,6 +41,12 @@ Bugfixes
 * On first time start up of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`, the default save location is now utilised for
   calibration and focus files.
 
+Single Crystal Diffraction
+------------------
 
+New Features
+############
+
+- The TOPAZ Instrument Defintion File is updated with latest calibration and number of active banks.
 
 :ref:`Release 6.4.0 <v6.4.0>`
