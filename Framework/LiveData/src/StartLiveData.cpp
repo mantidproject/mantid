@@ -227,6 +227,10 @@ void StartLiveData::exec() {
     // Launch asyncronously
     monitorAlg->executeAsync();
 
+    // Clear the local listener reference just in case this algorithm object
+    // is kept around longer than is necessary so that it does not keep
+    // any listeners active
+    m_listener.reset();
     // Set the output property that passes back a handle to the ongoing live
     // algorithm
     setProperty("MonitorLiveData", algBase);
