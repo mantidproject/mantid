@@ -246,22 +246,28 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.0207, places=3)
 
 
-class TotalScatteringFilterTest(systemtesting.MantidSystemTest):
+class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
 
     pdf_output = None
+    r_min = 1.0
 
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
         mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
-        self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, freq_params=[1])
+        self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, pdf_type="g(r)", freq_params=[self.r_min])
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.90692, places=3)
+        x_data = self.pdf_output.dataX(0)
+        y_data = self.pdf_output.dataY(0)
+        idx_to_check_filter = 5
+        self.assertTrue(x_data[idx_to_check_filter] < self.r_min)
+        self.assertAlmostEqual(y_data[idx_to_check_filter], 0.0, places=1)
+        self.assertAlmostEqual(y_data[37], 1.0187, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
