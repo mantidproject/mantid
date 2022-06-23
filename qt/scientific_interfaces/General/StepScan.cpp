@@ -608,6 +608,7 @@ void StepScan::generateCurve(const QString &var) {
     MatrixWorkspace_sptr top = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_plotWSName);
     MatrixWorkspace_sptr bottom = norm->getProperty("OutputWorkspace");
     top /= bottom;
+    AnalysisDataService::Instance().addOrReplace(m_plotWSName, top);
   }
 
   plotCurve();

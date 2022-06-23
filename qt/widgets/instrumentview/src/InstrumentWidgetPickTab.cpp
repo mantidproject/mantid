@@ -1630,7 +1630,7 @@ void DetectorPlotController::savePlotToWorkspace() {
   std::vector<Mantid::detid_t> detids;
   // unit id for x vector in the created workspace
   std::string unitX;
-  foreach (QString label, labels) {
+  for (const QString &label : labels) {
     std::vector<double> x, y, e;
     // split the label to get the detector id and selection type
     QStringList parts = label.split(QRegExp("[()]"));

@@ -83,21 +83,13 @@ using namespace Mantid::API;
 template <typename LHSType, typename RHSType, typename ResultType>
 ResultType performBinaryOp(const LHSType lhs, const RHSType rhs, const std::string &op, const std::string &name,
                            bool inplace, bool reverse) {
-  std::string algoName = op;
-
   // ----- Determine which version of the algo should be called -----
   MatrixWorkspace_const_sptr lhs_mat = std::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
   MatrixWorkspace_const_sptr rhs_mat = std::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
   WorkspaceGroup_const_sptr lhs_grp = std::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
   WorkspaceGroup_const_sptr rhs_grp = std::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
 
-  if ((lhs_mat || lhs_grp) && (rhs_mat || rhs_grp))
-    // Both sides are matrixworkspace - use the original algos (e..g "Plus.")
-    algoName = op;
-  else
-    // One of the workspaces must be MDHistoWorkspace or MDEventWorkspace
-    // Use the MD version, e.g. "PlusMD"
-    algoName = op + "MD";
+  const auto algoName = (lhs_mat || lhs_grp) && (rhs_mat || rhs_grp) ? op : op + "MD";
 
   ResultType result;
   std::string error;

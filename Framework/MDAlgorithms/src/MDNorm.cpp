@@ -1518,10 +1518,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, con
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex, 0.3 + progStep * (1. + progIndex), ndets);
   // muliple threading
-  bool safe = true;
-  if (m_diffraction) {
-    safe = Kernel::threadSafe(*integrFlux);
-  }
+  bool safe = m_diffraction ? Kernel::threadSafe(*integrFlux) : true;
 
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
 for (int64_t i = 0; i < ndets; i++) {

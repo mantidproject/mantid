@@ -214,8 +214,8 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS, st
  * @param sumSQErrors : Accumulation error in/out ref. Squared value.
  * @param sumNEvents : Accumulation n_event in/out ref.
  */
-void performWeightedSum(MDHistoWorkspaceIterator const *const iterator, MDBoxImplicitFunction &box, double &sumSignal,
-                        double &sumSQErrors, double &sumNEvents) {
+void performWeightedSum(MDHistoWorkspaceIterator const *const iterator, const MDBoxImplicitFunction &box,
+                        double &sumSignal, double &sumSQErrors, double &sumNEvents) {
   if (!iterator->getIsMasked()) {
     const double weight = box.fraction(iterator->getBoxExtents());
     if (weight != 0) {
