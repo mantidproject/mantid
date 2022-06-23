@@ -18,6 +18,7 @@ set(LIB_SRCS
     src/PeakMarker.cpp
     src/Plot.cpp
     src/RangeMarker.cpp
+    src/RegionSelector.cpp
     src/ScalarMappable.cpp
     src/SingleMarker.cpp
 )
@@ -40,6 +41,7 @@ set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/PeakMarker.h
     inc/MantidQtWidgets/MplCpp/Plot.h
     inc/MantidQtWidgets/MplCpp/RangeMarker.h
+    inc/MantidQtWidgets/MplCpp/RegionSelector.h
     inc/MantidQtWidgets/MplCpp/ScalarMappable.h
     inc/MantidQtWidgets/MplCpp/SingleMarker.h
 )
