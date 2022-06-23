@@ -530,6 +530,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         Clear all the rectangles currently shown
         """
         self._manager.clear()
+        self._selector.set_visible(False)
         self._update_plot_values()
 
     def handle_key(self, key: str):

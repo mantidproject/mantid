@@ -8,13 +8,15 @@ class RectangleSelection(RectangleSelector):
 
     def _release(self, event):
         """
-        Copyrights go to matplotlib, because this is a straight copy of the _release function of the RectangeSelector.
+        Copyrights go to matplotlib, because this is a straight copy of the _release function of the RectangleSelector.
         HOWEVER, this copied overriding function behaves differently than its original, for reasons I cannot explain.
         Where the basic RectangleSelector stops reporting clicks (i.e. rectangle selectors with no width nor heights)
         after one of those, this version continue, making it possible to switch between selectors in the view.
 
         So for now, we use this version even if there is no rational reason I can see for it to be needed.
         """
+
+        # TODO half of this is bound to be deprecated soon, fix that (and stop its warning screaming)
 
         if not self.interactive:
             self.to_draw.set_visible(False)

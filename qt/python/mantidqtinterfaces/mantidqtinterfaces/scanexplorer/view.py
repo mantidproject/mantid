@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
+from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
 from qtpy.QtCore import *
 
 import mantid
@@ -56,11 +56,43 @@ class ScanExplorerView(QMainWindow):
         self.advanced_button = QPushButton(text="Advanced", toolTip="Open SANSILLParameterScan dialog")
         self.advanced_button.clicked.connect(self.open_alg_dialog)
 
+        # part not visible at start up : data handling
+        # button to clear the plot and reset it
+        self.clear_button = QPushButton(text="Clear")
+        self.clear_button.setVisible(False)
+
+        # button to go in navigation mode
+        self.move_button = QPushButton(text="Move")
+        self.move_button.setVisible(False)
+        self.move_button.setCheckable(True)
+
+        # button to go in zoom mode
+        self.zoom_button = QPushButton(text="Zoom")
+        self.zoom_button.setVisible(False)
+        self.zoom_button.setCheckable(True)
+
+        # button to go in rectangle drawing mode
+        self.multiple_button = QPushButton(text="Rectangles")
+        self.multiple_button.setVisible(False)
+        self.multiple_button.setCheckable(True)
+
         # setting the layout
-        upper_layout = QHBoxLayout(self)
-        upper_layout.addWidget(self.file_line_edit)
-        upper_layout.addWidget(self.browse_button)
-        upper_layout.addWidget(self.advanced_button)
+        upper_layout = QVBoxLayout(self)
+        layout = QHBoxLayout()
+        layout.addWidget(self.file_line_edit)
+        layout.addWidget(self.browse_button)
+        layout.addWidget(self.advanced_button)
+
+        upper_layout.addLayout(layout)
+
+        layout_2 = QHBoxLayout()
+
+        layout_2.addWidget(self.clear_button)
+        layout_2.addWidget(self.move_button)
+        layout_2.addWidget(self.zoom_button)
+        layout_2.addWidget(self.multiple_button)
+
+        upper_layout.addLayout(layout_2)
 
         bar_widget = QGroupBox()
         bar_widget.setLayout(upper_layout)
@@ -70,24 +102,85 @@ class ScanExplorerView(QMainWindow):
         # register startup
         mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "ScanExplorer", False)
 
-    def start_multiple_rect_mode(self):
+    def manage_buttons(self):
         """
-        Change to multiple rectangle mode.
+        Handle data view manipulation buttons. Remove the slice viewer default control bar and show the custom one.
         """
-        self._rectangles_manager = RectanglesManager(self)
+        self.data_view.mpl_toolbar.setVisible(False)
+        self.data_view.image_info_widget.setVisible(False)
+        self.data_view.track_cursor.setVisible(False)
+        self.data_view.dimensions.setVisible(False)
 
-        if self.lower_splitter.count() == 1:
-            self.lower_splitter.addWidget(self._rectangles_manager)
+        self.clear_button.clicked.connect(self.on_clear_clicked)
+        self.move_button.clicked.connect(self.on_move_clicked)
+        self.zoom_button.clicked.connect(self.on_zoom_clicked)
+        self.multiple_button.clicked.connect(self.on_multiple_clicked)
+
+        self.clear_button.setVisible(True)
+        self.move_button.setVisible(True)
+        self.zoom_button.setVisible(True)
+        self.multiple_button.setVisible(True)
+
+    def on_clear_clicked(self, _):
+        """
+        Slot called when the clear button is clicked
+        """
+        self._data_view.mpl_toolbar.set_action_checked(ToolItemText.HOME, True, True)
+        self._rectangles_manager.clear()
+
+    def on_zoom_clicked(self, state: bool):
+        """
+        Slot called when the zoom button is clicked. Reset the rectangle manager and set mode to zoom.
+        @param state: the new state of the button
+        """
+        if state:
+            self.move_button.setChecked(False)
+            self.multiple_button.setChecked(False)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.ZOOM, True, True)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.HOME, False, False)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.PAN, False, False)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, False, False)
         else:
-            self.lower_splitter.replaceWidget(1, self._rectangles_manager)
+            self.zoom_button.setChecked(True)
 
-        tool = MultipleRectangleSelectionLinePlot
-        self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, state=True, trigger=True)
-        self._data_view.switch_line_plots_tool(tool, self.presenter)
+    def on_move_clicked(self, state: bool):
+        """
+        Slot called when the move button is clicked. Reset the rectangle manager and set mode to move.
+        @param state: the new state of the button
+        """
+        if state:
+            self.multiple_button.setChecked(False)
+            self.zoom_button.setChecked(False)
 
-        # TODO stop calling private attributes
-        self._data_view.mpl_toolbar.set_action_checked("TEST", state=True, trigger=False)
-        self._data_view.mpl_toolbar.homeClicked.connect(self._data_view._line_plots.clear)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.PAN, True, True)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.HOME, False, True)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.ZOOM, False, True)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.REGIONSELECTION, False, True)
+        else:
+            self.move_button.setChecked(True)
+
+    def on_multiple_clicked(self, state: bool):
+        """
+        Slot called when the rectangles button is clicked. Change to multiple rectangle mode.
+        @param state: the new state of the button
+        """
+        if state:
+            self.move_button.setChecked(False)
+            self.zoom_button.setChecked(False)
+
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.HOME, state=False, trigger=True)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.ZOOM, state=False, trigger=True)
+            self._data_view.mpl_toolbar.set_action_checked(ToolItemText.PAN, state=False, trigger=True)
+        else:
+            self.multiple_button.setChecked(True)
+            return
+
+        if self._rectangles_manager is None:
+            self._rectangles_manager = RectanglesManager(self)
+            self.lower_splitter.addWidget(self._rectangles_manager)
+
+            tool = MultipleRectangleSelectionLinePlot
+            self._data_view.switch_line_plots_tool(tool, self.presenter)
 
     def refresh_view(self):
         """
