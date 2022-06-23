@@ -10,7 +10,7 @@ from .directinstrument import DirectInstrument
 
 
 class PyChopInstrument(DirectInstrument):
-    """Simulated direct-geometry INS with PyChop2
+    """Simulated direct-geometry INS with PyChop
 
     PyChop is used to compute energy resolution as a function of energy for
     given instrument settings.

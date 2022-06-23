@@ -6,8 +6,8 @@ PyChop
 .. contents:: Table of Contents
   :local:
 
-.. figure:: /images/PyChop2.png
-   :alt: PyChop2.png
+.. figure:: /images/PyChopGui.png
+   :alt: PyChopGui.png
    :align: right
    :width: 455
 

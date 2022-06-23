@@ -197,7 +197,6 @@ class ChopperSystem(object):
             warnings.warn('No default variants defined. Using ''%s'' as default' % (self._default_variant), SyntaxWarning)
             self.variant = self._default_variant
 
-    # Define getters/setters here to be backwards compatible with old PyChop2. Actually use properties underneath
     def setChopper(self, *args, **kwargs):
         """
         Set the chopper package type (Fermi instruments) or variant (LET).
