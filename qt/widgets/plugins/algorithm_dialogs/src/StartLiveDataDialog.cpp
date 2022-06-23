@@ -91,9 +91,15 @@ StartLiveDataDialog::~StartLiveDataDialog() {
 
 /// Set up the dialog layout
 void StartLiveDataDialog::initLayout() {
-  ui.setupUi(this);
+  // Disable autoinit as we need to control the order of this ourselves.
+  // The listener properties are only visible when the listener type is set
+  // that requires the values to be parsed. By disabling autoinit we
+  // allow us to call this at the end of this function and then reset the
+  // listener properties layout based on this
+  this->m_autoParseOnInit = false;
 
-  // Enable scrollbars (must happen after setupUi()!)
+  ui.setupUi(this);
+  // must happen after elements are added
   m_scrollbars.setEnabled(true);
 
   // To save the history of inputs
@@ -184,7 +190,6 @@ void StartLiveDataDialog::initLayout() {
   updateConnectionChoices(ui.cmbInstrument->currentText());
   updateConnectionDetails(ui.cmbConnection->currentText());
   setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
-  initListenerPropLayout();
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changeProcessingAlgorithm()));
@@ -217,6 +222,15 @@ void StartLiveDataDialog::initLayout() {
 
   QLayout *buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
+
+  // Parse values and set property values. See comment at start of this method
+  // for why this is done here.
+  this->parse();
+  this->setPropertyValues();
+
+  // Now that we have set the listener property on the algorithm add any extra
+  // elements for the new properties that may have appeared
+  initListenerPropLayout();
 }
 
 //------------------------------------------------------------------------------
