@@ -73,19 +73,19 @@ Command line interface
 ----------------------
 
 In addition to the GUI, there is also a python commandline interface to PyChop.
-This is encapsulated in the ``PyChop2`` class within the ``PyChop`` module. Within
+This is encapsulated in the ``Instrument`` class within the ``pychop.Instruments`` module. Within
 Mantid, to do a single point calculation of the flux and resolution
 
 .. code:: python
 
-    from mantidqtinterfaces.PyChop import PyChop2
-    resolution, flux = PyChop2.calculate(inst='maps', package='a', frequency=500, ei=600, etrans=range(0,550,50))
+    from pychop.Instruments import Instrument
+    resolution, flux = Instrument.calculate(inst='maps', package='a', frequency=500, ei=600, etrans=range(0,550,50))
 
-The parameters are in order, so ``PyChop2.calculate('maps','a',500,600,range(0,550,50))``
+The parameters are in order, so ``Instrument.calculate('maps','a',500,600,range(0,550,50))``
 also works.
 
 
-To further simplify the use of ``PyChop2`` for data modeling, the `calculate` function (only) allows for
+To further simplify the use of ``Instrument`` for data modeling, the `calculate` function (only) allows for
 `etrans='polynomial'` parameter. If that is used, the energy transfer from `-Ei` to `Ei` with a step
 of `0.01Ei` is used, then fitted to a cubic polynomial. The resolutoion resturned by the function is an array
 with four elements, so the desired value can be recovered using
@@ -97,7 +97,7 @@ In addition, an object orient interface is provided:
 
 .. code:: python
 
-    mapsres = PyChop2('maps')
+    mapsres = Instrument('maps')
     mapsres.setChopper('a')
     mapsres.setFrequency(500)
     mapsres.setEi(600)
@@ -107,7 +107,7 @@ In particular, the method ``getResolution``, which takes the energy transfers to
 calculate the resolution for as an input, can be directly passed to third party
 programs for resolution convolution purposes.
 
-For further help, use ``help(PyChop2)`` after importing the class.
+For further help, use ``help(Instrument)`` after importing the class.
 
 Theory
 ------

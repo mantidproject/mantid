@@ -877,12 +877,14 @@ class Instrument(object):
     @classmethod
     def calculate(cls, *args, **kwargs):
         """
-        ! Calculates the resolution and flux directly (without setting up a PyChop2 object)
+        ! Calculates the resolution and flux directly
         !
-        ! PyChop2.calculate('mari', 's', 250., 55.)                # Instname, Chopper Type, Freq, Ei in order
-        ! PyChop2.calculate('let', 'High flux', [160., 80.], 2.2)  # For LET, specify resolution and pulse remover freq
-        ! PyChop2.calculate(inst='mari', package='s', freq=250., ei=55.) # With keyword arguments
-        ! PyChop2.calculate(inst='let', variant='High resolution', freq=[160., 80.], ei=2.2)
+        ! from pychop.Instruments import Instrument
+        !
+        ! Instrument.calculate('mari', 's', 250., 55.)                # Instname, Chopper Type, Freq, Ei in order
+        ! Instrument.calculate('let', 'High flux', [160., 80.], 2.2)  # For LET, specify resolution and pulse remover freq
+        ! Instrument.calculate(inst='mari', package='s', freq=250., ei=55.) # With keyword arguments
+        ! Instrument.calculate(inst='let', variant='High resolution', freq=[160., 80.], ei=2.2)
         !
         ! For LET, the allowed variant names are:
         !   'High resolution'
@@ -894,15 +896,15 @@ class Instrument(object):
         ! If you want the inelastic resolution, specify the inelastic energy transfer
         ! as either the last positional argument, or as a keyword argument, e.g.:
         !
-        ! PyChop2.calculate('merlin', 'g', 450., 60., range(55))
-        ! PyChop2.calculate('maps', 'a', 450., 600., etrans=np.linspace(0,550,55))
+        ! Instrument.calculate('merlin', 'g', 450., 60., range(55))
+        ! Instrument.calculate('maps', 'a', 450., 600., etrans=np.linspace(0,550,55))
         !
         ! For fast calculations, one can return a polynomial approximation (cubic) of the
         ! resolution function. By passing etrans='polynomial', the calculator estimates the
         ! resolution for etrans=np.arange(-Ei, Ei, Ei*0.01) then fits it to a cubic polynomial.
         ! The resolution is then an array with coefficients, from the lowest power.
         !
-        ! res, flux = PyChop2.calculate(inst='cncs', variant='High flux', freq=240, ei=1.5, etrans='polynomial')
+        ! res, flux = Instrument.calculate(inst='cncs', variant='High flux', freq=240, ei=1.5, etrans='polynomial')
         !
         ! The results are returned as tuple: (resolution, flux)
         """
