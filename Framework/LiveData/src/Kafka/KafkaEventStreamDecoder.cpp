@@ -562,19 +562,30 @@ void KafkaEventStreamDecoder::initLocalCaches(const RunStartStruct &runStartData
   }
 
   // Set mapping function
-  if (ConfigService::Instance().getInstrument(instName).facility().name() == "ISIS" ||
-      runStartData.detSpecMapSpecified) {
+  if (runStartData.detSpecMapSpecified) {
+    // This assumes that the ID sent through Kafka is spectrum number.
     specnum_t idToIdxOffset(0);
     auto specToIdx = eventBuffer->getSpectrumToWorkspaceIndexVector(idToIdxOffset);
     m_eventIdToWkspIdx = [specToIdx = std::move(specToIdx), idToIdxOffset](uint64_t specNum) {
       return specToIdx[specNum + idToIdxOffset];
     };
   } else {
-    detid_t idToIdxOffset(0);
-    auto detIdToIdx = eventBuffer->getDetectorIDToWorkspaceIndexVector(idToIdxOffset);
-    m_eventIdToWkspIdx = [detIdToIdx = std::move(detIdToIdx), idToIdxOffset](uint64_t detId) {
-      return detIdToIdx[detId + idToIdxOffset];
-    };
+    if (ConfigService::Instance().getInstrument(instName).facility().name() == "ISIS") {
+      auto detIdToIdx = eventBuffer->getDetectorIDToWorkspaceIndexMap();
+      m_eventIdToWkspIdx = [detIdToIdx = std::move(detIdToIdx)](uint64_t detId) -> size_t {
+        auto it = detIdToIdx.find(static_cast<int>(detId));
+        if (it != detIdToIdx.end())
+          return it->second;
+        else
+          return 0;
+      };
+    } else {
+      detid_t idToIdxOffset(0);
+      auto detIdToIdx = eventBuffer->getDetectorIDToWorkspaceIndexVector(idToIdxOffset);
+      m_eventIdToWkspIdx = [detIdToIdx = std::move(detIdToIdx), idToIdxOffset](uint64_t detId) {
+        return detIdToIdx[detId + idToIdxOffset];
+      };
+    }
   }
 
   // Load the instrument if possible but continue if we can't
