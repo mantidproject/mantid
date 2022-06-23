@@ -1066,9 +1066,9 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     // the chosen by the user and for all temperatures have the same
     // number of iterations
     m_leftRefrPoints = getProperty("NumRefrigerationSteps");
-    if (m_leftRefrPoints <= 0) {
+    if (m_leftRefrPoints == 0) {
       g_log.warning() << "Wrong value for the number of refrigeration"
-                         " points (<= 0). Therefore, default value (5 points) taken.\n";
+                         " points (== 0). Therefore, default value (5 points) taken.\n";
       m_leftRefrPoints = 5;
     }
 

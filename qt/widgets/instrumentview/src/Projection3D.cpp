@@ -233,7 +233,7 @@ void Projection3D::getMaskedDetectors(std::vector<size_t> &detIndices) const {
   double zmin = 1.0;
   double zmax = 0.0;
   QSet<int> ids;
-  foreach (const QPoint &p, pixels) {
+  for (const QPoint &p : pixels) {
     int id = getDetectorID(p.x(), p.y());
     if (ids.contains(id))
       continue;

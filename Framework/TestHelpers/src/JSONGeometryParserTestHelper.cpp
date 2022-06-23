@@ -171,7 +171,7 @@ void addStream(Json::Value &parent, const std::string &name, const std::string &
 namespace Mantid::FrameworkTestHelpers {
 namespace JSONTestInstrumentBuilder {
 
-void initialiseRoot(Json::Value &root, const std::string &name) { root[name]; }
+void initialiseRoot(const Json::Value &root, const std::string &name) { root[name]; }
 
 Json::Value &addNXEntry(Json::Value &root, const std::string &name) {
   return addNX(root["nexus_structure"], name, "NXentry");

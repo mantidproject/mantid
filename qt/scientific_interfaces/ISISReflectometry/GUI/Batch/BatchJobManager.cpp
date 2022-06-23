@@ -55,7 +55,7 @@ int BatchJobManager::itemsInSelection(Item::ItemCountFunction countFunction) con
   auto const &locations = m_rowLocationsToProcess;
   return std::accumulate(
       locations.cbegin(), locations.cend(), 0,
-      [&jobs, &locations, countFunction](int &count, MantidWidgets::Batch::RowLocation const &location) {
+      [&jobs, &locations, countFunction](int const count, MantidWidgets::Batch::RowLocation const &location) {
         return count + countItemsForLocation(jobs, location, locations, countFunction);
       });
 }

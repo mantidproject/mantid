@@ -156,9 +156,8 @@ void PlotAsymmetryByLogValueDialog::fillLogBox() {
       const std::vector<Mantid::Kernel::Property *> &props = mws->run().getLogData();
       if (gws) {
         m_uiForm.alpha->setEnabled(false);
-        std::vector<std::string> wsNames = gws->getNames();
-        for (auto &wsName : wsNames) {
-          Mantid::API::AnalysisDataService::Instance().remove(wsName);
+        for (auto const &name : gws->getNames()) {
+          Mantid::API::AnalysisDataService::Instance().remove(name);
         }
       } else {
         m_uiForm.alpha->setEnabled(true);

@@ -66,7 +66,7 @@ public:
 
   float getError() const { return mError; }
 
-  bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) { return event1 < event2; }
+  bool operator()(const SimpleMDEvent &event1, const SimpleMDEvent &event2) const { return event1 < event2; }
 
   /**
    * @brief override operator <
@@ -125,8 +125,6 @@ public:
     return less;
   }
 
-  bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
-
   SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
     // coordiate
     size_t numdirs = mCoordinates.size();
@@ -143,7 +141,7 @@ public:
 float SimpleMDEvent::s_tolerance(static_cast<float>(1E-7));
 
 //----------------------------------------------------------------------------------------------
-bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
+bool compareSimpleEvents(const SimpleMDEvent &self, const SimpleMDEvent &other) { return self < other; }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareMDWorkspaces)

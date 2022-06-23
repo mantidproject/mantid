@@ -109,7 +109,7 @@ public: // for the time being
                          const std::vector<std::string> &dimPropertyNames = std::vector<std::string>());
 
   /// compare two descriptions and select the complimentary result.
-  void checkWSCorresponsMDWorkspace(MDWSDescription &NewMDWorkspaceD);
+  void checkWSCorresponsMDWorkspace(const MDWSDescription &NewMDWorkspaceD);
 
   void setMinMax(const std::vector<double> &minVal, const std::vector<double> &maxVal);
   void setDimName(unsigned int nDim, const std::string &Name);
