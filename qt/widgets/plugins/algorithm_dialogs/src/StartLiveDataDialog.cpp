@@ -206,8 +206,7 @@ void StartLiveDataDialog::initLayout() {
 
   connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(setDefaultAccumulationMethod(const QString &)));
-  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(initListenerPropLayout(const QString &)));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(initListenerPropLayout()));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateUiElements(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
