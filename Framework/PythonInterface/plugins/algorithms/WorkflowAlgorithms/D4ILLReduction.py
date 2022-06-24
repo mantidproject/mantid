@@ -276,8 +276,58 @@ class D4ILLReduction(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=det_list, OutputWorkspace=ws)
         return ws, mon, progress
 
-    def _normalise(self, ws, mon):
-        return ws
+    def _get_normalisation_factor(self, det, mon, method, norm_standard):
+        """
+        Creates a workspace used as denominator in normalisation.
+
+        :param mon:
+        :param str method: normalisation method, one out of Monitor, Time, or None
+        :param float norm_standard: value of the standard to which normalise
+        :return: name of normalisation workspace
+        """
+        if method == 'Time':
+            value = mtd[det].getRun().getLogData('duration').value
+            error = 0.01  # s
+        elif method == 'Monitor':
+            value = mtd[mon].readY(0)[0]
+            error = mtd[mon].readE(0)[0]
+        else: # method == None
+            value = 1.0
+            error = 0.0
+        norm_ws = 'norm_factor'
+        CreateSingleValuedWorkspace(
+            OutputWorkspace=norm_ws,
+            DataValue=value / norm_standard,
+            ErrorValue=error/norm_standard)
+        return norm_ws
+
+    def _normalise(self, ws, mon, method, norm_standard):
+        """
+        Normalises the provided workspace using the chosen method and to a designated standard.
+
+        :param str ws: workspace to normalise
+        :param str mon: monitor workspace name, used when method is Monitor
+        :param str method: normalisation method, one out of Monitor, Time, or None
+        :param float norm_standard: value of the standard to which normalise
+        :return: :return: name of normalised workspace
+        """
+
+        if isinstance(mtd[ws], WorkspaceGroup):
+            normalised_list = []
+            for entry_no, entry in enumerate(mtd[ws]):
+                normalised_ws = self._normalise(entry.name(), mtd[mon][entry_no].name(), method, norm_standard)
+                normalised_list.append(normalised_ws)
+            normalised_group_ws = '{}_normalised'.format(ws)
+            GroupWorkspaces(InputWorkspaces=normalised_list, OutputWorkspace=normalised_group_ws)
+            if self.getProperty('ClearCache').value:
+                DeleteWorkspace(Workspace=ws)
+            return normalised_group_ws
+        normalisation_ws = self._get_normalisation_factor(ws, mon, method, norm_standard)
+        normalised_ws = '{}_normalised'.format(ws)
+        Divide(LHSWorkspace=ws, RHSWorkspace=normalisation_ws, OutputWorkspace=normalised_ws)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspace(Workspace=normalisation_ws)
+        return normalised_ws
 
     def _rotate_banks(self, ws, shift):
         """
@@ -325,7 +375,8 @@ class D4ILLReduction(PythonAlgorithm):
         progress.report('Correcting relative efficiency')
         ws = self._correct_relative_efficiency(ws)
         progress.report('Normalising to monitor/time')
-        ws = self._normalise(ws, mon)
+        ws = self._normalise(ws, mon, method=self.getPropertyValue('NormaliseBy'),
+                             norm_standard=self.getProperty('NormalisationStandard').value)
         progress.report('Creating diffractograms')
         ws = self._create_diffractograms(ws)
         progress.report('Finalizing')
