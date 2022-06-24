@@ -20,11 +20,4 @@ resolution = merlin.getResolution()
 
 resolution, flux = Instrument.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
 """
-
-
-def PyChop2(instrument, chopper=None, freq=None):
-    import warnings
-    warnings.warn("Deprecation Warning: Importing 'PyChop2' from the 'mantidqtinterfaces.PyChop' module is deprecated."
-                  "Please import 'Instrument' from the 'pychop.Instruments' module instead.", DeprecationWarning)
-    from pychop.Instruments import Instrument
-    return Instrument(instrument, chopper, freq)
+from pychop import PyChop2  # noqa
