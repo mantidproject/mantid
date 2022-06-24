@@ -13,10 +13,10 @@ import builtins
 import warnings
 import numpy as np
 
-from mantidqtinterfaces.PyChop import PyChop2
+from pychop.Instruments import Instrument
 
 
-class PyChop2Tests(unittest.TestCase):
+class PyChopInstrumentTests(unittest.TestCase):
 
     # Tests the Fermi chopper instruments
     def test_pychop_fermi(self):
@@ -24,7 +24,7 @@ class PyChop2Tests(unittest.TestCase):
         res = []
         flux = []
         for inc, instname in enumerate(instnames):
-            chopobj = PyChop2(instname)
+            chopobj = Instrument(instname)
             # Code should give an error if the chopper settings and Ei have
             # not been set.
             self.assertRaises(ValueError, chopobj.getResolution)
@@ -44,7 +44,7 @@ class PyChop2Tests(unittest.TestCase):
         self.assertLess(res[1][0], res[2][0])
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
-            rr, ff = PyChop2.calculate(instname, 's', 200, 18, 0)
+            rr, ff = Instrument.calculate(instname, 's', 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
 
@@ -54,7 +54,7 @@ class PyChop2Tests(unittest.TestCase):
         res = []
         flux = []
         for inc, variant in enumerate(variants):
-            chopobj = PyChop2('LET', variant)
+            chopobj = Instrument('LET', variant)
             # Checks that it instantiates the correct variant
             self.assertTrue(variant in chopobj.getChopper())
             # Code should give an error if the chopper settings and Ei have
@@ -73,12 +73,12 @@ class PyChop2Tests(unittest.TestCase):
         self.assertLessEqual(res[1][0], res[0][0])
         # Now tests the standalone function
         for inc, variant in enumerate(variants):
-            rr, ff = PyChop2.calculate('LET', variant, 200, 18, 0)
+            rr, ff = Instrument.calculate('LET', variant, 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
 
     def test_pychop_invalid_ei(self):
-        chopobj = PyChop2('MARI', 'G', 400.)
+        chopobj = Instrument('MARI', 'G', 400.)
         chopobj.setEi(120)
         with warnings.catch_warnings(record=True) as w:
             res = chopobj.getResolution(130.)

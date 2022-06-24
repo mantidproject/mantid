@@ -12,15 +12,19 @@ At present, the subclasses understand the ISIS instruments 'LET', 'MAPS', 'MARI'
 
 Usage:
 
-from mantidqtinterfaces.PyChop import PyChop2
+from pychop.Instruments import Instrument
 
-merlin = PyChop2('merlin','s',250)
+merlin = Instrument('merlin','s',250)
 merlin.setEi(25)
 resolution = merlin.getResolution()
 
-resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
-
-PyChop2.showGUI()
+resolution, flux = Instrument.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
 """
 
-from .Instruments import Instrument as PyChop2  # noqa: F401
+
+def PyChop2(*args, **kwargs):
+    import warnings
+    warnings.warn("Deprecation Warning: Importing 'PyChop2' from the 'mantidqtinterfaces.PyChop' module is deprecated."
+                  "Please import 'Instrument' from the 'pychop.Instruments' module instead.", DeprecationWarning)
+    from pychop.Instruments import Instrument
+    return Instrument(*args, **kwargs)

@@ -282,8 +282,8 @@ Or using an arbitrary function `my_func`::
 
 Finally, the :ref:`PyChop` interface may be used to generate the resolution function for a particular spectrometer::
 
-    from mantidqtinterfaces.PyChop import PyChop2
-    marires = PyChop2('MARI')
+    from pychop.Instruments import Instrument
+    marires = Instrument('MARI')
     marires.setChopper('S')
     marires.setFrequency(250)
     marires.setEi(30)
