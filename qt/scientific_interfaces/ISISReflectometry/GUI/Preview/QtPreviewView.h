@@ -31,6 +31,8 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
+  QLayout *getLayout() const override;
+
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
 

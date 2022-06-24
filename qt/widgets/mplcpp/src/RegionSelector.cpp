@@ -31,7 +31,6 @@ Python::Object newPresenter(Workspace_sptr workspace) {
 
   boost::python::dict options;
   options["ws"] = workspace;
-  options["is_window"] = false;
   auto constructor = presenterModule().attr("RegionSelector");
   return constructor(*boost::python::tuple(), **options);
 }

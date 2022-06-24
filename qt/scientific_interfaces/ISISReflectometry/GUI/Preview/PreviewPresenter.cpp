@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "MantidQtWidgets/MplCpp/RegionSelector.h"
 #include <memory>
+
+using MantidQt::Widgets::MplCpp::RegionSelector;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
@@ -55,6 +58,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   m_view->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
   // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
+
+  auto regionSelector = RegionSelector(m_model->getLoadedWs(), m_view->getLayout());
 }
 
 void PreviewPresenter::notifySumBanksCompleted() {

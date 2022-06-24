@@ -52,6 +52,8 @@ void QtPreviewView::onContourExportToAdsClicked() const { m_notifyee->notifyCont
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
+QLayout *QtPreviewView::getLayout() const { return m_ui.contour_plot_layout; }
+
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   // We need to recreate the surface so disconnect any existing signals first
   if (m_instDisplay->getSurface()) {

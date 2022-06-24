@@ -8,6 +8,7 @@
 
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
+#include <QLayout>
 #include <memory>
 #include <string>
 
@@ -30,6 +31,7 @@ public:
   virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual std::string getWorkspaceName() const = 0;
+  virtual QLayout *getLayout() const = 0;
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
 
