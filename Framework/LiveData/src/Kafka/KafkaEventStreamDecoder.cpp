@@ -594,8 +594,8 @@ void KafkaEventStreamDecoder::initLocalCaches(const RunStartStruct &runStartData
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
-  // Convert nanoseconds to seconds (and discard the extra precision)
-  auto runStartTime = static_cast<time_t>(runStartData.startTime / 1000000000);
+  // Convert milliseconds to seconds (and discard the extra precision)
+  auto runStartTime = static_cast<time_t>(runStartData.startTime / 1000);
   m_runStart.set_from_time_t(runStartTime);
   auto timeString = m_runStart.toISO8601String();
   // Run number

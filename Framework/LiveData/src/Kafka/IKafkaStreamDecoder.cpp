@@ -122,16 +122,12 @@ bool IKafkaStreamDecoder::dataReset() {
 
 void IKafkaStreamDecoder::joinStreamAtTime(const IKafkaStreamDecoder::RunStartStruct &runStartData) {
   auto runStartTime = runStartData.startTime;
-  int64_t startTimeMilliseconds = nanosecondsToMilliseconds(runStartTime);
+  int64_t startTimeMilliseconds = runStartTime;
   m_dataStream = m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic}, startTimeMilliseconds,
                                      SubscribeAtOption::TIME);
   // make sure we listen to the run start topic starting from the run start
   // message we already got the start time from
   m_dataStream->seek(m_runInfoTopic, 0, runStartData.runStartMsgOffset);
-}
-
-int64_t IKafkaStreamDecoder::nanosecondsToMilliseconds(uint64_t timeNanoseconds) {
-  return static_cast<int64_t>(timeNanoseconds / 1000000);
 }
 
 /**
