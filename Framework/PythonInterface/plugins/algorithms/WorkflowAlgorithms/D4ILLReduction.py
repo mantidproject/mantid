@@ -11,6 +11,7 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 import numpy as np
+from scipy.constants import physical_constants
 
 
 class D4ILLReduction(PythonAlgorithm):
@@ -215,8 +216,50 @@ class D4ILLReduction(PythonAlgorithm):
             DeleteWorkspace(Workspace=eff_corr_ws)
         return output_ws
 
+    def _convert_to_q(self, ws, output_ws):
+        """
+        Converts the bin axis values of the  provided workspace from scattering angle to momentum exchange.
+
+        :param str ws: name of the workspace with x-axis in 2theta units
+        :return: name of the workspace converted to q
+        """
+        h = physical_constants['Planck constant'][0]  # in m^2 kg / s
+        neutron_mass = physical_constants['neutron mass'][0]  # in kg
+        Ei = mtd[ws].getRun().getLogData('Ei').value * 1.60218e-22  # in J, meV->J
+        v = np.sqrt(2.0 * Ei / neutron_mass) # in m /s
+        momentum = neutron_mass * v # in m * kg / s
+        wavelength = h / momentum * 1e10 # in Angstroem
+        ConvertAxisByFormula(
+            InputWorkspace=ws,
+            OutputWorkspace=output_ws,
+            Formula='4*{0}*sin(x*{0}/360.0) / {1}'.format(np.pi, wavelength),
+            Axis='X',
+            AxisUnits='MomentumTransfer'
+        )
+        return output_ws
+
     def _create_diffractograms(self, ws):
-        return ws
+        """
+        Creates diffractograms of reduced data as a function of scattering angle and momentum exchange.
+
+        :param str ws: input workspace name to be put on common 2theta and q axis
+        :return: workspace group name containing diffractograms in 2theta and q
+        """
+        diff_2theta_ws = '{}_diffractogram_2theta'.format(ws)
+        SumOverlappingTubes(
+            InputWorkspaces=ws,
+            OutputWorkspace=diff_2theta_ws,
+            OutputType='1D',
+            ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
+            HeightAxis='-10,10' # in D4C case, this is arbitrarily large to contain all detectors
+        )
+        diff_q_ws = '{}_diffractogram_q'.format(ws)
+        self._convert_to_q(diff_2theta_ws, output_ws=diff_q_ws)
+        output_name = self.getPropertyValue('OutputWorkspace')
+        GroupWorkspaces(InputWorkspaces=[diff_2theta_ws, diff_q_ws], OutputWorkspace=output_name)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspace(Workspace=ws)
+        return output_name
 
     def _finalize(self, ws):
         """Finalizes the reduction step by removing special values, calling merging functions and setting unique names
