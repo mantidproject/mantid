@@ -384,14 +384,11 @@ if(ENABLE_CPACK)
         "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
         "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
         "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-        "libnexus0v5 (>= 4.3),"
-        "libjsoncpp1 (>=0.7.0),"
         "libmuparser2v5,"
         "libtbb2,"
         "librdkafka1,librdkafka++1,"
         "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}"
     )
-
     if("${UNIX_CODENAME}" STREQUAL "bionic")
       set(CPACK_DEBIAN_PACKAGE_DEPENDS
           "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23," "liboce-foundation11,liboce-modeling11," "libqscintilla2-qt4-13,"
@@ -399,6 +396,14 @@ if(ENABLE_CPACK)
       )
       if(ENABLE_WORKBENCH)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
+      endif()
+    elseif("${UNIX_CODENAME}" STREQUAL "bullseye")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS
+          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl25," "liboce-foundation11,liboce-modeling11," "libnexus1 (>= 4.3),"
+          "libjsoncpp24 (>=0.7.0)"
+      )
+      if(ENABLE_WORKBENCH)
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-15")
       endif()
     elseif("${UNIX_DIST}" MATCHES "Ubuntu")
       message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
@@ -415,9 +420,13 @@ if(ENABLE_CPACK)
         "python3-scipy,"
         "python3-toml,"
         "python3-pycifrw (>= 4.2.1),"
-        "python3-yaml,"
-        "ipython3-qtconsole"
+        "python3-yaml"
     ) # transitional package for bionic
+    if("${UNIX_CODENAME}" STREQUAL "bionic")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},ipython3-qtconsole")
+    elseif("${UNIX_CODENAME}" STREQUAL "bullseye")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-qtconsole")
+    endif()
 
     if(ENABLE_WORKBENCH)
       set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")
@@ -433,7 +442,11 @@ if(ENABLE_CPACK)
   if(USE_JEMALLOC)
     message(STATUS "Adding jemalloc to the package requirements")
     set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, jemalloc >= 3.0")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc1 (>= 3.0)")
+    if("${UNIX_CODENAME}" STREQUAL "bionic")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc1 (>= 3.0)")
+    elseif("{UNIX_CODENAME}" STREQUAL "bullseye")
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc2 (>= 3.0)")
+    endif()
   endif()
 
   # run cpack configuration
