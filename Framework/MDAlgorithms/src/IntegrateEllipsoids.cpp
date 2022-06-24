@@ -60,7 +60,7 @@ void IntegrateEllipsoids::exec() {
   Algorithm_sptr alg;
 
   // detect which algo to run
-  if ((isIntegrateInHKL || isGetUBFromPeaksWorkspace) && indexCount > 0 && !shareBackground) {
+  if ((isIntegrateInHKL || isGetUBFromPeaksWorkspace) && indexCount != 0 && !shareBackground) {
     // v1
     alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoids", -1., -1., true, 1));
   } else {
