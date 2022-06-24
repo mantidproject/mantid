@@ -10,6 +10,7 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
 from mantid.simpleapi import *
+import numpy as np
 
 
 class D4ILLReduction(PythonAlgorithm):
@@ -93,6 +94,27 @@ class D4ILLReduction(PythonAlgorithm):
                              doc="Whether to create and show all intermediate workspaces at each correction step.")
 
     def _correct_bank_positions(self, ws):
+        """
+        Corrects bank positions by rotating them around the sample by the defined zero angle and values available from
+        an ASCII calibration file.
+
+        :param str ws: name of the workspace to be corrected
+        :return: corrected workspace name
+        """
+        zero_angle_corr = self.getProperty('ZeroPositionAngle').value
+        calibration_file = self.getPropertyValue('BankPositionOffsetsFile')
+        n_banks = mtd[ws][0].getInstrument().getIntParameter("number_banks")[0] \
+            if isinstance(mtd[ws], WorkspaceGroup) else mtd[ws].getInstrument().getIntParameter("number_banks")[0]
+        bank_shifts = self._get_shifts(calibration_file, zero_angle_corr, n_banks)
+        if self.getProperty('DebugMode').value:
+            ws_old = ws
+            ws = '{}_bank_pos_corrected'.format(ws_old)
+            CloneWorkspace(InputWorkspace=ws_old, OutputWorkspace=ws)
+        if isinstance(mtd[ws], WorkspaceGroup):
+            for entry in mtd[ws]:
+                self._rotate_banks(entry.name(), bank_shifts)
+        else:
+            self._rotate_banks(ws, bank_shifts)
         return ws
 
     def _create_dead_time_correction(self, ws, tau):
@@ -155,8 +177,36 @@ class D4ILLReduction(PythonAlgorithm):
         ws = ws[2:]
         self.setProperty('OutputWorkspace', mtd[ws])
 
-    def _normalise(self, ws, mon):
-        return ws
+    def _get_shifts(self, calibration_file, zero_angle_corr, n_banks):
+        """
+        Loads the angular shifts for all banks from a provided ASCII file.
+
+        :param str calibration_file: path to bank shifts calibration file
+        :param float zero_angle_corr: angular correction (in deg) to all banks
+        :param int n_banks: number of banks of the detector
+        :return: a list with angles for banks to be rotated around the sample (in deg)
+        """
+        bank_shifts = []
+        try:
+            with open(calibration_file, "r") as calibration:
+                for line in calibration:
+                    if "#" in line: # comments are ignored
+                        continue
+                    line = line.strip(' ')
+                    columns = line.split()
+                    if columns:
+                        angular_shift = float(columns[1]) + zero_angle_corr
+                        bank_shifts.append(angular_shift)
+                if len(bank_shifts) != n_banks:
+                    raise RuntimeError("Bank shifts calibration file does not entries for all banks.")
+        except FileNotFoundError:
+            self.log().warning("Bank calibration file not found or not provided.")
+            bank_shifts = [zero_angle_corr] * n_banks
+        except RuntimeError as e:
+            self.log().warning(str(e))
+            self.log().warning("Padding the shifts list with zero angle correction.")
+            bank_shifts.extend([zero_angle_corr]*(np.zeros(len(bank_shifts)-n_banks)))
+        return bank_shifts
 
     def _load_data(self, progress):
         """Loads the data scan, with each scan step in individual workspace, and splits detectors from monitors."""
@@ -177,6 +227,41 @@ class D4ILLReduction(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=mon_list, OutputWorkspace=mon)
         GroupWorkspaces(InputWorkspaces=det_list, OutputWorkspace=ws)
         return ws, mon, progress
+
+    def _normalise(self, ws, mon):
+        return ws
+
+    def _rotate_banks(self, ws, shift):
+        """
+        Rotates all banks in a workspace by a value provided in the shift list.
+
+        :param str ws: workspace to be corrected
+        :param list(float) shift: list containing angular rotations around the sample
+        """
+        bank_no = 0
+        deg2rad = np.pi / 180.0
+        compInfo = mtd[ws].componentInfo()
+        for comp in compInfo:
+            if 'panel' in comp.name:
+                if shift[bank_no] == 0:
+                    bank_no += 1
+                    continue
+                pos = comp.position
+                x, y, z = pos.getX(), pos.getY(), pos.getZ()
+                # calculate rotation around Y by angle theta (in degrees)
+                r = np.sqrt(x ** 2 + z ** 2)
+                starting_angle = np.arctan2(x, z)
+                newY = y
+                newX = r * np.sin(starting_angle + shift[bank_no] * deg2rad)
+                newZ = r * np.cos(starting_angle + shift[bank_no] * deg2rad)
+                MoveInstrumentComponent(
+                    Workspace=ws,
+                    ComponentName=comp.name,
+                    X=newX,
+                    Y=newY,
+                    Z=newZ,
+                    RelativePosition=False)
+                bank_no += 1
 
     def PyExec(self):
         nReports = 7
