@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
-    MultipleFileProperty, Progress, PythonAlgorithm, WorkspaceGroupProperty
+    MultipleFileProperty, Progress, PythonAlgorithm, WorkspaceGroup, \
+    WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
 from mantid.simpleapi import *
 
@@ -94,8 +95,52 @@ class D4ILLReduction(PythonAlgorithm):
     def _correct_bank_positions(self, ws):
         return ws
 
+    def _create_dead_time_correction(self, ws, tau):
+        """
+        Creates a workspace containing multiplicative dead-time correction.
+
+        :param str ws: workspace to be corrected
+        :param float tau: count rate coefficient
+        """
+        time_ws = 'time_ws'
+        time_val = mtd[ws].run().getLogData('duration').value
+        CreateSingleValuedWorkspace(DataValue=time_val, OutputWorkspace=time_ws)
+        tmp_ws = 'tmp'
+        Divide(LHSWorkspace=ws, RHSWorkspace=time_ws, OutputWorkspace=tmp_ws)
+        corr_ws = 'correction_ws'
+        # DeadTimeCorrection algorithm corrects workspace containing rates, while D4 data contains counts and we want
+        # to keep it that way, therefore we create a temporary workspace with rates and extract the correction for later
+        # use
+        DeadTimeCorrection(InputWorkspace=tmp_ws, Tau=tau, OutputWorkspace=corr_ws)
+        # output of the final divide contains the multiplicative dead-time correction
+        Divide(LHSWorkspace=corr_ws, RHSWorkspace=tmp_ws, OutputWorkspace=corr_ws)
+        DeleteWorkspaces(WorkspaceList=[tmp_ws, time_ws])
+        return corr_ws
+
     def _correct_dead_time(self, ws, tau):
-        return ws
+        """
+        Corrects for the dead-time of detectors or a monitor.
+
+        :param str ws: workspace (or group) name to be corrected
+        :param float tau: count rate coefficient
+        :return output workspace name
+        """
+        if isinstance(mtd[ws], WorkspaceGroup):
+            corrected_list = []
+            for entry in mtd[ws]:
+                corrected_ws = self._correct_dead_time(entry.name(), tau)
+                corrected_list.append(corrected_ws)
+            corrected_ws = '{}_dt_corrected'.format(ws)
+            GroupWorkspaces(InputWorkspaces=corrected_list, OutputWorkspace=corrected_ws)
+            if self.getProperty('ClearCache').value:
+                DeleteWorkspace(Workspace=ws)
+            return corrected_ws
+        correction_ws = self._create_dead_time_correction(ws, tau)
+        corrected_ws = '{}_dt_corrected'.format(ws)
+        Multiply(LHSWorkspace=ws, RHSWorkspace=correction_ws, OutputWorkspace=corrected_ws)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspaces(WorkspaceList=[correction_ws])
+        return corrected_ws
 
     def _correct_relative_efficiency(self, ws):
         return ws
