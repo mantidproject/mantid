@@ -839,8 +839,13 @@ void LoadILLDiffraction::setSampleLogs() {
   if (m_scanType != NoScan) {
     run.addLogData(new PropertyWithValue<int>("ScanSteps", static_cast<int>(m_numberScanPoints)));
   }
-  double lambda = run.getLogAsSingleValue("wavelength");
-  double eFixed = WAVE_TO_E / (lambda * lambda);
+  double eFixed;
+  if (run.hasProperty("wavelength")) {
+    double lambda = run.getLogAsSingleValue("wavelength");
+    eFixed = WAVE_TO_E / (lambda * lambda);
+  } else { // D4C, wavelength is not specified and Ei is provided directly
+    eFixed = run.getPropertyValueAsType<double>("Monochromator.ei");
+  }
   run.addLogData(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyWithValue<double>("Ei", eFixed)), true);
   run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors", m_numberDetectorsActual));
   if (m_pixelHeight != 0.) {
