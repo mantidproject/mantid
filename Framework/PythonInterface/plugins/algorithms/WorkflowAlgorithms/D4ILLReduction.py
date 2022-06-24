@@ -262,10 +262,8 @@ class D4ILLReduction(PythonAlgorithm):
         return output_name
 
     def _finalize(self, ws):
-        """Finalizes the reduction step by removing special values, calling merging functions and setting unique names
+        """Finalizes the reduction step by removing special values, and setting unique names
          to the output workspaces."""
-        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
-        ws = ws[2:]
         self.setProperty('OutputWorkspace', mtd[ws])
 
     def _get_shifts(self, calibration_file, zero_angle_corr, n_banks):
@@ -300,7 +298,10 @@ class D4ILLReduction(PythonAlgorithm):
         return bank_shifts
 
     def _load_data(self, progress):
-        """Loads the data scan, with each scan step in individual workspace, and splits detectors from monitors."""
+        """Loads the data scan, with each scan step in individual workspace, and splits detectors from monitors.
+
+        :param: progress: object of Progress class allowing to follow execution of the loading
+        """
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         progress.report(0, 'Loading data')
         LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLDiffraction',
