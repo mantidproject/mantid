@@ -131,7 +131,8 @@ class GenerateLogbook(PythonAlgorithm):
         try:
             logbook_optional_parameters = parameters.getStringParameter('logbook_optional_parameters')[0]
         except IndexError:
-            raise RuntimeError("Optional headers are requested but are not defined for {}.".format(self._instrument))
+            self.log().warning("Optional headers are requested but are not defined for {}.".format(self._instrument))
+            return
         else:
             logbook_optional_parameters = logbook_optional_parameters.split(',')
             # create tmp dictionary with headers and paths read from IPF with whitespaces removed from the header
@@ -155,7 +156,7 @@ class GenerateLogbook(PythonAlgorithm):
                             break
                     if (('s', header) not in optional_entries and ('d', header) not in optional_entries
                             and ('f', header) not in optional_entries):
-                        raise RuntimeError("Header {} requested, but not defined for {}.".format(header, self._instrument))
+                        self.log().warning("Header {} requested, but not defined for {}.".format(header, self._instrument))
 
     def _get_custom_entries(self):
         logbook_custom_entries = self.getPropertyValue('CustomEntries')
