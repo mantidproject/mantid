@@ -78,9 +78,10 @@ Converting above Fullprof ICPV parameter into Mantid parameter file
 
 The syntax for a Mantid parameter file is described :ref:`here <InstrumentDefinitionFile>`, in particular look for the section on fitting :ref:`parameter <Using parameter>` on that page.
 
-Fullprof definition of NPROF=9 is the convolution of back-to-back exponential with a peudo-voigt.
-This is in fact not a perfect match with Mantid's :ref:`BackToBackExponential<func-BackToBackExponential>` function (as of this writing)
-since it is the peakshape function for a back-to-back exponential convoluted with a Gaussian. Hence the Lorentzian part of the fullprof NPROF=9 is here ignored.
+Fullprof definition of ``NPROF=9`` is the convolution of a back-to-back exponential with a pseudo-voigt.
+This is in fact not a perfect match with Mantid's :ref:`BackToBackExponential<func-BackToBackExponential>` function
+(as of this writing), since it is the peak shape function for a back-to-back exponential convoluted with a Gaussian.
+Hence the Lorentzian part of the fullprof ``NPROF=9`` is here ignored.
 
 So the exercise is to convert fullprof
 
@@ -91,8 +92,9 @@ So the exercise is to convert fullprof
     !          alph0       beta0       alph1       beta1
     ALFBE    0.000000    0.026707    0.086999    0.005560
 
-nto the parameters :math:`A`, :math:`B` and :math:`S` of :ref:`BackToBackExponential<func-BackToBackExponential>`. From comparing the formula for the fitting function :ref:`BackToBackExponential<func-BackToBackExponential>` with formulas in the :ref:`fullprof manual <http://www.ill.eu/sites/fullprof/>`
-the conversion equations are estimated to be:
+Into the parameters :math:`A`, :math:`B` and :math:`S` of :ref:`BackToBackExponential<func-BackToBackExponential>`.
+From comparing the formula for the fitting function :ref:`BackToBackExponential<func-BackToBackExponential>` with
+formulas in the :ref:`fullprof manual <http://www.ill.eu/sites/fullprof/>`the conversion equations are estimated to be:
 
 .. math::
 
@@ -123,8 +125,9 @@ So the translation of the example just above into :ref:`BackToBackExponential<fu
       </parameter>
 
 Notice ``<fixed />`` has been added, such that, by default the parameters ``A`` and ``B`` are fixed.
-This is entirely optional, but for fitting e.g. HRPD or GEM data this makes sense since these parameters are supposed to be instrument specific (considered fixed for a given beamline period at least)
-whereas ``S`` depends on the specific sample data is collected for on the beamline.
+This is entirely optional, but for fitting e.g. HRPD or GEM data this makes sense since these parameters are supposed
+to be instrument specific (considered fixed for a given beamline period at least) whereas ``S`` depends on the specific
+sample data that are collected on the beamline.
 
 In Fullprof: Sig-2, Sig-1, beta1, etc. carries units and the result-unit of ``S`` is TOF and the result-unit of ``A`` and ``B`` is 1/TOF.
 
