@@ -3,8 +3,7 @@
 :: Sets up the environment configured for Mantid by CMake and
 :: starts the appropriate version of Visual Studio
 
-call %~dp0thirdpartypaths.bat
 set VCVARS=@MSVC_VAR_LOCATION@
 set UseEnv=true
 :: Start command line
-%COMSPEC% /k ""%VCVARS%\vcvarsall.bat"" amd64
+%COMSPEC% /k "conda activate %CONDA_BASE_DIR% && "%VCVARS%\vcvarsall.bat" amd64"
