@@ -164,8 +164,56 @@ class D4ILLReduction(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=[correction_ws])
         return corrected_ws
 
+    def _create_efficiency_correction(self, efficiency_file_name, n_detectors):
+        """
+        Creates a workspace with efficiency factors for each detector.
+
+        :param str efficiency_file_name:
+        :param int n_detectors:
+        :return:
+        """
+        y_values = np.zeros(n_detectors)
+        det_no = 0
+        with open(efficiency_file_name, "r") as efficiency:
+            for line in efficiency:
+                if "#" in line:
+                    continue
+                line = line.strip(' ')
+                columns = line.split()
+                if columns:
+                    corr_val = float(columns[2])
+                    y_values[det_no] = corr_val if corr_val >= 0 else np.nan
+                    det_no += 1
+        eff_corr_ws = 'eff_corr_ws'
+        x_values = np.array(0)
+        CreateWorkspace(DataX=x_values, DataY=y_values, NSpec=len(y_values), OutputWorkspace=eff_corr_ws)
+        return eff_corr_ws
+
     def _correct_relative_efficiency(self, ws):
-        return ws
+        """
+        Corrects the relative efficiency of each detector using values provided in an external ASCII file.
+
+        :param str ws: name of the workspace to be corrected
+        :return: name of corrected workspace
+        """
+
+        if self.getProperty('EfficiencyCalibrationFile').isDefault:
+            return ws
+        calibration_file = self.getPropertyValue('EfficiencyCalibrationFile')
+        if isinstance(mtd[ws], WorkspaceGroup):
+            n_banks = mtd[ws][0].getInstrument().getIntParameter("number_banks")[0]
+            n_detectors = mtd[ws][0].getInstrument().getIntParameter("number_pixels_per_bank")[0]
+        else:
+            n_banks = mtd[ws].getInstrument().getIntParameter("number_banks")[0]
+            n_detectors = mtd[ws].getInstrument().getIntParameter("number_pixels_per_bank")[0]
+        eff_corr_ws = self._create_efficiency_correction(calibration_file, n_banks * n_detectors)
+
+        output_ws = '{}_efficiency_corrected'.format(ws)
+        Divide(LHSWorkspace=ws, RHSWorkspace=eff_corr_ws, OutputWorkspace=output_ws)
+        MaskDetectorsIf(InputWorkspace=output_ws, OutputWorkspace=output_ws, Operator='NotFinite')
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspace(Workspace=eff_corr_ws)
+        return output_ws
 
     def _create_diffractograms(self, ws):
         return ws
