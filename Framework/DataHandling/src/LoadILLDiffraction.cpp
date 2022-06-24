@@ -91,7 +91,7 @@ const std::string LoadILLDiffraction::summary() const { return "Loads ILL diffra
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B", "IN5", "PANTHER", "SHARP"}) {}
+    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B", "D4C", "IN5", "PANTHER", "SHARP"}) {}
 /**
  * Initialize the algorithm's properties.
  */
