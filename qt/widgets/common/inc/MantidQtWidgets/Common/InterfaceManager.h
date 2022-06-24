@@ -82,9 +82,6 @@ public:
   /// @param url Relative URL of help page to show.
   void showHelpPage(const QString &url = QString());
 
-  /// @param page Wiki page to show help for
-  void showWikiPage(const QString &page = QString());
-
   /// @param name of algorithm to show help for
   /// @param version of algorithm
   void showAlgorithmHelp(const QString &name, const int version = -1);

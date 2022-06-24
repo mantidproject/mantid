@@ -51,11 +51,6 @@ const QString BASE_URL("qthelp://org.mantidproject/doc/");
 /// Url to display if nothing else is suggested.
 const QString DEFAULT_URL(BASE_URL + "index.html");
 
-/// Base url for all of the wiki links
-const QString WIKI_BASE_URL("https://www.mantidproject.org/");
-/// Url to display if nothing else is suggested.
-const QString WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
-
 /// name of the collection file itself
 const QString COLLECTION_FILE("MantidProject.qhc");
 
@@ -63,7 +58,7 @@ const QString COLLECTION_FILE("MantidProject.qhc");
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
 MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags)
-    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
+    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile("") {
   // find the collection and delete the cache file if this is the first run
   if (!bool(g_helpWindow)) {
     this->determineFileLocs();
@@ -138,12 +133,9 @@ void MantidHelpWindow::showPage(const QUrl &url) {
       this->showHelp(DEFAULT_URL);
     else
       this->showHelp(url.toString());
-  } else // qt-assistant disabled
+  } else if (!url.isEmpty()) // qt-assistant disabled
   {
-    if (url.isEmpty())
-      this->openWebpage(WIKI_DEFAULT_URL);
-    else
-      this->openWebpage(url);
+    this->openWebpage(url);
   }
 }
 
@@ -155,21 +147,6 @@ void MantidHelpWindow::showPage(const QUrl &url) {
  * If it is empty show the default page.
  */
 void MantidHelpWindow::showPage(const string &url) { this->showPage(QUrl(QString(url.c_str()))); }
-
-void MantidHelpWindow::showWikiPage(const string &page) {
-  if (page.empty())
-    this->openWebpage(WIKI_DEFAULT_URL);
-  else
-    this->openWebpage(WIKI_BASE_URL + page.c_str());
-}
-
-/**
- * Convenience method for HelpWindowImpl::showWikiPage(const string &).
- *
- * @param page The name of the wiki page to show. If this is empty show
- * the wiki homepage.
- */
-void MantidHelpWindow::showWikiPage(const QString &page) { this->showWikiPage(page.toStdString()); }
 
 /**
  * Show the help page for a particular algorithm. The page is picked
@@ -204,16 +181,8 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
     } else {
       this->showHelp(help_url);
     }
-  } else { // qt-assistant disabled
-    if (help_url.isEmpty()) {
-      if (name.empty()) {
-        this->showWikiPage(std::string("Category:Algorithms"));
-      } else {
-        this->showWikiPage(name);
-      }
-    } else {
-      this->openWebpage(help_url);
-    }
+  } else if (!help_url.isEmpty()) {
+    this->openWebpage(help_url);
   }
 }
 
@@ -245,12 +214,6 @@ void MantidHelpWindow::showConcept(const string &name) {
     else
       url += QString(name.c_str()) + ".html";
     this->showHelp(url);
-  } else // qt-assistant disabled
-  {
-    if (name.empty())
-      this->showWikiPage(std::string("Category:Concepts"));
-    else
-      this->showWikiPage(name);
   }
 }
 
@@ -280,12 +243,6 @@ void MantidHelpWindow::showFitFunction(const std::string &name) {
       url = functionUrl;
 
     this->showHelp(url);
-  } else // qt-assistant disabled
-  {
-    if (name.empty())
-      this->showWikiPage(std::string("Category:Fit_functions"));
-    else
-      this->showWikiPage(name);
   }
 }
 
@@ -446,14 +403,6 @@ void MantidHelpWindow::determineFileLocs() {
 
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);
-    m_cacheFile = path.absolute().toString();
-  } else if (dataLoc.endsWith("MantidPlot")) // understood to end in "Mantid/MantidPlot"
-  {
-    Poco::Path path(dataLoc.toStdString());
-    path = path.parent(); // drop off "MantidPlot"
-    path = path.parent(); // drop off "Mantid"
-    path = Poco::Path(path, "mantidproject");
-    path = Poco::Path(path, m_cacheFile);
     m_cacheFile = path.absolute().toString();
   } else {
     g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
