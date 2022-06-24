@@ -38,6 +38,7 @@ GNU_DIAG_ON("conversion")
 
 using namespace Mantid::Types;
 using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::Logger;
 
 // Counters
 size_t totalNumEventsSinceStart = 0;
@@ -328,10 +329,18 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       eventsPerMessage = nEvents - lastMessageEvents;
       lastMessageEvents = nEvents;
 
+      if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+        g_log.debug() << "Pulled message with " << eventsPerMessage << " events at pulsetime " << currentPulseTime
+                      << "\n";
+      }
       /* If there are enough events in the receive buffer then empty it into
        * the EventWorkspace(s) */
       if (m_receivedEventBuffer.size() > m_intermediateBufferFlushThreshold) {
         flushIntermediateBuffer();
+      } else {
+        if (g_log.is(Logger::Priority::PRIO_DEBUG))
+          g_log.debug() << "Receive buffer size < " << m_intermediateBufferFlushThreshold
+                        << " events. Skipping flush to workspace (events are kept for next flush).\n";
       }
 
       totalNumEventsSinceStart = nEvents;
