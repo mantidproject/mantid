@@ -11,7 +11,7 @@
 using namespace MantidQt::API;
 using std::string;
 
-MantidHelpInterface::MantidHelpInterface() = default;
+MantidHelpInterface::MantidHelpInterface(QWidget *parent) : QWidget(parent) {}
 
 MantidHelpInterface::~MantidHelpInterface() = default;
 

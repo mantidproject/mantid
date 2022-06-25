@@ -77,7 +77,7 @@ public:
    * Function that instantiates the help window.
    * @return the help window
    */
-  MantidHelpInterface *createHelpWindow() const;
+  MantidHelpInterface *createHelpWindow(QWidget *parent = nullptr) const;
 
   /// @param url Relative URL of help page to show.
   void showHelpPage(const QString &url = QString());
@@ -105,12 +105,6 @@ public:
 
   void closeHelpWindow();
 
-  /**
-   * Registration function for the help window factory.
-   * @param factory the factory instance
-   */
-  static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
-
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 
@@ -127,12 +121,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-/// Used to register help window
-#define REGISTER_HELPWINDOW(TYPE)                                                                                      \
-  namespace {                                                                                                          \
-  Mantid::Kernel::RegistrationHelper                                                                                   \
-      register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(                                \
-                               new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())),                        \
-                           0));                                                                                        \
-  }

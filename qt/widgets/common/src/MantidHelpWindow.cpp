@@ -36,8 +36,6 @@ namespace MantidQt::MantidWidgets {
 using std::string;
 using namespace MantidQt::API;
 
-REGISTER_HELPWINDOW(MantidHelpWindow)
-
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidHelpWindow");
@@ -58,13 +56,12 @@ const QString COLLECTION_FILE("MantidProject.qhc");
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
 MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags)
-    : MantidHelpInterface(), m_collectionFile(""), m_cacheFile("") {
-  // find the collection and delete the cache file if this is the first run
-  if (g_helpWindow == nullptr) {
-    this->determineFileLocs();
+    : MantidHelpInterface(parent), m_collectionFile(""), m_cacheFile("") {
+  // find the collection files
+  this->determineFileLocs();
 
-    // see if chache file exists and remove it - shouldn't be necessary, but it
-    // is
+  if (g_helpWindow == nullptr) {
+    // see if cache file exists and remove it - shouldn't be necessary, but it is
     if (!m_cacheFile.empty()) {
       if (Poco::File(m_cacheFile).exists()) {
         g_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
@@ -80,7 +77,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
 
     // create the help engine with the found location
     g_log.debug() << "Loading " << m_collectionFile << "\n";
-    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()), parent);
+    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
     QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
     g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
 
@@ -93,7 +90,8 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
     g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
 
     // create a new help window
-    g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
+    g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
+    g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
     g_helpWindow->setWindowTitle(QString("Mantid - Help"));
     g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
 
@@ -107,8 +105,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
   }
 }
 
-/// Destructor does nothing.
-MantidHelpWindow::~MantidHelpWindow() { this->shutdown(); }
+MantidHelpWindow::~MantidHelpWindow() { g_helpWindow = nullptr; }
 
 void MantidHelpWindow::showHelp(const QString &url) {
   g_log.debug() << "open help window for \"" << url.toStdString() << "\"\n";
@@ -297,8 +294,8 @@ void MantidHelpWindow::shutdown() {
   // close the window and delete the object
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
-  g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
-  g_helpWindow->close();
+  if (g_helpWindow != nullptr)
+    g_helpWindow->close();
 }
 
 /**

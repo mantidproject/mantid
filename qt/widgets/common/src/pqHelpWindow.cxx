@@ -305,7 +305,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
   connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)), this,
           SLOT(linkHovered(QString, QString, QString)));
 #else
-  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(QTHELP_SCHEME, new QtHelpUrlHandler(engine));
+  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(QTHELP_SCHEME, new QtHelpUrlHandler(engine, this));
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
   connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this, SLOT(showLinkedPage(QUrl)));
@@ -324,6 +324,12 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
 
   // setup the search engine to do its job
   m_helpEngine->searchEngine()->reindexDocumentation();
+}
+
+pqHelpWindow ::~pqHelpWindow() {
+  if (const auto parent = this->parent()) {
+    parent->deleteLater();
+  }
 }
 
 //-----------------------------------------------------------------------------

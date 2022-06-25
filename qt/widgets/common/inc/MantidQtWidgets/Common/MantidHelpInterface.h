@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpInterface : public QWidget {
   Q_OBJECT
 public:
   /// Default constructor
-  MantidHelpInterface();
+  MantidHelpInterface(QWidget *parent = nullptr);
   /// Default destructor.
   ~MantidHelpInterface() override;
 
@@ -41,7 +41,6 @@ public:
   virtual void showCustomInterface(const QString &name, const QString &area = QString(),
                                    const QString &section = QString());
 
-public slots:
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
 };

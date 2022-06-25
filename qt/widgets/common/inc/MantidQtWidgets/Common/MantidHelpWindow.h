@@ -43,6 +43,9 @@ public:
   void showCustomInterface(const QString &name, const QString &area = QString(),
                            const QString &section = QString()) override;
 
+  /// Perform any clean up on main window shutdown
+  void shutdown() override;
+
 private:
   void showHelp(const QString &url);
   void openWebpage(const QUrl &url);
@@ -59,8 +62,6 @@ private:
   void determineFileLocs();
 
 public slots:
-  /// Perform any clean up on main window shutdown
-  void shutdown() override;
   void warning(const QString &msg);
 };
 

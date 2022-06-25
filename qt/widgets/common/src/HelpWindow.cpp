@@ -21,20 +21,6 @@ namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("HelpWindow");
 
-/**
- * Attach the parent to the gui and connect the shutdown signal
- *
- * @param gui The help window that will render the url.
- * @param parent The parent widget.
- */
-void connectParent(MantidHelpInterface *gui, QWidget *parent) {
-  if (parent) {
-    if (parent->metaObject()->indexOfSignal("shutting_down") > 0) {
-      QObject::connect(parent, SIGNAL(shutting_down()), gui, SLOT(shutdown()));
-    }
-    gui->setParent(parent);
-  }
-}
 } // namespace
 
 using std::string;
@@ -43,9 +29,8 @@ void HelpWindow::showPage(QWidget *parent, const std::string &url) { showPage(pa
 
 void HelpWindow::showPage(QWidget *parent, const QString &url) {
   InterfaceManager interfaceManager;
-  MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+  MantidHelpInterface *gui = interfaceManager.createHelpWindow(parent);
   if (gui) {
-    connectParent(gui, parent);
     gui->showPage(url);
   } else {
     g_log.error() << "Failed to launch help for page " << url.toStdString() << "\n";
@@ -54,9 +39,8 @@ void HelpWindow::showPage(QWidget *parent, const QString &url) {
 
 void HelpWindow::showPage(QWidget *parent, const QUrl &url) {
   InterfaceManager interfaceManager;
-  MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+  MantidHelpInterface *gui = interfaceManager.createHelpWindow(parent);
   if (gui) {
-    connectParent(gui, parent);
     gui->showPage(url);
   } else {
     g_log.error() << "Failed to launch help for page " << url.toString().toStdString() << "\n";
@@ -69,9 +53,8 @@ void HelpWindow::showAlgorithm(QWidget *parent, const std::string &name, const i
 
 void HelpWindow::showAlgorithm(QWidget *parent, const QString &name, const int version) {
   InterfaceManager interfaceManager;
-  MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+  MantidHelpInterface *gui = interfaceManager.createHelpWindow(parent);
   if (gui) {
-    connectParent(gui, parent);
     gui->showAlgorithm(name, version);
   } else {
     // Open online help
@@ -86,9 +69,8 @@ void HelpWindow::showConcept(QWidget *parent, const std::string &name) { showCon
 
 void HelpWindow::showConcept(QWidget *parent, const QString &name) {
   InterfaceManager interfaceManager;
-  MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+  MantidHelpInterface *gui = interfaceManager.createHelpWindow(parent);
   if (gui) {
-    connectParent(gui, parent);
     gui->showConcept(name);
   } else {
     g_log.error() << "Failed to launch help for concept " << name.toStdString() << "\n";
@@ -97,9 +79,8 @@ void HelpWindow::showConcept(QWidget *parent, const QString &name) {
 
 void HelpWindow::showFitFunction(QWidget *parent, const std::string &name) {
   InterfaceManager interfaceManager;
-  MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+  MantidHelpInterface *gui = interfaceManager.createHelpWindow(parent);
   if (gui) {
-    connectParent(gui, parent);
     gui->showFitFunction(name);
   } else {
     g_log.error() << "Failed to launch help for fit function " << name << "\n";
@@ -115,9 +96,8 @@ void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name, c
 void HelpWindow::showCustomInterface(QWidget *parent, const QString &name, const QString &area,
                                      const QString &section) {
   InterfaceManager interfaceManager;
-  MantidHelpInterface *gui = interfaceManager.createHelpWindow();
+  MantidHelpInterface *gui = interfaceManager.createHelpWindow(parent);
   if (gui) {
-    connectParent(gui, parent);
     gui->showCustomInterface(name, area, section);
   } else {
     // Open online help
