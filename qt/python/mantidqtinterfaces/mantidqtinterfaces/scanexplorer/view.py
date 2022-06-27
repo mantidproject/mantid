@@ -12,6 +12,7 @@ from qtpy.QtCore import *
 import mantid
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot
 
 from .rectangle_plot import MultipleRectangleSelectionLinePlot
 from .rectangle_controller import RectanglesManager
@@ -111,6 +112,8 @@ class ScanExplorerView(QMainWindow):
         self.data_view.track_cursor.setVisible(False)
         self.data_view.dimensions.setVisible(False)
 
+        self._data_view._region_selection_on = True  # TODO stop setting private parameter without asking nicely
+
         self.clear_button.clicked.connect(self.on_clear_clicked)
         self.move_button.clicked.connect(self.on_move_clicked)
         self.zoom_button.clicked.connect(self.on_zoom_clicked)
@@ -120,6 +123,9 @@ class ScanExplorerView(QMainWindow):
         self.move_button.setVisible(True)
         self.zoom_button.setVisible(True)
         self.multiple_button.setVisible(True)
+
+        self.multiple_button.setChecked(True)
+        self.on_multiple_clicked(True)
 
     def on_clear_clicked(self, _):
         """
@@ -173,14 +179,22 @@ class ScanExplorerView(QMainWindow):
             self._data_view.mpl_toolbar.set_action_checked(ToolItemText.PAN, state=False, trigger=True)
         else:
             self.multiple_button.setChecked(True)
-            return
 
-        if self._rectangles_manager is None:
-            self._rectangles_manager = RectanglesManager(self)
+    def initialize_rectangle_manager(self):
+        """
+        Initialize or reset the rectangle manager setting.
+        """
+        self.data_view.add_line_plots(PixelLinePlot, self.data_view.presenter)
+
+        self._rectangles_manager = RectanglesManager(self)
+
+        tool = MultipleRectangleSelectionLinePlot
+        self._data_view.switch_line_plots_tool(tool, self.presenter)
+
+        if self.lower_splitter.count() > 1:
+            self.lower_splitter.replaceWidget(1, self._rectangles_manager)
+        else:
             self.lower_splitter.addWidget(self._rectangles_manager)
-
-            tool = MultipleRectangleSelectionLinePlot
-            self._data_view.switch_line_plots_tool(tool, self.presenter)
 
     def refresh_view(self):
         """
@@ -264,3 +278,7 @@ class ScanExplorerView(QMainWindow):
     @property
     def rectangles_manager(self):
         return self._rectangles_manager
+
+    @rectangles_manager.setter
+    def rectangles_manager(self, value):
+        self._rectangles_manager = value

@@ -14,7 +14,6 @@ from qtpy.QtCore import QObject, Signal
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, AlgorithmObserver, Algorithm
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
-from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot  # , RectangleSelectionLinePlot
 from mantid.kernel import logger
 from mantid.api import mtd
 # from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationTool
@@ -107,9 +106,10 @@ class ScanExplorerPresenter:
             return
 
         self._ws = workspace
-        self.view.data_view = presenter._data_view
+        self.view.data_view = presenter.view.data_view
         self.view.show_slice_viewer(workspace)
-        self.view.data_view.add_line_plots(PixelLinePlot, self.view.data_view.presenter)
+
+        self.view.initialize_rectangle_manager()
 
         self.view.manage_buttons()
 
