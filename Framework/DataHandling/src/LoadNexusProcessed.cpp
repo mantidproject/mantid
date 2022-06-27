@@ -29,14 +29,15 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
-
 #include <nexus/NeXusException.hpp>
 
 #include <map>
@@ -88,7 +89,7 @@ using SpectraInfo_optional = boost::optional<SpectraInfo>;
  * @param logger
  * @return
  */
-SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
+SpectraInfo extractMappingInfo(const NXEntry &mtd_entry, Logger &logger) {
   SpectraInfo spectraInfo;
   // Instrument information
 
@@ -778,7 +779,7 @@ void LoadNexusProcessed::loadNumericColumn(const Mantid::NeXus::NXData &tableDat
 /**
  * Load a table
  */
-API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
+API::Workspace_sptr LoadNexusProcessed::loadTableEntry(const NXEntry &entry) {
   API::ITableWorkspace_sptr workspace;
   workspace = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
@@ -1441,16 +1442,52 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
   size_t nspectra = data.dim0();
   // process optional spectrum parameters, if set
   checkOptionalProperties(nspectra);
-  // Actual number of spectra in output workspace (if only a range was going
-  // to be loaded)
+  // Actual number of spectra in output workspace (if only a range was going to be loaded)
   size_t total_specs = calculateWorkspaceSize(nspectra);
 
-  //// Create the 2D workspace for the output
+  if (nchannels == 1 && nspectra == 1) {
+    // if there is only one value of channels and nspectra, it may be a WorkspaceSingleValue
+    // check for instrument
+    bool hasInstrument = mtd_entry.containsGroup("instrument");
+    if (hasInstrument) {
+      std::string inst_name = mtd_entry.getString("instrument/name");
+      boost::algorithm::trim(inst_name);
+      if (inst_name == "")
+        hasInstrument = false;
+    } else {
+      // data saved with SaveNexusESS will have the instrument in a directory named after it
+      // check for special types of instrument: "basic_rect" and "unspecified_instrument":
+      if (mtd_entry.containsGroup("basic_rect") || mtd_entry.containsGroup("unspecified_instrument")) {
+        hasInstrument = true;
+      } else {
+        // check for other possible instruments
+        for (auto facility : ConfigService::Instance().getFacilities()) {
+          for (auto instrumentName : facility->instruments()) {
+            if (instrumentName.name() != "" && mtd_entry.containsGroup(instrumentName.name())) {
+              hasInstrument = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    // check for metadata
+    bool hasMetadata = mtd_entry.containsGroup("logs");
+    if (hasMetadata) {
+      // if there is more than one log (called "goniometer") then it's not a single-valued ws
+      const auto nLogs = mtd_entry.openNXGroup("logs").groups().size();
+      if (nLogs <= 1) { // only "goniometer" group is present, thus it's a single-valued ws
+        hasMetadata = false;
+      }
+    }
+    // a workspace with no instrument and no metadata, and only one entry is a single-valued ws
+    if (!hasInstrument && !hasMetadata)
+      workspaceType = "WorkspaceSingleValue";
+  }
   bool hasFracArea = false;
   if (wksp_cls.isValid("frac_area")) {
     // frac_area entry is the signal for a RebinnedOutput workspace
     hasFracArea = true;
-    workspaceType.clear();
     workspaceType = "RebinnedOutput";
   }
 
@@ -1823,7 +1860,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry &mtd_entry, API::MatrixWork
   bool haveSpectraAxis = local_workspace.getAxis(1)->isSpectra();
 
   for (int i = 1; i <= spectraInfo.nSpectra; ++i) {
-    int spectrum(-1);
+    int spectrum;
     // prefer the spectra number from the instrument section
     // over anything else. If not there then use a spectra axis
     // number if we have one, else make one up as nothing was
@@ -1999,7 +2036,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4, std::string
  * @param wksp_cls :: The data group
  * @param local_workspace :: The workspace to read into
  */
-void LoadNexusProcessed::readBinMasking(NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
+void LoadNexusProcessed::readBinMasking(const NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
   if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
     return;
   }
