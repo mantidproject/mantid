@@ -205,7 +205,7 @@ template <typename MDE, size_t nd> void FakeMD::addFakeEllipsoid(typename MDEven
 
   // prepare random number generator
   std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
-  std::normal_distribution<double> d(0.0, 1.0); // mean = 0, std = 1
+  Kernel::normal_distribution<double> d(0.0, 1.0); // mean = 0, std = 1
 
   // Inserter to help choose the correct event type
   auto eventHelper = MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
