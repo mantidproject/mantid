@@ -37,6 +37,9 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 // Load libraries once
 std::once_flag DLLS_LOADED;
 
+// Track if message saying offline help is unavailable has been shown
+bool offlineHelpMsgDisplayed = false;
+
 QList<QPointer<UserSubWindow>> &existingInterfaces() {
   static QList<QPointer<UserSubWindow>> existingInterfaces;
   return existingInterfaces;
@@ -45,7 +48,7 @@ QList<QPointer<UserSubWindow>> &existingInterfaces() {
 } // namespace
 
 // initialise HelpWindow factory
-Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *InterfaceManager::m_helpViewer = nullptr;
+Mantid::Kernel::AbstractInstantiator<MantidHelpInterface, QWidget *> *InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions
@@ -216,12 +219,25 @@ InterfaceManager::InterfaceManager() {
 /// Destructor
 InterfaceManager::~InterfaceManager() = default;
 
+void InterfaceManager::registerHelpWindowFactory(
+    Mantid::Kernel::AbstractInstantiator<MantidHelpInterface, QWidget *> *factory) {
+  m_helpViewer = factory;
+}
+
 MantidHelpInterface *InterfaceManager::createHelpWindow(QWidget *parent) const {
-  MantidHelpInterface *interface = static_cast<MantidHelpInterface *>(new MantidHelpWindow(parent));
-  if (!interface) {
-    g_log.error("Error creating help window");
+  if (m_helpViewer == nullptr) {
+    if (!offlineHelpMsgDisplayed) {
+      g_log.information("Offline help is not available in this version of Workbench.");
+      offlineHelpMsgDisplayed = true;
+    }
+    return nullptr;
+  } else {
+    MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance(parent);
+    if (!interface) {
+      g_log.error("Error creating help window");
+    }
+    return interface;
   }
-  return interface;
 }
 
 void InterfaceManager::showHelpPage(const QString &url) {

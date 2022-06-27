@@ -10,12 +10,12 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-//#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 
 #include <QHash>
 #include <QString>
 #include <QStringList>
+#include <QWidget>
 
 //----------------------------------
 // Qt Forward declarations
@@ -105,6 +105,12 @@ public:
 
   void closeHelpWindow();
 
+  /**
+   * Registration function for the help window factory.
+   * @param factory the factory instance
+   */
+  static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface, QWidget *> *factory);
+
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 
@@ -117,7 +123,16 @@ private:
   void notifyExistingInterfaces(UserSubWindow *newWindow);
 
   /// Handle to the help window factory
-  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
+  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface, QWidget *> *m_helpViewer;
 };
 } // namespace API
 } // namespace MantidQt
+
+/// Used to register help window
+#define REGISTER_HELPWINDOW(TYPE)                                                                                      \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(                                \
+                               new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface, QWidget *>())),             \
+                           0));                                                                                        \
+  }

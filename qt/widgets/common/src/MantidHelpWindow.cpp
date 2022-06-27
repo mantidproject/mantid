@@ -36,6 +36,8 @@ namespace MantidQt::MantidWidgets {
 using std::string;
 using namespace MantidQt::API;
 
+REGISTER_HELPWINDOW(MantidHelpWindow)
+
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidHelpWindow");
