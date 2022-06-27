@@ -156,7 +156,8 @@ public:
     const std::string mdName = "IntegratePeaksMDHKLTest_MDEWS_bg";
     createMDEW(mdName);
     size_t neventsPeak = 10000;
-    auto neventsBg = static_cast<size_t>(0.5 * neventsPeak * 8 / (4 * M_PI * pow(0.5, 3) / 3)); // half density
+    auto neventsBg =
+        static_cast<size_t>(0.5 * static_cast<double>(neventsPeak) * 8 / (4 * M_PI * pow(0.5, 3) / 3)); // half density
     addPeakAndBackground(mdName, neventsPeak, 1., 1., 1., 0.5, neventsBg);
 
     auto mdews = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>(mdName);
