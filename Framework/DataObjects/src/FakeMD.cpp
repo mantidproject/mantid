@@ -16,6 +16,7 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/normal_distribution.h"
 
 #include "boost/math/distributions.hpp"
 
@@ -96,7 +97,7 @@ template <typename MDE, size_t nd> void FakeMD::addFakePeak(typename MDEventWork
 
   std::mt19937 rng(static_cast<unsigned int>(m_randomSeed));
   std::uniform_real_distribution<coord_t> flat(0, 1.0);
-  std::normal_distribution<coord_t> normal(0.0, 1.0); // mean = 0, std = 1
+  Kernel::normal_distribution<coord_t> normal(0.0, 1.0); // mean = 0, std = 1
 
   // Inserter to help choose the correct event type
   auto eventHelper = MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
