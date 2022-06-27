@@ -1138,7 +1138,10 @@ def waterfall_create_fill(ax):
     errorbar_cap_lines = remove_and_return_errorbar_cap_lines(ax)
 
     for i, line in enumerate(ax.get_lines()):
-        bottom_line = [min(line.get_ydata()) - ((i * ax.height) / 100)] * len(line.get_ydata())
+        if ax.get_yscale() == "log":
+            bottom_line = [min(line.get_ydata())] * len(line.get_ydata())
+        else:
+            bottom_line = [min(line.get_ydata()) - ((i * ax.height) / 100)] * len(line.get_ydata())
         fill = ax.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
         fill.set_zorder((len(ax.get_lines()) - i) + 1)
         set_waterfall_fill_visible(ax, i)
