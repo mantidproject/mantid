@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <iostream>
 #include <sstream>
 #include <thread>
 #include <utility>
@@ -21,8 +20,8 @@ using RdKafka::Metadata;
 using RdKafka::TopicMetadata;
 
 namespace {
-/// Timeout for message consume
-const int CONSUME_TIMEOUT_MS = 300000;
+/// Timeout for message consume (ms)
+const int CONSUME_TIMEOUT_MS = 5000;
 const std::string MAX_MESSAGE_SIZE = "500000000";
 // Receive buffer size must be at least MAX_MESSAGE_SIZE+512
 const std::string RECEIVE_BUFFER_SIZE = "500000512";
