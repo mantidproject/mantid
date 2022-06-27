@@ -42,7 +42,7 @@ int getIndexCount(PeaksWorkspace_sptr peakWorkspace) {
   const int numPeaks = peakWorkspace->getNumberPeaks();
   for (int i = 0; i < numPeaks; ++i) {
     const auto peak = peakWorkspace->getPeak(i);
-    if (peak.getHKL().norm2() > 0)
+    if (peak.getIntHKL().norm2() > 0 || peak.getIntMNP().norm2() > 0)
       indexCount += 1;
   }
   return indexCount;
@@ -60,7 +60,7 @@ void IntegrateEllipsoids::exec() {
   Algorithm_sptr alg;
 
   // detect which algo to run
-  if ((isIntegrateInHKL || isGetUBFromPeaksWorkspace) || (indexCount != 0 && !shareBackground)) {
+  if (isIntegrateInHKL || isGetUBFromPeaksWorkspace || (indexCount > 0 && !shareBackground)) {
     // v1
     alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoids", -1., -1., true, 1));
   } else {
