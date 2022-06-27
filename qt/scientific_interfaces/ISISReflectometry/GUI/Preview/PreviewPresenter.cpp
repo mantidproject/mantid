@@ -58,14 +58,11 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   m_view->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
   // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
-
-  auto regionSelector = RegionSelector(m_model->getLoadedWs(), m_view->getLayout());
 }
 
 void PreviewPresenter::notifySumBanksCompleted() {
   g_log.debug("Sum banks completed");
-  // TODO Implement plotting of the summed workspace
-  // m_view->plotSliceView(m_model->getSummedWs())
+  m_view->plotRegionSelector(m_model->getSummedWs());
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {

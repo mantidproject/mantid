@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPreviewView.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
@@ -12,6 +13,7 @@
 
 #include <string>
 
+using Mantid::API::MatrixWorkspace_sptr;
 using namespace Mantid::Kernel;
 using MantidQt::MantidWidgets::ProjectionSurface;
 
@@ -52,8 +54,6 @@ void QtPreviewView::onContourExportToAdsClicked() const { m_notifyee->notifyCont
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
-QLayout *QtPreviewView::getLayout() const { return m_ui.contour_plot_layout; }
-
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   // We need to recreate the surface so disconnect any existing signals first
   if (m_instDisplay->getSurface()) {
@@ -62,6 +62,11 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
   m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis));
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
 }
+
+void QtPreviewView::plotRegionSelector(MatrixWorkspace_sptr ws) {
+  m_regionSelector = std::make_unique<MantidQt::Widgets::MplCpp::RegionSelector>(ws, m_ui.contour_plot_layout);
+}
+
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 void QtPreviewView::setInstViewEditState(bool isChecked) { m_ui.iv_edit_button->setDown(isChecked); }
 

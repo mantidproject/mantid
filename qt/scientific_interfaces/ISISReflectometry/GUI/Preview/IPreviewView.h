@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <QLayout>
@@ -31,9 +32,9 @@ public:
   virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual std::string getWorkspaceName() const = 0;
-  virtual QLayout *getLayout() const = 0;
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
+  virtual void plotRegionSelector(Mantid::API::MatrixWorkspace_sptr ws) = 0;
 
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;

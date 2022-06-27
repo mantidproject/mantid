@@ -8,8 +8,10 @@
 
 #include "Common/DllConfig.h"
 #include "IPreviewView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/MplCpp/RegionSelector.h"
 #include "ui_PreviewWidget.h"
 
 #include <QObject>
@@ -31,10 +33,10 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
-  QLayout *getLayout() const override;
 
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
+  void plotRegionSelector(Mantid::API::MatrixWorkspace_sptr ws) override;
 
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
@@ -50,6 +52,7 @@ private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
+  std::unique_ptr<MantidQt::Widgets::MplCpp::RegionSelector> m_regionSelector{nullptr};
 
   void connectSignals() const;
   void loadToolbarIcons();
