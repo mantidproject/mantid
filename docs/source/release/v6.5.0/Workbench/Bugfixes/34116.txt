@@ -1,0 +1,1 @@
+- There is no longer a crash when opening the same documentation page for a second time on some interfaces.
