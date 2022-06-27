@@ -76,6 +76,17 @@ def _return_numors_from_ws(ws_name):
     return numors
 
 
+def add_correction_information(ws, parameters):
+    """Adds information regarding corrections and inputs to the provided workspace using the parameters dictionary.
+
+    Args:
+    ws: (str) workspace name to which information is to be added
+    parameters: (dict) dictionary containing parameter name to be added and its value
+    """
+    for param in parameters:
+        mtd[ws].getRun().addProperty(param, parameters[param], True)
+
+
 def add_correction_numors(ws, stransmission, container, absorber, beam, flux, solvent, reference,
                           sensitivity):
     """Adds numors used for corrections and inputs to the provided workspace.

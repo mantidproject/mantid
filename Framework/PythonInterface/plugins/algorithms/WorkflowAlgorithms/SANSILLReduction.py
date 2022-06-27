@@ -687,42 +687,24 @@ class SANSILLReduction(PythonAlgorithm):
         Args:
             ws: (str) workspace name to which information is to be added
         """
-        mtd[ws].getRun().addProperty(
-            'numor_list',
-            common.return_numors_from_path(self.getPropertyValue('Run')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'sample_transmission_ws',
-            common.return_numors_from_path(self.getPropertyValue('TransmissionInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'container_ws',
-            common.return_numors_from_path(self.getPropertyValue('ContainerInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'absorber_ws',
-            common.return_numors_from_path(self.getPropertyValue('AbsorberInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'beam_ws',
-            common.return_numors_from_path(self.getPropertyValue('BeamInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'flux_ws',
-            common.return_numors_from_path(self.getPropertyValue('FluxInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'reference_ws',
-            common.return_numors_from_path(self.getPropertyValue('ReferenceInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'sensitivity_ws',
-            common.return_numors_from_path(self.getPropertyValue('SensitivityInputWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'mask_ws',
-            common.return_numors_from_path(self.getPropertyValue('MaskedInputWorkspace')),
-            True)
+        # first, let's create the dictionary containing all parameters that should be added to the metadata
+        parameters = dict()
+        parameters['numor_list'] = common.return_numors_from_path(self.getPropertyValue('Run'))
+        parameters['sample_transmission_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('TransmissionInputWorkspace'))
+        parameters['container_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('ContainerInputWorkspace'))
+        parameters['absorber_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('AbsorberInputWorkspace'))
+        parameters['beam_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('BeamInputWorkspace'))
+        parameters['flux_ws'] = common.return_numors_from_path(self.getPropertyValue('FluxInputWorkspace'))
+        parameters['reference_ws'] = common.return_numors_from_path(self.getPropertyValue('ReferenceInputWorkspace'))
+        parameters['sensitivity_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('SensitivityInputWorkspace'))
+        parameters['mask_ws'] = common.return_numors_from_path(self.getPropertyValue('MaskedInputWorkspace'))
+        # when all is set, a common function can set them all
+        common.add_correction_information(ws, parameters)
 
     def _apply_masks(self, ws):
         # apply the default mask, e.g. the bad detector edges

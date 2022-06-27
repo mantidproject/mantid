@@ -236,38 +236,23 @@ class SANSILLReduction(PythonAlgorithm):
         Args:
             ws: (str) workspace name to which information is to be added
         """
-        mtd[ws].getRun().addProperty(
-            'numor_list',
-            common.return_numors_from_path(self.getPropertyValue('Runs')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'sample_transmission_ws',
-            common.return_numors_from_path(self.getPropertyValue('TransmissionWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'container_ws',
-            common.return_numors_from_path(self.getPropertyValue('EmptyContainerWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'absorber_ws',
-            common.return_numors_from_path(self.getPropertyValue('DarkCurrentWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'beam_ws',
-            common.return_numors_from_path(self.getPropertyValue('EmptyBeamWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'flux_ws',
-            common.return_numors_from_path(self.getPropertyValue('FluxWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'sensitivity_ws',
-            common.return_numors_from_path(self.getPropertyValue('SensitivityWorkspace')),
-            True)
-        mtd[ws].getRun().addProperty(
-            'mask_ws',
-            common.return_numors_from_path(self.getPropertyValue('MaskWorkspace')),
-            True)
+        # first, let's create the dictionary containing all parameters that should be added to the metadata
+        parameters = dict()
+        parameters['numor_list'] = common.return_numors_from_path(self.getPropertyValue('Runs'))
+        parameters['sample_transmission_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('TransmissionWorkspace'))
+        parameters['container_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('EmptyContainerWorkspace'))
+        parameters['absorber_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('DarkCurrentWorkspace'))
+        parameters['beam_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('EmptyBeamWorkspace'))
+        parameters['flux_ws'] = common.return_numors_from_path(self.getPropertyValue('FluxWorkspace'))
+        parameters['sensitivity_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('SensitivityWorkspace'))
+        parameters['mask_ws'] = common.return_numors_from_path(self.getPropertyValue('MaskWorkspace'))
+        # when all is set, a common function can set them all
+        common.add_correction_information(ws, parameters)
 
     def reset(self):
         '''Resets the class member variables'''
