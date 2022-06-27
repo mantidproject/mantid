@@ -196,21 +196,6 @@ class ScanExplorerView(QMainWindow):
         else:
             self.lower_splitter.addWidget(self._rectangles_manager)
 
-    def refresh_view(self):
-        """
-        Updates the view to enable/disable certain options depending on the model.
-        """
-
-        # we don't want to use model.get_ws for the image info widget as this needs
-        # extra arguments depending on workspace type.
-        workspace = self.presenter.ws()
-        workspace.readLock()
-        try:
-            self._data_view.image_info_widget.setWorkspace(workspace)
-            self.new_plot()
-        finally:
-            workspace.unlock()
-
     def show_slice_viewer(self, workspace):
         """
         Set visual options for the slice viewer and display it.
@@ -225,12 +210,6 @@ class ScanExplorerView(QMainWindow):
             self.lower_splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
 
         self.plot_workspace(workspace)
-
-    def new_plot(self):
-        """
-        Tell the view to display a new plot of an MatrixWorkspace
-        """
-        self._data_view.plot_matrix(self._ws, distribution=not False)
 
     def plot_workspace(self, workspace):
         self._data_view.plot_matrix(workspace)

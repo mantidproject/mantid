@@ -6,27 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from enum import Enum
 from os import path
 from numpy import array
 
 from qtpy.QtCore import QObject, Signal
 
-from mantid.api import MatrixWorkspace, MultipleExperimentInfos, AlgorithmObserver, Algorithm
+from mantid.api import MatrixWorkspace, AlgorithmObserver, Algorithm
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantid.kernel import logger
 from mantid.api import mtd
-# from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationTool
 
 
 from .model import ScanExplorerModel
 from .view import ScanExplorerView
-
-
-class WS_TYPE(Enum):
-    MDE = 0
-    MDH = 1
-    MATRIX = 2
 
 
 class ScanExplorerPresenter:
@@ -46,55 +38,7 @@ class ScanExplorerPresenter:
 
         self.future_workspace: str = ""
 
-    def get_dim_info(self, n: int) -> dict:
-        """
-        @param n: the dimension to consider
-        @return: dict of (minimum :float,
-                          maximum :float,
-                          number_of_bins :int,
-                          width :float,
-                          name :str,
-                          units :str,
-                          type :str,
-                          can_rebin: bool,
-                          qdim: bool) for this nth dimension
-        """
-        workspace = self._ws
-        dim = workspace.getDimension(n)
-        return {
-            'minimum': dim.getMinimum(),
-            'maximum': dim.getMaximum(),
-            'number_of_bins': dim.getNBins(),
-            'width': dim.getBinWidth(),
-            'name': dim.name,
-            'units': dim.getUnits(),
-            'type': self.get_ws_type().name,
-            'can_rebin': False,
-            'qdim': dim.getMDFrame().isQ()
-        }
-
-    def get_dimensions_info(self) -> list:
-        """
-        @return: a list of dict for each dimension containing dim_info
-        """
-        return [self.get_dim_info(n) for n in range(self._ws.getNumDims())]
-
-    def get_ws_type(self) -> WS_TYPE:
-        """
-        @return the type of the workspace being shown, from the enum defined above.
-        """
-        # TODO should we limit ourselves to matrix workspaces, since they are the most relevant to our purpose ?
-        if isinstance(self._ws, MatrixWorkspace):
-            return WS_TYPE.MATRIX
-        elif isinstance(self._ws, MultipleExperimentInfos):
-            if self._ws.isMDHistoWorkspace():
-                return WS_TYPE.MDH
-            else:
-                return WS_TYPE.MDE
-        else:
-            raise ValueError("Unsupported workspace type")
-
-    def create_slice_viewer(self, workspace):
+    def create_slice_viewer(self, workspace: MatrixWorkspace):
         """
         Create the slice viewer widget to be shown.
         @param workspace: the workspace to show
