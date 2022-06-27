@@ -494,34 +494,11 @@ public:
     // creates the peak workspace, sets UB, and indexes them
     PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
 
-    // integrate without satellite background for comparison
     IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.setChild(true));
     TS_ASSERT_THROWS_NOTHING(alg.setRethrows(true));
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_nosatellite"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GetUBFromPeaksWorkspace", true));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
 
-    PeaksWorkspace_sptr peaksNoSatellite = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(peaksNoSatellite->getNumberPeaks(), 3);
-
-    // auto wsHistNoSatellite = peaksNoSatellite->getHistory();
-    // auto algHistNoSatellite = wsHistNoSatellite.getAlgorithmHistory(wsHistNoSatellite.size() - 1);
-    // auto childHistNoSatellite = algHistNoSatellite->getChildAlgorithmHistory(0);
-    // TS_ASSERT_EQUALS(childHistNoSatellite->version(), 2);
-
-    // integrate the data now with satellite background options
+    // integrate the data now with satellite background options via V1 route
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
@@ -544,6 +521,33 @@ public:
     PeaksWorkspace_sptr peaksSatellite = alg.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(peaksSatellite->getNumberPeaks(), 3);
 
+    // Tolerance of 0 to force 0 peaks
+    auto indexalg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("IndexPeaks");
+    indexalg->initialize();
+    indexalg->setProperty("PeaksWorkspace", peaksWS);
+    indexalg->setProperty("Tolerance", 0.0);
+    indexalg->setProperty("ToleranceForSatellite", 0.0);
+    indexalg->execute();
+
+    // integrate without satellite background for comparison via V2 route
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeaksWorkspace", peaksWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "peaks_integrated_nosatellite"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RegionRadius", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.0425));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.043));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.055));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CutoffIsigI", 5.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseOnePercentBackgroundCorrection", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GetUBFromPeaksWorkspace", false));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
+
+    PeaksWorkspace_sptr peaksNoSatellite = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(peaksNoSatellite->getNumberPeaks(), 3);
+
     for (int peakind = 0; peakind < peaksSatellite->getNumberPeaks(); peakind++) {
       const Peak &peakNoSatellite = peaksNoSatellite->getPeak(peakind);
       const Peak &peakSatellite = peaksSatellite->getPeak(peakind);
@@ -551,7 +555,7 @@ public:
       // first peak is satellite peak and should have different intensity than first run of algorithm
       // last two peaks should be identical to algorithm without satellite background options
       if (peakind == 0) {
-        TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), 0.0, 1e-6);
+        TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), 17.0, 1e-6);
         TS_ASSERT_DELTA(peakSatellite.getIntensity(), 12.0, 1e-6);
       } else {
         TS_ASSERT_DELTA(peakNoSatellite.getIntensity(), peakSatellite.getIntensity(), 1e-6);
