@@ -42,7 +42,7 @@ def package_options() {
 def recipe_update_options() {
   recipe_options=""
   if(PACKAGE_SUFFIX.trim() == '') {
-    recipe_options+=" --release_version"
+    recipe_options+=" --release-version"
   }
   return recipe_options
 }
