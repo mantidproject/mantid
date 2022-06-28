@@ -238,7 +238,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   m_eventWorkspace = std::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
-      (workspaceID.find("RebinnedOutput") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
+      (workspaceID.find("RebinnedOutput") == std::string::npos) &&
+      (workspaceID.find("WorkspaceSingleValue") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
       !offsetsWorkspace && !maskWorkspace)
     throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
                                          "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");

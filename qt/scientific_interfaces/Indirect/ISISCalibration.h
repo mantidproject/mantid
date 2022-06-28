@@ -74,6 +74,8 @@ private slots:
 
 private:
   void setDefaultInstDetails(QMap<QString, QString> const &instrumentDetails);
+  void connectRangeSelectors();
+  void disconnectRangeSelectors();
   void createRESfile(const QString &file);
   void addRuntimeSmoothing(const QString &workspaceName);
   void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector, const double &minimum, const double &maximum,

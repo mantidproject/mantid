@@ -16,6 +16,8 @@
 #include <QStringList>
 #include <QValidator>
 
+#include <algorithm>
+
 namespace {
 
 int WS_INDEX_MIN(0);
@@ -195,10 +197,10 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
 
   auto const selectionModel = this->selectionModel();
   if (selectionModel->hasSelection()) {
-
-    for (auto const &rowIndex : selectionModel->selectedRows())
-      rowIndices.emplace_back(FitDomainIndex(static_cast<std::size_t>(rowIndex.row())));
-
+    const auto selectedRows = selectionModel->selectedRows();
+    std::transform(
+        selectedRows.cbegin(), selectedRows.cend(), std::back_inserter(rowIndices),
+        [](const auto &rowIndex) { return std::move(FitDomainIndex(static_cast<std::size_t>(rowIndex.row()))); });
     std::reverse(rowIndices.begin(), rowIndices.end());
   }
   return rowIndices;

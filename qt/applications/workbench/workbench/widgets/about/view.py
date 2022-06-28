@@ -302,7 +302,7 @@ font: {self.rescale_w(12)}px;
         icon_layout_top = QHBoxLayout()
         icon_layout_top.setContentsMargins(0, self.rescale_h(10), 0, 0)
         icon_layout_top.setSpacing(0)
-        icon_layout_top.addWidget(self.create_label_with_image(112, 50, ':/images/ISIS_Logo_Transparent.gif'))
+        icon_layout_top.addWidget(self.create_label_with_image(112, 60, ':/images/ISIS_Logo_Transparent_UKRI.png'))
         icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(10), self.rescale_h(20), hPolicy=QSizePolicy.Fixed))
         icon_layout_top.addWidget(self.create_label_with_image(94, 50, ':/images/ess_logo_transparent_small.png'))
         icon_layout_top.addSpacerItem(QSpacerItem(self.rescale_w(40), 20, hPolicy=QSizePolicy.Expanding))

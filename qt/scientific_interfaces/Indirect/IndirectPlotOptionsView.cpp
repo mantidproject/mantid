@@ -13,6 +13,8 @@
 #include <QMessageBox>
 #include <QSettings>
 
+#include <stdexcept>
+
 namespace {
 
 auto constexpr SETTINGS_GROUP = "Indices suggestions";

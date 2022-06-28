@@ -9,10 +9,10 @@ from mantid.simpleapi import GroupWorkspaces
 from mantid.api import (Algorithm, AlgorithmFactory, WorkspaceGroupProperty)
 from mantid.kernel import (Direction, StringArrayProperty)
 
-SAMP_POSITION = {6.0: "btm",
-                 85.5: "mid",
-                 165.0: "top",
-                 "None": "None"}
+SAMP_POSITION = {6.0: "btm_",
+                 85.5: "mid_",
+                 165.0: "top_",
+                 "None": ""}
 
 
 class GroupBySampleChangerPosition(Algorithm):
@@ -48,7 +48,7 @@ class GroupBySampleChangerPosition(Algorithm):
         sample_sorted_lists = self._sort_runs_by_sample()
         output_ws_name = []
         for sample in sample_sorted_lists:
-            group_ws_name = self._output_prefix + "_" + SAMP_POSITION[sample] + "_" + self._output_suffix
+            group_ws_name = self._output_prefix + "_" + SAMP_POSITION[sample] + self._output_suffix
             GroupWorkspaces(InputWorkspaces=sample_sorted_lists[sample], OutputWorkspace=group_ws_name)
             output_ws_name.append(group_ws_name)
         self.setProperty('OutputWorkspaceList', output_ws_name)

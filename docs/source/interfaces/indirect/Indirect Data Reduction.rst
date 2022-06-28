@@ -61,6 +61,8 @@ If the default facility has been set to ISIS, then the ISIS Energy Transfer tab 
 be replaced by the ILL Energy Transfer tab if the default facility has been set to ILL. A further explanation of each tab
 can be found below.
 
+.. _ISISEnergyTransfer:
+
 ISIS Energy Transfer
 ~~~~~~~~~~~~~~~~~~~~
 

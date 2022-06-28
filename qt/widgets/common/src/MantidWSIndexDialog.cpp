@@ -17,9 +17,12 @@
 #include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
+
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cstdlib>
 #include <exception>
+#include <numeric>
 #include <utility>
 
 namespace MantidQt::MantidWidgets {
@@ -1009,14 +1012,8 @@ const QList<Interval> &IntervalList::getList() const { return m_list; }
 
 int IntervalList::totalIntervalLength() const {
   // Total up all the individual Interval lengths in the list:
-
-  int total = 0;
-
-  for (const auto &i : m_list) {
-    total += (i.length());
-  }
-
-  return total;
+  return std::accumulate(m_list.cbegin(), m_list.cend(), 0,
+                         [](int lhs, const auto &interval) { return lhs + interval.length(); });
 }
 
 std::string IntervalList::toStdString(int numOfIntervals) const {
@@ -1162,21 +1159,15 @@ std::set<int> IntervalList::getIntSet() const {
 }
 
 bool IntervalList::contains(const Interval &other) const {
-  for (const auto &i : m_list) {
-    if (i.contains(other))
-      return true;
-  }
-
-  return false;
+  const auto it =
+      std::find_if(m_list.cbegin(), m_list.cend(), [&other](const auto &interval) { return interval.contains(other); });
+  return it != m_list.cend();
 }
 
 bool IntervalList::contains(const IntervalList &other) const {
-  for (const auto &i : other.m_list) {
-    if (!IntervalList::contains(i))
-      return false;
-  }
-
-  return true;
+  const auto it = std::find_if((other.m_list).cbegin(), (other.m_list).cend(),
+                               [this](const auto &interval) { return !IntervalList::contains(interval); });
+  return it == (other.m_list).cend();
 }
 
 bool IntervalList::isParsable(const QString &input, const IntervalList &container) {

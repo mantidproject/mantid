@@ -774,10 +774,8 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
   const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine maximum pixel id
-  m_detid_max = 0; // seems like a safe lower bound
-  for (const auto detID : detIDs)
-    if (detID > m_detid_max)
-      m_detid_max = detID;
+  const auto it = std::max_element(detIDs.cbegin(), detIDs.cend());
+  m_detid_max = it == detIDs.cend() ? 0 : *it; // in case detIDs is empty
 
   // Pad all the pixels
   m_progress->report("Padding Pixels");
@@ -1982,10 +1980,8 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(const DataObjects::Even
   const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine maximum pixel id
-  m_detid_max = 0; // seems like a safe lower bound
-  for (const auto detID : detIDs)
-    if (detID > m_detid_max)
-      m_detid_max = detID;
+  const auto it = std::max_element(detIDs.cbegin(), detIDs.cend());
+  m_detid_max = it == detIDs.cend() ? 0 : *it; // in case detIDs is empty
 
   // Pad all the pixels
   m_progress->report("Padding Pixels of workspace");

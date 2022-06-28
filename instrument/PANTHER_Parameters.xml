@@ -121,7 +121,7 @@
 			      cps:/entry0/instrument/Detector/detsum//entry0/actual_time:f,
 			      Treg:/entry0/sample/regulation_temperature:f,
 			      Tsamp:/entry0/sample/temperature:f,
-			      subtitle:/entry0/experiment_identifier:f" />
+			      subtitle:/entry0/experiment_identifier:s" />
 		</parameter>
 		<parameter name="logbook_optional_parameters" type="string" visible="false">
 		  <value val="lambda:/entry0/wavelength:f,

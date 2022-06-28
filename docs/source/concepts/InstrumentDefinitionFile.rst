@@ -1224,8 +1224,8 @@ output of the formula is left as it is. But for example if the x-axis
 unit of the data is TOF then the formula output is converted into, it in
 this case, the unit "1/TOF^2". Examples where 'unit' and 'result-unit'
 are used include:
-`CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_ and
-`CreateIkedaCarpenterParameters <http://www.mantidproject.org/CreateIkedaCarpenterParameters>`_.
+:ref:`CreateBackToBackParameters <CreateBackToBackParameters>` and
+:ref:`CreateIkedaCarpenterParameters <CreateIkedaCarpenterParameters>`.
 
 An example which demonstrate using a look-up-table is
 

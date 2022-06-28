@@ -10,7 +10,7 @@
 # 3rd party imports
 
 import mantid.api
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt, QTimer, Signal
 from qtpy.QtWidgets import (QHBoxLayout, QSplitter, QWidget)
 
 # local imports
@@ -110,6 +110,11 @@ class SliceViewerView(QWidget, ObservingView):
         :return: The PeaksViewerCollectionView
         """
         self.peaks_view.set_visible(on)
+
+    def delayed_refresh(self):
+        """Post an event to the event loop that causes the view to
+        update on the next cycle"""
+        QTimer.singleShot(0, self.presenter.refresh_view)
 
     def close(self):
         self.presenter.notify_close()

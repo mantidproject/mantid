@@ -21,6 +21,8 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
+
 namespace {
 
 // Convert the enum PlotType to a string to pass to ApplyMuonDetectorGrouping
@@ -321,11 +323,11 @@ API::Grouping LoadAndApplyMuonDetectorGrouping::loadGroupsAndPairs() {
  * are paired are also included as groups.
  */
 void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(const Grouping &grouping) {
-  for (auto &&groupName : grouping.groupNames) {
-    if (!MuonAlgorithmHelper::checkValidGroupPairName(groupName)) {
-      throw std::invalid_argument("Some group names are invalid : " + groupName);
-    }
-  }
+  const auto it = std::find_if_not(grouping.groupNames.cbegin(), grouping.groupNames.cend(), [](auto &&groupName) {
+    return MuonAlgorithmHelper::checkValidGroupPairName(groupName);
+  });
+  if (it != grouping.groupNames.cend())
+    throw std::invalid_argument("Some group names are invalid : " + *it);
 
   for (auto p = 0u; p < grouping.pairs.size(); ++p) {
     std::string pairName = grouping.pairNames[p];

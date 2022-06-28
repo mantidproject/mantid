@@ -1,1 +1,0 @@
-- When loading and saving a project or a script, the working directory of the dialogs is set to the current default save directory.

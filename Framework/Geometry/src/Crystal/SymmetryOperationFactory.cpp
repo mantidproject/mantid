@@ -8,6 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <memory>
 
@@ -35,10 +36,8 @@ std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(const 
 std::vector<SymmetryOperation> SymmetryOperationFactoryImpl::createSymOps(const std::vector<std::string> &identifiers) {
   std::vector<SymmetryOperation> symOps;
   symOps.reserve(identifiers.size());
-  for (const auto &identifier : identifiers) {
-    symOps.emplace_back(createSymOp(boost::trim_copy(identifier)));
-  }
-
+  std::transform(identifiers.cbegin(), identifiers.cend(), std::back_inserter(symOps),
+                 [this](const auto &identifier) { return createSymOp(boost::trim_copy(identifier)); });
   return symOps;
 }
 
@@ -65,9 +64,8 @@ bool SymmetryOperationFactoryImpl::isSubscribed(const std::string &identifier) c
 std::vector<std::string> SymmetryOperationFactoryImpl::subscribedSymbols() const {
   std::vector<std::string> symbols;
   symbols.reserve(m_prototypes.size());
-  for (const auto &prototype : m_prototypes) {
-    symbols.emplace_back(prototype.first);
-  }
+  std::transform(m_prototypes.cbegin(), m_prototypes.cend(), std::back_inserter(symbols),
+                 [](const auto &prototype) { return prototype.first; });
   return symbols;
 }
 

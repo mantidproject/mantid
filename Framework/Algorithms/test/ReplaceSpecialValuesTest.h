@@ -30,7 +30,7 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     const std::vector<Property *> props = alg2.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 13);
+    TS_ASSERT_EQUALS(props.size(), 14);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspace");
     TS_ASSERT(dynamic_cast<WorkspaceProperty<MatrixWorkspace> *>(props[0]));
@@ -232,6 +232,95 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void testExecCheckSmallNonAbsolute() {
+    MatrixWorkspace_sptr inputWS = createWorkspace();
+    // Put in some small values
+    inputWS->dataY(0)[0] = -3.0E-7;
+    inputWS->dataY(0)[1] = 1.99E-7;
+    AnalysisDataService::Instance().add("InputWS", inputWS);
+
+    Mantid::Algorithms::ReplaceSpecialValues alg3;
+    alg3.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("SmallNumberThreshold", "2.0E-7"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("SmallNumberValue", "0.123"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("SmallNumberError", "0.456"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("UseAbsolute", false));
+
+    TS_ASSERT_THROWS_NOTHING(alg3.execute());
+    TS_ASSERT(alg3.isExecuted());
+
+    MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WSCor"));
+    TS_ASSERT(result);
+
+    TS_ASSERT_EQUALS(result->y(0)[0], 0.123);
+    TS_ASSERT_EQUALS(result->e(0)[0], 0.456);
+    TS_ASSERT_EQUALS(result->y(0)[1], 0.123);
+    TS_ASSERT_EQUALS(result->e(0)[1], 0.456);
+
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
+      for (int j = 0; j < 4; ++j) {
+        if (!std::isnormal(inputWS->y(i)[j]) || !std::isnormal(inputWS->e(i)[j])) {
+          // Skip any we can't compare
+          continue;
+        } else {
+          TS_ASSERT(result->y(i)[j] >= inputWS->y(i)[j]);
+        }
+      }
+    }
+
+    AnalysisDataService::Instance().remove("InputWS");
+    AnalysisDataService::Instance().remove("WSCor");
+  }
+
+  void testExecCheckLargeNonAbsolute() {
+    MatrixWorkspace_sptr inputWS = createWorkspace();
+    // Put in some small values
+    inputWS->dataY(0)[0] = 1600;
+    inputWS->dataY(0)[1] = -2000;
+    inputWS->dataE(0)[1] = -1000;
+    AnalysisDataService::Instance().add("InputWS", inputWS);
+
+    Mantid::Algorithms::ReplaceSpecialValues alg3;
+    alg3.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("InputWorkspace", "InputWS"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("OutputWorkspace", "WSCor"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberThreshold", "1500"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberValue", "999"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("BigNumberError", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("CheckErrorAxis", true));
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("UseAbsolute", false));
+
+    TS_ASSERT_THROWS_NOTHING(alg3.execute());
+    TS_ASSERT(alg3.isExecuted());
+
+    MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(result = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("WSCor"));
+    TS_ASSERT(result);
+
+    TS_ASSERT_EQUALS(result->y(0)[0], 999);
+    TS_ASSERT_EQUALS(result->e(0)[0], 0);
+    TS_ASSERT_EQUALS(result->y(0)[1], -2000);
+    TS_ASSERT_EQUALS(result->e(0)[1], -1000);
+
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
+      for (int j = 0; j < 4; ++j) {
+        if (!std::isnormal(inputWS->y(i)[j]) || !std::isnormal(inputWS->e(i)[j])) {
+          // Skip any we can't compare
+          continue;
+        } else {
+          TS_ASSERT(result->y(i)[j] <= inputWS->y(i)[j]);
+        }
+      }
+    }
+
+    AnalysisDataService::Instance().remove("InputWS");
+    AnalysisDataService::Instance().remove("WSCor");
+  }
+
   void checkValues(const MatrixWorkspace_sptr &inputWS, const MatrixWorkspace_sptr &result, bool naNCheck,
                    bool infCheck) {
 
@@ -273,8 +362,8 @@ public:
     double inf = std::numeric_limits<double>::infinity();
     inputWS->dataY(0)[2] = inf;
     inputWS->dataY(1)[0] = -inf;
-    inputWS->dataY(2)[0] = 999;
-    inputWS->dataE(2)[0] = inf;
+    inputWS->dataY(2)[0] = -999;
+    inputWS->dataE(2)[0] = 999;
     inputWS->dataY(3)[1] = 999;
     inputWS->dataE(3)[1] = -inf;
     double nan = std::numeric_limits<double>::quiet_NaN();
@@ -282,7 +371,7 @@ public:
     inputWS->dataY(5)[1] = nan;
     inputWS->dataY(6)[3] = 999;
     inputWS->dataE(6)[3] = nan;
-    inputWS->dataY(7)[1] = 999;
+    inputWS->dataY(7)[1] = -999;
     inputWS->dataE(7)[1] = nan;
 
     return inputWS;

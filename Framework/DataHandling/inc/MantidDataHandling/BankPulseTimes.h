@@ -9,9 +9,9 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
 
-#include <nexus/NeXusFile.hpp>
-
-using namespace ::NeXus;
+namespace NeXus {
+class File;
+}
 
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,

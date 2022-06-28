@@ -62,6 +62,40 @@ def artists_hidden(artists):
             artist.set_visible(True)
 
 
+@contextmanager
+def autoscale_on_update(ax, state, axis='both'):
+    """
+    Context manager to temporarily change value of autoscale_on_update
+    :param matplotlib.axes.Axes ax: The axes to disable autoscale on
+    :param bool state: True turns auto-scaling on, False off
+    :param str axis: {'both', 'x', 'y'} The axis to set the scaling on
+    """
+    original_state = ax.get_autoscale_on()
+    try:
+        # If we are making the first plot on an axes object
+        # i.e. ax.lines is empty, axes has default ylim values.
+        # Therefore we need to autoscale regardless of state parameter.
+        if ax.lines:
+            if axis == 'both':
+                original_state = ax.get_autoscale_on()
+                ax.set_autoscale_on(state)
+            elif axis == 'x':
+                original_state = ax.get_autoscalex_on()
+                ax.set_autoscalex_on(state)
+            elif axis == 'y':
+                original_state = ax.get_autoscaley_on()
+                ax.set_autoscaley_on(state)
+        yield
+    finally:
+        if ax.lines:
+            if axis == 'both':
+                ax.set_autoscale_on(original_state)
+            elif axis == 'x':
+                ax.set_autoscalex_on(original_state)
+            elif axis == 'y':
+                ax.set_autoscaley_on(original_state)
+
+
 def find_errorbar_container(line, containers):
     """
     Finds the ErrorbarContainer associated with the plot line.
@@ -130,9 +164,11 @@ def row_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().rowspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().rowspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
-        return ax.rowNum
+        # An 'inset' axes does not have a rowNum, so return None
+        return ax.rowNum if hasattr(ax, 'rowNum') else None
 
 
 def col_num(ax):
@@ -141,9 +177,11 @@ def col_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().colspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().colspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
-        return ax.colNum
+        # An 'inset' axes does not have a colNum, so return None
+        return ax.colNum if hasattr(ax, 'colNum') else None
 
 
 def zoom_axis(ax, coord, x_or_y, factor):

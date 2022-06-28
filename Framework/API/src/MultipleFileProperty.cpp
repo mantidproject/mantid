@@ -19,6 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
+#include <algorithm>
 #include <cctype>
 #include <functional>
 #include <numeric>
@@ -84,10 +85,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name, unsigned int
   }
 
   m_multiFileLoadingEnabled = Kernel::ConfigService::Instance().getValue<bool>("loading.multifile").get_value_or(false);
-
-  for (const auto &ext : exts)
-    if (doesNotContainWildCard(ext))
-      m_exts.emplace_back(ext);
+  std::copy_if(exts.cbegin(), exts.cend(), std::back_inserter(m_exts), doesNotContainWildCard);
 }
 
 /**
