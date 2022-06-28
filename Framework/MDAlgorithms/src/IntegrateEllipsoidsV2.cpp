@@ -328,13 +328,6 @@ void IntegrateEllipsoidsV2::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   SlimEvents qList;
 
-  // get the index count
-  int indexCount = 0;
-  for (size_t i = 0; i < n_peaks; ++i) {
-    if (peaks[i].getHKL().norm2() > 0)
-      indexCount += 1;
-  }
-
   // Note: we skip un-indexed peaks if index count greater than zero
   for (size_t i = 0; i < n_peaks; i++) {
     // check if peak is satellite peak
@@ -346,11 +339,7 @@ void IntegrateEllipsoidsV2::exec() {
       continue; // skip this peak
     }
     // add peak Q to list
-    V3D hkl(peaks[i].getIntHKL());
-    // use tolerance == 1 to just check for (0,0,0,0,0,0)
-    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) || indexCount == 0) {
-      qList.emplace_back(std::pair<double, double>(1., 1.), peak_q);
-    }
+    qList.emplace_back(std::pair<double, double>(1., 1.), peak_q);
   }
 
   // Peak vectors
