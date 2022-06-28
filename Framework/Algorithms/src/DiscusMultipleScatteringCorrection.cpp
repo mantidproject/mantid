@@ -760,21 +760,6 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
         SQValues.insert(SQValues.begin(), SQValues.front());
       }
       if (qValues.back() < qmax) {
-        if (m_EMode != DeltaEMode::Elastic) {
-          // in case qmax is DBL_MAX add a few extra points beyond supplied q range that are closer. Useful for
-          // m_QSQIntegral where flat interpolation means final point at qmax probably won't be used
-          double maxSuppliedQ = qValues.back();
-          if (maxSuppliedQ > 0.) {
-            if (2 * maxSuppliedQ < qmax) {
-              qValues.push_back(2 * maxSuppliedQ);
-              SQValues.push_back(SQValues.back());
-            }
-            if (4 * maxSuppliedQ < qmax) {
-              qValues.push_back(4 * maxSuppliedQ);
-              SQValues.push_back(SQValues.back());
-            }
-          }
-        }
         qValues.push_back(qmax);
         SQValues.push_back(SQValues.back());
       }
@@ -914,24 +899,29 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const API::Matrix
 void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs,
                                                                            const double specialK) {
   for (auto &SQWSMapping : matWSs) {
-    auto &QSQWS = SQWSMapping.QSQ;
-    std::vector<double> IOfQYFull;
-    std::vector<double> finalkValues, QSQIntegrals;
-    std::vector<double> kValues = {specialK};
     // Calculate the integral for a range of k values. Not massively important which k values but choose them here
-    // based on the q points in the QS(Q) profile and the initial k values incident on the sample
-    const std::vector<double> qValues = QSQWS->histogram(0).readX();
-    double lastq = -1;
+    // based on the q points in the S(Q) profile and the initial k values incident on the sample
+    std::set<double> kValues = {specialK};
+    const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).readX();
     for (auto q : qValues) {
-      // extra points were added to make QSQ integral more accurate but don't need a separate QSQ integral at these
-      if (q > 0 && q > std::nextafter(lastq, DBL_MAX)) {
-        double k = q / 2;
-        kValues.insert(std::upper_bound(kValues.begin(), kValues.end(), k), k);
-      }
-      lastq = q;
+      if (q > 0)
+        kValues.insert(q / 2);
     }
+
+    // add a few extra points beyond supplied q range to ensure capture asymptotic value of integral/2*k*k.
+    // Useful when doing a flat interpolation on m_QSQIntegral during inelastic calculation where k not known up front
+    if (m_EMode != DeltaEMode::Elastic) {
+      double maxSuppliedQ = qValues.back();
+      if (maxSuppliedQ > 0.) {
+        kValues.insert(maxSuppliedQ);
+        kValues.insert(2 * maxSuppliedQ);
+      }
+    }
+
+    std::vector<double> finalkValues, QSQIntegrals;
     for (auto k : kValues) {
-      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(QSQWS, k);
+      std::vector<double> IOfQYFull;
+      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k);
       auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
       // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
       // into a k region where the integral is actually non-zero
@@ -1122,6 +1112,9 @@ double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const ISpectrum
 
 /**
  * Interpolate function using flat interpolation from previous point
+ * @param histToInterpolate The histogram containing the data to interpolate
+ * @param x The x value to interpolate at
+ * @return The interpolated value
  */
 double DiscusMultipleScatteringCorrection::interpolateFlat(const ISpectrum &histToInterpolate, double x) {
   auto &xHisto = histToInterpolate.x();
