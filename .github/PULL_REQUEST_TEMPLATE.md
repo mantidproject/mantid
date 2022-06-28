@@ -18,7 +18,7 @@ Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 If you add release notes please save them as a separate file using the Issue or PR number as the file name. Check the file is located in the correct directory for your note(s).
 -->
 
-<!-- Ensure the base of this PR is correct (e.g. release-next or master)
+<!-- Ensure the base of this PR is correct (e.g. release-next or main)
 Finally, don't forget to add the appropriate labels, milestones, etc.!  -->
 
 ---
