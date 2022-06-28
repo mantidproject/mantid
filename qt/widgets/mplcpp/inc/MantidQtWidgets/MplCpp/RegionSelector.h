@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include <QLayout>
@@ -14,7 +14,8 @@
 namespace MantidQt::Widgets::MplCpp {
 class MANTID_MPLCPP_DLL RegionSelector : public Common::Python::InstanceHolder {
 public:
-  RegionSelector(Mantid::API::MatrixWorkspace_sptr const &workspace, QLayout *layout);
+  RegionSelector(Mantid::API::Workspace_sptr const &workspace, QLayout *layout);
+  void updateWorkspace(Mantid::API::Workspace_sptr const &workspace);
 
 private:
   Common::Python::Object getView() const;

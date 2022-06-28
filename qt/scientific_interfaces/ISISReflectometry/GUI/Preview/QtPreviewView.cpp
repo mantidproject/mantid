@@ -64,7 +64,11 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
 }
 
 void QtPreviewView::plotRegionSelector(MatrixWorkspace_sptr ws) {
-  m_regionSelector = std::make_unique<MantidQt::Widgets::MplCpp::RegionSelector>(ws, m_ui.contour_plot_layout);
+  if (!m_regionSelector) {
+    m_regionSelector = std::make_unique<MantidQt::Widgets::MplCpp::RegionSelector>(ws, m_ui.contour_plot_layout);
+  } else {
+    m_regionSelector->updateWorkspace(ws);
+  }
 }
 
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }

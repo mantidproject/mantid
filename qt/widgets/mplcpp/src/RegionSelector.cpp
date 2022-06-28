@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/MplCpp/RegionSelector.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
@@ -14,7 +13,6 @@
 
 #include <QWidget>
 
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
@@ -38,7 +36,7 @@ Python::Object newPresenter(Workspace_sptr workspace) {
 
 namespace MantidQt::Widgets::MplCpp {
 
-RegionSelector::RegionSelector(MatrixWorkspace_sptr const &workspace, QLayout *layout)
+RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout)
     : Python::InstanceHolder(newPresenter(workspace)), m_layout(layout) {
   GlobalInterpreterLock lock;
   auto view = Python::extract<QWidget>(getView());
@@ -55,4 +53,12 @@ void RegionSelector::show() const {
   GlobalInterpreterLock lock;
   getView().attr("show")();
 }
+
+void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
+  GlobalInterpreterLock lock;
+  boost::python::dict kwargs;
+  kwargs["workspace"] = workspace;
+  pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
+}
+
 } // namespace MantidQt::Widgets::MplCpp
