@@ -31,7 +31,7 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
 
 
 def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb,
-                  sample_details, vanadium_path, absorb_method="Mayers", paalman_pings_events_per_point=None):
+                  sample_details, vanadium_path, absorb_method, paalman_pings_events_per_point=None):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -142,7 +142,7 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
 
 
 def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details,
-                          absorb_method="Mayers", paalman_pings_events_per_point=None):
+                          absorb_method, paalman_pings_events_per_point=None):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
@@ -201,7 +201,7 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
 
 
 def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details,
-                             absorb_method="Mayers", paalman_pings_events_per_point=None):
+                             absorb_method, paalman_pings_events_per_point=None):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)

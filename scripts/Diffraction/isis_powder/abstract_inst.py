@@ -68,7 +68,7 @@ class AbstractInst(object):
                do_van_normalisation,
                do_absorb_corrections,
                sample_details=None,
-               absorb_method="Mayers",
+               absorb_method=None,
                paalman_pings_events_per_point=None):
         """
         Focuses the user specified run - should be called by the concrete instrument

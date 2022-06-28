@@ -459,7 +459,7 @@ def run_focus_no_chopper(run_number):
 
 def run_focus_absorption(run_number, paalman_pings=False):
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
-    sample_empty_scale = 0.5  # Set it to 50% scale
+    sample_empty_scale = 0.5  # ignored if paalman_pings True
 
     # Copy the required splined file into place first (instead of relying on generated one)
     splined_file_name = "POLARIS00098532_splined.nxs"
@@ -469,12 +469,16 @@ def run_focus_absorption(run_number, paalman_pings=False):
 
     inst_object = setup_inst_object("PDF", with_container=True)
     if paalman_pings:
-        inst_object._inst_settings.absorb_method = "PaalmanPings"  # defaults to Mayers
+        inst_object._inst_settings.absorb_method = "PaalmanPings"  # the default is Mayers
         inst_object._inst_settings.paalman_pings_events_per_point = 1
 
-    return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
-                             do_absorb_corrections=True, sample_empty=sample_empty,
-                             sample_empty_scale=sample_empty_scale, multiple_scattering=False)
+        return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
+                                 do_absorb_corrections=True, sample_empty=sample_empty,
+                                 multiple_scattering=False)
+    else:
+        return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
+                                 do_absorb_corrections=True, sample_empty=sample_empty,
+                                 sample_empty_scale=sample_empty_scale, multiple_scattering=False)
 
 
 def setup_mantid_paths():
