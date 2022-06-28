@@ -161,6 +161,18 @@ public:
     presenter.notifyContourExportAdsRequested();
   }
 
+  void test_sum_banks_completed_plots_region_selector() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockView, plotRegionSelector(Eq(ws))).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+
+    presenter.notifySumBanksCompleted();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
