@@ -302,6 +302,8 @@ class D4ILLReduction(PythonAlgorithm):
             # and the suffix will indicate the X-axis unit of the workspace: either 2theta or q
             output_name = '{}_diffractogram_{}'.format(output_ws_name, (entry.name())[(entry.name()).rfind('_')+1:])
             RenameWorkspace(InputWorkspace=entry, OutputWorkspace=output_name)
+            if self.getProperty('ExportASCII').value:
+                SaveAscii(InputWorkspace=output_name, Filename='{}.dat'.format(output_name))
         self.setProperty('OutputWorkspace', mtd[ws])
 
     def _get_shifts(self, calibration_file, zero_angle_corr, n_banks):
