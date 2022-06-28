@@ -278,10 +278,10 @@ class D4ILLReduction(PythonAlgorithm):
         det_list = []
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
-                mon_ws = '{}_mon'.format(entry.name())
-                mon_list.append(mon_ws)
                 det_ws = entry.name()
                 det_list.append(det_ws)
+                mon_ws = '{}_mon'.format(det_ws)
+                mon_list.append(mon_ws)
                 ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=det_ws,
                                 MonitorWorkspace=mon_ws)
         else:
@@ -296,8 +296,13 @@ class D4ILLReduction(PythonAlgorithm):
         return ws, mon
 
     def _finalize(self, ws):
-        """Finalizes the reduction step by removing special values, and setting unique names
-         to the output workspaces."""
+        """Finalizes the reduction step by setting unique names to the output workspaces."""
+        output_ws_name = self.getPropertyValue('OutputWorkspace')
+        for entry in mtd[ws]:
+            # the output is going to contain the output workspace name as prefix, 'diffractogram' string as the middle,
+            # and the suffix will indicate the X-axis unit of the workspace: either 2theta or q
+            output_name = '{}_diffractogram_{}'.format(output_ws_name, (entry.name())[(entry.name()).rfind('_')+1:])
+            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=output_name)
         self.setProperty('OutputWorkspace', mtd[ws])
 
     def _get_shifts(self, calibration_file, zero_angle_corr, n_banks):
@@ -338,7 +343,7 @@ class D4ILLReduction(PythonAlgorithm):
         Args:
         progress: (obj) object of Progress class allowing to follow execution of the loading
         """
-        ws = '__' + self.getPropertyValue('OutputWorkspace')
+        ws = '__{}'.format(self.getPropertyValue('OutputWorkspace'))
         progress.report(0, 'Loading data')
         LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLDiffraction',
                      OutputWorkspace=ws, startProgress=0.0, endProgress=0.3)
