@@ -14,6 +14,7 @@
 // forward declaration
 class QHelpEngine;
 class QString;
+class QUrl;
 class QWidget;
 class pqHelpWindow;
 
@@ -42,6 +43,8 @@ public:
                            const std::string &section = std::string()) override;
   void showCustomInterface(const QString &name, const QString &area = QString(),
                            const QString &section = QString()) override;
+
+  bool isHelpPageFound(const QUrl &url) const override;
 
   /// Perform any clean up on main window shutdown
   void shutdown() override;

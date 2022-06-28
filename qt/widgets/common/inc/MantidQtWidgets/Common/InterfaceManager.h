@@ -80,7 +80,7 @@ public:
   MantidHelpInterface *createHelpWindow(QWidget *parent = nullptr) const;
 
   /// @param url Relative URL of help page to show.
-  void showHelpPage(const QString &url = QString());
+  void showHelpPage(const QString &url = QString(), QWidget *parent = nullptr);
 
   /// @param name of algorithm to show help for
   /// @param version of algorithm
@@ -102,6 +102,8 @@ public:
 
   /// @param url of web page to open in browser
   void showWebPage(const QString &url);
+
+  bool isHelpPageFound(const QString &url) const;
 
   void closeHelpWindow();
 

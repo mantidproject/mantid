@@ -357,12 +357,13 @@ public:
       QWidget *parent = nullptr);
   QStringList getUserSubWindowKeys() const;
 
-  void showHelpPage(const QString &url=QString());
+  void showHelpPage(const QString &url=QString(), QWidget *parent = nullptr);
   void showAlgorithmHelp(const QString &name, const int version=-1);
   void showConceptHelp(const QString &name);
   void showFitFunctionHelp(const QString &name=QString());
   void showCustomInterfaceHelp(const QString &name, const QString &area=QString(), const QString &section=QString());
   void showWebPage(const QString &url);
+  bool isHelpPageFound(const QString &url) const;
   void closeHelpWindow();
 };
 

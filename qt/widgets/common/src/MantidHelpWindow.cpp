@@ -289,6 +289,13 @@ void MantidHelpWindow::showCustomInterface(const std::string &name, const std::s
 }
 
 /**
+ * Check to see if the help page url has been found or is missing
+ */
+bool MantidHelpWindow::isHelpPageFound(const QUrl &url) const {
+  return g_helpWindow != nullptr ? g_helpWindow->isExistingPage(url) : false;
+}
+
+/**
  * Can be called by the host process to indicate that it will
  * close soon. This closes the help window & releases the QProcess
  */
@@ -296,8 +303,9 @@ void MantidHelpWindow::shutdown() {
   // close the window and delete the object
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
-  if (g_helpWindow != nullptr)
+  if (g_helpWindow != nullptr) {
     g_helpWindow->close();
+  }
 }
 
 /**

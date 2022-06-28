@@ -240,8 +240,8 @@ MantidHelpInterface *InterfaceManager::createHelpWindow(QWidget *parent) const {
   }
 }
 
-void InterfaceManager::showHelpPage(const QString &url) {
-  auto window = createHelpWindow();
+void InterfaceManager::showHelpPage(const QString &url, QWidget *parent) {
+  auto window = createHelpWindow(parent);
   window->showPage(url);
 }
 
@@ -266,6 +266,10 @@ void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QStrin
 }
 
 void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
+
+bool InterfaceManager::isHelpPageFound(const QString &url) const {
+  return MantidHelpWindow::helpWindowExists() ? createHelpWindow()->isHelpPageFound(QUrl(url)) : false;
+}
 
 void InterfaceManager::closeHelpWindow() {
   if (MantidHelpWindow::helpWindowExists()) {
