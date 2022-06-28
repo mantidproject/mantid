@@ -165,15 +165,15 @@ class D4ILLReduction(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=[correction_ws])
         return corrected_ws
 
-    def _create_efficiency_correction(self, efficiency_file_name, n_detectors):
+    def _create_efficiency_correction(self, efficiency_file_name):
         """
         Creates a workspace with efficiency factors for each detector.
 
-        :param str efficiency_file_name:
-        :param int n_detectors:
-        :return:
+        Args:
+        efficiency_file_name: (str) path to the file containing efficiency correction factors for each detector
+        :return: name of the workspace containing efficiency correction
         """
-        y_values = np.zeros(n_detectors)
+        y_values = []
         det_no = 0
         with open(efficiency_file_name, "r") as efficiency:
             for line in efficiency:
@@ -183,31 +183,26 @@ class D4ILLReduction(PythonAlgorithm):
                 columns = line.split()
                 if columns:
                     corr_val = float(columns[2])
-                    y_values[det_no] = corr_val if corr_val >= 0 else np.nan
+                    y_values.append(corr_val if corr_val >= 0 else np.nan)
                     det_no += 1
         eff_corr_ws = 'eff_corr_ws'
         x_values = np.array(0)
-        CreateWorkspace(DataX=x_values, DataY=y_values, NSpec=len(y_values), OutputWorkspace=eff_corr_ws)
+        CreateWorkspace(DataX=x_values, DataY=np.array(y_values), NSpec=len(y_values), OutputWorkspace=eff_corr_ws)
         return eff_corr_ws
 
     def _correct_relative_efficiency(self, ws):
         """
         Corrects the relative efficiency of each detector using values provided in an external ASCII file.
 
-        :param str ws: name of the workspace to be corrected
+        Args:
+        ws: (str) name of the workspace to be corrected
         :return: name of corrected workspace
         """
 
         if self.getProperty('EfficiencyCalibrationFile').isDefault:
             return ws
         calibration_file = self.getPropertyValue('EfficiencyCalibrationFile')
-        if isinstance(mtd[ws], WorkspaceGroup):
-            n_banks = mtd[ws][0].getInstrument().getIntParameter("number_banks")[0]
-            n_detectors = mtd[ws][0].getInstrument().getIntParameter("number_pixels_per_bank")[0]
-        else:
-            n_banks = mtd[ws].getInstrument().getIntParameter("number_banks")[0]
-            n_detectors = mtd[ws].getInstrument().getIntParameter("number_pixels_per_bank")[0]
-        eff_corr_ws = self._create_efficiency_correction(calibration_file, n_banks * n_detectors)
+        eff_corr_ws = self._create_efficiency_correction(calibration_file)
 
         output_ws = '{}_efficiency_corrected'.format(ws)
         Divide(LHSWorkspace=ws, RHSWorkspace=eff_corr_ws, OutputWorkspace=output_ws)
@@ -227,8 +222,11 @@ class D4ILLReduction(PythonAlgorithm):
         neutron_mass = physical_constants['neutron mass'][0]  # in kg
         Ei = mtd[ws].getRun().getLogData('Ei').value * 1.60218e-22  # in J, meV->J
         v = np.sqrt(2.0 * Ei / neutron_mass) # in m /s
-        momentum = neutron_mass * v # in m * kg / s
-        wavelength = h / momentum * 1e10 # in Angstroem
+        momentum = neutron_mass * v  # in m * kg / s
+        if self.getProperty('Wavelength').isDefault:
+            wavelength = h / momentum * 1e10  # in Angstroem
+        else:
+            wavelength = self.getProperty('Wavelength').value
         ConvertAxisByFormula(
             InputWorkspace=ws,
             OutputWorkspace=output_ws,
