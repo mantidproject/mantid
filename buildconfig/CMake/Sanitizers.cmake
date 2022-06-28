@@ -37,7 +37,9 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
     )
 
     if(${USE_SANITIZERS_LOWER} MATCHES "address")
-      add_compile_options($<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:/fsanitize=address>)
+      add_compile_options(
+        $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>,$<CONFIG:DebugWithRelRuntime>>:/fsanitize=address>
+      )
       add_link_options(
         "$<IF:$<CONFIG:Debug>,/wholearchive:clang_rt.asan_dbg_dynamic-x86_64.lib;/wholearchive:clang_rt.asan_dbg_dynamic_runtime_thunk-x86_64.lib;/wholearchive:vcasand.lib,/wholearchive:clang_rt.asan_dynamic-x86_64.lib;/wholearchive:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib;/wholearchive:vcasan.lib>"
       )
