@@ -9,7 +9,7 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup, Run
 from mantid.simpleapi import config, mtd, D4ILLReduction, Integration
 from mantid.geometry import Instrument
 import numpy as np
-from os import remove
+from os import remove, path
 
 
 class D4ILLReductionTest(unittest.TestCase):
@@ -37,19 +37,32 @@ class D4ILLReductionTest(unittest.TestCase):
 
     def test_single_run_default(self):
         output_ws = 'single_run_default'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws)
+        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, ExportAscii=False)
         self._check_output(mtd[output_ws], 256, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
                            'Height', 'Label')
 
     def test_multi_run_default(self):
         output_ws = 'multi_run_default'
-        D4ILLReduction(Run='387229:387230', OutputWorkspace=output_ws)
+        D4ILLReduction(Run='387229:387230', OutputWorkspace=output_ws, ExportAscii=False)
         self._check_output(mtd[output_ws], 258, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
                            'Height', 'Label')
 
+    def test_save_ascii(self):
+        output_ws = 'multi_run_default'
+        D4ILLReduction(Run='387229:387230', OutputWorkspace=output_ws, ExportAscii=True)
+        self.assertTrue(path.exists(path.join(config['defaultsave.directory'],
+                                              '{}_diffractogram_2theta.dat'.format(output_ws))))
+        self.assertTrue(path.exists(path.join(config['defaultsave.directory'],
+                                              '{}_diffractogram_q.dat'.format(output_ws))))
+        remove(path.join(config['defaultsave.directory'],
+                         '{}_diffractogram_2theta.dat'.format(output_ws)))  # clean up the temporary file
+        remove(path.join(config['defaultsave.directory'],
+                         '{}_diffractogram_q.dat'.format(output_ws)))  # clean up the temporary file
+
+
     def test_rotation(self):
         output_ws = 'single_run_rotation'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, ZeroPositionAngle=10)
+        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, ZeroPositionAngle=10, ExportAscii=True)
         min_angular_range = mtd[output_ws][0].readX(0)[0]
         max_angular_range = mtd[output_ws][0].readX(0)[256]
         self.assertAlmostEqual(min_angular_range, 19.70, delta=1e-2)
@@ -57,7 +70,7 @@ class D4ILLReductionTest(unittest.TestCase):
 
     def test_normalise_to_monitor(self):
         output_ws = 'norm_to_monitor'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, NormaliseBy='Monitor')
+        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, NormaliseBy='Monitor', ExportAscii=True)
         self._check_output(mtd[output_ws], 256, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
                            'Height', 'Label')
         integrated_ws = 'integration_ws'
@@ -67,7 +80,8 @@ class D4ILLReductionTest(unittest.TestCase):
 
     def test_normalise_to_time(self):
         output_ws = 'norm_to_time'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, NormaliseBy='Time', NormalisationStandard=80)
+        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, NormaliseBy='Time', NormalisationStandard=80,
+                       ExportAscii=True)
         self._check_output(mtd[output_ws], 256, 1, 2, ['Scattering Angle', 'q'], ['Label', 'MomentumTransfer'],
                            'Height', 'Label')
         integrated_ws = 'integration_ws'
@@ -82,7 +96,8 @@ class D4ILLReductionTest(unittest.TestCase):
             for bank_no, bank_pos in enumerate(bank_positions):
                 f.write("{}\t{}\n".format(bank_no, bank_pos))
         output_ws = 'calibrate_positions'
-        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, BankPositionOffsetsFile=calibration_file)
+        D4ILLReduction(Run='387230', OutputWorkspace=output_ws, BankPositionOffsetsFile=calibration_file,
+                       ExportAscii=True)
         remove(calibration_file)  # clean up the temporary file
         min_angular_range = mtd[output_ws][0].readX(0)[0]
         max_angular_range = mtd[output_ws][0].readX(0)[256]
