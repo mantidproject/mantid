@@ -99,8 +99,9 @@ class D4ILLReduction(PythonAlgorithm):
         Corrects bank positions by rotating them around the sample by the defined zero angle and values available from
         an ASCII calibration file.
 
-        :param str ws: name of the workspace to be corrected
-        :return: corrected workspace name
+        Args:
+        ws: (str) name of the workspace to be corrected
+        return: (str) corrected workspace name
         """
         zero_angle_corr = self.getProperty('ZeroPositionAngle').value
         calibration_file = self.getPropertyValue('BankPositionOffsetsFile')
@@ -122,8 +123,10 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Creates a workspace containing multiplicative dead-time correction.
 
-        :param str ws: workspace to be corrected
-        :param float tau: count rate coefficient
+        Args:
+        ws: (str) workspace to be corrected
+        tau: (float) count rate coefficient
+        return: (str) corrected workspace name
         """
         time_ws = 'time_ws'
         time_val = mtd[ws].run().getLogData('duration').value
@@ -144,9 +147,10 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Corrects for the dead-time of detectors or a monitor.
 
-        :param str ws: workspace (or group) name to be corrected
-        :param float tau: count rate coefficient
-        :return output workspace name
+        Args:
+        ws: (str) workspace (or group) name to be corrected
+        tau: (float) count rate coefficient
+        return: (str) output workspace name
         """
         if isinstance(mtd[ws], WorkspaceGroup):
             corrected_list = []
@@ -171,7 +175,7 @@ class D4ILLReduction(PythonAlgorithm):
 
         Args:
         efficiency_file_name: (str) path to the file containing efficiency correction factors for each detector
-        :return: name of the workspace containing efficiency correction
+        return: (str) name of the workspace containing efficiency correction
         """
         y_values = []
         det_no = 0
@@ -196,7 +200,7 @@ class D4ILLReduction(PythonAlgorithm):
 
         Args:
         ws: (str) name of the workspace to be corrected
-        :return: name of corrected workspace
+        return: (str) name of corrected workspace
         """
 
         if self.getProperty('EfficiencyCalibrationFile').isDefault:
@@ -215,8 +219,9 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Converts the bin axis values of the  provided workspace from scattering angle to momentum exchange.
 
-        :param str ws: name of the workspace with x-axis in 2theta units
-        :return: name of the workspace converted to q
+        Args:
+        ws: (str) name of the workspace with x-axis in 2theta units
+        return: (str) name of the workspace converted to q
         """
         h = physical_constants['Planck constant'][0]  # in m^2 kg / s
         neutron_mass = physical_constants['neutron mass'][0]  # in kg
@@ -240,8 +245,9 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Creates diffractograms of reduced data as a function of scattering angle and momentum exchange.
 
-        :param str ws: input workspace name to be put on common 2theta and q axis
-        :return: workspace group name containing diffractograms in 2theta and q
+        Args:
+        ws: (str) input workspace name to be put on common 2theta and q axis
+        return: (str) workspace group name containing diffractograms in 2theta and q
         """
         diff_2theta_ws = '{}_diffractogram_2theta'.format(ws)
         SumOverlappingTubes(
@@ -261,9 +267,11 @@ class D4ILLReduction(PythonAlgorithm):
 
     def _separate_detectors_monitors(self, ws):
         """
+        Separates the input workspace into groups containing monitor workspaces and detector workspaces.
 
-        :param ws: name of the input workspace
-        :return:
+        Args:
+        ws: (str) name of the input workspace
+        return: (tuple) two names of workspace groups containing detector, and monitor workspaces
         """
         mon = '{}_mon'.format(ws)
         mon_list = []
@@ -296,10 +304,11 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Loads the angular shifts for all banks from a provided ASCII file.
 
-        :param str calibration_file: path to bank shifts calibration file
-        :param float zero_angle_corr: angular correction (in deg) to all banks
-        :param int n_banks: number of banks of the detector
-        :return: a list with angles for banks to be rotated around the sample (in deg)
+        Args:
+        calibration_file: (str) path to bank shifts calibration file
+        zero_angle_corr: (float) angular correction (in deg) to all banks
+        n_banks: (int) number of banks of the detector
+        return: (list) a list with angles for banks to be rotated around the sample (in deg)
         """
         bank_shifts = []
         try:
@@ -326,7 +335,8 @@ class D4ILLReduction(PythonAlgorithm):
     def _load_data(self, progress):
         """Loads the data scan, with each scan step in individual workspace, and splits detectors from monitors.
 
-        :param: progress: object of Progress class allowing to follow execution of the loading
+        Args:
+        progress: (obj) object of Progress class allowing to follow execution of the loading
         """
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         progress.report(0, 'Loading data')
@@ -339,10 +349,12 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Creates a workspace used as denominator in normalisation.
 
-        :param mon:
-        :param str method: normalisation method, one out of Monitor, Time, or None
-        :param float norm_standard: value of the standard to which normalise
-        :return: name of normalisation workspace
+        Args:
+        det: (str) name of the detector workspace
+        mon: (str) name of the monitor workspace
+        method: (str) normalisation method, one out of Monitor, Time, or None
+        norm_standard: (float) value of the standard to which normalise
+        return: name of normalisation workspace
         """
         if method == 'Time':
             value = mtd[det].getRun().getLogData('duration').value
@@ -350,7 +362,7 @@ class D4ILLReduction(PythonAlgorithm):
         elif method == 'Monitor':
             value = mtd[mon].readY(0)[0]
             error = mtd[mon].readE(0)[0]
-        else: # method == None
+        else:  # method == None
             value = 1.0
             error = 0.0
         norm_ws = 'norm_factor'
@@ -364,11 +376,12 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Normalises the provided workspace using the chosen method and to a designated standard.
 
-        :param str ws: workspace to normalise
-        :param str mon: monitor workspace name, used when method is Monitor
-        :param str method: normalisation method, one out of Monitor, Time, or None
-        :param float norm_standard: value of the standard to which normalise
-        :return: :return: name of normalised workspace
+        Args:
+        ws: (str) name of workspace to normalise
+        mon: (str) monitor workspace name, used when method is Monitor
+        method: (str) normalisation method, one out of Monitor, Time, or None
+        norm_standard: (float) value of the standard to which normalise
+        return: (str) name of normalised workspace
         """
 
         if isinstance(mtd[ws], WorkspaceGroup):
@@ -392,8 +405,9 @@ class D4ILLReduction(PythonAlgorithm):
         """
         Rotates all banks in a workspace by a value provided in the shift list.
 
-        :param str ws: workspace to be corrected
-        :param list(float) shift: list containing angular rotations around the sample
+        Args:
+        ws: (str) workspace to be corrected
+        shift: (list(float)) list containing angular rotations around the sample
         """
         bank_no = 0
         deg2rad = np.pi / 180.0
