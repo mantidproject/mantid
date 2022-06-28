@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
-#include "MantidQtWidgets/MplCpp/RegionSelector.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
 
-using MantidQt::Widgets::MplCpp::RegionSelector;
+using MantidQt::Widgets::RegionSelector;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");

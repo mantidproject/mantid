@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidQtWidgets/MplCpp/RegionSelector.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
@@ -34,7 +34,7 @@ Python::Object newPresenter(Workspace_sptr workspace) {
 }
 } // namespace
 
-namespace MantidQt::Widgets::MplCpp {
+namespace MantidQt::Widgets {
 
 RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout)
     : Python::InstanceHolder(newPresenter(workspace)), m_layout(layout) {
@@ -61,4 +61,4 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
 }
 
-} // namespace MantidQt::Widgets::MplCpp
+} // namespace MantidQt::Widgets

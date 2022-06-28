@@ -65,7 +65,7 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
 
 void QtPreviewView::plotRegionSelector(MatrixWorkspace_sptr ws) {
   if (!m_regionSelector) {
-    m_regionSelector = std::make_unique<MantidQt::Widgets::MplCpp::RegionSelector>(ws, m_ui.contour_plot_layout);
+    m_regionSelector = std::make_unique<MantidQt::Widgets::RegionSelector>(ws, m_ui.contour_plot_layout);
   } else {
     m_regionSelector->updateWorkspace(ws);
   }

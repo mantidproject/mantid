@@ -8,11 +8,11 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
-#include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include "MantidQtWidgets/RegionSelector/DllConfig.h"
 #include <QLayout>
 
-namespace MantidQt::Widgets::MplCpp {
-class MANTID_MPLCPP_DLL RegionSelector : public Common::Python::InstanceHolder {
+namespace MantidQt::Widgets {
+class MANTID_REGIONSELECTOR_DLL RegionSelector : public Common::Python::InstanceHolder {
 public:
   RegionSelector(Mantid::API::Workspace_sptr const &workspace, QLayout *layout);
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace);
@@ -23,4 +23,4 @@ private:
 
   QLayout *m_layout;
 };
-} // namespace MantidQt::Widgets::MplCpp
+} // namespace MantidQt::Widgets

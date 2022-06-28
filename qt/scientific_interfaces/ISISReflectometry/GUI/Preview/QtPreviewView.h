@@ -11,7 +11,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidQtWidgets/MplCpp/RegionSelector.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"
 
 #include <QObject>
@@ -52,7 +52,7 @@ private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
-  std::unique_ptr<MantidQt::Widgets::MplCpp::RegionSelector> m_regionSelector{nullptr};
+  std::unique_ptr<MantidQt::Widgets::RegionSelector> m_regionSelector{nullptr};
 
   void connectSignals() const;
   void loadToolbarIcons();
