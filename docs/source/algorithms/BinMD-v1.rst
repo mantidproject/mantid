@@ -121,7 +121,7 @@ Output:
 
 .. testoutput:: AxisAligned
 
-    Number of events = 250734
+    Number of events = 250334
 
 The output looks like the following in the :ref:`sliceviewer`:
 
