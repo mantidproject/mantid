@@ -7,7 +7,7 @@ from numpy.testing import assert_allclose
 from systemtesting import MantidSystemTest
 from mantid.api import mtd
 from mantid.kernel import V3D
-from mantid.simpleapi import (LoadNexus, IndexPeaks, IntegrateEllipsoids)
+from mantid.simpleapi import (LoadNexus, IntegrateEllipsoids)
 
 
 class IntegrateEllipsoidsTest(MantidSystemTest):
@@ -40,7 +40,9 @@ class IntegrateEllipsoidsTest(MantidSystemTest):
         # intensities for the first two peaks
         assert_allclose(table.column('Intens')[0:2], [938, 13936], atol=1.0)
 
-        IndexPeaks(PeaksWorkspace='peaks_output', Tolerance=0.0)
+        for pk in range(mtd['peaks_input'].getNumberPeaks()):
+            mtd['peaks_input'].getPeak(pk).setHKL(0,0,0)
+
         IntegrateEllipsoids(InputWorkspace='events',
                             PeaksWorkspace='peaks_input',
                             OutputWorkspace='peaks_output',
