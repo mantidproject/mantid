@@ -6,6 +6,7 @@ from numpy.testing import assert_allclose
 
 from systemtesting import MantidSystemTest
 from mantid.api import mtd
+from mantid.kernel import V3D
 from mantid.simpleapi import (LoadNexus, IntegrateEllipsoids)
 
 
@@ -20,6 +21,7 @@ class IntegrateEllipsoidsTest(MantidSystemTest):
         table corresponds to satellite peak HKL=(1.5, 1.5,0) and main peak (1,1,0)"""
         LoadNexus(Filename='TOPAZ_39037_bank29.nxs', OutputWorkspace='events')
         LoadNexus(Filename='TOPAZ_39037_peaks_short.nxs', OutputWorkspace='peaks_input')
+        mtd['peaks_input'].getPeak(0).setIntMNP(V3D(1,0,0))
         IntegrateEllipsoids(InputWorkspace='events',
                             PeaksWorkspace='peaks_input',
                             OutputWorkspace='peaks_output',

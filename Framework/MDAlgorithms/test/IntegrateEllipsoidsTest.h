@@ -669,13 +669,13 @@ public:
     AnalysisDataService::Instance().remove(peaksWS->getName());
   }
 
-  void test_execution_V1_Path() {
+  void test_execution_V1_Path_integrate_HKL() {
 
     const std::vector<V3D> peaksHKL = {V3D(0.15, 1.85, -1.0), V3D(1.0, 4.0, -3.0), V3D(1.0, 5.0, -3.0)};
 
     // creates the peak workspace, sets UB, and indexes them
     PeaksWorkspace_sptr peaksWS = createPeaksForSatelliteTests(peaksHKL);
-    // integrate with sharing background region to satellite peaks
+
     IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_satelliteEventWS));
@@ -687,6 +687,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.26));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQMultiplier", 0.01));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AdaptiveQBackground", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GetUBFromPeaksWorkspace", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrateInHKL", true));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT_THROWS_NOTHING(alg.isExecuted());
