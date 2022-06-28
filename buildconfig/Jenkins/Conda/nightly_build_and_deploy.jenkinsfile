@@ -132,9 +132,12 @@ pipeline {
         environment name: 'PUBLISH_PACKAGES', value: 'true'
       }
       agent { label 'conda-build-linux' }
-      environment { GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}") }
+      environment {
+        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
+        RECIPE_UPDATE_OPTIONS = recipe_update_options()
+      }
       steps {
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL ${recipe_update_options()}'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_TOKEN $GITHUB_USER_NAME $GITHUB_USER_EMAIL $RECIPE_UPDATE_OPTIONS'
       }
     }
     stage('Packaging') {
