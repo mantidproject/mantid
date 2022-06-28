@@ -36,7 +36,7 @@ class Polaris(AbstractInst):
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
                            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
                            sample_details=self._sample_details,
-                           absorb_method=self._inst_settings.absorb_method,
+                           empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
                            paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point)
 
     def create_vanadium(self, **kwargs):

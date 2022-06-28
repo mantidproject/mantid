@@ -20,7 +20,7 @@ class WORKSPACE_UNITS(object):
     wavelength = "Wavelength"
 
 
-class ABSORB_METHOD(object):
-    enum_friendly_name = "absorb method"
-    mayers = "Mayers"  # default
+class EMPTY_CAN_SUBTRACTION_METHOD(object):
+    enum_friendly_name = "empty can subtraction method"
+    simple = "Simple"  # default
     paalman_pings = "PaalmanPings"

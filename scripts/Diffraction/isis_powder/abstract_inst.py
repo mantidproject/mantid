@@ -68,7 +68,7 @@ class AbstractInst(object):
                do_van_normalisation,
                do_absorb_corrections,
                sample_details=None,
-               absorb_method=None,
+               empty_can_subtraction_method=None,
                paalman_pings_events_per_point=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
@@ -82,7 +82,7 @@ class AbstractInst(object):
                            instrument=self,
                            absorb=do_absorb_corrections,
                            sample_details=sample_details,
-                           absorb_method=absorb_method,
+                           empty_can_subtraction_method=empty_can_subtraction_method,
                            paalman_pings_events_per_point=paalman_pings_events_per_point)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):

@@ -469,7 +469,7 @@ def run_focus_absorption(run_number, paalman_pings=False):
 
     inst_object = setup_inst_object("PDF", with_container=True)
     if paalman_pings:
-        inst_object._inst_settings.absorb_method = "PaalmanPings"  # the default is Mayers
+        inst_object._inst_settings.empty_can_subtraction_method = "PaalmanPings"  # the default is Simple
         inst_object._inst_settings.paalman_pings_events_per_point = 1
 
         return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
