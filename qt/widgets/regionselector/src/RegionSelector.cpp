@@ -40,6 +40,8 @@ RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout)
     : Python::InstanceHolder(newPresenter(workspace)), m_layout(layout) {
   GlobalInterpreterLock lock;
   auto view = Python::extract<QWidget>(getView());
+  constexpr auto MIN_SLICEVIEWER_HEIGHT = 250;
+  view->setMinimumHeight(MIN_SLICEVIEWER_HEIGHT);
   m_layout->addWidget(view);
   show();
 }
