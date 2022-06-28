@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -261,6 +261,34 @@ class D4ILLReduction(PythonAlgorithm):
             DeleteWorkspace(Workspace=ws)
         return output_name
 
+    def _separate_detectors_monitors(self, ws):
+        """
+
+        :param ws: name of the input workspace
+        :return:
+        """
+        mon = '{}_mon'.format(ws)
+        mon_list = []
+        det_list = []
+        if isinstance(mtd[ws], WorkspaceGroup):
+            for entry in mtd[ws]:
+                mon_ws = '{}_mon'.format(entry.name())
+                mon_list.append(mon_ws)
+                det_ws = entry.name()
+                det_list.append(det_ws)
+                ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=det_ws,
+                                MonitorWorkspace=mon_ws)
+        else:
+            det_ws = '{}_1'.format(ws)
+            det_list.append(det_ws)
+            mon_ws = '{}_mon'.format(det_ws)
+            mon_list.append(mon_ws)
+            ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=det_ws,
+                            MonitorWorkspace=mon_ws)
+        GroupWorkspaces(InputWorkspaces=mon_list, OutputWorkspace=mon)
+        GroupWorkspaces(InputWorkspaces=det_list, OutputWorkspace=ws)
+        return ws, mon
+
     def _finalize(self, ws):
         """Finalizes the reduction step by removing special values, and setting unique names
          to the output workspaces."""
@@ -306,18 +334,7 @@ class D4ILLReduction(PythonAlgorithm):
         progress.report(0, 'Loading data')
         LoadAndMerge(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLDiffraction',
                      OutputWorkspace=ws, startProgress=0.0, endProgress=0.3)
-        mon = ws + '_mon'
-        mon_list = []
-        det_list = []
-        for entry in mtd[ws]:
-            mon_ws = entry.name() + '_mon'
-            mon_list.append(mon_ws)
-            det_ws = entry.name()
-            det_list.append(det_ws)
-            ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=det_ws,
-                            MonitorWorkspace=mon_ws)
-        GroupWorkspaces(InputWorkspaces=mon_list, OutputWorkspace=mon)
-        GroupWorkspaces(InputWorkspaces=det_list, OutputWorkspace=ws)
+        det, mon = self._separate_detectors_monitors(ws)
         return ws, mon, progress
 
     def _get_normalisation_factor(self, det, mon, method, norm_standard):
