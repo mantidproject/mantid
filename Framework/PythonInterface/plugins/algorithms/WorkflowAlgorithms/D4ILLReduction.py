@@ -166,7 +166,7 @@ class D4ILLReduction(PythonAlgorithm):
         corrected_ws = '{}_dt_corrected'.format(ws)
         Multiply(LHSWorkspace=ws, RHSWorkspace=correction_ws, OutputWorkspace=corrected_ws)
         if self.getProperty('ClearCache').value:
-            DeleteWorkspaces(WorkspaceList=[correction_ws])
+            DeleteWorkspace(Workspace=correction_ws)
         return corrected_ws
 
     def _create_efficiency_correction(self, efficiency_file_name):
@@ -202,7 +202,6 @@ class D4ILLReduction(PythonAlgorithm):
         ws: (str) name of the workspace to be corrected
         return: (str) name of corrected workspace
         """
-
         if self.getProperty('EfficiencyCalibrationFile').isDefault:
             return ws
         calibration_file = self.getPropertyValue('EfficiencyCalibrationFile')
@@ -212,7 +211,7 @@ class D4ILLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=ws, RHSWorkspace=eff_corr_ws, OutputWorkspace=output_ws)
         MaskDetectorsIf(InputWorkspace=output_ws, OutputWorkspace=output_ws, Operator='NotFinite')
         if self.getProperty('ClearCache').value:
-            DeleteWorkspace(Workspace=eff_corr_ws)
+            DeleteWorkspaces(WorkspaceList=[eff_corr_ws, ws])
         return output_ws
 
     def _convert_to_q(self, ws, output_ws):
@@ -374,7 +373,7 @@ class D4ILLReduction(PythonAlgorithm):
         CreateSingleValuedWorkspace(
             OutputWorkspace=norm_ws,
             DataValue=value / norm_standard,
-            ErrorValue=error/norm_standard)
+            ErrorValue=error / norm_standard)
         return norm_ws
 
     def _normalise(self, ws, mon, method, norm_standard):
@@ -388,7 +387,6 @@ class D4ILLReduction(PythonAlgorithm):
         norm_standard: (float) value of the standard to which normalise
         return: (str) name of normalised workspace
         """
-
         if isinstance(mtd[ws], WorkspaceGroup):
             normalised_list = []
             for entry_no, entry in enumerate(mtd[ws]):
@@ -397,13 +395,13 @@ class D4ILLReduction(PythonAlgorithm):
             normalised_group_ws = '{}_normalised'.format(ws)
             GroupWorkspaces(InputWorkspaces=normalised_list, OutputWorkspace=normalised_group_ws)
             if self.getProperty('ClearCache').value:
-                DeleteWorkspace(Workspace=ws)
+                DeleteWorkspaces(WorkspaceList=[ws, mon])
             return normalised_group_ws
         normalisation_ws = self._get_normalisation_factor(ws, mon, method, norm_standard)
         normalised_ws = '{}_normalised'.format(ws)
         Divide(LHSWorkspace=ws, RHSWorkspace=normalisation_ws, OutputWorkspace=normalised_ws)
         if self.getProperty('ClearCache').value:
-            DeleteWorkspace(Workspace=normalisation_ws)
+            DeleteWorkspaces(WorkspaceList=[normalisation_ws])
         return normalised_ws
 
     def _rotate_banks(self, ws, shift):
