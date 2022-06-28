@@ -764,13 +764,15 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
           // in case qmax is DBL_MAX add a few extra points beyond supplied q range that are closer. Useful for
           // m_QSQIntegral where flat interpolation means final point at qmax probably won't be used
           double maxSuppliedQ = qValues.back();
-          if (2 * maxSuppliedQ < qmax) {
-            qValues.push_back(2 * maxSuppliedQ);
-            SQValues.push_back(SQValues.back());
-          }
-          if (4 * maxSuppliedQ < qmax) {
-            qValues.push_back(4 * maxSuppliedQ);
-            SQValues.push_back(SQValues.back());
+          if (maxSuppliedQ > 0.) {
+            if (2 * maxSuppliedQ < qmax) {
+              qValues.push_back(2 * maxSuppliedQ);
+              SQValues.push_back(SQValues.back());
+            }
+            if (4 * maxSuppliedQ < qmax) {
+              qValues.push_back(4 * maxSuppliedQ);
+              SQValues.push_back(SQValues.back());
+            }
           }
         }
         qValues.push_back(qmax);
@@ -816,16 +818,23 @@ DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr
   if (!wAxis)
     throw std::invalid_argument("Cannot calculate cumulative probability for S(Q,w) without a numeric w axis");
   auto &wValues = wAxis->getValues();
-  std::vector<double> wBinEdges;
-  wBinEdges.reserve(wValues.size() + 1);
-  VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+  std::vector<double> wWidths;
+  if (wValues.size() == 1) {
+    // convertToBinBoundary currently gives width of 1 for single point but because this is essential for the maths
+    // set the width to 1 explicitly
+    wWidths.push_back(1.);
+  } else {
+    std::vector<double> wBinEdges;
+    wBinEdges.reserve(wValues.size() + 1);
+    VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+    std::adjacent_difference(wBinEdges.begin(), wBinEdges.end(), std::back_inserter(wWidths));
+    wWidths.erase(wWidths.begin()); // first element returned by adjacent_difference isn't a diff so delete it
+  }
 
   double wMax = fromWaveVector(kinc);
   auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
   size_t iFirstInaccessibleW = std::distance(wValues.begin(), it);
   auto nAccessibleWPoints = iFirstInaccessibleW;
-  // shrink bin edges list down to accessible bins only
-  wBinEdges.resize(nAccessibleWPoints + 1);
 
   // loop through the S(Q) spectra for the different energy transfer values
   for (size_t iW = 0; iW < nAccessibleWPoints; iW++) {
@@ -836,7 +845,7 @@ DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr
     qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
     wIndices.insert(wIndices.end(), IOfQX.size(), static_cast<double>(iW));
     // w bin width for elastic will equal 1
-    double wBinWidth = wBinEdges[iW + 1] - wBinEdges[iW];
+    double wBinWidth = wWidths[iW];
     std::transform(IOfQY.begin(), IOfQY.end(), IOfQY.begin(),
                    [IOfQMaxPreviousRow, wBinWidth](double d) -> double { return d * wBinWidth + IOfQMaxPreviousRow; });
     IOfQMaxPreviousRow = IOfQY.back();
@@ -1187,11 +1196,16 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
   if (!wAxis)
     throw std::invalid_argument("Cannot perform 2D interpolation on S(Q,w) that doesn't have a numeric w axis");
   auto &wValues = wAxis->getValues();
-  try {
-    // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
-    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
-  } catch (std::out_of_range &) {
-  }
+  if (wValues.size() == 1) {
+    // don't use indexOfValue here because for single point it invents a bin width of +/-0.5
+    if (w == wValues[0])
+      iW = 0;
+  } else
+    try {
+      // required w values will often equal the points in the S(Q,w) distribution so pick nearest value
+      iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
+    } catch (std::out_of_range &) {
+    }
   if (iW >= 0) {
     if (m_importanceSampling)
       // the square root interpolation used to look up Q, w in InvPOfQ is based on flat interpolation of S(Q) so use
