@@ -487,6 +487,8 @@ void ConvertCWPDMDToSpectra::binMD(const API::IMDEventWorkspace_const_sptr &mdws
         }
         if (xindex >= static_cast<int>(vecy.size())) {
           g_log.warning() << "Case unexpected:  Event X = " << outx << ", Boundary = " << vecx[xindex] << "\n";
+        } else if (xindex < 0) {
+          g_log.warning() << "Case unexpected:  Event X = " << outx << ", Boundary index is out of vector range.\n";
         }
       }
 
