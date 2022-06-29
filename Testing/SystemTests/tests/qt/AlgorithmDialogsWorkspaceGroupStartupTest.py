@@ -17,8 +17,7 @@ class AlgorithmDialogsWorkspaceGroupStartupTest(AlgorithmDialogsStartupTestBase)
     def _setup_test(self) -> None:
         self._workspace_type = "WorkspaceGroup"
         # These algorithms currently fail to open when the given workspace type is auto-selected from the ADS
-        self._exclude_algorithms = ["AnvredCorrection", "CalculateDynamicRange", "CopyDataRange", "CreateEPP",
-                                    "CropToComponent", "CylinderPaalmanPingsCorrection",
+        self._exclude_algorithms = ["CylinderPaalmanPingsCorrection",
                                     "EnggEstimateFocussedBackground", "FlatPlatePaalmanPingsCorrection",
                                     "GetDetectorOffsets", "HB2AReduce", "HB3APredictPeaks", "LorentzCorrection",
                                     "MaskBinsIf", "MaskNonOverlappingBins", "MSDFit", "MuonPairingAsymmetry",

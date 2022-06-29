@@ -9,6 +9,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -36,7 +37,7 @@ using namespace DataObjects;
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
 
                   "A 2D workspace with X values of d-spacing");
 
@@ -77,6 +78,10 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
   std::map<std::string, std::string> result;
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (!inputWS) {
+    result["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+    return result;
+  }
   const auto unit = inputWS->getAxis(0)->unit()->caption();
   const auto unitErrorMsg =
       "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'd-Spacing', your unit was : " +
