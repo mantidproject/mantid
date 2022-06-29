@@ -250,7 +250,7 @@ void LoadILLSANS::setNumberOfMonitors() { m_numberOfMonitors = this->m_instrumen
  * @param numberOfTubes
  * @param numberOfPixelsPerTube
  */
-void LoadILLSANS::getDataDimensions(NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
+void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
                                     int &numberOfPixelsPerTube) {
   if (m_instrumentName == "D16B") {
     numberOfChannels = data.dim0();
@@ -605,7 +605,7 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
  * @param binning: the binning to assign the monitor values
  * @return the new workspace index on which to load next
  */
-size_t LoadILLSANS::loadDataFromD16BMonitor(NeXus::NXEntry &firstEntry, size_t firstIndex,
+size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, size_t firstIndex,
                                             const std::vector<double> &binning) {
   std::string path = "/data_scan/scanned_variables/data";
 
