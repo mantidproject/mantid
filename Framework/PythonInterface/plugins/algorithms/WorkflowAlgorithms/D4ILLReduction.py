@@ -9,7 +9,9 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     MultipleFileProperty, Progress, PythonAlgorithm, WorkspaceGroup, \
     WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
-from mantid.simpleapi import *
+from mantid.simpleapi import ConvertAxisByFormula, CloneWorkspace, CreateSingleValuedWorkspace, CreateWorkspace, \
+    DeadTimeCorrection, DeleteWorkspace, DeleteWorkspaces, Divide, ExtractMonitors, GroupWorkspaces, LoadAndMerge, \
+    MaskDetectorsIf, MoveInstrumentComponent, mtd, Multiply, RenameWorkspace, SaveAscii, SumOverlappingTubes
 import numpy as np
 from scipy.constants import physical_constants
 
