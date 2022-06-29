@@ -60,6 +60,9 @@ class MSDFit(DataProcessorAlgorithm):
         issues = dict()
 
         workspace = self.getProperty('InputWorkspace').value
+        if not isinstance(workspace, MatrixWorkspace):
+            issues['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            return issues
         x_data = workspace.readX(0)
 
         # Validate X axis fitting range

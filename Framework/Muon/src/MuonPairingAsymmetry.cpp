@@ -119,12 +119,12 @@ void MuonPairingAsymmetry::init() {
 
   // Select groups via workspaces
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace1", emptyString, Direction::Input,
-                                                                 PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("InputWorkspace1", emptyString, Direction::Input,
+                                                                      PropertyMode::Optional),
                   "Input workspace containing data from grouped detectors.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace2", emptyString, Direction::Input,
-                                                                 PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("InputWorkspace2", emptyString, Direction::Input,
+                                                                      PropertyMode::Optional),
                   "Input workspace containing data from grouped detectors.");
 
   setPropertySettings("InputWorkspace1",
@@ -221,13 +221,25 @@ void MuonPairingAsymmetry::validateManualGroups(std::map<std::string, std::strin
     errors["Group1"] = "The two groups must be different.";
   }
 
-  WorkspaceGroup_sptr inputWS = this->getProperty("InputWorkspace");
-  validatePeriods(inputWS, errors);
+  Workspace_sptr inputWS = this->getProperty("InputWorkspace");
+  if (const auto workspaceGroup = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+    validatePeriods(workspaceGroup, errors);
+  } else {
+    errors["InputWorkspace"] = "The InputWorkspace must be a WorkspaceGroup.";
+  }
 }
 
 void MuonPairingAsymmetry::validateGroupsWorkspaces(std::map<std::string, std::string> &errors) {
-  Workspace_sptr ws1 = this->getProperty("InputWorkspace1");
-  Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
+  WorkspaceGroup_sptr ws1 = this->getProperty("InputWorkspace1");
+  WorkspaceGroup_sptr ws2 = this->getProperty("InputWorkspace2");
+  if (!ws1) {
+    errors["InputWorkspace1"] = "The InputWorkspace1 must be a WorkspaceGroup.";
+    return;
+  }
+  if (!ws2) {
+    errors["InputWorkspace2"] = "The InputWorkspace2 must be a WorkspaceGroup.";
+    return;
+  }
   if (ws1->isGroup() && !ws2->isGroup()) {
     errors["InputWorkspace1"] = "InputWorkspace2 should be multi period to match InputWorkspace1";
   }

@@ -41,7 +41,14 @@ class RebinRagged(PythonAlgorithm):
         self.declareProperty("PreserveEvents", True, "False converts event workspaces to histograms")
 
     def validateInputs(self):
+        errors = {}
+
         inputWS = self.getProperty("InputWorkspace").value
+
+        if not isinstance(inputWS, MatrixWorkspace):
+            errors['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            return errors
+
         xmins = self.getProperty("XMin").value
         xmaxs = self.getProperty("XMax").value
         deltas = self.getProperty("Delta").value
@@ -50,8 +57,6 @@ class RebinRagged(PythonAlgorithm):
         numMin = len(xmins)
         numMax = len(xmaxs)
         numDelta = len(deltas)
-
-        errors = {}
 
         if numDelta == 0:
             errors["Delta"] = "Must specify binning"
