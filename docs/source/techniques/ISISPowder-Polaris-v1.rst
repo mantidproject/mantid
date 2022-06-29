@@ -406,8 +406,10 @@ Example Input:
 
 empty_can_subtraction_method
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Sets the absorption method used in the :ref:`focus_polaris_isis-powder-diffraction-ref` method. This parameter
-is optional and can be set to either ``"Simple"`` (default) or ``"PaalmanPings"``. In ``"PaalmanPings"`` mode
+Sets the empty can subtraction type used in the :ref:`focus_polaris_isis-powder-diffraction-ref` method. This parameter
+is optional and can be set to either ``"Simple"`` (default) or ``"PaalmanPings"``. In ``"PaalmanPings"`` mode,
+the absorption correction is applied by :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`,
+followed by :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`. Additionally, in this mode
 the :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref` parameter can be utilised.
 
 Example Input:

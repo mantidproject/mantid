@@ -400,8 +400,10 @@ class _HollowCylinder(object):
 class _FlatPlateHolder(object):
     def __init__(self, kwargs, sample_height, sample_width, sample_thickness, sample_center, sample_angle):
         # By using kwargs we get a better error than "init takes n arguments"
-        front_thick = common.dictionary_key_helper(dictionary=kwargs, key="front_thick", throws=False)
-        back_thick = common.dictionary_key_helper(dictionary=kwargs, key="back_thick", throws=False)
+        front_thick = common.dictionary_key_helper(dictionary=kwargs, key="front_thick",
+                                                   exception_msg=property_err_string.format("front_thick"))
+        back_thick = common.dictionary_key_helper(dictionary=kwargs, key="back_thick",
+                                                  exception_msg=property_err_string.format("back_thick"))
 
         SampleDetails.validate_constructor_inputs({"front_thick": front_thick, "back_thick": back_thick})
         self.front_thick = float(front_thick)

@@ -116,6 +116,11 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
 
 def apply_paalmanpings_absorb_and_subtract_empty(workspace, summed_empty, sample_details,
                                                  paalman_pings_events_per_point=None):
+    if paalman_pings_events_per_point:
+        events_per_point = int(paalman_pings_events_per_point)
+    else:
+        events_per_point = 1000
+
     container_geometry = sample_details.generate_container_geometry()
     container_material = sample_details.generate_container_material()
     if container_geometry and container_material:
@@ -123,18 +128,16 @@ def apply_paalmanpings_absorb_and_subtract_empty(workspace, summed_empty, sample
                          Material=sample_details.generate_sample_material(),
                          ContainerGeometry=container_geometry,
                          ContainerMaterial=container_material)
+        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
+                                                              EventsPerPoint=events_per_point)
+        workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
+                                                       CorrectionsWorkspace=corrections,
+                                                       CanWorkspace=summed_empty)
     else:
         mantid.SetSample(workspace, Geometry=sample_details.generate_sample_geometry(),
                          Material=sample_details.generate_sample_material())
-
-    if paalman_pings_events_per_point:
-        events_per_point = int(paalman_pings_events_per_point)
-    else:
-        events_per_point = 1000
-    corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
-                                                          EventsPerPoint=events_per_point)
-    workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
-                                                   CorrectionsWorkspace=corrections,
-                                                   CanWorkspace=summed_empty)
-
+        corrections = mantid.PaalmanPingsMonteCarloAbsorption(InputWorkspace=workspace, Shape='Preset',
+                                                              EventsPerPoint=events_per_point)
+        workspace = mantid.ApplyPaalmanPingsCorrection(SampleWorkspace=workspace,
+                                                       CorrectionsWorkspace=corrections)
     return workspace
