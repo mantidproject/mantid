@@ -95,7 +95,7 @@ if(WIN32)
     set(_qrc_file_contents
         "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n"
     )
-    if(CONDA_BUILD)
+    if(CONDA_BUILD OR CONDA_ENV)
       file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
     else()
       set(_qt5_dir ${THIRD_PARTY_DIR}/lib/qt5)
