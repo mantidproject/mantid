@@ -180,7 +180,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        sample_ws_name = self.getPropertyValue('SampleWorkspace')
+        sample_ws = self.getProperty('SampleWorkspace').value
         can_ws_name = self.getPropertyValue('CanWorkspace')
         use_can = can_ws_name != ''
 
@@ -199,9 +199,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._efixed = self.getProperty('Efixed').value
 
         if self._emode != 'Efixed':
-            if not isinstance(mtd[sample_ws_name], MatrixWorkspace):
+            if not isinstance(sample_ws, MatrixWorkspace):
                 issues['SampleWorkspace'] = "The SampleWorkspace must be a MatrixWorkspace."
-            elif mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+            elif sample_ws.getAxis(0).getUnit().unitID() != 'Wavelength':
                 # require both sample and can ws have wavelenght as x-axis
                 issues['SampleWorkspace'] = 'The SampleWorkspace must have units of wavelength.'
 

@@ -133,10 +133,11 @@ std::map<std::string, std::string> MaskNonOverlappingBins::validateInputs() {
   API::MatrixWorkspace_const_sptr comparisonWS = getProperty(Prop::COMPARISON_WS);
   if (!inputWS) {
     issues[Prop::INPUT_WS] = "The " + Prop::INPUT_WS + " must be a MatrixWorkspace.";
-    return issues;
   }
   if (!comparisonWS) {
     issues[Prop::COMPARISON_WS] = "The " + Prop::COMPARISON_WS + " must be a MatrixWorkspace.";
+  }
+  if (!issues.empty()) {
     return issues;
   }
   if (inputWS->getNumberHistograms() != comparisonWS->getNumberHistograms()) {

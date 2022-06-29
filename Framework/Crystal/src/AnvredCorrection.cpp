@@ -80,8 +80,9 @@ void AnvredCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "The X values for the input workspace must be in units of wavelength or TOF");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "The X values for the input workspace must be in units of wavelength or TOF");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name");
 

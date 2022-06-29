@@ -155,10 +155,11 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   MatrixWorkspace_sptr rhs = getProperty("RHSWorkspace");
   if (!lhs) {
     issues["LHSWorkspace"] = "The LHSWorkspace must be a MatrixWorkspace.";
-    return issues;
   }
   if (!rhs) {
     issues["RHSWorkspace"] = "The RHSWorkspace must be a MatrixWorkspace.";
+  }
+  if (!issues.empty()) {
     return issues;
   }
   RunCombinationHelper combHelper;
