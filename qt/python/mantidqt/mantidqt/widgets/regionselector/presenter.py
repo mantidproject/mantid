@@ -43,3 +43,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def nonorthogonal_axes(self, state: bool) -> None:
         pass
+
+    def update_workspace(self, workspace) -> None:
+        self.model.ws = workspace
+        info_widget = self.view._data_view.image_info_widget
+        info_widget.setWorkspace(workspace)
+        self.new_plot()

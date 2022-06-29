@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
+
+using MantidQt::Widgets::RegionSelector;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
@@ -59,8 +62,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
 void PreviewPresenter::notifySumBanksCompleted() {
   g_log.debug("Sum banks completed");
-  // TODO Implement plotting of the summed workspace
-  // m_view->plotSliceView(m_model->getSummedWs())
+  m_view->plotRegionSelector(m_model->getSummedWs());
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {

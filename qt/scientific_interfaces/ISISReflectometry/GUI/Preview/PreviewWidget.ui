@@ -185,7 +185,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView_2"/>
+         <widget class="QWidget" name="region_selector" native="true"/>
         </item>
        </layout>
       </widget>
@@ -227,7 +227,6 @@
  </widget>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>treeView_2</tabstop>
   <tabstop>plot_1d_toolbar_placeholder</tabstop>
   <tabstop>treeView</tabstop>
   <tabstop>tableWidget_2</tabstop>
