@@ -191,6 +191,8 @@ all of the Local Project Managers.
 1 week before Code Freeze
 #########################
 
+*  Check that all people with release roles are added to the *\#release-roles*
+   Slack channel and others are removed.
 *  Post on the *\#general* slack channel reminding developers of the impending
    release and stating that they have only 5 days left before the code freeze.
 *  Send an email to beta test users explaining the dates for the testing, and
