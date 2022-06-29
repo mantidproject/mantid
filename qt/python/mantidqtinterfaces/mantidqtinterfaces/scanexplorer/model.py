@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from mantid.simpleapi import SANSILLParameterScan
-from os.path import basename
+from pathlib import Path
 
 
 class ScanExplorerModel:
@@ -15,7 +15,11 @@ class ScanExplorerModel:
     def __init__(self, presenter=None):
         self.presenter = presenter
 
-    def process_file(self, file):
-        name = basename(file)[:-4] + "_scan"
-        out = SANSILLParameterScan(SampleRun=file, OutputWorkspace=name, NormaliseBy="None")
+    def process_file(self, file_name: str):
+        """
+        Process the given file without any special treatment, as a quick representation of the data.
+        @param file_name: the name of the file to process, containing a scan with more than one point.
+        """
+        name = Path(file_name).stem + "_scan"
+        out = SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=name, NormaliseBy="None")
         self.presenter.create_slice_viewer(out)
