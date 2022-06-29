@@ -49,15 +49,16 @@ class SANSILLParameterScan(PythonAlgorithm):
         if not (self.getPropertyValue('OutputJoinedWorkspace') or self.getPropertyValue("OutputWorkspace")):
             issues["OutputJoinedWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
             issues["OutputWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
-        if self.getPropertyValue('PixelYmin') > self.getPropertyValue("PixelYmax"):
+        if self.getProperty('PixelYmin').value > self.getProperty("PixelYmax").value:
+            print('ymin', self.getPropertyValue('PixelYmin'), 'yamx', type(self.getProperty('PixelYmax').value))
             issues["PixelYMin"] = "YMin needs to be lesser than YMax"
             issues["PixelYMax"] = "YMax needs to be greater than YMin"
         return issues
 
     def setUp(self):
-        self.sample = self.getPropertyValue('SampleRuns')
-        self.absorber = self.getPropertyValue('AbsorberRuns').replace(',', '+')
-        self.container = self.getPropertyValue('ContainerRuns').replace(',', '+')
+        self.sample = self.getPropertyValue('SampleRun')
+        self.absorber = self.getPropertyValue('AbsorberRun').replace(',', '+')
+        self.container = self.getPropertyValue('ContainerRun').replace(',', '+')
         self.sensitivity = self.getPropertyValue('SensitivityMap')
         self.default_mask = self.getPropertyValue('DefaultMaskFile')
         self.normalise = self.getPropertyValue('NormaliseBy')
@@ -84,24 +85,18 @@ class SANSILLParameterScan(PythonAlgorithm):
                                                optional=PropertyMode.Optional),
                              doc="The output workspace containing all the reduced data, before grouping.")
 
-        self.declareProperty(MultipleFileProperty('SampleRuns',
-                                                  action=FileAction.Load,
-                                                  extensions=['nxs']),
-                             doc='Sample run(s).')
+        self.declareProperty(FileProperty('SampleRun', '', action=FileAction.Load, extensions=['nxs']),
+                             doc='Sample scan file.')
 
-        self.declareProperty(MultipleFileProperty('AbsorberRuns',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
-                             doc='Absorber (Cd/B4C) run(s).')
+        self.declareProperty(FileProperty('AbsorberRun', '', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='Absorber run.')
 
-        self.declareProperty(MultipleFileProperty('ContainerRuns',
-                                                  action=FileAction.OptionalLoad,
-                                                  extensions=['nxs']),
-                             doc='Empty container run(s).')
+        self.declareProperty(FileProperty('ContainerRun', '', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='Empty container run.')
 
-        self.setPropertyGroup('SampleRuns', 'Numors')
-        self.setPropertyGroup('AbsorberRuns', 'Numors')
-        self.setPropertyGroup('ContainerRuns', 'Numors')
+        self.setPropertyGroup('SampleRun', 'Numors')
+        self.setPropertyGroup('AbsorberRun', 'Numors')
+        self.setPropertyGroup('ContainerRun', 'Numors')
 
         self.declareProperty(FileProperty('SensitivityMap', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the map of relative detector efficiencies.')
