@@ -32,7 +32,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         super().__init__(plotter, exporter)
 
         ax = plotter.image_axes
-        self._selector = RectangleSelection(ax, self._on_rectangle_selected, drawtype='box', interactive=True, ignore_event_outside=False)
+        self._selector = RectangleSelection(ax, self._on_rectangle_selected, drawtype='box', interactive=True)
         self.signals = MultipleRectangleSelectionLinePlotSignals()
         self._manager: RectanglesManager = exporter.rectangles_manager
 
