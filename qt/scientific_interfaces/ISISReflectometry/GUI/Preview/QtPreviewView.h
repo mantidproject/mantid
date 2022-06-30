@@ -36,7 +36,6 @@ public:
   // Plotting
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
-  void plotRegionSelector(Mantid::API::MatrixWorkspace_sptr ws) override;
   // Instrument viewer toolbar
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
@@ -50,6 +49,8 @@ public:
   void activateRectangularROIMode() override;
 
   std::vector<size_t> getSelectedDetectors() const override;
+
+  QLayout *getRegionSelectorLayout() const override;
 
 private:
   Ui::PreviewWidget m_ui;

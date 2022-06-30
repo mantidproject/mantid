@@ -40,7 +40,6 @@ public:
   // Plotting
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
-  virtual void plotRegionSelector(Mantid::API::MatrixWorkspace_sptr ws) = 0;
   //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;
@@ -57,5 +56,7 @@ public:
   virtual void activateRectangularROIMode() = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
+
+  virtual QLayout *getRegionSelectorLayout() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

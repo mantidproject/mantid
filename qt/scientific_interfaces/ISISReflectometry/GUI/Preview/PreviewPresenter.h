@@ -16,6 +16,10 @@
 
 #include <memory>
 
+namespace MantidQt::Widgets {
+class IRegionSelector;
+}
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
@@ -53,5 +57,6 @@ private:
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
+  std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

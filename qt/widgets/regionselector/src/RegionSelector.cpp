@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
+#include <QLayout>
 #include <QWidget>
 
 using Mantid::API::Workspace_sptr;
@@ -45,6 +46,10 @@ RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout)
   m_layout->addWidget(view);
   show();
 }
+
+RegionSelector::RegionSelector(RegionSelector &&) = default;
+
+RegionSelector &RegionSelector::operator=(RegionSelector &&) = default;
 
 Common::Python::Object RegionSelector::getView() const {
   GlobalInterpreterLock lock;

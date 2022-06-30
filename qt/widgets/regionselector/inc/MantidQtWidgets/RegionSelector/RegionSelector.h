@@ -6,16 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/RegionSelector/DllConfig.h"
-#include <QLayout>
+#include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
+
+class QLayout;
 
 namespace MantidQt::Widgets {
-class MANTID_REGIONSELECTOR_DLL RegionSelector : public Common::Python::InstanceHolder {
+class MANTID_REGIONSELECTOR_DLL RegionSelector : public Common::Python::InstanceHolder, public IRegionSelector {
 public:
   RegionSelector(Mantid::API::Workspace_sptr const &workspace, QLayout *layout);
-  void updateWorkspace(Mantid::API::Workspace_sptr const &workspace);
+  RegionSelector(RegionSelector const &) = delete;
+  RegionSelector(RegionSelector &&);
+  RegionSelector &operator=(RegionSelector const &) = delete;
+  RegionSelector &operator=(RegionSelector &&);
+
+  void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
 
 private:
   Common::Python::Object getView() const;

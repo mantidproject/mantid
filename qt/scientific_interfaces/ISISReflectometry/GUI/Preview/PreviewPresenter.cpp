@@ -6,14 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
 
+using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
+
+class QLayout;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
-}
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
@@ -61,8 +67,11 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 }
 
 void PreviewPresenter::notifySumBanksCompleted() {
-  g_log.debug("Sum banks completed");
-  m_view->plotRegionSelector(m_model->getSummedWs());
+  if (!m_regionSelector) {
+    m_regionSelector = std::make_unique<RegionSelector>(m_model->getSummedWs(), m_view->getRegionSelectorLayout());
+  } else {
+    m_regionSelector->updateWorkspace(m_model->getSummedWs());
+  }
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
