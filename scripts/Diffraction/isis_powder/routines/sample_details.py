@@ -227,7 +227,14 @@ class SampleDetails(object):
 
     def generate_container_material(self):
         if self.container_material_object:
-            return {'ChemicalFormula': self.container_material_object.chemical_formula}
+            container_material_json = {'ChemicalFormula': self.container_material_object.chemical_formula}
+            if self.material_object.number_density:
+                container_material_json["SampleNumberDensity"] = self.material_object.number_density
+            if self.material_object.absorption_cross_section:
+                container_material_json["AttenuationXSection"] = self.material_object.absorption_cross_section
+            if self.material_object.scattering_cross_section:
+                container_material_json["ScatteringXSection"] = self.material_object.scattering_cross_section
+            return container_material_json
         else:
             return None
 
