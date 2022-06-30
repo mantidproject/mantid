@@ -29,7 +29,9 @@ Python::Object newPresenter(Workspace_sptr workspace) {
   GlobalInterpreterLock lock;
 
   boost::python::dict options;
-  options["ws"] = workspace;
+  if (workspace) {
+    options["ws"] = workspace;
+  }
   auto constructor = presenterModule().attr("RegionSelector");
   return constructor(*boost::python::tuple(), **options);
 }
