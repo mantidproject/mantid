@@ -36,13 +36,15 @@ void QtPreviewView::loadToolbarIcons() {
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
 
 void QtPreviewView::connectSignals() const {
+  // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
-
+  // Instrument viewer toolbar
   connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
   connect(m_ui.iv_edit_button, SIGNAL(clicked()), this, SLOT(onInstViewEditClicked()));
   connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
-  connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectExportToAdsClicked()));
-  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onRegionSelectRectSelectClicked()));
+  // Region selector toolbar
+  connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectorExportToAdsClicked()));
+  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onSelectRectangularROIClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -52,8 +54,9 @@ void QtPreviewView::onInstViewEditClicked() const { m_notifyee->notifyInstViewEd
 void QtPreviewView::onInstViewSelectRectClicked() const { m_notifyee->notifyInstViewSelectRectRequested(); }
 void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
 
-void QtPreviewView::onRegionSelectExportToAdsClicked() const { m_notifyee->notifyRegionSelectExportAdsRequested(); }
-void QtPreviewView::onRegionSelectRectSelectClicked() const { m_notifyee->notifyRegionSelectRectSelectRequested(); }
+void QtPreviewView::onRegionSelectorExportToAdsClicked() const { m_notifyee->notifyRegionSelectorExportAdsRequested(); }
+
+void QtPreviewView::onSelectRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
@@ -96,6 +99,12 @@ void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_zoom_button->setEnabled(enable);
   m_ui.iv_edit_button->setEnabled(enable);
   m_ui.iv_rect_select_button->setEnabled(enable);
+}
+
+void QtPreviewView::setRectangularROIState(bool enable) { m_ui.rs_rect_select_button->setEnabled(enable); }
+
+void QtPreviewView::activateRectangularROIMode() {
+  // TODO notify region selector
 }
 
 std::vector<size_t> QtPreviewView::getSelectedDetectors() const {

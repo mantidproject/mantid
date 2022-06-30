@@ -98,7 +98,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   m_model->sumBanksAsync(*m_jobManager);
 }
 
-void PreviewPresenter::notifyRegionSelectExportAdsRequested() { m_model->exportSummedWsToAds(); }
+void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
 
-void PreviewPresenter::notifyRegionSelectRectSelectRequested() {}
+void PreviewPresenter::notifyRectangularROIModeRequested() {}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

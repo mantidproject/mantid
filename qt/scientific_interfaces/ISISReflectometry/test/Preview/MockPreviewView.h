@@ -30,6 +30,8 @@ public:
   MOCK_METHOD(void, setInstViewToolbarEnabled, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomMode, (), (override));
   MOCK_METHOD(void, setInstViewEditMode, (), (override));
+  MOCK_METHOD(void, setRectangularROIState, (bool), (override));
+  MOCK_METHOD(void, activateRectangularROIMode, (), (override));
   MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

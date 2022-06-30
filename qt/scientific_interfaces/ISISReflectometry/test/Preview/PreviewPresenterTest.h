@@ -158,7 +158,7 @@ public:
     EXPECT_CALL(*mockModel, exportSummedWsToAds()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
 
-    presenter.notifyRegionSelectExportAdsRequested();
+    presenter.notifyRegionSelectorExportAdsRequested();
   }
 
   void test_sum_banks_completed_plots_region_selector() {
@@ -171,6 +171,15 @@ public:
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
 
     presenter.notifySumBanksCompleted();
+  }
+
+  void test_rectangular_roi_requested_updates_view() {
+    auto mockView = makeView();
+
+    expectActivateRectangularROIMode(*mockView);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+
+    presenter.notifyRectangularROIModeRequested();
   }
 
 private:
@@ -257,5 +266,12 @@ private:
     EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(true))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
+  }
+
+  void expectActivateRectangularROIMode(MockPreviewView &mockView) {
+    // TODO Disable edit button when implemented
+    // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, activateRectangularROIMode()).Times(1);
   }
 };
