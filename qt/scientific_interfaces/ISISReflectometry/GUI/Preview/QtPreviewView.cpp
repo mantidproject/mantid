@@ -95,10 +95,6 @@ void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
 
 void QtPreviewView::setRectangularROIState(bool enable) { m_ui.rs_rect_select_button->setEnabled(enable); }
 
-void QtPreviewView::activateRectangularROIMode() {
-  // TODO notify region selector
-}
-
 std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
   std::vector<size_t> result;
   // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"

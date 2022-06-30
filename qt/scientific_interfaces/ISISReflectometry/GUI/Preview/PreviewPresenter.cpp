@@ -109,5 +109,9 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
 
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
 
-void PreviewPresenter::notifyRectangularROIModeRequested() {}
+void PreviewPresenter::notifyRectangularROIModeRequested() {
+  m_view->setRectangularROIState(true);
+  // TODO implement rectangle selection in region selector
+  // m_regionSelector->rectangleSelection();
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

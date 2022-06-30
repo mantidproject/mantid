@@ -182,7 +182,7 @@ public:
   void test_rectangular_roi_requested_updates_view() {
     auto mockView = makeView();
 
-    // TODO expectActivateRectangularROIMode(*mockView);
+    expectActivateRectangularROIMode(*mockView);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
 
     presenter.notifyRectangularROIModeRequested();
@@ -282,6 +282,7 @@ private:
     // TODO Disable edit button when implemented
     // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
-    EXPECT_CALL(mockView, activateRectangularROIMode()).Times(1);
+    // TODO implement rectangle selection on region selector
+    // EXPECT_CALL(mockRegionSelector, rectangleSelection()).Times(1);
   }
 };

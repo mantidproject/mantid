@@ -46,7 +46,6 @@ public:
   void setInstViewToolbarEnabled(bool enable) override;
   // Region selector toolbar
   void setRectangularROIState(bool enable) override;
-  void activateRectangularROIMode() override;
 
   std::vector<size_t> getSelectedDetectors() const override;
 

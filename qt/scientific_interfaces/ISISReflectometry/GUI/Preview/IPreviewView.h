@@ -53,7 +53,6 @@ public:
   // virtual void setEditROIState(bool on) = 0;
   // virtual void activateEditROIMode() = 0;
   virtual void setRectangularROIState(bool on) = 0;
-  virtual void activateRectangularROIMode() = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
 
