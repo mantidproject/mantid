@@ -289,10 +289,14 @@ void MantidHelpWindow::showCustomInterface(const std::string &name, const std::s
 }
 
 /**
- * Check to see if the help page url has been found or is missing
+ * Check to see if the help page url can be found or is missing, without opening a GUI.
  */
-bool MantidHelpWindow::isHelpPageFound(const QUrl &url) const {
-  return g_helpWindow != nullptr ? g_helpWindow->isExistingPage(url) : false;
+bool MantidHelpWindow::doesHelpPageExist(const QUrl &url) {
+  const auto binDirectory = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
+  const auto collectionFile = QString::fromStdString(findCollectionFile(binDirectory));
+
+  auto helpEngine = new QHelpEngine(collectionFile);
+  return (helpEngine->findFile(url).isValid() && (helpEngine->fileData(url).size() > 0));
 }
 
 /**
@@ -314,74 +318,77 @@ void MantidHelpWindow::shutdown() {
  * information see
  *http://doc.qt.digia.com/qq/qq28-qthelp.html#htmlfilesandhelpprojects
  *
- * @param binDir The location of the mantid executable.
+ * @param binDirectory The location of the mantid executable.
  */
-void MantidHelpWindow::findCollectionFile(std::string &binDir) {
-  // this being empty notes the feature being disabled
-  m_collectionFile = "";
+std::string MantidHelpWindow::findCollectionFile(const QString &binDirectory) {
 
-  QDir searchDir(QString::fromStdString(binDir));
-
+  std::vector<QDir> searchDirectories;
   // try next to the executable
-  QString path = searchDir.absoluteFilePath(COLLECTION_FILE);
-  g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
-  if (searchDir.exists(COLLECTION_FILE)) {
-    m_collectionFile = path.toStdString();
-    return;
-  } else {
-    g_log.debug() << "QHelp Collection file " << path.toStdString() << " not found\n";
-  }
-
+  searchDirectories.emplace_back(QDir(binDirectory));
   // try where the builds will put it for a single configuration build
-  searchDir.cdUp();
-  if (searchDir.cd("docs")) {
-    searchDir.cd("qthelp");
-    path = searchDir.absoluteFilePath(COLLECTION_FILE);
-    g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
-    if (searchDir.exists(COLLECTION_FILE)) {
-      m_collectionFile = path.toStdString();
-      return;
-    }
+  QDir searchDirectory(binDirectory);
+  searchDirectory.cdUp();
+  if (searchDirectory.cd("docs")) {
+    searchDirectory.cd("qthelp");
+    searchDirectories.emplace_back(searchDirectory);
   }
   // try where the builds will put it for a multi-configuration build
-  searchDir.cdUp();
-  if (searchDir.cd("docs")) {
-    searchDir.cd("qthelp");
-    path = searchDir.absoluteFilePath(COLLECTION_FILE);
+  searchDirectory.cdUp();
+  if (searchDirectory.cd("docs")) {
+    searchDirectory.cd("qthelp");
+    searchDirectories.emplace_back(searchDirectory);
+  }
+  // try in windows/linux install location
+  searchDirectory = QDir(binDirectory);
+  searchDirectory.cdUp();
+  searchDirectory.cd("share");
+  searchDirectory.cd("doc");
+  searchDirectories.emplace_back(searchDirectory);
+  // try a special place for mac/osx
+  searchDirectory = QDir(binDirectory);
+  searchDirectory.cdUp();
+  searchDirectory.cdUp();
+  searchDirectory.cd("share");
+  searchDirectory.cd("doc");
+  searchDirectories.emplace_back(searchDirectory);
+
+  for (const auto &directory : searchDirectories) {
+    const auto path = directory.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
-    if (searchDir.exists(COLLECTION_FILE)) {
-      m_collectionFile = path.toStdString();
-      return;
+    if (directory.exists(COLLECTION_FILE)) {
+      return path.toStdString();
     }
   }
+  return "";
+}
 
-  // try in windows/linux install location
-  searchDir = QDir(QString::fromStdString(binDir));
-  searchDir.cdUp();
-  searchDir.cd("share");
-  searchDir.cd("doc");
-  path = searchDir.absoluteFilePath(COLLECTION_FILE);
-  g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
-  if (searchDir.exists(COLLECTION_FILE)) {
-    m_collectionFile = path.toStdString();
-    return;
+/**
+ * Determine the location of the cache file.
+ * @param collectionFile The location of the collection file.
+ */
+std::string MantidHelpWindow::findCacheFile(const std::string &collectionFile) {
+  std::string cacheFile("");
+  if (collectionFile.empty()) {
+    // clear out the other filenames
+    return cacheFile;
   }
+  g_log.debug() << "Using collection file \"" << collectionFile << "\"\n";
 
-  // try a special place for mac/osx
-  searchDir = QDir(QString::fromStdString(binDir));
-  searchDir.cdUp();
-  searchDir.cdUp();
-  searchDir.cd("share");
-  searchDir.cd("doc");
-  path = searchDir.absoluteFilePath(COLLECTION_FILE);
-  g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
-  if (searchDir.exists(COLLECTION_FILE)) {
-    m_collectionFile = path.toStdString();
-    return;
+  // determine cache file location
+  cacheFile = COLLECTION_FILE.toStdString();
+
+  QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
+
+  if (dataLoc.endsWith("mantidproject")) {
+    Poco::Path path(dataLoc.toStdString(), cacheFile);
+    cacheFile = path.absolute().toString();
+  } else {
+    g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
+    Poco::Path path(dataLoc.toStdString(), "mantidproject");
+    path = Poco::Path(path, COLLECTION_FILE.toStdString());
+    cacheFile = path.absolute().toString();
   }
-
-  // all tries have failed
-  g_log.information("Failed to find help system collection file \"" + COLLECTION_FILE.toStdString() + "\"");
+  return cacheFile;
 }
 
 /**
@@ -391,28 +398,8 @@ void MantidHelpWindow::determineFileLocs() {
   // determine collection file location
   string binDir = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
 
-  this->findCollectionFile(binDir);
-  if (m_collectionFile.empty()) {
-    // clear out the other filenames
-    m_cacheFile = "";
-    return;
-  }
-  g_log.debug() << "Using collection file \"" << m_collectionFile << "\"\n";
-
-  // determine cache file location
-  m_cacheFile = COLLECTION_FILE.toStdString();
-
-  QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
-
-  if (dataLoc.endsWith("mantidproject")) {
-    Poco::Path path(dataLoc.toStdString(), m_cacheFile);
-    m_cacheFile = path.absolute().toString();
-  } else {
-    g_log.debug() << "Failed to determine help cache file location\n"; // REMOVE
-    Poco::Path path(dataLoc.toStdString(), "mantidproject");
-    path = Poco::Path(path, COLLECTION_FILE.toStdString());
-    m_cacheFile = path.absolute().toString();
-  }
+  m_collectionFile = findCollectionFile(QString::fromStdString(binDir));
+  m_cacheFile = findCacheFile(m_collectionFile);
 }
 
 void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }

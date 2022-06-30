@@ -267,8 +267,8 @@ void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QStrin
 
 void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
 
-bool InterfaceManager::isHelpPageFound(const QString &url) const {
-  return MantidHelpWindow::helpWindowExists() ? createHelpWindow()->isHelpPageFound(QUrl(url)) : false;
+bool InterfaceManager::doesHelpPageExist(const QString &url) const {
+  return MantidHelpWindow::doesHelpPageExist(QUrl(url));
 }
 
 void InterfaceManager::closeHelpWindow() {

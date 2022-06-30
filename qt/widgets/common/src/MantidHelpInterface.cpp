@@ -52,6 +52,4 @@ void MantidHelpInterface::showCustomInterface(const QString &name, const QString
   UNUSED_ARG(section);
 }
 
-bool MantidHelpInterface::isHelpPageFound(const QUrl &url) const { return false; }
-
 void MantidHelpInterface::shutdown() {}

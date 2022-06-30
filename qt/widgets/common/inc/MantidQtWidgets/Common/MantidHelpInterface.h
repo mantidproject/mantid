@@ -41,8 +41,6 @@ public:
   virtual void showCustomInterface(const QString &name, const QString &area = QString(),
                                    const QString &section = QString());
 
-  virtual bool isHelpPageFound(const QUrl &url) const;
-
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
 };

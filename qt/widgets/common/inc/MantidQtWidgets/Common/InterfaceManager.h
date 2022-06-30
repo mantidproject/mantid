@@ -103,7 +103,7 @@ public:
   /// @param url of web page to open in browser
   void showWebPage(const QString &url);
 
-  bool isHelpPageFound(const QString &url) const;
+  bool doesHelpPageExist(const QString &url) const;
 
   void closeHelpWindow();
 

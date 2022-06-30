@@ -26,6 +26,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow : public API::MantidHelpInterf
 
 public:
   static bool helpWindowExists() { return g_helpWindow != nullptr; }
+  static bool doesHelpPageExist(const QUrl &url);
 
   MantidHelpWindow(QWidget *parent = nullptr, const Qt::WindowFlags &flags = nullptr);
   ~MantidHelpWindow() override;
@@ -44,14 +45,15 @@ public:
   void showCustomInterface(const QString &name, const QString &area = QString(),
                            const QString &section = QString()) override;
 
-  bool isHelpPageFound(const QUrl &url) const override;
-
   /// Perform any clean up on main window shutdown
   void shutdown() override;
 
 private:
   void showHelp(const QString &url);
   void openWebpage(const QUrl &url);
+
+  static std::string findCollectionFile(const QString &binDirectory);
+  static std::string findCacheFile(const std::string &collectionFile);
 
   /// The full path of the collection file.
   std::string m_collectionFile;
@@ -61,7 +63,6 @@ private:
   /// The window that renders the help information
   static pqHelpWindow *g_helpWindow;
 
-  void findCollectionFile(std::string &binDir);
   void determineFileLocs();
 
 public slots:

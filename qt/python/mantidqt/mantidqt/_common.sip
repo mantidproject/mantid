@@ -363,7 +363,7 @@ public:
   void showFitFunctionHelp(const QString &name=QString());
   void showCustomInterfaceHelp(const QString &name, const QString &area=QString(), const QString &section=QString());
   void showWebPage(const QString &url);
-  bool isHelpPageFound(const QString &url) const;
+  bool doesHelpPageExist(const QString &url) const;
   void closeHelpWindow();
 };
 

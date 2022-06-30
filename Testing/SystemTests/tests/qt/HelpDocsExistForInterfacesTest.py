@@ -11,8 +11,6 @@ from mantidqt.interfacemanager import InterfaceManager
 #from mantidqt.usersubwindowfactory import UserSubWindowFactory
 from mantidqt.utils.qt.testing import get_application
 
-from qtpy.QtWidgets import QWidget
-
 # These interfaces are excluded for now as they do not have documentation
 EXCLUDE_INTERFACES = ["DGS_Reduction", "Elemental_Analysis", "ORNL_SANS", "Powder_Diffraction_Reduction"]
 
@@ -40,33 +38,28 @@ class HelpDocsExistForInterfacesTest(MantidSystemTest):
 
         self._interface_manager = InterfaceManager()
         self._interfaces = python_interfaces + cpp_interfaces
+        self._qapp = get_application()
         #self._cpp_interfaces = UserSubWindowFactory.Instance().keys()
+
+    def cleanup(self):
+        self._qapp = None
 
     def runTest(self):
         if len(self._interfaces) == 0:
             self.fail("Failed to find the names of the python interfaces.")
 
-        self._qapp = get_application()
-
         for category, name in self._interfaces:
             if name not in EXCLUDE_INTERFACES:
                 category = INTERFACE_DOCS[name][0] if name in INTERFACE_DOCS else category.lower()
                 doc_name = INTERFACE_DOCS[name][1] if name in INTERFACE_DOCS else name.replace("_", " ")
-                self._attempt_to_open_python_help_window(category,  doc_name)
-        self._qapp = None
+                self._check_interface_documentation_page_exists(category,  doc_name)
 
-    def _attempt_to_open_python_help_window(self, category: str, doc_name: str) -> None:
-        """Attempt to open the help documentation for a python interface."""
+    def _check_interface_documentation_page_exists(self, category: str, doc_name: str) -> None:
+        """Check that the help documentation page for an interface can be found."""
         url = f"qthelp://org.mantidproject/doc/interfaces/{category}/{doc_name}.html"
         print(url)  # Useful for debugging
-        parent = QWidget()
-
-        self._interface_manager.showHelpPage(url, parent)
-        if not self._interface_manager.isHelpPageFound(url):
+        if not self._interface_manager.doesHelpPageExist(url):
             self.fail(f"Missing an interface help page for '{category}/{doc_name}'. Tried the following url:\n {url}")
-
-        parent.close()
-        self._qapp.closeAllWindows()
 
     def _attempt_to_open_cpp_help_window(self, interface_name):
         """Attempt to open the help documentation for a cpp interface."""
