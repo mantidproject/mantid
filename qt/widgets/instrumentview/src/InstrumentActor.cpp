@@ -1031,7 +1031,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
     m_DataMaxValue = -DBL_MAX;
 
     const auto &spectrumInfo = workspace->spectrumInfo();
-    auto maskWksp = getMaskWorkspace();
+    auto maskWksp = getMaskWorkspaceIfExists();
 
     // Ignore monitors if multiple detectors aren't grouped.
     for (size_t i = 0; i < m_integratedSignal.size(); i++) {
