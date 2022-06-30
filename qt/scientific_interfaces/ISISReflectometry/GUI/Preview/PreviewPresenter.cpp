@@ -99,4 +99,6 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
 }
 
 void PreviewPresenter::notifyRegionSelectExportAdsRequested() { m_model->exportSummedWsToAds(); }
+
+void PreviewPresenter::notifyRegionSelectRectSelectRequested() {}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -42,6 +42,7 @@ void QtPreviewView::connectSignals() const {
   connect(m_ui.iv_edit_button, SIGNAL(clicked()), this, SLOT(onInstViewEditClicked()));
   connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
   connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectExportToAdsClicked()));
+  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onRegionSelectRectSelectClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -52,6 +53,7 @@ void QtPreviewView::onInstViewSelectRectClicked() const { m_notifyee->notifyInst
 void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
 
 void QtPreviewView::onRegionSelectExportToAdsClicked() const { m_notifyee->notifyRegionSelectExportAdsRequested(); }
+void QtPreviewView::onRegionSelectRectSelectClicked() const { m_notifyee->notifyRegionSelectRectSelectRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 

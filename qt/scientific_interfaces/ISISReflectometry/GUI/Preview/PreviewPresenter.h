@@ -41,6 +41,7 @@ public:
   void notifyInstViewShapeChanged() override;
 
   void notifyRegionSelectExportAdsRequested() override;
+  void notifyRegionSelectRectSelectRequested() override;
 
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;

@@ -64,5 +64,6 @@ private slots:
   void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
   void onRegionSelectExportToAdsClicked() const;
+  void onRegionSelectRectSelectClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
