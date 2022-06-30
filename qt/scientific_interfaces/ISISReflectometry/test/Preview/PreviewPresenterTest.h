@@ -44,6 +44,7 @@ class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockJobManagerT = std::unique_ptr<MockJobManager>;
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
+  using MockRegionSelectorT = std::unique_ptr<MockRegionSelector>;
 
 public:
   void test_notify_load_workspace_requested_loads_from_file_if_not_in_ads() {
@@ -163,15 +164,17 @@ public:
     presenter.notifyRegionSelectorExportAdsRequested();
   }
 
-  void xtest_sum_banks_completed_plots_region_selector() {
+  void test_sum_banks_completed_plots_region_selector() {
     auto mockView = makeView();
     auto mockModel = makeModel();
+    auto mockRegionSelectorPtr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelectorPtr.get();
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(*mockView, getRegionSelectorLayout).Times(1);
-    // TODO EXPECT_CALL(*mockView, plotRegionSelector(Eq(ws))).Times(1);
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
+                                               makeInstViewModel(), std::move(mockRegionSelectorPtr)));
 
     presenter.notifySumBanksCompleted();
   }
@@ -203,11 +206,15 @@ private:
 
   MockInstViewModelT makeInstViewModel() { return std::make_unique<MockInstViewModel>(); }
 
+  MockRegionSelectorT makeRegionSelector() { return std::make_unique<MockRegionSelector>(); }
+
   PreviewPresenter::Dependencies packDeps(MockPreviewView *view,
                                           MockModelT model = std::make_unique<MockPreviewModel>(),
                                           MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
-                                          MockInstViewModelT instView = std::make_unique<MockInstViewModel>()) {
-    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView)};
+                                          MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
+                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>()) {
+    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView),
+                                          std::move(regionSelector)};
   }
 
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,

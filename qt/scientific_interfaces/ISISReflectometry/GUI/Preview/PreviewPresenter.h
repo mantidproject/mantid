@@ -31,6 +31,7 @@ public:
     std::unique_ptr<IPreviewModel> model;
     std::unique_ptr<IJobManager> jobManager;
     std::unique_ptr<IInstViewModel> instViewModel;
+    std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
   };
 
   PreviewPresenter(Dependencies dependencies);
