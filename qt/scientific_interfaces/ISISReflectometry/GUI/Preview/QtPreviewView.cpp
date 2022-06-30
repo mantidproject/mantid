@@ -29,7 +29,7 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_zoom_button->setIcon(MantidQt::Icons::getIcon("mdi.magnify", "black", 1.3));
   m_ui.iv_edit_button->setIcon(MantidQt::Icons::getIcon("mdi.pencil", "black", 1.3));
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
-  m_ui.contour_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
+  m_ui.rs_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
@@ -40,7 +40,7 @@ void QtPreviewView::connectSignals() const {
   connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
   connect(m_ui.iv_edit_button, SIGNAL(clicked()), this, SLOT(onInstViewEditClicked()));
   connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
-  connect(m_ui.contour_ads_export_button, SIGNAL(clicked()), this, SLOT(onContourExportToAdsClicked()));
+  connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectExportToAdsClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -50,7 +50,7 @@ void QtPreviewView::onInstViewEditClicked() const { m_notifyee->notifyInstViewEd
 void QtPreviewView::onInstViewSelectRectClicked() const { m_notifyee->notifyInstViewSelectRectRequested(); }
 void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
 
-void QtPreviewView::onContourExportToAdsClicked() const { m_notifyee->notifyContourExportAdsRequested(); }
+void QtPreviewView::onRegionSelectExportToAdsClicked() const { m_notifyee->notifyRegionSelectExportAdsRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
@@ -65,7 +65,7 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
 
 void QtPreviewView::plotRegionSelector(MatrixWorkspace_sptr ws) {
   if (!m_regionSelector) {
-    m_regionSelector = std::make_unique<MantidQt::Widgets::RegionSelector>(ws, m_ui.contour_plot_layout);
+    m_regionSelector = std::make_unique<MantidQt::Widgets::RegionSelector>(ws, m_ui.rs_plot_layout);
   } else {
     m_regionSelector->updateWorkspace(ws);
   }

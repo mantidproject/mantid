@@ -24,7 +24,7 @@ public:
   virtual void notifyInstViewSelectRectRequested() = 0;
   virtual void notifyInstViewShapeChanged() = 0;
 
-  virtual void notifyContourExportAdsRequested() = 0;
+  virtual void notifyRegionSelectExportAdsRequested() = 0;
 };
 
 class IPreviewView {

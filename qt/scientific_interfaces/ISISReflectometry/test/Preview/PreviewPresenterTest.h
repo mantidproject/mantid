@@ -151,14 +151,14 @@ public:
     presenter.notifyInstViewShapeChanged();
   }
 
-  void test_notify_contour_export_to_ads_requested() {
+  void test_notify_region_selector_export_to_ads_requested() {
     auto mockView = makeView();
     auto mockModel = makeModel();
 
     EXPECT_CALL(*mockModel, exportSummedWsToAds()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
 
-    presenter.notifyContourExportAdsRequested();
+    presenter.notifyRegionSelectExportAdsRequested();
   }
 
   void test_sum_banks_completed_plots_region_selector() {
