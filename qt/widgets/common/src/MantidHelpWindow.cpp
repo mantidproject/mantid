@@ -12,8 +12,10 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/pqHelpWindow.h"
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -44,7 +46,7 @@ Mantid::Kernel::Logger g_log("MantidHelpWindow");
 } // namespace
 
 // initialise the help window
-pqHelpWindow *MantidHelpWindow::g_helpWindow = nullptr;
+QPointer<pqHelpWindow> MantidHelpWindow::g_helpWindow;
 
 /// Base url for all of the files in the project.
 const QString BASE_URL("qthelp://org.mantidproject/doc/");
@@ -62,7 +64,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
   // find the collection files
   this->determineFileLocs();
 
-  if (g_helpWindow == nullptr) {
+  if (!helpWindowExists()) {
     // see if cache file exists and remove it - shouldn't be necessary, but it is
     if (!m_cacheFile.empty()) {
       if (Poco::File(m_cacheFile).exists()) {
@@ -107,8 +109,6 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
   }
 }
 
-MantidHelpWindow::~MantidHelpWindow() { g_helpWindow = nullptr; }
-
 void MantidHelpWindow::showHelp(const QString &url) {
   g_log.debug() << "open help window for \"" << url.toStdString() << "\"\n";
   // bring up the help window if it is showing
@@ -127,7 +127,7 @@ void MantidHelpWindow::openWebpage(const QUrl &url) {
 void MantidHelpWindow::showPage(const QString &url) { this->showPage(QUrl(url)); }
 
 void MantidHelpWindow::showPage(const QUrl &url) {
-  if (g_helpWindow != nullptr) {
+  if (helpWindowExists()) {
     this->showHelp(!url.isEmpty() ? url.toString() : DEFAULT_URL);
   } else if (!url.isEmpty()) { // qt-assistant disabled
     this->openWebpage(url);
@@ -163,7 +163,7 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
     help_url = QString::fromStdString(alg->helpURL());
   }
-  if (g_helpWindow != nullptr) {
+  if (helpWindowExists()) {
     if (help_url.isEmpty()) {
       QString url(BASE_URL);
       url += "algorithms/";
@@ -201,7 +201,7 @@ void MantidHelpWindow::showAlgorithm(const QString &name, const int version) {
  * the concept index.
  */
 void MantidHelpWindow::showConcept(const string &name) {
-  if (g_helpWindow != nullptr) {
+  if (helpWindowExists()) {
     QString url(BASE_URL);
     url += "concepts/";
     if (name.empty())
@@ -228,7 +228,7 @@ void MantidHelpWindow::showConcept(const QString &name) { this->showConcept(name
  * the fit function index.
  */
 void MantidHelpWindow::showFitFunction(const std::string &name) {
-  if (g_helpWindow != nullptr) {
+  if (helpWindowExists()) {
     QString url(BASE_URL);
     url += "fitting/fitfunctions/";
     auto functionUrl = url + QString(name.c_str()) + ".html";
@@ -270,7 +270,7 @@ void MantidHelpWindow::showCustomInterface(const QString &name, const QString &a
  */
 void MantidHelpWindow::showCustomInterface(const std::string &name, const std::string &area,
                                            const std::string &section) {
-  if (g_helpWindow != nullptr) {
+  if (helpWindowExists()) {
     QString url(BASE_URL);
     url += "interfaces/";
     if (!area.empty()) {
@@ -307,7 +307,7 @@ void MantidHelpWindow::shutdown() {
   // close the window and delete the object
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
-  if (g_helpWindow != nullptr) {
+  if (helpWindowExists()) {
     g_helpWindow->close();
   }
 }
