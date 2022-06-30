@@ -116,6 +116,13 @@ class AbstractInst(object):
         """
         return True
 
+    def perform_abs_vanadium_norm(self):
+        """
+        :return: Whether the sample run should undergo an absolute normalisation to
+        produce a differential cross section
+        """
+        return False
+
     # Mandatory overrides
 
     def _get_run_details(self, run_number_string):

@@ -161,3 +161,7 @@ class Polaris(AbstractInst):
         return absorb_corrections.apply_paalmanpings_absorb_and_subtract_empty(
             workspace=workspace, summed_empty=summed_empty, sample_details=sample_details,
             paalman_pings_events_per_point=paalman_pings_events_per_point)
+
+    def perform_abs_vanadium_norm(self):
+        return self._inst_settings.mode == "PDF"
+

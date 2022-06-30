@@ -10,6 +10,7 @@ from mantid.kernel import logger
 
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
+import math
 import numpy
 import os
 
@@ -132,9 +133,9 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     split_data_spectra = common.extract_ws_spectra(input_workspace)
 
     if perform_vanadium_norm:
-        processed_spectra = _divide_by_vanadium_splines(spectra_list=split_data_spectra,
-                                                        vanadium_splines=vanadium_splines,
-                                                        instrument=instrument)
+        processed_spectra = _normalize_spectra(spectra_list=split_data_spectra,
+                                               vanadium_splines=vanadium_splines,
+                                               instrument=instrument)
     else:
         processed_spectra = split_data_spectra
 
@@ -168,23 +169,39 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     return output
 
 
-def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
-    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum, StoreInADS=False)
+def _normalize_one_spectrum(single_spectrum_ws, spline, instrument):
+    rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=single_spectrum_ws, StoreInADS=False)
+    divided = mantid.Divide(LHSWorkspace=single_spectrum_ws, RHSWorkspace=rebinned_spline, StoreInADS=False)
     if instrument.get_instrument_prefix() == "GEM":
-        divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
-                                StoreInADS=False)
-        complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, StoreInADS=False)
+        values_replaced = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, StoreInADS=False)
         # crop based off max between 1000 and 2000 tof as the vanadium peak on Gem will always occur here
-        return _crop_spline_to_percent_of_max(rebinned_spline, complete, spectrum, 1000, 2000)
+        complete = _crop_spline_to_percent_of_max(rebinned_spline, values_replaced, single_spectrum_ws, 1000, 2000)
+    else:
+        complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, OutputWorkspace=single_spectrum_ws)
 
-    divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline,
-                            StoreInADS=False)
-    complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, OutputWorkspace=spectrum)
+    if instrument.perform_abs_vanadium_norm():
+        vanadium_material = spline.sample().getMaterial()
+        v_number_density = vanadium_material.numberDensity
+        v_cross_section = vanadium_material.totalScatterXSection()
+        vanadium_shape = spline.sample().getShape()
+        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+        num_v_atoms = vanadium_shape.volume() * v_number_density
+
+        sample_material = single_spectrum_ws.sample().getMaterial()
+        sample_number_density = sample_material.numberDensity
+        sample_shape = spline.sample().getShape()
+        num_sample_atoms = sample_shape.volume() * sample_number_density
+
+        abs_norm_factor = v_number_density * v_cross_section * num_v_atoms / \
+                          (sample_number_density * num_sample_atoms * 4 * math.pi)
+        abs_norm_factor_ws = mantid.CreateSingleValuedWorkspace(DataValue=abs_norm_factor)
+        complete = mantid.Multiply(LHSWorkspace=complete, RHSWorkspace=abs_norm_factor_ws,
+                                   OutputWorkspace=single_spectrum_ws)
 
     return complete
 
 
-def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
+def _normalize_spectra(spectra_list, vanadium_splines, instrument):
     if hasattr(vanadium_splines, "OutputWorkspace"):
         vanadium_splines = vanadium_splines.OutputWorkspace
     if type(vanadium_splines) is WorkspaceGroup:  # vanadium splines is a workspacegroup
@@ -193,10 +210,10 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
         if num_splines != num_spectra:
             raise RuntimeError("Mismatch between number of banks in vanadium and number of banks in workspace to focus"
                                "\nThere are {} banks for vanadium but {} for the run".format(num_splines, num_spectra))
-        output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws, instrument)
+        output_list = [_normalize_one_spectrum(data_ws, van_ws, instrument)
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
-    output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines, instrument)]
+    output_list = [_normalize_one_spectrum(spectra_list[0], vanadium_splines, instrument)]
     return output_list
 
 

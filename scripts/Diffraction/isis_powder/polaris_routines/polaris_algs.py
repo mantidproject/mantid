@@ -9,6 +9,7 @@ import math
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
+from mantid.kernel import MaterialBuilder
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
@@ -79,20 +80,30 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
+def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=False, q_lims=None, cal_file_name=None,
+                    delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
                     freq_params=None, debug=False):
+    if sample_details is None:
+        raise RuntimeError("A SampleDetails object was not set. Please create a SampleDetails object and set the "
+                           "relevant properties it. Then set the new sample by calling set_sample_details()")
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+
+    # convert diff cross section to S(Q)
+    material_builder = MaterialBuilder()
+    sample = material_builder.setFormula(sample_details.material_object.chemical_formula).build()
+    sample_scatter_cross_section = sample.totalScatterXSection()
+    focused_ws = focused_ws * 4 * math.pi / sample_scatter_cross_section
 
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
     sample_geometry = sample_details.generate_sample_geometry()
     sample_material = sample_details.generate_sample_material()
+
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
         InputWorkspace=raw_ws,
         CalFileName=cal_file_name,
-        SampleGeometry=sample_geometry,
-        SampleMaterial=sample_material,
+        SampleGeometry=sample_geometry_json,
+        SampleMaterial=sample_material_json,
         CrystalDensity=sample_details.material_object.crystal_density)
 
     ws_group_list = []
