@@ -170,6 +170,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="rs_rect_select_button">
+            <property name="toolTip">
+             <string>Select a rectangular region of interest</string>
+            </property>
+            <property name="text">
+             <string>Rectangular ROI</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="rs_toolbar_spacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
