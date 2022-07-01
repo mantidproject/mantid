@@ -212,7 +212,8 @@ The following properties are required to set the sample material:
 
 - :ref:`chemical_formula_sampleDetails_isis-powder-diffraction-ref`
 - :ref:`number_density_sampleDetails_isis-powder-diffraction-ref`
-- :ref:`crystal_density_sampleDetails_isis-powder-diffraction-ref`
+- :ref:`_number_density_effective_sampleDetails_isis-powder-diffraction-ref`
+- :ref:`_packing_fraction_sampleDetails_isis-powder-diffraction-ref`
   (Optional if *chemical_formula* is an element, otherwise mandatory).
 
 Example
@@ -251,6 +252,8 @@ This parameter defines the number density of the property.
 When :ref:`chemical_formula_sampleDetails_isis-powder-diffraction-ref`
 defines an element this can automatically be calculated by Mantid.
 
+This value is used to convert between different PDF types in `Polaris.create_total_scattering_pdf`.
+
 If :ref:`chemical_formula_sampleDetails_isis-powder-diffraction-ref`
 is not an element the user must enter this value.
 
@@ -258,21 +261,38 @@ Example Input:
 
 ..  code-block:: python
 
-    sample_obj.set_material(number_density=0.123, ...)
+    sample_obj.set_material(number_density=0.231, ...)
 
-.. _crystal_density_sampleDetails_isis-powder-diffraction-ref:
+.. _number_density_effective_sampleDetails_isis-powder-diffraction-ref:
 
-crystal_density
-^^^^^^^^^^^^^^^
-This parameter defines the full or crystallographic number density of the material.
-If this is not set it will use the `number_density` in its place. This value
-is used to convert between different PDF types in `Polaris.create_total_scattering_pdf`.
+number_density_effective
+^^^^^^^^^^^^^^^^^^^^^^^^
+This can be used to supply a powder density. It is used in conjunction with
+number_density which contains the full crystallographic density
+
+This value is used in absorption\multiple scattering corrections and converting intensity into a differential cross section (if an absolute normalisation is performed)
+
+If this parameter isn't supplied then it is assumed to be equal to the number_density
 
 Example Input:
 
 ..  code-block:: python
 
-    sample_obj.set_material(crystal_density=0.231, ...)
+    sample_obj.set_material(number_density_effective=0.123, ...)
+
+.. _packing_fraction_sampleDetails_isis-powder-diffraction-ref:
+
+packing_fraction
+^^^^^^^^^^^^^^^^
+This is an alternative to using number_density_effective to specify a powder_density
+This value is a fraction between 0.0 and 1.0 and if supplied then number_density_effective is calculated by multipling packing_fraction by number_density
+
+Example Input:
+
+..  code-block:: python
+
+    sample_obj.set_material(packing_fraction=0.5, ...)
+
 
 .. _set_material_properties_sampleDetails_isis-powder-diffraction-ref:
 
