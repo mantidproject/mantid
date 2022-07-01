@@ -127,9 +127,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             except ValueError:
                 issues['VanadiumWorkspace'] = "Desired vanadium workspace: {} cannot be found.".format(vanadium_ws)
 
-        if self.getProperty('MaskWithVanadium').value and self.getProperty('VanadiumWorkspace').isDefault:
-            issues['VanadiumWorkspace'] = 'Please provide a vanadium input for a masking reference.'
-
         if not self.getProperty('FlatBackgroundSource').isDefault \
                 and self.getPropertyValue('FlatBackgroundSource') not in mtd:
             # attempts to load the file, raises a runtime error if the desired file does not exist
@@ -479,6 +476,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             self.to_clean.append(self.vanadium_epp)
+            self.vanadium_raw = '{}_raw'.format(ws)
+            self.to_clean.append(self.vanadium_raw)
+            kwargs['OutputRawWorkspace'] = self.vanadium_raw
         kwargs[common.PROP_NORMALISATION] = self.getPropertyValue(common.PROP_NORMALISATION)
         kwargs[common.PROP_MON_PEAK_SIGMA_MULTIPLIER] = self.getPropertyValue(common.PROP_MON_PEAK_SIGMA_MULTIPLIER)
         if not self.clear_cache:
@@ -788,7 +788,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.vanadium_epp:
             kwargs[common.PROP_EPP_WS] = self.vanadium_epp
         DirectILLDiagnostics(
-            InputWorkspace=ws,
+            InputWorkspace=self.vanadium_raw,
             OutputWorkspace=vanadium_diagnostics,
             **kwargs
         )
