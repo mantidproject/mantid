@@ -33,19 +33,19 @@
 			<value val="100000" />
 		</parameter>
 		<parameter name="enable_flat_background_subtraction" type="bool" visible="false">
-			<value val="false" />
+			<value val="true" />
 		</parameter>
 		<parameter name="enable_background_diagnostics" type="bool" visible="false">
 			<value val="false" />
 		</parameter>
 		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
-			<value val="false" />
+			<value val="true" />
 		</parameter>
 		<parameter name="beam_stop_diagnostics_spectra" type="string" visible="false">
 			<value val=""/>
 		</parameter>
 		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
-			<value val="false" />
+			<value val="true" />
 		</parameter>
 		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
 			<value val="false" />
