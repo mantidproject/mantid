@@ -44,4 +44,3 @@ mtd_add_sip_module(
 
 add_subdirectory(icons)
 add_subdirectory(widgets/instrumentview)
-add_subdirectory(widgets/regionselector)

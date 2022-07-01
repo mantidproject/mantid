@@ -13,7 +13,7 @@
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
-#include "MantidQtWidgets/RegionSelector/RegionSelectorObserver.h"
+#include "MantidAPI/RegionSelectorObserver.h"
 
 #include <memory>
 
@@ -26,11 +26,11 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
                                                         public PreviewViewSubscriber,
                                                         public JobManagerSubscriber,
-                                                        public MantidQt::Widgets::RegionSelectorObserver {
+                                                        public Mantid::API::RegionSelectorObserver {
 public:
   // Stub class to observe region selector; needed because it has to be passed
   // through as a shared_ptr to python code, so we cannot pass ourselves
-  class StubRegionObserver : public MantidQt::Widgets::RegionSelectorObserver {
+  class StubRegionObserver : public Mantid::API::RegionSelectorObserver {
   public:
     // subscribe so we can get the notifcation passed back to us
     void subscribe(RegionSelectorObserver *notifyee) { m_notifyee = notifyee; }
@@ -38,7 +38,7 @@ public:
     void notifyRegionChanged() override { m_notifyee->notifyRegionChanged(); }
 
   private:
-    MantidQt::Widgets::RegionSelectorObserver *m_notifyee{nullptr};
+    Mantid::API::RegionSelectorObserver *m_notifyee{nullptr};
   };
 
   struct Dependencies {

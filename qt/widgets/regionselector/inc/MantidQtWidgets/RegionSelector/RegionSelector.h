@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/RegionSelector/DllConfig.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
-#include "MantidQtWidgets/RegionSelector/RegionSelectorObserver.h"
 
 class QLayout;
 
@@ -23,7 +23,7 @@ public:
   RegionSelector &operator=(RegionSelector const &) = delete;
   RegionSelector &operator=(RegionSelector &&);
 
-  void subscribe(std::shared_ptr<RegionSelectorObserver> const &notifyee) override;
+  void subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) override;
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
   void addRectangularRegion() override;
 

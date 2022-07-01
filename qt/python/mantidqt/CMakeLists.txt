@@ -34,10 +34,7 @@ add_custom_command(
 )
 add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
 
-add_dependencies(
-  mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5
-  mantidqt_regionselectorqt5
-)
+add_dependencies(mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5)
 if(MSVC)
   # Debug builds need libraries that are linked with MSVC debug runtime
   add_custom_command(

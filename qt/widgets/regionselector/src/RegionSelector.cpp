@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
+#include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
@@ -63,12 +64,11 @@ void RegionSelector::show() const {
   getView().attr("show")();
 }
 
-void RegionSelector::subscribe(std::shared_ptr<RegionSelectorObserver> const &notifyee) {
+void RegionSelector::subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) {
   GlobalInterpreterLock lock;
   boost::python::dict kwargs;
   kwargs["notifyee"] = notifyee;
-  // pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
-  // pyobj().attr("subscribe")(notifyee);
+  pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
 }
 
 void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {

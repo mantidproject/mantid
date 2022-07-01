@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/RegionSelector/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 
-namespace MantidQt::Widgets {
-class MANTID_REGIONSELECTOR_DLL RegionSelectorObserver {
+namespace Mantid::API {
+class MANTID_API_DLL RegionSelectorObserver {
 public:
   virtual ~RegionSelectorObserver() = default;
   virtual void notifyRegionChanged() = 0;
 };
-} // namespace MantidQt::Widgets
+} // namespace Mantid::API

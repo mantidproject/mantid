@@ -330,6 +330,7 @@ set(INC_FILES
     inc/MantidAPI/Projection.h
     inc/MantidAPI/RawCountValidator.h
     inc/MantidAPI/RefAxis.h
+    inc/MantidAPI/RegionSelectorObserver.h
     inc/MantidAPI/ResizeRectangularDetectorHelper.h
     inc/MantidAPI/Run.h
     inc/MantidAPI/Sample.h
