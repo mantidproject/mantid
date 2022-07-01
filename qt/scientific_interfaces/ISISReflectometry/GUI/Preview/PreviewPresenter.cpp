@@ -25,12 +25,15 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_regionSelector(std::move(dependencies.regionSelector)) {
+      m_regionSelector(std::move(dependencies.regionSelector)), m_stubRegionObserver{new StubRegionObserver} {
 
   if (!m_regionSelector) {
     m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
   }
-  m_regionSelector->subscribe(*this);
+  // stub observer subscribes to the region selector
+  m_regionSelector->subscribe(m_stubRegionObserver);
+  // we subscribe to the stub observer
+  m_stubRegionObserver->subscribe(this);
 
   m_view->subscribe(this);
   m_jobManager->subscribe(this);

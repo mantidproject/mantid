@@ -11,7 +11,7 @@
 namespace MantidQt::Widgets {
 class MockRegionSelector : public IRegionSelector {
 public:
-  MOCK_METHOD(void, subscribe, (RegionSelectorObserver &), (override));
+  MOCK_METHOD(void, subscribe, (std::shared_ptr<RegionSelectorObserver> const &), (override));
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::Workspace_sptr const &workspace), (override));
   MOCK_METHOD(void, addRectangularRegion, (), (override));
 };

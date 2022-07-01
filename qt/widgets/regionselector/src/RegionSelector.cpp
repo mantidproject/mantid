@@ -63,12 +63,12 @@ void RegionSelector::show() const {
   getView().attr("show")();
 }
 
-void RegionSelector::subscribe(RegionSelectorObserver &notifyee) {
+void RegionSelector::subscribe(std::shared_ptr<RegionSelectorObserver> const &notifyee) {
   GlobalInterpreterLock lock;
   boost::python::dict kwargs;
-  // kwargs["notifyee"] = notifyee;
-  //  pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
-  pyobj().attr("subscribe")(notifyee);
+  kwargs["notifyee"] = notifyee;
+  // pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
+  // pyobj().attr("subscribe")(notifyee);
 }
 
 void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {

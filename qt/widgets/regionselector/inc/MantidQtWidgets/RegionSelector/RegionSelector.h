@@ -23,7 +23,7 @@ public:
   RegionSelector &operator=(RegionSelector const &) = delete;
   RegionSelector &operator=(RegionSelector &&);
 
-  void subscribe(RegionSelectorObserver &notifyee) override;
+  void subscribe(std::shared_ptr<RegionSelectorObserver> const &notifyee) override;
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
   void addRectangularRegion() override;
 

@@ -16,7 +16,7 @@ namespace MantidQt::Widgets {
 class MANTID_REGIONSELECTOR_DLL IRegionSelector {
 public:
   virtual ~IRegionSelector() = default;
-  virtual void subscribe(RegionSelectorObserver &notifyee) = 0;
+  virtual void subscribe(std::shared_ptr<RegionSelectorObserver> const &notifyee) = 0;
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
   virtual void addRectangularRegion() = 0;
 };
