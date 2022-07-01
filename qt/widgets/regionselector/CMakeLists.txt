@@ -1,8 +1,9 @@
 # Rules for matplotlib cpp library
 set(LIB_SRCS src/RegionSelector.cpp)
 
-set(NOMOC_HEADERS inc/MantidQtWidgets/RegionSelector/DllConfig.h inc/MantidQtWidgets/RegionSelector/IRegionSelector.h
-                  inc/MantidQtWidgets/RegionSelector/RegionSelector.h
+set(NOMOC_HEADERS
+    inc/MantidQtWidgets/RegionSelector/DllConfig.h inc/MantidQtWidgets/RegionSelector/IRegionSelector.h
+    inc/MantidQtWidgets/RegionSelector/RegionSelector.h inc/MantidQtWidgets/RegionSelector/RegionSelectorObserver.h
 )
 
 # Target

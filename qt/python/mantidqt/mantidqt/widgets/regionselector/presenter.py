@@ -9,9 +9,12 @@ from ..observers.observing_presenter import ObservingPresenter
 from ..sliceviewer.models.dimensions import Dimensions
 from ..sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
 from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
+from mantidqt.utils.qt import import_qt
 
 # 3rd party imports
 from matplotlib.widgets import RectangleSelector
+
+RegionSelectorObserver = import_qt('._regionselector', 'mantidqt.widgets.regionselector', 'RegionSelectorObserver')
 
 
 class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
