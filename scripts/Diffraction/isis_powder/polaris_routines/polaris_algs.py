@@ -94,6 +94,8 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=Fal
     sample = material_builder.setFormula(sample_details.material_object.chemical_formula).build()
     sample_scatter_cross_section = sample.totalScatterXSection()
     focused_ws = focused_ws * 4 * math.pi / sample_scatter_cross_section
+    if debug:
+        s_of_q = mantid.CloneWorkspace(InputWorkspace=focused_ws)
 
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
     sample_geometry = sample_details.generate_sample_geometry()
@@ -119,6 +121,8 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=Fal
         raise RuntimeError("To use create_total_scattering_pdf you need to run focus with "
                            "do_van_normalisation=true first.")
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
+    if debug:
+        s_of_q_corrected = mantid.CloneWorkspace(InputWorkspace=focused_ws)
     focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
