@@ -129,16 +129,16 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=Fal
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        fast_fourier_filter(merged_ws, rho0=sample_details.material_object.crystal_density, freq_params=freq_params)
+        fast_fourier_filter(merged_ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
-                                                rho0=sample_details.material_object.crystal_density)
+                                                rho0=sample_details.material_object.number_density)
     else:
         for ws in focused_ws:
-            fast_fourier_filter(ws, rho0=sample_details.material_object.crystal_density, freq_params=freq_params)
+            fast_fourier_filter(ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
-                                                rho0=sample_details.material_object.crystal_density)
+                                                rho0=sample_details.material_object.number_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     if not debug:

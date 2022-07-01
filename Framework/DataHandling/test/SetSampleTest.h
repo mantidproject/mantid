@@ -791,6 +791,33 @@ public:
     TS_ASSERT(alg->isExecuted());
   }
 
+  void test_material_properties_correctly_set() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto sampleShape = ComponentCreationHelper::createSphere(0.5);
+    sampleShape->setID("mysample");
+    inputWS->mutableSample().setShape(sampleShape);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", "");
+    auto props = createMaterialProps();
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("CoherentXSection", 10.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("IncoherentXSection", 5.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("AttenuationXSection", 3.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("NumberDensity", 2.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("EffectiveNumberDensity", 1.25), "");
+    alg->setProperty("Material", props);
+    alg->setProperty("Environment", "");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    const auto &material = inputWS->sample().getMaterial();
+    TS_ASSERT_EQUALS("V", material.name());
+    TS_ASSERT_EQUALS(10.0, material.cohScatterXSection());
+    TS_ASSERT_EQUALS(5.0, material.incohScatterXSection());
+    TS_ASSERT_EQUALS(3.0, material.absorbXSection());
+    TS_ASSERT_DELTA(2.0, material.numberDensity(), 1e-04);
+    TS_ASSERT_DELTA(1.25, material.numberDensityEffective(), 1e-04);
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------

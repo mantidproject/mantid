@@ -59,6 +59,7 @@ void CalculatePlaczekSelfScattering::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "Workspace with the Self scattering correction, in the same unit as the InputWorkspace.");
   declareProperty("CrystalDensity", EMPTY_DBL(), "The crystalographic density of the sample material.");
+  declareProperty("ScaleByPackingFraction", true, "Scale the correction value by packing fraction.");
 }
 //----------------------------------------------------------------------------------------------
 /** Validate inputs.
@@ -101,6 +102,7 @@ double CalculatePlaczekSelfScattering::getPackingFraction(const API::MatrixWorks
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
+  const bool scaleByPackingFraction = getProperty("ScaleByPackingFraction");
   auto inputUnit = inWS->getAxis(0)->unit();
 
   // calculate summation term w/ neutron mass over molecular mass ratio
@@ -160,7 +162,8 @@ void CalculatePlaczekSelfScattering::exec() {
         const double term2 = f * (1.0 - eps1[xIndex]);
         const double inelasticPlaczekSelfCorrection =
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 * summationTerm;
-        y[xIndex] = inelasticPlaczekSelfCorrection * packingFraction;
+        y[xIndex] =
+            scaleByPackingFraction ? inelasticPlaczekSelfCorrection * packingFraction : inelasticPlaczekSelfCorrection;
       }
     } else {
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {

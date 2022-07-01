@@ -77,6 +77,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                                           FitSpectrumWith="CubicSpline")
         self_scattering_correction = CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
                                                                     IncidentSpectra=fit_spectra,
+                                                                    ScaleByPackingFraction=False,
                                                                     Version=1)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,

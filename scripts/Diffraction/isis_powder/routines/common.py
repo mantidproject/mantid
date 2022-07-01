@@ -689,7 +689,6 @@ def _run_number_generator(processed_string):
     except RuntimeError:
         raise ValueError("Could not generate run numbers from this input: " + processed_string)
 
-
 def workspace_has_current(ws):
     """
     Gat whether the total charge for this run was greater than 0
