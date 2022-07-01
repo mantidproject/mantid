@@ -167,23 +167,26 @@ public:
   void test_sum_banks_completed_plots_region_selector() {
     auto mockView = makeView();
     auto mockModel = makeModel();
-    auto mockRegionSelectorPtr = makeRegionSelector();
-    auto mockRegionSelector = mockRegionSelectorPtr.get();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
 
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
-                                               makeInstViewModel(), std::move(mockRegionSelectorPtr)));
+                                               makeInstViewModel(), std::move(mockRegionSelector_uptr)));
 
     presenter.notifySumBanksCompleted();
   }
 
   void test_rectangular_roi_requested_updates_view() {
     auto mockView = makeView();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    expectActivateRectangularROIMode(*mockView);
-    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    expectActivateRectangularROIMode(*mockView, *mockRegionSelector);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
+                                               std::move(mockRegionSelector_uptr)));
 
     presenter.notifyRectangularROIModeRequested();
   }
@@ -278,11 +281,10 @@ private:
     EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
   }
 
-  void expectActivateRectangularROIMode(MockPreviewView &mockView) {
+  void expectActivateRectangularROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
     // TODO Disable edit button when implemented
     // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
-    // TODO implement rectangle selection on region selector
-    // EXPECT_CALL(mockRegionSelector, rectangleSelection()).Times(1);
+    EXPECT_CALL(mockRegionSelector, addRectangularRegion()).Times(1);
   }
 };

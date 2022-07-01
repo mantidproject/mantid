@@ -16,5 +16,6 @@ class MANTID_REGIONSELECTOR_DLL IRegionSelector {
 public:
   virtual ~IRegionSelector() = default;
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
+  virtual void addRectangularRegion() = 0;
 };
 } // namespace MantidQt::Widgets

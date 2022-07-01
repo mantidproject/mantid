@@ -23,6 +23,7 @@ public:
   RegionSelector &operator=(RegionSelector &&);
 
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
+  void addRectangularRegion() override;
 
 private:
   Common::Python::Object getView() const;

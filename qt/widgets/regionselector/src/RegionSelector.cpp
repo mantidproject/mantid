@@ -70,4 +70,8 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
 }
 
+void RegionSelector::addRectangularRegion() {
+  GlobalInterpreterLock lock;
+  // pyobj().attr("add_rectangular_region")();
+}
 } // namespace MantidQt::Widgets

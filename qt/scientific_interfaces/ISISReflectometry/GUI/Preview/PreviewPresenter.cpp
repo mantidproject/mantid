@@ -111,7 +111,6 @@ void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->expor
 
 void PreviewPresenter::notifyRectangularROIModeRequested() {
   m_view->setRectangularROIState(true);
-  // TODO implement rectangle selection in region selector
-  // m_regionSelector->rectangleSelection();
+  m_regionSelector->addRectangularRegion();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
