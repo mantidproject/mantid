@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
+import SANSILLCommon as common
 from mantid.api import PythonAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, \
     MultipleFileProperty, PropertyMode, Progress, WorkspaceGroup, FileAction
 from mantid.dataobjects import SpecialWorkspace2D
@@ -229,6 +230,30 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('OutputFluxWorkspace', beam)
 
+    def _add_correction_information(self, ws):
+        """Adds information regarding corrections and inputs to the provided workspace.
+
+        Args:
+            ws: (str) workspace name to which information is to be added
+        """
+        # first, let's create the dictionary containing all parameters that should be added to the metadata
+        parameters = dict()
+        parameters['numor_list'] = common.return_numors_from_path(self.getPropertyValue('Runs'))
+        parameters['sample_transmission_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('TransmissionWorkspace'))
+        parameters['container_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('EmptyContainerWorkspace'))
+        parameters['absorber_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('DarkCurrentWorkspace'))
+        parameters['beam_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('EmptyBeamWorkspace'))
+        parameters['flux_ws'] = common.return_numors_from_path(self.getPropertyValue('FluxWorkspace'))
+        parameters['sensitivity_ws'] = \
+            common.return_numors_from_path(self.getPropertyValue('SensitivityWorkspace'))
+        parameters['mask_ws'] = common.return_numors_from_path(self.getPropertyValue('MaskWorkspace'))
+        # when all is set, a common function can set them all
+        common.add_correction_information(ws, parameters)
+
     def reset(self):
         '''Resets the class member variables'''
         self.instrument = None
@@ -357,6 +382,7 @@ class SANSILLReduction(PythonAlgorithm):
                 beam_y = run['BeamCenterY'].value
                 AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
                 AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
+                AddSampleLog(Workspace=ws, LogName='beam_ws', LogText=beam_ws, LogType='String')
                 self.apply_multipanel_beam_center_corr(ws, beam_x, beam_y)
                 if 'BeamWidthX' in run:
                     AddSampleLog(Workspace=ws, LogName='BeamWidthX', LogText=str(run['BeamWidthX'].value),
@@ -388,6 +414,7 @@ class SANSILLReduction(PythonAlgorithm):
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
             AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
+            AddSampleLog(Workspace=ws, LogName='flux_ws', LogText=flux_ws, LogType='String')
 
     def apply_transmission(self, ws):
         '''Applies transmission correction'''
@@ -402,6 +429,7 @@ class SANSILLReduction(PythonAlgorithm):
                                  OutputWorkspace=tr_ws_rebin)
                 ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=tr_ws_rebin,
                                             ThetaDependent=theta_dependent, OutputWorkspace=ws)
+                mtd[ws].getRun().addProperty('sample.transmission', list(mtd[tr_ws_rebin].readY(0)), True)
                 DeleteWorkspace(tr_ws_rebin)
             else:
                 check_wavelengths_match(mtd[tr_ws], mtd[ws])
@@ -416,6 +444,7 @@ class SANSILLReduction(PythonAlgorithm):
                                             TransmissionWorkspace=tr_to_apply,
                                             ThetaDependent=theta_dependent,
                                             OutputWorkspace=ws)
+                mtd[ws].getRun().addProperty('sample.transmission', list(mtd[tr_to_apply].readY(0)), True)
                 if needs_broadcasting:
                     DeleteWorkspace(tr_to_apply)
                 if theta_dependent and self.instrument == 'D16' and 75 < mtd[ws].getRun()['Gamma.value'].value < 105:
@@ -960,6 +989,7 @@ class SANSILLReduction(PythonAlgorithm):
                             if self.process != 'Solvent':
                                 self.apply_solvent(ws)
                                 self.progress.report()
+        self._add_correction_information(ws)
         self.setProperty('OutputWorkspace', ws)
 
     def PyExec(self):
