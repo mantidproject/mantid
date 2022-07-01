@@ -113,4 +113,9 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
   m_view->setRectangularROIState(true);
   m_regionSelector->addRectangularRegion();
 }
+
+void PreviewPresenter::notifyRegionChanged() {
+  // TODO Get ROI from m_regionSelector and perform the reduction
+  g_log.notice("region of interest was changed");
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

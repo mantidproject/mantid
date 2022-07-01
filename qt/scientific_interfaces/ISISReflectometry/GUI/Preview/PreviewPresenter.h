@@ -13,6 +13,7 @@
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelectorObserver.h"
 
 #include <memory>
 
@@ -24,7 +25,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
                                                         public PreviewViewSubscriber,
-                                                        public JobManagerSubscriber {
+                                                        public JobManagerSubscriber,
+                                                        public MantidQt::Widgets::RegionSelectorObserver {
 public:
   struct Dependencies {
     IPreviewView *view{nullptr};
@@ -52,6 +54,9 @@ public:
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
   void notifySumBanksCompleted() override;
+
+  // RegionSelectionObserver overrides
+  void notifyRegionChanged() override;
 
 private:
   IPreviewView *m_view{nullptr};
