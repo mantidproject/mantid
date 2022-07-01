@@ -134,7 +134,7 @@ void MayersSampleCorrection::exec() {
     double _(0.0), theta(0.0), phi(0.0);
     pos.getSpherical(_, theta, phi);
     params.azimuth = asin(sin(theta) * sin(phi));
-    params.rho = sampleMaterial.numberDensity();
+    params.rho = sampleMaterial.numberDensityEffective();
     params.sigmaAbs = sampleMaterial.absorbXSection();
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
