@@ -22,13 +22,17 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if ws and WorkspaceInfo.get_ws_type(ws) != WS_TYPE.MATRIX:
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
 
+        self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent)
         super().__init__(ws, self.view._data_view)
-        self.selection = None
+        self._selection = None
 
         if ws:
             self._initialise_dimensions(ws)
             self._set_workspace(ws)
+
+    def subscribe(self, notifyee: RegionSelectorObserver):
+        self.notifyee = notifyee
 
     def dimensions_changed(self) -> None:
         self.new_plot()
@@ -88,5 +92,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         :param eclick: Event marking where the mouse was clicked
         :param erelease: Event marking where the mouse was released
         """
-        self.selection = (eclick.ydata, erelease.ydata)
-        print('Selected spectra', self.selection)
+        self._selection = self._selector.extents
+        # extents contains x1, x2, y1, y2
+        y1, y2 = self._selection[2], self._selection[3]
+        print('Selected spectra:', y1, y2)
+        if self.notifyee:
+            self.notifyee.notifyRegionChanged()
