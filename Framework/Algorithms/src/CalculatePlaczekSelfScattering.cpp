@@ -87,7 +87,7 @@ double CalculatePlaczekSelfScattering::getPackingFraction(const API::MatrixWorks
 
   // see if the user thinks the material wasn't setup right
   const double crystalDensity = getProperty("CrystalDensity");
-  if (crystalDensity > 0.) {
+  if (crystalDensity > 0. && !isEmpty(crystalDensity)) {
     // assume that the number density set in the Material is the effective number density
     packingFraction = material.numberDensity() / crystalDensity;
   }

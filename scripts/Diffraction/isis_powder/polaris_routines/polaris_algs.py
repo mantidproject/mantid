@@ -105,8 +105,7 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=Fal
         InputWorkspace=raw_ws,
         CalFileName=cal_file_name,
         SampleGeometry=sample_geometry_json,
-        SampleMaterial=sample_material_json,
-        CrystalDensity=sample_details.material_object.crystal_density)
+        SampleMaterial=sample_material_json)
 
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
