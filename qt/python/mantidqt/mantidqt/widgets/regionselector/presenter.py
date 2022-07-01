@@ -10,6 +10,9 @@ from ..sliceviewer.models.dimensions import Dimensions
 from ..sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
 from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 
+# 3rd party imports
+from matplotlib.widgets import RectangleSelector
+
 
 class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def __init__(self, ws=None, parent=None, view=None):
@@ -18,6 +21,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
         self.view = view if view else RegionSelectorView(self, parent)
         super().__init__(ws, self.view._data_view)
+        self.selection = None
 
         if ws:
             self._initialise_dimensions(ws)
@@ -48,6 +52,20 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
         self._set_workspace(workspace)
 
+    def add_rectangular_region(self):
+        """
+        Toggle the rectangular region selection tool.
+        """
+        self._selector = RectangleSelector(
+            self.view._data_view.ax,
+            self._on_rectangle_selected,
+            useblit=False,  # rectangle persists on button release
+            button=[1],
+            minspanx=5,
+            minspany=5,
+            spancoords='pixels',
+            interactive=True)
+
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
         self.view.create_axes_orthogonal(
@@ -57,3 +75,12 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.model.ws = workspace
         self.view.set_workspace(workspace)
         self.new_plot()
+
+    def _on_rectangle_selected(self, eclick, erelease):
+        """
+        Callback when a rectangle has been draw on the axes
+        :param eclick: Event marking where the mouse was clicked
+        :param erelease: Event marking where the mouse was released
+        """
+        self.selection = (eclick.ydata, erelease.ydata)
+        print('Selected spectra', self.selection)
