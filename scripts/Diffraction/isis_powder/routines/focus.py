@@ -181,14 +181,14 @@ def _normalize_one_spectrum(single_spectrum_ws, spline, instrument):
 
     if instrument.perform_abs_vanadium_norm():
         vanadium_material = spline.sample().getMaterial()
-        v_number_density = vanadium_material.numberDensity
+        v_number_density = vanadium_material.numberDensityEffective
         v_cross_section = vanadium_material.totalScatterXSection()
         vanadium_shape = spline.sample().getShape()
         # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
         num_v_atoms = vanadium_shape.volume() * v_number_density
 
         sample_material = single_spectrum_ws.sample().getMaterial()
-        sample_number_density = sample_material.numberDensity
+        sample_number_density = sample_material.numberDensityEffective
         sample_shape = spline.sample().getShape()
         num_sample_atoms = sample_shape.volume() * sample_number_density
 
