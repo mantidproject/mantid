@@ -6,6 +6,7 @@ set UseEnv=true
 
 setlocal
 set CONDA_ENV_DIR=@CONDA_BASE_DIR@
+set PYTHONPATH=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
 set VCVARS=@MSVC_VAR_LOCATION@
 
 :: Start command line
