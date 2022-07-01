@@ -168,7 +168,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.to_clean.append(self.elastic_channel_ws)
         if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
                 and self.getProperty('MaskThresholdMin').isDefault and self.getProperty('MaskThresholdMax').isDefault
-                and self.getProperty('MaskedAngles').isDefault and self.getProperty('MaskWithVanadium').isDefault):
+                and self.getProperty('MaskedAngles').isDefault):
             self.masking = False
         else:
             self.masking = True
@@ -289,8 +289,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='MaskedAngles', values=[], validator=orderedPairsValidator),
                              doc='Mask detectors in the given angular range.')
 
-        self.declareProperty('MaskWithVanadium', False,
-                             doc='Whether to mask using vanadium workspace.')
+        self.declareProperty('MaskWithVanadium', True,
+                             doc='Whether to mask using vanadium diagnostics workspace.')
 
         masking_group_name = 'Masking'
         self.setPropertyGroup('MaskWorkspace', masking_group_name)
@@ -604,9 +604,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             LoadEmptyInstrument(InstrumentName=self.instrument, OutputWorkspace=masked_angles_ws)
             MaskAngle(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])
             existing_masks.append(masked_angles_ws)
-        mask_with_vanadium = self.getProperty('MaskWithVanadium').value
-        if mask_with_vanadium:
-            existing_masks.append(self.vanadium_diagnostics)
 
         mask_ws = 'mask_ws'
         if len(existing_masks) == 0:
@@ -762,12 +759,15 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                     self.getProperty(common.PROP_REBINNING_PARAMS_W).value
             if not self.getProperty('MomentumTransferBinning').isDefault:
                 optional_parameters['QBinningParams'] = self.getProperty('MomentumTransferBinning').value
+            if not self.getProperty('VanadiumWorkspace').isDefault:
+                optional_parameters['IntegratedVanadiumWorkspace'] = vanadium_integral
+                if self.getProperty('MaskWithVanadium').value:
+                    optional_parameters['DiagnosticsWorkspace'] = vanadium_diagnostics
+
             DirectILLReduction(
                 InputWorkspace=ws,
                 OutputWorkspace=processed_sample,
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
-                IntegratedVanadiumWorkspace=vanadium_integral,
-                DiagnosticsWorkspace=vanadium_diagnostics,
                 AbsoluteUnitsNormalisation=self.getProperty(common.PROP_ABSOLUTE_UNITS).value,
                 **optional_parameters
             )
