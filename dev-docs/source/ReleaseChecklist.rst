@@ -277,6 +277,8 @@ After the Technical Release Manager has finished their release day tasks:
 
    ``ISIS Instrument Scientists + Other``
 
+   ``supportanalysis<at>stfc.ac.uk``
+
 *  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
