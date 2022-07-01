@@ -12,11 +12,12 @@
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "ui_FitDialog.h"
 
+#include <QSpinBox>
+
 //------------------------------------------------------------------------------
 // Qt Forward declarations
 //------------------------------------------------------------------------------
 class QVBoxLayout;
-class QSpinBox;
 
 namespace MantidQt {
 //------------------------------------------------------------------------------

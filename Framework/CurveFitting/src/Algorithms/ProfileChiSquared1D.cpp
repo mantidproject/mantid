@@ -236,12 +236,12 @@ void ProfileChiSquared1D::execConcrete() {
   auto nameColumn = errorsTable->addColumn("str", "Parameter");
   auto valueColumn = errorsTable->addColumn("double", "Value");
   auto minValueColumn = errorsTable->addColumn("double", "Value at Min");
-  auto leftErrColumn = errorsTable->addColumn("double", "Left Error (1-sigma)");
-  auto rightErrColumn = errorsTable->addColumn("double", "Right Error (1-sigma)");
-  auto leftErrColumn_2 = errorsTable->addColumn("double", "Left Error (2-sigma)");
-  auto rightErrColumn_2 = errorsTable->addColumn("double", "Right Error (2-sigma )");
-  auto leftErrColumn_3 = errorsTable->addColumn("double", "Left Error (3-sigma)");
-  auto rightErrColumn_3 = errorsTable->addColumn("double", "Right Error (3-sigma )");
+  errorsTable->addColumn("double", "Left Error (1-sigma)");
+  errorsTable->addColumn("double", "Right Error (1-sigma)");
+  errorsTable->addColumn("double", "Left Error (2-sigma)");
+  errorsTable->addColumn("double", "Right Error (2-sigma )");
+  errorsTable->addColumn("double", "Left Error (3-sigma)");
+  errorsTable->addColumn("double", "Right Error (3-sigma )");
   auto quadraticErrColumn = errorsTable->addColumn("double", "Quadratic Error (1-sigma)");
   errorsTable->setRowCount(freeParameters.size());
   declareProperty(

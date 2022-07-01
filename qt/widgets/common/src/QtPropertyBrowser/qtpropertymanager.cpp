@@ -90,6 +90,7 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QFontDatabase>
+#include <QGlobalStatic>
 #include <QIcon>
 #include <QLabel>
 #include <QLocale>

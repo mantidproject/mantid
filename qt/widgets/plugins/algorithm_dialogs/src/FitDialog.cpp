@@ -14,7 +14,6 @@
 #include <QComboBox>
 #include <QDesktopWidget>
 #include <QFileInfo>
-#include <QSpinBox>
 #include <QUrl>
 
 // Mantid
