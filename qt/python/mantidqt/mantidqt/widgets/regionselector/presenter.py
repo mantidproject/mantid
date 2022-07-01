@@ -47,6 +47,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         pass
 
     def update_workspace(self, workspace) -> None:
+        if WorkspaceInfo.get_ws_type(workspace) != WS_TYPE.MATRIX:
+            raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
+
         if not self.model.ws:
             self._initialise_dimensions(workspace)
 
