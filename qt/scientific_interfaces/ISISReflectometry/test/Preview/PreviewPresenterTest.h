@@ -191,6 +191,16 @@ public:
     presenter.notifyRectangularROIModeRequested();
   }
 
+  void test_constructor_subscribes_to_region_selector() {
+    auto mockView = makeView();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
+
+    EXPECT_CALL(*mockRegionSelector, subscribe(_)).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
+                                               std::move(mockRegionSelector_uptr)));
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();

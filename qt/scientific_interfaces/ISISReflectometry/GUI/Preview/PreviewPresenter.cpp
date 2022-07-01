@@ -30,6 +30,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   if (!m_regionSelector) {
     m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
   }
+  m_regionSelector->subscribe(*this);
 
   m_view->subscribe(this);
   m_jobManager->subscribe(this);

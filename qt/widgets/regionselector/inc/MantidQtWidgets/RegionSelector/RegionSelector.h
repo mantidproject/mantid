@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/RegionSelector/DllConfig.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelectorObserver.h"
 
 class QLayout;
 
@@ -22,6 +23,7 @@ public:
   RegionSelector &operator=(RegionSelector const &) = delete;
   RegionSelector &operator=(RegionSelector &&);
 
+  void subscribe(RegionSelectorObserver &notifyee) override;
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
   void addRectangularRegion() override;
 
