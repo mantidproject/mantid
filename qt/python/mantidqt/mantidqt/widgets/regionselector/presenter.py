@@ -23,7 +23,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent)
         super().__init__(ws, self.view._data_view)
-        self._selection = None
+        self._selection: list[float] = None
 
         if ws:
             self._initialise_dimensions(ws)
@@ -74,6 +74,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             spancoords='pixels',
             interactive=True)
 
+    def get_region(self):
+        return self._selection
+
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
         self.view.create_axes_orthogonal(
@@ -90,9 +93,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         :param eclick: Event marking where the mouse was clicked
         :param erelease: Event marking where the mouse was released
         """
-        self._selection = self._selector.extents
-        # extents contains x1, x2, y1, y2
-        y1, y2 = self._selection[2], self._selection[3]
-        print('Selected spectra:', y1, y2)
+        # extents contains x1, x2, y1, y2. Just store y (spectra) for now
+        self._selection = [self._selector.extents[2], self._selector.extents[3]]
         if self.notifyee:
             self.notifyee.notifyRegionChanged()

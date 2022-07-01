@@ -120,6 +120,7 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
 
 void PreviewPresenter::notifyRegionChanged() {
   // TODO Get ROI from m_regionSelector and perform the reduction
-  g_log.notice("region of interest was changed");
+  auto roi = m_regionSelector->getRegion();
+  g_log.notice("Region of interest was changed: " + std::to_string(roi[0]) + " to " + std::to_string(roi[1]));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

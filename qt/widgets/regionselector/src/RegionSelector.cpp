@@ -14,6 +14,8 @@
 
 #include <QLayout>
 #include <QWidget>
+#include <boost/python/extract.hpp>
+#include <vector>
 
 using Mantid::API::Workspace_sptr;
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -81,5 +83,15 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
 void RegionSelector::addRectangularRegion() {
   GlobalInterpreterLock lock;
   pyobj().attr("add_rectangular_region")();
+}
+
+std::vector<double> RegionSelector::getRegion() {
+  GlobalInterpreterLock lock;
+  auto pyValues = pyobj().attr("get_region")();
+  auto result = std::vector<double>();
+  for (int i = 0; i < len(pyValues); ++i) {
+    result.push_back(boost::python::extract<double>(pyValues[i]));
+  }
+  return result;
 }
 } // namespace MantidQt::Widgets
