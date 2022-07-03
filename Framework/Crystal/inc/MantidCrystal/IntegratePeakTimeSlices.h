@@ -322,7 +322,6 @@ private:
   // returns true if Neighborhood list is changed
   bool updateNeighbors(const std::shared_ptr<Geometry::IComponent> &comp, const Kernel::V3D &CentPos,
                        const Kernel::V3D &oldCenter, double NewRadius, double &neighborRadius);
-  bool m_debug;
 };
 } // namespace Crystal
 } // namespace Mantid

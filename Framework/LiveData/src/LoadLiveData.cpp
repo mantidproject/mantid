@@ -242,7 +242,7 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
     for (size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries()); ++i) {
       addMatrixWSChunk(accum_gws->getItem(i), gws->getItem(i));
     }
-  } else if (MatrixWorkspace_sptr mws = std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
+  } else if (std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
     // If workspace is a Matrix workspace just add the chunk
     addMatrixWSChunk(m_accumWS, chunkWS);
   } else {

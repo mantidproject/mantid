@@ -667,7 +667,6 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS, cons
   for (auto &it : sourceDetMap) {
     spectr2index_map.insert(std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
-  spec2index_map new_map;
   for (int i : maskedSpecID) {
     // find spectra number from spectra ID for the source workspace
     const auto itSpec = s2imap.find(i);

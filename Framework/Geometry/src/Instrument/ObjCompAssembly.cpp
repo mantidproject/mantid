@@ -331,7 +331,7 @@ void ObjCompAssembly::testIntersectionWithChildren(Track &testRay,
   int nchildren = this->nelements();
   for (int i = 0; i < nchildren; ++i) {
     std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
-    if (ICompAssembly_sptr childAssembly = std::dynamic_pointer_cast<ICompAssembly>(comp)) {
+    if (std::dynamic_pointer_cast<ICompAssembly>(comp)) {
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection

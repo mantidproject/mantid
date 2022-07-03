@@ -599,10 +599,7 @@ void GroupDetectors2::processGroupingWorkspace(const GroupingWorkspace_const_spt
     size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
     if (groupid > 0) {
-      if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
-        // not found - create an empty set
-        group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
-      }
+      group2WSIndexSetmap.insert({groupid, std::set<size_t>()});
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
       for (const auto &spectrumDefinition : spectrumInfo.spectrumDefinition(i)) {
@@ -645,10 +642,7 @@ void GroupDetectors2::processMatrixWorkspace(const MatrixWorkspace_const_sptr &g
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = i;
-    if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
-      // not found - create an empty set
-      group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
-    }
+    group2WSIndexSetmap.insert({groupid, std::set<size_t>()});
 
     // If the detector was not found or was not in a group, then ignore it.
     if (spectrumInfo.spectrumDefinition(i).size() > 1) {

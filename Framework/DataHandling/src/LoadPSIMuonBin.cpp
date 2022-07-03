@@ -806,9 +806,8 @@ std::string LoadPSIMuonBin::detectTempFile() {
   std::deque<fs::path> queue;
   queue.push_back(fs::path{searchDir});
   while (!queue.empty()) {
-    const auto entry = queue.front();
     queue.pop_front();
-    for (fs::directory_iterator dirIter{entry}; dirIter != fs::directory_iterator(); ++dirIter) {
+    for (fs::directory_iterator dirIter{queue.front()}; dirIter != fs::directory_iterator(); ++dirIter) {
       const auto &entry{dirIter->path()};
 
       if (fs::is_directory(entry)) {

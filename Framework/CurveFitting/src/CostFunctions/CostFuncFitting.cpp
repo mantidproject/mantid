@@ -378,10 +378,8 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
 
   m_value = 0.0;
 
-  if (evalDeriv) {
-    m_der.resize(numParams);
-    m_der.zero();
-  }
+  m_der.resize(numParams);
+  m_der.zero();
   if (evalHessian) {
     m_hessian.resize(numParams, numParams);
     m_hessian.zero();

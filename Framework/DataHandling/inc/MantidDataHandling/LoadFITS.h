@@ -99,8 +99,8 @@ private:
   void doFilterNoise(double thresh, API::MantidImage &imageY, API::MantidImage &imageE);
 
   /// rebin the matrix/image
-  void doRebin(size_t rebin, API::MantidImage &imageY, API::MantidImage &imageE, API::MantidImage &rebinnedY,
-               API::MantidImage &rebinnedE);
+  void doRebin(size_t rebin, const API::MantidImage &imageY, const API::MantidImage &imageE,
+               API::MantidImage &rebinnedY, API::MantidImage &rebinnedE);
 
   /// identifies fits coming from 'other' cameras by specific headers
   bool isInstrOtherThanIMAT(const FITSInfo &hdr);

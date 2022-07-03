@@ -503,23 +503,6 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(const Mantid::Kernel::VMD
   VMD dir = end - start;
   const auto length = dir.normalize();
 
-// Vector with +1 where direction is positive, -1 where negative
-#define sgn(x) ((x < 0) ? -1.0f : ((x > 0.) ? 1.0f : 0.0f))
-  VMD dirSign(nd);
-  for (size_t d = 0; d < nd; d++) {
-    dirSign[d] = sgn(dir[d]);
-  }
-  const auto BADINDEX = size_t(-1);
-
-  // Dimensions of the workspace
-  boost::scoped_array<size_t> index(new size_t[nd]);
-  boost::scoped_array<size_t> numBins(new size_t[nd]);
-  for (size_t d = 0; d < nd; d++) {
-    IMDDimension_const_sptr dim = this->getDimension(d);
-    index[d] = BADINDEX;
-    numBins[d] = dim->getNBins();
-  }
-
   const std::set<coord_t> boundaries = getBinBoundariesOnLine(start, end, nd, dir, length);
 
   if (boundaries.empty()) {

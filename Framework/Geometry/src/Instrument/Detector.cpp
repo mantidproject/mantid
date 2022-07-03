@@ -109,13 +109,7 @@ double Detector::getPhi() const {
  */
 double Detector::getPhiOffset(const double &offset) const {
   double avgPos = getPhi();
-  double phiOut = avgPos;
-  if (avgPos < 0) {
-    phiOut = -(offset + avgPos);
-  } else {
-    phiOut = offset - avgPos;
-  }
-  return phiOut;
+  return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
 
 /** returns the detector's topology, namely, the meaning of the detector's

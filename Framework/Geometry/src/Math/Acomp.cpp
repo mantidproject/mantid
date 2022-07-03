@@ -876,7 +876,6 @@ It is set on exit (to the EPI)
 @return :: 1 if successful and 0 if failed
 */
 {
-  const int debug(0);
   if (PIform.empty())
     return 0;
 
@@ -909,10 +908,6 @@ It is set on exit (to the EPI)
       return 0;
     }
   }
-  /// DEBUG PRINT
-  if (debug)
-    printImplicates(PIform, Grid);
-  /// END DEBUG
 
   std::vector<int>::iterator dx, ddx; // DNF active iterator
   std::vector<int>::iterator px;      // PIactive iterator
@@ -943,17 +938,6 @@ It is set on exit (to the EPI)
   // Remove dead items from active list
   using std::placeholders::_1;
   DNFactive.erase(remove_if(DNFactive.begin(), DNFactive.end(), std::bind(std::less<int>(), _1, 0)), DNFactive.end());
-
-  /// DEBUG PRINT
-  if (debug) {
-    for (px = PIactive.begin(); px != PIactive.end(); ++px) {
-      logger.debug() << PIform[*px] << ":";
-      for (ddx = DNFactive.begin(); ddx != DNFactive.end(); ++ddx)
-        logger.debug() << ((Grid[*px][*ddx]) ? " 1" : " 0");
-      logger.debug() << '\n';
-    }
-    logger.debug() << "END OF TABLE \n";
-  }
 
   // Ok -- now the hard work...
   // need to find shortest "combination" that spans

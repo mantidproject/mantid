@@ -36,16 +36,16 @@ public:
 private:
   void init() override;
   void exec() override;
-  void setInstrumentName(NeXus::NXEntry &entry);
+  void setInstrumentName(const NeXus::NXEntry &entry);
   void initWorkSpace(NeXus::NXEntry &);
-  void loadTimeDetails(NeXus::NXEntry &entry);
+  void loadTimeDetails(const NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &);
   int getDetectorElasticPeakPosition(const NeXus::NXFloat &);
   void setTimeBinning(HistogramData::HistogramX &histX, int, double);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
   void loadExperimentDetails(NeXus::NXEntry &);
-  void loadRunDetails(NeXus::NXEntry &);
+  void loadRunDetails(const NeXus::NXEntry &);
   void runLoadInstrument();
 
   std::vector<std::string> m_supportedInstruments;
