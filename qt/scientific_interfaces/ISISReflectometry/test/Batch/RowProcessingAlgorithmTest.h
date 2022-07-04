@@ -7,12 +7,12 @@
 #pragma once
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+#include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
-using namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using MantidQt::API::IAlgorithmRuntimeProps;
 
@@ -36,14 +36,20 @@ public:
 
   void testExperimentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    auto result = createAlgorithmRuntimeProps(model);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model);
     checkExperimentSettings(*result);
   }
 
   void testExperimentSettingsWithEmptyRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    checkExperimentSettings(*result);
+  }
+
+  void testExperimentSettingsWithPreviewRow() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkExperimentSettings(*result);
   }
 
@@ -51,28 +57,52 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // angle within tolerance of 2.3
     auto row = makeRow(2.29);
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     checkMatchesAngleRow(*result);
   }
+
+  // TODO
+  //  void testLookupPreviewRowWithAngleLookup() {
+  //    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+  //    // angle within tolerance of 2.3
+  //    auto row = makePreviewRow(2.29);
+  //    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+  //    checkMatchesAngleRow(*result);
+  //  }
 
   void testLookupRowWithWildcardLookup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // angle outside tolerance of any angle matches wildcard row instead
     auto row = makeRow(2.28);
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     checkMatchesWildcardRow(*result);
   }
 
+  // TODO
+  //  void testLookupPreviewRowWithWildcardLookup() {
+  //    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+  //    // angle outside tolerance of any angle matches wildcard row instead
+  //    auto row = makePreviewRow(2.28);
+  //    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+  //    checkMatchesWildcardRow(*result);
+  //  }
+
   void testInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    auto result = createAlgorithmRuntimeProps(model);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model);
     checkMatchesInstrument(*result);
   }
 
   void testInstrumentSettingsWithEmptyRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    checkMatchesInstrument(*result);
+  }
+
+  void testInstrumentSettingsWithPreviewRow() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkMatchesInstrument(*result);
   }
 
@@ -80,35 +110,70 @@ public:
     auto slicing = Slicing(UniformSlicingByTime(123.4));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto row = makeEmptyRow();
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    checkMatchesSlicing(*result);
+  }
+
+  void testSettingsForSlicingWithPreviewRow() {
+    auto slicing = Slicing(UniformSlicingByTime(123.4));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkMatchesSlicing(*result);
   }
 
   void testSettingsForSlicingByTime() {
     auto slicing = Slicing(UniformSlicingByTime(123.4));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto result = createAlgorithmRuntimeProps(model);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model);
+    checkMatchesSlicingByTime(*result);
+  }
+
+  void testSettingsForSlicingByTimeWithPreviewRow() {
+    auto slicing = Slicing(UniformSlicingByTime(123.4));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkMatchesSlicingByTime(*result);
   }
 
   void testSettingsForSlicingByNumberOfSlices() {
     auto slicing = Slicing(UniformSlicingByNumberOfSlices(3));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto result = createAlgorithmRuntimeProps(model);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model);
+    checkMatchesSlicingByNumber(*result);
+  }
+
+  void testSettingsForSlicingByNumberOfSlicesWithPreviewRow() {
+    auto slicing = Slicing(UniformSlicingByNumberOfSlices(3));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkMatchesSlicingByNumber(*result);
   }
 
   void testSettingsForSlicingByList() {
     auto slicing = Slicing(CustomSlicingByList({3.1, 10.2, 47.35}));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto result = createAlgorithmRuntimeProps(model);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model);
+    checkMatchesSlicingByList(*result);
+  }
+
+  void testSettingsForSlicingByListWithPreviewRow() {
+    auto slicing = Slicing(CustomSlicingByList({3.1, 10.2, 47.35}));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkMatchesSlicingByList(*result);
   }
 
   void testSettingsForSlicingByLog() {
     auto slicing = Slicing(SlicingByEventLog({18.2}, "test_log_name"));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
-    auto result = createAlgorithmRuntimeProps(model);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model);
+    checkMatchesSlicingByLog(*result);
+  }
+
+  void testSettingsForSlicingByLogWithPreviewRow() {
+    auto slicing = Slicing(SlicingByEventLog({18.2}, "test_log_name"));
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
+    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
     checkMatchesSlicingByLog(*result);
   }
 
@@ -117,7 +182,7 @@ public:
     // Use an angle that will match per-theta defaults. They should be
     // overridden by the cell values
     auto row = makeRowWithMainCellsFilled(2.3);
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
 
     TS_ASSERT_EQUALS(result->getPropertyValue("InputRunList"), "12345, 12346");
     TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "92345");
@@ -134,7 +199,7 @@ public:
     // property that does not get set anywhere else on the GUI
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ThetaLogName", "theta_log_name"}});
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result->getPropertyValue("ThetaLogName"), "theta_log_name");
   }
 
@@ -142,7 +207,7 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(
         2.3, ReductionOptionsMap{{"AnalysisMode", "PointDetectorAnalysis"}, {"ReductionType", "DivergentBeam"}});
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result->getPropertyValue("AnalysisMode"), "PointDetectorAnalysis");
     TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "DivergentBeam");
   }
@@ -152,14 +217,14 @@ public:
     // Use an angle that will match per-theta defaults. They should be
     // overridden by the cell values
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ProcessingInstructions", "390-410"}});
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "390-410");
   }
 
   void testOptionsCellOverridesInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"WavelengthMin", "3.3"}});
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     assertProperty(*result, "WavelengthMin", 3.3);
   }
 
@@ -172,7 +237,7 @@ public:
                    makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
-    auto result = createAlgorithmRuntimeProps(model, row);
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
 
     TS_ASSERT_EQUALS(result->getPropertyValue("SubtractBackground"), "1");
     TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundCalculationMethod"), "AveragePixelFit");
@@ -187,6 +252,8 @@ private:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
+
+  PreviewRow makePreviewRow() { return PreviewRow({"12345"}); }
 
   void checkExperimentSettings(IAlgorithmRuntimeProps const &result) {
     TS_ASSERT_EQUALS(result.getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
