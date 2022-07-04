@@ -353,6 +353,5 @@ unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:321
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:599
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCInterface.cpp:232
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
 
