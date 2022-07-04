@@ -67,6 +67,7 @@ public:
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
   void notifySumBanksCompleted() override;
+  void notifyReductionCompleted() override;
 
   // RegionSelectionObserver overrides
   void notifyRegionChanged() override;

@@ -78,6 +78,11 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
 void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
+void PreviewPresenter::notifyReductionCompleted() {
+  // TODO plot reduced workspace
+  g_log.notice("Reduction completed");
+}
+
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
   m_view->setInstViewEditState(false);
