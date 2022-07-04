@@ -294,6 +294,7 @@ public:
   MOCK_METHOD1(subscribe, void(JobManagerSubscriber *notifyee));
   MOCK_METHOD1(startPreprocessing, void(PreviewRow &row));
   MOCK_METHOD1(startSumBanks, void(PreviewRow &row));
+  MOCK_METHOD1(startReduction, void(PreviewRow &row));
 };
 
 class MockJobManagerSubscriber : public JobManagerSubscriber {

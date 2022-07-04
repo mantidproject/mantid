@@ -259,10 +259,15 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
  * @param model : the reduction configuration model
  * @param row : the row from the preview tab
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row,
+                                                    Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  if (!alg) {
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  }
   alg->setRethrows(true);
+  alg->setAlwaysStoreInADS(false);
+  alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, row);

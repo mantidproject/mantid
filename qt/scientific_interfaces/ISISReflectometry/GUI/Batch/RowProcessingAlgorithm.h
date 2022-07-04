@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 #include <boost/optional.hpp>
@@ -25,8 +26,8 @@ class Row;
 namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
 // These functions concern reduction of a workspace using ReflectometryReductionOneAuto. This is used to perform
 // just the reduction step on its own when performing on-the-fly reduction on the Preview tab
-MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model,
-                                                                                                  PreviewRow &row);
+MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr
+createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, Mantid::API::IAlgorithm_sptr alg = nullptr);
 MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
 createAlgorithmRuntimeProps(IBatch const &model, PreviewRow const &row);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
