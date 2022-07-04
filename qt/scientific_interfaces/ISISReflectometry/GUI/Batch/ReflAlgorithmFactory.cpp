@@ -22,7 +22,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePostprocessin
   return GroupProcessing::createConfiguredAlgorithm(m_batch, group);
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeReductionAlgorithm(Row &row) const {
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeRowProcessingAlgorithm(Row &row) const {
   return RowProcessing::createConfiguredAlgorithm(m_batch, row);
 }
 
@@ -34,4 +34,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeSumBanksAlgor
   return SumBanks::createConfiguredAlgorithm(m_batch, row, nullptr);
 }
 
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeReductionAlgorithm(PreviewRow &row) const {
+  return Reduction::createConfiguredAlgorithm(m_batch, row);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
