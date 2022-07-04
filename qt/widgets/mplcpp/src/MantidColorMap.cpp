@@ -24,16 +24,16 @@ namespace MantidQt::Widgets::MplCpp {
  * @param parent A widget to act as parent for the chooser dialog
  * @return
  */
-QString MantidColorMap::chooseColorMap(const QString &previous, QWidget *parent) {
+std::pair<QString, bool> MantidColorMap::chooseColorMap(const QString &previous, QWidget *parent) {
   static QStringList allowedCMaps{"coolwarm", "gray", "jet", "plasma", "summer", "winter", "viridis"};
   const int currentIdx = allowedCMaps.indexOf(previous);
   bool ok;
   QString item = QInputDialog::getItem(parent, "Select colormap...", "Name:", allowedCMaps,
                                        currentIdx >= 0 ? currentIdx : 0, false, &ok);
   if (ok && !item.isEmpty())
-    return item;
+    return std::make_pair(item, true);
   else
-    return previous;
+    return std::make_pair(previous, true);
 }
 
 /**

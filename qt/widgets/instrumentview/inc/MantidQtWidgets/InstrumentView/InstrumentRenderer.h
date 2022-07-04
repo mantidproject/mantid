@@ -33,6 +33,7 @@ private:
   ColorMap m_colorMap;
   bool m_isUsingLayers;
   size_t m_layer;
+  bool m_HighlightDetsWithZeroCount;
 
 public:
   InstrumentRenderer(const InstrumentActor &actor);

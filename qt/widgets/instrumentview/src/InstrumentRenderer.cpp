@@ -47,7 +47,8 @@ void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo, const size_t
 }
 } // namespace
 
-InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor) : m_actor(actor), m_isUsingLayers(false) {
+InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
+    : m_actor(actor), m_isUsingLayers(false), m_HighlightDetsWithZeroCount(false) {
 
   m_displayListId[0] = 0;
   m_displayListId[1] = 0;
@@ -352,7 +353,8 @@ void InstrumentRenderer::resetColors() {
   for (size_t det = 0; det < counts.size(); ++det) {
     if (!isMasked(det)) {
       const double integratedValue(counts[det]);
-      if (integratedValue == InstrumentActor::INVALID_VALUE) {
+      if (integratedValue == InstrumentActor::INVALID_VALUE ||
+          (m_HighlightDetsWithZeroCount && integratedValue == 0.)) {
         m_colors[det] = invalidColor;
       } else {
         const auto &color = rgba[det];
