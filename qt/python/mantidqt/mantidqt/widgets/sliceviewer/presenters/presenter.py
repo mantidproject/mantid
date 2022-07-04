@@ -384,6 +384,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         if not self.view:
             return
 
+        self.view.refresh_queued = False
+
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
         ws = self.model.ws
