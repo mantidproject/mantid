@@ -16,6 +16,12 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using MantidQt::API::IAlgorithmRuntimeProps;
 
+namespace {
+void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name, double expected) {
+  TS_ASSERT_DELTA(static_cast<double>(props.getProperty(name)), expected, 1e-6);
+}
+} // namespace
+
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -116,11 +122,11 @@ public:
     TS_ASSERT_EQUALS(result->getPropertyValue("InputRunList"), "12345, 12346");
     TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "92345");
     TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "92346");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ThetaIn"), "2.300000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMin"), "0.100000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferStep"), "0.090000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMax"), "0.910000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleFactor"), "2.200000");
+    assertProperty(*result, "ThetaIn", 2.3);
+    assertProperty(*result, "MomentumTransferMin", 0.1);
+    assertProperty(*result, "MomentumTransferStep", 0.09);
+    assertProperty(*result, "MomentumTransferMax", 0.91);
+    assertProperty(*result, "ScaleFactor", 2.2);
   }
 
   void testAddingPropertyViaOptionsCell() {
@@ -154,7 +160,7 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"WavelengthMin", "3.3"}});
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMin"), "3.3");
+    assertProperty(*result, "WavelengthMin", 3.3);
   }
 
   void testOptionsCellOverridesSubtractBackgroundAndStillPicksUpSettings() {
@@ -195,8 +201,8 @@ private:
     TS_ASSERT_EQUALS(result.getPropertyValue("PolarizationAnalysis"), "1");
     TS_ASSERT_EQUALS(result.getPropertyValue("FloodCorrection"), "Workspace");
     TS_ASSERT_EQUALS(result.getPropertyValue("FloodWorkspace"), "test_workspace");
-    TS_ASSERT_EQUALS(result.getPropertyValue("StartOverlap"), "7.500000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("EndOverlap"), "9.200000");
+    assertProperty(result, "StartOverlap", 7.5);
+    assertProperty(result, "EndOverlap", 9.2);
     TS_ASSERT_EQUALS(result.getPropertyValue("Params"), "-0.02");
     TS_ASSERT_EQUALS(result.getPropertyValue("ScaleRHSWorkspace"), "1");
   }
@@ -205,10 +211,10 @@ private:
     TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22348, 22349");
     TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22358, 22359");
     TS_ASSERT_EQUALS(result.getPropertyValue("TransmissionProcessingInstructions"), "4");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMin"), "0.009000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferStep"), "0.030000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMax"), "1.300000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("ScaleFactor"), "0.900000");
+    assertProperty(result, "MomentumTransferMin", 0.009);
+    assertProperty(result, "MomentumTransferStep", 0.03);
+    assertProperty(result, "MomentumTransferMax", 1.3);
+    assertProperty(result, "ScaleFactor", 0.9);
     TS_ASSERT_EQUALS(result.getPropertyValue("ProcessingInstructions"), "4-6");
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "2-3,7-8");
   }
@@ -217,33 +223,31 @@ private:
     TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22345");
     TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22346");
     TS_ASSERT_EQUALS(result.getPropertyValue("TransmissionProcessingInstructions"), "5-6");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMin"), "0.007000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferStep"), "0.010000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMax"), "1.100000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("ScaleFactor"), "0.700000");
+    assertProperty(result, "MomentumTransferMin", 0.007);
+    assertProperty(result, "MomentumTransferStep", 0.01);
+    assertProperty(result, "MomentumTransferMax", 1.1);
+    assertProperty(result, "ScaleFactor", 0.7);
     TS_ASSERT_EQUALS(result.getPropertyValue("ProcessingInstructions"), "1");
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
   }
 
   void checkMatchesInstrument(IAlgorithmRuntimeProps const &result) {
-    TS_ASSERT_EQUALS(result.getPropertyValue("WavelengthMin"), "2.300000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("WavelengthMax"), "14.400000");
+    assertProperty(result, "WavelengthMin", 2.3);
+    assertProperty(result, "WavelengthMax", 14.4);
     TS_ASSERT_EQUALS(result.getPropertyValue("I0MonitorIndex"), "2");
     TS_ASSERT_EQUALS(result.getPropertyValue("NormalizeByIntegratedMonitors"), "1");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorBackgroundWavelengthMin"), "1.100000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorBackgroundWavelengthMax"), "17.200000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorIntegrationWavelengthMin"), "3.400000");
-    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorIntegrationWavelengthMax"), "10.800000");
+    assertProperty(result, "MonitorBackgroundWavelengthMin", 1.1);
+    assertProperty(result, "MonitorBackgroundWavelengthMax", 17.2);
+    assertProperty(result, "MonitorIntegrationWavelengthMin", 3.4);
+    assertProperty(result, "MonitorIntegrationWavelengthMax", 10.8);
     TS_ASSERT_EQUALS(result.getPropertyValue("CorrectDetectors"), "1");
     TS_ASSERT_EQUALS(result.getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
   }
 
-  void checkMatchesSlicing(IAlgorithmRuntimeProps const &result) {
-    TS_ASSERT_EQUALS(result.getPropertyValue("TimeInterval"), "123.400000");
-  }
+  void checkMatchesSlicing(IAlgorithmRuntimeProps const &result) { assertProperty(result, "TimeInterval", 123.4); }
 
   void checkMatchesSlicingByTime(IAlgorithmRuntimeProps const &result) {
-    TS_ASSERT_EQUALS(result.getPropertyValue("TimeInterval"), "123.400000");
+    assertProperty(result, "TimeInterval", 123.4);
   }
 
   void checkMatchesSlicingByNumber(IAlgorithmRuntimeProps const &result) {
@@ -256,6 +260,6 @@ private:
 
   void checkMatchesSlicingByLog(IAlgorithmRuntimeProps const &result) {
     TS_ASSERT_EQUALS(result.getPropertyValue("LogName"), "test_log_name");
-    TS_ASSERT_EQUALS(result.getPropertyValue("LogValueInterval"), "18.200000");
+    assertProperty(result, "LogValueInterval", 18.2);
   }
 };
