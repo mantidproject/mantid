@@ -191,6 +191,20 @@ public:
     presenter.notifyRectangularROIModeRequested();
   }
 
+  void test_notify_region_changed_starts_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
+    // TODO reset edit mode after region is selected
+    // expectRegionSelectorSetToEditMode(*mockView);
+    expectReduceAsyncCalledOnSelectedRegion(*mockModel, *mockJobManager, *mockRegionSelector);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               makeInstViewModel(), std::move(mockRegionSelector_uptr)));
+    presenter.notifyRegionChanged();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
@@ -287,5 +301,13 @@ private:
     // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
     EXPECT_CALL(mockRegionSelector, addRectangularRegion()).Times(1);
+  }
+
+  void expectReduceAsyncCalledOnSelectedRegion(MockPreviewModel &mockModel, MockJobManager &mockJobManager,
+                                               MockRegionSelector &mockRegionSelector) {
+    auto roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion()).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockModel, setSelectedRegion(roi)).Times(1);
+    EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
   }
 };

@@ -96,6 +96,20 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
+  //  void test_reduce() {
+  //    auto mockJobManager = MockJobManager();
+  //    auto expectedWs = createWorkspace();
+  //    EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
+  //    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+  //
+  //    PreviewModel model;
+  //    model.reduceAsync(mockJobManager, selection);
+  //
+  //    auto workspace = model.getReducedWs();
+  //    TS_ASSERT(workspace);
+  //    TS_ASSERT_EQUALS(workspace, expectedWs);
+  //  }
+
   void test_convert_detIDs_to_string() {
     PreviewModel model;
     auto const indices = std::vector<Mantid::detid_t>{99, 4, 5};

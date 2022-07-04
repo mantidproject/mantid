@@ -127,5 +127,7 @@ void PreviewPresenter::notifyRegionChanged() {
   // TODO Get ROI from m_regionSelector and perform the reduction
   auto roi = m_regionSelector->getRegion();
   g_log.notice("Region of interest was changed: " + std::to_string(roi[0]) + " to " + std::to_string(roi[1]));
+  m_model->setSelectedRegion(roi);
+  m_model->reduceAsync(*m_jobManager);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -15,6 +15,6 @@ public:
   MOCK_METHOD(void, subscribe, (std::shared_ptr<Mantid::API::RegionSelectorObserver> const &), (override));
   MOCK_METHOD(void, updateWorkspace, (Mantid::API::Workspace_sptr const &workspace), (override));
   MOCK_METHOD(void, addRectangularRegion, (), (override));
-  MOCK_METHOD(std::vector<double>, getRegion, (), (override));
+  MOCK_METHOD(Selection, getRegion, (), (override));
 };
 } // namespace MantidQt::Widgets

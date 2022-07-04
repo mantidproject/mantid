@@ -26,7 +26,7 @@ public:
   void subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) override;
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
   void addRectangularRegion() override;
-  std::vector<double> getRegion() override;
+  Selection getRegion() override;
 
 private:
   Common::Python::Object getView() const;

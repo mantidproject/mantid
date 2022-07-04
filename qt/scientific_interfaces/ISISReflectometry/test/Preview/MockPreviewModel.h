@@ -28,8 +28,10 @@ public:
   MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
 
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
+  MOCK_METHOD(void, setSelectedRegion, (Selection const &), (override));
 
   MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
+  MOCK_METHOD(void, reduceAsync, (IJobManager &), (override));
   MOCK_METHOD(std::string, detIDsToString, (std::vector<Mantid::detid_t> const &), (const, override));
   MOCK_METHOD(void, exportSummedWsToAds, (), (const, override));
 };
