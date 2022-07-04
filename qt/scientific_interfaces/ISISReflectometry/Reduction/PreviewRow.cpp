@@ -28,13 +28,21 @@ int PreviewRow::completedItems() const { return 1; }
 
 Mantid::API::MatrixWorkspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
 Mantid::API::MatrixWorkspace_sptr PreviewRow::getSummedWs() const noexcept { return m_summedWs; }
+Mantid::API::MatrixWorkspace_sptr PreviewRow::getReducedWs() const noexcept { return m_reducedWs; }
 
 void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
 void PreviewRow::setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
+void PreviewRow::setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_reducedWs = std::move(ws); }
 
 std::vector<Mantid::detid_t> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
 
 void PreviewRow::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept {
   m_selectedBanks = std::move(selectedBanks);
+}
+
+std::vector<double> PreviewRow::getSelectedRegion() const noexcept { return m_selectedRegion; }
+
+void PreviewRow::setSelectedRegion(std::vector<double> selectedRegion) noexcept {
+  m_selectedRegion = std::move(selectedRegion);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

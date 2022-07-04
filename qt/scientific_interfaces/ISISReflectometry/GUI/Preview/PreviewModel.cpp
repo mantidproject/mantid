@@ -72,13 +72,11 @@ void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceN
  */
 void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumBanks(*m_runDetails); }
 
-void PreviewModel::reduceAsync(IJobManager &jobManager) {
-  // TODO implement
-  // jobManager.startReduction(*m_runDetails);
-}
+void PreviewModel::reduceAsync(IJobManager &jobManager) { jobManager.startReduction(*m_runDetails); }
 
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
 MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
+MatrixWorkspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
 
 std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 
@@ -86,9 +84,9 @@ void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) 
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 
-void PreviewModel::setSelectedRegion(Selection const &selection) {
-  // TODO implement
-}
+auto PreviewModel::getSelectedRegion() const -> Selection { return m_runDetails->getSelectedRegion(); }
+
+void PreviewModel::setSelectedRegion(Selection const &selection) { m_runDetails->setSelectedRegion(selection); }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});

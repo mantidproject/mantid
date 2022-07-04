@@ -28,6 +28,8 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
   virtual std::vector<Mantid::detid_t> getSelectedBanks() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
+  virtual Selection getSelectedRegion() const = 0;
 
   virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
   virtual void setSelectedRegion(Selection const &selection) = 0;

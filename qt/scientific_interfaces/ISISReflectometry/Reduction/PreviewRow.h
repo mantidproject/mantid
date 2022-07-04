@@ -39,11 +39,15 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
+  Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
   std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
+  std::vector<double> getSelectedRegion() const noexcept;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
+  void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
+  void setSelectedRegion(std::vector<double> selectedRegion) noexcept;
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
@@ -54,8 +58,10 @@ public:
 private:
   std::vector<std::string> m_runNumbers;
   std::vector<Mantid::detid_t> m_selectedBanks;
+  std::vector<double> m_selectedRegion;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
+  Mantid::API::MatrixWorkspace_sptr m_reducedWs;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
