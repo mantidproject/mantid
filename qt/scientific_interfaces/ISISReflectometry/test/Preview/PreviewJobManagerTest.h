@@ -140,6 +140,22 @@ public:
     assertUpdateItemCallbackWasCalled();
   }
 
+  void test_notify_reduction_algorithm_complete_notifies_subscriber() {
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    auto previewRow = makePreviewRow();
+    auto stubAlg = makeConfiguredReductionAlg(previewRow);
+
+    EXPECT_CALL(mockSubscriber, notifyReductionCompleted).Times(1);
+
+    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto stubAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(stubAlg);
+    jobManager.notifyAlgorithmComplete(stubAlgRef);
+
+    assertUpdateItemCallbackWasCalled();
+  }
+
   void test_notify_algorithm_complete_throws_with_unknown_algorithm() {
     auto mockJobRunner = MockJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
@@ -199,6 +215,11 @@ private:
     const std::string name() const override { return "ReflectometryISISSumBanks"; }
   };
 
+  class StubAlgReduction : public StubAlgorithm {
+  public:
+    const std::string name() const override { return "ReflectometryReductionOneAuto"; }
+  };
+
   PreviewJobManager
   makeJobManager(MockJobRunner *mockJobRunner,
                  std::unique_ptr<IReflAlgorithmFactory> algFactory = std::make_unique<MockReflAlgorithmFactory>()) {
@@ -241,6 +262,10 @@ private:
 
   std::shared_ptr<ConfiguredAlgorithm> makeConfiguredSumBanksAlg(Item &item) {
     return makeConfiguredAlg(item, std::make_shared<StubAlgSumBanks>());
+  }
+
+  std::shared_ptr<ConfiguredAlgorithm> makeConfiguredReductionAlg(Item &item) {
+    return makeConfiguredAlg(item, std::make_shared<StubAlgReduction>());
   }
 
   void expectPreprocessingAlgCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,

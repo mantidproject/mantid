@@ -302,6 +302,7 @@ class MockJobManagerSubscriber : public JobManagerSubscriber {
 public:
   MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
   MOCK_METHOD0(notifySumBanksCompleted, void());
+  MOCK_METHOD0(notifyReductionCompleted, void());
 };
 
 class MockEncoder : public IEncoder {
