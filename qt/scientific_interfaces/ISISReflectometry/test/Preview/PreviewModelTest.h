@@ -82,6 +82,13 @@ public:
     TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
   }
 
+  void test_set_and_get_selected_region() {
+    PreviewModel model;
+    const IPreviewModel::Selection inputRoi{3.6, 11.4};
+    model.setSelectedRegion(inputRoi);
+    TS_ASSERT_EQUALS(inputRoi, model.getSelectedRegion())
+  }
+
   void test_sum_banks() {
     auto mockJobManager = MockJobManager();
     auto expectedWs = createWorkspace();
@@ -96,19 +103,19 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
-  //  void test_reduce() {
-  //    auto mockJobManager = MockJobManager();
-  //    auto expectedWs = createWorkspace();
-  //    EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
-  //    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
-  //
-  //    PreviewModel model;
-  //    model.reduceAsync(mockJobManager, selection);
-  //
-  //    auto workspace = model.getReducedWs();
-  //    TS_ASSERT(workspace);
-  //    TS_ASSERT_EQUALS(workspace, expectedWs);
-  //  }
+  void test_reduce() {
+    auto mockJobManager = MockJobManager();
+    auto expectedWs = createWorkspace();
+    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
+
+    PreviewModel model;
+    model.reduceAsync(mockJobManager);
+
+    auto workspace = model.getReducedWs();
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
 
   void test_convert_detIDs_to_string() {
     PreviewModel model;
