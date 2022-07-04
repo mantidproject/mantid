@@ -99,6 +99,8 @@ void PreviewJobManager::startPreprocessing(PreviewRow &row) {
 
 void PreviewJobManager::startSumBanks(PreviewRow &row) { executeAlg(m_algFactory->makeSumBanksAlgorithm(row)); }
 
+void PreviewJobManager::startReduction(PreviewRow &row) { executeAlg(m_algFactory->makeReductionAlgorithm(row)); }
+
 void PreviewJobManager::executeAlg(IConfiguredAlgorithm_sptr alg) {
   m_jobRunner->clearAlgorithmQueue();
   m_jobRunner->setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr>{std::move(alg)});
