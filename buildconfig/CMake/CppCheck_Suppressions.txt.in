@@ -118,7 +118,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithm
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:306
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:307
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/CostFunctions/CostFuncFitting.cpp:381
-unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:1069
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/TrustRegionMinimizer.cpp:815
 uninitDerivedMemberVar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BivariateNormal.cpp:65
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/Convolution.cpp:224
@@ -127,7 +126,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalE
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:450
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:450
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:480
-identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalFieldMultiSpectrum.cpp:128
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:305
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:305
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ParDomain.cpp:72
@@ -340,16 +338,7 @@ unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtprope
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1546
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:277
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:114
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/Mpl/ContourPreviewPlot.cpp:83
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/Mpl/PreviewPlot.cpp:618
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankRenderingHelpers.cpp:172
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ObserverPattern.h:65
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:186
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1638
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1671
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:248
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadDialog.cpp:137
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:201
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:178
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:207
@@ -362,19 +351,8 @@ unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:292
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:292
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:321
-shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/PlotAsymmetryByLogValueDialog.cpp:160
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:608
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:610
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:697
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:115
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:343
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:168
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingPresenter.cpp:310
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:599
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCInterface.cpp:232
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:91
-constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:58
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:152
-constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/InstrumentPresenter.cpp:18
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
 
