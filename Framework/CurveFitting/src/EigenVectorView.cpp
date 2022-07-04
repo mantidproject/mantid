@@ -58,7 +58,7 @@ EigenVector_View::EigenVector_View(const vec_map_type &vector, const size_t nEle
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
 EigenVector_View::EigenVector_View(const Eigen::VectorXd &vector, const size_t nElements, const size_t startElement)
-    : m_view({}, 0, dynamic_stride(0, 0)), isConst(true) {
+    : m_view({}, 0, dynamic_stride(0, 0)), m_isConst(true) {
   new (&m_view) vec_const_map_type(vector.data() + startElement, nElements, dynamic_stride(0, 1));
 }
 
@@ -67,13 +67,13 @@ EigenVector_View::EigenVector_View(const Eigen::VectorXd &vector, const size_t n
 /// @param startElement :: The first element of the view.
 /// @param nElements :: The number of elements to view.
 EigenVector_View::EigenVector_View(const double *base, const size_t nElements, const size_t startElement)
-    : m_view({}, 0, dynamic_stride(0, 0)), isConst(true) {
+    : m_view({}, 0, dynamic_stride(0, 0)), m_isConst(true) {
   new (&m_view) vec_const_map_type(base + startElement, nElements, dynamic_stride(0, 1));
 }
 
 // CONST copy constructor
 /// @param v :: EigenVector_View to copy.
-EigenVector_View::EigenVector_View(const EigenVector_View &v) : m_view({}, 0, dynamic_stride(0, 0)), isConst(true) {
+EigenVector_View::EigenVector_View(const EigenVector_View &v) : m_view({}, 0, dynamic_stride(0, 0)), m_isConst(true) {
   new (&m_view) vec_const_map_type(v.vector_inspector().data(), v.size(), dynamic_stride(0, 1));
 }
 
@@ -81,11 +81,11 @@ EigenVector_View::EigenVector_View(const EigenVector_View &v) : m_view({}, 0, dy
 /// @param v :: EigenVector_View to copy.
 /// @returns a EigenVector_View which is a copy of v.
 EigenVector_View::EigenVector_View(EigenVector_View &v)
-    : m_view(v.vector_mutator().data(), v.size(), dynamic_stride(0, 1)), isConst(false) {}
+    : m_view(v.vector_mutator().data(), v.size(), dynamic_stride(0, 1)), m_isConst(false) {}
 
 /// @returns a non-const reference to the member m_view, an Eigen::Map of an Eigen::VectorXd.
 vec_map_type &EigenVector_View::vector_mutator() {
-  if (!isConst) {
+  if (!m_isConst) {
     return m_view;
   } else {
     throw std::runtime_error("Vector is const vector, cannot mutate const vector.");
@@ -93,7 +93,6 @@ vec_map_type &EigenVector_View::vector_mutator() {
 }
 
 EigenVector_View &EigenVector_View::operator=(EigenVector_View &v) {
-
   new (&m_view)
       vec_map_type(v.m_view.data(), v.m_view.size(), dynamic_stride(v.m_view.outerStride(), v.m_view.innerStride()));
 
@@ -101,10 +100,8 @@ EigenVector_View &EigenVector_View::operator=(EigenVector_View &v) {
 }
 
 EigenVector_View &EigenVector_View::operator=(EigenVector_View &&v) {
-
   new (&m_view)
       vec_map_type(v.m_view.data(), v.m_view.size(), dynamic_stride(v.m_view.outerStride(), v.m_view.innerStride()));
-
   return *this;
 }
 } // namespace Mantid::CurveFitting

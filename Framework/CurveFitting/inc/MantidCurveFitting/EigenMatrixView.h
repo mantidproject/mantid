@@ -26,29 +26,27 @@ public:
 
   // constructor: array->matrix view
   EigenMatrix_View(double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1 = SIZE_T_NULL,
-                   size_t nElements_2 = SIZE_T_NULL, const size_t &startElement_1 = 0,
-                   const size_t &startElement_2 = 0);
+                   size_t nElements_2 = SIZE_T_NULL, const size_t startElement_1 = 0, const size_t startElement_2 = 0);
 
   // constructor: matrix->matrix view
   EigenMatrix_View(Eigen::MatrixXd &matrix, size_t nElements_1 = SIZE_T_NULL, size_t nElements_2 = SIZE_T_NULL,
-                   const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
+                   const size_t startElement_1 = 0, const size_t startElement_2 = 0);
 
   // constructor: map->matrix view
   EigenMatrix_View(map_type &matrix, size_t nElements_1 = SIZE_T_NULL, size_t nElements_2 = SIZE_T_NULL,
-                   const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
+                   const size_t startElement_1 = 0, const size_t startElement_2 = 0);
 
   // CONST constructor: array->matrix view
   EigenMatrix_View(const double *base, const size_t nTotalRows, size_t nTotalCols, size_t nElements_1 = SIZE_T_NULL,
-                   size_t nElements_2 = SIZE_T_NULL, const size_t &startElement_1 = 0,
-                   const size_t &startElement_2 = 0);
+                   size_t nElements_2 = SIZE_T_NULL, const size_t startElement_1 = 0, const size_t startElement_2 = 0);
 
   // CONST constructor: matrix->matrix view
   EigenMatrix_View(const Eigen::MatrixXd &matrix, size_t nElements_1 = SIZE_T_NULL, size_t nElements_2 = SIZE_T_NULL,
-                   const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
+                   const size_t startElement_1 = 0, const size_t startElement_2 = 0);
 
   // CONST constructor: map->matrix view
   EigenMatrix_View(const map_type &matrix, size_t nElements_1 = SIZE_T_NULL, size_t nElements_2 = SIZE_T_NULL,
-                   const size_t &startElement_1 = 0, const size_t &startElement_2 = 0);
+                   const size_t startElement_1 = 0, const size_t startElement_2 = 0);
 
   // copy constructor
   EigenMatrix_View(EigenMatrix_View &v);
@@ -68,7 +66,14 @@ public:
   EigenMatrix_View &operator=(EigenMatrix_View &&V);
 
 protected:
+  void initialiseMatrix(const size_t nTotalRows, const size_t nTotalCols, size_t &nElements_1, size_t &nElements_2) {
+    if (nElements_1 == SIZE_T_NULL)
+      nElements_1 = nTotalRows;
+    if (nElements_2 == SIZE_T_NULL)
+      nElements_2 = nTotalCols;
+  }
+
   map_type m_view;
-  bool isConst = false;
+  bool m_isConst = false;
 };
 } // namespace Mantid::CurveFitting

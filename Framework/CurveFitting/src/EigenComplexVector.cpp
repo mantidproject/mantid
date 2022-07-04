@@ -163,12 +163,9 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
 /// @param indices :: Indices defining the order of elements in sorted vector.
 void ComplexVector::sort(const std::vector<size_t> &indices) {
   std::vector<ComplexType> temp_data(size());
-
-  for (size_t i = 0; i < size(); ++i) {
-    temp_data[i] = m_vector(indices[i]);
-  }
+  std::transform(indices.cbegin(), indices.cend(), temp_data.begin(),
+                 [&m_vector = m_vector](int i) { return m_vector(i); });
   resize(indices.size());
-
   m_vector = complex_vec_map_type(temp_data.data(), temp_data.size(), dynamic_stride(0, 1));
 }
 

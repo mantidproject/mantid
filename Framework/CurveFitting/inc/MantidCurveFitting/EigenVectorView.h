@@ -54,6 +54,6 @@ public:
 
 protected:
   vec_map_type m_view;
-  bool isConst = false;
+  bool m_isConst = false;
 };
 } // namespace Mantid::CurveFitting

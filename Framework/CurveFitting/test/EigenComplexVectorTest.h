@@ -216,6 +216,17 @@ public:
     TS_ASSERT_EQUALS(v1.get(2), res_3);
   }
 
+  void test_sort_by_indicies() {
+    auto v1 = makeVector1_complex();
+    std::vector<size_t> indiciesVec = {2, 0, 1};
+
+    v1.sort(indiciesVec);
+    TS_ASSERT_EQUALS(v1.size(), 3.0);
+    TS_ASSERT_EQUALS(v1.get(0), v12);
+    TS_ASSERT_EQUALS(v1.get(1), v10);
+    TS_ASSERT_EQUALS(v1.get(2), v11);
+  }
+
   ComplexVector makeVector1_complex() {
     ComplexVector v(3);
     v.set(0, v10);
