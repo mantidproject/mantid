@@ -14,6 +14,7 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
+using MantidQt::API::IAlgorithmRuntimeProps;
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
@@ -30,42 +31,14 @@ public:
   void testExperimentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result->getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "NonFlatSample");
-    TS_ASSERT_EQUALS(result->getPropertyValue("SummationType"), "SumInQ");
-    TS_ASSERT_EQUALS(result->getPropertyValue("IncludePartialBins"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("Debug"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("SubtractBackground"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundCalculationMethod"), "Polynomial");
-    TS_ASSERT_EQUALS(result->getPropertyValue("DegreeOfPolynomial"), "3");
-    TS_ASSERT_EQUALS(result->getPropertyValue("CostFunction"), "Unweighted least squares");
-    TS_ASSERT_EQUALS(result->getPropertyValue("PolarizationAnalysis"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("FloodCorrection"), "Workspace");
-    TS_ASSERT_EQUALS(result->getPropertyValue("FloodWorkspace"), "test_workspace");
-    TS_ASSERT_EQUALS(result->getPropertyValue("StartOverlap"), "7.500000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("EndOverlap"), "9.200000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.02");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleRHSWorkspace"), "1");
+    checkExperimentSettings(*result);
   }
 
   void testExperimentSettingsWithEmptyRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result->getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "NonFlatSample");
-    TS_ASSERT_EQUALS(result->getPropertyValue("SummationType"), "SumInQ");
-    TS_ASSERT_EQUALS(result->getPropertyValue("IncludePartialBins"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("Debug"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("SubtractBackground"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundCalculationMethod"), "Polynomial");
-    TS_ASSERT_EQUALS(result->getPropertyValue("DegreeOfPolynomial"), "3");
-    TS_ASSERT_EQUALS(result->getPropertyValue("CostFunction"), "Unweighted least squares");
-    TS_ASSERT_EQUALS(result->getPropertyValue("PolarizationAnalysis"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("FloodCorrection"), "Workspace");
-    TS_ASSERT_EQUALS(result->getPropertyValue("FloodWorkspace"), "test_workspace");
-    TS_ASSERT_EQUALS(result->getPropertyValue("StartOverlap"), "7.500000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("EndOverlap"), "9.200000");
+    checkExperimentSettings(*result);
   }
 
   void testLookupRowWithAngleLookup() {
@@ -73,15 +46,7 @@ public:
     // angle within tolerance of 2.3
     auto row = makeRow(2.29);
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "22348, 22349");
-    TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "22358, 22359");
-    TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "4");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMin"), "0.009000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferStep"), "0.030000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMax"), "1.300000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleFactor"), "0.900000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "4-6");
-    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "2-3,7-8");
+    checkMatchesAngleRow(*result);
   }
 
   void testLookupRowWithWildcardLookup() {
@@ -89,47 +54,20 @@ public:
     // angle outside tolerance of any angle matches wildcard row instead
     auto row = makeRow(2.28);
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "22345");
-    TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "22346");
-    TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "5-6");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMin"), "0.007000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferStep"), "0.010000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMax"), "1.100000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleFactor"), "0.700000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "3,7");
+    checkMatchesWildcardRow(*result);
   }
 
   void testInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMin"), "2.300000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMax"), "14.400000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("I0MonitorIndex"), "2");
-    TS_ASSERT_EQUALS(result->getPropertyValue("NormalizeByIntegratedMonitors"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMin"), "1.100000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMax"), "17.200000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMin"), "3.400000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMax"), "10.800000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("CorrectDetectors"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
+    checkMatchesInstrument(*result);
   }
 
   void testInstrumentSettingsWithEmptyRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
-
-    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMin"), "2.300000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMax"), "14.400000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("I0MonitorIndex"), "2");
-    TS_ASSERT_EQUALS(result->getPropertyValue("NormalizeByIntegratedMonitors"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMin"), "1.100000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMax"), "17.200000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMin"), "3.400000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMax"), "10.800000");
-    TS_ASSERT_EQUALS(result->getPropertyValue("CorrectDetectors"), "1");
-    TS_ASSERT_EQUALS(result->getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
+    checkMatchesInstrument(*result);
   }
 
   void testSettingsForSlicingWithEmptyRow() {
@@ -137,36 +75,35 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result->getPropertyValue("TimeInterval"), "123.400000");
+    checkMatchesSlicing(*result);
   }
 
   void testSettingsForSlicingByTime() {
     auto slicing = Slicing(UniformSlicingByTime(123.4));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result->getPropertyValue("TimeInterval"), "123.400000");
+    checkMatchesSlicingByTime(*result);
   }
 
   void testSettingsForSlicingByNumberOfSlices() {
     auto slicing = Slicing(UniformSlicingByNumberOfSlices(3));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result->getPropertyValue("NumberOfSlices"), "3");
+    checkMatchesSlicingByNumber(*result);
   }
 
   void testSettingsForSlicingByList() {
     auto slicing = Slicing(CustomSlicingByList({3.1, 10.2, 47.35}));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result->getPropertyValue("TimeInterval"), "3.1, 10.2, 47.35");
+    checkMatchesSlicingByList(*result);
   }
 
   void testSettingsForSlicingByLog() {
     auto slicing = Slicing(SlicingByEventLog({18.2}, "test_log_name"));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result->getPropertyValue("LogName"), "test_log_name");
-    TS_ASSERT_EQUALS(result->getPropertyValue("LogValueInterval"), "18.200000");
+    checkMatchesSlicingByLog(*result);
   }
 
   void testSettingsForRowCellValues() {
@@ -244,4 +181,81 @@ private:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
+
+  void checkExperimentSettings(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ReductionType"), "NonFlatSample");
+    TS_ASSERT_EQUALS(result.getPropertyValue("SummationType"), "SumInQ");
+    TS_ASSERT_EQUALS(result.getPropertyValue("IncludePartialBins"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("Debug"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("SubtractBackground"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundCalculationMethod"), "Polynomial");
+    TS_ASSERT_EQUALS(result.getPropertyValue("DegreeOfPolynomial"), "3");
+    TS_ASSERT_EQUALS(result.getPropertyValue("CostFunction"), "Unweighted least squares");
+    TS_ASSERT_EQUALS(result.getPropertyValue("PolarizationAnalysis"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("FloodCorrection"), "Workspace");
+    TS_ASSERT_EQUALS(result.getPropertyValue("FloodWorkspace"), "test_workspace");
+    TS_ASSERT_EQUALS(result.getPropertyValue("StartOverlap"), "7.500000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("EndOverlap"), "9.200000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("Params"), "-0.02");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ScaleRHSWorkspace"), "1");
+  }
+
+  void checkMatchesAngleRow(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22348, 22349");
+    TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22358, 22359");
+    TS_ASSERT_EQUALS(result.getPropertyValue("TransmissionProcessingInstructions"), "4");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMin"), "0.009000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferStep"), "0.030000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMax"), "1.300000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ScaleFactor"), "0.900000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ProcessingInstructions"), "4-6");
+    TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "2-3,7-8");
+  }
+
+  void checkMatchesWildcardRow(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22345");
+    TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22346");
+    TS_ASSERT_EQUALS(result.getPropertyValue("TransmissionProcessingInstructions"), "5-6");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMin"), "0.007000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferStep"), "0.010000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MomentumTransferMax"), "1.100000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ScaleFactor"), "0.700000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ProcessingInstructions"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
+  }
+
+  void checkMatchesInstrument(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("WavelengthMin"), "2.300000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("WavelengthMax"), "14.400000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("I0MonitorIndex"), "2");
+    TS_ASSERT_EQUALS(result.getPropertyValue("NormalizeByIntegratedMonitors"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorBackgroundWavelengthMin"), "1.100000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorBackgroundWavelengthMax"), "17.200000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorIntegrationWavelengthMin"), "3.400000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("MonitorIntegrationWavelengthMax"), "10.800000");
+    TS_ASSERT_EQUALS(result.getPropertyValue("CorrectDetectors"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
+  }
+
+  void checkMatchesSlicing(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("TimeInterval"), "123.400000");
+  }
+
+  void checkMatchesSlicingByTime(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("TimeInterval"), "123.400000");
+  }
+
+  void checkMatchesSlicingByNumber(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("NumberOfSlices"), "3");
+  }
+
+  void checkMatchesSlicingByList(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("TimeInterval"), "3.1, 10.2, 47.35");
+  }
+
+  void checkMatchesSlicingByLog(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("LogName"), "test_log_name");
+    TS_ASSERT_EQUALS(result.getPropertyValue("LogValueInterval"), "18.200000");
+  }
 };
