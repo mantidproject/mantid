@@ -29,6 +29,7 @@ public:
   bool loadWorkspaceFromAds(std::string const &workspaceName) override;
   void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
   void sumBanksAsync(IJobManager &jobManager) override;
+  void reduceAsync(IJobManager &jobManager) override;
 
   std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const override;
 
@@ -37,6 +38,8 @@ public:
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
 
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
+  void setSelectedRegion(Selection const &selection) override;
+
   void exportSummedWsToAds() const override;
 
 private:

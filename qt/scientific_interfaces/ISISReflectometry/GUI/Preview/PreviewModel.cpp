@@ -72,6 +72,11 @@ void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceN
  */
 void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumBanks(*m_runDetails); }
 
+void PreviewModel::reduceAsync(IJobManager &jobManager) {
+  // TODO implement
+  // jobManager.startReduction(*m_runDetails);
+}
+
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
 MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
 
@@ -79,6 +84,10 @@ std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_r
 
 void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
+}
+
+void PreviewModel::setSelectedRegion(Selection const &selection) {
+  // TODO implement
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
