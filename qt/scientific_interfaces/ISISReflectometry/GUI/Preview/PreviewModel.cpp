@@ -117,4 +117,13 @@ void PreviewModel::exportSummedWsToAds() const {
     g_log.error("Could not export summed WS. No rectangular selection has been made on the instrument viewer.");
   }
 }
+
+void PreviewModel::exportReducedWsToAds() const {
+  if (auto reducedWs = m_runDetails->getReducedWs()) {
+    AnalysisDataService::Instance().addOrReplace("preview_reduced_ws", reducedWs);
+  } else {
+    g_log.error(
+        "Could not export reduced WS. No selection has been made on the instrument viewer and/or region selector.");
+  }
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
