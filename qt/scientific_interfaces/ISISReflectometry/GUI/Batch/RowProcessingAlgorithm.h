@@ -10,6 +10,7 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
+#include "Reduction/Item.h"
 #include <boost/optional.hpp>
 
 #include <map>
@@ -30,6 +31,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL MantidQt::API::IConfiguredAlgorithm_sptr
 createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, Mantid::API::IAlgorithm_sptr alg = nullptr);
 MANTIDQT_ISISREFLECTOMETRY_DLL std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
 createAlgorithmRuntimeProps(IBatch const &model, PreviewRow const &row);
+MANTIDQT_ISISREFLECTOMETRY_DLL void updateRowOnAlgorithmComplete(const Mantid::API::IAlgorithm_sptr &algorithm,
+                                                                 Item &item);
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
