@@ -28,24 +28,142 @@ class InstrumentArrayConverter:
     def __init__(self, ws):
         self.ws = ws
         self.inst = ws.getInstrument()
-        if any(inst_comp for inst_comp in self.inst if
-               isinstance(inst_comp, RectangularDetector) or isinstance(inst_comp, GridDetector)):
+        if any(self.inst[icomp] for icomp in range(self.inst.nelements()) if
+               isinstance(self.inst[icomp], RectangularDetector) or isinstance(self.inst[icomp], GridDetector)):
             # might not be true for all components due to presence of monitors etc.
-            self.get_peak_array = self._get_peak_region_array_rectangular_detector
+            self.get_detid_array = self._get_detid_array_rect_detector
         else:
-            # elif is  component assembly
-            self.get_peak_array = self._get_peak_array_general
+            self.get_detid_array = self._get_detid_array_comp_assembly
 
-    def _get_peak_array_general(self, peak, bank_name):
-        # To-Do - expose NearestNeighbourWorkspaceInfo.h to python
-        return None
+    @staticmethod
+    def _split_string_trailing_int(name):
+        *_, match = re.finditer(r'\d+', name)  # last match
+        return name[:match.start()], name[match.start():]  # prefix, num_str
 
-    def get_rectangular_component(self, bank_name):
-        return next((inst_comp for inst_comp in self.inst if (
-                isinstance(inst_comp, RectangularDetector) or isinstance(inst_comp, GridDetector))
-                     and bank_name in inst_comp.getFullName()), None)
+    @staticmethod
+    def _find_nearest_child_to_component(parent, comp, excl=None, ndepth=1):
+        dist = np.inf
+        nearest_child = None
+        for ichild in range(parent.nelements()):
+            child = parent[ichild]
+            if hasattr(child, 'nelements'):
+                while child.nelements() == 1:
+                    child = child[0]
+            is_correct_type = 'CompAssembly' in child.type() or child.type() == 'DetectorComponent'
+            is_not_excluded = excl is None or child.getFullName() != excl
+            if is_correct_type and is_not_excluded:
+                this_dist = child.getDistance(comp)
+                if this_dist < dist:
+                    dist = this_dist
+                    nearest_child = child
+        if ndepth > 1:
+            nearest_child = InstrumentArrayConverter._find_nearest_child_to_component(nearest_child, comp,
+                                                                                      ndepth=ndepth - 1)
+        return nearest_child
 
-    def _get_peak_region_array_rectangular_detector(self, peak, detid, bank_name, dpixel=8):
+    def _find_nearest_adjacent_col_component(self, dcol, col, ncols, bank_name, col_prefix, col_str, delim):
+        next_col_prefix, next_col_str = None, None
+        isLHS = np.any(dcol + col < 1)
+        isRHS = np.any(dcol + col > ncols)
+        if isLHS or isRHS:
+            # get tube/col at each end of detector to get tube separation
+            detLHS = self.inst.getComponentByName(
+                delim.join([bank_name, f'{col_prefix}{1:0{len(col_str)}d}']))
+            detRHS = self.inst.getComponentByName(
+                delim.join([bank_name, f'{col_prefix}{ncols:0{len(col_str)}d}']))
+            det_sep = detLHS.getDistance(detRHS) / (ncols - 1)  # loose half pix at each end (cen-cen dist.)
+            # look for adjacent tube in adjacent banks
+            det_ref = detLHS if isLHS else detRHS
+            next_det = self._find_nearest_child_to_component(self.inst, det_ref, excl=bank_name, ndepth=2)
+            if next_det is not None and next_det.getDistance(det_ref) < 1.1 * det_sep:
+                # is considered adjacent
+                next_col_prefix, next_col_str = self._split_string_trailing_int(next_det.getFullName())
+        return next_col_prefix, next_col_str, isLHS, isRHS
+
+    def _get_detid_array_comp_assembly(self, bank, detid, row, col, dpixel):
+        ndet_per_spec = len(self.ws.getSpectrum(self.ws.getIndicesFromDetectorIDs([detid])[0]).getDetectorIDs())
+        nrows = bank[0].nelements()
+        ncols = bank.nelements()
+
+        # get range of row/col
+        drow_vec = np.arange(-dpixel, dpixel + 1) * ndet_per_spec  # to account for n-1 detector mapping in a tube
+        drow_vec = drow_vec[np.logical_and(drow_vec > -row, drow_vec <= nrows - row)]
+        dcol_vec = np.arange(-dpixel, dpixel + 1)  # can't crop this a-priori as don't know if adjacent bank
+        dcol, drow = np.meshgrid(dcol_vec, drow_vec)
+
+        # get row and col component names from string representation of instrument tree
+        ci = self.ws.componentInfo()
+        det_idx = self.ws.detectorInfo().indexOf(detid)
+        row_name = ci.name(det_idx)  # e.g. 'pixel0066'
+        row_prefix, row_str = self._split_string_trailing_int(row_name)  # e.g. 'pixel', '0066'
+        col_name = ci.name(ci.parent(det_idx))
+        col_prefix, col_str = self._split_string_trailing_int(col_name)
+        bank_name = bank.getFullName()
+        bank_prefix, bank_str = self._split_string_trailing_int(bank_name)  # 'e.g. WISH/panel09/WISHPanel', '09'
+        delim = bank_prefix[len(ci.name(ci.root()))]
+
+        # check for adjacent tube in adjacent banks
+        next_col_prefix, next_col_str, isLHS, isRHS = self._find_nearest_adjacent_col_component(dcol, col, ncols,
+                                                                                                bank_name,
+                                                                                                col_prefix, col_str,
+                                                                                                delim)
+
+        # loop over row/cols and get detids
+        detids = np.zeros(dcol.shape, int)
+        for icol in range(dcol.shape[1]):
+            new_col = col + dcol[0, icol]
+            col_comp_name = None  # None indicates no column component (tube) found in this or adjacent bank
+            if new_col > 0 and new_col <= ncols:  # indexing starts from 1
+                # column comp in this bank
+                col_comp_name = delim.join([bank_name, f'{col_prefix}{new_col:0{len(col_str)}d}'])
+            elif next_col_str is not None:
+                # adjacent colulmn component found in another bank
+                new_col = int(next_col_str) + new_col
+                if isRHS:
+                    new_col -= (ncols + 1)
+                col_comp_name = f'{next_col_prefix}{new_col:0{len(next_col_str)}d}'
+            for irow in range(dcol.shape[0]):
+                if col_comp_name is not None:
+                    new_row = row + drow[irow, 0]
+                    row_comp_name = f'{row_prefix}{new_row:0{len(row_str)}d}'
+                    det = self.inst.getComponentByName(delim.join([col_comp_name, row_comp_name]))
+                    if det is not None:
+                        detids[irow, icol] = det.getID()
+
+        # remove starting or trailing zeros from detids etc. where no adjacent tubes found in other banks
+        icols_keep = detids[0, :] != 0
+        detids = detids[:, icols_keep]
+        dcol = dcol[:, icols_keep]
+        drow = drow[:, icols_keep]
+        # detector edges
+        col_edges = np.zeros(detids.shape, dtype=bool)
+        if isLHS and dcol[0, 0] == 1 - col:
+            col_edges[:, 0] = True
+        elif isRHS and dcol[0, -1] == ncols - col:
+            col_edges[:, -1] = True
+        row_edges = np.logical_or(drow <= ndet_per_spec - row, drow >= nrows - row - ndet_per_spec)
+        detector_edges = np.logical_or(row_edges, col_edges)
+        # row_peak, icol_peak
+        irow_peak = np.where(drow[:, 0] == 0)[0][0]
+        icol_peak = np.where(dcol[0, :] == 0)[0][0]
+        return detids, detector_edges, irow_peak, icol_peak
+
+    def _get_detid_array_rect_detector(self, bank, detid, row, col, dpixel):
+        col_step, row_step = bank.idstep(), bank.idstepbyrow()  # step in detID along col and row
+        # need to adjust range depending on whether above min/max row/col
+        drow_vec = np.arange(max(0, row - dpixel), min(row + dpixel + 1, bank.xpixels())) - row
+        dcol_vec = np.arange(max(0, col - dpixel), min(col + dpixel + 1, bank.ypixels())) - col
+        dcol, drow = np.meshgrid(dcol_vec, drow_vec)
+        detids = detid + dcol * col_step + drow * row_step
+        # create bool mask for detector edges
+        detector_edges = np.logical_or.reduce((drow == -row, dcol == -col,
+                                               drow == bank.xpixels() - 1 - row, dcol == bank.ypixels() - 1 - col))
+        # get indices of peak centre
+        irow_peak = np.where(drow_vec == 0)[0][0]
+        icol_peak = np.where(dcol_vec == 0)[0][0]
+        return detids, detector_edges, irow_peak, icol_peak
+
+    def get_peak_region_array(self, peak, detid, bank_name, dpixel=8):
         """
         :param peak: peak object
         :param detid: detector id of peak (from peak table)
@@ -58,21 +176,12 @@ class InstrumentArrayConverter:
         :return ispec: spectrum index corresponding to detid of peak
         :return edges: bool mask True for pixels on the edge of a detector bank/panel
         """
-        comp = self.get_rectangular_component(bank_name)
-        if comp is None:
-            return
-        col_step, row_step = comp.idstep(), comp.idstepbyrow()  # step in detID along col and row
-
+        bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
-        # need to adjust range depending on whether above min/max row/col
-        drow_vec = np.arange(max(0, row - dpixel), min(row + dpixel + 1, comp.xpixels())) - row
-        dcol_vec = np.arange(max(0, col - dpixel), min(col + dpixel + 1, comp.ypixels())) - col
-        dcol, drow = np.meshgrid(dcol_vec, drow_vec)
-        detids = detid + dcol * col_step + drow * row_step
-
+        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, dpixel)
+        # get signal and error from each spectrum
         ispecs = np.array(self.ws.getIndicesFromDetectorIDs(
             [int(d) for d in detids.flatten()])).reshape(detids.shape)
-
         signal = np.zeros((*ispecs.shape, self.ws.blocksize()))
         errors = np.zeros(signal.shape)
         for irow in range(signal.shape[0]):
@@ -80,15 +189,11 @@ class InstrumentArrayConverter:
                 ispec = int(ispecs[irow, icol])
                 signal[irow, icol, :] = self.ws.readY(ispec)
                 errors[irow, icol, :] = self.ws.readE(ispec)
-
-        irow_peak = np.where(drow_vec == 0)[0][0]
-        icol_peak = np.where(dcol_vec == 0)[0][0]
-        ispec = int(ispecs[irow_peak, icol_peak])
-
-        detector_edges = np.logical_or.reduce((drow == -row, dcol == -col,
-                                               drow == comp.xpixels() - 1 - row, dcol == comp.ypixels() - 1 - col))
-
-        return signal, errors, irow_peak, icol_peak, ispec, detector_edges
+        # get x bin centers
+        xvals = self.ws.readX(int(ispecs[irow_peak, icol_peak]))
+        if len(xvals) > self.ws.blocksize():
+            xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
+        return xvals, signal, errors, irow_peak, icol_peak, detector_edges
 
 
 def is_peak_mask_valid(peak_mask, npk_min=3, density_min=0.35, nrow_max=8, ncol_max=15,
@@ -157,13 +262,13 @@ def calc_snr(signal, error_sq):
     return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
 
-def optimise_window_intens_over_sig(signal, error_sq,  ilo, ihi, ntol=8):
+def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8):
     if ihi == ilo:
         ihi += 1
     nbad = 0
     prev_IoverSig = calc_snr(signal[ilo:ihi], error_sq[ilo:ihi])
     for istep_hi in range(1, signal.size - ihi):
-        this_IoverSig = calc_snr(signal[ilo:ihi+istep_hi], error_sq[ilo:ihi+istep_hi])
+        this_IoverSig = calc_snr(signal[ilo:ihi + istep_hi], error_sq[ilo:ihi + istep_hi])
         if this_IoverSig > prev_IoverSig:
             prev_IoverSig = this_IoverSig
             nbad = 0
@@ -175,7 +280,7 @@ def optimise_window_intens_over_sig(signal, error_sq,  ilo, ihi, ntol=8):
     nbad = 0
     prev_IoverSig = calc_snr(signal[ilo:ihi], error_sq[ilo:ihi])
     for istep_lo in range(1, ilo):
-        this_IoverSig = calc_snr(signal[ilo-istep_lo:ihi], error_sq[ilo-istep_lo:ihi])
+        this_IoverSig = calc_snr(signal[ilo - istep_lo:ihi], error_sq[ilo - istep_lo:ihi])
         if this_IoverSig > prev_IoverSig:
             prev_IoverSig = this_IoverSig
             nbad = 0
@@ -198,7 +303,7 @@ def find_peak_limits(signal, error_sq, ilo, ihi):
     ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
     istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ilo
     # expand window to maximise I/sig (good for when peak not entirely in window)
-    return optimise_window_intens_over_sig(signal, error_sq, istart, iend + 1)#
+    return optimise_window_intens_over_sig(signal, error_sq, istart, iend + 1)  #
 
 
 def focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk):
@@ -378,12 +483,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             pdf = PdfPages(plot_filename)
         for ipk, pk in enumerate(pk_ws_int):
             # get data array in window of side length dpixel around peak region (truncated at edge pf detector)
-            signal, error, irow, icol, ispec, detector_edges = array_converter.get_peak_array(pk, detids[ipk],
-                                                                                              bank_names[ipk], dpixel)
-            # get xdata
-            xpk = ws.readX(ispec)
-            if len(xpk) > ws.blocksize():
-                xpk = 0.5 * (xpk[:-1] + xpk[1:])  # convert to bin centers - must be easier way!
+            xpk, signal, error, irow, icol, detector_edges = array_converter.get_peak_region_array(pk, detids[ipk],
+                                                                                                   bank_names[ipk],
+                                                                                                   dpixel)
             # get TOF window using resolution parameters
             if frac_tof_window > 0:
                 dTOF = tofs[ipk] * frac_tof_window
