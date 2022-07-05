@@ -27,7 +27,7 @@ public:
   MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getReducedWs, (), (const, override));
   MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
-  MOCK_METHOD(Selection, getSelectedRegion, (), (const, override));
+  MOCK_METHOD(ProcessingInstructions, getProcessingInstructions, (), (const, override));
 
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
   MOCK_METHOD(void, setSelectedRegion, (Selection const &), (override));

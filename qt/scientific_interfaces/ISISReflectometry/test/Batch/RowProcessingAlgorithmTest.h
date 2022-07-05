@@ -49,8 +49,16 @@ public:
 
   void testExperimentSettingsWithPreviewRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    auto result = Reduction::createAlgorithmRuntimeProps(model, makePreviewRow());
+    auto previewRow = makePreviewRow();
+    auto processingInstructions = std::string("2-3");
+    previewRow.setProcessingInstructions(processingInstructions);
+
+    auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
+
+    // Check results from the experiment settings tab
     checkExperimentSettings(*result);
+    // Check the settings from the PreviewRow model
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), processingInstructions);
   }
 
   void testLookupRowWithAngleLookup() {

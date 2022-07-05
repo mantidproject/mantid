@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "Reduction/ProcessingInstructions.h"
 #include <string>
 #include <vector>
 
@@ -29,7 +30,7 @@ public:
   virtual std::vector<Mantid::detid_t> getSelectedBanks() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
-  virtual Selection getSelectedRegion() const = 0;
+  virtual ProcessingInstructions getProcessingInstructions() const = 0;
 
   virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
   virtual void setSelectedRegion(Selection const &selection) = 0;

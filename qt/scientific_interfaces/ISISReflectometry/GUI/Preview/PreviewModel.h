@@ -36,7 +36,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
   std::vector<Mantid::detid_t> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
-  Selection getSelectedRegion() const override;
+  ProcessingInstructions getProcessingInstructions() const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
 
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;

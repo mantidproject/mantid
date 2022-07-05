@@ -82,11 +82,12 @@ public:
     TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
   }
 
-  void test_set_and_get_selected_region() {
+  void test_set_selected_region_converts_to_processing_instructions_string() {
     PreviewModel model;
     const IPreviewModel::Selection inputRoi{3.6, 11.4};
     model.setSelectedRegion(inputRoi);
-    TS_ASSERT_EQUALS(inputRoi, model.getSelectedRegion())
+    // Start and end are rounded to nearest integer and converted to a string
+    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions())
   }
 
   void test_sum_banks() {
