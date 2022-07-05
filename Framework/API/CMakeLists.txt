@@ -127,6 +127,7 @@ set(SRC_FILES
     src/PropertyWithValue.cpp
     src/RawCountValidator.cpp
     src/RefAxis.cpp
+    src/RegionSelectorObserver.cpp
     src/ResizeRectangularDetectorHelper.cpp
     src/Run.cpp
     src/Sample.cpp
