@@ -17,6 +17,7 @@ from mantid.geometry import RectangularDetector, GridDetector
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.colors import LogNorm
+import re
 
 
 class InstrumentArrayConverter:
@@ -381,12 +382,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.declareProperty(name="NPixels", defaultValue=8, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=3),
                              doc="Length of window on detector in number of pixels")
-        self.declareProperty(name='FractionalTOFWindow', defaultValue=0, direction=Direction.Input,
-                             validator=IntBoundedValidator(lower=0),
+        self.declareProperty(name='FractionalTOFWindow', defaultValue=0.0, direction=Direction.Input,
+                             validator=FloatBoundedValidator(lower=0.0, upper=1.0),
                              doc="dTOF/TOF window best chosen from forward-scattering bank with worst resolution.")
         condition_to_use_resn = EnabledWhenProperty('FractionalTOFWindow', PropertyCriterion.IsEqualTo, "0")
         self.declareProperty(name="BackscatteringTOFResolution", defaultValue=0.04, direction=Direction.Input,
-                             validator=FloatBoundedValidator(lower=0),
+                             validator=FloatBoundedValidator(lower=0, upper=1.0),
                              doc="dTOF/TOF of window for peaks at back-scattering (resolution dominated by moderator "
                                  "contribution, dT0/T0, and uncertainty in path length dL/L which is assumed constant"
                                  "for all pixels).")
