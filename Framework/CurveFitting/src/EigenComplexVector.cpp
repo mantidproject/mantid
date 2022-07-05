@@ -164,7 +164,7 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
 void ComplexVector::sort(const std::vector<size_t> &indices) {
   std::vector<ComplexType> temp_data(size());
   std::transform(indices.cbegin(), indices.cend(), temp_data.begin(),
-                 [&m_vector = m_vector](int i) { return m_vector(i); });
+                 [&m_vector = m_vector](size_t i) { return m_vector(i); });
   resize(indices.size());
   m_vector = complex_vec_map_type(temp_data.data(), temp_data.size(), dynamic_stride(0, 1));
 }
