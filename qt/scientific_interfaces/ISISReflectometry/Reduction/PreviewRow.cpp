@@ -40,9 +40,9 @@ void PreviewRow::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) no
   m_selectedBanks = std::move(selectedBanks);
 }
 
-std::vector<double> PreviewRow::getSelectedRegion() const noexcept { return m_selectedRegion; }
+ProcessingInstructions PreviewRow::getProcessingInstructions() const noexcept { return m_processingInstructions; }
 
-void PreviewRow::setSelectedRegion(std::vector<double> selectedRegion) noexcept {
-  m_selectedRegion = std::move(selectedRegion);
+void PreviewRow::setProcessingInstructions(ProcessingInstructions processingInstructions) noexcept {
+  m_processingInstructions = std::move(processingInstructions);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

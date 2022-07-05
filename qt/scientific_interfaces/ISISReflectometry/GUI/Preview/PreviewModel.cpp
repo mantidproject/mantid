@@ -84,9 +84,22 @@ void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) 
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 
-auto PreviewModel::getSelectedRegion() const -> Selection { return m_runDetails->getSelectedRegion(); }
+ProcessingInstructions PreviewModel::getProcessingInstructions() const {
+  return m_runDetails->getProcessingInstructions();
+}
 
-void PreviewModel::setSelectedRegion(Selection const &selection) { m_runDetails->setSelectedRegion(selection); }
+void PreviewModel::setSelectedRegion(Selection const &selection) {
+  // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices
+  if (selection.size() != 2) {
+    throw std::runtime_error("Program error: unexpected selection size; expected 2, got " +
+                             std::to_string(selection.size()));
+  }
+  // For now we just support a y axis of spectrum number so round to the nearest integer
+  auto const start = static_cast<int>(std::round(selection[0]));
+  auto const end = static_cast<int>(std::round(selection[1]));
+  auto processingInstructions = ProcessingInstructions(std::to_string(start) + "-" + std::to_string(end));
+  m_runDetails->setProcessingInstructions(std::move(processingInstructions));
+}
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
