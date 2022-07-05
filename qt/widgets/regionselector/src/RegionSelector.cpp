@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
+#include <QLayout>
 #include <QWidget>
 
 using Mantid::API::Workspace_sptr;
@@ -28,7 +29,9 @@ Python::Object newPresenter(Workspace_sptr workspace) {
   GlobalInterpreterLock lock;
 
   boost::python::dict options;
-  options["ws"] = workspace;
+  if (workspace) {
+    options["ws"] = workspace;
+  }
   auto constructor = presenterModule().attr("RegionSelector");
   return constructor(*boost::python::tuple(), **options);
 }
@@ -45,6 +48,10 @@ RegionSelector::RegionSelector(Workspace_sptr const &workspace, QLayout *layout)
   m_layout->addWidget(view);
   show();
 }
+
+RegionSelector::RegionSelector(RegionSelector &&) = default;
+
+RegionSelector &RegionSelector::operator=(RegionSelector &&) = default;
 
 Common::Python::Object RegionSelector::getView() const {
   GlobalInterpreterLock lock;
@@ -63,4 +70,8 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
 }
 
+void RegionSelector::addRectangularRegion() {
+  GlobalInterpreterLock lock;
+  pyobj().attr("add_rectangular_region")();
+}
 } // namespace MantidQt::Widgets

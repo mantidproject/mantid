@@ -16,6 +16,10 @@
 
 #include <memory>
 
+namespace MantidQt::Widgets {
+class IRegionSelector;
+}
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
@@ -27,6 +31,7 @@ public:
     std::unique_ptr<IPreviewModel> model;
     std::unique_ptr<IJobManager> jobManager;
     std::unique_ptr<IInstViewModel> instViewModel;
+    std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
   };
 
   PreviewPresenter(Dependencies dependencies);
@@ -40,7 +45,9 @@ public:
   void notifyInstViewSelectRectRequested() override;
   void notifyInstViewShapeChanged() override;
 
-  void notifyContourExportAdsRequested() override;
+  void notifyRegionSelectorExportAdsRequested() override;
+
+  void notifyRectangularROIModeRequested() override;
 
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
@@ -51,5 +58,6 @@ private:
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
+  std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

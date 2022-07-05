@@ -6,19 +6,31 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
 
+using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
+
+class QLayout;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
-}
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
-      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)) {
+      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
+      m_regionSelector(std::move(dependencies.regionSelector)) {
+
+  if (!m_regionSelector) {
+    m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
+  }
+
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
 
@@ -60,10 +72,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
 }
 
-void PreviewPresenter::notifySumBanksCompleted() {
-  g_log.debug("Sum banks completed");
-  m_view->plotRegionSelector(m_model->getSummedWs());
-}
+void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
@@ -98,5 +107,10 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   m_model->sumBanksAsync(*m_jobManager);
 }
 
-void PreviewPresenter::notifyContourExportAdsRequested() { m_model->exportSummedWsToAds(); }
+void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
+
+void PreviewPresenter::notifyRectangularROIModeRequested() {
+  m_view->setRectangularROIState(true);
+  m_regionSelector->addRectangularRegion();
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -9,7 +9,6 @@ widget is embedded into ISISReflectometry - Preview tab.
 """
 from typing import List
 from mantid.api import AnalysisDataService
-from mantid.kernel import logger
 
 from mantidqt.widgets.regionselector.presenter import RegionSelector
 
@@ -17,8 +16,9 @@ from mantidqt.widgets.regionselector.presenter import RegionSelector
 ads = AnalysisDataService.Instance()
 workspace_names: List[str] = ads.getObjectNames()
 if len(workspace_names) < 1:
-    logger.error("Ensure at least one workspace is loaded in Mantid")
+    workspace = None
 else:
+    # Just get any workspace from the ADS to test with
     workspace = ads.retrieve(workspace_names[0])
-    presenter = RegionSelector(ws=workspace)
-    presenter.view.show()
+presenter = RegionSelector(ws=workspace)
+presenter.view.show()
