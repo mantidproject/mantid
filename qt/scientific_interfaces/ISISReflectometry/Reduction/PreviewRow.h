@@ -29,6 +29,8 @@ public:
   PreviewRow &operator=(PreviewRow &&) = default;
 
   std::vector<std::string> const &runNumbers() const;
+  double theta() const;
+  void setTheta(double theta);
 
   bool isGroup() const override;
   bool isPreview() const override;
@@ -58,6 +60,7 @@ public:
 
 private:
   std::vector<std::string> m_runNumbers;
+  double m_theta;
   std::vector<Mantid::detid_t> m_selectedBanks;
   ProcessingInstructions m_processingInstructions;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;

@@ -197,9 +197,11 @@ public:
     auto mockJobManager = makeJobManager();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
+
     // TODO reset edit mode after region is selected
     // expectRegionSelectorSetToEditMode(*mockView);
-    expectReduceAsyncCalledOnSelectedRegion(*mockModel, *mockJobManager, *mockRegionSelector);
+    expectReduceAsyncCalledOnSelectedRegion(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
                                                makeInstViewModel(), std::move(mockRegionSelector_uptr)));
     presenter.notifyRegionChanged();
@@ -303,11 +305,17 @@ private:
     EXPECT_CALL(mockRegionSelector, addRectangularRegion()).Times(1);
   }
 
-  void expectReduceAsyncCalledOnSelectedRegion(MockPreviewModel &mockModel, MockJobManager &mockJobManager,
-                                               MockRegionSelector &mockRegionSelector) {
+  void expectReduceAsyncCalledOnSelectedRegion(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                               MockJobManager &mockJobManager, MockRegionSelector &mockRegionSelector) {
+    // Check ROI is set
     auto roi = IRegionSelector::Selection{3.5, 11.23};
     EXPECT_CALL(mockRegionSelector, getRegion()).Times(1).WillOnce(Return(roi));
     EXPECT_CALL(mockModel, setSelectedRegion(roi)).Times(1);
+    // Check theta is set
+    auto theta = 0.3;
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
+    EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
+    // Check reduction is executed
     EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
   }
 };

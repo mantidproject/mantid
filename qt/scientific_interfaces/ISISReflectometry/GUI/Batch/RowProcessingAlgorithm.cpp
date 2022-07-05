@@ -302,7 +302,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   properties->setProperty("InputWorkspace", previewRow.getSummedWs());
   properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions());
   // TODO add the real theta once it is implemented in the previewRow
-  properties->setProperty("ThetaIn", 0.5);
+  properties->setProperty("ThetaIn", previewRow.theta());
   return properties;
 }
 

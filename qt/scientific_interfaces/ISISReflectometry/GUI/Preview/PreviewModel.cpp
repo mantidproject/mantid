@@ -80,6 +80,7 @@ MatrixWorkspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->g
 
 std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 
+void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
 void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }

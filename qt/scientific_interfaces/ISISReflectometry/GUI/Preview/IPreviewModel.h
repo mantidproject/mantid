@@ -32,6 +32,8 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
   virtual ProcessingInstructions getProcessingInstructions() const = 0;
 
+  virtual void setTheta(double theta) = 0;
+
   virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
   virtual void setSelectedRegion(Selection const &selection) = 0;
 

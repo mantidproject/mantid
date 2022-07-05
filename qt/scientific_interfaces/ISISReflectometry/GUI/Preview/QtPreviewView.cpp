@@ -58,6 +58,8 @@ void QtPreviewView::onSelectRectangularROIClicked() const { m_notifyee->notifyRe
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
+double QtPreviewView::getAngle() const { return m_ui.angle_spin_box->value(); }
+
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   // We need to recreate the surface so disconnect any existing signals first
   if (m_instDisplay->getSurface()) {

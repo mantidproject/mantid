@@ -53,6 +53,8 @@ public:
     auto previewRow = makePreviewRow();
     auto processingInstructions = std::string("2-3");
     previewRow.setProcessingInstructions(processingInstructions);
+    auto theta = 0.7;
+    previewRow.setTheta(theta);
 
     auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
 
@@ -60,6 +62,7 @@ public:
     checkExperimentSettings(*result);
     // Check the settings from the PreviewRow model
     TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), processingInstructions);
+    assertProperty(*result, "ThetaIn", theta);
   }
 
   void testLookupRowWithAngleLookup() {
