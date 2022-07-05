@@ -12,11 +12,16 @@
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers) : Item(), m_runNumbers(std::move(runNumbers)) {
+PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers)
+    : Item(), m_runNumbers(std::move(runNumbers)), m_theta{0.0} {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
 std::vector<std::string> const &PreviewRow::runNumbers() const { return m_runNumbers; }
+
+double PreviewRow::theta() const { return m_theta; }
+
+void PreviewRow::setTheta(double theta) { m_theta = theta; }
 
 bool PreviewRow::isGroup() const { return false; }
 

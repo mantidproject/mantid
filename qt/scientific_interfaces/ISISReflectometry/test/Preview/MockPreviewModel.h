@@ -29,6 +29,7 @@ public:
   MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
   MOCK_METHOD(ProcessingInstructions, getProcessingInstructions, (), (const, override));
 
+  MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
   MOCK_METHOD(void, setSelectedRegion, (Selection const &), (override));
 

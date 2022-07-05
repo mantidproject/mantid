@@ -39,6 +39,7 @@ public:
   ProcessingInstructions getProcessingInstructions() const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
 
+  void setTheta(double theta) override;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
   void setSelectedRegion(Selection const &selection) override;
 

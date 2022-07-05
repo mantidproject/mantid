@@ -124,9 +124,13 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
 }
 
 void PreviewPresenter::notifyRegionChanged() {
+  // Set the selection from the view
   auto roi = m_regionSelector->getRegion();
   m_model->setSelectedRegion(roi);
   g_log.notice("Running reduction on ROI: " + m_model->getProcessingInstructions());
+  // Ensure the angle is up to date
+  m_model->setTheta(m_view->getAngle());
+  // Perform the reduction
   m_model->reduceAsync(*m_jobManager);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
