@@ -25,7 +25,7 @@ public:
   virtual void notifyInstViewShapeChanged() = 0;
 
   virtual void notifyRegionSelectorExportAdsRequested() = 0;
-  virtual void notify1DPlotExportAdsRequested() = 0;
+  virtual void notifyLinePlotExportAdsRequested() = 0;
 
   // TODO implement edit ROI button and ROI-changed callback
   // virtual void notifyEditROIRequested() = 0;
@@ -42,6 +42,7 @@ public:
   // Plotting
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
+  virtual void plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;

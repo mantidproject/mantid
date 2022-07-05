@@ -202,7 +202,7 @@
       <widget class="QWidget" name="linePlotLayoutWidget">
        <layout class="QVBoxLayout" name="line_plot_layout">
         <item>
-         <widget class="QToolButton" name="plot_ads_export_button">
+         <widget class="QToolButton" name="lp_ads_export_button">
           <property name="toolTip">
            <string>Export the reduced workspace to the workspaces list</string>
           </property>
@@ -210,9 +210,6 @@
            <string>Export reduced workspace</string>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QTreeView" name="treeView"/>
         </item>
        </layout>
       </widget>

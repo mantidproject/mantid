@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"
 
@@ -37,6 +38,7 @@ public:
   // Plotting
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
+  void plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   // Instrument viewer toolbar
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
@@ -56,6 +58,7 @@ private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
+  std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_linePlot{nullptr};
 
   void connectSignals() const;
   void loadToolbarIcons();
@@ -67,7 +70,7 @@ private slots:
   void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
   void onRegionSelectorExportToAdsClicked() const;
-  void on1DPlotExportToAdsClicked() const;
+  void onLinePlotExportToAdsClicked() const;
   void onSelectRectangularROIClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

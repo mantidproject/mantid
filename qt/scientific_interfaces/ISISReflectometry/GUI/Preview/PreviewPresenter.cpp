@@ -78,10 +78,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
 void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
-void PreviewPresenter::notifyReductionCompleted() {
-  // TODO plot reduced workspace
-  g_log.notice("Reduction completed");
-}
+void PreviewPresenter::notifyReductionCompleted() { m_view->plotLinePlot(m_model->getReducedWs()); }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
@@ -134,5 +131,5 @@ void PreviewPresenter::notifyRegionChanged() {
   m_model->reduceAsync(*m_jobManager);
 }
 
-void PreviewPresenter::notify1DPlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
+void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

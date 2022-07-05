@@ -5,10 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPreviewView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <string>
 
@@ -19,6 +21,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_ui.setupUi(this);
   m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
+  m_linePlot = std::make_unique<MantidWidgets::PreviewPlot>();
+  m_ui.line_plot_layout->addWidget(m_linePlot.get());
+
   loadToolbarIcons();
   connectSignals();
 }
@@ -29,7 +34,7 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
   m_ui.rs_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
   m_ui.rs_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
-  m_ui.plot_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
+  m_ui.lp_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
@@ -44,7 +49,8 @@ void QtPreviewView::connectSignals() const {
   // Region selector toolbar
   connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectorExportToAdsClicked()));
   connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onSelectRectangularROIClicked()));
-  connect(m_ui.plot_ads_export_button, SIGNAL(clicked()), this, SLOT(on1DPlotExportToAdsClicked()));
+  // Line plot toolbar
+  connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -58,7 +64,7 @@ void QtPreviewView::onRegionSelectorExportToAdsClicked() const { m_notifyee->not
 
 void QtPreviewView::onSelectRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
 
-void QtPreviewView::on1DPlotExportToAdsClicked() const { m_notifyee->notify1DPlotExportAdsRequested(); }
+void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
@@ -71,6 +77,12 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
   }
   m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis));
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
+}
+
+void QtPreviewView::plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  auto const label = QString("preview_reduced_ws");
+  m_linePlot->removeSpectrum(label);
+  m_linePlot->addSpectrum(label, workspace);
 }
 
 QLayout *QtPreviewView::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }

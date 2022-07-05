@@ -171,7 +171,7 @@ public:
     EXPECT_CALL(*mockModel, exportReducedWsToAds()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
 
-    presenter.notify1DPlotExportAdsRequested();
+    presenter.notifyLinePlotExportAdsRequested();
   }
 
   void test_sum_banks_completed_plots_region_selector() {
@@ -215,6 +215,19 @@ public:
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
                                                makeInstViewModel(), std::move(mockRegionSelector_uptr)));
     presenter.notifyRegionChanged();
+  }
+
+  void test_line_plot_is_displayed_when_reduction_completed() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto lineLabel = std::string("line_label");
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+
+    EXPECT_CALL(*mockModel, getReducedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockView, plotLinePlot(ws)).Times(1);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    presenter.notifyReductionCompleted();
   }
 
 private:

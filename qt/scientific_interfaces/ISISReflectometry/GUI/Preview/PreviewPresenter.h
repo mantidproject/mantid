@@ -61,7 +61,7 @@ public:
   void notifyInstViewShapeChanged() override;
 
   void notifyRegionSelectorExportAdsRequested() override;
-  void notify1DPlotExportAdsRequested() override;
+  void notifyLinePlotExportAdsRequested() override;
 
   void notifyRectangularROIModeRequested() override;
 
