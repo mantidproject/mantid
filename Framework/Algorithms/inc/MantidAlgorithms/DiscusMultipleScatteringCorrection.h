@@ -34,7 +34,7 @@ struct ComponentWorkspaceMapping {
   std::string_view materialName;
   API::MatrixWorkspace_sptr SQ;
   API::MatrixWorkspace_sptr logSQ;
-  std::shared_ptr<DataObjects::Histogram1D> QSQIntegral;
+  std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor;
   API::MatrixWorkspace_sptr QSQ;
   API::MatrixWorkspace_sptr InvPOfQ;
   int scatterCount = 0;
@@ -74,7 +74,7 @@ protected:
   std::tuple<double, int> sampleQW(const API::MatrixWorkspace_sptr &CumulativeProb, double x);
   double interpolateSquareRoot(const API::ISpectrum &histToInterpolate, double x);
   double interpolateGaussian(const API::ISpectrum &histToInterpolate, double x);
-  double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w, double q);
+  double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w, double q, double k);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
   void integrateCumulative(const Mantid::HistogramData::Histogram &h, const double xmin, const double xmax,
                            std::vector<double> &resultX, std::vector<double> &resultY);
@@ -135,6 +135,7 @@ private:
   Kernel::V3D m_sourcePos;
   std::shared_ptr<const Geometry::ReferenceFrame> m_refframe;
   const Geometry::SampleEnvironment *m_env{nullptr};
+  bool m_NormalizeSQ{};
 };
 } // namespace Algorithms
 } // namespace Mantid

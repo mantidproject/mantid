@@ -95,9 +95,8 @@ public:
     alg->setProperty("NeutronPathsMultiple", 10000);
     alg->setProperty("ImportanceSampling", true);
     alg->execute();
-    Mantid::API::WorkspaceGroup_sptr output =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-    Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    auto wsPtr = output->getItem("MuscatResults_Scatter_2");
     auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
 
     // validate that the max scatter angle is ~120 degrees (peak is at 120.0 but slight tail)
@@ -145,7 +144,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
       std::vector<std::string> wsNames = {"MuscatResults_Scatter_1_NoAbs",      "MuscatResults_Scatter_1",
                                           "MuscatResults_Scatter_1_Integrated", "MuscatResults_Scatter_2",
@@ -178,9 +177,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
       // calculate result analytically
       const int SPECTRUMINDEXTOTEST = 1;
@@ -215,11 +214,11 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
       // check single scatter result still matches analytical result
       const int SPECTRUMINDEXTOTEST = 1;
@@ -266,11 +265,11 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
       // check single scatter result still matches analytical result
       const int SPECTRUMINDEXTOTEST = 1;
@@ -317,9 +316,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
       // check single scatter result still matches analytical result
       const auto &mat = inputWorkspace->sample().getMaterial();
@@ -509,9 +508,9 @@ public:
     alg->execute();
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
       // validate that the max scatter angle is ~61.5 degrees
       for (size_t i = 0; i < NTHETA; i++) {
@@ -633,11 +632,11 @@ public:
     alg->execute();
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
 
       const int SPECTRUMINDEXTOTEST = 2; // 20 degrees
@@ -707,6 +706,77 @@ public:
     for (size_t i = 0; i < ws->getNumberHistograms(); i++)
       ws->getSpectrum(i).clearDetectorIDs();
     TS_ASSERT_THROWS(alg.getXMinMax(*ws, xmin, xmax), const std::runtime_error &);
+  }
+
+  void test_SQ_normalisation() {
+    // run variation on elastic delta function test but with less scenarios to check normalisation behaviour
+    const double THICKNESS = 0.001; // metres
+
+    const int NTHETA = 900;
+    const double ang_inc = 180.0 / NTHETA;
+    auto inputWorkspace =
+        SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+
+    auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3);
+    SofQWorkspace->mutableX(0) = {0.9985, 0.9995, 1.0005};
+    // S(Q) zero everywhere apart from spike at Q=1. Height chosen here so that S(Q) properly normalised
+    // ie integral of QS(Q) ~2k^2 for k=1
+    SofQWorkspace->mutableY(0) = {0., 2000., 0.};
+    SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+
+    auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
+    alg->initialize();
+    alg->setRethrows(true);
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("StructureFactorWorkspace", SofQWorkspace));
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    const int NSCATTERINGS = 2;
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 1000);
+    alg->setProperty("NeutronPathsMultiple", 1000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->execute();
+    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+
+    SofQWorkspace->mutableY(0) = {0., 4000., 0.};
+    alg->setProperty("StructureFactorWorkspace", SofQWorkspace);
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 1000);
+    alg->setProperty("NeutronPathsMultiple", 1000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->execute();
+    output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto doubleScatterResult2 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+
+    SofQWorkspace->mutableY(0) = {0., 4000., 0.};
+    alg->setProperty("StructureFactorWorkspace", SofQWorkspace);
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 1000);
+    alg->setProperty("NeutronPathsMultiple", 1000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->setProperty("NormalizeStructureFactors", true);
+    alg->execute();
+    output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto doubleScatterResult3 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+
+    // without normalisation - scaling S(Q) on a calc with a single material should scale the result by same factor.
+    // This is due to the S(Q) factor used for the track from final scatter to detector
+    TS_ASSERT_DELTA(doubleScatterResult2->y(0)[0], 2 * doubleScatterResult->y(0)[0], 1E-6);
+    // with normalisation - scaling a properly normalised S(Q) shouldn't make a difference
+    TS_ASSERT_DELTA(doubleScatterResult3->y(0)[0], doubleScatterResult->y(0)[0], 1E-6);
+
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
   }
 
   //---------------------------------------------------------------------------

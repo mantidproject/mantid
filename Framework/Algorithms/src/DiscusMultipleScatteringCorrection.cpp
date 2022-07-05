@@ -159,6 +159,10 @@ void DiscusMultipleScatteringCorrection::init() {
   declareProperty("SimulateEnergiesIndependently", false,
                   "For inelastic calculation, whether the results for adjacent energy transfer bins are simulated "
                   "separately. Currently applies to Direct geometry only");
+  declareProperty("NormalizeStructureFactors", false,
+                  "Enable normalization of supplied structure factor(s). May be required when running a calculation "
+                  "involving more than one material where the normalization of the default S(Q)=1 structure factor "
+                  "doesn't match the normalization of a supplied non-isotropic structure factor");
 }
 
 /**
@@ -388,6 +392,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   size_t nEnvComponents = 0;
   if (inputWS->sample().hasEnvironment())
     nEnvComponents = inputWS->sample().getEnvironment().nelements();
+  m_SQWSs.clear();
   if (SQWSGroup) {
     std::string matName = inputWS->sample().getMaterial().name();
     auto SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
@@ -460,6 +465,8 @@ void DiscusMultipleScatteringCorrection::exec() {
                     << inputNbins << ".\n ";
     nSimulationPoints = inputNbins;
   }
+
+  m_NormalizeSQ = getProperty("NormalizeStructureFactors");
 
   const bool useSparseInstrument = getProperty("SparseInstrument");
   SparseWorkspace_sptr sparseWS;
@@ -931,11 +938,11 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
         QSQIntegrals.push_back(normalisedIntegral);
       }
     }
-    auto QSQIntegral = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
-                                                                  HistogramData::Histogram::YMode::Frequencies);
-    QSQIntegral->dataX() = finalkValues;
-    QSQIntegral->dataY() = QSQIntegrals;
-    SQWSMapping.QSQIntegral = QSQIntegral;
+    auto QSQScaleFactor = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
+                                                                     HistogramData::Histogram::YMode::Frequencies);
+    QSQScaleFactor->dataX() = finalkValues;
+    QSQScaleFactor->dataY() = QSQIntegrals;
+    SQWSMapping.QSQScaleFactor = QSQScaleFactor;
   }
 }
 
@@ -1182,7 +1189,7 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
  * @return The interpolated S(Q,w) value
  */
 double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w,
-                                                         double q) {
+                                                         double q, double k) {
   double SQ = 0.;
   int iW = -1;
   auto wAxis = dynamic_cast<NumericAxis *>(SQWSMapping.SQ->getAxis(1));
@@ -1209,7 +1216,10 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
                                q);
   }
 
-  return SQ;
+  // normalization factor for S(Q) same as for Q.S(Q)
+  double SQScalingFactor = m_NormalizeSQ ? interpolateFlat(*SQWSMapping.QSQScaleFactor, k) : 1;
+
+  return SQ / SQScalingFactor;
 }
 
 /**
@@ -1353,7 +1363,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
                                         });
       assert(componentWSIt != componentWorkspaces.end());
       auto componentWSMapping = *componentWSIt; // to help debugging
-      double SQ = Interpolate2D(componentWSMapping, finalW, q);
+      double SQ = Interpolate2D(componentWSMapping, finalW, q, k);
       double AT2 = 1;
       for (auto it = track.cbegin(); it != track.cend(); it++) {
         double sigma_total;
@@ -1406,9 +1416,9 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   return {qmin, qrange};
 }
 
-double DiscusMultipleScatteringCorrection::getQSQIntegral(const ISpectrum &QSQIntegral, double k) {
+double DiscusMultipleScatteringCorrection::getQSQIntegral(const ISpectrum &QSQScaleFactor, double k) {
   // the QSQIntegrals were divided by k^2 so in theory they should be ~flat
-  return interpolateFlat(QSQIntegral, k) * 2 * k * k;
+  return interpolateFlat(QSQScaleFactor, k) * 2 * k * k;
 }
 
 // update track direction and weight
@@ -1466,7 +1476,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
     if (SQ > 0) {
-      double integralQSQ = getQSQIntegral(*componentWSIt->QSQIntegral, kinc);
+      double integralQSQ = getQSQIntegral(*componentWSIt->QSQScaleFactor, kinc);
       assert(integralQSQ != 0.);
       weight = weight / integralQSQ;
     } else
