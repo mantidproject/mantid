@@ -25,6 +25,7 @@ public:
   virtual void notifyInstViewShapeChanged() = 0;
 
   virtual void notifyRegionSelectorExportAdsRequested() = 0;
+  virtual void notify1DPlotExportAdsRequested() = 0;
 
   // TODO implement edit ROI button and ROI-changed callback
   // virtual void notifyEditROIRequested() = 0;

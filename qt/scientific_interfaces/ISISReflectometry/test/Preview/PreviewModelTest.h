@@ -152,12 +152,40 @@ public:
     model.exportSummedWsToAds();
   }
 
+  void test_export_reduced_ws_to_ads() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto ws = generateReducedWs(mockJobManager, model);
+
+    model.exportReducedWsToAds();
+    auto &ads = AnalysisDataService::Instance();
+    const std::string expectedName = "preview_reduced_ws";
+
+    TS_ASSERT(ads.doesExist(expectedName));
+    TS_ASSERT_EQUALS(ws, ads.retrieveWS<MatrixWorkspace>(expectedName));
+    ads.remove(expectedName);
+  }
+
+  void test_export_reduced_ws_with_no_ws_set_does_not_throw() {
+    PreviewModel model;
+    // This should emit an error, but we cannot observe this from our test
+    model.exportReducedWsToAds();
+  }
+
 private:
   MatrixWorkspace_sptr generateSummedWs(MockJobManager &mockJobManager, PreviewModel &model) {
     auto expectedWs = createWorkspace();
     auto wsSumBanksEffect = [&expectedWs](PreviewRow &row) { row.setSummedWs(expectedWs); };
     ON_CALL(mockJobManager, startSumBanks(_)).WillByDefault(Invoke(wsSumBanksEffect));
     model.sumBanksAsync(mockJobManager);
+    return expectedWs;
+  }
+
+  MatrixWorkspace_sptr generateReducedWs(MockJobManager &mockJobManager, PreviewModel &model) {
+    auto expectedWs = createWorkspace();
+    auto wsReduceEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    ON_CALL(mockJobManager, startReduction(_)).WillByDefault(Invoke(wsReduceEffect));
+    model.reduceAsync(mockJobManager);
     return expectedWs;
   }
 
