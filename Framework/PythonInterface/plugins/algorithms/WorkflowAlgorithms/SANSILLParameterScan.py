@@ -12,7 +12,7 @@ from mantid.simpleapi import *
 from SANSILLAutoProcess import needs_loading, needs_processing
 
 
-class SANSILLParameterScan(PythonAlgorithm):
+class SANSILLParameterScan(DataProcessorAlgorithm):
     """
     Performs treatment for scans along a parameter for D16.
     """
@@ -104,11 +104,7 @@ class SANSILLParameterScan(PythonAlgorithm):
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
 
-        # TODO copy that from reduction
-        self.declareProperty(name='NormaliseBy',
-                             defaultValue='Time',
-                             validator=StringListValidator(['None', 'Time', 'Monitor']),
-                             doc='Choose the normalisation type.')
+        self.copyProperties("SANSILLReduction", ["NormaliseBy"], version=2)
 
         self.declareProperty('Observable', 'Omega.value',
                              doc='Parameter from the sample logs along which the scan is made')
