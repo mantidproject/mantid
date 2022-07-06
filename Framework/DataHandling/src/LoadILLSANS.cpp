@@ -126,7 +126,7 @@ void LoadILLSANS::exec() {
     double distance;
     try {
       distance = firstEntry.getFloat(instrumentPath + "/Det/value") / 1000; // mm to metre
-    } catch (...) {
+    } catch (std::runtime_error &) {
       distance = 0;
     }
     const double angle = firstEntry.getFloat(instrumentPath + "/Gamma/value");
