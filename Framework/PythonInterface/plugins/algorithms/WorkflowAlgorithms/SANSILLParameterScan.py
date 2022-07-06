@@ -4,10 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import *
-from mantid.kernel import *
+from mantid.kernel import IntBoundedValidator, Direction
 from mantid.simpleapi import *
 from SANSILLAutoProcess import needs_loading, needs_processing
 
@@ -51,7 +50,6 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
             issues["OutputJoinedWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
             issues["OutputWorkspace"] = "Please provide either OutputJoinedWorkspace, OutputWorkspace or both."
         if self.getProperty('PixelYmin').value > self.getProperty("PixelYmax").value:
-            print('ymin', self.getPropertyValue('PixelYmin'), 'yamx', type(self.getProperty('PixelYmax').value))
             issues["PixelYMin"] = "YMin needs to be lesser than YMax"
             issues["PixelYMax"] = "YMax needs to be greater than YMin"
         return issues
@@ -128,16 +126,10 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         _, load_ws_name = needs_loading(self.sample, "Load")
         Load(Filename=self.sample, OutputWorkspace=load_ws_name, startProgress=0, endProgress=0.7)
 
-        # TODO remove that when monitors are added to nexus
-        ws = mtd[load_ws_name]
-        x_val = ws.dataX(0)
-        ws.setX(ws.getNumberHistograms() - 1, x_val)
-        ws.setX(ws.getNumberHistograms() - 2, x_val)
-
         sorted_data = load_ws_name + '_sorted' if not self.output_joined else self.output_joined
         SortXAxis(InputWorkspace=load_ws_name, OutputWorkspace=sorted_data,
                   startProgress=0.75, endProgress=0.8)
-        mtd[load_ws_name].delete()
+        DeleteWorkspace(Workspace=load_ws_name)
 
         self.load_input_files()
         self.reduce(sorted_data)
@@ -148,7 +140,7 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         self.group_detectors(sorted_data)
 
         if not self.output_joined:
-            mtd[sorted_data].delete()
+            DeleteWorkspace(Workspace=sorted_data)
         else:
             self.setProperty('OutputJoinedWorkspace', mtd[self.output_joined])
 
@@ -197,13 +189,13 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
         process_container, container_name = needs_processing(self.container, 'Container')
 
         if process_container:
-            # TODO check if it necessary to put the default mask here
             self.progress.report(0, 'Processing container')
             SANSILLReduction(Run=self.container,
                              ProcessAs='EmptyContainer',
                              OutputWorkspace=container_name,
                              AbsorberInputWorkspace=absorber_name,
                              CacheSolidAngle=True,
+                             DefaultMaskWorkspace=self.default_mask,
                              NormaliseBy=self.normalise,
                              Version=2)
 
