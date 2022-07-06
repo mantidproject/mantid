@@ -70,8 +70,7 @@ int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/entry0/mode") &&
       ((descriptor.pathExists("/entry0/reactor_power") && descriptor.pathExists("/entry0/instrument_name")) ||
        (descriptor.pathExists("/entry0/instrument/name") && descriptor.pathExists("/entry0/acquisition_mode") &&
-        !descriptor.pathExists("/entry0/instrument/Detector")))) // serves to remove the TOF
-                                                                 // instruments
+        !descriptor.pathExists("/entry0/instrument/Detector")))) // serves to remove the TOF instruments
   {
     return 80;
   } else {
@@ -240,6 +239,10 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
   return pos;
 }
 
+/**
+ * @brief LoadILLSANS::setNumberOfMonitors
+ * Set the number of monitor attribute depending on the instrument loaded.
+ */
 void LoadILLSANS::setNumberOfMonitors() { m_numberOfMonitors = this->m_instrumentName == "D16B" ? 1 : 2; }
 
 /**
@@ -286,16 +289,24 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   m_isD16Omega = (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
 
-  if (m_instrumentName == "D16" && data.dim1() == 1152 && data.dim2() == 192) {
-    m_instrumentName = "D16B";
-    m_isD16Omega = true;
-    setNumberOfMonitors();
+  if (m_instrumentName == "D16") {
+    const size_t numberOfWiresInD16B = 1152;
+    const size_t numberOfPixelsPerWireInD16B = 192;
+
+    // Check if the instrument loaded is D16B. It cannot be differentiated from D16 by the structure of the nexus file
+    // only, so we need to check the data size.
+    if (data.dim1() == numberOfWiresInD16B && data.dim2() == numberOfPixelsPerWireInD16B) {
+      m_instrumentName = "D16B";
+      m_isD16Omega = true;
+      setNumberOfMonitors(); // update the number of monitors now that the instrument changed.
+    }
   }
 
   int numberOfTubes, numberOfPixelsPerTubes, numberOfChannels;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTubes);
 
-  MultichannelType type = (numberOfChannels != 1) ? MultichannelType::SCAN : MultichannelType::TOF;
+  // For these monochromatic instruments, one bin is "TOF" mode, and more than that is a scan
+  MultichannelType type = (numberOfChannels == 1) ? MultichannelType::TOF : MultichannelType::SCAN;
 
   numberOfHistograms = numberOfPixelsPerTubes * numberOfTubes + m_numberOfMonitors;
 
@@ -654,13 +665,13 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
 
   if (m_instrumentName == "D16B") {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int i = 0; i < numberOfTubes; i++) {
-      for (int j = 0; j < numberOfPixelsPerTube; j++) {
+    for (int tubeIndex = 0; tubeIndex < numberOfTubes; ++tubeIndex) {
+      for (int pixelIndex = 0; pixelIndex < numberOfPixelsPerTube; ++pixelIndex) {
         std::vector<int> spectrum(numberOfChannels);
-        for (int k = 0; k < numberOfChannels; k++) {
-          spectrum[k] = data(k, i, j);
+        for (int channelIndex = 0; channelIndex < numberOfChannels; ++channelIndex) {
+          spectrum[channelIndex] = data(channelIndex, tubeIndex, pixelIndex);
         }
-        const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
+        const size_t index = firstIndex + tubeIndex * numberOfPixelsPerTube + pixelIndex;
         const HistogramData::Counts histoCounts(spectrum.begin(), spectrum.end());
         const HistogramData::CountVariances histoVariances(spectrum.begin(), spectrum.end());
 
@@ -673,15 +684,15 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
   } else {
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int i = 0; i < numberOfTubes; ++i) {
-      for (int j = 0; j < numberOfPixelsPerTube; ++j) {
+    for (int tubeIndex = 0; tubeIndex < numberOfTubes; ++tubeIndex) {
+      for (int pixelIndex = 0; pixelIndex < numberOfPixelsPerTube; ++pixelIndex) {
         int *data_p;
         if (m_isD16Omega) {
-          data_p = &data(0, i, j);
+          data_p = &data(0, tubeIndex, pixelIndex);
         } else {
-          data_p = &data(i, j, 0);
+          data_p = &data(tubeIndex, pixelIndex, 0);
         }
-        const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
+        const size_t index = firstIndex + tubeIndex * numberOfPixelsPerTube + pixelIndex;
         const HistogramData::Counts histoCounts(data_p, data_p + numberOfChannels);
         const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
         m_localWorkspace->setCounts(index, histoCounts);
