@@ -655,17 +655,17 @@ public:
   }
 
   void test_direct_on_realistic_structure_factor_with_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, true, false, -1, 0.00023, 0.00019,
-                                                     2E-05);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, true, false, -1, 0.00025, 0.00022,
+                                                     5E-05);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, false, -1, 0.00023, 0.00019,
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, false, -1, 0.00025, 0.00022,
                                                      1E-04);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling_simulate_w_separately() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, true, -1, 0.00023, 0.00019,
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, true, -1, 0.00025, 0.00022,
                                                      1E-04);
   }
 
