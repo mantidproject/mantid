@@ -80,5 +80,11 @@ private:
   std::unique_ptr<IInstViewModel> m_instViewModel;
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
+
+  void plotInstView();
+  void plotRegionSelector();
+  void plotLinePlot();
+  void runSumBanks();
+  void runReduction();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

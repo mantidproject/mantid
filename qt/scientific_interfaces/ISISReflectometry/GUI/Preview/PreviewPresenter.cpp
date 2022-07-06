@@ -68,17 +68,24 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
-  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
-                       m_instViewModel->getAxis());
+  plotInstView();
   // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_view->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
-  // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
+  // Perform summing banks to update the next plot, if possible
+  runSumBanks();
 }
 
-void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+void PreviewPresenter::notifySumBanksCompleted() {
+  plotRegionSelector();
+  // Perform reduction to update the next plot, if possible
+  runReduction();
+}
 
-void PreviewPresenter::notifyReductionCompleted() { m_view->plotLinePlot(m_model->getReducedWs()); }
+void PreviewPresenter::notifyReductionCompleted() {
+  // Update the final plot
+  plotLinePlot();
+}
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
@@ -106,11 +113,9 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   notifyInstViewEditRequested();
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
-  auto selectionStr = m_model->detIDsToString(indices);
-  g_log.debug(selectionStr);
-
   m_model->setSelectedBanks(indices);
-  m_model->sumBanksAsync(*m_jobManager);
+  // Execute summing the selected banks
+  runSumBanks();
 }
 
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
@@ -124,12 +129,27 @@ void PreviewPresenter::notifyRegionChanged() {
   // Set the selection from the view
   auto roi = m_regionSelector->getRegion();
   m_model->setSelectedRegion(roi);
-  g_log.notice("Running reduction on ROI: " + m_model->getProcessingInstructions());
+  runReduction();
+}
+
+void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
+
+void PreviewPresenter::plotInstView() {
+  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
+                       m_instViewModel->getAxis());
+}
+
+void PreviewPresenter::plotRegionSelector() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+
+void PreviewPresenter::plotLinePlot() { m_view->plotLinePlot(m_model->getReducedWs()); }
+
+void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
+
+void PreviewPresenter::runReduction() {
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
   // Perform the reduction
   m_model->reduceAsync(*m_jobManager);
 }
 
-void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
