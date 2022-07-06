@@ -58,7 +58,7 @@ Using the new variables the integral is:
 
 .. math::
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{q_i^{min}}^{q_i^{max}} dQ_i \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{\int_{w_i^{min}}^{w_i^{max}} \int_{q_i^{min}}^{q_i^{max}} Q_i S(Q_i, \omega_i) dQ_i} S(Q_i, \omega_i) \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{q_i^{min}}^{q_i^{max}} dQ_i \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{\int_{w_i^{min}}^{w_i^{max}} \int_{q_i^{min}}^{q_i^{max}} Q_i S(Q_i, \omega_i) dQ_i d\omega_i} S(Q_i, \omega_i) \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
 
 This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`u_i` between 0 and 1 and values for :math:`Q_i` between :math:`q_i^{min}` and :math:`q_i^{max}`.
 A simulated path is traced through the sample to enable the :math:`l_i^{\ max}` values to be calculated. The path is traced by calculating the :math:`l_i`, :math:`\theta` and :math:`\phi` values as follows from the random variables. The code keeps a note of the start coordinates of the current path segment and updates it when moving to the next segment using these randomly selected lengths and directions:
@@ -75,8 +75,8 @@ The final Monte Carlo integration that is actually performed by the code is as f
 
    J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{<Q S(Q, \omega)>} S(Q_i, \omega_i) \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
 
-The purpose of replacing :math:`2 k^2` with :math:`\int Q S(Q) dQ` can now be seen because it avoids the need to multiply by an integration range across :math:`dQ` when converting the integral to a Monte Carlo integration.
-This is useful in the inelastic version of this algorithm where the integration of the structure factor is over two dimensions :math:`Q` and :math:`\omega` and the area of :math:`Q\omega` space that has been integrated over is less obvious.
+The purpose of replacing :math:`2 k^2` with :math:`\int Q S(Q, \omega) dQ d\omega` can now be seen because it avoids the need to multiply by an integration range across :math:`dQ` and :math:`d\omega` when converting the integral to a Monte Carlo integration.
+This is useful in the inelastic version of this algorithm where the kinematically accessible area of :math:`Q\omega` space that has been integrated over will not be rectangular.
 
 This is similar to the formulation described in the Mancinelli paper except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
 
