@@ -113,10 +113,10 @@ class SANSILLParameterScan(PythonAlgorithm):
         self.declareProperty('Observable', 'Omega.value',
                              doc='Parameter from the sample logs along which the scan is made')
 
-        self.declareProperty('PixelYMin', 140, validator=IntBoundedValidator(lower=0),
-                             doc='Minimal y-index taken in the integration')
-        self.declareProperty('PixelYMax', 180, validator=IntBoundedValidator(lower=0),
-                             doc='Maximal y-index taken in the integration')
+        self.declareProperty('PixelYMin', 3, validator=IntBoundedValidator(lower=0),
+                             doc='Minimal y-index taken in the integration. Default is based on D16B geometry.')
+        self.declareProperty('PixelYMax', 189, validator=IntBoundedValidator(lower=0),
+                             doc='Maximal y-index taken in the integration. Default is based on D16B geometry.')
 
         self.setPropertyGroup('SensitivityMap', 'Options')
         self.setPropertyGroup('DefaultMaskFile', 'Options')
