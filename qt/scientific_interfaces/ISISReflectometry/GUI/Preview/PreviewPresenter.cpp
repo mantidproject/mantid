@@ -25,11 +25,15 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_regionSelector(std::move(dependencies.regionSelector)) {
+      m_regionSelector(std::move(dependencies.regionSelector)), m_stubRegionObserver{new StubRegionObserver} {
 
   if (!m_regionSelector) {
     m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
   }
+  // stub observer subscribes to the region selector
+  m_regionSelector->subscribe(m_stubRegionObserver);
+  // we subscribe to the stub observer
+  m_stubRegionObserver->subscribe(this);
 
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
@@ -112,5 +116,11 @@ void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->expor
 void PreviewPresenter::notifyRectangularROIModeRequested() {
   m_view->setRectangularROIState(true);
   m_regionSelector->addRectangularRegion();
+}
+
+void PreviewPresenter::notifyRegionChanged() {
+  // TODO Get ROI from m_regionSelector and perform the reduction
+  auto roi = m_regionSelector->getRegion();
+  g_log.notice("Region of interest was changed: " + std::to_string(roi[0]) + " to " + std::to_string(roi[1]));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

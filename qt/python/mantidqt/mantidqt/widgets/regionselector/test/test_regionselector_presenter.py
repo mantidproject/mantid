@@ -78,6 +78,17 @@ class RegionSelectorTest(unittest.TestCase):
 
         self.assertIsNotNone(region_selector._selector)
 
+    def test_on_rectangle_selected_notifies_observer(self):
+        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        mock_observer = Mock()
+        region_selector.subscribe(mock_observer)
+
+        region_selector.add_rectangular_region()
+        region_selector._on_rectangle_selected(Mock(), Mock())
+
+        mock_observer.notifyRegionChanged.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

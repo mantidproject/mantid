@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
+#include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
@@ -13,6 +14,8 @@
 
 #include <QLayout>
 #include <QWidget>
+#include <boost/python/extract.hpp>
+#include <vector>
 
 using Mantid::API::Workspace_sptr;
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -63,6 +66,13 @@ void RegionSelector::show() const {
   getView().attr("show")();
 }
 
+void RegionSelector::subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) {
+  GlobalInterpreterLock lock;
+  boost::python::dict kwargs;
+  kwargs["notifyee"] = notifyee;
+  pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
+}
+
 void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   GlobalInterpreterLock lock;
   boost::python::dict kwargs;
@@ -73,5 +83,15 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
 void RegionSelector::addRectangularRegion() {
   GlobalInterpreterLock lock;
   pyobj().attr("add_rectangular_region")();
+}
+
+std::vector<double> RegionSelector::getRegion() {
+  GlobalInterpreterLock lock;
+  auto pyValues = pyobj().attr("get_region")();
+  auto result = std::vector<double>();
+  for (int i = 0; i < len(pyValues); ++i) {
+    result.push_back(boost::python::extract<double>(pyValues[i]));
+  }
+  return result;
 }
 } // namespace MantidQt::Widgets

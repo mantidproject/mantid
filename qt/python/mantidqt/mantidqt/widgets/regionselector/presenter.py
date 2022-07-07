@@ -9,6 +9,7 @@ from ..observers.observing_presenter import ObservingPresenter
 from ..sliceviewer.models.dimensions import Dimensions
 from ..sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
 from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
+from mantid.api import RegionSelectorObserver
 
 # 3rd party imports
 from matplotlib.widgets import RectangleSelector
@@ -19,13 +20,17 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if ws and WorkspaceInfo.get_ws_type(ws) != WS_TYPE.MATRIX:
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
 
+        self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent)
         super().__init__(ws, self.view._data_view)
-        self.selection = None
+        self._selection: list[float] = None
 
         if ws:
             self._initialise_dimensions(ws)
             self._set_workspace(ws)
+
+    def subscribe(self, notifyee: RegionSelectorObserver):
+        self.notifyee = notifyee
 
     def dimensions_changed(self) -> None:
         self.new_plot()
@@ -69,6 +74,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             spancoords='pixels',
             interactive=True)
 
+    def get_region(self):
+        return self._selection
+
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
         self.view.create_axes_orthogonal(
@@ -85,5 +93,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         :param eclick: Event marking where the mouse was clicked
         :param erelease: Event marking where the mouse was released
         """
-        self.selection = (eclick.ydata, erelease.ydata)
-        print('Selected spectra', self.selection)
+        # extents contains x1, x2, y1, y2. Just store y (spectra) for now
+        self._selection = [self._selector.extents[2], self._selector.extents[3]]
+        if self.notifyee:
+            self.notifyee.notifyRegionChanged()

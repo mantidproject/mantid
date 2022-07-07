@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/RegionSelector/DllConfig.h"
 
@@ -15,7 +16,9 @@ namespace MantidQt::Widgets {
 class MANTID_REGIONSELECTOR_DLL IRegionSelector {
 public:
   virtual ~IRegionSelector() = default;
+  virtual void subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) = 0;
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
   virtual void addRectangularRegion() = 0;
+  virtual std::vector<double> getRegion() = 0;
 };
 } // namespace MantidQt::Widgets
