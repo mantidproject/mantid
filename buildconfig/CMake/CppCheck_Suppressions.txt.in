@@ -236,5 +236,3 @@ unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtedito
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:277
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:114
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
-returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
-
