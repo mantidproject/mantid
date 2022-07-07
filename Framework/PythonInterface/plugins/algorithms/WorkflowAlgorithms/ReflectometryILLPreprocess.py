@@ -397,10 +397,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if angle_option == 'SampleAngle':
                 bragg_angle = common.sample_angle(first_run)
             elif angle_option == 'DetectorAngle':
-                bragg_angle = -self.getProperty('DirectBeamDetectorAngle').value
-                # in this clause we still need to correct for the difference of foreground
-                # centres between direct and reflected beams
-                # but we need first to load the reflected beam to be able to do this
+                bragg_angle = 0.0
+                # in this case, we still need to correct for the difference of foreground
+                # centres between direct and reflected beams, and this can be done most clearly
+                # when the centre of the reflected beam is set at the beam axis
             elif angle_option == 'UserAngle':
                 bragg_angle = self.getProperty('BraggAngle').value
             load_options['BraggAngle'] = bragg_angle
