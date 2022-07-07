@@ -596,7 +596,8 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
         }
       }
       // Add average monitor counts to a property:
-      double averageMonitorCounts = std::accumulate(data(), data() + data.dim2(), 0) / static_cast<double>(data.dim2());
+      double averageMonitorCounts =
+          std::accumulate(data(), data() + data.dim2(), double(0)) / static_cast<double>(data.dim2());
       // make sure the monitor has values!
       if (averageMonitorCounts > 0) {
         API::Run &runDetails = m_localWorkspace->mutableRun();
@@ -636,7 +637,7 @@ size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, si
 
   // Add average monitor counts to a property:
   double averageMonitorCounts =
-      std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), 0) /
+      std::accumulate(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1(), double(0)) /
       static_cast<double>(scannedVariables.dim1());
 
   // make sure the monitor has values!
