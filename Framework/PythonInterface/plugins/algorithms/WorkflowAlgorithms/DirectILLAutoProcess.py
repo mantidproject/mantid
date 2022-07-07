@@ -784,7 +784,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             ws = self._apply_mask(ws)
 
         vanadium_diagnostics = 'diag_{}'.format(numor)
-        kwargs = {'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF'}
+        kwargs = dict()
         if self.vanadium_epp:
             kwargs[common.PROP_EPP_WS] = self.vanadium_epp
         DirectILLDiagnostics(
