@@ -63,7 +63,7 @@ def cc_calibrate_groups(data_ws,
     :param SkipCrossCorrelation: Skip cross correlation for specified groups
     :param PeakFunction: Peak function to use for extracting the offset
     :param SmoothNPoints: Number of points for smoothing spectra, for cross correlation ONLY
-    :return: Combined DiffCal workspace from all the different groups
+    :return: Combined DiffCal workspace from all the different groups, pixel skipped for cross correlation
     """
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
@@ -74,6 +74,7 @@ def cc_calibrate_groups(data_ws,
 
     _accum_cc = None
     to_skip = []
+    cc_mask = []
     for group in group_list:
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
         # for those parameters for which both a single value and a list is accepted. If a
@@ -134,11 +135,13 @@ def cc_calibrate_groups(data_ws,
                            OutputWorkspace='_tmp_group_cc')
 
             bin_range = (Xmax_group-Xmin_group)/Step
+
             GetDetectorOffsets(InputWorkspace='_tmp_group_cc',
                                Step=Step,
                                Xmin=-bin_range, XMax=bin_range,
                                DReference=DRef_group,
                                MaxOffset=1,
+                               MaskWorkspace='Mask_tmp_cc',
                                PeakFunction=pf_group,
                                OutputWorkspace='_tmp_group_cc')
 
@@ -175,6 +178,17 @@ def cc_calibrate_groups(data_ws,
 
             num_cycle += 1
 
+        if not cc_mask:
+            for i in range(mtd['Mask_tmp_cc'].getNumberHistograms()):
+                if mtd['Mask_tmp_cc'].readY(i)[0] == 1:
+                    cc_mask.append(1)
+                else:
+                    cc_mask.append(0)
+        else:
+            for i in range(mtd['Mask_tmp_cc'].getNumberHistograms()):
+                if mtd['Mask_tmp_cc'].readY(i)[0] == 1:
+                    cc_mask[i] = 1
+
         if not _accum_cc:
             _accum_cc = RenameWorkspace('_tmp_group_cc')
         else:
@@ -190,6 +204,10 @@ def cc_calibrate_groups(data_ws,
     DeleteWorkspace('_tmp_group_cc_raw')
     if cycling and '_tmp_group_cc_diffcal' in mtd:
         DeleteWorkspace('_tmp_group_cc_diffcal')
+
+    # Mask detectors which fail cross correlation.
+    cc_mask_spec = [i + 1 for i, item in enumerate(cc_mask) if item == 1]
+    MaskDetectors(data_ws, SpectraList=cc_mask_spec)
 
     return mtd[f'{output_basename}_cc_diffcal'], to_skip
 
@@ -492,6 +510,7 @@ def process_json(json_filename):
                                    previous_calibration,
                                    cc_kwargs=cc_kwargs,
                                    pdcal_kwargs=pdcal_kwargs)
+
     mask = mtd['group_calibration_pd_diffcal_mask']
 
     CreateGroupingWorkspace(InputWorkspace=ws,
