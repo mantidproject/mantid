@@ -35,7 +35,6 @@ public:
 
   MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
   MOCK_METHOD(void, reduceAsync, (IJobManager &), (override));
-  MOCK_METHOD(std::string, detIDsToString, (std::vector<Mantid::detid_t> const &), (const, override));
   MOCK_METHOD(void, exportSummedWsToAds, (), (const, override));
   MOCK_METHOD(void, exportReducedWsToAds, (), (const, override));
 };

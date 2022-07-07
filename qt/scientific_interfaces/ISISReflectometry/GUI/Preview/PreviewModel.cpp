@@ -106,10 +106,6 @@ void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
 }
 
-std::string PreviewModel::detIDsToString(std::vector<Mantid::detid_t> const &indices) const {
-  return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
-}
-
 void PreviewModel::exportSummedWsToAds() const {
   if (auto summedWs = m_runDetails->getSummedWs()) {
     AnalysisDataService::Instance().addOrReplace("preview_summed_ws", summedWs);
