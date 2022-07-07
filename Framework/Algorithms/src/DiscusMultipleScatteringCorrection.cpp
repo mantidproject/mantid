@@ -1189,7 +1189,7 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
  * @return The interpolated S(Q,w) value
  */
 double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w,
-                                                         double q, double k) {
+                                                         double q) {
   double SQ = 0.;
   int iW = -1;
   auto wAxis = dynamic_cast<NumericAxis *>(SQWSMapping.SQ->getAxis(1));
@@ -1216,10 +1216,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
                                q);
   }
 
-  // normalization factor for S(Q) same as for Q.S(Q)
-  double SQScalingFactor = m_NormalizeSQ ? interpolateFlat(*SQWSMapping.QSQScaleFactor, k) : 1;
-
-  return SQ / SQScalingFactor;
+  return SQ;
 }
 
 /**
@@ -1363,7 +1360,10 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
                                         });
       assert(componentWSIt != componentWorkspaces.end());
       auto componentWSMapping = *componentWSIt; // to help debugging
-      double SQ = Interpolate2D(componentWSMapping, finalW, q, k);
+      double SQ = Interpolate2D(componentWSMapping, finalW, q);
+      scatteringXSection = m_NormalizeSQ ? scatteringXSection / interpolateFlat(*(componentWSMapping.QSQScaleFactor), k)
+                                         : scatteringXSectionFull;
+
       double AT2 = 1;
       for (auto it = track.cbegin(); it != track.cend(); it++) {
         double sigma_total;
@@ -1376,7 +1376,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
         const double dl = it->distInsideObject;
         AT2 *= exp(-dl * vmu);
       }
-      weights.emplace_back(weight * AT2 * SQ * scatteringXSectionFull / (4 * M_PI));
+      weights.emplace_back(weight * AT2 * SQ * scatteringXSection / (4 * M_PI));
     } else {
       weights.emplace_back(0.);
     }
@@ -1441,7 +1441,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
     SQ = interpolateFlat(componentWSIt->SQ->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
-    auto &wValues = dynamic_cast<NumericAxis *>(/*m_logSQ*/ componentWSIt->SQ->getAxis(1))->getValues();
+    auto &wValues = dynamic_cast<NumericAxis *>(componentWSIt->SQ->getAxis(1))->getValues();
     // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
     // Note - Discus took different approach where it sampled q,w from kinematically accessible range only but it
     // only calculated for double scattering and easier to normalise in that case
@@ -1472,7 +1472,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
     double maxkf = toWaveVector(fromWaveVector(kinc) - wValues.front());
     double qrange = kinc + maxkf;
     QQ = qrange * rng.nextValue();
-    SQ = interpolateFlat /* interpolateGaussian(m_logSQ->getSpectrum(iW)*/ (componentWSIt->SQ->getSpectrum(iW), QQ);
+    SQ = interpolateGaussian(componentWSIt->logSQ->getSpectrum(iW), QQ);
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
     if (SQ > 0) {
