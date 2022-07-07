@@ -41,9 +41,6 @@
 		<parameter name="enable_elastic_peak_diagnostics" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
-		<parameter name="beam_stop_diagnostics_spectra" type="string" visible="false">
-			<value val=""/>
-		</parameter>
 		<parameter name="enable_incident_energy_calibration" type="bool" visible="false">
 			<value val="true" />
 		</parameter>
