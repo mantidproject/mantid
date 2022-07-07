@@ -211,6 +211,16 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="line_plot" native="true">
+          <property name="toolTip">
+           <string>Reduced data. Use right-click for plot options</string>
+          </property>
+          <property name="toolTipDuration">
+           <number>2000</number>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -242,6 +252,14 @@
   <tabstop>tableWidget_2</tabstop>
   <tabstop>pushButton_3</tabstop>
  </tabstops>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../../icons/resources/icons.qrc"/>
  </resources>

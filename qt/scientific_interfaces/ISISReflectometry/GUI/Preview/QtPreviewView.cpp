@@ -21,8 +21,6 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_ui.setupUi(this);
   m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
-  m_linePlot = std::make_unique<MantidWidgets::PreviewPlot>();
-  m_ui.line_plot_layout->addWidget(m_linePlot.get());
 
   loadToolbarIcons();
   connectSignals();
@@ -81,8 +79,9 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
 
 void QtPreviewView::plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   auto const label = QString("preview_reduced_ws");
-  m_linePlot->removeSpectrum(label);
-  m_linePlot->addSpectrum(label, workspace);
+  m_ui.line_plot->clear();
+  m_ui.line_plot->addSpectrum(label, workspace);
+  m_ui.line_plot->replot();
 }
 
 QLayout *QtPreviewView::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }
