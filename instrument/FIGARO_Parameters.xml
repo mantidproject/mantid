@@ -2,7 +2,7 @@
 <parameter-file instrument="FIGARO">
 
 	<component-link name="FIGARO">
-		<parameter name="deltaE-mode" type="string">
+		<parameter name="deltaE-mode" type="string" visible="false">
 			<value val="direct" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
@@ -43,15 +43,15 @@
 		<parameter name="conjoin_sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="chopper_window_opening">
+		<parameter name="chopper_window_opening" visible="false">
 		<!-- Chopper opening window [degrees]-->
 			<value val="45.0"/>
 		</parameter>
-		<parameter name="DH1Z">
+		<parameter name="DH1Z" visible="false">
 		 <!-- The sample to first height motor position along Z [m]-->
  		 	<value val="1.135" />
 		</parameter>
-		<parameter name="DH2Z">
+		<parameter name="DH2Z" visible="false" >
 		  <!-- The sample to second height motor position along Z [m]-->
 		  <value val="2.077" />
 		</parameter>
