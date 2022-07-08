@@ -57,23 +57,23 @@ class ScanExplorerPresenter:
 
         self.view.manage_buttons()
 
-    def on_file_selected(self, file: str):
+    def on_file_selected(self, file_path: str):
         """
         Slot triggered by the user selecting a file through the browser
-        @param file: the path to the file selected
+        @param file_path: the path to the file selected
         """
-        self.view.file_line_edit.setText(file)
+        self.view.file_line_edit.setText(file_path)
         self.on_line_edited()
 
     def on_line_edited(self):
         """
         Slot triggered by the line edit being validated.
         """
-        file = self.view.file_line_edit.text()
-        if path.isfile(file):
-            self.model.process_file(file)
+        file_path = self.view.file_line_edit.text()
+        if path.isfile(file_path):
+            self.model.process_file(file_path)
         else:
-            logger.warning("Path {} does not point to a valid file.".format(file))
+            logger.error("Path {} does not point to a valid file.".format(file_path))
 
     def on_dialog_accepted(self):
         """
