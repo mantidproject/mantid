@@ -257,16 +257,16 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             return (f"{self._spac}"
                     "SaveAscii('mat_{}'.format(workspace), "
                     f"'{self._export_path}/"
-                    "{{}}.csv'.format(workspace)"
+                    "{}.csv'.format(workspace)"
                     ", WriteSpectrumID=False)")
         return ''
 
     def _get_nexus_save_string(self):
         if self._nexus:
             return (f"{self._spac}SaveNexus"
-                    "('mat_{{}}'.format(workspace), "
+                    "('mat_{}'.format(workspace), "
                     f"'{self._export_path}/"
-                    "{{}}.nxs'.format("
+                    "{}.nxs'.format("
                     "workspace))")
         return ""
 
