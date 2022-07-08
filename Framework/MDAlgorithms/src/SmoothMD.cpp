@@ -403,10 +403,6 @@ void SmoothMD::exec() {
 
   // Get the input weighting workspace
   IMDHistoWorkspace_sptr weightingWS = this->getProperty("InputNormalizationWorkspace");
-  OptionalIMDHistoWorkspace_const_sptr optionalWeightingWS;
-  if (weightingWS) {
-    optionalWeightingWS = weightingWS;
-  }
 
   // Get the width vector
   std::vector<double> widthVector = this->getProperty("WidthVector");

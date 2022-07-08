@@ -227,7 +227,6 @@ void writeXYZPixeloffset(H5::Group &grp, const Geometry::ComponentInfo &compInfo
   bool yIsZero = isApproxZero(posy, PRECISION);
   bool zIsZero = isApproxZero(posz, PRECISION);
 
-  auto bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
 
   int rank = 1;
@@ -772,7 +771,6 @@ public:
       }
     }
 
-    H5::StrType dependencyStrType = strTypeOfSize(dependency);
     writeNXMonitorNumber(childGroup, monitorId);
 
     writeStrDataset(childGroup, BANK_NAME, monitorName);
@@ -795,7 +793,7 @@ public:
    * @param mappings : Spectra to detector mappings
    */
   void monitor(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo, const int monitorId,
-               const size_t index, SpectraMappings &mappings) {
+               const size_t index, const SpectraMappings &mappings) {
 
     auto childGroup = monitor(parentGroup, compInfo, monitorId, index);
     // Additional mapping information written.
@@ -867,7 +865,6 @@ public:
       }
     }
 
-    H5::StrType dependencyStrType = strTypeOfSize(dependency);
     writeXYZPixeloffset(childGroup, compInfo, index);
     writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 
@@ -892,7 +889,7 @@ public:
    * NXdetector will be extracted.
    */
   void detector(const H5::Group &parentGroup, const Geometry::ComponentInfo &compInfo, const std::vector<int> &detIds,
-                const size_t index, SpectraMappings &mappings) {
+                const size_t index, const SpectraMappings &mappings) {
 
     auto childGroup = detector(parentGroup, compInfo, detIds, index);
 
@@ -925,7 +922,7 @@ private:
 
   // function to create a simple sub-group that has a nexus class attribute,
   // inside a parent group.
-  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name, const std::string &nexusAttribute) {
+  H5::Group simpleNXSubGroup(const H5::Group &parent, const std::string &name, const std::string &nexusAttribute) {
     H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
     writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
     return subGroup;

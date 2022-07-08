@@ -179,8 +179,7 @@ QList<MatrixWorkspace_const_sptr> MantidTreeWidget::getSelectedMatrixWorkspaces(
         }
       }
     } else {
-      if (selectedWsNameSet.find(wsName) == selectedWsNameSet.end()) {
-        selectedWsNameSet.insert(wsName);
+      if (selectedWsNameSet.insert(wsName).second) {
         selectedWsNameList.emplace_back(wsName);
       }
     }
