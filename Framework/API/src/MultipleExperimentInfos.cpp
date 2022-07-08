@@ -26,6 +26,11 @@ MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos &
   this->copyExperimentInfos(other);
 }
 
+MultipleExperimentInfos &MultipleExperimentInfos::operator=(const MultipleExperimentInfos &other) {
+  this->copyExperimentInfos(other);
+  return *this;
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Get the ExperimentInfo for the given Experiment-Info Index
  *

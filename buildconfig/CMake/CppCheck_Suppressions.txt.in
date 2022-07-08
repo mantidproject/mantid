@@ -31,11 +31,6 @@ unusedPrivateFunction
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
 
 // --------- Missing copy assignment / constructors -------------------
-// We don't want more creeping in so just mark these one by one
-
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MultipleExperimentInfos.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/SingleValueParameter.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/VectorParameter.h
 
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCat.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCatEntity.h

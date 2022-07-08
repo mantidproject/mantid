@@ -30,6 +30,7 @@ public:
   SingleValueParameter(ValType value);
   SingleValueParameter();
   SingleValueParameter(const SingleValueParameter<Derived, ValType> &other);
+  SingleValueParameter<Derived, ValType> &operator=(const SingleValueParameter<Derived, ValType> &other);
   std::string toXMLString() const override;
   Derived &operator=(const Derived &other);
   bool operator==(const Derived &other) const;
@@ -100,6 +101,13 @@ bool SingleValueParameter<Derived, ValType>::operator!=(const Derived &other) co
 template <typename Derived, typename ValType>
 SingleValueParameter<Derived, ValType>::SingleValueParameter(const SingleValueParameter<Derived, ValType> &other)
     : m_value(other.m_value), m_isValid(other.m_isValid) {}
+
+template <typename Derived, typename ValType>
+SingleValueParameter<Derived, ValType> &
+SingleValueParameter<Derived, ValType>::operator=(const SingleValueParameter<Derived, ValType> &other) {
+  m_value = other.m_value;
+  m_isValid = other.m_isValid;
+}
 
 /// Default constructor. Object is created in invalid state.
 template <typename Derived, typename ValType>
