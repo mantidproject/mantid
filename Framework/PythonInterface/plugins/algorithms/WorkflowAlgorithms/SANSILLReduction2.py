@@ -831,29 +831,34 @@ class SANSILLReduction(PythonAlgorithm):
         There it could load the instrument only with the first run to save some time
         The main complexity here is the injection of blanks (for sample) and replicas (for transmission)
         """
-        if self.getPropertyValue('Runs').isDefault():
-            # no runs provided means the workspaces are already loaded
-            self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
-            return
-
         ws = self.getPropertyValue('OutputWorkspace')
-        tmp = f'__{ws}'
-        runs = self.getPropertyValue('Runs').split(',')
-        non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
-        blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
+        if not self.getProperty('Runs').isDefault:
+            tmp = f'__{ws}'
+            runs = self.getPropertyValue('Runs').split(',')
+            non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
+            blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
 
-        nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
-        self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+            nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
+            self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
 
-        if self.getPropertyValue('ProcessAs') == 'Transmission':
-            # sometimes the same transmission can be applied to many samples
-            non_blank_runs = self.remove_repeated(non_blank_runs)
+            if self.getPropertyValue('ProcessAs') == 'Transmission':
+                # sometimes the same transmission can be applied to many samples
+                non_blank_runs = self.remove_repeated(non_blank_runs)
 
-        LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp, startProgress=0., endProgress=len(non_blank_runs)/nreports)
-        self.progress.report(len(non_blank_runs), 'Loaded')
+            LoadAndMerge(Filename=','.join(non_blank_runs),
+                         OutputWorkspace=tmp,
+                         startProgress=0.,
+                         endProgress=len(non_blank_runs)/nreports)
+
+            self.progress.report(len(non_blank_runs), 'Loaded')
+        else:
+            # no runs have been provided, so the user has given an already loaded workspace
+            tmp = self.getPropertyValue('SampleWorkspace')
+            blank_runs = []
+            self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
         if isinstance(mtd[tmp], MatrixWorkspace) and blank_runs:
-            # if we loaded a single workspace but there are blanks, need to make a group so that the blanks can be inserted
+            # if we loaded a single workspace but there are blanks, need to make a group so the blanks can be inserted
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=tmp+'_0')
             GroupWorkspaces(InputWorkspaces=[tmp+'_0'], OutputWorkspace=tmp)
 
@@ -981,10 +986,7 @@ class SANSILLReduction(PythonAlgorithm):
         If we are processing the empty beam we apply the dark current correction and process as empty beam
         If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
         """
-        if self.getPropertyValue('Runs').isDefault():
-            ws = self.getPropertyValue('SampleWorkspace')
-        else:
-            ws = self.getPropertyValue('OutputWorkspace')
+        ws = self.getPropertyValue('OutputWorkspace')
 
         self.apply_normalisation(ws)
         self.progress.report()
