@@ -310,6 +310,7 @@ EventList &EventList::operator=(const EventList &rhs) {
   // Note that we are NOT copying the MRU pointer
   // the EventWorkspace that posseses the EventList has already configured the mru
   IEventList::operator=(rhs);
+  mru = nullptr;
   m_histogram = rhs.m_histogram;
   events = rhs.events;
   weightedEvents = rhs.weightedEvents;

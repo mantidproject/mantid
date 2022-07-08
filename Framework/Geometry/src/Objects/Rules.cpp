@@ -451,6 +451,7 @@ Rule &Rule::operator=(const Rule & /*unused*/)
   @return *this
 */
 {
+  Parent = this->Parent;
   return *this;
 }
 

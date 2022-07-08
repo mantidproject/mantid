@@ -140,7 +140,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.c
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:149
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:159
 wrongPrintfScanfArgNum:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:54
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/AffineMatrixParameter.cpp:121
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:145
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1090
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1100
@@ -156,7 +155,6 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1209
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1218
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1227
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:955
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1021
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1051
@@ -165,7 +163,6 @@ redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjec
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
 invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:220
