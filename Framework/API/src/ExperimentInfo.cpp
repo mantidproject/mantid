@@ -79,6 +79,15 @@ ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   setSpectrumDefinitions(source.spectrumInfo().sharedSpectrumDefinitions());
 }
 
+/**
+ * Implements the copy assignment operator
+ */
+ExperimentInfo &ExperimentInfo::operator=(const ExperimentInfo &source) {
+  this->copyExperimentInfoFrom(&source);
+  setSpectrumDefinitions(source.spectrumInfo().sharedSpectrumDefinitions());
+  return *this;
+}
+
 // Defined as default in source for forward declaration with std::unique_ptr.
 ExperimentInfo::~ExperimentInfo() = default;
 
