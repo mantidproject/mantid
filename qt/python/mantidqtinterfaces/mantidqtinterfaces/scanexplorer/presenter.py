@@ -57,10 +57,6 @@ class ScanExplorerPresenter:
 
         self.view.manage_buttons()
 
-        # TODO find a better way to activate the cursor tracking
-        self.view.data_view.track_cursor.setChecked(False)
-        self.view.data_view.track_cursor.setChecked(True)
-
     def on_file_selected(self, file: str):
         """
         Slot triggered by the user selecting a file through the browser
