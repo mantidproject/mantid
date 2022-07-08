@@ -831,8 +831,8 @@ class SANSILLReduction(PythonAlgorithm):
         There it could load the instrument only with the first run to save some time
         The main complexity here is the injection of blanks (for sample) and replicas (for transmission)
         """
-        if not self.getPropertyValue('Runs'):
-            #
+        if self.getPropertyValue('Runs').isDefault():
+            # no runs provided means the workspaces are already loaded
             self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
             return
 
@@ -981,7 +981,7 @@ class SANSILLReduction(PythonAlgorithm):
         If we are processing the empty beam we apply the dark current correction and process as empty beam
         If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
         """
-        if not self.getPropertyValue('Runs'):
+        if self.getPropertyValue('Runs').isDefault():
             ws = self.getPropertyValue('SampleWorkspace')
         else:
             ws = self.getPropertyValue('OutputWorkspace')
