@@ -744,6 +744,9 @@ class FunctionHandler {
 public:
   /// Constructor
   FunctionHandler(IFunction_sptr fun) : m_fun(std::move(fun)) {}
+  /// Delete copy constructor and copy assignment operator
+  FunctionHandler(const FunctionHandler &) = delete;
+  FunctionHandler &operator=(const FunctionHandler &) = delete;
   /// Virtual destructor
   virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function
