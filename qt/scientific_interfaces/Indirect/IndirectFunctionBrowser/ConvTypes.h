@@ -26,6 +26,7 @@ using namespace Mantid::API;
 enum class FitType {
   None,
   TeixeiraWater,
+  FickDiffusion,
   StretchedExpFT,
   DiffSphere,
   ElasticDiffSphere,
@@ -70,6 +71,9 @@ enum class ParamID {
   TW_DIFFCOEFF,
   TW_TAU,
   TW_CENTRE,
+  FD_HEIGHT,
+  FD_DIFFCOEFF,
+  FD_CENTRE,
   DELTA_HEIGHT,
   DELTA_CENTER,
   TEMPERATURE,

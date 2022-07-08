@@ -342,10 +342,11 @@ QStringList ConvFunctionModel::makeGlobalList() const {
 
 void ConvFunctionModel::setFitType(FitType fitType) {
   m_fitType = fitType;
-  if (FitTypeQDepends[m_fitType])
+  if (FitTypeQDepends[m_fitType]) {
     m_isQDependentFunction = true;
-  else
+  } else {
     m_isQDependentFunction = false;
+  }
   setModel();
 }
 
@@ -555,6 +556,11 @@ std::string ConvFunctionModel::buildTeixeiraFunctionString() const {
          "constraints=(Height>0, DiffCoeff>0, Tau>0)";
 }
 
+std::string ConvFunctionModel::buildFickFunctionString() const {
+  return "name=FickDiffusionSQE, Height=1, DiffCoeff=2.3, Centre=0, "
+         "constraints=(Height>0, DiffCoeff>0)";
+}
+
 std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
   return "name=StretchedExpFT, Height=0.1, Tau=100, Beta=1, Centre=0, "
          "constraints=(Height>0, Tau>0)";
@@ -616,6 +622,8 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
   }
   if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
+  } else if (m_fitType == FitType::FickDiffusion) {
+    functions.append(buildFickFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
@@ -657,6 +665,8 @@ std::string ConvFunctionModel::buildFitTypeString() const {
   std::string functions;
   if (m_fitType == FitType::TeixeiraWater) {
     functions.append(buildTeixeiraFunctionString());
+  } else if (m_fitType == FitType::FickDiffusion) {
+    functions.append(buildFickFunctionString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {

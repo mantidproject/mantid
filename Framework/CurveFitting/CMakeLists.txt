@@ -100,6 +100,7 @@ set(SRC_FILES
     src/Functions/ExpDecay.cpp
     src/Functions/ExpDecayMuon.cpp
     src/Functions/ExpDecayOsc.cpp
+    src/Functions/FickDiffusionSQE.cpp
     src/Functions/FlatBackground.cpp
     src/Functions/FullprofPolynomial.cpp
     src/Functions/FunctionQDepends.cpp
@@ -279,6 +280,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ExpDecay.h
     inc/MantidCurveFitting/Functions/ExpDecayMuon.h
     inc/MantidCurveFitting/Functions/ExpDecayOsc.h
+    inc/MantidCurveFitting/Functions/FickDiffusionSQE.h
     inc/MantidCurveFitting/Functions/FlatBackground.h
     inc/MantidCurveFitting/Functions/FullprofPolynomial.h
     inc/MantidCurveFitting/Functions/FunctionQDepends.h
@@ -451,6 +453,7 @@ set(TEST_FILES
     Functions/ExpDecayMuonTest.h
     Functions/ExpDecayOscTest.h
     Functions/ExpDecayTest.h
+    Functions/FickDiffusionSQETest.h
     Functions/FlatBackgroundTest.h
     Functions/FullprofPolynomialTest.h
     Functions/FunctionQDependsTest.h
