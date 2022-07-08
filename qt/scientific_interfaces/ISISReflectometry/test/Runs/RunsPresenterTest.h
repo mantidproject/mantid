@@ -506,8 +506,7 @@ public:
   void testTransferUpdatesLookupIndexes() {
     auto presenter = makePresenter();
     auto expectedJobs = expectGetValidSearchResult();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged()).Times(1);
-    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+    EXPECT_CALL(m_mainPresenter, notifyRunsTransferred()).Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }

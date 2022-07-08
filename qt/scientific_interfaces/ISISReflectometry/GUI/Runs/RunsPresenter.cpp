@@ -118,10 +118,7 @@ void RunsPresenter::notifySearchFailed() {
   }
 }
 
-void RunsPresenter::notifyTransfer() {
-  transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
-  notifyRowStateChanged();
-}
+void RunsPresenter::notifyTransfer() { transfer(m_view->getSelectedSearchRows(), TransferMatch::Any); }
 
 // Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
@@ -456,8 +453,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);
-    m_mainPresenter->notifySettingsChanged();
-    notifyRowModelChanged();
+    m_mainPresenter->notifyRunsTransferred();
   }
 }
 
