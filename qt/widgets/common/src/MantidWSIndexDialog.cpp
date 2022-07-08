@@ -71,7 +71,7 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, const Qt::WindowFlags 
  * @returns Struct containing user options
  */
 MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
-  UserInput options;
+  UserInput options = UserInput();
   options.plots = getPlots();
   options.simple = is1DPlotSelected();
   options.waterfall = isWaterfallPlotSelected();
@@ -88,7 +88,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
 
   // Advanced options
   if (m_advanced && (options.simple || options.waterfall || options.surface || options.contour)) {
-    UserInputAdvanced userInputAdvanced;
+    UserInputAdvanced userInputAdvanced = UserInputAdvanced();
     if (options.surface || options.contour) {
       userInputAdvanced.accepted = true;
       userInputAdvanced.plotIndex = getPlotIndex();
@@ -107,7 +107,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
       }
     }
     options.isAdvanced = true;
-    options.advanced = userInputAdvanced;
+    options.advanced = std::move(userInputAdvanced);
   } else {
     options.isAdvanced = false; // We don't want the view to look at options.advanced.
   }
