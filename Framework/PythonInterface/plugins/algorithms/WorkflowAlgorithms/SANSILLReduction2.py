@@ -526,12 +526,22 @@ class SANSILLReduction(PythonAlgorithm):
                 check_wavelengths_match(mtd[solvent_ws], mtd[ws])
                 Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
 
-    def apply_solid_angle(self, ws):
-        """Calculates solid angle and divides by it"""
+    def apply_solid_angle(self, ws: str):
+        """
+        Calculates the solid angle and divides by it.
+        @param ws: the name of the workspace on which to apply the solid angle correction
+        """
         sa_ws = ws + '_solidangle'
+        method = 'Rectangle '
+
         # D22B has the front panel tilted, hence the Rectangle approximation is wrong
         # D16 can be rotated around the sample, where again rectangle is wrong unless we rotate back
-        method = 'GenericShape' if self.instrument == 'D22B' or self.instrument == 'D16' else 'Rectangle'
+        if self.instrument == 'D22B' or self.instrument == 'D16':
+            method = 'GenericShape'
+        # new D16 is a banana detector
+        elif self.instrument == 'D16B':
+            method = 'VerticalTube'
+
         SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method=method)
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
         DeleteWorkspace(Workspace=sa_ws)
