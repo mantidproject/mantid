@@ -212,7 +212,7 @@
          </widget>
         </item>
         <item>
-         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="line_plot" native="true">
+         <widget class="MantidQt::MantidWidgets::QtPlot" name="line_plot" native="true">
           <property name="toolTip">
            <string>Reduced data. Use right-click for plot options</string>
           </property>
@@ -254,9 +254,9 @@
  </tabstops>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::PreviewPlot</class>
+   <class>MantidQt::MantidWidgets::QtPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
+   <header>MantidQtWidgets/Plotting/QtPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
