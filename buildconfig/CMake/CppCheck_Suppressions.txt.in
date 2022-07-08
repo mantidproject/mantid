@@ -26,9 +26,6 @@ preprocessorErrorDirective
 
 // Cppcheck struggles with some inheritance chains, some of these might be true though
 unusedPrivateFunction
-// ---------- Individual suppressions -----------------
-
-pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
 
 // --------- Missing copy assignment / constructors -------------------
 
