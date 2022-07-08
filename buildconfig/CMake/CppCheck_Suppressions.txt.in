@@ -158,9 +158,6 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1209
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1218
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1227
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDLeanEvent.h:344
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDLeanEvent.h:346
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDLeanEvent.h:347
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:955
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1021
