@@ -141,10 +141,3 @@ class DNSReductionGUIView(QMainWindow):
         if old_message and not clear:
             message = " AND ".join((message, old_message))
         self.ui.statusbar.showMessage(message, time * 1000)
-
-    def switch_to_plot_tab(self):
-        for i, subview in enumerate(self.subviews):
-            if "Plot" in subview.NAME:
-                self.ui.tabWidget.setCurrentIndex(i)
-                self._tab_changed(i)
-                break
