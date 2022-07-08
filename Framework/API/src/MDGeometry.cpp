@@ -102,6 +102,50 @@ MDGeometry::MDGeometry(const MDGeometry &other)
     this->setOriginalWorkspace(other.m_originalWorkspaces[i], i);
 }
 
+MDGeometry &MDGeometry::operator=(const MDGeometry &other) {
+  m_dimensions = {};
+  m_originalWorkspaces = {};
+  m_origin = other.m_origin;
+  m_transforms_FromOriginal = {};
+  m_transforms_ToOriginal = {};
+
+  m_notificationHelper = std::make_unique<MDGeometryNotificationHelper>(*this);
+  m_Wtransf = other.m_Wtransf;
+  m_basisVectors = other.m_basisVectors;
+
+  // Perform a deep copy of the dimensions
+  std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
+  for (size_t d = 0; d < other.getNumDims(); d++) {
+    // Copy the dimension
+    auto dim = std::make_shared<MDHistoDimension>(other.getDimension(d).get());
+    dimensions.emplace_back(dim);
+  }
+  this->initGeometry(dimensions);
+
+  // Perform a deep copy of the coordinate transformations
+  std::vector<CoordTransform_const_sptr>::const_iterator it;
+  for (it = other.m_transforms_FromOriginal.begin(); it != other.m_transforms_FromOriginal.end(); ++it) {
+    if (*it)
+      m_transforms_FromOriginal.emplace_back(CoordTransform_const_sptr((*it)->clone()));
+    else
+      m_transforms_FromOriginal.emplace_back(CoordTransform_const_sptr());
+  }
+
+  for (it = other.m_transforms_ToOriginal.begin(); it != other.m_transforms_ToOriginal.end(); ++it) {
+    if (*it)
+      m_transforms_ToOriginal.emplace_back(CoordTransform_const_sptr((*it)->clone()));
+    else
+      m_transforms_ToOriginal.emplace_back(CoordTransform_const_sptr());
+  }
+
+  // Copy the references to the original workspaces
+  // This will also set up the delete observer to listen to those workspaces
+  // being deleted.
+  for (size_t i = 0; i < other.m_originalWorkspaces.size(); i++)
+    this->setOriginalWorkspace(other.m_originalWorkspaces[i], i);
+  return *this;
+}
+
 /**
  * Clear all transforms to and from original workspaces.
  */
