@@ -174,8 +174,8 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             idx = bisect_left(axis, first_value)
             edge = (axis[idx] + axis[idx - 1]) / 2
 
-            previous_edge = (axis[idx - 1] + axis[idx - 2]) / 2
-            next_edge = (axis[idx] + axis[idx + 1]) / 2
+            previous_edge = (axis[idx - 1] + axis[idx - 2]) / 2 if idx > 1 else mini
+            next_edge = (axis[idx] + axis[idx + 1]) / 2 if idx < len(axis) - 1 else maxi
 
             if abs(first_value - edge) < abs(second_value - edge):
                 return (edge, previous_edge) if second_value < edge else (edge, next_edge)
