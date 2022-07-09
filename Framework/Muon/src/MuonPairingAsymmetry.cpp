@@ -233,10 +233,11 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(std::map<std::string, std::s
   Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
   if (!ws1) {
     errors["InputWorkspace1"] = "The InputWorkspace1 must be a Workspace.";
-    return;
   }
   if (!ws2) {
     errors["InputWorkspace2"] = "The InputWorkspace2 must be a Workspace.";
+  }
+  if (errors.count("InputWorkspace1") == 1 || errors.count("InputWorkspace2") == 1) {
     return;
   }
   if (ws1->isGroup() && !ws2->isGroup()) {

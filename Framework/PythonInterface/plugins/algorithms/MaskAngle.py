@@ -60,10 +60,10 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         elif isinstance(ws, mantid.api.MatrixWorkspace):
             hasInstrument = len(ws.componentInfo()) > 0
         else:
+            hasInstrument = False
             issues["Workspace"] = "Workspace must be a WorkspaceGroup or MatrixWorkspace."
-            return issues
 
-        if not hasInstrument:
+        if not hasInstrument and "Workspace" not in issues:
             issues["Workspace"] = "Workspace must have an associated instrument."
 
         angleMin = self.getProperty('MinAngle').value

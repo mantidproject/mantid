@@ -119,14 +119,14 @@ class HB2AReduce(PythonAlgorithm):
                 issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
 
             directory = f'/HFIR/HB2A/IPTS-{ipts}'
-            if self.getProperty("Exp").value == Property.EMPTY_INT:
-                if os.path.isdir(directory):
+            if os.path.isdir(directory):
+                if self.getProperty("Exp").value == Property.EMPTY_INT:
                     exp_list = sorted(e for e in os.listdir(directory) if 'exp' in e)
                     if len(exp_list) > 1:
                         exps = ','.join(e.replace('exp', '') for e in exp_list)
                         issues["Exp"] = f'Multiple experiments found in IPTS-{ipts}. You must set Exp to one of {exps}'
             else:
-                issues["Exp"] = f"Failed to find the directory: {directory}"
+                issues["IPTS"] = f"Failed to find the directory: {directory}"
 
         # validate output format options
         # Def_x    GSAS    XYE
@@ -142,12 +142,12 @@ class HB2AReduce(PythonAlgorithm):
                 if not filenames:
                     ipts = self.getProperty("IPTS").value
                     exp = self.getProperty("Exp").value
-                    if self.getProperty("Exp").value == Property.EMPTY_INT:
-                        directory = f'/HFIR/HB2A/IPTS-{ipts}'
-                        if os.path.isdir(directory):
+                    directory = f'/HFIR/HB2A/IPTS-{ipts}'
+                    if os.path.isdir(directory):
+                        if self.getProperty("Exp").value == Property.EMPTY_INT:
                             exp = int([e for e in os.listdir(directory) if 'exp' in e][0].replace('exp', ''))
-                        else:
-                            issues["Exp"] = f"Failed to find the directory: {directory}"
+                    else:
+                        issues["IPTS"] = f"Failed to find the directory: {directory}"
                     filenames = [
                         '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(
                             ipts, exp, scan) for scan in self.getProperty("ScanNumbers").value
