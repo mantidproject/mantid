@@ -29,9 +29,6 @@ unusedPrivateFunction
 
 // --------- Missing copy assignment / constructors -------------------
 
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/Qwt/QwtWorkspaceBinData.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h
-
 noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BankPulseTimes.h
 noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.h
 noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
