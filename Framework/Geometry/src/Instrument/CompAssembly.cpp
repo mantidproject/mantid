@@ -66,6 +66,19 @@ CompAssembly::CompAssembly(const CompAssembly &assem)
   }
 }
 
+CompAssembly &CompAssembly::operator=(const CompAssembly &assem) {
+  m_children = assem.m_children;
+  m_cachedBoundingBox = assem.m_cachedBoundingBox;
+  // Need to do a deep copy
+  comp_it it;
+  for (it = m_children.begin(); it != m_children.end(); ++it) {
+    *it = (*it)->clone();
+    // Move copied component object's parent from old to new CompAssembly
+    (*it)->setParent(this);
+  }
+  return *this;
+}
+
 /** Destructor
  */
 CompAssembly::~CompAssembly() {

@@ -29,14 +29,6 @@ unusedPrivateFunction
 
 // --------- Missing copy assignment / constructors -------------------
 
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCat.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Catalog/inc/MantidCatalog/ONCatEntity.h
-
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/CompAssembly.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/Container.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Instrument/ObjCompAssembly.h
-copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rendering/GeometryHandler.h
-
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/Qwt/QwtWorkspaceBinData.h
 copyCtorAndEqOperator:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h
 

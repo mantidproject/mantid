@@ -60,6 +60,13 @@ Container::Container(const Container &container)
     : m_shape(IObject_sptr(container.m_shape->clone())), m_sampleShapeXML(container.m_sampleShapeXML),
       m_sampleShape(container.m_sampleShape) {}
 
+Container &Container::operator=(const Container &container) {
+  m_shape = IObject_sptr(container.m_shape->clone());
+  m_sampleShapeXML = container.m_sampleShapeXML;
+  m_sampleShape = container.m_sampleShape;
+  return *this;
+}
+
 /**
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
