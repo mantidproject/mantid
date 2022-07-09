@@ -79,7 +79,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:492
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:501
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:508
-unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:650
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/TrustRegionMinimizer.cpp:807
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:453
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:453
@@ -164,12 +163,9 @@ invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADA
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:280
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:280
 unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:61
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/LoadLiveData.cpp:271
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/Quat.cpp:55
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/V3D.cpp:123
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/PointGroup.cpp:62
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/SymmetryElement.cpp:43
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:86
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MatrixWorkspace.cpp:65

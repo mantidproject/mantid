@@ -267,8 +267,10 @@ void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS, const Workspa
     auto accumMon = accumMW->monitorWorkspace();
     auto chunkMon = chunkMW->monitorWorkspace();
 
-    if (accumMon && chunkMon)
-      accumMon += chunkMon;
+    if (accumMon && chunkMon) {
+      // Addition operation on the accumMon sptr stored in the ADS
+      accumMon + chunkMon;
+    }
   }
 
   // Now do the main workspace

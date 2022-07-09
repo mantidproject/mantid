@@ -59,8 +59,6 @@ std::string __repr__implementation(const PointGroup &self) {
 void export_PointGroup() {
   register_ptr_to_python<std::shared_ptr<PointGroup>>();
 
-  scope pointGroupScope = class_<PointGroup, boost::noncopyable>("PointGroup", no_init);
-
   enum_<PointGroup::CrystalSystem>("CrystalSystem")
       .value("Triclinic", PointGroup::CrystalSystem::Triclinic)
       .value("Monoclinic", PointGroup::CrystalSystem::Monoclinic)
