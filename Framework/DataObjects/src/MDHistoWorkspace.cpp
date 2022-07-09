@@ -1055,7 +1055,7 @@ void MDHistoWorkspace::lessThan(const MDHistoWorkspace &b) {
   checkWorkspaceSize(b, "lessThan");
   for (size_t i = 0; i < m_length; ++i) {
     m_signals[i] = (m_signals[i] < b.m_signals[i]) ? 1.0 : 0.0;
-    m_errorsSquared[i] = 0;
+    m_errorsSquared[i] = 0.0;
   }
 }
 

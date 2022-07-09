@@ -94,8 +94,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDat
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:628
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:404
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:740
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:857
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:589
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:590
@@ -124,8 +122,6 @@ objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:6
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:674
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:675
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/ProcessBankData.cpp:203
-rethrowNoCurrentException:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveDetectorsGrouping.cpp:90
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.cpp:175
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.cpp:183
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:149
@@ -149,10 +145,8 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:955
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1021
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1051
-assignBoolToFloat:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:1058
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:670
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:43
 invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
 invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
@@ -177,16 +171,7 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:179
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/LoadFlexiNexus.cpp:221
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:78
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:79
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:117
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:118
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:156
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/SINQ/src/SINQTranspose3D.cpp:157
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SANSSensitivityCorrection.cpp:151
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:191
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ImportMDHistoWorkspace.cpp:98
 deallocuse:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:118
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1142

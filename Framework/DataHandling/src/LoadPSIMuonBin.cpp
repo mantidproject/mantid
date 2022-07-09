@@ -737,7 +737,7 @@ void LoadPSIMuonBin::readInTemperatureFileHeader(const std::string &contents) {
   std::string line = "";
   for (const auto charecter : contents) {
     if (charecter == '\n') {
-      if (line[0] == '!' && lineNo > uselessLines) {
+      if (!line.empty() && line[0] == '!' && lineNo > uselessLines) {
         processHeaderLine(line);
       } else if (line[0] != '!') {
         return;
@@ -851,16 +851,16 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
   readInTemperatureFileHeader(contents);
 
   std::string line = "";
-  for (const auto &charecter : contents) {
-    if (charecter == '\n') {
-      if (line[0] == '!') {
+  for (const auto &character : contents) {
+    if (character == '\n') {
+      if (!line.empty() && line[0] == '!') {
         line = "";
       } else {
         processLine(line, ws);
         line = "";
       }
     } else {
-      line += charecter;
+      line += character;
     }
   }
 }
