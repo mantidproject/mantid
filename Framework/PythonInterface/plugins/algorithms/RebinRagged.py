@@ -44,24 +44,13 @@ class RebinRagged(PythonAlgorithm):
         errors = {}
 
         inputWS = self.getProperty("InputWorkspace").value
-
-        if not isinstance(inputWS, MatrixWorkspace):
-            errors['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
-            return errors
-
         xmins = self.getProperty("XMin").value
         xmaxs = self.getProperty("XMax").value
         deltas = self.getProperty("Delta").value
 
-        numSpec = inputWS.getNumberHistograms()
         numMin = len(xmins)
         numMax = len(xmaxs)
         numDelta = len(deltas)
-
-        if numDelta == 0:
-            errors["Delta"] = "Must specify binning"
-        elif not (numDelta == 1 or numDelta == numSpec):
-            errors["Delta"] = "Must specify for each spetra ({}!={})".format(numDelta, numSpec)
 
         if np.any(np.invert(np.isfinite(xmins))):
             errors["Delta"] = "All must be finite"
@@ -72,11 +61,21 @@ class RebinRagged(PythonAlgorithm):
             errors["XMin"] = "Must specify minimums or maximums"
             errors["XMax"] = "Must specify minimums or maximums"
 
-        if numMin > 1 and numMin != numSpec:
-            errors["XMin"] = "Must specify min for each spectra ({}!={})".format(numMin, numSpec)
+        if isinstance(inputWS, MatrixWorkspace):
+            numSpec = inputWS.getNumberHistograms()
 
-        if numMax > 1 and numMax != numSpec:
-            errors["XMax"] = "Must specify max for each spectra ({}!={})".format(numMax, numSpec)
+            if numDelta == 0:
+                errors["Delta"] = "Must specify binning"
+            elif not (numDelta == 1 or numDelta == numSpec):
+                errors["Delta"] = "Must specify for each spetra ({}!={})".format(numDelta, numSpec)
+
+            if numMin > 1 and numMin != numSpec:
+                errors["XMin"] = "Must specify min for each spectra ({}!={})".format(numMin, numSpec)
+
+            if numMax > 1 and numMax != numSpec:
+                errors["XMax"] = "Must specify max for each spectra ({}!={})".format(numMax, numSpec)
+        else:
+            errors['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
 
         return errors
 
