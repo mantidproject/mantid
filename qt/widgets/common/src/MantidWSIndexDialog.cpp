@@ -347,7 +347,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
     QStringList values = m_logValues->lineEdit()->text().split(',');
     bool firstValue = true;
     double previousValue = 0.0;
-    foreach (QString value, values) {
+    for (const auto &value : values) {
       bool ok = false;
       double currentValue = value.toDouble(&ok);
       // Check for non-numeric value
@@ -729,7 +729,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
  */
 void MantidWSIndexWidget::generateSpectraNumIntervals() {
   bool firstWs = true;
-  foreach (const QString wsName, m_wsNames) {
+  for (const auto &wsName : m_wsNames) {
     Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if (!ws)
