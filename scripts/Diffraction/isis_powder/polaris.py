@@ -164,4 +164,3 @@ class Polaris(AbstractInst):
 
     def perform_abs_vanadium_norm(self):
         return self._inst_settings.mode == "PDF"
-
