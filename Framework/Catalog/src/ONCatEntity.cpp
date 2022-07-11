@@ -27,7 +27,7 @@ ONCatEntity &ONCatEntity::operator=(const ONCatEntity &other) {
   m_type = other.m_type;
   m_content = std::make_unique<Content>(*other.m_content);
   return *this;
-};
+}
 
 ONCatEntity::~ONCatEntity() = default;
 

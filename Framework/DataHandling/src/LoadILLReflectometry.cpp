@@ -375,7 +375,7 @@ std::vector<int> LoadILLReflectometry::loadSingleMonitor(const NeXus::NXEntry &e
  * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
-std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
+std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(const NeXus::NXEntry &entry) {
   g_log.debug("Read monitor data...");
   // vector of monitors with one entry
   const std::vector<std::vector<int>> monitors{loadSingleMonitor(entry, "monitor1/data"),

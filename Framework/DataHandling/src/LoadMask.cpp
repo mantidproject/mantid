@@ -576,7 +576,6 @@ void LoadMask::parseXML() {
 
   std::vector<specnum_t> singleSp, pairSp;
   std::vector<detid_t> maskSingleDet, maskPairDet;
-  std::vector<detid_t> umaskSingleDet, umaskPairDet;
 
   bool ingroup = false;
   while (pNode) {

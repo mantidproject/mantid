@@ -107,6 +107,7 @@ SingleValueParameter<Derived, ValType> &
 SingleValueParameter<Derived, ValType>::operator=(const SingleValueParameter<Derived, ValType> &other) {
   m_value = other.m_value;
   m_isValid = other.m_isValid;
+  return *this;
 }
 
 /// Default constructor. Object is created in invalid state.

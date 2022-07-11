@@ -1038,8 +1038,8 @@ MDHistoWorkspace &MDHistoWorkspace::operator^=(const MDHistoWorkspace &b) {
  */
 void MDHistoWorkspace::operatorNot() {
   for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = (m_signals[i] == 0.0 || m_masks[i]);
-    m_errorsSquared[i] = 0;
+    m_signals[i] = (m_signals[i] == 0.0 || m_masks[i]) ? 1.0 : 0.0;
+    m_errorsSquared[i] = 0.0;
   }
 }
 
@@ -1070,7 +1070,7 @@ void MDHistoWorkspace::lessThan(const MDHistoWorkspace &b) {
 void MDHistoWorkspace::lessThan(const signal_t signal) {
   for (size_t i = 0; i < m_length; ++i) {
     m_signals[i] = (m_signals[i] < signal) ? 1.0 : 0.0;
-    m_errorsSquared[i] = 0;
+    m_errorsSquared[i] = 0.0;
   }
 }
 

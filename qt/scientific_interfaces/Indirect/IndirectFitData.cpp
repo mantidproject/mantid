@@ -14,10 +14,9 @@
 #include "MantidKernel/UnitConversion.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include <sstream>
-
-#include <QString>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -123,10 +122,12 @@ std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   return str;
 }
 
-std::string formatArgumentsInString(const std::string &formatString, const std::string &arg1, const std::string &arg2) {
-  return QString::fromStdString(formatString)
-      .arg(QString::fromStdString(arg1), QString::fromStdString(arg2))
-      .toStdString();
+boost::basic_format<char> &tryPassFormatArgument(boost::basic_format<char> &formatString, const std::string &arg) {
+  try {
+    return formatString % arg;
+  } catch (const boost::io::too_many_args &) {
+    return formatString;
+  }
 }
 
 std::pair<double, double> getBinRange(const MatrixWorkspace_sptr &workspace) {
@@ -180,13 +181,25 @@ IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace, const Fu
 }
 
 std::string IndirectFitData::displayName(const std::string &formatString, const std::string &) const {
-  auto displayName = formatArgumentsInString(formatString, getBasename(), m_spectra.getString());
-  std::replace(displayName.begin(), displayName.end(), ',', '+');
-  return displayName;
+  const auto workspaceName = getBasename();
+  const auto spectraString = m_spectra.getString();
+
+  auto formatted = boost::format(formatString);
+  formatted = tryPassFormatArgument(formatted, workspaceName);
+  formatted = tryPassFormatArgument(formatted, spectraString);
+
+  auto name = formatted.str();
+  std::replace(name.begin(), name.end(), ',', '+');
+  return name;
 }
 
 std::string IndirectFitData::displayName(const std::string &formatString, WorkspaceIndex spectrum) const {
-  return formatArgumentsInString(formatString, getBasename(), std::to_string(spectrum.value));
+  const auto workspaceName = getBasename();
+
+  auto formatted = boost::format(formatString);
+  formatted = tryPassFormatArgument(formatted, workspaceName);
+  formatted = tryPassFormatArgument(formatted, std::to_string(spectrum.value));
+  return formatted.str();
 }
 
 std::string IndirectFitData::getBasename() const { return cutLastOf(workspace()->getName(), "_red"); }

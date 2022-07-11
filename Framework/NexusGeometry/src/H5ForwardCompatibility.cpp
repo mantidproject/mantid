@@ -48,6 +48,9 @@ std::string getObjName(const H5::H5Object &obj) {
     char *name_C = new char[name_size + 1]; // temporary C-string
     memset(name_C, 0, name_size + 1);       // clear buffer
 
+    // Use overloaded function
+    getObjName(obj, name_C, name_size + 1);
+
     // Convert the C object name to return
     obj_name = name_C;
 

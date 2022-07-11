@@ -668,10 +668,9 @@ int CSGObject::procPair(std::string &lineStr, std::map<int, std::unique_ptr<Rule
     ;
 
   // Get rules
-  auto RRA = std::move(ruleMap[Ra]);
-  auto RRB = std::move(ruleMap[Rb]);
-  auto Join = (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(std::move(RRA), std::move(RRB)))
-                     : std::unique_ptr<Rule>(std::make_unique<Intersection>(std::move(RRA), std::move(RRB)));
+  auto Join =
+      (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(std::move(ruleMap[Ra]), std::move(ruleMap[Rb])))
+             : std::unique_ptr<Rule>(std::make_unique<Intersection>(std::move(ruleMap[Ra]), std::move(ruleMap[Rb])));
   ruleMap[Ra] = std::move(Join);
   ruleMap.erase(ruleMap.find(Rb));
 

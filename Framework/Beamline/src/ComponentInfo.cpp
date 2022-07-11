@@ -647,11 +647,9 @@ std::vector<bool> ComponentInfo::buildMergeIndices(const ComponentInfo &other) c
       const auto interval1 = other.m_scanIntervals[t1];
       const auto interval2 = m_scanIntervals[t2];
       if (interval1 == interval2) {
-        if (size() > 0u) {
-          for (size_t compIndex = 0u; compIndex < size(); ++compIndex) {
-            checkIdenticalIntervals(other, std::pair<size_t, size_t>(compIndex, t1),
-                                    std::pair<size_t, size_t>(compIndex, t2));
-          }
+        for (size_t compIndex = 0u; compIndex < size(); ++compIndex) {
+          checkIdenticalIntervals(other, std::pair<size_t, size_t>(compIndex, t1),
+                                  std::pair<size_t, size_t>(compIndex, t2));
         }
         merge[t1] = false;
       } else if ((interval1.first < interval2.second) && (interval1.second > interval2.first)) {

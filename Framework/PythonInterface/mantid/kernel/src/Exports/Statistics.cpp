@@ -13,7 +13,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/scope.hpp>
 

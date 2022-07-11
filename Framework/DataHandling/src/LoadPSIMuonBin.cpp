@@ -739,7 +739,7 @@ void LoadPSIMuonBin::readInTemperatureFileHeader(const std::string &contents) {
     if (charecter == '\n') {
       if (!line.empty() && line[0] == '!' && lineNo > uselessLines) {
         processHeaderLine(line);
-      } else if (line[0] != '!') {
+      } else if (line.empty() || line[0] != '!') {
         return;
       }
       ++lineNo;
@@ -803,11 +803,11 @@ std::string LoadPSIMuonBin::detectTempFile() {
   namespace fs = boost::filesystem;
   const fs::path searchDir{fs::path{getPropertyValue("Filename")}.parent_path()};
 
-  std::deque<fs::path> queue;
-  queue.push_back(fs::path{searchDir});
+  std::deque<fs::path> queue{fs::path{searchDir}};
   while (!queue.empty()) {
+    const auto first = queue.front();
     queue.pop_front();
-    for (fs::directory_iterator dirIter{queue.front()}; dirIter != fs::directory_iterator(); ++dirIter) {
+    for (fs::directory_iterator dirIter{first}; dirIter != fs::directory_iterator(); ++dirIter) {
       const auto &entry{dirIter->path()};
 
       if (fs::is_directory(entry)) {
