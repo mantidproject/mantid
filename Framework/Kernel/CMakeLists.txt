@@ -595,7 +595,7 @@ set(ALGORITHMDEPRECATED "Raise")
 configure_file(../Properties/Mantid.properties.template ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 
 # Then, copy into appropriate place
-if(MSVC)
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   file(
     GENERATE
     OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
