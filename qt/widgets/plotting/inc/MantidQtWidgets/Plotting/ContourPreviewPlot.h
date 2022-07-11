@@ -6,10 +6,5 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <QtGlobal>
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.h"
-#else
+// Defer to matplotlib-based implementation
 #include "MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h"
-#endif

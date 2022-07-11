@@ -75,7 +75,7 @@ class TomlSchemaV1Validator(object):
 
         binning_keys = {"wavelength": {"start", "step", "stop", "type", "binning"},
                         "1d_reduction": {"binning", "radius_cut", "wavelength_cut"},
-                        "2d_reduction": {"step", "stop", "type", "interpolate"}}
+                        "2d_reduction": {"step", "stop", "type"}}
 
         reduction_keys = {"merged": {"rescale": {"min", "max", "use_fit"},
                                      "shift": {"min", "max", "use_fit", "factor"},
@@ -85,14 +85,14 @@ class TomlSchemaV1Validator(object):
         q_resolution_keys = {"enabled", "moderator_file", "source_aperture", "delta_r",
                              "h1", "h2", "w1", "w2"}
 
-        transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background"}},
+        transmission_keys = {"monitor": {"*": {"spectrum_number", "background", "shift", "use_own_background",
+                                               "use_different_norm_monitor", "trans_norm_monitor"}},
+                             "ROI": {"file"},
                              "fitting": {"enabled": None, "function": None, "polynomial_order": None,
-                                         "parameters": {"lambda_min", "lambda_max"}},
-                             "selected_monitor": None}
+                                         "parameters": {"lambda_min", "lambda_max"}}}
 
         normalisation_keys = {"monitor": {"*": {"spectrum_number", "background"}},
-                              "all_monitors": {"background", "enabled"},
-                              "selected_monitor": None}
+                              "all_monitors": {"background", "enabled"}}
 
         mask_keys = {
                      "prompt_peak" : {"start", "stop"},

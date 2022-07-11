@@ -192,7 +192,7 @@ public:
 
   /**
    * Atribute visitor class. It provides a separate access method
-   * for each attribute type. When applied to a particular attribue
+   * for each attribute type. When applied to a particular attribute
    * the appropriate method will be used. The child classes must
    * implement the virtual AttributeVisitor::apply methods. See
    * implementation of Attribute::value() method for an example.
@@ -213,15 +213,15 @@ public:
     T operator()(std::vector<double> &v) const { return apply(v); }
 
   protected:
-    /// Implement this mathod to access attribute as string
+    /// Implement this method to access attribute as string
     virtual T apply(std::string &) const = 0;
-    /// Implement this mathod to access attribute as double
+    /// Implement this method to access attribute as double
     virtual T apply(double &) const = 0;
-    /// Implement this mathod to access attribute as int
+    /// Implement this method to access attribute as int
     virtual T apply(int &) const = 0;
-    /// Implement this mathod to access attribute as bool
+    /// Implement this method to access attribute as bool
     virtual T apply(bool &) const = 0;
-    /// Implement this mathod to access attribute as vector
+    /// Implement this method to access attribute as vector
     virtual T apply(std::vector<double> &) const = 0;
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
@@ -617,6 +617,8 @@ public:
   [[nodiscard]] virtual std::vector<std::shared_ptr<IFunction>> createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  /// Calculate step size for the given parameter value
+  [[nodiscard]] double calculateStepSize(const double parameterValue) const;
   /// Set the covariance matrix
   void setCovarianceMatrix(const std::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
@@ -647,6 +649,13 @@ public:
   virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
   /// Get status of parameter
   [[nodiscard]] virtual ParameterStatus getParameterStatus(size_t i) const = 0;
+
+  /// Describes the method in which the step size will be calculated:
+  /// DEFAULT: Uses the traditional Mantid method of calculating the step size.
+  /// SQRT_EPSILON: Uses the square root of epsilon to calculate the step size.
+  enum class StepSizeMethod { DEFAULT, SQRT_EPSILON };
+  /// Sets the StepSizeMethod to use when calculation the step size
+  virtual void setStepSizeMethod(const StepSizeMethod method);
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -713,6 +722,8 @@ private:
   std::vector<ParameterTie *> m_orderedTies;
   /// whether the function usage has been registered
   bool m_isRegistered{false};
+  /// The function used to calculate the step size
+  std::function<double(const double)> m_stepSizeFunction;
 };
 
 /// shared pointer to the function base class

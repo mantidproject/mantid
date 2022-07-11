@@ -281,8 +281,7 @@ signals:
 
   // other
   void redrawRequired(); ///< request redrawing of self
-  void updateInfoText(); ///< request update of the info string at bottom of
-  /// InstrumentWindow
+  void updateInfoText(); ///< request update of the info string at bottom of InstrumentWindow
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*_t1*/);
 
 protected slots:
@@ -295,6 +294,7 @@ protected slots:
   void erasePeaks(const QRect &rect);
   void comparePeaks(const QRect &rect);
   void alignPeaks(const QRect &rect);
+  void showToolTip(int x, int y);
 
   void colorMapChanged();
   void refreshView();

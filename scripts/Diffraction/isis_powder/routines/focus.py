@@ -14,56 +14,75 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None,
+          empty_can_subtraction_method="Simple", paalman_pings_events_per_point=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
-                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details)
+                                        run_number=run_number_string, absorb=absorb,
+                                        sample_details=sample_details, empty_can_subtraction_method=empty_can_subtraction_method,
+                                        paalman_pings_events_per_point=paalman_pings_events_per_point)
     elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb,
-                                     sample_details=sample_details)
+                                     sample_details=sample_details, empty_can_subtraction_method=empty_can_subtraction_method,
+                                     paalman_pings_events_per_point=paalman_pings_events_per_point)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details,
-                  vanadium_path):
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb,
+                  sample_details, vanadium_path, empty_can_subtraction_method, paalman_pings_events_per_point=None):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
 
     # Subtract empty instrument runs, as long as this run isn't an empty, user hasn't turned empty subtraction off, or
     # The user has not supplied a sample empty
-    is_run_empty = common.runs_overlap(run_number, run_details.empty_runs)
+    is_run_empty = common.runs_overlap(run_number, run_details.empty_inst_runs)
     summed_empty = None
     if not is_run_empty and instrument.should_subtract_empty_inst() and not run_details.sample_empty:
-        if os.path.isfile(run_details.summed_empty_file_path):
-            logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_file_path)
-            summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_file_path)
+        if os.path.isfile(run_details.summed_empty_inst_file_path):
+            logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_inst_file_path)
+            summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_inst_file_path)
         else:
-            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_runs,
+            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_inst_runs,
                                                        instrument=instrument)
     elif run_details.sample_empty:
-        # Subtract a sample empty if specified
+        scale_factor = 1.0
+        if empty_can_subtraction_method != 'PaalmanPings':
+            scale_factor = instrument._inst_settings.sample_empty_scale
+        # Subtract a sample empty if specified ie empty can
         summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
                                                    instrument=instrument,
-                                                   scale_factor=instrument._inst_settings.sample_empty_scale)
-    if summed_empty is not None:
-        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace,
-                                                      empty_sample=summed_empty)
+                                                   scale_factor=scale_factor)
 
-    # Crop to largest acceptable TOF range
-    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
-
-    # Correct for absorption / multiple scattering if required
-    if absorb:
-        input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+    if absorb and empty_can_subtraction_method == 'PaalmanPings':
+        if run_details.sample_empty: # need summed_empty including container
+            input_workspace = instrument._apply_paalmanpings_absorb_and_subtract_empty(
+                                                        workspace=input_workspace,
+                                                        summed_empty=summed_empty,
+                                                        sample_details=sample_details,
+                                                        paalman_pings_events_per_point=paalman_pings_events_per_point)
+            # Crop to largest acceptable TOF range
+            input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+        else:
+            raise TypeError("The PaalmanPings absorption method requires 'sample_empty' to be supplied.")
     else:
-        # Set sample material if specified by the user
-        if sample_details is not None:
-            mantid.SetSample(InputWorkspace=input_workspace,
-                             Geometry=common.generate_sample_geometry(sample_details),
-                             Material=common.generate_sample_material(sample_details))
+        if summed_empty:
+            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+        # Crop to largest acceptable TOF range
+        input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+
+        if absorb:
+            input_workspace = instrument._apply_absorb_corrections(run_details=run_details,
+                                                                   ws_to_correct=input_workspace)
+        else:
+            # Set sample material if specified by the user
+            if sample_details is not None:
+                mantid.SetSample(InputWorkspace=input_workspace,
+                                 Geometry=sample_details.generate_sample_geometry(),
+                                 Material=sample_details.generate_sample_material())
+
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
                         CalibrationFile=run_details.offset_file_path)
@@ -122,7 +141,8 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details):
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details,
+                          empty_can_subtraction_method, paalman_pings_events_per_point=None):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
@@ -138,7 +158,9 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
-                               sample_details=sample_details, vanadium_path=vanadium_splines)
+                               sample_details=sample_details, vanadium_path=vanadium_splines,
+                               empty_can_subtraction_method=empty_can_subtraction_method,
+                               paalman_pings_events_per_point=paalman_pings_events_per_point)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         if hasattr(vanadium_splines, "OutputWorkspace"):
             vanadium_splines = vanadium_splines.OutputWorkspace
@@ -178,7 +200,8 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     return output_list
 
 
-def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details):
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details,
+                             empty_can_subtraction_method, paalman_pings_events_per_point=None):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
@@ -196,7 +219,8 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
-                               vanadium_path=vanadium_splines)
+                               vanadium_path=vanadium_splines, empty_can_subtraction_method=empty_can_subtraction_method,
+                               paalman_pings_events_per_point=paalman_pings_events_per_point)
     return output
 
 

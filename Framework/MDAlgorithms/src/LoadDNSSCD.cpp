@@ -41,6 +41,8 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception_ptr.hpp>
 #include <boost/regex.hpp>
+
+#include <algorithm>
 #include <iomanip>
 #include <iterator>
 #include <map>
@@ -238,8 +240,7 @@ void LoadDNSSCD::loadHuber(const ITableWorkspace_sptr &tws) {
 Mantid::API::ITableWorkspace_sptr LoadDNSSCD::saveHuber() {
   std::vector<double> huber;
   huber.reserve(m_data.size());
-  for (const auto &ds : m_data)
-    huber.emplace_back(ds.huber);
+  std::transform(m_data.cbegin(), m_data.cend(), std::back_inserter(huber), [](const auto &ds) { return ds.huber; });
   // remove dublicates
   std::sort(huber.begin(), huber.end());
   huber.erase(unique(huber.begin(), huber.end()), huber.end());
@@ -304,7 +305,7 @@ void LoadDNSSCD::exec() {
   // merge data with different time channel number is not allowed
   auto ch_n = m_data.front().nchannels;
   bool same_channel_number =
-      std::all_of(m_data.begin(), m_data.end(), [ch_n](ExpData &d) { return (d.nchannels == ch_n); });
+      std::all_of(m_data.cbegin(), m_data.cend(), [ch_n](const ExpData &d) { return (d.nchannels == ch_n); });
   if (!same_channel_number)
     throw std::runtime_error("Error: cannot merge data with different TOF channel numbers.");
 
@@ -610,9 +611,6 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   std::vector<double> tth_limits = getProperty("TwoThetaLimits");
   double theta_min = tth_limits[0] / 2.0;
   double theta_max = tth_limits[1] / 2.0;
-
-  double omega_offset = getProperty("OmegaOffset");
-  omega_offset *= -1.0;
 
   std::vector<double> extentMins = {theta_min, 0.0, tof1};
   std::vector<double> extentMaxs = {theta_max, 360.0, m_tof_max};

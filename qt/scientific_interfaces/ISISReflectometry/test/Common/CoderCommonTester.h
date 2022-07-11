@@ -275,6 +275,60 @@ private:
   }
 };
 
+/**
+ * This fake version of the LoadAndProcess exists so we don't have to import the
+ * python API, which was causing some issues on Ubuntu when running the tests.
+ *
+ * It is only used to set the tooltips in the views from the algorithm.
+ */
+class ReflectometryISISLoadAndProcess : public Mantid::API::Algorithm {
+public:
+  ReflectometryISISLoadAndProcess() : Algorithm() {}
+  ~ReflectometryISISLoadAndProcess() override = default;
+  const std::string name() const override { return "ReflectometryISISLoadAndProcess"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "ReflectometryISISLoadAndProcess"; }
+
+  void init() override {
+    declareProperty("FirstTransmissionRunList", "");
+    declareProperty("SecondTransmissionRunList", "");
+    declareProperty("MomentumTransferMin", "");
+    declareProperty("MomentumTransferStep", "");
+    declareProperty("MomentumTransferMax", "");
+    declareProperty("TransmissionProcessingInstructions", "");
+    declareProperty("ScaleFactor", "");
+    declareProperty("ProcessingInstructions", "");
+    declareProperty("BackgroundProcessingInstructions", "");
+    declareProperty("AnalysisMode", "");
+    declareProperty("StartOverlap", "");
+    declareProperty("EndOverlap", "");
+    declareProperty("Params", "");
+    declareProperty("ScaleRHSWorkspace", "");
+    declareProperty("PolarizationAnalysis", "");
+    declareProperty("ReductionType", "");
+    declareProperty("SummationType", "");
+    declareProperty("IncludePartialBins", "");
+    declareProperty("FloodCorrection", "");
+    declareProperty("FloodWorkspace", "");
+    declareProperty("Debug", "");
+    declareProperty("SubtractBackground", "");
+    declareProperty("BackgroundCalculationMethod", "");
+    declareProperty("DegreeOfPolynomial", "");
+    declareProperty("CostFunction", "");
+    declareProperty("NormalizeByIntegratedMonitors", "");
+    declareProperty("MonitorIntegrationWavelengthMin", "");
+    declareProperty("MonitorIntegrationWavelengthMax", "");
+    declareProperty("MonitorBackgroundWavelengthMin", "");
+    declareProperty("MonitorBackgroundWavelengthMax", "");
+    declareProperty("WavelengthMin", "");
+    declareProperty("WavelengthMax", "");
+    declareProperty("I0MonitorIndex", "");
+    declareProperty("DetectorCorrectionType", "");
+    declareProperty("CorrectDetectors", "");
+  }
+  void exec() override {}
+};
+
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

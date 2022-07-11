@@ -6,22 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
 #include "../../Reduction/Batch.h"
+#include "../../Reduction/PreviewRow.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using Mantid::API::IAlgorithm_sptr;
+using MantidQt::API::AlgorithmRuntimeProps;
+using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
 } // namespace
-
-namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
-
-using API::IConfiguredAlgorithm_sptr;
-using Mantid::API::IAlgorithm_sptr;
-using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
 
 namespace { // unnamed namespace
 // These functions update properties in an AlgorithmRuntimeProps for specific
@@ -241,8 +242,65 @@ boost::optional<LookupRow> findWildcardLookupRow(IBatch const &model) {
   }
   return lookupRow;
 }
+
+// Set properties from the batch model
+void updatePropertiesFromBatchModel(AlgorithmRuntimeProps &properties, IBatch const &model) {
+  // Update properties from settings in the event, experiment and instrument tabs
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updateInstrumentProperties(properties, model.instrument());
+}
 } // unnamed namespace
 
+namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
+/** Create a configured algorithm for processing a row. The algorithm
+ * properties are set from the reduction configuration model and the
+ * cell values in the given row.
+ * @param model : the reduction configuration model
+ * @param row : the row from the preview tab
+ */
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row) {
+  // Create the algorithm
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  alg->setRethrows(true);
+
+  // Set the algorithm properties from the model
+  auto properties = createAlgorithmRuntimeProps(model, row);
+
+  // Return the configured algorithm
+  auto jobAlgorithm =
+      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowFromOutputProperties, &row);
+  return jobAlgorithm;
+}
+
+/** This function gets the canonical set of properties for performing the reduction, either using defaults for all runs
+ * or for a specific run if that run's Row is passed. It starts with the most generic set of defaults, overrides them
+ * from the lookup table if a match is found there, and then finally overrides them with the specific run's settings if
+ * the user has specified them on the Runs table.
+ *
+ * @param model : the Batch model containing all of the default settings and the lookup table
+ * @param row : optional run details from the Runs table
+ * @returns : a custom PropertyManager class with all of the algorithm properties set
+ */
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                   PreviewRow const &previewRow) {
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  updatePropertiesFromBatchModel(*properties, model);
+  // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
+  // TODO need to find row by angle/title; for now it just uses the wildcard row
+  auto lookupRow = findWildcardLookupRow(model);
+  if (lookupRow) {
+    updateLookupRowProperties(*properties, *lookupRow);
+  }
+  // Update properties from the preview tab
+  properties->setProperty("InputWorkspace", previewRow.getSummedWs());
+  // TODO add theta once it is in the previewRow
+  // AlgorithmProperties::update("ThetaIn", previewRow.theta(), properties);
+  return properties;
+}
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 /** Create a configured algorithm for processing a row. The algorithm
  * properties are set from the reduction configuration model and the
  * cell values in the given row.
@@ -276,9 +334,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
                                                                                    boost::optional<Row const &> row) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
-  updateEventProperties(*properties, model.slicing());
-  updateExperimentProperties(*properties, model.experiment());
-  updateInstrumentProperties(*properties, model.instrument());
+  updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
   auto lookupRow = row ? findLookupRow(*row, model) : findWildcardLookupRow(model);
   if (lookupRow) {

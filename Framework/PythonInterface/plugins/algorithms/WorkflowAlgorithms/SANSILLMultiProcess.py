@@ -389,7 +389,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                         try:
                             FileFinder.Instance().findRuns(item)
                         except RuntimeError as re:
-                            issues[prop] = re
+                            issues[prop] = str(re)
         return issues
 
     def validateInputs(self):
@@ -773,9 +773,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if self.getProperty('ProduceSensitivity').value:
                 process = 'Water'
                 sens_out = sample_ws + '_Sens'
-            uesr_thickness = self.getProperty('SampleThickness').value
+            user_thickness = self.getProperty('SampleThickness').value
             thickness_from = self.getPropertyValue('SampleThicknessFrom')
-            thickness_to_use = uesr_thickness if thickness_from == 'User' else [-1]
+            thickness_to_use = user_thickness if thickness_from == 'User' else [-1]
             SANSILLReduction(Runs=runs,
                              ProcessAs=process,
                              DarkCurrentWorkspace=dark_current_ws,
@@ -796,6 +796,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              OutputSensitivityWorkspace=sens_out,
                              startProgress=(self.lambda_rank+d)*self.n_samples/self.n_reports,
                              endProgress=(self.lambda_rank+d+1)*self.n_samples/self.n_reports)
+            add_correction_numors(ws=sample_ws, stransmission=sample_tr_ws,
+                                  container=empty_can_ws, absorber=dark_current_ws, beam=empty_beam_ws,
+                                  flux=flux_ws, solvent=solvent_ws, reference='', sensitivity='')
             return [sample_ws, sens_out]
         else:
             return []
@@ -948,6 +951,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                    OutputScaleFactorsWorkspace=output_scale_factors,
                    ReferenceWorkspace=inputs[self.getProperty('StitchReferenceIndex').value],
                    **kwargs)
+            mtd[output].getRun().addProperty('stitch_scale_factors', list(mtd[output_scale_factors].readY(0)), True)
             return [output, output_scale_factors]
         except RuntimeError as e:
             self.log().error('Unable to stitch, consider stitching manually: '+str(e))

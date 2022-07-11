@@ -20,7 +20,8 @@ matplotlib.use('Agg')
 sys.modules['mantid.simpleapi'] = mock.MagicMock()
 
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
-from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter, SliceViewer)  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter,
+                                                               SliceViewer)  # noqa: E402
 from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
@@ -264,6 +265,44 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.enable_tool_button.assert_has_calls(
             (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
 
+    def test_cut_view_button_disabled_if_model_cannot_support_it(self):
+        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
+        self.model.can_support_non_axis_cuts.return_value = False
+
+        SliceViewer(None, model=self.model, view=self.view)
+
+        self.view.data_view.disable_tool_button.assert_has_calls([mock.call(ToolItemText.NONAXISALIGNEDCUTS)])
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerPresenter")
+    def test_cut_view_toggled_on(self, mock_cv_pres):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        self.view.data_view.track_cursor = mock.MagicMock()
+
+        presenter.non_axis_aligned_cut(True)
+
+        mock_cv_pres.assert_called_once_with(presenter, self.view.data_view.canvas)
+        # test correct buttons disabled
+        self.view.data_view.deactivate_and_disable_tool.assert_has_calls([mock.call(tool) for tool in
+                                                                          (ToolItemText.REGIONSELECTION,
+                                                                           ToolItemText.LINEPLOTS,
+                                                                           ToolItemText.NONORTHOGONAL_AXES)])
+        self.view.data_view.deactivate_tool.assert_called_once_with(ToolItemText.ZOOM)
+        self.view.data_view.track_cursor.setChecked.assert_called_once_with(False)
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_sliceinfo")
+    def test_cut_view_toggled_off(self, mock_get_sliceinfo):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter._cutviewer_presenter = mock.MagicMock()
+        mock_get_sliceinfo.return_value.can_support_nonorthogonal_axes.return_value = True
+
+        presenter.non_axis_aligned_cut(False)
+
+        presenter._cutviewer_presenter.hide_view.assert_called_once()
+        # test correct buttons disabled
+        self.view.data_view.enable_tool_button.assert_has_calls([mock.call(tool) for tool in
+                                                                 (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS,
+                                                                  ToolItemText.NONORTHOGONAL_AXES)])
+
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.new_plot_MDH")
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_dimensions_changed_when_transpose_2D_MD_workspace(self, mock_sliceinfo_cls, mock_new_plot):
@@ -425,7 +464,7 @@ class SliceViewerTest(unittest.TestCase):
             presenter.replace_workspace('workspace', workspace)
 
             presenter.view.emit_close.assert_not_called()
-            presenter.view.data_view.plot_MDH.assert_called_once()
+            presenter.view.delayed_refresh.assert_called_once()  # leave it to QTimer to call refresh_view()
 
     def test_refresh_view(self):
         presenter, _ = _create_presenter(self.model,
@@ -442,6 +481,18 @@ class SliceViewerTest(unittest.TestCase):
         self.view.data_view.image_info_widget.setWorkspace.assert_has_calls(calls)
         self.view.setWindowTitle.assert_called_with(self.model.get_title())
         presenter.new_plot.assert_called_once()
+
+    def test_refresh_queued_flag_reset_upon_refresh_view(self):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter.new_plot = mock.Mock()
+        presenter.view.refresh_queued = True
+
+        presenter.refresh_view()
+        self.assertFalse(presenter.view.refresh_queued)
 
     def test_clear_observer_peaks_presenter_not_none(self):
         presenter, _ = _create_presenter(self.model,
@@ -495,7 +546,7 @@ class SliceViewerTest(unittest.TestCase):
         pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
 
         pres._close_view_with_message.assert_not_called()
-        self.assertEquals(mock_model, pres.model)
+        self.assertEqual(mock_model, pres.model)
 
     def test_replace_workspace_replaces_model(self):
         mock_model = mock.MagicMock()
@@ -504,7 +555,7 @@ class SliceViewerTest(unittest.TestCase):
         mock_model.workspace_equals.return_value = True
         with mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewerModel") as mock_model_class:
             pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
-            self.assertEquals(mock_model_class.return_value, pres.model)
+            self.assertEqual(mock_model_class.return_value, pres.model)
 
     def test_rename_workspace(self):
         mock_model = mock.MagicMock()

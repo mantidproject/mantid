@@ -16,7 +16,14 @@ General Notes
 Format Changes
 ==============
 
-V0 (Mantid 6.1.x) to V1 (Mantid 6.3.x)
+V0 (Mantid 6.3+) to V1 (Mantid 6.4+)
+--------------------------------------
+
+- *norm_monitor* and *trans_monitor* in *instrument.configuration* now take a monitor name (e.g. "M1") instead of a spectrum number
+- *selected_monitor* in *normalisation* and *transmission* has been removed in favour of this change in *instrument.configuration*
+- *trans_monitor* can now have the value *"ROI"*
+
+V0 (Mantid 6.1.x) to V0 (Mantid 6.3+)
 --------------------------------------
 
 - *normalisation* and *normalization* are both accepted and equivalent
@@ -40,12 +47,14 @@ toml_file_version
 This is always the first line of the file and represents the TOML
 file version. Long-term this allows us to make changes in a backwards compatible way.
 
-Available TOML Versions: 0
+Available TOML Versions:
+
+- 1
 
 ..  code-block:: none
 
   # First line of file
-  toml_file_version = 0
+  toml_file_version = 1
 
   # Everything else
 
@@ -1203,14 +1212,14 @@ regions of pixels from the calculation.
     [mask]
     mask_files = ["a.xml", "b.xml", "c.xml"]
 
-:ref:`mask_h-ref`
+.. _mask_h-ref:
 
 MASK[/FRONT][/REAR] Hn
 ----------------------
 
 This command was used to specify a **horizontal row** of detector pixels
 to be omitted from the calculation during data reduction. See also
-:ref:`mask_h_h-ref`.
+:ref:`mask_h-ref`.
 
 The TOML replacement command actually permits several rows to be
 specified at once.
@@ -1239,7 +1248,7 @@ specified at once.
         # Masks horizontal 100 and 200
         detector_rows = [100, 200]
 
-:ref:`mask_h_h-ref`
+:ref:`mask_h-ref`
 
 MASK[/FRONT][/REAR] Hn>Hm
 -------------------------
@@ -1275,14 +1284,14 @@ specified at once.
         # Also includes 130-135 to show multiple can be masked
         detector_row_ranges = [[126, 127], [130, 135]]
 
-:ref:`mask_v-ref`
+.. _mask_v-ref:
 
 MASK[/FRONT][/REAR] Vn
 ----------------------
 
 This command was used to specify a **vertical column** of detector pixels
 to be omitted from the calculation during data reduction. See also
-:ref:`mask_v_v-ref`.
+:ref:`mask_v-ref`.
 
 The TOML replacement command actually permits several columns to be
 specified at once.
@@ -1311,7 +1320,7 @@ specified at once.
         # Masks vertical 100 and 200
         detector_columns = [100, 200]
 
-:ref:`mask_v_v-ref`
+:ref:`mask_v-ref`
 
 MASK[/FRONT][/REAR] Vn>Vm
 -------------------------
@@ -1656,64 +1665,133 @@ the moderator-monitor distance.
 
 Unsupported
 
-MON[/TRANS]/SPECTRUM=n[/INTERPOLATE]
+MON/SPECTRUM=n
 ------------------------------------
 
 This command was used to specify which monitor *spectrum* (not number) was to
-be used for normalisation during data reduction. If the /TRANS qualifier was
-present then the command only applied to the normalisation of *transmission*
-spectra.
-
-The optional /INTERPOLATE qualifier could be used to apply an interpolating
-rebin of the specified monitor spectrum. This could be useful as a means of
-'smoothing' noisy monitor spectra where the normal rebin command generated
-'stepped' histograms.
+be used for normalisation during data reduction.
 
 ..  code-block:: none
+
+  [instrument.configuration]
+    norm_monitor = "Mn"
 
   [normalisation]
     #Normalisation monitor
 
-    # This name is used below so if there was a monitor called FOO1
-    # this would work with it
-    selected_monitor = "M1"
+    [normalisation.monitor.Ma]
+      spectrum_number = n1
 
-    [normalisation.monitor.M1]
-      spectrum_number = n
+    [normalisation.monitor.Mb]
+      spectrum_number = n2
 
 **Existing Example:**
 
 ..  code-block:: none
 
     MON/SPECTRUM=1
-    MON/TRANS/SPECTRUM=2
-
-    MON/SPECTRUM=1/INTERPOLATE
 
 **Replacement Example**
 
 ..  code-block:: none
 
+  [instrument.configuration]
+    norm_monitor = "M1"
+
   [normalisation]
-    #Normalisation monitor
-
-    # This name is used below so if there was a monitor called FOO1
-    # this would work with it
-    selected_monitor = "M1"
-
     [normalisation.monitor.M1]
       spectrum_number = 1
 
-  [transmission]
-    selected_monitor = "M2"
+.. _mon_interpolate-ref:
 
+MON [/INTERPOLATE]
+------------------
+The optional /INTERPOLATE qualifier could be used to apply an interpolating
+rebin of the specified monitor spectrum. This could be useful as a means of
+'smoothing' noisy monitor spectra where the normal rebin command generated
+'stepped' histograms.
+
+This command has been been made obsolete by the switch to monitors running
+in Event mode.
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MON/SPECTRUM=1/INTERPOLATE
+
+**Replacement Example**
+
+Unsupported - Obsolete
+
+MON/TRANS/SPECTRUM=n
+------------------------------------
+This command could also be used to specify which monitor *spectrum* (not number) was to
+be used for normalisation during data reduction. As the /TRANS qualifier was
+present the command only applied to the normalisation of *transmission*
+spectra.
+
+..  code-block:: none
+
+  [instrument.configuration]
+    norm_monitor = "Ma"
+    trans_monitor = "Mb"
+
+  [normalisation]
+    #Normalisation monitor
+
+    [normalisation.monitor.Ma]
+      spectrum_number = n1
+
+    [normalisation.monitor.Mb]
+      spectrum_number = n2
+
+    [normalisation.monitor.Mc]
+      spectrum_number = n3
+
+  [transmission]
+    [transmission.monitor.Mb]
+      use_different_norm_monitor = true
+      trans_norm_monitor = "Mc"
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MON/SPECTRUM=1
+    TRANS/TRANSPEC=2
+    MON/TRANS/SPECTRUM=4
+
+**Replacement Example**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    norm_monitor = "M1"
+    trans_monitor = "M2"
+
+  [normalisation]
+    [normalisation.monitor.M1]
+      spectrum_number = 1
+
+    [normalisation.monitor.M4]
+      spectrum_number = 4
+
+  [transmission]
     [transmission.monitor.M2]
       spectrum_number = 2
+      use_different_norm_monitor = true
+      trans_norm_monitor = "M4"
 
   # If interpolation is also required:
   [binning]
     [binning.2d_reduction]
       interpolate = true
+
+MON/TRANS[/INTERPOLATE]
+-----------------------
+
+See :ref:`mon_interpolate-ref`.
 
 PRINT string
 ------------
@@ -2283,7 +2361,7 @@ Unsupported
 .. _trans_mask-ref:
 
 TRANS/MASK=filename
-------------------
+--------------------
 
 This command was used in conjunction with TRANS/RADIUS=r or, more likely,
 TRANS/ROI=filename to *exclude* regions of the detector specified by those
@@ -2303,7 +2381,7 @@ TRANS/MASK=filename command.** See also :ref:`trans_transpec-ref`.
 
 **Replacement Example**
 
-Unsupported, pending future discussion.
+Unsupported, see :ref:`trans_roi-ref`.
 
 .. _trans_radius-ref:
 
@@ -2352,6 +2430,22 @@ filename was expected to be a Mantid mask file in XML format.
 **Note that if also present a TRANS/TRANSPEC=s command would always supersede a
 TRANS/ROI=filename command.** See also :ref:`trans_transpec-ref`.
 
+**Replacement**
+
+..  code-block:: none
+
+    [instrument.configuration]
+      trans_monitor = "ROI"
+
+    [transmission]
+      # This will be ignored:
+      [transmission.monitor.Mn]
+        spectrum_number = s
+
+      [transmission.ROI]
+        file = "roi_file.xml"
+
+
 **Existing Example:**
 
 ..  code-block:: none
@@ -2360,7 +2454,13 @@ TRANS/ROI=filename command.** See also :ref:`trans_transpec-ref`.
 
 **Replacement Example**
 
-Unsupported, pending future discussion.
+    [instrument.configuration]
+      trans_monitor = "ROI"
+
+    [transmission]
+
+      [transmission.ROI]
+        file = "filename.xml"
 
 .. _trans_transpec-ref:
 
@@ -2375,10 +2475,11 @@ number may, or may not, be the same depending on the instrument!
 
 ..  code-block:: none
 
-    [transmission]
+    [instrument.configuration]
       # Where Mn is arbitrary but must match the section label
-      selected_monitor = "Mn"
+      trans_monitor = "Mn"
 
+    [transmission]
       [transmission.monitor.Mn]
         spectrum_number = s
 
@@ -2392,9 +2493,10 @@ number may, or may not, be the same depending on the instrument!
 
 ..  code-block:: none
 
-    [transmission]
-      selected_monitor = "M3"
+    [instrument.configuration]
+      trans_monitor = "M3"
 
+    [transmission]
       [transmission.monitor.M3]
         spectrum_number = 3
 
@@ -2414,13 +2516,14 @@ transmission monitors.
 
 ..  code-block:: none
 
-    [transmission]
+    [instrument.configuration]
       # Where Mn is arbitrary but must match the section label
-      selected_monitor = "Mn"
+      trans_monitor = "Mn"
 
+    [transmission]
       [transmission.monitor.Mn]
         spectrum_number = s
-		shift = dz
+		    shift = dz
 
 **Existing Example:**
 
@@ -2432,9 +2535,10 @@ transmission monitors.
 
 ..  code-block:: none
 
-    [transmission]
-      selected_monitor = "M4"
+    [instrument.configuration]
+      trans_monitor = "M4"
 
+    [transmission]
       [transmission.monitor.M4]
         spectrum_number = 17788
         shift = -0.012

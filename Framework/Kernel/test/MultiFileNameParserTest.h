@@ -30,13 +30,15 @@ public:
   /////////////////////////////////////////////////////////////////////////////
 
   void test_single() {
-    ParsedRuns result = parseMultiRunString("1");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
   }
 
   void test_listOfSingles() {
-    ParsedRuns result = parseMultiRunString("1,2,3,4,5,6,7,8");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1,2,3,4,5,6,7,8");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[1][0], 2);
@@ -49,7 +51,8 @@ public:
   }
 
   void test_range() {
-    ParsedRuns result = parseMultiRunString("1:8");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1:8");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[1][0], 2);
@@ -62,7 +65,8 @@ public:
   }
 
   void test_steppedRange() {
-    ParsedRuns result = parseMultiRunString("1:8:3");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1:8:3");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[1][0], 4);
@@ -70,7 +74,8 @@ public:
   }
 
   void test_descendingSteppedRange() {
-    ParsedRuns result = parseMultiRunString("8:1:3");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("8:1:3");
 
     TS_ASSERT_EQUALS(result[0][0], 8);
     TS_ASSERT_EQUALS(result[1][0], 5);
@@ -78,7 +83,8 @@ public:
   }
 
   void test_descendingSteppedRange_2() {
-    ParsedRuns result = parseMultiRunString("8:1:2");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("8:1:2");
 
     TS_ASSERT_EQUALS(result[0][0], 8);
     TS_ASSERT_EQUALS(result[1][0], 6);
@@ -87,7 +93,8 @@ public:
   }
 
   void test_addedList() {
-    ParsedRuns result = parseMultiRunString("1+2+3+4+5+6+7+8");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1+2+3+4+5+6+7+8");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 2);
@@ -100,7 +107,8 @@ public:
   }
 
   void test_addedRange() {
-    ParsedRuns result = parseMultiRunString("1-8");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-8");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 2);
@@ -113,7 +121,8 @@ public:
   }
 
   void test_addedSteppedRange() {
-    ParsedRuns result = parseMultiRunString("1-8:3");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-8:3");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 4);
@@ -121,7 +130,8 @@ public:
   }
 
   void test_descendingAddedRange() {
-    ParsedRuns result = parseMultiRunString("8-1");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("8-1");
 
     TS_ASSERT_EQUALS(result[0][0], 8);
     TS_ASSERT_EQUALS(result[0][1], 7);
@@ -134,7 +144,8 @@ public:
   }
 
   void test_descendingAddedSteppedRange() {
-    ParsedRuns result = parseMultiRunString("8-1:3");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("8-1:3");
 
     TS_ASSERT_EQUALS(result[0][0], 8);
     TS_ASSERT_EQUALS(result[0][1], 5);
@@ -142,7 +153,8 @@ public:
   }
 
   void test_descendingAddedSteppedRange_2() {
-    ParsedRuns result = parseMultiRunString("8-1:2");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("8-1:2");
 
     TS_ASSERT_EQUALS(result[0][0], 8);
     TS_ASSERT_EQUALS(result[0][1], 6);
@@ -151,7 +163,8 @@ public:
   }
 
   void test_complexList() {
-    ParsedRuns result = parseMultiRunString("1-4,1:4,1+2+3+4,1,2,3,4");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-4,1:4,1+2+3+4,1,2,3,4");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 2);
@@ -175,7 +188,8 @@ public:
   }
 
   void test_singlePlusAddRange() {
-    ParsedRuns result = parseMultiRunString("1+3-6");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1+3-6");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 3);
@@ -185,7 +199,8 @@ public:
   }
 
   void test_addRangePlusSingle() {
-    ParsedRuns result = parseMultiRunString("1-3+5");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-3+5");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 2);
@@ -193,10 +208,14 @@ public:
     TS_ASSERT_EQUALS(result[0][3], 5);
   }
 
-  void test_nothingReturnedWhenPassedEmptyString() { TS_ASSERT_EQUALS(parseMultiRunString("").size(), 0); }
+  void test_nothingReturnedWhenPassedEmptyString() {
+    Parser parser;
+    TS_ASSERT_EQUALS(parser.parseMultiRunString("").size(), 0);
+  }
 
   void test_sumTwoAddRanges() {
-    ParsedRuns result = parseMultiRunString("1-2+4-6");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-2+4-6");
 
     TS_ASSERT_EQUALS(result[0][0], 1);
     TS_ASSERT_EQUALS(result[0][1], 2);
@@ -206,7 +225,8 @@ public:
   }
 
   void test_sumMultipleAddRanges() {
-    ParsedRuns result = parseMultiRunString("1-2+4-6+8-10");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-2+4-6+8-10");
 
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 8)
@@ -221,7 +241,8 @@ public:
   }
 
   void test_multipleAddRangesAndSinge() {
-    ParsedRuns result = parseMultiRunString("1-2+4-6+8-10+15");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-2+4-6+8-10+15");
 
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 9)
@@ -237,7 +258,8 @@ public:
   }
 
   void test_multipleAddRangesAndSingle() {
-    ParsedRuns result = parseMultiRunString("1-2+4-6+8-10+15");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-2+4-6+8-10+15");
 
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 9)
@@ -253,7 +275,8 @@ public:
   }
 
   void test_singleAndMultipleAddRanges() {
-    ParsedRuns result = parseMultiRunString("1+3-4+6-9+11-12");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1+3-4+6-9+11-12");
 
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 9)
@@ -269,7 +292,8 @@ public:
   }
 
   void test_singleWithinMultipleAddRanges() {
-    ParsedRuns result = parseMultiRunString("1-2+4+6-9+11-12");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-2+4+6-9+11-12");
 
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 9)
@@ -285,7 +309,8 @@ public:
   }
 
   void test_steppedRangeWithinMultipleAddRanges() {
-    ParsedRuns result = parseMultiRunString("1-2+4-8:2+10-11");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1-2+4-8:2+10-11");
 
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 7)
@@ -299,7 +324,8 @@ public:
   }
 
   void test_allAddRangeVariantsTogether() {
-    ParsedRuns result = parseMultiRunString("1+2-3+4-6:1+7+8-9+10");
+    Parser parser;
+    ParsedRuns result = parser.parseMultiRunString("1+2-3+4-6:1+7+8-9+10");
     TS_ASSERT_EQUALS(result.size(), 1)
     TS_ASSERT_EQUALS(result.front().size(), 10)
     TS_ASSERT_EQUALS(result[0][0], 1);
@@ -315,43 +341,54 @@ public:
   }
 
   void test_errorThrownWhenPassedUnexpectedChar() {
+    Parser parser;
     std::string message = "Non-numeric or otherwise unaccetable character(s) detected.";
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("#"), const std::runtime_error &re, std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("a"), const std::runtime_error &re, std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("Z"), const std::runtime_error &re, std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("("), const std::runtime_error &re, std::string(re.what()), message);
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString(">"), const std::runtime_error &re, std::string(re.what()), message);
-
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1012-n1059:5"), const std::runtime_error &re, std::string(re.what()),
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("#"), const std::runtime_error &re, std::string(re.what()),
                             message);
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("a"), const std::runtime_error &re, std::string(re.what()),
+                            message);
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("Z"), const std::runtime_error &re, std::string(re.what()),
+                            message);
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("("), const std::runtime_error &re, std::string(re.what()),
+                            message);
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString(">"), const std::runtime_error &re, std::string(re.what()),
+                            message);
+
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("1012-n1059:5"), const std::runtime_error &re,
+                            std::string(re.what()), message);
   }
 
   void test_errorThrownOnEmptyToken() {
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1,,3"), const std::runtime_error &re, std::string(re.what()),
+    Parser parser;
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("1,,3"), const std::runtime_error &re, std::string(re.what()),
                             "A comma-separated token is empty.");
   }
 
   void test_errorThrownWhenStringDoesNotStartAndEndWithNumeral() {
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("+2+3"), const std::runtime_error &re, std::string(re.what()),
+    Parser parser;
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("+2+3"), const std::runtime_error &re, std::string(re.what()),
                             "The token \"+2+3\" is of an incorrect form.  Does "
                             "it begin or end with a plus, minus or colon?");
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("2-3:"), const std::runtime_error &re, std::string(re.what()),
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("2-3:"), const std::runtime_error &re, std::string(re.what()),
                             "The token \"2-3:\" is of an incorrect form.  Does "
                             "it begin or end with a plus, minus or colon?");
   }
 
   void test_errorThrownIfStepSizeEqualsZero() {
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1:3:0"), const std::runtime_error &re, std::string(re.what()),
+    Parser parser;
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("1:3:0"), const std::runtime_error &re, std::string(re.what()),
                             "Unable to generate a range with a step size of zero.");
   }
 
   void test_errorThrownIfAddedStepSizeEqualsZero() {
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1-3:0"), const std::runtime_error &re, std::string(re.what()),
+    Parser parser;
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("1-3:0"), const std::runtime_error &re, std::string(re.what()),
                             "Unable to generate a range with a step size of zero.");
   }
 
   void test_errorThrownIfOfIncorrectForm() {
-    TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1-3-1"), const std::runtime_error &re, std::string(re.what()),
+    Parser parser;
+    TS_ASSERT_THROWS_EQUALS(parser.parseMultiRunString("1-3-1"), const std::runtime_error &re, std::string(re.what()),
                             "The token \"1-3-1\" is of an incorrect form.");
   }
 

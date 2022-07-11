@@ -4,8 +4,8 @@ channels:
   - conda-forge
 
 dependencies:
-  - boost=1.75.* # Also pulls in boost-cpp
-  - cmake>=3.20.*
+  - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
+  - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - doxygen>=1.9.*
   - eigen=3.4.*
   - euphonic=0.6.*
@@ -27,7 +27,7 @@ dependencies:
   - poco=1.10.*
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
-  - pyqt>=5.12.3,<6
+  - pyqt>=5.12,<5.15
   - python-dateutil>=2.8.1
   - python=3.8.*
   - python.app
@@ -38,8 +38,8 @@ dependencies:
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.6.2
-  - setuptools=48.0.0 # Pinned purposefully due to incompatibility with later versions
-  - sphinx<=3.5.4 # Pinned at 3.5.4 and below due to styling changes in 4.0, and 4.3 has a bug fix which imports a lot of matplotlib code (probably correctly, based on what we have in the api/python/mantid/plots/index.html file) and fails the doctests.
+  - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
+  - sphinx >= 4.5.*
   - sphinx_bootstrap_theme<=0.7.1
   - tbb-devel=2020.2.*
   - tbb=2020.2.*
@@ -49,3 +49,9 @@ dependencies:
   # Needed only for development
   - cppcheck==2.5
   - pre-commit>=2.12.0
+
+  # Use conda version of clang to get matching CXXFLAGS.
+  # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml#L23
+  - clang_osx-64=12
+  - clangxx_osx-64=12
+  - llvm-openmp=12

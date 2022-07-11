@@ -37,10 +37,20 @@ class WorkspaceInfo:
         """
         ws_type = WorkspaceInfo.get_ws_type(workspace)
 
-        return ws_type == WS_TYPE.MDE or \
-               (ws_type == WS_TYPE.MDH
-                and workspace.hasOriginalWorkspace(0)
-                and workspace.getOriginalWorkspace(0).getNumDims() == workspace.getNumDims())
+        return ws_type == WS_TYPE.MDE or WorkspaceInfo.can_rebin_original_MDE_workspace(workspace)
+
+    @staticmethod
+    def can_rebin_original_MDE_workspace(ws) -> bool:
+        if WorkspaceInfo.get_ws_type(ws) == WS_TYPE.MDH and ws.hasOriginalWorkspace(0):
+            has_same_ndims = ws.getOriginalWorkspace(0).getNumDims() == ws.getNumDims()
+            try:
+                # check if mdhisto altered since original ws BinMD - then not valid to rebin original
+                mdhisto_has_been_altered = bool(int(ws.getExperimentInfo(0).run().get("mdhisto_was_modified").value))
+            except:
+                mdhisto_has_been_altered = False
+            return has_same_ndims and not mdhisto_has_been_altered
+        else:
+            return False
 
     @staticmethod
     def display_indices(slicepoint: Sequence[Optional[float]], transpose: bool = False):

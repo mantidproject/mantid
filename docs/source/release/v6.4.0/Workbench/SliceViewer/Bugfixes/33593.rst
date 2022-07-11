@@ -1,1 +1,0 @@
-- Color limit autoscaling now works for MDHisto workspaces in non-orthogonal view in sliceviewer.

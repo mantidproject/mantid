@@ -78,7 +78,7 @@ public:
       _hkls.erase(it);
   }
   const Mantid::Kernel::V3D &getQ() const { return _Q; }
-  double angle(const PeakCandidate &rhs) { return rhs._Q.angle(_Q); }
+  double angle(const PeakCandidate &rhs) const { return rhs._Q.angle(_Q); }
   void setIndex(const std::set<index> &s) {
     _hkls.clear();
     _hkls = s;
@@ -101,14 +101,13 @@ public:
       {
         const index &index1 = *it1;
         const index &index2 = *it2;
-        double angle = uc.recAngle(index1._h, index1._k, index1._l, index2._h, index2._k, index2._l,
-                                   1);                    // calculate angle between each fictional
-                                                          // primative vector on both this and
-                                                          // other.
-        if (std::abs(angle - measured_angle) < tolerance) // If peak angles are the same as the dspacing angles we
-                                                          // can say that this peak corresponds to privatve vector
-                                                          // hkl and the other corresponds to primative vector hkl
-        {
+
+        // calculate angle between each fictional primative vector on both this and other.
+        double reciprocalAngle = uc.recAngle(index1._h, index1._k, index1._l, index2._h, index2._k, index2._l, 1);
+
+        // If peak angles are the same as the dspacing angles we can say that this peak corresponds to privatve vector
+        // hkl and the other corresponds to primative vector hkl
+        if (std::abs(reciprocalAngle - measured_angle) < tolerance) {
           s1.insert(index1);
           s2.insert(index2);
         }
@@ -140,7 +139,7 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return (1); }
+  int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {"IndexPeaks"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Crystal\\Peaks"; }
@@ -149,7 +148,7 @@ private:
   // Helper method to cull potential hkls off each peak.
   void cullHKLs(std::vector<PeakCandidate> &peakCandidates, Mantid::Geometry::UnitCell &unitcell);
   // Helper method used to check that not all peaks are colinear.
-  void validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const;
+  void validateNotColinear(const std::vector<PeakCandidate> &peakCandidates) const;
   // Overridden Algorithm methods
   void init() override;
   //

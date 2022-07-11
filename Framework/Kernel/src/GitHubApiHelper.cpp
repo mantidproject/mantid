@@ -15,6 +15,7 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
 #include <json/json.h>
 #include <map>
@@ -63,7 +64,7 @@ std::string getApiToken() {
   }
 
   // unset is the user's way of intentionally turning of authentication
-  if (token.empty() || token == "unset") {
+  if (token.empty() || boost::istarts_with(token, "unset")) {
     token = "";
   } else {
     // error check that token is possibly valid - 40 char

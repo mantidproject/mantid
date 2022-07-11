@@ -35,7 +35,9 @@ class Polaris(AbstractInst):
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
                            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-                           sample_details=self._sample_details)
+                           sample_details=self._sample_details,
+                           empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
+                           paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
@@ -153,3 +155,9 @@ class Polaris(AbstractInst):
 
         self._inst_settings.update_attributes(advanced_config=polaris_advanced_config.get_mode_specific_dict(mode),
                                               suppress_warnings=True)
+
+    def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details,
+                                                      paalman_pings_events_per_point=None):
+        return absorb_corrections.apply_paalmanpings_absorb_and_subtract_empty(
+            workspace=workspace, summed_empty=summed_empty, sample_details=sample_details,
+            paalman_pings_events_per_point=paalman_pings_events_per_point)

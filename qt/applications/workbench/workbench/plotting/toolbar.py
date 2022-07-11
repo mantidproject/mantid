@@ -236,7 +236,8 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
         # For contour and wireframe plots, add a toolbar option to change the colour of the lines.
         if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
-            self.set_up_color_selector_toolbar_button(fig)
+            if any(isinstance(col, LineCollection) for col in fig.get_axes()[0].collections):
+                self.set_up_color_selector_toolbar_button(fig)
 
         if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()

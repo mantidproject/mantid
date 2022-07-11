@@ -821,6 +821,7 @@ set(QT5_TEST_FILES
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/Python/SipTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
@@ -831,10 +832,6 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
-
-if(NOT APPLE)
-  list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
-endif()
 
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(

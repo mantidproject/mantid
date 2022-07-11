@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-from ..memorywidget.memoryinfo import get_memory_info
+from ..memorywidget.memoryinfo import get_memory_info, get_mantid_memory_info
 from ...utils.asynchronous import set_interval
 
 TIME_INTERVAL_MEMORY_USAGE_UPDATE = 2.000  # in s
@@ -23,7 +23,9 @@ class MemoryPresenter(object):
         self.view = view
         self.update_allowed = True
         self.set_bar_color_at_start()
+        self.set_mantid_bar_color_at_start()
         self.update_memory_usage()
+        self.update_mantid_memory_usage()
         self.thread_stopper = self.update_memory_usage_threaded()
 
     def __del__(self):
@@ -41,20 +43,43 @@ class MemoryPresenter(object):
         else:
             pass
 
+    def set_mantid_bar_color_at_start(self):
+        """
+        Sets style of the memory(progress) bar at the start
+        """
+        current_value = self.view.mantid_memory_bar.value()
+        if current_value >= self.view.critical:
+            self.view.set_mantid_bar_color(0, current_value)
+        elif current_value < self.view.critical:
+            self.view.set_mantid_bar_color(100, current_value)
+        else:
+            pass
+
     @set_interval(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
     def update_memory_usage_threaded(self):
         """
         Calls update_memory_usage once every TIME_INTERVAL_MEMORY_USAGE_UPDATE
         """
         self.update_memory_usage()
+        self.update_mantid_memory_usage()
 
     def update_memory_usage(self):
         """
         Gets memory usage information and passes it to the view
         """
         if self.update_allowed:
-            mem_used_percent, mem_used, mem_avail = get_memory_info()
-            self.view.invoke_set_value(mem_used_percent, mem_used, mem_avail)
+            system_memory_bar = get_memory_info()
+            self.view.invoke_set_value(system_memory_bar.used_percent, system_memory_bar.used_GB,
+                                       system_memory_bar.system_total_GB)
+
+    def update_mantid_memory_usage(self):
+        """
+        Gets memory usage information and passes it to the view
+        """
+        if self.update_allowed:
+            mantid_memory_bar = get_mantid_memory_info()
+            self.view.invoke_mantid_set_value(mantid_memory_bar.used_percent, mantid_memory_bar.used_GB,
+                                              mantid_memory_bar.system_total_GB)
 
     def cancel_memory_update(self):
         """

@@ -16,7 +16,7 @@ class CheckForSampleLogsTest(unittest.TestCase):
         result = simpleapi.CheckForSampleLogs(w, 'Phase1')
         self.assertEqual(result, '')
         result = simpleapi.CheckForSampleLogs(w, 'Phrase1')
-        self.assertNotEquals(result, '')
+        self.assertNotEqual(result, '')
 
 
 if __name__=="__main__":

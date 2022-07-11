@@ -376,6 +376,10 @@ LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
       LookupRow(makeLookupRow(2.3))};
 }
 
+LookupTable makeLookupTableWithTwoValidDuplicateCriteria() {
+  return LookupTable{makeLookupRow(0.5, boost::regex(".*")), makeLookupRow(0.5, boost::regex("g.*"))};
+}
+
 std::map<std::string, std::string> makeStitchOptions() {
   return std::map<std::string, std::string>{{"key1", "value1"}, {"key2", "value2"}};
 }
@@ -420,6 +424,13 @@ Experiment makeEmptyExperiment() {
                     makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
                     std::map<std::string, std::string>(), LookupTable());
+}
+
+Experiment makeExperimentWithValidDuplicateCriteria() {
+  return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInQ, true, true,
+                    makeBackgroundSubtraction(), makePolarizationCorrections(), makeFloodCorrections(),
+                    makeTransmissionStitchOptions(), makeStitchOptions(),
+                    makeLookupTableWithTwoValidDuplicateCriteria());
 }
 
 /* Instrument */

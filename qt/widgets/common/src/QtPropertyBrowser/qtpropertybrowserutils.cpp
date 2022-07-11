@@ -95,13 +95,9 @@
 #include <QPainter>
 
 namespace {
-// Translation function for Qt4/Qt5. Qt5 has no encoding option
+// Translation function for Qt5
 QString translateUtf8Encoded(const char *context, const char *key, const char *disambiguation = nullptr, int n = -1) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QApplication::translate(context, key, disambiguation, QApplication::UnicodeUTF8, n);
-#else
   return QApplication::translate(context, key, disambiguation, n);
-#endif
 }
 } // namespace
 

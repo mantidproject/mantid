@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/DataServiceExporter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
@@ -61,8 +62,19 @@ Workspace_sptr makeWorkspaceGroup() {
   return wsGroup;
 }
 
+void addItem(WorkspaceGroup &self, const std::string &name) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  self.add(name);
+}
+
 void addWorkspace(WorkspaceGroup &self, const boost::python::object &pyobj) {
+  ReleaseGlobalInterpreterLock releaseGIL;
   self.addWorkspace(DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>::extractCppValue(pyobj));
+}
+
+void removeItem(WorkspaceGroup &self, const std::string &name) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  self.remove(name);
 }
 
 PyObject *getItem(WorkspaceGroup &self, const int &index) {
@@ -83,10 +95,10 @@ void export_WorkspaceGroup() {
       .def("contains", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
            (arg("self"), arg("workspace")), "Returns true if the given name is in the group")
       .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")), "Sort members by name")
-      .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")), "Add a name to the group")
+      .def("add", addItem, (arg("self"), arg("workspace_name")), "Add a name to the group")
       .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")), "Add a workspace to the group.")
       .def("size", &WorkspaceGroup::size, arg("self"), "Returns the number of workspaces contained in the group")
-      .def("remove", &WorkspaceGroup::remove, (arg("self"), arg("workspace_name")), "Remove a name from the group")
+      .def("remove", removeItem, (arg("self"), arg("workspace_name")), "Remove a name from the group")
       .def("getItem", getItem, (arg("self"), arg("index")), "Returns the item at the given index")
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
            "Returns true if the workspace group is multi-period")

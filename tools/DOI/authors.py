@@ -19,7 +19,7 @@ import subprocess
 # prefer multiple translations over blacklist entries in case users log back on
 # to machines and start using old aliases again.
 _translations = {
-    # Name in Git.             :  Preffered name for DOI.
+    # Name in Git.             :  Preferred name for DOI.
     'Freddie Akeroyd': 'Akeroyd, Freddie',
     'Stuart Ansell': 'Ansell, Stuart',
     'Sofia Antony': 'Antony, Sofia',
@@ -278,7 +278,11 @@ _translations = {
     'Jesse McGaha': 'McGaha, Jesse',
     'jrmcgaha-dev': 'McGaha, Jesse',
     'Zachary Morgan': 'Morgan, Zachary',
-    'MialLewis': 'Lewis, Mial'
+    'MialLewis': 'Lewis, Mial',
+    'Jan-Lukas Wynen': 'Wynen, Jan-Lukas',
+    'Steve K': 'King, Steve',
+    'Oleksandr Koshchii': 'Koshchii, Oleksandr',
+    'walshmm': 'Walsh, Michael'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

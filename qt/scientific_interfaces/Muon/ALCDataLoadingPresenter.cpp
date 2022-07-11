@@ -306,9 +306,8 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   std::vector<std::string> logs;
 
   const auto &properties = ws->run().getProperties();
-  for (auto property : properties) {
-    logs.emplace_back(property->name());
-  }
+  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(logs),
+                 [](const auto &property) { return property->name(); });
 
   // sort alphabetically
   // cannot use standard sort alone as some logs are capitalised and some are

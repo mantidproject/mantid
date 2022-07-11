@@ -60,9 +60,9 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
         self.assertTrue(ws.isHistogramData())
-        self.assertEquals(ws.blocksize(), blocksize)
-        self.assertEquals(ws.getNumberHistograms(), 1)
-        self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'Wavelength')
+        self.assertEqual(ws.blocksize(), blocksize)
+        self.assertEqual(ws.getNumberHistograms(), 1)
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'Wavelength')
 
 
 if __name__ == "__main__":

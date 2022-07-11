@@ -283,7 +283,7 @@ class MantidAxesTest(unittest.TestCase):
             axes.images[0].set_cmap(new_cmap)
 
         def extra_checks(axes):
-            self.assertEquals(new_cmap, axes.images[0].get_cmap().name)
+            self.assertEqual(new_cmap, axes.images[0].get_cmap().name)
 
         self._do_image_replace_common_bins(self.ax.imshow,
                                            lambda ax: ax.images,
@@ -297,7 +297,7 @@ class MantidAxesTest(unittest.TestCase):
             axes.images[0].set_interpolation(interpolation)
 
         def extra_checks(axes):
-            self.assertEquals(interpolation, axes.images[0].get_interpolation())
+            self.assertEqual(interpolation, axes.images[0].get_interpolation())
 
         self._do_image_replace_common_bins(self.ax.imshow,
                                            lambda ax: ax.images,
@@ -508,8 +508,7 @@ class MantidAxesTest(unittest.TestCase):
         autoscale if the workspace changes
         """
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], OutputWorkspace="ws")
-        self.ax.autoscale(enable=False, axis='both')
-        self.ax.plot(ws)
+        self.ax.plot(ws, autoscale_on_update=False)
         CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], OutputWorkspace="ws")
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
@@ -518,8 +517,7 @@ class MantidAxesTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.plot(ws)
         ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
-        self.ax.autoscale(enable=False, axis='both')
-        self.ax.plot(ws2)
+        self.ax.plot(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_plot_autoscales_by_default(self):
@@ -540,16 +538,14 @@ class MantidAxesTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.errorbar(ws)
         ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
-        self.ax.autoscale(enable=False, axis='both')
-        self.ax.errorbar(ws2)
+        self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscaling_can_be_turned_off(self):
         ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], DataE=[1, 2], OutputWorkspace="ws")
         self.ax.errorbar(ws)
         ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace="ws2")
-        self.ax.autoscale(enable=False, axis='both')
-        self.ax.errorbar(ws2)
+        self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_plotting_ws_without_giving_spec_num_sets_spec_num_if_ws_has_1_histogram(self):
@@ -637,6 +633,34 @@ class MantidAxesTest(unittest.TestCase):
         # Check that the lines have the same x and y data.
         self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
+
+    def test_converting_waterfall_plot_scale(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        # Plot the same line twice.
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        x_lin_1 = ax.get_lines()[1].get_xdata()[0]
+        y_lin_1 = ax.get_lines()[1].get_ydata()[0]
+
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        x_log = ax.get_lines()[1].get_xdata()[0]
+        y_log = ax.get_lines()[1].get_ydata()[0]
+
+        ax.set_xscale("linear")
+        ax.set_yscale("linear")
+        x_lin_2 = ax.get_lines()[1].get_xdata()[0]
+        y_lin_2 = ax.get_lines()[1].get_ydata()[0]
+
+        self.assertTrue(ax.is_waterfall())
+        # Check the lines' data are different now that it is a log scale waterfall plot.
+        self.assertNotEqual(x_lin_1, x_log)
+        self.assertNotEqual(y_lin_1, y_log)
+        self.assertEqual(x_lin_1, x_lin_2)
+        self.assertEqual(y_lin_1, y_lin_2)
 
     def test_create_fill_creates_fills_for_waterfall_plot(self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})

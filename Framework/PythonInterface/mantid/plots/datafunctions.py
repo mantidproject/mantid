@@ -446,7 +446,7 @@ def get_md_data2d_bin_centers(workspace, normalization, indices=None, transpose=
 
 
 def boundaries_from_points(input_array):
-    """"
+    """
     The function tries to guess bin boundaries from bin centers
 
     :param input_array: a :class:`numpy.ndarray` of bin centers
@@ -979,7 +979,8 @@ def remove_and_return_errorbar_cap_lines(ax):
                         break
 
             if line_is_errorbar_cap:
-                errorbar_cap_lines.append(ax.lines.pop(ax.lines.index(line)))
+                errorbar_cap_lines.append(line)
+                line.remove()
 
     return errorbar_cap_lines
 
@@ -1047,11 +1048,13 @@ def apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_mo
             # Shift the errorbars
             for bar_line_col in container[2]:
                 segments = bar_line_col.get_segments()
+                i = 0
                 for point in segments:
                     for row in range(2):
-                        point[row][1] += amount_to_move_y
+                        point[row][1] += amount_to_move_y[i]
                     for column in range(2):
-                        point[column][0] += amount_to_move_x
+                        point[column][0] += amount_to_move_x[i]
+                    i+=1
                 bar_line_col.set_segments(segments)
             bar_line_col.set_zorder((len(ax.get_lines()) - index) + 1)
             break
@@ -1059,12 +1062,20 @@ def apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_mo
 
 def convert_single_line_to_waterfall(ax, index, x=None, y=None, need_to_update_fill=False):
     line = ax.get_lines()[index]
-
-    amount_to_move_x = index * ax.width * (ax.waterfall_x_offset / 500) if x is None else \
-        index * ax.width * ((x - ax.waterfall_x_offset) / 500)
-
-    amount_to_move_y = index * ax.height * (ax.waterfall_y_offset / 500) if y is None else \
-        index * ax.height * ((y - ax.waterfall_y_offset) / 500)
+    x_data = line.get_xdata()
+    y_data = line.get_ydata()
+    if ax.get_xscale() == "log":
+        amount_to_move_x = x_data * ((1 + ax.waterfall_x_offset / 100) ** index - 1) if x is None else \
+            x_data * (((1 + x / 100)/(1 + ax.waterfall_x_offset / 100)) ** index - 1)
+    else:
+        amount_to_move_x = np.zeros(x_data.size) + index * ax.width * (ax.waterfall_x_offset / 500) if x is None else \
+            np.zeros(x_data.size) + index * ax.width * ((x - ax.waterfall_x_offset) / 500)
+    if ax.get_yscale() == "log":
+        amount_to_move_y = y_data * ((1 + ax.waterfall_y_offset / 100) ** index - 1) if y is None else \
+            y_data * (((1 + y / 100)/(1 + ax.waterfall_y_offset / 100)) ** index - 1)
+    else:
+        amount_to_move_y = np.zeros(y_data.size) + index * ax.height * (ax.waterfall_y_offset / 500) if y is None else \
+            np.zeros(y_data.size) + index * ax.height * ((y - ax.waterfall_y_offset) / 500)
 
     if line.get_label() == "_nolegend_":
         apply_waterfall_offset_to_errorbars(ax, line, amount_to_move_x, amount_to_move_y, index)
@@ -1128,7 +1139,10 @@ def waterfall_create_fill(ax):
     errorbar_cap_lines = remove_and_return_errorbar_cap_lines(ax)
 
     for i, line in enumerate(ax.get_lines()):
-        bottom_line = [min(line.get_ydata()) - ((i * ax.height) / 100)] * len(line.get_ydata())
+        if ax.get_yscale() == "log":
+            bottom_line = [min(line.get_ydata())] * len(line.get_ydata())
+        else:
+            bottom_line = [min(line.get_ydata()) - ((i * ax.height) / 100)] * len(line.get_ydata())
         fill = ax.fill_between(line.get_xdata(), line.get_ydata(), bottom_line)
         fill.set_zorder((len(ax.get_lines()) - i) + 1)
         set_waterfall_fill_visible(ax, i)

@@ -48,13 +48,13 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
     def checkOutput(self, ws, items, blocksize):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
-        self.assertEquals(ws.getNumberOfEntries(), items)
+        self.assertEqual(ws.getNumberOfEntries(), items)
         item = ws[0]
         self.assertTrue(isinstance(item, MatrixWorkspace))
         self.assertTrue(item.isHistogramData())
-        self.assertEquals(item.blocksize(), blocksize)
-        self.assertEquals(item.getNumberHistograms(), 1)
-        self.assertEquals(item.getAxis(0).getUnit().unitID(), 'Wavelength')
+        self.assertEqual(item.blocksize(), blocksize)
+        self.assertEqual(item.getNumberHistograms(), 1)
+        self.assertEqual(item.getAxis(0).getUnit().unitID(), 'Wavelength')
 
 if __name__ == "__main__":
     unittest.main()

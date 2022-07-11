@@ -1,4 +1,11 @@
 #!/bin/bash
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
 
 # Construct a standalone macOS MantidWorkbench .dmg bundle.
 # The bundle is created from a pre-packaged conda version
@@ -15,11 +22,16 @@ DETACH_MAX_TRIES=5
 DETACH_WAIT_SECS=60
 CONDA_EXE=mamba
 CONDA_PACKAGE=mantidworkbench
+BUNDLE_PREFIX=MantidWorkbench
+ICON_DIR="$HERE/../../../images"
+
+# Common routines
+source $HERE/../common/common.sh
 
 # Cleanup on script exit
 # Remove temporary work files and ensure volumes are detached
 #   $1 - The name of the mounted volume that, if it still exists, should be detached
-function cleanup() {
+function on_exit() {
   ensure_volume_detached "$1"
   rm -f "$TEMP_OSA_SCPT"
   rm -f "$TEMP_IMAGE"
@@ -45,6 +57,17 @@ function ensure_volume_detached() {
   done
 }
 
+# Certain packages use LC_REEXPORT_DYLIB rather than LC_LOAD_DYLIB for their dependents
+# See http://blog.darlinghq.org/2018/07/mach-o-linking-and-loading-tricks.html for details.
+# Conda install rewrites these LC_REEXPORT_DYLIB links with absolute links and breaks relocation
+# This can easily be remedied by switching to use the @rpath identifier
+# We avoid scanning the whole bundle as this potentially very expensive and instead fixup the libraries
+# we know have issues
+function fixup_reexport_paths() {
+  local bundle_conda_prefix=$1
+  fixup_reexport_dependent_path "$(find "$bundle_conda_prefix" -name 'libncurses.*' -type f)"
+}
+
 # Use otool/install_name_tool to change a dependent path
 # to a reexported library. The original is assumed to contain
 # an absolute path
@@ -58,39 +81,6 @@ function fixup_reexport_dependent_path() {
   install_name_tool -change "${dependent_path}" @rpath/"${dependent_fname}" "${libpath}"
 }
 
-function trim_conda() {
-  local bundle_conda_prefix=$1
-  echo "Purging '$bundle_conda_prefix' of unnecessary items"
-  # Heavily cut down everything in bin
-  mv "$bundle_conda_prefix"/bin "$bundle_conda_prefix"/bin_tmp
-  mkdir "$bundle_conda_prefix"/bin
-  cp "$bundle_conda_prefix"/bin_tmp/Mantid.properties "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/mantid-scripts.pth "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/MantidWorkbench "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/python "$bundle_conda_prefix"/bin/
-  cp "$bundle_conda_prefix"/bin_tmp/pip "$bundle_conda_prefix"/bin/
-  sed -i "" '1s|.*|#!/usr/bin/env python|' "$bundle_conda_prefix"/bin/pip
-  # Heavily cut down share
-  mv "$bundle_conda_prefix"/share "$bundle_conda_prefix"/share_tmp
-  mkdir "$bundle_conda_prefix"/share
-  mv "$bundle_conda_prefix"/share_tmp/doc "$bundle_conda_prefix"/share/
-  # Removals
-  rm -rf "$bundle_conda_prefix"/bin_tmp \
-    "$bundle_conda_prefix"/include \
-    "$bundle_conda_prefix"/man \
-    "$bundle_conda_prefix"/mkspecs \
-    "$bundle_conda_prefix"/phrasebooks \
-    "$bundle_conda_prefix"/qml \
-    "$bundle_conda_prefix"/qsci \
-    "$bundle_conda_prefix"/share_tmp \
-    "$bundle_conda_prefix"/translations
-  find "$bundle_conda_prefix" -name 'qt.conf' -delete
-  find "$bundle_conda_prefix" -name '*.a' -delete
-  find "$bundle_conda_prefix" -name "*.pyc" -type f -delete
-  find "$bundle_conda_prefix" -path "*/__pycache__/*" -delete
-  find "$bundle_contents" -name '*.plist' -delete
-}
-
 # Add required resources into bundle
 #   $1 - Location of bundle contents directory
 #   $2 - Name of the bundle (part before .app)
@@ -101,7 +91,6 @@ function add_resources() {
   local bundle_icon=$3
   cp "$HERE"/BundleExecutable "$bundle_contents"/MacOS/"$bundle_name"
   chmod +x "$bundle_contents"/MacOS/"$bundle_name"
-  cp "$HERE"/qt.conf "$bundle_contents"/Resources/bin/qt.conf
   cp "$bundle_icon" "$bundle_contents"/Resources
 }
 
@@ -122,7 +111,7 @@ function create_plist() {
   add_string_to_plist "$bundle_plist" CFBundleName "$bundle_name"
   add_string_to_plist "$bundle_plist" CFBundleIconFile "$(basename $bundle_icon)"
   add_string_to_plist "$bundle_plist" CFBundleVersion "$version"
-  add_string_to_plist "$bundle_plist" CFBundleLongVersionString "$version"
+  add_string_to_plist "$bundle_plist" CFBundleShortVersionString "$version"
 }
 
 # Add a key string-value pair to a plist
@@ -152,7 +141,7 @@ function create_disk_image() {
   # Set Finder background
   hdiutil create -ov -srcfolder "$BUILD_DIR" -volname "$version_name" -fs HFS+ -format UDRW "$TEMP_IMAGE"
   volume_name=$(hdiutil attach "$TEMP_IMAGE" | perl -n -e '/\/Volumes\/(.+)/ && print $1')
-  trap "cleanup $volume_name" RETURN
+  trap "on_exit $volume_name" RETURN
   volume_path=/Volumes/"$volume_name"
   rm "$volume_path"/"$padding_filename"
   sed -e "s/@BUNDLE_NAME@/$bundle_name/" "$HERE/dmg_setup.scpt.in" > "$TEMP_OSA_SCPT"
@@ -167,46 +156,61 @@ function create_disk_image() {
 # Print usage and exit
 function usage() {
   local exitcode=$1
-  echo "Usage: $0 [options] bundle_name icon_file"
+  echo "Usage: $0 [options]"
   echo
   echo "Create a DragNDrop bundle out of a Conda package. The package is built in $BUILD_DIR."
+  echo "The final name will be '${BUNDLENAME}${suffix}.app'"
   echo "This directory will be created if it does not exist or purged if it already exists."
   echo "The final .dmg will be created in the current working directory."
   echo "Options:"
   echo "  -c Optional Conda channel overriding the default mantid"
+  echo "  -s Optional Add a suffix to the output mantid file, has to be Unstable, or Nightly or not used"
   echo
-  echo "Positional Arguments"
-  echo "  bundle_name: The name of the bundle app directory, i.e. the final name will be '${bundle_name}.app'"
-  echo "  icon_file: An icon file, in icns format, for the final bundle"
   exit $exitcode
 }
 
 ## Script begin
 # Optional arguments
 conda_channel=mantid
-while getopts ":c:h" o; do
-  case "$o" in
-  c) conda_channel="$OPTARG";;
-  h) usage 0;;
-  *) usage 1;;
-esac
+suffix=
+while [ ! $# -eq 0 ]
+do
+  case "$1" in
+    -c)
+        conda_channel="$2"
+        shift
+        ;;
+    -s)
+        suffix="$2"
+        shift
+        ;;
+    -h)
+        usage 0
+        ;;
+    *)
+        if [ ! -z "$2" ]
+        then
+          usage 1
+        fi
+        ;;
+  esac
+  shift
 done
-shift $((OPTIND-1))
 
-# Positional arguments
-# 2) - the name of the bundle
-# 3) - path to .icns image used as icon for bundle
-bundle_name=$1
-bundle_icon=$2
+# If suffix is not empty and does not contain Unstable or Nightly then fail.
+if [ ! -z "$suffix" ]; then
+  if [ "$suffix" != "Unstable" ] && [ "$suffix" != "Nightly" ]; then
+    echo "Suffix must either not be passed, or be Unstable or Nightly, for release do not pass this argument."
+    exit 1
+  fi
+fi
 
-# Sanity check arguments. Especially ensure that paths are not empty as we are removing
-# items and we don't want to accidentally clean out system paths
-test -n "$bundle_name" || usage 1
-test -n "$bundle_icon" || usage 1
-
+bundle_name="$BUNDLE_PREFIX$suffix"
+bundle_icon="${ICON_DIR}/mantid_workbench$(echo $suffix | tr '[:upper:]' '[:lower:]').icns"
 bundle_dirname="$bundle_name".app
 bundle_contents="$BUILD_DIR"/"$bundle_dirname"/Contents
 echo "Building '$bundle_dirname' in '$BUILD_DIR' from '$conda_channel' Conda channel"
+echo "Using bundle icon ${bundle_icon}"
 
 # Build directory needs to be empty before we start
 if [ -d "$BUILD_DIR" ]; then
@@ -225,7 +229,8 @@ mkdir -p "$bundle_contents"/{Resources,MacOS}
 bundle_conda_prefix="$bundle_contents"/Resources
 
 echo "Creating Conda environment in '$bundle_conda_prefix' from '$CONDA_PACKAGE'"
-"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy --channel "$conda_channel" --yes \
+"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
+  --channel "$conda_channel" --channel conda-forge --yes \
   "$CONDA_PACKAGE" \
   jq  # used for processing the version string
 echo
@@ -239,22 +244,11 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
-# Certain packages use LC_REEXPORT_DYLIB rather than LC_LOAD_DYLIB for their dependents
-# See http://blog.darlinghq.org/2018/07/mach-o-linking-and-loading-tricks.html for details.
-# Conda install rewrites these LC_REEXPORT_DYLIB links with absolute links and breaks relocation
-# This can easily be remedied by switching to use the @rpath identifier
-# We avoid scanning the whole bundle as this potentially very expensive and instead fixup the libraries
-# we know have issues
-fixup_reexport_dependent_path "$(find "$bundle_conda_prefix" -name 'libncurses.*' -type f)"
-
-# Conda bundles pretty much everything with each of its packages and much of this is
-# unnecessary in this type of bundle - trim the fat.
+# Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
-
-# Add required resources
+fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
+fixup_reexport_paths "$bundle_conda_prefix"
 add_resources "$bundle_contents" "$bundle_name" "$bundle_icon"
-
-# Create a plist from base version
 create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 
 # Create DMG, including custom background and /Applications link

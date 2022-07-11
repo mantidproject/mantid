@@ -36,6 +36,7 @@
 #include "MantidKernel/V2D.h"
 
 #include <Poco/Path.h>
+#include <algorithm>
 #include <memory>
 
 using namespace Mantid::Geometry;
@@ -330,10 +331,8 @@ std::shared_ptr<DetectorGroup> createRingOfCylindricalDetectors(const double R_m
   auto vecOfDetectors = createVectorOfCylindricalDetectors(R_min, R_max, z0);
   std::vector<std::shared_ptr<const IDetector>> groupMembers;
   groupMembers.reserve(vecOfDetectors.size());
-  for (auto &det : vecOfDetectors) {
-    groupMembers.emplace_back(std::move(det));
-  }
-
+  std::transform(vecOfDetectors.begin(), vecOfDetectors.end(), std::back_inserter(groupMembers),
+                 [](auto &det) { return std::move(det); });
   return std::make_shared<DetectorGroup>(std::move(groupMembers));
 }
 

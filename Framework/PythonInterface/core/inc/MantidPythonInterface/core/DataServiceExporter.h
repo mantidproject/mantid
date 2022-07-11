@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WeakPtr.h"
 
 #include <boost/python/class.hpp>
@@ -62,8 +63,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
             .def("retrieve", &DataServiceExporter::retrieveOrKeyError, (arg("self"), arg("name")),
                  "Retrieve the named object. Raises an exception if the name "
                  "does not exist")
-            .def("remove", &SvcType::remove, (arg("self"), arg("name")), "Remove a named object")
-            .def("clear", &SvcType::clear, arg("self"), "Removes all objects managed by the service.")
+            .def("remove", &DataServiceExporter::removeItem, (arg("self"), arg("name")), "Remove a named object")
+            .def("clear", &DataServiceExporter::clearItems, arg("self"), "Removes all objects managed by the service.")
             .def("size", &SvcType::size, arg("self"), "Returns the number of objects within the service")
             .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList, (arg("self"), arg("contain") = ""),
                  "Return the list of names currently known to the ADS")
@@ -73,7 +74,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
             .def("__getitem__", &DataServiceExporter::retrieveOrKeyError, (arg("self"), arg("name")))
             .def("__setitem__", &DataServiceExporter::addOrReplaceItem, (arg("self"), arg("name"), arg("item")))
             .def("__contains__", &SvcType::doesExist, (arg("self"), arg("name")))
-            .def("__delitem__", &SvcType::remove, (arg("self"), arg("name")));
+            .def("__delitem__", &DataServiceExporter::removeItem, (arg("self"), arg("name")));
 
     return classType;
   }
@@ -85,6 +86,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param item A boost.python wrapped SvcHeldType object
    */
   static void addItem(SvcType &self, const std::string &name, const boost::python::object &item) {
+    ReleaseGlobalInterpreterLock releaseGIL;
     self.add(name, extractCppValue(item));
   }
 
@@ -96,7 +98,27 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param item A boost.python wrapped SvcHeldType object
    */
   static void addOrReplaceItem(SvcType &self, const std::string &name, const boost::python::object &item) {
+    ReleaseGlobalInterpreterLock releaseGIL;
     self.addOrReplace(name, extractCppValue(item));
+  }
+
+  /**
+   * Remove an item from the service
+   * @param self A reference to the calling object
+   * @param name The name of the item in the service to remove
+   */
+  static void removeItem(SvcType &self, const std::string &name) {
+    ReleaseGlobalInterpreterLock releaseGIL;
+    self.remove(name);
+  }
+
+  /**
+   * Remove an item from the service
+   * @param self A reference to the calling object
+   */
+  static void clearItems(SvcType &self) {
+    ReleaseGlobalInterpreterLock releaseGIL;
+    self.clear();
   }
 
   /**

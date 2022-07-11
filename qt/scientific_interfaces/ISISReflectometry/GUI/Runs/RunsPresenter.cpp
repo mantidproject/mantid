@@ -118,10 +118,7 @@ void RunsPresenter::notifySearchFailed() {
   }
 }
 
-void RunsPresenter::notifyTransfer() {
-  transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
-  notifyRowStateChanged();
-}
+void RunsPresenter::notifyTransfer() { transfer(m_view->getSelectedSearchRows(), TransferMatch::Any); }
 
 // Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
@@ -165,10 +162,14 @@ void RunsPresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
   tablePresenter()->notifyRowStateChanged(item);
 }
 
-void RunsPresenter::notifyRowOutputsChanged() { tablePresenter()->notifyRowOutputsChanged(); }
+void RunsPresenter::notifyRowModelChanged() {
+  tablePresenter()->notifyRowModelChanged();
+  tablePresenter()->notifyRowStateChanged();
+}
 
-void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
-  tablePresenter()->notifyRowOutputsChanged(item);
+void RunsPresenter::notifyRowModelChanged(boost::optional<Item const &> item) {
+  tablePresenter()->notifyRowModelChanged(item);
+  tablePresenter()->notifyRowStateChanged(item);
 }
 
 void RunsPresenter::notifyBatchLoaded() { m_tablePresenter->notifyBatchLoaded(); }
@@ -283,6 +284,12 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 std::string RunsPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
 void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
+
+void RunsPresenter::notifyRowContentChanged(Row &changedRow) { m_mainPresenter->notifyRowContentChanged(changedRow); }
+
+void RunsPresenter::notifyGroupNameChanged(Group &changedGroup) {
+  m_mainPresenter->notifyGroupNameChanged(changedGroup);
+}
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
@@ -446,6 +453,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);
+    m_mainPresenter->notifyRunsTransferred();
   }
 }
 

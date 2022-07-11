@@ -22,6 +22,7 @@ set(SRC_FILES
     src/ConvertCWPDMDToSpectra.cpp
     src/ConvertCWSDExpToMomentum.cpp
     src/ConvertCWSDMDtoHKL.cpp
+    src/ConvertHFIRSCDtoMDE.cpp
     src/ConvertMDHistoToMatrixWorkspace.cpp
     src/ConvertSpiceDataToRealSpace.cpp
     src/ConvertToDetectorFaceMD.cpp
@@ -32,11 +33,11 @@ set(SRC_FILES
     src/ConvertToMDMinMaxGlobal.cpp
     src/ConvertToMDMinMaxLocal.cpp
     src/ConvertToMDParent.cpp
-    src/ConvertHFIRSCDtoMDE.cpp
     src/CreateMD.cpp
     src/CreateMDHistoWorkspace.cpp
     src/CreateMDWorkspace.cpp
     src/CutMD.cpp
+    src/DgsScatteredTransmissionCorrectionMD.cpp
     src/DisplayNormalizationSetter.cpp
     src/DivideMD.cpp
     src/EqualToMD.cpp
@@ -53,8 +54,9 @@ set(SRC_FILES
     src/ImportMDHistoWorkspace.cpp
     src/ImportMDHistoWorkspaceBase.cpp
     src/Integrate3DEvents.cpp
-    src/IntegrateQLabEvents.cpp
     src/IntegrateEllipsoids.cpp
+    src/IntegrateEllipsoidsV1.cpp
+    src/IntegrateEllipsoidsV2.cpp
     src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateFlux.cpp
     src/IntegrateMDHistoWorkspace.cpp
@@ -62,6 +64,7 @@ set(SRC_FILES
     src/IntegratePeaksMD.cpp
     src/IntegratePeaksMD2.cpp
     src/IntegratePeaksMDHKL.cpp
+    src/IntegrateQLabEvents.cpp
     src/InvalidParameter.cpp
     src/InvalidParameterParser.cpp
     src/LessThanMD.cpp
@@ -99,7 +102,6 @@ set(SRC_FILES
     src/SaveMD.cpp
     src/SaveMD2.cpp
     src/SaveZODS.cpp
-    src/DgsScatteredTransmissionCorrectionMD.cpp
     src/SetMDFrame.cpp
     src/SetMDUsingMask.cpp
     src/SliceMD.cpp
@@ -137,6 +139,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
     inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
     inc/MantidMDAlgorithms/ConvertCWSDMDtoHKL.h
+    inc/MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h
     inc/MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h
     inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
     inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
@@ -147,11 +150,11 @@ set(INC_FILES
     inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
     inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
     inc/MantidMDAlgorithms/ConvertToMDParent.h
-    inc/MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h
     inc/MantidMDAlgorithms/CreateMD.h
     inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
     inc/MantidMDAlgorithms/CreateMDWorkspace.h
     inc/MantidMDAlgorithms/CutMD.h
+    inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
     inc/MantidMDAlgorithms/DisplayNormalizationSetter.h
     inc/MantidMDAlgorithms/DivideMD.h
     inc/MantidMDAlgorithms/DllConfig.h
@@ -170,8 +173,9 @@ set(INC_FILES
     inc/MantidMDAlgorithms/ImportMDHistoWorkspace.h
     inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
     inc/MantidMDAlgorithms/Integrate3DEvents.h
-    inc/MantidMDAlgorithms/IntegrateQLabEvents.h
     inc/MantidMDAlgorithms/IntegrateEllipsoids.h
+    inc/MantidMDAlgorithms/IntegrateEllipsoidsV1.h
+    inc/MantidMDAlgorithms/IntegrateEllipsoidsV2.h
     inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
     inc/MantidMDAlgorithms/IntegrateFlux.h
     inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
@@ -179,6 +183,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/IntegratePeaksMD.h
     inc/MantidMDAlgorithms/IntegratePeaksMD2.h
     inc/MantidMDAlgorithms/IntegratePeaksMDHKL.h
+    inc/MantidMDAlgorithms/IntegrateQLabEvents.h
     inc/MantidMDAlgorithms/InvalidParameter.h
     inc/MantidMDAlgorithms/InvalidParameterParser.h
     inc/MantidMDAlgorithms/LessThanMD.h
@@ -219,7 +224,6 @@ set(INC_FILES
     inc/MantidMDAlgorithms/SaveMD.h
     inc/MantidMDAlgorithms/SaveMD2.h
     inc/MantidMDAlgorithms/SaveZODS.h
-    inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
     inc/MantidMDAlgorithms/SetMDFrame.h
     inc/MantidMDAlgorithms/SetMDUsingMask.h
     inc/MantidMDAlgorithms/SliceMD.h
@@ -255,6 +259,7 @@ set(TEST_FILES
     ConvertCWSDExpToMomentumTest.h
     ConvertCWSDMDtoHKLTest.h
     ConvertEventsToMDTest.h
+    ConvertHFIRSCDtoMDETest.h
     ConvertMDHistoToMatrixWorkspaceTest.h
     ConvertSpiceDataToRealSpaceTest.h
     ConvertToDetectorFaceMDTest.h
@@ -266,11 +271,11 @@ set(TEST_FILES
     ConvertToMDMinMaxLocalTest.h
     ConvertToMDTest.h
     ConvertToQ3DdETest.h
-    ConvertHFIRSCDtoMDETest.h
     CreateMDHistoWorkspaceTest.h
     CreateMDTest.h
     CreateMDWorkspaceTest.h
     CutMDTest.h
+    DgsScatteredTransmissionCorrectionMDTest.h
     DisplayNormalizationSetterTest.h
     DivideMDTest.h
     EqualToMDTest.h
@@ -285,7 +290,6 @@ set(TEST_FILES
     ImportMDEventWorkspaceTest.h
     ImportMDHistoWorkspaceTest.h
     Integrate3DEventsTest.h
-    IntegrateQLabEventsTest.h
     IntegrateEllipsoidsTest.h
     IntegrateEllipsoidsTwoStepTest.h
     IntegrateEllipsoidsWithSatellitesTest.h
@@ -295,6 +299,7 @@ set(TEST_FILES
     IntegratePeaksMD2Test.h
     IntegratePeaksMDHKLTest.h
     IntegratePeaksMDTest.h
+    IntegrateQLabEventsTest.h
     InvalidParameterParserTest.h
     InvalidParameterTest.h
     LessThanMDTest.h
@@ -331,7 +336,6 @@ set(TEST_FILES
     SaveMD2Test.h
     SaveMDTest.h
     SaveZODSTest.h
-    DgsScatteredTransmissionCorrectionMDTest.h
     SetMDFrameTest.h
     SetMDUsingMaskTest.h
     SliceMDTest.h

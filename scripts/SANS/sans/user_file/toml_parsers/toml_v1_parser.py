@@ -111,6 +111,7 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self._parse_reduction()
         self._parse_spatial_masks()
         self._parse_transmission()
+        self._parse_transmission_roi()
         self._parse_transmission_fitting()
 
     @property
@@ -142,14 +143,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
     def _parse_instrument_configuration(self):
         inst_config_dict = self.get_val(["instrument", "configuration"])
-
-        # The legacy user file would accept missing spec nums, we want to lock this down in the
-        # TOML parser without affecting backwards compatibility by doing this check upstream
-        norm_monitor = self.get_val("norm_monitor", inst_config_dict)
-        trans_monitor = self.get_val("trans_monitor", inst_config_dict)
-
-        self.calculate_transmission.incident_monitor = norm_monitor
-        self.calculate_transmission.transmission_monitor = trans_monitor
 
         self.convert_to_q.q_resolution_collimation_length = self.get_val("collimation_length", inst_config_dict)
         self.convert_to_q.gravity_extra_length = self.get_val("gravity_extra_length", inst_config_dict, 0.0)
@@ -248,10 +241,9 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         if two_d_step_type:
             self.convert_to_q.q_xy_step_type = RangeStepType(two_d_step_type)
 
-        rebin_type = self.get_val(["2d_reduction", "interpolate"], binning_dict, default=False)
-        rebin_type = RebinType.INTERPOLATING_REBIN if rebin_type else RebinType.REBIN
-        self.calculate_transmission.rebin_type = rebin_type
-        self.normalize_to_monitor.rebin_type = rebin_type
+        # We could previous interpolate. This is now obsolete, see the docs for details
+        self.calculate_transmission.rebin_type = RebinType.REBIN
+        self.normalize_to_monitor.rebin_type = RebinType.REBIN
 
     def _parse_reduction(self):
         reduction_dict = self.get_val(["reduction"])
@@ -311,16 +303,29 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_resolution_w2 = self.get_val("w2", q_dict)
 
     def _parse_transmission(self):
-        transmission_dict = self.get_val("transmission")
-        monitor_name = self.get_val("selected_monitor", transmission_dict)
-        # Have to be a bit more careful since we will use the index operator manually to throw KeyError
-        if not transmission_dict or not monitor_name:
+        # The legacy user file would accept missing spec nums, we want to lock this down in the
+        # TOML parser without affecting backwards compatibility by doing this check upstream
+        selected_trans_monitor = self.get_val(["instrument", "configuration", "trans_monitor"])
+        if not selected_trans_monitor or str(selected_trans_monitor).casefold() == "ROI".casefold():
+            # ROI is handled in _parse_transmission_roi()
             return
+        transmission_dict = self.get_mandatory_val(["transmission", "monitor", selected_trans_monitor])
 
-        # This is mandatory so we don't use get_toml_val
-        monitor_dict = transmission_dict["monitor"][monitor_name]
+        if self.get_val("use_different_norm_monitor", transmission_dict):
+            selected_norm_monitor = self.get_mandatory_val(
+                ["transmission", "monitor", selected_trans_monitor, "trans_norm_monitor"])
+        else:
+            selected_norm_monitor = self.get_mandatory_val(["instrument", "configuration", "norm_monitor"])
 
-        if "M5" in monitor_name:
+        self.calculate_transmission.incident_monitor = self.get_mandatory_val(
+            [self._get_normalisation_spelling(), "monitor", selected_norm_monitor, "spectrum_number"])
+
+        self.calculate_transmission.transmission_monitor = self.get_mandatory_val(
+            ["transmission", "monitor", selected_trans_monitor, "spectrum_number"])
+
+        monitor_dict = transmission_dict
+
+        if "M5" in selected_trans_monitor:
             self.move.monitor_5_offset = self.get_val("shift", monitor_dict, default=0.0)
         else:
             # Instruments will use monitor 3/4/17788 (not making the last one up) here instead of 4
@@ -337,6 +342,19 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             self.calculate_transmission.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
             self.normalize_to_monitor.background_TOF_monitor_start.update({str(monitor_spec_num): background[0]})
             self.normalize_to_monitor.background_TOF_monitor_stop.update({str(monitor_spec_num): background[1]})
+
+    def _parse_transmission_roi(self):
+        monitor_name = self.get_val(["instrument", "configuration", "trans_monitor"])
+        if not str(monitor_name).casefold() == "ROI".casefold():
+            return
+
+        file = self.get_mandatory_val(["transmission", "ROI", "file"])
+        if not isinstance(file, str):
+            raise ValueError("A single file is currently only accepted for ROI")
+        elif not file:
+            raise ValueError("The ROI filename selected was empty")
+
+        self.calculate_transmission.transmission_roi_files = [file]
 
     def _parse_transmission_fitting(self):
         fit_dict = self.get_val(["transmission", "fitting"])
@@ -368,12 +386,15 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         if fit_type is FitType.POLYNOMIAL:
             set_val_on_both("polynomial_order", self.get_val("polynomial_order", fit_dict))
 
-    def _parse_normalisation(self):
-        normalisation_dict = self.get_val("normalisation")
-        if not normalisation_dict:
-            normalisation_dict = self.get_val("normalization")
+    def _get_normalisation_spelling(self) -> str:
+        return "normalization" if self.get_val("normalization") else "normalisation"
 
-        selected_monitor = self.get_val("selected_monitor", normalisation_dict)
+    def _parse_normalisation(self):
+        norm_key_name = self._get_normalisation_spelling()
+        normalisation_dict = self.get_val(norm_key_name)
+
+        selected_monitor = self.get_val(["instrument", "configuration", "norm_monitor"])
+
         if self.get_val(["all_monitors", "enabled"], normalisation_dict):
             background = self.get_val(["all_monitors", "background"], normalisation_dict)
             if len(background) != 2:
@@ -383,10 +404,10 @@ class _TomlV1ParserImpl(TomlParserImplBase):
             self.normalize_to_monitor.background_TOF_general_start = background[0]
             self.normalize_to_monitor.background_TOF_general_stop = background[1]
 
-        if not normalisation_dict or not selected_monitor:
+        if not selected_monitor:
             return
 
-        monitor_dict = normalisation_dict["monitor"][selected_monitor]
+        monitor_dict = self.get_mandatory_val([norm_key_name, "monitor", selected_monitor])
 
         # Mandatory as its subtle if missing
         monitor_spec_num = monitor_dict["spectrum_number"]

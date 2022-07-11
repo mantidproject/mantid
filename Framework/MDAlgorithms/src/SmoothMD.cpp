@@ -17,6 +17,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
+
+#include <algorithm>
 #include <boost/tuple/tuple.hpp>
 #include <limits>
 #include <map>
@@ -128,10 +130,8 @@ KernelVector renormaliseKernel(KernelVector kernel, const std::vector<bool> &val
  */
 KernelVector normaliseKernel(KernelVector kernel) {
   double sum_kernel_recip = 1.0 / std::accumulate(kernel.cbegin(), kernel.cend(), 0.0);
-  for (auto &pixel : kernel) {
-    pixel *= sum_kernel_recip;
-  }
-
+  std::transform(kernel.cbegin(), kernel.cend(), kernel.begin(),
+                 [sum_kernel_recip](const auto &value) { return value * sum_kernel_recip; });
   return kernel;
 }
 
@@ -268,9 +268,8 @@ IMDHistoWorkspace_sptr SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sp
   // Create a kernel for each dimension and
   std::vector<KernelVector> gaussian_kernels;
   gaussian_kernels.reserve(widthVector.size());
-  for (const auto width : widthVector) {
-    gaussian_kernels.emplace_back(gaussianKernel(width));
-  }
+  std::transform(widthVector.cbegin(), widthVector.cend(), std::back_inserter(gaussian_kernels),
+                 [](const auto width) { return gaussianKernel(width); });
 
   const int nThreads = Mantid::API::FrameworkManager::Instance().getNumOMPThreads(); // NThreads to Request
 
@@ -403,10 +402,6 @@ void SmoothMD::exec() {
 
   // Get the input weighting workspace
   IMDHistoWorkspace_sptr weightingWS = this->getProperty("InputNormalizationWorkspace");
-  OptionalIMDHistoWorkspace_const_sptr optionalWeightingWS;
-  if (weightingWS) {
-    optionalWeightingWS = weightingWS;
-  }
 
   // Get the width vector
   std::vector<double> widthVector = this->getProperty("WidthVector");

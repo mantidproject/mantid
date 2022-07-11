@@ -38,7 +38,7 @@ int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLo
 
 using API::IConfiguredAlgorithm_sptr;
 
-BatchJobManager::BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
+BatchJobManager::BatchJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory)
     : m_batch(batch), m_algFactory(std::move(algFactory)), m_isProcessing(false), m_isAutoreducing(false),
       m_reprocessFailed(false), m_processAll(false), m_processPartial(false) {
   // TODO Pass IJobRunner into this class and move job execution here instead of in the presenter
@@ -55,7 +55,7 @@ int BatchJobManager::itemsInSelection(Item::ItemCountFunction countFunction) con
   auto const &locations = m_rowLocationsToProcess;
   return std::accumulate(
       locations.cbegin(), locations.cend(), 0,
-      [&jobs, &locations, countFunction](int &count, MantidWidgets::Batch::RowLocation const &location) {
+      [&jobs, &locations, countFunction](int const count, MantidWidgets::Batch::RowLocation const &location) {
         return count + countItemsForLocation(jobs, location, locations, countFunction);
       });
 }
@@ -148,12 +148,9 @@ bool BatchJobManager::hasSelectedRowsRequiringProcessing(Group const &group) {
   // If the group itself is selected, consider its rows to also be selected
   auto processAllRowsInGroup = (m_processAll || isSelected(group));
 
-  for (auto const &row : group.rows()) {
-    if (row && (processAllRowsInGroup || isSelected(row.get())) && row->requiresProcessing(m_reprocessFailed))
-      return true;
-  }
-
-  return false;
+  return std::any_of((group.rows()).cbegin(), (group.rows()).cend(), [this, &processAllRowsInGroup](const auto &row) {
+    return (row && (processAllRowsInGroup || isSelected(row.get())) && row->requiresProcessing(m_reprocessFailed));
+  });
 }
 
 /** Get algorithms and related properties for processing a batch of rows and
@@ -218,7 +215,7 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmsForProcessingRo
 void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   IConfiguredAlgorithm_sptr algorithm;
   try {
-    algorithm = m_algFactory->makeReductionAlgorithm(row);
+    algorithm = m_algFactory->makeRowProcessingAlgorithm(row);
   } catch (MultipleRowsFoundException const &) {
     row.setError("The title and angle specified matches multiple rows in the Experiment Settings tab");
     // Mark the item as skipped so we don't reprocess it in the current round of

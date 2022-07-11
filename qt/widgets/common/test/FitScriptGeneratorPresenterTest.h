@@ -38,12 +38,8 @@ Mantid::API::IFunction_sptr createIFunction(std::string const &functionString) {
 
 } // namespace
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
 MATCHER_P(BoolAttributeValue, value, "") { return arg.asBool() == value; }
 MATCHER_P(VectorSize, expectedSize, "") { return arg.size() == expectedSize; }
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FitScriptGeneratorPresenterTest : public CxxTest::TestSuite {
 

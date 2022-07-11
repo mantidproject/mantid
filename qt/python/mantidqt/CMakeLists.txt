@@ -109,6 +109,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/codeeditor/test/test_scriptcompatibility.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
+    mantidqt/widgets/colorbar/test/test_colorbar.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
@@ -125,7 +126,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
-    mantidqt/widgets/regionselector/test/test_presenter.py
+    mantidqt/widgets/regionselector/test/test_regionselector_presenter.py
     mantidqt/widgets/sliceviewer/test/test_base_presenter.py
     mantidqt/widgets/sliceviewer/test/test_dimensions.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
@@ -139,6 +140,9 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_dataview.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
     mantidqt/widgets/sliceviewer/test/test_workspace_info.py
+    mantidqt/widgets/sliceviewer/cutviewer/test/test_cutviewer_model.py
+    mantidqt/widgets/sliceviewer/cutviewer/test/test_cutviewer_presenter.py
+    mantidqt/widgets/sliceviewer/cutviewer//representation/test/test_cut_representation.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py

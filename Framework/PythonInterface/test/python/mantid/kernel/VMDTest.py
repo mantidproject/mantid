@@ -26,23 +26,23 @@ class VMDTest(unittest.TestCase):
         a = VMD(1.0,2.0,1.0)
         b = VMD(1.0,-2.0,-1.0)
         sp = a.scalar_prod(b)
-        self.assertAlmostEquals(sp,-4.0)
+        self.assertAlmostEqual(sp,-4.0)
 
     def test_crossprod(self):
         a = VMD(1.0,0.0,0.0)
         b = VMD(0.0,1.0,0.0)
         c = a.cross_prod(b)
-        self.assertAlmostEquals(c[0],0.0)
-        self.assertAlmostEquals(c[1],0.0)
-        self.assertAlmostEquals(c[2],1.0)
+        self.assertAlmostEqual(c[0],0.0)
+        self.assertAlmostEqual(c[1],0.0)
+        self.assertAlmostEqual(c[2],1.0)
 
     def test_norm(self):
         p = VMD(1.0,-5.0,8.0);
-        self.assertAlmostEquals(p.norm(), math.sqrt(90.0),places=6)
+        self.assertAlmostEqual(p.norm(), math.sqrt(90.0),places=6)
 
     def test_norm2(self):
         p = VMD(1.0,-5.0,8.0);
-        self.assertAlmostEquals(p.norm2(), 90.0, places=6)
+        self.assertAlmostEqual(p.norm2(), 90.0, places=6)
 
     def test_normalize(self):
         a = VMD(3,4, math.sqrt(39.0))
@@ -50,9 +50,9 @@ class VMDTest(unittest.TestCase):
         self.assertEqual(pre_norm, a.normalize())
 
         b = VMD(3./8,4./8, math.sqrt(39.0)/8.) # normalized version
-        self.assertAlmostEquals(b[0], a[0], places=6)
-        self.assertAlmostEquals(b[1], a[1], places=6)
-        self.assertAlmostEquals(b[2], a[2], places=6)
+        self.assertAlmostEqual(b[0], a[0], places=6)
+        self.assertAlmostEqual(b[1], a[1], places=6)
+        self.assertAlmostEqual(b[2], a[2], places=6)
 
     def test_angle(self):
         a = VMD(1,0,0);

@@ -83,7 +83,7 @@ public:
     static
         typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value, MortonT>::type
         getIndex(const MDLeanEvent<nd> &event) {
-      return event.getIndex();
+      return event.index;
     }
   };
   template <class Accessor> friend struct AccessFor;
@@ -108,7 +108,7 @@ protected:
 #pragma pack(push, 1)
   union {
     coord_t center[nd];
-    MortonT index;
+    MortonT index = 0;
   };
 #pragma pack(pop)
 
@@ -134,8 +134,6 @@ private:
     for (unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }
-
-  const MortonT getIndex() const { return index; }
 
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
@@ -341,17 +339,15 @@ public:
     totalSignal = 0;
     totalErrSq = 0;
 
-    size_t index(0);
+    size_t dataIndex(0);
     for (const MDLeanEvent<nd> &event : events) {
-      float signal = event.signal;
-      float errorSquared = event.errorSquared;
-      data[index++] = static_cast<coord_t>(signal);
-      data[index++] = static_cast<coord_t>(errorSquared);
+      data[dataIndex++] = static_cast<coord_t>(event.signal);
+      data[dataIndex++] = static_cast<coord_t>(event.errorSquared);
       for (size_t d = 0; d < nd; d++)
-        data[index++] = event.center[d];
+        data[dataIndex++] = event.center[d];
       // Track the total signal
-      totalSignal += signal_t(signal);
-      totalErrSq += signal_t(errorSquared);
+      totalSignal += signal_t(event.signal);
+      totalErrSq += signal_t(event.errorSquared);
     }
   }
 

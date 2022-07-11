@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
+#include <QLayout>
 #include <memory>
 #include <string>
 
@@ -22,7 +24,12 @@ public:
   virtual void notifyInstViewSelectRectRequested() = 0;
   virtual void notifyInstViewShapeChanged() = 0;
 
-  virtual void notifyContourExportAdsRequested() = 0;
+  virtual void notifyRegionSelectorExportAdsRequested() = 0;
+
+  // TODO implement edit ROI button and ROI-changed callback
+  // virtual void notifyEditROIRequested() = 0;
+  // virtual void notifyROIChanged() = 0;
+  virtual void notifyRectangularROIModeRequested() = 0;
 };
 
 class IPreviewView {
@@ -30,9 +37,10 @@ public:
   virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual std::string getWorkspaceName() const = 0;
+  // Plotting
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
-
+  //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;
   virtual void setInstViewSelectRectState(bool on) = 0;
@@ -40,7 +48,14 @@ public:
   virtual void setInstViewEditMode() = 0;
   virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
+  // Region selector toolbar
+  // TODO implement edit ROI button
+  // virtual void setEditROIState(bool on) = 0;
+  // virtual void activateEditROIMode() = 0;
+  virtual void setRectangularROIState(bool on) = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
+
+  virtual QLayout *getRegionSelectorLayout() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

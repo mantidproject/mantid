@@ -18,7 +18,7 @@ class ElementalAnalysisGUITest(unittest.TestCase):
         try:
             GUI.closeEvent(event())
         except:
-            self.assertEquals("GUI did not close correctly", "")
+            self.assertEqual("GUI did not close correctly", "")
 
 
 if __name__ == '__main__':

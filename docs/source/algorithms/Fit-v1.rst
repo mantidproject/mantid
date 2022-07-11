@@ -273,6 +273,35 @@ The effect of setting `PeakRadius` to a non-default value can be seen from next 
 
 It can be used to speed up computations but there is a danger of introducing higher errors.
 
+Step Size
+#########
+
+The choice of step size, :math:`h`, is an important consideration when the derivative of a function
+is calculated numerically using floating-point arithmetic. Mantid provides two methods for calculating
+the step size. Depending on the data you are fitting, you might want to use a different step size
+calculation method than the default.
+
+The ``Default`` method calculates the step size as follows:
+
++---------------------------+---------------------+
+| :math:`x_0` range         | :math:`h`           |
++===========================+=====================+
+| :math:`|x_0| < 2.22e-303` | :math:`100\epsilon` |
++---------------------------+---------------------+
+| :math:`|x_0| >= 2.22e-303`| :math:`0.001x_0`    |
++---------------------------+---------------------+
+
+The ``Sqrt epsilon`` method calculates the step size as follows:
+
++-----------------------+----------------------------+
+| :math:`x_0` range     | :math:`h`                  |
++=======================+============================+
+| :math:`|x_0| < 1`	| :math:`\sqrt{\epsilon}`    |
++-----------------------+----------------------------+
+| :math:`|x_0| >= 1`    | :math:`x_0\sqrt{\epsilon}` |
++-----------------------+----------------------------+
+
+where :math:`x_0` is the value of the active parameter and :math:`\epsilon \approx 2.22e-16`.
 
 Output
 ######

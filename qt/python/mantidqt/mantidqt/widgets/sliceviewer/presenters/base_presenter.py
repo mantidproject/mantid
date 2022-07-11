@@ -29,7 +29,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             limits = ((x0, x1), (y0, y1))
         else:
             # otherwise query data model based on slice info and transpose
-            limits = Dimensions.get_dim_limits(self.model.ws, self.get_slicepoint(), self._data_view.dimensions.transpose)
+            limits = self.get_data_limits()
         self.set_axes_limits(*limits)
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
@@ -54,6 +54,12 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             self.new_plot()  # automatically uses current display limits
         else:
             self._data_view.draw_plot()
+
+    def get_data_limits(self):
+        return Dimensions.get_dim_limits(self.model.ws, self.get_slicepoint(), self._data_view.dimensions.transpose)
+
+    def get_dimensions(self):
+        return self.view.data_view.dimensions
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.

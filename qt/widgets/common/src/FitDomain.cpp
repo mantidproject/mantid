@@ -93,12 +93,12 @@ void FitDomain::removeFunction(std::string const &function) {
 }
 
 void FitDomain::removeFunctionFromIFunction(std::string const &function, IFunction_sptr &iFunction) {
-  for (auto const &functionName : getFunctionNamesInString(function)) {
-    if (iFunction->name() == functionName) {
-      iFunction = nullptr;
-      break;
-    }
-  }
+  auto const functionNames = getFunctionNamesInString(function);
+  const std::string iFunctionName = iFunction->name();
+  const auto it = std::find_if(functionNames.cbegin(), functionNames.cend(),
+                               [&iFunctionName](const auto &name) { return iFunctionName == name; });
+  if (it != functionNames.cend())
+    iFunction = nullptr;
 }
 
 void FitDomain::removeFunctionFromComposite(std::string const &function, CompositeFunction_sptr &composite) {
@@ -122,7 +122,7 @@ void FitDomain::addFunction(IFunction_sptr const &function) {
 }
 
 void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
-  if (auto const isComposite = toComposite(function)) {
+  if (toComposite(function)) {
     g_log.error("Add function failed: Nested composite functions are not supported.");
     return;
   }

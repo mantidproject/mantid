@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../../../../widgets/regionselector/test/MockRegionSelector.h"
 #include "../ReflMockObjects.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -26,6 +27,7 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using namespace MantidQt::API;
 using namespace Mantid::Kernel;
+using namespace MantidQt::Widgets;
 
 using ::testing::_;
 using ::testing::ByRef;
@@ -42,6 +44,7 @@ class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockJobManagerT = std::unique_ptr<MockJobManager>;
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
+  using MockRegionSelectorT = std::unique_ptr<MockRegionSelector>;
 
 public:
   void test_notify_load_workspace_requested_loads_from_file_if_not_in_ads() {
@@ -151,14 +154,41 @@ public:
     presenter.notifyInstViewShapeChanged();
   }
 
-  void test_notify_contour_export_to_ads_requested() {
+  void test_notify_region_selector_export_to_ads_requested() {
     auto mockView = makeView();
     auto mockModel = makeModel();
 
     EXPECT_CALL(*mockModel, exportSummedWsToAds()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
 
-    presenter.notifyContourExportAdsRequested();
+    presenter.notifyRegionSelectorExportAdsRequested();
+  }
+
+  void test_sum_banks_completed_plots_region_selector() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
+
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
+                                               makeInstViewModel(), std::move(mockRegionSelector_uptr)));
+
+    presenter.notifySumBanksCompleted();
+  }
+
+  void test_rectangular_roi_requested_updates_view() {
+    auto mockView = makeView();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
+
+    expectActivateRectangularROIMode(*mockView, *mockRegionSelector);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
+                                               std::move(mockRegionSelector_uptr)));
+
+    presenter.notifyRectangularROIModeRequested();
   }
 
 private:
@@ -179,11 +209,16 @@ private:
 
   MockInstViewModelT makeInstViewModel() { return std::make_unique<MockInstViewModel>(); }
 
+  MockRegionSelectorT makeRegionSelector() { return std::make_unique<MockRegionSelector>(); }
+
   PreviewPresenter::Dependencies packDeps(MockPreviewView *view,
                                           MockModelT model = std::make_unique<MockPreviewModel>(),
                                           MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
-                                          MockInstViewModelT instView = std::make_unique<MockInstViewModel>()) {
-    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView)};
+                                          MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
+                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>()) {
+    EXPECT_CALL(*regionSelector, subscribe(NotNull())).Times(1);
+    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView),
+                                          std::move(regionSelector)};
   }
 
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
@@ -245,5 +280,12 @@ private:
     EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(true))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
+  }
+
+  void expectActivateRectangularROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
+    // TODO Disable edit button when implemented
+    // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
+    EXPECT_CALL(mockRegionSelector, addRectangularRegion()).Times(1);
   }
 };

@@ -19,9 +19,18 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using MantidQt::MantidWidgets::Batch::Cell;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 using MantidQt::MantidWidgets::Batch::RowPath;
+using testing::AllOf;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
+
+namespace {
+MATCHER_P(AreAllColour, colour, "Colour checker for vectors of Cells") {
+  auto const col = colour;
+  return std::all_of(arg.cbegin(), arg.cend(),
+                     [col](auto const &cell) { return strcmp(cell.backgroundColor().c_str(), col) == 0; });
+}
+} // namespace
 
 class RunsTablePresenterProcessingTest : public CxxTest::TestSuite, RunsTablePresenterTest {
 public:
@@ -126,8 +135,9 @@ public:
 
   void testSettingsChangedResetsStateInView() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
-    expectGroupStateCleared();
-    expectRowStateCleared();
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCellsWithSomeValues())).Times(1);
     presenter.settingsChanged();
     verifyAndClearExpectations();
   }
@@ -169,7 +179,7 @@ public:
   void testRowStateChangedForCompleteRow() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
     getRow(presenter, 0, 0)->setSuccess();
-    expectGroupStateCleared();
+    expectGroupState(Colour::CHILDREN_SUCCESS);
     expectRowState(Colour::SUCCESS);
     presenter.notifyRowStateChanged();
     verifyAndClearExpectations();
@@ -195,8 +205,8 @@ public:
 
   void testRowStateChangedForCompleteGroup() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
-    getGroup(presenter, 0).setSuccess();
     getRow(presenter, 0, 0)->setSuccess();
+    getGroup(presenter, 0).setSuccess();
     expectGroupState(Colour::SUCCESS);
     expectRowState(Colour::SUCCESS);
     presenter.notifyRowStateChanged();
@@ -205,29 +215,29 @@ public:
 
   void testRowStateChangedForErrorGroup() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
-    getGroup(presenter, 0).setError("error message");
     getRow(presenter, 0, 0)->setSuccess();
+    getGroup(presenter, 0).setError("error message");
     expectGroupState(Colour::FAILURE);
     expectRowState(Colour::SUCCESS);
     presenter.notifyRowStateChanged();
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedForInputQRange() {
+  void testNotifyRowModelChangedForInputQRange() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithInputQRangeModel());
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCellsWithValues(Colour::DEFAULT))).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
     verifyAndClearExpectations();
   }
 
-  void testNotifyRowOutputsChangedForOutputQRange() {
+  void testNotifyRowModelChangedForOutputQRange() {
     auto presenter = makePresenter(m_view, oneGroupWithARowWithOutputQRangeModel());
     auto cells = rowCellsWithValues(Colour::DEFAULT);
     cells[4].setOutput();
     cells[5].setOutput();
     cells[6].setOutput();
     EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
-    presenter.notifyRowOutputsChanged();
+    presenter.notifyRowModelChanged();
     verifyAndClearExpectations();
   }
 
@@ -247,8 +257,8 @@ public:
 
 private:
   std::vector<Cell> rowCells(const char *colour) {
-    auto cells =
-        std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell(""), Cell("")};
+    auto cells = std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""),
+                                   Cell(""), Cell(""), Cell(""), Cell(""), Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
@@ -257,18 +267,26 @@ private:
   std::vector<Cell> rowCellsWithValues(const char *colour) {
     auto cells =
         std::vector<Cell>{Cell("12345"),    Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell("0.500000"),
-                          Cell("0.900000"), Cell("0.010000"), Cell(""),        Cell("")};
+                          Cell("0.900000"), Cell("0.010000"), Cell(""),        Cell(""),        Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
   }
 
+  std::vector<Cell> rowCellsWithSomeValues() {
+    return std::vector<Cell>{Cell("12345"), Cell("0.500000"), Cell("Trans A"), Cell("Trans B"), Cell(""),
+                             Cell(""),      Cell(""),         Cell(""),        Cell(""),        Cell("")};
+  }
+
   void expectGroupStateCleared() {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), AllOf(rowCells(Colour::DEFAULT), AreAllColour(Colour::DEFAULT))))
+        .Times(AtLeast(1));
   }
 
   void expectRowStateCleared() {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(Colour::DEFAULT))).Times(1);
+    EXPECT_CALL(m_jobs,
+                setCellsAt(RowLocation({0, 0}), AllOf(rowCells(Colour::DEFAULT), AreAllColour(Colour::DEFAULT))))
+        .Times(AtLeast(1));
   }
 
   void expectRowStateInvalid() {
@@ -277,15 +295,15 @@ private:
       cell.setToolTip("Row will not be processed: it either contains invalid cell values, "
                       "or duplicates a reduction in another row");
 
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), cells)).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), AllOf(cells, AreAllColour(Colour::INVALID)))).Times(1);
   }
 
   void expectGroupState(const char *colour) {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), rowCells(colour))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0}), AllOf(rowCells(colour), AreAllColour(colour)))).Times(1);
   }
 
   void expectRowState(const char *colour) {
-    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), rowCells(colour))).Times(1);
+    EXPECT_CALL(m_jobs, setCellsAt(RowLocation({0, 0}), AllOf(rowCells(colour), AreAllColour(colour)))).Times(1);
   }
 
   void expectUpdateProgressBar() {

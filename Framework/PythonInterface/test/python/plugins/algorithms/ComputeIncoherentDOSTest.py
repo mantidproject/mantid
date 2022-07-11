@@ -131,8 +131,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g = self.compute(qs, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i])
-            self.assertAlmostEquals(dos_Es[i], g[i])
+            self.assertAlmostEqual(dos_Ys[i], g[i])
+            self.assertAlmostEqual(dos_Es[i], g[i])
 
     def test_computation_nontransposed_TwoThetaW(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -148,8 +148,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g = self.computeFromTwoTheta(twoThetas, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i])
-            self.assertAlmostEquals(dos_Es[i], g[i])
+            self.assertAlmostEqual(dos_Ys[i], g[i])
+            self.assertAlmostEqual(dos_Es[i], g[i])
 
     def test_computation_transposed_TwoThetaW(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -166,8 +166,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g = self.computeFromTwoTheta(twoThetas, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i])
-            self.assertAlmostEquals(dos_Es[i], g[i])
+            self.assertAlmostEqual(dos_Ys[i], g[i])
+            self.assertAlmostEqual(dos_Es[i], g[i])
 
     def test_computation_transposed_QW(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -184,8 +184,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g = self.compute(qs, energyBins)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i])
-            self.assertAlmostEquals(dos_Es[i], g[i])
+            self.assertAlmostEqual(dos_Ys[i], g[i])
+            self.assertAlmostEqual(dos_Es[i], g[i])
 
     def test_nonzero_MDS(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -202,8 +202,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g = self.compute(qs, energyBins, msd=msd)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i], delta=g[i] * 1e-12)
-            self.assertAlmostEquals(dos_Es[i], g[i], delta=g[i] * 1e-12)
+            self.assertAlmostEqual(dos_Ys[i], g[i], delta=g[i] * 1e-12)
+            self.assertAlmostEqual(dos_Es[i], g[i], delta=g[i] * 1e-12)
 
     def test_nondefault_temperature(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -220,8 +220,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         g = self.compute(qs, energyBins, temperature=temperature)
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i])
-            self.assertAlmostEquals(dos_Es[i], g[i])
+            self.assertAlmostEqual(dos_Ys[i], g[i])
+            self.assertAlmostEqual(dos_Es[i], g[i])
 
     def test_multiple_histograms(self):
         energyBins = np.arange(-7., 7., 0.13)
@@ -248,8 +248,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         gE = np.sqrt(g1**2 + g2**2 + g3**2) / 3
         np.testing.assert_equal(dos_Xs, energyBins)
         for i in range(len(dos_Ys)):
-            self.assertAlmostEquals(dos_Ys[i], g[i])
-            self.assertAlmostEquals(dos_Es[i], gE[i])
+            self.assertAlmostEqual(dos_Ys[i], g[i])
+            self.assertAlmostEqual(dos_Es[i], gE[i])
 
 
 if __name__=="__main__":

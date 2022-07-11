@@ -53,13 +53,6 @@ class SliceViewerDataView(QWidget):
         self._region_selection_on = False
         self._orig_lims = None
 
-        # Dimension widget
-        self.dimensions_layout = QGridLayout()
-        self.dimensions = DimensionWidget(dims_info, parent=self)
-        self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
-        self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
-        self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
-
         self.colorbar_layout = QVBoxLayout()
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
         self.colorbar_layout.setSpacing(0)
@@ -70,11 +63,16 @@ class SliceViewerDataView(QWidget):
         self.track_cursor.setToolTip(
             "Update the image readout table when the cursor is over the plot. "
             "If unticked the table will update only when the plot is clicked")
-        self.dimensions_layout.setHorizontalSpacing(10)
-        self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
-        self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
         self.track_cursor.setChecked(True)
         self.track_cursor.stateChanged.connect(self.on_track_cursor_state_change)
+
+        # Dimension widget
+        self.dimensions_layout = QGridLayout()
+        self.dimensions_layout.setHorizontalSpacing(10)
+        if (dims_info):
+            self.create_dimensions(dims_info)
+        else:
+            self.dimensions = None
 
         # normalization options
         if can_normalise:
@@ -142,6 +140,14 @@ class SliceViewerDataView(QWidget):
         layout.addWidget(self.canvas, 2, 0, 1, 1)
         layout.addWidget(self.status_bar, 3, 0, 1, 1)
         layout.setRowStretch(2, 1)
+
+    def create_dimensions(self, dims_info):
+        self.dimensions = DimensionWidget(dims_info, parent=self)
+        self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
+        self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
+        self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
+        self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
+        self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
 
     @property
     def grid_on(self):
@@ -564,3 +570,7 @@ class SliceViewerDataView(QWidget):
         if scale == 'Power':
             exponent = self.colorbar.powerscale_value
             self.conf.set(POWERSCALE, exponent)
+
+    def on_resize(self):
+        if not self.line_plots_active:
+            self.ax.figure.tight_layout()  # tight_layout doesn't work with LinePlots enabled atm

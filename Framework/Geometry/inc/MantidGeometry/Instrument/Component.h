@@ -171,7 +171,7 @@ public:
    * is not found
    */
   std::string getParameterType(const std::string &pname, bool recursive = true) const override {
-    Parameter_sptr param = Parameter_sptr(); // Null shared pointer
+    Parameter_sptr param;
     if (recursive) {
       param = m_map->getRecursive(this, pname);
     } else {
@@ -257,7 +257,7 @@ public:
    */
   bool getParameterVisible(const std::string &p_name, bool recursive) const override {
     if (m_map) {
-      Parameter_sptr param = Parameter_sptr(); // Null shared pointer
+      Parameter_sptr param;
       if (recursive) {
         param = m_map->getRecursive(this, p_name);
       } else {
@@ -323,7 +323,7 @@ protected:
    */
   template <class TYPE> std::vector<TYPE> getParameter(const std::string &p_name, bool recursive) const {
     if (m_map) {
-      Parameter_sptr param = Parameter_sptr(); // Null shared pointer
+      Parameter_sptr param;
       if (recursive) {
         param = m_map->getRecursive(this, p_name);
       } else {

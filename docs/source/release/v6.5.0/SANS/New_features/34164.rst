@@ -1,0 +1,1 @@
+- Support loading and reducing data for the new detector for D16 at ILL.

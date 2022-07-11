@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidPythonInterface/core/Policies/AsType.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>
@@ -82,25 +83,18 @@ using namespace Mantid::API;
 template <typename LHSType, typename RHSType, typename ResultType>
 ResultType performBinaryOp(const LHSType lhs, const RHSType rhs, const std::string &op, const std::string &name,
                            bool inplace, bool reverse) {
-  std::string algoName = op;
-
   // ----- Determine which version of the algo should be called -----
   MatrixWorkspace_const_sptr lhs_mat = std::dynamic_pointer_cast<const MatrixWorkspace>(lhs);
   MatrixWorkspace_const_sptr rhs_mat = std::dynamic_pointer_cast<const MatrixWorkspace>(rhs);
   WorkspaceGroup_const_sptr lhs_grp = std::dynamic_pointer_cast<const WorkspaceGroup>(lhs);
   WorkspaceGroup_const_sptr rhs_grp = std::dynamic_pointer_cast<const WorkspaceGroup>(rhs);
 
-  if ((lhs_mat || lhs_grp) && (rhs_mat || rhs_grp))
-    // Both sides are matrixworkspace - use the original algos (e..g "Plus.")
-    algoName = op;
-  else
-    // One of the workspaces must be MDHistoWorkspace or MDEventWorkspace
-    // Use the MD version, e.g. "PlusMD"
-    algoName = op + "MD";
+  const auto algoName = (lhs_mat || lhs_grp) && (rhs_mat || rhs_grp) ? op : op + "MD";
 
   ResultType result;
   std::string error;
   try {
+    ReleaseGlobalInterpreterLock releaseGIL;
     if (reverse) {
       result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType, ResultType>(algoName, rhs, lhs, inplace,
                                                                                             false, name, true);
@@ -165,7 +159,10 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value, 
   alg->setProperty<double>("DataValue", value);
   const std::string tmpName("__python_binary_op_single_value");
   alg->setPropertyValue("OutputWorkspace", tmpName);
-  alg->execute();
+  { // instantiate releaseGIL in limited scope to allow for repeat in 'performBinaryOp'
+    ReleaseGlobalInterpreterLock releaseGIL;
+    alg->execute();
+  }
 
   MatrixWorkspace_sptr singleValue;
   if (alg->isExecuted()) {

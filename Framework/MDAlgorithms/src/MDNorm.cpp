@@ -29,8 +29,9 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 
 namespace Mantid::MDAlgorithms {
 
@@ -958,11 +959,11 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
     }
     parametersIndex++;
   }
-  for (auto &idx : dimensionIndex) {
-    if (idx > numDimsTemp)
-      throw(std::invalid_argument("Cannot find at least one of QDimension0, "
-                                  "QDimension1, or QDimension2"));
-  }
+  const auto it = std::find_if(dimensionIndex.cbegin(), dimensionIndex.cend(),
+                               [numDimsTemp](const auto &idx) { return idx > numDimsTemp; });
+  if (it != dimensionIndex.cend())
+    throw(std::invalid_argument("Cannot find at least one of QDimension0, "
+                                "QDimension1, or QDimension2"));
 }
 
 /**
@@ -1518,10 +1519,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues, con
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex, 0.3 + progStep * (1. + progIndex), ndets);
   // muliple threading
-  bool safe = true;
-  if (m_diffraction) {
-    safe = Kernel::threadSafe(*integrFlux);
-  }
+  bool safe = m_diffraction ? Kernel::threadSafe(*integrFlux) : true;
 
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (safe))
 for (int64_t i = 0; i < ndets; i++) {

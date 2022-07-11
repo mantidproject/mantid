@@ -369,9 +369,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (auto &binBoundary : binBoundaries) {
-        binBoundary = unitConv.convertUnits(binBoundary);
-      }
+      std::transform(binBoundaries.cbegin(), binBoundaries.cend(), binBoundaries.begin(),
+                     [&unitConv](const auto &binBoundary) { return unitConv.convertUnits(binBoundary); });
     }
     // sort bin boundaries in case if unit transformation have swapped them.
     if (binBoundaries[0] > binBoundaries.back()) {

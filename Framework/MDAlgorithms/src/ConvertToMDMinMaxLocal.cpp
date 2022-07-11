@@ -135,7 +135,6 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MD
   //
   auto nSpectra = WSDescription.m_PreprDetTable->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum");
   auto detIDMap = WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
-  auto sp2detMap = WSDescription.m_PreprDetTable->getColVector<size_t>("spec2detMap");
 
   // vector to place transformed coordinates;
   std::vector<coord_t> locCoord(nDims);

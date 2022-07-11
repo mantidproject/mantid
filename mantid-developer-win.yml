@@ -4,8 +4,8 @@ channels:
   - conda-forge
 
 dependencies:
-  - boost=1.75.* # Also pulls in boost-cpp
-  - cmake>=3.20.*
+  - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
+  - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - conda-wrappers
   - doxygen>=1.9.*
   - eigen=3.4.*
@@ -14,6 +14,7 @@ dependencies:
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
   - h5py>=2.10.0,<3 # Pinned back due to api differences
   - hdf5=1.10.*
+  - ipykernel<6 # Added as hard dependency only to deal with an issue with ipykernel v6 and incompatibility with qtconsole/workbench, was previously a soft dependency that was allowed to update to v6 by qtconsole, at present it stops workbench from loading.
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0
   - lib3mf # windows only
@@ -28,7 +29,7 @@ dependencies:
   - poco=1.10.*
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
-  - pyqt>=5.12.3,<6
+  - pyqt>=5.12.3,<5.15
   - python-dateutil>=2.8.1
   - python=3.8.*
   - pyyaml>=5.4.1
@@ -38,8 +39,8 @@ dependencies:
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.6.2
-  - setuptools=48.0.0 # Pinned purposefully due to incompatibility with later versions
-  - sphinx<=3.5.4 # Pinned at 3.5.4 and below due to styling changes in 4.0, and 4.3 has a bug fix which imports a lot of matplotlib code (probably correctly, based on what we have in the api/python/mantid/plots/index.html file) and fails the doctests.
+  - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
+  - sphinx >= 4.5.*
   - sphinx_bootstrap_theme<=0.7.1
   - tbb-devel=2020.2.*
   - tbb=2020.2.*

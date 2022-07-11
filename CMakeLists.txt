@@ -9,10 +9,6 @@ if(POLICY CMP0022)
   cmake_policy(SET CMP0022 NEW)
 endif()
 
-if(POLICY CMP0072)
-  cmake_policy(SET CMP0072 OLD)
-endif()
-
 if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
@@ -137,8 +133,9 @@ include(Span)
 
 # Find OpenGL
 if(ENABLE_OPENGL)
+  # Use legacy libGL library
+  set(OpenGL_GL_PREFERENCE LEGACY)
   find_package(OpenGL REQUIRED)
-  # FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
   if(NOT OPENGL_FOUND)
     message(FATAL_ERROR "OpenGL was not found.")
   endif()

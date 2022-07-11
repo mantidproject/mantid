@@ -592,7 +592,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
           std::transform(PeakRadius.begin(), PeakRadius.end(), std::back_inserter(eigenvals),
-                         [](double &r) { return std::pow(r, 2.0); });
+                         [](double r) { return std::pow(r, 2.0); });
           eigenvects.push_back(V3D(1.0, 0.0, 0.0));
           eigenvects.push_back(V3D(0.0, 1.0, 0.0));
           eigenvects.push_back(V3D(0.0, 0.0, 1.0));
@@ -636,9 +636,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
           std::vector<double> eigenvals_background_inner;
           std::vector<double> eigenvals_background_outer;
           std::transform(BackgroundInnerRadius.begin(), BackgroundInnerRadius.end(),
-                         std::back_inserter(eigenvals_background_inner), [](double &r) { return std::pow(r, 2.0); });
+                         std::back_inserter(eigenvals_background_inner), [](double r) { return std::pow(r, 2.0); });
           std::transform(BackgroundOuterRadius.begin(), BackgroundOuterRadius.end(),
-                         std::back_inserter(eigenvals_background_outer), [](double &r) { return std::pow(r, 2.0); });
+                         std::back_inserter(eigenvals_background_outer), [](double r) { return std::pow(r, 2.0); });
 
           if (BackgroundOuterRadiusVector[0] > PeakRadiusVector[0]) {
             // transform ellispoid onto sphere of radius = R
@@ -664,11 +664,11 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
             bgSignal = bgSignalOuter - bgSignalInner;
             bgErrorSquared = bgErrorSquaredInner + bgErrorSquaredOuter;
             g_log.debug() << "unscaled background signal from ellipsoid integration = " << bgSignal << '\n';
-            const double scaleFactor = (PeakRadius[0] * PeakRadius[1] * PeakRadius[2]) /
-                                       (BackgroundOuterRadius[0] * BackgroundOuterRadius[1] * BackgroundOuterRadius[2] -
-                                        BackgroundInnerRadius[0] * BackgroundInnerRadius[1] * BackgroundInnerRadius[2]);
-            bgSignal *= scaleFactor;
-            bgErrorSquared *= scaleFactor * scaleFactor;
+            const double scale = (PeakRadius[0] * PeakRadius[1] * PeakRadius[2]) /
+                                 (BackgroundOuterRadius[0] * BackgroundOuterRadius[1] * BackgroundOuterRadius[2] -
+                                  BackgroundInnerRadius[0] * BackgroundInnerRadius[1] * BackgroundInnerRadius[2]);
+            bgSignal *= scale;
+            bgErrorSquared *= pow(scale, 2);
           }
           // set peak shape
           // get radii in same proprtion as eigenvalues

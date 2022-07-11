@@ -17,6 +17,7 @@ from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
+from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
@@ -44,6 +45,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
         self._logger = Logger("SliceViewer")
         self._peaks_presenter: PeaksViewerCollectionPresenter = None
+        self._cutviewer_presenter = None
         self.conf = conf
 
         # Acts as a 'time capsule' to the properties of the model at this
@@ -66,6 +68,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         sliceinfo = self.get_sliceinfo()
         if not sliceinfo.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+        if not self.model.can_support_non_axis_cuts():
+            self.view.data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
 
@@ -174,6 +178,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                          qflags=dimensions.qflags,
                          axes_angles=axes_angles)
 
+    def get_proj_matrix(self):
+        return self.model.get_proj_matrix()
+
+    def get_axes_limits(self):
+        return self.view.data_view.get_axes_limits()
+
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
         data_view = self._data_view
@@ -201,11 +211,13 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.new_plot(dimensions_transposing=True)
         else:
             self.new_plot()
+        self._call_cutviewer_presenter_if_created("on_dimension_changed")
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
         self._call_peaks_presenter_if_created("notify",
                                               PeaksViewerPresenter.Event.SlicePointChanged)
+        self._call_cutviewer_presenter_if_created("on_slicepoint_changed")
         self.update_plot_data()
 
     def export_roi(self, limits):
@@ -266,6 +278,14 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._logger.error(str(exc))
             self._show_status_message("Error exporting single-pixel cut")
 
+    def perform_non_axis_aligned_cut(self, vectors, extents, nbins):
+        try:
+            wscut_name = self.model.perform_non_axis_aligned_cut_to_workspace(vectors, extents, nbins)
+            self._call_cutviewer_presenter_if_created('on_cut_done', wscut_name)
+        except Exception as exc:
+            self._logger.error(str(exc))
+            self._show_status_message("Error exporting single-pixel cut")
+
     def nonorthogonal_axes(self, state: bool):
         """
         Toggle non-orthogonal axes on current view
@@ -274,6 +294,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         data_view = self.view.data_view
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
+            data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             # set transform from sliceinfo but ignore view as non-ortho state not set yet
             data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
@@ -282,6 +303,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
+            data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
 
@@ -310,6 +332,25 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self.view.peaks_view.hide()
 
+    def non_axis_aligned_cut(self, state):
+        data_view = self._data_view
+        if state:
+            if self._cutviewer_presenter is None:
+                self._cutviewer_presenter = CutViewerPresenter(self, data_view.canvas)
+                self.view.add_widget_to_splitter(self._cutviewer_presenter.get_view())
+            self._cutviewer_presenter.show_view()
+            data_view.deactivate_tool(ToolItemText.ZOOM)
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
+                data_view.deactivate_and_disable_tool(tool)
+            # turn off cursor tracking as this causes plot to resize interfering with interactive cutting tool
+            data_view.track_cursor.setChecked(False)  # on_track_cursor_state_change(False)
+        else:
+            self._cutviewer_presenter.hide_view()
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
+                data_view.enable_tool_button(tool)
+            if self.get_sliceinfo().can_support_nonorthogonal_axes():
+                data_view.enable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
+
     def replace_workspace(self, workspace_name, workspace):
         """
         Called when the SliceViewerADSObserver has detected that a workspace has changed
@@ -330,7 +371,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self.refresh_view()
+            self.view.delayed_refresh()
         except ValueError as err:
             self._close_view_with_message(
                 f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
@@ -342,6 +383,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         if not self.view:
             return
+
+        self.view.refresh_queued = False
 
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
@@ -373,9 +416,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._peaks_presenter.clear_observer()
 
     def canvas_clicked(self, event):
-        if self._peaks_presenter is not None:
-            if event.inaxes:
-                sliceinfo = self.get_sliceinfo()
+        if self._peaks_presenter is not None and event.inaxes:
+            sliceinfo = self.get_sliceinfo()
+            if sliceinfo.can_support_peak_overlay():
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
@@ -404,6 +447,16 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         if self._peaks_presenter is not None:
             getattr(self._peaks_presenter, attr)(*args, **kwargs)
+
+    def _call_cutviewer_presenter_if_created(self, attr, *args, **kwargs):
+        """
+        Call a method on the peaks presenter if it has been created
+        :param attr: The attribute to call
+        :param *args: Positional-arguments to pass to call
+        :param **kwargs Keyword-arguments to pass to call
+        """
+        if self._cutviewer_presenter is not None:
+            getattr(self._cutviewer_presenter, attr)(*args, **kwargs)
 
     def _show_status_message(self, message: str):
         """

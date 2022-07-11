@@ -4,6 +4,7 @@
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
     algorithms/Abins.py
+    algorithms/Abins2D.py
     algorithms/AlignAndFocusPowderFromFiles.py
     algorithms/AlignComponents.py
     algorithms/AngularAutoCorrelationsSingleAxis.py
@@ -307,6 +308,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANSStitch.py
     algorithms/WorkflowAlgorithms/SavePlot1D.py
     algorithms/WorkflowAlgorithms/SaveVulcanGSS.py
+    algorithms/WorkflowAlgorithms/SimpleShapeDiscusInelastic.py
     algorithms/WorkflowAlgorithms/SimpleShapeMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/SimulatedDensityOfStates.py
     algorithms/WorkflowAlgorithms/SingleCrystalDiffuseReduction.py

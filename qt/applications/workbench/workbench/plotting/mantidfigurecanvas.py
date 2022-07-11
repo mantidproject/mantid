@@ -8,8 +8,10 @@
 """
 Qt-based matplotlib canvas
 """
+from distutils.version import LooseVersion
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPen
+import matplotlib
 from matplotlib.backends.backend_qt5agg import (  # noqa: F401
     FigureCanvasQTAgg, draw_if_interactive, show)
 from mantid.plots.mantidimage import MantidImage, ImageIntensity
@@ -20,6 +22,8 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
         super().__init__(figure=figure)
         self._pen_color = Qt.black
         self._pen_thickness = 1.5
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            self._dpi_ratio = self.devicePixelRatio() or 1
 
     # options controlling the pen used by tools that manipulate the graph - e.g the zoom box
     @property

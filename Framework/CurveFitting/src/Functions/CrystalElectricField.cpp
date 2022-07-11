@@ -450,7 +450,7 @@ double matjz2(const ComplexFortranMatrix &ev, int i, int k, int dim) { return st
 // calculates all transition matrix elements for a single crystal
 // and a polycrystalline sample (powder)
 //---------------------------------------------------------------
-void matcalc(const ComplexFortranMatrix &ev, int dim, DoubleFortranMatrix &jx2, DoubleFortranMatrix &jy2,
+void matcalc(const ComplexFortranMatrix &ev, const int dim, DoubleFortranMatrix &jx2, DoubleFortranMatrix &jy2,
              DoubleFortranMatrix &jz2, DoubleFortranMatrix &jt2) {
   for (int i = 1; i <= dim; ++i) {   // do 10 i=1,dim
     for (int k = 1; k <= dim; ++k) { // do 20 k=1,dim
@@ -480,8 +480,8 @@ double exp_(double z) {
 // calculates all transition intensities for
 // a polycrystalline sample (powder)
 //------------------------------------------
-void intcalc(double r0, double gj, double z, const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
-             DoubleFortranMatrix &inten, int dim, double temp) {
+void intcalc(const double r0, const double gj, const double z, const DoubleFortranMatrix &jt2,
+             const DoubleFortranVector &e, DoubleFortranMatrix &inten, const int dim, double temp) {
   // Original code from FOCUS calculated integrated intensity in barn
   // auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
   // ISIS normalised data is in milibarn/steradian - need to multiply

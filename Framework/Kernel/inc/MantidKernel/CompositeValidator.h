@@ -11,6 +11,7 @@
 
 #include <memory>
 
+#include <algorithm>
 #include <list>
 #include <string>
 #include <vector>
@@ -51,14 +52,10 @@ public:
   /// Returns true if the child list contains a validator of the specified
   /// template type
   template <typename T> bool contains() {
-    for (const auto &validator : m_children) {
-      // avoid std::dynamic_pointer cast to avoid constructing
-      // a temporary shared_ptr type
-      if (dynamic_cast<T *>(validator.get())) {
-        return true;
-      }
-    }
-    return false;
+    // avoid std::dynamic_pointer cast to avoid constructing
+    // a temporary shared_ptr type
+    return std::any_of(m_children.cbegin(), m_children.cend(),
+                       [](const IValidator_sptr &validator) { return dynamic_cast<T *>(validator.get()) != nullptr; });
   }
 
 private:

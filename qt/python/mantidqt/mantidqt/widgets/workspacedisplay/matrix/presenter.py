@@ -63,6 +63,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         # connect to replace_signal signal to handle replacement of the workspace
         self.container.replace_signal.connect(self.action_replace_workspace)
+        self.container.rename_signal.connect(self.action_rename_workspace)
 
     def show_view(self):
         self.container.show()
@@ -71,6 +72,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         if self.model.workspace_equals(workspace_name):
             self.model = MatrixWorkspaceDisplayModel(workspace)
             self.setup_tables()
+
+    def action_rename_workspace(self, workspace_name):
+        self.model.set_name(workspace_name)
 
     @classmethod
     def supports(cls, ws):
@@ -101,10 +105,10 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
         ws = table.model().ws
         table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_spectra")
-        num_rows = ws.blocksize()
-        table_ws.setRowCount(num_rows)
+        row_sizes = [ws.getNumberBins(row) for row in selected_rows]
+        table_ws.setRowCount(max(row_sizes))
         num_col = 4 if self.hasDx else 3
-        for i, row in enumerate(selected_rows):
+        for i, (row, row_size) in enumerate(zip(selected_rows, row_sizes)):
             table_ws.addColumn("double", "XS" + str(row))
             table_ws.addColumn("double", "YS" + str(row))
             table_ws.addColumn("double", "ES" + str(row))
@@ -117,7 +121,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             data_x = ws.readX(row)
             data_e = ws.readE(row)
 
-            for j in range(num_rows):
+            for j in range(row_size):
                 table_ws.setCell(j, col_x, data_x[j])
                 table_ws.setCell(j, col_y, data_y[j])
                 table_ws.setCell(j, col_e, data_e[j])
@@ -127,7 +131,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                 table_ws.addColumn("double", "DXS" + str(row))
                 col_dx = num_col * i + 3
                 data_dx = ws.readDx(row)
-                for j in range(num_rows):
+                for j in range(row_size):
                     table_ws.setCell(j, col_dx, data_dx[j])
 
     def action_copy_bin_to_table(self, table):

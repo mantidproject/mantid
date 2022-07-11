@@ -88,7 +88,7 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self._check_workspace_group(mtd['out_red'], 1, 18, 1)
 
-        self.assertEquals(mtd['out_red'].getItem(0).readX(0)[0], 90)
+        self.assertEqual(mtd['out_red'].getItem(0).readX(0)[0], 90)
 
     def test_ifws_monitor_peaks(self):
 
@@ -106,8 +106,8 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertTrue(run.hasProperty('MonitorLeftPeak'))
         self.assertTrue(run.hasProperty('MonitorRightPeak'))
 
-        self.assertEquals(run.getLogData('MonitorLeftPeak').value, 2)
-        self.assertEquals(run.getLogData('MonitorRightPeak').value, 508)
+        self.assertEqual(run.getLogData('MonitorLeftPeak').value, 2)
+        self.assertEqual(run.getLogData('MonitorRightPeak').value, 508)
 
     def test_ifws_manual_peaks(self):
 
@@ -126,8 +126,8 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertTrue(run.hasProperty('ManualInelasticLeftPeak'))
         self.assertTrue(run.hasProperty('ManualInelasticRightPeak'))
 
-        self.assertEquals(run.getLogData('ManualInelasticLeftPeak').value, 3)
-        self.assertEquals(run.getLogData('ManualInelasticRightPeak').value, 507)
+        self.assertEqual(run.getLogData('ManualInelasticLeftPeak').value, 3)
+        self.assertEqual(run.getLogData('ManualInelasticRightPeak').value, 507)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 

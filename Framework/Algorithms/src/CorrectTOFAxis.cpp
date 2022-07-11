@@ -227,7 +227,7 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
   // If no reference workspace, we either use a predefined elastic channel
   // or EPP tables to declare the elastic TOF.
   const double elasticBinFullIndex = getProperty(PropertyNames::ELASTIC_BIN_INDEX);
-  const int elasticBinIndex = static_cast<const int>(elasticBinFullIndex);
+  const int elasticBinIndex = static_cast<int>(elasticBinFullIndex);
   const std::vector<int> spectra = getProperty(PropertyNames::REFERENCE_SPECTRA);
   const double l2 = getProperty(PropertyNames::L2);
   if (elasticBinFullIndex != EMPTY_DBL()) {

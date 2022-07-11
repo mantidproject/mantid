@@ -19,7 +19,7 @@ class TestCalculateMuonGroupPair(unittest.TestCase):
 
         params = _get_MuonGroupingCounts_parameters(group, periods)
 
-        self.assertEquals(params, {'GroupName': 'fwd', 'Grouping': '1,2,3,4,5', 'SummedPeriods': [1]})
+        self.assertEqual(params, {'GroupName': 'fwd', 'Grouping': '1,2,3,4,5', 'SummedPeriods': [1]})
 
     def test_parameters_correct_for_estimate_muon_asymmetry(self):
         group = MuonGroup('fwd', [1, 2, 3, 4, 5], [1, 2])
@@ -30,7 +30,7 @@ class TestCalculateMuonGroupPair(unittest.TestCase):
 
         params = _get_EstimateMuonAsymmetryFromCounts_parameters(context, group, run, periods)
 
-        self.assertEquals(params, {'StartX': 0.0,
+        self.assertEqual(params, {'StartX': 0.0,
                                    'EndX': 15.0,
                                    'OutputUnNormData': True})
 

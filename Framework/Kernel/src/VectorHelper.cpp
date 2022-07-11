@@ -440,13 +440,21 @@ void convertToBinBoundary(const std::vector<double> &bin_centers, std::vector<do
  */
 
 size_t indexOfValueFromCenters(const std::vector<double> &bin_centers, const double value) {
+  int index = indexOfValueFromCentersNoThrow(bin_centers, value);
+  if (index >= 0)
+    return static_cast<size_t>(index);
+  else
+    throw std::out_of_range("indexOfValue - value out of range");
+}
+
+int indexOfValueFromCentersNoThrow(const std::vector<double> &bin_centers, const double value) {
   if (bin_centers.empty()) {
     throw std::out_of_range("indexOfValue - vector is empty");
   }
   if (bin_centers.size() == 1) {
     // no mean to guess bin size, assuming 1
     if (value < bin_centers[0] - 0.5 || value > bin_centers[0] + 0.5) {
-      throw std::out_of_range("indexOfValue - value out of range");
+      return -1;
     } else {
       return 0;
     }
@@ -455,18 +463,18 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers, const dou
     const double firstBinLowEdge = bin_centers[0] - 0.5 * (bin_centers[1] - bin_centers[0]);
     const double lastBinHighEdge = bin_centers[n - 1] + 0.5 * (bin_centers[n - 1] - bin_centers[n - 2]);
     if (value < firstBinLowEdge || value > lastBinHighEdge) {
-      throw std::out_of_range("indexOfValue - value out of range");
+      return -1;
     } else {
       const auto it = std::lower_bound(bin_centers.begin(), bin_centers.end(), value);
       if (it == bin_centers.end()) {
-        return n - 1;
+        return static_cast<int>(n - 1);
       }
       size_t binIndex = std::distance(bin_centers.begin(), it);
       if (binIndex > 0 &&
           value < bin_centers[binIndex - 1] + 0.5 * (bin_centers[binIndex] - bin_centers[binIndex - 1])) {
         binIndex--;
       }
-      return binIndex;
+      return static_cast<int>(binIndex);
     }
   }
 }
