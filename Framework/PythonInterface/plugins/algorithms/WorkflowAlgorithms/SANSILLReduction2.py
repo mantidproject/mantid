@@ -895,7 +895,9 @@ class SANSILLReduction(PythonAlgorithm):
             self.preprocess(tmp)
             if self.mode == AcqMode.REVENT or self.mode == AcqMode.MONO:
                 self.linearize_axis(tmp)
-            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
+            if tmp != ws:
+                RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
+
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         self.progress.report('Combined')
