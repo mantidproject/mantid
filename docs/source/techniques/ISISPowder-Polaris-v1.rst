@@ -115,6 +115,7 @@ The following parameters may also be optionally set:
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
 - :ref:`empty_can_subtraction_method_isis-powder-diffraction-ref`
 - :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref`
+- :ref:`van_normalisation_method_isis-powder-diffraction-ref`
 
 
 Example
@@ -401,6 +402,30 @@ Example Input:
 ..  code-block:: python
 
   polaris_example.focus(do_van_normalisation=True, ...)
+
+.. _van_normalisation_method_isis-powder-diffraction-ref:
+
+van_normalisation_method
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Indicates whether a relative or absoluate normalisation should
+be performed. The possible values are "Relative" and "Absolute".
+
+This parameter is optional. The default value when mode="Rietveld" is "Relative". The default value when mode="PDF" is "Absolute".
+
+If "Absolute" is selected then the measured intensity is multipled by the following additional factor:
+
+.. math::
+
+    \frac{\rho_v V_v \sigma_v}{4 \pi \rho_s V_s}
+
+where :math:`\rho=` number density, :math:`V=` volume of material in the beam and the subscripts :math:`v` and :math:`s` indicate Vanadium and sample respectively.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(van_normalisation_method="Absolute", ...)
 
 .. _empty_can_subtraction_method_isis-powder-diffraction-ref:
 
