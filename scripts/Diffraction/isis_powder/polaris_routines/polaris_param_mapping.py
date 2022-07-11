@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.routines.common import PARAM_MAPPING as COMMON_PARAM_MAPPING
-from isis_powder.routines.common_enums import INPUT_BATCHING, EMPTY_CAN_SUBTRACTION_METHOD
+from isis_powder.routines.common_enums import INPUT_BATCHING, EMPTY_CAN_SUBTRACTION_METHOD, VAN_NORMALIZATION_METHOD
 from isis_powder.polaris_routines.polaris_enums import POLARIS_CHOPPER_MODES
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
@@ -19,6 +19,8 @@ attr_mapping = [
     ParamMapEntry(ext_name="delta_q", int_name="delta_q", optional=True),
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
     ParamMapEntry(ext_name="do_van_normalisation", int_name="do_van_normalisation"),
+    ParamMapEntry(ext_name="van_normalization_method", int_name="van_normalization_method",
+                  enum_class=VAN_NORMALIZATION_METHOD, optional=True),
     ParamMapEntry(ext_name="empty_can_subtraction_method", int_name="empty_can_subtraction_method",
                   enum_class=EMPTY_CAN_SUBTRACTION_METHOD, optional=True),
     ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
