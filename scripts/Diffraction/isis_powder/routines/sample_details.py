@@ -64,14 +64,16 @@ class SampleDetails(object):
                                                         exception_msg="The following argument is required but was not"
                                                                       " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
-        crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
+        number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective",
+                                                                throws=False)
+        packing_fraction = common.dictionary_key_helper(dictionary=kwargs, key="packing_fraction", throws=False)
         if self.container_material_object is not None:
             self.print_container_details()
             raise RuntimeError("The container material has already been set to the above details. "
                                "To change the material call 'reset_sample_material()'")
 
         self.container_material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
-                                                   crystal_density=crystal_density)
+                                                   number_density_effective=number_density_effective, packing_fraction=packing_fraction)
         if self._shape_type.capitalize() == "Cylinder":
             self._container_shape = _HollowCylinder(kwargs, sample_height=self.height(), sample_radius=self.radius(),
                                                     sample_center=self.center())
@@ -214,7 +216,11 @@ class SampleDetails(object):
         """
         material_json = {'ChemicalFormula': self.material_object.chemical_formula}
         if self.material_object.number_density:
-            material_json["SampleNumberDensity"] = self.material_object.number_density
+            material_json["NumberDensity"] = self.material_object.number_density
+        if self.material_object.number_density_effective:
+            material_json["EffectiveNumberDensity"] = self.material_object.number_density_effective
+        if self.material_object.packing_fraction:
+            material_json["PackingFraction"] = self.material_object.packing_fraction
         if self.material_object.absorption_cross_section:
             material_json["AttenuationXSection"] = self.material_object.absorption_cross_section
         if self.material_object.scattering_cross_section:
@@ -230,12 +236,16 @@ class SampleDetails(object):
     def generate_container_material(self):
         if self.container_material_object:
             container_material_json = {'ChemicalFormula': self.container_material_object.chemical_formula}
-            if self.material_object.number_density:
-                container_material_json["SampleNumberDensity"] = self.material_object.number_density
-            if self.material_object.absorption_cross_section:
-                container_material_json["AttenuationXSection"] = self.material_object.absorption_cross_section
-            if self.material_object.scattering_cross_section:
-                container_material_json["ScatteringXSection"] = self.material_object.scattering_cross_section
+            if self.container_material_object.number_density:
+                container_material_json["NumberDensity"] = self.container_material_object.number_density
+            if self.container_material_object.number_density_effective:
+                container_material_json["EffectiveNumberDensity"] = self.container_material_object.number_density_effective
+            if self.container_material_object.packing_fraction:
+                container_material_json["PackingFraction"] = self.container_material_object.packing_fraction
+            if self.container_material_object.absorption_cross_section:
+                container_material_json["AttenuationXSection"] = self.container_material_object.absorption_cross_section
+            if self.container_material_object.scattering_cross_section:
+                container_material_json["ScatteringXSection"] = self.container_material_object.scattering_cross_section
             return container_material_json
         else:
             return None
