@@ -192,8 +192,8 @@ def _normalize_one_spectrum(single_spectrum_ws, spline, instrument):
         sample_shape = spline.sample().getShape()
         num_sample_atoms = sample_shape.volume() * sample_number_density
 
-        abs_norm_factor = v_number_density * v_cross_section * num_v_atoms / \
-                          (sample_number_density * num_sample_atoms * 4 * math.pi)
+        abs_norm_factor = v_cross_section * num_v_atoms / \
+                          (num_sample_atoms * 4 * math.pi)
         logger.debug("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
         # avoid "Variable invalidated, data has been deleted" error when debugging
         output_ws_name = single_spectrum_ws.name()
