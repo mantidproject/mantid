@@ -27,12 +27,6 @@ preprocessorErrorDirective
 // Cppcheck struggles with some inheritance chains, some of these might be true though
 unusedPrivateFunction
 
-// --------- Missing copy assignment / constructors -------------------
-
-noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BankPulseTimes.h
-noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.h
-noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
-
 // ----------------- Upstream libs ---------------
 
 // All ANN files as they are upstream anyway
