@@ -1,0 +1,1 @@
+- The settings from the ``Event Handling`` tab are now correctly applied after loading a batch.
