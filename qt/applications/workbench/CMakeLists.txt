@@ -12,12 +12,16 @@ if(APPLE OR WIN32)
     INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
   )
   # Allow VS to start workbench for debugging
+  set(_vs_debugger_args "${MSVC_BIN_DIR}/workbench-script.pyw --single-process")
+  # cmake-format: off
   set_target_properties(
     workbench
     PROPERTIES VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
-               VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
-               VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
+               VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${_vs_debugger_args}>
+               VS_DEBUGGER_ENVIRONMENT
+               $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
   )
+  # cmake-format: on
 else()
   add_python_package(
     workbench EXECUTABLE

@@ -34,6 +34,13 @@ def main():
     parser.add_argument('--error-on-warning',
                         action='store_true',
                         help='Convert python warnings to exceptions')
+    parser.add_argument('--single-process', action='store_true',
+                        help='Run workbench with a single process and not in dual-process mode. '
+                             'By default the initial process creates a second process to run the '
+                             'workbench that users see, allowing crashes of the second process '
+                             'to be detected. This flag disables this behaviour and runs everything '
+                             'in one process. This is mostly useful for debuggers. '
+                             'Be aware that this also implies --no-error-reporter.')
     parser.add_argument('--no-error-reporter',
                         action='store_true',
                         help='Stop the error reporter from opening if you suffer an exception or crash.')
@@ -49,8 +56,8 @@ def main():
     options = parser.parse_args()
 
     if options.error_on_warning:
-        warnings.simplefilter("error") # Change the filter in this process
-        os.environ["PYTHONWARNINGS"] = "error" # Also affect subprocesses
+        warnings.simplefilter("error")  # Change the filter in this process
+        os.environ["PYTHONWARNINGS"] = "error"  # Also affect subprocesses
 
     if options.profile:
         output_path = os.path.abspath(os.path.expanduser(options.profile))
