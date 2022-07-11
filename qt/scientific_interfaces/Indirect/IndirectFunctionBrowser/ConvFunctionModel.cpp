@@ -561,6 +561,11 @@ std::string ConvFunctionModel::buildFickFunctionString() const {
          "constraints=(Height>0, DiffCoeff>0)";
 }
 
+std::string ConvFunctionModel::buildChudleyElliotString() const {
+  return "name=ChudleyElliotSQE, Height=1, Tau=1.25, Centre=0, L=1.0, "
+         "constraints=(Height>0, Tau>0)";
+}
+
 std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
   return "name=StretchedExpFT, Height=0.1, Tau=100, Beta=1, Centre=0, "
          "constraints=(Height>0, Tau>0)";
@@ -624,6 +629,8 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::FickDiffusion) {
     functions.append(buildFickFunctionString());
+  } else if (m_fitType == FitType::ChudleyElliot) {
+    functions.append(buildChudleyElliotString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
@@ -667,6 +674,8 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildTeixeiraFunctionString());
   } else if (m_fitType == FitType::FickDiffusion) {
     functions.append(buildFickFunctionString());
+  } else if (m_fitType == FitType::ChudleyElliot) {
+    functions.append(buildChudleyElliotString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {

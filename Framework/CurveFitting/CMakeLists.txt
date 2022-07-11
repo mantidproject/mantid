@@ -64,6 +64,7 @@ set(SRC_FILES
     src/Functions/Bk2BkExpConvPV.cpp
     src/Functions/ChebfunBase.cpp
     src/Functions/Chebyshev.cpp
+    src/Functions/ChudleyElliotSQE.cpp
     src/Functions/ComptonPeakProfile.cpp
     src/Functions/ComptonProfile.cpp
     src/Functions/ComptonScatteringCountRate.cpp
@@ -249,6 +250,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/Bk2BkExpConvPV.h
     inc/MantidCurveFitting/Functions/ChebfunBase.h
     inc/MantidCurveFitting/Functions/Chebyshev.h
+    inc/MantidCurveFitting/Functions/ChudleyElliotSQE.h
     inc/MantidCurveFitting/Functions/ComptonPeakProfile.h
     inc/MantidCurveFitting/Functions/ComptonProfile.h
     inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
@@ -425,6 +427,7 @@ set(TEST_FILES
     Functions/Bk2BkExpConvPVTest.h
     Functions/ChebfunBaseTest.h
     Functions/ChebyshevTest.h
+    Functions/ChudleyElliotSQETest.h
     Functions/ComptonPeakProfileTest.h
     Functions/ComptonProfileTest.h
     Functions/ComptonScatteringCountRateTest.h

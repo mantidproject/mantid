@@ -10,7 +10,7 @@ Description
 -----------
 
 This fitting function models the dynamic structure factor
-for a particle undergoing jump diffusion.
+for a particle undergoing jump diffusion using Fick's law for diffusion.
 
 .. math::
 

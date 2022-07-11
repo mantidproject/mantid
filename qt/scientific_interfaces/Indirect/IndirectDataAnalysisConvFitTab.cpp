@@ -64,6 +64,7 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
   m_fitStrings["StretchedExpFT"] = "SFT";
   m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
   m_fitStrings["FickDiffusionSQE"] = "FickDiff";
+  m_fitStrings["ChudleyElliotSQE"] = "ChudElliot";
   m_fitStrings["DiffRotDiscreteCircle"] = "DC";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
