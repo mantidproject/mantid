@@ -53,6 +53,19 @@
             }
         },
         {
+            "name": "win-ninja",
+            "displayName": "win-ninja",
+            "description": "Default build options for a windows conda Ninja build",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_BUILD_TYPE": "Release",
+                "USE_PRECOMPILED_HEADERS": "OFF"
+            }
+        },
+        {
             "name": "linux",
             "displayName": "linux",
             "description": "Default build options for a linux conda build",
