@@ -174,7 +174,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check it stores number density if passed (both flavours)
         material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
-                                                               number_density=number_density_effective_sample)
+                                                               number_density_effective=number_density_effective_sample)
         self.assertEqual(material_obj_number_density.number_density_effective, number_density_effective_sample)
 
         material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
@@ -386,7 +386,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         result = sample_details_obj.generate_sample_material()
         # Validate
         expected = {'ChemicalFormula': 'Si',
-                    'SampleNumberDensity': 1.5,
+                    'NumberDensity': 1.5,
                     'AttenuationXSection': 123.0,
                     'ScatteringXSection': 456.0}
         self.assertEqual(result, expected)
