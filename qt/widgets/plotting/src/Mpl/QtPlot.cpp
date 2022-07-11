@@ -17,9 +17,7 @@ using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
 
 namespace MantidQt::MantidWidgets {
-QtPlot::QtPlot(QWidget *parent) : QWidget(parent), m_canvas(new FigureCanvasQt(111, "mantid", parent)) {
-  createLayout();
-}
+QtPlot::QtPlot(QWidget *parent) : QWidget(parent), m_canvas(new FigureCanvasQt(111, "", parent)) { createLayout(); }
 
 void QtPlot::clear() {}
 
