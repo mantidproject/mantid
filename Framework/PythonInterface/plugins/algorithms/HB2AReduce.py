@@ -146,12 +146,11 @@ class HB2AReduce(PythonAlgorithm):
                     if os.path.isdir(directory):
                         if self.getProperty("Exp").value == Property.EMPTY_INT:
                             exp = int([e for e in os.listdir(directory) if 'exp' in e][0].replace('exp', ''))
+                        filenames = [f"{directory}/exp{exp}/Datafiles/HB2A_exp{exp:04}_scan{scan:04}.dat"
+                                     for scan in self.getProperty("ScanNumbers").value]
                     else:
                         issues["IPTS"] = f"Failed to find the directory: {directory}"
-                    filenames = [
-                        '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(
-                            ipts, exp, scan) for scan in self.getProperty("ScanNumbers").value
-                    ]
+
                 filenames = filenames if isinstance(filenames, list) else [filenames]
                 _target = "# def_x = 2theta"
                 for fn in filenames:
