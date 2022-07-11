@@ -26,7 +26,7 @@ class EMPTY_CAN_SUBTRACTION_METHOD(object):
     paalman_pings = "PaalmanPings"
 
 
-class VAN_NORMALIZATION_METHOD(object):
-    enum_friendly_name = "vanadium normalization method"
+class VAN_NORMALISATION_METHOD(object):
+    enum_friendly_name = "vanadium normalisation method"
     relative = "Relative"  # default
     absolute = "Absolute"

@@ -104,12 +104,12 @@ variables = {
 
 def get_mode_specific_dict(mode):
     if mode is None:
-        return {"focused_cropping_values": 'auto', "van_normalization_method": "Relative"}
+        return {"focused_cropping_values": 'auto', "van_normalisation_method": "Relative"}
     mode = mode.lower()
     if mode == "pdf":
-        return {"focused_cropping_values": pdf_focused_cropping_values, "van_normalization_method": "Absolute"}
+        return {"focused_cropping_values": pdf_focused_cropping_values, "van_normalisation_method": "Absolute"}
     if mode == "rietveld":
-        return {"focused_cropping_values": rietveld_focused_cropping_values, "van_normalization_method": "Relative"}
+        return {"focused_cropping_values": rietveld_focused_cropping_values, "van_normalisation_method": "Relative"}
     raise ValueError("Invalid chopper mode: \"{}\"".format(mode))
 
 

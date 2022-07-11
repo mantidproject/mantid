@@ -163,4 +163,4 @@ class Polaris(AbstractInst):
             paalman_pings_events_per_point=paalman_pings_events_per_point)
 
     def perform_abs_vanadium_norm(self):
-        return self._inst_settings.van_normalization_method == "Absolute"
+        return self._inst_settings.van_normalisation_method == "Absolute"
