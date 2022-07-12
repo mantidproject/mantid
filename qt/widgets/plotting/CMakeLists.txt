@@ -8,6 +8,7 @@ set(MPL_SRC_FILES
     src/Mpl/PreviewPlot.cpp
     src/Mpl/RangeSelector.cpp
     src/Mpl/SingleSelector.cpp
+    src/PlotWidget/PlotModel.cpp
     src/PlotWidget/QtPlotView.cpp
 )
 
@@ -25,6 +26,7 @@ set(MPL_INC_FILES
     inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
     inc/MantidQtWidgets/Plotting/PeakPicker.h
     inc/MantidQtWidgets/Plotting/PreviewPlot.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/PlotModel.h
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 
@@ -48,7 +50,9 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 
-set(TEST_FILES test/ContourPreviewPlotTest.h test/ExternalPlotterTest.h test/PlotWidget/PlotPresenterTest.h)
+set(TEST_FILES test/ContourPreviewPlotTest.h test/ExternalPlotterTest.h test/PlotWidget/PlotModelTest.h
+               test/PlotWidget/PlotPresenterTest.h
+)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestInitialization.h")
 # Testing target
