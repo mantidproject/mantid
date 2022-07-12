@@ -48,7 +48,7 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 
-set(TEST_FILES test/ContourPreviewPlotTest.h test/ExternalPlotterTest.h)
+set(TEST_FILES test/ContourPreviewPlotTest.h test/ExternalPlotterTest.h test/QtPlotTest.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestInitialization.h")
 # Testing target
