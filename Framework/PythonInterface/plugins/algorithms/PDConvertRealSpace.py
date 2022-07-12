@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.api import (PythonAlgorithm, AlgorithmFactory,
-                        MatrixWorkspaceProperty,
-                        WorkspaceProperty, WorkspaceFactory)
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty,
+                        WorkspaceFactory)
 from mantid.kernel import (Direction, StringListValidator, logger)
 
 from pystog.converter import Converter
@@ -58,7 +57,9 @@ class PDConvertRealSpace(PythonAlgorithm):
     def validateInputs(self):
         result = dict()
         input_ws = self.getProperty('InputWorkspace').value
-        if input_ws.sample().getMaterial():
+        if not isinstance(input_ws, MatrixWorkspace):
+            result['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+        elif input_ws.sample().getMaterial():
             if input_ws.sample().getMaterial().cohScatterLengthSqrd() == 0.:
                 from_quantity = self.getProperty('From').value
                 to_quantity = self.getProperty('To').value

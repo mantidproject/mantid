@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm, Progress
+from mantid.api import AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, PythonAlgorithm, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 import numpy as np
 from scipy.signal import savgol_filter
@@ -59,7 +59,9 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         issues = dict()
         # check there are more than three points in a workspace
         inws = self.getProperty("InputWorkspace").value
-        if inws.blocksize() < self.MIN_WINDOW_SIZE:
+        if not isinstance(inws, MatrixWorkspace):
+            issues['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+        elif inws.blocksize() < self.MIN_WINDOW_SIZE:
             issues['InputWorkspace'] = "At least three points needed in each spectra"
         return issues
 
