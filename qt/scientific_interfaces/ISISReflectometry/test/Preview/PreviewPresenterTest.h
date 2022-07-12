@@ -164,6 +164,16 @@ public:
     presenter.notifyRegionSelectorExportAdsRequested();
   }
 
+  void test_notify_1D_plot_export_to_ads_requested() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+
+    EXPECT_CALL(*mockModel, exportReducedWsToAds()).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+
+    presenter.notify1DPlotExportAdsRequested();
+  }
+
   void test_sum_banks_completed_plots_region_selector() {
     auto mockView = makeView();
     auto mockModel = makeModel();

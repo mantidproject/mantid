@@ -133,4 +133,6 @@ void PreviewPresenter::notifyRegionChanged() {
   // Perform the reduction
   m_model->reduceAsync(*m_jobManager);
 }
+
+void PreviewPresenter::notify1DPlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

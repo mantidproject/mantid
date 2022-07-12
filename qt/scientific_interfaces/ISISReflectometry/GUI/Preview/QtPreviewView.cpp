@@ -29,6 +29,7 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
   m_ui.rs_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
   m_ui.rs_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
+  m_ui.plot_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
@@ -43,6 +44,7 @@ void QtPreviewView::connectSignals() const {
   // Region selector toolbar
   connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectorExportToAdsClicked()));
   connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onSelectRectangularROIClicked()));
+  connect(m_ui.plot_ads_export_button, SIGNAL(clicked()), this, SLOT(on1DPlotExportToAdsClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -55,6 +57,8 @@ void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewS
 void QtPreviewView::onRegionSelectorExportToAdsClicked() const { m_notifyee->notifyRegionSelectorExportAdsRequested(); }
 
 void QtPreviewView::onSelectRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
+
+void QtPreviewView::on1DPlotExportToAdsClicked() const { m_notifyee->notify1DPlotExportAdsRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 

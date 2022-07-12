@@ -56,7 +56,6 @@ private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
-  std::unique_ptr<MantidQt::Widgets::RegionSelector> m_regionSelector{nullptr};
 
   void connectSignals() const;
   void loadToolbarIcons();
@@ -68,6 +67,7 @@ private slots:
   void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
   void onRegionSelectorExportToAdsClicked() const;
+  void on1DPlotExportToAdsClicked() const;
   void onSelectRectangularROIClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

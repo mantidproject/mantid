@@ -39,5 +39,6 @@ public:
 
   virtual std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const = 0;
   virtual void exportSummedWsToAds() const = 0;
+  virtual void exportReducedWsToAds() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

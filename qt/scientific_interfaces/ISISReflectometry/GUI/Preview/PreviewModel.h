@@ -44,6 +44,7 @@ public:
   void setSelectedRegion(Selection const &selection) override;
 
   void exportSummedWsToAds() const override;
+  void exportReducedWsToAds() const override;
 
 private:
   // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't
