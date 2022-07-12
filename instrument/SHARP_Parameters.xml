@@ -45,7 +45,7 @@
 			<value val="true" />
 		</parameter>
 		<parameter name="enable_elastic_peak_fitting" type="bool" visible="false">
-			<value val="true" />
+			<value val="false" />
 		</parameter>
 		<parameter name="enable_elastic_channel_fitting" type="bool" visible="false">
 			<value val="true" />
