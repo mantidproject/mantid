@@ -14,11 +14,11 @@
 #include <QWidget>
 
 namespace MantidQt::MantidWidgets {
-class EXPORT_OPT_MANTIDQT_PLOTTING QtPlot : public QWidget {
+class EXPORT_OPT_MANTIDQT_PLOTTING QtPlotView : public QWidget {
   Q_OBJECT
 public:
   enum class AxisScale { LINEAR, LOG };
-  QtPlot(QWidget *parent = nullptr);
+  QtPlotView(QWidget *parent = nullptr);
 
   void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 

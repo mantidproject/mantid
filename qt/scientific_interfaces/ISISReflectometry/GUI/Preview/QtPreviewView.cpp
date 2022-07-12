@@ -79,8 +79,8 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
 
 void QtPreviewView::plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   auto const wsIndex = size_t{0};
-  m_ui.line_plot->setXScaleType(MantidWidgets::QtPlot::AxisScale::LOG);
-  m_ui.line_plot->setYScaleType(MantidWidgets::QtPlot::AxisScale::LOG);
+  m_ui.line_plot->setXScaleType(MantidWidgets::QtPlotView::AxisScale::LOG);
+  m_ui.line_plot->setYScaleType(MantidWidgets::QtPlotView::AxisScale::LOG);
   m_ui.line_plot->setSpectrum(workspace, wsIndex);
 }
 

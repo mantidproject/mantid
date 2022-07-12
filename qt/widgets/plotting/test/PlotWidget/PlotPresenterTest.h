@@ -24,7 +24,7 @@ MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms, int numberOfB
 
 } // namespace
 
-/// Unit tests for QtPlot
+/// Unit tests for PlotPresenter
 class PlotPresenterTest : public CxxTest::TestSuite {
 public:
   static PlotPresenterTest *createSuite() { return new PlotPresenterTest(); }
@@ -33,44 +33,44 @@ public:
 
   PlotPresenterTest() { PyImport_ImportModule("mantid.plots"); }
 
-  void test_constructor() { TS_ASSERT_THROWS_NOTHING(QtPlot(nullptr)); }
+  void test_constructor() { TS_ASSERT_THROWS_NOTHING(QtPlotView(nullptr)); }
 
   void test_set_spectrum() {
-    auto plot = QtPlot(nullptr);
+    auto plot = QtPlotView(nullptr);
     auto ws = createMatrixWorkspace(3);
 
     TS_ASSERT_THROWS_NOTHING(plot.setSpectrum(ws, 1));
   }
 
   void test_set_x_scale() {
-    auto plot = QtPlot(nullptr);
+    auto plot = QtPlotView(nullptr);
     auto ws = createMatrixWorkspace(3);
     plot.setSpectrum(ws, 1);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlot::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlot::AxisScale::LOG));
+    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LINEAR));
+    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LOG));
   }
 
   void test_set_x_scale_no_workspace() {
-    auto plot = QtPlot(nullptr);
+    auto plot = QtPlotView(nullptr);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlot::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlot::AxisScale::LOG));
+    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LINEAR));
+    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LOG));
   }
 
   void test_set_y_scale() {
-    auto plot = QtPlot(nullptr);
+    auto plot = QtPlotView(nullptr);
     auto ws = createMatrixWorkspace(3);
     plot.setSpectrum(ws, 1);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlot::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlot::AxisScale::LOG));
+    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LINEAR));
+    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LOG));
   }
 
   void test_set_y_scale_no_workspace() {
-    auto plot = QtPlot(nullptr);
+    auto plot = QtPlotView(nullptr);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlot::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlot::AxisScale::LOG));
+    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LINEAR));
+    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LOG));
   }
 };
