@@ -139,6 +139,9 @@ class GenerateLogbook(PythonAlgorithm):
             optional_entries = dict()
             for entry in logbook_optional_parameters:
                 optional_entry = entry.split(':')
+                if len(optional_entry) == 1:
+                    self.log().warning("Optional header {} is requested but is not properly defined.".format(optional_entry[0]))
+                    continue
                 if len(optional_entry) < 3:
                     optional_entry.append('s')
                 optional_entries[(optional_entry[2], str(optional_entry[0]).strip())] = optional_entry[1]
