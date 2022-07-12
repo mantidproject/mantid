@@ -818,6 +818,7 @@ std::string LoadILLDiffraction::getInstrumentFilePath(const std::string &instNam
 }
 
 /** Adds some sample logs needed later by reduction
+ *  @throw runtime_error If wavelength or Monochromator.ei metadata is missing from the file
  */
 void LoadILLDiffraction::setSampleLogs() {
   Run &run = m_outWorkspace->mutableRun();
@@ -843,8 +844,10 @@ void LoadILLDiffraction::setSampleLogs() {
   if (run.hasProperty("wavelength")) {
     double lambda = run.getLogAsSingleValue("wavelength");
     eFixed = WAVE_TO_E / (lambda * lambda);
-  } else { // D4C, wavelength is not specified and Ei is provided directly
+  } else if (run.hasProperty("Monochromator.ei")) { // D4C, wavelength is not specified and Ei is provided directly
     eFixed = run.getPropertyValueAsType<double>("Monochromator.ei");
+  } else {
+    throw std::runtime_error("Neither wavelength nor Monochromator.ei are not specified in the loaded file.");
   }
   run.addLogData(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyWithValue<double>("Ei", eFixed)), true);
   run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors", m_numberDetectorsActual));
