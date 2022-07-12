@@ -124,6 +124,40 @@ The importance sampling has also been implemented for inelastic instruments by f
 A 1D coordinate is created which is the actual Q value added onto the maximum Q from the preceding :math:`\omega` row: :math:`Q'(Q,\omega_i) = Q + Q_{max}(\omega_{i-1})`
 With this approach there is no interpolation performed between different :math:`\omega` values. It's not clear whether the importance sampling is useful for inelastic calculations since the area where the multiple scattering correction tends to be largest relative to the signal is away from the peak in :math:`S(Q, \omega)`.
 
+Support for sample environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The calculation can include scattering from the sample environment (eg can) in the Monte Carlo simulation. The term "segment" has previously been used to refer to a straight neutron path between two scattering events. For the purpose of this description the term "link" will be used to refer to a subsection of a segment that lies within a single material.
+
+The modified calculation is illustrated here with an example of a sample contained in a can where a track may contain three different links (can then sample then can). If the selected scatter point occurs somewhere in the third link, the quantity :math:`t_i` is redefined as:
+
+.. math::
+
+   t_i = \frac{1-e^{-\mu_1 l_1^{max} - \mu_2 l_2^{max} - \mu_3 (l_i - l_1^{max} - l_2^{max})}}{1-e^{-\mu_1 l_1^{max} - \mu_2 l_2^{max} - \mu_3 l_3^{max}}}
+
+This can be generally expressed as follows where n is the number of sample environment components:
+
+.. math::
+
+   t_i = \frac{1-e^{-\sum\limits_{j=1}^{n} \mu_j\ min(max( l_i - \sum\limits_{k=1}^{j-1} l_k^{max},\ 0),\ l_j^{max})}}{1-e^{-\sum\limits_{j=1}^{n} \mu_j l_j^{max}}}
+
+Based on this the length of the ith segment can be derived from a :math:`t_i` that has been randomly selected between 0 and 1 as follows where again the expression is for the specific case of a track containing three different links:
+
+.. math::
+   :label: l_i
+
+   \mu_1 l_1^{max} + \mu_2 l_2^{max} + \mu_3 (l_i - l_1^{max} - l_2^{max}) = - ln(1-(1-e^{-\sum\limits_{j=1}^{n}\mu_j l_j^{max}})t_i)
+
+...and more generally (although perhaps less helpfully in terms of explaining how the code works):
+
+.. math::
+
+   \sum\limits_{j=1}^{n} \mu_j\ min(max( l_i - \sum\limits_{k=1}^{j-1} l_k^{max},\ 0),\ l_j^{max}) = - ln(1-(1-e^{-\sum\limits_{j=1}^{n}\mu_j l_j^{max}})t_i)
+
+It can be seen that the formula :eq:`l_i` can be solved for :math:`l_i` by calculating the quantity on the right hand side and then sequentially subtracting :math:`\mu_i l_i^{max}` from it for increasing i while keeping the running total >=0.
+The value of :math:`i` when you can't subtract any more :math:`\mu_i l_i^{max}` identifies the component containing the scatter. Dividing by :math:`\mu_i` at this point gives you the length into that component that the track reaches.
+
+The other modification to the calculation to support scattering in the sample environment is that a different structure factor and scattering cross section is required for each material. The component containing each scatter is derived from the :math:`l_i` calculation and is used to look up the structure factor and cross section.
 
 Outputs
 #######
@@ -151,7 +185,7 @@ Note that this differs from the approach taken in other Mantid absorption correc
 :math:`J_{1}^{*}` corrects for attenuation due to absorption before and after the simulated scattering event (which is the same as MonteCarloAbsorption) but it only corrects for attenuation due to scattering after the simulated scattering event.
 For this reason it's not clear this feature from Discus is useful but it has been left in for historical reasons.
 
-The sample shape can be specified by running the algorithms :ref:`SetSample <algm-SetSample>` or :ref:`LoadSampleShape <algm-LoadSampleShape>` on the input workspace prior to running this algorithm.
+The sample shape (and optionally the sample environment shape) can be specified by running the algorithms :ref:`SetSample <algm-SetSample>` or :ref:`LoadSampleShape <algm-LoadSampleShape>` on the input workspace prior to running this algorithm.
 
 The algorithm can take a long time to run on instruments with a lot of spectra and\or a lot of bins in each spectrum. The run time can be reduced by enabling the following interpolation features:
 
