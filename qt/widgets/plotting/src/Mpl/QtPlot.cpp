@@ -21,16 +21,35 @@ QtPlot::QtPlot(QWidget *parent) : QWidget(parent), m_canvas(new FigureCanvasQt(1
 
 void QtPlot::clear() {}
 
+void QtPlot::setXScaleType(const AxisScale axisScale) {
+  switch (axisScale) {
+  case AxisScale::LINEAR:
+    m_axisProperties[QString("xscale")] = QVariant("linear");
+    break;
+  case AxisScale::LOG:
+    m_axisProperties[QString("xscale")] = QVariant("log");
+    break;
+  }
+}
+
+void QtPlot::setYScaleType(const AxisScale axisScale) {
+  switch (axisScale) {
+  case AxisScale::LINEAR:
+    m_axisProperties[QString("yscale")] = QVariant("linear");
+    break;
+  case AxisScale::LOG:
+    m_axisProperties[QString("yscale")] = QVariant("log");
+    break;
+  }
+}
+
 void QtPlot::addSpectrum(const MatrixWorkspace_sptr &ws, const size_t wsIndex) {
-  QHash<QString, QVariant> ax_properties;
-  ax_properties[QString("yscale")] = QVariant("log");
-  ax_properties[QString("xscale")] = QVariant("log");
   const bool plotErrorBars = true;
 
   auto const workspaces = std::vector<MatrixWorkspace_sptr>{ws};
   auto const wkspIndices = std::vector<int>{static_cast<int>(wsIndex)};
 
-  Widgets::MplCpp::plot(workspaces, boost::none, wkspIndices, m_canvas->gcf().pyobj(), boost::none, ax_properties,
+  Widgets::MplCpp::plot(workspaces, boost::none, wkspIndices, m_canvas->gcf().pyobj(), boost::none, m_axisProperties,
                         boost::none, plotErrorBars, false);
 }
 

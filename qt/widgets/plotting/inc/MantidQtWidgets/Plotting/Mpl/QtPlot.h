@@ -17,13 +17,19 @@ namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING QtPlot : public QWidget {
   Q_OBJECT
 public:
+  enum class AxisScale { LINEAR, LOG };
   QtPlot(QWidget *parent = nullptr);
 
   void clear();
   void addSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
+  void setXScaleType(const AxisScale axisScale);
+  void setYScaleType(const AxisScale axisScale);
+
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
+
+  QHash<QString, QVariant> m_axisProperties;
 
   Widgets::MplCpp::Figure createFigure();
   void createLayout();
