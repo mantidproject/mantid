@@ -1278,6 +1278,38 @@ class CrystalFieldFit(object):
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
 
+    def fit_with_gofit(self):
+        from gofit import regularisation
+
+        data = np.loadtxt('C:\\Users\\mlc47243\\Documents\\mantid-data\\cubic.txt')
+
+        def fun(p, x):
+            return p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3
+
+        def eval_res(p):
+            x = data[:, 0]
+            y = data[:, 1]
+            return y - fun(p, x)
+
+        def eval_jac(p):
+            x = data[:, 0]
+            ones = np.ones(len(x))
+            return -1 * np.transpose([ones, x, x ** 2, x ** 3])
+
+        m = data.shape[0]
+        n = 4
+        p0 = np.array([8, 2.98, 4, 1.02])
+
+        # Parameters
+        maxit = 200
+
+        p, status = regularisation(m, n, p0, eval_res, jac=eval_jac, maxit=maxit)
+
+        print("Status:")
+        print(status)
+        print("p*:")
+        print(p)
+
     def two_step_fit(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
         logger.warning("Please note that this is a first experimental version of the two_step_fit algorithm.")
         fix_all_peaks = self.model.FixAllPeaks
