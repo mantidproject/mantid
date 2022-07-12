@@ -256,7 +256,7 @@
   <customwidget>
    <class>MantidQt::MantidWidgets::QtPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/QtPlot.h</header>
+   <header>MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -11,7 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidPythonInterface/core/WrapPython.h"
-#include "MantidQtWidgets/Plotting/QtPlot.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -25,13 +25,13 @@ MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms, int numberOfB
 } // namespace
 
 /// Unit tests for QtPlot
-class QtPlotTest : public CxxTest::TestSuite {
+class PlotPresenterTest : public CxxTest::TestSuite {
 public:
-  static QtPlotTest *createSuite() { return new QtPlotTest(); }
+  static PlotPresenterTest *createSuite() { return new PlotPresenterTest(); }
 
-  static void destroySuite(QtPlotTest *suite) { delete suite; }
+  static void destroySuite(PlotPresenterTest *suite) { delete suite; }
 
-  QtPlotTest() { PyImport_ImportModule("mantid.plots"); }
+  PlotPresenterTest() { PyImport_ImportModule("mantid.plots"); }
 
   void test_constructor() { TS_ASSERT_THROWS_NOTHING(QtPlot(nullptr)); }
 
