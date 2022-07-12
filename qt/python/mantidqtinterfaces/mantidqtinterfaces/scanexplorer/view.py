@@ -218,7 +218,7 @@ class ScanExplorerView(QMainWindow):
         """
         Open a new directory manager window so the user can select files.
         """
-        base_directory = "/users/tillet/data/d16_omega/new_proto"
+        base_directory = self.presenter.get_base_directory()
 
         dialog = QFileDialog()
         dialog.setFileMode(QFileDialog.ExistingFiles)

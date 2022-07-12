@@ -6,14 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from os import path
+from os import path, sep
 from numpy import array
 
 from qtpy.QtCore import QObject, Signal
 
 from mantid.api import MatrixWorkspace, AlgorithmObserver, Algorithm
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
-from mantid.kernel import logger
+from mantid.kernel import logger, config
 from mantid.api import mtd
 
 
@@ -115,6 +115,21 @@ class ScanExplorerPresenter:
         @return the x and y axes of the scan workspace
         """
         return self._ws.getAxis(0).extractValues(), self._ws.getAxis(1).extractValues()
+
+    @staticmethod
+    def get_base_directory() -> str:
+        """
+        Get the directory to use as default for browsing.
+        Usually the first from the user defined data search directories list.
+        @return the absolute path of this directory
+        """
+        data_search_dirs = config.getDataSearchDirs()
+
+        for directory in data_search_dirs:
+            if path.isdir(directory):
+                return directory
+
+        return path.abspath(sep)
 
     @property
     def ws(self):
