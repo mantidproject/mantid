@@ -33,6 +33,7 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
+  double getAngle() const override;
   // Plotting
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;

@@ -78,6 +78,11 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
 void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
+void PreviewPresenter::notifyReductionCompleted() {
+  // TODO plot reduced workspace
+  g_log.notice("Reduction completed");
+}
+
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
   m_view->setInstViewEditState(false);
@@ -119,8 +124,13 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
 }
 
 void PreviewPresenter::notifyRegionChanged() {
-  // TODO Get ROI from m_regionSelector and perform the reduction
+  // Set the selection from the view
   auto roi = m_regionSelector->getRegion();
-  g_log.notice("Region of interest was changed: " + std::to_string(roi[0]) + " to " + std::to_string(roi[1]));
+  m_model->setSelectedRegion(roi);
+  g_log.notice("Running reduction on ROI: " + m_model->getProcessingInstructions());
+  // Ensure the angle is up to date
+  m_model->setTheta(m_view->getAngle());
+  // Perform the reduction
+  m_model->reduceAsync(*m_jobManager);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

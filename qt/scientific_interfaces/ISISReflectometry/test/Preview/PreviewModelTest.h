@@ -82,6 +82,14 @@ public:
     TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
   }
 
+  void test_set_selected_region_converts_to_processing_instructions_string() {
+    PreviewModel model;
+    const IPreviewModel::Selection inputRoi{3.6, 11.4};
+    model.setSelectedRegion(inputRoi);
+    // Start and end are rounded to nearest integer and converted to a string
+    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions())
+  }
+
   void test_sum_banks() {
     auto mockJobManager = MockJobManager();
     auto expectedWs = createWorkspace();
@@ -92,6 +100,20 @@ public:
     model.sumBanksAsync(mockJobManager);
 
     auto workspace = model.getSummedWs();
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
+
+  void test_reduce() {
+    auto mockJobManager = MockJobManager();
+    auto expectedWs = createWorkspace();
+    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
+
+    PreviewModel model;
+    model.reduceAsync(mockJobManager);
+
+    auto workspace = model.getReducedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }

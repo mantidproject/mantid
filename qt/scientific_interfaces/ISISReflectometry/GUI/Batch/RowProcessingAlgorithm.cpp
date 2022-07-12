@@ -17,6 +17,7 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
 using MantidQt::API::AlgorithmRuntimeProps;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
@@ -259,17 +260,22 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
  * @param model : the reduction configuration model
  * @param row : the row from the preview tab
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row,
+                                                    Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  if (!alg) {
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  }
   alg->setRethrows(true);
+  alg->setAlwaysStoreInADS(false);
+  alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
   auto properties = createAlgorithmRuntimeProps(model, row);
 
   // Return the configured algorithm
   auto jobAlgorithm =
-      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowFromOutputProperties, &row);
+      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowOnAlgorithmComplete, &row);
   return jobAlgorithm;
 }
 
@@ -294,9 +300,15 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   }
   // Update properties from the preview tab
   properties->setProperty("InputWorkspace", previewRow.getSummedWs());
-  // TODO add theta once it is in the previewRow
-  // AlgorithmProperties::update("ThetaIn", previewRow.theta(), properties);
+  properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions());
+  properties->setProperty("ThetaIn", previewRow.theta());
   return properties;
+}
+
+void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
+  auto &row = dynamic_cast<PreviewRow &>(item);
+  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  row.setReducedWs(outputWs);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
 
