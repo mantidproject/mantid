@@ -20,7 +20,7 @@ public:
   QtPlot(QWidget *parent = nullptr);
 
   void clear();
-  void addSpectrum(const std::string &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  void addSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;

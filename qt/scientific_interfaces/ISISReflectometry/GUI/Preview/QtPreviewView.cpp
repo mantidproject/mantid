@@ -78,9 +78,8 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
 }
 
 void QtPreviewView::plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  auto const label = std::string("preview_reduced_ws");
   auto const wsIndex = size_t{0};
-  m_ui.line_plot->addSpectrum(label, workspace, wsIndex);
+  m_ui.line_plot->addSpectrum(workspace, wsIndex);
 }
 
 QLayout *QtPreviewView::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }

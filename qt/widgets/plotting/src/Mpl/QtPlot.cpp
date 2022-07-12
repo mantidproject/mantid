@@ -21,7 +21,7 @@ QtPlot::QtPlot(QWidget *parent) : QWidget(parent), m_canvas(new FigureCanvasQt(1
 
 void QtPlot::clear() {}
 
-void QtPlot::addSpectrum(const std::string &lineLabel, const MatrixWorkspace_sptr &ws, const size_t wsIndex) {
+void QtPlot::addSpectrum(const MatrixWorkspace_sptr &ws, const size_t wsIndex) {
   QHash<QString, QVariant> ax_properties;
   ax_properties[QString("yscale")] = QVariant("log");
   ax_properties[QString("xscale")] = QVariant("log");
