@@ -10,7 +10,6 @@
 
 #include <QVBoxLayout>
 #include <QWidget>
-#include <string>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt::Widgets::Common;
@@ -18,8 +17,6 @@ using namespace MantidQt::Widgets::MplCpp;
 
 namespace MantidQt::MantidWidgets {
 QtPlot::QtPlot(QWidget *parent) : QWidget(parent), m_canvas(new FigureCanvasQt(111, "", parent)) { createLayout(); }
-
-void QtPlot::clear() {}
 
 void QtPlot::setXScaleType(const AxisScale axisScale) {
   switch (axisScale) {
@@ -30,6 +27,7 @@ void QtPlot::setXScaleType(const AxisScale axisScale) {
     m_axisProperties[QString("xscale")] = QVariant("log");
     break;
   }
+  plot();
 }
 
 void QtPlot::setYScaleType(const AxisScale axisScale) {
@@ -41,16 +39,22 @@ void QtPlot::setYScaleType(const AxisScale axisScale) {
     m_axisProperties[QString("yscale")] = QVariant("log");
     break;
   }
+  plot();
 }
 
-void QtPlot::addSpectrum(const MatrixWorkspace_sptr &ws, const size_t wsIndex) {
-  const bool plotErrorBars = true;
+void QtPlot::setSpectrum(const MatrixWorkspace_sptr &ws, const size_t wsIndex) {
 
-  auto const workspaces = std::vector<MatrixWorkspace_sptr>{ws};
-  auto const wkspIndices = std::vector<int>{static_cast<int>(wsIndex)};
+  m_workspaces = std::vector<MatrixWorkspace_sptr>{ws};
+  m_workspaceIndices = std::vector<int>{static_cast<int>(wsIndex)};
 
-  Widgets::MplCpp::plot(workspaces, boost::none, wkspIndices, m_canvas->gcf().pyobj(), boost::none, m_axisProperties,
-                        boost::none, plotErrorBars, false);
+  plot();
+}
+
+void QtPlot::plot() {
+  constexpr bool plotErrorBars = true;
+
+  Widgets::MplCpp::plot(m_workspaces, boost::none, m_workspaceIndices, m_canvas->gcf().pyobj(), boost::none,
+                        m_axisProperties, boost::none, plotErrorBars, false);
 }
 
 void QtPlot::createLayout() {

@@ -20,8 +20,7 @@ public:
   enum class AxisScale { LINEAR, LOG };
   QtPlot(QWidget *parent = nullptr);
 
-  void clear();
-  void addSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
   void setXScaleType(const AxisScale axisScale);
   void setYScaleType(const AxisScale axisScale);
@@ -29,9 +28,13 @@ public:
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
 
+  std::vector<Mantid::API::MatrixWorkspace_sptr> m_workspaces;
+  std::vector<int> m_workspaceIndices;
+
   QHash<QString, QVariant> m_axisProperties;
 
   Widgets::MplCpp::Figure createFigure();
   void createLayout();
+  void plot();
 };
 } // namespace MantidQt::MantidWidgets

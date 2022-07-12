@@ -81,7 +81,7 @@ void QtPreviewView::plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &worksp
   auto const wsIndex = size_t{0};
   m_ui.line_plot->setXScaleType(MantidWidgets::QtPlot::AxisScale::LOG);
   m_ui.line_plot->setYScaleType(MantidWidgets::QtPlot::AxisScale::LOG);
-  m_ui.line_plot->addSpectrum(workspace, wsIndex);
+  m_ui.line_plot->setSpectrum(workspace, wsIndex);
 }
 
 QLayout *QtPreviewView::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }
