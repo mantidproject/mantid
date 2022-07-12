@@ -111,6 +111,7 @@ set(SRC_FILES
     src/Functions/GaussianComptonProfile.cpp
     src/Functions/GramCharlier.cpp
     src/Functions/GramCharlierComptonProfile.cpp
+    src/Functions/HallRossSQE.cpp
     src/Functions/IkedaCarpenterPV.cpp
     src/Functions/InelasticDiffRotDiscreteCircle.cpp
     src/Functions/InelasticDiffSphere.cpp
@@ -292,6 +293,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/GramCharlier.h
     inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
+    inc/MantidCurveFitting/Functions/HallRossSQE.h
     inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
     inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
@@ -465,6 +467,7 @@ set(TEST_FILES
     Functions/GaussianComptonProfileTest.h
     Functions/GaussianTest.h
     Functions/GramCharlierComptonProfileTest.h
+    Functions/HallRossSQETest.h
     Functions/IkedaCarpenterPVTest.h
     Functions/InelasticIsoRotDiffTest.h
     Functions/IsoRotDiffTest.h

@@ -566,6 +566,11 @@ std::string ConvFunctionModel::buildChudleyElliotString() const {
          "constraints=(Height>0, Tau>0)";
 }
 
+std::string ConvFunctionModel::buildHallRossString() const {
+  return "name=HallRossSQE, Height=1, Tau=1.25, Centre=0, L=1.0, "
+         "constraints=(Height>0, Tau>0)";
+}
+
 std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {
   return "name=StretchedExpFT, Height=0.1, Tau=100, Beta=1, Centre=0, "
          "constraints=(Height>0, Tau>0)";
@@ -631,6 +636,8 @@ std::string ConvFunctionModel::buildPeaksFunctionString() const {
     functions.append(buildFickFunctionString());
   } else if (m_fitType == FitType::ChudleyElliot) {
     functions.append(buildChudleyElliotString());
+  } else if (m_fitType == FitType::HallRoss) {
+    functions.append(buildHallRossString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {
@@ -676,6 +683,8 @@ std::string ConvFunctionModel::buildFitTypeString() const {
     functions.append(buildFickFunctionString());
   } else if (m_fitType == FitType::ChudleyElliot) {
     functions.append(buildChudleyElliotString());
+  } else if (m_fitType == FitType::HallRoss) {
+    functions.append(buildHallRossString());
   } else if (m_fitType == FitType::StretchedExpFT) {
     functions.append(buildStretchExpFTFunctionString());
   } else if (m_fitType == FitType::DiffSphere) {

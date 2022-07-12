@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
-#include "MantidCurveFitting/Functions/ChudleyElliotSQE.h"
+#include "MantidCurveFitting/Functions/HallRossSQE.h"
 // Mantid Headers from the same project
 // N/A
 // Mantid headers from other projects
@@ -20,17 +20,17 @@
 #include <limits>
 
 namespace {
-Mantid::Kernel::Logger g_log("ChudleyElliotSQE");
+Mantid::Kernel::Logger g_log("HallRossSQE");
 }
 
 namespace Mantid::CurveFitting::Functions {
 
-DECLARE_FUNCTION(ChudleyElliotSQE)
+DECLARE_FUNCTION(HallRossSQE)
 
 /**
  * @brief function parameters and impose constraints
  */
-void ChudleyElliotSQE::declareParameters() {
+void HallRossSQE::declareParameters() {
   this->declareParameter("Height", 1.0, "scaling factor");
   this->declareParameter("Centre", 0.0, "Shift along the X-axis");
   this->declareParameter("Tau", 1.25, "Residence time");
@@ -43,7 +43,7 @@ void ChudleyElliotSQE::declareParameters() {
  * @param xValues energy domain where function is evaluated
  * @param nData size of the energy domain
  */
-void ChudleyElliotSQE::function1D(double *out, const double *xValues, const size_t nData) const {
+void HallRossSQE::function1D(double *out, const double *xValues, const size_t nData) const {
   double hbar(0.658211626); // ps*meV
   auto H = this->getParameter("Height");
   auto C = this->getParameter("Centre");
@@ -61,7 +61,7 @@ void ChudleyElliotSQE::function1D(double *out, const double *xValues, const size
   }
 
   // Lorentzian intensities and HWHM
-  auto G = hbar * (1 - (sin(Q * L) / (Q * L))) / T;
+  auto G = hbar * (1 - exp(-(Q * Q * L * L) / 2.0)) / T;
   for (size_t j = 0; j < nData; j++) {
     auto E = xValues[j] - C;
     out[j] += H * G / (G * G + E * E) / M_PI;
@@ -74,7 +74,7 @@ void ChudleyElliotSQE::function1D(double *out, const double *xValues, const size
  * derivatives for parameters
  * DiffCoeff, Tau, and Centre, selecting sensible steps.
  */
-void ChudleyElliotSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian, const double *xValues, const size_t nData) {
+void HallRossSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian, const double *xValues, const size_t nData) {
   const double deltaF{0.1}; // increase parameter by this fraction
   const size_t nParam = this->nParams();
   // cutoff defines the smallest change in the parameter when calculating the
