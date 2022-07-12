@@ -1,0 +1,1 @@
+- Fixed a bug in Indirect Data Reduction where the spectra in the detector table after grouping started at 0. The spectra now start at 1.

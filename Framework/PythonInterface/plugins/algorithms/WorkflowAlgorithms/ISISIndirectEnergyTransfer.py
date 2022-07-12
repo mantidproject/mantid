@@ -134,6 +134,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
+        #import pydevd_pycharm
+        #pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
                                              get_detectors_to_mask,
@@ -288,8 +290,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Group result workspaces
         summary_prog.report('grouping workspaces')
-        GroupWorkspaces(InputWorkspaces=output_workspace_names,
-                        OutputWorkspace=self._output_ws)
+        self.output_ws = GroupWorkspaces(InputWorkspaces=output_workspace_names,
+                                         OutputWorkspace=self._output_ws)
+
+        # The spectrum numbers need to start at 1 not 0 if spectra are grouped
+        if self.output_ws.getNumberOfEntries() == 1 and self.getProperty('GroupingMethod').value == 'Custom':
+            for i in range(len(self.output_ws.getItem(0).getSpectrumNumbers())):
+                self.output_ws.getItem(0).getSpectrum(i).setSpectrumNo(i+1)
 
         self.setProperty('OutputWorkspace', mtd[self._output_ws])
 
