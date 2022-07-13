@@ -535,6 +535,14 @@ public:
     presenter->notifyGroupNameChanged(group);
   }
 
+  void testIndexesUpdatedWhenRowsTransferred() {
+    auto mock = makeMockModel();
+    EXPECT_CALL(*mock, updateLookupIndexesOfTable()).Times(1);
+    auto presenter = makePresenter(std::move(mock));
+    EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged()).Times(1);
+    presenter->notifyRunsTransferred();
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;

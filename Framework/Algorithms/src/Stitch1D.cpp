@@ -153,10 +153,15 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
   std::map<std::string, std::string> issues;
   MatrixWorkspace_sptr lhs = getProperty("LHSWorkspace");
   MatrixWorkspace_sptr rhs = getProperty("RHSWorkspace");
-  if (!lhs)
-    issues["LHSWorkspace"] = "Cannot retrieve workspace";
-  if (!rhs)
-    issues["RHSWorkspace"] = "Cannot retrieve workspace";
+  if (!lhs) {
+    issues["LHSWorkspace"] = "The LHSWorkspace must be a MatrixWorkspace.";
+  }
+  if (!rhs) {
+    issues["RHSWorkspace"] = "The RHSWorkspace must be a MatrixWorkspace.";
+  }
+  if (!issues.empty()) {
+    return issues;
+  }
   RunCombinationHelper combHelper;
   combHelper.setReferenceProperties(lhs);
   std::string compatible = combHelper.checkCompatibility(rhs, true);

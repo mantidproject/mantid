@@ -60,7 +60,7 @@ def _get_splash_image():
 
     # the proportion of the whole window size for the splash screen
     splash_screen_scaling = 0.25
-    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(int(width * splash_screen_scaling),
+    return QPixmap(':/images/MantidSplashScreen_4k.png').scaled(int(width * splash_screen_scaling),
                                                                 int(height * splash_screen_scaling),
                                                                 Qt.KeepAspectRatio,
                                                                 Qt.SmoothTransformation)

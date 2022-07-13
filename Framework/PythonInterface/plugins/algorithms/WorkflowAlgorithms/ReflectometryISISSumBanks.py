@@ -52,7 +52,9 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         else:
             summed_workspace = self.sum_banks(input_workspace)
 
-        self.setProperty(self._OUTPUT_WS, summed_workspace)
+        result = self._prepend_monitors(input_workspace, summed_workspace)
+
+        self.setProperty(self._OUTPUT_WS, result)
 
     def validateInputs(self):
         issues = dict()
@@ -90,12 +92,22 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         if not inst:
             raise RuntimeError('The input workspace must have an instrument')
 
+        det_info = workspace.detectorInfo()
+
         for idx in range(inst.nelements()):
             component = inst[idx]
-            if type(component) == RectangularDetector:
-                if result:
-                    raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
-                result = component
+            # Skip non-rectangular components
+            if type(component) != RectangularDetector:
+                continue
+            # Skip monitors (assume there's only one detector in a monitor)
+            if det_info.isMonitor(det_info.indexOf(component.minDetectorID())):
+                continue
+            # Error if we find more than one match i.e. if result is already set
+            if result:
+                raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
+            # Match found - set the result
+            result = component
+
         if not result:
             raise RuntimeError('The input workspace must contain a rectangular detector')
         return result
@@ -104,6 +116,16 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         alg = self.createChildAlgorithm(*args, **kwargs)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
+    def _prepend_monitors(self, input_workspace, summed_workspace):
+        crop_alg = self.createChildAlgorithm("ExtractMonitors", InputWorkspace=input_workspace,
+                                             MonitorWorkspace="__preview_summed_ws_monitors")
+        crop_alg.execute()
+        monitor_workspace = crop_alg.getProperty("MonitorWorkspace").value
+
+        append_alg = self.createChildAlgorithm("AppendSpectra", InputWorkspace1=monitor_workspace, InputWorkspace2=summed_workspace)
+        append_alg.execute()
+        return append_alg.getProperty("OutputWorkspace").value
 
 
 AlgorithmFactory.subscribe(ReflectometryISISSumBanks)

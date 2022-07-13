@@ -188,17 +188,17 @@ void MDNormSCD::cacheInputs() {
  * @return A string donating the energy transfer mode of the input workspace
  */
 std::string MDNormSCD::inputEnergyMode() const {
-  const auto &hist = m_inputWS->getHistory();
-  const size_t nalgs = hist.size();
-  const auto &lastAlgorithm = hist.lastAlgorithm();
+  const auto &history = m_inputWS->getHistory();
+  const size_t nalgs = history.size();
+  const auto &lastAlgorithm = history.lastAlgorithm();
 
   std::string emode;
   if (lastAlgorithm->name() == "ConvertToMD") {
     emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgorithm->name() == "Load" || hist.lastAlgorithm()->name() == "LoadMD") &&
-             hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
+  } else if ((lastAlgorithm->name() == "Load" || history.lastAlgorithm()->name() == "LoadMD") &&
+             history.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    PropertyHistories histvec = hist.getAlgorithmHistory(nalgs - 2)->getProperties();
+    PropertyHistories histvec = history.getAlgorithmHistory(nalgs - 2)->getProperties();
     for (auto &hist : histvec) {
       if (hist->name() == "dEAnalysisMode") {
         emode = hist->value();

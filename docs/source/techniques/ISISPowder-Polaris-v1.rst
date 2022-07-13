@@ -113,6 +113,8 @@ The following parameters may also be optionally set:
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
 - :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
+- :ref:`empty_can_subtraction_method_isis-powder-diffraction-ref`
+- :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref`
 
 
 Example
@@ -400,6 +402,22 @@ Example Input:
 
   polaris_example.focus(do_van_normalisation=True, ...)
 
+.. _empty_can_subtraction_method_isis-powder-diffraction-ref:
+
+empty_can_subtraction_method
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Sets the empty can subtraction type used in the :ref:`focus_polaris_isis-powder-diffraction-ref` method. This parameter
+is optional and can be set to either ``"Simple"`` (default) or ``"PaalmanPings"``. In ``"PaalmanPings"`` mode,
+the absorption correction is applied by :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`,
+followed by :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`. Additionally, in this mode
+the :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref` parameter can be utilised.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(empty_can_subtraction_method="PaalmanPings", ...)
+
 .. _file_ext_polaris_isis-powder-diffraction-ref:
 
 file_ext
@@ -508,6 +526,21 @@ Example Input:
 ..  code-block:: python
 
   polaris_example = Polaris(output_directory=r"C:\path\to\output_dir", ...)
+
+.. _paalman_pings_events_per_point_isis-powder-diffraction-ref:
+
+paalman_pings_events_per_point
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Sets the number of EventsPerPoint to use in the
+:ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`. The default value is 1000.
+This parameter is only used when :ref:`empty_can_subtraction_method_isis-powder-diffraction-ref` is set to ``"PaalmanPings"``.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(paalman_pings_events_per_point=10, ...)
 
 .. _run_number_polaris_isis_powder-diffraction-ref:
 

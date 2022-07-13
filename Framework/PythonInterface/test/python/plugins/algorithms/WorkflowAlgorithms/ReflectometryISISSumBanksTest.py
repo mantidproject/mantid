@@ -95,5 +95,19 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         self.assertNotEqual(test_ws, summed_ws)
         self.assertTrue(numpy.allclose(num_banks_included * test_ws.readY(0), summed_ws.readY(0)))
 
+    def test_monitors_are_included(self):
+        num_banks = 3
+        num_monitors = 2
+        test_ws = CreateSampleWorkspace(StoreInADS=False, NumBanks=1, BankPixelWidth=num_banks, NumMonitors=num_monitors)
+
+        summed_ws = ReflectometryISISSumBanks().sum_banks(test_ws)
+
+        self.assertEqual(num_banks + num_monitors, summed_ws.getNumberHistograms())
+        for idx in range(summed_ws.getNumberHistograms()):
+            # The monitors are at the end
+            expected_monitor = idx >= num_banks
+            self.assertEqual(expected_monitor, summed_ws.getDetector(idx).isMonitor())
+
+
 if __name__ == '__main__':
     unittest.main()

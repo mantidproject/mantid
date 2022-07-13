@@ -174,9 +174,9 @@ void setBankVisited(const ComponentInfo &componentInfo, size_t bankIndex, std::v
 }
 
 size_t findNumDetectors(const ComponentInfo &componentInfo, const std::vector<size_t> &components) {
-  return std::accumulate(components.cbegin(), components.cend(), 0, [&componentInfo](size_t lhs, const auto &comp) {
-    return componentInfo.isDetector(comp) ? lhs + 1 : lhs;
-  });
+  return std::accumulate(
+      components.cbegin(), components.cend(), std::size_t{0u},
+      [&componentInfo](size_t lhs, const auto &comp) { return componentInfo.isDetector(comp) ? lhs + 1u : lhs; });
 }
 
 void initialisePolygonWithTransformedBoundingBoxPoints(QPolygonF &panelPolygon, const ComponentInfo &componentInfo,

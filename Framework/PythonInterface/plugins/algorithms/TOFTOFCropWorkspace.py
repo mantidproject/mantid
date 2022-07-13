@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty    # , WorkspaceUnitValidator
+from mantid.api import AlgorithmFactory, MatrixWorkspace, WorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction
 import mantid.simpleapi as api
 
@@ -22,7 +22,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Splitting"
 
     def seeAlso(self):
-        return [ "TOFTOFMergeRuns","CorrectTOF" ]
+        return ["TOFTOFMergeRuns", "CorrectTOF"]
 
     def name(self):
         """ Return summary
@@ -35,19 +35,18 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        # better would be to use the validator, but it fails if WorkspaceGroup is given as an input
-        # self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input,
-        #                                       validator=WorkspaceUnitValidator('TOF')),
-        #                     doc="Input workspace.")
         self.declareProperty(WorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
                              doc="Input workspace.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace that will contain the results")
-        return
 
     def validateInputs(self):
         issues = dict()
         input_workspace = self.getProperty("InputWorkspace").value
+
+        if not isinstance(input_workspace, MatrixWorkspace):
+            issues['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            return issues
 
         xunit = input_workspace.getAxis(0).getUnit().unitID()
         if xunit != 'TOF':

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "D16B">
+
+    <component-link name="D16B">
+      <!-- Logs to sum when merging the runs -->
+      <parameter name="sample_logs_sum" type="string" visible="false">
+        <value val="time, duration, timer" />
+      </parameter>
+
+      <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations. -->
+       <parameter name="x-pixel-size" type="number">
+        <value val="1.5"/>
+      </parameter>
+      <parameter name="y-pixel-size" type="number">
+        <value val="2"/>
+      </parameter>
+
+      <!-- The size of the detector (in mm or pixel) -->
+      <parameter name="detector-width" type="number">
+        <value val="1152"/>
+      </parameter>
+      <parameter name="detector-height" type="number">
+        <value val="192"/>
+      </parameter>
+    </component-link>
+
+</parameter-file>

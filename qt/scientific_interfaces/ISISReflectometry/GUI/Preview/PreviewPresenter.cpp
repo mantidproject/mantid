@@ -6,16 +6,35 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
+
+using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::Widgets::IRegionSelector;
+using MantidQt::Widgets::RegionSelector;
+
+class QLayout;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Presenter");
-}
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
-      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)) {
+      m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
+      m_regionSelector(std::move(dependencies.regionSelector)), m_stubRegionObserver{new StubRegionObserver} {
+
+  if (!m_regionSelector) {
+    m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
+  }
+  // stub observer subscribes to the region selector
+  m_regionSelector->subscribe(m_stubRegionObserver);
+  // we subscribe to the stub observer
+  m_stubRegionObserver->subscribe(this);
+
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
 
@@ -57,10 +76,11 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
 }
 
-void PreviewPresenter::notifySumBanksCompleted() {
-  g_log.debug("Sum banks completed");
-  // TODO Implement plotting of the summed workspace
-  // m_view->plotSliceView(m_model->getSummedWs())
+void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+
+void PreviewPresenter::notifyReductionCompleted() {
+  // TODO plot reduced workspace
+  g_log.notice("Reduction completed");
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
@@ -96,5 +116,23 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   m_model->sumBanksAsync(*m_jobManager);
 }
 
-void PreviewPresenter::notifyContourExportAdsRequested() { m_model->exportSummedWsToAds(); }
+void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
+
+void PreviewPresenter::notifyRectangularROIModeRequested() {
+  m_view->setRectangularROIState(true);
+  m_regionSelector->addRectangularRegion();
+}
+
+void PreviewPresenter::notifyRegionChanged() {
+  // Set the selection from the view
+  auto roi = m_regionSelector->getRegion();
+  m_model->setSelectedRegion(roi);
+  g_log.notice("Running reduction on ROI: " + m_model->getProcessingInstructions());
+  // Ensure the angle is up to date
+  m_model->setTheta(m_view->getAngle());
+  // Perform the reduction
+  m_model->reduceAsync(*m_jobManager);
+}
+
+void PreviewPresenter::notify1DPlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

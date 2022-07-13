@@ -67,7 +67,9 @@ class AbstractInst(object):
                run_number_string,
                do_van_normalisation,
                do_absorb_corrections,
-               sample_details=None):
+               sample_details=None,
+               empty_can_subtraction_method=None,
+               paalman_pings_events_per_point=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -79,7 +81,9 @@ class AbstractInst(object):
                            perform_vanadium_norm=do_van_normalisation,
                            instrument=self,
                            absorb=do_absorb_corrections,
-                           sample_details=sample_details)
+                           sample_details=sample_details,
+                           empty_can_subtraction_method=empty_can_subtraction_method,
+                           paalman_pings_events_per_point=paalman_pings_events_per_point)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -137,9 +141,22 @@ class AbstractInst(object):
                 should handle the difference between a vanadium workspace and regular workspace
                 :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
                 :return: A workspace containing the corrections
-                """
+        """
         raise NotImplementedError(
             "apply_absorb_corrections Not implemented for this instrument yet")
+
+    def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details,
+                                                      paalman_pings_events_per_point=None):
+        """
+                Generates absorption corrections to compensate for the container.
+                :param workspace: the workspace to correct
+                :param summed_empty: The summed and normalised empty runs
+                :param sample_details: the sample details that may include container details
+                :param run_number: focus run number
+                :return: A workspace containing the corrections
+        """
+        raise NotImplementedError(
+            "apply_paalmanpings_absorb_and_subtract_empty Not implemented for this instrument yet")
 
     def _generate_output_file_name(self, run_number_string):
         """
