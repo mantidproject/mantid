@@ -455,23 +455,24 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         table_ws.addColumn("int", "Peak")
         table_ws.addColumn("float", "2Theta")
         table_ws.addColumn("float", "Omega")
-        table_ws.addColumn("float", "I")
 
-        xmin, xmax, ymin, ymax = self.plotter.image.get_extent()
+        additional_data = self._manager.additional_peaks_info(self.get_rectangles())
 
-        arr = self.plotter.image.get_array()
-        x_step = (xmax - xmin) / arr.shape[1]
-        y_step = (ymax - ymin) / arr.shape[0]
+        # adding new necessary columns
+        for key in additional_data.keys():
+            if additional_data[key]:
+                table_ws.addColumn("float", key)
 
         for index, rect in enumerate(self.get_rectangles()):
             peak = self._find_peak(rect)
             self._show_peak(rect, peak)
 
-            # find the indices corresponding to the position in the array
-            x_ind = max(int(np.ceil((peak[0] - xmin) / x_step)), 0)
-            y_ind = max(int(np.ceil((peak[1] - ymin) / y_step)), 0)
+            peak_dict = {"Peak": index, "2Theta": peak[0], "Omega": peak[1]}
 
-            table_ws.addRow({"Peak": index, "2Theta": peak[0], "Omega": peak[1], "I": arr[y_ind, x_ind]})
+            for key in additional_data.keys():
+                peak_dict[key] = additional_data[key][index]
+
+            table_ws.addRow(peak_dict)
 
     def _find_peak(self, rect: Rectangle) -> (float, float):
         """

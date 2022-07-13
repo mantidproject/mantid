@@ -27,6 +27,9 @@ class RectanglesManager(QWidget):
         self.rectangles = []  # list of all the rectangles currently managed
         self.current_rectangle_index = -1
 
+        # function which returns additional info to put in the peak table
+        self.additional_peaks_info = lambda *args: dict()
+
         self.table = QTableWidget()
         self.table.setColumnCount(2)
 
