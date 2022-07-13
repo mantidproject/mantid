@@ -10,9 +10,9 @@
 using Mantid::API::MatrixWorkspace_sptr;
 
 namespace MantidQt::MantidWidgets {
-PlotPresenter::PlotPresenter(IPlotView *view) {}
+PlotPresenter::PlotPresenter(IPlotView *view) : m_view(view) {}
 
-void PlotPresenter::setScaleLinear(const AxisID axisID) {}
+void PlotPresenter::setScaleLinear(const AxisID axisID) { m_view->setScaleLinear(axisID); }
 
-void PlotPresenter::setScaleLog(const AxisID axisID) {}
+void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisID); }
 } // namespace MantidQt::MantidWidgets

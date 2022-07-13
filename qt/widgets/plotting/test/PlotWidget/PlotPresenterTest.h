@@ -21,14 +21,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace {
-
-MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms, int numberOfBoundaries = 4) {
-  return WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms, numberOfBoundaries);
-}
-
-} // namespace
-
 /// Unit tests for PlotPresenter
 class PlotPresenterTest : public CxxTest::TestSuite {
 public:

@@ -20,5 +20,8 @@ public:
 
   void setScaleLinear(const AxisID axisID);
   void setScaleLog(const AxisID axisID);
+
+private:
+  IPlotView *m_view = nullptr;
 };
 } // namespace MantidQt::MantidWidgets
