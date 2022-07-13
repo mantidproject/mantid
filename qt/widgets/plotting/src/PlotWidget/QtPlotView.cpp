@@ -10,6 +10,7 @@
 
 #include <QVBoxLayout>
 #include <QWidget>
+#include <vector>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt::Widgets::Common;

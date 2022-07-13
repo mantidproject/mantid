@@ -9,6 +9,7 @@ set(MPL_SRC_FILES
     src/Mpl/RangeSelector.cpp
     src/Mpl/SingleSelector.cpp
     src/PlotWidget/PlotModel.cpp
+    src/PlotWidget/PlotPresenter.cpp
     src/PlotWidget/QtPlotView.cpp
 )
 
@@ -26,7 +27,9 @@ set(MPL_INC_FILES
     inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
     inc/MantidQtWidgets/Plotting/PeakPicker.h
     inc/MantidQtWidgets/Plotting/PreviewPlot.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/IPlotView.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotModel.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 

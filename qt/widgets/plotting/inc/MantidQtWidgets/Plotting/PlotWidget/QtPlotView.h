@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Plotting/DllOption.h"
 
 #include <QWidget>
+#include <vector>
 
 namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING QtPlotView : public QWidget {
