@@ -58,7 +58,7 @@ Using the new variables the integral is:
 
 .. math::
 
-   J_n = \frac{1}{A} \int\hspace{-5mu}dS\int_{0}^{1}\hspace{-5mu}dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1}\hspace{-5mu}dt_{i+1}\int_{0}^{1} du_i \iint \limits_{D(k_i)}\hspace{-5mu}dQ_i d\omega_i\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i S(Q_i, \omega_i)}{I(k_i)} \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int\hspace{-3pt}dS\int_{0}^{1}\hspace{-3pt}dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1}\hspace{-3pt}dt_{i+1}\int_{0}^{1} du_i \iint \limits_{D(k_i)}\hspace{-3pt}dQ_i d\omega_i\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i S(Q_i, \omega_i)}{I(k_i)} \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
 
 This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`u_i` between 0 and 1. The integral over :math:`Q\omega` space is performed by integrating a slightly modified :math:`S(Q,\omega)` function over a rectangular region. :math:`S_{kin}(Q,\omega)` equals zero if :math:`Q` and :math:`\omega` are outside the kinematically accessible region.
 The rectangular region spans the full length of the :math:`\omega` axis in the :math:`S(Q,\omega)` profile and goes from zero to the maximum possible :math:`Q_i` for a particular :math:`k_i` in the q direction.
