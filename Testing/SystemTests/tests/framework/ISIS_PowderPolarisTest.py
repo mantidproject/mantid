@@ -75,7 +75,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -86,7 +86,7 @@ class FocusTest(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus()
+        self.focus_results = run_focus_no_absorption()
 
     def validate(self):
         # check output files as expected
@@ -257,15 +257,15 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        expected_peak_values = [-0.00092,
-                                0.24875,
-                                0.43894,
-                                0.20343,
-                                0.9777]
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked
+        expected_peak_values = [0.8792,
+                                1.0984,
+                                2.9487,
+                                4.6388,
+                                4.3766]
         for index, ws in enumerate(self.pdf_output):
-            self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
+            idx = get_bin_number_at_given_r(ws.dataX(0), 3.9)
+            self.assertAlmostEqual(ws.dataY(0)[idx], expected_peak_values[index], places=3)
 
 
 class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
@@ -282,8 +282,8 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.00835, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.6022, places=3)
 
 
 class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
@@ -319,7 +319,7 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
         # a truncated WS
-        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 197, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 255, places=3)
 
 
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
@@ -336,8 +336,8 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.0207, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 2.9044, places=3)
 
 
 class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
@@ -355,13 +355,13 @@ class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
         x_data = self.pdf_output.dataX(0)
         y_data = self.pdf_output.dataY(0)
         idx_to_check_filter = 5
         self.assertTrue(x_data[idx_to_check_filter] < self.r_min)
         self.assertAlmostEqual(y_data[idx_to_check_filter], 0.0, places=1)
-        self.assertAlmostEqual(y_data[37], 1.0187, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(y_data[idx], 2.6837, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
@@ -378,8 +378,8 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 6.93898, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.4126, places=3)
 
 
 def run_total_scattering(run_number, merge_banks, q_lims=None, delta_q=None, delta_r=None, pdf_type="G(r)",
@@ -424,7 +424,7 @@ def run_vanadium_calibration():
     return splined_ws, unsplined_ws
 
 
-def run_focus():
+def run_focus_no_absorption():
     run_number = 98533
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
@@ -438,7 +438,8 @@ def run_focus():
     inst_object = setup_inst_object(mode="PDF")
     return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
                              do_absorb_corrections=False, sample_empty=sample_empty,
-                             sample_empty_scale=sample_empty_scale)
+                             sample_empty_scale=sample_empty_scale,
+                             van_normalisation_method="Relative")
 
 
 def run_focus_no_chopper(run_number):
@@ -474,11 +475,13 @@ def run_focus_absorption(run_number, paalman_pings=False):
 
         return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
                                  do_absorb_corrections=True, sample_empty=sample_empty,
-                                 multiple_scattering=False)
+                                 multiple_scattering=False,
+                                 van_normalisation_method="Relative")
     else:
         return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
                                  do_absorb_corrections=True, sample_empty=sample_empty,
-                                 sample_empty_scale=sample_empty_scale, multiple_scattering=False)
+                                 sample_empty_scale=sample_empty_scale, multiple_scattering=False,
+                                 van_normalisation_method="Relative")
 
 
 def setup_mantid_paths():
@@ -512,3 +515,11 @@ def _try_delete(path):
             os.remove(path)
     except OSError:
         print("Could not delete output file at: ", path)
+
+
+def get_bin_number_at_given_r(r_data, r):
+    r_edges = r_data
+    r_centres = (r_edges[:-1] + r_edges[1:]) / 2
+    diffs = [abs(i - r) for i in r_centres]
+    idx = diffs.index(min(diffs))
+    return idx

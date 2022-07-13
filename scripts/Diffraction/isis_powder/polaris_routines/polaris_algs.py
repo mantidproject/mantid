@@ -225,6 +225,8 @@ def _determine_chopper_mode(ws):
 
 
 def fast_fourier_filter(ws, rho0, freq_params=None):
+    # To be improved - input workspace doesn't have regular bins but output from this filter process does (and typically
+    # has a lot more bins since the width is taken from the narrowest bin in the input)
     if freq_params:
         q_data = ws.dataX(0)
         q_max = q_data[-1]
