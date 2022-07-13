@@ -293,6 +293,16 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, co
       // transform the data
       FOfR[i] = FOfR[i] / (factor * R[i] * R[i]) - 1.0;
     }
+  } else if (PDFType == G_K_OF_R) {
+    API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    const Kernel::Material &material = inputWS->sample().getMaterial();
+    double sigma = material.cohScatterXSection();
+    const double factor = sigma / (4. * M_PI);
+
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // transform the data
+      FOfR[i] = FOfR[i] / factor;
+    }
   }
   return;
 }
