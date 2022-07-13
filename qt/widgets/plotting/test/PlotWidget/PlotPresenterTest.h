@@ -10,8 +10,13 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidPythonInterface/core/WrapPython.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
 #include "MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h"
+#include "MockPlotView.h"
+
+#include <gmock/gmock.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -31,46 +36,39 @@ public:
 
   static void destroySuite(PlotPresenterTest *suite) { delete suite; }
 
-  PlotPresenterTest() { PyImport_ImportModule("mantid.plots"); }
+  void test_set_scale_linear_x() {
+    auto view = testing::NiceMock<MockPlotView>();
+    auto presenter = PlotPresenter(&view);
 
-  void test_constructor() { TS_ASSERT_THROWS_NOTHING(QtPlotView(nullptr)); }
+    EXPECT_CALL(view, setScaleLinear(AxisID::XBottom)).Times(1);
 
-  void test_set_spectrum() {
-    auto plot = QtPlotView(nullptr);
-    auto ws = createMatrixWorkspace(3);
-
-    TS_ASSERT_THROWS_NOTHING(plot.setSpectrum(ws, 1));
+    presenter.setScaleLinear(AxisID::XBottom);
   }
 
-  void test_set_x_scale() {
-    auto plot = QtPlotView(nullptr);
-    auto ws = createMatrixWorkspace(3);
-    plot.setSpectrum(ws, 1);
+  void test_set_scale_linear_y() {
+    auto view = testing::NiceMock<MockPlotView>();
+    auto presenter = PlotPresenter(&view);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LOG));
+    EXPECT_CALL(view, setScaleLinear(AxisID::YLeft)).Times(1);
+
+    presenter.setScaleLinear(AxisID::YLeft);
   }
 
-  void test_set_x_scale_no_workspace() {
-    auto plot = QtPlotView(nullptr);
+  void test_set_scale_log_x() {
+    auto view = testing::NiceMock<MockPlotView>();
+    auto presenter = PlotPresenter(&view);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setXScaleType(QtPlotView::AxisScale::LOG));
+    EXPECT_CALL(view, setScaleLog(AxisID::XBottom)).Times(1);
+
+    presenter.setScaleLog(AxisID::XBottom);
   }
 
-  void test_set_y_scale() {
-    auto plot = QtPlotView(nullptr);
-    auto ws = createMatrixWorkspace(3);
-    plot.setSpectrum(ws, 1);
+  void test_set_scale_log_y() {
+    auto view = testing::NiceMock<MockPlotView>();
+    auto presenter = PlotPresenter(&view);
 
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LOG));
-  }
+    EXPECT_CALL(view, setScaleLog(AxisID::YLeft)).Times(1);
 
-  void test_set_y_scale_no_workspace() {
-    auto plot = QtPlotView(nullptr);
-
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LINEAR));
-    TS_ASSERT_THROWS_NOTHING(plot.setYScaleType(QtPlotView::AxisScale::LOG));
+    presenter.setScaleLog(AxisID::YLeft);
   }
 };

@@ -14,8 +14,9 @@
 namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING IPlotView {
 public:
-  void setScaleLinear(const AxisID axisID);
-  void setScaleLog(const AxisID axisID);
-  void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces, const std::vector<int> &workspaceIndices);
+  virtual void setScaleLinear(const AxisID axisID) = 0;
+  virtual void setScaleLog(const AxisID axisID) = 0;
+  virtual void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                    const std::vector<int> &workspaceIndices) = 0;
 };
 } // namespace MantidQt::MantidWidgets
