@@ -112,6 +112,19 @@ otherwise
 
    </center>
 
+**G_k(r)**
+##########
+
+.. raw:: html
+
+   <center>
+
+:math:`G_k(r) = \frac{\sigma_s G(r)}{(4 \pi)^2 \rho_0 r} = \frac{\sigma_s}{4 \pi} [g(r)-1]`
+
+.. raw:: html
+
+   </center>
+
 **Note:** All output forms are calculated by transforming :math:`g(r)-1`.
 
 Usage
