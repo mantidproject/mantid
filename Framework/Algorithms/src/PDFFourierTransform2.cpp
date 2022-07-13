@@ -44,6 +44,8 @@ const string BIG_G_OF_R("G(r)");
 const string LITTLE_G_OF_R("g(r)");
 /// Radial distribution function
 const string RDF_OF_R("RDF(r)");
+/// Total radial distribution function
+const string G_K_OF_R("G_k(r)");
 
 /// Normalized intensity
 const string S_OF_Q("S(Q)");
@@ -110,6 +112,7 @@ void PDFFourierTransform2::init() {
   pdfTypes.emplace_back(BIG_G_OF_R);
   pdfTypes.emplace_back(LITTLE_G_OF_R);
   pdfTypes.emplace_back(RDF_OF_R);
+  pdfTypes.emplace_back(G_K_OF_R);
   declareProperty("PDFType", BIG_G_OF_R, std::make_shared<StringListValidator>(pdfTypes),
                   "Type of output PDF including G(r)");
 
@@ -343,6 +346,16 @@ void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &
       DFOfR[i] = DFOfR[i] * R[i];
       // transform the data
       FOfR[i] = (FOfR[i] + 1.0) * factor * R[i] * R[i];
+    }
+  } else if (outputType == G_K_OF_R) {
+    API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    const Kernel::Material &material = inputWS->sample().getMaterial();
+    double sigma = material.cohScatterXSection();
+    const double factor = sigma / (4. * M_PI);
+
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // transform the data
+      FOfR[i] = FOfR[i] * factor;
     }
   }
   return;
