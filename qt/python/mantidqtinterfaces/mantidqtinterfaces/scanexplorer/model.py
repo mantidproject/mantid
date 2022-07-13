@@ -23,3 +23,11 @@ class ScanExplorerModel:
         name = Path(file_name).stem + "_scan"
         out = SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=name, NormaliseBy="None")
         self.presenter.create_slice_viewer(out)
+
+    def process_background(self, background_file_name: str):
+        """
+        Process the background without treatment.
+        """
+        name = "_" + Path(background_file_name).stem
+        SANSILLParameterScan(SampleRun=background_file_name, OutputWorkspace=name, NormaliseBy="None")
+        self.presenter.set_bg_ws(name)

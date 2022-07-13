@@ -24,18 +24,22 @@ from .view import ScanExplorerView
 class ScanExplorerPresenter:
 
     def __init__(self):
-        self._ws: MatrixWorkspace = None
+        self._ws: MatrixWorkspace = None  # the workspace containing the data shown
+        self._bg_ws: MatrixWorkspace = None  # the workspace containing the background, if there is one.
+
         self.view = ScanExplorerView(presenter=self)
         self.model = ScanExplorerModel(presenter=self)
 
         self.view.sig_files_selected.connect(self.on_file_selected)
         self.view.file_line_edit.returnPressed.connect(self.on_line_edited)
+        self.view.sig_background_selected.connect(self.model.process_background)
 
         self.observer = ScanAlgorithmObserver()
 
         self.observer.signals.finished.connect(self.on_algorithm_finished)
         self.observer.signals.started.connect(self.set_algorithm_result_name)
 
+        # the name of the workspace in which the result of the ParameterScan algorithm will be loaded once it ran
         self.future_workspace: str = ""
 
     def create_slice_viewer(self, workspace: MatrixWorkspace):
@@ -64,6 +68,13 @@ class ScanExplorerPresenter:
         """
         self.view.file_line_edit.setText(file_path)
         self.on_line_edited()
+
+    def on_background_selected(self, bg_file_path: str):
+        """
+        Slot triggered when a background file is selected
+        @param bg_file_path: the path to the file containing the background
+        """
+        self.model.process_background(bg_file_path)
 
     def on_line_edited(self):
         """
@@ -130,6 +141,13 @@ class ScanExplorerPresenter:
                 return directory
 
         return path.abspath(sep)
+
+    def set_bg_ws(self, ws_name):
+        """
+        Set the background workspace as the one with provided name.
+        @param ws_name: the name of the workspace
+        """
+        self._bg_ws = mtd[ws_name]
 
     @property
     def ws(self):

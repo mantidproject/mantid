@@ -26,8 +26,11 @@ class ScanExplorerView(QMainWindow):
     """Allowed file extensions"""
     FILE_EXTENSION_FILTER = "*.nxs"
 
-    """Signal sent when files are selected in the file dialog."""
+    """Signal sent when a file is selected to be loaded in the file dialog."""
     sig_files_selected = Signal(str)
+
+    """Signal sent when a file is selected as a background in the dialog."""
+    sig_background_selected = Signal(str)
 
     def __init__(self, parent=None, presenter=None):
         super().__init__(parent)
@@ -77,12 +80,19 @@ class ScanExplorerView(QMainWindow):
         self.multiple_button.setVisible(False)
         self.multiple_button.setCheckable(True)
 
+        # button to set/replace the background workspace
+        self.background_button = QPushButton(text='Set background')
+        self.background_button.setVisible(True)
+        self.background_button.setCheckable(False)
+        self.background_button.clicked.connect(self.on_set_background_clicked)
+
         # setting the layout
         upper_layout = QVBoxLayout(self)
         layout = QHBoxLayout()
         layout.addWidget(self.file_line_edit)
         layout.addWidget(self.browse_button)
         layout.addWidget(self.advanced_button)
+        layout.addWidget(self.background_button)
 
         upper_layout.addLayout(layout)
 
@@ -195,6 +205,22 @@ class ScanExplorerView(QMainWindow):
             self.lower_splitter.replaceWidget(1, self._rectangles_manager)
         else:
             self.lower_splitter.addWidget(self._rectangles_manager)
+
+    def on_set_background_clicked(self):
+        """
+        Slot triggered by clicking on set/replace background workspace. Open a window to select the workspace.
+        """
+        base_directory = self.presenter.get_base_directory()
+
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.ExistingFiles)
+        file_path, _ = dialog.getOpenFileName(parent=self,
+                                              caption="Open file",
+                                              directory=base_directory,
+                                              filter=self.FILE_EXTENSION_FILTER)
+        if file_path:
+            self.sig_background_selected.emit(file_path)
+            self.background_button.setText("Replace background")
 
     def show_slice_viewer(self, workspace):
         """
