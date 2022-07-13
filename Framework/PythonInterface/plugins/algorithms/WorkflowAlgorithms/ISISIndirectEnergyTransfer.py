@@ -134,8 +134,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
-        #import pydevd_pycharm
-        #pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
                                              get_detectors_to_mask,
