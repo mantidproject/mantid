@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction, AlgorithmManager, mtd
 from mantid.kernel import logger
-from mantid.simpleapi import CalculateChiSquared, FunctionFactory, plotSpectrum
+from mantid.simpleapi import CalculateChiSquared, EvaluateFunction, FunctionFactory, FunctionWrapper, plotSpectrum
 from .function import PeaksFunction, PhysicalProperties, ResolutionModel, Background, Function
 from .energies import energies
 from .normalisation import split2range, ionname2Nre
 from .CrystalFieldMultiSite import CrystalFieldMultiSite
 from scipy.constants import physical_constants
+from scipy.optimize._numdiff import approx_derivative
 import numpy as np
 import re
 import scipy.optimize as sp
@@ -1278,37 +1279,118 @@ class CrystalFieldFit(object):
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
 
-    def fit_with_gofit(self):
+    def fit_with_gofit(self, parameter_bounds=None, **kwargs):
         from gofit import regularisation
 
-        data = np.loadtxt('C:\\Users\\mlc47243\\Documents\\mantid-data\\cubic.txt')
+        if parameter_bounds is None:
+            parameter_bounds = dict()
 
-        def fun(p, x):
-            return p[0] + p[1] * x + p[2] * x ** 2 + p[3] * x ** 3
+        # Read the x, y and error data from the input workspace.  Find the number of data points, and parameters.
+        x = self._input_workspace.readX(0)
+        y = self._input_workspace.readY(0)
+        e = self._input_workspace.readE(0)
 
-        def eval_res(p):
-            x = data[:, 0]
-            y = data[:, 1]
-            return y - fun(p, x)
+        m = self._input_workspace.getNumberBins(0)
+        n = self.model.function.nParams()
 
-        def eval_jac(p):
-            x = data[:, 0]
-            ones = np.ones(len(x))
-            return -1 * np.transpose([ones, x, x ** 2, x ** 3])
+        # Get the initial parameter values of the function
+        p0 = np.array([self.model.function.getParameterValue(i) for i in range(n)])
 
-        m = data.shape[0]
-        n = 4
-        p0 = np.array([8, 2.98, 4, 1.02])
+        # Find the bounds to use for each parameter.
+        xl, xu = self._parse_lower_and_upper_bounds(n, parameter_bounds)
 
-        # Parameters
-        maxit = 200
+        # Separates out the B and S parameters into two separate lists.
+        b_parameters, s_parameters = self._parse_b_and_s_parameters(parameter_bounds)
 
-        p, status = regularisation(m, n, p0, eval_res, jac=eval_jac, maxit=maxit)
+        # Create a function for scaling a parameter at a specific index in an array
+        def scale_param(params, index):
+            return (params[index] - xl[index])/(xu[index] - xl[index])
 
-        print("Status:")
-        print(status)
-        print("p*:")
-        print(p)
+        # Create a wrapper around a callable mantid fitting function
+        callable_func = FunctionWrapper(self.model.function)
+
+        def wrapped_func(*params):
+            return callable_func(x, *params)
+
+        # Create a non-linear least squares cost function
+        def nlls_cost_function(params):
+            return np.ravel((y - wrapped_func(*np.array(params))) / e)
+
+        # Create a Jacobian method to calculate the cost function residual using scipy 2-point approx derivative
+        def create_jacobian(res, rel_step=None):
+            return lambda p: approx_derivative(res, p, method="2-point", rel_step=rel_step)
+
+        # def R(p):
+        #     #p_unscaled = (xl + (xu - xl) * p)
+        #     return nlls_cost_function(p)
+        # params, status = regularisation(m, n, p0, R, jac=create_jacobian(R), **kwargs)
+
+        # Stage 1: Fix initial shape params, optimize B parameters
+        def R1(p):
+            xk = [p[i] if self.model.function.parameterName(i) in b_parameters else scale_param(p0, i) for i in range(n)]
+            return nlls_cost_function(xk)
+
+        p1, status1 = regularisation(m, n, p0, R1, jac=create_jacobian(R1), **kwargs)
+        self._process_gofit_output(p1, "step1")
+
+        # Stage 2: Fix B parameters, optimize shape parameters
+        def R2(p):
+            xk = [p[i] if self.model.function.parameterName(i) in s_parameters else p1[i] for i in range(n)]
+            return nlls_cost_function(xk)
+
+        p2, status2 = regularisation(m, n, p1, R2, jac=create_jacobian(R2), **kwargs)
+        self._process_gofit_output(p2, "step2")
+
+        # Stage 3: Optimize over B parameters again
+        def R3(p):
+            xk = [p[i] if self.model.function.parameterName(i) in b_parameters else p2[i] for i in range(n)]
+            return nlls_cost_function(xk)
+
+        p3, status3 = regularisation(m, n, p2, R3, jac=create_jacobian(R3), **kwargs)
+        self._process_gofit_output(p3, "step3")
+
+        # Stage 4: Optimize over shape parameters again
+        def R4(p):
+            xk = [p[i] if self.model.function.parameterName(i) in s_parameters else p3[i] for i in range(n)]
+            return nlls_cost_function(xk)
+
+        p4, status4 = regularisation(m, n, p3, R4, jac=create_jacobian(R4, rel_step=1e-5), **kwargs)
+        self._process_gofit_output(p4, "step4")
+
+        for i, j, k, l, m in zip([self.model.function.parameterName(t) for t in range(n)], p1, p2, p3, p4):
+            print(f"{i} = {j}     {k}     {l}     {m}")
+        print(str(self.model.function))
+
+    def _parse_lower_and_upper_bounds(self, n: int, parameter_bounds: dict) -> tuple:
+        """Parses the lower and upper bounds into two separate numpy arrays."""
+        xl, xu = [], []
+        for i in range(n):
+            param_name = self.model.function.parameterName(i)
+            xl.append(parameter_bounds[param_name][0] if param_name in parameter_bounds else 0)
+            xu.append(parameter_bounds[param_name][1] if param_name in parameter_bounds else 1)
+
+        return np.array(xl), np.array(xu)
+
+    @staticmethod
+    def _parse_b_and_s_parameters(parameter_bounds: dict) -> tuple:
+        """Parse the parameters into two lists, one containing B parameters, and the other containing S parameters."""
+        b_params, s_params = [], []
+        for key in parameter_bounds.keys():
+            if key[0] == "B":
+                b_params.append(key)
+            else:
+                s_params.append(key)
+        return b_params, s_params
+
+    def _process_gofit_output(self, parameter_values, suffix="None") -> None:
+        """Create an output workspace with the fitted data, and a parameter table."""
+        for i, value in enumerate(parameter_values):
+            self.model.function.setParameter(i, value)
+
+        output_name = self._fit_properties["Output"] if "Output" in self._fit_properties else self._output_workspace_base_name
+        EvaluateFunction(Function=str(self.model.function),
+                         InputWorkspace=self._input_workspace,
+                         OutputWorkspace=output_name + "_Workspace" + suffix)
 
     def two_step_fit(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
         logger.warning("Please note that this is a first experimental version of the two_step_fit algorithm.")
@@ -1525,7 +1607,7 @@ class CrystalFieldFit(object):
         alg.initialize()
         alg.setProperty('Function', fun)
         alg.setProperty('InputWorkspace', self._input_workspace)
-        alg.setProperty('Output', 'fit')
+        alg.setProperty('Output', self._output_workspace_base_name)
         self._set_fit_properties(alg)
         alg.execute()
         function = alg.getProperty('Function').value
@@ -1548,7 +1630,7 @@ class CrystalFieldFit(object):
         for workspace in self._input_workspace[1:]:
             alg.setProperty('InputWorkspace_%s' % i, workspace)
             i += 1
-        alg.setProperty('Output', 'fit')
+        alg.setProperty('Output', self._output_workspace_base_name)
         self._set_fit_properties(alg)
         alg.execute()
         function = alg.getProperty('Function').value
