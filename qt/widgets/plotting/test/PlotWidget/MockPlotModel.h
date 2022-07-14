@@ -6,19 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/PlotModel.h"
 
 #include <gmock/gmock.h>
 
 namespace MantidQt::MantidWidgets {
 
-class MockPlotPresenter : public PlotPresenter {
+class MockPlotModel : public PlotModel {
 public:
-  MockPlotPresenter() : PlotPresenter(nullptr){};
+  virtual ~MockPlotModel() = default;
 
+  MOCK_METHOD(std::vector<Mantid::API::MatrixWorkspace_sptr>, getWorkspaces, (), (const, override));
+  MOCK_METHOD(std::vector<int>, getWorkspaceIndices, (), (const, override));
   MOCK_METHOD(void, setSpectrum, (const Mantid::API::MatrixWorkspace_sptr &, const size_t), (override));
-  MOCK_METHOD(void, setScaleLinear, (const AxisID), (override));
-  MOCK_METHOD(void, setScaleLog, (const AxisID), (override));
-  MOCK_METHOD(void, plot, (), (override));
 };
 } // namespace MantidQt::MantidWidgets

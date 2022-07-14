@@ -14,12 +14,19 @@
 #include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
 #include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
 #include "MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h"
+#include "MockPlotModel.h"
 #include "MockPlotView.h"
 
 #include <gmock/gmock.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
+using testing::NiceMock;
+using testing::Return;
+
+MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms, int numberOfBoundaries = 4) {
+  return WorkspaceCreationHelper::create2DWorkspace(numberOfHistograms, numberOfBoundaries);
+}
 
 /// Unit tests for PlotPresenter
 class PlotPresenterTest : public CxxTest::TestSuite {
@@ -28,8 +35,36 @@ public:
 
   static void destroySuite(PlotPresenterTest *suite) { delete suite; }
 
+  void test_set_spectrum() {
+    auto view = NiceMock<MockPlotView>();
+    auto model = std::make_unique<NiceMock<MockPlotModel>>();
+    auto ws = createMatrixWorkspace(3);
+    auto const wsIndex = 1;
+
+    EXPECT_CALL(*model, setSpectrum(ws, wsIndex)).Times(1);
+
+    auto presenter = PlotPresenter(&view, std::move(model));
+
+    presenter.setSpectrum(ws, wsIndex);
+  }
+
+  void test_plot() {
+    auto view = NiceMock<MockPlotView>();
+    auto model = std::make_unique<NiceMock<MockPlotModel>>();
+    auto workspaces = std::vector<MatrixWorkspace_sptr>{createMatrixWorkspace(3)};
+    auto const wsIndices = std::vector<int>{1};
+
+    EXPECT_CALL(*model, getWorkspaces()).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(*model, getWorkspaceIndices()).Times(1).WillOnce(Return(wsIndices));
+    EXPECT_CALL(view, plot(workspaces, wsIndices)).Times(1);
+
+    auto presenter = PlotPresenter(&view, std::move(model));
+
+    presenter.plot();
+  }
+
   void test_set_scale_linear_x() {
-    auto view = testing::NiceMock<MockPlotView>();
+    auto view = NiceMock<MockPlotView>();
     auto presenter = PlotPresenter(&view);
 
     EXPECT_CALL(view, setScaleLinear(AxisID::XBottom)).Times(1);
@@ -38,7 +73,7 @@ public:
   }
 
   void test_set_scale_linear_y() {
-    auto view = testing::NiceMock<MockPlotView>();
+    auto view = NiceMock<MockPlotView>();
     auto presenter = PlotPresenter(&view);
 
     EXPECT_CALL(view, setScaleLinear(AxisID::YLeft)).Times(1);
@@ -47,7 +82,7 @@ public:
   }
 
   void test_set_scale_log_x() {
-    auto view = testing::NiceMock<MockPlotView>();
+    auto view = NiceMock<MockPlotView>();
     auto presenter = PlotPresenter(&view);
 
     EXPECT_CALL(view, setScaleLog(AxisID::XBottom)).Times(1);
@@ -56,7 +91,7 @@ public:
   }
 
   void test_set_scale_log_y() {
-    auto view = testing::NiceMock<MockPlotView>();
+    auto view = NiceMock<MockPlotView>();
     auto presenter = PlotPresenter(&view);
 
     EXPECT_CALL(view, setScaleLog(AxisID::YLeft)).Times(1);

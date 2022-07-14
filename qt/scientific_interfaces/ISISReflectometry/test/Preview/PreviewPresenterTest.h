@@ -230,8 +230,11 @@ public:
 
     EXPECT_CALL(*mockModel, getReducedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(*mockLinePlot, setSpectrum(ws, 0)).Times(1);
+    EXPECT_CALL(*mockLinePlot, plot()).Times(1);
+
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
                                                makeInstViewModel(), makeRegionSelector(), std::move(mockLinePlot)));
+
     presenter.notifyReductionCompleted();
   }
 

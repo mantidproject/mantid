@@ -10,11 +10,20 @@
 using Mantid::API::MatrixWorkspace_sptr;
 
 namespace MantidQt::MantidWidgets {
-PlotPresenter::PlotPresenter(IPlotView *view) : m_view(view) {}
+PlotPresenter::PlotPresenter(IPlotView *view, std::unique_ptr<PlotModel> model)
+    : m_view(view), m_model(std::move(model)) {
+  if (!m_model) {
+    m_model = std::make_unique<PlotModel>();
+  }
+}
 
-void PlotPresenter::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex) {}
+void PlotPresenter::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex) {
+  m_model->setSpectrum(ws, wsIndex);
+}
 
 void PlotPresenter::setScaleLinear(const AxisID axisID) { m_view->setScaleLinear(axisID); }
 
 void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisID); }
+
+void PlotPresenter::plot() { m_view->plot(m_model->getWorkspaces(), m_model->getWorkspaceIndices()); }
 } // namespace MantidQt::MantidWidgets

@@ -154,6 +154,7 @@ void PreviewPresenter::plotLinePlot() {
     g_log.warning("Reduced workspace has " + std::to_string(numSpec) + " spectra; expected 1");
   }
   m_plotPresenter->setSpectrum(ws, 0);
+  m_plotPresenter->plot();
 }
 
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }

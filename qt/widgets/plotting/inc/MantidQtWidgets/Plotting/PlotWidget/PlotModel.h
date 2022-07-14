@@ -14,10 +14,12 @@
 namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING PlotModel {
 public:
-  std::vector<Mantid::API::MatrixWorkspace_sptr> getWorkspaces() const;
-  std::vector<int> getWorkspaceIndices() const;
+  virtual ~PlotModel() = default;
 
-  void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  virtual std::vector<Mantid::API::MatrixWorkspace_sptr> getWorkspaces() const;
+  virtual std::vector<int> getWorkspaceIndices() const;
+
+  virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
 private:
   std::vector<Mantid::API::MatrixWorkspace_sptr> m_workspaces;
