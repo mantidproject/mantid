@@ -166,8 +166,7 @@ public:
     // generate a result corresponding to Figure 4 in the Mancinelli paper (flat
     // plate sample for once scattered neutrons) where there's an analytical solution
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -196,8 +195,7 @@ public:
   void run_flat_plate_sample_multiple_scatter(int nPaths, bool importanceSampling) {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace =
-        SetupFlatPlateWorkspace(2, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS, DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
     // overwrite x with single point centered at wavelength=1 Angstrom. Algorithm used to take x units of wavelength
     // so this allows test values to be preserved
     Mantid::HistogramData::Points xv = {2 * M_PI};
@@ -247,8 +245,7 @@ public:
   void test_flat_plate_sample_multiple_scatter_with_bin_interp() {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace =
-        SetupFlatPlateWorkspace(2, 1, 1.0, 3, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS, DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 3, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
     // overwrite x with points equivalent to wavelength=1,2,3 Angstroms. Algorithm used to take x units of wavelength
     // so this allows test values to be preserved
     Mantid::HistogramData::Points xv = {2 * M_PI / 3, M_PI, 2 * M_PI};
@@ -791,8 +788,7 @@ public:
     // before the call to validateInputs that happens inside alg->execute()
     auto alg = createAlgorithm();
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWorkspace", inputWorkspace);
     auto inputWorkspaceGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
     Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWSGroup", inputWorkspaceGroup);
@@ -938,7 +934,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  0., {0., 0., 0.}, DeltaEMode::Elastic);
+                                                  0., {0., 0., 1.}, DeltaEMode::Elastic);
     alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("StructureFactorWorkspace", IsotropicSofQWorkspace);
     alg.setPropertyValue("OutputWorkspace", "MuscatResults");

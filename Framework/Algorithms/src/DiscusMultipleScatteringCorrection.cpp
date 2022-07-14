@@ -179,33 +179,41 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     return issues;
   }
   Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
-  if (!sample) {
+  if (!sample)
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
-  } else {
-    if (inputWS->sample().getMaterial().numberDensity() == 0)
-      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
-  }
 
   bool atLeastOneValidShape = inputWS->sample().getShape().hasValidShape();
-  if (!atLeastOneValidShape && m_env) {
-    for (size_t i = 0; i < m_env->nelements(); i++) {
-      auto env = inputWS->sample().getEnvironment();
-      if (env.getComponent(i).hasValidShape()) {
-        atLeastOneValidShape = true;
-        break;
+  if (!atLeastOneValidShape) {
+    if (inputWS->sample().hasEnvironment()) {
+      auto env = &inputWS->sample().getEnvironment();
+      for (size_t i = 0; i < env->nelements(); i++) {
+        if (env->getComponent(i).hasValidShape()) {
+          atLeastOneValidShape = true;
+          break;
+        }
       }
     }
   }
   if (!atLeastOneValidShape) {
-    throw std::invalid_argument("Either the Sample or one of the environment parts must have a valid shape.");
+    issues["InputWorkspace"] = "Either the Sample or one of the environment parts must have a valid shape.";
   }
+
+  size_t nEnvComponents = 0;
+  if (inputWS->sample().hasEnvironment())
+    nEnvComponents = inputWS->sample().getEnvironment().nelements();
+  if (inputWS->sample().getShape().hasValidShape())
+    if (inputWS->sample().getMaterial().numberDensity() == 0)
+      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
+  for (size_t i = 0; i < nEnvComponents; i++)
+    if (inputWS->sample().getEnvironment().getComponent(i).material().numberDensity() == 0)
+      issues["InputWorkspace"] = "Sample environment component " + std::to_string(i) +
+                                 " must have a material set up with a non-zero number density ";
 
   std::vector<MatrixWorkspace_sptr> SQWSs;
   Workspace_sptr SQWSBase = getProperty("StructureFactorWorkspace");
   auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWSBase);
   if (SQWSGroup) {
     auto groupMembers = SQWSGroup->getAllItems();
-    size_t nEnvComponents = 0;
     if (inputWS->sample().hasEnvironment())
       nEnvComponents = inputWS->sample().getEnvironment().nelements();
     std::set<std::string> materialNames;
@@ -1479,7 +1487,8 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
       iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
     }
 
-    // if w inaccessible return (ie treat as zero weight) rather than retry so that integration stays over full w range
+    // if w inaccessible return (ie treat as zero weight) rather than retry so that integration stays over full w
+    // range
     if (fromWaveVector(kinc) - wValues[iW] <= 0)
       return false;
     k = toWaveVector(fromWaveVector(kinc) - wValues[iW]);

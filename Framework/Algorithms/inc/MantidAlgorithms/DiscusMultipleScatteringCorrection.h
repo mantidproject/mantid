@@ -34,9 +34,9 @@ struct ComponentWorkspaceMapping {
   std::string_view materialName;
   API::MatrixWorkspace_sptr SQ;
   API::MatrixWorkspace_sptr logSQ{};
-  std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor;
-  API::MatrixWorkspace_sptr QSQ;
-  API::MatrixWorkspace_sptr InvPOfQ;
+  std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor{};
+  API::MatrixWorkspace_sptr QSQ{};
+  API::MatrixWorkspace_sptr InvPOfQ{};
   int scatterCount = 0;
 };
 
