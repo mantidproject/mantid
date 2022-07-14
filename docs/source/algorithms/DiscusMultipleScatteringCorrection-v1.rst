@@ -157,7 +157,7 @@ Based on this the length of the ith segment can be derived from a :math:`t_i` th
 It can be seen that the formula :eq:`l_i` can be solved for :math:`l_i` by calculating the quantity on the right hand side and then sequentially subtracting :math:`\mu_i l_i^{max}` from it for increasing i while keeping the running total >=0.
 The value of :math:`i` when you can't subtract any more :math:`\mu_i l_i^{max}` identifies the component containing the scatter. Dividing by :math:`\mu_i` at this point gives you the length into that component that the track reaches.
 
-The other modification to the calculation to support scattering in the sample environment is that a different structure factor and scattering cross section is required for each material. The component containing each scatter is derived from the :math:`l_i` calculation and is used to look up the structure factor and cross section.
+The other modification to the calculation to support scattering in the sample environment is that a different structure factor :math:`S(Q,\omega)` , :math:`I(k)` and scattering cross section :math:`\sigma_s` is required for each material. The component containing each scatter is derived from the :math:`l_i` calculation and is used to look up the material.
 
 Outputs
 #######
