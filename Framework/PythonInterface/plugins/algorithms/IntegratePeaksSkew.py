@@ -497,7 +497,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         tofs = pk_ws.column('TOF')
         if plot_filename:
             fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
-            pdf = PdfPages(plot_filename)
+            try:
+                pdf = PdfPages(plot_filename)
+            except OSError:
+                raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
+                                   f"another programme and that the user has permission to write to that directory.")
         irows_delete = []
         for ipk, pk in enumerate(pk_ws):
             # copy pk to output peak workspace
