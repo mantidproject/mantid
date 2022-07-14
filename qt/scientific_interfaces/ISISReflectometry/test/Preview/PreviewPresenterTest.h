@@ -12,6 +12,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockInstViewModel.h"
+#include "MockPlotPresenter.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
@@ -29,6 +30,8 @@ using namespace MantidQt::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::Widgets;
 
+using MantidQt::MantidWidgets::MockPlotPresenter;
+
 using ::testing::_;
 using ::testing::ByRef;
 using ::testing::Eq;
@@ -45,6 +48,7 @@ class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
   using MockRegionSelectorT = std::unique_ptr<MockRegionSelector>;
+  using MockPlotPresenterT = std::unique_ptr<MockPlotPresenter>;
 
 public:
   void test_notify_load_workspace_requested_loads_from_file_if_not_in_ads() {
@@ -220,12 +224,14 @@ public:
   void test_line_plot_is_displayed_when_reduction_completed() {
     auto mockView = makeView();
     auto mockModel = makeModel();
+    auto mockLinePlot = std::make_unique<MockPlotPresenter>();
     auto lineLabel = std::string("line_label");
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
     EXPECT_CALL(*mockModel, getReducedWs()).Times(1).WillOnce(Return(ws));
-
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    EXPECT_CALL(*mockLinePlot, setSpectrum(ws, 0)).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
+                                               makeInstViewModel(), makeRegionSelector(), std::move(mockLinePlot)));
     presenter.notifyReductionCompleted();
   }
 
@@ -253,10 +259,15 @@ private:
                                           MockModelT model = std::make_unique<MockPreviewModel>(),
                                           MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
                                           MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
-                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>()) {
+                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>(),
+                                          MockPlotPresenterT linePlot = std::make_unique<MockPlotPresenter>()) {
     EXPECT_CALL(*regionSelector, subscribe(NotNull())).Times(1);
-    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView),
-                                          std::move(regionSelector)};
+    return PreviewPresenter::Dependencies{view,
+                                          std::move(model),
+                                          std::move(jobManager),
+                                          std::move(instView),
+                                          std::move(regionSelector),
+                                          std::move(linePlot)};
   }
 
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,

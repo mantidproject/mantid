@@ -15,11 +15,12 @@ namespace MantidQt::MantidWidgets {
 class EXPORT_OPT_MANTIDQT_PLOTTING PlotPresenter {
 public:
   PlotPresenter(IPlotView *view);
+  virtual ~PlotPresenter() = default;
 
-  void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
-  void setScaleLinear(const AxisID axisID);
-  void setScaleLog(const AxisID axisID);
+  virtual void setScaleLinear(const AxisID axisID);
+  virtual void setScaleLog(const AxisID axisID);
 
 private:
   IPlotView *m_view = nullptr;

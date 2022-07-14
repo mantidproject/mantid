@@ -4,17 +4,20 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#pragma once
 
-using Mantid::API::MatrixWorkspace_sptr;
+#include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
+
+#include <gmock/gmock.h>
 
 namespace MantidQt::MantidWidgets {
-PlotPresenter::PlotPresenter(IPlotView *view) : m_view(view) {}
 
-void PlotPresenter::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex) {}
+class MockPlotPresenter : public PlotPresenter {
+public:
+  MockPlotPresenter() : PlotPresenter(nullptr){};
 
-void PlotPresenter::setScaleLinear(const AxisID axisID) { m_view->setScaleLinear(axisID); }
-
-void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisID); }
+  MOCK_METHOD(void, setSpectrum, (const Mantid::API::MatrixWorkspace_sptr &, const size_t), (override));
+  MOCK_METHOD(void, setScaleLinear, (const AxisID), (override));
+  MOCK_METHOD(void, setScaleLog, (const AxisID), (override));
+};
 } // namespace MantidQt::MantidWidgets

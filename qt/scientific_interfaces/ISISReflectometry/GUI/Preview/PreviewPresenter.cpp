@@ -146,7 +146,15 @@ void PreviewPresenter::plotInstView() {
 
 void PreviewPresenter::plotRegionSelector() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
-void PreviewPresenter::plotLinePlot() {}
+void PreviewPresenter::plotLinePlot() {
+  auto ws = m_model->getReducedWs();
+  assert(ws);
+  auto const numSpec = ws->getNumberHistograms();
+  if (numSpec != 1) {
+    g_log.warning("Reduced workspace has " + std::to_string(numSpec) + " spectra; expected 1");
+  }
+  m_plotPresenter->setSpectrum(ws, 0);
+}
 
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 
