@@ -1729,7 +1729,7 @@ void DiscusMultipleScatteringCorrection::createInvPOfQWorkspaces(ComponentWorksp
     size_t expectedMaxSize = QSQ->size();
     MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(nhists, HistogramData::Points{0.});
     ws->dataX(0).reserve(expectedMaxSize);
-    for (int i = 0; i < nhists; i++)
+    for (size_t i = 0; i < nhists; i++)
       ws->dataY(i).reserve(expectedMaxSize);
     SQWSMapping.InvPOfQ = ws;
   }
