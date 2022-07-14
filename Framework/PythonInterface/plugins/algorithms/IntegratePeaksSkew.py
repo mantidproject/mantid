@@ -206,7 +206,7 @@ class InstrumentArrayConverter:
         xvals = self.ws.readX(int(ispecs[irow_peak, icol_peak]))
         if len(xvals) > self.ws.blocksize():
             xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
-        return xvals, signal, errors, irow_peak, icol_peak, detector_edges
+        return xvals, signal, errors, irow_peak, icol_peak, detector_edges, detids
 
 
 def is_peak_mask_valid(peak_mask, npk_min=3, density_min=0.35, nrow_max=8, ncol_max=15,
@@ -413,8 +413,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # peak mask validators
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
                              doc="Integrate peaks if contains pixels on edge of the detector.")
-        self.declareProperty(name="UseNearestPeak", defaultValue=False, direction=Direction.Input,
-                             doc="Find nearest peak pixel if peak position is in a background pixel.")
         self.declareProperty(name="NPixMin", defaultValue=3, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
                              doc="Minimum number of pixels contributing to a peak")
@@ -435,14 +433,21 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=0),
                              doc="Minimum number of pixels in a vacancy")
         self.setPropertyGroup("IntegrateIfOnEdge", "Peak Mask Validation")
-        self.setPropertyGroup("UseNearestPeak", "Peak Mask Validation")
         self.setPropertyGroup("NPixMin", "Peak Mask Validation")
         self.setPropertyGroup("DensityPixMin", "Peak Mask Validation")
         self.setPropertyGroup("NRowMax", "Peak Mask Validation")
         self.setPropertyGroup("NColMax", "Peak Mask Validation")
         self.setPropertyGroup("NVacanciesMax", "Peak Mask Validation")
         self.setPropertyGroup("NPixPerVacancyMin", "Peak Mask Validation")
-
+        # peak finding
+        self.declareProperty(name="UseNearestPeak", defaultValue=False, direction=Direction.Input,
+                             doc="Find nearest peak pixel if peak position is in a background pixel.")
+        self.declareProperty(name="UpdatePeakPosition", defaultValue=False, direction=Direction.Input,
+                             doc="If True then the peak position will be updated to be the detid with the"
+                                 "largest integrated counts over the optimised TOF window, and the peak TOF will be"
+                                 "taken as the maximum of the focused data in the TOF window.")
+        self.setPropertyGroup("UseNearestPeak", "Peak Finding")
+        self.setPropertyGroup("UpdatePeakPosition", "Peak Finding")
         # plotting
         self.declareProperty(FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
                              "Optional file path in which to write diagnostic plots (note this will slow the "
@@ -466,7 +471,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         dth = self.getProperty("ThetaWidth").value
         dpixel = self.getProperty("NPixels").value
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
-        use_nearest = self.getProperty("UseNearestPeak").value
         # peak mask validation
         npk_min = self.getProperty("NPixMin").value
         density_min = self.getProperty("DensityPixMin").value
@@ -474,6 +478,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ncol_max = self.getProperty("NColMax").value
         max_nvacancies = self.getProperty("NVacanciesMax").value
         min_npixels_per_vacancy = self.getProperty("NPixPerVacancyMin").value
+        # peak finding
+        use_nearest = self.getProperty("UseNearestPeak").value
+        update_peak_pos = self.getProperty("UpdatePeakPosition").value
         # plotting
         plot_filename = self.getProperty("OutputFile").value
 
@@ -482,20 +489,25 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # setup progress bar
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=pk_ws.getNumberPeaks())
 
-        # Empty table workspace
-        pk_ws_int = CloneWorkspace(InputWorkspace=pk_ws, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
+        # Empty table workspace (clone and delete so as to preserve UB, sample, history etc.)
+        pk_ws_int = CloneWorkspace(InputWorkspace=pk_ws, OutputWorkspace="_temp")  # make temp in case same ws in
+        DeleteTableRows(TableWorkspace=pk_ws_int, Rows=range(pk_ws_int.getNumberPeaks()))
         # get spectrum indices for all peaks in table
-        detids = pk_ws_int.column('DetID')
-        bank_names = pk_ws_int.column('BankName')
-        tofs = pk_ws_int.column('TOF')
+        detids = pk_ws.column('DetID')
+        bank_names = pk_ws.column('BankName')
+        tofs = pk_ws.column('TOF')
         if plot_filename:
             fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
             pdf = PdfPages(plot_filename)
-        for ipk, pk in enumerate(pk_ws_int):
+        irows_delete = []
+        for ipk, pk in enumerate(pk_ws):
+            # copy pk to output peak workspace
+            pk_ws_int.addPeak(pk)
+            pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
             # get data array in window of side length dpixel around peak region (truncated at edge pf detector)
-            xpk, signal, error, irow, icol, detector_edges = array_converter.get_peak_region_array(pk, detids[ipk],
-                                                                                                   bank_names[ipk],
-                                                                                                   dpixel)
+            xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detids[ipk],
+                                                                                                    bank_names[ipk],
+                                                                                                    dpixel)
             # get TOF window using resolution parameters
             if frac_tof_window > 0:
                 dTOF = tofs[ipk] * frac_tof_window
@@ -510,7 +522,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             integrated = False
             if peak_label == 0:
                 status = PEAK_MASK_STATUS.NO_PEAK
-            elif not integrate_on_edge and np.any(np.logical_and(peak_mask, detector_edges)):
+            elif not integrate_on_edge and np.any(np.logical_and(peak_mask, det_edges)):
                 status = PEAK_MASK_STATUS.ON_EDGE
             else:
                 is_valid_mask, status = is_peak_mask_valid(peak_mask, npk_min, density_min, nrow_max, ncol_max,
@@ -523,12 +535,24 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     ypk[0] = ypk[0] * dx[0]  # assume first has same dx as adjacent bin
                     epk_sq[1:] = epk_sq[1:] * (dx ** 2)
                     epk_sq[0] = epk_sq[0] * (dx[0] ** 2)
-                    # get lorentz factor
-                    th = pk.getScattering() / 2
-                    wl = pk.getWavelength()
-                    L = (np.sin(th) ** 2) / (wl ** 4)
                     # find bg and pk bins in focused spectrum by maximising I/sig
                     ixlo_opt, ixhi_opt = find_peak_limits(ypk, epk_sq, ixlo, ixhi)
+                    # add peak to pk_ws_int (do this before overwrite fields of pk in input workspace)
+                    if update_peak_pos:
+                        # find det
+                        idet = np.argmax(signal[:, :, ixlo_opt:ixhi_opt].sum(axis=2)[peak_mask])
+                        det = dets[peak_mask][idet]
+                        irow, icol = np.where(dets == det)
+                        # update tof
+                        imax = np.argmax(ypk[ixlo_opt:ixhi_opt]) + ixlo_opt
+                        # replace last added peak
+                        irows_delete.append(pk_ws_int.getNumberPeaks()-1)
+                        AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpk[imax], DetectorID=int(det))
+                        pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
+                    # calc intens and sig
+                    th = pk.getScattering() / 2
+                    wl = pk.getWavelength()
+                    L = (np.sin(th) ** 2) / (wl ** 4)  # at updated peak pos if applicable
                     intens = L * np.sum(ypk[ixlo_opt:ixhi_opt])
                     sig = L * np.sqrt(np.sum(epk_sq[ixlo_opt:ixhi_opt]))
                     integrated = True
@@ -575,10 +599,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 cbar.remove()
             # update progress
             prog_reporter.report("Integrating Peaks")
+        DeleteTableRows(TableWorkspace=pk_ws_int, Rows=irows_delete)
         if plot_filename:
             plt.close(fig)
             pdf.close()
         # assign output
+        RenameWorkspace(InputWorkspace=pk_ws_int, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         self.setProperty("OutputWorkspace", pk_ws_int)
 
 
