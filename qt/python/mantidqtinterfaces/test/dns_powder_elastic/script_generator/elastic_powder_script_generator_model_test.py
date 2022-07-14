@@ -170,7 +170,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(len(testv), 16)
         self.assertEqual(
             testv[0],
-            "# sepearation of coherent and incoherent scattering of non"
+            "# separation of coherent and incoherent scattering of non"
             " magnetic sample")
         self.assertEqual(
             testv[1],
@@ -322,7 +322,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(testv, [
             '', '# subtract background from vanadium and nicr',
             'for sample, workspacelist in wss_standard.items(): \n    '
-            'for workspace in workspacelist:\n        background_substr'
+            'for workspace in workspacelist:\n        background_subtr'
             'action(workspace)'
         ])
         self.model._vanac = False

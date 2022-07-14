@@ -10,6 +10,7 @@ Class which loads and stores a single DNS datafile in a dictionary.
 """
 
 import unittest
+import os
 from unittest.mock import patch
 from unittest import mock
 
@@ -23,8 +24,8 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import (
     create_script_name, automatic_ttheta_binning, get_ttheta_step, round_step,
     get_omega_step, list_to_set, automatic_omega_binning,
-    get_proposal_from_filname, get_sample_fields, create_dataset,
-    get_datatype_from_samplename, remove_non_measured_fields,
+    get_proposal_from_filename, get_sample_fields, create_dataset,
+    get_datatype_from_sample_name, remove_non_measured_fields,
     get_bank_positions)
 
 
@@ -144,8 +145,8 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertEqual(testv, mock_binning.return_value)
         mock_binning.assert_called_once_with(304.0, 304.0, 1)
 
-    def test_get_proposal_from_filname(self):
-        testv = get_proposal_from_filname('p678_000123.d_dat', 123)
+    def test_get_proposal_from_filename(self):
+        testv = get_proposal_from_filename('p678_000123.d_dat', 123)
         self.assertEqual(testv, 'p678')
 
     def test_get_sample_fields(self):
@@ -155,17 +156,17 @@ class DNSDatasetTest(unittest.TestCase):
     def test_create_dataset(self):
         testv = create_dataset(self.fulldata, 'C:/123')
         self.assertEqual(testv, {
-            '4p1K_map': {'z_nsf': [788058], 'path': 'C:/123\\service'}})
+            '4p1K_map': {'z_nsf': [788058], 'path': os.path.join('C:/123', 'service')}})
         testv = create_dataset(self.standarddata, 'C:/123')
         self.assertEqual(testv, {
-            'empty': {'x_nsf': [788058], 'path': 'C:/123\\test_empty.d_dat'},
+            'empty': {'x_nsf': [788058], 'path': os.path.join('C:/123', 'test_empty.d_dat')},
             'vana': {'z_nsf': [788058, 788059],
-                     'path': 'C:/123\\test_vana.d_dat'}})
+                     'path': os.path.join('C:/123', 'test_vana.d_dat')}})
 
-    def test_get_datatype_from_samplename(self):
-        testv = get_datatype_from_samplename('_12 3')
+    def test_get_datatype_from_sample_name(self):
+        testv = get_datatype_from_sample_name('_12 3')
         self.assertEqual(testv, '123')
-        testv = get_datatype_from_samplename('leer')
+        testv = get_datatype_from_sample_name('leer')
         self.assertEqual(testv, 'empty')
 
     def test_remove_non_measured_fields(self):

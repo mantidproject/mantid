@@ -146,14 +146,14 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='sample_x_sf_norm', factor=0.7)
         with self.assertRaises(DNSError) as context:
             vanadium_correction('sample_x_sf',
-                                vanaset=None,
+                                vana_set=None,
                                 ignore_vana_fields=False,
                                 sum_vana_sf_nsf=False)
         self.assertTrue('No vanadium file for' in str(context.exception))
         get_fake_MD_workspace_unique(name='vana_x_sf', factor=1.3)
         get_fake_MD_workspace_unique(name='vana_x_sf_norm', factor=1.1)
         test_v = vanadium_correction('sample_x_sf',
-                                     vanaset=None,
+                                     vana_set=None,
                                      ignore_vana_fields=False,
                                      sum_vana_sf_nsf=False)
         self.assertIsInstance(test_v, IMDHistoWorkspace)
@@ -173,13 +173,13 @@ class MDPowderElasticTest(unittest.TestCase):
     def test_vanadium_correction_2(self):
         with self.assertRaises(DNSError) as context:
             vanadium_correction('sample_x_sf',
-                                vanaset=None,
+                                vana_set=None,
                                 ignore_vana_fields=True,
                                 sum_vana_sf_nsf=False)
         self.assertTrue('Need to give vanadium' in str(context.exception))
         with self.assertRaises(DNSError) as context:
             vanadium_correction('sample_x_sf',
-                                vanaset=['x_sf, x_nsf'],
+                                vana_set=['x_sf, x_nsf'],
                                 ignore_vana_fields=True,
                                 sum_vana_sf_nsf=False)
         self.assertTrue('No vanadium file for ' in str(context.exception))
@@ -190,7 +190,7 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='vana_x_nsf', factor=30.3)
         get_fake_MD_workspace_unique(name='vana_x_nsf_norm', factor=0.5)
         test_v = vanadium_correction('sample_x_sf',
-                                     vanaset={'x_sf': 1, 'x_nsf': 2},
+                                     vana_set={'x_sf': 1, 'x_nsf': 2},
                                      ignore_vana_fields=True,
                                      sum_vana_sf_nsf=False)
         self.assertIsInstance(test_v, IMDHistoWorkspace)
@@ -211,7 +211,7 @@ class MDPowderElasticTest(unittest.TestCase):
     def test_vanadium_correction_3(self):
         with self.assertRaises(DNSError) as context:
             vanadium_correction('sample_x_sf',
-                                vanaset=None,
+                                vana_set=None,
                                 ignore_vana_fields=False,
                                 sum_vana_sf_nsf=True)
         self.assertTrue('No vanadium file for x_sf' in str(context.exception))
@@ -219,7 +219,7 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='vana_x_sf_norm', factor=1.1)
         with self.assertRaises(DNSError) as context:
             vanadium_correction('sample_x_sf',
-                                vanaset=None,
+                                vana_set=None,
                                 ignore_vana_fields=False,
                                 sum_vana_sf_nsf=True)
         self.assertTrue('No vanadium file for x_nsf' in str(context.exception))
@@ -228,7 +228,7 @@ class MDPowderElasticTest(unittest.TestCase):
         get_fake_MD_workspace_unique(name='vana_x_nsf', factor=30.3)
         get_fake_MD_workspace_unique(name='vana_x_nsf_norm', factor=0.5)
         test_v = vanadium_correction('sample_x_sf',
-                                     vanaset=None,
+                                     vana_set=None,
                                      ignore_vana_fields=False,
                                      sum_vana_sf_nsf=True)
         self.assertIsInstance(test_v, IMDHistoWorkspace)

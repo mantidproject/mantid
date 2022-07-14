@@ -17,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
 from mantidqtinterfaces.dns_powder_elastic.data_structures. \
     dns_standard_interpolator import (
         read_standard_file, create_array, average_array, interp,
-        closest_filenumber, write_inp_file, interpolate_standard
+        closest_file_number, write_inp_file, interpolate_standard
         )
 
 
@@ -70,10 +70,10 @@ class DNSStandardInterpolatorTest(unittest.TestCase):
              26.4, 27.6, 28.8])).all())
         self.assertTrue((testv[0] == self.arr1).all())
 
-    def test_closest_filenumber(self):
-        testv = closest_filenumber(5.2, {5: 1, 6: 2, 5.1: 2})
+    def test_closest_file_number(self):
+        testv = closest_file_number(5.2, {5: 1, 6: 2, 5.1: 2})
         self.assertEqual(testv, 2)
-        testv = closest_filenumber(5, {5: 1, 6: 2, 5.1: 2})
+        testv = closest_file_number(5, {5: 1, 6: 2, 5.1: 2})
         self.assertEqual(testv, 1)
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
