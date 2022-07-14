@@ -47,13 +47,15 @@ public:
 
   void test_plot() {
     auto view = MockPlotView();
-    auto model = std::make_unique<MockPlotModel>();
+    auto model = makeModel();
     auto workspaces = std::vector<MatrixWorkspace_sptr>{createMatrixWorkspace(3)};
     auto const wsIndices = std::vector<int>{1};
+    auto const plotErrors = true;
 
     EXPECT_CALL(*model, getWorkspaces()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(*model, getWorkspaceIndices()).Times(1).WillOnce(Return(wsIndices));
-    EXPECT_CALL(view, plot(workspaces, wsIndices)).Times(1);
+    EXPECT_CALL(*model, getPlotErrorBars()).Times(1).WillOnce(Return(plotErrors));
+    EXPECT_CALL(view, plot(workspaces, wsIndices, plotErrors)).Times(1);
 
     auto presenter = PlotPresenter(&view, std::move(model));
 
@@ -95,4 +97,17 @@ public:
 
     presenter.setScaleLog(AxisID::YLeft);
   }
+
+  void test_set_plot_error_bars() {
+    auto view = MockPlotView();
+    auto model = makeModel();
+
+    EXPECT_CALL(*model, setPlotErrorBars(true)).Times(1);
+    auto presenter = PlotPresenter(&view, std::move(model));
+
+    presenter.setPlotErrorBars(true);
+  }
+
+private:
+  std::unique_ptr<MockPlotModel> makeModel() { return std::make_unique<MockPlotModel>(); }
 };

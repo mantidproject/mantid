@@ -42,4 +42,11 @@ public:
     TS_ASSERT_EQUALS(model.getWorkspaceIndices(), expectedIndices);
     TS_ASSERT_EQUALS(model.getWorkspaces(), expectedWorkspaces);
   }
+
+  void test_set_get_plot_error_bars() {
+    auto model = PlotModel();
+    model.setPlotErrorBars(true);
+
+    TS_ASSERT(model.getPlotErrorBars());
+  }
 };

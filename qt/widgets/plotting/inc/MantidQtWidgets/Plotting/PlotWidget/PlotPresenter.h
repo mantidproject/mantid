@@ -23,6 +23,8 @@ public:
   virtual void setScaleLinear(const AxisID axisID);
   virtual void setScaleLog(const AxisID axisID);
 
+  virtual void setPlotErrorBars(const bool plotErrorBars);
+
   virtual void plot();
 
 private:

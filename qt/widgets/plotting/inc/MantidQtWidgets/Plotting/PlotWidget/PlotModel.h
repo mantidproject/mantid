@@ -21,8 +21,12 @@ public:
 
   virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
+  virtual bool getPlotErrorBars() const { return m_plotErrorBars; }
+  virtual void setPlotErrorBars(const bool plotErrorBars) { m_plotErrorBars = plotErrorBars; }
+
 private:
   std::vector<Mantid::API::MatrixWorkspace_sptr> m_workspaces;
   std::vector<int> m_workspaceIndices;
+  bool m_plotErrorBars{false};
 };
 } // namespace MantidQt::MantidWidgets

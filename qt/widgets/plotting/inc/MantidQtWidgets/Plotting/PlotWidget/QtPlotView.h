@@ -23,8 +23,8 @@ public:
   void setScaleLinear(const AxisID axisID) override;
   void setScaleLog(const AxisID axisID) override;
 
-  void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
-            const std::vector<int> &workspaceIndices) override;
+  void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces, const std::vector<int> &workspaceIndices,
+            const bool plotErrorBars) override;
 
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;

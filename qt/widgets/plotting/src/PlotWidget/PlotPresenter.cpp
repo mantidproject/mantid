@@ -25,5 +25,9 @@ void PlotPresenter::setScaleLinear(const AxisID axisID) { m_view->setScaleLinear
 
 void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisID); }
 
-void PlotPresenter::plot() { m_view->plot(m_model->getWorkspaces(), m_model->getWorkspaceIndices()); }
+void PlotPresenter::setPlotErrorBars(const bool plotErrorBars) { m_model->setPlotErrorBars(plotErrorBars); }
+
+void PlotPresenter::plot() {
+  m_view->plot(m_model->getWorkspaces(), m_model->getWorkspaceIndices(), m_model->getPlotErrorBars());
+}
 } // namespace MantidQt::MantidWidgets

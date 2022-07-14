@@ -19,5 +19,7 @@ public:
   MOCK_METHOD(std::vector<Mantid::API::MatrixWorkspace_sptr>, getWorkspaces, (), (const, override));
   MOCK_METHOD(std::vector<int>, getWorkspaceIndices, (), (const, override));
   MOCK_METHOD(void, setSpectrum, (const Mantid::API::MatrixWorkspace_sptr &, const size_t), (override));
+  MOCK_METHOD(void, setPlotErrorBars, (const bool), (override));
+  MOCK_METHOD(bool, getPlotErrorBars, (), (const, override));
 };
 } // namespace MantidQt::MantidWidgets
