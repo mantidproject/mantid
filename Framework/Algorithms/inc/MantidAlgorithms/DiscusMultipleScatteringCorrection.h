@@ -33,7 +33,7 @@ struct ComponentWorkspaceMapping {
   Geometry::IObject_const_sptr ComponentPtr;
   std::string_view materialName;
   API::MatrixWorkspace_sptr SQ;
-  API::MatrixWorkspace_sptr logSQ;
+  API::MatrixWorkspace_sptr logSQ{};
   std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor;
   API::MatrixWorkspace_sptr QSQ;
   API::MatrixWorkspace_sptr InvPOfQ;
@@ -64,6 +64,7 @@ public:
     return "Calculates a multiple scattering correction using a Monte Carlo method";
   }
   const std::string alias() const override { return "Muscat"; }
+  bool checkGroups() override { return false; }
 
 protected:
   virtual std::shared_ptr<SparseWorkspace> createSparseWorkspace(const API::MatrixWorkspace &modelWS,

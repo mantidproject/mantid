@@ -16,6 +16,7 @@
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -902,6 +903,34 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
+  void test_missing_structure_factor_for_material() {
+    Mantid::Algorithms::DiscusMultipleScatteringCorrection alg;
+    const double THICKNESS = 0.001; // metres
+    // create workspace with sample shape and container
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
+                                                  0., {0., 0., 1.}, DeltaEMode::Elastic, 0., true);
+    // create workspace group for structure factors so the isotropic defaulting doesn't kick in
+    auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
+    SofQWorkspace->mutableX(0) = {0.9985, 0.9995, 1.0005, 1.0015};
+    // S(Q) zero everywhere apart from spike at Q=1
+    SofQWorkspace->mutableY(0) = {0., 100., 0.};
+    SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Ni", SofQWorkspace);
+    auto structureFactorsGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestSQGroup", structureFactorsGroup);
+    structureFactorsGroup->add(SofQWorkspace->getName());
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputWorkspace);
+    alg.setProperty("StructureFactorWorkspace", structureFactorsGroup);
+    alg.setPropertyValue("OutputWorkspace", "MuscatResults");
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    // now add in missing S(Q) workspace and it should work
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("V", IsotropicSofQWorkspace);
+    structureFactorsGroup->add(IsotropicSofQWorkspace->getName());
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    Mantid::API::AnalysisDataService::Instance().remove("DiscusTestSQGroup");
+  }
+
   void test_cant_run_withAlwaysStoreInADS_false() {
     const double THICKNESS = 0.001; // metres
     DiscusMultipleScatteringCorrectionHelper alg;
@@ -909,7 +938,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Elastic);
+                                                  0., {0., 0., 0.}, DeltaEMode::Elastic);
     alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("StructureFactorWorkspace", IsotropicSofQWorkspace);
     alg.setPropertyValue("OutputWorkspace", "MuscatResults");
@@ -933,7 +962,8 @@ private:
   SetupFlatPlateWorkspace(const int nlat, const int nlong, const double anginc, const int nbins, const double xmin,
                           const double deltax, const double width, const double height, const double thickness,
                           const double angle = 0., const V3D axis = {0., 0., 1.},
-                          const DeltaEMode::Type EMode = DeltaEMode::Elastic, const double efixed = 5.0) {
+                          const DeltaEMode::Type EMode = DeltaEMode::Elastic, const double efixed = 5.0,
+                          const bool addContainer = false) {
     std::string unitName = "Momentum";
     if (EMode != DeltaEMode::Elastic) {
       unitName = "DeltaE";
@@ -945,6 +975,20 @@ private:
     auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
     flatPlateShape->setMaterial(mat);
     inputWorkspace->mutableSample().setShape(flatPlateShape);
+
+    if (addContainer) {
+      auto xmlShapeStreamFront =
+          ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., -(thickness / 2 + 0.0025)}, "front");
+      auto xmlShapeStreamBack =
+          ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., thickness / 2 + 0.0025}, "back");
+      std::string combinedXML = xmlShapeStreamFront + xmlShapeStreamBack + "<algebra val=\"back:front\"/>";
+      ShapeFactory shapeMaker;
+      auto holderShape = shapeMaker.createShape(combinedXML);
+      auto shape = std::shared_ptr<IObject>(holderShape->cloneWithMaterial(
+          Mantid::Kernel::Material("V", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.07223)));
+      auto can = std::make_shared<Container>(shape);
+      inputWorkspace->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
+    }
 
     auto inst = inputWorkspace->getInstrument();
     auto &pmap = inputWorkspace->instrumentParameters();

@@ -186,6 +186,20 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
       issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
   }
 
+  bool atLeastOneValidShape = inputWS->sample().getShape().hasValidShape();
+  if (!atLeastOneValidShape && m_env) {
+    for (size_t i = 0; i < m_env->nelements(); i++) {
+      auto env = inputWS->sample().getEnvironment();
+      if (env.getComponent(i).hasValidShape()) {
+        atLeastOneValidShape = true;
+        break;
+      }
+    }
+  }
+  if (!atLeastOneValidShape) {
+    throw std::invalid_argument("Either the Sample or one of the environment parts must have a valid shape.");
+  }
+
   std::vector<MatrixWorkspace_sptr> SQWSs;
   Workspace_sptr SQWSBase = getProperty("StructureFactorWorkspace");
   auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWSBase);
@@ -197,7 +211,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     std::set<std::string> materialNames;
     materialNames.insert(inputWS->sample().getMaterial().name());
     for (size_t i = 0; i < nEnvComponents; i++)
-      materialNames.insert(inputWS->sample().getEnvironment().getComponent(i).id());
+      materialNames.insert(inputWS->sample().getEnvironment().getComponent(i).material().name());
 
     for (auto &materialName : materialNames) {
       auto wsIt = std::find_if(groupMembers.begin(), groupMembers.end(),
@@ -1183,7 +1197,7 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
  * Interpolate value on S(Q,w) surface given a Q and w. For now there is no interpolation between
  * w values so the nearest one is taken. Also S(Q,w) is assumed to be zero for w beyond the w limits
  * of the supplied surface. S(Q,w) is assumed to equal the extreme value for q beyond the q limits
- * @param SOfQ A workspace containing the structure factor to interpolate
+ * @param SQWSMapping A set of workspaces related to the structure factor to interpolate
  * @param w The energy transfer (w) value to interpolate at
  * @param q The momentum transfer (q) value to interpolate at
  * @return The interpolated S(Q,w) value
@@ -1229,7 +1243,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
  * @param nPaths The number of paths to simulate
  * @param nScatters The number of scattering events to simulate along each path
  * @param rng Random number generator
- * @param invPOfQ Inverse of the cumulative prob distribution of Q (used in importance sampling)
+ * @param componentWorkspaces list of workspaces related to the structure factor for each sample/env component
  * @param kinc The incident wavevector
  * @param wValues A vector of overall energy transfers
  * @param detPos The position of the detector we're currently calculating a correction for
@@ -1270,7 +1284,7 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  * material
  * @param nScatters The number of scattering events to simulate along each path
  * @param rng Random number generator
- * @param materialWorkspaces List of S(Q,w) related workspaces for each material in the sample\environment
+ * @param componentWorkspaces list of workspaces related to the structure factor for each sample/env component
  * @param kinc The incident wavevector
  * @param wValues A vector of overall energy transfers
  * @param detPos The detector position xyz coordinates
@@ -1578,6 +1592,7 @@ Geometry::Track DiscusMultipleScatteringCorrection::start_point(Kernel::PseudoRa
  * @param k The wavevector of the track
  * @param rng Random number generator
  * @param specialSingleScatterCalc Boolean indicating whether special single scatter calculation should be performed
+ * @param componentWorkspaces list of workspaces related to the structure factor for each sample/env component
  * @return the shape object for the component where the scatter occurred
  */
 
@@ -1605,7 +1620,6 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
   double b4Overall = (1.0 - exp(-totalMuL));
   double muL = -log(1 - rng.nextValue() * b4Overall);
   double vl = 0.;
-  double scatterXsection = 0.;
   double newWeight = 0.;
   double prevExpTerms = 1.;
   std::tuple<const Geometry::IObject *, double, double, double> geometryObjectDetails;
