@@ -247,8 +247,8 @@
  </widget>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>plot_ads_export_button</tabstop>
-  <tabstop>treeView</tabstop>
+  <tabstop>rs_ads_export_button</tabstop>
+  <tabstop>lp_ads_export_button</tabstop>
   <tabstop>tableWidget_2</tabstop>
   <tabstop>pushButton_3</tabstop>
  </tabstops>
