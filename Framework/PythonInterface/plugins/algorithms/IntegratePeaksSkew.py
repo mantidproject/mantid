@@ -582,7 +582,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     iend = min(max(ixhi, ixhi_opt) + ipad, len(xpk) - 1)
                 ax[1].errorbar(xpk[istart:iend], ypk[istart:iend], yerr=np.sqrt(epk_sq[istart:iend]),
                                marker='o', markersize=3, capsize=2, ls='', color='k', label='data')
-                ax[1].axvline(tofs[ipk], ls='--', color='k', label='Centre')
+                ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
                 ax[1].axvline(xpk[ixlo], ls=':', color='r', label='Initial window')
                 ax[1].axvline(xpk[ixhi], ls=':', color='r')
                 ax[1].axhline(0, ls=':', color='k')
@@ -594,7 +594,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 fig.tight_layout()
                 ax[1].relim()
                 ax[1].autoscale_view()
-                pdf.savefig(fig, rasterized=True)
+                pdf.savefig(fig, rasterized=False)
                 [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
                 cbar.remove()
             # update progress
