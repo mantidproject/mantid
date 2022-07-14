@@ -33,9 +33,7 @@ set(MPL_INC_FILES
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 
-set(MPL_UI_FILES inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui inc/MantidQtWidgets/Plotting/PreviewPlot.ui
-                 inc/MantidQtWidgets/Plotting/PlotWidget/PlotWidget.ui
-)
+set(MPL_UI_FILES inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPlotting

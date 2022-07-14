@@ -11,7 +11,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"

@@ -11,9 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
-#include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
 #include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
-#include "MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h"
 #include "MockPlotModel.h"
 #include "MockPlotView.h"
 
