@@ -12,7 +12,7 @@ from .energies import energies
 from .normalisation import split2range, ionname2Nre
 from .CrystalFieldMultiSite import CrystalFieldMultiSite
 from scipy.constants import physical_constants
-from scipy.optimize._numdiff import approx_derivative
+#from scipy.optimize._numdiff import approx_derivative
 import numpy as np
 import re
 import scipy.optimize as sp
@@ -1280,7 +1280,7 @@ class CrystalFieldFit(object):
         self.model.FixAllPeaks = fix_all_peaks
 
     def fit_with_gofit(self, parameter_bounds=None, **kwargs):
-        from gofit import regularisation
+        from gofit import alternating#, regularisation
 
         if parameter_bounds is None:
             parameter_bounds = dict()
@@ -1299,13 +1299,6 @@ class CrystalFieldFit(object):
         # Find the bounds to use for each parameter.
         xl, xu = self._parse_lower_and_upper_bounds(n, parameter_bounds)
 
-        # Separates out the B and S parameters into two separate lists.
-        b_parameters, s_parameters = self._parse_b_and_s_parameters(parameter_bounds)
-
-        # Create a function for scaling a parameter at a specific index in an array
-        def scale_param(params, index):
-            return (params[index] - xl[index])/(xu[index] - xl[index])
-
         # Create a wrapper around a callable mantid fitting function
         callable_func = FunctionWrapper(self.model.function)
 
@@ -1317,45 +1310,16 @@ class CrystalFieldFit(object):
             return np.ravel((y - wrapped_func(*np.array(params))) / e)
 
         # Create a Jacobian method to calculate the cost function residual using scipy 2-point approx derivative
-        def create_jacobian(res, rel_step=None):
-            return lambda p: approx_derivative(res, p, method="2-point", rel_step=rel_step)
+        #def create_jacobian(res, rel_step=None):
+        #    return lambda p: approx_derivative(res, p, method="2-point", rel_step=rel_step)
 
-        # def R(p):
-        #     #p_unscaled = (xl + (xu - xl) * p)
-        #     return nlls_cost_function(p)
+        def R(p):
+            #p_unscaled = (xl + (xu - xl) * p)
+            return nlls_cost_function(p)
         # params, status = regularisation(m, n, p0, R, jac=create_jacobian(R), **kwargs)
 
-        # Stage 1: Fix initial shape params, optimize B parameters
-        def R1(p):
-            xk = [p[i] if self.model.function.parameterName(i) in b_parameters else scale_param(p0, i) for i in range(n)]
-            return nlls_cost_function(xk)
-
-        p1, status1 = regularisation(m, n, p0, R1, jac=create_jacobian(R1), **kwargs)
-        self._process_gofit_output(p1, "step1")
-
-        # Stage 2: Fix B parameters, optimize shape parameters
-        def R2(p):
-            xk = [p[i] if self.model.function.parameterName(i) in s_parameters else p1[i] for i in range(n)]
-            return nlls_cost_function(xk)
-
-        p2, status2 = regularisation(m, n, p1, R2, jac=create_jacobian(R2), **kwargs)
-        self._process_gofit_output(p2, "step2")
-
-        # Stage 3: Optimize over B parameters again
-        def R3(p):
-            xk = [p[i] if self.model.function.parameterName(i) in b_parameters else p2[i] for i in range(n)]
-            return nlls_cost_function(xk)
-
-        p3, status3 = regularisation(m, n, p2, R3, jac=create_jacobian(R3), **kwargs)
-        self._process_gofit_output(p3, "step3")
-
-        # Stage 4: Optimize over shape parameters again
-        def R4(p):
-            xk = [p[i] if self.model.function.parameterName(i) in s_parameters else p3[i] for i in range(n)]
-            return nlls_cost_function(xk)
-
-        p4, status4 = regularisation(m, n, p3, R4, jac=create_jacobian(R4, rel_step=1e-5), **kwargs)
-        self._process_gofit_output(p4, "step4")
+        params, status = alternating(m, n, 9, p0, xl, xu, R, **kwargs)
+        self._process_gofit_output(params, "alternating")
 
         for i, j, k, l, m in zip([self.model.function.parameterName(t) for t in range(n)], p1, p2, p3, p4):
             print(f"{i} = {j}     {k}     {l}     {m}")
@@ -1370,17 +1334,6 @@ class CrystalFieldFit(object):
             xu.append(parameter_bounds[param_name][1] if param_name in parameter_bounds else 1)
 
         return np.array(xl), np.array(xu)
-
-    @staticmethod
-    def _parse_b_and_s_parameters(parameter_bounds: dict) -> tuple:
-        """Parse the parameters into two lists, one containing B parameters, and the other containing S parameters."""
-        b_params, s_params = [], []
-        for key in parameter_bounds.keys():
-            if key[0] == "B":
-                b_params.append(key)
-            else:
-                s_params.append(key)
-        return b_params, s_params
 
     def _process_gofit_output(self, parameter_values, suffix="None") -> None:
         """Create an output workspace with the fitted data, and a parameter table."""
