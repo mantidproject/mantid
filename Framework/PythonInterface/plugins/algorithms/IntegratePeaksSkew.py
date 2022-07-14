@@ -9,7 +9,6 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, Matr
 from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty,
                            PropertyCriterion)
 import numpy as np
-from mantid.simpleapi import *
 from scipy.signal import convolve2d
 from scipy.ndimage import label
 from scipy.stats import moment
@@ -490,8 +489,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=pk_ws.getNumberPeaks())
 
         # Empty table workspace (clone and delete so as to preserve UB, sample, history etc.)
-        pk_ws_int = CloneWorkspace(InputWorkspace=pk_ws, OutputWorkspace="_temp")  # make temp in case same ws in
-        DeleteTableRows(TableWorkspace=pk_ws_int, Rows=range(pk_ws_int.getNumberPeaks()))
+        pk_ws_int = self.child_CloneWorkspace(InputWorkspace=pk_ws, OutputWorkspace="_temp")  # temp for ws in/out same
+        self.child_DeleteTableRows(TableWorkspace=pk_ws_int, Rows=range(pk_ws_int.getNumberPeaks()))
         # get spectrum indices for all peaks in table
         detids = pk_ws.column('DetID')
         bank_names = pk_ws.column('BankName')
@@ -547,7 +546,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                         imax = np.argmax(ypk[ixlo_opt:ixhi_opt]) + ixlo_opt
                         # replace last added peak
                         irows_delete.append(pk_ws_int.getNumberPeaks()-1)
-                        AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpk[imax], DetectorID=int(det))
+                        self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpk[imax],
+                                           DetectorID=int(det))
                         pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
                     # calc intens and sig
                     th = pk.getScattering() / 2
@@ -599,13 +599,31 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 cbar.remove()
             # update progress
             prog_reporter.report("Integrating Peaks")
-        DeleteTableRows(TableWorkspace=pk_ws_int, Rows=irows_delete)
+        self.child_DeleteTableRows(TableWorkspace=pk_ws_int, Rows=irows_delete)
         if plot_filename:
             plt.close(fig)
             pdf.close()
         # assign output
-        RenameWorkspace(InputWorkspace=pk_ws_int, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         self.setProperty("OutputWorkspace", pk_ws_int)
+
+    def child_CloneWorkspace(self, **kwargs):
+        alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+        for prop, value in kwargs.items():
+            alg.setProperty(prop, value)
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
+
+    def child_DeleteTableRows(self, **kwargs):
+        alg = self.createChildAlgorithm("DeleteTableRows", enableLogging=False)
+        for prop, value in kwargs.items():
+            alg.setProperty(prop, value)
+        alg.execute()
+
+    def child_AddPeak(self, **kwargs):
+        alg = self.createChildAlgorithm("AddPeak", enableLogging=False)
+        for prop, value in kwargs.items():
+            alg.setProperty(prop, value)
+        alg.execute()
 
 
 # register algorithm with mantid
