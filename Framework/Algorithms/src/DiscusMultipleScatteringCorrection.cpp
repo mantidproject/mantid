@@ -855,8 +855,8 @@ DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr
  */
 void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(
     double kinc, const ComponentWorkspaceMappings &materialWorkspaces) {
-  for (size_t i = 0; i < materialWorkspaces.size(); i++) {
-    auto QSQ = materialWorkspaces[i].QSQ;
+  for (size_t iMat = 0; iMat < materialWorkspaces.size(); iMat++) {
+    auto QSQ = materialWorkspaces[iMat].QSQ;
     auto [IOfQYFull, qValuesFull, wIndices] = integrateQSQ(QSQ, kinc);
     auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
     if (IOfQYAtQMax == 0.)
@@ -867,7 +867,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(
                    [IOfQYAtQMax](double d) -> double { return d / IOfQYAtQMax; });
     // Store the normalized integral (= cumulative probability) on the x axis
     // The y values in the two spectra store Q, w (or w index to be precise)
-    auto &InvPOfQ = materialWorkspaces[i].InvPOfQ;
+    auto &InvPOfQ = materialWorkspaces[iMat].InvPOfQ;
     for (size_t i = 0; i < InvPOfQ->getNumberHistograms(); i++) {
       InvPOfQ->dataX(i).resize(IOfQYNorm.size());
       InvPOfQ->dataX(i) = IOfQYNorm;
