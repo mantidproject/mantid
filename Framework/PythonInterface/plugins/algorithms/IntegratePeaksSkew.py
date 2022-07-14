@@ -18,6 +18,18 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.colors import LogNorm
 import re
+from enum import Enum
+
+
+class PEAK_MASK_STATUS(Enum):
+    VALID = "Peak mask is valid"
+    NPIX_MIN = "Peak mask has too few pixels"
+    NCOL_MAX = "Peak mask has too many columns"
+    NROW_MAX = "Peak mask has too many rows"
+    DENSITY_MIN = "Peak mask density is below limit"
+    VACANCY_MAX = "Peak mask has too many vacancies"
+    ON_EDGE = "Peak mask is on the detector edge"
+    NO_PEAK = "No peak detected."
 
 
 class InstrumentArrayConverter:
@@ -200,22 +212,19 @@ class InstrumentArrayConverter:
 def is_peak_mask_valid(peak_mask, npk_min=3, density_min=0.35, nrow_max=8, ncol_max=15,
                        min_npixels_per_vacancy=2, max_nvacancies=1):
     if peak_mask.sum() < npk_min:
-        print('peak_mask.sum() < npk_min')
-        return False
-    if np.sum(peak_mask.sum(axis=1) > 0) > ncol_max:
-        print('peak_mask.sum(axis=1) > 0) > ncol_max')
-        return False
-    if np.sum(peak_mask.sum(axis=0) > 0) > nrow_max:
-        print("np.sum(peak_mask.sum(axis=0) > 0) > nrow_max")
-        return False
-    density = peak_mask.sum() / (np.sum(peak_mask.sum(axis=0) > 0) * np.sum(peak_mask.sum(axis=1) > 0))
+        return False, PEAK_MASK_STATUS.NPIX_MIN
+    ncol = np.sum(peak_mask.sum(axis=1) > 0)
+    if ncol > ncol_max:
+        return False, PEAK_MASK_STATUS.NCOL_MAX
+    nrow = np.sum(peak_mask.sum(axis=0) > 0)
+    if nrow > nrow_max:
+        return False, PEAK_MASK_STATUS.NROW_MAX
+    density = peak_mask.sum() / (ncol*nrow)
     if density < density_min:
-        print("peak_mask.sum() / peak_mask.size < density_min")
-        return False
+        return False, PEAK_MASK_STATUS.DENSITY_MIN
     if does_peak_have_vacancies(peak_mask, min_npixels_per_vacancy, max_nvacancies):
-        print('has vacancies')
-        return False
-    return True
+        return False, PEAK_MASK_STATUS.VACANCY_MAX
+    return True, PEAK_MASK_STATUS.VALID
 
 
 def does_peak_have_vacancies(peak_mask, min_npixels_per_vacancy=2, max_nvacancies=1):
@@ -414,10 +423,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="Minimum density of peak pixels in bounding box")
         self.declareProperty(name="NRowMax", defaultValue=15, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
-                             doc="Maximum number of rows in peak mask (note on WISH rows are equivalent to tubes).")
+                             doc="Maximum number of rows in peak mask (note on WISH rows are equivalent to pixels).")
         self.declareProperty(name="NColMax", defaultValue=15, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
-                             doc="Maximum number of columns in peak mask")
+                             doc="Maximum number of columns in peak mask (note on WISH cols are equivalent to tubes).")
         self.declareProperty(name="NVacanciesMax", defaultValue=0, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=0),
                              doc="Maximum number of vacancies (contiguous regions of non-peak pixels entirely "
@@ -499,29 +508,30 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             peak_mask, non_bg_mask, peak_label = find_peak_mask(signal, ixlo, ixhi, irow, icol, use_nearest)
             intens, sig = 0.0, 0.0
             integrated = False
-            if not integrate_on_edge and np.any(np.logical_and(peak_mask, detector_edges)):
-                # warn peak on detector
-                pass
-            elif peak_label == 0 or not is_peak_mask_valid(peak_mask, npk_min, density_min, nrow_max, ncol_max,
-                                                           min_npixels_per_vacancy, max_nvacancies):
-                # warn peak not found
-                pass
+            if peak_label == 0:
+                status = PEAK_MASK_STATUS.NO_PEAK
+            elif not integrate_on_edge and np.any(np.logical_and(peak_mask, detector_edges)):
+                status = PEAK_MASK_STATUS.ON_EDGE
             else:
-                ypk, epk_sq = focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk)
-                # normalise by bin width
-                dx = np.diff(xpk)
-                dx = np.hstack((dx[0], dx))  # assume first has same dx as adjacent bin
-                ypk = ypk * dx
-                epk_sq = epk_sq * (dx ** 2)
-                # get lorentz factor for subsequent correction
-                th = pk.getScattering() / 2
-                wl = pk.getWavelength()
-                L = (np.sin(th) ** 2) / (wl ** 4)
-                # find bg and pk bins in focused spectrum by maximising I/sig
-                ixlo_opt, ixhi_opt = find_peak_limits(ypk, epk_sq, ixlo, ixhi)
-                intens = L * np.sum(ypk[ixlo_opt:ixhi_opt])
-                sig = L * np.sqrt(np.sum(epk_sq[ixlo_opt:ixhi_opt]))
-                integrated = True
+                is_valid_mask, status = is_peak_mask_valid(peak_mask, npk_min, density_min, nrow_max, ncol_max,
+                                                               min_npixels_per_vacancy, max_nvacancies)
+                if is_valid_mask:
+                    ypk, epk_sq = focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk)
+                    # normalise by bin width
+                    dx = np.diff(xpk)
+                    ypk[1:] = ypk[1:] * dx
+                    ypk[0] = ypk[0] * dx[0]  # assume first has same dx as adjacent bin
+                    epk_sq[1:] = epk_sq[1:] * (dx ** 2)
+                    epk_sq[0] = epk_sq[0] * (dx[0] ** 2)
+                    # get lorentz factor
+                    th = pk.getScattering() / 2
+                    wl = pk.getWavelength()
+                    L = (np.sin(th) ** 2) / (wl ** 4)
+                    # find bg and pk bins in focused spectrum by maximising I/sig
+                    ixlo_opt, ixhi_opt = find_peak_limits(ypk, epk_sq, ixlo, ixhi)
+                    intens = L * np.sum(ypk[ixlo_opt:ixhi_opt])
+                    sig = L * np.sqrt(np.sum(epk_sq[ixlo_opt:ixhi_opt]))
+                    integrated = True
             # update peak with new intens and sig
             pk.setIntensity(intens)
             pk.setSigmaIntensity(sig)
@@ -531,7 +541,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 img = ax[0].imshow(image_data, vmax=image_data[peak_mask].mean(), norm=LogNorm())
                 ax[0].plot(*np.where(peak_mask.T), 'xw')
                 ax[0].plot(icol, irow, 'or')
-                title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) lambda={np.round(pk.getWavelength(), 2)} Ang"
+                title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
+                            f"lambda={np.round(pk.getWavelength(), 2)} Ang\n{status.value}"
                 ax[0].set_title(title_str)
                 # 1D plot
                 ipad = int((ixhi - ixlo) / 2)  # extra portion of data shown outside the 1D window
