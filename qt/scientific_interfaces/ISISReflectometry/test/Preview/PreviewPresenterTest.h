@@ -266,15 +266,20 @@ private:
                                           MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
                                           MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>(),
                                           MockPlotPresenterT linePlot = std::make_unique<MockPlotPresenter>()) {
-    EXPECT_CALL(*regionSelector, subscribe(NotNull())).Times(1);
-    EXPECT_CALL(*linePlot, setScaleLog(AxisID::YLeft)).Times(1);
-    EXPECT_CALL(*linePlot, setScaleLog(AxisID::XBottom)).Times(1);
+    expectPresenterConstructed(*regionSelector, *linePlot);
     return PreviewPresenter::Dependencies{view,
                                           std::move(model),
                                           std::move(jobManager),
                                           std::move(instView),
                                           std::move(regionSelector),
                                           std::move(linePlot)};
+  }
+
+  void expectPresenterConstructed(MockRegionSelector &regionSelector, MockPlotPresenter &linePlot) {
+    EXPECT_CALL(regionSelector, subscribe(NotNull())).Times(1);
+    EXPECT_CALL(linePlot, setScaleLog(AxisID::YLeft)).Times(1);
+    EXPECT_CALL(linePlot, setScaleLog(AxisID::XBottom)).Times(1);
+    EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
   }
 
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,

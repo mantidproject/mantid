@@ -49,6 +49,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
+  m_plotPresenter->setPlotErrorBars(true);
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
