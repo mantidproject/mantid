@@ -10,32 +10,32 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
 
 #include <QWidget>
 #include <vector>
 
 namespace MantidQt::MantidWidgets {
-class EXPORT_OPT_MANTIDQT_PLOTTING QtPlotView : public QWidget {
+class EXPORT_OPT_MANTIDQT_PLOTTING QtPlotView : public QWidget, public IPlotView {
   Q_OBJECT
 public:
   enum class AxisScale { LINEAR, LOG };
   QtPlotView(QWidget *parent = nullptr);
 
-  void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
+  void setScaleLinear(const AxisID axisID) override;
+  void setScaleLog(const AxisID axisID) override;
 
-  void setXScaleType(const AxisScale axisScale);
-  void setYScaleType(const AxisScale axisScale);
+  void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+            const std::vector<int> &workspaceIndices) override;
 
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
-
   std::vector<Mantid::API::MatrixWorkspace_sptr> m_workspaces;
+
   std::vector<int> m_workspaceIndices;
 
   QHash<QString, QVariant> m_axisProperties;
-
   Widgets::MplCpp::Figure createFigure();
   void createLayout();
-  void plot();
 };
 } // namespace MantidQt::MantidWidgets

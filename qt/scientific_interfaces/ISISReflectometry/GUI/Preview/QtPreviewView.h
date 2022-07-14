@@ -11,15 +11,19 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"
-
 #include <QObject>
 #include <QWidget>
 
 #include <memory>
 #include <string>
+
+namespace MantidQt::MantidWidgets {
+class IPlotView;
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -38,7 +42,6 @@ public:
   // Plotting
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
-  void plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   // Instrument viewer toolbar
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
@@ -53,6 +56,7 @@ public:
   std::vector<size_t> getSelectedDetectors() const override;
 
   QLayout *getRegionSelectorLayout() const override;
+  MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
 
 private:
   Ui::PreviewWidget m_ui;

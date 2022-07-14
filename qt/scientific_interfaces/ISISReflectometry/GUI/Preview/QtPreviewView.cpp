@@ -15,6 +15,7 @@
 #include <string>
 
 using namespace Mantid::Kernel;
+using MantidQt::MantidWidgets::IPlotView;
 using MantidQt::MantidWidgets::ProjectionSurface;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -77,14 +78,9 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
 }
 
-void QtPreviewView::plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  auto const wsIndex = size_t{0};
-  m_ui.line_plot->setXScaleType(MantidWidgets::QtPlotView::AxisScale::LOG);
-  m_ui.line_plot->setYScaleType(MantidWidgets::QtPlotView::AxisScale::LOG);
-  m_ui.line_plot->setSpectrum(workspace, wsIndex);
-}
-
 QLayout *QtPreviewView::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }
+
+IPlotView *QtPreviewView::getLinePlotView() const { return m_ui.line_plot; }
 
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 void QtPreviewView::setInstViewEditState(bool isChecked) { m_ui.iv_edit_button->setDown(isChecked); }

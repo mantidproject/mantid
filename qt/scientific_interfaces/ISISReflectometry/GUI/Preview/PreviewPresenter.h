@@ -14,7 +14,7 @@
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
 #include "MantidAPI/RegionSelectorObserver.h"
-
+#include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
 #include <memory>
 
 namespace MantidQt::Widgets {
@@ -47,6 +47,7 @@ public:
     std::unique_ptr<IJobManager> jobManager;
     std::unique_ptr<IInstViewModel> instViewModel;
     std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
+    std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> plotPresenter{nullptr};
   };
 
   PreviewPresenter(Dependencies dependencies);
@@ -79,6 +80,7 @@ private:
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
+  std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
 
   void plotInstView();

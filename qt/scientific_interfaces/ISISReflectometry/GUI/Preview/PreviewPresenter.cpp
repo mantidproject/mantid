@@ -12,6 +12,7 @@
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::MantidWidgets::PlotPresenter;
 using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
 
@@ -25,10 +26,14 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_regionSelector(std::move(dependencies.regionSelector)), m_stubRegionObserver{new StubRegionObserver} {
+      m_regionSelector(std::move(dependencies.regionSelector)),
+      m_plotPresenter(std::move(dependencies.plotPresenter)), m_stubRegionObserver{new StubRegionObserver} {
 
   if (!m_regionSelector) {
     m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
+  }
+  if (!m_plotPresenter) {
+    m_plotPresenter = std::make_unique<PlotPresenter>(m_view->getLinePlotView());
   }
   // stub observer subscribes to the region selector
   m_regionSelector->subscribe(m_stubRegionObserver);
@@ -141,7 +146,7 @@ void PreviewPresenter::plotInstView() {
 
 void PreviewPresenter::plotRegionSelector() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
 
-void PreviewPresenter::plotLinePlot() { m_view->plotLinePlot(m_model->getReducedWs()); }
+void PreviewPresenter::plotLinePlot() {}
 
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 

@@ -224,7 +224,6 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
     EXPECT_CALL(*mockModel, getReducedWs()).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(*mockView, plotLinePlot(ws)).Times(1);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     presenter.notifyReductionCompleted();

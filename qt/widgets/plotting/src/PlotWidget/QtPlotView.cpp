@@ -21,42 +21,33 @@ QtPlotView::QtPlotView(QWidget *parent) : QWidget(parent), m_canvas(new FigureCa
   createLayout();
 }
 
-void QtPlotView::setXScaleType(const AxisScale axisScale) {
-  switch (axisScale) {
-  case AxisScale::LINEAR:
+void QtPlotView::setScaleLinear(const AxisID axisID) {
+  switch (axisID) {
+  case AxisID::XBottom:
     m_axisProperties[QString("xscale")] = QVariant("linear");
     break;
-  case AxisScale::LOG:
-    m_axisProperties[QString("xscale")] = QVariant("log");
-    break;
-  }
-  plot();
-}
-
-void QtPlotView::setYScaleType(const AxisScale axisScale) {
-  switch (axisScale) {
-  case AxisScale::LINEAR:
+  case AxisID::YLeft:
     m_axisProperties[QString("yscale")] = QVariant("linear");
     break;
-  case AxisScale::LOG:
+  }
+}
+
+void QtPlotView::setScaleLog(const AxisID axisID) {
+  switch (axisID) {
+  case AxisID::XBottom:
+    m_axisProperties[QString("xscale")] = QVariant("log");
+    break;
+  case AxisID::YLeft:
     m_axisProperties[QString("yscale")] = QVariant("log");
     break;
   }
-  plot();
 }
 
-void QtPlotView::setSpectrum(const MatrixWorkspace_sptr &ws, const size_t wsIndex) {
-
-  m_workspaces = std::vector<MatrixWorkspace_sptr>{ws};
-  m_workspaceIndices = std::vector<int>{static_cast<int>(wsIndex)};
-
-  plot();
-}
-
-void QtPlotView::plot() {
+void QtPlotView::plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                      const std::vector<int> &workspaceIndices) {
   constexpr bool plotErrorBars = true;
 
-  Widgets::MplCpp::plot(m_workspaces, boost::none, m_workspaceIndices, m_canvas->gcf().pyobj(), boost::none,
+  Widgets::MplCpp::plot(workspaces, boost::none, workspaceIndices, m_canvas->gcf().pyobj(), boost::none,
                         m_axisProperties, boost::none, plotErrorBars, false);
 }
 

@@ -13,6 +13,10 @@
 #include <memory>
 #include <string>
 
+namespace MantidQt::MantidWidgets {
+class IPlotView;
+}
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class PreviewViewSubscriber {
 public:
@@ -42,7 +46,6 @@ public:
   // Plotting
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
-  virtual void plotLinePlot(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   //  Instrument viewer toolbar
   virtual void setInstViewZoomState(bool on) = 0;
   virtual void setInstViewEditState(bool on) = 0;
@@ -60,5 +63,6 @@ public:
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
+  virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
