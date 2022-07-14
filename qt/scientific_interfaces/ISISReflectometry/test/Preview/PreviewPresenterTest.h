@@ -11,6 +11,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MockInstViewModel.h"
 #include "MockPlotPresenter.h"
 #include "MockPreviewModel.h"
@@ -30,6 +31,7 @@ using namespace MantidQt::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::Widgets;
 
+using MantidQt::MantidWidgets::AxisID;
 using MantidQt::MantidWidgets::MockPlotPresenter;
 
 using ::testing::_;
@@ -265,6 +267,8 @@ private:
                                           MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>(),
                                           MockPlotPresenterT linePlot = std::make_unique<MockPlotPresenter>()) {
     EXPECT_CALL(*regionSelector, subscribe(NotNull())).Times(1);
+    EXPECT_CALL(*linePlot, setScaleLog(AxisID::YLeft)).Times(1);
+    EXPECT_CALL(*linePlot, setScaleLog(AxisID::XBottom)).Times(1);
     return PreviewPresenter::Dependencies{view,
                                           std::move(model),
                                           std::move(jobManager),

@@ -7,11 +7,13 @@
 
 #include "PreviewPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::MantidWidgets::AxisID;
 using MantidQt::MantidWidgets::PlotPresenter;
 using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
@@ -44,6 +46,9 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
+
+  m_plotPresenter->setScaleLog(AxisID::YLeft);
+  m_plotPresenter->setScaleLog(AxisID::XBottom);
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
