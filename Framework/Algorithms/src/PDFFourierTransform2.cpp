@@ -300,6 +300,8 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, co
     const double factor = sigma / (4. * M_PI);
 
     for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = DFOfR[i] / factor;
       // transform the data
       FOfR[i] = FOfR[i] / factor;
     }
@@ -364,6 +366,8 @@ void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &
     const double factor = sigma / (4. * M_PI);
 
     for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = DFOfR[i] * factor;
       // transform the data
       FOfR[i] = FOfR[i] * factor;
     }
