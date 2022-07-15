@@ -104,7 +104,7 @@ pipeline {
           options { timestamps () }
           steps {
             script { WORKSPACE_UNIX_PATH = "${WORKSPACE}".replaceAll("\\\\", "/") }
-            build_and_test_win("win-msvc")
+            build_and_test_win("win-ninja-ci")
           }
           post {
             always {
