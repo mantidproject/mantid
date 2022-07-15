@@ -284,7 +284,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         savestrings = [x for x in [ascii_string, nexus_string] if x]
         return "".join(savestrings)
 
-    def script_maker(self, options, paths, fselector=None):
+    def script_maker(self, options, paths, f_selector=None):
         self._script = []
 
         # options shortcut
@@ -305,8 +305,8 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                        and bool(self._export_path))
         self._norm = get_normation(options)
 
-        self._setup_sample_data(paths, fselector)
-        self._setup_standard_data(paths, fselector)
+        self._setup_sample_data(paths, f_selector)
+        self._setup_standard_data(paths, f_selector)
         self._interpolate_standard()
         self._set_loop()
 
