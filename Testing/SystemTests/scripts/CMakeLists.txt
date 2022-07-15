@@ -26,7 +26,9 @@ file(WRITE ${SAVE_DIR_FILE} "${SAVE_DIR}")
 
 # Configure files for developers running tests
 set(SYSTEMTESTS_RUNNER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/runSystemTests.py)
-if(MSVC OR XCODE_VERSION)
+
+get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_is_multi_config)
   set(MULTI_CONFIG_GENERATOR "true")
 else()
   set(MULTI_CONFIG_GENERATOR "false")

@@ -133,7 +133,12 @@ endif()
 
 file(TO_CMAKE_PATH ${MSVC_PATHS} MSVC_PATHS)
 
-set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+if(_is_multi_config)
+  set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+else()
+  set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin)
+endif()
+
 set(MSVC_IDE_ENV
     "\
 PYTHONPATH=${MSVC_BIN_DIR}\n\

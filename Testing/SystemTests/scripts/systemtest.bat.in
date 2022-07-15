@@ -12,6 +12,7 @@
 
 set PYTHON_EXE=@PYTHON_EXECUTABLE@
 set RUNNER_SCRIPT=@SYSTEMTESTS_RUNNER_SCRIPT@
+set MULTI_CONFIG_GENERATOR=@MULTI_CONFIG_GENERATOR@
 set BIN_DIR=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
 set MANTIDPYTHON_ARGS=--classic
 
@@ -22,33 +23,55 @@ if [%1]==[-h] (
 )
 
 :: Are there enough arguments
-if [%1] EQU [-C] (
-  if [%2] NEQ [] (
-    set MANTIDPYTHON=%BIN_DIR%\%2\mantidpython.bat
+if "%MULTI_CONFIG_GENERATOR%" == "true" (
+  if [%1] EQU [-C] (
+    if [%2] NEQ [] (
+      set MANTIDPYTHON=%BIN_DIR%\%2\mantidpython.bat
+    ) else (
+      echo -C requires a config argument
+      echo.
+      echo Use -h for full usage
+      goto error
+    )
   ) else (
-    echo -C requires a config argument
+    echo Multi-configuration build requires -C ^<cfg^> to specify test configuration
     echo.
     echo Use -h for full usage
     goto error
   )
 ) else (
-  echo Multi-configuration build requires -C ^<cfg^> to specify test configuration
-  echo.
-  echo Use -h for full usage
-  goto error
+  if [%1] EQU [-C] (
+    echo Ninja builds do not require you to specify a configuration -C.
+    echo.
+    echo Use -h for full usage
+    goto error
+  ) else (
+    set MANTIDPYTHON=%BIN_DIR%\mantidpython.bat
+  )
 )
 
 :: Update testing data
 echo Updating testing data...
-cmake --build . --config %2 --target StandardTestData
-if ERRORLEVEL 1 exit /b %ERRORLEVEL%
-cmake --build . --config %2 --target SystemTestData
-if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+if "%MULTI_CONFIG_GENERATOR%" == "true" (
+  cmake --build . --target StandardTestData --config %2
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+  cmake --build . --target SystemTestData --config %2
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+) else (
+  cmake --build . --target StandardTestData
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+  cmake --build . --target SystemTestData
+  if ERRORLEVEL 1 exit /b %ERRORLEVEL%
+)
 
 :: Execute
 echo.
 echo Running tests...
-%MANTIDPYTHON% %MANTIDPYTHON_ARGS% %RUNNER_SCRIPT% --executable="%MANTIDPYTHON%" --exec-args=" --classic" %3 %4 %5 %6 %7 %8 %9
+if "%MULTI_CONFIG_GENERATOR%" == "true" (
+  %MANTIDPYTHON% %MANTIDPYTHON_ARGS% %RUNNER_SCRIPT% --executable="%MANTIDPYTHON%" --exec-args=" --classic" %3 %4 %5 %6 %7 %8 %9
+) else (
+  %MANTIDPYTHON% %MANTIDPYTHON_ARGS% %RUNNER_SCRIPT% --executable="%MANTIDPYTHON%" --exec-args=" --classic" %1 %2 %3 %4 %5 %6 %7
+)
 goto end
 
 :: -------- Functions  ---------
