@@ -1617,7 +1617,8 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
   for (auto it = track.cbegin(); it != track.cend(); it++) {
     const double trackSegLength = it->distInsideObject;
     const auto geometryObj = it->object;
-    auto [sigma_total, scatteringXSection] = new_vector(geometryObj->material(), k, specialSingleScatterCalc);
+    double sigma_total;
+    std::tie(sigma_total, std::ignore) = new_vector(geometryObj->material(), k, specialSingleScatterCalc);
     double vmu = 100 * geometryObj->material().numberDensityEffective() * sigma_total;
     double muL = trackSegLength * vmu;
     totalMuL += muL;
