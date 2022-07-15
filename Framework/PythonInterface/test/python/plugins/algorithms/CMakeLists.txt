@@ -76,6 +76,7 @@ set(TEST_PY_FILES
     LoadLiveDataTest.py
     LoadLampTest.py
     LoadLogPropertyTableTest.py
+    LoadSANSLegacyTest.py
     LoadMultipleGSSTest.py
     LoadNMoldyn3AsciiTest.py
     LoadNMoldyn4Ascii1DTest.py
