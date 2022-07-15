@@ -16,7 +16,9 @@ from scipy.optimize._numdiff import approx_derivative
 import numpy as np
 import re
 import scipy.optimize as sp
+from typing import Callable, Dict, List, Tuple
 import warnings
+
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
 
@@ -1279,8 +1281,18 @@ class CrystalFieldFit(object):
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
 
-    def gofit(self, algorithm_callable, **kwargs) -> None:
-        """Performs a fit using an algorithm from the GOFit python package."""
+    def gofit(self, algorithm_callable: Callable, **kwargs) -> None:
+        """
+        Performs a fit using an algorithm from the GOFit python package.
+        @param algorithm_callable: The algorithm callable from the GOFit python package.
+        @param kwargs: Keyword arguments. The following keywords are understood:
+
+            - jacobian: A boolean to specify whether to use a Jacobian (regularisation and multistart only).
+            - parameter_bounds: A dictionary of tuples containing the upper and lower bounds for each parameter
+                                (multistart and alternating only).
+
+        the remaining kwargs are passed to the GOFit algorithm callable.
+        """
         # Get the name of the algorithm as the name of the callable python function.
         algorithm_name = algorithm_callable.__name__
 
@@ -1317,17 +1329,18 @@ class CrystalFieldFit(object):
         else:
             self._process_gofit_output(all_parameters, params, "_" + algorithm_name)
 
-    def _get_algorithm_args(self, algorithm_name: str, all_parameters: list, b_parameters: list, p0, residual, **kwargs):
+    def _get_algorithm_args(self, algorithm_name: str, all_parameters: List[str], b_parameters: List[str],
+                            p0: List[float], residual: Callable, **kwargs) -> List:
         """Gets the algorithm arguments to be used for a specific GOFit algorithm."""
         algorithm_args = []
         if algorithm_name == "regularisation":
-            algorithm_args.append(p0)
+            algorithm_args.append(np.array(p0))
         elif algorithm_name == "alternating":
-            algorithm_args.extend([len(b_parameters), p0])
+            algorithm_args.extend([len(b_parameters), np.array(p0)])
 
         if algorithm_name == "multistart" or algorithm_name == "alternating":
             xl, xu = self._parse_lower_and_upper_bounds(all_parameters, kwargs.pop("parameter_bounds", dict()))
-            algorithm_args.extend([xl, xu])
+            algorithm_args.extend([np.array(xl), np.array(xu)])
 
         algorithm_args.append(residual)
 
@@ -1335,17 +1348,7 @@ class CrystalFieldFit(object):
             algorithm_args.append(lambda p: approx_derivative(residual, p, method="2-point"))
         return algorithm_args
 
-    @staticmethod
-    def _parse_lower_and_upper_bounds(parameters_names: list, parameter_bounds: dict) -> tuple:
-        """Parses the lower and upper bounds into two separate numpy arrays."""
-        xl, xu = [], []
-        for name in parameters_names:
-            bounds = parameter_bounds.get(name, [0, 1])
-            xl.append(bounds[0])
-            xu.append(bounds[1])
-        return np.array(xl), np.array(xu)
-
-    def _find_b_and_shape_parameters_to_optimize(self) -> tuple:
+    def _find_b_and_shape_parameters_to_optimize(self) -> Tuple[List[str], List[str], List[float]]:
         """Finds the B parameters and Shape parameters we want to optimize across."""
         b_params, shape_params, initial_values = [], [], []
         for i in range(self.model.function.nParams()):
@@ -1357,9 +1360,20 @@ class CrystalFieldFit(object):
             elif "FWHM" in name or name == "IntensityScaling":
                 shape_params.append(name)
                 initial_values.append(value)
-        return b_params, shape_params, np.array(initial_values)
+        return b_params, shape_params, initial_values
 
-    def _process_gofit_output(self, parameter_names, parameter_values, suffix="") -> None:
+    @staticmethod
+    def _parse_lower_and_upper_bounds(parameters_names: List[str],
+                                      parameter_bounds: Dict[str, Tuple[float, float]]) -> Tuple[List[float], List[float]]:
+        """Parses the lower and upper bounds into two separate lists."""
+        xl, xu = [], []
+        for name in parameters_names:
+            bounds = parameter_bounds.get(name, [0, 1])
+            xl.append(bounds[0])
+            xu.append(bounds[1])
+        return xl, xu
+
+    def _process_gofit_output(self, parameter_names: List[str], parameter_values: List[float], suffix: str = "") -> None:
         """Create an output workspace with the fitted data, and a parameter table."""
         for name, value in zip(parameter_names, parameter_values):
             self.model.function.setParameter(name, value)
