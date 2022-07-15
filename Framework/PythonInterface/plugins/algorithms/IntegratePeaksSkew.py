@@ -253,8 +253,9 @@ def find_bg_pts_seed_skew(signal, ibg_seed=None):
         ibg_seed = np.arange(signal.size)
     # sort and grow seed
     isort = np.argsort(-signal[ibg_seed])  # descending order
+    istart = 0
     iend = len(signal)
-    prev_skew = moment(signal[ibg_seed[isort[:iend]]], 3)
+    prev_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
     for istart in range(1, iend):
         this_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
         if this_skew >= prev_skew:  # this_skew <= 0 or
@@ -301,12 +302,14 @@ def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8):
 def find_peak_limits(signal, error_sq, ilo, ihi):
     # find initial background points in tof window using skew method (excl. points above mean)
     ibg, _ = find_bg_pts_seed_skew(signal[ilo:ihi])
-    ibg += ilo
     # create mask and find largest contiguous region of peak bins
     skew_mask = np.ones(ihi - ilo, dtype=bool)
-    skew_mask[ibg - ilo] = False
+    skew_mask[ibg] = False
     labels, nlabel = label(skew_mask)
-    ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
+    if nlabel == 0:
+        ilabel = 0
+    else:
+        ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
     istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ilo
     # expand window to maximise I/sig (good for when peak not entirely in window)
     return optimise_window_intens_over_sig(signal, error_sq, istart, iend + 1)  #
@@ -346,7 +349,7 @@ def find_peak_mask(signal, ixlo, ixhi, irow, icol, use_nearest):
     labeled_array, num_features = label(non_bg_mask)
     # find label corresponding to peak
     peak_label = labeled_array[irow, icol]
-    if peak_label == 0 and use_nearest:
+    if peak_label == 0 and num_features > 0 and use_nearest:
         irows, icols = get_nearest_non_masked_index(non_bg_mask, irow, icol)
         # look for label corresponding to max. num peak pixels
         labels = np.unique(labeled_array[irows, icols])
@@ -581,7 +584,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     iend = min(ixhi + ipad, len(xpk) - 1)
                 else:
                     ax[1].axvline(xpk[ixlo_opt], ls='--', color='b', label='Optimal window')
-                    ax[1].axvline(xpk[ixhi_opt], ls='--', color='b')
+                    ax[1].axvline(xpk[ixhi_opt-1], ls='--', color='b')
                     istart = max(min(ixlo, ixlo_opt) - ipad, 0)
                     iend = min(max(ixhi, ixhi_opt) + ipad, len(xpk) - 1)
                 ax[1].errorbar(xpk[istart:iend], ypk[istart:iend], yerr=np.sqrt(epk_sq[istart:iend]),
