@@ -159,6 +159,8 @@ class InstrumentArrayConverter:
 
     def _get_detid_array_rect_detector(self, bank, detid, row, col, dpixel):
         col_step, row_step = bank.idstep(), bank.idstepbyrow()  # step in detID along col and row
+        if bank.idfillbyfirst_y():
+            col_step, row_step = row_step, col_step
         # need to adjust range depending on whether above min/max row/col
         drow_vec = np.arange(max(0, row - dpixel), min(row + dpixel + 1, bank.xpixels())) - row
         dcol_vec = np.arange(max(0, col - dpixel), min(col + dpixel + 1, bank.ypixels())) - col
