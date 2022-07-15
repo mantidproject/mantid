@@ -7,11 +7,14 @@
 
 #include "PreviewPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::MantidWidgets::AxisID;
+using MantidQt::MantidWidgets::PlotPresenter;
 using MantidQt::Widgets::IRegionSelector;
 using MantidQt::Widgets::RegionSelector;
 
@@ -25,10 +28,14 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 PreviewPresenter::PreviewPresenter(Dependencies dependencies)
     : m_view(dependencies.view), m_model(std::move(dependencies.model)),
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)),
-      m_regionSelector(std::move(dependencies.regionSelector)), m_stubRegionObserver{new StubRegionObserver} {
+      m_regionSelector(std::move(dependencies.regionSelector)),
+      m_plotPresenter(std::move(dependencies.plotPresenter)), m_stubRegionObserver{new StubRegionObserver} {
 
   if (!m_regionSelector) {
     m_regionSelector = std::make_unique<RegionSelector>(nullptr, m_view->getRegionSelectorLayout());
+  }
+  if (!m_plotPresenter) {
+    m_plotPresenter = std::make_unique<PlotPresenter>(m_view->getLinePlotView());
   }
   // stub observer subscribes to the region selector
   m_regionSelector->subscribe(m_stubRegionObserver);
@@ -39,6 +46,10 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
+
+  m_plotPresenter->setScaleLog(AxisID::YLeft);
+  m_plotPresenter->setScaleLog(AxisID::XBottom);
+  m_plotPresenter->setPlotErrorBars(true);
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
@@ -68,19 +79,23 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
-  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
-                       m_instViewModel->getAxis());
+  plotInstView();
   // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_view->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
-  // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
+  // Perform summing banks to update the next plot, if possible
+  runSumBanks();
 }
 
-void PreviewPresenter::notifySumBanksCompleted() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+void PreviewPresenter::notifySumBanksCompleted() {
+  plotRegionSelector();
+  // Perform reduction to update the next plot, if possible
+  runReduction();
+}
 
 void PreviewPresenter::notifyReductionCompleted() {
-  // TODO plot reduced workspace
-  g_log.notice("Reduction completed");
+  // Update the final plot
+  plotLinePlot();
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
@@ -109,11 +124,9 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   notifyInstViewEditRequested();
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
-  auto selectionStr = m_model->detIDsToString(indices);
-  g_log.debug(selectionStr);
-
   m_model->setSelectedBanks(indices);
-  m_model->sumBanksAsync(*m_jobManager);
+  // Execute summing the selected banks
+  runSumBanks();
 }
 
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
@@ -127,12 +140,36 @@ void PreviewPresenter::notifyRegionChanged() {
   // Set the selection from the view
   auto roi = m_regionSelector->getRegion();
   m_model->setSelectedRegion(roi);
-  g_log.notice("Running reduction on ROI: " + m_model->getProcessingInstructions());
+  runReduction();
+}
+
+void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
+
+void PreviewPresenter::plotInstView() {
+  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
+                       m_instViewModel->getAxis());
+}
+
+void PreviewPresenter::plotRegionSelector() { m_regionSelector->updateWorkspace(m_model->getSummedWs()); }
+
+void PreviewPresenter::plotLinePlot() {
+  auto ws = m_model->getReducedWs();
+  assert(ws);
+  auto const numSpec = ws->getNumberHistograms();
+  if (numSpec != 1) {
+    g_log.warning("Reduced workspace has " + std::to_string(numSpec) + " spectra; expected 1");
+  }
+  m_plotPresenter->setSpectrum(ws, 0);
+  m_plotPresenter->plot();
+}
+
+void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
+
+void PreviewPresenter::runReduction() {
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
   // Perform the reduction
   m_model->reduceAsync(*m_jobManager);
 }
 
-void PreviewPresenter::notify1DPlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -31,8 +31,6 @@ public:
   void sumBanksAsync(IJobManager &jobManager) override;
   void reduceAsync(IJobManager &jobManager) override;
 
-  std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const override;
-
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
   std::vector<Mantid::detid_t> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;

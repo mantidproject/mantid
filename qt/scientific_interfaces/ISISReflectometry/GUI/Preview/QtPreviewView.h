@@ -11,14 +11,18 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"
-
 #include <QObject>
 #include <QWidget>
 
 #include <memory>
 #include <string>
+
+namespace MantidQt::MantidWidgets {
+class IPlotView;
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -51,6 +55,7 @@ public:
   std::vector<size_t> getSelectedDetectors() const override;
 
   QLayout *getRegionSelectorLayout() const override;
+  MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
 
 private:
   Ui::PreviewWidget m_ui;
@@ -67,7 +72,7 @@ private slots:
   void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
   void onRegionSelectorExportToAdsClicked() const;
-  void on1DPlotExportToAdsClicked() const;
+  void onLinePlotExportToAdsClicked() const;
   void onSelectRectangularROIClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -118,20 +118,6 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
-  void test_convert_detIDs_to_string() {
-    PreviewModel model;
-    auto const indices = std::vector<Mantid::detid_t>{99, 4, 5};
-    auto result = model.detIDsToString(indices);
-    TS_ASSERT_EQUALS(result, "99,4,5");
-  }
-
-  void test_convert_empty_detIDs_to_string() {
-    PreviewModel model;
-    auto const indices = std::vector<Mantid::detid_t>{};
-    auto result = model.detIDsToString(indices);
-    TS_ASSERT_EQUALS("", result);
-  }
-
   void test_export_summed_ws_to_ads() {
     PreviewModel model;
     auto mockJobManager = MockJobManager();

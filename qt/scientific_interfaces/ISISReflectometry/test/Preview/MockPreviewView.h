@@ -33,5 +33,6 @@ public:
   MOCK_METHOD(void, setRectangularROIState, (bool), (override));
   MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
   MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
+  MOCK_METHOD(MantidQt::MantidWidgets::IPlotView *, getLinePlotView, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
