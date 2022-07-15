@@ -61,7 +61,7 @@
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
                 "CONDA_ENV": true,
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
                 "USE_PRECOMPILED_HEADERS": "OFF"
             }
         },
