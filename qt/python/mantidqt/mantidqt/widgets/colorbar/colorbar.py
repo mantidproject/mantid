@@ -306,7 +306,10 @@ class ColorbarWidget(QWidget):
     def _calculate_clim(self) -> tuple:
         """Calculate the colorbar limits to use when autoscale is turned on."""
         axes = self.colorbar.mappable
-        data = axes.get_array_clipped_to_bounds() if hasattr(axes, "get_array_clipped_to_bounds") else axes.get_array()
+        try:
+            data = axes.get_array_clipped_to_bounds()
+        except AttributeError:
+            data = axes.get_array()
 
         log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
         try:
@@ -317,7 +320,7 @@ class ColorbarWidget(QWidget):
                 # If any dimension is zero then we have no data in the display area
                 data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
 
-                return (0.0, 0.0) if data_is_empty else (masked_data.min(), masked_data.max())
+                return (0.1, 1.0) if data_is_empty else (masked_data.min(), masked_data.max())
             except (AttributeError, IndexError):
                 data = data[np.nonzero(data)] if log_normalisation else data
                 return np.nanmin(data), np.nanmax(data)
