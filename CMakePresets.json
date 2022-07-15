@@ -42,8 +42,8 @@
             }
         },
         {
-            "name": "win",
-            "displayName": "win",
+            "name": "win-msvc",
+            "displayName": "win-msvc",
             "description": "Default build options for a windows conda build",
             "binaryDir": "${sourceDir}/build",
             "generator": "Visual Studio 16 2019",
@@ -55,7 +55,20 @@
         {
             "name": "win-ninja",
             "displayName": "win-ninja",
-            "description": "Default build options for a windows conda Ninja build",
+            "description": "Default build options for a windows conda Ninja debug build",
+            "binaryDir": "${sourceDir}/build",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+                "CONDA_ENV": true,
+                "CMAKE_BUILD_TYPE": "Debug",
+                "USE_PRECOMPILED_HEADERS": "OFF"
+            }
+        },
+        {
+            "name": "win-ninja-ci",
+            "displayName": "win-ninja-ci",
+            "description": "Default build options for a windows conda Ninja release build",
             "binaryDir": "${sourceDir}/build",
             "generator": "Ninja",
             "cacheVariables": {

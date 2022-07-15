@@ -57,8 +57,8 @@ Configure CMake and generate build files
 * Run ``conda activate mantid-developer`` to activate your conda environment.
 * Inside of your mantid source directory run either:
 
-    * ``cmake --preset=win`` if you want your build directory inside your source directory, or
-    * ``cmake --preset=win -B {BUILD_DIR}`` to specify a different build directory.
+    * ``cmake --preset=win-msvc`` if you want your build directory inside your source directory, or
+    * ``cmake --preset=win-msvc -B {BUILD_DIR}`` to specify a different build directory.
 
 Compile and Build using Visual Studio
 ----------------------------------------------------------
