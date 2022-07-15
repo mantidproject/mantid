@@ -54,13 +54,13 @@
     {
       "name": "win-ninja",
       "displayName": "win-ninja",
-      "description": "Default build options for a windows conda Ninja build",
+      "description": "Default build options for a windows conda Ninja DebugWithRelRuntime build",
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
       "cacheVariables": {
 	"CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
 	"CONDA_ENV": true,
-	"CMAKE_BUILD_TYPE": "Release",
+	"CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
 	"USE_PRECOMPILED_HEADERS": "OFF"
       }
     },
