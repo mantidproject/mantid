@@ -127,7 +127,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             'md_single_crystal_elastic import '
             'vanadium_correction, flipping_ratio_correction',
             'from mantidqtinterfaces.dns_single_crystal_elastic.scripts.'
-            'md_single_crystal_elastic import background_substraction',
+            'md_single_crystal_elastic import background_subtraction',
             'from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace,'
             ' mtd',
             'from mantid.simpleapi import SaveAscii, SaveNexus', ''

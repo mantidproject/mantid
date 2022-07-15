@@ -10,8 +10,8 @@ DNS script helpers for elastic powder reduction
 
 # pylint: disable=unused-import
 from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic \
-    import flipping_ratio_correction, raise_error, background_substraction
-__all__ = ('background_substraction','flipping_ratio_correction')
+    import flipping_ratio_correction, raise_error, background_subtraction
+__all__ = ('background_subtraction','flipping_ratio_correction')
 
 import numpy as np
 from mantid.simpleapi import (BinMD, CreateSingleValuedWorkspace, DivideMD,
