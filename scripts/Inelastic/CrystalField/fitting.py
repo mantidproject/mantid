@@ -12,7 +12,7 @@ from .energies import energies
 from .normalisation import split2range, ionname2Nre
 from .CrystalFieldMultiSite import CrystalFieldMultiSite
 from scipy.constants import physical_constants
-#from scipy.optimize._numdiff import approx_derivative
+from scipy.optimize._numdiff import approx_derivative
 import numpy as np
 import re
 import scipy.optimize as sp
@@ -1279,25 +1279,25 @@ class CrystalFieldFit(object):
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
 
-    def fit_with_gofit(self, parameter_bounds=None, **kwargs):
-        from gofit import alternating#, regularisation
+    def gofit(self, algorithm="regularisation", parameter_bounds=None, **kwargs):
+        try:
+            from gofit import multistart, regularisation
+        except ImportError:
+            logger.error("Failed to import the gofit python package. Please make sure you gofit is pip installed.")
+            return
 
         if parameter_bounds is None:
             parameter_bounds = dict()
 
-        # Read the x, y and error data from the input workspace.  Find the number of data points, and parameters.
-        x = self._input_workspace.readX(0)
-        y = self._input_workspace.readY(0)
-        e = self._input_workspace.readE(0)
+        # Read the x, y and error data from the input workspace.
+        x, y, e = self._input_workspace.readX(0), self._input_workspace.readY(0), self._input_workspace.readE(0)
 
+        # Find the number of data points, and parameters.
         m = self._input_workspace.getNumberBins(0)
         n = self.model.function.nParams()
 
         # Get the initial parameter values of the function
         p0 = np.array([self.model.function.getParameterValue(i) for i in range(n)])
-
-        # Find the bounds to use for each parameter.
-        xl, xu = self._parse_lower_and_upper_bounds(n, parameter_bounds)
 
         # Create a wrapper around a callable mantid fitting function
         callable_func = FunctionWrapper(self.model.function)
@@ -1305,25 +1305,49 @@ class CrystalFieldFit(object):
         def wrapped_func(*params):
             return callable_func(x, *params)
 
-        # Create a non-linear least squares cost function
-        def nlls_cost_function(params):
+        # Calculates the residual using a non-linear least squares cost function
+        def residual(params):
             return np.ravel((y - wrapped_func(*np.array(params))) / e)
 
-        # Create a Jacobian method to calculate the cost function residual using scipy 2-point approx derivative
-        #def create_jacobian(res, rel_step=None):
-        #    return lambda p: approx_derivative(res, p, method="2-point", rel_step=rel_step)
+        # Calculates the jacobian using the scipy 2-point approx_derivative method
+        def jacobian(p):
+            return approx_derivative(residual, p, method="2-point")
 
-        def R(p):
-            #p_unscaled = (xl + (xu - xl) * p)
-            return nlls_cost_function(p)
-        # params, status = regularisation(m, n, p0, R, jac=create_jacobian(R), **kwargs)
+        if algorithm == "regularisation":
+            params, status = regularisation(m, n, p0, residual, jac=jacobian, **kwargs)
+            self._process_gofit_output(params, "_regularisation")
 
-        params, status = alternating(m, n, 9, p0, xl, xu, R, **kwargs)
-        self._process_gofit_output(params, "alternating")
+            for i, j in zip([self.model.function.parameterName(t) for t in range(n)], params):
+                print(f"{i} = {j}")
+            print(str(self.model.function))
+            return
 
-        for i, j, k, l, m in zip([self.model.function.parameterName(t) for t in range(n)], p1, p2, p3, p4):
-            print(f"{i} = {j}     {k}     {l}     {m}")
-        print(str(self.model.function))
+        # Find the bounds to use for each parameter.
+        xl, xu = self._parse_lower_and_upper_bounds(n, parameter_bounds)
+
+        if algorithm == "multistart":
+            params, status = multistart(m, n, xl, xu, residual, jac=jacobian, **kwargs)
+            self._process_gofit_output(params, "_multistart")
+
+            for i, j in zip([self.model.function.parameterName(t) for t in range(n)], params):
+                print(f"{i} = {j}")
+            print(str(self.model.function))
+        elif algorithm == "alternating":
+            raise RuntimeError("Not implemented yet")
+        else:
+            raise RuntimeError(f"GOFit does not have '{algorithm}' as an algorithm. Please use one of "
+                               f"['regularisation', 'multistart', 'alternating'].")
+
+        # print(str(p0) + "\n")
+        # print(str(xl) + "\n")
+        # print(str(xu) + "\n")
+        # print(str(xl > p0) + "\n")
+        # print(str(xu < p0) + "\n")
+        # for i, j in zip([self.model.function.parameterName(t) for t in range(n)], p0):
+        #     print(f"{i} = {j}")
+        # print(str(self.model.function))
+        # params, status = alternating(m, n, 9, p0, xl, xu, residual, **kwargs)
+        # self._process_gofit_output(params, "alternating")
 
     def _parse_lower_and_upper_bounds(self, n: int, parameter_bounds: dict) -> tuple:
         """Parses the lower and upper bounds into two separate numpy arrays."""
@@ -1331,19 +1355,21 @@ class CrystalFieldFit(object):
         for i in range(n):
             param_name = self.model.function.parameterName(i)
             xl.append(parameter_bounds[param_name][0] if param_name in parameter_bounds else 0)
-            xu.append(parameter_bounds[param_name][1] if param_name in parameter_bounds else 1)
+            xu.append(parameter_bounds[param_name][1] if param_name in parameter_bounds else 1000)
+            # PeakCentre and Amplitudes will be fixed anyway. Find different function with only relevant params?
 
         return np.array(xl), np.array(xu)
 
-    def _process_gofit_output(self, parameter_values, suffix="None") -> None:
+    def _process_gofit_output(self, parameter_values, suffix="") -> None:
         """Create an output workspace with the fitted data, and a parameter table."""
         for i, value in enumerate(parameter_values):
-            self.model.function.setParameter(i, value)
+            if not self.model.function.isFixed(i):
+                self.model.function.setParameter(i, value)
 
         output_name = self._fit_properties["Output"] if "Output" in self._fit_properties else self._output_workspace_base_name
         EvaluateFunction(Function=str(self.model.function),
                          InputWorkspace=self._input_workspace,
-                         OutputWorkspace=output_name + "_Workspace" + suffix)
+                         OutputWorkspace=output_name + suffix)
 
     def two_step_fit(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
         logger.warning("Please note that this is a first experimental version of the two_step_fit algorithm.")

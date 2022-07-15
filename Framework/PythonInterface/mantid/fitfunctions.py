@@ -176,7 +176,8 @@ class FunctionWrapper(object):
             x_list = [x]
 
         for i in range(len(params)):
-            self.fun.setParameter(i, params[i])
+            if not self.fun.isFixed(i):
+                self.fun.setParameter(i, params[i])
         y = x_list[:]
         ws = self._execute_algorithm('CreateWorkspace', DataX=x_list, DataY=y)
         out = self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=ws)
