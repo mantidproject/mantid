@@ -133,10 +133,10 @@ endif()
 
 file(TO_CMAKE_PATH ${MSVC_PATHS} MSVC_PATHS)
 
-if(CMAKE_GENERATOR MATCHES "Ninja")
-  set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin)
-else()
+if(_is_multi_config)
   set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+else()
+  set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin)
 endif()
 
 set(MSVC_IDE_ENV
