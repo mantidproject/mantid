@@ -851,10 +851,12 @@ DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr
   auto nAccessibleWPoints = iFirstInaccessibleW;
 
   // loop through the S(Q) spectra for the different energy transfer values
+  std::vector<double> IOfQX, IOfQY;
   for (size_t iW = 0; iW < nAccessibleWPoints; iW++) {
     auto kf = getKf(wValues[iW], kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
-    std::vector<double> IOfQX, IOfQY;
+    IOfQX.clear();
+    IOfQY.clear();
     integrateCumulative(QSQ->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
     qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
     wIndices.insert(wIndices.end(), IOfQX.size(), static_cast<double>(iW));
@@ -928,9 +930,9 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const API::Matrix
 void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs,
                                                                            const double specialK) {
   for (auto &SQWSMapping : matWSs) {
+    std::set<double> kValues = {specialK};
     // Calculate the integral for a range of k values. Not massively important which k values but choose them here
     // based on the q points in the S(Q) profile and the initial k values incident on the sample
-    std::set<double> kValues = {specialK};
     const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).readX();
     for (auto q : qValues) {
       if (q > 0)
@@ -1002,8 +1004,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
     throw std::runtime_error("Distribution doesn't extend as far as upper integration limit, x=" +
                              std::to_string(xmax));
 
-  auto iter = std::upper_bound(h.x().cbegin(), h.x().cend(), xmin);
-  auto iRight = static_cast<size_t>(std::distance(h.x().cbegin(), iter));
+  auto iter = std::upper_bound(xValues.cbegin(), xValues.cend(), xmin);
+  auto iRight = static_cast<size_t>(std::distance(xValues.cbegin(), iter));
 
   auto linearInterp = [&xValues, &yValues](const double x, const size_t lIndex, const size_t rIndex) -> double {
     return (yValues[lIndex] * (xValues[rIndex] - x) + yValues[rIndex] * (x - xValues[lIndex])) /
@@ -1040,9 +1042,11 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     yToUse = isPoints ? 0.5 * (yValues[iRight] + yValues[iRight - 1]) : yValues[iRight - 1];
-    sum += yToUse * (xValues[iRight] - xValues[iRight - 1]);
-    if (xValues[iRight] > std::nextafter(xValues[iRight - 1], DBL_MAX)) {
-      resultX.emplace_back(xValues[iRight]);
+    double xLeft = xValues[iRight - 1];
+    double xRight = xValues[iRight];
+    sum += yToUse * (xRight - xLeft);
+    if (xRight > std::nextafter(xLeft, DBL_MAX)) {
+      resultX.emplace_back(xRight);
       resultY.emplace_back(sum);
     }
   }
