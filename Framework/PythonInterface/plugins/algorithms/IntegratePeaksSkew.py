@@ -13,9 +13,6 @@ from scipy.signal import convolve2d
 from scipy.ndimage import label
 from scipy.stats import moment
 from mantid.geometry import RectangularDetector, GridDetector
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-from matplotlib.colors import LogNorm
 import re
 from enum import Enum
 
@@ -496,6 +493,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         bank_names = pk_ws.column('BankName')
         tofs = pk_ws.column('TOF')
         if plot_filename:
+            import matplotlib.pyplot as plt
+            from matplotlib.backends.backend_pdf import PdfPages
+            from matplotlib.colors import LogNorm
             fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
             try:
                 pdf = PdfPages(plot_filename)
