@@ -23,7 +23,7 @@ class FunctionWrapper(object):
                 return wrapper(fun, *args, **kwargs)
         return FunctionWrapper(fun, **kwargs)
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, params_to_optimize=None, **kwargs):
         """
         Called when creating an instance
 
@@ -37,6 +37,9 @@ class FunctionWrapper(object):
         else:
             self.fun = FunctionFactory.createFunction(name)
         self.init_paramgeters_and_attributes(**kwargs)
+
+        self.params_to_optimize = params_to_optimize if params_to_optimize is not None else \
+            [self.fun.parameterName(i) for i in range(self.fun.nParams())]
 
     def init_paramgeters_and_attributes(self, **kwargs):
         # Deal with attributes first
@@ -175,9 +178,8 @@ class FunctionWrapper(object):
         else:
             x_list = [x]
 
-        for i in range(len(params)):
-            if not self.fun.isFixed(i):
-                self.fun.setParameter(i, params[i])
+        for i, param_name in enumerate(self.params_to_optimize):
+            self.fun.setParameter(param_name, params[i])
         y = x_list[:]
         ws = self._execute_algorithm('CreateWorkspace', DataX=x_list, DataY=y)
         out = self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=ws)

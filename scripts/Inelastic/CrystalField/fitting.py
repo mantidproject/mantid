@@ -1279,28 +1279,24 @@ class CrystalFieldFit(object):
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
 
-    def gofit(self, algorithm="regularisation", parameter_bounds=None, **kwargs):
-        try:
-            from gofit import multistart, regularisation
-        except ImportError:
-            logger.error("Failed to import the gofit python package. Please make sure you gofit is pip installed.")
-            return
+    def gofit(self, algorithm_callable, **kwargs) -> None:
+        """Performs a fit using an algorithm from the GOFit python package."""
+        # Get the name of the algorithm as the name of the callable python function.
+        algorithm_name = algorithm_callable.__name__
 
-        if parameter_bounds is None:
-            parameter_bounds = dict()
+        # Find the B parameters and Shape parameters we want to optimize across, and their initial values
+        b_parameters, shape_parameters, p0 = self._find_b_and_shape_parameters_to_optimize()
+        all_parameters = b_parameters + shape_parameters
 
         # Read the x, y and error data from the input workspace.
         x, y, e = self._input_workspace.readX(0), self._input_workspace.readY(0), self._input_workspace.readE(0)
 
         # Find the number of data points, and parameters.
         m = self._input_workspace.getNumberBins(0)
-        n = self.model.function.nParams()
-
-        # Get the initial parameter values of the function
-        p0 = np.array([self.model.function.getParameterValue(i) for i in range(n)])
+        n = len(all_parameters)
 
         # Create a wrapper around a callable mantid fitting function
-        callable_func = FunctionWrapper(self.model.function)
+        callable_func = FunctionWrapper(self.model.function, all_parameters)
 
         def wrapped_func(*params):
             return callable_func(x, *params)
@@ -1309,62 +1305,64 @@ class CrystalFieldFit(object):
         def residual(params):
             return np.ravel((y - wrapped_func(*np.array(params))) / e)
 
-        # Calculates the jacobian using the scipy 2-point approx_derivative method
-        def jacobian(p):
-            return approx_derivative(residual, p, method="2-point")
+        # Get the algorithm args to use for the specific algorithm we are using
+        algorithm_args = [m, n] + self._get_algorithm_args(algorithm_name, all_parameters, b_parameters, p0, residual,
+                                                           **kwargs)
 
-        if algorithm == "regularisation":
-            params, status = regularisation(m, n, p0, residual, jac=jacobian, **kwargs)
-            self._process_gofit_output(params, "_regularisation")
-
-            for i, j in zip([self.model.function.parameterName(t) for t in range(n)], params):
-                print(f"{i} = {j}")
-            print(str(self.model.function))
-            return
-
-        # Find the bounds to use for each parameter.
-        xl, xu = self._parse_lower_and_upper_bounds(n, parameter_bounds)
-
-        if algorithm == "multistart":
-            params, status = multistart(m, n, xl, xu, residual, jac=jacobian, **kwargs)
-            self._process_gofit_output(params, "_multistart")
-
-            for i, j in zip([self.model.function.parameterName(t) for t in range(n)], params):
-                print(f"{i} = {j}")
-            print(str(self.model.function))
-        elif algorithm == "alternating":
-            raise RuntimeError("Not implemented yet")
+        # Attempt to do a fit using one of the GOFit algorithms. A TypeError can occur when provided an invalid kwarg
+        try:
+            params, status = algorithm_callable(*algorithm_args, **kwargs)
+        except TypeError as ex:
+            logger.error(str(ex))
         else:
-            raise RuntimeError(f"GOFit does not have '{algorithm}' as an algorithm. Please use one of "
-                               f"['regularisation', 'multistart', 'alternating'].")
+            self._process_gofit_output(all_parameters, params, "_" + algorithm_name)
 
-        # print(str(p0) + "\n")
-        # print(str(xl) + "\n")
-        # print(str(xu) + "\n")
-        # print(str(xl > p0) + "\n")
-        # print(str(xu < p0) + "\n")
-        # for i, j in zip([self.model.function.parameterName(t) for t in range(n)], p0):
-        #     print(f"{i} = {j}")
-        # print(str(self.model.function))
-        # params, status = alternating(m, n, 9, p0, xl, xu, residual, **kwargs)
-        # self._process_gofit_output(params, "alternating")
+    def _get_algorithm_args(self, algorithm_name: str, all_parameters: list, b_parameters: list, p0, residual, **kwargs):
+        """Gets the algorithm arguments to be used for a specific GOFit algorithm."""
+        algorithm_args = []
+        if algorithm_name == "regularisation":
+            algorithm_args.append(p0)
+        elif algorithm_name == "alternating":
+            algorithm_args.extend([len(b_parameters), p0])
 
-    def _parse_lower_and_upper_bounds(self, n: int, parameter_bounds: dict) -> tuple:
+        if algorithm_name == "multistart" or algorithm_name == "alternating":
+            xl, xu = self._parse_lower_and_upper_bounds(all_parameters, kwargs.pop("parameter_bounds", dict()))
+            algorithm_args.extend([xl, xu])
+
+        algorithm_args.append(residual)
+
+        if (algorithm_name == "regularisation" or algorithm_name == "multistart") and kwargs.pop("jacobian", False):
+            algorithm_args.append(lambda p: approx_derivative(residual, p, method="2-point"))
+        return algorithm_args
+
+    @staticmethod
+    def _parse_lower_and_upper_bounds(parameters_names: list, parameter_bounds: dict) -> tuple:
         """Parses the lower and upper bounds into two separate numpy arrays."""
         xl, xu = [], []
-        for i in range(n):
-            param_name = self.model.function.parameterName(i)
-            xl.append(parameter_bounds[param_name][0] if param_name in parameter_bounds else 0)
-            xu.append(parameter_bounds[param_name][1] if param_name in parameter_bounds else 1000)
-            # PeakCentre and Amplitudes will be fixed anyway. Find different function with only relevant params?
-
+        for name in parameters_names:
+            bounds = parameter_bounds.get(name, [0, 1])
+            xl.append(bounds[0])
+            xu.append(bounds[1])
         return np.array(xl), np.array(xu)
 
-    def _process_gofit_output(self, parameter_values, suffix="") -> None:
+    def _find_b_and_shape_parameters_to_optimize(self) -> tuple:
+        """Finds the B parameters and Shape parameters we want to optimize across."""
+        b_params, shape_params, initial_values = [], [], []
+        for i in range(self.model.function.nParams()):
+            name = self.model.function.parameterName(i)
+            value = self.model.function.getParameterValue(i)
+            if (name.startswith('B') or name.startswith('IB')) and value != 0.0:
+                b_params.append(name)
+                initial_values.append(value)
+            elif "FWHM" in name or name == "IntensityScaling":
+                shape_params.append(name)
+                initial_values.append(value)
+        return b_params, shape_params, np.array(initial_values)
+
+    def _process_gofit_output(self, parameter_names, parameter_values, suffix="") -> None:
         """Create an output workspace with the fitted data, and a parameter table."""
-        for i, value in enumerate(parameter_values):
-            if not self.model.function.isFixed(i):
-                self.model.function.setParameter(i, value)
+        for name, value in zip(parameter_names, parameter_values):
+            self.model.function.setParameter(name, value)
 
         output_name = self._fit_properties["Output"] if "Output" in self._fit_properties else self._output_workspace_base_name
         EvaluateFunction(Function=str(self.model.function),
