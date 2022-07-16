@@ -99,9 +99,9 @@
     <string>Simulation</string>
    </property>
   </action>
-  <action name="actionSingle_crystal_elastic">
+  <action name="actionSingle_Crystal_Elastic">
    <property name="text">
-    <string>Single Crystal elastic</string>
+    <string>Single Crystal Elastic</string>
    </property>
   </action>
   <action name="actionPowder_Elastic">
@@ -129,9 +129,9 @@
     <string>DNS website</string>
    </property>
   </action>
-  <action name="actionsingle_crystal_elastic">
+  <action name="actionSingle_Crystal_Elastic">
    <property name="text">
-    <string>Single crystal elastic</string>
+    <string>Single Crystal Elastic</string>
    </property>
   </action>
   <action name="actionSingle_Crystal_Elastic">
