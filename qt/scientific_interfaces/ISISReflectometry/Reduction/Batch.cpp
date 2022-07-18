@@ -31,6 +31,10 @@ boost::optional<LookupRow> Batch::findLookupRow(Row const &row) const {
   return experiment().findLookupRow(row, runsTable().thetaTolerance());
 }
 
+boost::optional<LookupRow> Batch::findLookupRow(PreviewRow const &previewRow) const {
+  return experiment().findLookupRow(previewRow, runsTable().thetaTolerance());
+}
+
 boost::optional<LookupRow> Batch::findWildcardLookupRow() const { return experiment().findWildcardLookupRow(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
