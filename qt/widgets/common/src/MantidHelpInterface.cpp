@@ -51,5 +51,3 @@ void MantidHelpInterface::showCustomInterface(const QString &name, const QString
   UNUSED_ARG(area);
   UNUSED_ARG(section);
 }
-
-void MantidHelpInterface::shutdown() {}

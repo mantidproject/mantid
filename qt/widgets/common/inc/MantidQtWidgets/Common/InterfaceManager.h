@@ -77,9 +77,10 @@ public:
    * Function that instantiates the help window.
    * @return the help window
    */
-  MantidHelpInterface *createHelpWindow(QWidget *parent = nullptr) const;
+  static MantidHelpInterface *createHelpWindow(QWidget *parent = nullptr);
 
   /// @param url Relative URL of help page to show.
+  /// @param parent The parent widget of the help page.
   void showHelpPage(const QString &url = QString(), QWidget *parent = nullptr);
 
   /// @param name of algorithm to show help for
@@ -105,7 +106,7 @@ public:
 
   bool doesHelpPageExist(const QString &url) const;
 
-  void closeHelpWindow();
+  static void closeHelpWindow();
 
   /**
    * Registration function for the help window factory.

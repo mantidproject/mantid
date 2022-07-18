@@ -300,13 +300,14 @@ bool MantidHelpWindow::doesHelpPageExist(const QUrl &url) {
 }
 
 /**
- * Can be called by the host process to indicate that it will
- * close soon. This closes the help window & releases the QProcess
+ * Returns true if the help window exists.
  */
-void MantidHelpWindow::shutdown() {
-  // close the window and delete the object
-  // Deleting the object ensures the help engine's destructor is called and
-  // avoids a segfault when workbench is closed
+bool MantidHelpWindow::helpWindowExists() { return !g_helpWindow.isNull(); }
+
+/**
+ * Closes the help window.
+ */
+void MantidHelpWindow::closeHelpWindow() {
   if (helpWindowExists()) {
     g_helpWindow->close();
   }

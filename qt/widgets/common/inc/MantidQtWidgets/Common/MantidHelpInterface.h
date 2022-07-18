@@ -40,9 +40,6 @@ public:
                                    const std::string &section = std::string());
   virtual void showCustomInterface(const QString &name, const QString &area = QString(),
                                    const QString &section = QString());
-
-  /// Perform any clean up on main window shutdown
-  virtual void shutdown();
 };
 } // namespace API
 } // namespace MantidQt

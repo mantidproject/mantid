@@ -26,8 +26,9 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow : public API::MantidHelpInterf
   Q_OBJECT
 
 public:
-  static bool helpWindowExists() { return !g_helpWindow.isNull(); }
   static bool doesHelpPageExist(const QUrl &url);
+  static bool helpWindowExists();
+  static void closeHelpWindow();
 
   MantidHelpWindow(QWidget *parent = nullptr, const Qt::WindowFlags &flags = nullptr);
 
@@ -44,9 +45,6 @@ public:
                            const std::string &section = std::string()) override;
   void showCustomInterface(const QString &name, const QString &area = QString(),
                            const QString &section = QString()) override;
-
-  /// Perform any clean up on main window shutdown
-  void shutdown() override;
 
 private:
   void showHelp(const QString &url);

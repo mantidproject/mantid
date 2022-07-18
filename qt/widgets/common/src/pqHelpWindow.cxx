@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QBuffer>
 #include <QFileInfo>
 #include <QHash>
-#include <QHelpContentWidget>
 #include <QHelpEngine>
 #include <QHelpIndexWidget>
 #include <QHelpSearchQueryWidget>
@@ -289,7 +288,6 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
   connect(this->m_helpEngine->searchEngine()->queryWidget(), SIGNAL(search()), this, SLOT(search()));
 
   // connect the index page to the content pane
-  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)), this, SLOT(showPage(QUrl)));
   connect(this->m_helpEngine->indexWidget(), SIGNAL(linkActivated(QUrl, QString)), this, SLOT(showPage(QUrl)));
 
 // setup the content pane
@@ -324,12 +322,6 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
 
   // setup the search engine to do its job
   m_helpEngine->searchEngine()->reindexDocumentation();
-}
-
-pqHelpWindow ::~pqHelpWindow() {
-  if (const auto parent = this->parent()) {
-    parent->deleteLater();
-  }
 }
 
 //-----------------------------------------------------------------------------

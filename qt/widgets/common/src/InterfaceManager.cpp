@@ -25,6 +25,7 @@
 #include <Poco/Environment.h>
 #include <QPointer>
 #include <QStringList>
+#include <QUrl>
 
 using namespace MantidQt::API;
 using Mantid::Kernel::AbstractInstantiator;
@@ -224,7 +225,7 @@ void InterfaceManager::registerHelpWindowFactory(
   m_helpViewer = factory;
 }
 
-MantidHelpInterface *InterfaceManager::createHelpWindow(QWidget *parent) const {
+MantidHelpInterface *InterfaceManager::createHelpWindow(QWidget *parent) {
   if (m_helpViewer == nullptr) {
     if (!offlineHelpMsgDisplayed) {
       g_log.information("Offline help is not available in this version of Workbench.");
@@ -232,7 +233,7 @@ MantidHelpInterface *InterfaceManager::createHelpWindow(QWidget *parent) const {
     }
     return nullptr;
   } else {
-    MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance(parent);
+    MantidHelpInterface *interface = m_helpViewer->createUnwrappedInstance(parent);
     if (!interface) {
       g_log.error("Error creating help window");
     }
@@ -271,9 +272,4 @@ bool InterfaceManager::doesHelpPageExist(const QString &url) const {
   return MantidHelpWindow::doesHelpPageExist(QUrl(url));
 }
 
-void InterfaceManager::closeHelpWindow() {
-  if (MantidHelpWindow::helpWindowExists()) {
-    auto window = createHelpWindow();
-    window->shutdown();
-  }
-}
+void InterfaceManager::closeHelpWindow() { MantidHelpWindow::closeHelpWindow(); }
