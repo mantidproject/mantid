@@ -5,32 +5,39 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import tempfile
+import shutil
+from os import path
 from mantid.simpleapi import (IntegratePeaksSkew, CreatePeaksWorkspace, AddPeak, AnalysisDataService)
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt
 
 class IntegratePeaksSkewTest(unittest.TestCase):
-
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         # load empty instrument so can create a peak table
-        self.ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(2, 5, 11)  # nbanks, npix, nbins
-        axis = self.ws.getAxis(0)
+        cls.ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(2, 5, 11)  # nbanks, npix, nbins
+        axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
         # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=3.5)
         peak_1D = 2 * array([0, 0, 0, 1, 4, 6, 4, 1, 0, 0, 0])
-        self.ws.setY(12, self.ws.readY(12) + peak_1D)
+        cls.ws.setY(12, cls.ws.readY(12) + peak_1D)
         ispecs = [7, 11, 12, 13, 17, 22]
         for ispec in ispecs:
-            self.ws.setY(ispec, self.ws.readY(ispec) + peak_1D)
-            self.ws.setE(ispec, sqrt(self.ws.readY(ispec)))
+            cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D)
+            cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
         # make peak table
-        self.peaks = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
-        AddPeak(PeaksWorkspace=self.peaks, RunWorkspace=self.ws, TOF=5, DetectorID=32)  # inside fake peak (bank 1)
-        AddPeak(PeaksWorkspace=self.peaks, RunWorkspace=self.ws, TOF=5, DetectorID=27)  # outside fake peak (bank 1)
-        AddPeak(peaksWorkspace=self.peaks, RunWorkspace=self.ws, TOF=5, DetectorID=62)  # middle bank 2 (no peak)
+        cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
+        AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=32)  # inside fake peak (bank 1)
+        AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=27)  # outside fake peak (bank 1)
+        AddPeak(peaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=62)  # middle bank 2 (no peak)
+        # output file dir
+        cls._test_dir = tempfile.mkdtemp()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         AnalysisDataService.clear()
+        shutil.rmtree(cls._test_dir)
 
     def test_integrate_on_edge_option(self):
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
@@ -73,7 +80,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
     def test_integrate_use_nearest_peak_true_update_peak_position_true(self):
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
                                  IntegrateIfOnEdge=True, UseNearestPeak=True, UpdatePeakPosition=True,
-                                 OutputWorkspace='out2')
+                                 OutputWorkspace='out3')
         # check intensity/sigma of first two peaks equal (same peak integrated)
         # note intensity will be same now as peak position updated
         for ipk in range(2):
@@ -86,6 +93,12 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # check other peaks not integrated
         self.assertEqual(out.getPeak(out.getNumberPeaks()-1).getIntensity(), 0)
 
+    def test_print_output_file(self):
+        out_file = path.join(self._test_dir, 'out.pdf')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
+                                 IntegrateIfOnEdge=False, OutputWorkspace='out4', OutputFile=out_file)
+        # check output file saved
+        self.assertTrue(path.exists(out_file))
 
 
 if __name__ == '__main__':
