@@ -502,6 +502,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             from matplotlib.backends.backend_pdf import PdfPages
             from matplotlib.colors import LogNorm
             fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
+            fig.subplots_adjust(wspace=0.5)  # ensure plenty spaxce between subplots (want to avoid slow tight_layout)
             try:
                 pdf = PdfPages(plot_filename)
             except OSError:
@@ -575,8 +576,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 ax[0].plot(*np.where(peak_mask.T), 'xw')
                 ax[0].plot(icol, irow, 'or')
                 title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
-                            f"lambda={np.round(pk.getWavelength(), 2)} Ang\n{status.value}"
+                            rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
+                            f"\n{status.value}"
                 ax[0].set_title(title_str)
+                ax[0].set_xlabel('dColumn')
+                ax[0].set_ylabel('dRow')
                 # 1D plot
                 ipad = int((ixhi - ixlo) / 2)  # extra portion of data shown outside the 1D window
                 if not integrated:
@@ -595,12 +599,13 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 ax[1].axvline(xpk[ixlo], ls=':', color='r', label='Initial window')
                 ax[1].axvline(xpk[ixhi], ls=':', color='r')
                 ax[1].axhline(0, ls=':', color='k')
-                ax[1].legend(fontsize=7)
+                ax[1].legend(fontsize=7, loc=1, ncol=2)
                 # figure formatting
                 intens_over_sig = round(intens / sig, 2) if sig > 0 else 0
                 ax[1].set_title(f'I/sig = {intens_over_sig}')
+                ax[1].set_xlabel(r'TOF ($\mu$s)')
+                ax[1].set_ylabel('Intensity')
                 cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0])
-                fig.tight_layout()
                 ax[1].relim()
                 ax[1].autoscale_view()
                 pdf.savefig(fig, rasterized=False)
