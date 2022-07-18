@@ -6,14 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import h5py
+from typing import Tuple, List, Sequence, Union
 
 from mantid import config
 from mantid.kernel import (Direction, StringArrayMandatoryValidator, StringArrayProperty, CompositeValidator)
-from mantid.api import (PythonAlgorithm, FileProperty, FileAction, Progress)
+from mantid.api import (DataProcessorAlgorithm, FileProperty, FileAction, Progress)
 from mantid.simpleapi import *  # noqa
 
+CycleRun = Tuple[Union[int,None], int]
+CycleRuns = Tuple[Union[int,None], List[int]]
 
-def seq_to_list(iseqn):
+
+def seq_to_list(iseqn : str) -> List[int]:
     # convert a comma separated range of numbers returned as a list
     # first clean all whitespaces
     seqn = iseqn.replace(' ', '')
@@ -37,7 +41,8 @@ def seq_to_list(iseqn):
     return nlist
 
 
-def cycle_and_runs(run_seq):
+def cycle_and_runs(run_seq : str) -> CycleRuns:
+    # convert a run sequence as a string to the cycle and runs
     ss = run_seq.split('::')
     if len(ss) == 2:
         return int(ss[0]), seq_to_list(ss[1])
@@ -45,7 +50,9 @@ def cycle_and_runs(run_seq):
         return None, seq_to_list(ss[0])
 
 
-def expand_as_cycle_runs(sample_runs):
+def expand_as_cycle_runs(sample_runs : str) -> List[CycleRun]:
+    # expand a collection of cycle runs as a string to an explicit
+    # list of cycle run pairs
     cycle_runs = []
     for run_seq in sample_runs.split(';'):
         cycle, runs = cycle_and_runs(run_seq)
@@ -54,7 +61,8 @@ def expand_as_cycle_runs(sample_runs):
     return cycle_runs
 
 
-def copy_datset_nodes(src_hdf, dst_hdf, tags):
+def copy_datset_nodes(src_hdf : str, dst_hdf : str, tags : Sequence[str]) -> None:
+    # copy the collection of nodes between hdf files
     with h5py.File(dst_hdf, 'r+') as f_dst:
         with h5py.File(src_hdf, 'r') as f_src:
             for tag in tags:
@@ -63,7 +71,7 @@ def copy_datset_nodes(src_hdf, dst_hdf, tags):
                 dset[...] = sval
 
 
-class PelicanCrystalProcessing(PythonAlgorithm):
+class PelicanCrystalProcessing(DataProcessorAlgorithm):
 
     def category(self):
         return "Workflow"
