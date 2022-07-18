@@ -392,7 +392,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         #   window parameters
         self.declareProperty(name="NPixels", defaultValue=8, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=3),
-                             doc="Length of window on detector in number of pixels")
+                             doc="Half length of window on detector in number of pixels.")
         self.declareProperty(name='FractionalTOFWindow', defaultValue=0.0, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0.0, upper=1.0),
                              doc="dTOF/TOF window best chosen from forward-scattering bank with worst resolution.")
