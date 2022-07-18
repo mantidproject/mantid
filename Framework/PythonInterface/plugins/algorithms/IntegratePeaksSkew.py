@@ -260,7 +260,8 @@ def find_bg_pts_seed_skew(signal, ibg_seed=None):
     prev_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
     for istart in range(1, iend):
         this_skew = moment(signal[ibg_seed[isort[istart:iend]]], 3)
-        if this_skew >= prev_skew:  # this_skew <= 0 or
+        if this_skew >= prev_skew:
+            istart -= 1
             break
         else:
             prev_skew = this_skew
