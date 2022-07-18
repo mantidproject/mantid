@@ -171,7 +171,6 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         steps = len(cycle_runs) + 1
         self._progress = Progress(
             self, start=0.0, end=1.0, nreports=steps)
-        #grouped = []
 
         saveFolder = scratch_folder if scratch_folder else config['defaultsave.directory']
         for cycle, run in cycle_runs:
