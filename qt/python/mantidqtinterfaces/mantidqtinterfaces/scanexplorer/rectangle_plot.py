@@ -32,7 +32,8 @@ class UserInteraction(Enum):
 
 class MultipleRectangleSelectionLinePlot(KeyHandler):
 
-    STATUS_MESSAGE = "Press key to send roi/cuts to workspaces: r=roi, c=both cuts, x=X, y=Y. Esc clears region"
+    STATUS_MESSAGE = "Press key to export: c=both cuts, x=X, y=Y, p=peaks. 'Del' deletes a ROI. " \
+                     "'f' interpolates rectangles."
     SELECTION_KEYS = ('c', 'x', 'y', 'f', "delete", 'p')
     EPSILON = 1e-3
 
