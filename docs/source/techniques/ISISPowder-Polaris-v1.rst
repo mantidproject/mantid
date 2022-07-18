@@ -417,12 +417,12 @@ Example Input:
 van_normalisation_method
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Indicates whether a relative or absoluate normalisation should
+Indicates whether a relative or absolute normalisation should
 be performed. The possible values are "Relative" and "Absolute".
 
-This parameter is optional. The default value when mode="Rietveld" is "Relative". The default value when mode="PDF" is "Absolute".
+This parameter is optional. The default value when :ref:`mode_polaris_isis-powder-diffraction-ref` ="Rietveld" is "Relative". The default value when mode="PDF" is "Absolute".
 
-If "Absolute" is selected then the measured intensity is multipled by the following additional factor:
+If "Absolute" is selected then the measured intensity is multipled by the following additional factor to give a differential cross section (which is based on equation 8 in [#Howe]_):
 
 .. math::
 
@@ -900,6 +900,13 @@ On POLARIS this is set to the following:
 .. code-block:: python
 
   cylinder_position = [0.0, 0.0, 0.0]
+
+References
+----------
+
+.. [#Howe] M A Howe, R L McGreevy and W S Howells
+   *The analysis of liquid structure data from time-of-flight neutron diffractometry*
+   J. Phys.: Condens. Matter 1 (1989)
 
 
 .. categories:: Techniques
