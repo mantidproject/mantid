@@ -1328,6 +1328,7 @@ class CrystalFieldFit(object):
         except TypeError as ex:
             logger.error(str(ex))
         else:
+            print(f"GOFit exited with status code {status}.")
             self._process_gofit_output(all_parameters, params, "_" + algorithm_name)
 
     def _get_algorithm_args(self, algorithm_name: str, all_parameters: List[str], b_parameters: List[str],
