@@ -1,0 +1,2 @@
+* Fixed logic issues in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` that prevents the integration of satellite peaks.
+

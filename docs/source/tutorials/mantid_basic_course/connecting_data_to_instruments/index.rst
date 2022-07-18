@@ -13,7 +13,7 @@ Feel free to checkout the instrument sections of each facility website.
 |
 |
 
-|ISIS_Logo_Transparent.gif| |Julich.jpg| |ORNL_logo.jpg| |Psi_logo.png|
+|ISIS_Logo_Transparent_UKRI.png| |Julich.jpg| |ORNL_logo.jpg| |Psi_logo.png|
 
 |
 |
@@ -56,7 +56,7 @@ Feel free to checkout the instrument sections of each facility website.
 .. |ILL_logo.png| image:: ../../../../../images/ILL_logo.png
                     :width: 150px
                     :target: https://www.ill.eu/
-.. |ISIS_Logo_Transparent.gif| image:: ../../../../../images/ISIS_Logo_Transparent.gif
+.. |ISIS_Logo_Transparent_UKRI.png| image:: ../../../../../images/ISIS_Logo_Transparent_UKRI.png
                     :width: 200px
                     :target: https://www.isis.stfc.ac.uk/
 .. |Julich.jpg| image:: ../../../../../images/Julich.jpg

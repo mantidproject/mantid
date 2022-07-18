@@ -467,6 +467,25 @@ public:
     checkWavelength(outputWS, 4.8);
   }
 
+  void test_D16B() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "066321.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 6)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 3.);
+    checkWavelength(outputWS, 4.45);
+  }
+
   void test_D33_MONO() {
     LoadILLSANS alg;
     alg.setChild(true);

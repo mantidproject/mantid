@@ -276,6 +276,11 @@ void BatchPresenter::notifyRowContentChanged(Row &changedRow) { m_model->updateL
 
 void BatchPresenter::notifyGroupNameChanged(Group &changedGroup) { m_model->updateLookupIndexesOfGroup(changedGroup); }
 
+void BatchPresenter::notifyRunsTransferred() {
+  m_model->updateLookupIndexesOfTable();
+  m_runsPresenter->notifyRowModelChanged();
+}
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }

@@ -56,10 +56,10 @@ private:
 
   void addMDEvents(std::vector<std::vector<coord_t>> &vec_q_sample, std::vector<float> &vec_signal);
 
-  void saveMDToFile(std::vector<std::vector<Mantid::coord_t>> &vec_event_qsample, std::vector<float> &vec_event_signal);
+  void saveMDToFile(const std::vector<std::vector<coord_t>> &vecEventQsample, const std::vector<float> &vecEventSignal);
 
-  void saveEventsToFile(const std::string &filename, std::vector<Kernel::V3D> &vec_event_pos,
-                        std::vector<signal_t> &vec_event_signal, std::vector<detid_t> &vec_event_detid);
+  void saveEventsToFile(const std::string &filename, std::vector<Kernel::V3D> &vecEventPos,
+                        const std::vector<signal_t> &vecEventSignal, const std::vector<detid_t> &vecEventDetid);
 
   void getUBMatrix();
 

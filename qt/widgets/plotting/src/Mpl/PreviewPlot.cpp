@@ -615,7 +615,7 @@ void PreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotific
     return;
   }
   // Ignore non matrix workspaces
-  if (auto oldWS = std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
       if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
         this->replot();

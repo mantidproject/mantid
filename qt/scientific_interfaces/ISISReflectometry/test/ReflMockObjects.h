@@ -87,6 +87,7 @@ public:
   MOCK_METHOD0(notifyBatchLoaded, void());
   MOCK_METHOD1(notifyRowContentChanged, void(Row &));
   MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
+  MOCK_METHOD0(notifyRunsTransferred, void());
 
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
@@ -294,12 +295,14 @@ public:
   MOCK_METHOD1(subscribe, void(JobManagerSubscriber *notifyee));
   MOCK_METHOD1(startPreprocessing, void(PreviewRow &row));
   MOCK_METHOD1(startSumBanks, void(PreviewRow &row));
+  MOCK_METHOD1(startReduction, void(PreviewRow &row));
 };
 
 class MockJobManagerSubscriber : public JobManagerSubscriber {
 public:
   MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
   MOCK_METHOD0(notifySumBanksCompleted, void());
+  MOCK_METHOD0(notifyReductionCompleted, void());
 };
 
 class MockEncoder : public IEncoder {

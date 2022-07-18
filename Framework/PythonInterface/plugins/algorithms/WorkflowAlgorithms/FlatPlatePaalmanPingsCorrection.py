@@ -10,7 +10,7 @@ import math
 
 import numpy as np
 from mantid.simpleapi import *
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspace, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction, logger)
 
@@ -180,7 +180,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        sample_ws_name = self.getPropertyValue('SampleWorkspace')
+        sample_ws = self.getProperty('SampleWorkspace').value
         can_ws_name = self.getPropertyValue('CanWorkspace')
         use_can = can_ws_name != ''
 
@@ -199,12 +199,17 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._efixed = self.getProperty('Efixed').value
 
         if self._emode != 'Efixed':
-            # require both sample and can ws have wavelenght as x-axis
-            if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['SampleWorkspace'] = 'Workspace must have units of wavelength.'
+            if not isinstance(sample_ws, MatrixWorkspace):
+                issues['SampleWorkspace'] = "The SampleWorkspace must be a MatrixWorkspace."
+            elif sample_ws.getAxis(0).getUnit().unitID() != 'Wavelength':
+                # require both sample and can ws have wavelenght as x-axis
+                issues['SampleWorkspace'] = 'The SampleWorkspace must have units of wavelength.'
 
-            if use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
+            if use_can:
+                if not isinstance(mtd[can_ws_name], MatrixWorkspace):
+                    issues['CanWorkspace'] = "The CanWorkspace must be a MatrixWorkspace."
+                elif mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                    issues['CanWorkspace'] = 'The CanWorkspace must have units of wavelength.'
 
         return issues
 

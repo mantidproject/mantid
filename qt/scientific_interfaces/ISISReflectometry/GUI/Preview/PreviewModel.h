@@ -29,15 +29,20 @@ public:
   bool loadWorkspaceFromAds(std::string const &workspaceName) override;
   void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
   void sumBanksAsync(IJobManager &jobManager) override;
-
-  std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const override;
+  void reduceAsync(IJobManager &jobManager) override;
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
   std::vector<Mantid::detid_t> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
+  ProcessingInstructions getProcessingInstructions() const override;
+  Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
 
+  void setTheta(double theta) override;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
+  void setSelectedRegion(Selection const &selection) override;
+
   void exportSummedWsToAds() const override;
+  void exportReducedWsToAds() const override;
 
 private:
   // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't

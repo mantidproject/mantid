@@ -1,0 +1,1 @@
+- Fixed an issue in Powder Diffraction Reduction GUI where the GUI would crash when being launched the second time.

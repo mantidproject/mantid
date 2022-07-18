@@ -62,7 +62,7 @@ mtd_add_qt_tests(
             Mantid::PythonInterfaceCore
             Python::Python
   MTD_QT_LINK_LIBS MantidScientificInterfacesISISReflectometry MantidQtWidgetsCommon MantidQtWidgetsPlotting
-                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp
+                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp MantidQtWidgetsRegionSelector
   PARENT_DEPENDENCIES GUITests
 )
 

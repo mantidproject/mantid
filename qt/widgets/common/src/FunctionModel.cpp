@@ -498,8 +498,9 @@ void FunctionModel::checkNumberOfDomains(const QList<FunctionModelDataset> &data
 }
 
 int FunctionModel::numberOfDomains(const QList<FunctionModelDataset> &datasets) const {
-  return std::accumulate(datasets.cbegin(), datasets.cend(), 0,
-                         [](size_t lhs, const auto &dataset) { return lhs + dataset.numberOfSpectra(); });
+  return std::accumulate(datasets.cbegin(), datasets.cend(), 0, [](int lhs, const auto &dataset) {
+    return lhs + static_cast<int>(dataset.numberOfSpectra());
+  });
 }
 
 /// Check a domain/function index to be in range.

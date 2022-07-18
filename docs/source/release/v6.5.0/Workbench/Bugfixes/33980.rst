@@ -1,0 +1,1 @@
+- Scaling for waterfall plots has been fixed for scaling in log scale plots

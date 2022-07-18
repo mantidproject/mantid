@@ -20,6 +20,7 @@ class MockPreviewView : public IPreviewView {
 public:
   MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
+  MOCK_METHOD(double, getAngle, (), (const, override));
   MOCK_METHOD(void, plotInstView,
               (MantidWidgets::InstrumentActor *, Mantid::Kernel::V3D const &, Mantid::Kernel::V3D const &), (override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
@@ -29,6 +30,9 @@ public:
   MOCK_METHOD(void, setInstViewToolbarEnabled, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomMode, (), (override));
   MOCK_METHOD(void, setInstViewEditMode, (), (override));
+  MOCK_METHOD(void, setRectangularROIState, (bool), (override));
   MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
+  MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
+  MOCK_METHOD(MantidQt::MantidWidgets::IPlotView *, getLinePlotView, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

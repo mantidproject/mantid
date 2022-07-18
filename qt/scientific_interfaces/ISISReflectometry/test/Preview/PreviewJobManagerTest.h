@@ -111,6 +111,19 @@ public:
     jobManager.startSumBanks(previewRow);
   }
 
+  void test_start_reduction() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
+    auto previewRow = makePreviewRow();
+    auto stubAlg = makeConfiguredAlg();
+
+    expectReductionAlgorithmCreated(*mockAlgFactory, previewRow, stubAlg);
+    expectAlgorithmExecuted(stubAlg, mockJobRunner);
+
+    auto jobManager = makeJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    jobManager.startReduction(previewRow);
+  }
+
   void test_notify_sum_banks_algorithm_complete_notifies_subscriber() {
     auto mockJobRunner = MockJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
@@ -119,6 +132,22 @@ public:
     auto stubAlg = makeConfiguredSumBanksAlg(previewRow);
 
     EXPECT_CALL(mockSubscriber, notifySumBanksCompleted).Times(1);
+
+    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto stubAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(stubAlg);
+    jobManager.notifyAlgorithmComplete(stubAlgRef);
+
+    assertUpdateItemCallbackWasCalled();
+  }
+
+  void test_notify_reduction_algorithm_complete_notifies_subscriber() {
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    auto previewRow = makePreviewRow();
+    auto stubAlg = makeConfiguredReductionAlg(previewRow);
+
+    EXPECT_CALL(mockSubscriber, notifyReductionCompleted).Times(1);
 
     auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
     auto stubAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(stubAlg);
@@ -186,6 +215,11 @@ private:
     const std::string name() const override { return "ReflectometryISISSumBanks"; }
   };
 
+  class StubAlgReduction : public StubAlgorithm {
+  public:
+    const std::string name() const override { return "ReflectometryReductionOneAuto"; }
+  };
+
   PreviewJobManager
   makeJobManager(MockJobRunner *mockJobRunner,
                  std::unique_ptr<IReflAlgorithmFactory> algFactory = std::make_unique<MockReflAlgorithmFactory>()) {
@@ -230,6 +264,10 @@ private:
     return makeConfiguredAlg(item, std::make_shared<StubAlgSumBanks>());
   }
 
+  std::shared_ptr<ConfiguredAlgorithm> makeConfiguredReductionAlg(Item &item) {
+    return makeConfiguredAlg(item, std::make_shared<StubAlgReduction>());
+  }
+
   void expectPreprocessingAlgCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
                                      IConfiguredAlgorithm_sptr const &alg) {
     EXPECT_CALL(mockAlgFactory, makePreprocessingAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
@@ -238,6 +276,11 @@ private:
   void expectSumBanksAlgorithmCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
                                       IConfiguredAlgorithm_sptr const &alg) {
     EXPECT_CALL(mockAlgFactory, makeSumBanksAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
+  }
+
+  void expectReductionAlgorithmCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
+                                       IConfiguredAlgorithm_sptr const &alg) {
+    EXPECT_CALL(mockAlgFactory, makeReductionAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
   }
 
   void expectAlgorithmExecuted(IConfiguredAlgorithm_sptr const &alg, MockJobRunner &mockJobRunner) {

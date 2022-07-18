@@ -9,6 +9,7 @@
 #include "Item.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "Reduction/ProcessingInstructions.h"
 
 #include <string>
 #include <vector>
@@ -28,6 +29,8 @@ public:
   PreviewRow &operator=(PreviewRow &&) = default;
 
   std::vector<std::string> const &runNumbers() const;
+  double theta() const;
+  void setTheta(double theta);
 
   bool isGroup() const override;
   bool isPreview() const override;
@@ -39,11 +42,15 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
+  Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
   std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
+  ProcessingInstructions getProcessingInstructions() const noexcept;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
+  void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
+  void setProcessingInstructions(ProcessingInstructions processingInstructions) noexcept;
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
@@ -53,9 +60,12 @@ public:
 
 private:
   std::vector<std::string> m_runNumbers;
+  double m_theta;
   std::vector<Mantid::detid_t> m_selectedBanks;
+  ProcessingInstructions m_processingInstructions;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
+  Mantid::API::MatrixWorkspace_sptr m_reducedWs;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

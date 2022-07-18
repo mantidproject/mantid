@@ -5,20 +5,24 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtPreviewView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <string>
 
 using namespace Mantid::Kernel;
+using MantidQt::MantidWidgets::IPlotView;
 using MantidQt::MantidWidgets::ProjectionSurface;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_ui.setupUi(this);
   m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
+
   loadToolbarIcons();
   connectSignals();
 }
@@ -27,18 +31,25 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_zoom_button->setIcon(MantidQt::Icons::getIcon("mdi.magnify", "black", 1.3));
   m_ui.iv_edit_button->setIcon(MantidQt::Icons::getIcon("mdi.pencil", "black", 1.3));
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
-  m_ui.contour_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
+  m_ui.rs_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
+  m_ui.rs_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
+  m_ui.lp_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
 
 void QtPreviewView::connectSignals() const {
+  // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
-
+  // Instrument viewer toolbar
   connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
   connect(m_ui.iv_edit_button, SIGNAL(clicked()), this, SLOT(onInstViewEditClicked()));
   connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
-  connect(m_ui.contour_ads_export_button, SIGNAL(clicked()), this, SLOT(onContourExportToAdsClicked()));
+  // Region selector toolbar
+  connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectorExportToAdsClicked()));
+  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onSelectRectangularROIClicked()));
+  // Line plot toolbar
+  connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -48,9 +59,15 @@ void QtPreviewView::onInstViewEditClicked() const { m_notifyee->notifyInstViewEd
 void QtPreviewView::onInstViewSelectRectClicked() const { m_notifyee->notifyInstViewSelectRectRequested(); }
 void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
 
-void QtPreviewView::onContourExportToAdsClicked() const { m_notifyee->notifyContourExportAdsRequested(); }
+void QtPreviewView::onRegionSelectorExportToAdsClicked() const { m_notifyee->notifyRegionSelectorExportAdsRequested(); }
+
+void QtPreviewView::onSelectRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
+
+void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
+
+double QtPreviewView::getAngle() const { return m_ui.angle_spin_box->value(); }
 
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   // We need to recreate the surface so disconnect any existing signals first
@@ -60,6 +77,11 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
   m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis));
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
 }
+
+QLayout *QtPreviewView::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }
+
+IPlotView *QtPreviewView::getLinePlotView() const { return m_ui.line_plot; }
+
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 void QtPreviewView::setInstViewEditState(bool isChecked) { m_ui.iv_edit_button->setDown(isChecked); }
 
@@ -83,6 +105,8 @@ void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_edit_button->setEnabled(enable);
   m_ui.iv_rect_select_button->setEnabled(enable);
 }
+
+void QtPreviewView::setRectangularROIState(bool enable) { m_ui.rs_rect_select_button->setEnabled(enable); }
 
 std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
   std::vector<size_t> result;

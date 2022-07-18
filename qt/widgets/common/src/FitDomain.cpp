@@ -122,7 +122,7 @@ void FitDomain::addFunction(IFunction_sptr const &function) {
 }
 
 void FitDomain::addFunctionToExisting(IFunction_sptr const &function) {
-  if (auto const isComposite = toComposite(function)) {
+  if (toComposite(function)) {
     g_log.error("Add function failed: Nested composite functions are not supported.");
     return;
   }

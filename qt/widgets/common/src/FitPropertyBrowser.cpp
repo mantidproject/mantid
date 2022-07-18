@@ -502,12 +502,9 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 
 // Adds the fit result workspaces to the qlistwidget in the browser
 void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
-  auto name = outputName();
-  std::vector<std::string> workspaceNames;
-  workspaceNames.reserve(3);
-  workspaceNames.emplace_back(name + "_NormalisedCovarianceMatrix");
-  workspaceNames.emplace_back(name + "_Parameters");
-  workspaceNames.emplace_back(name + "_Workspace");
+  const auto outName = outputName();
+  const std::vector<std::string> workspaceNames{outName + "_NormalisedCovarianceMatrix", outName + "_Parameters",
+                                                outName + "_Workspace"};
 
   for (const auto &name : workspaceNames) {
     // check if already in the list

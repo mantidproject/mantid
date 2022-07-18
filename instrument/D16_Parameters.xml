@@ -6,10 +6,6 @@
       <parameter name="sample_logs_sum" type="string" visible="false">
         <value val="time, duration, timer" />
       </parameter>
-      <!-- The width of the detector in pixels -->
-      <parameter name="detector-width" type="number">
-        <value val="320"/>
-      </parameter>
       <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
       Note that for the panels, often pixels have transposed shape, but the surface is the same.
       Q binning is based on the maximum of the 2 dimensions, so it is also invariant.-->

@@ -886,7 +886,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
       if (nxStat != NX_ERROR) {
         LoadHelper loadHelper;
-        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun());
+        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
         NXclose(&nxHandle);
       }
     }

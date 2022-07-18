@@ -82,6 +82,14 @@ public:
     TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
   }
 
+  void test_set_selected_region_converts_to_processing_instructions_string() {
+    PreviewModel model;
+    const IPreviewModel::Selection inputRoi{3.6, 11.4};
+    model.setSelectedRegion(inputRoi);
+    // Start and end are rounded to nearest integer and converted to a string
+    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions())
+  }
+
   void test_sum_banks() {
     auto mockJobManager = MockJobManager();
     auto expectedWs = createWorkspace();
@@ -96,18 +104,18 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
-  void test_convert_detIDs_to_string() {
-    PreviewModel model;
-    auto const indices = std::vector<Mantid::detid_t>{99, 4, 5};
-    auto result = model.detIDsToString(indices);
-    TS_ASSERT_EQUALS(result, "99,4,5");
-  }
+  void test_reduce() {
+    auto mockJobManager = MockJobManager();
+    auto expectedWs = createWorkspace();
+    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
 
-  void test_convert_empty_detIDs_to_string() {
     PreviewModel model;
-    auto const indices = std::vector<Mantid::detid_t>{};
-    auto result = model.detIDsToString(indices);
-    TS_ASSERT_EQUALS("", result);
+    model.reduceAsync(mockJobManager);
+
+    auto workspace = model.getReducedWs();
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
   void test_export_summed_ws_to_ads() {
@@ -130,12 +138,40 @@ public:
     model.exportSummedWsToAds();
   }
 
+  void test_export_reduced_ws_to_ads() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto ws = generateReducedWs(mockJobManager, model);
+
+    model.exportReducedWsToAds();
+    auto &ads = AnalysisDataService::Instance();
+    const std::string expectedName = "preview_reduced_ws";
+
+    TS_ASSERT(ads.doesExist(expectedName));
+    TS_ASSERT_EQUALS(ws, ads.retrieveWS<MatrixWorkspace>(expectedName));
+    ads.remove(expectedName);
+  }
+
+  void test_export_reduced_ws_with_no_ws_set_does_not_throw() {
+    PreviewModel model;
+    // This should emit an error, but we cannot observe this from our test
+    model.exportReducedWsToAds();
+  }
+
 private:
   MatrixWorkspace_sptr generateSummedWs(MockJobManager &mockJobManager, PreviewModel &model) {
     auto expectedWs = createWorkspace();
     auto wsSumBanksEffect = [&expectedWs](PreviewRow &row) { row.setSummedWs(expectedWs); };
     ON_CALL(mockJobManager, startSumBanks(_)).WillByDefault(Invoke(wsSumBanksEffect));
     model.sumBanksAsync(mockJobManager);
+    return expectedWs;
+  }
+
+  MatrixWorkspace_sptr generateReducedWs(MockJobManager &mockJobManager, PreviewModel &model) {
+    auto expectedWs = createWorkspace();
+    auto wsReduceEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    ON_CALL(mockJobManager, startReduction(_)).WillByDefault(Invoke(wsReduceEffect));
+    model.reduceAsync(mockJobManager);
     return expectedWs;
   }
 

@@ -10,12 +10,12 @@
 // Includes
 //--------------------------------------
 #include <QGroupBox>
+#include <QLineEdit>
 #include <QWidget>
 
 //--------------------------------------
 // Qt forward declarations
 //--------------------------------------
-class QLineEdit;
 class QComboBox;
 class QRadioButton;
 class QLabel;

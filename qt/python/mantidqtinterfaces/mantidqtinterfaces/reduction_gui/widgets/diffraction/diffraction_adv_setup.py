@@ -172,6 +172,8 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.massdensity_edit.setText(str(state.measuredmassdensity))
         if state.samplegeometry:
             self._content.sampleheight_edit.setText(str(state.samplegeometry['Height']))
+        else:
+            self._content.sampleheight_edit.setText("")
         self._content.containertype_combo.setCurrentIndex(
             self._content.containertype_combo.findText(state.containershape))
         self._content.correctiontype_combo.setCurrentIndex(

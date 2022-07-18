@@ -45,12 +45,10 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
             self.fail("Failed to find any of the Algorithms.")
 
         print(f"Running the AlgorithmDialog{self._workspace_type}StartupTest with a {self._workspace_type} in the ADS")
-        print(f"Excluding the following algorithms from the test: {str(self._exclude_algorithms)}")
 
         for algorithm_name in self._unique_algorithm_names:
-            if algorithm_name not in self._exclude_algorithms:
-                # print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
-                self._attempt_to_open_algorithm_dialog(self._workspace_type, algorithm_name)
+            # print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
+            self._attempt_to_open_algorithm_dialog(self._workspace_type, algorithm_name)
 
     def _attempt_to_open_algorithm_dialog(self, workspace_type: str, algorithm_name: str) -> None:
         """Attempt to open the most recent version of the algorithm provided."""

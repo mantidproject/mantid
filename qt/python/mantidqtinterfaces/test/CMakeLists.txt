@@ -1,4 +1,4 @@
-set(TEST_PY_FILES PyChopTest.py)
+set(TEST_PY_FILES PyChopInstrumentTest.py)
 
 if(ENABLE_WORKBENCH)
   set(PYUNITTEST_QT_API pyqt5) # force to use qt5

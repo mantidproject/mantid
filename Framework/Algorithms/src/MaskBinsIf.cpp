@@ -65,13 +65,19 @@ void MaskBinsIf::init() {
  */
 std::map<std::string, std::string> MaskBinsIf::validateInputs() {
   std::map<std::string, std::string> issues;
-  double y = 0., e = 0., x = 0., dx = 0., s = 0.;
-  mu::Parser parser = makeParser(y, e, x, dx, s, getPropertyValue("Criterion"));
-  try {
-    parser.Eval();
-  } catch (mu::Parser::exception_type &exception) {
-    issues["Criterion"] = "Invalid expression given: " + exception.GetMsg();
+  const std::string criterion = getPropertyValue("Criterion");
+  if (criterion.empty()) {
+    issues["Criterion"] = "The criterion expression provided is empty";
+  } else {
+    double y = 0., e = 0., x = 0., dx = 0., s = 0.;
+    mu::Parser parser = makeParser(y, e, x, dx, s, criterion);
+    try {
+      parser.Eval();
+    } catch (mu::Parser::exception_type &exception) {
+      issues["Criterion"] = "Invalid expression given: " + exception.GetMsg();
+    }
   }
+
   return issues;
 }
 
