@@ -573,7 +573,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             if plot_filename:
                 # 2D plot
                 image_data = signal[:, :, ixlo:ixhi].sum(axis=2)
-                img = ax[0].imshow(image_data, vmax=image_data[peak_mask].mean(), norm=LogNorm())
+                img = ax[0].imshow(image_data, norm=LogNorm(vmax=image_data[peak_mask].mean()))
                 ax[0].plot(*np.where(peak_mask.T), 'xw')
                 ax[0].plot(icol, irow, 'or')
                 title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
@@ -607,6 +607,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 ax[1].set_xlabel(r'TOF ($\mu$s)')
                 ax[1].set_ylabel('Intensity')
                 cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0])
+                cbar.ax.tick_params(labelsize=7, which='both')
                 ax[1].relim()
                 ax[1].autoscale_view()
                 pdf.savefig(fig, rasterized=False)
