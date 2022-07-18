@@ -9,7 +9,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspac
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
-from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
+from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, Plus, RebinToWorkspace,
                               ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
 import ReflectometryILL_common as common
 import ILL_utilities as utils
@@ -283,9 +283,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             WorkspaceIndex=beamPosIndex,
             EnableLogging=self._subalgLogging)
         maxIndex = ws.getNumberHistograms() - 1
-        foregroundYs = foregroundWS.dataY(0)
-        foregroundEs = foregroundWS.dataE(0)
-        numpy.square(foregroundEs, out=foregroundEs)
         for i in sumIndices:
             if i == beamPosIndex:
                 continue
@@ -302,12 +299,11 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 WorkspaceToMatch=foregroundWS,
                 OutputWorkspace=addeeWSName,
                 EnableLogging=self._subalgLogging)
-            ys = addeeWS.readY(0)
-            foregroundYs += ys
-            es = addeeWS.readE(0)
-            foregroundEs += es**2
+            Plus(
+                LHSWorkspace=foregroundWSName,
+                RHSWorkspace=addeeWS,
+                OutputWorkspace=foregroundWSName)
             self._cleanup.cleanup(addeeWS)
-        numpy.sqrt(foregroundEs, out=foregroundEs)
         foregroundWS = self._correctForFractionalForegroundCentre(ws, foregroundWS)
         self._cleanup.cleanup(ws)
         return foregroundWS
