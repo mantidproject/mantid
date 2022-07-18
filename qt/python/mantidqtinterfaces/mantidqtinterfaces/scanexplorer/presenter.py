@@ -7,8 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from os import path, sep
-from numpy import array
-
+import numpy as np
 from qtpy.QtCore import QObject, Signal
 
 from mantid.api import MatrixWorkspace, AlgorithmObserver, Algorithm
@@ -60,6 +59,34 @@ class ScanExplorerPresenter:
         self.view.initialize_rectangle_manager()
 
         self.view.manage_buttons()
+
+    def additional_peaks_info(self, rectangles: list) -> dict:
+        """
+        Create additional information to be stored in the peak table workspace exported by the ROI plot.
+        Here those info are :
+        - I: the integrated counts over the ROI
+        - I (bg corrected): I minus the counts in the background workspace over the same ROI.
+        Minimal background correction.
+
+        @param rectangles: the list of ROIs, as matplotlib Rectangle patches
+        @return a dictionary whose keys are the table's columns headers and items are a list of the associated value
+        for each ROIs.
+        """
+        sample_roi_integrations, corrected_roi_integrations = self.model.roi_integration(self._ws, rectangles, self._bg_ws)
+        peak_dict = {'I': sample_roi_integrations}
+
+        if self._bg_ws is not None:
+            peak_dict["I (bg corrected)"] = corrected_roi_integrations
+
+            if np.any(self._bg_ws.getAxis(0).extractValues() != self._ws.getAxis(0).extractValues()):
+                logger.warning("Background and sample data have different two theta ranges."
+                               "Please check that these data match.")
+
+            if len(self._bg_ws.getAxis(1)) > 1:
+                logger.warning("Background has more than one slice. "
+                               "Only the first one is considered for background subtraction.")
+
+        return peak_dict
 
     def on_file_selected(self, file_path: str):
         """
@@ -120,7 +147,7 @@ class ScanExplorerPresenter:
         """
         self.future_workspace = new_algorithm.getPropertyValue("OutputWorkspace")
 
-    def get_axes(self) -> (array, array):
+    def get_axes(self) -> (np.array, np.array):
         """
         Get the axes from the workspace
         @return the x and y axes of the scan workspace

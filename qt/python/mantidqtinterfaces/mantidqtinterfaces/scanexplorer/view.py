@@ -197,6 +197,7 @@ class ScanExplorerView(QMainWindow):
         self.data_view.add_line_plots(PixelLinePlot, self.data_view.presenter)
 
         self._rectangles_manager = RectanglesManager(self)
+        self._rectangles_manager.additional_peaks_info = self.presenter.additional_peaks_info
 
         tool = MultipleRectangleSelectionLinePlot
         self._data_view.switch_line_plots_tool(tool, self.presenter)
