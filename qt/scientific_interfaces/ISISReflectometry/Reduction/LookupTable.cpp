@@ -7,6 +7,7 @@
 
 #include "LookupTable.h"
 #include "IGroup.h"
+#include "PreviewRow.h"
 #include "Row.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
@@ -40,6 +41,16 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
   lookupRows = findEmptyRegexes();
   // Now filter by angle; it should be unique
   if (auto found = searchByTheta(lookupRows, row.theta(), tolerance)) {
+    return found;
+  }
+  // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
+  // which will be used for everything where a specific match is not found
+  auto result = findWildcardLookupRow();
+  return result;
+}
+
+boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
+  if (auto found = searchByTheta(m_lookupRows, previewRow.theta(), tolerance)) {
     return found;
   }
   // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
