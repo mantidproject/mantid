@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction, AlgorithmManager, mtd
 from mantid.kernel import logger
-from mantid.simpleapi import CalculateChiSquared, EvaluateFunction, FunctionFactory, FunctionWrapper, plotSpectrum
+from mantid.simpleapi import (CalculateChiSquared, CreateEmptyTableWorkspace, EvaluateFunction, FunctionFactory,
+                              FunctionWrapper, plotSpectrum)
 from .function import PeaksFunction, PhysicalProperties, ResolutionModel, Background, Function
 from .energies import energies
 from .normalisation import split2range, ionname2Nre
@@ -1382,6 +1383,16 @@ class CrystalFieldFit(object):
         EvaluateFunction(Function=str(self.model.function),
                          InputWorkspace=self._input_workspace,
                          OutputWorkspace=output_name + suffix)
+        self._create_parameter_table(output_name, suffix)
+
+    def _create_parameter_table(self, output_name: str, suffix: str) -> None:
+        """Creates a table workspace to display the output parameters from a GOFit."""
+        parameter_table = CreateEmptyTableWorkspace(OutputWorkspace=output_name + suffix + "_parameters")
+        parameter_table.setTitle("Fit Parameters")
+        parameter_table.addColumn("str", "Parameter")
+        parameter_table.addColumn("float", "Value")
+        for i in range(self.model.function.nParams()):
+            parameter_table.addRow([self.model.function.parameterName(i), self.model.function.getParameterValue(i)])
 
     def two_step_fit(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
         logger.warning("Please note that this is a first experimental version of the two_step_fit algorithm.")
