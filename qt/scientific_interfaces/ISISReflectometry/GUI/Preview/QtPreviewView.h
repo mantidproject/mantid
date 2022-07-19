@@ -49,6 +49,7 @@ public:
   void setInstViewEditMode() override;
   void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
+  void setAngle(double angle) override;
   // Region selector toolbar
   void setRectangularROIState(bool enable) override;
 

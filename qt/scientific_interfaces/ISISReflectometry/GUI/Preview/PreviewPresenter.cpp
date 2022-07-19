@@ -77,6 +77,9 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   auto ws = m_model->getLoadedWs();
   assert(ws);
 
+  // Set the angle so that it has a non-zero value when the reduction is run
+  m_view->setAngle(m_model->getDefaultTheta());
+
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
   plotInstView();
