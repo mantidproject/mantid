@@ -104,10 +104,9 @@ def _calibratedIncidentEnergy(detWorkspace, monWorkspace, monEPPWorkspace, eiCal
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,
                                                   DataValue=energy,
                                                   EnableLogging=algorithmLogging)
-        return eiWorkspace
     else:
         log.error('Instrument ' + instrument_name + ' not supported for incident energy calibration')
-        return None
+    return eiWorkspace
 
 
 def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
