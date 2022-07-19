@@ -441,7 +441,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="Maximum number of vacancies (contiguous regions of non-peak pixels entirely "
                                  "contained within the peak mask) for a valid peak.")
         self.declareProperty(name="NPixPerVacancyMin", defaultValue=1, direction=Direction.Input,
-                             validator=IntBoundedValidator(lower=0),
+                             validator=IntBoundedValidator(lower=1),
                              doc="Minimum number of pixels in a vacancy")
         self.setPropertyGroup("IntegrateIfOnEdge", "Peak Mask Validation")
         self.setPropertyGroup("NPixMin", "Peak Mask Validation")
