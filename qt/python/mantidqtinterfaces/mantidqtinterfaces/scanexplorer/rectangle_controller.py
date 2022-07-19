@@ -48,17 +48,6 @@ class RectanglesManager(QWidget):
         self.rectangles.append([controller, rectangle])
         self.current_rectangle_index = len(self.rectangles) - 1
 
-    def remove_current_controller(self):
-        """
-        Remove the currently active controller
-        """
-        if self.current_controller_index == -1:
-            logger.debug("No current controller, cannot delete it.")
-            return
-        controller, rectangle = self.rectangles.pop(self.current_rectangle_index)
-        controller.remove_from(self.table)
-        self.current_rectangle_index = -1
-
     def find_controller(self, x0: float, y0: float, x1: float, y1: float) -> int:
         """
         Find the controller with given coordinates
@@ -133,6 +122,7 @@ class RectanglesManager(QWidget):
         Delete the currently selected shape.
         """
         if self.current_rectangle_index == -1:
+            logger.debug("No current controller, cannot delete it.")
             return
 
         controller, rectangle = self.rectangles.pop(self.current_rectangle_index)
