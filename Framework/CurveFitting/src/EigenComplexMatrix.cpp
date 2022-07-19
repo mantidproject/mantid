@@ -64,7 +64,7 @@ ComplexMatrix &ComplexMatrix::operator=(const Eigen::MatrixXcd eigenMatrix) {
 }
 
 /// Is matrix empty
-bool ComplexMatrix::isEmpty() const { return m_matrix.size() == 0 ? 1 : 0; }
+bool ComplexMatrix::isEmpty() const { return m_matrix.size() == 0; }
 
 /// Resize the matrix
 /// @param nx :: New first dimension

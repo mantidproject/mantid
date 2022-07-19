@@ -66,10 +66,10 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M)
 
   // Mantid::Kernel::Matrix stores row by row, so have to transpose initial matrix.
   // To do this we copy into an eign matrix, then tranpose.
-  auto temp_vec = M.getVector();
-  Eigen::MatrixXd temp_matr_tr = EigenMatrix_View(temp_vec.data(), M.numCols(), M.numRows()).matrix_mutator();
-  Eigen::MatrixXd temp_matr = temp_matr_tr.transpose();
-  std::copy(temp_matr.data(), temp_matr.data() + temp_matr.size(), m_data.data());
+  auto tempVec = M.getVector();
+  Eigen::MatrixXd tempMatrTr = EigenMatrix_View(tempVec.data(), M.numCols(), M.numRows()).matrix_mutator();
+  Eigen::MatrixXd tempMatr = tempMatrTr.transpose();
+  std::copy(tempMatr.data(), tempMatr.data() + tempMatr.size(), m_data.data());
 }
 
 /// Create a submatrix. A submatrix is a reference to part of the parent matrix.
@@ -86,13 +86,12 @@ EigenMatrix::EigenMatrix(const Kernel::Matrix<double> &M, size_t row, size_t col
 
   // Mantid::Kernel::Matrix stores row by row, so have to transpose initial matrix before taking view.
   // To do this we copy into an eign matrix, tranpose, then take a sub matrix.
-  auto temp_vec = M.getVector();
-  Eigen::MatrixXd temp_matr_tr = EigenMatrix_View(temp_vec.data(), M.numCols(), M.numRows()).matrix_mutator();
-  Eigen::MatrixXd temp_matr = temp_matr_tr.transpose();
-  auto temp_matr_sub_view =
-      EigenMatrix_View(temp_matr.data(), temp_matr.rows(), temp_matr.cols(), nRows, nCols, row, col);
-  Eigen::MatrixXd temp_matr_sub = temp_matr_sub_view.matrix_inspector();
-  std::copy(temp_matr_sub.data(), temp_matr_sub.data() + temp_matr_sub.size(), m_data.data());
+  auto tempVec = M.getVector();
+  Eigen::MatrixXd tempMatrTr = EigenMatrix_View(tempVec.data(), M.numCols(), M.numRows()).matrix_mutator();
+  Eigen::MatrixXd tempMatr = tempMatrTr.transpose();
+  auto tempMatrSubView = EigenMatrix_View(tempMatr.data(), tempMatr.rows(), tempMatr.cols(), nRows, nCols, row, col);
+  Eigen::MatrixXd tempMatrSub = tempMatrSubView.matrix_inspector();
+  std::copy(tempMatrSub.data(), tempMatrSub.data() + tempMatrSub.size(), m_data.data());
 }
 
 /// "Move" constructor
