@@ -207,8 +207,10 @@ class InstrumentArrayConverter:
         return xvals, signal, errors, irow_peak, icol_peak, detector_edges, detids
 
 
-def is_peak_mask_valid(peak_mask, npk_min=3, density_min=0.35, nrow_max=8, ncol_max=15,
-                       min_npixels_per_vacancy=2, max_nvacancies=1):
+def is_peak_mask_valid(peak_mask, peak_label, npk_min, density_min, nrow_max, ncol_max,
+                       min_npixels_per_vacancy, max_nvacancies):
+    if peak_label == 0:
+        return False, PEAK_MASK_STATUS.NO_PEAK
     if peak_mask.sum() < npk_min:
         return False, PEAK_MASK_STATUS.NPIX_MIN
     ncol = np.sum(peak_mask.sum(axis=0) > 0)
@@ -400,7 +402,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.declareProperty(name="BackscatteringTOFResolution", defaultValue=0.04, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0, upper=1.0),
                              doc="dTOF/TOF of window for peaks at back-scattering (resolution dominated by moderator "
-                                 "contribution, dT0/T0, and uncertainty in path length dL/L which is assumed constant"
+                                 "contribution, dT0/T0, and uncertainty in path length dL/L which is assumed constant "
                                  "for all pixels).")
         self.setPropertySettings("BackscatteringTOFResolution", condition_to_use_resn)
         self.declareProperty(name="ThetaWidth", defaultValue=0.015, direction=Direction.Input,
@@ -408,10 +410,17 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="dTheta resolution (estimated from width at forward scattering minus contribution "
                                  "from moderator, dT0/T0, and path length dL/L).")
         self.setPropertySettings("ThetaWidth", condition_to_use_resn)
+        self.declareProperty(name="OptimiseMask", defaultValue=False, direction=Direction.Input,
+                             doc="Redo peak mask using optimal TOF window discovered (the original mask is found from "
+                                 "the integrated intensity over a TOF window determined from the resolution "
+                                 "parameters). A new optimal TOF window is then found using the new peak mask."
+                                 "Note this can be helpful if resolution parameters or peak centres are not very "
+                                 "accurate.")
         self.setPropertyGroup("NPixels", "Integration Window Parameters")
         self.setPropertyGroup('FractionalTOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
+        self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
         # peak mask validators
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
                              doc="Integrate peaks if contains pixels on edge of the detector.")
@@ -445,8 +454,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.declareProperty(name="UseNearestPeak", defaultValue=False, direction=Direction.Input,
                              doc="Find nearest peak pixel if peak position is in a background pixel.")
         self.declareProperty(name="UpdatePeakPosition", defaultValue=False, direction=Direction.Input,
-                             doc="If True then the peak position will be updated to be the detid with the"
-                                 "largest integrated counts over the optimised TOF window, and the peak TOF will be"
+                             doc="If True then the peak position will be updated to be the detid with the "
+                                 "largest integrated counts over the optimised TOF window, and the peak TOF will be "
                                  "taken as the maximum of the focused data in the TOF window.")
         self.setPropertyGroup("UseNearestPeak", "Peak Finding")
         self.setPropertyGroup("UpdatePeakPosition", "Peak Finding")
@@ -472,8 +481,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = self.getProperty("ThetaWidth").value
         dpixel = self.getProperty("NPixels").value
-        integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
+        optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
+        integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
         npk_min = self.getProperty("NPixMin").value
         density_min = self.getProperty("DensityPixMin").value
         nrow_max = self.getProperty("NRowMax").value
@@ -530,24 +540,35 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             peak_mask, non_bg_mask, peak_label = find_peak_mask(signal, ixlo, ixhi, irow, icol, use_nearest)
             intens, sig = 0.0, 0.0
             integrated = False
-            if peak_label == 0:
-                status = PEAK_MASK_STATUS.NO_PEAK
-            elif not integrate_on_edge and np.any(np.logical_and(peak_mask, det_edges)):
+            if not integrate_on_edge and np.any(np.logical_and(peak_mask, det_edges)):
                 status = PEAK_MASK_STATUS.ON_EDGE
             else:
-                is_valid_mask, status = is_peak_mask_valid(peak_mask, npk_min, density_min, nrow_max, ncol_max,
-                                                               min_npixels_per_vacancy, max_nvacancies)
+                is_valid_mask, status = is_peak_mask_valid(peak_mask, peak_label, npk_min, density_min,
+                                                           nrow_max, ncol_max, min_npixels_per_vacancy, max_nvacancies)
                 if is_valid_mask:
                     ypk, epk_sq = focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk)
-                    # normalise by bin width
-                    dx = np.diff(xpk)
-                    ypk[1:] = ypk[1:] * dx
-                    ypk[0] = ypk[0] * dx[0]  # assume first has same dx as adjacent bin
-                    epk_sq[1:] = epk_sq[1:] * (dx ** 2)
-                    epk_sq[0] = epk_sq[0] * (dx[0] ** 2)
                     # find bg and pk bins in focused spectrum by maximising I/sig
                     ixlo_opt, ixhi_opt = find_peak_limits(ypk, epk_sq, ixlo, ixhi)
-                    # add peak to pk_ws_int (do this before overwrite fields of pk in input workspace)
+                    if optimise_mask:
+                        # update the peak mask
+                        opt_peak_mask, opt_non_bg_mask, peak_label = find_peak_mask(signal, ixlo_opt, ixhi_opt, irow,
+                                                                                    icol, use_nearest)
+                        if not integrate_on_edge and np.any(np.logical_and(opt_peak_mask, det_edges)):
+                            status = PEAK_MASK_STATUS.ON_EDGE
+                        else:
+                            # combine masks as optimal TOF window can truncate peak slightly
+                            opt_peak_mask = np.logical_or(peak_mask, opt_peak_mask)
+                            is_valid_mask, new_status = is_peak_mask_valid(opt_peak_mask, peak_label, npk_min,
+                                                                           density_min, nrow_max, ncol_max,
+                                                                           min_npixels_per_vacancy, max_nvacancies)
+                            if is_valid_mask:
+                                status = new_status
+                                # refocus data and re-optimise TOF limits
+                                peak_mask = opt_peak_mask
+                                non_bg_mask = np.logical_and(non_bg_mask, opt_non_bg_mask)
+                                ypk, epk_sq = focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk)
+                                ixlo_opt, ixhi_opt = find_peak_limits(ypk, epk_sq, min(ixlo, ixlo_opt),
+                                                                      max(ixhi, ixhi_opt))
                     if update_peak_pos:
                         # find det
                         idet = np.argmax(signal[:, :, ixlo_opt:ixhi_opt].sum(axis=2)[peak_mask])
@@ -560,6 +581,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                         self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpk[imax],
                                            DetectorID=int(det))
                         pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
+                    # normalise by bin width before final integration
+                    dx = np.diff(xpk)
+                    ypk[1:] = ypk[1:] * dx
+                    ypk[0] = ypk[0] * dx[0]  # assume first has same dx as adjacent bin
+                    epk_sq[1:] = epk_sq[1:] * (dx ** 2)
+                    epk_sq[0] = epk_sq[0] * (dx[0] ** 2)
                     # calc intens and sig
                     th = pk.getScattering() / 2
                     wl = pk.getWavelength()
@@ -571,8 +598,17 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             pk.setIntensity(intens)
             pk.setSigmaIntensity(sig)
             if plot_filename:
-                # 2D plot
-                image_data = signal[:, :, ixlo:ixhi].sum(axis=2)
+                if not integrated:
+                    ypk = signal[peak_mask].sum(axis=0)
+                    epk_sq = np.sum(error[peak_mask] ** 2, axis=0)
+                    ixlo_opt = ixlo
+                    ixhi_opt = ixhi
+                # limits for 1D plot
+                ipad = int((ixhi - ixlo) / 2)  # extra portion of data shown outside the 1D window
+                istart = max(min(ixlo, ixlo_opt) - ipad, 0)
+                iend = min(max(ixhi, ixhi_opt) + ipad, len(xpk) - 1)
+                # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
+                image_data = signal[:, :, ixlo_opt:ixhi_opt].sum(axis=2)
                 img = ax[0].imshow(image_data, norm=LogNorm(vmax=image_data[peak_mask].mean()))
                 ax[0].plot(*np.where(peak_mask.T), 'xw')
                 ax[0].plot(icol, irow, 'or')
@@ -583,22 +619,13 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 ax[0].set_xlabel('dColumn')
                 ax[0].set_ylabel('dRow')
                 # 1D plot
-                ipad = int((ixhi - ixlo) / 2)  # extra portion of data shown outside the 1D window
-                if not integrated:
-                    ypk = signal[peak_mask].sum(axis=0)
-                    epk_sq = np.sum(error[peak_mask] ** 2, axis=0)
-                    istart = max(ixlo - ipad, 0)
-                    iend = min(ixhi + ipad, len(xpk) - 1)
-                else:
-                    ax[1].axvline(xpk[ixlo_opt], ls='--', color='b', label='Optimal window')
-                    ax[1].axvline(xpk[ixhi_opt-1], ls='--', color='b')
-                    istart = max(min(ixlo, ixlo_opt) - ipad, 0)
-                    iend = min(max(ixhi, ixhi_opt) + ipad, len(xpk) - 1)
+                ax[1].axvline(xpk[ixlo_opt], ls='--', color='b', label='Optimal window')
+                ax[1].axvline(xpk[ixhi_opt-1], ls='--', color='b')
                 ax[1].errorbar(xpk[istart:iend], ypk[istart:iend], yerr=np.sqrt(epk_sq[istart:iend]),
                                marker='o', markersize=3, capsize=2, ls='', color='k', label='data')
                 ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
                 ax[1].axvline(xpk[ixlo], ls=':', color='r', label='Initial window')
-                ax[1].axvline(xpk[ixhi], ls=':', color='r')
+                ax[1].axvline(xpk[ixhi-1], ls=':', color='r')
                 ax[1].axhline(0, ls=':', color='k')
                 ax[1].legend(fontsize=7, loc=1, ncol=2)
                 # figure formatting
