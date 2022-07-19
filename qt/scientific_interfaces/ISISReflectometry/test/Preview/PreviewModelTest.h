@@ -158,6 +158,24 @@ public:
     model.exportReducedWsToAds();
   }
 
+  void test_get_set_loaded_workspace() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    TS_ASSERT_EQUALS(model.getLoadedWs(), ws);
+  }
+
+  void test_get_theta_from_workspace() {
+    PreviewModel model;
+    auto theta = 2.3;
+    auto ws = createWorkspace();
+    ws->mutableRun().addProperty("Theta", theta, true);
+    model.setLoadedWs(ws);
+
+    TS_ASSERT_DELTA(model.getDefaultTheta(), theta, 1e-6);
+  }
+
 private:
   MatrixWorkspace_sptr generateSummedWs(MockJobManager &mockJobManager, PreviewModel &model) {
     auto expectedWs = createWorkspace();

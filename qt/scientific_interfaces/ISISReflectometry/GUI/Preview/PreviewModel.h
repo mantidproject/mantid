@@ -36,7 +36,9 @@ public:
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
   ProcessingInstructions getProcessingInstructions() const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
+  double getDefaultTheta() const override;
 
+  void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
   void setTheta(double theta) override;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
   void setSelectedRegion(Selection const &selection) override;
@@ -51,5 +53,7 @@ private:
   std::unique_ptr<PreviewRow> m_runDetails{nullptr};
 
   void createRunDetails(std::string const &workspaceName);
+
+  double getThetaFromLogs(std::string const &logName) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -31,6 +31,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
   virtual ProcessingInstructions getProcessingInstructions() const = 0;
+  virtual double getDefaultTheta() const = 0;
 
   virtual void setTheta(double theta) = 0;
 
