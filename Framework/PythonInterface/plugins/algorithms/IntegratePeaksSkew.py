@@ -553,9 +553,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                         # update the peak mask
                         opt_peak_mask, opt_non_bg_mask, peak_label = find_peak_mask(signal, ixlo_opt, ixhi_opt, irow,
                                                                                     icol, use_nearest)
-                        if not integrate_on_edge and np.any(np.logical_and(opt_peak_mask, det_edges)):
-                            status = PEAK_MASK_STATUS.ON_EDGE
-                        else:
+                        if not np.any(np.logical_and(opt_peak_mask, det_edges)) or integrate_on_edge:
                             # combine masks as optimal TOF window can truncate peak slightly
                             opt_peak_mask = np.logical_or(peak_mask, opt_peak_mask)
                             is_valid_mask, new_status = is_peak_mask_valid(opt_peak_mask, peak_label, npk_min,
