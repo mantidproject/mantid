@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <gsl/gsl_version.h>
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
@@ -16,6 +17,18 @@ using Mantid::CurveFitting::Algorithms::SplineSmoothing;
 
 class SplineSmoothingTest : public CxxTest::TestSuite {
 public:
+  bool skipTests() override {
+// Skip this test suite if running on RHEL7.
+// Due to compatability issues, RHEL7 uses a different version of GSL to other platforms.
+// This causes this test to fail on RHEL7.
+// As RHEL7 is no longer supported, this test will be skipped on GSL verisons < 2.
+#if GSL_MAJOR_VERSION < 2
+    return true;
+#else
+    return false;
+#endif
+  }
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static SplineSmoothingTest *createSuite() { return new SplineSmoothingTest(); }
