@@ -211,10 +211,10 @@ def is_peak_mask_valid(peak_mask, npk_min=3, density_min=0.35, nrow_max=8, ncol_
                        min_npixels_per_vacancy=2, max_nvacancies=1):
     if peak_mask.sum() < npk_min:
         return False, PEAK_MASK_STATUS.NPIX_MIN
-    ncol = np.sum(peak_mask.sum(axis=1) > 0)
+    ncol = np.sum(peak_mask.sum(axis=0) > 0)
     if ncol > ncol_max:
         return False, PEAK_MASK_STATUS.NCOL_MAX
-    nrow = np.sum(peak_mask.sum(axis=0) > 0)
+    nrow = np.sum(peak_mask.sum(axis=1) > 0)
     if nrow > nrow_max:
         return False, PEAK_MASK_STATUS.NROW_MAX
     density = peak_mask.sum() / (ncol*nrow)
@@ -606,7 +606,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 ax[1].set_title(f'I/sig = {intens_over_sig}')
                 ax[1].set_xlabel(r'TOF ($\mu$s)')
                 ax[1].set_ylabel('Intensity')
-                cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0])
+                cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0], label='Intensity')
                 cbar.ax.tick_params(labelsize=7, which='both')
                 ax[1].relim()
                 ax[1].autoscale_view()
