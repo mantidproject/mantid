@@ -89,14 +89,6 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=Fal
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
-    # convert diff cross section to S(Q)
-    material_builder = MaterialBuilder()
-    sample = material_builder.setFormula(sample_details.material_object.chemical_formula).build()
-    sample_scatter_cross_section = sample.totalScatterXSection()
-    focused_ws = focused_ws * 4 * math.pi / sample_scatter_cross_section
-    if debug:
-        s_of_q = mantid.CloneWorkspace(InputWorkspace=focused_ws)
-
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
     sample_geometry_json = sample_details.generate_sample_geometry()
     sample_material_json = sample_details.generate_sample_material()
@@ -121,8 +113,18 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, merge_banks=Fal
                            "do_van_normalisation=true first.")
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
     if debug:
-        s_of_q_corrected = mantid.CloneWorkspace(InputWorkspace=focused_ws)
-    focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
+        dcs_corrected = mantid.CloneWorkspace(InputWorkspace=focused_ws)
+
+    # convert diff cross section to S(Q) - 1
+    material_builder = MaterialBuilder()
+    sample = material_builder.setFormula(sample_details.material_object.chemical_formula).build()
+    sample_total_scatter_cross_section = sample.totalScatterXSection()
+    sample_coh_scatter_cross_section = sample.cohScatterXSection()
+    focused_ws = focused_ws - sample_total_scatter_cross_section / (4 * math.pi)
+    focused_ws = focused_ws * 4 * math.pi / sample_coh_scatter_cross_section
+    if debug:
+        s_of_q_minus_one = mantid.CloneWorkspace(InputWorkspace=focused_ws)
+
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
