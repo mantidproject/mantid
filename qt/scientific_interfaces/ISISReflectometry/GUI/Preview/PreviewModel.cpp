@@ -15,9 +15,11 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <boost/utility/in_place_factory.hpp>
 
+#include <optional>
 #include <string>
 
 using namespace Mantid::API;
@@ -81,7 +83,13 @@ MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->ge
 MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
 MatrixWorkspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
 
-double PreviewModel::getDefaultTheta() const { return getThetaFromLogs("Theta"); }
+std::optional<double> PreviewModel::getDefaultTheta() const {
+  auto theta = getThetaFromLogs("Theta");
+  if (theta && *theta > Tolerance) {
+    return theta;
+  }
+  return std::nullopt;
+}
 
 std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 
@@ -130,21 +138,21 @@ void PreviewModel::exportReducedWsToAds() const {
   }
 }
 
-double PreviewModel::getThetaFromLogs(const std::string &logName) const {
-  double theta = -1.;
+std::optional<double> PreviewModel::getThetaFromLogs(const std::string &logName) const {
   const Mantid::API::Run &run = getLoadedWs()->run();
+  if (!run.hasProperty(logName)) {
+    return std::nullopt;
+  }
   Property *logData = run.getLogData(logName);
   auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
   auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
 
   if (logPWV) {
-    theta = *logPWV;
+    return *logPWV;
   } else if (logTSP && logTSP->realSize() > 0) {
-    theta = logTSP->lastValue();
-  } else {
-    throw Exception::NotFoundError("Theta", "Log value not found");
+    return logTSP->lastValue();
   }
-  return theta;
+  return std::nullopt;
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -15,6 +15,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,7 +37,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
   ProcessingInstructions getProcessingInstructions() const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
-  double getDefaultTheta() const override;
+  std::optional<double> getDefaultTheta() const override;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
   void setTheta(double theta) override;
@@ -54,6 +55,6 @@ private:
 
   void createRunDetails(std::string const &workspaceName);
 
-  double getThetaFromLogs(std::string const &logName) const;
+  std::optional<double> getThetaFromLogs(std::string const &logName) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -78,7 +78,9 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   assert(ws);
 
   // Set the angle so that it has a non-zero value when the reduction is run
-  m_view->setAngle(m_model->getDefaultTheta());
+  if (auto const theta = m_model->getDefaultTheta()) {
+    m_view->setAngle(*theta);
+  }
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
