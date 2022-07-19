@@ -78,7 +78,6 @@ public:
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
-    expectLoadWorkspaceCompletedUpdatesAngle(*mockView, *mockModel);
 
     auto presenter = PreviewPresenter(
         packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
@@ -114,6 +113,7 @@ public:
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
   }
+
   void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
@@ -121,9 +121,30 @@ public:
     auto mockInstViewModel = makeInstViewModel();
 
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
-    expectLoadWorkspaceCompletedUpdatesAngle(*mockView, *mockModel);
 
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_angle_is_set_if_it_equals_zero() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedUpdatesAngle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_angle_is_not_set_if_already_set_manually() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedDoesNotUpdateAngle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
     auto presenter = PreviewPresenter(std::move(deps));
     presenter.notifyLoadWorkspaceCompleted();
   }
@@ -293,9 +314,23 @@ private:
   }
 
   void expectLoadWorkspaceCompletedUpdatesAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     auto angle = 2.3;
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(0.0));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
     EXPECT_CALL(mockView, setAngle(angle)).Times(1);
+  }
+
+  void expectLoadWorkspaceCompletedDoesNotUpdateAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto angle = 2.3;
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(angle));
+    EXPECT_CALL(mockModel, getDefaultTheta()).Times(0);
+    EXPECT_CALL(mockView, setAngle(_)).Times(0);
   }
 
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,

@@ -7,6 +7,7 @@
 
 #include "PreviewPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -77,9 +78,12 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   auto ws = m_model->getLoadedWs();
   assert(ws);
 
-  // Set the angle so that it has a non-zero value when the reduction is run
-  if (auto const theta = m_model->getDefaultTheta()) {
-    m_view->setAngle(*theta);
+  // Only set the angle to the default if the user hasn't already set it manually
+  if (m_view->getAngle() < Mantid::Kernel::Tolerance) {
+    // Set the angle so that it has a non-zero value when the reduction is run
+    if (auto const theta = m_model->getDefaultTheta()) {
+      m_view->setAngle(*theta);
+    }
   }
 
   // Notify the instrument view model that the workspace has changed before we get the surface
