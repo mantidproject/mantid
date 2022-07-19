@@ -293,8 +293,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
-  // TODO need to find row by angle/title; for now it just uses the wildcard row
-  auto lookupRow = findWildcardLookupRow(model);
+  auto lookupRow = model.findLookupRow(previewRow);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
   }

@@ -50,18 +50,14 @@ public:
 
   void testExperimentSettingsWithPreviewRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    auto previewRow = makePreviewRow();
-    auto processingInstructions = std::string("2-3");
-    previewRow.setProcessingInstructions(processingInstructions);
     auto theta = 0.7;
-    previewRow.setTheta(theta);
-
+    auto previewRow = makePreviewRow(theta, "2-3");
     auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
 
     // Check results from the experiment settings tab
     checkExperimentSettings(*result);
     // Check the settings from the PreviewRow model
-    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), processingInstructions);
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "2-3");
     assertProperty(*result, "ThetaIn", theta);
   }
 
@@ -73,14 +69,14 @@ public:
     checkMatchesAngleRow(*result);
   }
 
-  // TODO
-  //  void testLookupPreviewRowWithAngleLookup() {
-  //    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-  //    // angle within tolerance of 2.3
-  //    auto row = makePreviewRow(2.29);
-  //    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
-  //    checkMatchesAngleRow(*result);
-  //  }
+  void testLookupPreviewRowWithAngleLookup() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    // angle within tolerance of 2.3
+    auto previewRow = makePreviewRow(2.29, "2-3");
+    auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
+    checkMatchesAngleRowExcludingProcessingInstructions(*result);
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "2-3");
+  }
 
   void testLookupRowWithWildcardLookup() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
@@ -90,14 +86,14 @@ public:
     checkMatchesWildcardRow(*result);
   }
 
-  // TODO
-  //  void testLookupPreviewRowWithWildcardLookup() {
-  //    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-  //    // angle outside tolerance of any angle matches wildcard row instead
-  //    auto row = makePreviewRow(2.28);
-  //    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
-  //    checkMatchesWildcardRow(*result);
-  //  }
+  void testLookupPreviewRowWithWildcardLookup() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    // angle outside tolerance of any angle matches wildcard row instead
+    auto row = makePreviewRow(2.28, "2-3");
+    auto result = Reduction::createAlgorithmRuntimeProps(model, row);
+    checkMatchesWildcardRowExcludingProcessingInstructions(*result);
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "2-3");
+  }
 
   void testInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
@@ -294,7 +290,12 @@ private:
     const std::string m_propName = "OutputWorkspace";
   };
 
-  PreviewRow makePreviewRow() { return PreviewRow({"12345"}); }
+  PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11") {
+    auto previewRow = PreviewRow({"12345"});
+    previewRow.setTheta(theta);
+    previewRow.setProcessingInstructions(processingInstructions);
+    return previewRow;
+  }
 
   void checkExperimentSettings(IAlgorithmRuntimeProps const &result) {
     TS_ASSERT_EQUALS(result.getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
@@ -327,6 +328,17 @@ private:
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "2-3,7-8");
   }
 
+  void checkMatchesAngleRowExcludingProcessingInstructions(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22348, 22349");
+    TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22358, 22359");
+    TS_ASSERT_EQUALS(result.getPropertyValue("TransmissionProcessingInstructions"), "4");
+    assertProperty(result, "MomentumTransferMin", 0.009);
+    assertProperty(result, "MomentumTransferStep", 0.03);
+    assertProperty(result, "MomentumTransferMax", 1.3);
+    assertProperty(result, "ScaleFactor", 0.9);
+    TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "2-3,7-8");
+  }
+
   void checkMatchesWildcardRow(IAlgorithmRuntimeProps const &result) {
     TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22345");
     TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22346");
@@ -336,6 +348,17 @@ private:
     assertProperty(result, "MomentumTransferMax", 1.1);
     assertProperty(result, "ScaleFactor", 0.7);
     TS_ASSERT_EQUALS(result.getPropertyValue("ProcessingInstructions"), "1");
+    TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
+  }
+
+  void checkMatchesWildcardRowExcludingProcessingInstructions(IAlgorithmRuntimeProps const &result) {
+    TS_ASSERT_EQUALS(result.getPropertyValue("FirstTransmissionRunList"), "22345");
+    TS_ASSERT_EQUALS(result.getPropertyValue("SecondTransmissionRunList"), "22346");
+    TS_ASSERT_EQUALS(result.getPropertyValue("TransmissionProcessingInstructions"), "5-6");
+    assertProperty(result, "MomentumTransferMin", 0.007);
+    assertProperty(result, "MomentumTransferStep", 0.01);
+    assertProperty(result, "MomentumTransferMax", 1.1);
+    assertProperty(result, "ScaleFactor", 0.7);
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
   }
 
