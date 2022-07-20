@@ -1,4 +1,4 @@
-set(COMMON_SRC_FILES Plotter.cpp Encoder.cpp Decoder.cpp)
+set(COMMON_SRC_FILES Plotter.cpp Encoder.cpp Decoder.cpp QtJobRunner.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(COMMON_INC_FILES
@@ -11,6 +11,7 @@ set(COMMON_INC_FILES
     Plotter.h
     Encoder.h
     Decoder.h
+    QtJobRunner.h
 )
 
 prepend(COMMON_SRC_FILES GUI/Common ${COMMON_SRC_FILES})
