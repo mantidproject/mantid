@@ -296,8 +296,7 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, co
   } else if (PDFType == G_K_OF_R) {
     API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
     const Kernel::Material &material = inputWS->sample().getMaterial();
-    double sigma = material.cohScatterXSection();
-    const double factor = sigma / (4. * M_PI);
+    const double factor = 0.001 * pow(material.cohScatterLength(), 2);
 
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // error propagation - assuming uncertainty in r = 0
@@ -362,8 +361,7 @@ void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &
   } else if (outputType == G_K_OF_R) {
     API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
     const Kernel::Material &material = inputWS->sample().getMaterial();
-    double sigma = material.cohScatterXSection();
-    const double factor = sigma / (4. * M_PI);
+    const double factor = 0.001 * pow(material.cohScatterLength(), 2);
 
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // error propagation - assuming uncertainty in r = 0

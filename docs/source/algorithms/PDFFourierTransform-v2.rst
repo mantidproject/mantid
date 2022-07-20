@@ -119,7 +119,7 @@ otherwise
 
    <center>
 
-:math:`G_k(r) = \frac{\sigma_s G(r)}{(4 \pi)^2 \rho_0 r} = \frac{\sigma_s}{4 \pi} [g(r)-1]`
+:math:`G_k(r) = \frac{0.01 * \langle b_{coh} \rangle ^2 G^{PDF}(r)}{(4 \pi)^2 \rho_0 r} = 0.01 * \langle b_{coh} \rangle ^2 [g(r)-1]`
 
 .. raw:: html
 
