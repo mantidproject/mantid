@@ -11,8 +11,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SetSample.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -129,6 +132,31 @@ public:
     TS_ASSERT_DELTA(GofR[0], 0.0200, 0.0001);
     TS_ASSERT_DELTA(GofR[249], -0.4928, 0.0001);
     TS_ASSERT_EQUALS(pdfUnit->caption(), "Atomic Distance");
+  }
+
+  // Tests that the algorithm with execute for each of the different PDFTypes
+  void test_check_PDFType_executes() {
+
+    std::string PDFTypeArray[4] = {"g(r)", "G(r)", "RDF(r)", "G_k(r)"};
+
+    API::Workspace_sptr ws = createWS(20, 0.1, "TestInput2", "MomentumTransfer");
+
+    for (std::string value : PDFTypeArray) {
+      PDFFourierTransform2 pdfft;
+      pdfft.initialize();
+      pdfft.setProperty("InputWorkspace", ws);
+      pdfft.setProperty("Direction", "Forward");
+      pdfft.setProperty("OutputWorkspace", "PDFGofR");
+      pdfft.setProperty("SofQType", "S(Q)");
+      pdfft.setProperty("Rmax", 20.0);
+      pdfft.setProperty("DeltaR", 0.01);
+      pdfft.setProperty("Qmin", 0.0);
+      pdfft.setProperty("Qmax", 30.0);
+      pdfft.setProperty("PDFType", value);
+
+      TS_ASSERT_THROWS_NOTHING(pdfft.execute());
+      TS_ASSERT(pdfft.isExecuted());
+    }
   }
 
   void test_CheckNan() {
@@ -259,6 +287,82 @@ public:
     endZeroValuesY[99] = 0.0;
     TS_ASSERT_EQUALS(alg.determineMinIndex(0.0, X, endZeroValuesY), 3);
     TS_ASSERT_EQUALS(alg.determineMaxIndex(20.0, X, endZeroValuesY), 97);
+  }
+
+  void test_PDFTypes_fwd() {
+    API::MatrixWorkspace_sptr ws = createWS(20, 0.1, "CheckResult2", "MomentumTransfer");
+
+    // create the material
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+    using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
+
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
+
+    auto const rho0 = 0.07192;
+
+    // set the sample information
+    Mantid::DataHandling::SetSample setsample;
+    setsample.initialize();
+    setsample.setProperty("InputWorkspace", ws);
+    setsample.setProperty("Material", material);
+    setsample.execute();
+
+    // check g(r) returns correct value
+    DataObjects::Workspace2D_sptr pdfws_gr = standard_ws_ptr(ws, "g(r)", "Forward");
+    const auto little_gofR = pdfws_gr->y(0);
+    const auto gofR_comparison = 3.2015617108;
+    TS_ASSERT_DELTA(little_gofR[10], gofR_comparison, 1e-8);
+
+    // check G(r) returns correct value
+    DataObjects::Workspace2D_sptr pdfws_big_gr = standard_ws_ptr(ws, "G(r)", "Forward");
+    const auto big_gofR = pdfws_big_gr->y(0);
+    const auto &R_G = pdfws_big_gr->x(0);
+    const auto calculated_big_gofR = (gofR_comparison - 1) * 4. * M_PI * rho0 * R_G[10];
+
+    TS_ASSERT_DELTA(big_gofR[10], calculated_big_gofR, 1e-8);
+
+    // check RDF(r) returns correct value
+    DataObjects::Workspace2D_sptr pdfws_rdf_r = standard_ws_ptr(ws, "RDF(r)", "Forward");
+    const auto rdfofR = pdfws_rdf_r->y(0);
+    const auto &R_RDF = pdfws_rdf_r->x(0);
+    const auto calculated_rdfofR = gofR_comparison * 4. * M_PI * R_RDF[10] * rho0 * R_RDF[10];
+
+    TS_ASSERT_DELTA(rdfofR[10], calculated_rdfofR, 1e-8);
+
+    //// check G_k(r) returns correct value
+    DataObjects::Workspace2D_sptr pdfws_gkr = standard_ws_ptr(ws, "G_k(r)", "Forward");
+    const auto gkofR = pdfws_gkr->y(0);
+    const Kernel::Material &material2 = pdfws_gkr->sample().getMaterial();
+    const auto factor = 0.001 * pow(material2.cohScatterLength(), 2);
+    const auto calculated_gkofR = (gofR_comparison - 1) * factor;
+
+    TS_ASSERT_DELTA(gkofR[10], calculated_gkofR, 1e-8);
+  }
+
+private:
+  DataObjects::Workspace2D_sptr standard_ws_ptr(API::MatrixWorkspace_sptr ws, std::string PDFType,
+                                                std::string Direction) {
+    // 1. Run PDFFT
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("Direction", Direction);
+    pdfft.setProperty("OutputWorkspace", "outputWS");
+    pdfft.setProperty("SofQType", "S(Q)");
+    pdfft.setProperty("Rmax", 20.0);
+    pdfft.setProperty("DeltaR", 0.01);
+    pdfft.setProperty("Qmin", 0.0);
+    pdfft.setProperty("Qmax", 30.0);
+    pdfft.setProperty("PDFType", PDFType);
+
+    pdfft.execute();
+
+    DataObjects::Workspace2D_sptr pdfws =
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("outputWS"));
+
+    return pdfws;
   }
 };
 
