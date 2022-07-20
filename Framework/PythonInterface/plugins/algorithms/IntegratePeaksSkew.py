@@ -423,7 +423,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
         # peak mask validators
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
-                             doc="Integrate peaks if contains pixels on edge of the detector.")
+                             doc="Integrate peaks that contain pixels on edge of the detector.")
         self.declareProperty(name="NPixMin", defaultValue=3, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
                              doc="Minimum number of pixels contributing to a peak")
