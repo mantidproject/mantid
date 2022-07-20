@@ -37,6 +37,7 @@ class RectanglesManager(QWidget):
         self.layout().addWidget(self.table)
 
         self.table.cellChanged.connect(self.on_field_changed)
+        self.manage_table_width()
 
     def add_rectangle(self, rectangle: patches.Rectangle):
         """
@@ -47,6 +48,7 @@ class RectanglesManager(QWidget):
         controller.insert_in(self.table)
         self.rectangles.append([controller, rectangle])
         self.current_rectangle_index = len(self.rectangles) - 1
+        self.manage_table_width()
 
     def find_controller(self, x0: float, y0: float, x1: float, y1: float) -> int:
         """
@@ -102,6 +104,19 @@ class RectanglesManager(QWidget):
         controller, rectangle = self.rectangles[index]
         self.sig_controller_updated.emit(rectangle, *controller.get_values())
 
+    def manage_table_width(self):
+        """
+        Manage the table fixed width, depending if there are rows, so it takes exactly the width it needs.
+        """
+
+        if self.table.rowCount() == 0:
+            # set the width of the table to be the size of its columns + the size of the separation between them
+            self.table.setFixedWidth(sum(self.table.columnWidth(i) for i in range(self.table.columnCount())) + 2)
+        else:
+            # set the table to the width of the columns + the width of the separation between them
+            # + some offset which I think comes from the row numbers
+            self.table.setFixedWidth(sum(self.table.columnWidth(i) for i in range(self.table.columnCount())) + 2 + 11)
+
     def get_current_rectangle(self) -> patches.Rectangle:
         """
         Get the current rectangle object
@@ -130,6 +145,7 @@ class RectanglesManager(QWidget):
         rectangle.remove()
 
         self.current_rectangle_index = -1
+        self.manage_table_width()
 
     def clear(self):
         """
@@ -140,6 +156,7 @@ class RectanglesManager(QWidget):
             rectangle.remove()
         self.rectangles = []
         self.current_rectangle_index = -1
+        self.manage_table_width()
 
 
 class RectangleController:
