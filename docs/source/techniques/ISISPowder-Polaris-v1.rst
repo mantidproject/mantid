@@ -181,7 +181,7 @@ The function performs the following processing:
 - subtracts the Placzek self scattering correction from the differential cross section
 - converts the differential cross-section into an :math:`S(Q) - 1` distribution using the following relationship where :math:`\sigma_s` is the total scattering cross section and :math:`\sigma_{coh}` is the coherent scattering cross section. This is based on equations 5, 9 and 19 in [#Keen]_:
 
-:math:`\hspace{20pt}\frac{\sigma_{coh}}{4 \pi}[S(Q) - 1] = \frac{d\sigma_s}{d\Omega}(Q) - \frac{\sigma_s}{4 \pi}`
+:math:`\hspace{20pt}S(Q) - 1 = (\frac{d\sigma_s}{d\Omega}(Q) - <b_{tot}^2>) / <b_{coh}>^2 = (\frac{d\sigma_s}{d\Omega}(Q) - \frac{\sigma_s}{4 \pi}) / <b_{coh}>^2`
 
 - converts the :math:`S(Q) - 1` distribution into a PDF using :ref:`algm-PDFFourierTransform`
 

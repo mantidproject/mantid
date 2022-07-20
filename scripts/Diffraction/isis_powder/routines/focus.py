@@ -194,10 +194,11 @@ def _normalize_one_spectrum(single_spectrum_ws, spline, instrument):
 
         abs_norm_factor = v_cross_section * num_v_atoms / \
                           (num_sample_atoms * 4 * math.pi)
-        logger.debug("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
+        logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
         # avoid "Variable invalidated, data has been deleted" error when debugging
         output_ws_name = single_spectrum_ws.name()
-        abs_norm_factor_ws = mantid.CreateSingleValuedWorkspace(DataValue=abs_norm_factor)
+        abs_norm_factor_ws = mantid.CreateSingleValuedWorkspace(DataValue=abs_norm_factor,
+                                                                OutputWorkspace="__abs_norm_factor_ws")
         complete = mantid.Multiply(LHSWorkspace=complete, RHSWorkspace=abs_norm_factor_ws,
                                    OutputWorkspace=output_ws_name)
 
