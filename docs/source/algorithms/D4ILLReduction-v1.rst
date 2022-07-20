@@ -28,7 +28,7 @@ Caching with ADS
 This algorithm cleans-up the intermediate workspaces if `ClearCache` property is checked (`True` by default).
 
 Default naming schemes are imposed to ensure smooth communication of workspace contents. While user can specify the name for the output :ref:`WorkspaceGroup <WorkspaceGroup>`,
-the names of contents will consist of the name of the group as a prefix, `diffractogram` as the middle part, and the X-axis unit (either `q` or `2theta` as the suffix.
+the names of contents will consist of the name of the group as a prefix, `diffractogram` as the middle part, and the X-axis unit (either `q` or `2theta` as the suffix).
 
 
 Saving output
