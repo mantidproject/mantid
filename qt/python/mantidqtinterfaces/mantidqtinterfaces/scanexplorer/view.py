@@ -45,7 +45,7 @@ class ScanExplorerView(QMainWindow):
         self.splitter = QSplitter(orientation=Qt.Vertical, parent=self)
         self.setCentralWidget(self.splitter)
 
-        self.lower_splitter = None  # splitter for the lower part of the widget.
+        self.lower_splitter = QSplitter()  # splitter for the lower part of the widget.
         # Holds the data view and the rectangle table, as they are created. At startup, not shown.
 
         # at start up, only the upper part: selecting data
@@ -228,13 +228,16 @@ class ScanExplorerView(QMainWindow):
         Set visual options for the slice viewer and display it.
         @param workspace: the workspace to display
         """
-        if self.splitter.count() == 1:
-            self.lower_splitter = QSplitter()
+        if self.lower_splitter.count() == 0:
             self.lower_splitter.addWidget(self._data_view)
 
             self.splitter.addWidget(self.lower_splitter)
         else:
             self.lower_splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
+
+        # forbid collapsing anything with the slice viewer in it
+        self.lower_splitter.setCollapsible(0, False)
+        self.splitter.setCollapsible(1, False)
 
         self.plot_workspace(workspace)
 
