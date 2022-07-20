@@ -50,7 +50,7 @@ public:
     auto batchModel = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
                                               runsPresenter->mutableRunsTable(), eventPresenter->slicing());
     auto algFactory = std::make_unique<ReflAlgorithmFactory>(*batchModel);
-    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view, std::move(algFactory));
+    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), std::move(algFactory));
 
     return std::make_unique<BatchPresenter>(view, std::move(batchModel), view, std::move(runsPresenter),
                                             std::move(eventPresenter), std::move(experimentPresenter),
