@@ -221,7 +221,6 @@ class ScanExplorerView(QMainWindow):
                                               filter=self.FILE_EXTENSION_FILTER)
         if file_path:
             self.sig_background_selected.emit(file_path)
-            self.background_button.setText("Replace background")
 
     def show_slice_viewer(self, workspace):
         """

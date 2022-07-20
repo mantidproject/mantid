@@ -12,6 +12,7 @@ import numpy as np
 
 from mantid.simpleapi import SANSILLParameterScan
 from mantid.api import MatrixWorkspace
+from mantid.kernel import logger
 
 
 class ScanExplorerModel:
@@ -25,7 +26,14 @@ class ScanExplorerModel:
         @param file_name: the name of the file to process, containing a scan with more than one point.
         """
         name = Path(file_name).stem + "_scan"
-        out = SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=name, NormaliseBy="None")
+
+        try:
+            out = SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=name, NormaliseBy="None")
+        except RuntimeError:
+            logger.error("Cannot process given sample file. Please check the provided file can be processed as a scan. "
+                         "See error above for more info.")
+            return
+
         self.presenter.create_slice_viewer(out)
 
     def process_background(self, background_file_name: str):
@@ -33,7 +41,14 @@ class ScanExplorerModel:
         Process the background without treatment.
         """
         name = "_" + Path(background_file_name).stem
-        SANSILLParameterScan(SampleRun=background_file_name, OutputWorkspace=name, NormaliseBy="None")
+
+        try:
+            SANSILLParameterScan(SampleRun=background_file_name, OutputWorkspace=name, NormaliseBy="None")
+        except RuntimeError:
+            logger.error("Cannot process background file. Please check the provided file can be processed as a scan. "
+                         "See error above for more info.")
+            return
+
         self.presenter.set_bg_ws(name)
 
     @staticmethod

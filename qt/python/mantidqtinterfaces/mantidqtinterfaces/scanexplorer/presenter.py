@@ -175,6 +175,7 @@ class ScanExplorerPresenter:
         @param ws_name: the name of the workspace
         """
         self._bg_ws = mtd[ws_name]
+        self.view.background_button.setText("Replace background")
 
     @property
     def ws(self):
