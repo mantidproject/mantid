@@ -426,11 +426,14 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         width = rect.get_width()
         height = rect.get_height()
 
+        # as long as we can add more ROis on either side of the first ROI, we do
         while xmin < v < xmax or xmin < -v < xmax:
-            if self.rectangle_fit_on_image((v, v), width, height):
-                self._draw_rectangle((v - width / 2, v - height / 2), width, height)
-            if self.rectangle_fit_on_image((- v, -v), width, height):
-                self._draw_rectangle((- v - width / 2, - v - height / 2), width, height)
+
+            # since the x axis is 2*theta, omega = theta means y = x/2
+            if self.rectangle_fit_on_image((v, v / 2), width, height):
+                self._draw_rectangle((v - width / 2, v / 2 - height / 2), width, height)
+            if self.rectangle_fit_on_image((- v, -v / 2), width, height):
+                self._draw_rectangle((- v - width / 2, - v / 2 - height / 2), width, height)
 
             i += 1
             v = np.rad2deg(np.arcsin(i * sin_theta))
