@@ -77,7 +77,7 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
-    expectLoadWorkspaceCompleted(*mockView, *mockModel, *mockInstViewModel);
+    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
 
     auto presenter = PreviewPresenter(
         packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
@@ -113,15 +113,38 @@ public:
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
   }
+
   void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
     auto mockInstViewModel = makeInstViewModel();
 
-    expectLoadWorkspaceCompleted(*mockView, *mockModel, *mockInstViewModel);
+    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
 
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_angle_is_set_if_it_equals_zero() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedUpdatesAngle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_angle_is_not_set_if_already_set_manually() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedDoesNotUpdateAngle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
     auto presenter = PreviewPresenter(std::move(deps));
     presenter.notifyLoadWorkspaceCompleted();
   }
@@ -282,18 +305,38 @@ private:
     EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
   }
 
-  void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
-                                    MockInstViewModel &mockInstViewModel) {
+  void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                                         MockInstViewModel &mockInstViewModel) {
     expectInstViewModelUpdatedWithLoadedWorkspace(mockModel, mockInstViewModel);
     expectPlotInstView(mockView, mockInstViewModel);
     expectInstViewToolbarEnabled(mockView);
     expectInstViewSetToZoomMode(mockView);
   }
 
+  void expectLoadWorkspaceCompletedUpdatesAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto angle = 2.3;
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(0.0));
+    EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
+    EXPECT_CALL(mockView, setAngle(angle)).Times(1);
+  }
+
+  void expectLoadWorkspaceCompletedDoesNotUpdateAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto angle = 2.3;
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(angle));
+    EXPECT_CALL(mockModel, getDefaultTheta()).Times(0);
+    EXPECT_CALL(mockView, setAngle(_)).Times(0);
+  }
+
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
 

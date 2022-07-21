@@ -158,6 +158,45 @@ public:
     model.exportReducedWsToAds();
   }
 
+  void test_get_set_loaded_workspace() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    TS_ASSERT_EQUALS(model.getLoadedWs(), ws);
+  }
+
+  void test_get_theta_from_workspace() {
+    PreviewModel model;
+    auto theta = 2.3;
+    auto ws = createWorkspace();
+    ws->mutableRun().addProperty("Theta", theta, true);
+    model.setLoadedWs(ws);
+
+    TS_ASSERT(model.getDefaultTheta());
+    TS_ASSERT_DELTA(*model.getDefaultTheta(), theta, 1e-6);
+  }
+
+  void test_get_theta_from_workspace_not_found() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    TS_ASSERT(!model.getDefaultTheta());
+  }
+
+  void test_get_theta_from_workspace_is_invalid() {
+    PreviewModel model;
+    auto thetas = std::vector<double>{0.0, -1.2, 0.00000000008};
+    for (auto theta : thetas) {
+      auto ws = createWorkspace();
+      ws->mutableRun().addProperty("Theta", theta, true);
+      model.setLoadedWs(ws);
+
+      TS_ASSERT(!model.getDefaultTheta());
+    }
+  }
+
 private:
   MatrixWorkspace_sptr generateSummedWs(MockJobManager &mockJobManager, PreviewModel &model) {
     auto expectedWs = createWorkspace();

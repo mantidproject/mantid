@@ -106,6 +106,8 @@ void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_rect_select_button->setEnabled(enable);
 }
 
+void QtPreviewView::setAngle(double angle) { m_ui.angle_spin_box->setValue(angle); }
+
 void QtPreviewView::setRectangularROIState(bool enable) { m_ui.rs_rect_select_button->setEnabled(enable); }
 
 std::vector<size_t> QtPreviewView::getSelectedDetectors() const {

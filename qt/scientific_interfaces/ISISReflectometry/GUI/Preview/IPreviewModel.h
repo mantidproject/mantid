@@ -9,6 +9,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "Reduction/ProcessingInstructions.h"
+
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -31,6 +33,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
   virtual ProcessingInstructions getProcessingInstructions() const = 0;
+  virtual std::optional<double> getDefaultTheta() const = 0;
 
   virtual void setTheta(double theta) = 0;
 
