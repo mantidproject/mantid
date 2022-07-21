@@ -367,12 +367,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         rectangles = self.get_rectangles()
         if len(rectangles) == 1:
-            self._place_interpolate_in_q()
+            self._place_interpolate_linear()
         elif len(rectangles) == 2:
             self._place_interpolate_linear()
         else:
             logger.warning("Cannot place more peak regions : current number of regions invalid "
-                           "(2 expected, {} found)".format(len(rectangles)))
+                           "(1 or 2 expected, {} found)".format(len(rectangles)))
             return
 
         self._update_plot_values()
@@ -383,13 +383,23 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         """
         rectangles = self.get_rectangles()
 
-        rect_0, rect_1 = rectangles
+        if len(rectangles) == 2:
+            rect_0, rect_1 = rectangles
+            new_height = (rect_0.get_height() + rect_1.get_height()) / 2
+            new_width = (rect_0.get_width() + rect_1.get_width()) / 2
+            center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
+            center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
 
-        new_height = (rect_0.get_height() + rect_1.get_height()) / 2
-        new_width = (rect_0.get_width() + rect_1.get_width()) / 2
+        else:
+            # normally, there is only one rectangle in this case
+            rect_0 = rectangles[0]
 
-        center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
-        center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
+            new_height = rect_0.get_height()
+            new_width = rect_0.get_width()
+
+            peak = self._find_peak(rectangles[0])
+            center_0 = np.array(peak)
+            center_1 = np.array((0, 0))
 
         def move(seed: np.array, offset: np.array):
             """
@@ -409,6 +419,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
     def _place_interpolate_in_q(self):
         """
+        THIS METHOD IS CURRENTLY NOT USED
+        According to the theory, Qn = nQ1 is the expected relationship. But the scientists insist for linear spacing
+        between ROIs, and we don't have data to decide yet, so we are going with their formula for now.
+        This stays here nonetheless just in case the data was to show this method is more useful.
+        If it is not needed by the end of next cycle (221 or 231), it should be safe to remove this function.
+
         Interpolate the user-provided rectangle position to determine ROI around the other peaks.
         This method assumes that:
         1) the rectangle provided correspond to the first (non-zero theta) peak
