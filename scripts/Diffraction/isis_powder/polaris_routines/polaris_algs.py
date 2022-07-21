@@ -13,6 +13,7 @@ from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 from isis_powder.polaris_routines import polaris_advanced_config
+from mantid.kernel import logger
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
@@ -104,7 +105,10 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
                                                          WorkspaceToMatch=focused_ws)
-
+    if not compare_ws_YUnit(focused_ws,self_scattering_correction):
+        logger.warning("create_total_scattering_pdf() is only valid when the data is focused with vanadium "
+                       "normalisation.")
+        return
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
     focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
@@ -232,3 +236,9 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
         mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="g(r)",
                                    Filter=True, Qmax=q_max, deltaQ=q_delta, Rmax=r_max,
                                    Direction='Backward', rho0=rho0)
+
+
+def compare_ws_YUnit(ws1, ws2):
+    ws1_YUnit = ws1.getItem(0).YUnit()
+    ws2_YUnit = ws2.getItem(0).YUnit()
+    return ws1_YUnit == ws2_YUnit
