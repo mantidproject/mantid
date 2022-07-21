@@ -210,6 +210,7 @@ class ColorbarWidget(QWidget):
         self.colorbar.mappable.set_norm(self.get_norm())
         self.set_mappable(self.colorbar.mappable)
         self.update_clim_validator()
+        self.update_clim()
         self.scaleNormChanged.emit()
 
     def get_norm(self):
