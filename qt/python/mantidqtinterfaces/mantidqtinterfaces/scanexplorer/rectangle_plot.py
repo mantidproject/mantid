@@ -426,6 +426,12 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         width = rect.get_width()
         height = rect.get_height()
 
+        # there is no ROI at 2theta = 0 because that's the beam and no data can be analysed there.
+
+        # place the ROI symmetric to the user given one.
+        if self.rectangle_fit_on_image((-peak[0], peak[1]), width, height):
+            self._draw_rectangle((-peak[0] - width / 2, -peak[1] - height / 2), width, height)
+
         # as long as we can add more ROis on either side of the first ROI, we do
         while xmin < v < xmax or xmin < -v < xmax:
 
