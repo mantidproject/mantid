@@ -1,5 +1,5 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
 import numpy as np
 
@@ -28,13 +28,23 @@ class DtClsSANS:
             except IndexError:
                 pass
         self.info = tmp_dict
-        self.assign_values()
+        self._assign_values()
 
-    def assign_values(self):
-        for att in self.__dict__.keys():
-            self.assign_value(att)
+    def get_values_dict(self):
+        """
+        return dictionary with variables of helper class
+        (without 'section_name' and 'info')
+        """
+        values = asdict(self)
+        del values['section_name']
+        del values['info']
+        return values
 
-    def assign_value(self, att, unique_name=None):
+    def _assign_values(self):
+        for att in self.get_values_dict().keys():
+            self._assign_value(att)
+
+    def _assign_value(self, att, unique_name=None):
         try:
             if unique_name:
                 setattr(self, unique_name, float(self.info[att]))
@@ -62,6 +72,9 @@ class FileSANS(DtClsSANS):
         return np.datetime64(datetime.strptime(self.info['ToDate'] + ' ' + self.info['ToTime'],
                                                self._date_format))
 
+    def get_title(self):
+        return self.info['Title'] if self.info['Title'] else self.info['FileName']
+
 
 @dataclass
 class SampleSANS(DtClsSANS):
@@ -76,6 +89,26 @@ class SetupSANS(DtClsSANS):
 @dataclass
 class CounterSANS(DtClsSANS):
     section_name: str = 'Counter'
+
+    sum_all_counts: float = 0
+    time: float = 0
+    monitor1: float = 0
+    monitor2: float = 0
+
+    def _assign_values(self):
+        """
+        one of the methods to add variable with unique name
+        """
+        super()._assign_values()
+        self._assign_value('Sum', 'sum_all_counts')
+        self._assign_value('Time', 'time')
+        self._assign_value('Moni1', 'monitor1')
+        self._assign_value('Moni2', 'monitor2')
+
+    def is_monitors_exist(self):
+        if self.monitor1 != 0 or self.monitor2 != 0:
+            return True
+        return False
 
 
 @dataclass
@@ -102,12 +135,17 @@ class CommentSANS(DtClsSANS):
 
     det1_omg_value: float = 0
 
-    def assign_values(self):
+    def _assign_values(self):
         """
         one of the methods to add variable with unique name
         """
-        super().assign_values()
-        self.assign_value('selector_lambda_value', 'wavelength')
+        super()._assign_values()
+        self._assign_value('selector_lambda_value', 'wavelength')
+
+    def set_wavelength(self, user_wavelength):
+        if user_wavelength > 0:
+            self.wavelength = user_wavelength
+            self.info['selector_lambda_value'] = user_wavelength
 
 
 @dataclass
@@ -117,7 +155,7 @@ class CountsSANS(DtClsSANS):
 
     def process_data(self):
         for line in self.info:
-            if len(line) > 3:   # check if line has no zero length (' ', '\n', ...)
+            if len(line) > 3:  # check if line has no zero length (' ', '\n', ...)
                 tmp_data = line.split(',')
                 self.data.append([float(i) for i in tmp_data])
 
@@ -125,8 +163,11 @@ class CountsSANS(DtClsSANS):
 class SANSdata(object):
     """
     This class describes the SANS-1_MLZ data structure
-    will be used for SANS-1 data read-in and write-out routines
+    will be used for SANS-1 data read-in and write-out routines.
+    Data from each section of raw file contains in the variable
+    with the same name.
     """
+
     def __init__(self):
         self.file: FileSANS = FileSANS()
         self.sample: SampleSANS = SampleSANS()
@@ -143,36 +184,41 @@ class SANSdata(object):
 
     def analyze_source(self, filename):
         """
-        read the SANS-1 raw file into the SANS-1 data object
+        read the SANS-1.001 raw file into the SANS-1 data object
         """
         with open(filename, 'r') as fhandler:
             unprocessed = fhandler.read()
-        try:
-            self.sort_data(unprocessed.split('%'))
-        except IndexError as e:
-            raise FileNotFoundError(e)
+        self._sort_data(unprocessed.split('%'))
 
     @staticmethod
-    def find_first_section_position(unprocessed):
-        if unprocessed[0][0] != '\n':
+    def _find_first_section_position(unprocessed):
+        if unprocessed[0][0] == 'F':
             return 0
         return 1
 
-    def sort_data(self, unprocessed):
+    def _sort_data(self, unprocessed):
         """
         initialize information for every section
         """
-        pos = self.find_first_section_position(unprocessed)
+        pos = self._find_first_section_position(unprocessed)
 
         if len(unprocessed[pos:]) != len(self._subsequence):
-            raise IndexError(f"Incorrect amount of sections: "
-                             f"{len(unprocessed[pos:])} != {len(self._subsequence)}")
+            raise FileNotFoundError(f"Incorrect amount of sections: "
+                                    f"{len(unprocessed[pos:])} != {len(self._subsequence)}")
 
         for i in range(len(self._subsequence)):
             tmp = unprocessed[i + pos].split('\n')
             if tmp[0] != self._subsequence[i].section_name:
-                raise IndexError(f"Section name doesn't match with expected: "
-                                 f"'{tmp[0]}' != '{self._subsequence[i].section_name}'")
+                raise FileNotFoundError(f"Section name doesn't match with expected: "
+                                        f"'{tmp[0]}' != '{self._subsequence[i].section_name}'")
 
             self._subsequence[i].info = deepcopy(tmp[1:])
             self._subsequence[i].process_data()
+
+# def main():
+#     data = SANSdata()
+#     data.analyze_source('/home/andrii/repositories/AndriiDemk/mantid/build/ExternalData/Testing/Data/UnitTest/D0511339.001')
+#     print(data.counter.info)
+#
+# if __name__ == "__main__":
+#     main()

@@ -91,6 +91,47 @@ class LoadSANS1MLZTest(unittest.TestCase):
         # self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
+    def test_LoadValidData_noMonitors(self):
+        """
+        test: create workspace with no monitors
+        """
+        output_ws_name = "LoadSANS1MLZTest_Test3"
+        filename = "D0511339.001"
+        file_inv = "sans-incomplete.001"
+        fpath = f'../../../../../../build/ExternalData/Testing/Data/UnitTest/{filename}'
+        with open(file_inv, "w") as f:
+            with open(fpath, "r") as fs:
+                t = fs.readlines()
+                f.writelines(t[:150])
+                f.writelines(t[153:])
+        alg_test = run_algorithm("LoadSANS1MLZ", Filename=file_inv,
+                                 OutputWorkspace=output_ws_name,
+                                 SectionOption='CommentSection',
+                                 Wavelength=3.2)
+        os.remove(file_inv)
+        self.assertTrue(alg_test.isExecuted())
+
+        # Verify some values
+        ws = AnalysisDataService.retrieve(output_ws_name)
+        self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
+        # dimensions
+        self.assertEqual(16384, ws.getNumberHistograms())
+        # self.assertEqual(2,  ws.getNumDims())
+        # data array
+        self.assertEqual(519, ws.readY(8502))
+        self.assertEqual(427, ws.readY(8629))
+        # sample logs
+        run = ws.getRun()
+        self.assertEqual(4, run.getProperty('det1_x_value').value)
+        self.assertEqual(20000, run.getProperty('det1_z_value').value)
+        self.assertEqual(3.2, run.getProperty('selector_lambda_value').value)
+        self.assertEqual('error: blocked', run.getProperty('selector_tilt_status').value)
+        self.assertEqual(0.00074, run.getProperty('selector_vacuum_value').value)
+        # check whether detector bank is rotated
+        # det = ws.getDetector(0)
+        # self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
+        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
+
     def test_aaaa(self):
         self.assertTrue(1 == 1)
 
