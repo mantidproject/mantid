@@ -9,7 +9,9 @@
 Description
 -----------
 
-This loads the nexus files produced by the SANS instruments D11, D22, D33 and D16 at the ILL.
+This is the specialized loader for the raw `.nxs` files produced by the SANS instruments D11, D22, D33 and D16 at the ILL.
+This loader can load only a single file at each call. If loading more than one file is required, please refer to
+:ref:`Load <algm-Load>` or :ref:`LoadAndMerge <algm-LoadAndMerge>` algorithms, which are more suited to that task.
 
 This loader reads the detector positions from the nexus file and places the detectors accordingly.
 
@@ -20,7 +22,7 @@ For D11 and D22 it supports the nominal and low resolution modes (pixel splittin
 For D16, it supports monochromatic and scan mode. The `Wavelength` parameter is intended for old D16 files that may lack
 the wavelength value.
 
-It also supports the newer version for these instruments.
+It also supports newer versions of these instruments.
 
 The output is a histogram workspace with unit of wavelength (Angstrom), or the parameter being scanned for D16 scans.
 It has a single bin for monochromatic, many bins (ragged) for TOF mode for D33, and as many bins as there are scan
