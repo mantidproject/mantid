@@ -1318,9 +1318,13 @@ class CrystalFieldFit(object):
         def residual(params):
             return np.ravel((y - wrapped_func(*np.array(params))) / e)
 
+        # Pop the 'parameter_bounds' and 'jacobian' arguments
+        parameter_bounds = kwargs.pop("parameter_bounds", dict())
+        jacobian = kwargs.pop("jacobian", False)
+
         # Get the algorithm args to use for the specific algorithm we are using
         algorithm_args = [m, n] + self._get_algorithm_args(algorithm_name, all_parameters, b_parameters, p0, residual,
-                                                           **kwargs)
+                                                           parameter_bounds, jacobian)
 
         # Attempt to do a fit using one of the GOFit algorithms. A TypeError can occur when provided an invalid kwarg
         try:
@@ -1332,7 +1336,8 @@ class CrystalFieldFit(object):
             self._process_gofit_output(all_parameters, params, "_" + algorithm_name)
 
     def _get_algorithm_args(self, algorithm_name: str, all_parameters: List[str], b_parameters: List[str],
-                            p0: List[float], residual: Callable, **kwargs) -> List:
+                            p0: List[float], residual: Callable, parameter_bounds: Dict[str, Tuple[float, float]],
+                            jacobian: bool) -> List:
         """Gets the algorithm arguments to be used for a specific GOFit algorithm."""
         algorithm_args = []
         if algorithm_name == "regularisation":
@@ -1341,12 +1346,12 @@ class CrystalFieldFit(object):
             algorithm_args.extend([len(b_parameters), np.array(p0)])
 
         if algorithm_name == "multistart" or algorithm_name == "alternating":
-            xl, xu = self._parse_lower_and_upper_bounds(all_parameters, kwargs.pop("parameter_bounds", dict()))
+            xl, xu = self._parse_lower_and_upper_bounds(all_parameters, parameter_bounds)
             algorithm_args.extend([np.array(xl), np.array(xu)])
 
         algorithm_args.append(residual)
 
-        if (algorithm_name == "regularisation" or algorithm_name == "multistart") and kwargs.pop("jacobian", False):
+        if jacobian and (algorithm_name == "regularisation" or algorithm_name == "multistart"):
             algorithm_args.append(lambda p: approx_derivative(residual, p, method="2-point"))
         return algorithm_args
 
