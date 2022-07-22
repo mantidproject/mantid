@@ -7,6 +7,7 @@
 #pragma once
 #include "BatchPresenter.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/QtJobRunner.h"
 #include "GUI/Event/EventPresenterFactory.h"
 #include "GUI/Experiment/ExperimentPresenterFactory.h"
 #include "GUI/Instrument/InstrumentPresenterFactory.h"
@@ -50,9 +51,10 @@ public:
     auto batchModel = std::make_unique<Batch>(experimentPresenter->experiment(), instrumentPresenter->instrument(),
                                               runsPresenter->mutableRunsTable(), eventPresenter->slicing());
     auto algFactory = std::make_unique<ReflAlgorithmFactory>(*batchModel);
-    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), view, std::move(algFactory));
+    auto previewPresenter = m_previewPresenterFactory.make(view->preview(), std::move(algFactory));
 
-    return std::make_unique<BatchPresenter>(view, std::move(batchModel), view, std::move(runsPresenter),
+    auto jobRunner = std::make_unique<QtJobRunner>();
+    return std::make_unique<BatchPresenter>(view, std::move(batchModel), std::move(jobRunner), std::move(runsPresenter),
                                             std::move(eventPresenter), std::move(experimentPresenter),
                                             std::move(instrumentPresenter), std::move(savePresenter),
                                             std::move(previewPresenter), m_messageHandler);

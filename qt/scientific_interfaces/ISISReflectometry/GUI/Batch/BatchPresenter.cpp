@@ -33,7 +33,7 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
+BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<IJobRunner> jobRunner,
                                std::unique_ptr<IRunsPresenter> runsPresenter,
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
@@ -44,7 +44,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, 
     : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
+      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)),
       m_messageHandler(messageHandler), m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
 
   m_jobRunner->subscribe(this);
