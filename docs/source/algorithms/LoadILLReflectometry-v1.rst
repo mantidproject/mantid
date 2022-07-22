@@ -9,7 +9,11 @@
 Description
 -----------
 
-Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_.
+This is the specialized loader for the raw `.nxs` files produced by the reflectometry instruments at ILL.
+Currently it supports `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ and `FIGARO <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_. This loader can load only a single file at each call. If loading more than one
+file is required, please refer to :ref:`Load <algm-Load>` or :ref:`LoadAndMerge <algm-LoadAndMerge>` algorithms, which are
+more suited for the task.
+
 Both time-of-flight and monochromatic instrument configurations are supported.
 In general, this loader reads detector and monitor counts and adds x-axis and error values.
 The output workspace contains histogram data.
@@ -32,7 +36,8 @@ Measurement
 The loader can load both types of data: direct and reflected beam.
 In both cases the foreground centre will be fitted.
 In case of direct beam, the detector will be rotated around the sample such that the fractional workspace index of the foreground centre will appear at 0 scattering angle.
-In case of reflected beam, **BraggAngle** is mandatory, and the detector will be driven such that the foreground centre will appear at **2*BraggAngle**.
+In case of reflected beam, if **BraggAngle** is provided, then it will be the angle used for the rotation of the detector such that the foreground centre will appear at **2*BraggAngle**.
+If the **BraggAngle** property is not specified, then the sample angle metadata position (`SAN`)` is going to be used instead.
 
 Usage
 -----
