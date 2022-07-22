@@ -1,0 +1,1 @@
+- Fixed a bug where clicking 'Run' on the :ref:`Apply Absorption Corrections Tab<indirect_apply_absorp_correct>` in the :ref:`Corrections GUI<interface-indirect-corrections>` with no Sample or Corrections would close mantid.
