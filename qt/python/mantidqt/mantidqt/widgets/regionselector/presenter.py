@@ -93,7 +93,10 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def get_region(self):
         # extents contains x1, x2, y1, y2. Just store y (spectra) for now
-        return [self._selectors[0].extents[2], self._selectors[0].extents[3]]
+        result = []
+        for selector in self._selectors:
+            result.extend([selector.extents[2], selector.extents[3]])
+        return result
 
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))

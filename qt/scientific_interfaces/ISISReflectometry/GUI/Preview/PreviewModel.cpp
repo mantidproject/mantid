@@ -106,14 +106,20 @@ ProcessingInstructions PreviewModel::getProcessingInstructions() const {
 
 void PreviewModel::setSelectedRegion(Selection const &selection) {
   // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices
-  if (selection.size() != 2) {
-    throw std::runtime_error("Program error: unexpected selection size; expected 2, got " +
+  if (selection.size() % 2 != 0) {
+    throw std::runtime_error("Program error: unexpected selection size; must be multiple of 2; got " +
                              std::to_string(selection.size()));
   }
   // For now we just support a y axis of spectrum number so round to the nearest integer
-  auto const start = static_cast<int>(std::round(selection[0]));
-  auto const end = static_cast<int>(std::round(selection[1]));
-  auto processingInstructions = ProcessingInstructions(std::to_string(start) + "-" + std::to_string(end));
+  auto processingInstructions = ProcessingInstructions{};
+  for (size_t i = 0; i < selection.size(); i += 2) {
+    auto const start = static_cast<int>(std::round(selection[i]));
+    auto const end = static_cast<int>(std::round(selection[i + 1]));
+    if (!processingInstructions.empty()) {
+      processingInstructions += ",";
+    }
+    processingInstructions += std::to_string(start) + "-" + std::to_string(end);
+  }
   m_runDetails->setProcessingInstructions(std::move(processingInstructions));
 }
 
