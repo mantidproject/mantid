@@ -10,8 +10,13 @@
 Description
 -----------
 
-This is the loader for the raw `.nxs` files produced by the polarized diffractometers and spectrometers at ILL.
-Currently it supports only the D7 instrument. Workspaces in the loaded group are sorted according to their flipper
+This is the specialized loader for the raw `.nxs` files produced by the polarized diffractometers and spectrometers at ILL.
+Currently it supports only the D7 instrument. This loader can load only a single file at each call. If loading more than one
+file is required, please refer to :ref:`Load <algm-Load>` or :ref:`LoadAndMerge <algm-LoadAndMerge>` algorithms, which are
+more suited for the task.
+
+The output of this loader is a :ref:`WorkspaceGroup <WorkspaceGroup>` containing as many workspaces as there were different
+polarisation orientation in the loaded `.nxs` file. Workspaces in the loaded group are sorted according to their flipper
 state value for each present polarisation orientation, with the first workspace having always flipper 'ON',
 and the next 'OFF'.
 
