@@ -10,8 +10,10 @@
 Description
 -----------
 
-This is the loader for the raw `.nxs` files produced by the powder diffractometers at ILL.
-Currently it supports the instruments D20, D1B and D2B, as well as IN5, PANTHER, and SHARP in the data scan mode.
+This is the specialized loader for the raw `.nxs` files produced by the powder diffractometers at ILL. Currently it supports the instruments
+D20, D1B and D2B, as well as IN5, PANTHER, and SHARP in the data scan mode. This loader can load only a single file at each call. If loading
+more than one file is required, please refer to :ref:`Load <algm-Load>` or :ref:`LoadAndMerge <algm-LoadAndMerge>` algorithms, which are more suited
+to load multiple data files.
 
 The *TwoThetaOffset* parameter corresponding to the rotation of the detector is optional and only used for D1B. It is to be provided in degrees.
 
