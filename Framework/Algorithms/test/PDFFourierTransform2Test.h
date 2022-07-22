@@ -16,6 +16,7 @@
 #include "MantidDataHandling/SetSample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -211,7 +212,7 @@ public:
 
     DataObjects::Workspace2D_sptr pdfws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    const auto GofR = pdfws->y(0);
+    const auto &GofR = pdfws->y(0);
 
     TS_ASSERT(GofR[0] > 40.0);
     for (size_t i = 1; i < GofR.size(); i++) {
@@ -318,15 +319,14 @@ public:
     // check G(r) returns correct value
     DataObjects::Workspace2D_sptr pdfws_big_gr = standard_ws_ptr(ws, "G(r)", "Forward");
     const auto big_gofR = pdfws_big_gr->y(0);
-    const auto &R_G = pdfws_big_gr->x(0);
+    const auto R_G = pdfws_big_gr->x(0);
     const auto calculated_big_gofR = (gofR_comparison - 1) * 4. * M_PI * rho0 * R_G[10];
-
     TS_ASSERT_DELTA(big_gofR[10], calculated_big_gofR, 1e-8);
 
     // check RDF(r) returns correct value
     DataObjects::Workspace2D_sptr pdfws_rdf_r = standard_ws_ptr(ws, "RDF(r)", "Forward");
     const auto rdfofR = pdfws_rdf_r->y(0);
-    const auto &R_RDF = pdfws_rdf_r->x(0);
+    const auto R_RDF = pdfws_rdf_r->x(0);
     const auto calculated_rdfofR = gofR_comparison * 4. * M_PI * R_RDF[10] * rho0 * R_RDF[10];
 
     TS_ASSERT_DELTA(rdfofR[10], calculated_rdfofR, 1e-8);
@@ -339,6 +339,57 @@ public:
     const auto calculated_gkofR = (gofR_comparison - 1) * factor;
 
     TS_ASSERT_DELTA(gkofR[10], calculated_gkofR, 1e-8);
+  }
+
+  void test_PDFTypes_bkwd() {
+    API::MatrixWorkspace_sptr ws = createWS(20, 0.1, "CheckResult3", "MomentumTransfer");
+
+    // shared values for tests
+    std::vector<double> x(2, 2.0);
+    std::vector<double> dy(2, 0.0);
+    std::vector<double> dx(2, 0.0);
+    const double rho0 = 1.0;
+    const double cohScatLen = 1.0;
+    const double factor1 = 4. * M_PI * rho0;
+    const double single_x = 2.0;
+
+    // set up initial y values
+    std::vector<double> y(2, 5.0);
+
+    // Algorithm destructor crashes without workspace properties initialised
+    PDFFourierTransform2 pdfft;
+    pdfft.initialize();
+    pdfft.setProperty("InputWorkspace", ws);
+    pdfft.setProperty("OutputWorkspace", "outputWS");
+
+    // test g(r)
+    const std::string LITTLE_G_OF_R("g(r)");
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, LITTLE_G_OF_R, rho0, cohScatLen);
+    const auto exp_gr = 4.0;
+    const auto actual_gr = y[0];
+    TS_ASSERT_DELTA(actual_gr, exp_gr, 1e-8);
+
+    // test G(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
+    const std::string BIG_G_OF_R("G(r)");
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, BIG_G_OF_R, rho0, cohScatLen);
+    const auto exp_big_gr = exp_gr / (factor1 * single_x);
+    const auto actual_big_gr = y[0];
+    TS_ASSERT_DELTA(actual_big_gr, exp_big_gr, 1e-8);
+
+    //// test RDF(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
+    const std::string RDF_OF_R("RDF(r)");
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, RDF_OF_R, rho0, cohScatLen);
+    const auto exp_rdf_r = exp_big_gr / (factor1 * single_x * single_x) - 1.0;
+    const auto actual_rdf_r = y[0];
+    TS_ASSERT_DELTA(actual_rdf_r, exp_rdf_r, 1e-8);
+
+    //// test G_k(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
+    const std::string G_K_OF_R("G_k(r)");
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, G_K_OF_R, rho0, cohScatLen);
+    const double factor2 = 0.001 * pow(cohScatLen, 2);
+    const auto exp_gkr = exp_rdf_r / factor2;
+    const auto actual_gkr = y[0];
+    TS_ASSERT_DELTA(actual_gkr, exp_gkr, 1e-8);
   }
 
 private:
@@ -359,10 +410,10 @@ private:
 
     pdfft.execute();
 
-    DataObjects::Workspace2D_sptr pdfws =
+    DataObjects::Workspace2D_sptr output_ws =
         std::dynamic_pointer_cast<DataObjects::Workspace2D>(API::AnalysisDataService::Instance().retrieve("outputWS"));
 
-    return pdfws;
+    return output_ws;
   }
 };
 
