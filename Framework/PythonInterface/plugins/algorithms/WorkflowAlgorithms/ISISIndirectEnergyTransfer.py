@@ -292,7 +292,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                          OutputWorkspace=self._output_ws)
 
         # The spectrum numbers need to start at 1 not 0 if spectra are grouped
-        if self.output_ws.getNumberOfEntries() == 1 and self.getProperty('GroupingMethod').value == 'Custom':
+        if self.output_ws.getNumberOfEntries() == 1:
             for i in range(len(self.output_ws.getItem(0).getSpectrumNumbers())):
                 self.output_ws.getItem(0).getSpectrum(i).setSpectrumNo(i+1)
 
