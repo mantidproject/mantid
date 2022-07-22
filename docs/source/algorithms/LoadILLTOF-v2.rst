@@ -9,16 +9,17 @@
 Description
 -----------
 
-Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with
-the given name.
 
-To date this algorithm only supports: IN4, IN5, IN6, PANTHER, and SHARP.
+This is the specialized loader for the raw `.nxs` files produced by direct spectrometers at ILL.
+Currently it supports IN4, IN5, IN6, PANTHER, and SHARP ILL instruments. This loader can load only
+a single file at each call. If loading more than one file is required, please refer to :ref:`Load <algm-Load>`
+or :ref:`LoadAndMerge <algm-LoadAndMerge>` algorithms, which are more suited for the task.
 
-By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the ConvertToTOF option.
+By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the **ConvertToTOF** option.
 
 This algorithm also supports diffraction mode. In this case, the unit of the output workspace will be wavelength instead of time-of-flight or channel.
 The support for the omega scan measurement mode for IN5, PANTHER, and SHARP is **not** handled by this loader, but instead the data
-is loaded with :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>`.
+is loaded using :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>`.
 
 .. note::
     The initial time-of-flight axis is set up using the 'time_of_flight' field in the NeXus file. Therefore the conversion from 'TOF' to 'DeltaE' may not give the correct zero-energy transfer.
