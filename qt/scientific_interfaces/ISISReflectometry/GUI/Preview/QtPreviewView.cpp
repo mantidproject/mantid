@@ -48,7 +48,8 @@ void QtPreviewView::connectSignals() const {
   connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
   // Region selector toolbar
   connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectorExportToAdsClicked()));
-  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onSelectRectangularROIClicked()));
+  connect(m_ui.rs_edit_button, SIGNAL(clicked()), this, SLOT(onEditROIClicked()));
+  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onAddRectangularROIClicked()));
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
 }
@@ -62,7 +63,9 @@ void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewS
 
 void QtPreviewView::onRegionSelectorExportToAdsClicked() const { m_notifyee->notifyRegionSelectorExportAdsRequested(); }
 
-void QtPreviewView::onSelectRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
+void QtPreviewView::onEditROIClicked() const { m_notifyee->notifyEditROIModeRequested(); }
+
+void QtPreviewView::onAddRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
 
 void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
 
@@ -115,7 +118,9 @@ void QtPreviewView::setRegionSelectorToolbarEnabled(bool enable) {
 
 void QtPreviewView::setAngle(double angle) { m_ui.angle_spin_box->setValue(angle); }
 
-void QtPreviewView::setRectangularROIState(bool enable) { m_ui.rs_rect_select_button->setEnabled(enable); }
+void QtPreviewView::setEditROIState(bool state) { m_ui.rs_edit_button->setDown(state); }
+
+void QtPreviewView::setAddRectangularROIState(bool state) { m_ui.rs_rect_select_button->setDown(state); }
 
 std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
   std::vector<size_t> result;

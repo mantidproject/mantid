@@ -142,12 +142,21 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
 
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
 
+void PreviewPresenter::notifyEditROIModeRequested() {
+  m_view->setAddRectangularROIState(false);
+  m_view->setEditROIState(true);
+}
+
 void PreviewPresenter::notifyRectangularROIModeRequested() {
-  m_view->setRectangularROIState(true);
+  m_view->setEditROIState(false);
+  m_view->setAddRectangularROIState(true);
   m_regionSelector->addRectangularRegion();
 }
 
 void PreviewPresenter::notifyRegionChanged() {
+  m_view->setAddRectangularROIState(false);
+  m_view->setEditROIState(true);
+
   // Set the selection from the view
   auto roi = m_regionSelector->getRegion();
   m_model->setSelectedRegion(roi);
