@@ -54,6 +54,7 @@ public:
   virtual void setInstViewEditMode() = 0;
   virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
+  virtual void setRegionSelectorToolbarEnabled(bool enable) = 0;
   virtual void setAngle(double angle) = 0;
   // Region selector toolbar
   // TODO implement edit ROI button

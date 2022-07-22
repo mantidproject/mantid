@@ -212,8 +212,12 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
+    expectRegionSelectorToolbarEnabled(*mockView, false);
+
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
                                                makeInstViewModel(), std::move(mockRegionSelector_uptr)));
+
+    expectRegionSelectorToolbarEnabled(*mockView, true);
 
     presenter.notifySumBanksCompleted();
   }
@@ -362,6 +366,10 @@ private:
 
   void expectInstViewToolbarEnabled(MockPreviewView &mockView) {
     EXPECT_CALL(mockView, setInstViewToolbarEnabled(Eq(true))).Times(1);
+  }
+
+  void expectRegionSelectorToolbarEnabled(MockPreviewView &mockView, bool enable) {
+    EXPECT_CALL(mockView, setRegionSelectorToolbarEnabled(Eq(enable))).Times(1);
   }
 
   void expectInstViewSetToZoomMode(MockPreviewView &mockView) {

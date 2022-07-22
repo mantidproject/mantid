@@ -47,6 +47,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
+  m_view->setRegionSelectorToolbarEnabled(false);
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
@@ -98,6 +99,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
+  m_view->setRegionSelectorToolbarEnabled(true);
   // Perform reduction to update the next plot, if possible
   runReduction();
 }
