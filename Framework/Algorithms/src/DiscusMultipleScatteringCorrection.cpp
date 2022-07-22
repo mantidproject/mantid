@@ -570,8 +570,10 @@ void DiscusMultipleScatteringCorrection::exec() {
 
       const auto detPos = spectrumInfo.position(i);
 
-      // create copy of the SQ workspaces vector
+      // create copy of the SQ workspaces vector and fully copy any members that will be modified
       auto componentWorkspaces = m_SQWSs;
+      for (auto &ws : componentWorkspaces)
+        ws.QSQIntegral = std::make_shared<DataObjects::Histogram1D>(*ws.QSQIntegral);
 
       if (m_importanceSampling)
         // prep invPOfQ outside the bin loop to avoid costly construction\destruction
@@ -588,7 +590,6 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, componentWorkspaces);
-        calculateQSQIntegralAsFunctionOfK(componentWorkspaces, kinc);
 
         auto weights = simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
@@ -720,10 +721,17 @@ void DiscusMultipleScatteringCorrection::exec() {
   setProperty("OutputWorkspace", wsgroup);
 
   if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
+    g_log.information() << "Total simulation points=" << nhists * nSimulationPoints << "\n";
     for (auto &kv : m_attemptsToGenerateInitialTrack)
-      g_log.information() << "Generating initial track required " + std::to_string(kv.first) + " attempts on " +
-                                 std::to_string(kv.second) + " occasions.\n";
-    g_log.information() << "Calls to interceptSurface= " + std::to_string(m_callsToInterceptSurface) + "\n";
+      g_log.information() << "Generating initial track required " << kv.first << " attempts on " << kv.second
+                          << " occasions.\n";
+    g_log.information() << "Calls to interceptSurface=" << m_callsToInterceptSurface << "\n";
+    g_log.information() << "Total I(k) calculations=" << m_IkCalculations << ", average per simulation point="
+                        << static_cast<double>(m_IkCalculations) / static_cast<double>(nhists * nSimulationPoints)
+                        << "\n";
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))
+      for (size_t i = 0; i < m_SQWSs.size(); i++)
+        g_log.information() << "Scatters in component " << i << ": " << *(m_SQWSs[i].scatterCount) << "\n";
   }
 }
 
@@ -812,6 +820,8 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
       outputWS->dataY(iW) = QSQValues;
     }
     SQWSMapping.QSQ = outputWS;
+    SQWSMapping.QSQIntegral = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
+                                                                         HistogramData::Histogram::YMode::Frequencies);
   }
 }
 
@@ -916,57 +926,6 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const API::Matrix
       else
         return std::log(d);
     });
-  }
-}
-
-/**
- * This is a generalised version of the normalisation done in the original Discus algorithm
- * The original algorithm only considered two scatters so there was only ever one scatter
- * with a free direction after scatter that got a contribution from the q_dir function. This
- * meant that the k value going into the scatter was always fixed and equal to the overall kinc
- * The approach here will cope with multiple scatters by calculating a sumQSS at multiple
- * kinc values. These will be interpolated as required later on
- */
-void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs,
-                                                                           const double specialK) {
-  for (auto &SQWSMapping : matWSs) {
-    std::set<double> kValues = {specialK};
-    // Calculate the integral for a range of k values. Not massively important which k values but choose them here
-    // based on the q points in the S(Q) profile and the initial k values incident on the sample
-    const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).readX();
-    for (auto q : qValues) {
-      if (q > 0)
-        kValues.insert(q / 2);
-    }
-
-    // add a few extra points beyond supplied q range to ensure capture asymptotic value of integral/2*k*k.
-    // Useful when doing a flat interpolation on m_QSQIntegral during inelastic calculation where k not known up front
-    if (m_EMode != DeltaEMode::Elastic) {
-      double maxSuppliedQ = qValues.back();
-      if (maxSuppliedQ > 0.) {
-        kValues.insert(maxSuppliedQ);
-        kValues.insert(2 * maxSuppliedQ);
-      }
-    }
-
-    std::vector<double> finalkValues, QSQIntegrals;
-    for (auto k : kValues) {
-      std::vector<double> IOfQYFull;
-      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k);
-      auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
-      // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
-      // into a k region where the integral is actually non-zero
-      if (IOfQYAtQMax > 0) {
-        double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
-        finalkValues.push_back(k);
-        QSQIntegrals.push_back(normalisedIntegral);
-      }
-    }
-    auto QSQScaleFactor = std::make_shared<DataObjects::Histogram1D>(HistogramData::Histogram::XMode::Points,
-                                                                     HistogramData::Histogram::YMode::Frequencies);
-    QSQScaleFactor->dataX() = finalkValues;
-    QSQScaleFactor->dataY() = QSQIntegrals;
-    SQWSMapping.QSQScaleFactor = QSQScaleFactor;
   }
 }
 
@@ -1387,7 +1346,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
       assert(componentWSIt != componentWorkspaces.end());
       auto componentWSMapping = *componentWSIt; // to help debugging
       double SQ = Interpolate2D(componentWSMapping, finalW, q);
-      scatteringXSection = m_NormalizeSQ ? scatteringXSection / interpolateFlat(*(componentWSMapping.QSQScaleFactor), k)
+      scatteringXSection = m_NormalizeSQ ? scatteringXSection * 2 * k * k / getQSQIntegral(componentWSMapping, k)
                                          : scatteringXSectionFull;
 
       double AT2 = 1;
@@ -1442,9 +1401,35 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   return {qmin, qrange};
 }
 
-double DiscusMultipleScatteringCorrection::getQSQIntegral(const ISpectrum &QSQScaleFactor, double k) {
-  // the QSQIntegrals were divided by k^2 so in theory they should be ~flat
-  return interpolateFlat(QSQScaleFactor, k) * 2 * k * k;
+/**
+ * This is a generalised version of the normalisation done in the original Discus algorithm
+ * The original algorithm only considered two scatters so there was only ever one scatter
+ * with a free direction after scatter that got a contribution from the q_dir function. This
+ * meant that the k value going into the scatter was always fixed and equal to the overall kinc
+ * The approach here will cope with multiple scatters by calculating a sumQSS at each required
+ * kinc values and cache the results
+ */
+double DiscusMultipleScatteringCorrection::getQSQIntegral(const ComponentWorkspaceMapping &SQWSMapping,
+                                                          const double k) {
+  auto prevCalculatedIntegrals = SQWSMapping.QSQIntegral;
+  assert(prevCalculatedIntegrals->histogram().xMode() == HistogramData::Histogram::XMode::Points);
+  auto const iter = std::find_if(prevCalculatedIntegrals->x().cbegin(), prevCalculatedIntegrals->x().cend(),
+                                 [&k](double const &value) { return std::abs(k - value) <= 1E-06; });
+  if (iter != prevCalculatedIntegrals->x().cend()) {
+    auto index = std::distance(prevCalculatedIntegrals->x().cbegin(), iter);
+    return prevCalculatedIntegrals->y()[index];
+  } else {
+    std::vector<double> IOfQYFull;
+    std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k);
+    auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+    // add result to the cache
+    auto &kList = prevCalculatedIntegrals->dataX();
+    kList.insert(std::upper_bound(kList.begin(), kList.end(), k), k);
+    auto &integralsList = prevCalculatedIntegrals->dataY();
+    integralsList.insert(std::upper_bound(integralsList.begin(), integralsList.end(), IOfQYAtQMax), IOfQYAtQMax);
+    m_IkCalculations++;
+    return IOfQYAtQMax;
+  }
 }
 
 // update track direction and weight
@@ -1503,7 +1488,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
     if (SQ > 0) {
-      double integralQSQ = getQSQIntegral(*componentWSIt->QSQScaleFactor, kinc);
+      double integralQSQ = getQSQIntegral(*componentWSIt, kinc);
       assert(integralQSQ != 0.);
       weight = weight / integralQSQ;
     } else
@@ -1662,7 +1647,7 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
                                     [geometryObject](const ComponentWorkspaceMapping &CompDetails) {
                                       return CompDetails.ComponentPtr.get() == geometryObject;
                                     });
-    ComponentIt->scatterCount++;
+    (*(ComponentIt->scatterCount))++;
   }
   return geometryObject;
 }

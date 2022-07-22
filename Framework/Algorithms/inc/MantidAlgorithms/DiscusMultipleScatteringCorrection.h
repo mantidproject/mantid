@@ -34,10 +34,10 @@ struct ComponentWorkspaceMapping {
   std::string_view materialName;
   API::MatrixWorkspace_sptr SQ;
   API::MatrixWorkspace_sptr logSQ{};
-  std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor{};
+  std::shared_ptr<DataObjects::Histogram1D> QSQIntegral{};
   API::MatrixWorkspace_sptr QSQ{};
   API::MatrixWorkspace_sptr InvPOfQ{};
-  int scatterCount = 0;
+  std::shared_ptr<int> scatterCount = std::make_shared<int>(0);
 };
 
 /** Calculates a multiple scattering correction
@@ -111,7 +111,6 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   void createInvPOfQWorkspaces(ComponentWorkspaceMappings &matWSs, size_t nhists);
   void convertToLogWorkspace(const API::MatrixWorkspace_sptr &SOfQ);
-  void calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs, const double specialK);
   void prepareCumulativeProbForQ(double kinc, const ComponentWorkspaceMappings &PInvOfQs);
   void prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
@@ -122,8 +121,9 @@ private:
                                                                          const std::vector<double> &xPoints);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
   integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc);
-  double getQSQIntegral(const API::ISpectrum &QSQIntegral, double k);
+  double getQSQIntegral(const ComponentWorkspaceMapping &SQWSMapping, const double k);
   long long m_callsToInterceptSurface{0};
+  long long m_IkCalculations{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts{};
   std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k

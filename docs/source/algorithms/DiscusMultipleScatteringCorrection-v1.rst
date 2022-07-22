@@ -85,7 +85,7 @@ where the integration ranges over the rectangular :math:`Q \omega` region are de
 
 This is similar to the formulation described in the Mancinelli paper except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
 
-The integral :math:`I(k)` is evaluated deterministically up front at a set of k values and interpolated as required.
+The integral :math:`I(k)` is evaluated deterministically as required using a caching mechanism so that repeated requests for :math:`I(k)` at the same :math:`k` result in the previous result being reused.
 
 The factor for the final track segment can also be normalised by setting ``NormalizeStructureFactors=true`` which replaces :math:`\sigma_s` with :math:`2k_n^2 \sigma_s(k_n)/I(k_n)`. This feature wasn't in the original Discus implementation.
 
