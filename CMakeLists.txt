@@ -132,7 +132,7 @@ endif()
 include(Span)
 
 # Find OpenGL
-if(ENABLE_OPENGL)
+if(ENABLE_OPENGL AND (BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT))
   # Use legacy libGL library
   set(OpenGL_GL_PREFERENCE LEGACY)
   find_package(OpenGL REQUIRED)
