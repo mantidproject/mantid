@@ -410,8 +410,6 @@ if(ENABLE_PRECOMMIT)
       )
     endif()
   endif()
-else()
-  message(AUTHOR_WARNING "Pre-commit not enabled by CMake, please enable manually.")
 endif()
 
 # ######################################################################################################################
