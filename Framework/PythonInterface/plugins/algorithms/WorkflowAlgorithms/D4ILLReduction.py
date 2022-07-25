@@ -224,12 +224,12 @@ class D4ILLReduction(PythonAlgorithm):
         ws: (str) name of the workspace with x-axis in 2theta units
         return: (str) name of the workspace converted to q
         """
-        h = physical_constants['Planck constant'][0]  # in m^2 kg / s
-        neutron_mass = physical_constants['neutron mass'][0]  # in kg
         Ei = mtd[ws].getRun().getLogData('Ei').value * 1.60218e-22  # in J, meV->J
-        v = np.sqrt(2.0 * Ei / neutron_mass) # in m /s
-        momentum = neutron_mass * v  # in m * kg / s
-        if self.getProperty('Wavelength').isDefault:
+        if self.getProperty('Wavelength').isDefault and Ei != 0:
+            h = physical_constants['Planck constant'][0]  # in m^2 kg / s
+            neutron_mass = physical_constants['neutron mass'][0]  # in kg
+            v = np.sqrt(2.0 * Ei / neutron_mass)  # in m /s
+            momentum = neutron_mass * v  # in m * kg / s
             wavelength = h / momentum * 1e10  # in Angstroem
         else:
             wavelength = self.getProperty('Wavelength').value
