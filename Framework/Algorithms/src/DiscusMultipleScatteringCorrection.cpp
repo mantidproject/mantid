@@ -1264,9 +1264,11 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
  * @return A tuple containing a success/fail boolean and the calculated weights
  * across the n-1 multiple scatters
  */
-std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatter(
-    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng, ComponentWorkspaceMappings &componentWorkspaces,
-    const double kinc, const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+std::tuple<bool, std::vector<double>>
+DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
+                                            const ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
+                                            const std::vector<double> &wValues, const Kernel::V3D &detPos,
+                                            bool specialSingleScatterCalc) {
   double weight = 1;
 
   auto track = start_point(rng);
@@ -1434,14 +1436,12 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
                                                const double scatteringXSection,
                                                Kernel::PseudoRandomNumberGenerator &rng, double &weight) {
   const double kinc = k;
-  double QQ, SQ;
+  double QQ;
   int iW;
   auto componentWSIt = findMatchingComponent(componentWorkspaces, shapePtr);
   if (m_importanceSampling) {
     std::tie(QQ, iW) = sampleQW(componentWSIt->InvPOfQ, rng.nextValue());
     k = getKf(componentWSIt->SQ->getAxis(1)->getValue(iW), kinc);
-    // S(Q) not strictly needed here but useful to see if the most popular values are indeed being returned
-    SQ = interpolateFlat(componentWSIt->SQ->getSpectrum(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
     auto &wValues = dynamic_cast<NumericAxis *>(componentWSIt->SQ->getAxis(1))->getValues();
@@ -1476,7 +1476,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
     double maxkf = toWaveVector(fromWaveVector(kinc) - wValues.front());
     double qrange = kinc + maxkf;
     QQ = qrange * rng.nextValue();
-    SQ = interpolateGaussian(componentWSIt->logSQ->getSpectrum(iW), QQ);
+    double SQ = interpolateGaussian(componentWSIt->logSQ->getSpectrum(iW), QQ);
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
     if (SQ > 0) {
@@ -1588,7 +1588,7 @@ Geometry::Track DiscusMultipleScatteringCorrection::start_point(Kernel::PseudoRa
 
 const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosition(
     Geometry::Track &track, double &weight, const double k, Kernel::PseudoRandomNumberGenerator &rng,
-    bool specialSingleScatterCalc, ComponentWorkspaceMappings &componentWorkspaces) {
+    bool specialSingleScatterCalc, const ComponentWorkspaceMappings &componentWorkspaces) {
   double totalMuL = 0.;
   auto nlinks = track.count();
   // Set default size to 5 (same as in LineIntersectVisit.h)
@@ -1631,6 +1631,8 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
     }
   }
   weight = weight * newWeight;
+  // At the moment this doesn't cope if sample shape is concave eg if track has more than one segment inside the
+  // sample with segment outside sample in between
   // Note - this clears the track intersections but the sample\environment shapes live on
   inc_xyz(track, vl);
   auto geometryObject = std::get<0>(geometryObjectDetails);
