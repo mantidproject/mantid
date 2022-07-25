@@ -345,16 +345,16 @@ public:
     API::MatrixWorkspace_sptr ws = createWS(20, 0.1, "CheckResult3", "AtomicDistance");
 
     // shared values for tests
-    std::vector<double> x(2, 2.0);
+    const double single_x = 2.0;
+    std::vector<double> x(2, single_x);
     std::vector<double> dy(2, 0.0);
     std::vector<double> dx(2, 0.0);
     const double rho0 = 1.0;
     const double cohScatLen = 1.0;
     const double factor1 = 4. * M_PI * rho0;
-    const double single_x = 2.0;
 
     // set up initial y values
-    std::vector<double> y(single_x, 5.0);
+    std::vector<double> y(2, 5.0);
 
     // Algorithm destructor crashes without workspace properties initialised
     PDFFourierTransform2 pdfft;
