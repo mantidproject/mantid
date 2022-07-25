@@ -48,6 +48,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
         for selector in self._selectors:
             if self._contains_point(selector.extents, event.xdata, event.ydata):
+                # Ensure only one selector is active to avoid confusing matplotlib behaviour
                 selector.set_active(True)
                 return
 
@@ -69,6 +70,14 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             self._initialise_dimensions(workspace)
 
         self._set_workspace(workspace)
+
+    def cancel_drawing_region(self):
+        """
+        Cancel drawing a region if a different toolbar option is pressed.
+        """
+        if self._drawing_region:
+            self._selectors.pop()
+            self._drawing_region = False
 
     def add_rectangular_region(self):
         """
@@ -119,5 +128,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self.notifyee:
             self.notifyee.notifyRegionChanged()
 
-    def _contains_point(self, extents, x, y):
+    @staticmethod
+    def _contains_point(extents, x, y):
         return extents[0] <= x <= extents[1] and extents[2] <= y <= extents[3]

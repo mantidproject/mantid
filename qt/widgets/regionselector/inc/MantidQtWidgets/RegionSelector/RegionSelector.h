@@ -27,6 +27,7 @@ public:
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
   void addRectangularRegion() override;
   Selection getRegion() override;
+  void cancelDrawingRegion() override;
 
 private:
   Common::Python::Object getView() const;

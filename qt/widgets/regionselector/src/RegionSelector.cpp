@@ -85,6 +85,11 @@ void RegionSelector::addRectangularRegion() {
   pyobj().attr("add_rectangular_region")();
 }
 
+void RegionSelector::cancelDrawingRegion() {
+  GlobalInterpreterLock lock;
+  pyobj().attr("cancel_drawing_region")();
+}
+
 auto RegionSelector::getRegion() -> Selection {
   GlobalInterpreterLock lock;
   auto pyValues = pyobj().attr("get_region")();

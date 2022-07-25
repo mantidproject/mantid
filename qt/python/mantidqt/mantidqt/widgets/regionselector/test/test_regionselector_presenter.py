@@ -125,9 +125,22 @@ class RegionSelectorTest(unittest.TestCase):
     def test_canvas_clicked_sets_selectors_active_if_contains_point(self):
         region_selector, selector_one, selector_two = self._mock_selectors()
 
-        region_selector._contains_point = Mock(return_value=True)
+        event = Mock()
+        event.xdata = 1.5
+        event.ydata = 3.5
+        region_selector.canvas_clicked(event)
 
-        region_selector.canvas_clicked(Mock())
+        selector_one.set_active.assert_has_calls([call(False), call(True)])
+        selector_two.set_active.assert_called_once_with(False)
+
+    def test_canvas_clicked_sets_only_one_selector_active_if_multiple_contain_point(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_two.extents = selector_one.extents
+
+        event = Mock()
+        event.xdata = 1.5
+        event.ydata = 3.5
+        region_selector.canvas_clicked(event)
 
         selector_one.set_active.assert_has_calls([call(False), call(True)])
         selector_two.set_active.assert_called_once_with(False)
@@ -142,9 +155,22 @@ class RegionSelectorTest(unittest.TestCase):
 
         mock_observer.notifyRegionChanged.assert_called_once()
 
+    def test_cancel_drawing_region_will_remove_last_selector(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.add_rectangular_region()
+        self.assertEqual(1, len(region_selector._selectors))
+        region_selector.cancel_drawing_region()
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_cancel_drawing_region_with_no_selectors_does_not_crash(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.cancel_drawing_region()
+
     def _mock_selectors(self):
         selector_one, selector_two = Mock(), Mock()
         selector_one.set_active, selector_two.set_active = Mock(), Mock()
+        selector_one.extents = [1, 2, 3, 4]
+        selector_two.extents = [5, 6, 7, 8]
 
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         region_selector._selectors.append(selector_one)
