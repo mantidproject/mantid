@@ -34,8 +34,8 @@ public:
   /// @copydoc Algorithm::validateInputs()
   std::map<std::string, std::string> validateInputs() override;
   void convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R, std::vector<double> &DFOfR,
-                               const std::vector<double> &DR, const std::string &PDFType, const std::double_t &rho0,
-                               const std::double_t &cohScatLen);
+                               const std::vector<double> &DR, const std::string &PDFType, const double &rho0,
+                               const double &cohScatLen);
 
 protected:
   size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y);
@@ -53,8 +53,8 @@ private:
   void convertFromSQMinus1(HistogramData::HistogramY &FOfQ, const HistogramData::HistogramX &Q,
                            HistogramData::HistogramE &DFOfQ);
   void convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, const HistogramData::HistogramX &R,
-                                 HistogramData::HistogramE &DFOfR, const std::string &PDFType,
-                                 const std::double_t &rho0, const std::double_t &cohScatLen);
+                                 HistogramData::HistogramE &DFOfR, const std::string &PDFType, const double &rho0,
+                                 const double &cohScatLen);
 };
 
 } // namespace Algorithms

@@ -270,9 +270,8 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vec
 
 void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R,
                                                    std::vector<double> &DFOfR, const std::vector<double> &DR,
-                                                   const std::string &PDFType, const std::double_t &rho0,
-                                                   const std::double_t &cohScatLen) {
-  // string PDFType = getProperty("PDFType");
+                                                   const std::string &PDFType, const double &rho0,
+                                                   const double &cohScatLen) {
   if (PDFType == LITTLE_G_OF_R) {
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // transform the data
@@ -295,7 +294,7 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, co
       FOfR[i] = FOfR[i] / (factor * R[i] * R[i]) - 1.0;
     }
   } else if (PDFType == G_K_OF_R) {
-    const double factor = 0.001 * pow(cohScatLen, 2);
+    const double factor = 0.01 * pow(cohScatLen, 2);
 
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // error propagation - assuming uncertainty in r = 0
@@ -333,7 +332,7 @@ void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, 
 void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR,
                                                      const HistogramData::HistogramX &R,
                                                      HistogramData::HistogramE &DFOfR, const std::string &PDFType,
-                                                     const std::double_t &rho0, const std::double_t &cohScatLen) {
+                                                     const double &rho0, const double &cohScatLen) {
   // convert to the correct form of PDF
   if (PDFType == LITTLE_G_OF_R) {
     for (size_t i = 0; i < FOfR.size(); ++i) {
@@ -357,7 +356,7 @@ void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &
       FOfR[i] = (FOfR[i] + 1.0) * factor * R[i] * R[i];
     }
   } else if (PDFType == G_K_OF_R) {
-    const double factor = 0.001 * pow(cohScatLen, 2);
+    const double factor = 0.01 * pow(cohScatLen, 2);
 
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // error propagation - assuming uncertainty in r = 0

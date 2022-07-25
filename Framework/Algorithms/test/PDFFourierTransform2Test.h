@@ -293,15 +293,15 @@ public:
   void test_PDFTypes_fwd() {
     API::MatrixWorkspace_sptr ws = createWS(20, 0.1, "CheckResult2", "MomentumTransfer");
 
+    auto const rho0 = 0.07192;
+
     // create the material
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
 
     auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
     material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
-    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
-
-    auto const rho0 = 0.07192;
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", rho0), "");
 
     // set the sample information
     Mantid::DataHandling::SetSample setsample;
@@ -311,38 +311,38 @@ public:
     setsample.execute();
 
     // check g(r) returns correct value
-    DataObjects::Workspace2D_sptr pdfws_gr = standard_ws_ptr(ws, "g(r)", "Forward");
+    DataObjects::Workspace2D_sptr pdfws_gr = run_pdfft2_alg(ws, "g(r)", "Forward");
     const auto little_gofR = pdfws_gr->y(0);
     const auto gofR_comparison = 3.2015617108;
     TS_ASSERT_DELTA(little_gofR[10], gofR_comparison, 1e-8);
 
     // check G(r) returns correct value
-    DataObjects::Workspace2D_sptr pdfws_big_gr = standard_ws_ptr(ws, "G(r)", "Forward");
+    DataObjects::Workspace2D_sptr pdfws_big_gr = run_pdfft2_alg(ws, "G(r)", "Forward");
     const auto big_gofR = pdfws_big_gr->y(0);
     const auto R_G = pdfws_big_gr->x(0);
     const auto calculated_big_gofR = (gofR_comparison - 1) * 4. * M_PI * rho0 * R_G[10];
     TS_ASSERT_DELTA(big_gofR[10], calculated_big_gofR, 1e-8);
 
     // check RDF(r) returns correct value
-    DataObjects::Workspace2D_sptr pdfws_rdf_r = standard_ws_ptr(ws, "RDF(r)", "Forward");
+    DataObjects::Workspace2D_sptr pdfws_rdf_r = run_pdfft2_alg(ws, "RDF(r)", "Forward");
     const auto rdfofR = pdfws_rdf_r->y(0);
     const auto R_RDF = pdfws_rdf_r->x(0);
-    const auto calculated_rdfofR = gofR_comparison * 4. * M_PI * R_RDF[10] * rho0 * R_RDF[10];
+    const auto calculated_rdfofR = gofR_comparison * 4. * M_PI * rho0 * R_RDF[10] * R_RDF[10];
 
     TS_ASSERT_DELTA(rdfofR[10], calculated_rdfofR, 1e-8);
 
     //// check G_k(r) returns correct value
-    DataObjects::Workspace2D_sptr pdfws_gkr = standard_ws_ptr(ws, "G_k(r)", "Forward");
+    DataObjects::Workspace2D_sptr pdfws_gkr = run_pdfft2_alg(ws, "G_k(r)", "Forward");
     const auto gkofR = pdfws_gkr->y(0);
     const Kernel::Material &material2 = pdfws_gkr->sample().getMaterial();
-    const auto factor = 0.001 * pow(material2.cohScatterLength(), 2);
+    const auto factor = 0.01 * pow(material2.cohScatterLength(), 2);
     const auto calculated_gkofR = (gofR_comparison - 1) * factor;
 
     TS_ASSERT_DELTA(gkofR[10], calculated_gkofR, 1e-8);
   }
 
   void test_PDFTypes_bkwd() {
-    API::MatrixWorkspace_sptr ws = createWS(20, 0.1, "CheckResult3", "MomentumTransfer");
+    API::MatrixWorkspace_sptr ws = createWS(20, 0.1, "CheckResult3", "AtomicDistance");
 
     // shared values for tests
     std::vector<double> x(2, 2.0);
@@ -354,7 +354,7 @@ public:
     const double single_x = 2.0;
 
     // set up initial y values
-    std::vector<double> y(2, 5.0);
+    std::vector<double> y(single_x, 5.0);
 
     // Algorithm destructor crashes without workspace properties initialised
     PDFFourierTransform2 pdfft;
@@ -386,15 +386,15 @@ public:
     //// test G_k(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string G_K_OF_R("G_k(r)");
     pdfft.convertToLittleGRMinus1(y, x, dy, dx, G_K_OF_R, rho0, cohScatLen);
-    const double factor2 = 0.001 * pow(cohScatLen, 2);
+    const double factor2 = 0.01 * pow(cohScatLen, 2);
     const auto exp_gkr = exp_rdf_r / factor2;
     const auto actual_gkr = y[0];
     TS_ASSERT_DELTA(actual_gkr, exp_gkr, 1e-8);
   }
 
 private:
-  DataObjects::Workspace2D_sptr standard_ws_ptr(API::MatrixWorkspace_sptr ws, std::string PDFType,
-                                                std::string Direction) {
+  DataObjects::Workspace2D_sptr run_pdfft2_alg(API::MatrixWorkspace_sptr ws, std::string PDFType,
+                                               std::string Direction) {
     // 1. Run PDFFT
     PDFFourierTransform2 pdfft;
     pdfft.initialize();

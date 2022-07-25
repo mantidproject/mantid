@@ -51,7 +51,7 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):
-        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)']:
+        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)', 'G_k(r)']:
             kwargs['pdf_type'] = 'G(r)'
             logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
