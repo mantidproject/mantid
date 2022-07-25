@@ -1339,11 +1339,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
       const auto qVector = directionToDetector * kout - prevDirection * k;
       const double q = qVector.norm();
       const double finalW = fromWaveVector(k) - finalE;
-      auto componentWSIt = std::find_if(componentWorkspaces.begin(), componentWorkspaces.end(),
-                                        [shapeObjectWithScatter](const ComponentWorkspaceMapping &SQWS) {
-                                          return SQWS.ComponentPtr.get() == shapeObjectWithScatter;
-                                        });
-      assert(componentWSIt != componentWorkspaces.end());
+      auto componentWSIt = findMatchingComponent(componentWorkspaces, shapeObjectWithScatter);
       auto componentWSMapping = *componentWSIt; // to help debugging
       double SQ = Interpolate2D(componentWSMapping, finalW, q);
       scatteringXSection = m_NormalizeSQ ? scatteringXSection * 2 * k * k / getQSQIntegral(componentWSMapping, k)
@@ -1440,11 +1436,7 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
   const double kinc = k;
   double QQ, SQ;
   int iW;
-  auto componentWSIt = std::find_if(componentWorkspaces.begin(), componentWorkspaces.end(),
-                                    [shapePtr](const ComponentWorkspaceMapping &componentWSMapping) {
-                                      return componentWSMapping.ComponentPtr.get() == shapePtr;
-                                    });
-  assert(componentWSIt != componentWorkspaces.end());
+  auto componentWSIt = findMatchingComponent(componentWorkspaces, shapePtr);
   if (m_importanceSampling) {
     std::tie(QQ, iW) = sampleQW(componentWSIt->InvPOfQ, rng.nextValue());
     k = getKf(componentWSIt->SQ->getAxis(1)->getValue(iW), kinc);
@@ -1643,11 +1635,8 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
   inc_xyz(track, vl);
   auto geometryObject = std::get<0>(geometryObjectDetails);
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-    auto ComponentIt = std::find_if(componentWorkspaces.begin(), componentWorkspaces.end(),
-                                    [geometryObject](const ComponentWorkspaceMapping &CompDetails) {
-                                      return CompDetails.ComponentPtr.get() == geometryObject;
-                                    });
-    (*(ComponentIt->scatterCount))++;
+    auto componentIt = findMatchingComponent(componentWorkspaces, geometryObject);
+    (*(componentIt->scatterCount))++;
   }
   return geometryObject;
 }
@@ -1803,6 +1792,26 @@ void DiscusMultipleScatteringCorrection::correctForWorkspaceNameClash(std::strin
 void DiscusMultipleScatteringCorrection::setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName) {
   correctForWorkspaceNameClash(wsName);
   API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
+}
+
+/**
+ * Lookup a sample or sample environment component in the supplied list
+ * @param componentWorkspaces The list of components, each with some associated workspaces
+ * @param shapeObjectWithScatter A pointer to the component shape that is to be looked up
+ * @return an iterator to the found sample or sample environment component
+ */
+boost::container::vec_iterator<ComponentWorkspaceMapping *, true>
+DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
+                                                          const Geometry::IObject *shapeObjectWithScatter) {
+  // Currently look up based on the raw pointer value. Did consider looking up based on something more human readable
+  // such as the component id or name but this isn't guaranteed to be set and a string key may be longer than the
+  // pointer which is probably 8 bytes
+  auto componentWSIt = std::find_if(componentWorkspaces.begin(), componentWorkspaces.end(),
+                                    [shapeObjectWithScatter](const ComponentWorkspaceMapping &SQWS) {
+                                      return SQWS.ComponentPtr.get() == shapeObjectWithScatter;
+                                    });
+  assert(componentWSIt != componentWorkspaces.end());
+  return componentWSIt;
 }
 
 } // namespace Mantid::Algorithms
