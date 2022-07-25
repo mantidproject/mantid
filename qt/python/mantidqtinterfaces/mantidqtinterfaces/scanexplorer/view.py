@@ -8,6 +8,7 @@
 
 from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
 from qtpy.QtCore import *
+from qtpy.QtGui import QCloseEvent
 
 import mantid
 from mantidqt.interfacemanager import InterfaceManager
@@ -238,9 +239,6 @@ class ScanExplorerView(QMainWindow):
         self.lower_splitter.setCollapsible(0, False)
         self.splitter.setCollapsible(1, False)
 
-        self.plot_workspace(workspace)
-
-    def plot_workspace(self, workspace):
         self._data_view.plot_matrix(workspace)
 
     def show_directory_manager(self):
@@ -274,6 +272,20 @@ class ScanExplorerView(QMainWindow):
         dialog.show()
 
         dialog.accepted.connect(self.presenter.on_dialog_accepted)
+
+    def closeEvent(self, event: QCloseEvent):
+        """
+        Triggered when the window is closed. Cleans help-related details.
+        """
+        # shutdown help window process
+        self.presenter.assistant_process.close()
+        self.presenter.assistant_process.waitForFinished()
+
+        if self.data_view:
+            # disconnect the help button so a call to help in the slice viewer won't invoke the incorrect one
+            self.data_view.help_button.clicked.disconnect()
+
+        super().closeEvent(event)
 
     @property
     def data_view(self):

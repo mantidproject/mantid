@@ -8,13 +8,12 @@
 
 from os import path, sep
 import numpy as np
-from qtpy.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal, QProcess
 
-from mantid.api import MatrixWorkspace, AlgorithmObserver, Algorithm
-from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+from mantid.api import MatrixWorkspace, AlgorithmObserver, Algorithm, mtd
 from mantid.kernel import logger, config
-from mantid.api import mtd
-
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
+from mantidqt.gui_helper import show_interface_help
 
 from .model import ScanExplorerModel
 from .view import ScanExplorerView
@@ -38,6 +37,9 @@ class ScanExplorerPresenter:
         self.observer.signals.finished.connect(self.on_algorithm_finished)
         self.observer.signals.started.connect(self.set_algorithm_result_name)
 
+        # help window process
+        self.assistant_process = QProcess(self.view)
+
         # the name of the workspace in which the result of the ParameterScan algorithm will be loaded once it ran
         self.future_workspace: str = ""
 
@@ -54,6 +56,13 @@ class ScanExplorerPresenter:
 
         self._ws = workspace
         self.view.data_view = presenter.view.data_view
+
+        # we are sort of sharing the help button with the slice viewer,
+        # so we disconnect it first in case the slice viewer already claimed it
+        self.view.data_view.help_button.clicked.disconnect()
+
+        self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
+
         self.view.show_slice_viewer(workspace)
 
         self.view.initialize_rectangle_manager()
@@ -87,6 +96,12 @@ class ScanExplorerPresenter:
                                "Only the first one is considered for background subtraction.")
 
         return peak_dict
+
+    def action_open_help_window(self):
+        """
+        Open the help window for this interface.
+        """
+        show_interface_help("SimpleScanViewer", self.assistant_process, area="ILL")
 
     def on_file_selected(self, file_path: str):
         """
@@ -234,7 +249,7 @@ class ScanAlgorithmObserver(AlgorithmObserver):
 
     def errorHandle(self, msg):
         """
-        Called when the observed algo encounter an error.
+        Called when the observed algorithm encounters an error.
         """
         self.error = True
         self.error_message = msg
