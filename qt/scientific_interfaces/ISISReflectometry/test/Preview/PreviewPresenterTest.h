@@ -222,16 +222,30 @@ public:
     presenter.notifySumBanksCompleted();
   }
 
-  void test_rectangular_roi_requested_updates_view() {
+  void test_rectangular_roi_requested() {
     auto mockView = makeView();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    expectActivateRectangularROIMode(*mockView, *mockRegionSelector);
+    expectRectangularROIMode(*mockView, *mockRegionSelector);
+    EXPECT_CALL(*mockRegionSelector, addRectangularRegion()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockRegionSelector_uptr)));
 
     presenter.notifyRectangularROIModeRequested();
+  }
+
+  void test_edit_roi_mode_requested() {
+    auto mockView = makeView();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
+
+    expectEditROIMode(*mockView, *mockRegionSelector);
+    EXPECT_CALL(*mockRegionSelector, cancelDrawingRegion()).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
+                                               std::move(mockRegionSelector_uptr)));
+
+    presenter.notifyEditROIModeRequested();
   }
 
   void test_notify_region_changed_starts_reduction() {
@@ -241,8 +255,7 @@ public:
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    // TODO reset edit mode after region is selected
-    // expectRegionSelectorSetToEditMode(*mockView);
+    expectEditROIMode(*mockView, *mockRegionSelector);
     expectReduceAsyncCalledOnSelectedRegion(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
@@ -393,11 +406,14 @@ private:
     EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
   }
 
-  void expectActivateRectangularROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
-    // TODO Disable edit button when implemented
-    // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
+  void expectRectangularROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
+    EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
-    EXPECT_CALL(mockRegionSelector, addRectangularRegion()).Times(1);
+  }
+
+  void expectEditROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
+    EXPECT_CALL(mockView, setEditROIState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setRectangularROIState(Eq(false))).Times(1);
   }
 
   void expectReduceAsyncCalledOnSelectedRegion(MockPreviewView &mockView, MockPreviewModel &mockModel,

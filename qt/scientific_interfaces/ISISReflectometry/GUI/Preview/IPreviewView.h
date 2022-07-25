@@ -56,7 +56,7 @@ public:
   virtual void setAngle(double angle) = 0;
   // Region selector toolbar
   virtual void setEditROIState(bool state) = 0;
-  virtual void setAddRectangularROIState(bool state) = 0;
+  virtual void setRectangularROIState(bool state) = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
 

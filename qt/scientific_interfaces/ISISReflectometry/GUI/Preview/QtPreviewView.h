@@ -53,7 +53,7 @@ public:
   void setAngle(double angle) override;
   // Region selector toolbar
   void setEditROIState(bool state) override;
-  void setAddRectangularROIState(bool state) override;
+  void setRectangularROIState(bool state) override;
 
   std::vector<size_t> getSelectedDetectors() const override;
 

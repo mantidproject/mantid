@@ -120,7 +120,7 @@ void QtPreviewView::setAngle(double angle) { m_ui.angle_spin_box->setValue(angle
 
 void QtPreviewView::setEditROIState(bool state) { m_ui.rs_edit_button->setDown(state); }
 
-void QtPreviewView::setAddRectangularROIState(bool state) { m_ui.rs_rect_select_button->setDown(state); }
+void QtPreviewView::setRectangularROIState(bool state) { m_ui.rs_rect_select_button->setDown(state); }
 
 std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
   std::vector<size_t> result;
