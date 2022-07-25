@@ -443,7 +443,7 @@ The ``multistart`` algorithm requires you to pass in parameter_bounds and the nu
 
 The ``alternating`` algorithm also requires you to pass in parameter_bounds and the number of samples::
 
-    fit.gofit(algorithm_callable=gofit.alternating,, parameter_bounds=parameter_bounds, samples=100, maxit=500)
+    fit.gofit(algorithm_callable=gofit.alternating, parameter_bounds=parameter_bounds, samples=100, maxit=500)
 
 A full list of possible arguments for these algorithm can be found `here <https://github.com/ralna/GOFit/blob/master/docs/algorithms.md>`_. The output from these fits
 should be a matrix workspace containing the fitted data, and a table workspace containing the fitted parameters.
