@@ -66,7 +66,7 @@ class D4ILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="Wavelength",
                              defaultValue=0.5,
-                             doc="The measurement wavelength, in Angstrom.")
+                             doc="The measurement wavelength, in Angstrom. Will be used if not default or if Ei in metadata is 0.")
 
         self.declareProperty(name="NormaliseBy",
                              defaultValue="Monitor",
