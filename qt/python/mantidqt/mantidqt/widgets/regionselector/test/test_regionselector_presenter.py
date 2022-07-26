@@ -70,29 +70,36 @@ class RegionSelectorTest(unittest.TestCase):
     def test_add_rectangular_region_creates_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
 
-        region_selector.add_rectangular_region()
+        region_selector.add_rectangular_region("test")
 
         self.assertEqual(1, len(region_selector._selectors))
         self.assertTrue(region_selector._selectors[0].active)
+        self.assertEqual("test", region_selector._selectors[0].region_type())
 
     def test_add_second_rectangular_region_deactivates_first_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
 
-        region_selector.add_rectangular_region()
-        region_selector.add_rectangular_region()
+        region_selector.add_rectangular_region("test")
+        region_selector.add_rectangular_region("test")
 
         self.assertEqual(2, len(region_selector._selectors))
 
         self.assertFalse(region_selector._selectors[0].active)
         self.assertTrue(region_selector._selectors[1].active)
 
-    def test_get_region(self):
+    def test_get_region_with_two_signal_regions(self):
         region_selector, selector_one, selector_two = self._mock_selectors()
 
-        region = region_selector.get_region()
+        region = region_selector.get_region("signal")
         self.assertEqual(4, len(region))
         self.assertEqual([selector_one.extents[2], selector_one.extents[3], selector_two.extents[2],
                           selector_two.extents[3]], region)
+
+    def test_get_region_with_different_region_types(self):
+        region_selector, selector_one, selector_two = self._mock_selectors("signal", "background")
+        region = region_selector.get_region("signal")
+        self.assertEqual(2, len(region))
+        self.assertEqual([selector_one.extents[2], selector_one.extents[3]], region)
 
     def test_canvas_clicked_does_nothing_when_redrawing_region(self):
         region_selector, selector_one, selector_two = self._mock_selectors()
@@ -142,14 +149,14 @@ class RegionSelectorTest(unittest.TestCase):
         mock_observer = Mock()
         region_selector.subscribe(mock_observer)
 
-        region_selector.add_rectangular_region()
+        region_selector.add_rectangular_region("test")
         region_selector._on_rectangle_selected(Mock(), Mock())
 
         mock_observer.notifyRegionChanged.assert_called_once()
 
     def test_cancel_drawing_region_will_remove_last_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
-        region_selector.add_rectangular_region()
+        region_selector.add_rectangular_region("test")
         self.assertEqual(1, len(region_selector._selectors))
         region_selector.cancel_drawing_region()
         self.assertEqual(0, len(region_selector._selectors))
@@ -158,8 +165,10 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         region_selector.cancel_drawing_region()
 
-    def _mock_selectors(self):
+    def _mock_selectors(self, selector_one_type="signal", selector_two_type="signal"):
         selector_one, selector_two = Mock(), Mock()
+        selector_one.region_type = Mock(return_value=selector_one_type)
+        selector_two.region_type = Mock(return_value=selector_two_type)
         selector_one.set_active, selector_two.set_active = Mock(), Mock()
         selector_one.extents = [1, 2, 3, 4]
         selector_two.extents = [5, 6, 7, 8]

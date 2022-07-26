@@ -18,6 +18,15 @@ import matplotlib
 from matplotlib.widgets import RectangleSelector
 
 
+class Selector(RectangleSelector):
+    def __init__(self, region_type, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._region_type = region_type
+
+    def region_type(self):
+        return self._region_type
+
+
 class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def __init__(self, ws=None, parent=None, view=None):
         if ws and WorkspaceInfo.get_ws_type(ws) != WS_TYPE.MATRIX:
@@ -26,7 +35,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent)
         super().__init__(ws, self.view._data_view)
-        self._selectors: list[RectangleSelector] = []
+        self._selectors: list[Selector] = []
         self._drawing_region = False
 
         if ws:
@@ -82,7 +91,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             self._selectors.pop()
             self._drawing_region = False
 
-    def add_rectangular_region(self):
+    def add_rectangular_region(self, region_type):
         """
         Add a rectangular region selection tool.
         """
@@ -99,16 +108,17 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             selector_kwargs["drag_from_anywhere"] = True
             selector_kwargs["ignore_event_outside"] = True
 
-        self._selectors.append(RectangleSelector(self.view._data_view.ax, self._on_rectangle_selected,
+        self._selectors.append(Selector(region_type, self.view._data_view.ax, self._on_rectangle_selected,
                                                  **selector_kwargs))
 
         self._drawing_region = True
 
-    def get_region(self):
+    def get_region(self, region_type):
         # extents contains x1, x2, y1, y2. Just store y (spectra) for now
         result = []
         for selector in self._selectors:
-            result.extend([selector.extents[2], selector.extents[3]])
+            if selector.region_type() == region_type:
+                result.extend([selector.extents[2], selector.extents[3]])
         return result
 
     def _initialise_dimensions(self, workspace):
