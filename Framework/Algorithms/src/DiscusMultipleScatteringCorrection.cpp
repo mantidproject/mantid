@@ -1802,7 +1802,7 @@ void DiscusMultipleScatteringCorrection::setWorkspaceName(const API::MatrixWorks
  * @param shapeObjectWithScatter A pointer to the component shape that is to be looked up
  * @return an iterator to the found sample or sample environment component
  */
-boost::container::vec_iterator<ComponentWorkspaceMapping *, true>
+const ComponentWorkspaceMapping *
 DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
                                                           const Geometry::IObject *shapeObjectWithScatter) {
   // Currently look up based on the raw pointer value. Did consider looking up based on something more human readable
@@ -1813,7 +1813,9 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
                                       return SQWS.ComponentPtr.get() == shapeObjectWithScatter;
                                     });
   assert(componentWSIt != componentWorkspaces.end());
-  return componentWSIt;
+  // can't return iterator because boost have moved vec_iterator into a different namespace post v1.65.1 so won't
+  // build on all platforms
+  return &(*componentWSIt);
 }
 
 } // namespace Mantid::Algorithms

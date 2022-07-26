@@ -122,9 +122,8 @@ private:
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
   integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc);
   double getQSQIntegral(const ComponentWorkspaceMapping &SQWSMapping, const double k);
-  boost::container::vec_iterator<ComponentWorkspaceMapping *, true>
-  findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
-                        const Geometry::IObject *shapeObjectWithScatter);
+  const ComponentWorkspaceMapping *findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
+                                                         const Geometry::IObject *shapeObjectWithScatter);
   long long m_callsToInterceptSurface{0};
   long long m_IkCalculations{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
