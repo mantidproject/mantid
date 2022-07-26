@@ -227,7 +227,7 @@ public:
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    expectRectangularROIMode(*mockView, *mockRegionSelector);
+    expectRectangularROIMode(*mockView);
     EXPECT_CALL(*mockRegionSelector, addRectangularRegion()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockRegionSelector_uptr)));
@@ -240,7 +240,7 @@ public:
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    expectEditROIMode(*mockView, *mockRegionSelector);
+    expectEditROIMode(*mockView);
     EXPECT_CALL(*mockRegionSelector, cancelDrawingRegion()).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockRegionSelector_uptr)));
@@ -255,7 +255,7 @@ public:
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
-    expectEditROIMode(*mockView, *mockRegionSelector);
+    expectEditROIMode(*mockView);
     expectReduceAsyncCalledOnSelectedRegion(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
@@ -406,12 +406,12 @@ private:
     EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
   }
 
-  void expectRectangularROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
+  void expectRectangularROIMode(MockPreviewView &mockView) {
     EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
   }
 
-  void expectEditROIMode(MockPreviewView &mockView, MockRegionSelector &mockRegionSelector) {
+  void expectEditROIMode(MockPreviewView &mockView) {
     EXPECT_CALL(mockView, setEditROIState(Eq(true))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(false))).Times(1);
   }
