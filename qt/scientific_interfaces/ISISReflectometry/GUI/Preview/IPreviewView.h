@@ -32,7 +32,7 @@ public:
   virtual void notifyLinePlotExportAdsRequested() = 0;
 
   virtual void notifyEditROIModeRequested() = 0;
-  virtual void notifyRectangularROIModeRequested() = 0;
+  virtual void notifyRectangularROIModeRequested(const std::string &regionType) = 0;
 };
 
 class IPreviewView {

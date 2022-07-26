@@ -21,8 +21,8 @@ public:
   virtual ~IRegionSelector() = default;
   virtual void subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) = 0;
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
-  virtual void addRectangularRegion() = 0;
-  virtual Selection getRegion() = 0;
+  virtual void addRectangularRegion(const std::string &regionType) = 0;
+  virtual Selection getRegion(const std::string &regionType) = 0;
   virtual void cancelDrawingRegion() = 0;
 };
 } // namespace MantidQt::Widgets

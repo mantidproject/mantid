@@ -185,7 +185,13 @@
              <string>Select a rectangular region of interest</string>
             </property>
             <property name="text">
-             <string>Rectangular ROI</string>
+             <string/>
+            </property>
+            <property name="popupMode">
+             <enum>QToolButton::MenuButtonPopup</enum>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>

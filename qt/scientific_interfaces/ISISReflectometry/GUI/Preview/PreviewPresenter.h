@@ -65,7 +65,7 @@ public:
   void notifyLinePlotExportAdsRequested() override;
 
   void notifyEditROIModeRequested() override;
-  void notifyRectangularROIModeRequested() override;
+  void notifyRectangularROIModeRequested(const std::string &regionType) override;
 
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;

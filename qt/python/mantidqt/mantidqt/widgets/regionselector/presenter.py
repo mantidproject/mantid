@@ -19,8 +19,23 @@ from matplotlib.widgets import RectangleSelector
 
 
 class Selector(RectangleSelector):
-    def __init__(self, region_type, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    selector_kwargs = {"useblit": False,  # rectangle persists on button release
+                       "button": [1],
+                       "minspanx": 5,
+                       "minspany": 5,
+                       "spancoords": "pixels",
+                       "interactive": True}
+
+    REGION_COLOURS = { "Signal": "green", "Background": "magenta", "Transmission": "blue" }
+
+    def __init__(self, region_type, *args):
+        self.selector_kwargs["props"] = dict(facecolor='white', edgecolor=self.REGION_COLOURS.get(region_type),
+                                             alpha=0.2, linewidth=2, fill=True)
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            self.selector_kwargs["drag_from_anywhere"] = True
+            self.selector_kwargs["ignore_event_outside"] = True
+
+        super().__init__(*args, **self.selector_kwargs)
         self._region_type = region_type
 
     def region_type(self):
@@ -98,18 +113,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         for selector in self._selectors:
             selector.set_active(False)
 
-        selector_kwargs = {"useblit": False,  # rectangle persists on button release
-                           "button": [1],
-                           "minspanx": 5,
-                           "minspany": 5,
-                           "spancoords": "pixels",
-                           "interactive": True}
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
-            selector_kwargs["drag_from_anywhere"] = True
-            selector_kwargs["ignore_event_outside"] = True
-
-        self._selectors.append(Selector(region_type, self.view._data_view.ax, self._on_rectangle_selected,
-                                                 **selector_kwargs))
+        self._selectors.append(Selector(region_type, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
 

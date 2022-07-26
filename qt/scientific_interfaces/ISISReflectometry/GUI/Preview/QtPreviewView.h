@@ -67,6 +67,7 @@ private:
 
   void connectSignals() const;
   void loadToolbarIcons();
+  void setupSelectRegionTypes();
 
 private slots:
   void onLoadWorkspaceRequested() const;
@@ -77,6 +78,6 @@ private slots:
   void onRegionSelectorExportToAdsClicked() const;
   void onLinePlotExportToAdsClicked() const;
   void onEditROIClicked() const;
-  void onAddRectangularROIClicked() const;
+  void onAddRectangularROIClicked(QAction *regionType) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

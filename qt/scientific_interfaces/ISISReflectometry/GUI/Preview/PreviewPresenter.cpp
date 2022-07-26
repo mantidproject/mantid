@@ -148,10 +148,10 @@ void PreviewPresenter::notifyEditROIModeRequested() {
   m_regionSelector->cancelDrawingRegion();
 }
 
-void PreviewPresenter::notifyRectangularROIModeRequested() {
+void PreviewPresenter::notifyRectangularROIModeRequested(const std::string &regionType) {
   m_view->setEditROIState(false);
   m_view->setRectangularROIState(true);
-  m_regionSelector->addRectangularRegion();
+  m_regionSelector->addRectangularRegion(regionType);
 }
 
 void PreviewPresenter::notifyRegionChanged() {
@@ -159,7 +159,8 @@ void PreviewPresenter::notifyRegionChanged() {
   m_view->setEditROIState(true);
 
   // Set the selection from the view
-  auto roi = m_regionSelector->getRegion();
+  // TODO make use of background and transmission regions. Move hard coded strings to somewhere central as an enum
+  auto roi = m_regionSelector->getRegion("Signal");
   m_model->setSelectedRegion(roi);
   runReduction();
 }
