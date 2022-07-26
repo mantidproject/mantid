@@ -87,20 +87,12 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertTrue(region_selector._selectors[1].active)
 
     def test_get_region(self):
-        x1, x2, x3, x4, y1, y2, y3, y4 = 1.0, 2.0, 5.0, 6.0, 3.0, 4.0, 7.0, 8.0
-
-        selector_one = Mock()
-        selector_one.extents = [x1, x2, y1, y2]
-        selector_two = Mock()
-        selector_two.extents = [x3, x4, y3, y4]
-
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
-        region_selector._selectors.append(selector_one)
-        region_selector._selectors.append(selector_two)
+        region_selector, selector_one, selector_two = self._mock_selectors()
 
         region = region_selector.get_region()
         self.assertEqual(4, len(region))
-        self.assertEqual([y1, y2, y3, y4], region)
+        self.assertEqual([selector_one.extents[2], selector_one.extents[3], selector_two.extents[2],
+                          selector_two.extents[3]], region)
 
     def test_canvas_clicked_does_nothing_when_redrawing_region(self):
         region_selector, selector_one, selector_two = self._mock_selectors()
