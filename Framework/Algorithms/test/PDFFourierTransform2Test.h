@@ -354,7 +354,7 @@ public:
     const double factor1 = 4. * M_PI * rho0;
 
     // set up initial y values
-    std::vector<double> y(2, 5.0);
+    std::vector<double> y_initial(2, 5.0);
 
     // Algorithm destructor crashes without workspace properties initialised
     PDFFourierTransform2 pdfft;
@@ -364,31 +364,35 @@ public:
 
     // test g(r)
     const std::string LITTLE_G_OF_R("g(r)");
-    pdfft.convertToLittleGRMinus1(y, x, dy, dx, LITTLE_G_OF_R, rho0, cohScatLen);
+    auto y_gr = y_initial;
+    pdfft.convertToLittleGRMinus1(y_gr, x, dy, dx, LITTLE_G_OF_R, rho0, cohScatLen);
     const auto exp_gr = 4.0;
-    const auto actual_gr = y[0];
+    const auto actual_gr = y_gr[0];
     TS_ASSERT_DELTA(actual_gr, exp_gr, 1e-8);
 
     // test G(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string BIG_G_OF_R("G(r)");
-    pdfft.convertToLittleGRMinus1(y, x, dy, dx, BIG_G_OF_R, rho0, cohScatLen);
-    const auto exp_big_gr = exp_gr / (factor1 * single_x);
-    const auto actual_big_gr = y[0];
-    TS_ASSERT_DELTA(actual_big_gr, exp_big_gr, 1e-8);
+    auto y_gr_minus_one = y_initial;
+    pdfft.convertToLittleGRMinus1(y_gr_minus_one, x, dy, dx, BIG_G_OF_R, rho0, cohScatLen);
+    const auto exp_little_gr_minus_one = y_initial[0] / (factor1 * single_x);
+    const auto actual_little_gr_minus_one = y_gr_minus_one[0];
+    TS_ASSERT_DELTA(actual_little_gr_minus_one, exp_little_gr_minus_one, 1e-8);
 
     //// test RDF(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string RDF_OF_R("RDF(r)");
-    pdfft.convertToLittleGRMinus1(y, x, dy, dx, RDF_OF_R, rho0, cohScatLen);
-    const auto exp_rdf_r = exp_big_gr / (factor1 * single_x * single_x) - 1.0;
-    const auto actual_rdf_r = y[0];
+    auto y_rdf_r = y_initial;
+    pdfft.convertToLittleGRMinus1(y_rdf_r, x, dy, dx, RDF_OF_R, rho0, cohScatLen);
+    const auto exp_rdf_r = y_initial[0] / (factor1 * single_x * single_x) - 1.0;
+    const auto actual_rdf_r = y_rdf_r[0];
     TS_ASSERT_DELTA(actual_rdf_r, exp_rdf_r, 1e-8);
 
     //// test G_k(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string G_K_OF_R("G_k(r)");
-    pdfft.convertToLittleGRMinus1(y, x, dy, dx, G_K_OF_R, rho0, cohScatLen);
+    auto y_gkr = y_initial;
+    pdfft.convertToLittleGRMinus1(y_gkr, x, dy, dx, G_K_OF_R, rho0, cohScatLen);
     const double factor2 = 0.01 * pow(cohScatLen, 2);
-    const auto exp_gkr = exp_rdf_r / factor2;
-    const auto actual_gkr = y[0];
+    const auto exp_gkr = y_initial[0] / factor2;
+    const auto actual_gkr = y_gkr[0];
     TS_ASSERT_DELTA(actual_gkr, exp_gkr, 1e-8);
   }
 
