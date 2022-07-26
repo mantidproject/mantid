@@ -47,6 +47,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
+  m_view->setRegionSelectorToolbarEnabled(false);
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
@@ -98,6 +99,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
+  m_view->setRegionSelectorToolbarEnabled(true);
   // Perform reduction to update the next plot, if possible
   runReduction();
 }
@@ -140,12 +142,22 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
 
 void PreviewPresenter::notifyRegionSelectorExportAdsRequested() { m_model->exportSummedWsToAds(); }
 
+void PreviewPresenter::notifyEditROIModeRequested() {
+  m_view->setRectangularROIState(false);
+  m_view->setEditROIState(true);
+  m_regionSelector->cancelDrawingRegion();
+}
+
 void PreviewPresenter::notifyRectangularROIModeRequested() {
+  m_view->setEditROIState(false);
   m_view->setRectangularROIState(true);
   m_regionSelector->addRectangularRegion();
 }
 
 void PreviewPresenter::notifyRegionChanged() {
+  m_view->setRectangularROIState(false);
+  m_view->setEditROIState(true);
+
   // Set the selection from the view
   auto roi = m_regionSelector->getRegion();
   m_model->setSelectedRegion(roi);

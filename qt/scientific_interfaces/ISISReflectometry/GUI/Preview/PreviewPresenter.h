@@ -64,6 +64,7 @@ public:
   void notifyRegionSelectorExportAdsRequested() override;
   void notifyLinePlotExportAdsRequested() override;
 
+  void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
 
   // JobManagerSubscriber overrides

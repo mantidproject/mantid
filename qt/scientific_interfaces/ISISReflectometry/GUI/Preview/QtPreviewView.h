@@ -49,9 +49,11 @@ public:
   void setInstViewEditMode() override;
   void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
+  void setRegionSelectorToolbarEnabled(bool enable) override;
   void setAngle(double angle) override;
   // Region selector toolbar
-  void setRectangularROIState(bool enable) override;
+  void setEditROIState(bool state) override;
+  void setRectangularROIState(bool state) override;
 
   std::vector<size_t> getSelectedDetectors() const override;
 
@@ -74,6 +76,7 @@ private slots:
   void onInstViewShapeChanged() const;
   void onRegionSelectorExportToAdsClicked() const;
   void onLinePlotExportToAdsClicked() const;
-  void onSelectRectangularROIClicked() const;
+  void onEditROIClicked() const;
+  void onAddRectangularROIClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

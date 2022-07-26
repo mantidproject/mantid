@@ -4,6 +4,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from distutils.version import LooseVersion
+
 from .view import RegionSelectorView
 from ..observers.observing_presenter import ObservingPresenter
 from ..sliceviewer.models.dimensions import Dimensions
@@ -12,6 +14,7 @@ from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantid.api import RegionSelectorObserver
 
 # 3rd party imports
+import matplotlib
 from matplotlib.widgets import RectangleSelector
 
 
@@ -23,7 +26,8 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.notifyee = None
         self.view = view if view else RegionSelectorView(self, parent)
         super().__init__(ws, self.view._data_view)
-        self._selection: list[float] = None
+        self._selectors: list[RectangleSelector] = []
+        self._drawing_region = False
 
         if ws:
             self._initialise_dimensions(ws)
@@ -39,7 +43,17 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         pass
 
     def canvas_clicked(self, event) -> None:
-        pass
+        if self._drawing_region:
+            return
+
+        for selector in self._selectors:
+            selector.set_active(False)
+
+        for selector in self._selectors:
+            if self._contains_point(selector.extents, event.xdata, event.ydata):
+                # Ensure only one selector is active to avoid confusing matplotlib behaviour
+                selector.set_active(True)
+                return
 
     def zoom_pan_clicked(self, active) -> None:
         pass
@@ -60,22 +74,42 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
         self._set_workspace(workspace)
 
+    def cancel_drawing_region(self):
+        """
+        Cancel drawing a region if a different toolbar option is pressed.
+        """
+        if self._drawing_region:
+            self._selectors.pop()
+            self._drawing_region = False
+
     def add_rectangular_region(self):
         """
-        Toggle the rectangular region selection tool.
+        Add a rectangular region selection tool.
         """
-        self._selector = RectangleSelector(
-            self.view._data_view.ax,
-            self._on_rectangle_selected,
-            useblit=False,  # rectangle persists on button release
-            button=[1],
-            minspanx=5,
-            minspany=5,
-            spancoords='pixels',
-            interactive=True)
+        for selector in self._selectors:
+            selector.set_active(False)
+
+        selector_kwargs = {"useblit": False,  # rectangle persists on button release
+                           "button": [1],
+                           "minspanx": 5,
+                           "minspany": 5,
+                           "spancoords": "pixels",
+                           "interactive": True}
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            selector_kwargs["drag_from_anywhere"] = True
+            selector_kwargs["ignore_event_outside"] = True
+
+        self._selectors.append(RectangleSelector(self.view._data_view.ax, self._on_rectangle_selected,
+                                                 **selector_kwargs))
+
+        self._drawing_region = True
 
     def get_region(self):
-        return self._selection
+        # extents contains x1, x2, y1, y2. Just store y (spectra) for now
+        result = []
+        for selector in self._selectors:
+            result.extend([selector.extents[2], selector.extents[3]])
+        return result
 
     def _initialise_dimensions(self, workspace):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
@@ -93,7 +127,11 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         :param eclick: Event marking where the mouse was clicked
         :param erelease: Event marking where the mouse was released
         """
-        # extents contains x1, x2, y1, y2. Just store y (spectra) for now
-        self._selection = [self._selector.extents[2], self._selector.extents[3]]
+        self._drawing_region = False
+
         if self.notifyee:
             self.notifyee.notifyRegionChanged()
+
+    @staticmethod
+    def _contains_point(extents, x, y):
+        return extents[0] <= x <= extents[1] and extents[2] <= y <= extents[3]

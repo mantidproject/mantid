@@ -170,6 +170,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="rs_edit_button">
+            <property name="toolTip">
+             <string>Edit a rectangular region of interest</string>
+            </property>
+            <property name="text">
+             <string>Edit ROI</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="rs_rect_select_button">
             <property name="toolTip">
              <string>Select a rectangular region of interest</string>
@@ -245,13 +255,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>workspace_line_edit</tabstop>
-  <tabstop>rs_ads_export_button</tabstop>
-  <tabstop>lp_ads_export_button</tabstop>
-  <tabstop>tableWidget_2</tabstop>
-  <tabstop>pushButton_3</tabstop>
- </tabstops>
  <customwidgets>
   <customwidget>
    <class>MantidQt::MantidWidgets::QtPlotView</class>
@@ -260,6 +263,13 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>workspace_line_edit</tabstop>
+  <tabstop>rs_ads_export_button</tabstop>
+  <tabstop>lp_ads_export_button</tabstop>
+  <tabstop>tableWidget_2</tabstop>
+  <tabstop>pushButton_3</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../../icons/resources/icons.qrc"/>
  </resources>

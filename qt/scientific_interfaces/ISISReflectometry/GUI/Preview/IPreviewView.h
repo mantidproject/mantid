@@ -31,9 +31,7 @@ public:
   virtual void notifyRegionSelectorExportAdsRequested() = 0;
   virtual void notifyLinePlotExportAdsRequested() = 0;
 
-  // TODO implement edit ROI button and ROI-changed callback
-  // virtual void notifyEditROIRequested() = 0;
-  // virtual void notifyROIChanged() = 0;
+  virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
 };
 
@@ -54,12 +52,11 @@ public:
   virtual void setInstViewEditMode() = 0;
   virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
+  virtual void setRegionSelectorToolbarEnabled(bool enable) = 0;
   virtual void setAngle(double angle) = 0;
   // Region selector toolbar
-  // TODO implement edit ROI button
-  // virtual void setEditROIState(bool on) = 0;
-  // virtual void activateEditROIMode() = 0;
-  virtual void setRectangularROIState(bool on) = 0;
+  virtual void setEditROIState(bool state) = 0;
+  virtual void setRectangularROIState(bool state) = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
 

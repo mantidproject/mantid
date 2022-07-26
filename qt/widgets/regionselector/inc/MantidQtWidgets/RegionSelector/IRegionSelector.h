@@ -23,5 +23,6 @@ public:
   virtual void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) = 0;
   virtual void addRectangularRegion() = 0;
   virtual Selection getRegion() = 0;
+  virtual void cancelDrawingRegion() = 0;
 };
 } // namespace MantidQt::Widgets

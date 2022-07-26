@@ -28,9 +28,11 @@ public:
   MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
   MOCK_METHOD(void, setInstViewSelectRectMode, (), (override));
   MOCK_METHOD(void, setInstViewToolbarEnabled, (bool), (override));
+  MOCK_METHOD(void, setRegionSelectorToolbarEnabled, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomMode, (), (override));
   MOCK_METHOD(void, setInstViewEditMode, (), (override));
   MOCK_METHOD(void, setRectangularROIState, (bool), (override));
+  MOCK_METHOD(void, setEditROIState, (bool), (override));
   MOCK_METHOD(void, setAngle, (double), (override));
   MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
   MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
