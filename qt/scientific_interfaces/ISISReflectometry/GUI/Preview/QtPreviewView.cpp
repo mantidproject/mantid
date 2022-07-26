@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "ROIType.h"
 
 #include <QAction>
 #include <QMenu>
@@ -20,12 +21,6 @@
 using namespace Mantid::Kernel;
 using MantidQt::MantidWidgets::IPlotView;
 using MantidQt::MantidWidgets::ProjectionSurface;
-
-namespace {
-static constexpr char *BACKGROUND_REGION = "Background";
-static constexpr char *SIGNAL_REGION = "Signal";
-static constexpr char *TRANSMISSION_REGION = "Transmission";
-} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
@@ -48,10 +43,15 @@ void QtPreviewView::loadToolbarIcons() {
 
 void QtPreviewView::setupSelectRegionTypes() {
   QMenu *menu = new QMenu();
-  QAction *signalAction = new QAction(MantidQt::Icons::getIcon("mdi.selection", "green", 1.3), SIGNAL_REGION);
-  QAction *backgroundAction = new QAction(MantidQt::Icons::getIcon("mdi.selection", "magenta", 1.3), BACKGROUND_REGION);
-  QAction *transmissionAction =
-      new QAction(MantidQt::Icons::getIcon("mdi.selection", "blue", 1.3), TRANSMISSION_REGION);
+  QAction *signalAction = new QAction(
+      MantidQt::Icons::getIcon("mdi.selection", QString::fromStdString(roiTypeToColor(ROIType::Signal)), 1.3),
+      QString::fromStdString(roiTypeToString(ROIType::Signal)));
+  QAction *backgroundAction = new QAction(
+      MantidQt::Icons::getIcon("mdi.selection", QString::fromStdString(roiTypeToColor(ROIType::Background)), 1.3),
+      QString::fromStdString(roiTypeToString(ROIType::Background)));
+  QAction *transmissionAction = new QAction(
+      MantidQt::Icons::getIcon("mdi.selection", QString::fromStdString(roiTypeToColor(ROIType::Transmission)), 1.3),
+      QString::fromStdString(roiTypeToString(ROIType::Transmission)));
 
   signalAction->setToolTip("Add rectangular signal region");
   backgroundAction->setToolTip("Add rectangular background region");

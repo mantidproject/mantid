@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
+#include "ROIType.h"
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
@@ -160,7 +161,7 @@ void PreviewPresenter::notifyRegionChanged() {
 
   // Set the selection from the view
   // TODO make use of background and transmission regions. Move hard coded strings to somewhere central as an enum
-  auto roi = m_regionSelector->getRegion("Signal");
+  auto roi = m_regionSelector->getRegion(roiTypeToString(ROIType::Signal));
   m_model->setSelectedRegion(roi);
   runReduction();
 }
