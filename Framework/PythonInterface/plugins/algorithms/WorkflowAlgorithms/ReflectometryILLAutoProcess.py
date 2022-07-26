@@ -834,7 +834,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         ws - workspace used to obtain reduction parameters
         """
         save_path = config['defaultsave.directory']
-        parameter_output = os.path.join(save_path, "{}.txt".format(mtd[ws].getName()))
+        parameter_output = os.path.join(save_path, "{}.dat".format(mtd[ws].getName()))
         is_group = isinstance(mtd[ws], WorkspaceGroup)
         run = mtd[ws][0].run() if is_group else mtd[ws].run()
         try:
