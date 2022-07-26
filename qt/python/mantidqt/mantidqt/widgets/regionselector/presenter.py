@@ -4,6 +4,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from distutils.version import LooseVersion
+
 from .view import RegionSelectorView
 from ..observers.observing_presenter import ObservingPresenter
 from ..sliceviewer.models.dimensions import Dimensions
@@ -12,6 +14,7 @@ from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantid.api import RegionSelectorObserver
 
 # 3rd party imports
+import matplotlib
 from matplotlib.widgets import RectangleSelector
 
 
@@ -86,17 +89,18 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         for selector in self._selectors:
             selector.set_active(False)
 
-        self._selectors.append(RectangleSelector(
-            self.view._data_view.ax,
-            self._on_rectangle_selected,
-            useblit=False,  # rectangle persists on button release
-            button=[1],
-            minspanx=5,
-            minspany=5,
-            spancoords='pixels',
-            interactive=True,
-            ignore_event_outside=True,
-            drag_from_anywhere=True))
+        selector_kwargs = {"useblit": False,  # rectangle persists on button release
+                           "button": [1],
+                           "minspanx": 5,
+                           "minspany": 5,
+                           "spancoords": "pixels",
+                           "interactive": True}
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            selector_kwargs["drag_from_anywhere"] = True
+            selector_kwargs["ignore_event_outside"] = True
+
+        self._selectors.append(RectangleSelector(self.view._data_view.ax, self._on_rectangle_selected,
+                                                 **selector_kwargs))
 
         self._drawing_region = True
 
