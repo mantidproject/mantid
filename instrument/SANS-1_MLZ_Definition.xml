@@ -27,6 +27,7 @@
       <pointing-up axis="y"/>
       <handedness val="right"/>
     </reference-frame>
+    <default-view axis-view="z-" view="3D"/>
   </defaults>
   <!--SOURCE-->
   <component type="chopper">
@@ -71,7 +72,7 @@
   <!--this is just the low resolution to start with-->
   <!-- <component idfillbyfirst="y" idstart="0" idstepbyrow="128" type="tube detector"> -->
   <component idfillbyfirst="y" idstart="0" idstepbyrow="128" type="detector">
-    <location x="0.0" y="0.0" z="0.0"/> <!--z has to be read from the data file-->
+    <location x="0.0" y="0.0" z="2.0"/> <!--z has to be read from the data file-->
   </component>
   <!-- <type is="rectangular_detector" name="tube detector" type="tube pixel" xpixels="128" xstart="-0.512" xstep="0.008" ypixels="128" ystart="-0.512" ystep="0.008"/> -->
   <type is="rectangular_detector" name="detector" type="pixel" xpixels="128" xstart="-0.512" xstep="0.008" ypixels="128" ystart="-0.512" ystep="0.008"/>

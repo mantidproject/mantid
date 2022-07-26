@@ -91,7 +91,7 @@ class CounterSANS(DtClsSANS):
     section_name: str = 'Counter'
 
     sum_all_counts: float = 0
-    time: float = 0
+    duration: float = 0
     monitor1: float = 0
     monitor2: float = 0
 
@@ -101,7 +101,7 @@ class CounterSANS(DtClsSANS):
         """
         super()._assign_values()
         self._assign_value('Sum', 'sum_all_counts')
-        self._assign_value('Time', 'time')
+        self._assign_value('Time', 'duration')
         self._assign_value('Moni1', 'monitor1')
         self._assign_value('Moni2', 'monitor2')
 
@@ -214,11 +214,3 @@ class SANSdata(object):
 
             self._subsequence[i].info = deepcopy(tmp[1:])
             self._subsequence[i].process_data()
-
-# def main():
-#     data = SANSdata()
-#     data.analyze_source('/home/andrii/repositories/AndriiDemk/mantid/build/ExternalData/Testing/Data/UnitTest/D0511339.001')
-#     print(data.counter.info)
-#
-# if __name__ == "__main__":
-#     main()

@@ -24,14 +24,16 @@ class LoadSANS1MLZ(PythonAlgorithm):
                                           FileAction.Load, ['.001']),
                              "Name of SANS experimental data file.")
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace",
-                                               "", direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace to store the experimental data.")
 
-        self.declareProperty("SectionOption", "EssentialData",
+        self.declareProperty("SectionOption",
+                             "EssentialData",
                              StringListValidator(["EssentialData", "CommentSection", "AllSections"]))
 
-        self.declareProperty(name="Wavelength", defaultValue=0.0, validator=FloatBoundedValidator(lower=0.0),
+        self.declareProperty(name="Wavelength",
+                             defaultValue=0.0,
+                             validator=FloatBoundedValidator(lower=0.0),
                              doc="Wavelength in Angstrom. If 0 will be read from data file.")
 
     def PyExec(self):
@@ -49,20 +51,23 @@ class LoadSANS1MLZ(PythonAlgorithm):
         except TypeError as e:
             raise RuntimeError(str(e) + "\nprobably incorrect 'Counts' data")
         else:
-            simpleapi.CreateWorkspace(OutputWorkspace=out_ws_name, DataX=data_x, DataY=data_y,
-                                      DataE=data_e, NSpec=n_spec, UnitX=x_unit)
+            simpleapi.CreateWorkspace(OutputWorkspace=out_ws_name,
+                                      DataX=data_x, DataY=data_y,
+                                      DataE=data_e, NSpec=n_spec,
+                                      UnitX=x_unit)
             out_ws = simpleapi.AnalysisDataService.retrieve(out_ws_name)
             out_ws.setYUnit(y_unit)
             out_ws.setYUnitLabel(y_label)
 
             run = out_ws.mutableRun()
             run.addProperty('run_title', metadata.file.get_title(), True)
-            run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
-                                   DateAndTime(metadata.file.run_end()))
+            run.setStartAndEndTime(DateAndTime(metadata.file.run_start()), DateAndTime(metadata.file.run_end()))
 
             simpleapi.LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
 
-            simpleapi.AddSampleLogMultiple(out_ws, LogNames=logs["names"], LogValues=logs["values"],
+            simpleapi.AddSampleLogMultiple(out_ws,
+                                           LogNames=logs["names"],
+                                           LogValues=logs["values"],
                                            LogUnits=logs["units"])
             self.setProperty("OutputWorkspace", out_ws)
 
@@ -96,26 +101,25 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     def create_logs(self, metadata):
         self.log().debug('Creation sample logs started')
-        essential_data_tobe_logged = {'det1_x_value': 'mm',
-                                      'det1_z_value': 'mm',
-                                      'wavelength': 'Angstrom',
-                                      'st1_x_value': '',
-                                      'st1_x_offset': '',
-                                      'st1_y_value': '',
-                                      'st1_y_offset': '',
-                                      'st1_z_value': '',
-                                      'st1_z_offset': '',
-                                      'det1_omg_value': 'degree',
-                                      'time': 'sec',
-                                      'sum_all_counts': '',
-                                      'monitor1': '',
-                                      'monitor2': '',
-                                      }
+        essential_data_tobe_logged = {
+            'det1_x_value': 'mm',
+            'det1_z_value': 'mm',
+            'wavelength': 'Angstrom',
+            'st1_x_value': '',
+            'st1_x_offset': '',
+            'st1_y_value': '',
+            'st1_y_offset': '',
+            'st1_z_value': '',
+            'st1_z_offset': '',
+            'det1_omg_value': 'degree',
+            'duration': 'sec',
+            'sum_all_counts': '',
+            'monitor1': '',
+            'monitor2': '',
+        }
 
         option = self.getPropertyValue("SectionOption")
-        logs = {"names": [],
-                "values": [],
-                "units": []}
+        logs = {"names": [], "values": [], "units": []}
         if option == 'EssentialData':
             """
             create logs with units
@@ -140,7 +144,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
     @staticmethod
     def create_labels():
         yunit = "Counts"
-        ylabel = "Intensity"
+        ylabel = "Counts"
         xunit = "Wavelength"
         return yunit, ylabel, xunit
 
