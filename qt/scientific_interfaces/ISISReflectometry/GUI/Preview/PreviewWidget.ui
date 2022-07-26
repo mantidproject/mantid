@@ -162,10 +162,10 @@
           <item>
            <widget class="QToolButton" name="rs_ads_export_button">
             <property name="toolTip">
-             <string>Export the summed workspace to the ADS</string>
+             <string>Export the summed workspace to the workspaces list</string>
             </property>
             <property name="text">
-             <string>ADS Export</string>
+             <string>Export summed workspace</string>
             </property>
            </widget>
           </item>
@@ -202,14 +202,24 @@
       <widget class="QWidget" name="linePlotLayoutWidget">
        <layout class="QVBoxLayout" name="line_plot_layout">
         <item>
-         <widget class="QPushButton" name="plot_1d_toolbar_placeholder">
+         <widget class="QToolButton" name="lp_ads_export_button">
+          <property name="toolTip">
+           <string>Export the reduced workspace to the workspaces list</string>
+          </property>
           <property name="text">
-           <string>Toolbar 1d</string>
+           <string>Export reduced workspace</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="MantidQt::MantidWidgets::QtPlotView" name="line_plot" native="true">
+          <property name="toolTip">
+           <string>Reduced data. Use right-click for plot options</string>
+          </property>
+          <property name="toolTipDuration">
+           <number>2000</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -237,11 +247,19 @@
  </widget>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>plot_1d_toolbar_placeholder</tabstop>
-  <tabstop>treeView</tabstop>
+  <tabstop>rs_ads_export_button</tabstop>
+  <tabstop>lp_ads_export_button</tabstop>
   <tabstop>tableWidget_2</tabstop>
   <tabstop>pushButton_3</tabstop>
  </tabstops>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::QtPlotView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../../icons/resources/icons.qrc"/>
  </resources>

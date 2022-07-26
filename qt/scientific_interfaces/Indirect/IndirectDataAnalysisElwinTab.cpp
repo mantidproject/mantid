@@ -154,13 +154,6 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
-  connect(m_uiForm.inputChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
-
-  // data selected changes
-  connect(m_uiForm.file, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
-
-  connect(m_uiForm.workspace, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
-
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SIGNAL(dataRemoved()));
@@ -172,8 +165,6 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   setHorizontalHeaders(headers);
   m_dataTable->setItemDelegateForColumn(headers.size() - 1, std::make_unique<ExcludeRegionDelegate>().release());
   m_dataTable->verticalHeader()->setVisible(false);
-
-  connect(m_dataTable, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {

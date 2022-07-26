@@ -85,10 +85,10 @@ void RegionSelector::addRectangularRegion() {
   pyobj().attr("add_rectangular_region")();
 }
 
-std::vector<double> RegionSelector::getRegion() {
+auto RegionSelector::getRegion() -> Selection {
   GlobalInterpreterLock lock;
   auto pyValues = pyobj().attr("get_region")();
-  auto result = std::vector<double>();
+  auto result = Selection();
   for (int i = 0; i < len(pyValues); ++i) {
     result.push_back(boost::python::extract<double>(pyValues[i]));
   }

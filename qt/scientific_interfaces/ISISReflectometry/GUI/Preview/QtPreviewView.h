@@ -11,14 +11,18 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"
-
 #include <QObject>
 #include <QWidget>
 
 #include <memory>
 #include <string>
+
+namespace MantidQt::MantidWidgets {
+class IPlotView;
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -33,6 +37,7 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
+  double getAngle() const override;
   // Plotting
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
@@ -44,18 +49,19 @@ public:
   void setInstViewEditMode() override;
   void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
+  void setAngle(double angle) override;
   // Region selector toolbar
   void setRectangularROIState(bool enable) override;
 
   std::vector<size_t> getSelectedDetectors() const override;
 
   QLayout *getRegionSelectorLayout() const override;
+  MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
 
 private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
-  std::unique_ptr<MantidQt::Widgets::RegionSelector> m_regionSelector{nullptr};
 
   void connectSignals() const;
   void loadToolbarIcons();
@@ -67,6 +73,7 @@ private slots:
   void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
   void onRegionSelectorExportToAdsClicked() const;
+  void onLinePlotExportToAdsClicked() const;
   void onSelectRectangularROIClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -145,7 +145,9 @@ void CreateEPP::exec() {
 std::map<std::string, std::string> CreateEPP::validateInputs(void) {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WORKSPACE);
-  if (!inputWS->run().hasProperty("Ei")) {
+  if (!inputWS) {
+    issues[PropertyNames::INPUT_WORKSPACE] = "The InputWorkspace must be a MatrixWorkspace.";
+  } else if (!inputWS->run().hasProperty("Ei")) {
     issues[PropertyNames::INPUT_WORKSPACE] = "Workspace is missing the 'Ei' sample log.";
   }
   return issues;

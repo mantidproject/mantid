@@ -54,7 +54,9 @@ const std::string CalculateDynamicRange::summary() const {
 std::map<std::string, std::string> CalculateDynamicRange::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr workspace = getProperty("Workspace");
-  if (workspace->getAxis(0)->unit()->unitID() != "Wavelength" && !workspace->run().hasProperty("wavelength")) {
+  if (!workspace) {
+    issues["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+  } else if (workspace->getAxis(0)->unit()->unitID() != "Wavelength" && !workspace->run().hasProperty("wavelength")) {
     issues["InputWorkspace"] = "If the workspace is not in units of wavelength it must have a sample log wavelength.";
   }
   return issues;

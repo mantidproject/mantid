@@ -42,7 +42,18 @@ int getIndexCount(PeaksWorkspace_sptr peakWorkspace) {
   const int numPeaks = peakWorkspace->getNumberPeaks();
   for (int i = 0; i < numPeaks; ++i) {
     const auto peak = peakWorkspace->getPeak(i);
-    if (peak.getHKL().norm2() > 0)
+    if (peak.getIntHKL().norm2() > 0)
+      indexCount += 1;
+  }
+  return indexCount;
+}
+
+int getSatelliteIndexCount(PeaksWorkspace_sptr peakWorkspace) {
+  int indexCount = 0;
+  const int numPeaks = peakWorkspace->getNumberPeaks();
+  for (int i = 0; i < numPeaks; ++i) {
+    const auto peak = peakWorkspace->getPeak(i);
+    if (peak.getIntMNP().norm2() > 0)
       indexCount += 1;
   }
   return indexCount;
@@ -56,17 +67,20 @@ void IntegrateEllipsoids::exec() {
   const PeaksWorkspace_sptr peakWorkspace = getProperty("PeaksWorkspace");
 
   const int indexCount = getIndexCount(peakWorkspace);
+  const int satelliteIndexCount = getSatelliteIndexCount(peakWorkspace);
 
   Algorithm_sptr alg;
 
   // detect which algo to run
-  if ((isIntegrateInHKL || isGetUBFromPeaksWorkspace) && indexCount > 0 && !shareBackground) {
+  if (isIntegrateInHKL || isGetUBFromPeaksWorkspace ||
+      (indexCount > 0 && satelliteIndexCount == 0 && !shareBackground)) {
     // v1
     alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoids", -1., -1., true, 1));
   } else {
     // v2
     alg = std::dynamic_pointer_cast<Algorithm>(createChildAlgorithm("IntegrateEllipsoids", -1., -1., true, 2));
   }
+
   // forward properties to algo
   alg->copyPropertiesFrom(*this);
   // run correct algo and return results

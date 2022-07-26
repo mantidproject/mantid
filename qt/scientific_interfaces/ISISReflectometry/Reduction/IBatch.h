@@ -17,6 +17,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class Experiment;
 class Instrument;
+class PreviewRow;
 class Row;
 class Group;
 class Item;
@@ -33,6 +34,7 @@ public:
   virtual Slicing const &slicing() const = 0;
 
   virtual boost::optional<LookupRow> findLookupRow(Row const &row) const = 0;
+  virtual boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow) const = 0;
   virtual boost::optional<LookupRow> findWildcardLookupRow() const = 0;
   virtual boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
   virtual bool isInSelection(const Item &item,

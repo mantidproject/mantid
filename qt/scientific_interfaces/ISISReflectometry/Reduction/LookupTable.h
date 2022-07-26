@@ -16,6 +16,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class Row;
+class PreviewRow;
 
 struct MultipleRowsFoundException : public std::length_error {
 public:
@@ -29,6 +30,7 @@ public:
   LookupTable(std::initializer_list<LookupRow> rowsIn);
 
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
+  boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
   size_t getIndex(LookupRow const &) const;
   std::vector<LookupRow> const &rows() const;

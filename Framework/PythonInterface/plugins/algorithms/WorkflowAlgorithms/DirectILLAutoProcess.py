@@ -127,9 +127,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             except ValueError:
                 issues['VanadiumWorkspace'] = "Desired vanadium workspace: {} cannot be found.".format(vanadium_ws)
 
-        if self.getProperty('MaskWithVanadium').value and self.getProperty('VanadiumWorkspace').isDefault:
-            issues['VanadiumWorkspace'] = 'Please provide a vanadium input for a masking reference.'
-
         if not self.getProperty('FlatBackgroundSource').isDefault \
                 and self.getPropertyValue('FlatBackgroundSource') not in mtd:
             # attempts to load the file, raises a runtime error if the desired file does not exist
@@ -168,7 +165,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.to_clean.append(self.elastic_channel_ws)
         if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
                 and self.getProperty('MaskThresholdMin').isDefault and self.getProperty('MaskThresholdMax').isDefault
-                and self.getProperty('MaskedAngles').isDefault and self.getProperty('MaskWithVanadium').isDefault):
+                and self.getProperty('MaskedAngles').isDefault):
             self.masking = False
         else:
             self.masking = True
@@ -214,9 +211,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('VanadiumWorkspace', '',
                              doc='File(s) or workspaces containing vanadium data.')
 
-        self.declareProperty(WorkspaceGroupProperty('EmptyContainerWorkspace', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
+        self.declareProperty('EmptyContainerWorkspace', '',
                              doc='Empty container workspace.')
 
         self.declareProperty('EmptyContainerScaling', 1.0,
@@ -232,7 +227,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('FlatBackgroundSource', "",
                              doc='File(s) or workspaces containing the source to calculate flat background.')
 
-        self.copyProperties('DirectILLCollectData', common.PROP_FLAT_BKG_SCALING)
+        self.copyProperties('DirectILLCollectData', [common.PROP_FLAT_BKG_SCALING, common.PROP_OUTPUT_FLAT_BKG_WS])
 
         self.copyProperties('DirectILLReduction', common.PROP_ABSOLUTE_UNITS)
 
@@ -245,7 +240,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, additional_inputs_group)
         self.setPropertyGroup('FlatBackgroundSource', additional_inputs_group)
         self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, additional_inputs_group)
+        self.setPropertyGroup(common.PROP_OUTPUT_FLAT_BKG_WS, additional_inputs_group)
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
+
+        self.copyProperties('DirectILLCollectData', [common.PROP_NORMALISATION, common.PROP_MON_PEAK_SIGMA_MULTIPLIER])
 
         self.copyProperties('DirectILLCollectData', common.PROP_INCIDENT_ENERGY_CALIBRATION)
 
@@ -288,8 +286,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='MaskedAngles', values=[], validator=orderedPairsValidator),
                              doc='Mask detectors in the given angular range.')
 
-        self.declareProperty('MaskWithVanadium', False,
-                             doc='Whether to mask using vanadium workspace.')
+        self.declareProperty('MaskWithVanadium', True,
+                             doc='Whether to mask using vanadium diagnostics workspace.')
 
         masking_group_name = 'Masking'
         self.setPropertyGroup('MaskWorkspace', masking_group_name)
@@ -456,7 +454,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         kwargs = dict()
         if not self.getProperty('FlatBackgroundSource').isDefault:
             kwargs['FlatBkgWorkspace'] = self.flat_background
-            kwargs[common.PROP_FLAT_BKG_SCALING] = self.flat_bkg_scaling
+        kwargs[common.PROP_FLAT_BKG_SCALING] = self.flat_bkg_scaling
+        kwargs[common.PROP_OUTPUT_FLAT_BKG_WS] = self.getPropertyValue(common.PROP_OUTPUT_FLAT_BKG_WS)
         if not self.getProperty(common.PROP_FLAT_BKG).isDefault:
             kwargs[common.PROP_FLAT_BKG] = self.getPropertyValue(common.PROP_FLAT_BKG)
             kwargs[common.PROP_FLAT_BKG_WINDOW] = self.getPropertyValue(common.PROP_FLAT_BKG_WINDOW)
@@ -477,6 +476,13 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             self.to_clean.append(self.vanadium_epp)
+            self.vanadium_raw = '{}_raw'.format(ws)
+            self.to_clean.append(self.vanadium_raw)
+            kwargs['OutputRawWorkspace'] = self.vanadium_raw
+        kwargs[common.PROP_NORMALISATION] = self.getPropertyValue(common.PROP_NORMALISATION)
+        kwargs[common.PROP_MON_PEAK_SIGMA_MULTIPLIER] = self.getPropertyValue(common.PROP_MON_PEAK_SIGMA_MULTIPLIER)
+        if not self.clear_cache:
+            kwargs[common.PROP_CLEANUP_MODE] = 'Cleanup OFF'
 
         DirectILLCollectData(
             Run=sample,
@@ -598,9 +604,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             LoadEmptyInstrument(InstrumentName=self.instrument, OutputWorkspace=masked_angles_ws)
             MaskAngle(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])
             existing_masks.append(masked_angles_ws)
-        mask_with_vanadium = self.getProperty('MaskWithVanadium').value
-        if mask_with_vanadium:
-            existing_masks.append(self.vanadium_diagnostics)
 
         mask_ws = 'mask_ws'
         if len(existing_masks) == 0:
@@ -756,12 +759,15 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                     self.getProperty(common.PROP_REBINNING_PARAMS_W).value
             if not self.getProperty('MomentumTransferBinning').isDefault:
                 optional_parameters['QBinningParams'] = self.getProperty('MomentumTransferBinning').value
+            if not self.getProperty('VanadiumWorkspace').isDefault:
+                optional_parameters['IntegratedVanadiumWorkspace'] = vanadium_integral
+                if self.getProperty('MaskWithVanadium').value:
+                    optional_parameters['DiagnosticsWorkspace'] = vanadium_diagnostics
+
             DirectILLReduction(
                 InputWorkspace=ws,
                 OutputWorkspace=processed_sample,
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
-                IntegratedVanadiumWorkspace=vanadium_integral,
-                DiagnosticsWorkspace=vanadium_diagnostics,
                 AbsoluteUnitsNormalisation=self.getProperty(common.PROP_ABSOLUTE_UNITS).value,
                 **optional_parameters
             )
@@ -778,11 +784,11 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             ws = self._apply_mask(ws)
 
         vanadium_diagnostics = 'diag_{}'.format(numor)
-        kwargs = {'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF'}
+        kwargs = dict()
         if self.vanadium_epp:
             kwargs[common.PROP_EPP_WS] = self.vanadium_epp
         DirectILLDiagnostics(
-            InputWorkspace=ws,
+            InputWorkspace=self.vanadium_raw,
             OutputWorkspace=vanadium_diagnostics,
             **kwargs
         )

@@ -11,7 +11,9 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MockInstViewModel.h"
+#include "MockPlotPresenter.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
@@ -29,6 +31,9 @@ using namespace MantidQt::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::Widgets;
 
+using MantidQt::MantidWidgets::AxisID;
+using MantidQt::MantidWidgets::MockPlotPresenter;
+
 using ::testing::_;
 using ::testing::ByRef;
 using ::testing::Eq;
@@ -45,6 +50,7 @@ class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
   using MockRegionSelectorT = std::unique_ptr<MockRegionSelector>;
+  using MockPlotPresenterT = std::unique_ptr<MockPlotPresenter>;
 
 public:
   void test_notify_load_workspace_requested_loads_from_file_if_not_in_ads() {
@@ -71,7 +77,7 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
-    expectLoadWorkspaceCompleted(*mockView, *mockModel, *mockInstViewModel);
+    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
 
     auto presenter = PreviewPresenter(
         packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
@@ -107,15 +113,38 @@ public:
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
   }
+
   void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
     auto mockJobManager = makeJobManager();
     auto mockInstViewModel = makeInstViewModel();
 
-    expectLoadWorkspaceCompleted(*mockView, *mockModel, *mockInstViewModel);
+    expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockView, *mockModel, *mockInstViewModel);
 
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_angle_is_set_if_it_equals_zero() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedUpdatesAngle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
+  void test_angle_is_not_set_if_already_set_manually() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedDoesNotUpdateAngle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
     auto presenter = PreviewPresenter(std::move(deps));
     presenter.notifyLoadWorkspaceCompleted();
   }
@@ -164,6 +193,16 @@ public:
     presenter.notifyRegionSelectorExportAdsRequested();
   }
 
+  void test_notify_1D_plot_export_to_ads_requested() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+
+    EXPECT_CALL(*mockModel, exportReducedWsToAds()).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+
+    presenter.notifyLinePlotExportAdsRequested();
+  }
+
   void test_sum_banks_completed_plots_region_selector() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -191,6 +230,39 @@ public:
     presenter.notifyRectangularROIModeRequested();
   }
 
+  void test_notify_region_changed_starts_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockRegionSelector_uptr = makeRegionSelector();
+    auto mockRegionSelector = mockRegionSelector_uptr.get();
+
+    // TODO reset edit mode after region is selected
+    // expectRegionSelectorSetToEditMode(*mockView);
+    expectReduceAsyncCalledOnSelectedRegion(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               makeInstViewModel(), std::move(mockRegionSelector_uptr)));
+    presenter.notifyRegionChanged();
+  }
+
+  void test_line_plot_is_displayed_when_reduction_completed() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockLinePlot = std::make_unique<MockPlotPresenter>();
+    auto lineLabel = std::string("line_label");
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+
+    EXPECT_CALL(*mockModel, getReducedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockLinePlot, setSpectrum(ws, 0)).Times(1);
+    EXPECT_CALL(*mockLinePlot, plot()).Times(1);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
+                                               makeInstViewModel(), makeRegionSelector(), std::move(mockLinePlot)));
+
+    presenter.notifyReductionCompleted();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
@@ -215,24 +287,56 @@ private:
                                           MockModelT model = std::make_unique<MockPreviewModel>(),
                                           MockJobManagerT jobManager = std::make_unique<NiceMock<MockJobManager>>(),
                                           MockInstViewModelT instView = std::make_unique<MockInstViewModel>(),
-                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>()) {
-    EXPECT_CALL(*regionSelector, subscribe(NotNull())).Times(1);
-    return PreviewPresenter::Dependencies{view, std::move(model), std::move(jobManager), std::move(instView),
-                                          std::move(regionSelector)};
+                                          MockRegionSelectorT regionSelector = std::make_unique<MockRegionSelector>(),
+                                          MockPlotPresenterT linePlot = std::make_unique<MockPlotPresenter>()) {
+    expectPresenterConstructed(*regionSelector, *linePlot);
+    return PreviewPresenter::Dependencies{view,
+                                          std::move(model),
+                                          std::move(jobManager),
+                                          std::move(instView),
+                                          std::move(regionSelector),
+                                          std::move(linePlot)};
   }
 
-  void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
-                                    MockInstViewModel &mockInstViewModel) {
+  void expectPresenterConstructed(MockRegionSelector &regionSelector, MockPlotPresenter &linePlot) {
+    EXPECT_CALL(regionSelector, subscribe(NotNull())).Times(1);
+    EXPECT_CALL(linePlot, setScaleLog(AxisID::YLeft)).Times(1);
+    EXPECT_CALL(linePlot, setScaleLog(AxisID::XBottom)).Times(1);
+    EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
+  }
+
+  void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                                         MockInstViewModel &mockInstViewModel) {
     expectInstViewModelUpdatedWithLoadedWorkspace(mockModel, mockInstViewModel);
     expectPlotInstView(mockView, mockInstViewModel);
     expectInstViewToolbarEnabled(mockView);
     expectInstViewSetToZoomMode(mockView);
   }
 
+  void expectLoadWorkspaceCompletedUpdatesAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto angle = 2.3;
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(0.0));
+    EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
+    EXPECT_CALL(mockView, setAngle(angle)).Times(1);
+  }
+
+  void expectLoadWorkspaceCompletedDoesNotUpdateAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto angle = 2.3;
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(angle));
+    EXPECT_CALL(mockModel, getDefaultTheta()).Times(0);
+    EXPECT_CALL(mockView, setAngle(_)).Times(0);
+  }
+
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
 
@@ -243,7 +347,6 @@ private:
     auto detIDsStr = std::string{"2, 3, 4"};
     EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
-    EXPECT_CALL(mockModel, detIDsToString(detIDs)).Times(1).WillOnce(Return(detIDsStr));
     EXPECT_CALL(mockModel, setSelectedBanks(detIDs)).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
@@ -287,5 +390,19 @@ private:
     // EXPECT_CALL(mockView, setEditROIState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setRectangularROIState(Eq(true))).Times(1);
     EXPECT_CALL(mockRegionSelector, addRectangularRegion()).Times(1);
+  }
+
+  void expectReduceAsyncCalledOnSelectedRegion(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                               MockJobManager &mockJobManager, MockRegionSelector &mockRegionSelector) {
+    // Check ROI is set
+    auto roi = IRegionSelector::Selection{3.5, 11.23};
+    EXPECT_CALL(mockRegionSelector, getRegion()).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockModel, setSelectedRegion(roi)).Times(1);
+    // Check theta is set
+    auto theta = 0.3;
+    EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
+    EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
+    // Check reduction is executed
+    EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
   }
 };

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/Reduction/LookupTable.h"
+#include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "TestHelpers/ModelCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -21,10 +22,17 @@ public:
     for (const auto angle : {0.5, 2.3}) {
       auto row = ModelCreationHelper::makeRow(angle);
       const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
-      TS_ASSERT(lookupRow)
-      const auto foundAngle = lookupRow->thetaOrWildcard();
-      TS_ASSERT(foundAngle)
-      TS_ASSERT_DELTA(*foundAngle, angle, m_exactMatchTolerance)
+      assertLookupRowAngle(lookupRow, angle);
+    }
+  }
+
+  void test_searching_by_theta_found_for_preview_row() {
+    LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAnglesAndWildcard();
+
+    for (const auto angle : {0.5, 2.3}) {
+      auto row = makePreviewRow(angle);
+      const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+      assertLookupRowAngle(lookupRow, angle);
     }
   }
 
@@ -35,12 +43,18 @@ public:
     for (const auto angle : {(0.5 - matchTolerance), (2.3 + matchTolerance)}) {
       auto row = ModelCreationHelper::makeRow(angle);
       const auto lookupRow = table.findLookupRow(row, matchTolerance);
-      TS_ASSERT(lookupRow)
-      const auto foundAngle = lookupRow->thetaOrWildcard();
-      TS_ASSERT(foundAngle)
-      if (foundAngle) {
-        TS_ASSERT_DELTA(*foundAngle, angle, matchTolerance)
-      }
+      assertLookupRowAngle(lookupRow, angle, matchTolerance);
+    }
+  }
+
+  void test_searching_by_theta_tolerance_found_for_preview_row() {
+    LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAnglesAndWildcard();
+
+    const double matchTolerance = 0.01;
+    for (const auto angle : {(0.5 - matchTolerance), (2.3 + matchTolerance)}) {
+      auto row = makePreviewRow(angle);
+      const auto lookupRow = table.findLookupRow(row, matchTolerance);
+      assertLookupRowAngle(lookupRow, angle, matchTolerance);
     }
   }
 
@@ -49,6 +63,19 @@ public:
 
     for (const auto angle : {1.2, 3.4}) {
       auto row = ModelCreationHelper::makeRow(angle);
+      const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+      TS_ASSERT(lookupRow)
+      const auto foundAngle = lookupRow->thetaOrWildcard();
+      TS_ASSERT(!foundAngle)
+      TS_ASSERT(lookupRow->isWildcard());
+    }
+  }
+
+  void test_searching_by_theta_not_found_returns_wildcard_for_preview_row() {
+    LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAnglesAndWildcard();
+
+    for (const auto angle : {1.2, 3.4}) {
+      auto row = makePreviewRow(angle);
       const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
       TS_ASSERT(lookupRow)
       const auto foundAngle = lookupRow->thetaOrWildcard();
@@ -66,11 +93,29 @@ public:
     TS_ASSERT(!lookupRow)
   }
 
+  void test_searching_by_theta_not_found_returns_none_for_preview_row() {
+    LookupTable table = ModelCreationHelper::makeLookupTableWithTwoAngles();
+
+    constexpr double notThere = 999;
+    auto row = makePreviewRow(notThere);
+    const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+    TS_ASSERT(!lookupRow)
+  }
+
   void test_searching_empty_table_returns_none() {
     LookupTable table = ModelCreationHelper::makeEmptyLookupTable();
 
     constexpr double notThere = 0.5;
     auto row = ModelCreationHelper::makeRow(notThere);
+    const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+    TS_ASSERT(!lookupRow)
+  }
+
+  void test_searching_empty_table_returns_none_for_preview_row() {
+    LookupTable table = ModelCreationHelper::makeEmptyLookupTable();
+
+    constexpr double notThere = 0.5;
+    auto row = makePreviewRow(notThere);
     const auto lookupRow = table.findLookupRow(row, m_exactMatchTolerance);
     TS_ASSERT(!lookupRow)
   }
@@ -237,5 +282,23 @@ public:
   }
 
 private:
-  const double m_exactMatchTolerance = 1e-6;
+  constexpr static const double m_exactMatchTolerance = 1e-6;
+
+  void assertLookupRowAngle(boost::optional<LookupRow> lookupRow, double expected,
+                            double match_tolerance = m_exactMatchTolerance) {
+    TS_ASSERT(lookupRow)
+    if (lookupRow) {
+      const auto foundAngle = lookupRow->thetaOrWildcard();
+      TS_ASSERT(foundAngle)
+      if (foundAngle) {
+        TS_ASSERT_DELTA(*foundAngle, expected, match_tolerance)
+      }
+    }
+  }
+
+  PreviewRow makePreviewRow(double theta) {
+    auto previewRow = PreviewRow(std::vector<std::string>{"12345"});
+    previewRow.setTheta(theta);
+    return previewRow;
+  }
 };
