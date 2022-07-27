@@ -25,7 +25,7 @@ public:
 
   void subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserver> const &notifyee) override;
   void updateWorkspace(Mantid::API::Workspace_sptr const &workspace) override;
-  void addRectangularRegion(const std::string &regionType) override;
+  void addRectangularRegion(const std::string &regionType, const std::string &color) override;
   Selection getRegion(const std::string &regionType) override;
   void cancelDrawingRegion() override;
 

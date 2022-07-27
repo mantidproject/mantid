@@ -150,9 +150,10 @@ void PreviewPresenter::notifyEditROIModeRequested() {
 }
 
 void PreviewPresenter::notifyRectangularROIModeRequested(const std::string &regionType) {
+  auto const roiType = roiTypeFromString(regionType);
   m_view->setEditROIState(false);
   m_view->setRectangularROIState(true);
-  m_regionSelector->addRectangularRegion(regionType);
+  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType));
 }
 
 void PreviewPresenter::notifyRegionChanged() {

@@ -17,6 +17,7 @@
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
+#include "ROIType.h"
 #include "TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -226,10 +227,11 @@ public:
     auto mockView = makeView();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
-    const std::string regionType = "Test";
+    const std::string regionType = roiTypeToString(ROIType::Signal);
+    const std::string color = roiTypeToColor(ROIType::Signal);
 
     expectRectangularROIMode(*mockView);
-    EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType)).Times(1);
+    EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType, color)).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockRegionSelector_uptr)));
 

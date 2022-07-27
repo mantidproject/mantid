@@ -26,11 +26,8 @@ class Selector(RectangleSelector):
                        "spancoords": "pixels",
                        "interactive": True}
 
-    REGION_COLOURS = { "Signal": "green", "Background": "magenta", "Transmission": "blue" }
-
-    def __init__(self, region_type, *args):
-        self.selector_kwargs["props"] = dict(facecolor='white', edgecolor=self.REGION_COLOURS.get(region_type),
-                                             alpha=0.2, linewidth=2, fill=True)
+    def __init__(self, region_type, color, *args):
+        self.selector_kwargs["props"] = dict(facecolor='white', edgecolor=color, alpha=0.2, linewidth=2, fill=True)
         if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
             self.selector_kwargs["drag_from_anywhere"] = True
             self.selector_kwargs["ignore_event_outside"] = True
@@ -106,14 +103,14 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             self._selectors.pop()
             self._drawing_region = False
 
-    def add_rectangular_region(self, region_type):
+    def add_rectangular_region(self, region_type, color):
         """
         Add a rectangular region selection tool.
         """
         for selector in self._selectors:
             selector.set_active(False)
 
-        self._selectors.append(Selector(region_type, self.view._data_view.ax, self._on_rectangle_selected))
+        self._selectors.append(Selector(region_type, color, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
 
