@@ -1,0 +1,1 @@
+- The algorithm :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` now simulates scattering in the a container (and more generally in any sample environment components) if a user sets up the shapes\materials in the input workspace prior to running the algorithm
