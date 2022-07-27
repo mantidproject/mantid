@@ -440,17 +440,20 @@ bool ApplyAbsorptionCorrections::validate() {
 
     // Check sample has the same number of Histograms as each of the workspaces in the corrections group
     m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
-    m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+    if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {
+      m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+      for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+        MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
 
-    for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
-      MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
+        const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
+        const size_t containerHist = factorWs->getNumberHistograms();
 
-      const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
-      const size_t containerHist = factorWs->getNumberHistograms();
-
-      if (sampleHist != containerHist) {
-        uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+        if (sampleHist != containerHist) {
+          uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+        }
       }
+    } else {
+      uiv.addErrorMessage("Please check the Corrections Workspace that has been selected.");
     }
   }
 
