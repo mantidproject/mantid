@@ -104,7 +104,9 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
                                                          WorkspaceToMatch=focused_ws)
-
+    if not compare_ws_compatibility(focused_ws,self_scattering_correction):
+        raise RuntimeError("To use create_total_scattering_pdf you need to run focus with "
+                           "do_van_normalisation=true first.")
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
     focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
@@ -232,3 +234,14 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
         mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="g(r)",
                                    Filter=True, Qmax=q_max, deltaQ=q_delta, Rmax=r_max,
                                    Direction='Backward', rho0=rho0)
+
+
+def compare_ws_compatibility(ws1, ws2):
+    """
+    Compares the YUnit and the distribution-type of the first workspaces of two groups for compatibility
+    """
+    ws1_YUnit = ws1.getItem(0).YUnit()
+    ws2_YUnit = ws2.getItem(0).YUnit()
+    ws1_Distribution = ws1.getItem(0).isDistribution()
+    ws2_Distribution = ws2.getItem(0).isDistribution()
+    return ws1_YUnit == ws2_YUnit and ws1_Distribution == ws2_Distribution
