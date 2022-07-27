@@ -156,6 +156,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                                                                  self._sum_files,
                                                                                  self._load_logs, None, self._sum_files)
         load_prog.report('files loaded')
+
         process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
         for c_ws_name in self._workspace_names:
             process_prog.report('processing workspace' + c_ws_name)
