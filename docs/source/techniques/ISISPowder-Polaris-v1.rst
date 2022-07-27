@@ -179,9 +179,14 @@ The function performs the following processing:
 - calculates the Placzek self scattering algorithm using the workflow algorithm :ref:`algm-TotScatCalculateSelfScattering`.
   This internally calculates a per detector Placzek correction using :ref:`algm-CalculatePlaczekSelfScattering-v1` and then focusses the correction using :ref:`algm-GroupDetectors`
 - subtracts the Placzek self scattering correction from the differential cross section
-- converts the differential cross-section into an :math:`S(Q) - 1` distribution using the following relationship where :math:`\sigma_s` is the total scattering cross section and :math:`\sigma_{coh}` is the coherent scattering cross section. This is based on equations 5, 9 and 19 in [#Keen]_:
+- converts the differential cross-section into an :math:`S(Q) - 1` distribution using the following equation. This is based on equations 5, 9 and 19 in [#Keen]_:
 
-:math:`\hspace{20pt}S(Q) - 1 = (\frac{d\sigma_s}{d\Omega}(Q) - <b_{tot}^2>) / <b_{coh}>^2 = (\frac{d\sigma_s}{d\Omega}(Q) - \frac{\sigma_s}{4 \pi}) / <b_{coh}>^2`
+  .. math::
+
+   S(Q) - 1 = (\frac{d\sigma_s}{d\Omega}(Q) - \langle\overline{b^2}\rangle) / \langle\overline{b}\rangle^2 = (\frac{d\sigma_s}{d\Omega}(Q) - \frac{\sigma_s}{4 \pi}) / \frac{\sigma_{coh}}{4 \pi}
+
+  | where :math:`\sigma_s` is the total scattering cross section, :math:`\sigma_{coh}` is the coherent scattering cross section, :math:`b` is the scattering length.
+  | The angled brackets indicate averaging across chemical formula units while the overline indicates averaging across isotopes and spin states for an individual element
 
 - converts the :math:`S(Q) - 1` distribution into a PDF using :ref:`algm-PDFFourierTransform`
 
