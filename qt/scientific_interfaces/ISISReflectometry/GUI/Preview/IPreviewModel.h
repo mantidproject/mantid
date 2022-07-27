@@ -11,6 +11,8 @@
 #include "ROIType.h"
 #include "Reduction/ProcessingInstructions.h"
 
+#include <boost/optional.hpp>
+
 #include <optional>
 #include <string>
 #include <vector>
@@ -33,7 +35,7 @@ public:
   virtual std::vector<Mantid::detid_t> getSelectedBanks() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
-  virtual ProcessingInstructions getProcessingInstructions(ROIType regionType) const = 0;
+  virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
   virtual std::optional<double> getDefaultTheta() const = 0;
 
   virtual void setTheta(double theta) = 0;

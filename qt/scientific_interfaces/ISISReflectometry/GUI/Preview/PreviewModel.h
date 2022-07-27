@@ -14,6 +14,8 @@
 #include "ROIType.h"
 #include "Reduction/PreviewRow.h"
 
+#include <boost/optional.hpp>
+
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -36,7 +38,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
   std::vector<Mantid::detid_t> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
-  ProcessingInstructions getProcessingInstructions(ROIType regionType) const override;
+  boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
   std::optional<double> getDefaultTheta() const override;
 

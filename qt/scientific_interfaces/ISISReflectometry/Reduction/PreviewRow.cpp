@@ -9,6 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 
+#include <boost/optional.hpp>
+
 #include <string>
 #include <vector>
 
@@ -46,7 +48,7 @@ void PreviewRow::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) no
   m_selectedBanks = std::move(selectedBanks);
 }
 
-ProcessingInstructions PreviewRow::getProcessingInstructions(ROIType regionType) const {
+boost::optional<ProcessingInstructions> PreviewRow::getProcessingInstructions(ROIType regionType) const {
   switch (regionType) {
   case ROIType::Signal:
     return m_processingInstructions;

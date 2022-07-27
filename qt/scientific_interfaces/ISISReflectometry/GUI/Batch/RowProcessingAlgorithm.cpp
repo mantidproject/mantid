@@ -46,6 +46,15 @@ void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties, RangeIn
   AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(), properties);
 }
 
+void updateProcessingInstructionsProperties(AlgorithmRuntimeProps &properties, PreviewRow const &previewRow) {
+  AlgorithmProperties::update("ProcessingInstructions", previewRow.getProcessingInstructions(ROIType::Signal),
+                              properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Background), properties);
+  AlgorithmProperties::update("TransmissionProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Transmission), properties);
+}
+
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   updateInputWorkspacesProperties(properties, row.reducedWorkspaceNames().inputRunNumbers());
   updateTransmissionWorkspaceProperties(properties, row.reducedWorkspaceNames().transmissionRuns());
@@ -300,12 +309,8 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   }
   // Update properties from the preview tab
   properties->setProperty("InputWorkspace", previewRow.getSummedWs());
-  properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions(ROIType::Signal));
-  properties->setProperty("BackgroundProcessingInstructions",
-                          previewRow.getProcessingInstructions(ROIType::Background));
-  properties->setProperty("TransmissionProcessingInstructions",
-                          previewRow.getProcessingInstructions(ROIType::Transmission));
   properties->setProperty("ThetaIn", previewRow.theta());
+  updateProcessingInstructionsProperties(*properties, previewRow);
   return properties;
 }
 

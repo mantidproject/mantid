@@ -18,6 +18,7 @@
 #include "MantidKernel/Tolerance.h"
 #include "ROIType.h"
 
+#include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
 #include <optional>
@@ -101,7 +102,7 @@ void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) 
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 
-ProcessingInstructions PreviewModel::getProcessingInstructions(ROIType regionType) const {
+boost::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(ROIType regionType) const {
   return m_runDetails->getProcessingInstructions(regionType);
 }
 

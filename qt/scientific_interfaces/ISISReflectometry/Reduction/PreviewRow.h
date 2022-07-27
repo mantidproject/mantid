@@ -12,6 +12,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "Reduction/ProcessingInstructions.h"
 
+#include <boost/optional.hpp>
+
 #include <string>
 #include <vector>
 
@@ -45,7 +47,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
   std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
-  ProcessingInstructions getProcessingInstructions(ROIType regionType) const;
+  boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
@@ -63,9 +65,9 @@ private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
   std::vector<Mantid::detid_t> m_selectedBanks;
-  ProcessingInstructions m_processingInstructions;
-  ProcessingInstructions m_backgroundProcessingInstructions;
-  ProcessingInstructions m_transmissionProcessingInstructions;
+  boost::optional<ProcessingInstructions> m_processingInstructions{boost::none};
+  boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions{boost::none};
+  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions{boost::none};
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
   Mantid::API::MatrixWorkspace_sptr m_reducedWs;
