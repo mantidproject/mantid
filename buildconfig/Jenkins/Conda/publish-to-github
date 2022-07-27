@@ -51,18 +51,31 @@ conda activate $CONDA_ENV_NAME
 
 # Export token for use by gh to authenticate
 export GITHUB_TOKEN
-# We want to provide a custom label that is a fixed string that both
-#   - better describes which package users should select
-#   - automatically handles deleting old packages
+# We want to provide a custom label that is a fixed string that
+# better describes which package users should select
 for asset in "$@"; do
     if [[ $asset == *.exe ]]; then
       label=MantidWorkbench-Windows
+      asset_query=".*\\\\.exe"
     elif [[ $asset == *.dmg ]]; then
       label=MantidWorkbench-macOS
+      asset_query=".*\\\\.dmg"
     elif [[ $asset == *.tar.xz ]]; then
       label=MantidWorkbench-Linux
-    else
-      echo "Unknown asset type found. Uploading as unlabelled asset."
+      asset_query=".*\\\\.tar.xz"
+      else
+      echo "Unknown asset type found \"${asset}\" Skipping upload."
+      continue
     fi
-    gh release -R $RELEASES_REPO upload --clobber $RELEASES_TAG "$asset#$label"
+
+    # grab name of current uploaded asset so it can be deleted later
+    old_uploaded_asset=$(gh release --repo $RELEASES_REPO view $RELEASES_TAG --json assets --jq ".assets[] | select(.name|test(\"${asset_query}\")) | .name")
+    echo "Uploading $asset, labelled as $asset#$label, to $RELEASES_TAG tag under $RELEASES_REPO"
+    gh release --repo $RELEASES_REPO upload --clobber $RELEASES_TAG "$asset#$label"
+
+    # remove old asset iff the current one uploaded
+    if [[ -n "$old_uploaded_asset" ]]  && [[ $? -eq 0 ]]; then
+      echo "Removing $old_uploaded_asset from $RELEASES_TAG tag under $RELEASES_REPO"
+      gh release --repo $RELEASES_REPO delete-asset --yes $RELEASES_TAG "$old_uploaded_asset"
+    fi
 done
