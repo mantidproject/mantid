@@ -328,7 +328,45 @@ void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWor
     throw std::runtime_error("Unable to determine min and max x values for workspace");
 }
 
-void DiscusMultipleScatteringCorrection::prepareStructureFactor() {
+void DiscusMultipleScatteringCorrection::prepareStructureFactors() {
+  Workspace_sptr suppliedSQWS = getProperty("StructureFactorWorkspace");
+  auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(suppliedSQWS);
+  size_t nEnvComponents = 0;
+  if (m_env)
+    nEnvComponents = m_env->nelements();
+  m_SQWSs.clear();
+  if (SQWSGroup) {
+    std::string matName = m_sampleShape->material().name();
+    auto SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
+    m_SQWSs.push_back(ComponentWorkspaceMapping{m_sampleShape, matName, SQWSGroupMember});
+    if (nEnvComponents > 0) {
+      matName = m_env->getContainer().material().name();
+      SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
+      m_SQWSs.push_back(ComponentWorkspaceMapping{m_env->getContainer().getShapePtr(), matName, SQWSGroupMember});
+    }
+    for (size_t i = 1; i < nEnvComponents; i++) {
+      matName = m_env->getComponent(i).material().name();
+      SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
+      m_SQWSs.push_back(ComponentWorkspaceMapping{m_env->getComponentPtr(i), matName, SQWSGroupMember});
+    }
+  } else {
+    m_SQWSs.push_back(ComponentWorkspaceMapping{m_sampleShape, m_sampleShape->material().name(),
+                                                std::dynamic_pointer_cast<MatrixWorkspace>(suppliedSQWS)});
+    MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
+        *m_SQWSs[0].SQ, static_cast<size_t>(1),
+        HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
+    if (nEnvComponents > 0) {
+      std::string_view matName = m_env->getContainer().material().name();
+      g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
+      m_SQWSs.push_back(ComponentWorkspaceMapping{m_env->getContainer().getShapePtr(), matName, isotropicSQ});
+    }
+    for (size_t i = 1; i < nEnvComponents; i++) {
+      std::string_view matName = m_env->getComponent(i).material().name();
+      g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
+      m_SQWSs.push_back(ComponentWorkspaceMapping{m_env->getComponentPtr(i), matName, isotropicSQ});
+    }
+  }
+
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
   for (auto &SQWSMapping : m_SQWSs) {
     auto &SQWS = SQWSMapping.SQ;
@@ -401,51 +439,15 @@ void DiscusMultipleScatteringCorrection::exec() {
                              "AlwaysStoreInADS set to true");
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  Workspace_sptr SQWS = getProperty("StructureFactorWorkspace");
-  std::vector<MatrixWorkspace_sptr> SQWSs;
-  auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWS);
-  size_t nEnvComponents = 0;
-  if (inputWS->sample().hasEnvironment())
-    nEnvComponents = inputWS->sample().getEnvironment().nelements();
-  m_SQWSs.clear();
-  if (SQWSGroup) {
-    std::string matName = inputWS->sample().getMaterial().name();
-    auto SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
-    m_SQWSs.push_back(ComponentWorkspaceMapping{inputWS->sample().getShapePtr(), matName, SQWSGroupMember});
-    if (nEnvComponents > 0) {
-      matName = inputWS->sample().getEnvironment().getContainer().material().name();
-      SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
-      m_SQWSs.push_back(ComponentWorkspaceMapping{inputWS->sample().getEnvironment().getContainer().getShapePtr(),
-                                                  inputWS->sample().getMaterial().name(), SQWSGroupMember});
-    }
-    for (size_t i = 1; i < nEnvComponents; i++) {
-      matName = inputWS->sample().getEnvironment().getComponent(i).material().name();
-      SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
-      m_SQWSs.push_back(
-          ComponentWorkspaceMapping{inputWS->sample().getEnvironment().getComponentPtr(i), matName, SQWSGroupMember});
-    }
-  } else {
-    m_SQWSs.push_back(ComponentWorkspaceMapping{inputWS->sample().getShapePtr(), inputWS->sample().getMaterial().name(),
-                                                std::dynamic_pointer_cast<MatrixWorkspace>(SQWS)});
-    MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
-        *m_SQWSs[0].SQ, static_cast<size_t>(1),
-        HistogramData::Histogram(HistogramData::Points{0.}, HistogramData::Frequencies{1.}));
-    if (nEnvComponents > 0) {
-      std::string_view matName = inputWS->sample().getEnvironment().getContainer().material().name();
-      g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
-      m_SQWSs.push_back(ComponentWorkspaceMapping{inputWS->sample().getEnvironment().getContainer().getShapePtr(),
-                                                  matName, isotropicSQ});
-    }
-    for (size_t i = 1; i < nEnvComponents; i++) {
-      std::string_view matName = inputWS->sample().getEnvironment().getComponent(i).material().name();
-      g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
-      auto sampleEnvComponent = inputWS->sample().getEnvironment().getComponentPtr(i);
-      m_SQWSs.push_back(
-          ComponentWorkspaceMapping{inputWS->sample().getEnvironment().getComponentPtr(i), matName, isotropicSQ});
-    }
+  m_sampleShape = inputWS->sample().getShapePtr();
+  // generate the bounding box before the multithreaded section
+  m_sampleShape->getBoundingBox();
+  try {
+    m_env = &inputWS->sample().getEnvironment();
+  } catch (std::runtime_error &) {
+    // swallow this as no defined environment from getEnvironment
   }
-
-  prepareStructureFactor();
+  prepareStructureFactors();
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS)
@@ -508,15 +510,6 @@ void DiscusMultipleScatteringCorrection::exec() {
   m_refframe = inputWS->getInstrument()->getReferenceFrame();
   m_sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const auto nhists = useSparseInstrument ? sparseWS->getNumberHistograms() : inputWS->getNumberHistograms();
-
-  m_sampleShape = inputWS->sample().getShapePtr();
-  // generate the bounding box before the multithreaded section
-  m_sampleShape->getBoundingBox();
-  try {
-    m_env = &inputWS->sample().getEnvironment();
-  } catch (std::runtime_error &) {
-    // swallow this as no defined environment from getEnvironment
-  }
 
   const int nSingleScatterEvents = getProperty("NeutronPathsSingle");
   const int nMultiScatterEvents = getProperty("NeutronPathsMultiple");
