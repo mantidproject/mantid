@@ -24,12 +24,11 @@ class Selector(RectangleSelector):
               "minspanx": 5,
               "minspany": 5,
               "spancoords": "pixels",
-              "interactive": True,
-              "props": dict(facecolor="white", alpha=0.2, linewidth=2, fill=True)}
+              "interactive": True}
 
     def __init__(self, region_type: str, color: str, *args):
-        self.kwargs["props"]["edgecolor"] = color
         if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            self.kwargs["props"] = dict(facecolor="white", edgecolor=color, alpha=0.2, linewidth=2, fill=True)
             self.kwargs["drag_from_anywhere"] = True
             self.kwargs["ignore_event_outside"] = True
 
