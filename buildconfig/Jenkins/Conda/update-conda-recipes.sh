@@ -98,6 +98,7 @@ function replace_version_data() {
 
 replace_version_data recipes/mantid/meta.yaml
 replace_version_data recipes/mantidqt/meta.yaml
+replace_version_data recipes/mantiddocs/meta.yaml
 replace_version_data recipes/mantidworkbench/meta.yaml
 
 if [[ $LOCAL_ONLY  == false ]]; then

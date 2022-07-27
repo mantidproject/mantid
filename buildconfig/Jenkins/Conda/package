@@ -60,6 +60,7 @@ SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
+ENABLE_BUILD_DOCS=false
 BUILD_CURRENT_BRANCH=false
 CLOBBER_FILE=
 RECIPES_TAG=main
@@ -72,6 +73,7 @@ do
         --build-mantid) ENABLE_BUILD_MANTID=true ;;
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
+        --build-docs) ENABLE_BUILD_DOCS=true ;;
         --build-current-branch) BUILD_CURRENT_BRANCH=true ;;
         --clobber-yml)
             CLOBBER_FILE="--clobber-file $2"
@@ -95,7 +97,12 @@ if [[ $ENABLE_BUILD_QT  == true ]]; then
     ENABLE_BUILD_MANTID=true
 fi
 
-if [[ $ENABLE_WORKBENCH  == true ]]; then
+if [[ $ENABLE_BUILD_WORKBENCH  == true ]]; then
+    ENABLE_BUILD_MANTID=true
+    ENABLE_BUILD_QT=true
+fi
+
+if [[ $ENABLE_BUILD_DOCS  == true ]]; then
     ENABLE_BUILD_MANTID=true
     ENABLE_BUILD_QT=true
 fi
@@ -144,11 +151,12 @@ fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
-
 if [[ $ENABLE_BUILD_QT == true ]]; then
     conda mambabuild ./mantidqt/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
-
+if [[ $ENABLE_BUILD_DOCS == true ]]; then
+    conda mambabuild ./mantiddocs/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
+fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
 fi
