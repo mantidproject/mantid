@@ -419,15 +419,23 @@ void PDFFourierTransform2::exec() {
     */
   }
 
+  const std::string PDFType = getProperty("PDFType");
   double rho0 = determineRho0();
   const Kernel::Material &material = inputWS->sample().getMaterial();
   const auto cohScatLen = material.cohScatterLength();
+
+  // A material needs to be provided in order to calculate G_K(r)
+  if (PDFType == "G_k(r)" && cohScatLen == 0.0) {
+    std::stringstream msg;
+    msg << "Coherent Scattering Length is zero. Please check a sample material has been specified";
+    throw std::runtime_error(msg.str());
+  }
 
   // convert to S(Q)-1 or g(R)+1
   if (direction == FORWARD) {
     convertToSQMinus1(inputY, inputX, inputDY, inputDX);
   } else if (direction == BACKWARD) {
-    convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX, getProperty("PDFType"), rho0, cohScatLen);
+    convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX, PDFType, rho0, cohScatLen);
   }
 
   double inMin, inMax, outDelta, outMax;
@@ -519,7 +527,7 @@ void PDFFourierTransform2::exec() {
   }
 
   if (direction == FORWARD) {
-    convertFromLittleGRMinus1(outputY, outputX, outputE, getProperty("PDFType"), rho0, cohScatLen);
+    convertFromLittleGRMinus1(outputY, outputX, outputE, PDFType, rho0, cohScatLen);
   } else if (direction == BACKWARD) {
     convertFromSQMinus1(outputY, outputX, outputE);
   }

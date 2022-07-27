@@ -142,6 +142,23 @@ public:
 
     API::Workspace_sptr ws = createWS(20, 0.1, "TestInput2", "MomentumTransfer");
 
+    // create the material as this is required for G_k(r)
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+    using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
+
+    auto const rho0 = 0.07192;
+
+    auto material = std::make_shared<Mantid::Kernel::PropertyManager>();
+    material->declareProperty(std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(std::make_unique<FloatProperty>("SampleNumberDensity", rho0), "");
+
+    // set the sample information
+    Mantid::DataHandling::SetSample setsample;
+    setsample.initialize();
+    setsample.setProperty("InputWorkspace", ws);
+    setsample.setProperty("Material", material);
+    setsample.execute();
+
     for (std::string value : PDFTypeArray) {
       PDFFourierTransform2 pdfft;
       pdfft.initialize();
@@ -364,36 +381,33 @@ public:
 
     // test g(r)
     const std::string LITTLE_G_OF_R("g(r)");
-    auto y_gr = y_initial;
-    pdfft.convertToLittleGRMinus1(y_gr, x, dy, dx, LITTLE_G_OF_R, rho0, cohScatLen);
-    const auto exp_gr = 4.0;
-    const auto actual_gr = y_gr[0];
-    TS_ASSERT_DELTA(actual_gr, exp_gr, 1e-8);
+    auto y = y_initial;
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, LITTLE_G_OF_R, rho0, cohScatLen);
+    const auto exp_from_gr = 4.0;
+    const auto actual_from_gr = y[0];
+    TS_ASSERT_DELTA(actual_from_gr, exp_from_gr, 1e-8);
 
-    // test G(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string BIG_G_OF_R("G(r)");
-    auto y_gr_minus_one = y_initial;
-    pdfft.convertToLittleGRMinus1(y_gr_minus_one, x, dy, dx, BIG_G_OF_R, rho0, cohScatLen);
-    const auto exp_little_gr_minus_one = y_initial[0] / (factor1 * single_x);
-    const auto actual_little_gr_minus_one = y_gr_minus_one[0];
-    TS_ASSERT_DELTA(actual_little_gr_minus_one, exp_little_gr_minus_one, 1e-8);
+    y = y_initial;
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, BIG_G_OF_R, rho0, cohScatLen);
+    const auto exp_from_big_gr = y_initial[0] / (factor1 * single_x);
+    const auto actual_from_big_gr = y[0];
+    TS_ASSERT_DELTA(actual_from_big_gr, exp_from_big_gr, 1e-8);
 
-    //// test RDF(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string RDF_OF_R("RDF(r)");
-    auto y_rdf_r = y_initial;
-    pdfft.convertToLittleGRMinus1(y_rdf_r, x, dy, dx, RDF_OF_R, rho0, cohScatLen);
-    const auto exp_rdf_r = y_initial[0] / (factor1 * single_x * single_x) - 1.0;
-    const auto actual_rdf_r = y_rdf_r[0];
-    TS_ASSERT_DELTA(actual_rdf_r, exp_rdf_r, 1e-8);
+    y = y_initial;
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, RDF_OF_R, rho0, cohScatLen);
+    const auto exp_from_rdf_r = y_initial[0] / (factor1 * single_x * single_x) - 1.0;
+    const auto actual_from_rdf_r = y[0];
+    TS_ASSERT_DELTA(actual_from_rdf_r, exp_from_rdf_r, 1e-8);
 
-    //// test G_k(r) - note that y values have been changed by previous call to convertToLittleGRMinus1
     const std::string G_K_OF_R("G_k(r)");
-    auto y_gkr = y_initial;
-    pdfft.convertToLittleGRMinus1(y_gkr, x, dy, dx, G_K_OF_R, rho0, cohScatLen);
+    y = y_initial;
+    pdfft.convertToLittleGRMinus1(y, x, dy, dx, G_K_OF_R, rho0, cohScatLen);
     const double factor2 = 0.01 * pow(cohScatLen, 2);
-    const auto exp_gkr = y_initial[0] / factor2;
-    const auto actual_gkr = y_gkr[0];
-    TS_ASSERT_DELTA(actual_gkr, exp_gkr, 1e-8);
+    const auto exp_from_gkr = y_initial[0] / factor2;
+    const auto actual_from_gkr = y[0];
+    TS_ASSERT_DELTA(actual_from_gkr, exp_from_gkr, 1e-8);
   }
 
 private:
