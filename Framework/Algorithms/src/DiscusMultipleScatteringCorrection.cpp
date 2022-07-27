@@ -23,7 +23,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
@@ -257,16 +256,10 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
       if (SQWS->getAxis(1)->isSpectra())
         issues["StructureFactorWorkspace"] += "S(Q, w) must have a numeric spectrum axis\n";
       std::vector<double> wValues;
-      if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE")
-        wValues = SQWS->x(0).rawData();
-      else {
-        auto wAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));
-        if (wAxis)
-          wValues = wAxis->getValues();
+      if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE") {
+        if (!SQWS->isCommonBins())
+          issues["StructureFactorWorkspace"] += "S(Q,w) must have common w values at all Q";
       }
-      Kernel::EqualBinsChecker checker(wValues, 1E-7, -1);
-      if (!checker.validate().empty())
-        issues["StructureFactorWorkspace"] += "S(Q,w) must have equally spaced w values";
     }
   }
 
