@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
+#include "../../../ISISReflectometry/GUI/Preview/ROIType.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -293,7 +294,7 @@ private:
   PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11") {
     auto previewRow = PreviewRow({"12345"});
     previewRow.setTheta(theta);
-    previewRow.setProcessingInstructions(processingInstructions);
+    previewRow.setProcessingInstructions(ROIType::Signal, processingInstructions);
     return previewRow;
   }
 

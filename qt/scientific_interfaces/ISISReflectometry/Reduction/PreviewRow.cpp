@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PreviewRow.h"
+#include "GUI/Preview/ROIType.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -45,9 +46,30 @@ void PreviewRow::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) no
   m_selectedBanks = std::move(selectedBanks);
 }
 
-ProcessingInstructions PreviewRow::getProcessingInstructions() const noexcept { return m_processingInstructions; }
+ProcessingInstructions PreviewRow::getProcessingInstructions(ROIType regionType) const {
+  switch (regionType) {
+  case ROIType::Signal:
+    return m_processingInstructions;
+  case ROIType::Background:
+    return m_backgroundProcessingInstructions;
+  case ROIType::Transmission:
+    return m_transmissionProcessingInstructions;
+  }
+  throw std::invalid_argument("Unexpected ROIType provided");
+}
 
-void PreviewRow::setProcessingInstructions(ProcessingInstructions processingInstructions) noexcept {
-  m_processingInstructions = std::move(processingInstructions);
+void PreviewRow::setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions) {
+  switch (regionType) {
+  case ROIType::Signal:
+    m_processingInstructions = std::move(processingInstructions);
+    return;
+  case ROIType::Background:
+    m_backgroundProcessingInstructions = std::move(processingInstructions);
+    return;
+  case ROIType::Transmission:
+    m_transmissionProcessingInstructions = std::move(processingInstructions);
+    return;
+  }
+  throw std::invalid_argument("Unexpected ROIType provided");
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

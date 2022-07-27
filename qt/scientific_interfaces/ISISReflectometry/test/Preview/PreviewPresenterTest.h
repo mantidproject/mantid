@@ -424,7 +424,7 @@ private:
     // Check ROI is set
     auto roi = IRegionSelector::Selection{3.5, 11.23};
     EXPECT_CALL(mockRegionSelector, getRegion("Signal")).Times(1).WillOnce(Return(roi));
-    EXPECT_CALL(mockModel, setSelectedRegion(roi)).Times(1);
+    EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Signal, roi)).Times(1);
     // Check theta is set
     auto theta = 0.3;
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));

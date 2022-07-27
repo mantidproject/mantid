@@ -16,6 +16,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Tolerance.h"
+#include "ROIType.h"
 
 #include <boost/utility/in_place_factory.hpp>
 
@@ -100,11 +101,11 @@ void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) 
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 
-ProcessingInstructions PreviewModel::getProcessingInstructions() const {
-  return m_runDetails->getProcessingInstructions();
+ProcessingInstructions PreviewModel::getProcessingInstructions(ROIType regionType) const {
+  return m_runDetails->getProcessingInstructions(regionType);
 }
 
-void PreviewModel::setSelectedRegion(Selection const &selection) {
+void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &selection) {
   // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices per
   // TODO rectangle selection
   if (selection.size() % 2 != 0) {
@@ -121,7 +122,7 @@ void PreviewModel::setSelectedRegion(Selection const &selection) {
     }
     processingInstructions += std::to_string(start) + "-" + std::to_string(end);
   }
-  m_runDetails->setProcessingInstructions(std::move(processingInstructions));
+  m_runDetails->setProcessingInstructions(regionType, std::move(processingInstructions));
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
+#include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/PreviewRow.h"
 #include "AlgorithmProperties.h"
@@ -299,7 +300,11 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   }
   // Update properties from the preview tab
   properties->setProperty("InputWorkspace", previewRow.getSummedWs());
-  properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions());
+  properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions(ROIType::Signal));
+  properties->setProperty("BackgroundProcessingInstructions",
+                          previewRow.getProcessingInstructions(ROIType::Background));
+  properties->setProperty("TransmissionProcessingInstructions",
+                          previewRow.getProcessingInstructions(ROIType::Transmission));
   properties->setProperty("ThetaIn", previewRow.theta());
   return properties;
 }

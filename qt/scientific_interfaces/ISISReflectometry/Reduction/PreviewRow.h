@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
+#include "GUI/Preview/ROIType.h"
 #include "Item.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
@@ -44,13 +45,13 @@ public:
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
   std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
-  ProcessingInstructions getProcessingInstructions() const noexcept;
+  ProcessingInstructions getProcessingInstructions(ROIType regionType) const;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
-  void setProcessingInstructions(ProcessingInstructions processingInstructions) noexcept;
+  void setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions);
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
@@ -63,6 +64,8 @@ private:
   double m_theta;
   std::vector<Mantid::detid_t> m_selectedBanks;
   ProcessingInstructions m_processingInstructions;
+  ProcessingInstructions m_backgroundProcessingInstructions;
+  ProcessingInstructions m_transmissionProcessingInstructions;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
   Mantid::API::MatrixWorkspace_sptr m_reducedWs;

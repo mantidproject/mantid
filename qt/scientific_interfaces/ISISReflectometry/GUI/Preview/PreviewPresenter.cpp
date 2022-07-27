@@ -163,7 +163,7 @@ void PreviewPresenter::notifyRegionChanged() {
   // Set the selection from the view
   // TODO make use of background and transmission regions. Move hard coded strings to somewhere central as an enum
   auto roi = m_regionSelector->getRegion(roiTypeToString(ROIType::Signal));
-  m_model->setSelectedRegion(roi);
+  m_model->setSelectedRegion(ROIType::Signal, roi);
   runReduction();
 }
 
