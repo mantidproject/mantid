@@ -6,10 +6,10 @@
 # package dependent on a different one it will build and produce that package too.
 #
 # Script usage:
-# conda-build-recipes WORKSPACE [options]
+# package-conda WORKSPACE [options]
 #
 # Example command to build all of the packages:
-# conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-workbench
+# conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-docs --build-workbench
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
@@ -19,13 +19,14 @@
 # Possible flags:
 #   --build-mantid: build the mantid package using conda-build
 #   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
+#   --build-docs: build the HTML/Qthelp documentation
 #   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
+#   --build-current-branch: build the packages from the latest commit in the currently checkout out branch
+#   --release-version: indicate that this is a build for a stable release
 #
 # Possible parameters:
 #   --clobber-yml: clobber the meta yaml files of each package build with conda-build, provide an absolute path to the yml file
 #   --recipes-tag: a branch or tag that should be used for cloning the recipes
-#   --build-current-branch: build the packages from the latest commit in the currently checkout out branch
-#   --package-suffix: An optional suffix to pass to the standalone package step.
 
 # Setup expected variables
 WORKSPACE=$1
@@ -62,9 +63,9 @@ ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
 ENABLE_BUILD_DOCS=false
 BUILD_CURRENT_BRANCH=false
+RELEASE_VERSION=false
 CLOBBER_FILE=
 RECIPES_TAG=main
-STANDALONE_PACKAGE_SUFFIX=
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -75,14 +76,12 @@ do
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
         --build-docs) ENABLE_BUILD_DOCS=true ;;
         --build-current-branch) BUILD_CURRENT_BRANCH=true ;;
+        --release-version) RELEASE_VERSION=true ;;
         --clobber-yml)
             CLOBBER_FILE="--clobber-file $2"
             shift ;;
         --recipes-tag)
             RECIPES_TAG="$2"
-            shift ;;
-        --package-suffix)
-            STANDALONE_PACKAGE_SUFFIX="$2"
             shift ;;
         *)
             echo "Argument not accepted: $1"
@@ -91,21 +90,6 @@ do
   esac
   shift
 done
-
-# Build dependencies for requested packages
-if [[ $ENABLE_BUILD_QT  == true ]]; then
-    ENABLE_BUILD_MANTID=true
-fi
-
-if [[ $ENABLE_BUILD_WORKBENCH  == true ]]; then
-    ENABLE_BUILD_MANTID=true
-    ENABLE_BUILD_QT=true
-fi
-
-if [[ $ENABLE_BUILD_DOCS  == true ]]; then
-    ENABLE_BUILD_MANTID=true
-    ENABLE_BUILD_QT=true
-fi
 
 # Setup Mambaforge
 $SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
@@ -131,16 +115,17 @@ git clone https://github.com/mantidproject/conda-recipes.git --depth=1 -b $RECIP
 if [[ $BUILD_CURRENT_BRANCH == true ]]; then
     RECIPE_UPDATE_ARGS="dummy_token dummy_name dummy_email --local-only"
     #If it's a release version, pass an extra argument to use the patch version number
-    if [[ -z "${STANDALONE_PACKAGE_SUFFIX}" ]]; then
+    if [[ $RELEASE_VERSION == true ]]; then
         RECIPE_UPDATE_ARGS="${RECIPE_UPDATE_ARGS} --release-version"
     fi
     $SCRIPT_DIR/update-conda-recipes.sh $RECIPE_UPDATE_ARGS
 fi
 
-# Run conda build. Use shortest path possible for Windows
+# Run conda build. Use a known path so packages built in other steps can be
+# copied to a known location and reused
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    rm -rf $CONDA_BLD_PATH
+    conda index $CONDA_BLD_PATH
 fi
 cd $RECIPES_DIR/recipes/
 
@@ -159,24 +144,4 @@ if [[ $ENABLE_BUILD_DOCS == true ]]; then
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $CLOBBER_FILE $WINDOWS_BUILD_OPTIONS
-fi
-
-# Build the standalone packages, currently only for Windows and macOS
-# Jenkins Pipeline expects packages in the root workspace directory
-cd $WORKSPACE
-# Set our local conda channel to find our locally build mantidworkbench package.
-LOCAL_CHANNEL=file://$CONDA_BLD_PATH
-PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
-if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
-    PACKAGING_ARGS="${PACKAGING_ARGS} -s ${STANDALONE_PACKAGE_SUFFIX}"
-fi
-if [[ $OSTYPE == 'msys'* ]]; then
-    rm -fr *.exe
-    ${WORKSPACE}/installers/conda/win/create_package.sh $PACKAGING_ARGS
-elif [[ $OSTYPE == 'darwin'* ]]; then
-    rm -fr *.dmg
-    ${WORKSPACE}/installers/conda/osx/create_bundle.sh $PACKAGING_ARGS
-else
-    rm -fr *.tar.xz
-    ${WORKSPACE}/installers/conda/linux/create_tarball.sh $PACKAGING_ARGS
 fi

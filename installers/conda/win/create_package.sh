@@ -73,7 +73,11 @@ rm -rf $CONDA_ENV_PATH
 mkdir $COPY_DIR
 
 echo "Creating conda env from mantidworkbench and jq"
-"$CONDA_EXE" create --prefix $CONDA_ENV_PATH mantidworkbench m2w64-jq notebook --copy -c $CONDA_CHANNEL -c conda-forge -y
+"$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
+  --copy --channel $CONDA_CHANNEL --channel conda-forge -y \
+  mantidworkbench \
+  notebook \
+  m2w64-jq
 echo "Conda env created"
 
 # Determine version information
