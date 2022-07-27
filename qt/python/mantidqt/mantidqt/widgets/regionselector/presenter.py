@@ -19,6 +19,7 @@ from matplotlib.widgets import RectangleSelector
 
 
 class Selector(RectangleSelector):
+    active_handle_alpha = 0.5
     kwargs = {"useblit": False,  # rectangle persists on button release
               "button": [1],
               "minspanx": 5,
@@ -37,6 +38,11 @@ class Selector(RectangleSelector):
 
     def region_type(self):
         return self._region_type
+
+    def set_active(self, active: bool) -> None:
+        """Hide the handles of a selector if it is not active."""
+        self.set_handle_props(alpha=self.active_handle_alpha if active else 0)
+        super().set_active(active)
 
 
 class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
