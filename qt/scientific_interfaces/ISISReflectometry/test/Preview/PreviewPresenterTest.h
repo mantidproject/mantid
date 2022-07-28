@@ -196,6 +196,7 @@ public:
   void test_sum_banks_completed_plots_region_selector() {
     auto mockView = makeView();
     auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
 
@@ -204,12 +205,26 @@ public:
     EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
     expectRegionSelectorToolbarEnabled(*mockView, false);
 
-    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
+    expectRunReduction(*mockView, *mockModel, *mockJobManager);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
                                                makeInstViewModel(), std::move(mockRegionSelector_uptr)));
 
     expectRegionSelectorToolbarEnabled(*mockView, true);
 
     presenter.notifySumBanksCompleted();
+  }
+
+  void test_notify_update_angle_will_run_a_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+
+    expectRunReduction(*mockView, *mockModel, *mockJobManager);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager)));
+
+    presenter.notifyUpdateAngle();
   }
 
   void test_rectangular_roi_requested() {
@@ -408,6 +423,11 @@ private:
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Signal, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Background, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Transmission, roi)).Times(1);
+    expectRunReduction(mockView, mockModel, mockJobManager);
+  }
+
+  void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager) {
+    EXPECT_CALL(mockView, setUpdateAngleButtonEnabled(false)).Times(1);
     // Check theta is set
     auto theta = 0.3;
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));

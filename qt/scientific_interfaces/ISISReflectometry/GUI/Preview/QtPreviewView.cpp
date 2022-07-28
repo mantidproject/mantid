@@ -72,6 +72,8 @@ void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_noti
 void QtPreviewView::connectSignals() const {
   // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
+  connect(m_ui.update_button, SIGNAL(clicked()), this, SLOT(onUpdateClicked()));
+  connect(m_ui.angle_spin_box, SIGNAL(valueChanged(double)), this, SLOT(onAngleEdited()));
   // Instrument viewer toolbar
   connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
   connect(m_ui.iv_edit_button, SIGNAL(clicked()), this, SLOT(onInstViewEditClicked()));
@@ -84,6 +86,7 @@ void QtPreviewView::connectSignals() const {
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
+void QtPreviewView::onUpdateClicked() const { m_notifyee->notifyUpdateAngle(); }
 
 void QtPreviewView::onInstViewZoomClicked() const { m_notifyee->notifyInstViewZoomRequested(); }
 void QtPreviewView::onInstViewEditClicked() const { m_notifyee->notifyInstViewEditRequested(); }
@@ -100,6 +103,8 @@ void QtPreviewView::onAddRectangularROIClicked(QAction *regionType) const {
 }
 
 void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
+
+void QtPreviewView::onAngleEdited() { m_ui.update_button->setEnabled(true); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
@@ -148,7 +153,13 @@ void QtPreviewView::setRegionSelectorToolbarEnabled(bool enable) {
   m_ui.rs_rect_select_button->setEnabled(enable);
 }
 
-void QtPreviewView::setAngle(double angle) { m_ui.angle_spin_box->setValue(angle); }
+void QtPreviewView::setAngle(double angle) {
+  m_ui.angle_spin_box->blockSignals(true);
+  m_ui.angle_spin_box->setValue(angle);
+  m_ui.angle_spin_box->blockSignals(false);
+}
+
+void QtPreviewView::setUpdateAngleButtonEnabled(bool enabled) { m_ui.update_button->setEnabled(enabled); }
 
 void QtPreviewView::setEditROIState(bool state) { m_ui.rs_edit_button->setDown(state); }
 

@@ -94,6 +94,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   runSumBanks();
 }
 
+void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
+
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
   m_view->setRegionSelectorToolbarEnabled(true);
@@ -189,6 +191,7 @@ void PreviewPresenter::plotLinePlot() {
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 
 void PreviewPresenter::runReduction() {
+  m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
   // Perform the reduction

@@ -55,6 +55,7 @@ public:
 
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
+  void notifyUpdateAngle() override;
 
   void notifyInstViewZoomRequested() override;
   void notifyInstViewEditRequested() override;

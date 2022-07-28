@@ -34,6 +34,7 @@ public:
   MOCK_METHOD(void, setRectangularROIState, (bool), (override));
   MOCK_METHOD(void, setEditROIState, (bool), (override));
   MOCK_METHOD(void, setAngle, (double), (override));
+  MOCK_METHOD(void, setUpdateAngleButtonEnabled, (bool), (override));
   MOCK_METHOD(std::vector<size_t>, getSelectedDetectors, (), (const, override));
   MOCK_METHOD(std::string, getRegionType, (), (const, override));
   MOCK_METHOD(QLayout *, getRegionSelectorLayout, (), (const, override));
