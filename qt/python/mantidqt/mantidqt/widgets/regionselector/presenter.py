@@ -5,6 +5,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 from distutils.version import LooseVersion
+from typing import Callable
 
 from .view import RegionSelectorView
 from ..observers.observing_presenter import ObservingPresenter
@@ -76,11 +77,32 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         for selector in self._selectors:
             selector.set_active(False)
 
+        clicked_selector = self._find_selector_if(lambda x: self._contains_point(x.extents, event.xdata, event.ydata))
+        if clicked_selector is not None:
+            # Ensure only one selector is active to avoid confusing matplotlib behaviour
+            clicked_selector.set_active(True)
+
+    def key_pressed(self, event) -> None:
+        """Handles key press events."""
+        if event.key == "delete":
+            selector = self._find_selector_if(lambda x: x.active)
+            if selector is not None:
+                self._remove_selector(selector)
+
+    def _remove_selector(self, selector: Selector) -> None:
+        """Remove selector from the plot."""
+        selector.set_active(False)
+        for artist in selector.artists:
+            artist.set_visible(False)
+        selector.update()
+        self._selectors.remove(selector)
+
+    def _find_selector_if(self, predicate: Callable) -> Selector:
+        """Find the first selector which agrees with a predicate. Return None if no selector is found."""
         for selector in self._selectors:
-            if self._contains_point(selector.extents, event.xdata, event.ydata):
-                # Ensure only one selector is active to avoid confusing matplotlib behaviour
-                selector.set_active(True)
-                return
+            if predicate(selector):
+                return selector
+        return None
 
     def zoom_pan_clicked(self, active) -> None:
         pass

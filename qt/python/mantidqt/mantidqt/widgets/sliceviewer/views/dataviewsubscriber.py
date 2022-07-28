@@ -14,6 +14,10 @@ class IDataViewSubscriber(ABC):
         pass
 
     @abstractmethod
+    def key_pressed(self, event) -> None:
+        pass
+
+    @abstractmethod
     def data_limits_changed(self):
         pass
 

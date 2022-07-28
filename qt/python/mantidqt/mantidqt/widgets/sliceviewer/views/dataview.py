@@ -92,6 +92,7 @@ class SliceViewerDataView(QWidget):
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
         self.canvas.mpl_connect('button_press_event', self.presenter.canvas_clicked)
+        self.canvas.mpl_connect('key_press_event', self.presenter.key_pressed)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
