@@ -43,7 +43,8 @@ class Selector(RectangleSelector):
 
     def set_active(self, active: bool) -> None:
         """Hide the handles of a selector if it is not active."""
-        self.set_handle_props(alpha=self.active_handle_alpha if active else 0)
+        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
+            self.set_handle_props(alpha=self.active_handle_alpha if active else 0)
         super().set_active(active)
 
 

@@ -425,6 +425,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
 
+    def key_pressed(self, event) -> None:
+        pass
+
+    def mouse_moved(self, event) -> None:
+        pass
+
     def deactivate_zoom_pan(self):
         self.view.data_view.deactivate_zoom_pan()
 

@@ -28,6 +28,12 @@ class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     def canvas_clicked(self, event) -> None:
         pass
 
+    def key_pressed(self, event) -> None:
+        pass
+
+    def mouse_moved(self, event) -> None:
+        pass
+
     def zoom_pan_clicked(self, active) -> None:
         pass
 
