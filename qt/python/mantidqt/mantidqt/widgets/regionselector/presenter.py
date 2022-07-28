@@ -90,20 +90,14 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             if selector is not None:
                 self._remove_selector(selector)
 
-    def _remove_selector(self, selector: Selector) -> None:
-        """Remove selector from the plot."""
-        selector.set_active(False)
-        for artist in selector.artists:
-            artist.set_visible(False)
-        selector.update()
-        self._selectors.remove(selector)
+    def mouse_moved(self, event) -> None:
+        """Handles mouse move events on the canvas."""
+        # Find selector if it is active and the mouse is hovering over it
+        selector = self._find_selector_if(
+            lambda x: x.active and self._contains_point(x.extents, event.xdata, event.ydata))
 
-    def _find_selector_if(self, predicate: Callable) -> Selector:
-        """Find the first selector which agrees with a predicate. Return None if no selector is found."""
-        for selector in self._selectors:
-            if predicate(selector):
-                return selector
-        return None
+        # Set an override cursor if a selector is found
+        self.view.set_override_cursor(selector is not None)
 
     def zoom_pan_clicked(self, active) -> None:
         pass
@@ -172,6 +166,35 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self.notifyee:
             self.notifyee.notifyRegionChanged()
 
+    def _remove_selector(self, selector: Selector) -> None:
+        """
+        Removes a selector from the plot
+        :param selector: The selector to be removed from the plot
+        """
+        selector.set_active(False)
+        for artist in selector.artists:
+            artist.set_visible(False)
+        selector.update()
+        self._selectors.remove(selector)
+
+    def _find_selector_if(self, predicate: Callable) -> Selector:
+        """
+        Find the first selector which agrees with a predicate. Return None if no selector is found
+        :param predicate: A callable function or lambda that takes a Selector and returns a boolean
+        """
+        for selector in self._selectors:
+            if predicate(selector):
+                return selector
+        return None
+
     @staticmethod
-    def _contains_point(extents, x, y):
+    def _contains_point(extents, x, y) -> bool:
+        """
+        Check if a point given by (x, y) is contained within a box with extents
+        :param extents: A list of 4 floats representing the x1, x2, y1 and y2 extents of a box
+        :param x: The x position of a point
+        :param y: The y position of a point
+        """
+        if x is None or y is None:
+            return False
         return extents[0] <= x <= extents[1] and extents[2] <= y <= extents[3]

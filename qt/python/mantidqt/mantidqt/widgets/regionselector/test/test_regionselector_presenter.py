@@ -182,6 +182,53 @@ class RegionSelectorTest(unittest.TestCase):
         selector_two.set_active.assert_called_once_with(False)
         selector_two.update.assert_called_once_with()
 
+    def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_exist(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.view.set_override_cursor = Mock()
+
+        event = Mock()
+        event.xdata, event.ydata = 1.0, 2.0
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_are_active(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = False
+
+        event = Mock()
+        event.xdata, event.ydata = 5.5, 7.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_not_set_override_cursor_if_not_hovering_over_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+
+        event = Mock()
+        event.xdata, event.ydata = 1.5, 3.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_set_override_cursor_if_hovering_over_active_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+
+        event = Mock()
+        event.xdata, event.ydata = 5.5, 7.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(True)
+
     def test_on_rectangle_selected_notifies_observer(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         mock_observer = Mock()

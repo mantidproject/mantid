@@ -18,6 +18,10 @@ class IDataViewSubscriber(ABC):
         pass
 
     @abstractmethod
+    def mouse_moved(self, event) -> None:
+        pass
+
+    @abstractmethod
     def data_limits_changed(self):
         pass
 
