@@ -7,8 +7,16 @@
 #pragma once
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IBatchPresenter;
+
 class IPreviewPresenter {
 public:
   virtual ~IPreviewPresenter() = default;
+
+  virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

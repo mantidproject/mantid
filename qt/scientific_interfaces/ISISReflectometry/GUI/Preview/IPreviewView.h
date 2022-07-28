@@ -18,9 +18,14 @@ class IPlotView;
 }
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IBatchPresenter;
+
 class PreviewViewSubscriber {
 public:
   virtual ~PreviewViewSubscriber() = default;
+
+  virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
+
   virtual void notifyLoadWorkspaceRequested() = 0;
 
   virtual void notifyInstViewZoomRequested() = 0;
@@ -39,6 +44,9 @@ class IPreviewView {
 public:
   virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
+  virtual void enableApplyButton() = 0;
+  virtual void disableApplyButton() = 0;
+
   virtual std::string getWorkspaceName() const = 0;
   virtual double getAngle() const = 0;
   // Plotting
