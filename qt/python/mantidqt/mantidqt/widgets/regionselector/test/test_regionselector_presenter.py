@@ -144,6 +144,44 @@ class RegionSelectorTest(unittest.TestCase):
         selector_one.set_active.assert_has_calls([call(False), call(True)])
         selector_two.set_active.assert_called_once_with(False)
 
+    def test_delete_key_pressed_will_do_nothing_if_no_selectors_exist(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(0, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_delete_key_pressed_will_do_nothing_if_no_selectors_are_active(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = False
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(2, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(2, len(region_selector._selectors))
+
+    def test_delete_key_pressed_will_remove_the_active_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+        selector_two.artists = []
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(2, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(1, len(region_selector._selectors))
+
+        selector_two.set_active.assert_called_once_with(False)
+        selector_two.update.assert_called_once_with()
+
     def test_on_rectangle_selected_notifies_observer(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         mock_observer = Mock()
