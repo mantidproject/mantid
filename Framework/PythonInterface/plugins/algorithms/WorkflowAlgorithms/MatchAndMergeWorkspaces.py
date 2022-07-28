@@ -160,6 +160,8 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         revised_wslist = np.delete(flat_list, index_to_remove)
         x_min = np.delete(x_min, index_to_remove)
         x_max = np.delete(x_max, index_to_remove)
+        if len(x_min) < 1 or len(x_max) < 1:
+            raise RuntimeError("You have excluded all banks. Merging requires at least one bank.")
         return revised_wslist, x_min, x_max
 
 

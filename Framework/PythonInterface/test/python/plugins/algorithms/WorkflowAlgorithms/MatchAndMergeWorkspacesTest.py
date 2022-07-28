@@ -124,6 +124,11 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         x_max = np.array([10, -1, 30, -1, 45])
         self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces='ws_group', XMin=x_min, XMax=x_max)
 
+    def test_excluding_all_banks_fails_with_wrong_input(self):
+        x_min = np.array([-1, -1, -1, -1, -1])
+        x_max = np.array([-1, -1, -1, -1, -1])
+        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces='ws_group', XMin=x_min, XMax=x_max)
+
 
 if __name__ == "__main__":
     unittest.main()
