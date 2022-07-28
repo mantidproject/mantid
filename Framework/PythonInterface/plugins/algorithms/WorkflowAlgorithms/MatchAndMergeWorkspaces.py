@@ -151,10 +151,10 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
     def exclude_banks(flat_list, x_min, x_max):
         index_to_remove = []
         for i in range(x_min.size):
-            if x_min[i] == -1:
-                if x_max[i] == -1:
-                    index_to_remove.append(i)
-                else:
+            if x_min[i] == -1 and x_max[i] == -1:
+                index_to_remove.append(i)
+            else:
+                if x_min[i] == -1 or x_max[i] == -1:
                     raise RuntimeError("The banks to be excluded in q_lims do not match. Please check "
                                        "that -1 has been added in the correct place on both lists.")
         revised_wslist = np.delete(flat_list, index_to_remove)

@@ -189,8 +189,8 @@ The output PDF can be customized with the following parameters:
   `g(r)`, `RDF(r)` (defaults to `G(r)`).
 - By calling with `merge_banks=True` a PDF will be generated based on the weighted sum of the detector
   banks performed using supplied Q limits `q_lims=q_limits`, q_limits can be in the form of an array or
-  with shape (2, x) where x is the number of detectors, or a string containing the directory
-  of an appropriately formatted `.lim` file. To exclude any of the banks use -1 as the value for that detector in each list.
+  with shape (2, x) where x is the number of banks, or a string containing the directory
+  of an appropriately formatted `.lim` file. To exclude any of the banks use -1 as the value for that bank in each list.
   By default or specifically called with `merge_banks=False` a PDF will be generated for each bank within the focused_workspace.
 - By calling with `delta_q` which will calculate the PDF after rebinning the Q workspace to have bin width `delta_r`.
 - By calling with `delta_r` which will calculate the PDF with bin width of `delta_q`.
