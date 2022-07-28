@@ -31,6 +31,7 @@ class Selector(RectangleSelector):
     def __init__(self, region_type: str, color: str, *args):
         if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
             self.kwargs["props"] = dict(facecolor="white", edgecolor=color, alpha=0.2, linewidth=2, fill=True)
+            self.kwargs["handle_props"] = dict(markersize=4)
             self.kwargs["drag_from_anywhere"] = True
             self.kwargs["ignore_event_outside"] = True
 
