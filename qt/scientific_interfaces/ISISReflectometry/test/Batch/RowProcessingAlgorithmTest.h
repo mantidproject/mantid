@@ -52,13 +52,15 @@ public:
   void testExperimentSettingsWithPreviewRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto theta = 0.7;
-    auto previewRow = makePreviewRow(theta, "2-3");
+    auto previewRow = makePreviewRow(theta, "2-3", "4-5", "6-7");
     auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
 
     // Check results from the experiment settings tab
     checkExperimentSettings(*result);
     // Check the settings from the PreviewRow model
     TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "2-3");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "4-5");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "6-7");
     assertProperty(*result, "ThetaIn", theta);
   }
 
@@ -225,9 +227,14 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     // Use an angle that will match per-theta defaults. They should be
     // overridden by the cell values
-    auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ProcessingInstructions", "390-410"}});
+    auto row =
+        makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ProcessingInstructions", "390-410"},
+                                                              {"BackgroundProcessingInstructions", "410-430"},
+                                                              {"TransmissionProcessingInstructions", "430-450"}});
     auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "390-410");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "410-430");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "430-450");
   }
 
   void testOptionsCellOverridesInstrumentSettings() {
@@ -291,10 +298,16 @@ private:
     const std::string m_propName = "OutputWorkspace";
   };
 
-  PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11") {
+  PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11",
+                            const std::string &backgroundProcessingInstructions = "",
+                            const std::string &transmissionProcessingInstructions = "") {
     auto previewRow = PreviewRow({"12345"});
     previewRow.setTheta(theta);
     previewRow.setProcessingInstructions(ROIType::Signal, processingInstructions);
+    if (!backgroundProcessingInstructions.empty())
+      previewRow.setProcessingInstructions(ROIType::Background, backgroundProcessingInstructions);
+    if (!transmissionProcessingInstructions.empty())
+      previewRow.setProcessingInstructions(ROIType::Transmission, transmissionProcessingInstructions);
     return previewRow;
   }
 
