@@ -190,12 +190,6 @@ class SANSdata(object):
             unprocessed = fhandler.read()
         self._sort_data(unprocessed.split('%'))
 
-    @staticmethod
-    def _find_first_section_position(unprocessed):
-        if unprocessed[0][0] == 'F':
-            return 0
-        return 1
-
     def _sort_data(self, unprocessed):
         """
         initialize information for every section
@@ -214,3 +208,9 @@ class SANSdata(object):
 
             self._subsequence[i].info = deepcopy(tmp[1:])
             self._subsequence[i].process_data()
+
+    @staticmethod
+    def _find_first_section_position(unprocessed):
+        if unprocessed[0][0] == 'F':
+            return 0
+        return 1

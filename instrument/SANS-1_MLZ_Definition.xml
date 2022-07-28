@@ -1,21 +1,17 @@
 <?xml version='1.0' encoding='ASCII'?>
 <instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-04-26 11:23:20.975212" name="SANS-1_MLZ" valid-from="2017-10-01 23:59:59" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!-- This is the instrument definition file of the SANS-1 small angle scattering instrument at MLZ.
-
        z axis defines the direction of the beam
        y axis will be the axis used for rotation
        coordinate system is right-handed
-
        rotation around x axis: phi (?)
        rotation around y axis: omega
        rotation around z axis: chi (?)
-
        Multi-detector:
        Size 1024 mm x 1024 mm
        Low resolution:
             128 x 128
             Pixel size 8 x 8 mm2
-
        For more information, please visit
        https://www.mlz-garching.de/sans-1
        -->
@@ -96,4 +92,3 @@
     <algebra val="pixel-shape"/>
   </type>
 </instrument>
-

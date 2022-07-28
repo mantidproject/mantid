@@ -31,6 +31,10 @@ class LoadSANS1MLZ(PythonAlgorithm):
                              "EssentialData",
                              StringListValidator(["EssentialData", "CommentSection", "AllSections"]))
 
+        self.declareProperty("FileType",
+                             "type1",
+                             StringListValidator(["type1", "type2"]))
+
         self.declareProperty(name="Wavelength",
                              defaultValue=0.0,
                              validator=FloatBoundedValidator(lower=0.0),
@@ -39,10 +43,12 @@ class LoadSANS1MLZ(PythonAlgorithm):
     def PyExec(self):
         filename = self.getPropertyValue("Filename")
         out_ws_name = self.getPropertyValue("OutputWorkspace")
+        # file_type = self.getPropertyValue("FileType")
         metadata = SANSdata()
 
         try:
-            metadata.analyze_source(filename)
+            metadata.analyze_source(filename)   # ToDo add file type option
+            # metadata.analyze_source(filename, file_type)
             data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
             logs = self.create_logs(metadata)
             y_unit, y_label, x_unit = self.create_labels()
@@ -85,7 +91,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             raise RuntimeError("'Counts' section include incorrect data:"
                                " must be 128x128")
 
-        wavelength_error = 0.15  # ToDo ?????????
+        wavelength_error = 0.15  # ToDo error?? wavelength - error > 0 !!
         metadata.comment.set_wavelength(float(self.getPropertyValue("Wavelength")))
         data_y = np.append([], metadata.counts.data)
         if metadata.counter.is_monitors_exist():
@@ -106,12 +112,12 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'det1_z_value': 'mm',
             'wavelength': 'Angstrom',
             'st1_x_value': '',
-            'st1_x_offset': '',
+            'st1_x_offset': '',                 # ToDo units of measurement???
             'st1_y_value': '',
             'st1_y_offset': '',
             'st1_z_value': '',
             'st1_z_offset': '',
-            'det1_omg_value': 'degree',
+            'det1_omg_value': 'degrees',
             'duration': 'sec',
             'sum_all_counts': '',
             'monitor1': '',
