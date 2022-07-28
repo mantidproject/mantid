@@ -80,9 +80,9 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
 }
 
-void RegionSelector::addRectangularRegion() {
+void RegionSelector::addRectangularRegion(const std::string &regionType, const std::string &color) {
   GlobalInterpreterLock lock;
-  pyobj().attr("add_rectangular_region")();
+  pyobj().attr("add_rectangular_region")(regionType, color);
 }
 
 void RegionSelector::cancelDrawingRegion() {
@@ -90,9 +90,9 @@ void RegionSelector::cancelDrawingRegion() {
   pyobj().attr("cancel_drawing_region")();
 }
 
-auto RegionSelector::getRegion() -> Selection {
+auto RegionSelector::getRegion(const std::string &regionType) -> Selection {
   GlobalInterpreterLock lock;
-  auto pyValues = pyobj().attr("get_region")();
+  auto pyValues = pyobj().attr("get_region")(regionType);
   auto result = Selection();
   for (int i = 0; i < len(pyValues); ++i) {
     result.push_back(boost::python::extract<double>(pyValues[i]));

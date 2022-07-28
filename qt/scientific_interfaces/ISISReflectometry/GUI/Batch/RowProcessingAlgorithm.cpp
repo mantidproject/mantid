@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
+#include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/PreviewRow.h"
 #include "AlgorithmProperties.h"
@@ -43,6 +44,15 @@ void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties, RangeIn
   AlgorithmProperties::update("MomentumTransferMin", rangeInQ.min(), properties);
   AlgorithmProperties::update("MomentumTransferMax", rangeInQ.max(), properties);
   AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(), properties);
+}
+
+void updateProcessingInstructionsProperties(AlgorithmRuntimeProps &properties, PreviewRow const &previewRow) {
+  AlgorithmProperties::update("ProcessingInstructions", previewRow.getProcessingInstructions(ROIType::Signal),
+                              properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Background), properties);
+  AlgorithmProperties::update("TransmissionProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Transmission), properties);
 }
 
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
@@ -299,8 +309,8 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   }
   // Update properties from the preview tab
   properties->setProperty("InputWorkspace", previewRow.getSummedWs());
-  properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions());
   properties->setProperty("ThetaIn", previewRow.theta());
+  updateProcessingInstructionsProperties(*properties, previewRow);
   return properties;
 }
 

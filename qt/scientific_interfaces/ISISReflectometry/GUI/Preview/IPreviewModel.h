@@ -8,7 +8,10 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "ROIType.h"
 #include "Reduction/ProcessingInstructions.h"
+
+#include <boost/optional.hpp>
 
 #include <optional>
 #include <string>
@@ -32,13 +35,13 @@ public:
   virtual std::vector<Mantid::detid_t> getSelectedBanks() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
-  virtual ProcessingInstructions getProcessingInstructions() const = 0;
+  virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
   virtual std::optional<double> getDefaultTheta() const = 0;
 
   virtual void setTheta(double theta) = 0;
 
   virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
-  virtual void setSelectedRegion(Selection const &selection) = 0;
+  virtual void setSelectedRegion(ROIType regionType, Selection const &selection) = 0;
 
   virtual void exportSummedWsToAds() const = 0;
   virtual void exportReducedWsToAds() const = 0;

@@ -56,6 +56,7 @@ public:
   void setRectangularROIState(bool state) override;
 
   std::vector<size_t> getSelectedDetectors() const override;
+  std::string getRegionType() const override;
 
   QLayout *getRegionSelectorLayout() const override;
   MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
@@ -67,6 +68,7 @@ private:
 
   void connectSignals() const;
   void loadToolbarIcons();
+  void setupSelectRegionTypes();
 
 private slots:
   void onLoadWorkspaceRequested() const;
@@ -77,6 +79,6 @@ private slots:
   void onRegionSelectorExportToAdsClicked() const;
   void onLinePlotExportToAdsClicked() const;
   void onEditROIClicked() const;
-  void onAddRectangularROIClicked() const;
+  void onAddRectangularROIClicked(QAction *regionType) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

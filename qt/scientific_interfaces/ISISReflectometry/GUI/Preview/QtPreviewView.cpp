@@ -11,6 +11,10 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "ROIType.h"
+
+#include <QAction>
+#include <QMenu>
 
 #include <string>
 
@@ -24,6 +28,7 @@ QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
 
   loadToolbarIcons();
+  setupSelectRegionTypes();
   connectSignals();
 }
 
@@ -33,8 +38,33 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
   m_ui.rs_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
   m_ui.rs_edit_button->setIcon(MantidQt::Icons::getIcon("mdi.pencil", "black", 1.3));
-  m_ui.rs_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
   m_ui.lp_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
+}
+
+void QtPreviewView::setupSelectRegionTypes() {
+  QMenu *menu = new QMenu();
+  QAction *signalAction = new QAction(
+      MantidQt::Icons::getIcon("mdi.selection", QString::fromStdString(roiTypeToColor(ROIType::Signal)), 1.3),
+      QString::fromStdString(roiTypeToString(ROIType::Signal)));
+  QAction *backgroundAction = new QAction(
+      MantidQt::Icons::getIcon("mdi.selection", QString::fromStdString(roiTypeToColor(ROIType::Background)), 1.3),
+      QString::fromStdString(roiTypeToString(ROIType::Background)));
+  QAction *transmissionAction = new QAction(
+      MantidQt::Icons::getIcon("mdi.selection", QString::fromStdString(roiTypeToColor(ROIType::Transmission)), 1.3),
+      QString::fromStdString(roiTypeToString(ROIType::Transmission)));
+
+  signalAction->setToolTip("Add rectangular signal region");
+  backgroundAction->setToolTip("Add rectangular background region");
+  transmissionAction->setToolTip("Add rectangular transmission region");
+
+  menu->addAction(signalAction);
+  menu->addAction(backgroundAction);
+  menu->addAction(transmissionAction);
+
+  m_ui.rs_rect_select_button->setMenu(menu);
+  m_ui.rs_rect_select_button->setDefaultAction(signalAction);
+
+  connect(menu, SIGNAL(triggered(QAction *)), this, SLOT(onAddRectangularROIClicked(QAction *)));
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
@@ -49,7 +79,6 @@ void QtPreviewView::connectSignals() const {
   // Region selector toolbar
   connect(m_ui.rs_ads_export_button, SIGNAL(clicked()), this, SLOT(onRegionSelectorExportToAdsClicked()));
   connect(m_ui.rs_edit_button, SIGNAL(clicked()), this, SLOT(onEditROIClicked()));
-  connect(m_ui.rs_rect_select_button, SIGNAL(clicked()), this, SLOT(onAddRectangularROIClicked()));
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
 }
@@ -65,7 +94,10 @@ void QtPreviewView::onRegionSelectorExportToAdsClicked() const { m_notifyee->not
 
 void QtPreviewView::onEditROIClicked() const { m_notifyee->notifyEditROIModeRequested(); }
 
-void QtPreviewView::onAddRectangularROIClicked() const { m_notifyee->notifyRectangularROIModeRequested(); }
+void QtPreviewView::onAddRectangularROIClicked(QAction *regionType) const {
+  m_ui.rs_rect_select_button->setDefaultAction(regionType);
+  m_notifyee->notifyRectangularROIModeRequested();
+}
 
 void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
 
@@ -128,5 +160,9 @@ std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
   // (although weather it's treated as a mask or not is up to the caller)
   m_instDisplay->getSurface()->getMaskedDetectors(result);
   return result;
+}
+
+std::string QtPreviewView::getRegionType() const {
+  return m_ui.rs_rect_select_button->defaultAction()->text().toStdString();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

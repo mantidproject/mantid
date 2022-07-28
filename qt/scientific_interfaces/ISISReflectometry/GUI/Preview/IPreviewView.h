@@ -59,6 +59,7 @@ public:
   virtual void setRectangularROIState(bool state) = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
+  virtual std::string getRegionType() const = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;

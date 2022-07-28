@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
+#include "ROIType.h"
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
@@ -149,9 +150,11 @@ void PreviewPresenter::notifyEditROIModeRequested() {
 }
 
 void PreviewPresenter::notifyRectangularROIModeRequested() {
+  auto const regionType = m_view->getRegionType();
+  auto const roiType = roiTypeFromString(regionType);
   m_view->setEditROIState(false);
   m_view->setRectangularROIState(true);
-  m_regionSelector->addRectangularRegion();
+  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType));
 }
 
 void PreviewPresenter::notifyRegionChanged() {
@@ -159,8 +162,11 @@ void PreviewPresenter::notifyRegionChanged() {
   m_view->setEditROIState(true);
 
   // Set the selection from the view
-  auto roi = m_regionSelector->getRegion();
-  m_model->setSelectedRegion(roi);
+  m_model->setSelectedRegion(ROIType::Signal, m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)));
+  m_model->setSelectedRegion(ROIType::Background, m_regionSelector->getRegion(roiTypeToString(ROIType::Background)));
+  m_model->setSelectedRegion(ROIType::Transmission,
+                             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
+
   runReduction();
 }
 

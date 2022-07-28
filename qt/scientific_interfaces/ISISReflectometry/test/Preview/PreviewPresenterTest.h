@@ -17,6 +17,7 @@
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
+#include "ROIType.h"
 #include "TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -226,9 +227,12 @@ public:
     auto mockView = makeView();
     auto mockRegionSelector_uptr = makeRegionSelector();
     auto mockRegionSelector = mockRegionSelector_uptr.get();
+    const std::string regionType = roiTypeToString(ROIType::Signal);
+    const std::string color = roiTypeToColor(ROIType::Signal);
 
+    EXPECT_CALL(*mockView, getRegionType()).Times(1).WillOnce(Return(regionType));
     expectRectangularROIMode(*mockView);
-    EXPECT_CALL(*mockRegionSelector, addRectangularRegion()).Times(1);
+    EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType, color)).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockRegionSelector_uptr)));
 
@@ -420,8 +424,12 @@ private:
                                                MockJobManager &mockJobManager, MockRegionSelector &mockRegionSelector) {
     // Check ROI is set
     auto roi = IRegionSelector::Selection{3.5, 11.23};
-    EXPECT_CALL(mockRegionSelector, getRegion()).Times(1).WillOnce(Return(roi));
-    EXPECT_CALL(mockModel, setSelectedRegion(roi)).Times(1);
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Signal))).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Background))).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockRegionSelector, getRegion(roiTypeToString(ROIType::Transmission))).Times(1).WillOnce(Return(roi));
+    EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Signal, roi)).Times(1);
+    EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Background, roi)).Times(1);
+    EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Transmission, roi)).Times(1);
     // Check theta is set
     auto theta = 0.3;
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
