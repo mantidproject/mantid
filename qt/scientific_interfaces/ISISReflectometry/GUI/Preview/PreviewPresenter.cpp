@@ -149,7 +149,8 @@ void PreviewPresenter::notifyEditROIModeRequested() {
   m_regionSelector->cancelDrawingRegion();
 }
 
-void PreviewPresenter::notifyRectangularROIModeRequested(const std::string &regionType) {
+void PreviewPresenter::notifyRectangularROIModeRequested() {
+  auto const regionType = m_view->getRegionType();
   auto const roiType = roiTypeFromString(regionType);
   m_view->setEditROIState(false);
   m_view->setRectangularROIState(true);

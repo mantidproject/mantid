@@ -230,12 +230,13 @@ public:
     const std::string regionType = roiTypeToString(ROIType::Signal);
     const std::string color = roiTypeToColor(ROIType::Signal);
 
+    EXPECT_CALL(*mockView, getRegionType()).Times(1).WillOnce(Return(regionType));
     expectRectangularROIMode(*mockView);
     EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType, color)).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockRegionSelector_uptr)));
 
-    presenter.notifyRectangularROIModeRequested(regionType);
+    presenter.notifyRectangularROIModeRequested();
   }
 
   void test_edit_roi_mode_requested() {

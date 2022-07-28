@@ -32,7 +32,7 @@ public:
   virtual void notifyLinePlotExportAdsRequested() = 0;
 
   virtual void notifyEditROIModeRequested() = 0;
-  virtual void notifyRectangularROIModeRequested(const std::string &regionType) = 0;
+  virtual void notifyRectangularROIModeRequested() = 0;
 };
 
 class IPreviewView {
@@ -59,6 +59,7 @@ public:
   virtual void setRectangularROIState(bool state) = 0;
 
   virtual std::vector<size_t> getSelectedDetectors() const = 0;
+  virtual std::string getRegionType() const = 0;
 
   virtual QLayout *getRegionSelectorLayout() const = 0;
   virtual MantidQt::MantidWidgets::IPlotView *getLinePlotView() const = 0;

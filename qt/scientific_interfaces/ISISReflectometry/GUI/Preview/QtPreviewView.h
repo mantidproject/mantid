@@ -56,6 +56,7 @@ public:
   void setRectangularROIState(bool state) override;
 
   std::vector<size_t> getSelectedDetectors() const override;
+  std::string getRegionType() const override;
 
   QLayout *getRegionSelectorLayout() const override;
   MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;

@@ -96,7 +96,7 @@ void QtPreviewView::onEditROIClicked() const { m_notifyee->notifyEditROIModeRequ
 
 void QtPreviewView::onAddRectangularROIClicked(QAction *regionType) const {
   m_ui.rs_rect_select_button->setDefaultAction(regionType);
-  m_notifyee->notifyRectangularROIModeRequested(regionType->text().toStdString());
+  m_notifyee->notifyRectangularROIModeRequested();
 }
 
 void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLinePlotExportAdsRequested(); }
@@ -160,5 +160,9 @@ std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
   // (although weather it's treated as a mask or not is up to the caller)
   m_instDisplay->getSurface()->getMaskedDetectors(result);
   return result;
+}
+
+std::string QtPreviewView::getRegionType() const {
+  return m_ui.rs_rect_select_button->defaultAction()->text().toStdString();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
