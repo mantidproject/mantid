@@ -81,6 +81,8 @@ public:
   void notifySumBanksCompleted() override;
   void notifyReductionCompleted() override;
 
+  void notifyReductionAlgorithmError() override;
+
   // RegionSelectionObserver overrides
   void notifyRegionChanged() override;
 

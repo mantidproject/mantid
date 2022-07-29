@@ -17,6 +17,8 @@ PlotPresenter::PlotPresenter(IPlotView *view, std::unique_ptr<PlotModel> model)
   }
 }
 
+void PlotPresenter::clearModel() { m_model->clear(); }
+
 void PlotPresenter::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex) {
   m_model->setSpectrum(ws, wsIndex);
 }

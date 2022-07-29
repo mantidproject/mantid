@@ -127,6 +127,12 @@ void PreviewPresenter::notifyReductionCompleted() {
   plotLinePlot();
 }
 
+void PreviewPresenter::notifyReductionAlgorithmError() {
+  // Clear the final plot if there is an error
+  m_plotPresenter->clearModel();
+  m_plotPresenter->plot();
+}
+
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
   m_view->setInstViewEditState(false);
