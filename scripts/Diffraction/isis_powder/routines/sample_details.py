@@ -46,7 +46,9 @@ class SampleDetails(object):
                                                         exception_msg="The following argument is required but was not"
                                                                       " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
-        crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
+        number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective",
+                                                                throws=False)
+        packing_fraction = common.dictionary_key_helper(dictionary=kwargs, key="packing_fraction", throws=False)
 
         if self.material_object is not None:
             self.print_sample_details()
@@ -55,21 +57,23 @@ class SampleDetails(object):
                                " to change the material call 'reset_sample_material()'")
 
         self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
-                                         crystal_density=crystal_density)
+                                         number_density_effective=number_density_effective, packing_fraction=packing_fraction)
 
     def set_container(self, **kwargs):
         chemical_formula = common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula",
                                                         exception_msg="The following argument is required but was not"
                                                                       " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
-        crystal_density = common.dictionary_key_helper(dictionary=kwargs, key="crystal_density", throws=False)
+        number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective",
+                                                                throws=False)
+        packing_fraction = common.dictionary_key_helper(dictionary=kwargs, key="packing_fraction", throws=False)
         if self.container_material_object is not None:
             self.print_container_details()
             raise RuntimeError("The container material has already been set to the above details. "
                                "To change the material call 'reset_sample_material()'")
 
         self.container_material_object = _Material(chemical_formula=chemical_formula, number_density=number_density,
-                                                   crystal_density=crystal_density)
+                                                   number_density_effective=number_density_effective, packing_fraction=packing_fraction)
         if self._shape_type.capitalize() == "Cylinder":
             self._container_shape = _HollowCylinder(kwargs, sample_height=self.height(), sample_radius=self.radius(),
                                                     sample_center=self.center())
@@ -212,7 +216,11 @@ class SampleDetails(object):
         """
         material_json = {'ChemicalFormula': self.material_object.chemical_formula}
         if self.material_object.number_density:
-            material_json["SampleNumberDensity"] = self.material_object.number_density
+            material_json["NumberDensity"] = self.material_object.number_density
+        if self.material_object.number_density_effective:
+            material_json["EffectiveNumberDensity"] = self.material_object.number_density_effective
+        if self.material_object.packing_fraction:
+            material_json["PackingFraction"] = self.material_object.packing_fraction
         if self.material_object.absorption_cross_section:
             material_json["AttenuationXSection"] = self.material_object.absorption_cross_section
         if self.material_object.scattering_cross_section:
@@ -228,38 +236,41 @@ class SampleDetails(object):
     def generate_container_material(self):
         if self.container_material_object:
             container_material_json = {'ChemicalFormula': self.container_material_object.chemical_formula}
-            if self.material_object.number_density:
-                container_material_json["SampleNumberDensity"] = self.material_object.number_density
-            if self.material_object.absorption_cross_section:
-                container_material_json["AttenuationXSection"] = self.material_object.absorption_cross_section
-            if self.material_object.scattering_cross_section:
-                container_material_json["ScatteringXSection"] = self.material_object.scattering_cross_section
+            if self.container_material_object.number_density:
+                container_material_json["NumberDensity"] = self.container_material_object.number_density
+            if self.container_material_object.number_density_effective:
+                container_material_json["EffectiveNumberDensity"] = self.container_material_object.number_density_effective
+            if self.container_material_object.packing_fraction:
+                container_material_json["PackingFraction"] = self.container_material_object.packing_fraction
+            if self.container_material_object.absorption_cross_section:
+                container_material_json["AttenuationXSection"] = self.container_material_object.absorption_cross_section
+            if self.container_material_object.scattering_cross_section:
+                container_material_json["ScatteringXSection"] = self.container_material_object.scattering_cross_section
             return container_material_json
         else:
             return None
 
 
 class _Material(object):
-    def __init__(self, chemical_formula, number_density=None, crystal_density=None):
+    def __init__(self, chemical_formula, number_density=None, number_density_effective=None, packing_fraction=None):
         self.chemical_formula = chemical_formula
-
         # If it is not an element Mantid requires us to provide the number density
         # which is required for absorption corrections.
-        if len(chemical_formula) > 2 and number_density is None:
+        if len(chemical_formula) > 2 and number_density is None and number_density_effective is None:
             raise ValueError("A number density formula must be set on a chemical formula which is not elemental."
                              " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The number"
-                             " density can be set using the following key: number_density")
+                             " density can be set using the following keys: number_density or number_density_effective")
         if number_density:
             # Always check value is sane if user has given one
             _check_value_is_physical(property_name="number_density", value=number_density)
         self.number_density = number_density
 
-        if crystal_density:
+        if number_density_effective:
             # Always check value is sane if user has given one
-            _check_value_is_physical(property_name="crystal_density", value=crystal_density)
-        else:
-            crystal_density = number_density
-        self.crystal_density = crystal_density
+            _check_value_is_physical(property_name="number_density_effective", value=number_density_effective)
+        self.number_density_effective = number_density_effective
+
+        self.packing_fraction = packing_fraction
 
         # Advanced material properties
         self.absorption_cross_section = None
@@ -275,7 +286,9 @@ class _Material(object):
 
         if self.number_density:
             print("Number Density: {}".format(self.number_density))
-        else:
+        if self.number_density_effective:
+            print("Effective Number Density: {}".format(self.number_density_effective))
+        if not self.number_density and not self.number_density_effective:
             print("Number Density: Set from elemental properties by Mantid")
         self._print_material_properties()
 

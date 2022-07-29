@@ -683,7 +683,7 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
     materialParams.massDensity = materialArgs.getProperty("MassDensity");
   }
   if (materialArgs.existsProperty("EffectiveNumberDensity")) {
-    materialParams.numberDensityEffective = materialArgs.getProperty("numberDensityEffective");
+    materialParams.numberDensityEffective = materialArgs.getProperty("EffectiveNumberDensity");
   }
   if (materialArgs.existsProperty("PackingFraction")) {
     materialParams.packingFraction = materialArgs.getProperty("packingFraction");
