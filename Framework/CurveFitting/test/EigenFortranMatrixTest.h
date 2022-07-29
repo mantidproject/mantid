@@ -8,24 +8,24 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/ComplexMatrix.h"
-#include "MantidCurveFitting/FortranMatrix.h"
-#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/EigenComplexMatrix.h"
+#include "MantidCurveFitting/EigenFortranMatrix.h"
+#include "MantidCurveFitting/EigenMatrix.h"
 
 using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
+using Mantid::CurveFitting::EigenMatrix;
 using Mantid::CurveFitting::FortranMatrix;
-using Mantid::CurveFitting::GSLMatrix;
 
-using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
+using DoubleFortranMatrix = FortranMatrix<EigenMatrix>;
 using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
 
-class FortranMatrixTest : public CxxTest::TestSuite {
+class EigenFortranMatrixTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FortranMatrixTest *createSuite() { return new FortranMatrixTest(); }
-  static void destroySuite(FortranMatrixTest *suite) { delete suite; }
+  static EigenFortranMatrixTest *createSuite() { return new EigenFortranMatrixTest(); }
+  static void destroySuite(EigenFortranMatrixTest *suite) { delete suite; }
 
   void test_double_c_indexing() {
     DoubleFortranMatrix m(3, 3);
@@ -143,14 +143,14 @@ public:
     m(1, 2) = v12;
     m(2, 1) = v21;
     m(2, 2) = v22;
-    auto p = m.gsl();
+    auto p = m.eigen();
 
     auto mm = m.moveToBaseMatrix();
     TS_ASSERT(mm(0, 0) == v11);
     TS_ASSERT(mm(0, 1) == v12);
     TS_ASSERT(mm(1, 0) == v21);
     TS_ASSERT(mm(1, 1) == v22);
-    TS_ASSERT_EQUALS(p, mm.gsl());
+    TS_ASSERT_EQUALS(p, mm.eigen());
   }
 
   void test_double_move() {
@@ -197,5 +197,27 @@ public:
     m.allocate(0, 3, -4, 4);
     TS_ASSERT_EQUALS(m.size1(), 4);
     TS_ASSERT_EQUALS(m.size2(), 9);
+  }
+
+  void test_transpose_complex() {
+    ComplexFortranMatrix m(1, 2);
+    m(1, 1) = 1.;
+    m(1, 2) = 2.;
+
+    ComplexFortranMatrix m_tr = m.transpose();
+
+    TS_ASSERT_EQUALS(m_tr(1, 1), m(1, 1));
+    TS_ASSERT_EQUALS(m_tr(2, 1), m(1, 2));
+  }
+
+  void test_transpose_double() {
+    DoubleFortranMatrix m(1, 2);
+    m(1, 1) = 1.;
+    m(1, 2) = 2.;
+
+    DoubleFortranMatrix m_tr = m.transpose();
+
+    TS_ASSERT_EQUALS(m_tr(1, 1), m(1, 1));
+    TS_ASSERT_EQUALS(m_tr(2, 1), m(1, 2));
   }
 };

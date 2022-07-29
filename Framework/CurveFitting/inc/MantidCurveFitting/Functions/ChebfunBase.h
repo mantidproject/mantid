@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/EigenMatrix.h"
 
 #include <functional>
 #include <memory>

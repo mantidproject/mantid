@@ -11,7 +11,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 #include "MantidKernel/Exception.h"
@@ -22,10 +22,6 @@
 namespace Mantid::CurveFitting::Functions {
 
 namespace {
-
-// Get a complex conjugate of the value returned by
-// ComplexMatrix::operator(i,j)
-ComplexType conj(const ComplexMatrixValueConverter &conv) { return std::conj(static_cast<ComplexType>(conv)); }
 
 // Does the actual calculation of the susceptibility
 void calculate(double *out, const double *xValues, const size_t nData, const DoubleFortranVector &en,

@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace CurveFitting {
 
-/** FortranMatrix is a wrapper template for GSLMatrix  and ComplexMatrix
+/** FortranMatrix is a wrapper template for EigenMatrix  and EigenComplexMatrix
   to simplify porting fortran programs to C++.
   This matrix allows to use arbitrary index bases as they do in
   fortran. Indexing can begin with any integer number including
@@ -44,20 +44,25 @@ public:
   /// Get the size along the second dimension as an int.
   int len2() const;
   /// Index operator
-  ElementConstType operator()(int i, int j) const;
-  ElementRefType operator()(int i, int j);
+  ElementConstType operator()(const int i, const int j) const;
+  ElementRefType operator()(const int i, const int j);
+  /// Assignment operator - Matrix Class
+  FortranMatrix<MatrixClass> &operator=(const MatrixClass &m);
+
   /// Move the data to a new matrix of MatrixClass
   MatrixClass moveToBaseMatrix();
+  /// copy and transpose the matrix
+  FortranMatrix<MatrixClass> transpose() const;
 
 private:
   /// Calculate the size (1D) of a matrix First
-  static size_t makeSize(int firstIndex, int lastIndex);
+  static size_t makeSize(const int firstIndex, const int lastIndex);
 };
 
 //-----------------  Method implementations -------------------------//
 
 /// Calculate the size (1D) of a matrix First
-template <class MatrixClass> size_t FortranMatrix<MatrixClass>::makeSize(int firstIndex, int lastIndex) {
+template <class MatrixClass> size_t FortranMatrix<MatrixClass>::makeSize(const int firstIndex, const int lastIndex) {
   if (lastIndex < firstIndex) {
     throw std::invalid_argument("Matrix defined with invalid index range.");
   }
@@ -112,13 +117,14 @@ template <class MatrixClass> void FortranMatrix<MatrixClass>::allocate(const int
 
 /// The "index" operator
 template <class MatrixClass>
-typename FortranMatrix<MatrixClass>::ElementConstType FortranMatrix<MatrixClass>::operator()(int i, int j) const {
+typename FortranMatrix<MatrixClass>::ElementConstType FortranMatrix<MatrixClass>::operator()(const int i,
+                                                                                             const int j) const {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
 }
 
 /// Get the reference to the data element
 template <class MatrixClass>
-typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::operator()(int i, int j) {
+typename FortranMatrix<MatrixClass>::ElementRefType FortranMatrix<MatrixClass>::operator()(const int i, const int j) {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1), static_cast<size_t>(j - m_base2));
 }
 
@@ -132,6 +138,24 @@ template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const { retu
 
 /// Get the size along the second dimension as an int.
 template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const { return static_cast<int>(this->size2()); }
+
+/// Copy matrix, transpose, then return transposed copy.
+template <class MatrixClass> FortranMatrix<MatrixClass> FortranMatrix<MatrixClass>::transpose() const {
+  FortranMatrix<MatrixClass> res;
+  res = this->tr();
+  return res;
+}
+
+/// Assignment operator - Matrix Class
+template <class MatrixClass> FortranMatrix<MatrixClass> &FortranMatrix<MatrixClass>::operator=(const MatrixClass &m) {
+  this->resize(m.size1(), m.size2());
+  for (size_t i = 0; i < this->size1(); i++) {
+    for (size_t j = 0; j < this->size2(); j++) {
+      this->operator()((int)i + 1, (int)j + 1) = m.get(i, j);
+    }
+  }
+  return *this;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

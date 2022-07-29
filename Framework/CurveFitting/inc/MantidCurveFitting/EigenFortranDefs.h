@@ -6,18 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidCurveFitting/ComplexMatrix.h"
-#include "MantidCurveFitting/FortranMatrix.h"
-#include "MantidCurveFitting/FortranVector.h"
-#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/EigenComplexMatrix.h"
+#include "MantidCurveFitting/EigenFortranMatrix.h"
+#include "MantidCurveFitting/EigenFortranVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
 
 namespace Mantid {
 namespace CurveFitting {
 
 using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
-using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
+using DoubleFortranMatrix = FortranMatrix<EigenMatrix>;
 using ComplexFortranVector = FortranVector<ComplexVector>;
-using DoubleFortranVector = FortranVector<GSLVector>;
+using DoubleFortranVector = FortranVector<EigenVector>;
 using IntFortranVector = FortranVector<std::vector<int>>;
 
 } // namespace CurveFitting

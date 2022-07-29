@@ -8,23 +8,25 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenVector.h"
+#include <MantidCurveFitting/EigenComplexMatrix.h>
+#include <MantidCurveFitting/EigenComplexVector.h>
 
 using namespace Mantid::CurveFitting;
 
-class GSLVectorTest : public CxxTest::TestSuite {
+class EigenVectorTest : public CxxTest::TestSuite {
 public:
-  void test_create_GSLVector() {
+  void test_create_EigenVector() {
     {
-      GSLVector v;
+      EigenVector v;
       TS_ASSERT_EQUALS(v.size(), 1);
     }
     {
-      GSLVector v(1);
+      EigenVector v(1);
       TS_ASSERT_EQUALS(v.size(), 1);
     }
     {
-      GSLVector v(2);
+      EigenVector v(2);
       TS_ASSERT_EQUALS(v.size(), 2);
     }
   }
@@ -34,19 +36,19 @@ public:
     v[0] = 2;
     v[1] = 4;
     v[2] = 6;
-    GSLVector gv(v);
-    TS_ASSERT_EQUALS(gv.size(), 3);
-    TS_ASSERT_EQUALS(gv[0], 2);
-    TS_ASSERT_EQUALS(gv[1], 4);
-    TS_ASSERT_EQUALS(gv[2], 6);
+    EigenVector ev(v);
+    TS_ASSERT_EQUALS(ev.size(), 3);
+    TS_ASSERT_EQUALS(ev[0], 2);
+    TS_ASSERT_EQUALS(ev[1], 4);
+    TS_ASSERT_EQUALS(ev[2], 6);
   }
 
   void test_create_from_initializer() {
-    GSLVector gv({2.0, 4.0, 6.0});
-    TS_ASSERT_EQUALS(gv.size(), 3);
-    TS_ASSERT_EQUALS(gv[0], 2);
-    TS_ASSERT_EQUALS(gv[1], 4);
-    TS_ASSERT_EQUALS(gv[2], 6);
+    EigenVector ev({2.0, 4.0, 6.0});
+    TS_ASSERT_EQUALS(ev.size(), 3);
+    TS_ASSERT_EQUALS(ev[0], 2);
+    TS_ASSERT_EQUALS(ev[1], 4);
+    TS_ASSERT_EQUALS(ev[2], 6);
   }
 
   void test_copy_constructor() {
@@ -54,12 +56,12 @@ public:
     v[0] = 2;
     v[1] = 4;
     v[2] = 6;
-    GSLVector gv(v);
-    GSLVector gc(gv);
-    TS_ASSERT_EQUALS(gc.size(), 3);
-    TS_ASSERT_EQUALS(gc[0], 2);
-    TS_ASSERT_EQUALS(gc[1], 4);
-    TS_ASSERT_EQUALS(gc[2], 6);
+    EigenVector ev(v);
+    EigenVector ec(ev);
+    TS_ASSERT_EQUALS(ec.size(), 3);
+    TS_ASSERT_EQUALS(ec[0], 2);
+    TS_ASSERT_EQUALS(ec[1], 4);
+    TS_ASSERT_EQUALS(ec[2], 6);
   }
 
   void test_assignment_operator() {
@@ -67,13 +69,13 @@ public:
     v[0] = 2;
     v[1] = 4;
     v[2] = 6;
-    GSLVector gv(v);
-    GSLVector gc;
-    gc = gv;
-    TS_ASSERT_EQUALS(gc.size(), 3);
-    TS_ASSERT_EQUALS(gc[0], 2);
-    TS_ASSERT_EQUALS(gc[1], 4);
-    TS_ASSERT_EQUALS(gc[2], 6);
+    EigenVector ev(v);
+    EigenVector ec;
+    ec = ev;
+    TS_ASSERT_EQUALS(ec.size(), 3);
+    TS_ASSERT_EQUALS(ec[0], 2);
+    TS_ASSERT_EQUALS(ec[1], 4);
+    TS_ASSERT_EQUALS(ec[2], 6);
   }
 
   void test_assignment_operator_std_vector() {
@@ -81,12 +83,12 @@ public:
     v[0] = 2;
     v[1] = 4;
     v[2] = 6;
-    GSLVector gc;
-    gc = v;
-    TS_ASSERT_EQUALS(gc.size(), 3);
-    TS_ASSERT_EQUALS(gc[0], 2);
-    TS_ASSERT_EQUALS(gc[1], 4);
-    TS_ASSERT_EQUALS(gc[2], 6);
+    EigenVector ec;
+    ec = v;
+    TS_ASSERT_EQUALS(ec.size(), 3);
+    TS_ASSERT_EQUALS(ec[0], 2);
+    TS_ASSERT_EQUALS(ec[1], 4);
+    TS_ASSERT_EQUALS(ec[2], 6);
   }
 
   void test_zero() {
@@ -94,81 +96,82 @@ public:
     v[0] = 2;
     v[1] = 4;
     v[2] = 6;
-    GSLVector gv(v);
-    gv.zero();
-    TS_ASSERT_EQUALS(gv[0], 0);
-    TS_ASSERT_EQUALS(gv[1], 0);
-    TS_ASSERT_EQUALS(gv[2], 0);
+    EigenVector ev(v);
+    ev.zero();
+    TS_ASSERT_EQUALS(ev[0], 0);
+    TS_ASSERT_EQUALS(ev[1], 0);
+    TS_ASSERT_EQUALS(ev[2], 0);
   }
 
   void test_set_get() {
-    GSLVector gv(3);
-    gv.set(0, 9.9);
-    gv.set(1, 7.7);
-    gv.set(2, 3.3);
-    TS_ASSERT_EQUALS(gv.get(0), 9.9);
-    TS_ASSERT_EQUALS(gv.get(1), 7.7);
-    TS_ASSERT_EQUALS(gv.get(2), 3.3);
+    EigenVector ev(3);
+    ev.set(0, 9.9);
+    ev.set(1, 7.7);
+    ev.set(2, 3.3);
+    TS_ASSERT_EQUALS(ev.get(0), 9.9);
+    TS_ASSERT_EQUALS(ev.get(1), 7.7);
+    TS_ASSERT_EQUALS(ev.get(2), 3.3);
   }
 
   void test_square_brackets() {
-    GSLVector gv(3);
-    gv.set(0, 9.9);
-    gv.set(1, 7.7);
-    gv.set(2, 3.3);
-    TS_ASSERT_EQUALS(gv[0], 9.9);
-    TS_ASSERT_EQUALS(gv[1], 7.7);
-    TS_ASSERT_EQUALS(gv[2], 3.3);
-    gv[0] = 3.3;
-    gv[1] = 9.9;
-    gv[2] = 7.7;
-    TS_ASSERT_EQUALS(gv[1], 9.9);
-    TS_ASSERT_EQUALS(gv[2], 7.7);
-    TS_ASSERT_EQUALS(gv[0], 3.3);
+    EigenVector ev(3);
+    ev.set(0, 9.9);
+    ev.set(1, 7.7);
+    ev.set(2, 3.3);
+    TS_ASSERT_EQUALS(ev[0], 9.9);
+    TS_ASSERT_EQUALS(ev[1], 7.7);
+    TS_ASSERT_EQUALS(ev[2], 3.3);
+    ev[0] = 3.3;
+    ev[1] = 9.9;
+    ev[2] = 7.7;
+    TS_ASSERT_EQUALS(ev[1], 9.9);
+    TS_ASSERT_EQUALS(ev[2], 7.7);
+    TS_ASSERT_EQUALS(ev[0], 3.3);
   }
 
-  void test_gsl() {
-    GSLVector gv(3);
-    gv.set(0, 9.9);
-    gv.set(1, 7.7);
-    gv.set(2, 3.3);
+  void test_eigen() {
+    EigenVector ev(3);
+    ev.set(0, 9.9);
+    ev.set(1, 7.7);
+    ev.set(2, 3.3);
 
-    auto gslVec = gv.gsl();
+    auto eigenVec = ev.inspector();
 
-    TS_ASSERT_EQUALS(gsl_vector_get(gslVec, 0), 9.9);
-    TS_ASSERT_EQUALS(gsl_vector_get(gslVec, 1), 7.7);
-    TS_ASSERT_EQUALS(gsl_vector_get(gslVec, 2), 3.3);
+    TS_ASSERT_EQUALS(eigenVec(0), 9.9);
+    TS_ASSERT_EQUALS(eigenVec(1), 7.7);
+    TS_ASSERT_EQUALS(eigenVec(2), 3.3);
   }
 
   void test_resize() {
-    GSLVector gv(3);
-    gv.set(0, 9.9);
-    gv.set(1, 7.7);
-    gv.set(2, 3.3);
+    EigenVector ev(3);
+    ev.set(0, 9.9);
+    ev.set(1, 7.7);
+    ev.set(2, 3.3);
 
-    gv.resize(5);
-    TS_ASSERT_EQUALS(gv.size(), 5);
-    TS_ASSERT_EQUALS(gv.get(0), 9.9);
-    TS_ASSERT_EQUALS(gv.get(1), 7.7);
-    TS_ASSERT_EQUALS(gv.get(2), 3.3);
-    TS_ASSERT_EQUALS(gv.get(3), 0);
-    TS_ASSERT_EQUALS(gv.get(4), 0);
+    ev.resize(5);
+    TS_ASSERT_EQUALS(ev.size(), 5);
+    TS_ASSERT_EQUALS(ev.get(0), 9.9);
+    TS_ASSERT_EQUALS(ev.get(1), 7.7);
+    TS_ASSERT_EQUALS(ev.get(2), 3.3);
+    TS_ASSERT_EQUALS(ev.get(3), 0);
+    TS_ASSERT_EQUALS(ev.get(4), 0);
 
-    gv[3] = 22;
-    gv[4] = 33;
-    TS_ASSERT_EQUALS(gv.get(3), 22);
-    TS_ASSERT_EQUALS(gv.get(4), 33);
+    ev[3] = 22;
+    ev[4] = 33;
+    TS_ASSERT_EQUALS(ev.get(3), 22);
+    TS_ASSERT_EQUALS(ev.get(4), 33);
 
-    gv.resize(2);
-    TS_ASSERT_EQUALS(gv.size(), 2);
-    TS_ASSERT_EQUALS(gv.get(0), 9.9);
-    TS_ASSERT_EQUALS(gv.get(1), 7.7);
+    ev.resize(2);
+    TS_ASSERT_EQUALS(ev.size(), 2);
+    TS_ASSERT_EQUALS(ev.get(0), 9.9);
+    TS_ASSERT_EQUALS(ev.get(1), 7.7);
   }
 
   void test_plus_operator() {
     auto v1 = makeVector1();
     auto v2 = makeVector2();
     v1 += v2;
+
     TS_ASSERT_EQUALS(v1.size(), 3);
     TS_ASSERT_EQUALS(v1[0], 8);
     TS_ASSERT_EQUALS(v1[1], 88);
@@ -214,7 +217,7 @@ public:
   }
 
   void test_find_min_element() {
-    GSLVector v(3);
+    EigenVector v(3);
     v[0] = 55;
     v[1] = 5;
     v[2] = 555;
@@ -226,7 +229,7 @@ public:
   }
 
   void test_find_max_element() {
-    GSLVector v(3);
+    EigenVector v(3);
     v[0] = 55;
     v[1] = 5;
     v[2] = 555;
@@ -238,7 +241,7 @@ public:
   }
 
   void test_find_min_max_element() {
-    GSLVector v(3);
+    EigenVector v(3);
     v[0] = 55;
     v[1] = 5;
     v[2] = 555;
@@ -248,7 +251,7 @@ public:
   }
 
   void test_sort_indices_ascending() {
-    GSLVector v(std::vector<double>{3.5, 5.9, 2.9, 0.5, 1.5});
+    EigenVector v(std::vector<double>{3.5, 5.9, 2.9, 0.5, 1.5});
     auto sorted = v.sortIndices();
     TS_ASSERT_EQUALS(sorted[0], 3);
     TS_ASSERT_EQUALS(sorted[1], 4);
@@ -270,7 +273,7 @@ public:
   }
 
   void test_sort_indices_descending() {
-    GSLVector v(std::vector<double>{3.5, 5.9, 2.9, 0.5, 1.5});
+    EigenVector v(std::vector<double>{3.5, 5.9, 2.9, 0.5, 1.5});
     auto sorted = v.sortIndices(false);
     TS_ASSERT_EQUALS(sorted[0], 1);
     TS_ASSERT_EQUALS(sorted[1], 0);
@@ -294,7 +297,7 @@ public:
   void test_move_std_vector() {
     std::vector<double> s{3.5, 5.9, 2.9, 0.5, 1.5};
     auto p0 = &s[0];
-    GSLVector v(std::move(s));
+    EigenVector v(std::move(s));
     TS_ASSERT_EQUALS(v.size(), 5);
     TS_ASSERT_EQUALS(v[0], 3.5);
     TS_ASSERT_EQUALS(v[1], 5.9);
@@ -321,25 +324,25 @@ public:
     TS_ASSERT_EQUALS(v[2], 565.0);
   }
 
-private:
-  GSLVector makeVector1() {
-    GSLVector v(3);
+  EigenVector makeVector1() {
+    EigenVector v(3);
     v[0] = 5;
     v[1] = 55;
     v[2] = 555;
+
     return v;
   }
 
-  GSLVector makeVector2() {
-    GSLVector v(3);
+  EigenVector makeVector2() {
+    EigenVector v(3);
     v[0] = 3;
     v[1] = 33;
     v[2] = 333;
     return v;
   }
 
-  GSLVector makeVector3() {
-    GSLVector v(2);
+  EigenVector makeVector3() {
+    EigenVector v(2);
     v[0] = 1;
     v[1] = 11;
     return v;

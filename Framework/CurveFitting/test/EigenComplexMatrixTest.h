@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/ComplexMatrix.h"
+#include "MantidCurveFitting/EigenComplexMatrix.h"
 
 using namespace Mantid::CurveFitting;
 
@@ -45,57 +45,9 @@ ComplexType v33{33, 0.33};
   TS_ASSERT_DELTA(ComplexType(v1).imag(), ComplexType(v2).imag(), d);
 } // namespace
 
-class ComplexMatrixTest : public CxxTest::TestSuite {
+class EigenComplexMatrixTest : public CxxTest::TestSuite {
 public:
-  void test_create_GSLMult2_plain_plain() {
-    const ComplexMatrix m1(2, 2);
-    const ComplexMatrix m2(2, 2);
-
-    ComplexMatrixMult2 mult2 = m1 * m2;
-
-    TS_ASSERT_EQUALS(mult2.tr1, false);
-    TS_ASSERT_EQUALS(mult2.tr2, false);
-    TS_ASSERT(mult2.m_1.gsl() == m1.gsl());
-    TS_ASSERT(mult2.m_2.gsl() == m2.gsl());
-  }
-
-  void test_create_GSLMult2_tr_plain() {
-    ComplexMatrix m1(2, 2);
-    ComplexMatrix m2(2, 2);
-
-    ComplexMatrixMult2 mult2 = m1.tr() * m2;
-
-    TS_ASSERT_EQUALS(mult2.tr1, true);
-    TS_ASSERT_EQUALS(mult2.tr2, false);
-    TS_ASSERT(mult2.m_1.gsl() == m1.gsl());
-    TS_ASSERT(mult2.m_2.gsl() == m2.gsl());
-  }
-
-  void test_create_GSLMult2_plain_tr() {
-    ComplexMatrix m1(2, 2);
-    ComplexMatrix m2(2, 2);
-
-    ComplexMatrixMult2 mult2 = m1 * m2.tr();
-
-    TS_ASSERT_EQUALS(mult2.tr1, false);
-    TS_ASSERT_EQUALS(mult2.tr2, true);
-    TS_ASSERT(mult2.m_1.gsl() == m1.gsl());
-    TS_ASSERT(mult2.m_2.gsl() == m2.gsl());
-  }
-
-  void test_create_GSLMult2_tr_tr() {
-    ComplexMatrix m1(2, 2);
-    ComplexMatrix m2(2, 2);
-
-    ComplexMatrixMult2 mult2 = m1.tr() * m2.tr();
-
-    TS_ASSERT_EQUALS(mult2.tr1, true);
-    TS_ASSERT_EQUALS(mult2.tr2, true);
-    TS_ASSERT(mult2.m_1.gsl() == m1.gsl());
-    TS_ASSERT(mult2.m_2.gsl() == m2.gsl());
-  }
-
-  void test_zeros() {
+  void test_zeros_complex() {
     ComplexMatrix m(10, 12);
     for (size_t i = 0; i < m.size1(); ++i) {
       for (size_t j = 0; j < m.size2(); ++j) {
@@ -106,7 +58,7 @@ public:
     }
   }
 
-  void test_resize() {
+  void test_resize_complex() {
     ComplexMatrix m(5, 6);
     for (size_t i = 0; i < m.size1(); ++i) {
       for (size_t j = 0; j < m.size2(); ++j) {
@@ -133,7 +85,7 @@ public:
     }
   }
 
-  void test_multiply_two_matrices() {
+  void test_multiply_two_matrices_complex() {
     ComplexMatrix m1(2, 2);
     m1.set(0, 0, v1);
     m1.set(0, 1, v2);
@@ -211,7 +163,7 @@ public:
     TS_ASSERT_COMPLEX_DELTA(m3.get(1, 1), 45.54, -9.2, 1e-8);
   }
 
-  void test_multiply_three_matrices() {
+  void test_multiply_three_matrices_complex() {
     ComplexMatrix m1(2, 2);
     m1.set(0, 0, v1);
     m1.set(0, 1, v2);
@@ -247,7 +199,7 @@ public:
       }
   }
 
-  void test_invert() {
+  void test_invert_complex() {
     ComplexMatrix m(2, 2);
     m.set(0, 0, 1);
     m.set(0, 1, 1);
@@ -269,7 +221,7 @@ public:
     TS_ASSERT_EQUALS(m.get(1, 1), 0.5);
   }
 
-  void test_subMatrix() {
+  void test_subMatrix_complex() {
     ComplexMatrix m(4, 4);
     m.set(0, 0, v0);
     m.set(0, 1, v1);
@@ -295,7 +247,7 @@ public:
     TS_ASSERT_EQUALS(subm.get(1, 1), v22);
   }
 
-  void test_subMatrix_fail() {
+  void test_subMatrix_fail_complex() {
     ComplexMatrix m(4, 4);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
@@ -317,14 +269,17 @@ public:
     TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3), const std::runtime_error &);
   }
 
-  void test_eigenSystem_rectangular_throw() {
+  void test_eigenSystem_rectangular_throw_complex() {
     ComplexMatrix M(3, 4);
-    GSLVector v;
+    EigenVector v;
     ComplexMatrix Q;
     TS_ASSERT_THROWS(M.eigenSystemHermitian(v, Q), const std::runtime_error &);
   }
 
   void test_small_real_eigenSystem() {
+    // this replicates a portion of the CrystalFieldTest. This ensures consistency of results at the
+    // ComplexMatrix level.
+
     const size_t n = 2;
     ComplexMatrix m(n, n);
     m.set(0, 0, 0);
@@ -332,7 +287,7 @@ public:
     m.set(1, 0, 1);
     m.set(1, 1, 11);
 
-    GSLVector v;
+    EigenVector v;
     ComplexMatrix Q;
     ComplexMatrix M = m;
     M.eigenSystemHermitian(v, Q);
@@ -340,12 +295,12 @@ public:
     TS_ASSERT_EQUALS(Q.size1(), n);
     TS_ASSERT_EQUALS(Q.size2(), n);
 
-    TS_ASSERT_DELTA(v[0], -0.09016994, 1e-8);
-    TS_ASSERT_DELTA(v[1], 11.09016994, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(v[0], -0.09016994, 0, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(v[1], 11.09016994, 0, 1e-8);
 
-    TS_ASSERT_COMPLEX_DELTA(Q.get(0, 0), 0.99595931, 0, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(Q.get(0, 0), -0.99595931, 0, 1e-8);
     TS_ASSERT_COMPLEX_DELTA(Q.get(0, 1), -0.0898056, 0, 1e-8);
-    TS_ASSERT_COMPLEX_DELTA(Q.get(1, 0), -0.0898056, 0, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(Q.get(1, 0), 0.0898056, 0, 1e-8);
     TS_ASSERT_COMPLEX_DELTA(Q.get(1, 1), -0.99595931, 0, 1e-8);
   }
 
@@ -357,7 +312,7 @@ public:
     m.set(1, 0, conj(v1));
     m.set(1, 1, 11);
 
-    GSLVector v;
+    EigenVector v;
     ComplexMatrix Q;
     ComplexMatrix M = m;
     M.eigenSystemHermitian(v, Q);
@@ -365,16 +320,16 @@ public:
     TS_ASSERT_EQUALS(Q.size1(), n);
     TS_ASSERT_EQUALS(Q.size2(), n);
 
-    TS_ASSERT_DELTA(v[0], -0.0910643, 1e-8);
-    TS_ASSERT_DELTA(v[1], 11.0910643, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(v[0], -0.0910643, 0, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(v[1], 11.0910643, 0, 1e-8);
 
-    TS_ASSERT_COMPLEX_DELTA(Q.get(0, 0), 0.99591981, 0, 1e-8);
-    TS_ASSERT_COMPLEX_DELTA(Q.get(0, 1), -0.09024265, 0, 1e-8);
-    TS_ASSERT_COMPLEX_DELTA(Q.get(1, 0), -0.08979479, 0.00897948, 1e-8);
-    TS_ASSERT_COMPLEX_DELTA(Q.get(1, 1), -0.99097725, 0.09909772, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(Q.get(0, 0), -0.99591981, 0, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(Q.get(0, 1), 0.09024265, 0, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(Q.get(1, 0), 0.08979479, -0.00897948, 1e-8);
+    TS_ASSERT_COMPLEX_DELTA(Q.get(1, 1), 0.99097725, -0.09909772, 1e-8);
   }
 
-  void test_eigenSystem() {
+  void test_eigenSystem_complex() {
     const size_t n = 4;
     ComplexMatrix m(n, n);
     m.set(0, 0, 0);
@@ -393,7 +348,7 @@ public:
     m.set(3, 1, conj(v13));
     m.set(3, 2, conj(v23));
     m.set(3, 3, 33);
-    GSLVector v;
+    EigenVector v;
     ComplexMatrix Q;
     ComplexMatrix M = m;
     M.eigenSystemHermitian(v, Q);
@@ -422,7 +377,48 @@ public:
     }
   }
 
-  void test_copyColumn() {
+  void test_crystal_eigenSystem() {
+    // this replicates a portion of the CrystalFieldTest. This ensures consistency of results at the
+    // ComplexMatrix level.
+
+    Eigen::MatrixXcd m{{27.737, 0, -85.3224, 0, -62.279, 0}, {0, -73.789, 0, 112.995, 0, -62.279},
+                       {-85.3224, 0, 46.052, 0, 112.995, 0}, {0, 112.995, 0, 46.052, 0, -85.3224},
+                       {-62.279, 0, 112.995, 0, -73.789, 0}, {0, -62.279, 0, -85.3224, 0, 27.737}};
+    ComplexMatrix m_c(std::move(m));
+
+    EigenVector v;
+    ComplexMatrix m_cr;
+
+    m_c.eigenSystemHermitian(v, m_cr);
+
+    auto indicies = v.sortIndices();
+    v.sort(indicies);
+    m_cr.sortColumns(indicies);
+
+    auto res = m_cr.ctr() * m_cr;
+
+    for (size_t i = 0; i < res.size1(); ++i) {
+      for (size_t j = 0; j < res.size2(); ++j) {
+        ComplexType value = res(i, j);
+        if (i == j) {
+          TS_ASSERT_DELTA(value.real(), 1.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        } else {
+          TS_ASSERT_DELTA(value.real(), 0.0, 1e-10);
+          TS_ASSERT_DELTA(value.imag(), 0.0, 1e-10);
+        }
+      }
+    }
+
+    Eigen::VectorXd ans_v(6);
+    ans_v << -142.461, -142.461, -42.2269, -42.2269, 184.688, 184.688;
+
+    for (size_t i = 0; i < v.size(); i++) {
+      TS_ASSERT_DELTA(v.get(i), ans_v(i), 1e-1);
+    }
+  }
+
+  void test_copyColumn_complex() {
 
     ComplexMatrix m(4, 4);
     m.set(0, 0, v0);
@@ -449,10 +445,11 @@ public:
     TS_ASSERT(column[3] == m.get(3, 2));
 
     column[2] = 0;
+    TS_ASSERT_EQUALS(column[2].real(), ComplexType(0, 0));
     TS_ASSERT_EQUALS(m.get(2, 2), v22);
   }
 
-  void test_copyRow() {
+  void test_copyRow_complex() {
 
     ComplexMatrix m(4, 4);
     m.set(0, 0, v0);
@@ -473,15 +470,17 @@ public:
     m.set(3, 3, v33);
 
     auto row = m.copyRow(1);
+
     TS_ASSERT(row[0] == m.get(1, 0));
     TS_ASSERT(row[1] == m.get(1, 1));
     TS_ASSERT(row[2] == m.get(1, 2));
     TS_ASSERT(row[3] == m.get(1, 3));
     row[2] = 0;
+    TS_ASSERT_EQUALS(row[2], ComplexType(0, 0));
     TS_ASSERT_EQUALS(m.get(1, 2), v12);
   }
 
-  void test_index_operator() {
+  void test_index_operator_complex() {
     ComplexMatrix m(2, 2);
     m(0, 0) = v11;
     m(0, 1) = v12;
@@ -494,7 +493,7 @@ public:
     TS_ASSERT(m(1, 1) == v22);
   }
 
-  void test_sort_columns() {
+  void test_sort_columns_complex() {
     ComplexMatrix m(3, 3);
     m(0, 0) = v11;
     m(1, 0) = v11;
@@ -545,65 +544,86 @@ public:
     }
   }
 
-  void test_copy_constructor() {
+  void test_copy_constructor_complex() {
     ComplexMatrix a(2, 2);
     a(0, 0) = v11;
     a(0, 1) = v12;
     a(1, 0) = v21;
     a(1, 1) = v22;
-    auto gsl = a.gsl();
+
     ComplexMatrix m(a);
     TS_ASSERT(m(0, 0) == v11);
     TS_ASSERT(m(0, 1) == v12);
     TS_ASSERT(m(1, 0) == v21);
     TS_ASSERT(m(1, 1) == v22);
-    TS_ASSERT_DIFFERS(m.gsl(), gsl);
+
+    a(1, 1) = 0;
+    TS_ASSERT_DIFFERS(a.eigen(), m.eigen());
   }
 
-  void test_move_constructor() {
+  void test_move_constructor_complex() {
     ComplexMatrix a(2, 2);
     a(0, 0) = v11;
     a(0, 1) = v12;
     a(1, 0) = v21;
     a(1, 1) = v22;
-    auto gsl = a.gsl();
     ComplexMatrix m(std::move(a));
+    // test that data has been transferred
     TS_ASSERT(m(0, 0) == v11);
     TS_ASSERT(m(0, 1) == v12);
     TS_ASSERT(m(1, 0) == v21);
     TS_ASSERT(m(1, 1) == v22);
-    TS_ASSERT_EQUALS(m.gsl(), gsl);
+    // Check data in has been deleted by move.
+    TS_ASSERT_EQUALS(a.eigen().size(), 0);
   }
 
-  void test_copy_assignment() {
+  void test_move_constructor_matrix_complex() {
+    Eigen::MatrixXcd a(2, 2);
+    a(0, 0) = v11;
+    a(0, 1) = v12;
+    a(1, 0) = v21;
+    a(1, 1) = v22;
+    ComplexMatrix m(std::move(a));
+    // test that data has been transferred
+    TS_ASSERT(m(0, 0) == v11);
+    TS_ASSERT(m(0, 1) == v12);
+    TS_ASSERT(m(1, 0) == v21);
+    TS_ASSERT(m(1, 1) == v22);
+    // Check data in has been deleted by move.
+    TS_ASSERT_EQUALS(a.size(), 0);
+  }
+
+  void test_copy_assignment_complex() {
     ComplexMatrix a(2, 2);
     a(0, 0) = v11;
     a(0, 1) = v12;
     a(1, 0) = v21;
     a(1, 1) = v22;
-    auto gsl = a.gsl();
+
     ComplexMatrix m;
     m = a;
     TS_ASSERT(m(0, 0) == v11);
     TS_ASSERT(m(0, 1) == v12);
     TS_ASSERT(m(1, 0) == v21);
     TS_ASSERT(m(1, 1) == v22);
-    TS_ASSERT_DIFFERS(m.gsl(), gsl);
+
+    a(1, 1) = 0;
+    TS_ASSERT_DIFFERS(&(m.eigen()), &(a.eigen()));
   }
 
-  void test_move_assignment() {
+  void test_move_assignment_complex() {
     ComplexMatrix a(2, 2);
     a(0, 0) = v11;
     a(0, 1) = v12;
     a(1, 0) = v21;
     a(1, 1) = v22;
-    auto gsl = a.gsl();
+    auto eigen = a.eigen();
     ComplexMatrix m;
     m = std::move(a);
     TS_ASSERT(m(0, 0) == v11);
     TS_ASSERT(m(0, 1) == v12);
     TS_ASSERT(m(1, 0) == v21);
     TS_ASSERT(m(1, 1) == v22);
-    TS_ASSERT_EQUALS(m.gsl(), gsl);
+    TS_ASSERT_EQUALS(m.eigen(), eigen);
   }
 };

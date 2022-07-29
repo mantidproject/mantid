@@ -8,7 +8,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldControl.h"
 
 #include <unordered_map>

@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace CurveFitting {
 
-/** FortranVector is a wrapper template for GSLVactor and ComplexVector
+/** FortranVector is a wrapper template for EigenVactor and EigenComplexVector
   to simplify porting fortran programs to C++.
   This vector allows to use arbitrary index bases as they do in
   fortran. Indexing can begin with any integer number including

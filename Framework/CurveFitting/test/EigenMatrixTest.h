@@ -8,62 +8,22 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/EigenComplexMatrix.h"
+#include "MantidCurveFitting/EigenComplexVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
 
 using namespace Mantid::CurveFitting;
 
-class GSLMatrixTest : public CxxTest::TestSuite {
+namespace {
+#define TS_ASSERT_COMPLEX_DELTA(v1, r2, i2, d)                                                                         \
+  TS_ASSERT_DELTA(ComplexType(v1).real(), r2, d);                                                                      \
+  TS_ASSERT_DELTA(ComplexType(v1).imag(), i2, d);
+} // namespace
+
+class EigenMatrixTest : public CxxTest::TestSuite {
 public:
-  void test_create_GSLMult2_plain_plain() {
-    GSLMatrix m1(2, 2);
-    GSLMatrix m2(2, 2);
-
-    GSLMatrixMult2 mult2 = m1 * m2;
-
-    TS_ASSERT_EQUALS(mult2.tr1, false);
-    TS_ASSERT_EQUALS(mult2.tr2, false);
-    TS_ASSERT_EQUALS(mult2.m_1.gsl(), m1.gsl());
-    TS_ASSERT_EQUALS(mult2.m_2.gsl(), m2.gsl());
-  }
-
-  void test_create_GSLMult2_tr_plain() {
-    GSLMatrix m1(2, 2);
-    GSLMatrix m2(2, 2);
-
-    GSLMatrixMult2 mult2 = m1.tr() * m2;
-
-    TS_ASSERT_EQUALS(mult2.tr1, true);
-    TS_ASSERT_EQUALS(mult2.tr2, false);
-    TS_ASSERT_EQUALS(mult2.m_1.gsl(), m1.gsl());
-    TS_ASSERT_EQUALS(mult2.m_2.gsl(), m2.gsl());
-  }
-
-  void test_create_GSLMult2_plain_tr() {
-    GSLMatrix m1(2, 2);
-    GSLMatrix m2(2, 2);
-
-    GSLMatrixMult2 mult2 = m1 * m2.tr();
-
-    TS_ASSERT_EQUALS(mult2.tr1, false);
-    TS_ASSERT_EQUALS(mult2.tr2, true);
-    TS_ASSERT_EQUALS(mult2.m_1.gsl(), m1.gsl());
-    TS_ASSERT_EQUALS(mult2.m_2.gsl(), m2.gsl());
-  }
-
-  void test_create_GSLMult2_tr_tr() {
-    GSLMatrix m1(2, 2);
-    GSLMatrix m2(2, 2);
-
-    GSLMatrixMult2 mult2 = m1.tr() * m2.tr();
-
-    TS_ASSERT_EQUALS(mult2.tr1, true);
-    TS_ASSERT_EQUALS(mult2.tr2, true);
-    TS_ASSERT_EQUALS(mult2.m_1.gsl(), m1.gsl());
-    TS_ASSERT_EQUALS(mult2.m_2.gsl(), m2.gsl());
-  }
-
   void test_create_from_initializer_list() {
-    GSLMatrix m({{1.0, 2.0}, {11.0, 12.0}, {21.0, 22.0}});
+    EigenMatrix m({{1.0, 2.0}, {11.0, 12.0}, {21.0, 22.0}});
     TS_ASSERT_EQUALS(m.size1(), 3);
     TS_ASSERT_EQUALS(m.size2(), 2);
     TS_ASSERT_EQUALS(m(0, 0), 1.);
@@ -74,19 +34,43 @@ public:
     TS_ASSERT_EQUALS(m(2, 1), 22.);
   }
 
+  void test_create_from_kernel_matrix() {
+    Mantid::Kernel::Matrix<double> m(3, 4);
+    for (size_t i = 0; i < m.numRows(); i++) {
+      for (size_t j = 0; j < m.numCols(); j++) {
+        m[i][j] = (double)(j + i * m.numCols());
+      }
+    }
+
+    EigenMatrix em2(m);
+    for (size_t i = 0; i < em2.size1(); i++) {
+      for (size_t j = 0; j < em2.size2(); j++) {
+        TS_ASSERT_EQUALS(em2(i, j), m[i][j]);
+      }
+    }
+
+    // create sub matrix
+    EigenMatrix em(m, 0, 0, 2, 2);
+    for (size_t i = 0; i < em.size1(); i++) {
+      for (size_t j = 0; j < em.size2(); j++) {
+        TS_ASSERT_EQUALS(em(i, j), m[i][j]);
+      }
+    }
+  }
+
   void test_multiply_two_matrices() {
-    GSLMatrix m1(2, 2);
+    EigenMatrix m1(2, 2);
     m1.set(0, 0, 1);
     m1.set(0, 1, 2);
     m1.set(1, 0, 3);
     m1.set(1, 1, 4);
-    GSLMatrix m2(2, 2);
+    EigenMatrix m2(2, 2);
     m2.set(0, 0, 5);
     m2.set(0, 1, 6);
     m2.set(1, 0, 7);
     m2.set(1, 1, 8);
 
-    GSLMatrix m3;
+    EigenMatrix m3;
 
     m3 = m1 * m2;
 
@@ -118,23 +102,23 @@ public:
   }
 
   void test_multiply_three_matrices() {
-    GSLMatrix m1(2, 2);
+    EigenMatrix m1(2, 2);
     m1.set(0, 0, 1);
     m1.set(0, 1, 2);
     m1.set(1, 0, 3);
     m1.set(1, 1, 4);
-    GSLMatrix m2(2, 2);
+    EigenMatrix m2(2, 2);
     m2.set(0, 0, 5);
     m2.set(0, 1, 6);
     m2.set(1, 0, 7);
     m2.set(1, 1, 8);
-    GSLMatrix m3(2, 2);
+    EigenMatrix m3(2, 2);
     m3.set(0, 0, 9);
     m3.set(0, 1, 10);
     m3.set(1, 0, 11);
     m3.set(1, 1, 12);
 
-    GSLMatrix m;
+    EigenMatrix m;
 
     m = m1.tr() * m2 * m3;
 
@@ -153,7 +137,7 @@ public:
   }
 
   void test_invert() {
-    GSLMatrix m(2, 2);
+    EigenMatrix m(2, 2);
     m.set(0, 0, 1);
     m.set(0, 1, 1);
     m.set(1, 0, 0);
@@ -175,7 +159,7 @@ public:
   }
 
   void test_subMatrix() {
-    GSLMatrix m(4, 4);
+    EigenMatrix m(3, 4);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
     m.set(0, 2, 2);
@@ -188,12 +172,9 @@ public:
     m.set(2, 1, 21);
     m.set(2, 2, 22);
     m.set(2, 3, 23);
-    m.set(3, 0, 30);
-    m.set(3, 1, 31);
-    m.set(3, 2, 32);
-    m.set(3, 3, 33);
 
-    GSLMatrix subm(m, 1, 1, 2, 2);
+    EigenMatrix subm(m, 1, 1, 2, 2);
+
     TS_ASSERT_EQUALS(subm.get(0, 0), 11);
     TS_ASSERT_EQUALS(subm.get(0, 1), 12);
     TS_ASSERT_EQUALS(subm.get(1, 0), 21);
@@ -201,7 +182,7 @@ public:
   }
 
   void test_subMatrix_fail() {
-    GSLMatrix m(4, 4);
+    EigenMatrix m(4, 4);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
     m.set(0, 2, 2);
@@ -219,19 +200,19 @@ public:
     m.set(3, 2, 32);
     m.set(3, 3, 33);
 
-    TS_ASSERT_THROWS(GSLMatrix subm(m, 2, 2, 3, 3), const std::runtime_error &);
+    TS_ASSERT_THROWS(EigenMatrix subm(m, 2, 2, 3, 3), const std::runtime_error &);
   }
 
   void test_eigenSystem_rectangular_throw() {
-    GSLMatrix M(3, 4);
-    GSLVector v;
-    GSLMatrix Q;
+    EigenMatrix M(3, 4);
+    EigenVector v;
+    EigenMatrix Q;
     TS_ASSERT_THROWS(M.eigenSystem(v, Q), const std::runtime_error &);
   }
 
   void test_eigenSystem() {
     const size_t n = 4;
-    GSLMatrix m(n, n);
+    EigenMatrix m(n, n);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
     m.set(0, 2, 2);
@@ -248,15 +229,15 @@ public:
     m.set(3, 1, 13);
     m.set(3, 2, 23);
     m.set(3, 3, 33);
-    GSLVector v;
-    GSLMatrix Q;
-    GSLMatrix M = m;
+    EigenVector v;
+    EigenMatrix Q;
+    EigenMatrix M = m;
     M.eigenSystem(v, Q);
     TS_ASSERT_EQUALS(v.size(), n);
     TS_ASSERT_EQUALS(Q.size1(), n);
     TS_ASSERT_EQUALS(Q.size2(), n);
     {
-      GSLMatrix D = Q.tr() * m * Q;
+      EigenMatrix D = Q.tr() * m * Q;
       double trace_m = 0.0;
       double trace_D = 0.0;
       double det = 1.0;
@@ -270,7 +251,7 @@ public:
       TS_ASSERT_DELTA(det, m.det(), 1e-10);
     }
     {
-      GSLMatrix D = Q.tr() * Q;
+      EigenMatrix D = Q.tr() * Q;
       for (size_t i = 0; i < n; ++i) {
         TS_ASSERT_DELTA(D.get(i, i), 1.0, 1e-10);
       }
@@ -279,7 +260,7 @@ public:
 
   void test_copyColumn() {
 
-    GSLMatrix m(4, 4);
+    EigenMatrix m(4, 4);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
     m.set(0, 2, 2);
@@ -309,7 +290,7 @@ public:
 
   void test_copyRow() {
 
-    GSLMatrix m(4, 4);
+    EigenMatrix m(4, 4);
     m.set(0, 0, 0);
     m.set(0, 1, 1);
     m.set(0, 2, 2);
@@ -337,7 +318,7 @@ public:
   }
 
   void test_index_operator() {
-    GSLMatrix m(3, 3);
+    EigenMatrix m(3, 3);
     m(0, 0) = 0.0;
     m(0, 1) = 1.0;
     m(0, 2) = 2.0;
@@ -369,8 +350,7 @@ public:
   }
 
   void test_initializer_list() {
-    gsl_set_error_handler_off();
-    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    EigenMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
     TS_ASSERT_EQUALS(m.size1(), 3);
     TS_ASSERT_EQUALS(m.size2(), 2);
     TS_ASSERT_EQUALS(m(0, 0), 1.0);
@@ -380,14 +360,13 @@ public:
     TS_ASSERT_EQUALS(m(1, 1), 2.0);
     TS_ASSERT_EQUALS(m(2, 1), -3.0);
 
-    TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}), const std::runtime_error &);
+    TS_ASSERT_THROWS(EigenMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}), const std::runtime_error &);
   }
 
   void test_vector_mul() {
-    gsl_set_error_handler_off();
-    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
-    GSLVector b({5.0, 2.0});
-    GSLVector x = m * b;
+    EigenMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    EigenVector b({5.0, 2.0});
+    EigenVector x = m * b;
     TS_ASSERT_EQUALS(x.size(), 3);
     TS_ASSERT_EQUALS(x[0], 9.0);
     TS_ASSERT_EQUALS(x[1], 24.0);
@@ -395,33 +374,32 @@ public:
   }
 
   void test_solve_singular() {
-    gsl_set_error_handler_off();
-    GSLMatrix m({{0.0, 0.0}, {0.0, 0.0}});
-    GSLVector b({1.0, 2.0});
-    GSLVector x;
-    TS_ASSERT_THROWS(m.solve(b, x), const std::runtime_error &);
+    EigenMatrix m({{0.0, 0.0}, {0.0, 0.0}});
+    EigenVector b({1.0, 2.0});
+    EigenVector x;
+    TS_ASSERT_THROWS(m.solve(b, x), const std::invalid_argument &);
   }
 
   void test_solve_singular_1() {
-    gsl_set_error_handler_off();
-    GSLMatrix m({{1.0, 2.0}, {2.0, 4.0}});
-    GSLVector b({1.0, 2.0});
-    GSLVector x;
-    TS_ASSERT_THROWS(m.solve(b, x), const std::runtime_error &);
+    EigenMatrix m({{1.0, 2.0}, {2.0, 4.0}});
+    EigenVector b({1.0, 2.0});
+    EigenVector x;
+    TS_ASSERT_THROWS(m.solve(b, x), const std::invalid_argument &);
   }
 
   void test_solve() {
-    gsl_set_error_handler_off();
-    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}});
-    GSLVector b({5.0, 2.0});
-    GSLVector x;
-    GSLMatrix mm = m;
+    EigenMatrix m({{1.0, 2.0}, {4.0, 2.0}});
+    EigenVector b({5.0, 2.0});
+    EigenVector x;
+    EigenMatrix mm = m;
     mm.solve(b, x);
-    TS_ASSERT_EQUALS(x.size(), 2);
-    TS_ASSERT_EQUALS(x[0], -1.0);
-    TS_ASSERT_EQUALS(x[1], 3.0);
-    GSLVector bb = m * x;
-    TS_ASSERT_EQUALS(bb[0], 5.0);
-    TS_ASSERT_EQUALS(bb[1], 2.0);
+    Eigen::VectorXd sol_vec = x.copy_view();
+
+    TS_ASSERT_DELTA(sol_vec.size(), 2, 1e-8);
+    TS_ASSERT_DELTA(sol_vec[0], -1.0, 1e-8);
+    TS_ASSERT_DELTA(sol_vec[1], 3.0, 1e-8);
+    Eigen::VectorXd test_sol = m.inspector() * sol_vec;
+    TS_ASSERT_DELTA(test_sol[0], 5.0, 1e-8);
+    TS_ASSERT_DELTA(test_sol[1], 2.0, 1e-8);
   }
 };

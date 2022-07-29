@@ -8,8 +8,8 @@
 
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+#include "MantidCurveFitting/EigenVector.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -55,10 +55,10 @@ private:
   double gaussianStep(const double &jump);
   /// Applied to the other parameters first and sequentially, finally to the
   /// current one
-  void tieApplication(const size_t &parameterIndex, GSLVector &newParameters, double &newValue);
+  void tieApplication(const size_t &parameterIndex, EigenVector &newParameters, double &newValue);
   /// Given the new chi2, next position is calculated and updated.
   /// m_changes[ParameterIndex] updated too
-  void algorithmDisplacement(const size_t &parameterIndex, const double &chi2New, const GSLVector &newParameters);
+  void algorithmDisplacement(const size_t &parameterIndex, const double &chi2New, const EigenVector &newParameters);
   /// Updates the ParameterIndex-th parameter jump if appropriate
   void jumpUpdate(const size_t &parameterIndex);
   /// Check for convergence (including Overexploration convergence), updates
@@ -115,7 +115,7 @@ private:
   /// The jump for each parameter
   std::vector<double> m_jump;
   /// Parameters' values.
-  GSLVector m_parameters;
+  EigenVector m_parameters;
   /// Markov chain.
   std::vector<std::vector<double>> m_chain;
   /// The chi square result of previous iteration;

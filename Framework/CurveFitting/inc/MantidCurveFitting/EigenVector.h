@@ -7,7 +7,10 @@
 #pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
-#include <gsl/gsl_vector.h>
+
+#include "Eigen/Core"
+#include "Eigen/Dense"
+#include "MantidCurveFitting/EigenVectorView.h"
 
 #include <ostream>
 #include <vector>
@@ -15,36 +18,41 @@
 namespace Mantid {
 namespace CurveFitting {
 /**
-A wrapper around gsl_vector.
+A wrapper around Eigen::Vector.
 
 @author Roman Tolchenov, Tessella plc
 @date 24/02/2012
 */
-class MANTID_CURVEFITTING_DLL GSLVector {
+
+class MANTID_CURVEFITTING_DLL EigenVector {
 public:
   /// Constructor
-  GSLVector();
+  EigenVector();
   /// Constructor
-  explicit GSLVector(const size_t n);
+  explicit EigenVector(const size_t n);
   /// Construct from a std vector
-  explicit GSLVector(std::vector<double> v);
-  /// Copy from a gsl vector
-  explicit GSLVector(const gsl_vector *v);
+  explicit EigenVector(std::vector<double> v);
+  /// Copy from a eigen::vector
+  explicit EigenVector(const Eigen::VectorXd *v);
   /// Construct from an initialisation list
-  GSLVector(std::initializer_list<double> ilist);
+  EigenVector(std::initializer_list<double> ilist);
   /// Copy constructor.
-  GSLVector(const GSLVector &v);
+  EigenVector(const EigenVector &v);
   /// Move constructor.
-  GSLVector(GSLVector &&v) noexcept;
+  EigenVector(EigenVector &&v) noexcept;
   /// Copy assignment operator
-  GSLVector &operator=(const GSLVector &v);
+  EigenVector &operator=(const EigenVector &v);
   /// Assignment operator
-  GSLVector &operator=(const std::vector<double> &v);
+  EigenVector &operator=(const std::vector<double> &v);
+  /// Assignment operator - Eigen::VectorXd
+  EigenVector &operator=(const Eigen::VectorXd v);
 
-  /// Get the pointer to the GSL vector
-  gsl_vector *gsl();
-  /// Get the pointer to the GSL vector
-  const gsl_vector *gsl() const;
+  /// Get the map of the eigen vector
+  inline vec_map_type &mutator() { return m_view.vector_mutator(); }
+  /// Get the const map of the eigen vector
+  const vec_map_type inspector() const { return m_view.vector_inspector(); }
+  /// Get a copy of the eigen vector
+  vec_map_type copy_view() const { return m_view.vector_copy(); }
 
   /// Resize the vector
   void resize(const size_t n);
@@ -52,13 +60,13 @@ public:
   size_t size() const;
 
   /// Set an element
-  void set(size_t i, double value);
+  void set(const size_t i, const double value);
   /// Get an element
-  double get(size_t i) const;
+  double get(const size_t i) const;
   /// Get a const reference to an element
-  const double &operator[](size_t i) const { return m_data[i]; }
+  const double &operator[](const size_t i) const { return m_data[i]; }
   /// Get a reference to an element
-  double &operator[](size_t i) { return m_data[i]; }
+  double &operator[](const size_t i) { return m_data[i]; }
   // Set all elements to zero
   void zero();
   /// Normalise this vector
@@ -68,7 +76,7 @@ public:
   /// Get vector norm squared
   double norm2() const;
   /// Calculate the dot product
-  double dot(const GSLVector &v) const;
+  double dot(const EigenVector &v) const;
   /// Get index of the minimum element
   size_t indexOfMinElement() const;
   /// Get index of the maximum element
@@ -81,27 +89,29 @@ public:
   void sort(const std::vector<size_t> &indices);
   /// Copy the values to an std vector of doubles
   std::vector<double> toStdVector() const;
+  /// Return a reference to m_data
+  std::vector<double> &StdVectorRef();
 
   /// Add a vector
-  GSLVector &operator+=(const GSLVector &v);
+  EigenVector &operator+=(const EigenVector &v);
   /// Subtract a vector
-  GSLVector &operator-=(const GSLVector &v);
+  EigenVector &operator-=(const EigenVector &v);
   /// Multiply by a vector (per element)
-  GSLVector &operator*=(const GSLVector &v);
+  EigenVector &operator*=(const EigenVector &v);
   /// Multiply by a number
-  GSLVector &operator*=(const double d);
+  EigenVector &operator*=(const double d);
   /// Add a number
-  GSLVector &operator+=(const double d);
+  EigenVector &operator+=(const double d);
 
 private:
   /// Default element storage
   std::vector<double> m_data;
-  /// The pointer to the GSL vector
-  gsl_vector_view m_view;
+  /// The map to the Eigen vector
+  EigenVector_View m_view;
 };
 
 /// The << operator.
-MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr, const GSLVector &v);
+MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr, const EigenVector &v);
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -8,7 +8,9 @@
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
-#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+
+#include <gsl/gsl_matrix.h>
 
 #include <stdexcept>
 #include <vector>
@@ -16,14 +18,15 @@
 namespace Mantid {
 namespace CurveFitting {
 /**
-An implementation of Jacobian using gsl_matrix.
-
+Two implementations of Jacobian.
+-The first (EigenJacobian) using Eigen::Matrix.
+- The second (JacobianImpl1) using gsl_matrix.
 @author Anders Markvardsen, ISIS, RAL
 @date 14/05/2010
 */
-class GSLJacobian : public API::Jacobian {
-  /// The pointer to the GSL's internal jacobian matrix
-  GSLMatrix m_J;
+class EigenJacobian : public API::Jacobian {
+  /// The pointer to the the internal jacobian matrix
+  EigenMatrix m_J;
   /// Maps declared indeces to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
 
@@ -31,7 +34,7 @@ public:
   /// Constructor
   /// @param fun :: Function which derivatives to be stored in this Jacobian.
   /// @param ny :: Size of the fitting data.
-  GSLJacobian(const API::IFunction &fun, const size_t ny) {
+  EigenJacobian(const API::IFunction &fun, const size_t ny) {
     m_index.resize(fun.nParams(), -1);
     size_t np = 0; // number of active parameters
     for (size_t i = 0; i < fun.nParams(); ++i) {
@@ -42,10 +45,10 @@ public:
     m_J.resize(ny, np);
   }
 
-  GSLMatrix &matrix() { return m_J; }
+  EigenMatrix &matrix() { return m_J; }
 
   /// Get the pointer to the GSL's jacobian
-  gsl_matrix *getJ() { return m_J.gsl(); }
+  map_type &getJ() { return m_J.mutator(); }
 
   /// overwrite base method
   /// @param value :: the value
@@ -55,10 +58,10 @@ public:
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
     if (iActiveP < m_J.size2()) {
       // add penalty to first and last point and every 10th point in between
-      m_J.gsl()->data[iActiveP] += value;
-      m_J.gsl()->data[(m_J.size1() - 1) * m_J.size2() + iActiveP] += value;
+      m_J.mutator().data()[iActiveP] += value;
+      m_J.mutator().data()[(m_J.size1() - 1) * m_J.size2() + iActiveP] += value;
       for (size_t iY = 9; iY < m_J.size1() - 1; iY += 10)
-        m_J.gsl()->data[iY * m_J.size2() + iActiveP] += value;
+        m_J.mutator().data()[iY * m_J.size2() + iActiveP] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");

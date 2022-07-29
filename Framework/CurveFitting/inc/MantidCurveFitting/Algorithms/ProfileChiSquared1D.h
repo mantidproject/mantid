@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 #include "MantidKernel/System.h"
 
@@ -31,7 +31,7 @@ private:
   void execConcrete() override;
   void unfixParameters();
   void refixParameters();
-  GSLMatrix getCovarianceMatrix();
+  EigenMatrix getCovarianceMatrix();
   std::tuple<double, double> getChiSquaredRoots(const Functions::ChebfunBase_sptr &approximation,
                                                 std::vector<double> &coeffs, double qvalue, double rBound,
                                                 double lBound) const;

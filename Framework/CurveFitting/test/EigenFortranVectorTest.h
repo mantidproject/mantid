@@ -8,21 +8,21 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/ComplexVector.h"
-#include "MantidCurveFitting/FortranVector.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenComplexVector.h"
+#include "MantidCurveFitting/EigenFortranVector.h"
+#include "MantidCurveFitting/EigenVector.h"
 
 using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::FortranVector;
-using FortranDoubleVector = FortranVector<Mantid::CurveFitting::GSLVector>;
+using FortranDoubleVector = FortranVector<Mantid::CurveFitting::EigenVector>;
 using FortranComplexVector = FortranVector<Mantid::CurveFitting::ComplexVector>;
 
-class FortranVectorTest : public CxxTest::TestSuite {
+class EigenFortranVectorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FortranVectorTest *createSuite() { return new FortranVectorTest(); }
-  static void destroySuite(FortranVectorTest *suite) { delete suite; }
+  static EigenFortranVectorTest *createSuite() { return new EigenFortranVectorTest(); }
+  static void destroySuite(EigenFortranVectorTest *suite) { delete suite; }
 
   void test_double_c_indexing() {
     FortranDoubleVector v(3);
@@ -155,9 +155,9 @@ public:
     v[1] = ComplexType{1, 0.1};
     v[2] = ComplexType{2, 0.2};
     v[3] = ComplexType{3, 0.3};
-    auto p = v.gsl();
+    auto p = v.eigen();
     auto vv = v.moveToBaseVector();
-    TS_ASSERT_EQUALS(p, vv.gsl());
+    TS_ASSERT_EQUALS(p, vv.eigen());
   }
 
   void test_allocate_double() {
