@@ -25,25 +25,47 @@
     </reference-frame>
     <default-view axis-view="z-" view="3D"/>
   </defaults>
+
   <!--SOURCE-->
-  <component type="chopper">
-    <location x="0.0" y="0.0" z="-23.95"/>
+  <component type="src">
+    <location x="0.0" y="0.0" z="-26.0"/>
   </component>
-  <type is="Source" name="chopper"/>
-  <!--Sample position-->
-  <!--would the sample be always at z=0 by definition? or is 0 the place where the sample is in the ideal case?-->
-  <component type="sample_position">
-    <location x="0.0" y="0.0" z="0.0"/>
+
+  <type is="Source" name="src">
+    <cylinder id="cyl-src">
+      <colour r="100.0" g="100.0" b="250.0"/>
+      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.07"/>
+      <height val="0.3"/>
+    </cylinder>
+    <algebra val="cyl-src"/>
+  </type>
+
+  <!--VELOCITY SELECTOR-->
+  <component type="test">
+    <location x="0.0" y="0.0" z="-25.0"/>
   </component>
-  <type is="SamplePos" name="sample_position"/>
+
+  <type is="test" name="test">
+    <cylinder id="cyl-test">
+      <colour r="100.0" g="100.0" b="250.0"/>
+      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.04"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="cyl-test"/>
+  </type>
+
   <!-- MONITORS-->
   <component idlist="monitors" type="monitors">
     <location/>
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location name="monitor1" z="-24.80"/>
-      <location name="monitor2" z="-24.43"/>
+      <location name="monitor1" z="-24.5"/>
+      <location name="monitor2" z="-25.5"/>
     </component>
   </type>
 
@@ -51,37 +73,57 @@
     <cylinder id="cyl-approx">
       <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
       <axis x="0.0" y="0.0" z="1.0"/>
-      <radius val="0.01"/>
-      <height val="0.03"/>
+      <radius val="0.08"/>
+      <height val="0.01"/>
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>
-  
-  <!--MONITOR SHAPE-->
-  <!--the monitors should be shapeless or point-like-->
-  <!--MONITOR IDs-->
+
   <idlist idname="monitors">
     <id val="100000"/>
     <id val="100001"/>
   </idlist>
-  <!--DETECTOR -->
-  <!--this is just the low resolution to start with-->
-  <!-- <component idfillbyfirst="y" idstart="0" idstepbyrow="128" type="tube detector"> -->
-  <component idfillbyfirst="y" idstart="0" idstepbyrow="128" type="detector">
-    <location x="0.0" y="0.0" z="2.0"/> <!--z has to be read from the data file-->
+
+  <!--CHOPPER-->
+  <component type="chopper">
+    <location x="0.0" y="0.0" z="-24.0"/>
   </component>
-  <!-- <type is="rectangular_detector" name="tube detector" type="tube pixel" xpixels="128" xstart="-0.512" xstep="0.008" ypixels="128" ystart="-0.512" ystep="0.008"/> -->
-  <type is="rectangular_detector" name="detector" type="pixel" xpixels="128" xstart="-0.512" xstep="0.008" ypixels="128" ystart="-0.512" ystep="0.008"/>
-  
-  <!--PIXEL, EACH PIXEL IS A DETECTOR-->
-  <!-- <type is="detector" name="tube pixel">
-    <cylinder id="pixel-shape">
-      <centre-of-bottom-base r="0.0" t="0.0" p="0.0"/>
-      <axis x="0.0" y="1.0" z="0.0"/>
-      <radius val="0.007324"/>
-      <height val="0.008"/>
+
+  <type is="ChopperPos" name="chopper">
+    <cylinder id="cyl-chopper">
+      <colour r="100.0" g="100.0" b="250.0"/>
+      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.04"/>
+      <height val="0.03"/>
     </cylinder>
-  </type> -->
+    <algebra val="cyl-chopper"/>
+  </type>
+
+  <!--smthg-->
+
+  <!--SAMPLE-->
+  <component type="sample_position">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+
+  <type is="SamplePos" name="sample_position">
+    <cylinder id="cyl-sample">
+      <colour r="100.0" g="100.0" b="250.0"/>
+      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+      <axis x="0.0" y="0.0" z="1.0"/>
+      <radius val="0.04"/>
+      <height val="0.03"/>
+    </cylinder>
+    <algebra val="cyl-sample"/>
+  </type>
+
+  <!--DETECTOR -->
+  <component idfillbyfirst="y" idstart="0" idstepbyrow="128" type="detector">
+    <location x="0.0" y="0.0" z="20.0"/>
+  </component>
+  <type is="rectangular_detector" name="detector" type="pixel" xpixels="128" xstart="-0.512" xstep="0.008" ypixels="128" ystart="-0.512" ystep="0.008"/>
+
   <type is="detector" name="pixel">
     <cuboid id="pixel-shape">
       <left-front-bottom-point x="-0.1" y="-0.1" z="1."/>
