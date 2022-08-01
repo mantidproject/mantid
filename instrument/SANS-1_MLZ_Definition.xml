@@ -4,14 +4,11 @@
        z axis defines the direction of the beam
        y axis will be the axis used for rotation
        coordinate system is right-handed
-       rotation around x axis: phi (?)
-       rotation around y axis: omega
-       rotation around z axis: chi (?)
-       Multi-detector:
+
+       Detector:
        Size 1024 mm x 1024 mm
-       Low resolution:
-            128 x 128
-            Pixel size 8 x 8 mm2
+          128 x 128
+          Pixel size 8 x 8 mm2
        For more information, please visit
        https://www.mlz-garching.de/sans-1
        -->
