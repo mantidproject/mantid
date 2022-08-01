@@ -119,9 +119,9 @@ void Fit::readProperties() {
   if (!ties.empty()) {
     m_function->addTies(ties);
   }
-  std::string contstraints = getPropertyValue("Constraints");
-  if (!contstraints.empty()) {
-    m_function->addConstraints(contstraints);
+  std::string constraints = getPropertyValue("Constraints");
+  if (!constraints.empty()) {
+    m_function->addConstraints(constraints);
   }
   m_function->registerFunctionUsage(isChild());
 
