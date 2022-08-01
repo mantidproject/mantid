@@ -27,10 +27,6 @@ class LoadSANS1MLZ(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace to store the experimental data.")
 
-        self.declareProperty("SectionOption",
-                             "EssentialData",
-                             StringListValidator(["EssentialData", "CommentSection", "AllSections", "ProMaxPlusUltra"]))
-
         self.declareProperty("FileType",
                              "type1",
                              StringListValidator(["type1", "type2"]))
@@ -136,38 +132,18 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'aperture': '',
         }
 
-        option = self.getPropertyValue("SectionOption")
         logs = {"names": [], "values": [], "units": []}
-        if option == 'EssentialData':
 
-            for i in metadata.get_subsequence()[:-1]:
-                logs["names"] = np.append(list(i.get_values_dict().keys()), logs["names"])
-                logs["values"] = np.append(list(i.get_values_dict().values()), logs["values"])
-            logs["units"] = [essential_data_tobe_logged[j] for j in logs["names"]]
+        for i in metadata.get_subsequence()[:-1]:
+            logs["names"] = np.append(list(i.get_values_dict().keys()), logs["names"])
+            logs["values"] = np.append(list(i.get_values_dict().values()), logs["values"])
+        logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],  logs["units"])
+        for i in metadata.get_subsequence()[:-1]:
+            logs["names"] = np.append([f"{i.section_name}.{j}" for j in i.info.keys()], logs["names"])
+            logs["values"] = np.append(list(i.info.values()), logs["values"])
 
-        elif option == 'CommentSection':
-            logs["names"] = list(metadata.comment.info.keys())
-            logs["values"] = list(metadata.comment.info.values())
-        # elif option == 'CommentSection':
-        #     # for i in metadata.comment.info.keys():
-        #     logs["names"] = [f"{metadata.comment.section_name}.{i}" for i in metadata.comment.info.keys()]
-        #     logs["values"] = list(metadata.comment.info.values())
-
-        elif option == 'AllSections':
-            for section in metadata.get_subsequence()[:-1]:
-                logs["names"] = np.append(list(section.info.keys()), logs["names"])
-                logs["values"] = np.append(list(section.info.values()), logs["values"])
-        elif option == 'ProMaxPlusUltra':
-            for i in metadata.get_subsequence()[:-1]:
-                logs["names"] = np.append(list(i.get_values_dict().keys()), logs["names"])
-                logs["values"] = np.append(list(i.get_values_dict().values()), logs["values"])
-            logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],  logs["units"])
-            for i in metadata.get_subsequence()[:-1]:
-                logs["names"] = np.append([f"{i.section_name}.{j}" for j in i.info.keys()], logs["names"])
-                logs["values"] = np.append(list(i.info.values()), logs["values"])
-
-            logs["units"] = np.append(['' for i in range(len(logs['names']) - len(logs['units']))],
-                                      logs["units"])
+        logs["units"] = np.append(['' for i in range(len(logs['names']) - len(logs['units']))],
+                                  logs["units"])
         self.log().debug('Creation sample logs successful')
         return logs
 

@@ -18,8 +18,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         filename = "D0511339.001"
         alg_test = run_algorithm("LoadSANS1MLZ",
                                  Filename=filename,
-                                 OutputWorkspace=output_ws_name,
-                                 SectionOption='EssentialData')
+                                 OutputWorkspace=output_ws_name)
 
         ws = AnalysisDataService.retrieve(output_ws_name)
         self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
@@ -32,7 +31,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         """
         output_ws_name = "LoadSANS1MLZTest_Test1"
         filename = "D0511339.001"
-        run_algorithm("LoadSANS1MLZ", Filename=filename, OutputWorkspace=output_ws_name, SectionOption='EssentialData')
+        run_algorithm("LoadSANS1MLZ", Filename=filename, OutputWorkspace=output_ws_name)
         ws = AnalysisDataService.retrieve(output_ws_name)
         # dimensions
         self.assertEqual(16386, ws.getNumberHistograms())
@@ -47,6 +46,18 @@ class LoadSANSMLZTest(unittest.TestCase):
 
         self.assertEqual('Eichproben', ws.getTitle())
         self.assertEqual(output_ws_name, ws.name())
+
+        self.assertEqual('', run.getProperty('position').value)
+        self.assertEqual(0.0, run.getProperty('thickness').value)
+        self.assertEqual(6, run.getProperty('wavelength').value)
+        self.assertEqual(20.1500, run.getProperty('sample_detector_distance').value)
+        self.assertEqual(30, run.getProperty('duration').value)
+        self.assertEqual(97318, run.getProperty('monitor1').value)
+        self.assertEqual(201028, run.getProperty('monitor2').value)
+        self.assertEqual(0.0, run.getProperty('beamcenter_x').value)
+        self.assertEqual(0.0, run.getProperty('beamcenter_y').value)
+        self.assertEqual(0.0, run.getProperty('scaling').value)
+        self.assertEqual(0.0, run.getProperty('transmission').value)
 
         det = ws.getDetector(0)
         self.assertAlmostEqual(2.07, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 2)
@@ -73,38 +84,6 @@ class LoadSANSMLZTest(unittest.TestCase):
                                    Filename=filename, OutputWorkspace=output_ws_name)
             os.remove(filename)
 
-    def test_LoadValidData_notDefaultProperties(self):
-        """
-        test: create workspace with unique parameters
-        """
-        output_ws_name = "LoadSANS1MLZTest_Test3"
-        filename = "D0511339.001"
-        alg_test = run_algorithm("LoadSANS1MLZ",
-                                 Filename=filename,
-                                 OutputWorkspace=output_ws_name,
-                                 SectionOption='CommentSection',
-                                 Wavelength=3.2)
-        self.assertTrue(alg_test.isExecuted())
-
-        # Verify some values
-        ws = AnalysisDataService.retrieve(output_ws_name)
-        self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
-        # dimensions
-        self.assertEqual(16386, ws.getNumberHistograms())
-        # self.assertEqual(2,  ws.getNumDims())
-        # data array
-        self.assertEqual(519, ws.readY(8502))
-        self.assertEqual(427, ws.readY(8629))
-        # sample logs
-        run = ws.getRun()
-        self.assertEqual(4, run.getProperty('det1_x_value').value)
-        self.assertEqual(20000, run.getProperty('det1_z_value').value)
-        self.assertEqual(3.2, run.getProperty('selector_lambda_value').value)
-        self.assertEqual('error: blocked', run.getProperty('selector_tilt_status').value)
-        self.assertEqual(0.00074, run.getProperty('selector_vacuum_value').value)
-
-        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
-
     def test_LoadValidData_noMonitors(self):
         """
         test: create workspace with no monitors
@@ -122,7 +101,6 @@ class LoadSANSMLZTest(unittest.TestCase):
         alg_test = run_algorithm("LoadSANS1MLZ",
                                  Filename=file_inv,
                                  OutputWorkspace=output_ws_name,
-                                 SectionOption='CommentSection',
                                  Wavelength=3.2)
         os.remove(file_inv)
         self.assertTrue(alg_test.isExecuted())
@@ -136,13 +114,6 @@ class LoadSANSMLZTest(unittest.TestCase):
         # data array
         self.assertEqual(519, ws.readY(8502))
         self.assertEqual(427, ws.readY(8629))
-        # sample logs
-        run = ws.getRun()
-        self.assertEqual(4, run.getProperty('det1_x_value').value)
-        self.assertEqual(20000, run.getProperty('det1_z_value').value)
-        self.assertEqual(3.2, run.getProperty('selector_lambda_value').value)
-        self.assertEqual('error: blocked', run.getProperty('selector_tilt_status').value)
-        self.assertEqual(0.00074, run.getProperty('selector_vacuum_value').value)
 
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
