@@ -73,6 +73,11 @@ void RegionSelector::subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserv
   pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
 }
 
+void RegionSelector::clearWorkspace() {
+  GlobalInterpreterLock lock;
+  pyobj().attr("clear_workspace")();
+}
+
 void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   GlobalInterpreterLock lock;
   boost::python::dict kwargs;

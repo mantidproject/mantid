@@ -127,11 +127,12 @@ void PreviewPresenter::notifyReductionCompleted() {
   plotLinePlot();
 }
 
-void PreviewPresenter::notifyReductionAlgorithmError() {
-  // Clear the final plot if there is an error
-  m_plotPresenter->clearModel();
-  m_plotPresenter->plot();
+void PreviewPresenter::notifySumBanksAlgorithmError() {
+  clearRegionSelector();
+  clearReductionPlot();
 }
+
+void PreviewPresenter::notifyReductionAlgorithmError() { clearReductionPlot(); }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
@@ -223,4 +224,13 @@ void PreviewPresenter::runReduction() {
   m_model->reduceAsync(*m_jobManager);
 }
 
+void PreviewPresenter::clearRegionSelector() {
+  m_regionSelector->clearWorkspace();
+  m_view->setRegionSelectorToolbarEnabled(false);
+}
+
+void PreviewPresenter::clearReductionPlot() {
+  m_plotPresenter->clearModel();
+  m_plotPresenter->plot();
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

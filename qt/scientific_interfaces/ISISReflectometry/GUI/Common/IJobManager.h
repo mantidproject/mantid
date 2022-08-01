@@ -20,6 +20,7 @@ public:
   virtual void notifySumBanksCompleted() = 0;
   virtual void notifyReductionCompleted() = 0;
 
+  virtual void notifySumBanksAlgorithmError() = 0;
   virtual void notifyReductionAlgorithmError() = 0;
 };
 
