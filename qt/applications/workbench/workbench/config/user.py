@@ -75,7 +75,7 @@ class UserConfig(object):
             return self._get_setting(option, second, type)
         except TypeError:
             # The 'PyQt_PyObject' (1024) type is sometimes used for settings which have an unknown type.
-            value = self._get_setting(option, type=QVariant.typeToName(1024))
+            value = self._get_setting(option, second, type=QVariant.typeToName(1024))
             return value if isinstance(value, type) else type(*value)
 
     def has(self, option, second=None):
