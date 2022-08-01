@@ -29,7 +29,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         self.declareProperty("SectionOption",
                              "EssentialData",
-                             StringListValidator(["EssentialData", "CommentSection", "AllSections"]))
+                             StringListValidator(["EssentialData", "CommentSection", "AllSections", "ProMaxPlusUltra"]))
 
         self.declareProperty("FileType",
                              "type1",
@@ -47,8 +47,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         metadata = SANSdata()
 
         try:
-            metadata.analyze_source(filename)   # ToDo add file type option
-            # metadata.analyze_source(filename, file_type)
+            metadata.analyze_source(filename)
             data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
             logs = self.create_logs(metadata)
             y_unit, y_label, x_unit = self.create_labels()
@@ -106,6 +105,10 @@ class LoadSANS1MLZ(PythonAlgorithm):
         return data_x, data_y, data_e, n_spec
 
     def create_logs(self, metadata):
+        """
+        create logs with units
+        warning! essential_data_tobe_logged should match
+        """
         self.log().debug('Creation sample logs started')
         essential_data_tobe_logged = {
             'det1_x_value': 'mm',
@@ -122,15 +125,21 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'sum_all_counts': '',
             'monitor1': '',
             'monitor2': '',
+            'sample_detector_distance': 'mm',
+            'thickness': 'mm',
+            'position': '',
+            'transmission': '',
+            'scaling': '',
+            'probability': '',
+            'beamcenter_x': '',
+            'beamcenter_y': '',
+            'aperture': '',
         }
 
         option = self.getPropertyValue("SectionOption")
         logs = {"names": [], "values": [], "units": []}
         if option == 'EssentialData':
-            """
-            create logs with units
-            warning! essential_data_tobe_logged should match
-            """
+
             for i in metadata.get_subsequence()[:-1]:
                 logs["names"] = np.append(list(i.get_values_dict().keys()), logs["names"])
                 logs["values"] = np.append(list(i.get_values_dict().values()), logs["values"])
@@ -139,11 +148,26 @@ class LoadSANS1MLZ(PythonAlgorithm):
         elif option == 'CommentSection':
             logs["names"] = list(metadata.comment.info.keys())
             logs["values"] = list(metadata.comment.info.values())
+        # elif option == 'CommentSection':
+        #     # for i in metadata.comment.info.keys():
+        #     logs["names"] = [f"{metadata.comment.section_name}.{i}" for i in metadata.comment.info.keys()]
+        #     logs["values"] = list(metadata.comment.info.values())
 
         elif option == 'AllSections':
             for section in metadata.get_subsequence()[:-1]:
                 logs["names"] = np.append(list(section.info.keys()), logs["names"])
                 logs["values"] = np.append(list(section.info.values()), logs["values"])
+        elif option == 'ProMaxPlusUltra':
+            for i in metadata.get_subsequence()[:-1]:
+                logs["names"] = np.append(list(i.get_values_dict().keys()), logs["names"])
+                logs["values"] = np.append(list(i.get_values_dict().values()), logs["values"])
+            logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],  logs["units"])
+            for i in metadata.get_subsequence()[:-1]:
+                logs["names"] = np.append([f"{i.section_name}.{j}" for j in i.info.keys()], logs["names"])
+                logs["values"] = np.append(list(i.info.values()), logs["values"])
+
+            logs["units"] = np.append(['' for i in range(len(logs['names']) - len(logs['units']))],
+                                      logs["units"])
         self.log().debug('Creation sample logs successful')
         return logs
 

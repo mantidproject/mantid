@@ -26,36 +26,39 @@
     <default-view axis-view="z-" view="3D"/>
   </defaults>
 
-  <!--SOURCE-->
-  <component type="src">
+  <!-- To visualize the compopents of the instrument assumed to use cylinder form of component.
+    The location of the object coincides with its center.
+    Shape of the component can be arbitrary, but its center must match the location. -->
+
+  <!--NEUTRON SOURCE
+    This component is not involved in calculations.-->
+  <component type="neutron_source">
     <location x="0.0" y="0.0" z="-26.0"/>
   </component>
 
-  <type is="Source" name="src">
-    <cylinder id="cyl-src">
-      <colour r="100.0" g="100.0" b="250.0"/>
-      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+  <type name="neutron_source">
+    <cylinder id="cyl-neutron_source">
+      <centre-of-bottom-base x="0.0" y="0.0" z="-0.15"/>
       <axis x="0.0" y="0.0" z="1.0"/>
       <radius val="0.07"/>
       <height val="0.3"/>
     </cylinder>
-    <algebra val="cyl-src"/>
+    <algebra val="cyl-neutron_source"/>
   </type>
 
   <!--VELOCITY SELECTOR-->
-  <component type="test">
+  <component type="velocity_selector">
     <location x="0.0" y="0.0" z="-25.0"/>
   </component>
 
-  <type is="test" name="test">
-    <cylinder id="cyl-test">
-      <colour r="100.0" g="100.0" b="250.0"/>
-      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+  <type is="Source" name="velocity_selector">
+    <cylinder id="cyl-velocity_selector">
+      <centre-of-bottom-base x="0.0" y="0.0" z="-0.015"/>
       <axis x="0.0" y="0.0" z="1.0"/>
       <radius val="0.04"/>
       <height val="0.03"/>
     </cylinder>
-    <algebra val="cyl-test"/>
+    <algebra val="cyl-velocity_selector"/>
   </type>
 
   <!-- MONITORS-->
@@ -71,7 +74,7 @@
 
   <type is="monitor" name="monitor">
     <cylinder id="cyl-approx">
-      <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
+      <centre-of-bottom-base x="0.0" y="0.0" z="-0.005"/>
       <axis x="0.0" y="0.0" z="1.0"/>
       <radius val="0.08"/>
       <height val="0.01"/>
@@ -91,8 +94,7 @@
 
   <type is="ChopperPos" name="chopper">
     <cylinder id="cyl-chopper">
-      <colour r="100.0" g="100.0" b="250.0"/>
-      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
+      <centre-of-bottom-base x="0.0" y="0.0" z="-0.015"/>
       <axis x="0.0" y="0.0" z="1.0"/>
       <radius val="0.04"/>
       <height val="0.03"/>
@@ -100,22 +102,22 @@
     <algebra val="cyl-chopper"/>
   </type>
 
-  <!--smthg-->
-
   <!--SAMPLE-->
   <component type="sample_position">
     <location x="0.0" y="0.0" z="0.0"/>
   </component>
+  <type is="SamplePos" name="sample_position"/>
+  <!--fake sample object for visualization-->
+  <component type="sample">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
 
-  <type is="SamplePos" name="sample_position">
-    <cylinder id="cyl-sample">
-      <colour r="100.0" g="100.0" b="250.0"/>
-      <centre-of-bottom-base p="0.0" r="0.0" t="1.0"/>
-      <axis x="0.0" y="0.0" z="1.0"/>
-      <radius val="0.04"/>
-      <height val="0.03"/>
-    </cylinder>
-    <algebra val="cyl-sample"/>
+  <type name="sample">
+    <sphere id="sample-sphere">
+      <centre x="0.0"  y="0.0" z="0.0" />
+      <radius val="0.07" />
+    </sphere>
+    <algebra val="sample-sphere" />
   </type>
 
   <!--DETECTOR -->
@@ -126,10 +128,10 @@
 
   <type is="detector" name="pixel">
     <cuboid id="pixel-shape">
-      <left-front-bottom-point x="-0.1" y="-0.1" z="1."/>
-      <left-front-top-point x="-0.1" y="0.1" z="1."/>
-      <left-back-bottom-point x="-0.1" y="-0.1" z="-1."/>
-      <right-front-bottom-point x="0.1" y="-0.1" z="1."/>
+      <left-front-bottom-point x="-0.004" y="-0.004" z="5e-05"/>
+      <left-front-top-point x="-0.004" y="0.004" z="5e-05"/>
+      <left-back-bottom-point x="-0.004" y="-0.004" z="-5e-05"/>
+      <right-front-bottom-point x="0.004" y="-0.004" z="5e-05"/>
     </cuboid>
     <algebra val="pixel-shape"/>
   </type>

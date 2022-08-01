@@ -79,11 +79,31 @@ class FileSANS(DtClsSANS):
 @dataclass
 class SampleSANS(DtClsSANS):
     section_name: str = 'Sample'
+    position: int = 0
+    thickness: float = 0
+
+    def _assign_values(self):
+        """
+        one of the methods to add variable with unique name
+        """
+        super()._assign_values()
+        self._assign_value('Position', 'position')
+        self._assign_value('Thickness', 'thickness')
 
 
 @dataclass
 class SetupSANS(DtClsSANS):
     section_name: str = 'Setup'
+    wavelength: int = 0
+    sample_detector_distance: float = 0
+
+    def _assign_values(self):
+        """
+        one of the methods to add variable with unique name
+        """
+        super()._assign_values()
+        self._assign_value('Lambda', 'wavelength')
+        self._assign_value('SD', 'sample_detector_distance')
 
 
 @dataclass
@@ -114,26 +134,31 @@ class CounterSANS(DtClsSANS):
 @dataclass
 class HistorySANS(DtClsSANS):
     section_name: str = 'History'
+    transmission: float = 0.0
+    scaling: float = 0.0
+    probability: float = 0.0
+    beamcenter_x: float = 0.0
+    beamcenter_y: float = 0.0
+    aperture: float = 0.0
+
+    def _assign_values(self):
+        """
+        one of the methods to add variable with unique name
+        """
+        super()._assign_values()
+        self._assign_value('Transmission', 'transmission')
+        self._assign_value('Scaling', 'scaling')
+        self._assign_value('Probability', 'probability')
+        self._assign_value('BeamcenterX', 'beamcenter_x')
+        self._assign_value('BeamcenterY', 'beamcenter_y')
+        self._assign_value('Aperture', 'aperture')
 
 
 @dataclass
 class CommentSANS(DtClsSANS):
     section_name: str = 'Comment'
 
-    det1_x_value: float = 0.0
-    det1_z_value: float = 0.0
     wavelength: float = 0.0
-
-    st1_x_value: float = 0.0
-    st1_x_offset: float = 0.0
-
-    st1_y_value: float = 0.0
-    st1_y_offset: float = 0.0
-
-    st1_z_value: float = 0.0
-    st1_z_offset: float = 0.0
-
-    det1_omg_value: float = 0
 
     def _assign_values(self):
         """
@@ -142,10 +167,10 @@ class CommentSANS(DtClsSANS):
         super()._assign_values()
         self._assign_value('selector_lambda_value', 'wavelength')
 
-    def set_wavelength(self, user_wavelength):
-        if user_wavelength > 0:
-            self.wavelength = user_wavelength
-            self.info['selector_lambda_value'] = user_wavelength
+    def set_wavelength(self, input_wavelength):
+        if input_wavelength > 0:
+            self.wavelength = input_wavelength
+            self.info['selector_lambda_value'] = input_wavelength
 
 
 @dataclass
@@ -188,7 +213,11 @@ class SANSdata(object):
         """
         with open(filename, 'r') as fhandler:
             unprocessed = fhandler.read()
-        self._sort_data(unprocessed.split('%'))
+        file_type = filename.split(".")[-1]
+        if file_type == "001":
+            self._sort_data(unprocessed.split('%'))
+        else:
+            raise FileNotFoundError("incorrect file")
 
     def _sort_data(self, unprocessed):
         """
