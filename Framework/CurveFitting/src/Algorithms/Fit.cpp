@@ -91,6 +91,28 @@ void Fit::initConcrete() {
                   "Output is an empty string).");
 }
 
+std::map<std::string, std::string> Fit::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  const auto possibleOperators = {";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
+  std::string constraints = getPropertyValue("Constraints");
+  if (constraints.size() > 0) {
+    auto operatorPresent = false;
+    for (auto op : possibleOperators) {
+      const auto it = constraints.find_first_of(op);
+      if (it <= constraints.size()) {
+        operatorPresent = true;
+        break;
+      }
+    }
+    if (!operatorPresent) {
+      issues["Constraints"] = "No operator is present in the constraint.";
+    }
+  }
+
+  return issues;
+}
+
 /// Read in the properties specific to Fit.
 void Fit::readProperties() {
   std::string ties = getPropertyValue("Ties");
