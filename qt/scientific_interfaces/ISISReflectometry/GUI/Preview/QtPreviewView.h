@@ -53,6 +53,7 @@ public:
   void setInstViewToolbarEnabled(bool enable) override;
   void setRegionSelectorToolbarEnabled(bool enable) override;
   void setAngle(double angle) override;
+  void setUpdateAngleButtonEnabled(bool enable) override;
   // Region selector toolbar
   void setEditROIState(bool state) override;
   void setRectangularROIState(bool state) override;
@@ -74,6 +75,7 @@ private:
 
 private slots:
   void onLoadWorkspaceRequested() const;
+  void onUpdateClicked() const;
   void onInstViewSelectRectClicked() const;
   void onInstViewZoomClicked() const;
   void onInstViewEditClicked() const;
@@ -82,5 +84,6 @@ private slots:
   void onLinePlotExportToAdsClicked() const;
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
+  void onAngleEdited();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

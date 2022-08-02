@@ -27,6 +27,7 @@ public:
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
 
   virtual void notifyLoadWorkspaceRequested() = 0;
+  virtual void notifyUpdateAngle() = 0;
 
   virtual void notifyInstViewZoomRequested() = 0;
   virtual void notifyInstViewEditRequested() = 0;
@@ -62,6 +63,7 @@ public:
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
   virtual void setRegionSelectorToolbarEnabled(bool enable) = 0;
   virtual void setAngle(double angle) = 0;
+  virtual void setUpdateAngleButtonEnabled(bool enabled) = 0;
   // Region selector toolbar
   virtual void setEditROIState(bool state) = 0;
   virtual void setRectangularROIState(bool state) = 0;
