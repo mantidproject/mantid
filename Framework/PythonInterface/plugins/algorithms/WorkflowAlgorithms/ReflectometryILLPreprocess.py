@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import (CompositeValidator, Direction, IntArrayLengthValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, IntBoundedValidator, StringListValidator, EnabledWhenProperty, PropertyCriterion)
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty,
+from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, IntArrayLengthValidator, IntArrayBoundedValidator,
+                           IntArrayProperty, IntBoundedValidator, StringListValidator, PropertyCriterion)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, MultipleFileProperty,
                         PropertyMode, WorkspaceUnitValidator)
 from mantid.simpleapi import *
 import ReflectometryILL_common as common
@@ -74,6 +74,8 @@ def normalisationMonitorWorkspaceIndex(ws):
 
 class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
+    _bragg_angle = None
+
     def category(self):
         """Return the categories of the algrithm."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
@@ -131,6 +133,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._instrumentName = ws.getInstrument().getName()
 
         ws, monWS = self._extractMonitors(ws)
+
+        if len((self.getPropertyValue(Prop.RUN)).split('+')) > 1:
+            # foreground refitting is needed if there is more than one merged numor
+            self._refit_foreground(ws)
 
         self._recalculate_average_chopper_params(ws)
         self._addSampleLogInfo(ws)
@@ -391,19 +397,18 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             'FitRangeUpper': self.getProperty(Prop.XMAX).value
         }
         if measurement_type == 'ReflectedBeam':
-            bragg_angle = None
             angle_option = self.getPropertyValue('AngleOption')
             first_run = self.getProperty(Prop.RUN).value[0]
             if angle_option == 'SampleAngle':
-                bragg_angle = common.sample_angle(first_run)
+                self._bragg_angle = common.sample_angle(first_run)
             elif angle_option == 'DetectorAngle':
-                bragg_angle = 0.0
+                self._bragg_angle = 0.0
                 # in this case, we still need to correct for the difference of foreground
                 # centres between direct and reflected beams, and this can be done most clearly
                 # when the centre of the reflected beam is set at the beam axis
             elif angle_option == 'UserAngle':
-                bragg_angle = self.getProperty('BraggAngle').value
-            load_options['BraggAngle'] = bragg_angle
+                self._bragg_angle = self.getProperty('BraggAngle').value
+            load_options['BraggAngle'] = self._bragg_angle
 
         # perform data consistency check
         if len(inputFiles.split('+')) > 1:
@@ -418,6 +423,113 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             EnableLogging=self._subalgLogging
         )
         return ws
+
+    def _refit_foreground(self, ws: MatrixWorkspace):
+        """Refits the foreground position of the reflected beam measurement, and corrects position of the entire
+         detector to correspond to the proper place.
+
+        Args:
+            ws (MatrixWorkspace): merged workspace that requires foreground refitting
+        """
+        # first, we need to  integrate the workspace indices
+        int_ws = '{}_integrated'.format(ws)
+        kwargs = {}
+        start_index = 0
+        if not self.getProperty(Prop.START_WS_INDEX).isDefault:
+            kwargs['StartWorkspaceIndex'] = self.getProperty(Prop.START_WS_INDEX).value
+            start_index = self.getProperty(Prop.START_WS_INDEX).value
+        if not self.getProperty(Prop.END_WS_INDEX).isDefault:
+            kwargs['EndWorkspaceIndex'] = self.getProperty(Prop.END_WS_INDEX).value
+        if not self.getProperty(Prop.XMAX).isDefault:
+            kwargs['RangeUpper'] = self.getProperty(Prop.XMAX).value
+        if not self.getProperty(Prop.XMIN).isDefault:
+            kwargs['RangeLower'] = self.getProperty(Prop.XMIN).value
+        Integration(
+            InputWorkspace=ws,
+            OutputWorkspace=int_ws,
+            **kwargs
+        )
+        Transpose(InputWorkspace=int_ws, OutputWorkspace=int_ws)  # the integration output is a bin plot, cannot be fitted
+        original_peak_centre = ws.getRun().getLogData('reduction.line_position').value
+        # determine the initial fitting parameters
+        yAxis = mtd[int_ws].readY(0)
+        max_height = np.max(yAxis)
+        max_index = start_index + (np.where(yAxis == max_height))[0][0]
+        sigma = max_index - (np.where(yAxis > 0.667 * max_height))[0][0]
+        sigma = sigma if sigma > 0 else 2
+        fit_fun = "name=FlatBackground, A0={};".format(0.3*max_height) \
+                  + "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}".format(max_index, 0.7*max_height, sigma)
+        try:
+            fit_name = 'fit_output'
+            fit_output = Fit(Function=fit_fun,
+                             InputWorkspace=int_ws,
+                             StartX=float(max_index - 3 * sigma),
+                             EndX=float(max_index + 3 * sigma),
+                             CreateOutput=True,
+                             IgnoreInvalidData=True,
+                             Output='{}_{}'.format(int_ws, fit_name))
+            # this table contains 5 rows, with fitted parameters of the magnitude flat background, then height, peakCentre,
+            # and Sigma of the Gaussian, and finally the cost function
+            param_table = fit_output.OutputParameters
+            # grabbing the fitted peak centre, already as a function of spectrum number
+            peak_centre = param_table.row(2)['Value']
+            # finally the instrument should be rotated to the correct position
+
+            self._cleanup.cleanup('{}_{}_Parameters'.format(int_ws, fit_name))
+            self._cleanup.cleanup('{}_{}_Workspace'.format(int_ws, fit_name))
+            self._cleanup.cleanup('{}_{}_NormalisedCovarianceMatrix'.format(int_ws, fit_name))
+        except RuntimeError:
+            self.log().error("Refitting of the foreground position of merge data failed. Using the maximum value instead.")
+            peak_centre = max_index
+        ws.getRun().addProperty('reduction.line_position', float(peak_centre), True)
+        self._rotate_instrument(ws, peak_centre, original_peak_centre)
+        self._cleanup.cleanup(int_ws)
+
+    def _rotate_instrument(self, ws: MatrixWorkspace, peak_centre: float, original_centre: float):
+        """
+        Rotates the instrument of the provided workspace by the given angle around the sample, and then rotates
+        the instrument around its own axis to maintain perpendicular orientation versus the incoming beam.
+
+        Args:
+        ws (MatrixWorkspace): workspace of which the instrument is going to be rotated
+        peak_centre (float): fitted peak centre in fractional tube number
+        original_centre (float): peak centre before the refitting
+        """
+        distance_entry = "det.value" if self._instrumentName == 'D17' else "Distance.Sample_CenterOfDetector_distance"
+        distance = 1e-3 * ws.getRun().getLogData(distance_entry).value  # in m
+
+        # the calculation below is reimplementation of the code in the LoadILLReflectometry that performs the same operation
+        sign = -1.0 if self._instrumentName == 'D17' else 1.0
+        detector = ws.getInstrument().getComponentByName("detector")
+        if self._instrumentName == 'D17':
+            pixel_width = detector.xstep()
+        else:
+            pixel_width = detector.ystep()
+        offset_width = (127.5 - peak_centre) * pixel_width
+        offset_angle = sign * atan(offset_width / distance)
+        angle = offset_angle
+        if self._bragg_angle is not None:  # case for a reflected beam
+            angle += 2 * self._bragg_angle * np.pi / 180.0
+
+        if self._instrumentName == 'D17':
+            x = distance * np.sin(angle)
+            y = 0
+            z = distance * np.cos(angle)
+        else:
+            x = 0
+            y = distance * np.sin(angle)
+            z = distance * np.cos(angle)
+        MoveInstrumentComponent(Workspace=ws, ComponentName="detector", x=x, y=y, z=z, RelativePosition=False)
+
+        # after the instrument is moved to its correct new position, it also has to be rotated to face the beam
+        original_angle = sign * atan((127.5 - original_centre) * pixel_width / distance) * 180.0 / np.pi
+        if self._bragg_angle is not None:  # case for a reflected beam
+            original_angle += 2 * self._bragg_angle
+        delta_angle = original_angle - angle * 180.0 / np.pi  # in degrees
+        x_orientation = 0 if self._instrumentName == 'D17' else -1
+        y_orientation = 1 if self._instrumentName == 'D17' else 0
+        RotateInstrumentComponent(Workspace=ws, ComponentName="detector", X=x_orientation, Y=y_orientation, Z=0,
+                                  Angle=delta_angle, RelativeRotation=True)
 
     def _recalculate_average_chopper_params(self, ws):
 
