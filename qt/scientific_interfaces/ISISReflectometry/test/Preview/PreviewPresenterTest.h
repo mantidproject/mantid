@@ -337,6 +337,17 @@ public:
     presenter.notifyAutoreductionPaused();
   }
 
+  void test_notify_apply_requested_notifies_main_presenter() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested()).Times(1);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyApplyRequested();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();

@@ -189,6 +189,8 @@ void PreviewPresenter::notifyRegionChanged() {
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 
+void PreviewPresenter::notifyApplyRequested() { m_mainPresenter->notifyPreviewApplyRequested(); }
+
 void PreviewPresenter::plotInstView() {
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
                        m_instViewModel->getAxis());

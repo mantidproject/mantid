@@ -105,6 +105,7 @@ public:
   MOCK_CONST_METHOD0(isBatchUnsaved, bool());
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
+  MOCK_METHOD0(notifyPreviewApplyRequested, void());
 };
 
 class MockRunsPresenter : public IRunsPresenter {

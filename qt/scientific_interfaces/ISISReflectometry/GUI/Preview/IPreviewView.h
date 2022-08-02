@@ -39,6 +39,8 @@ public:
 
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
+
+  virtual void notifyApplyRequested() = 0;
 };
 
 class IPreviewView {

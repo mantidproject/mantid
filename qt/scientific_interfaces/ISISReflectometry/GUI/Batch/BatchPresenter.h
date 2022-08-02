@@ -92,6 +92,7 @@ public:
   std::string instrumentName() const override;
   int percentComplete() const override;
   std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
+  void notifyPreviewApplyRequested() override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;

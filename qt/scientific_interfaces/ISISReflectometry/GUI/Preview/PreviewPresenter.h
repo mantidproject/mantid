@@ -76,6 +76,8 @@ public:
   void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
 
+  void notifyApplyRequested() override;
+
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
   void notifySumBanksCompleted() override;

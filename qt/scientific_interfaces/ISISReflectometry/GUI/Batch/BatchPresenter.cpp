@@ -366,4 +366,8 @@ void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
 }
+
+void BatchPresenter::notifyPreviewApplyRequested() {
+  // TODO respond to notification by notifying Experiment presenter to update table
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
