@@ -369,5 +369,8 @@ void BatchPresenter::clearADSHandle() {
 
 void BatchPresenter::notifyPreviewApplyRequested() {
   // TODO respond to notification by notifying Experiment presenter to update table
+  if (auto const previewRow = m_previewPresenter->getPreviewRowCopy()) {
+    m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

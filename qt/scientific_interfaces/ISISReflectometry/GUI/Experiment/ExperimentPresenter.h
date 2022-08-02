@@ -13,6 +13,7 @@
 #include "IExperimentView.h"
 #include "LookupTableValidationError.h"
 #include "Reduction/Experiment.h"
+#include "Reduction/PreviewRow.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -61,6 +62,7 @@ public:
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyPreviewApplyRequested(PreviewRow *previewRow) override;
   void restoreDefaults() override;
 
   bool hasValidSettings() const noexcept override;

@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "ROIType.h"
+#include "Reduction/PreviewRow.h"
 #include "Reduction/ProcessingInstructions.h"
 
 #include <boost/optional.hpp>
@@ -37,6 +38,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
   virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
   virtual std::optional<double> getDefaultTheta() const = 0;
+  virtual PreviewRow *getPreviewRowCopy() const = 0;
 
   virtual void setTheta(double theta) = 0;
 

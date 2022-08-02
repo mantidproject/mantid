@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Reduction/PreviewRow.h"
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IBatchPresenter;
 
@@ -18,5 +20,7 @@ public:
   virtual void notifyReductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
+
+  virtual PreviewRow *getPreviewRowCopy() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -7,9 +7,11 @@
 #include "ExperimentPresenter.h"
 #include "Common/Parse.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Preview/ROIType.h"
 #include "LookupTableValidator.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/ParseReflectometryStrings.h"
+#include "Reduction/PreviewRow.h"
 #include "Reduction/ValidateLookupRow.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -100,6 +102,18 @@ void ExperimentPresenter::notifyAutoreductionResumed() { updateWidgetEnabledStat
 void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   restoreDefaults();
+}
+
+void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow *previewRow) {
+  // TODO return by reference instead of copying
+  auto lookupRowCopy = m_model.findLookupRow(*previewRow, m_thetaTolerance);
+
+  auto signal = previewRow->getProcessingInstructions(ROIType::Signal);
+  auto background = previewRow->getProcessingInstructions(ROIType::Background);
+  auto transmission = previewRow->getProcessingInstructions(ROIType::Transmission);
+  // TODO set the processing instructions in the lookup row
+
+  updateViewFromModel();
 }
 
 void ExperimentPresenter::restoreDefaults() {
