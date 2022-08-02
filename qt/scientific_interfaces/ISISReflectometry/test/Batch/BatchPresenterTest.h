@@ -632,6 +632,7 @@ private:
   }
 
   void expectReductionResumed() {
+    EXPECT_CALL(*m_previewPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_savePresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_eventPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_experimentPresenter, notifyReductionResumed()).Times(1);
@@ -641,6 +642,7 @@ private:
   }
 
   void expectReductionPaused() {
+    EXPECT_CALL(*m_previewPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*m_savePresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*m_eventPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*m_experimentPresenter, notifyReductionPaused()).Times(1);
@@ -649,6 +651,7 @@ private:
   }
 
   void expectAutoreductionResumed() {
+    EXPECT_CALL(*m_previewPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_savePresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_eventPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionResumed()).Times(1);
@@ -659,6 +662,7 @@ private:
   }
 
   void expectAutoreductionPaused() {
+    EXPECT_CALL(*m_previewPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_savePresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_eventPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionPaused()).Times(1);

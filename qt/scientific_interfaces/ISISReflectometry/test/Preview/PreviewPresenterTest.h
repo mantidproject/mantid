@@ -36,6 +36,7 @@ using MantidQt::MantidWidgets::AxisID;
 using MantidQt::MantidWidgets::MockPlotPresenter;
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::NiceMock;
@@ -284,6 +285,54 @@ public:
     presenter.notifyReductionCompleted();
   }
 
+  void test_notify_reduction_resumed_disables_view() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectProcessingEnabled(mainPresenter);
+    expectApplyButtonDisabled(*mockView);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyReductionResumed();
+  }
+
+  void test_notify_reduction_paused_enables_view() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectProcessingDisabled(mainPresenter);
+    expectApplyButtonEnabled(*mockView);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyReductionPaused();
+  }
+
+  void test_notify_autoreduction_resumed_disables_view() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectAutoreducingEnabled(mainPresenter);
+    expectApplyButtonDisabled(*mockView);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyAutoreductionResumed();
+  }
+
+  void test_notify_autoreduction_paused_enables_view() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+
+    expectAutoreducingDisabled(mainPresenter);
+    expectApplyButtonEnabled(*mockView);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyAutoreductionPaused();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
@@ -436,5 +485,25 @@ private:
     EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
     // Check reduction is executed
     EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
+  }
+
+  void expectApplyButtonDisabled(MockPreviewView &mockView) { EXPECT_CALL(mockView, disableApplyButton()).Times(1); }
+
+  void expectApplyButtonEnabled(MockPreviewView &mockView) { EXPECT_CALL(mockView, enableApplyButton()).Times(1); }
+
+  void expectProcessingEnabled(MockBatchPresenter &mainPresenter) {
+    EXPECT_CALL(mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+  }
+
+  void expectProcessingDisabled(MockBatchPresenter &mainPresenter) {
+    EXPECT_CALL(mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+  }
+
+  void expectAutoreducingEnabled(MockBatchPresenter &mainPresenter) {
+    EXPECT_CALL(mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+  }
+
+  void expectAutoreducingDisabled(MockBatchPresenter &mainPresenter) {
+    EXPECT_CALL(mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 };

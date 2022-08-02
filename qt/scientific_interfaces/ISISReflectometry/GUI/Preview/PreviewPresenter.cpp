@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
@@ -53,6 +54,24 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
   m_plotPresenter->setPlotErrorBars(true);
+}
+
+void PreviewPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
+
+void PreviewPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
+
+void PreviewPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
+
+void PreviewPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
+
+void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
+
+void PreviewPresenter::updateWidgetEnabledState() {
+  if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
+    m_view->disableApplyButton();
+  } else {
+    m_view->enableApplyButton();
+  }
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS

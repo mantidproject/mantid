@@ -69,6 +69,10 @@ void QtPreviewView::setupSelectRegionTypes() {
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
 
+void QtPreviewView::enableApplyButton() { m_ui.pushButton_3->setEnabled(true); }
+
+void QtPreviewView::disableApplyButton() { m_ui.pushButton_3->setEnabled(false); }
+
 void QtPreviewView::connectSignals() const {
   // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));

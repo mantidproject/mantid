@@ -19,6 +19,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MockPreviewView : public IPreviewView {
 public:
   MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
+  MOCK_METHOD(void, enableApplyButton, (), (override));
+  MOCK_METHOD(void, disableApplyButton, (), (override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
   MOCK_METHOD(double, getAngle, (), (const, override));
   MOCK_METHOD(void, plotInstView,

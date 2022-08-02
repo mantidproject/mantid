@@ -22,6 +22,7 @@ class IRegionSelector;
 }
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IBatchPresenter;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
                                                         public PreviewViewSubscriber,
@@ -53,6 +54,13 @@ public:
   PreviewPresenter(Dependencies dependencies);
   virtual ~PreviewPresenter() = default;
 
+  // IPreviewPresenter overrides
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
+
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
 
@@ -77,12 +85,15 @@ public:
 
 private:
   IPreviewView *m_view{nullptr};
+  IBatchPresenter *m_mainPresenter{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
+
+  void updateWidgetEnabledState();
 
   void plotInstView();
   void plotRegionSelector();

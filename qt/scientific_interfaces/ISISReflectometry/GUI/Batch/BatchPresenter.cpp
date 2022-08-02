@@ -55,6 +55,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, 
   m_experimentPresenter->acceptMainPresenter(this);
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
+  m_previewPresenter->acceptMainPresenter(this);
 
   m_unsavedBatchFlag = false;
 
@@ -182,6 +183,7 @@ void BatchPresenter::resumeReduction() {
 
 void BatchPresenter::notifyReductionResumed() {
   // Notify child presenters
+  m_previewPresenter->notifyReductionResumed();
   m_savePresenter->notifyReductionResumed();
   m_eventPresenter->notifyReductionResumed();
   m_experimentPresenter->notifyReductionResumed();
@@ -196,6 +198,7 @@ void BatchPresenter::notifyReductionPaused() {
   // Update the model
   m_jobManager->notifyReductionPaused();
   // Notify child presenters
+  m_previewPresenter->notifyReductionPaused();
   m_savePresenter->notifyReductionPaused();
   m_eventPresenter->notifyReductionPaused();
   m_experimentPresenter->notifyReductionPaused();
@@ -227,6 +230,7 @@ void BatchPresenter::resumeAutoreduction() {
 
 void BatchPresenter::notifyAutoreductionResumed() {
   // Notify child presenters
+  m_previewPresenter->notifyAutoreductionResumed();
   m_savePresenter->notifyAutoreductionResumed();
   m_eventPresenter->notifyAutoreductionResumed();
   m_experimentPresenter->notifyAutoreductionResumed();
@@ -248,6 +252,7 @@ void BatchPresenter::pauseAutoreduction() {
 
 void BatchPresenter::notifyAutoreductionPaused() {
   // Notify child presenters
+  m_previewPresenter->notifyAutoreductionPaused();
   m_savePresenter->notifyAutoreductionPaused();
   m_eventPresenter->notifyAutoreductionPaused();
   m_experimentPresenter->notifyAutoreductionPaused();

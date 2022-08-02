@@ -35,6 +35,8 @@ public:
   QtPreviewView(QWidget *parent = nullptr);
 
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
+  void enableApplyButton() override;
+  void disableApplyButton() override;
 
   std::string getWorkspaceName() const override;
   double getAngle() const override;
