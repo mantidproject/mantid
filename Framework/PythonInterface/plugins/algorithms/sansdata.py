@@ -217,7 +217,7 @@ class SANSdata(object):
         if file_type == "001":
             self._sort_data(unprocessed.split('%'))
         else:
-            raise FileNotFoundError("incorrect file")
+            raise FileNotFoundError("Incorrect file")
 
     def _sort_data(self, unprocessed):
         """

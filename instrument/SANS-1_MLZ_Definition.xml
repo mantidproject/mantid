@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2018-04-26 11:23:20.975212" name="SANS-1_MLZ" valid-from="2017-10-01 23:59:59" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2022-08-02 11:23:20.975212" name="SANS-1_MLZ" valid-from="2017-10-01 23:59:59" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!-- This is the instrument definition file of the SANS-1 small angle scattering instrument at MLZ.
        z axis defines the direction of the beam
        y axis will be the axis used for rotation
@@ -23,12 +23,13 @@
     <default-view axis-view="z-" view="3D"/>
   </defaults>
 
-  <!-- To visualize the compopents of the instrument assumed to use cylinder form of component.
-    The location of the object coincides with its center.
-    Shape of the component can be arbitrary, but its center must match the location. -->
+  <!-- To visualize the compopents of the instrument it is assumed that most of the components are of a cylindrical shape.
+    If one needs to operate with actual instruments component shapes then the shapes need to be changed correspondingly.  
+    The location of the object coincides with its geometrical center.
+    In other words, shapes of the components can be arbitrary, but its geometrical center matches the "location". -->
 
   <!--NEUTRON SOURCE
-    This component is not involved in calculations.-->
+    This component is included for visualization purposes.-->
   <component type="neutron_source">
     <location x="0.0" y="0.0" z="-26.0"/>
   </component>
@@ -40,7 +41,7 @@
       <radius val="0.07"/>
       <height val="0.3"/>
     </cylinder>
-    <algebra val="cyl-neutron_source"/>
+    <!-- <algebra val="cyl-neutron_source"/> -->
   </type>
 
   <!--VELOCITY SELECTOR-->
@@ -55,7 +56,7 @@
       <radius val="0.04"/>
       <height val="0.03"/>
     </cylinder>
-    <algebra val="cyl-velocity_selector"/>
+    <!-- <algebra val="cyl-velocity_selector"/> -->
   </type>
 
   <!-- MONITORS-->
@@ -76,7 +77,7 @@
       <radius val="0.08"/>
       <height val="0.01"/>
     </cylinder>
-    <algebra val="cyl-approx"/>
+    <!-- <algebra val="cyl-approx"/> -->
   </type>
 
   <idlist idname="monitors">
@@ -96,7 +97,7 @@
       <radius val="0.04"/>
       <height val="0.03"/>
     </cylinder>
-    <algebra val="cyl-chopper"/>
+    <!-- <algebra val="cyl-chopper"/> -->
   </type>
 
   <!--SAMPLE-->
@@ -104,7 +105,7 @@
     <location x="0.0" y="0.0" z="0.0"/>
   </component>
   <type is="SamplePos" name="sample_position"/>
-  <!--fake sample object for visualization-->
+  <!--artificial sample object for visualization purposes-->
   <component type="sample">
     <location x="0.0" y="0.0" z="0.0"/>
   </component>
@@ -114,7 +115,7 @@
       <centre x="0.0"  y="0.0" z="0.0" />
       <radius val="0.07" />
     </sphere>
-    <algebra val="sample-sphere" />
+    <!-- <algebra val="sample-sphere" /> -->
   </type>
 
   <!--DETECTOR -->
@@ -125,11 +126,11 @@
 
   <type is="detector" name="pixel">
     <cuboid id="pixel-shape">
-      <left-front-bottom-point x="-0.004" y="-0.004" z="5e-05"/>
-      <left-front-top-point x="-0.004" y="0.004" z="5e-05"/>
-      <left-back-bottom-point x="-0.004" y="-0.004" z="-5e-05"/>
-      <right-front-bottom-point x="0.004" y="-0.004" z="5e-05"/>
+      <left-front-bottom-point x="-0.004" y="-0.004" z="0.0"/>
+      <left-front-top-point x="-0.004" y="0.004" z="0.0"/>
+      <left-back-bottom-point x="-0.004" y="-0.004" z="-1.0"/>
+      <right-front-bottom-point x="0.004" y="-0.004" z="0.0"/>
     </cuboid>
-    <algebra val="pixel-shape"/>
+    <!-- <algebra val="pixel-shape"/> -->
   </type>
 </instrument>

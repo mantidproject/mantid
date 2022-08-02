@@ -27,10 +27,6 @@ class LoadSANS1MLZ(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace to store the experimental data.")
 
-        self.declareProperty("FileType",
-                             "type1",
-                             StringListValidator(["type1", "type2"]))
-
         self.declareProperty(name="Wavelength",
                              defaultValue=0.0,
                              validator=FloatBoundedValidator(lower=0.0),
@@ -39,7 +35,6 @@ class LoadSANS1MLZ(PythonAlgorithm):
     def PyExec(self):
         filename = self.getPropertyValue("Filename")
         out_ws_name = self.getPropertyValue("OutputWorkspace")
-        # file_type = self.getPropertyValue("FileType")
         metadata = SANSdata()
 
         try:
@@ -106,12 +101,13 @@ class LoadSANS1MLZ(PythonAlgorithm):
         warning! essential_data_tobe_logged should match
         """
         self.log().debug('Creation sample logs started')
+        # units of measurement of main variables
         essential_data_tobe_logged = {
             'det1_x_value': 'mm',
             'det1_z_value': 'mm',
             'wavelength': 'Angstrom',
             'st1_x_value': '',
-            'st1_x_offset': '',                 # ToDo units of measurement???
+            'st1_x_offset': '',
             'st1_y_value': '',
             'st1_y_offset': '',
             'st1_z_value': '',
