@@ -144,6 +144,91 @@ class RegionSelectorTest(unittest.TestCase):
         selector_one.set_active.assert_has_calls([call(False), call(True)])
         selector_two.set_active.assert_called_once_with(False)
 
+    def test_delete_key_pressed_will_do_nothing_if_no_selectors_exist(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(0, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_delete_key_pressed_will_do_nothing_if_no_selectors_are_active(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = False
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(2, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(2, len(region_selector._selectors))
+
+    def test_delete_key_pressed_will_remove_the_active_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+        selector_two.artists = []
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(2, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(1, len(region_selector._selectors))
+
+        selector_two.set_active.assert_called_once_with(False)
+        selector_two.update.assert_called_once_with()
+
+    def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_exist(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.view.set_override_cursor = Mock()
+
+        event = Mock()
+        event.xdata, event.ydata = 1.0, 2.0
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_are_active(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = False
+
+        event = Mock()
+        event.xdata, event.ydata = 5.5, 7.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_not_set_override_cursor_if_not_hovering_over_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+
+        event = Mock()
+        event.xdata, event.ydata = 1.5, 3.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_set_override_cursor_if_hovering_over_active_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+
+        event = Mock()
+        event.xdata, event.ydata = 5.5, 7.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(True)
+
     def test_on_rectangle_selected_notifies_observer(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         mock_observer = Mock()
