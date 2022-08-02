@@ -180,6 +180,34 @@ public:
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmError(configuredAlgRef, ""), std::logic_error const &);
   }
 
+  void test_notify_algorithm_error_will_notify_when_sum_banks_algorithm_error_occurs() {
+    auto mockJobRunner = makeJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto previewRow = makePreviewRow();
+    auto sumBanksAlg = makeConfiguredSumBanksAlg(previewRow);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(sumBanksAlg);
+
+    EXPECT_CALL(mockSubscriber, notifySumBanksAlgorithmError).Times(1);
+
+    jobManager.notifyAlgorithmError(configuredAlgRef, "");
+  }
+
+  void test_notify_algorithm_error_will_notify_when_reduction_algorithm_error_occurs() {
+    auto mockJobRunner = makeJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto previewRow = makePreviewRow();
+    auto sumBanksAlg = makeConfiguredReductionAlg(previewRow);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(sumBanksAlg);
+
+    EXPECT_CALL(mockSubscriber, notifyReductionAlgorithmError).Times(1);
+
+    jobManager.notifyAlgorithmError(configuredAlgRef, "");
+  }
+
   void test_notify_algorithm_complete_catches_runtime_errors() {
     auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();

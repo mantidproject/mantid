@@ -337,6 +337,45 @@ public:
     presenter.notifyAutoreductionPaused();
   }
 
+  void test_region_selector_and_reduction_plot_is_cleared_on_a_sum_banks_algorithm_error() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mockPlotPresenter = std::make_unique<MockPlotPresenter>();
+
+    // Get the raw pointers before moving ownership of the unique ptrs to the PreviewPresenter, so we can set
+    // expectations later
+    auto rawMockRegionSelector = mockRegionSelector.get();
+    auto rawMockPlotPresenter = mockPlotPresenter.get();
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  std::move(mockRegionSelector), std::move(mockPlotPresenter)));
+
+    expectRegionSelectorCleared(*mockView, rawMockRegionSelector);
+    expectReductionPlotCleared(rawMockPlotPresenter);
+
+    presenter.notifySumBanksAlgorithmError();
+  }
+
+  void test_reduction_plot_is_cleared_on_a_reduction_algorithm_error() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockPlotPresenter = std::make_unique<MockPlotPresenter>();
+
+    // Get the raw pointer before moving ownership of the unique ptr to the PreviewPresenter, so we can set
+    // expectations later
+    auto rawMockPlotPresenter = mockPlotPresenter.get();
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makeInstViewModel(),
+                                  makeRegionSelector(), std::move(mockPlotPresenter)));
+
+    expectReductionPlotCleared(rawMockPlotPresenter);
+
+    presenter.notifyReductionAlgorithmError();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
@@ -503,5 +542,15 @@ private:
 
   void expectAutoreducingDisabled(MockBatchPresenter &mainPresenter) {
     EXPECT_CALL(mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
+  }
+
+  void expectRegionSelectorCleared(MockPreviewView &mockView, MockRegionSelector *mockRegionSelector) {
+    EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
+    EXPECT_CALL(mockView, setRegionSelectorToolbarEnabled(false)).Times(1);
+  }
+
+  void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {
+    EXPECT_CALL(*mockPlotPresenter, clearModel()).Times(1);
+    EXPECT_CALL(*mockPlotPresenter, plot()).Times(1);
   }
 };
