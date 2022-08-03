@@ -118,12 +118,12 @@
     <location x="0.0" y="0.0" z="20.0"/>
   </component>
   <type is="rectangular_detector" name="detector" type="pixel" xpixels="128" xstart="0.512" xstep="-0.008" ypixels="128" ystart="-0.512" ystep="0.008" />
-  <!--thickness is chosen randomly(z is not important)-->
+  <!--thickness (along z) is chosen arbitrary-->
   <type is="detector" name="pixel">
     <cuboid id="pixel-shape">
       <left-front-bottom-point x="-0.004" y="-0.004" z="0.0"/>
       <left-front-top-point x="-0.004" y="0.004" z="0.0"/>
-      <left-back-bottom-point x="-0.004" y="-0.004" z="-0.008"/>
+      <left-back-bottom-point x="-0.004" y="-0.004" z="-0.001"/>
       <right-front-bottom-point x="0.004" y="-0.004" z="0.0"/>
     </cuboid>
   </type>
