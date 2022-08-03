@@ -10,6 +10,7 @@ import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
+from mantid.api import AnalysisDataService
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
@@ -349,7 +350,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
 
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     file_ext = run_information.file_extension
-    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
+    raw_ws_list = load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
 
     if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
@@ -576,6 +577,19 @@ def read_masking_file(masking_file_path):
     return all_banks_masking_list
 
 
+def load_raw_files(run_number_string, instrument, file_ext=None):
+    """
+    Uses the run number string to generate a list of run numbers to load in
+    :param run_number_string: The run number string to generate
+    :param instrument: The instrument to generate the prefix filename for these runs
+    :return: A list of loaded workspaces
+    """
+    run_number_list = generate_run_numbers(run_number_string=run_number_string)
+    file_ext = "" if file_ext is None else file_ext
+    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
+    return load_raw_ws
+
+
 def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
     """
     Implementation of cropping the single workspace in TOF. First converts to TOF, crops then converts
@@ -631,19 +645,6 @@ def _check_load_range(list_of_runs_to_load):
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
-def _load_raw_files(run_number_string, instrument, file_ext=None):
-    """
-    Uses the run number string to generate a list of run numbers to load in
-    :param run_number_string: The run number string to generate
-    :param instrument: The instrument to generate the prefix filename for these runs
-    :return: A list of loaded workspaces
-    """
-    run_number_list = generate_run_numbers(run_number_string=run_number_string)
-    file_ext = "" if file_ext is None else file_ext
-    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
-    return load_raw_ws
-
-
 def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
     """
     Loads files based on the list passed to it. If the list is
@@ -658,8 +659,11 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
 
     for run_number in run_numbers_list:
         file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
-        read_ws = mantid.Load(Filename=file_name)
-        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
+        if not AnalysisDataService.doesExist(file_name):
+            read_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
+        else:
+            read_ws = AnalysisDataService.retrieve(file_name)
+        read_ws_list.append(read_ws)
 
     return read_ws_list
 
