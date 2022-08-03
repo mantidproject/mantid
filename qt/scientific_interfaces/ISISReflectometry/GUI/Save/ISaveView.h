@@ -23,6 +23,8 @@ public:
   virtual void notifySaveSelectedWorkspaces() = 0;
   virtual void notifyAutosaveDisabled() = 0;
   virtual void notifyAutosaveEnabled() = 0;
+  virtual void notifySaveIndividualRowsEnabled() = 0;
+  virtual void notifySaveIndividualRowsDisabled() = 0;
   virtual void notifySavePathChanged() = 0;
 };
 

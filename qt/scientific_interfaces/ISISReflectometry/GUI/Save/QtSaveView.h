@@ -108,6 +108,7 @@ public slots:
 
   void onSavePathChanged();
   void onAutosaveChanged(int state);
+  void onSaveIndividualRowsChanged(int state);
 
 private slots:
   void onSettingsChanged();

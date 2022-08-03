@@ -34,6 +34,7 @@ void QtSaveView::initLayout() {
   connect(m_ui.filterEdit, SIGNAL(textChanged(const QString &)), this, SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(requestWorkspaceParams()));
   connect(m_ui.saveReductionResultsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onAutosaveChanged(int)));
+  connect(m_ui.saveIndividualRowsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onSaveIndividualRowsChanged(int)));
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this, SLOT(onSavePathChanged()));
   connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this, SLOT(browseToSaveDirectory()));
 }
@@ -93,6 +94,14 @@ void QtSaveView::onAutosaveChanged(int state) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
         Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "DisableAutosave"}, false);
     m_notifyee->notifyAutosaveDisabled();
+  }
+}
+
+void QtSaveView::onSaveIndividualRowsChanged(int state) {
+  if (state == Qt::CheckState::Checked) {
+    m_notifyee->notifySaveIndividualRowsEnabled();
+  } else {
+    m_notifyee->notifySaveIndividualRowsDisabled();
   }
 }
 

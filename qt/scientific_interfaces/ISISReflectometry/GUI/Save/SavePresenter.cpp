@@ -28,7 +28,8 @@ using namespace Mantid::API;
  * @param view :: The view we are handling
  */
 SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver)
-    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
+    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false),
+      m_shouldSaveIndividualRows(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();
@@ -133,12 +134,18 @@ void SavePresenter::enableAutosave() {
 
 void SavePresenter::disableAutosave() { m_shouldAutosave = false; }
 
+void SavePresenter::notifySaveIndividualRowsEnabled() { m_shouldSaveIndividualRows = true; }
+
+void SavePresenter::notifySaveIndividualRowsDisabled() { m_shouldSaveIndividualRows = false; }
+
 void SavePresenter::onSavePathChanged() {
   if (shouldAutosave() && !isValidSaveDirectory(m_view->getSavePath()))
     warnInvalidSaveDirectory();
 }
 
 bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
+
+bool SavePresenter::shouldAutosaveGroupRows() const { return m_shouldSaveIndividualRows; }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
  * workspaces

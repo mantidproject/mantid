@@ -197,6 +197,43 @@ public:
     verifyAndClear();
   }
 
+  void testNotifySaveIndividualRowsEnabled() {
+    auto presenter = makePresenter();
+    // There are no calls to the view
+    presenter.notifySaveIndividualRowsEnabled();
+    verifyAndClear();
+  }
+
+  void testNotifySaveIndividualRowsDisabled() {
+    auto presenter = makePresenter();
+    // There are no calls to the view
+    presenter.notifySaveIndividualRowsDisabled();
+    verifyAndClear();
+  }
+
+  void testShouldAutosaveGroupRowsFalseByDefault() {
+    auto presenter = makePresenter();
+    bool saveRows = presenter.shouldAutosaveGroupRows();
+    TS_ASSERT(!saveRows);
+    verifyAndClear();
+  }
+
+  void testShouldAutosaveGroupRowsWhenSaveIndividualRowsIsEnabled() {
+    auto presenter = makePresenter();
+    presenter.notifySaveIndividualRowsEnabled();
+    bool saveRows = presenter.shouldAutosaveGroupRows();
+    TS_ASSERT(saveRows);
+    verifyAndClear();
+  }
+
+  void testShouldAutosaveGroupRowsWhenSaveIndividualRowsIsDisabled() {
+    auto presenter = makePresenter();
+    presenter.notifySaveIndividualRowsDisabled();
+    bool saveRows = presenter.shouldAutosaveGroupRows();
+    TS_ASSERT(!saveRows);
+    verifyAndClear();
+  }
+
   void testNotifySavePathChangedWithAutosaveOn() {
     auto presenter = makePresenter();
     enableAutosave(presenter);
