@@ -44,7 +44,7 @@ class LoadSANSMLZTest(unittest.TestCase):
 
         self.assertEqual(6, run.getProperty('wavelength').value)
 
-        self.assertEqual('Eichproben', ws.getTitle())
+        self.assertEqual('D0511339/1', ws.getTitle())
         self.assertEqual(output_ws_name, ws.name())
 
         self.assertEqual('', run.getProperty('position').value)
@@ -192,10 +192,7 @@ class SANS1DataClassFileSectionTest(unittest.TestCase):
         self.assertEqual(date, self.metadata.file.run_end())
 
     def test_GetTitleName(self):
-        title = 'Eichproben'
-        self.assertEqual(title, self.metadata.file.get_title())
-        self.metadata.file.info['Title'] = ''
-        title = self.filename
+        title = 'D0511339/1'
         self.assertEqual(title, self.metadata.file.get_title())
 
     def test_CheckSomeValues(self):

@@ -73,7 +73,8 @@ class FileSANS(DtClsSANS):
                                                self._date_format))
 
     def get_title(self):
-        return self.info['Title'] if self.info['Title'] else self.info['FileName']
+        file_name = self.info['FileName'].split('.')
+        return f"{file_name[0]}/{int(file_name[1])}"
 
 
 @dataclass
