@@ -41,7 +41,6 @@
       <radius val="0.07"/>
       <height val="0.3"/>
     </cylinder>
-    <!-- <algebra val="cyl-neutron_source"/> -->
   </type>
 
   <!--VELOCITY SELECTOR-->
@@ -56,7 +55,6 @@
       <radius val="0.04"/>
       <height val="0.03"/>
     </cylinder>
-    <!-- <algebra val="cyl-velocity_selector"/> -->
   </type>
 
   <!-- MONITORS-->
@@ -65,8 +63,8 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location name="monitor1" z="-24.5"/>
-      <location name="monitor2" z="-25.5"/>
+      <location name="monitor1" z="-25.5"/>
+      <location name="monitor2" z="-24.5"/>
     </component>
   </type>
 
@@ -77,7 +75,6 @@
       <radius val="0.08"/>
       <height val="0.01"/>
     </cylinder>
-    <!-- <algebra val="cyl-approx"/> -->
   </type>
 
   <idlist idname="monitors">
@@ -97,7 +94,6 @@
       <radius val="0.04"/>
       <height val="0.03"/>
     </cylinder>
-    <!-- <algebra val="cyl-chopper"/> -->
   </type>
 
   <!--SAMPLE-->
@@ -115,22 +111,20 @@
       <centre x="0.0"  y="0.0" z="0.0" />
       <radius val="0.07" />
     </sphere>
-    <!-- <algebra val="sample-sphere" /> -->
   </type>
 
   <!--DETECTOR -->
-  <component idfillbyfirst="y" idstart="0" idstepbyrow="128" type="detector">
+  <component idfillbyfirst="x" idstart="0" idstepbyrow="128" type="detector" >
     <location x="0.0" y="0.0" z="20.0"/>
   </component>
-  <type is="rectangular_detector" name="detector" type="pixel" xpixels="128" xstart="-0.512" xstep="0.008" ypixels="128" ystart="-0.512" ystep="0.008"/>
-
+  <type is="rectangular_detector" name="detector" type="pixel" xpixels="128" xstart="0.512" xstep="-0.008" ypixels="128" ystart="-0.512" ystep="0.008" />
+  <!--thickness is chosen randomly(z is not important)-->
   <type is="detector" name="pixel">
     <cuboid id="pixel-shape">
       <left-front-bottom-point x="-0.004" y="-0.004" z="0.0"/>
       <left-front-top-point x="-0.004" y="0.004" z="0.0"/>
-      <left-back-bottom-point x="-0.004" y="-0.004" z="-1.0"/>
+      <left-back-bottom-point x="-0.004" y="-0.004" z="-0.008"/>
       <right-front-bottom-point x="0.004" y="-0.004" z="0.0"/>
     </cuboid>
-    <!-- <algebra val="pixel-shape"/> -->
   </type>
 </instrument>
