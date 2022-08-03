@@ -86,7 +86,7 @@ public:
   // RegionSelectionObserver overrides
   void notifyRegionChanged() override;
 
-  PreviewRow *getPreviewRowCopy() const override;
+  PreviewRow const &getPreviewRow() const override;
 
 private:
   IPreviewView *m_view{nullptr};

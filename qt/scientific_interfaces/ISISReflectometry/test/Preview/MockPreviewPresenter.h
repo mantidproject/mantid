@@ -21,6 +21,6 @@ public:
   MOCK_METHOD(void, notifyAutoreductionResumed, (), (override));
   MOCK_METHOD(void, notifyAutoreductionPaused, (), (override));
 
-  MOCK_METHOD(PreviewRow *, getPreviewRowCopy, (), (const override));
+  MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

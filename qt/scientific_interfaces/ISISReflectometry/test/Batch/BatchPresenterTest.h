@@ -13,6 +13,7 @@
 #include "../Reduction/MockBatch.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MockBatchView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -29,6 +30,12 @@ using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::StrictMock;
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+MATCHER_P(CheckRunNumbers, runNumbers, "") { return arg.runNumbers() == runNumbers; }
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class BatchPresenterTest : public CxxTest::TestSuite {
 public:
@@ -535,6 +542,14 @@ public:
     auto presenter = makePresenter(std::move(mock));
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged()).Times(1);
     presenter->notifyRunsTransferred();
+  }
+
+  void testNotifyPreviewApplyRequested() {
+    auto presenter = makePresenter(makeModel());
+    auto const previewRow = PreviewRow({"12345"});
+    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+    EXPECT_CALL(*m_experimentPresenter, notifyPreviewApplyRequested(CheckRunNumbers(previewRow.runNumbers()))).Times(1);
+    presenter->notifyPreviewApplyRequested();
   }
 
 private:

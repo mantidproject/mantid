@@ -104,13 +104,13 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
   restoreDefaults();
 }
 
-void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow *previewRow) {
+void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
   // TODO return by reference instead of copying
-  auto lookupRowCopy = m_model.findLookupRow(*previewRow, m_thetaTolerance);
+  auto lookupRowCopy = m_model.findLookupRow(previewRow, m_thetaTolerance);
 
-  auto signal = previewRow->getProcessingInstructions(ROIType::Signal);
-  auto background = previewRow->getProcessingInstructions(ROIType::Background);
-  auto transmission = previewRow->getProcessingInstructions(ROIType::Transmission);
+  auto signal = previewRow.getProcessingInstructions(ROIType::Signal);
+  auto background = previewRow.getProcessingInstructions(ROIType::Background);
+  auto transmission = previewRow.getProcessingInstructions(ROIType::Transmission);
   // TODO set the processing instructions in the lookup row
 
   updateViewFromModel();

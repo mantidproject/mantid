@@ -41,7 +41,7 @@ public:
   boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
   std::optional<double> getDefaultTheta() const override;
-  PreviewRow *getPreviewRowCopy() const override;
+  PreviewRow const &getPreviewRow() const override;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
   void setTheta(double theta) override;

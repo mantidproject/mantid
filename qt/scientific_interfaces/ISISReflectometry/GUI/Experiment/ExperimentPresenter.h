@@ -62,7 +62,7 @@ public:
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
-  void notifyPreviewApplyRequested(PreviewRow *previewRow) override;
+  void notifyPreviewApplyRequested(PreviewRow const &previewRow) override;
   void restoreDefaults() override;
 
   bool hasValidSettings() const noexcept override;

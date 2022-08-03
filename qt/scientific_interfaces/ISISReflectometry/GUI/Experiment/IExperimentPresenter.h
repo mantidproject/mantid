@@ -28,7 +28,7 @@ public:
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
-  virtual void notifyPreviewApplyRequested(PreviewRow *previewRow) = 0;
+  virtual void notifyPreviewApplyRequested(PreviewRow const &previewRow) = 0;
   virtual void restoreDefaults() = 0;
   virtual bool hasValidSettings() const noexcept = 0;
 };

@@ -348,6 +348,17 @@ public:
     presenter.notifyApplyRequested();
   }
 
+  void test_get_preview_row() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto previewRow = PreviewRow({"12345"});
+
+    EXPECT_CALL(*mockModel, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    presenter.getPreviewRow();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();

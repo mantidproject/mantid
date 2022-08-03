@@ -219,6 +219,6 @@ void PreviewPresenter::runReduction() {
   m_model->reduceAsync(*m_jobManager);
 }
 
-PreviewRow *PreviewPresenter::getPreviewRowCopy() const { return m_model->getPreviewRowCopy(); }
+PreviewRow const &PreviewPresenter::getPreviewRow() const { return m_model->getPreviewRow(); }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

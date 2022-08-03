@@ -21,6 +21,6 @@ public:
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
 
-  virtual PreviewRow *getPreviewRowCopy() const = 0;
+  virtual PreviewRow const &getPreviewRow() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

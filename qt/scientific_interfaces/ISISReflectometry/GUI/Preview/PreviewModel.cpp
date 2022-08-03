@@ -93,12 +93,7 @@ std::optional<double> PreviewModel::getDefaultTheta() const {
   return std::nullopt;
 }
 
-PreviewRow *PreviewModel::getPreviewRowCopy() const {
-  if (m_runDetails) {
-    return m_runDetails.get();
-  }
-  return nullptr;
-}
+PreviewRow const &PreviewModel::getPreviewRow() const { return *m_runDetails; }
 
 std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 

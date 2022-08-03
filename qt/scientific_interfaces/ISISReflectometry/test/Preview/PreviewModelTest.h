@@ -214,6 +214,15 @@ public:
     }
   }
 
+  void test_get_preview_row() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    PreviewRow const &previewRow = model.getPreviewRow();
+    TS_ASSERT_EQUALS(ws, previewRow.getLoadedWs())
+  }
+
 private:
   MatrixWorkspace_sptr generateSummedWs(MockJobManager &mockJobManager, PreviewModel &model) {
     auto expectedWs = createWorkspace();

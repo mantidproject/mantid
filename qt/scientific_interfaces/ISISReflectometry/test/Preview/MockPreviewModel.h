@@ -32,7 +32,7 @@ public:
   MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
   MOCK_METHOD(boost::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
-  MOCK_METHOD(PreviewRow *, getPreviewRowCopy, (), (const, override));
+  MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
 
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
