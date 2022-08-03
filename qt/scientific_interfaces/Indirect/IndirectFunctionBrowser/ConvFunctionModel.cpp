@@ -563,12 +563,12 @@ std::string ConvFunctionModel::buildFickFunctionString() const {
 
 std::string ConvFunctionModel::buildChudleyElliotString() const {
   return "name=ChudleyElliotSQE, Height=1, Tau=1.25, Centre=0, L=1.0, "
-         "constraints=(Height>0, Tau>0)";
+         "constraints=(Height>0, Tau>0, L>0)";
 }
 
 std::string ConvFunctionModel::buildHallRossString() const {
   return "name=HallRossSQE, Height=1, Tau=1.25, Centre=0, L=1.0, "
-         "constraints=(Height>0, Tau>0)";
+         "constraints=(Height>0, Tau>0, L>0)";
 }
 
 std::string ConvFunctionModel::buildStretchExpFTFunctionString() const {

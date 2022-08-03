@@ -1,10 +1,10 @@
 .. _func-Hall-RossSQE:
 
-================
-ChudleyElliotSQE
-================
+===========
+HallRossSQE
+===========
 
-.. index:: ChudleyElliotSQE
+.. index:: HallRossSQE
 
 Description
 -----------
@@ -16,7 +16,7 @@ for a particle undergoing jump diffusion using the Hall-Ross Jump diffusion mode
 
    S(Q,E) = Height \cdot \frac{1}{\pi} \frac{\Gamma}{\Gamma^2+(E-Centre)^2}
 
-   \Gamma = \frac{\hbar}{\tau} \cdot (1-\exp(-\frac{l^2 Q^2}{2}))
+   \Gamma = \frac{\hbar}{\tau} \cdot \left(1-\exp(-\frac{l^2 Q^2}{2})\right)
 
 where:
 

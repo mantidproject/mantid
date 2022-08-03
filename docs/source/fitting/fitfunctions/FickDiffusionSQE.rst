@@ -10,7 +10,7 @@ Description
 -----------
 
 This fitting function models the dynamic structure factor
-for a particle undergoing jump diffusion using Fick's law for diffusion.
+for a particle undergoing jump diffusion using Fick's law for diffusion [1]_.
 
 .. math::
 
@@ -25,9 +25,14 @@ where:
 -  :math:`Centre` - Centre of peak, a fit parameter
 -  :math:`Q` - Momentum transfer, an attribute (non-fitting)
 
+.. attributes::
+
 .. properties::
 
-.. attributes::
+References
+----------
+
+.. [1] M. Bée, Chemical Physics 292, 121-141 (2003) <https://www.sciencedirect.com/science/article/abs/pii/S030101040300257X>
 
 .. categories::
 
