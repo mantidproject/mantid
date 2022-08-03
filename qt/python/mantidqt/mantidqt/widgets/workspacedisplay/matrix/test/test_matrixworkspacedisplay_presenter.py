@@ -378,7 +378,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(mock_notify.call_count, 1)
         self.assertEqual(mock_table.model.call_count, 0)
 
-    @patch("mantidqt.widgets.workspacedisplay.matrix.presenter.CreateEmptyTableWorkspace")
+    @patch("mantidqt.widgets.workspacedisplay.matrix.presenter._create_empty_table_workspace")
     def test_action_copy_bin_to_table(self, mock_create_table):
         _, mock_table, _, presenter = self.common_setup_action_plot(table_has_selection=False)
         self.setup_mock_selection(mock_table, num_selected_cols=2, num_selected_rows=None)
@@ -421,7 +421,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(mock_notify.call_count, 1)
         self.assertEqual(mock_table.model.call_count, 0)
 
-    @patch("mantidqt.widgets.workspacedisplay.matrix.presenter.CreateEmptyTableWorkspace")
+    @patch("mantidqt.widgets.workspacedisplay.matrix.presenter._create_empty_table_workspace")
     def test_action_copy_spectrum_to_table(self, mock_create_table):
         _, mock_table, _, presenter = self.common_setup_action_plot(table_has_selection=False)
         self.setup_mock_selection(mock_table, num_selected_cols=None, num_selected_rows=2)
