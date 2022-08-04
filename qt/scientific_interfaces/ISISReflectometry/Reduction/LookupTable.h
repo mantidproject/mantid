@@ -36,6 +36,8 @@ public:
   std::vector<LookupRow> const &rows() const;
   std::vector<LookupRow::ValueArray> toValueArray() const;
 
+  void addOrReplace(LookupRow lookupRow);
+
   friend bool operator==(LookupTable const &lhs, LookupTable const &rhs);
   friend bool operator!=(LookupTable const &lhs, LookupTable const &rhs);
 

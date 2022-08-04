@@ -129,6 +129,14 @@ std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
   return result;
 }
 
+void LookupTable::addOrReplace(LookupRow lookupRow) {
+  if (auto iter = std::find(m_lookupRows.begin(), m_lookupRows.end(), lookupRow); iter != m_lookupRows.cend()) {
+    *iter = std::move(lookupRow);
+  } else {
+    m_lookupRows.push_back(std::move(lookupRow));
+  }
+}
+
 bool operator==(LookupTable const &lhs, LookupTable const &rhs) { return lhs.m_lookupRows == rhs.m_lookupRows; }
 bool operator!=(LookupTable const &lhs, LookupTable const &rhs) { return !operator==(lhs, rhs); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

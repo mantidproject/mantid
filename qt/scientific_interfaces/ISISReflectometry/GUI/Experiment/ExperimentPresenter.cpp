@@ -76,6 +76,13 @@ bool ExperimentPresenter::isProcessing() const { return m_mainPresenter->isProce
 
 bool ExperimentPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
+void ExperimentPresenter::setLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
+                                                             ROIType regionType) {
+  if (auto instructions = previewRow.getProcessingInstructions(regionType)) {
+    lookupRow.setProcessingInstructions(regionType, instructions.get());
+  }
+}
+
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
@@ -106,22 +113,16 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
-  // TODO return by reference instead of copying
-  if (auto lookupRowCopy = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
-    auto row = lookupRowCopy.get();
+  if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
+    auto lookupRowCopy = *foundRow;
 
-    setLookupRowProcessingInstructions(previewRow, row, ROIType::Signal);
-    setLookupRowProcessingInstructions(previewRow, row, ROIType::Background);
-    setLookupRowProcessingInstructions(previewRow, row, ROIType::Transmission);
+    setLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
+    setLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
+    setLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
+
+    m_model.addOrReplace(std::move(lookupRowCopy));
 
     updateViewFromModel();
-  }
-}
-
-void ExperimentPresenter::setLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
-                                                             ROIType regionType) {
-  if (auto instructions = previewRow.getProcessingInstructions(regionType)) {
-    lookupRow.setProcessingInstructions(regionType, instructions.get());
   }
 }
 

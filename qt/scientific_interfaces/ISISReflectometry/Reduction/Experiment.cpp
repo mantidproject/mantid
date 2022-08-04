@@ -59,6 +59,8 @@ std::vector<LookupRow> const &Experiment::lookupTableRows() const { return m_loo
 
 std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const { return m_lookupTable.toValueArray(); }
 
+void Experiment::addOrReplace(LookupRow lookupRow) { m_lookupTable.addOrReplace(std::move(lookupRow)); }
+
 boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tolerance) const {
   return m_lookupTable.findLookupRow(row, tolerance);
 }
