@@ -500,11 +500,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         # the calculation below is reimplementation of the code in the LoadILLReflectometry that performs the same operation
         sign = -1.0 if self._instrumentName == 'D17' else 1.0
-        detector = ws.getInstrument().getComponentByName("detector")
-        if self._instrumentName == 'D17':
-            pixel_width = detector.xstep()
-        else:
-            pixel_width = detector.ystep()
+        pixel_width = common.pixelSize(self._instrumentName)
         offset_width = (127.5 - peak_centre) * pixel_width
         offset_angle = sign * atan(offset_width / distance)
         angle = offset_angle
