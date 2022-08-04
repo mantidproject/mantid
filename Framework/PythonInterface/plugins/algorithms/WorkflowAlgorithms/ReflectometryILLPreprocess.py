@@ -141,7 +141,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._recalculate_average_chopper_params(ws)
         self._addSampleLogInfo(ws)
 
-        if self.getPropertyValue('AngleOption')=='DetectorAngle' and self.getPropertyValue('Measurement')=='ReflectedBeam':
+        if self.getPropertyValue('AngleOption') == 'DetectorAngle' and self.getPropertyValue('Measurement') == 'ReflectedBeam':
             # we still have to do this after having loaded and found the foreground centre of the reflected beam
             ws = self._calibrateDetectorAngleByDirectBeam(ws)
 
