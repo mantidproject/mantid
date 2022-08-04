@@ -178,6 +178,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         selector.update()
         self._selectors.remove(selector)
 
+        if self.notifyee:
+            self.notifyee.notifyRegionChanged()
+
     def _find_selector_if(self, predicate: Callable) -> Selector:
         """
         Find the first selector which agrees with a predicate. Return None if no selector is found
