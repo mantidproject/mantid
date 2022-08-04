@@ -820,7 +820,8 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
  * variable, the w values correspodning to each value of the pseudo variable
  */
 std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
-DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc) {
+DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc,
+                                                 bool returnCumulative) {
   std::vector<double> IOfQYFull, qValuesFull, wIndices;
   double IOfQMaxPreviousRow = 0.;
 
@@ -848,12 +849,16 @@ DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr
 
   // loop through the S(Q) spectra for the different energy transfer values
   std::vector<double> IOfQX, IOfQY;
+  // reserve minimum space required for performance
+  IOfQYFull.reserve(nAccessibleWPoints);
+  qValuesFull.reserve(nAccessibleWPoints);
+  wIndices.reserve(nAccessibleWPoints);
   for (size_t iW = 0; iW < nAccessibleWPoints; iW++) {
     auto kf = getKf(wValues[iW], kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
     IOfQX.clear();
     IOfQY.clear();
-    integrateCumulative(QSQ->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
+    integrateCumulative(QSQ->getSpectrum(iW), qmin, qmin + qrange, IOfQX, IOfQY, returnCumulative);
     qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
     wIndices.insert(wIndices.end(), IOfQX.size(), static_cast<double>(iW));
     // w bin width for elastic will equal 1
@@ -877,7 +882,7 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(
     double kinc, const ComponentWorkspaceMappings &materialWorkspaces) {
   for (size_t iMat = 0; iMat < materialWorkspaces.size(); iMat++) {
     auto QSQ = materialWorkspaces[iMat].QSQ;
-    auto [IOfQYFull, qValuesFull, wIndices] = integrateQSQ(QSQ, kinc);
+    auto [IOfQYFull, qValuesFull, wIndices] = integrateQSQ(QSQ, kinc, true);
     auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
     if (IOfQYAtQMax == 0.)
       throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
@@ -927,17 +932,18 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const API::Matrix
  * @param resultX The x values at which the integral has been calculated
  * @param resultY the values of the integral at various x values up to xmax
  */
-void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h,
-                                                             const double xmin, const double xmax,
-                                                             std::vector<double> &resultX,
-                                                             std::vector<double> &resultY) {
-  const std::vector<double> &xValues = h.readX();
-  const std::vector<double> &yValues = h.readY();
-  bool isPoints = h.xMode() == HistogramData::Histogram::XMode::Points;
+void DiscusMultipleScatteringCorrection::integrateCumulative(const ISpectrum &h, const double xmin, const double xmax,
+                                                             std::vector<double> &resultX, std::vector<double> &resultY,
+                                                             const bool returnCumulative) {
+  const std::vector<double> &xValues = h.dataX();
+  const std::vector<double> &yValues = h.dataY();
+  bool isPoints = xValues.size() == yValues.size();
 
   // set the integral to zero at xmin
-  resultX.emplace_back(xmin);
-  resultY.emplace_back(0.);
+  if (returnCumulative) {
+    resultX.emplace_back(xmin);
+    resultY.emplace_back(0.);
+  }
   double sum = 0;
 
   // ensure there's a point at xmin
@@ -967,8 +973,10 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
       } else
         yToUse = yValues[iRight - 1];
       sum += yToUse * (xValues[iRight] - xmin);
-      resultX.push_back(xValues[iRight]);
-      resultY.push_back(sum);
+      if (returnCumulative) {
+        resultX.push_back(xValues[iRight]);
+        resultY.push_back(sum);
+      }
       iRight++;
     } else {
       if (isPoints) {
@@ -978,21 +986,28 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
       } else
         yToUse = yValues[iRight - 1];
       sum += yToUse * (xmax - xmin);
-      resultX.push_back(xmax);
-      resultY.push_back(sum);
+      if (returnCumulative) {
+        resultX.push_back(xmax);
+        resultY.push_back(sum);
+      }
       iRight++;
     }
   }
 
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
-    yToUse = isPoints ? 0.5 * (yValues[iRight] + yValues[iRight - 1]) : yValues[iRight - 1];
+    if (isPoints)
+      yToUse = 0.5 * (yValues[iRight - 1] + yValues[iRight]);
+    else
+      yToUse = yValues[iRight - 1];
     double xLeft = xValues[iRight - 1];
     double xRight = xValues[iRight];
     sum += yToUse * (xRight - xLeft);
-    if (xRight > std::nextafter(xLeft, DBL_MAX)) {
-      resultX.emplace_back(xRight);
-      resultY.emplace_back(sum);
+    if (returnCumulative) {
+      if (xRight > std::nextafter(xLeft, DBL_MAX)) {
+        resultX.emplace_back(xRight);
+        resultY.emplace_back(sum);
+      }
     }
   }
 
@@ -1004,6 +1019,12 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
     } else
       yToUse = yValues[iRight - 1];
     sum += yToUse * (xmax - xValues[iRight - 1]);
+    if (returnCumulative) {
+      resultX.emplace_back(xmax);
+      resultY.emplace_back(sum);
+    }
+  }
+  if (!returnCumulative) {
     resultX.emplace_back(xmax);
     resultY.emplace_back(sum);
   }
@@ -1013,7 +1034,7 @@ API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const 
   auto wsIntegrals = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
   for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
     std::vector<double> IOfQX, IOfQY;
-    integrateCumulative(ws->histogram(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY);
+    integrateCumulative(ws->getSpectrum(i), ws->x(i).front(), ws->x(i).back(), IOfQX, IOfQY, false);
     wsIntegrals->mutableY(i) = IOfQY.back();
   }
   return wsIntegrals;
@@ -1404,7 +1425,7 @@ double DiscusMultipleScatteringCorrection::getQSQIntegral(const ComponentWorkspa
     return prevCalculatedIntegrals->y()[index];
   } else {
     std::vector<double> IOfQYFull;
-    std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k);
+    std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k, false);
     auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
     // add result to the cache
     auto &kList = prevCalculatedIntegrals->dataX();

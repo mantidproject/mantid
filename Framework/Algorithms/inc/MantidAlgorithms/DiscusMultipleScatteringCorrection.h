@@ -78,8 +78,8 @@ protected:
   double interpolateGaussian(const API::ISpectrum &histToInterpolate, double x);
   double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w, double q);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
-  void integrateCumulative(const Mantid::HistogramData::Histogram &h, const double xmin, const double xmax,
-                           std::vector<double> &resultX, std::vector<double> &resultY);
+  void integrateCumulative(const API::ISpectrum &h, const double xmin, const double xmax, std::vector<double> &resultX,
+                           std::vector<double> &resultY, const bool returnCumulative);
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
 
@@ -121,7 +121,7 @@ private:
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
                                                                          const std::vector<double> &xPoints);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
-  integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc);
+  integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc, bool returnCumulative);
   double getQSQIntegral(const ComponentWorkspaceMapping &SQWSMapping, const double k);
   const ComponentWorkspaceMapping *findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
                                                          const Geometry::IObject *shapeObjectWithScatter);

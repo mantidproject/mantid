@@ -40,9 +40,9 @@ public:
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
     DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
-  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
-                           std::vector<double> &resultX, std::vector<double> &resultY) {
-    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
+  void integrateCumulative(const Mantid::API::ISpectrum &h, double xmin, double xmax, std::vector<double> &resultX,
+                           std::vector<double> &resultY, const bool returnCumulative) {
+    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY, returnCumulative);
   }
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) {
     DiscusMultipleScatteringCorrection::getXMinMax(ws, xmin, xmax);
@@ -400,44 +400,47 @@ public:
 
   void test_integrateCumulative() {
     DiscusMultipleScatteringCorrectionHelper alg;
-    Mantid::HistogramData::Histogram test(Mantid::HistogramData::Points({0., 1., 2., 3.}),
-                                          Mantid::HistogramData::Frequencies({1., 1., 1., 2.}));
+    auto ws = Mantid::DataObjects::create<Workspace2D>(
+        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 1., 2., 3.}),
+                                            Mantid::HistogramData::Frequencies({1., 1., 1., 2.})));
     std::vector<double> testResultX, testResultY;
-    alg.integrateCumulative(test, 0., 2.2, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.2, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[3], 2.22);
     testResultX.clear();
     testResultY.clear();
-    TS_ASSERT_THROWS(alg.integrateCumulative(test, 0., 3.2, testResultX, testResultY), std::runtime_error &);
+    TS_ASSERT_THROWS(alg.integrateCumulative(ws->getSpectrum(0), 0., 3.2, testResultX, testResultY, true),
+                     std::runtime_error &);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0., 2.0, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0., 0., testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 0., testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 1., 0., testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 1., 0., testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0.5, 1.5, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0.5, 1.5, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 1.0);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0.5, 0.9, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0.5, 0.9, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
     // bin edges tests
     testResultX.clear();
     testResultY.clear();
-    Mantid::HistogramData::Histogram test_edges(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
-                                                Mantid::HistogramData::Frequencies({1., 1., 2.}));
-    alg.integrateCumulative(test_edges, 0., 2.2, testResultX, testResultY);
+    auto ws_edges = Mantid::DataObjects::create<Workspace2D>(
+        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
+                                            Mantid::HistogramData::Frequencies({1., 1., 2.})));
+    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.2, testResultX, testResultY, true);
     TS_ASSERT_DELTA(testResultY[3], 2.4, 1E-10);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test_edges, 0., 2.0, testResultX, testResultY);
+    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
   }
 
