@@ -13,7 +13,6 @@
 #include "IExperimentView.h"
 #include "LookupTableValidationError.h"
 #include "Reduction/Experiment.h"
-#include "Reduction/LookupRow.h"
 #include "Reduction/PreviewRow.h"
 #include <boost/optional.hpp>
 

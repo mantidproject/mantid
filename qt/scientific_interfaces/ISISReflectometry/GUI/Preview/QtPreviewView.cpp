@@ -69,9 +69,9 @@ void QtPreviewView::setupSelectRegionTypes() {
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
 
-void QtPreviewView::enableApplyButton() { m_ui.pushButton_3->setEnabled(true); }
+void QtPreviewView::enableApplyButton() { m_ui.apply_button->setEnabled(true); }
 
-void QtPreviewView::disableApplyButton() { m_ui.pushButton_3->setEnabled(false); }
+void QtPreviewView::disableApplyButton() { m_ui.apply_button->setEnabled(false); }
 
 void QtPreviewView::connectSignals() const {
   // Loading section
@@ -88,7 +88,7 @@ void QtPreviewView::connectSignals() const {
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
   // Apply button
-  connect(m_ui.pushButton_3, SIGNAL(clicked()), this, SLOT(onApplyClicked()));
+  connect(m_ui.apply_button, SIGNAL(clicked()), this, SLOT(onApplyClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
