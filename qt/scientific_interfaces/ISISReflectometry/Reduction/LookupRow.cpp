@@ -60,12 +60,7 @@ void LookupRow::setProcessingInstructions(ROIType regionType, ProcessingInstruct
 }
 
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
-  return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher &&
-          lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
-          lhs.m_scaleFactor == rhs.m_scaleFactor &&
-          lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
-          lhs.m_processingInstructions == rhs.m_processingInstructions &&
-          lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions);
+  return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher);
 }
 
 bool operator!=(LookupRow const &lhs, LookupRow const &rhs) { return !(lhs == rhs); }
