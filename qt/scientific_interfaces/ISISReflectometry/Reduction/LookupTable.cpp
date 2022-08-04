@@ -113,13 +113,28 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
     return *match;
 }
 
+void LookupTable::replaceLookupRow(PreviewRow const &previewRow, double tolerance) {
+  if (auto const foundRow = findLookupRow(previewRow, tolerance)) {
+    auto lookupRowCopy = *foundRow;
+
+    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
+    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
+    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
+
+    m_lookupRows[getIndex(lookupRowCopy)] = std::move(lookupRowCopy);
+  } else {
+    throw RowNotFoundException("There is no row with title and angle matching '" + std::to_string(previewRow.theta()) +
+                               "' in the Lookup Table.");
+  }
+}
+
 size_t LookupTable::getIndex(const LookupRow &lookupRow) const {
   if (auto found = std::find(m_lookupRows.cbegin(), m_lookupRows.cend(), lookupRow); found != m_lookupRows.cend()) {
     auto index = std::distance(m_lookupRows.cbegin(), found);
     assert(index >= 0);
     return static_cast<size_t>(index);
   }
-  throw std::out_of_range("Lookup row not found.");
+  throw RowNotFoundException("Lookup row not found.");
 }
 
 std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
@@ -129,11 +144,10 @@ std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
   return result;
 }
 
-void LookupTable::addOrReplace(LookupRow lookupRow) {
-  if (auto iter = std::find(m_lookupRows.begin(), m_lookupRows.end(), lookupRow); iter != m_lookupRows.cend()) {
-    *iter = std::move(lookupRow);
-  } else {
-    m_lookupRows.push_back(std::move(lookupRow));
+void LookupTable::replaceLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
+                                                         ROIType regionType) {
+  if (auto const instructions = previewRow.getProcessingInstructions(regionType)) {
+    lookupRow.setProcessingInstructions(regionType, instructions.get());
   }
 }
 

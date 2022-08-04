@@ -278,51 +278,31 @@ public:
     auto const lookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
-    TS_ASSERT_THROWS(table.getIndex(lookupRow), std::out_of_range const &);
+    TS_ASSERT_THROWS(table.getIndex(lookupRow), RowNotFoundException const &);
   }
 
-  void test_add_or_replace_will_replace_row_with_same_angle_and_title() {
+  void test_replace_lookup_row_will_replace_row_with_same_angle_and_title() {
     auto constexpr angle = 2.3;
-    auto const lookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
-    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")), lookupRow,
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
+    auto matchingLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")), matchingLookupRow,
+                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
 
     TS_ASSERT_EQUALS(3, table.rows().size());
 
-    table.addOrReplace(lookupRow);
+    auto const previewRow = ModelCreationHelper::makePreviewRow({"12345"}, angle);
+    table.replaceLookupRow(previewRow, m_exactMatchTolerance);
 
-    TS_ASSERT_EQUALS(1, table.getIndex(lookupRow));
+    TS_ASSERT_EQUALS(1, table.getIndex(matchingLookupRow));
     TS_ASSERT_EQUALS(3, table.rows().size());
   }
 
-  void test_add_or_replace_will_add_new_row_if_not_same_angle() {
-    auto constexpr angle = 2.3;
-    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")),
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*")),
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
+  void test_replace_lookup_row_will_throw_if_no_row_with_matching_angle() {
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")),
+                             ModelCreationHelper::makeLookupRow(2.3, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
 
-    TS_ASSERT_EQUALS(3, table.rows().size());
-
-    auto const lookupRow = ModelCreationHelper::makeLookupRow(2.7, boost::regex("A.*"));
-    table.addOrReplace(lookupRow);
-
-    TS_ASSERT_EQUALS(3, table.getIndex(lookupRow));
-    TS_ASSERT_EQUALS(4, table.rows().size());
-  }
-
-  void test_add_or_replace_will_add_new_row_if_not_same_title() {
-    auto constexpr angle = 2.3;
-    auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")),
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*")),
-                             ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
-
-    TS_ASSERT_EQUALS(3, table.rows().size());
-
-    auto const lookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("B.*"));
-    table.addOrReplace(lookupRow);
-
-    TS_ASSERT_EQUALS(3, table.getIndex(lookupRow));
-    TS_ASSERT_EQUALS(4, table.rows().size());
+    auto const previewRow = ModelCreationHelper::makePreviewRow({"12345"}, 2.7);
+    TS_ASSERT_THROWS(table.replaceLookupRow(previewRow, m_exactMatchTolerance), RowNotFoundException const &);
   }
 
 private:

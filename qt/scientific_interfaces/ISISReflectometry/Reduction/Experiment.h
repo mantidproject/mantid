@@ -56,11 +56,11 @@ public:
   std::vector<LookupRow> const &lookupTableRows() const;
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
-  void addOrReplace(LookupRow lookupRow);
-
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
+
+  void replaceLookupRow(PreviewRow const &previewRow, double tolerance);
 
   boost::optional<size_t> getLookupRowIndexFromRow(Row const &row, double tolerance) const;
 

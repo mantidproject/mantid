@@ -9,7 +9,6 @@
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ExperimentOptionDefaults.h"
-#include "GUI/Preview/ROIType.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
 #include "LookupTableValidationError.h"
@@ -100,8 +99,6 @@ private:
 
   bool isProcessing() const;
   bool isAutoreducing() const;
-
-  void setLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
 
   IExperimentView *m_view = nullptr;
   Experiment m_model;

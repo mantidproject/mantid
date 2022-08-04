@@ -76,13 +76,6 @@ bool ExperimentPresenter::isProcessing() const { return m_mainPresenter->isProce
 
 bool ExperimentPresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
-void ExperimentPresenter::setLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
-                                                             ROIType regionType) {
-  if (auto instructions = previewRow.getProcessingInstructions(regionType)) {
-    lookupRow.setProcessingInstructions(regionType, instructions.get());
-  }
-}
-
 /** Tells the view to update the enabled/disabled state of all relevant
  * widgets based on whether processing is in progress or not.
  */
@@ -113,17 +106,16 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
-  if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
-    auto lookupRowCopy = *foundRow;
-
-    setLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
-    setLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
-    setLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
-
-    m_model.addOrReplace(std::move(lookupRowCopy));
-
-    updateViewFromModel();
+  try {
+    m_model.replaceLookupRow(previewRow, m_thetaTolerance);
+  } catch (RowNotFoundException const &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: " << ex.what()
+        << " Please add a row for this angle, add a wildcard row, or change the angle.";
+    g_log.error(msg.str());
+    return;
   }
+  updateViewFromModel();
 }
 
 void ExperimentPresenter::restoreDefaults() {
