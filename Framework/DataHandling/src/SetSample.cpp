@@ -829,7 +829,7 @@ std::string SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &a
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
     result = createHollowCylinderHolderXML(args, refFrame);
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::SPHERE)) {
-    result = createSphereXML(args, refFrame);
+    result = createSphereXML(args);
   } else {
     std::stringstream msg;
     msg << "Unknown 'Shape' argument '" << shape << "' provided in 'Geometry' property. Allowed values are "
@@ -1055,11 +1055,9 @@ std::string SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args
 /**
  * Create the XML required to define a sphere from the given args
  * @param args A user-supplied dict of args
- * @param refFrame Defines the reference frame for the shape
  * @return The XML definition string
  */
-std::string SetSample::createSphereXML(const Kernel::PropertyManager &args,
-                                       const Geometry::ReferenceFrame &refFrame) const {
+std::string SetSample::createSphereXML(const Kernel::PropertyManager &args) const {
   const double radius = static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
   std::vector<double> center = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
   std::transform(center.begin(), center.end(), center.begin(), [](double val) { return val *= 0.01; });
