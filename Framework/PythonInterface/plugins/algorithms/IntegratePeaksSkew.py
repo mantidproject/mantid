@@ -89,15 +89,15 @@ class InstrumentArrayConverter:
                 next_col_prefix, next_col_str = self._split_string_trailing_int(next_det.getFullName())
         return next_col_prefix, next_col_str, isLHS, isRHS
 
-    def _get_detid_array_comp_assembly(self, bank, detid, row, col, dpixel):
+    def _get_detid_array_comp_assembly(self, bank, detid, row, col, drows, dcols):
         ndet_per_spec = len(self.ws.getSpectrum(self.ws.getIndicesFromDetectorIDs([detid])[0]).getDetectorIDs())
         nrows = bank[0].nelements()
         ncols = bank.nelements()
 
         # get range of row/col
-        drow_vec = np.arange(-dpixel, dpixel + 1) * ndet_per_spec  # to account for n-1 detector mapping in a tube
+        drow_vec = np.arange(-drows, drows + 1) * ndet_per_spec  # to account for n-1 detector mapping in a tube
         drow_vec = drow_vec[np.logical_and(drow_vec > -row, drow_vec <= nrows - row)]
-        dcol_vec = np.arange(-dpixel, dpixel + 1)  # can't crop this a-priori as don't know if adjacent bank
+        dcol_vec = np.arange(-dcols, dcols + 1)  # can't crop this a-priori as don't know if adjacent bank
         dcol, drow = np.meshgrid(dcol_vec, drow_vec)
 
         # get row and col component names from string representation of instrument tree
@@ -157,13 +157,13 @@ class InstrumentArrayConverter:
         icol_peak = np.where(dcol[0, :] == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def _get_detid_array_rect_detector(self, bank, detid, row, col, dpixel):
+    def _get_detid_array_rect_detector(self, bank, detid, row, col, drows, dcols):
         col_step, row_step = bank.idstep(), bank.idstepbyrow()  # step in detID along col and row
         if bank.idfillbyfirst_y():
             col_step, row_step = row_step, col_step
         # need to adjust range depending on whether above min/max row/col
-        drow_vec = np.arange(max(0, row - dpixel), min(row + dpixel + 1, bank.xpixels())) - row
-        dcol_vec = np.arange(max(0, col - dpixel), min(col + dpixel + 1, bank.ypixels())) - col
+        drow_vec = np.arange(max(0, row - drows), min(row + drows + 1, bank.xpixels())) - row
+        dcol_vec = np.arange(max(0, col - dcols), min(col + dcols + 1, bank.ypixels())) - col
         dcol, drow = np.meshgrid(dcol_vec, drow_vec)
         detids = detid + dcol * col_step + drow * row_step
         # create bool mask for detector edges
@@ -174,7 +174,7 @@ class InstrumentArrayConverter:
         icol_peak = np.where(dcol_vec == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def get_peak_region_array(self, peak, detid, bank_name, dpixel=8):
+    def get_peak_region_array(self, peak, detid, bank_name, drows, dcols):
         """
         :param peak: peak object
         :param detid: detector id of peak (from peak table)
@@ -189,7 +189,7 @@ class InstrumentArrayConverter:
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
-        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, dpixel)
+        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols)
         # get signal and error from each spectrum
         ispecs = np.array(self.ws.getIndicesFromDetectorIDs(
             [int(d) for d in detids.flatten()])).reshape(detids.shape)
@@ -392,9 +392,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="A PeaksWorkspace containing the peaks to integrate.")
 
         #   window parameters
-        self.declareProperty(name="NPixels", defaultValue=8, direction=Direction.Input,
-                             validator=IntBoundedValidator(lower=3),
-                             doc="Half length of window on detector in number of pixels.")
+        self.declareProperty(name="NRows", defaultValue=8, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=1),
+                             doc="Half number of rows in the window on detector.")
+        self.declareProperty(name="NCols", defaultValue=8, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=1),
+                             doc="Half number of columns in the window on detector.")
         self.declareProperty(name='FractionalTOFWindow', defaultValue=0.0, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0.0, upper=1.0),
                              doc="dTOF/TOF window best chosen from forward-scattering bank with worst resolution.")
@@ -416,7 +419,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "parameters). A new optimal TOF window is then found using the new peak mask."
                                  "Note this can be helpful if resolution parameters or peak centres are not very "
                                  "accurate.")
-        self.setPropertyGroup("NPixels", "Integration Window Parameters")
+        self.setPropertyGroup("NRows", "Integration Window Parameters")
+        self.setPropertyGroup("NCols", "Integration Window Parameters")
         self.setPropertyGroup('FractionalTOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
@@ -480,7 +484,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         frac_tof_window = self.getProperty('FractionalTOFWindow').value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = self.getProperty("ThetaWidth").value
-        dpixel = self.getProperty("NPixels").value
+        drows = self.getProperty("NRows").value
+        dcols = self.getProperty("NCols").value
         optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
@@ -524,10 +529,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # copy pk to output peak workspace
             pk_ws_int.addPeak(pk)
             pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
-            # get data array in window of side length dpixel around peak region (truncated at edge pf detector)
+            # get data array in window around peak region (truncated at edge pf detector)
             xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detids[ipk],
                                                                                                     bank_names[ipk],
-                                                                                                    dpixel)
+                                                                                                    drows, dcols)
             # get TOF window using resolution parameters
             if frac_tof_window > 0:
                 dTOF = tofs[ipk] * frac_tof_window
