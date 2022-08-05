@@ -10,8 +10,7 @@ class DtClsSANS:
     """
     Parent dataclass for all next dataclasses.
     All next dataclasses are helper classes to describe
-    each section of SANS-1 datafile ('File', 'Sample',
-    'Setup', 'Counter', 'History', 'Comment', 'Counts');
+    each section of SANS-1 datafile ('File', 'Sample', etc.);
     You can simply add variables to helper dataclass:
      1. variable must have identical name as in raw data file;
      2. variable must have annotation and initial value;
@@ -273,6 +272,9 @@ class SANSdata(object):
             self._find_comments(unprocessed)
 
     def _initialize_info(self, unprocessed):
+        """
+        search for main sections; if section doesn't exist -> raise Error
+        """
         for section in self._subsequence:
             matches = section.pattern.finditer(unprocessed)
             match = next(matches, False)
@@ -281,6 +283,9 @@ class SANSdata(object):
             section.process_data(match.groups()[1])
 
     def _find_comments(self, unprocessed):
+        """
+        search for comment sectionS
+        """
         matches = self.comment.pattern.finditer(unprocessed)
         tmp = [match.groups()[1].split('\n') for match in matches]
         self.comment.process_data(list(itertools.chain(*tmp)))
