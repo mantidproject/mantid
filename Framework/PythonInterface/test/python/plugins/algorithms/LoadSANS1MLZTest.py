@@ -9,29 +9,34 @@ from plugins.algorithms.sansdata import SANSdata
 
 
 class LoadSANSMLZTest(unittest.TestCase):
+    def setUp(self) -> None:
+        # config.reset()
+        self.filename_001 = 'D0511339.001'
+        self.filename_002 = "D0665908.002"
 
-    def test_LoadValidData(self):
+    def test_LoadValidData001(self):
         """
-        test: whether the workspace has been created, is the instrument correct
+        test: whether the workspace has been created, is the instrument correct 001 file
         """
+        # with open(self.filename_001, "w") as f:
+        #     f.write('ok')
         output_ws_name = "LoadSANS1MLZTest_Test1"
-        filename = "D0511339.001"
         alg_test = run_algorithm("LoadSANS1MLZ",
-                                 Filename=filename,
+                                 # Filename="/home/andrii/repositories/AndriiDemk/mantid/build/ExternalData/Testing/Data/UnitTest/D0511339.001",
+                                 Filename=self.filename_001,
                                  OutputWorkspace=output_ws_name)
 
+        self.assertTrue(alg_test.isExecuted())
         ws = AnalysisDataService.retrieve(output_ws_name)
         self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
+        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
-        self.assertTrue(alg_test.isExecuted())
-
-    def test_VerifyValues(self):
+    def test_VerifyValues001(self):
         """
         test: whether the values are correct
         """
-        output_ws_name = "LoadSANS1MLZTest_Test1"
-        filename = "D0511339.001"
-        run_algorithm("LoadSANS1MLZ", Filename=filename, OutputWorkspace=output_ws_name)
+        output_ws_name = "LoadSANS1MLZTest_Test2"
+        run_algorithm("LoadSANS1MLZ", Filename=self.filename_001, OutputWorkspace=output_ws_name)
         ws = AnalysisDataService.retrieve(output_ws_name)
         # dimensions
         self.assertEqual(16386, ws.getNumberHistograms())
@@ -63,19 +68,17 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertAlmostEqual(2.07, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 2)
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
-    def test_LoadInvalidData(self):
+    def test_LoadInvalidData001(self):
         """
         test: trying to process incorrect data file;
         check is exceptions definition is correct
         """
-        output_ws_name = "LoadSANS1MLZTest_Test2"
+        output_ws_name = "LoadSANS1MLZTest_Test3"
         filename = "sans-incomplete.001"
         parameters = {
             'counts 128': "'Counts' section include incorrect data: must be 128x128",
-            'counts pr': "loop of ufunc does not support argument 0 of type list which"
-            " has no callable sqrt method\nprobably incorrect 'Counts' data",
-            'section name': "Section name doesn't match with expected: 'Coment' != 'Comment'",
-            'section amount': "Incorrect amount of sections: 6 != 7"
+            'counts pr': "'Counts' section include incorrect data: must be 128x128",
+            'section amount': "Failed to find 'File' section"
         }
 
         for param in parameters.keys():
@@ -84,14 +87,13 @@ class LoadSANSMLZTest(unittest.TestCase):
                                    Filename=filename, OutputWorkspace=output_ws_name)
             os.remove(filename)
 
-    def test_LoadValidData_noMonitors(self):
+    def test_LoadValidData_noMonitors001(self):
         """
         test: create workspace with no monitors
         """
-        output_ws_name = "LoadSANS1MLZTest_Test3"
+        output_ws_name = "LoadSANS1MLZTest_Test4"
         current_paths = config.getDataSearchDirs()[0]
-        filename = "D0511339.001"
-        filename_path = current_paths + filename
+        filename_path = current_paths + self.filename_001
         file_inv = "sans-incomplete.001"
         with open(file_inv, "w") as f:
             with open(filename_path, "r") as fs:
@@ -117,6 +119,73 @@ class LoadSANSMLZTest(unittest.TestCase):
 
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
+    def test_LoadValidData_sectionIndependence(self):
+        """
+        test: process incomplete data file;
+        """
+        output_ws_name = "LoadSANS1MLZTest_Test7"
+        filename = "sans-incomplete.001"
+
+        self._create_incomplete_dataFile(filename, 'independence ')
+        alg_test = run_algorithm("LoadSANS1MLZ",
+                                 Filename=filename,
+                                 OutputWorkspace=output_ws_name)
+
+        ws = AnalysisDataService.retrieve(output_ws_name)
+        self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
+
+        self.assertTrue(alg_test.isExecuted())
+        os.remove(filename)
+
+    def test_LoadValidData002(self):
+        """
+        test: whether the workspace has been created, is the instrument correct 002 file
+        """
+        output_ws_name = "LoadSANS1MLZTest_Test5"
+
+        alg_test = run_algorithm("LoadSANS1MLZ",
+                                 Filename=self.filename_002,
+                                 OutputWorkspace=output_ws_name)
+
+        ws = AnalysisDataService.retrieve(output_ws_name)
+        self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
+
+        self.assertTrue(alg_test.isExecuted())
+        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
+
+    def test_VerifyValues002(self):
+        """
+        test: whether the values are correct
+        """
+        output_ws_name = "LoadSANS1MLZTest_Test6"
+        run_algorithm("LoadSANS1MLZ", Filename=self.filename_002, OutputWorkspace=output_ws_name)
+        ws = AnalysisDataService.retrieve(output_ws_name)
+        # dimensions
+        self.assertEqual(16384, ws.getNumberHistograms())
+        self.assertEqual(2, ws.getNumDims())
+        # data array
+        self.assertEqual(0.4174, ws.readY(11797))
+        self.assertEqual(0.4257, ws.readY(7043))
+        # sample logs
+        run = ws.getRun()
+
+        self.assertEqual(4.5010, run.getProperty('wavelength').value)
+
+        self.assertEqual('D0665908/2', ws.getTitle())
+        self.assertEqual(output_ws_name, ws.name())
+
+        self.assertEqual(5, run.getProperty('position').value)
+        self.assertEqual(0.0, run.getProperty('thickness').value)
+        self.assertAlmostEqual(1.112, run.getProperty('sample_detector_distance').value, 2)
+        self.assertEqual(0.0, run.getProperty('beamcenter_x').value)
+        self.assertEqual(0.0, run.getProperty('beamcenter_y').value)
+        self.assertEqual(1, run.getProperty('scaling').value)
+        self.assertEqual(1, run.getProperty('transmission').value)
+
+        det = ws.getDetector(91)
+        self.assertAlmostEqual(1.592, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 2)
+        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
+
     @staticmethod
     def _create_incomplete_dataFile(filename, param):
         """
@@ -127,6 +196,9 @@ class LoadSANSMLZTest(unittest.TestCase):
             with open(filename, "w") as f:
                 f.write("\n\n\n\n")
                 f.write("%File\n\n")
+                f.write("DataSizeY=128\n")
+                f.write("DataSizeX=128\n")
+                f.write("FileName=data.001\n")
                 f.write("%Sample\n\n")
                 f.write("%Setup\n\n")
                 f.write("%Counter\n\n")
@@ -144,29 +216,59 @@ class LoadSANSMLZTest(unittest.TestCase):
         elif prm[0] == 'section':
             with open(filename, "w") as f:
                 f.write("\n\n\n\n")
-                f.write("%File\n\n")
+                if prm[1] == 'name':
+                    f.write("%Fle\n\n")
+                elif prm[1] == 'amount':
+                    pass
                 f.write("%Sample\n\n")
                 f.write("%Setup\n\n")
                 f.write("%Counter\n\n")
                 f.write("%History\n\n")
-                if prm[1] == 'name':
-                    f.write("%Coment\n\n")
-                elif prm[1] == 'amount':
-                    pass
+                f.write("%Comment\n\n")
                 f.write("%Counts\n\n")
                 s = ('1, ' * 127 + '1\n') * 128
                 f.write(s)
+        elif prm[0] == 'independence':
+            with open(filename, "w") as f:
+                f.write("\n\n\n\n")
+                f.write("%Setup\n\n")
+                f.write("%File\n\n")
+                f.write("DataSizeY=128\n")
+                f.write("DataSizeX=128\n")
+                f.write("FromDate=01/23/2018\n")
+                f.write("FromTime=03:33:20 PM\n")
+                f.write("ToDate=01/23/2018\n")
+                f.write("ToTime=03:33:51 PM\n")
+                f.write("FileName=data.001\n")
+                f.write("%Comment 1\n\n")
+                f.write("%History\n\n")
+                f.write("%Counts\n\n")
+                s = ('1, ' * 127 + '1\n') * 128
+                f.write(s)
+                f.write("%Sample\n\n")
+                f.write("%Counter\n\n")
 
 
 class SANS1DataClassTestHelper:
 
     @staticmethod
-    def set_up():
+    def set_up(comment=False, file_type='001'):
         metadata = SANSdata()
-        current_paths = config.getDataSearchDirs()[0]
-        filename = "D0511339.001"
+        filename_001 = "D0511339.001"
+        filename_002 = "D0665908.002"
+        current_paths = ''
+        filename = ''
+        for i in config.getDataSearchDirs():
+            if i.split('/')[-2] == 'UnitTest':
+                current_paths = i
+                break
+        if file_type == '001':
+            filename = filename_001
+        elif file_type == '002':
+            filename = filename_002
+
         filename_path = current_paths + filename
-        metadata.analyze_source(filename_path)
+        metadata.analyze_source(filename_path, comment)
         return metadata, filename
 
 
@@ -249,7 +351,7 @@ class SANS1DataClassCounterSectionTest(unittest.TestCase):
 class SANS1DataClassCommentSectionTest(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
+        self.metadata, self.filename = SANS1DataClassTestHelper.set_up(comment=True)
 
     def test_ChangeWavelength(self):
         self.assertEqual(6, self.metadata.comment.wavelength)
@@ -258,10 +360,9 @@ class SANS1DataClassCommentSectionTest(unittest.TestCase):
         self.assertEqual(4, self.metadata.comment.info['selector_lambda_value'])
 
     def test_CheckValues(self):
-        # self.assertEqual(4, self.metadata.comment.det1_x_value)
-        # self.assertEqual(-150, self.metadata.comment.st1_x_value)
-        # self.assertEqual(0, self.metadata.comment.det1_omg_value)
-        pass
+        self.assertEqual('4', self.metadata.comment.info['det1_x_value'])
+        self.assertEqual('-150.00', self.metadata.comment.info['st1_x_value'])
+        self.assertEqual('0', self.metadata.comment.info['det1_omg_value'])
 
 
 class SANS1DataClassCountsSectionTest(unittest.TestCase):
@@ -270,8 +371,19 @@ class SANS1DataClassCountsSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
 
     def test_Dimensions(self):
-        dim = sum([len(i) for i in self.metadata.counts.data])
+        dim = len(self.metadata.counts.data)
         self.assertEqual(16384, dim)
+
+
+class SANS1DataClassErrorsSectionTest(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.metadata, self.filename = SANS1DataClassTestHelper.set_up(file_type='002')
+
+    def test_CheckValues(self):
+        self.assertEqual(float('6.058e-03'), self.metadata.errors.data[702])
+        self.assertEqual(float('6.181e-03'), self.metadata.errors.data[11645])
+        self.assertEqual(float('5.922e-03'), self.metadata.errors.data[5000])
 
 
 if __name__ == '__main__':

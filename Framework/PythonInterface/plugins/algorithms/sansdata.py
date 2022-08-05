@@ -1,7 +1,8 @@
-from copy import deepcopy
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 import numpy as np
+import re
+import itertools
 
 
 @dataclass
@@ -19,9 +20,10 @@ class DtClsSANS:
     section_name: str = ''
     info: dict = field(default_factory=list)
 
-    def process_data(self):
+    def process_data(self, unprocessed):
+        unprocessed = self._data_preparation(unprocessed)
         tmp_dict = {}
-        for value in self.info:
+        for value in unprocessed:
             tmp = value.split('=')
             try:
                 tmp_dict[tmp[0]] = tmp[1]
@@ -58,10 +60,16 @@ class DtClsSANS:
         except KeyError:
             pass
 
+    @staticmethod
+    def _data_preparation(data):
+        return data.split('\n')
+
 
 @dataclass
 class FileSANS(DtClsSANS):
     section_name: str = 'File'
+    pattern = re.compile(r'(%File\n)([^%]*)')
+    type = '001'
     _date_format = '%m/%d/%Y %I:%M:%S %p'
 
     def run_start(self):
@@ -76,10 +84,15 @@ class FileSANS(DtClsSANS):
         file_name = self.info['FileName'].split('.')
         return f"{file_name[0]}/{int(file_name[1])}"
 
+    def process_data(self, unprocessed):
+        super().process_data(unprocessed)
+        self.type = self.info['FileName'].split('.')[1]
+
 
 @dataclass
 class SampleSANS(DtClsSANS):
     section_name: str = 'Sample'
+    pattern = re.compile(r'(%Sample\n)([^%]*)')
     position: int = 0
     thickness: float = 0
 
@@ -95,6 +108,7 @@ class SampleSANS(DtClsSANS):
 @dataclass
 class SetupSANS(DtClsSANS):
     section_name: str = 'Setup'
+    pattern = re.compile(r'(%Setup\n)([^%]*)')
     wavelength: int = 0
     sample_detector_distance: float = 0
 
@@ -110,6 +124,7 @@ class SetupSANS(DtClsSANS):
 @dataclass
 class CounterSANS(DtClsSANS):
     section_name: str = 'Counter'
+    pattern = re.compile(r'(%Counter\n)([^%]*)')
 
     sum_all_counts: float = 0
     duration: float = 0
@@ -135,6 +150,7 @@ class CounterSANS(DtClsSANS):
 @dataclass
 class HistorySANS(DtClsSANS):
     section_name: str = 'History'
+    pattern = re.compile(r'(%History\n)([^%]*)')
     transmission: float = 0.0
     scaling: float = 0.0
     probability: float = 0.0
@@ -158,6 +174,7 @@ class HistorySANS(DtClsSANS):
 @dataclass
 class CommentSANS(DtClsSANS):
     section_name: str = 'Comment'
+    pattern = re.compile(r'(%Comment.*\n)([^%]*)')
 
     wavelength: float = 0.0
 
@@ -173,17 +190,45 @@ class CommentSANS(DtClsSANS):
             self.wavelength = input_wavelength
             self.info['selector_lambda_value'] = input_wavelength
 
+    @staticmethod
+    def _data_preparation(data):
+        return data
+
 
 @dataclass
 class CountsSANS(DtClsSANS):
     section_name: str = 'Counts'
+    pattern = re.compile(r'(%Counts\n)([^%]*)')
+    data_type = '001'
     data: list = field(default_factory=list)
 
-    def process_data(self):
-        for line in self.info:
-            if len(line) > 3:  # check if line has no zero length (' ', '\n', ...)
-                tmp_data = line.split(',')
-                self.data.append([float(i) for i in tmp_data])
+    def process_data(self, unprocessed):
+        if self.data_type == '001':
+            self._process_001(unprocessed)
+        elif self.data_type == '002':
+            self._process_002(unprocessed)
+
+    def _process_001(self, unprocessed):
+        pattern = re.compile(r'\d+')
+        matches = pattern.findall(unprocessed)
+        self.data = [float(count) for count in matches]
+
+    def _process_002(self, unprocessed):
+        pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
+        matches = pattern.findall(unprocessed)
+        self.data = [float(count) for count in matches]
+
+
+@dataclass
+class ErrorsSANS(DtClsSANS):
+    section_name: str = 'Errors'
+    pattern = re.compile(r'(%Errors\n)([^%]*)')
+    data: list = field(default_factory=list)
+
+    def process_data(self, unprocessed):
+        pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
+        matches = pattern.findall(unprocessed)
+        self.data = [float(count) for count in matches]
 
 
 class SANSdata(object):
@@ -202,45 +247,40 @@ class SANSdata(object):
         self.history: HistorySANS = HistorySANS()
         self.comment: CommentSANS = CommentSANS()
         self.counts: CountsSANS = CountsSANS()
+        self.errors: ErrorsSANS = ErrorsSANS()
 
-        self._subsequence = [self.file, self.sample, self.setup, self.counter, self.history, self.comment, self.counts]
+        self._subsequence = [self.file, self.sample, self.setup, self.counter, self.history, self.counts]
 
     def get_subsequence(self):
         return self._subsequence
 
-    def analyze_source(self, filename):
+    def analyze_source(self, filename, comment=False):
         """
-        read the SANS-1.001 raw file into the SANS-1 data object
+        read the SANS-1.001/002 raw files into the SANS-1 data object
         """
         with open(filename, 'r') as fhandler:
             unprocessed = fhandler.read()
         file_type = filename.split(".")[-1]
         if file_type == "001":
-            self._sort_data(unprocessed.split('%'))
+            self._initialize_info(unprocessed)
+        elif file_type == "002":
+            self.counts.data_type = '002'
+            self._subsequence = [self.file, self.sample, self.setup, self.history, self.counts, self.errors]
+            self._initialize_info(unprocessed)
         else:
             raise FileNotFoundError("Incorrect file")
+        if comment:
+            self._find_comments(unprocessed)
 
-    def _sort_data(self, unprocessed):
-        """
-        initialize information for every section
-        """
-        pos = self._find_first_section_position(unprocessed)
+    def _initialize_info(self, unprocessed):
+        for section in self._subsequence:
+            matches = section.pattern.finditer(unprocessed)
+            match = next(matches, False)
+            if not match:
+                raise FileNotFoundError(f"Failed to find '{section.section_name}' section")
+            section.process_data(match.groups()[1])
 
-        if len(unprocessed[pos:]) != len(self._subsequence):
-            raise FileNotFoundError(f"Incorrect amount of sections: "
-                                    f"{len(unprocessed[pos:])} != {len(self._subsequence)}")
-
-        for i in range(len(self._subsequence)):
-            tmp = unprocessed[i + pos].split('\n')
-            if tmp[0] != self._subsequence[i].section_name:
-                raise FileNotFoundError(f"Section name doesn't match with expected: "
-                                        f"'{tmp[0]}' != '{self._subsequence[i].section_name}'")
-
-            self._subsequence[i].info = deepcopy(tmp[1:])
-            self._subsequence[i].process_data()
-
-    @staticmethod
-    def _find_first_section_position(unprocessed):
-        if unprocessed[0][0] == 'F':
-            return 0
-        return 1
+    def _find_comments(self, unprocessed):
+        matches = self.comment.pattern.finditer(unprocessed)
+        tmp = [match.groups()[1].split('\n') for match in matches]
+        self.comment.process_data(list(itertools.chain(*tmp)))

@@ -21,7 +21,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty("Filename", "",
-                                          FileAction.Load, ['.001']),
+                                          FileAction.Load, ['.001', '.002']),
                              "Name of SANS experimental data file.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
@@ -73,27 +73,26 @@ class LoadSANS1MLZ(PythonAlgorithm):
         monitors included
         """
         self.log().debug('Creation data for workspace started')
-        nrows = len(metadata.counts.data)
-        nbins = len(metadata.counts.data[0])
-        n_spec = nrows * nbins
 
-        if nrows != 128 or nbins != 128:
-            raise RuntimeError("'Counts' section include incorrect data:"
-                               " must be 128x128")
+        n_spec = self._get_spectrum_amount(metadata)
+        data_y = self._get_data_y(metadata)
+        wavelength, wavelength_error = self._get_wavelength(metadata)
 
-        wavelength_error = 0.15  # ToDo error?? wavelength - error > 0 !!
-        metadata.comment.set_wavelength(float(self.getPropertyValue("Wavelength")))
-        data_y = np.append([], metadata.counts.data)
-        if metadata.counter.is_monitors_exist():
-            n_spec += 2
-            data_y = np.append(data_y, [metadata.counter.monitor1, metadata.counter.monitor2])
-        data_e = np.array(np.sqrt(data_y))
-        data_x = np.zeros(2 * n_spec)
-        data_x.fill(metadata.comment.wavelength + wavelength_error)
-        data_x[::2] -= wavelength_error * 2
+        data_e = self._get_data_e(metadata, data_y)
+        data_x = self._get_data_x(wavelength, wavelength_error, n_spec)
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
+
+    def _get_wavelength(self, metadata):
+        wavelength_error = 0.15  # ToDo error?? wavelength - error > 0 !!
+        wavelength = metadata.setup.wavelength
+        user_wavelength = float(self.getPropertyValue("Wavelength"))
+        if user_wavelength > wavelength_error:
+            wavelength = user_wavelength
+        else:
+            self.log().notice('(wavelength < wavelength error) -> wavelength set to datafile value')
+        return wavelength, wavelength_error
 
     def create_logs(self, metadata):
         """
@@ -130,18 +129,60 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         logs = {"names": [], "values": [], "units": []}
 
-        for i in metadata.get_subsequence()[:-1]:
-            logs["names"] = np.append(list(i.get_values_dict().keys()), logs["names"])
-            logs["values"] = np.append(list(i.get_values_dict().values()), logs["values"])
-        logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],  logs["units"])
-        for i in metadata.get_subsequence()[:-1]:
-            logs["names"] = np.append([f"{i.section_name}.{j}" for j in i.info.keys()], logs["names"])
-            logs["values"] = np.append(list(i.info.values()), logs["values"])
+        sections_tobe_logged = []
+        if metadata.file.type == '001':
+            sections_tobe_logged = metadata.get_subsequence()[:-1]
+        if metadata.file.type == '002':
+            sections_tobe_logged = metadata.get_subsequence()[:-2]
 
-        logs["units"] = np.append(['' for i in range(len(logs['names']) - len(logs['units']))],
+        for section in sections_tobe_logged:
+            logs["names"] = np.append(list(section.get_values_dict().keys()), logs["names"])
+            logs["values"] = np.append(list(section.get_values_dict().values()), logs["values"])
+        logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],  logs["units"])
+        for section in sections_tobe_logged:
+            logs["names"] = np.append([f"{section.section_name}.{j}" for j in section.info.keys()], logs["names"])
+            logs["values"] = np.append(list(section.info.values()), logs["values"])
+
+        logs["units"] = np.append(['' for _ in range(len(logs['names']) - len(logs['units']))],
                                   logs["units"])
         self.log().debug('Creation sample logs successful')
         return logs
+
+    @staticmethod
+    def _get_spectrum_amount(metadata):
+        nrows = int(metadata.file.info['DataSizeY'])
+        nbins = int(metadata.file.info['DataSizeX'])
+        n_spec = nrows * nbins
+        if metadata.counter.is_monitors_exist():
+            n_spec += 2
+        return n_spec
+
+    @staticmethod
+    def _get_data_y(metadata):
+        data_y = np.append([], metadata.counts.data)
+        if len(data_y) != 16384:
+            raise RuntimeError("'Counts' section include incorrect data:"
+                               " must be 128x128")
+        if metadata.counter.is_monitors_exist():
+            data_y = np.append(data_y, [metadata.counter.monitor1, metadata.counter.monitor2])
+        return data_y
+
+    @staticmethod
+    def _get_data_x(wavelength, wavelength_error, n_spec):
+        data_x = np.zeros(2 * n_spec)
+        data_x.fill(wavelength + wavelength_error)
+        data_x[::2] -= wavelength_error * 2
+        return data_x
+
+    @staticmethod
+    def _get_data_e(metadata, data_y):
+        if metadata.file.type == '001':
+            data_e = np.array(np.sqrt(data_y))
+        elif metadata.file.type == '002':
+            data_e = np.append([], metadata.errors.data)
+        else:
+            raise RuntimeError
+        return data_e
 
     @staticmethod
     def create_labels():
