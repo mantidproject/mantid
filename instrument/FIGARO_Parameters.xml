@@ -47,6 +47,10 @@
 		<!-- Chopper opening window [degrees]-->
 			<value val="45.0"/>
 		</parameter>
+		<parameter name="chopper_radius" visible="false">
+		<!-- Chopper radius [m]-->
+			<value val="0.305"/>
+		</parameter>
 		<parameter name="DH1Z" visible="false">
 		 <!-- The sample to first height motor position along Z [m]-->
  		 	<value val="1.135" />

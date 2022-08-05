@@ -153,7 +153,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         detResolution = common.detectorResolution()
         chopperSpeed = common.chopperSpeed(logs, instrument)
         chopperOpening = common.chopperOpeningAngle(logs, instrument)
-        chopperRadius = 0.36 if instrumentName == 'D17' else 0.305
+        chopperRadius = instrument.getNumberParameter('chopper_radius')[0]
         chopperPairDist = common.chopperPairDistance(logs, instrument)
         tofBinWidth = self._TOFChannelWidth(logs)
         qWSName = self._names.withSuffix('in_momentum_transfer')

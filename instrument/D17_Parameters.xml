@@ -49,6 +49,12 @@
 			<value val="45.0" valid-to="2020-07-31T23:59:59"/>
 			<value val="20.0" valid-from="2020-08-01T00:00:00"/>
 		</parameter>
+		<parameter name="chopper_radius" visible="false">
+		<!-- Chopper radius [m]-->
+			<value val="0.36" valid-to="2020-07-31T23:59:59"/>
+			<value val="0.27" valid-from="2020-08-01T00:00:00"/>
+		</parameter>
+
 		<parameter name="chopper_gap_unit" type="string" visible="false">
 		<!-- The unit of the chopper gap -->
 			<value val="cm" valid-to="2019-08-19T23:59:59"/>
