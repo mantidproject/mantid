@@ -32,7 +32,7 @@ class MockCONF(object):
 
     def __init__(self):
         self.set = MagicMock()
-        self.get = MagicMock(side_effect=lambda x: test_CONF_settings[x])
+        self.get = MagicMock(side_effect=lambda x, type: test_CONF_settings[x])
         self.has = MagicMock(side_effect=lambda x: x in test_CONF_settings)
 
 

@@ -92,8 +92,8 @@ class MultiPythonFileInterpreter(QWidget):
         super(MultiPythonFileInterpreter, self).closeEvent(event)
 
     def load_settings_from_config(self, config):
-        self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
-        self.completion_enabled = config.get('Editors', 'completion_enabled')
+        self.confirm_on_save = config.get('project', 'prompt_save_editor_modified', type=bool)
+        self.completion_enabled = config.get('Editors', 'completion_enabled', type=bool)
         self.on_completion_change()
 
     @property

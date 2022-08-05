@@ -1,0 +1,1 @@
+- Opening multiple instances of Mantid in quick succession will no longer cause errors in the shared settings.
