@@ -1061,8 +1061,7 @@ std::string SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args
 std::string SetSample::createSphereXML(const Kernel::PropertyManager &args,
                                        const Geometry::ReferenceFrame &refFrame) const {
   const double radius = static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
-  std::vector<double> center = {0., 0., 0.};
-  center = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+  std::vector<double> center = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
   std::transform(center.begin(), center.end(), center.begin(), [](double val) { return val *= 0.01; });
 
   std::ostringstream xmlShapeStream;
