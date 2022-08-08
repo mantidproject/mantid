@@ -1,7 +1,7 @@
 from mantid.kernel import *
 from mantid.api import *
 from mantid import simpleapi
-from sansdata import SANSdata
+from SANS1DataMLZ import SANSdata
 import numpy as np
 
 

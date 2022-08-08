@@ -5,7 +5,7 @@ from mantid.api import AnalysisDataService
 from testhelpers import run_algorithm
 from mantid.simpleapi import LoadSANS1MLZ
 from mantid import config
-from plugins.algorithms.sansdata import SANSdata
+from plugins.algorithms.SANS1DataMLZ import SANSdata
 
 
 class LoadSANSMLZTest(unittest.TestCase):
