@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ROIType.h"
+#include "Reduction/RowExceptions.h"
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
@@ -189,7 +190,23 @@ void PreviewPresenter::notifyRegionChanged() {
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
 
-void PreviewPresenter::notifyApplyRequested() { m_mainPresenter->notifyPreviewApplyRequested(); }
+void PreviewPresenter::notifyApplyRequested() {
+  try {
+    m_mainPresenter->notifyPreviewApplyRequested();
+  } catch (RowNotFoundException &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Please add a row for this angle, add a wildcard row, or change the angle.";
+    g_log.error(msg.str());
+  } catch (MultipleRowsFoundException &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Applying to multiple rows with the same angle is not supported.";
+    g_log.error(msg.str());
+  }
+}
 
 void PreviewPresenter::plotInstView() {
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),

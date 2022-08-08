@@ -9,6 +9,7 @@
 #include "IGroup.h"
 #include "PreviewRow.h"
 #include "Row.h"
+#include "RowExceptions.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
@@ -113,19 +114,8 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
     return *match;
 }
 
-void LookupTable::replaceLookupRow(PreviewRow const &previewRow, double tolerance) {
-  if (auto const foundRow = findLookupRow(previewRow, tolerance)) {
-    auto lookupRowCopy = *foundRow;
-
-    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
-    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
-    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
-
-    m_lookupRows[getIndex(lookupRowCopy)] = std::move(lookupRowCopy);
-  } else {
-    throw RowNotFoundException("There is no row with title and angle matching '" + std::to_string(previewRow.theta()) +
-                               "' in the Lookup Table.");
-  }
+void LookupTable::replaceLookupRow(LookupRow lookupRow, double tolerance) {
+  m_lookupRows[getIndex(lookupRow)] = std::move(lookupRow);
 }
 
 size_t LookupTable::getIndex(const LookupRow &lookupRow) const {
@@ -142,13 +132,6 @@ std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {
   std::transform(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(result),
                  [](auto const &lookupRow) { return lookupRowToArray(lookupRow); });
   return result;
-}
-
-void LookupTable::replaceLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
-                                                         ROIType regionType) {
-  if (auto const instructions = previewRow.getProcessingInstructions(regionType)) {
-    lookupRow.setProcessingInstructions(regionType, instructions.get());
-  }
 }
 
 bool operator==(LookupTable const &lhs, LookupTable const &rhs) { return lhs.m_lookupRows == rhs.m_lookupRows; }

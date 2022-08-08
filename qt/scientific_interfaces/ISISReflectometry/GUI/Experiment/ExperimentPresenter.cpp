@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/ParseReflectometryStrings.h"
 #include "Reduction/PreviewRow.h"
+#include "Reduction/RowExceptions.h"
 #include "Reduction/ValidateLookupRow.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -104,16 +105,26 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
-  try {
-    m_model.replaceLookupRow(previewRow, m_thetaTolerance);
-  } catch (RowNotFoundException const &ex) {
-    std::ostringstream msg;
-    msg << "Could not update Experiment Settings: " << ex.what()
-        << " Please add a row for this angle, add a wildcard row, or change the angle.";
-    g_log.error(msg.str());
-    return;
+  if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
+    auto lookupRowCopy = *foundRow;
+
+    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
+    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
+    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
+
+    m_model.replaceLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
+    updateViewFromModel();
+  } else {
+    throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
+                               "' in the Lookup Table.");
   }
-  updateViewFromModel();
+}
+
+void ExperimentPresenter::replaceLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
+                                                                 ROIType regionType) {
+  if (auto const instructions = previewRow.getProcessingInstructions(regionType)) {
+    lookupRow.setProcessingInstructions(regionType, instructions.get());
+  }
 }
 
 void ExperimentPresenter::restoreDefaults() {

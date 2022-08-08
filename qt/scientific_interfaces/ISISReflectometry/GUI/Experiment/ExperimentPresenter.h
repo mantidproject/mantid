@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ExperimentOptionDefaults.h"
+#include "GUI/Preview/ROIType.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
 #include "LookupTableValidationError.h"
@@ -19,6 +20,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+class LookupRow;
 
 class ExperimentValidationErrors {
 public:
@@ -95,6 +98,8 @@ private:
   void updateBackgroundSubtractionEnabledState();
   void updatePolarizationCorrectionEnabledState();
   void updateFloodCorrectionEnabledState();
+
+  void replaceLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
 
   bool isProcessing() const;
   bool isAutoreducing() const;
