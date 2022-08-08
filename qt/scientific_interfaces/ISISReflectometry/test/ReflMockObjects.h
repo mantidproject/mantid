@@ -355,8 +355,8 @@ public:
   MOCK_METHOD1(algorithmStarted, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr, std::string const &));
-  MOCK_CONST_METHOD1(algorithmOutputWorkspacesToSave,
-                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_CONST_METHOD2(algorithmOutputWorkspacesToSave,
+                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr, bool));
   MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &>(std::string const &));
   MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
