@@ -1,4 +1,5 @@
 set(REDUCTION_SRC_FILES
+    Detector.cpp
     Group.cpp
     Item.cpp
     ItemState.cpp
@@ -31,6 +32,7 @@ set(REDUCTION_SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
 set(REDUCTION_INC_FILES
+    Detector.h
     Group.h
     Item.h
     ItemState.h

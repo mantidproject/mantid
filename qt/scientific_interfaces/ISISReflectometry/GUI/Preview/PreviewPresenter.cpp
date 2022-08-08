@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ROIType.h"
+#include "Reduction/Detector.h"
 #include "Reduction/RowExceptions.h"
 #include <memory>
 
@@ -104,14 +105,19 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
-  // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->updateWorkspace(ws);
-  plotInstView();
-  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-  m_view->setInstViewToolbarEnabled(true);
-  notifyInstViewZoomRequested();
-  // Perform summing banks to update the next plot, if possible
-  runSumBanks();
+  if (hasLinearDetector(ws)) {
+    // TODO clear instrument view
+    notifySumBanksCompleted();
+  } else {
+    // Notify the instrument view model that the workspace has changed before we get the surface
+    m_instViewModel->updateWorkspace(ws);
+    plotInstView();
+    // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+    m_view->setInstViewToolbarEnabled(true);
+    notifyInstViewZoomRequested();
+    // Perform summing banks to update the next plot, if possible
+    runSumBanks();
+  }
 }
 
 void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
