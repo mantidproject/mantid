@@ -116,6 +116,8 @@ private:
   void prepareCumulativeProbForQ(double kinc, const ComponentWorkspaceMappings &PInvOfQs);
   void prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
+  std::tuple<double, double, int, double> sampleQWUniform(const std::vector<double> &wValues,
+                                                          Kernel::PseudoRandomNumberGenerator &rng, const double kinc);
   void prepareStructureFactors();
   void convertWsBothAxesToPoints(API::MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);

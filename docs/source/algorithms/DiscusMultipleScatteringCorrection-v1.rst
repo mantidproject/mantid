@@ -127,9 +127,9 @@ With this approach there is no interpolation performed between different :math:`
 Support for sample environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The calculation can include scattering from the sample environment (eg can) in the Monte Carlo simulation. The term "segment" has previously been used to refer to a straight neutron path between two scattering events. For the purpose of this description the term "link" will be used to refer to a subsection of a segment that lies within a single material.
+The calculation can include scattering from the sample environment (e.g. can) in the Monte Carlo simulation. The term "segment" has previously been used to refer to a straight neutron path between two scattering events. For the purpose of this description the term "link" will be used to refer to a subsection of a segment that lies within a single material.
 
-The modified calculation is illustrated here with an example of a sample contained in a can where a track may contain three different links (can then sample then can). If the selected scatter point occurs somewhere in the third link, the quantity :math:`t_i` is redefined as:
+The modified calculation is illustrated here with an example of a sample contained in a can where a track may contain three different links (can, then sample, then can). If the selected scatter point occurs somewhere in the third link, the quantity :math:`t_i` is redefined as:
 
 .. math::
 

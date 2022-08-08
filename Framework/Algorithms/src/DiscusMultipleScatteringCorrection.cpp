@@ -197,28 +197,30 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     issues["InputWorkspace"] = "Either the Sample or one of the environment parts must have a valid shape.";
   }
 
-  size_t nEnvComponents = 0;
-  if (inputWS->sample().hasEnvironment())
-    nEnvComponents = inputWS->sample().getEnvironment().nelements();
   if (inputWS->sample().getShape().hasValidShape())
     if (inputWS->sample().getMaterial().numberDensity() == 0)
       issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
-  for (size_t i = 0; i < nEnvComponents; i++)
-    if (inputWS->sample().getEnvironment().getComponent(i).material().numberDensity() == 0)
-      issues["InputWorkspace"] = "Sample environment component " + std::to_string(i) +
-                                 " must have a material set up with a non-zero number density ";
+  if (inputWS->sample().hasEnvironment()) {
+    auto env = &inputWS->sample().getEnvironment();
+    for (size_t i = 0; i < env->nelements(); i++)
+      if (env->getComponent(i).hasValidShape())
+        if (env->getComponent(i).material().numberDensity() == 0)
+          issues["InputWorkspace"] = "Sample environment component " + std::to_string(i) +
+                                     " must have a material set up with a non-zero number density ";
+  }
 
   std::vector<MatrixWorkspace_sptr> SQWSs;
   Workspace_sptr SQWSBase = getProperty("StructureFactorWorkspace");
   auto SQWSGroup = std::dynamic_pointer_cast<WorkspaceGroup>(SQWSBase);
   if (SQWSGroup) {
     auto groupMembers = SQWSGroup->getAllItems();
-    if (inputWS->sample().hasEnvironment())
-      nEnvComponents = inputWS->sample().getEnvironment().nelements();
     std::set<std::string> materialNames;
     materialNames.insert(inputWS->sample().getMaterial().name());
-    for (size_t i = 0; i < nEnvComponents; i++)
-      materialNames.insert(inputWS->sample().getEnvironment().getComponent(i).material().name());
+    if (inputWS->sample().hasEnvironment()) {
+      auto nEnvComponents = inputWS->sample().getEnvironment().nelements();
+      for (size_t i = 0; i < nEnvComponents; i++)
+        materialNames.insert(inputWS->sample().getEnvironment().getComponent(i).material().name());
+    }
 
     for (auto &materialName : materialNames) {
       auto wsIt = std::find_if(groupMembers.begin(), groupMembers.end(),
@@ -816,9 +818,11 @@ void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
  * Integrate QSQ over Q and w over the kinematic range accessible for a given kinc
  * @param kinc The incident wavenumber
  * @param QSQ A workspace containing Q.S(Q,w) with each spectra S(Q) at a particular w
+ * @param returnCumulative A flag indicating whether the function should return the cumulative integral at each q value
+ * or just the total (quicker)
  * @return a tuple containing a cumulative integral as a function of a pseudo variable based on the q values
  * for each w concatenated into a single 1D sequence, the q values corresponding to each value of the pseudo
- * variable, the w values correspodning to each value of the pseudo variable
+ * variable, the w values corresponding to each value of the pseudo variable
  */
 std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
 DiscusMultipleScatteringCorrection::integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc,
@@ -985,6 +989,8 @@ void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(Compo
  * @param xmax The upper integration limit
  * @param resultX The x values at which the integral has been calculated
  * @param resultY the values of the integral at various x values up to xmax
+ * @param returnCumulative Flag to indicate whether the function should return the cumulative integral at each x value
+ * in the histogram or whether to just return the total integral (quicker)
  */
 void DiscusMultipleScatteringCorrection::integrateCumulative(const ISpectrum &h, const double xmin, const double xmax,
                                                              std::vector<double> &resultX, std::vector<double> &resultY,
@@ -1260,8 +1266,7 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
       // same interpolation here for consistency
       SQ = interpolateFlat(SQWSMapping.SQ->getSpectrum(iW), q);
     else
-      SQ = interpolateGaussian(SQWSMapping.logSQ->getSpectrum(iW) /* interpolateFlat(SQWSMapping.SQ->getSpectrum(iW)*/,
-                               q);
+      SQ = interpolateGaussian(SQWSMapping.logSQ->getSpectrum(iW), q);
   }
 
   return SQ;
@@ -1461,6 +1466,48 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange
   const double qrange = 2 * std::min(ki, kf);
   return {qmin, qrange};
 }
+/**
+ * Sample the q and w value for a scattering event without importance sampling
+ * @param wValues The energy transfer values from the S(Q,w) workspace
+ * @param rng Random number generator
+ * @param kinc The wavevector before the scatter event
+ * @return a tuple containing the sampled q, qrange, w and wrange values
+ */
+std::tuple<double, double, int, double>
+DiscusMultipleScatteringCorrection::sampleQWUniform(const std::vector<double> &wValues,
+                                                    Kernel::PseudoRandomNumberGenerator &rng, const double kinc) {
+
+  // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
+  // Note - Discus took different approach where it sampled q,w from kinematically accessible range only but it
+  // only calculated for double scattering and easier to normalise in that case
+  double wRange;
+  /*
+  // The rectangular integration region could be restricted further by limiting w range by calculating max possible w
+  // TO DO: validate the results for this optimisation
+  // the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
+  // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
+  double wMax = fromWaveVector(kinc);
+  // find largest w bin centre that is < wmax and then sample w up to the next bin edge
+  auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
+  int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);*/
+  int iW = 0;
+  if (wValues.size() == 1) {
+    iW = 0;
+    wRange = 1;
+  } else {
+    std::vector<double> wBinEdges;
+    wBinEdges.reserve(wValues.size() + 1);
+    VectorHelper::convertToBinBoundary(wValues, wBinEdges);
+    // w bins not necessarily equal so don't just sample w index
+    wRange = /*std::min(wMax, wBinEdges[iWMax + 1])*/ wBinEdges.back() - wBinEdges.front();
+    double w = wBinEdges.front() + rng.nextValue() * wRange;
+    iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
+  }
+  double maxkf = toWaveVector(fromWaveVector(kinc) - wValues.front());
+  double qRange = kinc + maxkf;
+  double q = qRange * rng.nextValue();
+  return {q, qRange, iW, wRange};
+}
 
 /**
  * This is a generalised version of the normalisation done in the original Discus algorithm
@@ -1475,7 +1522,17 @@ double DiscusMultipleScatteringCorrection::getQSQIntegral(const ISpectrum &QSQSc
   return interpolateFlat(QSQScaleFactor, k) * 2 * k * k;
 }
 
-// update track direction and weight
+/**
+ * Update track direction and weight as a result of a scatter
+ * @param track The track whose direction will be updated
+ * @param shapePtr A pointer to the shape in which the scatter is happening
+ * @param componentWorkspaces list of workspaces related to the structure factor for each sample/env component
+ * @param k The wavevector. Updated from the pre-scatter to post-scatter wavevector during the function
+ * @param scatteringXSection The scattering cross section of the material where the scatter happens
+ * @param rng Random number generator
+ * @param weight The current weight for this track. Updated to include this scatter during the function
+ */
+
 bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geometry::IObject *shapePtr,
                                                const ComponentWorkspaceMappings &componentWorkspaces, double &k,
                                                const double scatteringXSection,
@@ -1489,38 +1546,14 @@ bool DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Geo
     k = getKf(componentWSIt->SQ->getAxis(1)->getValue(iW), kinc);
     weight = weight * scatteringXSection;
   } else {
+    double qrange, wRange;
     auto &wValues = dynamic_cast<NumericAxis *>(componentWSIt->SQ->getAxis(1))->getValues();
-    // in order to keep integration limits constant sample full range of w even if some not kinematically accessible
-    // Note - Discus took different approach where it sampled q,w from kinematically accessible range only but it
-    // only calculated for double scattering and easier to normalise in that case
-    double wRange;
-    /*// the energy transfer must always be less than the positive value corresponding to energy going from ki to 0
-    // Note - this is still the case for indirect because on a multiple scatter the kf isn't kfixed
-    double wMax = fromWaveVector(kinc);
-    // find largest w bin centre that is < wmax and then sample w up to the next bin edge
-    auto it = std::lower_bound(wValues.begin(), wValues.end(), wMax);
-    int iWMax = static_cast<int>(std::distance(wValues.begin(), it) - 1);*/
-    if (wValues.size() == 1) {
-      iW = 0;
-      wRange = 1;
-    } else {
-      std::vector<double> wBinEdges;
-      wBinEdges.reserve(wValues.size() + 1);
-      VectorHelper::convertToBinBoundary(wValues, wBinEdges);
-      // w bins not necessarily equal so don't just sample w index
-      wRange = /*std::min(wMax, wBinEdges[iWMax + 1])*/ wBinEdges.back() - wBinEdges.front();
-      double w = wBinEdges.front() + rng.nextValue() * wRange;
-      iW = static_cast<int>(Kernel::VectorHelper::indexOfValueFromCentersNoThrow(wValues, w));
-    }
-
+    std::tie(QQ, qrange, iW, wRange) = sampleQWUniform(wValues, rng, kinc);
     // if w inaccessible return (ie treat as zero weight) rather than retry so that integration stays over full w
     // range
     if (fromWaveVector(kinc) - wValues[iW] <= 0)
       return false;
     k = getKf(wValues[iW], kinc);
-    double maxkf = toWaveVector(fromWaveVector(kinc) - wValues.front());
-    double qrange = kinc + maxkf;
-    QQ = qrange * rng.nextValue();
     double SQ = interpolateGaussian(componentWSIt->logSQ->getSpectrum(iW), QQ);
     // integrate over rectangular area of qw space
     weight = weight * scatteringXSection * SQ * QQ * qrange * wRange;
