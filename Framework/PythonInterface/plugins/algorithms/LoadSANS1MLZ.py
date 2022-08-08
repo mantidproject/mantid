@@ -1,5 +1,5 @@
-from mantid.kernel import *
-from mantid.api import *
+from mantid.kernel import * # ToDo not suggested import. Import explicitly
+from mantid.api import * # ToDo not suggested import. Import explicitly
 from mantid import simpleapi
 from SANS1DataMLZ import SANSdata
 import numpy as np
@@ -7,7 +7,7 @@ import numpy as np
 
 class LoadSANS1MLZ(PythonAlgorithm):
     """
-    Load the SANS1_MLZ raw data file to the matrix workspace
+    Load a SANS1_MLZ raw data file to the matrix workspace
     """
 
     def category(self):
@@ -30,7 +30,8 @@ class LoadSANS1MLZ(PythonAlgorithm):
         self.declareProperty(name="Wavelength",
                              defaultValue=0.0,
                              validator=FloatBoundedValidator(lower=0.0),
-                             doc="Wavelength in Angstrom. If 0 will be read from data file.")
+                             doc="Wavelength in Angstrom. If 0, the wavelength "
+                                 "will be read from the data file.")
 
     def PyExec(self):
         filename = self.getPropertyValue("Filename")
@@ -42,10 +43,10 @@ class LoadSANS1MLZ(PythonAlgorithm):
             data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
             logs = self.create_logs(metadata)
             y_unit, y_label, x_unit = self.create_labels()
-        except FileNotFoundError as e:
-            raise RuntimeError(str(e))
-        except TypeError as e:
-            raise RuntimeError(str(e) + "\nprobably incorrect 'Counts' data")
+        except FileNotFoundError as error:
+            raise RuntimeError(str(error))
+        except TypeError as error:
+            raise RuntimeError(str(error) + "\nprobably incorrect 'Counts' data")
         else:
             simpleapi.CreateWorkspace(OutputWorkspace=out_ws_name,
                                       DataX=data_x, DataY=data_y,
@@ -57,7 +58,8 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
             run = out_ws.mutableRun()
             run.addProperty('run_title', metadata.file.get_title(), True)
-            run.setStartAndEndTime(DateAndTime(metadata.file.run_start()), DateAndTime(metadata.file.run_end()))
+            run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
+                                   DateAndTime(metadata.file.run_end()))
 
             simpleapi.LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
 
@@ -69,8 +71,8 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     def create_datasets(self, metadata):
         """
-        return data values: DataX, DataY, DataE, amount of spectra
-        monitors included
+        return data values: DataX, DataY, DataE and number of spectra
+        (including monitors)
         """
         self.log().debug('Creation data for workspace started')
 
@@ -137,10 +139,13 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         for section in sections_tobe_logged:
             logs["names"] = np.append(list(section.get_values_dict().keys()), logs["names"])
-            logs["values"] = np.append(list(section.get_values_dict().values()), logs["values"])
-        logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],  logs["units"])
+            logs["values"] = np.append(list(section.get_values_dict().values()),
+                                       logs["values"])
+        logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],
+                                  logs["units"])
         for section in sections_tobe_logged:
-            logs["names"] = np.append([f"{section.section_name}.{j}" for j in section.info.keys()], logs["names"])
+            logs["names"] = np.append([f"{section.section_name}.{j}" for j in section.info.keys()],
+                                      logs["names"])
             logs["values"] = np.append(list(section.info.values()), logs["values"])
 
         logs["units"] = np.append(['' for _ in range(len(logs['names']) - len(logs['units']))],
@@ -150,11 +155,14 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     @staticmethod
     def _get_spectrum_amount(metadata):
-        nrows = int(metadata.file.info['DataSizeY'])
-        nbins = int(metadata.file.info['DataSizeX'])
-        n_spec = nrows * nbins
+        n_rows = int(metadata.file.info['DataSizeY'])
+        n_bins = int(metadata.file.info['DataSizeX'])
+        n_spec = n_rows * n_bins
         if metadata.counter.is_monitors_exist():
             n_spec += 2
+            # ToDo warning! To be fixed.
+            # better to have a parameter num_monitors
+            # and then n_spec += num_monitors
         return n_spec
 
     @staticmethod
@@ -169,6 +177,11 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     @staticmethod
     def _get_data_x(wavelength, wavelength_error, n_spec):
+        # ToDo warning! To be fixed.
+        # if you have more than 2 columns (time-of-flight data) then
+        # lines below won't work properly
+        # Better to introduce a parameter n_columns and
+        # use data_x = np.zeros(n_columns * n_spec), etc
         data_x = np.zeros(2 * n_spec)
         data_x.fill(wavelength + wavelength_error)
         data_x[::2] -= wavelength_error * 2
@@ -186,10 +199,10 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     @staticmethod
     def create_labels():
-        yunit = "Counts"
-        ylabel = "Counts"
-        xunit = "Wavelength"
-        return yunit, ylabel, xunit
+        y_unit = "Counts"
+        y_label = "Counts"
+        x_unit = "Wavelength"
+        return y_unit, y_label, x_unit
 
 
 # Register algorithm with mantid

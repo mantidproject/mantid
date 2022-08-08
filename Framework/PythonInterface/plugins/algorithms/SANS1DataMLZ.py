@@ -8,12 +8,13 @@ import itertools
 @dataclass
 class DtClsSANS:
     """
-    Parent dataclass for all next dataclasses.
-    All next dataclasses are helper classes to describe
-    each section of SANS-1 datafile ('File', 'Sample', etc.);
-    You can simply add variables to helper dataclass:
-     1. variable must have identical name as in raw data file;
-     2. variable must have annotation and initial value;
+    Parent dataclass for all subsequent dataclasses.
+    All subsequent dataclasses are helper classes to describe
+    each section of a SANS-1 datafile ('File', 'Sample', etc.);
+    A helper dataclass may be modified by adding a new variable
+    to it, provided that:
+     1. the variable has identical name as in the raw data file;
+     2. the variable has to be given an annotation and initial value,
      example -> new_var: float = 0
     """
     section_name: str = ''
@@ -230,12 +231,12 @@ class ErrorsSANS(DtClsSANS):
         self.data = [float(count) for count in matches]
 
 
-class SANSdata(object):
+class SANSdata():
     """
-    This class describes the SANS-1_MLZ data structure
+    This class describes the SANS-1_MLZ data structure and
     will be used for SANS-1 data read-in and write-out routines.
-    Data from each section of raw file contains in the variable
-    with the same name.
+    Data from each section of a raw datafile assigned to a
+    class that is named correspondingly.
     """
 
     def __init__(self):
@@ -248,7 +249,8 @@ class SANSdata(object):
         self.counts: CountsSANS = CountsSANS()
         self.errors: ErrorsSANS = ErrorsSANS()
 
-        self._subsequence = [self.file, self.sample, self.setup, self.counter, self.history, self.counts]
+        self._subsequence = [self.file, self.sample, self.setup,
+                             self.counter, self.history, self.counts]
 
     def get_subsequence(self):
         return self._subsequence
@@ -257,14 +259,15 @@ class SANSdata(object):
         """
         read the SANS-1.001/002 raw files into the SANS-1 data object
         """
-        with open(filename, 'r') as fhandler:
-            unprocessed = fhandler.read()
+        with open(filename, 'r') as file_handler:
+            unprocessed = file_handler.read()
         file_type = filename.split(".")[-1]
         if file_type == "001":
             self._initialize_info(unprocessed)
         elif file_type == "002":
             self.counts.data_type = '002'
-            self._subsequence = [self.file, self.sample, self.setup, self.history, self.counts, self.errors]
+            self._subsequence = [self.file, self.sample, self.setup,
+                                 self.history, self.counts, self.errors]
             self._initialize_info(unprocessed)
         else:
             raise FileNotFoundError("Incorrect file")
@@ -273,7 +276,7 @@ class SANSdata(object):
 
     def _initialize_info(self, unprocessed):
         """
-        search for main sections; if section doesn't exist -> raise Error
+        search for main sections; if a section doesn't exist -> raise Error
         """
         for section in self._subsequence:
             matches = section.pattern.finditer(unprocessed)
@@ -284,7 +287,7 @@ class SANSdata(object):
 
     def _find_comments(self, unprocessed):
         """
-        search for comment sectionS
+        search for a comments section
         """
         matches = self.comment.pattern.finditer(unprocessed)
         tmp = [match.groups()[1].split('\n') for match in matches]
