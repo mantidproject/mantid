@@ -1498,7 +1498,7 @@ class CrystalFieldFit(object):
             fun = self._function
         for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
             parName = fun.getParamName(par_id)
-            if parName in CrystalField.field_parameter_names or "IntensityScaling" in parName:
+            if (parName in CrystalField.field_parameter_names or "IntensityScaling" in parName) and parName not in fun.getTies():
                 self._free_cef_parameters.append(par_id)
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
