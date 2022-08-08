@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import ILL_utilities as utils
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution, Multiply,
-                              ReflectometryMomentumTransfer)
+from mantid.simpleapi import (CloneWorkspace, ConvertAxisByFormula, ConvertToPointData, CreateWorkspace, Divide,
+                              GroupToXResolution, Multiply, ReflectometryMomentumTransfer)
 import ReflectometryILL_common as common
 import scipy.constants as constants
+import numpy as np
 
 
 class Prop:
@@ -63,10 +64,25 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
 
         ws = self._correctForChopperOpenings(ws, directWS)
         ws = self._convertToMomentumTransfer(ws)
-
+        if not self.getProperty('ThetaCorrection').isDefault:
+            thetaWS = self.getProperty('ThetaCorrection').value
+            thetaWSinQ = CloneWorkspace(InputWorkspace=thetaWS, OutputWorkspace='{}_in_Q'.format(thetaWS.name()))
+            # theta0 = thetaWSinQ.getRun().getLogData('theta_zero').value
+            theta0 = ws.spectrumInfo().twoTheta(0) / 2.0
+            thetaWSinQ = ConvertAxisByFormula(
+                InputWorkspace=thetaWSinQ,
+                OutputWorkspace=thetaWSinQ.name(),
+                Axis='X',
+                Formula='4*pi*{}/x'.format(np.sin(theta0)),
+                AxisUnits='MomentumTransfer',
+            )
+            thetaWSinQ.setDx(0, ws.readDx(0))
+            thetaWSinQ = self._toPointData(thetaWSinQ)
+            thetaWSinQ = self._groupPoints(thetaWSinQ, 'theta_')
         sumInLambda = self._sumType(ws.run()) == 'SumInLambda'
         if sumInLambda:
             directWS = self._sameQAndDQ(ws, directWS, 'direct_')
+
         ws = self._toPointData(ws)
         ws = self._groupPoints(ws)
 
@@ -74,6 +90,9 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             directWS = self._toPointData(directWS, 'direct_')
             directWS = self._groupPoints(directWS, 'direct_')
             ws = self._divideByDirect(ws, directWS)
+
+        if not self.getProperty('ThetaCorrection').isDefault:
+            ws.setX(0, ws.readX(0) * thetaWSinQ.readY(0))
 
         self._finalize(ws)
 
@@ -115,6 +134,14 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             defaultValue=Property.EMPTY_DBL,
             validator=positiveFloat,
             doc='If set, group the output by steps of this fraction multiplied by Q resolution')
+        self.declareProperty(
+            MatrixWorkspaceProperty(
+                "ThetaCorrection",
+                defaultValue='',
+                direction=Direction.Input,
+                optional=PropertyMode.Optional,
+                validator=WorkspaceUnitValidator('Wavelength')),
+            doc='Theta correction factors from gravity correction.')
 
     def validateInputs(self):
         """Validate the input properties."""

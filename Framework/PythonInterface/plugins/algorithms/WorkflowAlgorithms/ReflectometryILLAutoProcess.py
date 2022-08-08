@@ -762,7 +762,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             Cleanup=self._cleanup,
         )
 
-    def convert_to_momentum_transfer(self, inputWorkspaceName, outputWorkspaceName, directForegroundName, angle_index):
+    def convert_to_momentum_transfer(self, inputWorkspaceName, outputWorkspaceName, directForegroundName, angle_index,
+                                     theta_correction=''):
         """Run the ReflectometryILLConvertToQ."""
         RebinToWorkspace(
             WorkspaceToRebin=directForegroundName,
@@ -775,6 +776,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             DirectForegroundWorkspace=directForegroundName,
             GroupingQFraction=float(self.get_value(PropertyNames.GROUPING_FRACTION, angle_index)),
             SubalgorithmLogging=self._subalgLogging,
+            ThetaCorrection=theta_correction,
             Cleanup=self._cleanup,
         )
         self._autoCleanup.cleanupLater(directForegroundName)
@@ -809,6 +811,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
         foregroundName, directForegroundName = self.sum_foreground(reflectedBeamName, foregroundName, sum_type,
                                                                    angle_index, directForegroundName)
+        theta_ws_name_cropped = ''
+        if self.getProperty('CorrectGravity').value:
+            theta_ws_name_cropped = self._crop_theta_correction(foregroundName,
+                                                                reflectedBeamName[:reflectedBeamName.find('_')]+'_new_twoTheta',
+                                                                angle_index)
         final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
         self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
                               format(final_two_theta))
@@ -817,7 +824,30 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().accumulate('Sample: {0}\n'.format('Bent' if isBent == 1 else 'Flat'))
         self._autoCleanup.cleanupLater(reflectedBeamName)
         self._autoCleanup.cleanupLater(foregroundName)
-        return foregroundName, directForegroundName
+        return foregroundName, directForegroundName, theta_ws_name_cropped
+
+    def _crop_theta_correction(self, reflected_beam_name: str, theta_ws_name: str, angle_index: str) -> str:
+        """Prepares the angular gravity correction workspace to be consistent with the reflected beam workspace.
+
+        Args:
+            reflected_beam_name (str): name of the reflected beam workspace
+            theta_ws_name (str): name of the angular gravity correction workspace
+            angle_index (int): index of the current angle position
+        """
+        if theta_ws_name not in mtd:
+            return
+        theta_ws_name_cropped = '{}_cropped'.format(theta_ws_name)
+        wavelengthRange = [float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
+                           float(self.get_value(PropertyNames.WAVELENGTH_UPPER, angle_index))]
+        RebinToWorkspace(WorkspaceToRebin=theta_ws_name, WorkspaceToMatch=reflected_beam_name,
+                         OutputWorkspace=theta_ws_name_cropped)
+        CropWorkspace(
+            InputWorkspace=theta_ws_name_cropped,
+            OutputWorkspace=theta_ws_name_cropped,
+            XMin=wavelengthRange[0],
+            XMax=wavelengthRange[1]
+        )
+        return theta_ws_name_cropped
 
     def compose_polarized_runs_list(self, angle_index):
         """Returns the lists of runs and names for different flipper configurations at the given angle_index"""
@@ -893,19 +923,21 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             # always process direct beam; even if it can be the same for different angles,
             # the foreground and background regions might be different
             self.process_direct_beam(directBeamName, directForegroundName, angle_index)
+            correctedThetaWS = ''
             if not self.is_polarized():
                 runRB = self.make_name(self._rb[angle_index])
                 refl_beam_names = self._get_numor_string(self._rb[angle_index])
                 self.log().accumulate('Reflected Beam(s): {0}\n'.format(refl_beam_names))
                 reflectedBeamName = runRB + '_reflected'
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
-                to_convert_to_q, directForegroundName = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName,
-                                                                                    directBeamName, angle_index)
+                to_convert_to_q, directForegroundName, correctedThetaWS = \
+                    self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
             else:
                 foreground_names = []
                 run_inputs, run_names = self.compose_polarized_runs_list(angle_index)
                 for (run, name) in zip(run_inputs, run_names):
-                    reflectedPolForegroundWSName, _ = self.process_reflected_beam(run, name, directBeamName, angle_index)
+                    reflectedPolForegroundWSName, _, correctedThetaWS = \
+                        self.process_reflected_beam(run, name, directBeamName, angle_index)
                     foreground_names.append(reflectedPolForegroundWSName)
                 to_convert_to_q = self._outWS + '_pol_' + str(angle_index)
                 self.polarization_correction(','.join(foreground_names), to_convert_to_q)
@@ -913,7 +945,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     self._autoCleanup.cleanupLater(workspace.getName())
 
             convertedToQName = self._outWS + '_' + str(angle_index)
-            self.convert_to_momentum_transfer(to_convert_to_q, convertedToQName, directForegroundName, angle_index)
+            self.convert_to_momentum_transfer(to_convert_to_q, convertedToQName, directForegroundName, angle_index, correctedThetaWS)
             if scaleFactor != 1:
                 Scale(InputWorkspace=convertedToQName, OutputWorkspace=convertedToQName, Factor=scaleFactor)
             to_group.append(convertedToQName)
