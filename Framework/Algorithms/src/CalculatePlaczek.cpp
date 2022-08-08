@@ -371,9 +371,6 @@ void CalculatePlaczek::exec() {
   }
   PARALLEL_CHECK_INTERRUPT_REGION
 
-  // consolidate output to workspace
-  outputWS->setDistribution(false);
-
   // set output
   setProperty("OutputWorkspace", outputWS);
 }

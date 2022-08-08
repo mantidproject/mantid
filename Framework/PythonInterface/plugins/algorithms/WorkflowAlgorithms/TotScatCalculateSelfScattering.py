@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import (CalculatePlaczekSelfScattering, ConvertUnits, CreateWorkspace,
+from mantid.simpleapi import (CalculatePlaczek, ConvertUnits, CreateWorkspace,
                               DeleteWorkspace, Divide, ExtractSpectra, FitIncidentSpectrum,
                               LoadCalFile, SetSample, GroupDetectors, Rebin)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty)
@@ -75,10 +75,10 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                                           BinningForCalc=[min_x, 1 * width_x, max_x],
                                           BinningForFit=[min_x, 10 * width_x, max_x],
                                           FitSpectrumWith="CubicSpline")
-        self_scattering_correction = CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
-                                                                    IncidentSpectra=fit_spectra,
-                                                                    ScaleByPackingFraction=False,
-                                                                    Version=1)
+        self_scattering_correction = CalculatePlaczek(InputWorkspace=raw_ws,
+                                                      IncidentSpectra=fit_spectra,
+                                                      ScaleByPackingFraction=False,
+                                                      Order=1)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,
                                                   Target="MomentumTransfer", EMode='Elastic')
