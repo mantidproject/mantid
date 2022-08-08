@@ -733,6 +733,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             Cleanup=self._cleanup,
         )
         if directForegroundName:
+            if '{}_rebinned'.format(directForegroundName) in mtd:
+                directForegroundName = '{}_rebinned'.format(directForegroundName)
             self.log().accumulate('Final source (mid chopper) to sample distance [m]: {0:.5f}\n'.
                                   format(mtd[outputWorkspaceName].spectrumInfo().l1()))
             self.log().accumulate('Final reflected foreground centre distance [m]: {0:.5f}\n'.
@@ -740,6 +742,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().accumulate('Final source (mid chopper) to foreground centre distance [m]: {0:.5f}\n'.
                                   format(mtd[outputWorkspaceName].spectrumInfo().l1()
                                          +mtd[outputWorkspaceName].spectrumInfo().l2(0)))
+        return outputWorkspaceName, directForegroundName
 
     def polarization_correction(self, inputWorkspaceName, outputWorkspaceName):
         """Run the ReflectometryILLPolarizationCor."""
@@ -753,6 +756,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def convert_to_momentum_transfer(self, inputWorkspaceName, outputWorkspaceName, directForegroundName, angle_index):
         """Run the ReflectometryILLConvertToQ."""
+        RebinToWorkspace(
+            WorkspaceToRebin=directForegroundName,
+            WorkspaceToMatch=inputWorkspaceName,
+            OutputWorkspace=directForegroundName
+        )
         ReflectometryILLConvertToQ(
             InputWorkspace=inputWorkspaceName,
             OutputWorkspace=outputWorkspaceName,
@@ -761,6 +769,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             SubalgorithmLogging=self._subalgLogging,
             Cleanup=self._cleanup,
         )
+        self._autoCleanup.cleanupLater(directForegroundName)
 
     def process_direct_beam(self, directBeamName, directForegroundName, angle_index):
         """Processes the direct beam for the given angle configuration."""
@@ -790,7 +799,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
         self.log().accumulate('Summation method: {0}\n'.format(sum_type))
         sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
-        self.sum_foreground(reflectedBeamName, foregroundName, sum_type, angle_index, directForegroundName)
+        foregroundName, directForegroundName = self.sum_foreground(reflectedBeamName, foregroundName, sum_type,
+                                                                   angle_index, directForegroundName)
         final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
         self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
                               format(final_two_theta))
@@ -799,7 +809,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().accumulate('Sample: {0}\n'.format('Bent' if isBent == 1 else 'Flat'))
         self._autoCleanup.cleanupLater(reflectedBeamName)
         self._autoCleanup.cleanupLater(foregroundName)
-        return foregroundName
+        return foregroundName, directForegroundName
 
     def compose_polarized_runs_list(self, angle_index):
         """Returns the lists of runs and names for different flipper configurations at the given angle_index"""
@@ -881,12 +891,13 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 self.log().accumulate('Reflected Beam(s): {0}\n'.format(refl_beam_names))
                 reflectedBeamName = runRB + '_reflected'
                 reflectedBeamInput = self.compose_run_string(self._rb[angle_index])
-                to_convert_to_q = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName, directBeamName, angle_index)
+                to_convert_to_q, directForegroundName = self.process_reflected_beam(reflectedBeamInput, reflectedBeamName,
+                                                                                    directBeamName, angle_index)
             else:
                 foreground_names = []
                 run_inputs, run_names = self.compose_polarized_runs_list(angle_index)
                 for (run, name) in zip(run_inputs, run_names):
-                    reflectedPolForegroundWSName = self.process_reflected_beam(run, name, directBeamName, angle_index)
+                    reflectedPolForegroundWSName, _ = self.process_reflected_beam(run, name, directBeamName, angle_index)
                     foreground_names.append(reflectedPolForegroundWSName)
                 to_convert_to_q = self._outWS + '_pol_' + str(angle_index)
                 self.polarization_correction(','.join(foreground_names), to_convert_to_q)

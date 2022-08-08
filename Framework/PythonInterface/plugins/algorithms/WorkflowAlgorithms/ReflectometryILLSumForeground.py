@@ -4,13 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
-from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, Plus, RebinToWorkspace,
-                              ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
+from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent,
+                              Plus, RebinToWorkspace, ReflectometryBeamStatistics, ReflectometrySumInQ,
+                              RotateInstrumentComponent)
 import ReflectometryILL_common as common
 import ILL_utilities as utils
 import numpy
@@ -78,13 +79,14 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumType = self._sumType()
         if sumType == SumType.IN_LAMBDA:
             ws = self._sumForegroundInLambda(ws)
-            if processReflected:
-                ws = self._rebinToDirect(ws)
         else:
             ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
         ws.run().addProperty(common.SampleLogs.SUM_TYPE, sumType, True)
         ws = self._applyWavelengthRange(ws)
+
+        if processReflected and sumType == SumType.IN_LAMBDA:
+            self._rebinDirectToReflected(self.getProperty(Prop.DIRECT_FOREGROUND_WS).value, ws)
 
         self._finalize(ws)
 
@@ -215,14 +217,17 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         """Return true if only the direct beam should be processed."""
         return self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault
 
-    def _divideByDirect(self, ws):
-        """Divide ws by the direct beam."""
-        ws = self._rebinToDirect(ws)
-        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+    def _divideByDirect(self, ws: MatrixWorkspace) -> MatrixWorkspace:
+        """Divide ws by the direct beam.
+
+        Args:
+            ws (MatrixWorkspace): reflected beam to be divided
+        """
+        direct_ws = self._rebinDirectToReflected(self.getProperty(Prop.DIRECT_FOREGROUND_WS).value, ws)
         reflectivityWSName = self._names.withSuffix('reflectivity')
         reflectivityWS = Divide(
             LHSWorkspace=ws,
-            RHSWorkspace=directWS,
+            RHSWorkspace=direct_ws,
             OutputWorkspace=reflectivityWSName,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
@@ -259,17 +264,22 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._cleanup.protect(ws)
         return ws
 
-    def _rebinToDirect(self, ws):
-        """Rebin ws to direct foreground."""
-        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
-        rebinnedWSName = self._names.withSuffix('rebinned')
-        rebinnedWS = RebinToWorkspace(
-            WorkspaceToRebin=ws,
-            WorkspaceToMatch=directWS,
-            OutputWorkspace=rebinnedWSName,
+    def _rebinDirectToReflected(self, direct_ws: MatrixWorkspace, ws: MatrixWorkspace) -> MatrixWorkspace:
+        """Rebin direct foreground to ws.
+
+        Args:
+            direct_ws (MatrixWorkspace): direct workspace to be rebinned
+            ws (MatrixWorkspace): reflected workspace used as WorkspaceToMatch for direct workspace.
+        Returns:
+            MatrixWorkspace with rebinned direct beam.
+        """
+        rebinned_direct_ws_name = '{}_rebinned'.format(direct_ws.name())
+        rebinned_ws = RebinToWorkspace(
+            WorkspaceToRebin=direct_ws,
+            WorkspaceToMatch=ws,
+            OutputWorkspace=rebinned_direct_ws_name,
             EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
-        return rebinnedWS
+        return rebinned_ws
 
     def _sumForegroundInLambda(self, ws):
         """Sum the foreground region into a single histogram."""

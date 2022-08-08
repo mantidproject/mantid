@@ -59,6 +59,7 @@ Usage
        DirectLineWorkspace=direct,
        WavelengthRange=[2, 15],
    )
+   directFgd = "{}_rebinned".format(directFgd)  # direct beam is rebinned to reflected beam
    reflectivityQ = ReflectometryILLConvertToQ(
        InputWorkspace=reflectivityLambda,
        # The next line is not needed if SumInQ was used in foreground summation
@@ -166,13 +167,13 @@ Output:
    R00 = ReflectometryILLConvertToQ(
        InputWorkspace=polcorr00,
        # The next line is not needed if SumInQ was used in foreground summation
-       DirectForegroundWorkspace='pol_corrected_direct_++',
+       DirectForegroundWorkspace='pol_corrected_direct_++_rebinned',
        GroupingQFraction=0.4
    )
    R11 = ReflectometryILLConvertToQ(
        InputWorkspace=polcorr11,
        # The next line is not needed if SumInQ was used in foreground summation
-       DirectForegroundWorkspace='pol_corrected_direct_++',
+       DirectForegroundWorkspace='pol_corrected_direct_++_rebinned',
        GroupingQFraction=0.4
    )
 
