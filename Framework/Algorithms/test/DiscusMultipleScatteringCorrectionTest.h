@@ -408,6 +408,10 @@ public:
     TS_ASSERT_EQUALS(testResultY[3], 2.22);
     testResultX.clear();
     testResultY.clear();
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.2, testResultX, testResultY, false);
+    TS_ASSERT_EQUALS(testResultY[0], 2.22);
+    testResultX.clear();
+    testResultY.clear();
     TS_ASSERT_THROWS(alg.integrateCumulative(ws->getSpectrum(0), 0., 3.2, testResultX, testResultY, true),
                      std::runtime_error &);
     testResultX.clear();
@@ -442,6 +446,10 @@ public:
     testResultY.clear();
     alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
+    testResultX.clear();
+    testResultY.clear();
+    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, false);
+    TS_ASSERT_EQUALS(testResultY[0], 2.0);
   }
 
   void test_inelastic_with_importance_sampling() {

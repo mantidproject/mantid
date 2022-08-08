@@ -34,7 +34,7 @@ struct ComponentWorkspaceMapping {
   std::string_view materialName;
   API::MatrixWorkspace_sptr SQ;
   API::MatrixWorkspace_sptr logSQ{};
-  std::shared_ptr<DataObjects::Histogram1D> QSQIntegral{};
+  std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor{};
   API::MatrixWorkspace_sptr QSQ{};
   API::MatrixWorkspace_sptr InvPOfQ{};
   std::shared_ptr<int> scatterCount = std::make_shared<int>(0);
@@ -112,6 +112,7 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   void createInvPOfQWorkspaces(ComponentWorkspaceMappings &matWSs, size_t nhists);
   void convertToLogWorkspace(const API::MatrixWorkspace_sptr &SOfQ);
+  void calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs, const std::vector<double> &specialKs);
   void prepareCumulativeProbForQ(double kinc, const ComponentWorkspaceMappings &PInvOfQs);
   void prepareQSQ(double kinc);
   double getKf(const double deltaE, const double kinc);
@@ -121,8 +122,8 @@ private:
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
                                                                          const std::vector<double> &xPoints);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
-  integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc, bool returnCumulative);
-  double getQSQIntegral(const ComponentWorkspaceMapping &SQWSMapping, const double k);
+  integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc, const bool returnCumulative);
+  double getQSQIntegral(const API::ISpectrum &QSQScaleFactor, double k);
   const ComponentWorkspaceMapping *findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
                                                          const Geometry::IObject *shapeObjectWithScatter);
   long long m_callsToInterceptSurface{0};
