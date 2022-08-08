@@ -13,6 +13,7 @@ import ReflectometryILL_common as common
 import ILL_utilities as utils
 import numpy as np
 from math import fabs, atan
+from scipy.constants import physical_constants
 
 
 class Prop:
@@ -75,6 +76,7 @@ def normalisationMonitorWorkspaceIndex(ws):
 class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     _bragg_angle = None
+    _theta_zero = None
 
     def category(self):
         """Return the categories of the algrithm."""
@@ -155,6 +157,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ws = self._subtractFlatBkg(ws)
 
         ws = self._convertToWavelength(ws)
+
+        if self.getProperty('CorrectGravity').value and self._instrumentName == "FIGARO":
+            ws = self._gravity_correction(ws)
 
         self._finalize(ws)
 
@@ -259,6 +264,12 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.XMAX,
                              defaultValue=-1.,
                              doc='Maximum wavelength [Angstrom] used for peak fitting.')
+
+        self.declareProperty(
+            name="CorrectGravity",
+            defaultValue=False,
+            doc="Whether to correct for gravity effects (FIGARO only)."
+        )
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -739,6 +750,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             delta_angle = -dir_angle + refl_angle
         else:
             delta_angle = 0.0
+        self._theta_zero = 2*self._theta_from_detector_angles() + delta_angle
         kwargs = dict()
         kwargs['DetectorCorrectionType'] = 'RotateAroundSample' \
             if self._instrumentName == 'D17' else 'VerticalShift'
@@ -747,7 +759,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             OutputWorkspace=calibratedWSName,
             DetectorComponentName='detector',
             LinePosition=direct_line,  # direct line position
-            TwoTheta=2*self._theta_from_detector_angles() + delta_angle,
+            TwoTheta=self._theta_zero,
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorFacesSample=True,
             EnableLogging=self._subalgLogging,
@@ -755,6 +767,90 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         )
         self._cleanup.cleanup(ws)
         return calibratedWS
+
+    def _gravity_correction(self, ws: MatrixWorkspace) -> MatrixWorkspace:
+        """Performs simple gravity correction by replacing the wavelength X-axis and providing the corrected
+        grazing angle, which is applied to data at a later stage. The algorithm below is reimplemented from COSMOS.
+
+        Args:
+             ws (MatrixWorkspace): reflected or direct beam workspace to be corrected for gravity
+        """
+        mm2m = 1e-3  # millimetre to metre conversion factor
+        us2s = 1e-6  # microsecond to second conversion factor
+        deg2rad = np.pi / 180.0
+        rad2deg = 1.0 / deg2rad
+        g = physical_constants['standard acceleration of gravity'][0]  # 9.80665 m / s^2
+        h = physical_constants['Planck constant'][0]  # in J * s
+        m_n = physical_constants['neutron mass'][0]  # in kg
+        planckperkg = h / m_n  # in m^2 / s
+
+        tsize = len(ws.readX(0))
+        xAxis = np.linspace(0.5, tsize-1, tsize, endpoint=False)
+
+        run = ws.getRun()
+        channel_width = run.getLogData('FrameOverlap.channel_width').value * us2s
+        poff = run.getLogData('MainParameters.pickup_offset').value
+        open_off = run.getLogData('MainParameters.open_offset').value
+        chop_window = run.getLogData('ChopperWindow').value
+        master_phase = run.getLogData('MainParameters.Master_chopper_phase').value
+        slave_phase = run.getLogData('MainParameters.Slave_chopper_phase').value
+        open_angle = chop_window - (slave_phase - master_phase) - open_off
+        delay_angle = master_phase + 0.5 * (poff - open_angle)
+        master_speed = run.getLogData('MainParameters.Master_chopper_speed').value
+        slave_speed = run.getLogData('MainParameters.Slave_chopper_speed').value
+        period = 60. / (0.5 * (master_speed + slave_speed))  # rpm
+        edelay = run.getLogData('PSD.time_of_flight_2').value * us2s
+        delay = edelay - (delay_angle / 360.0) * period
+        ref_total_tofd = ws.spectrumInfo().l1()+ws.spectrumInfo().l2(0)  # total time of flight distance
+        wavelength = 1e10 * (planckperkg * (xAxis * channel_width + delay) / ref_total_tofd)
+        xchopper = ws.spectrumInfo().l1()  # distance mid-chopper to sample
+        offset = run.getLogData('Distance.sample_changer_horizontal_offset').value * mm2m
+        xslits2 = run.getLogData('Distance.S2_sample').value * mm2m + offset
+        xslits3 = run.getLogData('Distance.S3_sample').value * mm2m + offset
+        cr = ws.getInstrument().getNumberParameter('chopper_radius')[0]  # m, Nexus is improperly filled
+
+        if self._theta_zero is not None:
+            theta0 = self._theta_zero * deg2rad / 2.0
+        else:
+            try:
+                theta0 = ws.getRun().getLogData('VirtualAxis.SAN_actual_angle').value * deg2rad
+            except RuntimeError:
+                theta0 = ws.getRun().getLogData('VirtualAxis.DAN_actual_angle').value * deg2rad
+
+        yslits3 = xslits3 * np.tan(theta0)  # x1 * tan(theta) in the paper
+        yslits2 = xslits2 * np.tan(theta0)
+
+        # origin is the centre of the sample
+        v = planckperkg * 1e10 / wavelength  # neutron velocity in m/s, 1e10 for A to m conversion
+        k = g / (2. * v ** 2)  # a characteristic inverse length
+
+        # define parabola y = y0 - k * (x-x0) ^ 2 passing by (xslits3, yslits3) and (xslits2, yslits2)
+        x0 = (k * ((xslits2**2) - (xslits3**2)) + yslits2 - yslits3) / (2 * k * (xslits2 - xslits3))
+        y0 = yslits3 + k * ((xslits3 - x0)**2)
+
+        delta = x0 - np.sqrt(y0 / k)  # shift in x along sample due to gravity
+
+        grad = (2. * k) * (x0 - delta)  # gradient of parabola (to find true theta at y = 0)
+        newTheta = np.arctan(grad)
+        name = ws.name()
+        shift = 2 if name[0] == '_' else 0
+        new_twoTheta_ws = '{}_new_twoTheta'.format(name[shift:shift+name[shift:].find('_')])
+
+        chopz = xchopper * np.tan(theta0) - (y0 - k * (xchopper - x0) ** 2)
+        poffoff = (chopz / cr) * rad2deg
+
+        newdelayangle = delay_angle - poffoff / 2.
+        newdelay = delay + ((delay_angle - newdelayangle) / 360.) * period
+        newlambda = 1e10 * (
+                    planckperkg * (xAxis * channel_width + newdelay) / ref_total_tofd)
+        correction = np.abs(newTheta / theta0)
+        # the y axis needs to be 1 value shorter than the X axis so the workspace is a histogram, which is needed for later rebinning
+        correction = 0.5*(correction[1:] + correction[:-1])
+        CreateWorkspace(DataX=newlambda, DataY=correction, OutputWorkspace=new_twoTheta_ws, UnitX='Wavelength',
+                        ParentWorkspace=ws)
+        for spec_no in range(ws.getNumberHistograms()):
+            ws.setX(spec_no, newlambda)
+        return ws
 
 
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)

@@ -543,6 +543,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             doc="Whether to save reduction parameters in an ASCII file."
         )
 
+        self.declareProperty(
+            name="CorrectGravity",
+            defaultValue=False,
+            doc="Whether to correct for gravity effects (FIGARO only)."
+        )
+
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
@@ -649,7 +655,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             FitStartWorkspaceIndex=int(self.get_value(PropertyNames.START_WS_INDEX_DIRECT, angle_index)),
             FitEndWorkspaceIndex=int(self.get_value(PropertyNames.END_WS_INDEX_DIRECT, angle_index)),
             FitRangeLower=self.getProperty(PropertyNames.XMIN_DIRECT).value,
-            FitRangeUpper=self.getProperty(PropertyNames.XMAX_DIRECT).value
+            FitRangeUpper=self.getProperty(PropertyNames.XMAX_DIRECT).value,
+            CorrectGravity=self.getProperty('CorrectGravity').value
         )
 
     def detector_angle_from_logs(self, ws):
@@ -702,7 +709,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             'FitStartWorkspaceIndex': int(self.get_value(PropertyNames.START_WS_INDEX, angle_index)),
             'FitEndWorkspaceIndex': int(self.get_value(PropertyNames.END_WS_INDEX, angle_index)),
             'FitRangeLower': self.get_value(PropertyNames.XMIN, angle_index),
-            'FitRangeUpper': self.get_value(PropertyNames.XMAX, angle_index)
+            'FitRangeUpper': self.get_value(PropertyNames.XMAX, angle_index),
+            'CorrectGravity': self.getProperty('CorrectGravity').value
         }
         if angle_option == PropertyNames.UAN:
             preprocess_args['BraggAngle'] = self.get_value(PropertyNames.THETA, angle_index)
