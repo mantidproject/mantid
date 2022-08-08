@@ -18,6 +18,7 @@
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
 #include "ROIType.h"
+#include "Reduction/RowExceptions.h"
 #include "TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -357,6 +358,32 @@ public:
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
     presenter.getPreviewRow();
+  }
+
+  void test_notify_apply_requested_will_catch_RowNotFoundException() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested())
+        .Times(1)
+        .WillRepeatedly(Throw(RowNotFoundException("Error message")));
+
+    presenter.notifyApplyRequested();
+  }
+
+  void test_notify_apply_requested_will_catch_MultipleRowsFoundException() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested())
+        .Times(1)
+        .WillRepeatedly(Throw(MultipleRowsFoundException("Error message")));
+
+    presenter.notifyApplyRequested();
   }
 
 private:

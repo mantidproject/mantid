@@ -114,7 +114,7 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
     return *match;
 }
 
-void LookupTable::replaceLookupRow(LookupRow lookupRow, double tolerance) {
+void LookupTable::updateLookupRow(LookupRow lookupRow, double tolerance) {
   m_lookupRows[getIndex(lookupRow)] = std::move(lookupRow);
 }
 

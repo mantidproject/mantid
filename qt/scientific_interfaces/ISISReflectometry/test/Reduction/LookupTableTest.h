@@ -9,6 +9,7 @@
 
 #include "../../../ISISReflectometry/Reduction/LookupTable.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "TestHelpers/ModelCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -281,28 +282,21 @@ public:
     TS_ASSERT_THROWS(table.getIndex(lookupRow), RowNotFoundException const &);
   }
 
-  void test_replace_lookup_row_will_replace_row_with_same_angle_and_title() {
+  void test_replace_lookup_row_will_replace_row_with_same_angle() {
     auto constexpr angle = 2.3;
-    auto matchingLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
-    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")), matchingLookupRow,
-                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
-
-    TS_ASSERT_EQUALS(3, table.rows().size());
-
-    auto const previewRow = ModelCreationHelper::makePreviewRow({"12345"}, angle);
-    table.replaceLookupRow(previewRow, m_exactMatchTolerance);
-
-    TS_ASSERT_EQUALS(1, table.getIndex(matchingLookupRow));
-    TS_ASSERT_EQUALS(3, table.rows().size());
-  }
-
-  void test_replace_lookup_row_will_throw_if_no_row_with_matching_angle() {
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")),
-                             ModelCreationHelper::makeLookupRow(2.3, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*")),
                              ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
 
-    auto const previewRow = ModelCreationHelper::makePreviewRow({"12345"}, 2.7);
-    TS_ASSERT_THROWS(table.replaceLookupRow(previewRow, m_exactMatchTolerance), RowNotFoundException const &);
+    TS_ASSERT_EQUALS(3, table.rows().size());
+
+    auto newLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
+    auto const signalProcessingInstructions = "5678";
+    newLookupRow.setProcessingInstructions(ROIType::Signal, signalProcessingInstructions);
+    table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance);
+
+    TS_ASSERT_EQUALS(signalProcessingInstructions, *table.rows()[1].processingInstructions());
+    TS_ASSERT_EQUALS(3, table.rows().size());
   }
 
 private:

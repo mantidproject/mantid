@@ -26,7 +26,7 @@ public:
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
-  void replaceLookupRow(LookupRow lookupRow, double tolerance);
+  void updateLookupRow(LookupRow lookupRow, double tolerance);
   size_t getIndex(LookupRow const &) const;
   std::vector<LookupRow> const &rows() const;
   std::vector<LookupRow::ValueArray> toValueArray() const;

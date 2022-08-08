@@ -99,7 +99,7 @@ private:
   void updatePolarizationCorrectionEnabledState();
   void updateFloodCorrectionEnabledState();
 
-  void replaceLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
+  void updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
 
   bool isProcessing() const;
   bool isAutoreducing() const;

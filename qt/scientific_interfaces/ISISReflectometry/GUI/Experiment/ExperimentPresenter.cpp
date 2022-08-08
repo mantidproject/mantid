@@ -108,11 +108,11 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     auto lookupRowCopy = *foundRow;
 
-    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
-    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
-    replaceLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
+    updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
+    updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
+    updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
 
-    m_model.replaceLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
+    m_model.updateLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
     updateViewFromModel();
   } else {
     throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
@@ -120,8 +120,8 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   }
 }
 
-void ExperimentPresenter::replaceLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
-                                                                 ROIType regionType) {
+void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
+                                                                ROIType regionType) {
   if (auto const instructions = previewRow.getProcessingInstructions(regionType)) {
     lookupRow.setProcessingInstructions(regionType, instructions.get());
   }
