@@ -68,6 +68,7 @@ set(SRC_FILES
     src/Functions/Bk2BkExpConvPV.cpp
     src/Functions/ChebfunBase.cpp
     src/Functions/Chebyshev.cpp
+    src/Functions/ChudleyElliotSQE.cpp
     src/Functions/ComptonPeakProfile.cpp
     src/Functions/ComptonProfile.cpp
     src/Functions/ComptonScatteringCountRate.cpp
@@ -104,6 +105,7 @@ set(SRC_FILES
     src/Functions/ExpDecay.cpp
     src/Functions/ExpDecayMuon.cpp
     src/Functions/ExpDecayOsc.cpp
+    src/Functions/FickDiffusionSQE.cpp
     src/Functions/FlatBackground.cpp
     src/Functions/FullprofPolynomial.cpp
     src/Functions/FunctionQDepends.cpp
@@ -113,6 +115,7 @@ set(SRC_FILES
     src/Functions/GaussianComptonProfile.cpp
     src/Functions/GramCharlier.cpp
     src/Functions/GramCharlierComptonProfile.cpp
+    src/Functions/HallRossSQE.cpp
     src/Functions/IkedaCarpenterPV.cpp
     src/Functions/InelasticDiffRotDiscreteCircle.cpp
     src/Functions/InelasticDiffSphere.cpp
@@ -255,6 +258,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/Bk2BkExpConvPV.h
     inc/MantidCurveFitting/Functions/ChebfunBase.h
     inc/MantidCurveFitting/Functions/Chebyshev.h
+    inc/MantidCurveFitting/Functions/ChudleyElliotSQE.h
     inc/MantidCurveFitting/Functions/ComptonPeakProfile.h
     inc/MantidCurveFitting/Functions/ComptonProfile.h
     inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
@@ -286,6 +290,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ExpDecay.h
     inc/MantidCurveFitting/Functions/ExpDecayMuon.h
     inc/MantidCurveFitting/Functions/ExpDecayOsc.h
+    inc/MantidCurveFitting/Functions/FickDiffusionSQE.h
     inc/MantidCurveFitting/Functions/FlatBackground.h
     inc/MantidCurveFitting/Functions/FullprofPolynomial.h
     inc/MantidCurveFitting/Functions/FunctionQDepends.h
@@ -295,6 +300,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/GramCharlier.h
     inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
+    inc/MantidCurveFitting/Functions/HallRossSQE.h
     inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
     inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
@@ -431,6 +437,7 @@ set(TEST_FILES
     Functions/Bk2BkExpConvPVTest.h
     Functions/ChebfunBaseTest.h
     Functions/ChebyshevTest.h
+    Functions/ChudleyElliotSQETest.h
     Functions/ComptonPeakProfileTest.h
     Functions/ComptonProfileTest.h
     Functions/ComptonScatteringCountRateTest.h
@@ -459,6 +466,7 @@ set(TEST_FILES
     Functions/ExpDecayMuonTest.h
     Functions/ExpDecayOscTest.h
     Functions/ExpDecayTest.h
+    Functions/FickDiffusionSQETest.h
     Functions/FlatBackgroundTest.h
     Functions/FullprofPolynomialTest.h
     Functions/FunctionQDependsTest.h
@@ -467,6 +475,7 @@ set(TEST_FILES
     Functions/GaussianComptonProfileTest.h
     Functions/GaussianTest.h
     Functions/GramCharlierComptonProfileTest.h
+    Functions/HallRossSQETest.h
     Functions/IkedaCarpenterPVTest.h
     Functions/InelasticIsoRotDiffTest.h
     Functions/IsoRotDiffTest.h
