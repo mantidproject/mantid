@@ -783,7 +783,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
 
     def process_direct_beam(self, directBeamName, directForegroundName, angle_index):
         """Processes the direct beam for the given angle configuration."""
-        dbrun = self._db[0]  if len(self._db) == 1 else self._db[angle_index]
+        dbrun = self._db[0] if len(self._db) == 1 else self._db[angle_index]
         directBeamInput = self.compose_run_string(dbrun)
         self.preprocess_direct_beam(directBeamInput, directBeamName, angle_index)
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
