@@ -9,8 +9,10 @@ import tempfile
 import shutil
 from os import path
 from mantid.simpleapi import (IntegratePeaksSkew, CreatePeaksWorkspace, AddPeak, AnalysisDataService, CloneWorkspace)
+from IntegratePeaksSkew import InstrumentArrayConverter
 from testhelpers import WorkspaceCreationHelper
-from numpy import array, sqrt
+from numpy import array, sqrt, arange
+
 
 class IntegratePeaksSkewTest(unittest.TestCase):
     @classmethod
@@ -166,6 +168,30 @@ class IntegratePeaksSkewTest(unittest.TestCase):
                                  NRows=1, NCols=2, IntegrateIfOnEdge=True, UseNearestPeak=True, NPixMin=1,
                                  UpdatePeakPosition=False, OutputWorkspace='out8')
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 5.46125, delta=1e-4)  # only one pixel in peak
+
+    def test_nrows_edge_ncols_edge(self):
+        array_converter = InstrumentArrayConverter(self.ws)
+        ipk = 0
+        pk = self.peaks.getPeak(ipk)
+        detid = self.peaks.column('DetID')[ipk]
+        bank = self.peaks.column('BankName')[ipk]
+
+        ncols_edge = 1
+        for nrows_edge in range(1, 3):
+            *_, det_edges, dets = array_converter.get_peak_region_array(pk, detid, bank, drows=3, dcols=3,
+                                                                        nrows_edge=nrows_edge, ncols_edge=ncols_edge)
+            self.assertTrue(det_edges[:nrows_edge, :].all())
+            self.assertTrue(det_edges[-nrows_edge:, :].all())
+            self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
+        nrows_edge = 1
+        for ncols_edge in range(1, 3):
+            *_, det_edges, dets = array_converter.get_peak_region_array(pk, detid, bank, drows=3, dcols=3,
+                                                                        nrows_edge=nrows_edge, ncols_edge=ncols_edge)
+            self.assertTrue(det_edges[:, :ncols_edge].all())
+            self.assertTrue(det_edges[:, -ncols_edge:].all())
+            self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
+        self.assertTrue((dets == arange(25, 50).reshape(5, 5).T).all())
+
 
 if __name__ == '__main__':
     unittest.main()

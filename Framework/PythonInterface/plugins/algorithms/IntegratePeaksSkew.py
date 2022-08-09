@@ -89,7 +89,7 @@ class InstrumentArrayConverter:
                 next_col_prefix, next_col_str = self._split_string_trailing_int(next_det.getFullName())
         return next_col_prefix, next_col_str, isLHS, isRHS
 
-    def _get_detid_array_comp_assembly(self, bank, detid, row, col, drows, dcols):
+    def _get_detid_array_comp_assembly(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge=1):
         ndet_per_spec = len(self.ws.getSpectrum(self.ws.getIndicesFromDetectorIDs([detid])[0]).getDetectorIDs())
         nrows = bank[0].nelements()
         ncols = bank.nelements()
@@ -144,20 +144,21 @@ class InstrumentArrayConverter:
         detids = detids[:, icols_keep]
         dcol = dcol[:, icols_keep]
         drow = drow[:, icols_keep]
-        # detector edges
+        # detector edges - note this only works for ncols_edge = 1
         col_edges = np.zeros(detids.shape, dtype=bool)
         if isLHS and dcol[0, 0] == 1 - col:
             col_edges[:, 0] = True
         elif isRHS and dcol[0, -1] == ncols - col:
             col_edges[:, -1] = True
-        row_edges = np.logical_or(drow <= ndet_per_spec - row, drow >= nrows - row - ndet_per_spec)
+        row_edges = np.logical_or(drow <= ndet_per_spec * nrows_edge - row,
+                                  drow > nrows - row - ndet_per_spec * nrows_edge)
         detector_edges = np.logical_or(row_edges, col_edges)
         # row_peak, icol_peak
         irow_peak = np.where(drow[:, 0] == 0)[0][0]
         icol_peak = np.where(dcol[0, :] == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def _get_detid_array_rect_detector(self, bank, detid, row, col, drows, dcols):
+    def _get_detid_array_rect_detector(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge):
         col_step, row_step = bank.idstep(), bank.idstepbyrow()  # step in detID along col and row
         if bank.idfillbyfirst_y():
             col_step, row_step = row_step, col_step
@@ -167,14 +168,15 @@ class InstrumentArrayConverter:
         dcol, drow = np.meshgrid(dcol_vec, drow_vec)
         detids = detid + dcol * col_step + drow * row_step
         # create bool mask for detector edges
-        detector_edges = np.logical_or.reduce((drow == -row, dcol == -col,
-                                               drow == bank.xpixels() - 1 - row, dcol == bank.ypixels() - 1 - col))
+        detector_edges = np.logical_or.reduce((drow <= -row + nrows_edge - 1, dcol <= -col + ncols_edge - 1,
+                                               drow >= bank.xpixels() - nrows_edge - row,
+                                               dcol >= bank.ypixels() - ncols_edge - col))
         # get indices of peak centre
         irow_peak = np.where(drow_vec == 0)[0][0]
         icol_peak = np.where(dcol_vec == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def get_peak_region_array(self, peak, detid, bank_name, drows, dcols):
+    def get_peak_region_array(self, peak, detid, bank_name, drows, dcols, nrows_edge, ncols_edge):
         """
         :param peak: peak object
         :param detid: detector id of peak (from peak table)
@@ -189,7 +191,8 @@ class InstrumentArrayConverter:
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
-        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols)
+        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols,
+                                                                            nrows_edge, ncols_edge)
         # get signal and error from each spectrum
         ispecs = np.array(self.ws.getIndicesFromDetectorIDs(
             [int(d) for d in detids.flatten()])).reshape(detids.shape)
@@ -219,7 +222,7 @@ def is_peak_mask_valid(peak_mask, peak_label, npk_min, density_min, nrow_max, nc
     nrow = np.sum(peak_mask.sum(axis=1) > 0)
     if nrow > nrow_max:
         return False, PEAK_MASK_STATUS.NROW_MAX
-    density = peak_mask.sum() / (ncol*nrow)
+    density = peak_mask.sum() / (ncol * nrow)
     if density < density_min:
         return False, PEAK_MASK_STATUS.DENSITY_MIN
     if does_peak_have_vacancies(peak_mask, min_npixels_per_vacancy, max_nvacancies):
@@ -428,6 +431,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # peak mask validators
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
                              doc="Integrate peaks that contain pixels on edge of the detector.")
+        self.declareProperty(name="NRowsEdge", defaultValue=1, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=1),
+                             doc="Masks including pixels on rows NRowsEdge from the detector edge are "
+                                 "defined as on the edge.")
+        self.declareProperty(name="NColsEdge", defaultValue=1, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=1),
+                             doc="Masks including pixels on cols NColsEdge from the detector edge are "
+                                 "defined as on the edge.")
         self.declareProperty(name="NPixMin", defaultValue=3, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
                              doc="Minimum number of pixels contributing to a peak")
@@ -448,6 +459,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=1),
                              doc="Minimum number of pixels in a vacancy")
         self.setPropertyGroup("IntegrateIfOnEdge", "Peak Mask Validation")
+        self.setPropertyGroup("NRowsEdge", "Peak Mask Validation")
+        self.setPropertyGroup("NColsEdge", "Peak Mask Validation")
         self.setPropertyGroup("NPixMin", "Peak Mask Validation")
         self.setPropertyGroup("DensityPixMin", "Peak Mask Validation")
         self.setPropertyGroup("NRowMax", "Peak Mask Validation")
@@ -476,6 +489,19 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the"
                                  " integrated intensities.")
 
+    def validateInputs(self):
+        issues = dict()
+        # check NColsEdge=1 for instruments with ComponentArray detector banks
+        ws = self.getProperty("InputWorkspace").value
+        inst = ws.getInstrument()
+        ncols_edge = self.getProperty("NColsEdge").value
+        if not any(inst[icomp] for icomp in range(inst.nelements()) if
+                   isinstance(inst[icomp], RectangularDetector) or isinstance(inst[icomp],
+                                                                              GridDetector)) and ncols_edge > 1:
+            issues["NColsEdge"] = ("If an instrument banks are not instances of RectangularDetector or GridDetector "
+                                   "then NColsEdge must equal 1.")
+        return issues
+
     def PyExec(self):
         # get input
         ws = self.getProperty("InputWorkspace").value
@@ -489,6 +515,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
+        nrows_edge = self.getProperty("NRowsEdge").value
+        ncols_edge = self.getProperty("NColsEdge").value
         npk_min = self.getProperty("NPixMin").value
         density_min = self.getProperty("DensityPixMin").value
         nrow_max = self.getProperty("NRowMax").value
@@ -532,7 +560,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # get data array in window around peak region (truncated at edge pf detector)
             xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detids[ipk],
                                                                                                     bank_names[ipk],
-                                                                                                    drows, dcols)
+                                                                                                    drows, dcols,
+                                                                                                    nrows_edge,
+                                                                                                    ncols_edge)
             # get TOF window using resolution parameters
             if frac_tof_window > 0:
                 dTOF = tofs[ipk] * frac_tof_window
@@ -580,7 +610,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                         # update tof
                         imax = np.argmax(ypk[ixlo_opt:ixhi_opt]) + ixlo_opt
                         # replace last added peak
-                        irows_delete.append(pk_ws_int.getNumberPeaks()-1)
+                        irows_delete.append(pk_ws_int.getNumberPeaks() - 1)
                         self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpk[imax],
                                            DetectorID=int(det))
                         pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
@@ -623,12 +653,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 ax[0].set_ylabel('dRow')
                 # 1D plot
                 ax[1].axvline(xpk[ixlo_opt], ls='--', color='b', label='Optimal window')
-                ax[1].axvline(xpk[ixhi_opt-1], ls='--', color='b')
+                ax[1].axvline(xpk[ixhi_opt - 1], ls='--', color='b')
                 ax[1].errorbar(xpk[istart:iend], ypk[istart:iend], yerr=np.sqrt(epk_sq[istart:iend]),
                                marker='o', markersize=3, capsize=2, ls='', color='k', label='data')
                 ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
                 ax[1].axvline(xpk[ixlo], ls=':', color='r', label='Initial window')
-                ax[1].axvline(xpk[ixhi-1], ls=':', color='r')
+                ax[1].axvline(xpk[ixhi - 1], ls=':', color='r')
                 ax[1].axhline(0, ls=':', color='k')
                 ax[1].legend(fontsize=7, loc=1, ncol=2)
                 # figure formatting
