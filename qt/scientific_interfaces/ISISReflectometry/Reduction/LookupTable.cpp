@@ -19,7 +19,7 @@ namespace {
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
 bool equalWithinTolerance(double val1, double val2, double tolerance) {
-  return std::abs(val1 - val2) <= (tolerance + EPSILON);
+  return std::abs(val1 - val2) <= (tolerance + 2.0 * EPSILON);
 }
 } // namespace
 
@@ -115,7 +115,15 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
 }
 
 void LookupTable::updateLookupRow(LookupRow lookupRow, double tolerance) {
-  m_lookupRows[getIndex(lookupRow)] = std::move(lookupRow);
+  auto match = std::find_if(m_lookupRows.begin(), m_lookupRows.end(),
+                            [&lookupRow, &tolerance](LookupRow const &candidate) -> bool {
+                              return candidate.hasEqualThetaAndTitle(lookupRow, tolerance);
+                            });
+  if (match != m_lookupRows.end()) {
+    (*match) = std::move(lookupRow);
+  } else {
+    throw RowNotFoundException("Lookup row not found.");
+  }
 }
 
 size_t LookupTable::getIndex(const LookupRow &lookupRow) const {

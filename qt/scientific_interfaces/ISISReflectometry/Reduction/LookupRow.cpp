@@ -7,6 +7,10 @@
 #include "LookupRow.h"
 #include "GUI/Preview/ROIType.h"
 
+namespace {
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+}
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
@@ -59,8 +63,24 @@ void LookupRow::setProcessingInstructions(ROIType regionType, ProcessingInstruct
   throw std::invalid_argument("Unexpected ROIType provided");
 }
 
+bool LookupRow::hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const {
+  if (!m_theta.is_initialized() && !lookupRow.m_theta.is_initialized()) {
+    return m_titleMatcher == lookupRow.m_titleMatcher;
+  }
+  if (m_theta.is_initialized() && lookupRow.m_theta.is_initialized()) {
+    return std::abs(*m_theta - *lookupRow.m_theta) <= (tolerance + 2.0 * EPSILON) &&
+           m_titleMatcher == lookupRow.m_titleMatcher;
+  }
+  return false;
+}
+
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
-  return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher);
+  return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher &&
+          lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
+          lhs.m_scaleFactor == rhs.m_scaleFactor &&
+          lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
+          lhs.m_processingInstructions == rhs.m_processingInstructions &&
+          lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions);
 }
 
 bool operator!=(LookupRow const &lhs, LookupRow const &rhs) { return !(lhs == rhs); }
