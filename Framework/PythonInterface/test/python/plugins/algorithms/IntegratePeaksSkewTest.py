@@ -160,36 +160,29 @@ class IntegratePeaksSkewTest(unittest.TestCase):
 
     def test_integration_with_non_square_window_nrows_ncols(self):
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 NRows=2, NCols=1, IntegrateIfOnEdge=True, UseNearestPeak=True,
+                                 NRows=2, NCols=1, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
                                  UpdatePeakPosition=False, OutputWorkspace='out8')
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 10.84209, delta=1e-4)
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 NRows=1, NCols=2, IntegrateIfOnEdge=True, UseNearestPeak=True, NPixMin=1,
-                                 UpdatePeakPosition=False, OutputWorkspace='out8')
+                                 NRows=1, NCols=2, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
+                                 NPixMin=1, UpdatePeakPosition=False, OutputWorkspace='out8')
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 5.46125, delta=1e-4)  # only one pixel in peak
 
-    def test_nrows_edge_ncols_edge(self):
+    def test_nrows_edge_ncols_edge_in_array_converter(self):
         array_converter = InstrumentArrayConverter(self.ws)
         ipk = 0
         pk = self.peaks.getPeak(ipk)
         detid = self.peaks.column('DetID')[ipk]
         bank = self.peaks.column('BankName')[ipk]
-
-        ncols_edge = 1
         for nrows_edge in range(1, 3):
-            *_, det_edges, dets = array_converter.get_peak_region_array(pk, detid, bank, drows=3, dcols=3,
-                                                                        nrows_edge=nrows_edge, ncols_edge=ncols_edge)
-            self.assertTrue(det_edges[:nrows_edge, :].all())
-            self.assertTrue(det_edges[-nrows_edge:, :].all())
-            self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
-        nrows_edge = 1
-        for ncols_edge in range(1, 3):
-            *_, det_edges, dets = array_converter.get_peak_region_array(pk, detid, bank, drows=3, dcols=3,
-                                                                        nrows_edge=nrows_edge, ncols_edge=ncols_edge)
-            self.assertTrue(det_edges[:, :ncols_edge].all())
-            self.assertTrue(det_edges[:, -ncols_edge:].all())
-            self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
+            for ncols_edge in range(1, 3):
+                *_, det_edges, dets = array_converter.get_peak_region_array(pk, detid, bank, drows=3, dcols=3,
+                                                                            nrows_edge=nrows_edge,
+                                                                            ncols_edge=ncols_edge)
+                self.assertTrue(det_edges[:nrows_edge, :].all())
+                self.assertTrue(det_edges[-nrows_edge:, :].all())
+                self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
         self.assertTrue((dets == arange(25, 50).reshape(5, 5).T).all())
 
 

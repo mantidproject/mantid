@@ -500,6 +500,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                                                               GridDetector)) and ncols_edge > 1:
             issues["NColsEdge"] = ("If an instrument banks are not instances of RectangularDetector or GridDetector "
                                    "then NColsEdge must equal 1.")
+        # check peak size limits are consistent with window size
+        drows = self.getProperty("NRows").value
+        dcols = self.getProperty("NCols").value
+        nrow_max = self.getProperty("NRowMax").value
+        ncol_max = self.getProperty("NColMax").value
+        if nrow_max > 2 * drows + 1:
+            issues["NRowMax"] = "NRowMax exceeds window size."
+        if ncol_max > 2 * dcols + 1:
+            issues["NColMax"] = "NColMax exceeds window size."
+        npk_min = self.getProperty("NPixMin").value
+        if npk_min > (2 * drows + 1) * (2 * dcols + 1):
+            issues["NPixMin"] = "NPixMin exceeds number of pixels in the window."
         return issues
 
     def PyExec(self):
