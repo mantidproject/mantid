@@ -20,10 +20,10 @@ function trim_conda() {
   cp "$bundle_conda_prefix"/bin_tmp/python* "$bundle_conda_prefix"/bin/
   cp "$bundle_conda_prefix"/bin_tmp/Mantid.properties "$bundle_conda_prefix"/bin/
   cp "$bundle_conda_prefix"/bin_tmp/mantid-scripts.pth "$bundle_conda_prefix"/bin/
-  if [[ $OSTYPE == 'darwin'* ]]; then
-    cp "$bundle_conda_prefix"/bin_tmp/MantidWorkbench "$bundle_conda_prefix"/bin/
-  elif [[ $OSTYPE == 'linux'*  ]]; then
-    cp "$bundle_conda_prefix"/bin_tmp/workbench "$bundle_conda_prefix"/bin/
+  cp "$bundle_conda_prefix"/bin_tmp/workbench "$bundle_conda_prefix"/bin/
+  if [ -f "$bundle_conda_prefix"/bin_tmp/mantidworkbench ]; then
+    # keep handwritten startup script used on Linux and created by cmake if it exists.
+    # todo: Can it be amalgamated with osx/BundleExecutable somehow?
     cp "$bundle_conda_prefix"/bin_tmp/mantidworkbench "$bundle_conda_prefix"/bin/
   fi
   # Heavily cut down share
