@@ -52,7 +52,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="output_directory", int_name="output_dir"),
     ParamMapEntry(ext_name="perform_attenuation", int_name="perform_atten"),
     ParamMapEntry(ext_name="raw_data_tof_cropping", int_name="raw_data_crop_vals"),
-    ParamMapEntry(ext_name="run_in_cycle", int_name="run_in_range"),
+    ParamMapEntry(ext_name="first_cycle_run_no", int_name="run_in_range"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
     ParamMapEntry(ext_name="sample_empty", int_name="sample_empty", optional=True),
     ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale"),

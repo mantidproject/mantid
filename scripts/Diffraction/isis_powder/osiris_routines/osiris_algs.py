@@ -10,6 +10,7 @@ from isis_powder.routines.run_details import create_run_details_object, get_cal_
 import numpy as np
 from mantid.simpleapi import NormaliseByCurrent, CropWorkspace, RebinToWorkspace, Minus, Divide, DiffractionFocussing, \
     ConvertUnits, MergeRuns, GroupWorkspaces
+from mantid.api import AnalysisDataService
 
 
 d_range_with_time = {'drange1': [11700, 51700],
@@ -45,6 +46,8 @@ class WORKSPACE_SUFFIX(object):
     pdf = '_pdf'
     merged = '_merged'
     focussed = '_focussed'
+    grouped = '_grouped'
+    dspace = '_dspace'
 
 
 def get_osiris_d_range(run_ws):
@@ -60,6 +63,7 @@ class DrangeData(object):
         self._empty_subtracted = []
         self._vanadium_corrected = []
         self._vanadium = ''
+        self._calibrated_vanadium = ''
         self._empty = ''
 
     def get_drange(self):
@@ -97,27 +101,41 @@ class DrangeData(object):
             Minus(LHSWorkspace=sample, RHSWorkspace=empty_rb,
                   OutputWorkspace=sample + WORKSPACE_SUFFIX.container_corrected)
             corrected.append(sample + WORKSPACE_SUFFIX.container_corrected)
-        self._empty_subtracted = corrected
-        return self._empty_subtracted
+        return corrected
 
-    def van_correction(self, calibration_file):
+    def calibrate_vanadium(self, calibration_file=''):
+        return self.calibrate_workspace(self._vanadium, calibration_file)
+
+    def van_correction(self, calibration_file=''):
         van_calib = self.calibrate_workspace(self._vanadium, calibration_file)
+
         samples = self._empty_subtracted if self._empty_subtracted else self._sample
         corrected = []
         for sample in samples:
             sample_calib = self.calibrate_workspace(sample, calibration_file)
             van_calib = RebinToWorkspace(WorkspaceToRebin=van_calib, WorkspaceToMatch=sample_calib,
                                          OutputWorkspace='van_rb', StoreInADS=False)
+
+            if WORKSPACE_SUFFIX.container_corrected in sample:
+                samplename = sample.replace(WORKSPACE_SUFFIX.container_corrected, '')
+            else:
+                samplename = sample
+
             Divide(LHSWorkspace=sample_calib, RHSWorkspace=van_calib,
-                   OutputWorkspace=sample+WORKSPACE_SUFFIX.vanadium_corrected)
-            corrected.append(sample+WORKSPACE_SUFFIX.vanadium_corrected)
+                   OutputWorkspace=samplename+WORKSPACE_SUFFIX.vanadium_corrected)
+            corrected.append(samplename+WORKSPACE_SUFFIX.vanadium_corrected)
         self._vanadium_corrected = corrected
         return self._vanadium_corrected
 
-    def calibrate_workspace(self, ws, calibration_file):
+    def calibrate_workspace(self, ws, calibration_file=''):
         calibrate_ws = NormaliseByCurrent(InputWorkspace=ws,
                                           OutputWorkspace="normalised",
                                           StoreInADS=False)
+        if calibration_file:
+            calibrate_ws = DiffractionFocussing(InputWorkspace=calibrate_ws,
+                                                GroupingFileName=calibration_file,
+                                                OutputWorkspace='focussed',
+                                                StoreInADS=False)
 
         calibrate_ws = ConvertUnits(InputWorkspace=calibrate_ws,
                                     Target='dSpacing',
@@ -126,18 +144,37 @@ class DrangeData(object):
                                     OutputWorkspace="aligned",
                                     StoreInADS=False)
 
-        calibrate_ws = DiffractionFocussing(InputWorkspace=calibrate_ws,
-                                            GroupingFileName=calibration_file,
-                                            OutputWorkspace='focussed',
-                                            StoreInADS=False)
+        calibrate_ws = CropWorkspace(InputWorkspace=calibrate_ws,
+                                     XMin=d_range_alice[self._drange][0],
+                                     XMax=d_range_alice[self._drange][1],
+                                     OutputWorkspace='calibrated',
+                                     StoreInADS=False)
+        return calibrate_ws
 
-        return CropWorkspace(InputWorkspace=calibrate_ws,
-                             XMin=d_range_alice[self._drange][0],
-                             XMax=d_range_alice[self._drange][1],
-                             OutputWorkspace="calibrated_sample",
-                             StoreInADS=False)
+    def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=''):
+        processed = []
+        for sample in self._sample:
+            outputname = sample+WORKSPACE_SUFFIX.pdf
+            if subtract_empty:
+                sample = self.subtract_container_from_sample(sample)
+            sample = self.calibrate_workspace(sample, focus_calibration_file)
+            if vanadium_correct:
+                van = self.calibrate_vanadium(focus_calibration_file)
+                calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=sample,
+                                             OutputWorkspace='van_rb', StoreInADS=False)
+                sample = Divide(LHSWorkspace=sample, RHSWorkspace=calib_van,
+                                OutputWorkspace=outputname)
+            AnalysisDataService.addOrReplace(outputname, sample)
+            processed.append(sample)
+        return processed
 
-    def run_diffraction_focussing(self, calibration_file):
+    def subtract_container_from_sample(self, sample):
+        empty_rb = RebinToWorkspace(WorkspaceToRebin=self._empty, WorkspaceToMatch=sample,
+                                    OutputWorkspace='empty_rb', StoreInADS=False)
+        return Minus(LHSWorkspace=sample, RHSWorkspace=empty_rb,
+                     OutputWorkspace=sample + WORKSPACE_SUFFIX.container_corrected, StoreInADS=False)
+
+    def run_diffraction_focussing(self, calibration_file=''):
         if self._vanadium_corrected:
             samples = self._vanadium_corrected
         else:
@@ -197,26 +234,25 @@ def run_empty_subtraction(run_number, drange_sets):
     empty_subtracted_samples = []
     for drange in drange_sets:
         empty_subtracted_samples.extend(drange_sets[drange].subtract_container())
-    GroupWorkspaces(InputWorkspaces=empty_subtracted_samples,
-                    outputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.container_corrected)
+    group_workspaces(empty_subtracted_samples, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.container_corrected)
     return empty_subtracted_samples
 
 
-def run_vanadium_correction(run_number, drange_sets, calfile):
+def run_vanadium_correction(run_number, drange_sets, calfile=''):
     van_corrected_samples = []
     for drange in drange_sets:
         van_corrected_samples.extend(drange_sets[drange].van_correction(calfile))
-    GroupWorkspaces(InputWorkspaces=van_corrected_samples,
-                    outputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.vanadium_corrected)
+    group_workspaces(van_corrected_samples, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.vanadium_corrected)
     return van_corrected_samples
 
 
-def run_diffraction_focussing(run_number, drange_sets, calfile):
+def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
     focussed = []
     for drange in drange_sets:
-        focussed.extend(drange_sets[drange].run_diffraction_focussing(calfile))
-    GroupWorkspaces(InputWorkspaces=focussed,
-                    outputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.focussed)
+        processed = drange_sets[drange].process_workspace(subtract_empty=subtract_empty, vanadium_correct=van_norm,
+                                                          focus_calibration_file=calfile)
+        focussed.extend(processed)
+    group_workspaces(focussed, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.focussed)
     return focussed
 
 
@@ -224,6 +260,10 @@ def merge_dspacing_runs(run_number, drange_sets, ws_group):
     merged = MergeRuns(InputWorkspaces=ws_group,
                        OutputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.merged)
     return correct_drange_overlap(merged, drange_sets)
+
+
+def group_workspaces(ws_list, output):
+    GroupWorkspaces(InputWorkspaces=ws_list, outputWorkspace=output)
 
 
 def _assign_drange_vanadium(drange, mapping):
@@ -238,3 +278,21 @@ def _get_run_numbers_for_key(current_mode_run_numbers, key):
     err_message = "this must be under the relevant Rietveld or PDF mode."
     return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key,
                                                 append_to_error_message=err_message)
+
+
+def load_raw(run_number_string, drange_sets, group, inst, file_ext):
+    """
+    :param run_number_string: string of run numbers for the sample
+    :param inst: The OSIRIS instrument object
+    """
+    input_ws_list = common.load_raw_files(run_number_string=run_number_string, instrument=inst, file_ext=file_ext)
+    for ws in input_ws_list:
+        drange = get_osiris_d_range(ws)
+        if group == 'sample':
+            drange_sets[drange].add_sample(ws.name())
+        elif group == 'vanadium':
+            drange_sets[drange].set_vanadium(ws.name())
+        elif group == 'empty':
+            drange_sets[drange].set_empty(ws.name())
+    group_workspaces(input_ws_list, 'OSIRIS' + run_number_string + WORKSPACE_SUFFIX.grouped)
+    return input_ws_list

@@ -52,32 +52,35 @@ class Osiris(AbstractInst):
         osiris_algs.get_empty_runs(self._drange_sets, self._inst_settings)
         return input_ws_list
 
-    def run_vanadium_correction(self, **kwargs):
+    def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
+        osiris_algs.load_raw(self._inst_settings.run_number, self._drange_sets,
+                             'sample', self, run_details.file_extension)
+        osiris_algs.load_raw(run_details.vanadium_run_numbers, self._drange_sets,
+                             'vanadium', self, run_details.file_extension)
+        osiris_algs.load_raw(run_details.empty_inst_runs, self._drange_sets,
+                             'empty', self, run_details.file_extension)
 
-        sample_runs = self._load_runs(sample_runs=self._inst_settings.run_number)
-        GroupWorkspaces(InputWorkspaces=sample_runs,
-                        outputWorkspace='OSIRIS' + self._inst_settings.run_number + '_grouped')
-        van_runs = self._load_runs(van_runs=run_details.vanadium_run_numbers)
-        GroupWorkspaces(InputWorkspaces=van_runs,
-                        outputWorkspace='OSIRIS' + run_details.vanadium_run_numbers + '_grouped')
-        empty_runs = self._load_runs(empty_runs=run_details.empty_inst_runs)
-        GroupWorkspaces(InputWorkspaces=empty_runs,
-                        outputWorkspace='OSIRIS' + run_details.empty_inst_runs + '_grouped')
-
-        calfile = run_details.grouping_file_path
-        osiris_algs.run_empty_subtraction(self._inst_settings.run_number, self._drange_sets)
-        van_correction = osiris_algs.run_vanadium_correction(self._inst_settings.run_number, self._drange_sets, calfile)
-        if self._inst_settings.merge_drange:
-            osiris_algs.merge_dspacing_runs(self._inst_settings.run_number, self._drange_sets, van_correction)
-        return van_correction
+        vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
+                                           do_absorb_corrections=self._inst_settings.absorb_corrections)
+        return vanadium_d
 
     def run_diffraction_focusing(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
+        osiris_algs.load_raw(self._inst_settings.run_number, self._drange_sets,
+                             'sample', self, run_details.file_extension)
+        osiris_algs.load_raw(run_details.vanadium_run_numbers, self._drange_sets,
+                             'vanadium', self, run_details.file_extension)
+        osiris_algs.load_raw(run_details.empty_inst_runs, self._drange_sets,
+                             'empty', self, run_details.file_extension)
+
         focussed_runs = osiris_algs.run_diffraction_focussing(self._inst_settings.run_number,
-                                                              self._drange_sets, run_details.grouping_file_path)
+                                                              self._drange_sets,
+                                                              run_details.grouping_file_path,
+                                                              van_norm=self._inst_settings.van_norm,
+                                                              subtract_empty=self._inst_settings.subtract_empty_inst)
         if self._inst_settings.merge_drange:
             osiris_algs.merge_dspacing_runs(self._inst_settings.run_number, self._drange_sets, focussed_runs)
 
