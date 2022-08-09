@@ -276,6 +276,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             FractionOfDx=qFraction,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
+        self._cleanup.cleanupLater(groupedWSName)
         return groupedWS
 
     def _inputWS(self):

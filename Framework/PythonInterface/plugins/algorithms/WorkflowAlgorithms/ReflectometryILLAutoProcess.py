@@ -812,10 +812,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         foregroundName, directForegroundName = self.sum_foreground(reflectedBeamName, foregroundName, sum_type,
                                                                    angle_index, directForegroundName)
         theta_ws_name_cropped = ''
+        theta_ws_name = reflectedBeamName[:reflectedBeamName.find('_')] + '_new_twoTheta'
         if self.getProperty('CorrectGravity').value:
-            theta_ws_name_cropped = self._crop_theta_correction(foregroundName,
-                                                                reflectedBeamName[:reflectedBeamName.find('_')]+'_new_twoTheta',
-                                                                angle_index)
+            theta_ws_name_cropped = self._crop_theta_correction(foregroundName, theta_ws_name, angle_index)
         final_two_theta = mtd[foregroundName].spectrumInfo().twoTheta(0) * 180/math.pi
         self.log().accumulate('Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.
                               format(final_two_theta))
@@ -824,6 +823,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self.log().accumulate('Sample: {0}\n'.format('Bent' if isBent == 1 else 'Flat'))
         self._autoCleanup.cleanupLater(reflectedBeamName)
         self._autoCleanup.cleanupLater(foregroundName)
+        self._autoCleanup.cleanupLater(theta_ws_name)
+        self._autoCleanup.cleanupLater(theta_ws_name_cropped)
         return foregroundName, directForegroundName, theta_ws_name_cropped
 
     def _crop_theta_correction(self, reflected_beam_name: str, theta_ws_name: str, angle_index: str) -> str:
@@ -835,7 +836,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             angle_index (int): index of the current angle position
         """
         if theta_ws_name not in mtd:
-            return
+            return ""
         theta_ws_name_cropped = '{}_cropped'.format(theta_ws_name)
         wavelengthRange = [float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
                            float(self.get_value(PropertyNames.WAVELENGTH_UPPER, angle_index))]

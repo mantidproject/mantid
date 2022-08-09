@@ -841,13 +841,14 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         newdelayangle = delay_angle - poffoff / 2.
         newdelay = delay + ((delay_angle - newdelayangle) / 360.) * period
-        newlambda = 1e10 * (
-                    planckperkg * (xAxis * channel_width + newdelay) / ref_total_tofd)
-        correction = np.abs(newTheta / theta0)
-        # the y axis needs to be 1 value shorter than the X axis so the workspace is a histogram, which is needed for later rebinning
-        correction = 0.5*(correction[1:] + correction[:-1])
-        CreateWorkspace(DataX=newlambda, DataY=correction, OutputWorkspace=new_twoTheta_ws, UnitX='Wavelength',
-                        ParentWorkspace=ws)
+        newlambda = 1e10 * (planckperkg * (xAxis * channel_width + newdelay) / ref_total_tofd)
+        if self.getPropertyValue('Measurement') == 'ReflectedBeam':
+            correction = np.abs(newTheta / theta0)
+            # the y axis needs to be 1 value shorter than the X axis so the workspace is a histogram,
+            # which is needed for rebinning at a later stage
+            correction = 0.5*(correction[1:] + correction[:-1])
+            CreateWorkspace(DataX=newlambda, DataY=correction, OutputWorkspace=new_twoTheta_ws, UnitX='Wavelength',
+                            ParentWorkspace=ws)
         for spec_no in range(ws.getNumberHistograms()):
             ws.setX(spec_no, newlambda)
         return ws
