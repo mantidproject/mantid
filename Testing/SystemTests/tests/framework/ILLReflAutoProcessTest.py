@@ -178,3 +178,64 @@ class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
             WavelengthUpperBound=wavelengthUpper,
             DeltaQFractionBinning=0.5
         )
+
+
+class FigaroCycle212GravityRefUp(systemtesting.MantidSystemTest):
+    """ Tests a reduction of C19H16O4 sample at 2 angles with the data from cycle 212.
+        Uses incoherent summation with detector angle option, and gravity correction with a reflection reference up.
+    """
+
+    def __init__(self):
+        super(FigaroCycle212GravityRefUp, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'FIGARO'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/FIGARO/')
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-4
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument', 'Sample']
+        return ['Cell_d2O', 'Figaro_Cell_d2O.nxs']
+
+    def runTest(self):
+        name = 'Cell_d2O'
+        runs = '743465,743466'
+        direct_run = '732252+732254,732255'
+        ReflectometryILLAutoProcess(
+            Run=runs,
+            DirectRun=direct_run,
+            OutputWorkspace=name,
+            AngleOption='DetectorAngle',
+            SummationType='Incoherent',
+            WavelengthLowerBound=[3.5, 2.5],
+            WavelengthUpperBound=[20, 19],
+            DeltaQFractionBinning=0.5,
+            GlobalScaleFactor=0.0484221,
+            Cleanup='Cleanup ON',
+            ReflFitStartWorkspaceIndex=25,
+            ReflFitEndWorkspaceIndex=230,
+            DirectFitStartWorkspaceIndex=25,
+            DirectFitEndWorkspaceIndex=230,
+            DirectLowAngleFrgHalfWidth=[3, 7],
+            DirectHighAngleFrgHalfWidth=[3, 7],
+            ReflLowAngleFrgHalfWidth=[3, 7],
+            ReflHighAngleFrgHalfWidth=[3, 7],
+            DirectLowAngleBkgOffset=5,
+            DirectLowAngleBkgWidth=5,
+            DirectHighAngleBkgOffset=5,
+            DirectHighAngleBkgWidth=5,
+            ReflLowAngleBkgOffset=5,
+            ReflLowAngleBkgWidth=5,
+            ReflHighAngleBkgOffset=5,
+            ReflHighAngleBkgWidth=5,
+            ReflFlatBackground='Background Average',
+            DirectFlatBackground='Background Average',
+            CorrectGravity=True
+        )
