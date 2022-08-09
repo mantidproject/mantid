@@ -16,7 +16,8 @@ namespace Mantid::API {
 
 using tokenizer = Mantid::Kernel::StringTokenizer;
 
-const std::string DEFAULT_OPS_STR[] = {";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
+const std::vector<std::string> Expression::DEFAULT_OPS_STR = {
+    ";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
 
 const std::string EMPTY_EXPRESSION_NAME = "EMPTY";
 namespace {
@@ -72,9 +73,7 @@ Expression::Expression() {
   m_operators.reset(new Operators());
   // Define binary operators. Put them in the reverse precedence order (from
   // lower to higher prec.)
-  std::vector<std::string> ops(DEFAULT_OPS_STR, DEFAULT_OPS_STR + 8);
-
-  add_operators(ops);
+  add_operators(Expression::DEFAULT_OPS_STR);
 
   // Define unary operators
   std::unordered_set<std::string> unary;

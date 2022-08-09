@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -94,7 +95,7 @@ void Fit::initConcrete() {
 std::map<std::string, std::string> Fit::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  const auto possibleOperators = {";", ",", "=", "== != > < <= >=", "&& || ^^", "+ -", "* /", "^"};
+  const auto possibleOperators = Mantid::API::Expression::DEFAULT_OPS_STR;
   std::string constraints = getPropertyValue("Constraints");
   if (constraints.size() > 0) {
     auto operatorPresent = false;
