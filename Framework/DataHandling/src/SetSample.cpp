@@ -31,7 +31,6 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/range/algorithm/transform.hpp>
 
 namespace Mantid::DataHandling {
 

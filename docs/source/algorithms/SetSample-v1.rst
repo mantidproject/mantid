@@ -41,8 +41,8 @@ expected along with additional keys specifying the values (all values are assume
 be in centimeters):
 
 - ``FlatPlate``: Width, Height, Thick, Center, Angle
-- ``Cylinder``: Height, Radius, Center
-- ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center
+- ``Cylinder``: Height, Radius, Center, Axis
+- ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center, Axis
 - ``FlatPlateHolder``: Width, Height, Thick, Center, Angle, FrontThick, BackThick. This is a CSG union of 2 FlatPlates tightly wrapping a FlatPlate sample. To be used for the ContainerGeometry.
 - ``HollowCylinderHolder``: Height, InnerRadius, InnerOuterRadius, OuterInnerRadius, OuterRadius, Center. This is a CSG union of 2 HollowCylinders tightly wrapping a HollowCylinder sample. To be used for the ContainerGeometry.
 - ``Sphere``: Center, Radius
