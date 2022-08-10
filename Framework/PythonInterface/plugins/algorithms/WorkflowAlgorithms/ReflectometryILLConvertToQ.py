@@ -67,7 +67,6 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         if not self.getProperty('ThetaCorrection').isDefault:
             thetaWS = self.getProperty('ThetaCorrection').value
             thetaWSinQ = CloneWorkspace(InputWorkspace=thetaWS, OutputWorkspace='{}_in_Q'.format(thetaWS.name()))
-            # theta0 = thetaWSinQ.getRun().getLogData('theta_zero').value
             theta0 = ws.spectrumInfo().twoTheta(0) / 2.0
             thetaWSinQ = ConvertAxisByFormula(
                 InputWorkspace=thetaWSinQ,
