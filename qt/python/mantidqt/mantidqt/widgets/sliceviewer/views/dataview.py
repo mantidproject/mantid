@@ -553,7 +553,7 @@ class SliceViewerDataView(QWidget):
             return scale
 
         if self.conf.has(SCALENORM):
-            scale = self.conf.get(SCALENORM)
+            scale = self.conf.get(SCALENORM, type=str)
 
         if scale == 'Power' and self.conf.has(POWERSCALE):
             exponent = self.conf.get(POWERSCALE)
