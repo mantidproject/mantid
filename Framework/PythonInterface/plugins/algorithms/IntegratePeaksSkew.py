@@ -31,7 +31,9 @@ class PEAK_MASK_STATUS(Enum):
 class InstrumentArrayConverter:
     """
     This class is used to convert the spectra in the region of a peak to a 3D numpy array of signal and errors
-    Note that it assumes that banks are not adjacent - i.e. it truncates the data to the edge of the bank
+    Note that for RectangularDetectors and GridDetectors it assumes that banks are not adjacent
+    - i.e. it truncates the data to the edge of the bank.  For general ComponentArray type detector banks it does
+     search for banks with adjacent column-components (on WISH this corresponds to tubes).
     """
 
     def __init__(self, ws):
@@ -70,10 +72,10 @@ class InstrumentArrayConverter:
                                                                                       ndepth=ndepth - 1)
         return nearest_child
 
-    def _find_nearest_adjacent_col_component(self, dcol, col, ncols, bank_name, col_prefix, col_str, delim):
+    def _find_nearest_adjacent_col_component(self, dcol, col, ncols, bank_name, col_prefix, col_str, delim, ncols_edge):
         next_col_prefix, next_col_str = None, None
-        isLHS = np.any(dcol + col < 1)
-        isRHS = np.any(dcol + col > ncols)
+        isLHS = np.any(dcol + col <= ncols_edge)
+        isRHS = np.any(dcol + col >= ncols - ncols_edge + 1)
         if isLHS or isRHS:
             # get tube/col at each end of detector to get tube separation
             detLHS = self.inst.getComponentByName(
@@ -115,18 +117,18 @@ class InstrumentArrayConverter:
         next_col_prefix, next_col_str, isLHS, isRHS = self._find_nearest_adjacent_col_component(dcol, col, ncols,
                                                                                                 bank_name,
                                                                                                 col_prefix, col_str,
-                                                                                                delim)
+                                                                                                delim, ncols_edge)
 
         # loop over row/cols and get detids
         detids = np.zeros(dcol.shape, int)
         for icol in range(dcol.shape[1]):
             new_col = col + dcol[0, icol]
             col_comp_name = None  # None indicates no column component (tube) found in this or adjacent bank
-            if new_col > 0 and new_col <= ncols:  # indexing starts from 1
+            if 0 < new_col <= ncols:  # indexing starts from 1
                 # column comp in this bank
                 col_comp_name = delim.join([bank_name, f'{col_prefix}{new_col:0{len(col_str)}d}'])
             elif next_col_str is not None:
-                # adjacent colulmn component found in another bank
+                # adjacent column component found in another bank
                 new_col = int(next_col_str) + new_col
                 if isRHS:
                     new_col -= (ncols + 1)
@@ -144,12 +146,15 @@ class InstrumentArrayConverter:
         detids = detids[:, icols_keep]
         dcol = dcol[:, icols_keep]
         drow = drow[:, icols_keep]
-        # detector edges - note this only works for ncols_edge = 1
         col_edges = np.zeros(detids.shape, dtype=bool)
-        if isLHS and dcol[0, 0] == 1 - col:
-            col_edges[:, 0] = True
-        elif isRHS and dcol[0, -1] == ncols - col:
-            col_edges[:, -1] = True
+        if next_col_str is None:
+            # no adjacent bank found (or window not within ncols_edge of detector edge)
+            if isLHS and dcol[0, 0] <= ncols_edge - col:
+                # window within ncols_edge of detector edge on LHS of the bank with no adjacent tube in another
+                col_edges = dcol <= ncols_edge - col
+            elif isRHS and dcol[0, -1] > ncols - col - ncols_edge:
+                # window within ncols_edge of detector edge on RHS of the bank with no adjacent tube in another
+                col_edges = dcol > ncols - col - ncols_edge
         row_edges = np.logical_or(drow <= ndet_per_spec * nrows_edge - row,
                                   drow > nrows - row - ndet_per_spec * nrows_edge)
         detector_edges = np.logical_or(row_edges, col_edges)
@@ -491,15 +496,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        # check NColsEdge=1 for instruments with ComponentArray detector banks
-        ws = self.getProperty("InputWorkspace").value
-        inst = ws.getInstrument()
-        ncols_edge = self.getProperty("NColsEdge").value
-        if not any(inst[icomp] for icomp in range(inst.nelements()) if
-                   isinstance(inst[icomp], RectangularDetector) or isinstance(inst[icomp],
-                                                                              GridDetector)) and ncols_edge > 1:
-            issues["NColsEdge"] = ("If an instrument banks are not instances of RectangularDetector or GridDetector "
-                                   "then NColsEdge must equal 1.")
         # check peak size limits are consistent with window size
         drows = self.getProperty("NRows").value
         dcols = self.getProperty("NCols").value
@@ -569,7 +565,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # copy pk to output peak workspace
             pk_ws_int.addPeak(pk)
             pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
-            # get data array in window around peak region (truncated at edge pf detector)
+            # get data array in window around peak region
             xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detids[ipk],
                                                                                                     bank_names[ipk],
                                                                                                     drows, dcols,
