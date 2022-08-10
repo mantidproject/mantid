@@ -36,12 +36,15 @@ class GSAS2Presenter(object):
         refine_params = self.view.get_refinement_parameters()
         number_output_histograms = self.model.run_model(load_params, refine_params, project_name,
                                                         self.rb_num, self.get_limits_if_same_load_parameters())
-        self.plot_result(1)
-        self.view.set_number_histograms(number_output_histograms)
-        self.save_latest_load_parameters()
+        if number_output_histograms:
+            self.plot_result(1)
+            self.view.set_number_histograms(number_output_histograms)
+            self.save_latest_load_parameters()
 
-    def save_latest_load_parameters(self):
-        self.latest_load_parameters = self.view.get_load_parameters()
+    def on_plot_index_changed(self, new_plot_index):
+        if new_plot_index:
+            if int(new_plot_index) != int(self.current_plot_index):
+                self.plot_result(new_plot_index)
 
     def get_limits_if_same_load_parameters(self):
         new_load_params = self.view.get_load_parameters()
@@ -55,10 +58,9 @@ class GSAS2Presenter(object):
                 return sorted(current_limits)
         return None
 
-    def on_plot_index_changed(self, new_plot_index):
-        if new_plot_index:
-            if int(new_plot_index) != int(self.current_plot_index):
-                self.plot_result(new_plot_index)
+    # =================
+    # Component Setters
+    # =================
 
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
@@ -72,6 +74,9 @@ class GSAS2Presenter(object):
         x_minimum = self.model.x_min[int(current_histogram_index)-1]
         x_maximum = self.model.x_max[int(current_histogram_index)-1]
         self.view.set_x_limits(x_minimum, x_maximum)
+
+    def save_latest_load_parameters(self):
+        self.latest_load_parameters = self.view.get_load_parameters()
 
     # ========
     # Plotting

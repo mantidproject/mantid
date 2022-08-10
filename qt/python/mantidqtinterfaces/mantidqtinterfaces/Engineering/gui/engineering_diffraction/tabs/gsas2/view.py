@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
-from qtpy.QtGui import QRegExpValidator  # , QDoubleValidator
+from qtpy.QtGui import QRegExpValidator
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QSizePolicy
 from os import path
@@ -15,7 +15,6 @@ from matplotlib.figure import Figure
 import matplotlib.lines as lines
 from mantidqt.MPLwidgets import FigureCanvas
 
-# from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.plot_toolbar import GSAS2PlotToolbar
 
@@ -30,10 +29,6 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     def __init__(self, parent=None, instrument="ENGINX"):
         super(GSAS2View, self).__init__(parent)
         self.setupUi(self)
-        none_one_many_int_float_comma_separated = \
-            QRegExpValidator(QtCore.QRegExp(r"^(?:\d+(?:\.\d*)?|\.\d+)(?:,(?:\d+(?:\.\d*)?|\.\d+))*$"),
-                             self.override_unitcell_length)
-        self.override_unitcell_length.setValidator(none_one_many_int_float_comma_separated)
 
         self.instrument_group_file_finder.setLabelText("Instrument Group")
         self.instrument_group_file_finder.isForRunFiles(False)
@@ -50,15 +45,24 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.focused_data_file_finder.setFileExtensions([".gss", ".gsa"])
         self.focused_data_file_finder.allowMultipleFiles(True)
 
-        # Temp to make dev testing quicker
+        self.mark_project_name_invalid_when_empty()
+        self.project_name_line_edit.textChanged.connect(self.mark_project_name_invalid_when_empty)
+        self.mark_checkboxes_invalid_when_empty()
+        self.refine_microstrain_checkbox.stateChanged.connect(self.mark_checkboxes_invalid_when_empty)
+        self.refine_sigma_one_checkbox.stateChanged.connect(self.mark_checkboxes_invalid_when_empty)
+        self.refine_gamma_y_checkbox.stateChanged.connect(self.mark_checkboxes_invalid_when_empty)
+        self.x_min_line_edit.editingFinished.connect(self.set_min_line_from_line_edit)
+        self.x_max_line_edit.editingFinished.connect(self.set_max_line_from_line_edit)
 
-        self.set_default_files(["/home/danielmurphy/Desktop/GSASMantiddata_030322/ENGINX_305738_bank_1.prm"],
-                               self.instrument_group_file_finder)
-        self.set_default_files(["/home/danielmurphy/Desktop/GSASMantiddata_030322/FE_GAMMA.cif"],
-                               self.phase_file_finder)
-        self.set_default_files(["/home/danielmurphy/Desktop/GSASMantiddata_030322/Save_gss_305761_307521_bank_1_bgsub"
-                                ".gsa"],
-                               self.focused_data_file_finder)
+        none_one_many_int_float_comma_separated = \
+            QRegExpValidator(QtCore.QRegExp(r"^(?:\d+(?:\.\d*)?|\.\d+)(?:,(?:\d+(?:\.\d*)?|\.\d+))*$"),
+                             self.override_unitcell_length)
+        self.override_unitcell_length.setValidator(none_one_many_int_float_comma_separated)
+        valid_file_name = QRegExpValidator(QtCore.QRegExp(r'^[^<>:;,"@£$%&\'^!?"*|\\\/]+$'),
+                                           self.project_name_line_edit)
+        self.project_name_line_edit.setValidator(valid_file_name)
+        self.x_min_line_edit.setValidator(LineEditDoubleValidator(self.x_min_line_edit, 0))
+        self.x_max_line_edit.setValidator(LineEditDoubleValidator(self.x_max_line_edit, 1))
 
         # Plotting
         self.figure = None
@@ -82,11 +86,6 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.setup_figure()
         self.setup_toolbar()
 
-        self.x_min_line_edit.editingFinished.connect(self.set_min_line_from_line_edit)
-        self.x_max_line_edit.editingFinished.connect(self.set_max_line_from_line_edit)
-        self.x_min_line_edit.setValidator(LineEditDoubleValidator(self.x_min_line_edit, 0))
-        self.x_max_line_edit.setValidator(LineEditDoubleValidator(self.x_max_line_edit, 1))
-
     # ===============
     # Slot Connectors
     # ===============
@@ -94,10 +93,9 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
     def set_refine_clicked(self, slot):
         self.refine_button.clicked.connect(slot)
 
-    def set_instrument_override(self, instrument):
-        # self.finder_focus.setInstrumentOverride(instrument)
-        # self.finder_vanadium.setInstrumentOverride(instrument)
-        pass
+    # =================
+    # Component Setters
+    # =================
 
     def set_default_gss_files(self, filepaths):
         self.set_default_files(filepaths, self.focused_data_file_finder)
@@ -122,9 +120,24 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.number_output_histograms_combobox.addItems(histogram_indices_items)
         self.number_output_histograms_combobox.setCurrentIndex(0)
 
-    # =================
-    # Component Setters
-    # =================
+    def mark_project_name_invalid_when_empty(self):
+        new_value = self.project_name_line_edit.text().strip(" \t")
+        if new_value == "":
+            self.project_name_invalid.show()
+            self.project_name_invalid.setToolTip("No Project Name specified.")
+        else:
+            self.project_name_invalid.hide()
+            self.project_name_invalid.setToolTip("")
+
+    def mark_checkboxes_invalid_when_empty(self):
+        if self.refine_microstrain_checkbox.isChecked() and self.refine_sigma_one_checkbox.isChecked() and \
+                self.refine_gamma_y_checkbox.isChecked():
+            self.checkboxes_invalid.show()
+            self.checkboxes_invalid.setToolTip("Refining the Microstrain with Sigma-1 and Gamma(Y)"
+                                               " may not be advisable.")
+        else:
+            self.checkboxes_invalid.hide()
+            self.checkboxes_invalid.setToolTip("")
 
     # =================
     # Component Getters
@@ -146,45 +159,6 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         # if self.figure.axes[0].get_lines():  # check there is currently a valid plot
         return [[self.x_min_line_edit.text()], [self.x_max_line_edit.text()]]
 
-    def set_x_limits(self, x_minimum, x_maximum):
-        self.set_x_limits_line_edits(x_minimum, x_maximum)
-        self.setup_range_markers(x_minimum, x_maximum)
-        self.set_initial_x_limits(x_minimum, x_maximum)
-
-    def set_x_limits_line_edits(self, x_min, x_max):
-        self.set_x_min_line_edit(x_min)
-        self.set_x_max_line_edit(x_max)
-
-    def set_x_min_line_edit(self, x_min):
-        if x_min and x_min != "":
-            two_decimal_string = str("{:.2f}".format(x_min))
-            self.x_min_line_edit.setText(two_decimal_string)
-            self.x_min_line_edit.validator().last_valid_value = two_decimal_string
-        else:
-            two_decimal_string = str("{:.2f}".format(self.initial_x_limits[0]))
-            self.x_min_line_edit.setText(two_decimal_string)
-            self.x_min_line_edit.validator().last_valid_value = two_decimal_string
-
-    def set_x_max_line_edit(self, x_max):
-        if x_max and x_max != "":
-            two_decimal_string = str("{:.2f}".format(x_max))
-            self.x_max_line_edit.setText(two_decimal_string)
-            self.x_max_line_edit.validator().last_valid_value = two_decimal_string
-        else:
-            two_decimal_string = str("{:.2f}".format(self.initial_x_limits[1]))
-            self.x_max_line_edit.setText(two_decimal_string)
-            self.x_max_line_edit.validator().last_valid_value = two_decimal_string
-
-    def set_initial_x_limits(self, x_minimum, x_maximum):
-        self.initial_x_limits = [x_minimum, x_maximum]
-        tolerance = 0.01
-        self.x_min_line_edit.validator().setBottom(float(x_minimum) - tolerance)
-        self.x_min_line_edit.validator().setTop(float(x_maximum) + tolerance)
-        self.x_max_line_edit.validator().setBottom(float(x_minimum) - tolerance)
-        self.x_max_line_edit.validator().setTop(float(x_maximum) + tolerance)
-        self.x_min_line_edit.validator().last_valid_value = str("{:.2f}".format(x_minimum))
-        self.x_max_line_edit.validator().last_valid_value = str("{:.2f}".format(x_maximum))
-
     # =================
     # Force Actions
     # =================
@@ -194,9 +168,9 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.phase_file_finder.findFiles(True)
         self.focused_data_file_finder.findFiles(True)
 
-    # ========
-    # Plotting
-    # ========
+    # =================
+    # Plot Window Setup
+    # =================
 
     def setup_figure(self):
         self.figure = Figure()
@@ -218,7 +192,6 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.plot_dock.setAllowedAreas(Qt.BottomDockWidgetArea)
         self.plot_dock.setWindowTitle("GSAS II Plot")
         self.plot_dock.topLevelChanged.connect(self.make_undocked_plot_larger)
-        # self.plot_dock.topLevelChanged.connect(self.add_range_markers_on_dock_event)
         self.initial_chart_width, self.initial_chart_height = self.plot_dock.width(), self.plot_dock.height()
         self.plot_dock.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding,
                                                  QSizePolicy.MinimumExpanding))
@@ -243,17 +216,13 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
 
         self.update_axes_position()
 
-    def ensure_fit_dock_closed(self):
-        if self.plot_dock.isFloating():
-            self.plot_dock.close()
-
     def setup_toolbar(self):
         self.toolbar.sig_home_clicked.connect(self.display_all)
         self.toolbar.sig_home_clicked.connect(self.display_all)
 
-    # =================
-    # Component Setters
-    # =================
+    # ======================
+    # Plot Component Setters
+    # ======================
 
     def clear_figure(self):
         self.figure.clf()
@@ -311,7 +280,21 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
                 ax.autoscale()
         self.update_figure()
 
-    def setup_range_markers(self, x_minimum, x_maximum, new_canvas=None):
+    # ======================
+    # Plot Component Getters
+    # ======================
+
+    def get_axes(self):
+        return self.figure.axes
+
+    def get_figure(self):
+        return self.figure
+
+    # ========================
+    # Limits and Range Markers
+    # ========================
+
+    def setup_range_markers(self, x_minimum, x_maximum):
         self.x_bounds = self.figure.axes[0].get_xlim()
         self.y_bounds = self.figure.axes[0].get_ylim()
         self.min_line = lines.Line2D([x_minimum, x_minimum], [self.y_bounds[0], self.y_bounds[1]],
@@ -322,16 +305,6 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.figure.axes[0].add_line(self.max_line)
         self.figure.canvas.draw_idle()
         self.update_figure()
-
-    # =================
-    # Component Getters
-    # =================
-
-    def get_axes(self):
-        return self.figure.axes
-
-    def get_figure(self):
-        return self.figure
 
     def on_press(self, event):
         if event.artist == self.min_line:
@@ -376,6 +349,16 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         self.figure.canvas.mpl_disconnect(self.max_releaser)
         self.figure.canvas.mpl_disconnect(self.max_follower)
 
+    def set_initial_x_limits(self, x_minimum, x_maximum):
+        self.initial_x_limits = [x_minimum, x_maximum]
+        tolerance = 0.01
+        self.x_min_line_edit.validator().setBottom(float(x_minimum) - tolerance)
+        self.x_min_line_edit.validator().setTop(float(x_maximum) + tolerance)
+        self.x_max_line_edit.validator().setBottom(float(x_minimum) - tolerance)
+        self.x_max_line_edit.validator().setTop(float(x_maximum) + tolerance)
+        self.x_min_line_edit.validator().last_valid_value = str("{:.2f}".format(x_minimum))
+        self.x_max_line_edit.validator().last_valid_value = str("{:.2f}".format(x_maximum))
+
     def set_min_line_from_line_edit(self):
         new_value = self.x_min_line_edit.text()
         if self.min_line and new_value != "":
@@ -384,7 +367,6 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
                 self.min_line.set_xdata([new_value, new_value])
             else:
                 self.min_line.set_xdata([self.initial_x_limits[0], self.initial_x_limits[0]])
-                # self.set_x_min_line_edit(self.initial_x_limits[0])
             self.figure.canvas.draw_idle()
 
     def set_max_line_from_line_edit(self):
@@ -395,5 +377,33 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
                 self.max_line.set_xdata([new_value, new_value])
             else:
                 self.max_line.set_xdata([self.initial_x_limits[1], self.initial_x_limits[1]])
-                # self.set_x_max_line_edit(self.initial_x_limits[1])
             self.figure.canvas.draw_idle()
+
+    def set_x_limits(self, x_minimum, x_maximum):
+        self.set_x_limits_line_edits(x_minimum, x_maximum)
+        self.setup_range_markers(x_minimum, x_maximum)
+        self.set_initial_x_limits(x_minimum, x_maximum)
+
+    def set_x_limits_line_edits(self, x_min, x_max):
+        self.set_x_min_line_edit(x_min)
+        self.set_x_max_line_edit(x_max)
+
+    def set_x_min_line_edit(self, x_min):
+        if x_min and x_min != "":
+            two_decimal_string = str("{:.2f}".format(x_min))
+            self.x_min_line_edit.setText(two_decimal_string)
+            self.x_min_line_edit.validator().last_valid_value = two_decimal_string
+        else:
+            two_decimal_string = str("{:.2f}".format(self.initial_x_limits[0]))
+            self.x_min_line_edit.setText(two_decimal_string)
+            self.x_min_line_edit.validator().last_valid_value = two_decimal_string
+
+    def set_x_max_line_edit(self, x_max):
+        if x_max and x_max != "":
+            two_decimal_string = str("{:.2f}".format(x_max))
+            self.x_max_line_edit.setText(two_decimal_string)
+            self.x_max_line_edit.validator().last_valid_value = two_decimal_string
+        else:
+            two_decimal_string = str("{:.2f}".format(self.initial_x_limits[1]))
+            self.x_max_line_edit.setText(two_decimal_string)
+            self.x_max_line_edit.validator().last_valid_value = two_decimal_string

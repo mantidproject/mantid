@@ -22,7 +22,7 @@ DEFAULT_SETTINGS = {
     "primary_log": 'strain',
     "sort_ascending": True,
     "default_peak": "BackToBackExponential",
-    "path_to_gsas2": "/home/danielmurphy/gsas2",
+    "path_to_gsas2": "/opt/gsas2",  # default on IDAaaS
     "timeout": "10",  # seconds
     "dSpacing_min": "1.0"  # angstroms
 }

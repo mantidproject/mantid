@@ -43,7 +43,7 @@ QGroupBox:title {
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <layout class="QGridLayout" name="gridLayout_17" rowstretch="0" columnstretch="0,0">
+      <layout class="QGridLayout" name="gridLayout_17" rowstretch="0" columnstretch="0,0,0">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
@@ -62,6 +62,62 @@ QGroupBox:title {
        </item>
        <item row="0" column="1">
         <widget class="QLineEdit" name="project_name_line_edit"/>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="project_name_invalid">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>10</horstretch>
+           <verstretch>20</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="WindowText">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>170</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="WindowText">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>170</red>
+               <green>0</green>
+               <blue>0</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="WindowText">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>118</red>
+               <green>116</green>
+               <blue>108</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <property name="text">
+          <string>*</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -231,7 +287,7 @@ QGroupBox:title {
            </layout>
           </item>
           <item row="0" column="1">
-           <layout class="QGridLayout" name="gridLayout_10" rowstretch="0,0,0,0,0,0" columnstretch="0">
+           <layout class="QGridLayout" name="gridLayout_10" rowstretch="0,0,0,0,0,0" columnstretch="0,0">
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
@@ -272,13 +328,69 @@ QGroupBox:title {
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QPushButton" name="refine_button">
               <property name="enabled">
                <bool>true</bool>
               </property>
               <property name="text">
                <string>Refine in GSAS II</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="checkboxes_invalid">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>10</horstretch>
+                <verstretch>20</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>10</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>170</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>170</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="WindowText">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>118</red>
+                    <green>116</green>
+                    <blue>108</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="text">
+               <string>*</string>
               </property>
              </widget>
             </item>
