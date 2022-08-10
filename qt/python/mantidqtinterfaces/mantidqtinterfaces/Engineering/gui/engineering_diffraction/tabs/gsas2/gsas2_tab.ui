@@ -61,11 +61,7 @@ QGroupBox:title {
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="project_name_line_edit">
-         <property name="text">
-          <string>220321script3</string>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="project_name_line_edit"/>
        </item>
       </layout>
      </item>
@@ -129,11 +125,7 @@ QGroupBox:title {
              <widget class="FileFinderWidget" name="phase_file_finder" native="true"/>
             </item>
             <item row="2" column="0">
-             <widget class="FileFinderWidget" name="focused_data_file_finder" native="true">
-              <property name="text" stdset="0">
-               <string>Save_gss_305761_307521_bank_1_bgsub.gsa</string>
-              </property>
-             </widget>
+             <widget class="FileFinderWidget" name="focused_data_file_finder" native="true"/>
             </item>
             <item row="0" column="0">
              <widget class="FileFinderWidget" name="instrument_group_file_finder" native="true"/>

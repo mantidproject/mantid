@@ -395,7 +395,7 @@ class GSAS2Model(object):
             chosen_cell_lengths = self.choose_cell_lengths(refinement_parameters[1],
                                                            loop_phase_filepath)  # [3.65, 3.65, 3.65]  #  I
             # should force to empty, len1 or len3 list of floats
-
+            mantid_pawley_reflections = []
             if self.refinement_method == 'Pawley':
                 space_group = self.read_space_group(loop_phase_filepath)
                 try:
@@ -428,11 +428,6 @@ class GSAS2Model(object):
         if user_limits:
             self.x_min = [float(k) for k in user_limits[0]]
             self.x_max = [float(k) for k in user_limits[1]]
-
-        # Hardcoded limits to allow example with .XRA/.CWN input focused files
-        if self.refinement_method == "Rietveld":
-            self.x_min = [16.0, 19.0]
-            self.x_max = [158.4, 153.0]
 
         if self.x_min and self.x_max:  # limits have been set by the user
             if len(self.x_min) != self.number_histograms:
