@@ -78,5 +78,8 @@
 	  <parameter name="logbook_optional_parameters" type="string" visible="false">
 	    <value val="sample changer:/entry0/instrument/VirtualSampleChanger/wanted_changer:f" />
 	  </parameter>
+		<parameter name="reduction_logs_to_save" type="string" visible="false">
+		  <value val="MainParameters.Master_chopper_phase,MainParameters.Master_chopper_speed,MainParameters.Slave_chopper_phase,MainParameters.Slave_chopper_speed,MainParameters.Pixel_width,MainParameters.open_offset,MainParameters.pickup_offset,san.value,VirtualAxis.DAN_actual_angle,MainParameters.Slit2_size,MainParameters.Slit3_size,MainParameters.MidChopper_Sample,Distance.Chopper1_Sample,Distance.ChopperGap,Distance.MidChopper_Sample,Distance.S2_S3,Distance.S3_Sample,Distance.Sample_centerOfDetector_distance"/>
+		</parameter>
 	</component-link>
 </parameter-file>

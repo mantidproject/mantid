@@ -119,11 +119,7 @@
 			      analyser pos:/entry0/instrument/tra/value:f" />
 		</parameter>
 		<parameter name="reduction_logs_to_save" type="string" visible="false">
-		  <value val="poff,d0,chopper1.speed_average,chopper1.phase_average,chopper2.speed_average,
-			      chopper2.phase_average,MainParameters.Pixel_width,MainParameters.open_offset,
-			      MainParameters.pickup_offset,ChopperWindow,
-			      san.value,dan.value"/>
+		  <value val="MainParameters.Master_chopper_phase,MainParameters.Master_chopper_speed,MainParameters.Slave_chopper_phase,MainParameters.Slave_chopper_speed,MainParameters.Pixel_width,MainParameters.open_offset,MainParameters.pickup_offset,san.value,dan.value,MainParameters.Slit2_size,MainParameters.Slit3_size,VirtualChopper.actual_opening,VirtualChopper.opening_phase_average,VirtualChopper.opening_phase_sigma,MainParameters.MidChopper_Sample,Distance.Chopper1_Sample,Distance.ChopperGap,Distance.MidChopper_Sample,Distance.S2_S3,Distance.S3_Sample,Distance.Sample_centerOfDetector_distance,trs.value,att.value,bst.value,Flipper1.state,Flipper2.state"/>
 		</parameter>
-
 	</component-link>
 </parameter-file>
