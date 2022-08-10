@@ -1,6 +1,8 @@
-from mantid.kernel import *     # ToDo not suggested import. Import explicitly
-from mantid.api import *    # ToDo not suggested import. Import explicitly
-from mantid import simpleapi
+from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
+    FileProperty, FileAction
+from mantid.simpleapi import CreateWorkspace, LoadInstrument, AddSampleLogMultiple, \
+    AnalysisDataService
 from SANS1DataMLZ import SANSdata
 import numpy as np
 
@@ -48,11 +50,11 @@ class LoadSANS1MLZ(PythonAlgorithm):
         except TypeError as error:
             raise RuntimeError(str(error) + "\nprobably incorrect 'Counts' data")
         else:
-            simpleapi.CreateWorkspace(OutputWorkspace=out_ws_name,
-                                      DataX=data_x, DataY=data_y,
-                                      DataE=data_e, NSpec=n_spec,
-                                      UnitX=x_unit)
-            out_ws = simpleapi.AnalysisDataService.retrieve(out_ws_name)
+            CreateWorkspace(OutputWorkspace=out_ws_name,
+                            DataX=data_x, DataY=data_y,
+                            DataE=data_e, NSpec=n_spec,
+                            UnitX=x_unit)
+            out_ws = AnalysisDataService.retrieve(out_ws_name)
             out_ws.setYUnit(y_unit)
             out_ws.setYUnitLabel(y_label)
 
@@ -61,12 +63,12 @@ class LoadSANS1MLZ(PythonAlgorithm):
             run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
                                    DateAndTime(metadata.file.run_end()))
 
-            simpleapi.LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
+            LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
 
-            simpleapi.AddSampleLogMultiple(out_ws,
-                                           LogNames=logs["names"],
-                                           LogValues=logs["values"],
-                                           LogUnits=logs["units"])
+            AddSampleLogMultiple(out_ws,
+                                 LogNames=logs["names"],
+                                 LogValues=logs["values"],
+                                 LogUnits=logs["units"])
             self.setProperty("OutputWorkspace", out_ws)
 
     def create_datasets(self, metadata: SANSdata) -> tuple:
