@@ -2,7 +2,7 @@ from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
 from mantid.simpleapi import CreateWorkspace, LoadInstrument, AddSampleLogMultiple, \
-    AnalysisDataService
+    AnalysisDataService, DeleteWorkspace
 from SANS1DataMLZ import SANSdata
 import numpy as np
 
@@ -69,7 +69,9 @@ class LoadSANS1MLZ(PythonAlgorithm):
                                  LogNames=logs["names"],
                                  LogValues=logs["values"],
                                  LogUnits=logs["units"])
+
             self.setProperty("OutputWorkspace", out_ws)
+            DeleteWorkspace(out_ws)
 
     def create_datasets(self, metadata: SANSdata) -> tuple:
         """
@@ -80,21 +82,12 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         n_spec = metadata.spectrum_amount()
         data_y = metadata.data_y()
-        wavelength = self._get_wavelength(metadata)
+        wavelength = self._wavelength(metadata)
         data_e = metadata.data_e()
         data_x = metadata.data_x(wavelength)
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
-
-    def _get_wavelength(self, metadata):
-        wavelength = metadata.setup.wavelength
-        user_wavelength = float(self.getPropertyValue("Wavelength"))
-        if user_wavelength > metadata.setup.wavelength_error:
-            wavelength = user_wavelength
-        elif user_wavelength > 0.001:
-            self.log().notice('(wavelength < wavelength error) -> wavelength set to datafile value')
-        return wavelength
 
     def create_logs(self, metadata: SANSdata) -> dict:
         """
@@ -136,10 +129,10 @@ class LoadSANS1MLZ(PythonAlgorithm):
             logs["names"] = np.append(list(section.get_values_dict().keys()), logs["names"])
             logs["values"] = np.append(list(section.get_values_dict().values()),
                                        logs["values"])
-        logs["units"] = np.append([essential_data_tobe_logged[j] for j in logs["names"]],
+        logs["units"] = np.append([essential_data_tobe_logged[variable] for variable in logs["names"]],
                                   logs["units"])
         for section in sections_tobe_logged:
-            logs["names"] = np.append([f"{section.section_name}.{j}" for j in section.info.keys()],
+            logs["names"] = np.append([f"{section.section_name}.{variable}" for variable in section.info.keys()],
                                       logs["names"])
             logs["values"] = np.append(list(section.info.values()), logs["values"])
 
@@ -147,6 +140,15 @@ class LoadSANS1MLZ(PythonAlgorithm):
                                   logs["units"])
         self.log().debug('Creation sample logs successful')
         return logs
+
+    def _wavelength(self, metadata):
+        wavelength = metadata.setup.wavelength
+        user_wavelength = float(self.getPropertyValue("Wavelength"))
+        if user_wavelength > metadata.setup.wavelength_error:
+            wavelength = user_wavelength
+        elif user_wavelength > 0.001:
+            self.log().notice('(wavelength < wavelength error) -> wavelength set to datafile value')
+        return wavelength
 
     @staticmethod
     def create_labels():

@@ -318,14 +318,15 @@ class SANSdata:
             unprocessed = file_handler.read()
         file_type = filename.split(".")[-1]
         if file_type == "001":
-            self._initialize_info(unprocessed)
+            pass
         elif file_type == "002":
             self.counts.data_type = '002'
             self._subsequence = [self.file, self.sample, self.setup,
                                  self.history, self.counts, self.errors]
-            self._initialize_info(unprocessed)
         else:
             raise FileNotFoundError("Incorrect file")
+
+        self._initialize_info(unprocessed)
         if comment:
             self._find_comments(unprocessed)
 
@@ -342,7 +343,7 @@ class SANSdata:
 
     def _find_comments(self, unprocessed):
         """
-        search for a comments sections
+        search for a comment sections
         """
         matches = self.comment.pattern.finditer(unprocessed)
         tmp = [match.groups()[1].split('\n') for match in matches]

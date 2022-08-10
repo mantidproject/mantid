@@ -18,11 +18,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         """
         test: whether the workspace has been created, is the instrument correct 001 file
         """
-        # with open(self.filename_001, "w") as f:
-        #     f.write('ok')
         output_ws_name = "LoadSANS1MLZTest_Test1"
         alg_test = run_algorithm("LoadSANS1MLZ",
-                                 # Filename="/home/andrii/repositories/AndriiDemk/mantid/build/ExternalData/Testing/Data/UnitTest/D0511339.001",
                                  Filename=self.filename_001,
                                  OutputWorkspace=output_ws_name)
 
