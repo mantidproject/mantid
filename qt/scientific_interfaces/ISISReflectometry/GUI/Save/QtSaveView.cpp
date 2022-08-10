@@ -63,6 +63,7 @@ void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.filterEdit);
   connectSettingsChange(*m_ui.regexCheckBox);
   connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
+  connectSettingsChange(*m_ui.saveIndividualRowsCheckBox);
   connectSettingsChange(*m_ui.headerCheckBox);
   connectSettingsChange(*m_ui.qResolutionCheckBox);
   connectSettingsChange(*m_ui.commaRadioButton);
