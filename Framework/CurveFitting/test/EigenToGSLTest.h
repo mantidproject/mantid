@@ -13,6 +13,10 @@
 #include <MantidCurveFitting/GSLFunctions.h>
 #include <gsl/gsl_blas.h>
 
+// JACOBIAN TEST INCLUDES
+#include "MantidCurveFitting/Functions/Gaussian.h"
+
+using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
 namespace {
@@ -106,5 +110,57 @@ public:
     for (size_t i = 0; i < v.size(); i++) {
       TS_ASSERT_EQUALS(gsl_vector_get(&v_gsl.vector, i), v[i]);
     }
+  }
+
+  std::shared_ptr<Functions::Gaussian> generate_tst_fn() {
+    std::shared_ptr<Functions::Gaussian> fn = std::make_shared<Functions::Gaussian>();
+    fn->initialize();
+    fn->setParameter("PeakCentre", 79440.0);
+    fn->setParameter("Height", 200.0);
+    fn->setParameter("Sigma", 30.0);
+    return fn;
+  }
+
+  void test_EigenJacobian_initialise() {
+    auto test_fn = generate_tst_fn();
+    int size = 10;
+
+    EigenJacobian J(*test_fn, size);
+    TS_ASSERT_EQUALS(J.matrix().size1(), size);
+    TS_ASSERT_EQUALS(J.matrix().size2(), test_fn->nParams());
+  }
+
+  void test_EigenJacobian_get_and_set() {
+    auto test_fn = generate_tst_fn();
+    int size = 10;
+    int val = 5;
+
+    EigenJacobian J(*test_fn, size);
+
+    J.set(5, 1, val);
+    J.set(9, 2, val * 3);
+    TS_ASSERT_EQUALS(J.get(5, 1), val);
+    TS_ASSERT_EQUALS(J.get(9, 2), val * 3);
+  }
+
+  void test_EigenJacobian_add_number_to_column() {
+    auto test_fn = generate_tst_fn();
+    int size = 35;
+    int val = 5;
+
+    EigenJacobian J(*test_fn, size);
+    J.addNumberToColumn(val, 0);
+    TS_ASSERT_EQUALS(J.get(0, 0), val);
+    TS_ASSERT_EQUALS(J.get(9, 0), val);
+    TS_ASSERT_EQUALS(J.get(19, 0), val);
+    TS_ASSERT_EQUALS(J.get(29, 0), val);
+    TS_ASSERT_EQUALS(J.get(size - 1, 0), val);
+
+    J.addNumberToColumn(val + 5, 1);
+    TS_ASSERT_EQUALS(J.get(0, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(9, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(19, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(29, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(size - 1, 1), val + 5);
   }
 };
