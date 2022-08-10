@@ -1,5 +1,5 @@
-from mantid.kernel import * # ToDo not suggested import. Import explicitly
-from mantid.api import * # ToDo not suggested import. Import explicitly
+from mantid.kernel import *     # ToDo not suggested import. Import explicitly
+from mantid.api import *    # ToDo not suggested import. Import explicitly
 from mantid import simpleapi
 from SANS1DataMLZ import SANSdata
 import numpy as np
@@ -69,34 +69,32 @@ class LoadSANS1MLZ(PythonAlgorithm):
                                            LogUnits=logs["units"])
             self.setProperty("OutputWorkspace", out_ws)
 
-    def create_datasets(self, metadata):
+    def create_datasets(self, metadata: SANSdata) -> tuple:
         """
-        return data values: DataX, DataY, DataE and number of spectra
+        :return: DataX, DataY, DataE and number of spectra
         (including monitors)
         """
         self.log().debug('Creation data for workspace started')
 
-        n_spec = self._get_spectrum_amount(metadata)
-        data_y = self._get_data_y(metadata)
-        wavelength, wavelength_error = self._get_wavelength(metadata)
-
-        data_e = self._get_data_e(metadata, data_y)
-        data_x = self._get_data_x(wavelength, wavelength_error, n_spec)
+        n_spec = metadata.spectrum_amount()
+        data_y = metadata.data_y()
+        wavelength = self._get_wavelength(metadata)
+        data_e = metadata.data_e()
+        data_x = metadata.data_x(wavelength)
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
 
     def _get_wavelength(self, metadata):
-        wavelength_error = 0.15  # ToDo error?? wavelength - error > 0 !!
         wavelength = metadata.setup.wavelength
         user_wavelength = float(self.getPropertyValue("Wavelength"))
-        if user_wavelength > wavelength_error:
+        if user_wavelength > metadata.setup.wavelength_error:
             wavelength = user_wavelength
-        else:
+        elif user_wavelength > 0.001:
             self.log().notice('(wavelength < wavelength error) -> wavelength set to datafile value')
-        return wavelength, wavelength_error
+        return wavelength
 
-    def create_logs(self, metadata):
+    def create_logs(self, metadata: SANSdata) -> dict:
         """
         create logs with units
         warning! essential_data_tobe_logged should match
@@ -107,6 +105,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'det1_x_value': 'mm',
             'det1_z_value': 'mm',
             'wavelength': 'Angstrom',
+            'wavelength_error': 'Angstrom',
             'st1_x_value': '',
             'st1_x_offset': '',
             'st1_y_value': '',
@@ -128,14 +127,8 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'beamcenter_y': '',
             'aperture': '',
         }
-
         logs = {"names": [], "values": [], "units": []}
-
-        sections_tobe_logged = []
-        if metadata.file.type == '001':
-            sections_tobe_logged = metadata.get_subsequence()[:-1]
-        if metadata.file.type == '002':
-            sections_tobe_logged = metadata.get_subsequence()[:-2]
+        sections_tobe_logged = metadata.get_subsequence()
 
         for section in sections_tobe_logged:
             logs["names"] = np.append(list(section.get_values_dict().keys()), logs["names"])
@@ -152,50 +145,6 @@ class LoadSANS1MLZ(PythonAlgorithm):
                                   logs["units"])
         self.log().debug('Creation sample logs successful')
         return logs
-
-    @staticmethod
-    def _get_spectrum_amount(metadata):
-        n_rows = int(metadata.file.info['DataSizeY'])
-        n_bins = int(metadata.file.info['DataSizeX'])
-        n_spec = n_rows * n_bins
-        if metadata.counter.is_monitors_exist():
-            n_spec += 2
-            # ToDo warning! To be fixed.
-            # better to have a parameter num_monitors
-            # and then n_spec += num_monitors
-        return n_spec
-
-    @staticmethod
-    def _get_data_y(metadata):
-        data_y = np.append([], metadata.counts.data)
-        if len(data_y) != 16384:
-            raise RuntimeError("'Counts' section include incorrect data:"
-                               " must be 128x128")
-        if metadata.counter.is_monitors_exist():
-            data_y = np.append(data_y, [metadata.counter.monitor1, metadata.counter.monitor2])
-        return data_y
-
-    @staticmethod
-    def _get_data_x(wavelength, wavelength_error, n_spec):
-        # ToDo warning! To be fixed.
-        # if you have more than 2 columns (time-of-flight data) then
-        # lines below won't work properly
-        # Better to introduce a parameter n_columns and
-        # use data_x = np.zeros(n_columns * n_spec), etc
-        data_x = np.zeros(2 * n_spec)
-        data_x.fill(wavelength + wavelength_error)
-        data_x[::2] -= wavelength_error * 2
-        return data_x
-
-    @staticmethod
-    def _get_data_e(metadata, data_y):
-        if metadata.file.type == '001':
-            data_e = np.array(np.sqrt(data_y))
-        elif metadata.file.type == '002':
-            data_e = np.append([], metadata.errors.data)
-        else:
-            raise RuntimeError
-        return data_e
 
     @staticmethod
     def create_labels():

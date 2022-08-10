@@ -76,8 +76,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         output_ws_name = "LoadSANS1MLZTest_Test3"
         filename = "sans-incomplete.001"
         parameters = {
-            'counts 128': "'Counts' section include incorrect data: must be 128x128",
-            'counts pr': "'Counts' section include incorrect data: must be 128x128",
+            'counts 128': "'Counts' section include incorrect data/amount of data",
+            'counts pr': "'Counts' section include incorrect data/amount of data",
             'section amount': "Failed to find 'File' section"
         }
 
@@ -336,10 +336,7 @@ class SANS1DataClassCounterSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
 
     def test_MonitorExist(self):
-        self.assertEqual(True, self.metadata.counter.is_monitors_exist())
-        self.metadata.counter.monitor1 = 0
-        self.metadata.counter.monitor2 = 0
-        self.assertEqual(False, self.metadata.counter.is_monitors_exist())
+        self.assertEqual([97318.0, 201028.0], self.metadata.counter.get_monitors())
 
     def test_CheckValues(self):
         self.assertEqual(97318, self.metadata.counter.monitor1)
@@ -353,12 +350,6 @@ class SANS1DataClassCommentSectionTest(unittest.TestCase):
     def setUp(self) -> None:
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up(comment=True)
 
-    def test_ChangeWavelength(self):
-        self.assertEqual(6, self.metadata.comment.wavelength)
-        self.metadata.comment.set_wavelength(4)
-        self.assertEqual(4, self.metadata.comment.wavelength)
-        self.assertEqual(4, self.metadata.comment.info['selector_lambda_value'])
-
     def test_CheckValues(self):
         self.assertEqual('4', self.metadata.comment.info['det1_x_value'])
         self.assertEqual('-150.00', self.metadata.comment.info['st1_x_value'])
@@ -371,8 +362,8 @@ class SANS1DataClassCountsSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
 
     def test_Dimensions(self):
-        dim = len(self.metadata.counts.data)
-        self.assertEqual(16384, dim)
+        dim = self.metadata.counts.data.shape
+        self.assertEqual((128, 128), dim)
 
 
 class SANS1DataClassErrorsSectionTest(unittest.TestCase):
@@ -381,9 +372,9 @@ class SANS1DataClassErrorsSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up(file_type='002')
 
     def test_CheckValues(self):
-        self.assertEqual(float('6.058e-03'), self.metadata.errors.data[702])
-        self.assertEqual(float('6.181e-03'), self.metadata.errors.data[11645])
-        self.assertEqual(float('5.922e-03'), self.metadata.errors.data[5000])
+        self.assertEqual(float('6.058e-03'), self.metadata.errors.data[87][6])
+        self.assertEqual(float('6.181e-03'), self.metadata.errors.data[1455][5])
+        self.assertEqual(float('5.922e-03'), self.metadata.errors.data[625][0])
 
 
 if __name__ == '__main__':

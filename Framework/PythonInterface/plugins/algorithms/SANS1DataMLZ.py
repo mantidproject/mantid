@@ -1,8 +1,9 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from datetime import datetime
 import numpy as np
 import re
 import itertools
+from scipy import ndimage
 
 
 @dataclass
@@ -18,7 +19,7 @@ class DtClsSANS:
      example -> new_var: float = 0
     """
     section_name: str = ''
-    info: dict = field(default_factory=list)
+    info = {}
 
     def process_data(self, unprocessed):
         unprocessed = self._data_preparation(unprocessed)
@@ -34,12 +35,11 @@ class DtClsSANS:
 
     def get_values_dict(self):
         """
-        return dictionary with variables of helper class
+        :return: dictionary with variables of helper class
         (without 'section_name' and 'info')
         """
         values = asdict(self)
         del values['section_name']
-        del values['info']
         return values
 
     def _assign_values(self):
@@ -109,8 +109,9 @@ class SampleSANS(DtClsSANS):
 class SetupSANS(DtClsSANS):
     section_name: str = 'Setup'
     pattern = re.compile(r'(%Setup\n)([^%]*)')
-    wavelength: int = 0
-    sample_detector_distance: float = 0
+    wavelength: float = 0.0
+    wavelength_error: float = 0.15
+    sample_detector_distance: float = 0.0
 
     def _assign_values(self):
         """
@@ -128,8 +129,26 @@ class CounterSANS(DtClsSANS):
 
     sum_all_counts: float = 0
     duration: float = 0
-    monitor1: float = 0
-    monitor2: float = 0
+    monitor1: float or None = None
+    monitor2: float or None = None
+
+    def get_monitors(self):
+        """
+        :return: [moni1, moni2]
+        if monitors don't exist
+            :return: []
+        """
+        if self.monitor1 is None and self.monitor2 is None:
+            return []
+        return [self.monitor1, self.monitor2]
+
+    def process_data(self, unprocessed):
+        super().process_data(unprocessed)
+        # after assign value monitor can be '' ->
+        if isinstance(self.monitor1, str):
+            self.monitor1 = None
+        if isinstance(self.monitor2, str):
+            self.monitor2 = None
 
     def _assign_values(self):
         """
@@ -140,11 +159,6 @@ class CounterSANS(DtClsSANS):
         self._assign_value('Time', 'duration')
         self._assign_value('Moni1', 'monitor1')
         self._assign_value('Moni2', 'monitor2')
-
-    def is_monitors_exist(self):
-        if self.monitor1 != 0 or self.monitor2 != 0:
-            return True
-        return False
 
 
 @dataclass
@@ -176,20 +190,6 @@ class CommentSANS(DtClsSANS):
     section_name: str = 'Comment'
     pattern = re.compile(r'(%Comment.*\n)([^%]*)')
 
-    wavelength: float = 0.0
-
-    def _assign_values(self):
-        """
-        one of the methods to add variable with unique name
-        """
-        super()._assign_values()
-        self._assign_value('selector_lambda_value', 'wavelength')
-
-    def set_wavelength(self, input_wavelength):
-        if input_wavelength > 0:
-            self.wavelength = input_wavelength
-            self.info['selector_lambda_value'] = input_wavelength
-
     @staticmethod
     def _data_preparation(data):
         return data
@@ -200,38 +200,44 @@ class CountsSANS(DtClsSANS):
     section_name: str = 'Counts'
     pattern = re.compile(r'(%Counts\n)([^%]*)')
     data_type = '001'
-    data: list = field(default_factory=list)
+    data = np.ndarray(shape=(128, 128), dtype=float)
 
     def process_data(self, unprocessed):
-        if self.data_type == '001':
-            self._process_001(unprocessed)
-        elif self.data_type == '002':
-            self._process_002(unprocessed)
+        try:
+            if self.data_type == '001':
+                self._process_001(unprocessed)
+            elif self.data_type == '002':
+                self._process_002(unprocessed)
+        except ValueError:
+            raise FileNotFoundError("'Counts' section include incorrect data/amount of data")
 
     def _process_001(self, unprocessed):
         pattern = re.compile(r'\d+')
         matches = pattern.findall(unprocessed)
-        self.data = [float(count) for count in matches]
+        self.data = np.array([count for count in matches], dtype=float).reshape(128, 128)
 
     def _process_002(self, unprocessed):
         pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
         matches = pattern.findall(unprocessed)
-        self.data = [float(count) for count in matches]
+        self.data = np.array([count for count in matches], dtype=float).reshape(2048, 8)
 
 
 @dataclass
 class ErrorsSANS(DtClsSANS):
     section_name: str = 'Errors'
     pattern = re.compile(r'(%Errors\n)([^%]*)')
-    data: list = field(default_factory=list)
+    data = np.ndarray(shape=(2048, 8), dtype=float)
 
     def process_data(self, unprocessed):
         pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
         matches = pattern.findall(unprocessed)
-        self.data = [float(count) for count in matches]
+        try:
+            self.data = np.array([count for count in matches], dtype=float).reshape(2048, 8)
+        except ValueError:
+            raise FileNotFoundError("'Errors' section include incorrect data/amount of data")
 
 
-class SANSdata():
+class SANSdata:
     """
     This class describes the SANS-1_MLZ data structure and
     will be used for SANS-1 data read-in and write-out routines.
@@ -252,10 +258,59 @@ class SANSdata():
         self._subsequence = [self.file, self.sample, self.setup,
                              self.counter, self.history, self.counts]
 
-    def get_subsequence(self):
+    def get_subsequence(self) -> list:
         return self._subsequence
 
-    def analyze_source(self, filename, comment=False):
+    def spectrum_amount(self) -> int:
+        n_rows = int(self.file.info['DataSizeY'])
+        n_bins = int(self.file.info['DataSizeX'])
+        n_spec = n_rows * n_bins
+        n_spec += len(self.counter.get_monitors())
+        return n_spec
+
+    def data_y(self) -> np.array:
+        """
+        :return: 1 dimensional counts data array for mantid workspace
+        """
+        data_y = self.counts.data.reshape(-1)
+        data_y = np.append(data_y, self.counter.get_monitors())
+        return data_y
+
+    def data_x(self, wavelength=None) -> np.ndarray:
+        # ToDo warning! To be fixed.
+        # if you have more than 2 columns (time-of-flight data) then
+        # lines below won't work properly
+        # Better to introduce a parameter n_columns and
+        # use data_x = np.zeros(n_columns * n_spec), etc
+        if wavelength is None:
+            wavelength = self.setup.wavelength
+        data_x = np.zeros(2 * self.spectrum_amount())
+        data_x.fill(wavelength + self.setup.wavelength_error)
+        data_x[::2] -= self.setup.wavelength_error * 2
+        return data_x
+
+    def data_e(self) -> np.ndarray:
+        """
+        if .001:
+            :return: sqrt(data_y)
+        if .002:
+            :return: 1 dimensional counts error array for mantid workspace
+        """
+        if self.file.type == '002':
+            data_e = np.append([], self.errors.data)
+        else:
+            data_e = np.array(np.sqrt(self.counts.data.reshape(-1)))
+            data_e = np.append(data_e, self.counter.get_monitors())
+        return data_e
+
+    def beamcenter_x_y(self) -> tuple:
+        """
+        :return: beamcenter x and y of raw data
+        """
+        beamcenter_y, beamcenter_x = ndimage.center_of_mass(self.counts.data)
+        return beamcenter_x, beamcenter_y
+
+    def analyze_source(self, filename: str, comment: bool = False):
         """
         read the SANS-1.001/002 raw files into the SANS-1 data object
         """
@@ -287,7 +342,7 @@ class SANSdata():
 
     def _find_comments(self, unprocessed):
         """
-        search for a comments section
+        search for a comments sections
         """
         matches = self.comment.pattern.finditer(unprocessed)
         tmp = [match.groups()[1].split('\n') for match in matches]
