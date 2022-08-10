@@ -1,0 +1,1 @@
+- Bug fix with SCALENORM and POWERNORM attributes not having type `str` set which prevented sliceviwer from opening
