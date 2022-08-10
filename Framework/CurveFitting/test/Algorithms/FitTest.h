@@ -113,8 +113,8 @@ public:
 
     fit.setProperty("Function", "name=LinearBackground");
     fit.setProperty("InputWorkspace", ws);
-    //    fit.setProperty("Constraints", "invalid");
-    TS_ASSERT_THROWS(fit.setProperty("Function", "invalid"), const std::invalid_argument &);
+    fit.setProperty("Constraints", "invalid");
+    TS_ASSERT_THROWS(fit.execute(), std::runtime_error &);
     API::AnalysisDataService::Instance().clear();
   }
 
