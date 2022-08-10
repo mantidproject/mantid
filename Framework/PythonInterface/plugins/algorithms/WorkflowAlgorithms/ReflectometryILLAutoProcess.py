@@ -797,7 +797,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self._autoCleanup.cleanupLater(directForegroundName)
         if self.is_polarized():
             self.polarization_correction(directForegroundName, directForegroundName)
-            frg_ws_name = mtd[directForegroundName][0].getName()
+            frg_ws_name = mtd[directForegroundName][0].name()
             RenameWorkspace(InputWorkspace=frg_ws_name, OutputWorkspace=directForegroundName)
 
     def process_reflected_beam(self, reflectedInput, reflectedBeamName, directBeamName, angle_index):
@@ -883,7 +883,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         ws - workspace used to obtain reduction parameters
         """
         save_path = config['defaultsave.directory']
-        parameter_output = os.path.join(save_path, "{}.dat".format(mtd[ws].getName()))
+        parameter_output = os.path.join(save_path, "{}.dat".format(mtd[ws].name()))
         is_group = isinstance(mtd[ws], WorkspaceGroup)
         run = mtd[ws][0].run() if is_group else mtd[ws].run()
         try:
@@ -943,7 +943,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 to_convert_to_q = self._outWS + '_pol_' + str(angle_index)
                 self.polarization_correction(','.join(foreground_names), to_convert_to_q)
                 for workspace in mtd[to_convert_to_q]:
-                    self._autoCleanup.cleanupLater(workspace.getName())
+                    self._autoCleanup.cleanupLater(workspace.name())
 
             convertedToQName = self._outWS + '_' + str(angle_index)
             self.convert_to_momentum_transfer(to_convert_to_q, convertedToQName, directForegroundName, angle_index, correctedThetaWS)
