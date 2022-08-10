@@ -182,6 +182,20 @@ class RegionSelectorTest(unittest.TestCase):
         selector_two.set_active.assert_called_once_with(False)
         selector_two.update.assert_called_once_with()
 
+    def test_delete_key_pressed_will_notify_region_changed(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active, selector_two.active = False, True
+        selector_two.artists = []
+        mock_observer = Mock()
+        region_selector.subscribe(mock_observer)
+
+        event = Mock()
+        event.key = "delete"
+
+        region_selector.key_pressed(event)
+
+        mock_observer.notifyRegionChanged.assert_called_once()
+
     def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_exist(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         region_selector.view.set_override_cursor = Mock()
