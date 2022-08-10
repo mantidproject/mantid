@@ -556,7 +556,7 @@ class SliceViewerDataView(QWidget):
             scale = self.conf.get(SCALENORM, type=str)
 
         if scale == 'Power' and self.conf.has(POWERSCALE):
-            exponent = self.conf.get(POWERSCALE)
+            exponent = self.conf.get(POWERSCALE, type=str)
             scale = (scale, exponent)
 
         scale = "SymmetricLog10" if scale == 'Log' else scale
