@@ -15,7 +15,7 @@ from tempfile import NamedTemporaryFile
 
 TEST_MESSAGE = "Hello Mantid!"
 EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"], "darwin": ["workbench"], "win32": ["workbench.exe"]}
-SUBPROCESS_TIMEOUT_SECS = 30
+SUBPROCESS_TIMEOUT_SECS = 300
 
 
 def get_mantid_executables_for_platform(platform):
