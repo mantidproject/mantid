@@ -818,6 +818,29 @@ public:
     TS_ASSERT_DELTA(1.25, material.numberDensityEffective(), 1e-04);
   }
 
+  void test_run_Geometry_As_Sphere() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createSphereGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+
+    // Check some random points inside sphere
+    // Check boundary
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.049, 0., 0.)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0., 0.049, 0.)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0., 0., 0.049)));
+    // Check outside boundary
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0., 0., 0.06)));
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -1202,6 +1225,21 @@ private:
     props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 0.4), "");
     props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
     props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis), "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createSphereGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Sphere"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 5), "");
+    std::vector<double> center{0, 0, 1};
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
+
     return props;
   }
 
