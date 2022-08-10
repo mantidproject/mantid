@@ -127,13 +127,13 @@ public:
     }
     int j = m_index[iP];
     if (j >= 0)
-      m_J->mutator().data()[iY * m_J->size2() + j] = value;
+      m_J->mutator().data()[j * m_J->size1() + iY] = value;
   }
   /// overwrite base method
   double get(size_t iY, size_t iP) override {
     int j = m_index[iP];
     if (j >= 0)
-      return m_J->inspector().data()[iY * m_J->size2() + j];
+      return m_J->inspector().data()[j * m_J->size1() + iY];
     return 0.0;
   }
   /// overwrite base method
