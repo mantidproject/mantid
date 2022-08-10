@@ -10,7 +10,6 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 
-#include <iostream>
 #include <stdexcept>
 #include <vector>
 
@@ -56,7 +55,7 @@ public:
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
     if (iActiveP < m_J.size2()) {
       // add penalty to first and last point and every 10th point in between
-      m_J.mutator().data()[iActiveP] += value;
+      m_J.mutator().data()[iActiveP * m_J.size1()] += value;
       m_J.mutator().data()[(iActiveP + 1) * m_J.size1() - 1] += value;
       for (size_t iY = 9; iY < m_J.size1() - 1; iY += 10)
         m_J.mutator().data()[iActiveP * m_J.size1() + iY] += value;
@@ -101,10 +100,10 @@ public:
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
     if (iActiveP < m_J->size2()) {
       // add penalty to first and last point and every 10th point in between
-      m_J->mutator().data()[iActiveP] += value;
-      m_J->mutator().data()[(iActiveP + 1) * m_J.size1() - 1] += value;
+      m_J->mutator().data()[iActiveP * m_J->size1()] += value;
+      m_J->mutator().data()[(iActiveP + 1) * m_J->size1() - 1] += value;
       for (size_t iY = 9; iY < m_J->size1() - 1; iY += 10)
-        m_J->mutator().data()[iActiveP * m_J.size1() + iY] += value;
+        m_J->mutator().data()[iActiveP * m_J->size1() + iY] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");
