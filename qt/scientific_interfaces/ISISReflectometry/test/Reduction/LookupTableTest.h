@@ -306,7 +306,8 @@ public:
 
     auto newLookupRow = ModelCreationHelper::makeLookupRow(55.0, boost::regex("A.*"));
 
-    TS_ASSERT_THROWS(table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance), RowNotFoundException);
+    TS_ASSERT_THROWS(table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance),
+                     RowNotFoundException const &);
   }
 
   void test_update_lookup_row_will_throw_if_row_with_same_title_matcher_not_found() {
@@ -316,7 +317,8 @@ public:
 
     auto newLookupRow = ModelCreationHelper::makeLookupRow(2.3, boost::regex("AB.*"));
 
-    TS_ASSERT_THROWS(table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance), RowNotFoundException);
+    TS_ASSERT_THROWS(table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance),
+                     RowNotFoundException const &);
   }
 
   void test_update_lookup_row_will_not_throw_if_theta_different_but_inside_tolerance() {

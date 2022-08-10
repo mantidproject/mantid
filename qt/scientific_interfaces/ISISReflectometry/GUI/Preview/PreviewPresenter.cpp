@@ -193,13 +193,13 @@ void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReduc
 void PreviewPresenter::notifyApplyRequested() {
   try {
     m_mainPresenter->notifyPreviewApplyRequested();
-  } catch (RowNotFoundException &ex) {
+  } catch (RowNotFoundException const &ex) {
     std::ostringstream msg;
     msg << "Could not update Experiment Settings: ";
     msg << ex.what();
     msg << " Please add a row for this angle, add a wildcard row, or change the angle.";
     g_log.error(msg.str());
-  } catch (MultipleRowsFoundException &ex) {
+  } catch (MultipleRowsFoundException const &ex) {
     std::ostringstream msg;
     msg << "Could not update Experiment Settings: ";
     msg << ex.what();
