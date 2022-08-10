@@ -540,6 +540,10 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
+  if (m_instrument == Supported::FIGARO) {
+    auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
+    m_localWorkspace->mutableRun().addLogData(new Kernel::PropertyWithValue<bool>("refdown", bgs3 > 45));
+  }
 }
 
 /**
