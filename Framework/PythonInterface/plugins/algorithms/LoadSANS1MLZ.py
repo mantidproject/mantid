@@ -91,8 +91,9 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     def create_logs(self, metadata: SANSdata) -> dict:
         """
-        create logs with units
+        :return: logs with units
         warning! essential_data_tobe_logged should match
+        with main variables
         """
         self.log().debug('Creation sample logs started')
         # units of measurement of main variables

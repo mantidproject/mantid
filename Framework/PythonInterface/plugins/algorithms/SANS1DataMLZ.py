@@ -1,9 +1,9 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import numpy as np
+from scipy import ndimage
 import re
 import itertools
-from scipy import ndimage
 
 
 @dataclass
@@ -35,8 +35,7 @@ class DtClsSANS:
 
     def get_values_dict(self):
         """
-        :return: dictionary with variables of helper class
-        (without 'section_name' and 'info')
+        :return: dictionary with main variables of helper class
         """
         values = asdict(self)
         del values['section_name']
@@ -46,7 +45,15 @@ class DtClsSANS:
         for att in self.get_values_dict().keys():
             self._assign_value(att)
 
-    def _assign_value(self, att, unique_name=None):
+    def _assign_value(self, att: str, unique_name: str = None):
+        """
+        if unique_name is None
+            :param att: helper class variable that already exist and match
+            with datafile variable name
+        else
+            :param att: name of variable in datafile
+            :param unique_name: helper class variable that already exist
+        """
         try:
             if unique_name:
                 setattr(self, unique_name, float(self.info[att]))
@@ -294,7 +301,7 @@ class SANSdata:
         if .001:
             :return: sqrt(data_y)
         if .002:
-            :return: 1 dimensional counts error array for mantid workspace
+            :return: 1 dimensional error data array for mantid workspace
         """
         if self.file.type == '002':
             data_e = np.append([], self.errors.data)
