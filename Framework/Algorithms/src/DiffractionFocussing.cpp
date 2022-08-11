@@ -13,7 +13,9 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Unit.h"
 
+#include <algorithm>
 #include <fstream>
+#include <iterator>
 #include <limits>
 #include <map>
 
@@ -73,11 +75,8 @@ void DiffractionFocussing::exec() {
   RebinWorkspace(tmpW);
 
   std::set<int64_t> groupNumbers;
-  for (std::multimap<int64_t, int64_t>::const_iterator d = detectorGroups.begin(); d != detectorGroups.end(); ++d) {
-    if (groupNumbers.find(d->first) == groupNumbers.end()) {
-      groupNumbers.insert(d->first);
-    }
-  }
+  std::transform(detectorGroups.cbegin(), detectorGroups.cend(), std::inserter(groupNumbers, groupNumbers.begin()),
+                 [](const auto &e) { return e.first; });
 
   int iprogress = 0;
   auto iprogress_count = static_cast<int>(groupNumbers.size());

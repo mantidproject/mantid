@@ -181,7 +181,7 @@ public:
 
   void testMaskWorkspaceSelectIfNotFinite() {
     auto correctMasking = [](MatrixWorkspace const &ws, const size_t wsIndex) {
-      return !isfinite(ws.y(wsIndex).front());
+      return !std::isfinite(ws.y(wsIndex).front());
     };
     MaskDetectorsIf alg;
     MatrixWorkspace_sptr inWS = makeFakeWorkspace();

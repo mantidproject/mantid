@@ -464,9 +464,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &split
     if (i_property == m_values.size()) {
       // i_property is out of the range. Then use the last entry
       myOutput->addValue(m_values[i_property - 1].time(), m_values[i_property - 1].value());
-
-      ++itspl;
-      ++counter;
       break;
     }
 
@@ -490,14 +487,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &split
     // Go to the next interval
     ++itspl;
     ++counter;
-    // But if we reached the end, then we are done.
-    if (itspl == splitter.end())
-      break;
-
-    // No need to keep looping through the filter if we are out of events
-    if (i_property == this->m_values.size())
-      break;
-
   } // Looping through entries in the splitter vector
 
   // Make sure all entries have the correct size recorded in m_size.
@@ -549,7 +538,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> 
   }
 
   DateAndTime filterStartTime = timeToFilterTo[index_splitter];
-  DateAndTime filterEndTime = timeToFilterTo[index_splitter + 1];
+  DateAndTime filterEndTime;
 
   // move along the entries to find the entry inside the current splitter
   auto firstEntryInSplitter = std::lower_bound(currentTimes.begin(), currentTimes.end(), filterStartTime);
@@ -663,9 +652,9 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval> 
   // If min or max were unset ("empty") in the algorithm, set to the min or max
   // value of the log
   if (emptyMin)
-    min = minValue();
+    min = static_cast<double>(minValue());
   if (emptyMax)
-    max = maxValue();
+    max = static_cast<double>(maxValue());
 
   // Make sure the splitter starts out empty
   split.clear();
@@ -762,12 +751,12 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   // If min or max were unset ("empty") in the algorithm, set to the min or max
   // value of the log
   if (emptyMin)
-    min = minValue();
+    min = static_cast<double>(minValue());
   if (emptyMax)
-    max = maxValue();
+    max = static_cast<double>(maxValue());
 
   // Assume everything before the 1st value is constant
-  double val = firstValue();
+  double val = static_cast<double>(firstValue());
   if ((val >= min) && (val <= max)) {
     TimeSplitterType extraFilter;
     extraFilter.emplace_back(range.begin(), firstTime(), 0);
@@ -777,7 +766,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   }
 
   // Assume everything after the LAST value is constant
-  val = lastValue();
+  val = static_cast<double>(lastValue());
   if ((val >= min) && (val <= max)) {
     TimeSplitterType extraFilter;
     extraFilter.emplace_back(lastTime(), range.end(), 0);
@@ -843,7 +832,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = getSingleValue(time.start(), index);
+    double value = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
 
     while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
@@ -903,7 +892,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = getSingleValue(time.start(), index);
+    double value = static_cast<double>(getSingleValue(time.start(), index));
     double valuestddev = (value - mean) * (value - mean);
     DateAndTime startTime = time.start();
 

@@ -15,6 +15,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <algorithm>
+
 namespace Mantid::DataHandling {
 DECLARE_ALGORITHM(ISISJournalGetExperimentRuns)
 
@@ -74,8 +76,8 @@ ITableWorkspace_sptr convertRunDataToTable(std::vector<IJournal::RunData> &runs)
 std::vector<std::string> getInstruments() {
   auto instruments = std::vector<std::string>();
   const auto &instrInfo = ConfigService::Instance().getFacility("ISIS").instruments();
-  for (const auto &instrument : instrInfo)
-    instruments.emplace_back(instrument.name());
+  std::transform(instrInfo.cbegin(), instrInfo.cend(), std::back_inserter(instruments),
+                 [](const auto instrument) { return instrument.name(); });
   return instruments;
 }
 

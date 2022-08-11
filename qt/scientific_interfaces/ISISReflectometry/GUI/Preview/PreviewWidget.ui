@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>870</height>
+    <height>873</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,6 +44,13 @@
       <widget class="QLineEdit" name="workspace_line_edit"/>
      </item>
      <item>
+      <widget class="QPushButton" name="load_button">
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="angle_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -65,9 +72,12 @@
       <widget class="QDoubleSpinBox" name="angle_spin_box"/>
      </item>
      <item>
-      <widget class="QPushButton" name="load_button">
+      <widget class="QPushButton" name="update_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
-        <string>Load</string>
+        <string>Update</string>
        </property>
       </widget>
      </item>
@@ -155,22 +165,48 @@
       <property name="handleWidth">
        <number>2</number>
       </property>
-      <widget class="QWidget" name="contourPlotLayoutWidget">
-       <layout class="QVBoxLayout" name="contour_plot_layout">
+      <widget class="QWidget" name="rsPlotLayoutWidget">
+       <layout class="QVBoxLayout" name="rs_plot_layout">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QToolButton" name="contour_ads_export_button">
+           <widget class="QToolButton" name="rs_ads_export_button">
             <property name="toolTip">
-             <string>Export the summed workspace to the ADS</string>
+             <string>Export the summed workspace to the workspaces list</string>
             </property>
             <property name="text">
-             <string>ADS Export</string>
+             <string>Export summed workspace</string>
             </property>
            </widget>
           </item>
           <item>
-           <spacer name="contour_toolbar_spacer">
+           <widget class="QToolButton" name="rs_edit_button">
+            <property name="toolTip">
+             <string>Edit a rectangular region of interest</string>
+            </property>
+            <property name="text">
+             <string>Edit ROI</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="rs_rect_select_button">
+            <property name="toolTip">
+             <string>Select a rectangular region of interest</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="popupMode">
+             <enum>QToolButton::MenuButtonPopup</enum>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="rs_toolbar_spacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -185,21 +221,31 @@
          </layout>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView_2"/>
+         <widget class="QWidget" name="region_selector" native="true"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="linePlotLayoutWidget">
        <layout class="QVBoxLayout" name="line_plot_layout">
         <item>
-         <widget class="QPushButton" name="plot_1d_toolbar_placeholder">
+         <widget class="QToolButton" name="lp_ads_export_button">
+          <property name="toolTip">
+           <string>Export the reduced workspace to the workspaces list</string>
+          </property>
           <property name="text">
-           <string>Toolbar 1d</string>
+           <string>Export reduced workspace</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="MantidQt::MantidWidgets::QtPlotView" name="line_plot" native="true">
+          <property name="toolTip">
+           <string>Reduced data. Use right-click for plot options</string>
+          </property>
+          <property name="toolTipDuration">
+           <number>2000</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -225,11 +271,18 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::QtPlotView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>treeView_2</tabstop>
-  <tabstop>plot_1d_toolbar_placeholder</tabstop>
-  <tabstop>treeView</tabstop>
+  <tabstop>rs_ads_export_button</tabstop>
+  <tabstop>lp_ads_export_button</tabstop>
   <tabstop>tableWidget_2</tabstop>
   <tabstop>pushButton_3</tabstop>
  </tabstops>

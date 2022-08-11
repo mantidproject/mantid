@@ -503,6 +503,14 @@ public:
     verifyAndClear();
   }
 
+  void testTransferUpdatesLookupIndexes() {
+    auto presenter = makePresenter();
+    auto expectedJobs = expectGetValidSearchResult();
+    EXPECT_CALL(m_mainPresenter, notifyRunsTransferred()).Times(1);
+    presenter.notifyTransfer();
+    verifyAndClear();
+  }
+
   void testChangeInstrumentOnViewNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
@@ -819,12 +827,8 @@ private:
   };
 
   RunsPresenterFriend makePresenter() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    IPythonRunner *pythonRunner = new MockPythonRunner();
-    Plotter plotter(pythonRunner);
-#else
     Plotter plotter;
-#endif
+
     auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
     auto presenter = RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
                                          m_instruments, &m_messageHandler);

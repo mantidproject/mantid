@@ -47,7 +47,9 @@ If defined in your class then you can use it to set a python attribute on your o
                 # Can the be accessed quicker later using self._nloops
                 self._nloops = value
 
-|
+
+.. _attribute_validators:
+
 ====================
 Attribute Validators
 ====================
@@ -55,9 +57,9 @@ Attribute Validators
 If desired, the possible values that an attribute can take can be restricted through the use
 of a Function Attribute Validator. Such a validator must derive from the ``IValidator``
 abstract class; a number of these are currently provided in the Mantid Kernel such as:
-    - List Validator (attribute value must be specified from a provided list of values).
-    - Bounded Validator (numeric attribute value must be between two provided bounds).
-    - String contrains validator (string attribute value must contain a provided sub-string/s)
+- List Validator (attribute value must be specified from a provided list of values).
+- Bounded Validator (numeric attribute value must be between two provided bounds).
+- String contrains validator (string attribute value must contain a provided sub-string/s)
 
 In python, attributes can be declared with a validator using the following syntax:
 

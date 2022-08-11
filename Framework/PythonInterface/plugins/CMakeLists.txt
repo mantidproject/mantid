@@ -4,6 +4,7 @@
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
     algorithms/Abins.py
+    algorithms/Abins2D.py
     algorithms/AlignAndFocusPowderFromFiles.py
     algorithms/AlignComponents.py
     algorithms/AngularAutoCorrelationsSingleAxis.py
@@ -148,6 +149,7 @@ set(PYTHON_PLUGINS
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
     algorithms/PelicanReduction.py
+    algorithms/PelicanCrystalProcessing.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py

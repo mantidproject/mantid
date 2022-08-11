@@ -66,7 +66,7 @@ class GeneralSettings(QObject):
 
     @property
     def data_path(self):
-        self._data_path = unicode(self._settings.value("general_data_path", '.'))
+        self._data_path = self._settings.value("general_data_path", '.', type=unicode)
         return self._data_path
 
     @data_path.setter
@@ -77,7 +77,7 @@ class GeneralSettings(QObject):
 
     @property
     def debug(self):
-        self._debug = unicode(self._settings.value("debug_mode", 'false')).lower()=='true'
+        self._debug = self._settings.value("debug_mode", False, type=bool)
         return self._debug
 
     @debug.setter
@@ -88,7 +88,7 @@ class GeneralSettings(QObject):
 
     @property
     def advanced(self):
-        self._advanced = unicode(self._settings.value("advanced_mode", 'true')).lower()=='true'
+        self._advanced = self._settings.value("advanced_mode", True, type=bool)
         return self._advanced
 
     @advanced.setter
@@ -102,8 +102,8 @@ class GeneralSettings(QObject):
         """ Get instrument name
         :return: instrument name or False
         """
-        self._instrument_name = unicode(self._settings.value("instrument_name", 'true'))
-        if self._instrument_name.lower() == 'true':
+        self._instrument_name = self._settings.value("instrument_name", "", type=unicode)
+        if self._instrument_name == "":
             self._instrument_name = False
         return self._instrument_name
 
@@ -115,8 +115,8 @@ class GeneralSettings(QObject):
 
     @property
     def facility_name(self):
-        self._facility_name = unicode(self._settings.value("facility_name", 'true'))
-        if self._facility_name.lower() == 'true':
+        self._facility_name = self._settings.value("facility_name", "", type=unicode)
+        if self._facility_name == "":
             self._facility_name = False
         return self._facility_name
 
@@ -128,7 +128,7 @@ class GeneralSettings(QObject):
 
     @property
     def data_output_dir(self):
-        self._data_output_dir = unicode(self._settings.value("data_output_dir", 'true')).lower()=='true'
+        self._data_output_dir = self._settings.value("data_output_dir", True, type=bool)
         return self._data_output_dir
 
     @data_output_dir.setter
@@ -139,7 +139,7 @@ class GeneralSettings(QObject):
 
     @property
     def catalog_data_path(self):
-        self._catalog_data_path = unicode(self._settings.value("catalog_data_path", self.data_path ))
+        self._catalog_data_path = self._settings.value("catalog_data_path", self.data_path, type=unicode)
         return self._catalog_data_path
 
     @catalog_data_path.setter

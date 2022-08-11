@@ -56,6 +56,8 @@ public:
     checkLoader("ILL/D16/218356", "LoadILLSANS");
   }
 
+  void test_LoadSANS_D16B() { checkLoader("ILL/D16/066321", "LoadILLSANS"); }
+
   void test_LoadDiffraction_D1B() { checkLoader("ILL/D1B/473432", "LoadILLDiffraction"); }
 
   void test_LoadDiffraction_D2B() { checkLoader("ILL/D2B/535401", "LoadILLDiffraction"); }

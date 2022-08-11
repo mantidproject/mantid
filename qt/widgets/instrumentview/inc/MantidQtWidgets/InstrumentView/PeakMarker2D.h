@@ -25,21 +25,17 @@ class PeakMarker2D : public Shape2D {
 public:
   enum Symbol { Circle = 0, Diamond, Square };
   struct Style {
-    Style(Symbol sb = Circle, const QColor &c = Qt::red,
-          int sz = g_defaultMarkerSize)
+    Style(Symbol sb = Circle, const QColor &c = Qt::red, int sz = g_defaultMarkerSize)
         : symbol(sb), color(std::move(c)), size(sz) {}
     Symbol symbol;
     QColor color;
     int size;
   };
-  PeakMarker2D(PeakOverlay &peakOverlay, double u, double v,
-               const Style &style = Style());
+  PeakMarker2D(PeakOverlay &peakOverlay, double u, double v, const Style &style = Style());
   /* --- Implemented Shape2D virtual methods --- */
   Shape2D *clone() const override { return new PeakMarker2D(*this); }
   bool selectAt(const QPointF &p) const override;
-  bool contains(const QPointF &p) const override {
-    return m_boundingRect.contains(p);
-  }
+  bool contains(const QPointF &p) const override { return m_boundingRect.contains(p); }
   void addToPath(QPainterPath &path) const override;
   /* --- Own public methods --- */
   /// Set new marker size to s

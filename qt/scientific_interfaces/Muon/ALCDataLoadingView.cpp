@@ -5,17 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingView.h"
-
 #include "ALCLatestFileFinder.h"
+
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
+
 #include <Poco/File.h>
-
-#include "MantidKernel/ConfigService.h"
-
 #include <QMessageBox>
+#include <algorithm>
 
 using namespace Mantid::API;
 
@@ -165,7 +165,7 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.dataPlot->clear();
-  auto _log = log();
+
   // If x scale is run number, ensure plain format
   if (log() == "run_number")
     m_ui.dataPlot->tickLabelFormat("x", "plain", false);
@@ -339,8 +339,8 @@ std::string ALCDataLoadingView::getRunsError() { return m_ui.runs->getFileProble
 std::vector<std::string> ALCDataLoadingView::getFiles() {
   const auto QFiles = m_ui.runs->getFilenames();
   std::vector<std::string> files;
-  for (const auto &file : QFiles)
-    files.emplace_back(file.toStdString());
+  std::transform(QFiles.cbegin(), QFiles.cend(), std::back_inserter(files),
+                 [](const auto &file) { return file.toStdString(); });
   return files;
 }
 

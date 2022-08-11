@@ -1,0 +1,1 @@
+- Added Total radial distribution function (G_k(r)) option to :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>` .

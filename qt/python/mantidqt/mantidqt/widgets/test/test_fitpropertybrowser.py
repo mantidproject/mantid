@@ -24,7 +24,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from workbench.plotting.figuremanager import FigureManagerADSObserver
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import MantidAxType, zoom
 
 from qtpy.QtWidgets import QDockWidget
 
@@ -178,13 +178,35 @@ class FitPropertyBrowserTest(unittest.TestCase):
         wsList = property_browser.getWorkspaceList()
         self.assertEqual(1, len(wsList))
 
-    def test_plot_limits_are_not_changed_when_plotting_fit_lines(self):
+    def test_plot_limits_are_not_changed_when_plotting_fit_lines_autoscale_true(self):
         fig, canvas, _ = self._create_and_plot_matrix_workspace()
         ax_limits = fig.get_axes()[0].axis()
         canvas.draw()
         widget = self._create_widget(canvas=canvas)
         fit_ws_name = "fit_ws"
         CreateSampleWorkspace(OutputWorkspace=fit_ws_name)
+        widget.fitting_done_slot(fit_ws_name)
+        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+
+    def test_plot_limits_are_not_changed_when_plotting_fit_lines_autoscale_false(self):
+        fig, canvas, ws = self._create_and_plot_matrix_workspace()
+        ax = fig.get_axes()[0]
+        full_ax_limits = ax.axis()
+        # zoom in x2 based on the central x and y values and recapture limits
+        # note, zoom turns autoscale off
+        zoom(ax, 0.5*(full_ax_limits[0]+full_ax_limits[1]), 0.5*(full_ax_limits[2]+full_ax_limits[3]), 2)
+        ax_limits = ax.axis()
+        canvas.draw()
+        widget = self._create_widget(canvas=canvas)
+        fit_ws_name = "fit_ws"
+        # create fit workspace containing 3 spectra (data\calc\diff)
+        CreateWorkspace(OutputWorkspace=fit_ws_name, DataX=[ax_limits[0], ax_limits[1]], DataY=[1]*6,
+                        NSpec=3, Distribution=False)
+        widget.fitting_done_slot(fit_ws_name)
+        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+        # user picks x range bigger than current zoom (but still within ws data range). Plot limits still don't change
+        CreateWorkspace(OutputWorkspace=fit_ws_name, DataX=[full_ax_limits[0], full_ax_limits[1]], DataY=[1]*6,
+                        NSpec=3, Distribution=False)
         widget.fitting_done_slot(fit_ws_name)
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
 
@@ -199,7 +221,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         # plot it twice
         for i in [0, 1]:
             fig = plot([ws], spectrum_nums=[1])
-            fig.canvas.get_window_title = Mock(return_value=ws_window_names[i])
+            fig.canvas.manager.get_window_title = Mock(return_value=ws_window_names[i])
             browser = self._create_widget(canvas=fig.canvas)
             # don't want the widget to actually show in test
             QDockWidget.show = Mock()

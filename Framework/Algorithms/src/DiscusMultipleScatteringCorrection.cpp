@@ -163,8 +163,14 @@ void DiscusMultipleScatteringCorrection::init() {
  * @return a map where keys are property names and values the found issues
  */
 std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateInputs() {
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  if (inputWS == nullptr) {
+    // Mainly aimed at groups. Group ws pass the property validation on MatrixWorkspace type if all members are
+    // MatrixWorkspaces. We output a WorkspaceGroup for a single input workspace so can't manage input groups
+    issues["InputWorkspace"] = "Input workspace must be a matrix workspace";
+    return issues;
+  }
   Geometry::IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
   if (!sample) {
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
@@ -278,10 +284,10 @@ void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWor
           xmax = xback;
       }
     }
-    // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
-    if (xmin > xmax)
-      throw std::runtime_error("Unable to determine min and max x values for workspace");
   }
+  // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
+  if (xmin > xmax)
+    throw std::runtime_error("Unable to determine min and max x values for workspace");
 }
 
 void DiscusMultipleScatteringCorrection::prepareStructureFactor() {

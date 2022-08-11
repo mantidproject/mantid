@@ -163,7 +163,11 @@ def _replace_special_values(workspace):
     replace_options = {"InputWorkspace": workspace,
                        "OutputWorkspace": EMPTY_NAME,
                        "NaNValue": 0.,
-                       "InfinityValue": 0.}
+                       "InfinityValue": 0.,
+                       "UseAbsolute": False,
+                       "SmallNumberThreshold": 0.0,
+                       "SmallNumberValue": 0.0,
+                       "SmallNumberError": 0.0}
     replace_alg = create_unmanaged_algorithm(replace_name, **replace_options)
     replace_alg.execute()
     return replace_alg.getProperty("OutputWorkspace").value

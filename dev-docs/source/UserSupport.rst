@@ -223,31 +223,29 @@ MacOS
 
 .. code-block:: shell
 
-	/Applications/MantidWorkbench.app/Contents/MacOS/MantidWorkbench
+   open --stdout=workbench_bundle.log --stderr=workbench_bundle.log /Applications/MantidWorkbench.app
 
 If this does not work, try launching with:
 
 .. code-block:: shell
 
-	cd /Applications/MantidWorkbench.app/Contents/MacOS
-	export QT_PLUGIN_PATH=$PWD/../PlugIns/
-	export PYTHONPATH=$PWD:$PYTHONPATH
-	python3 -m workbench.app.main
+   cd /Applications/MantidWorkbench.app/Contents/MacOS
+   ../Resources/python -m workbench.app.main
 
 
-4. Does **Qt** import correctly?
+1. Does **Qt** import correctly?
 
 .. code-block:: shell
 
-    /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
-    import qtpy.QtCore
+   /Applications/MantidWorkbench.app/Contents/Resources/python
+   import qtpy.QtCore
 
 
 5. Do **Mantid Algorithms** import correctly?
 
 .. code-block:: shell
 
-    /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
+    /Applications/MantidWorkbench.app/Contents/Resources/python
     import mantid.simpleapi
 
 
@@ -281,7 +279,7 @@ Advanced Options:
 
 .. code-block:: shell
 
-    cd /Applications/MantidWorkbench.app/Contents/MacOS/
+    cd /Applications/MantidWorkbench.app/Contents/Resources/
     python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 

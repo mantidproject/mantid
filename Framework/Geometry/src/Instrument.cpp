@@ -22,6 +22,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
+#include <algorithm>
 #include <memory>
 #include <nexus/NeXusFile.hpp>
 #include <queue>
@@ -499,11 +500,8 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
   if (detector_ids.empty())
     return false;
 
-  for (auto detector_id : detector_ids) {
-    if (this->isMonitor(detector_id))
-      return true;
-  }
-  return false;
+  return std::any_of(detector_ids.cbegin(), detector_ids.cend(),
+                     [this](const auto detector_id) { return isMonitor(detector_id); });
 }
 
 /**

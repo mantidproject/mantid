@@ -1,0 +1,1 @@
+- Three new fitting functions: FickDiffusionSQE, ChudleyElliotSQE, and HallRossSQE have been made and added to ConvFit

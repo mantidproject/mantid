@@ -69,7 +69,7 @@ class ReductionGUI(QMainWindow):
 
         # Name handle for the instrument
         if instrument is None:
-            instrument = unicode(settings.value("instrument_name", ''))
+            instrument = settings.value("instrument_name", '', type=unicode)
             if instrument_list is not None and instrument not in instrument_list:
                 instrument = None
 
@@ -83,13 +83,13 @@ class ReductionGUI(QMainWindow):
         self._interface = None
 
         # Recent files
-        self._recent_files = settings.value("recent_files", [])
+        self._recent_files = settings.value("recent_files", [], type=list)
         if self._recent_files is None:  # An empty list saved to QSettings comes back as 'None'
             self._recent_files = []
 
         # Folder to open files in
-        self._last_directory = unicode(settings.value("last_directory", '.'))
-        self._last_export_directory = unicode(settings.value("last_export_directory", '.'))
+        self._last_directory = settings.value("last_directory", '.', type=unicode)
+        self._last_export_directory = settings.value("last_export_directory", '.', type=unicode)
 
         # Current file name
         self._filename = None

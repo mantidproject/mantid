@@ -530,9 +530,10 @@ std::vector<double> PoldiAutoCorrelationCore::getDistances(const std::vector<int
   const double chopperDistance = m_chopper->distanceFromSample();
   std::vector<double> distances;
   distances.reserve(elements.size());
-  for (const auto element : elements) {
-    distances.emplace_back(chopperDistance + m_detector->distanceFromSample(element));
-  }
+  std::transform(elements.cbegin(), elements.cend(), std::back_inserter(distances),
+                 [this, chopperDistance](const auto &element) {
+                   return chopperDistance + m_detector->distanceFromSample(element);
+                 });
   return distances;
 }
 
@@ -627,12 +628,10 @@ double PoldiAutoCorrelationCore::getSumOfCounts(int timeBinCount, const std::vec
   double sum = 0.0;
 
   for (int t = 0; t < timeBinCount; ++t) {
-    for (auto detectorElement : detectorElements) {
-      sum += getCounts(detectorElement, t);
-    }
+    sum = std::accumulate(
+        detectorElements.cbegin(), detectorElements.cend(), sum,
+        [this, t](auto lhs, const auto detectorElement) { return lhs + getCounts(detectorElement, t); });
   }
-
   return sum;
 }
-
 } // namespace Mantid::Poldi

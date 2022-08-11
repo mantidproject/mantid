@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFunction1D.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 
 namespace Mantid {

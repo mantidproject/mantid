@@ -7,6 +7,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -15,6 +17,7 @@
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/ParallelEventLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -39,7 +42,6 @@ using Mantid::Types::Core::DateAndTime;
 using std::map;
 using std::string;
 using std::vector;
-using namespace ::NeXus;
 
 namespace Mantid::DataHandling {
 
@@ -461,7 +463,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
   if (file.hasAttr("units"))
     file.getAttr("units", units);
   // Read in the pulse times
-  auto pulse_times = NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
+  auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
   // Convert to seconds
@@ -884,7 +886,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
       if (nxStat != NX_ERROR) {
         LoadHelper loadHelper;
-        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun());
+        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
         NXclose(&nxHandle);
       }
     }
@@ -1060,9 +1062,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   if ((!someBanks.empty()) && (!monitors)) {
     std::vector<std::string> eventedBanks;
     eventedBanks.reserve(someBanks.size());
-    for (const auto &bank : someBanks) {
-      eventedBanks.emplace_back(bank + "_events");
-    }
+    std::transform(someBanks.cbegin(), someBanks.cend(), std::back_inserter(eventedBanks),
+                   [](const auto &bank) { return bank + "_events"; });
+
     // check that all of the requested banks are in the file
     const auto invalidBank =
         std::find_if(eventedBanks.cbegin(), eventedBanks.cend(), [&bankNames](const auto &someBank) {

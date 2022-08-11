@@ -30,7 +30,7 @@ def join_databases(dbfiles):
     all_results = []
     # Get the results of each file
     for dbfile in dbfiles:
-        print "Reading", dbfile
+        print("Reading", dbfile)
         sqlresults.set_database_filename(dbfile)
         these_results = sqlresults.get_results("")
         all_results += these_results
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         dbfile = args.dbfile[0]
 
     if not os.path.exists(dbfile):
-        print "Error! Could not find", dbfile
+        print("Error! Could not find", dbfile)
         sys.exit(1)
 
     # This is where we look for the DB file

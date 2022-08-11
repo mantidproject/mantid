@@ -329,8 +329,8 @@ MaterialBuilder::getOrCalculateRhoAndPacking(const Material::ChemicalFormula &fo
     }
   } else if (m_zParam && m_cellVol) {
     result.number_density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
-  } else if (!m_formula.empty() && m_formula.size() == 1) {
-    result.number_density = m_formula.front().atom->number_density;
+  } else if (!formula.empty() && formula.size() == 1) {
+    result.number_density = formula.front().atom->number_density;
   }
 
   // calculate the effective number density

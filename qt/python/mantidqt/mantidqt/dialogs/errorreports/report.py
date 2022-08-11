@@ -85,8 +85,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         # Prefill name and email saved in QSettings
         qSettings = QSettings()
         qSettings.beginGroup(self.CONTACT_INFO)
-        self.saved_name = str(qSettings.value(self.NAME, ""))
-        self.saved_email = str(qSettings.value(self.EMAIL, ""))
+        self.saved_name = qSettings.value(self.NAME, "", type=str)
+        self.saved_email = qSettings.value(self.EMAIL, "", type=str)
         qSettings.endGroup()
         if self.saved_name or self.saved_email:
             self.input_name_line_edit.setText(self.saved_name)

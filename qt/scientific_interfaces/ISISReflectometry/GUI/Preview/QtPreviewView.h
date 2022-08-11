@@ -8,15 +8,21 @@
 
 #include "Common/DllConfig.h"
 #include "IPreviewView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentDisplay.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
+#include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ui_PreviewWidget.h"
-
 #include <QObject>
 #include <QWidget>
 
 #include <memory>
 #include <string>
+
+namespace MantidQt::MantidWidgets {
+class IPlotView;
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -29,11 +35,15 @@ public:
   QtPreviewView(QWidget *parent = nullptr);
 
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
+  void enableApplyButton() override;
+  void disableApplyButton() override;
 
   std::string getWorkspaceName() const override;
+  double getAngle() const override;
+  // Plotting
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
-
+  // Instrument viewer toolbar
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;
   void setInstViewSelectRectState(bool isChecked) override;
@@ -41,8 +51,18 @@ public:
   void setInstViewEditMode() override;
   void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
+  void setRegionSelectorToolbarEnabled(bool enable) override;
+  void setAngle(double angle) override;
+  void setUpdateAngleButtonEnabled(bool enable) override;
+  // Region selector toolbar
+  void setEditROIState(bool state) override;
+  void setRectangularROIState(bool state) override;
 
   std::vector<size_t> getSelectedDetectors() const override;
+  std::string getRegionType() const override;
+
+  QLayout *getRegionSelectorLayout() const override;
+  MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
 
 private:
   Ui::PreviewWidget m_ui;
@@ -51,13 +71,19 @@ private:
 
   void connectSignals() const;
   void loadToolbarIcons();
+  void setupSelectRegionTypes();
 
 private slots:
   void onLoadWorkspaceRequested() const;
+  void onUpdateClicked() const;
   void onInstViewSelectRectClicked() const;
   void onInstViewZoomClicked() const;
   void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
-  void onContourExportToAdsClicked() const;
+  void onRegionSelectorExportToAdsClicked() const;
+  void onLinePlotExportToAdsClicked() const;
+  void onEditROIClicked() const;
+  void onAddRectangularROIClicked(QAction *regionType) const;
+  void onAngleEdited();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -741,12 +741,10 @@ void FunctionTreeView::addGlobalParameterTie(QtProperty *property, const std::st
 
   auto const fullName = getFullParameterName(parameterName, parentComposite ? static_cast<int>(parentIndex) : -1);
 
-  for (auto const &globalTie : m_globalTies) {
-    if (fullName == globalTie.m_parameter) {
-      addTieProperty(property, QString::fromStdString(globalTie.m_tie), true);
-      break;
-    }
-  }
+  const auto it = std::find_if(m_globalTies.cbegin(), m_globalTies.cend(),
+                               [&fullName](const auto &globalTie) { return fullName == globalTie.m_parameter; });
+  if (it != m_globalTies.cend())
+    addTieProperty(property, QString::fromStdString((*it).m_tie), true);
 }
 
 /**
@@ -1596,18 +1594,16 @@ QtProperty *FunctionTreeView::getAttributeProperty(const QString &attributeName)
 /// Get a property for a parameter which is a parent of a given
 /// property (tie or constraint).
 QtProperty *FunctionTreeView::getParentParameterProperty(QtProperty *prop) const {
-  for (auto &tie : m_ties) {
-    if (tie.tieProp == prop) {
-      return tie.paramProp;
-    }
-  }
+  const auto itProp =
+      std::find_if(m_ties.cbegin(), m_ties.cend(), [&prop](const auto &tie) { return tie.tieProp == prop; });
+  if (itProp != m_ties.cend())
+    return (*itProp).paramProp;
 
-  for (auto &constraint : m_constraints) {
-    if (constraint.lower == prop || constraint.upper == prop) {
-      return constraint.paramProp;
-    }
-  }
-
+  const auto itConstr = std::find_if(m_constraints.cbegin(), m_constraints.cend(), [&prop](const auto &constraint) {
+    return (constraint.lower == prop || constraint.upper == prop);
+  });
+  if (itConstr != m_constraints.cend())
+    return (*itConstr).paramProp;
   throw std::logic_error("QtProperty " + prop->propertyName().toStdString() +
                          " is not a child of a property for any function parameter.");
 }
@@ -1998,9 +1994,9 @@ void FunctionTreeView::tieChanged(QtProperty *prop) {
 
 /// Called when a constraint property changes
 void FunctionTreeView::constraintChanged(QtProperty *prop) {
-  for (const auto &constraint : m_constraints) {
-    const bool isLower = constraint.lower == prop;
-    const bool isUpper = constraint.upper == prop;
+  for (const auto &constr : m_constraints) {
+    const bool isLower = constr.lower == prop;
+    const bool isUpper = constr.upper == prop;
     if (isLower || isUpper) {
       auto paramProp = getParentParameterProperty(prop);
       QString functionIndex, constraint;

@@ -55,6 +55,7 @@ class SliceViewerModel(SliceViewerBaseModel):
         self._rebinned_name = wsname + '_svrebinned'
         self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
         self._roi_name = wsname + '_roi'
+        self._1Dcut_name = wsname + '_1Dcut'
 
         ws_type = WorkspaceInfo.get_ws_type(self._get_ws())
         if ws_type == WS_TYPE.MDE:
@@ -84,6 +85,18 @@ class SliceViewerModel(SliceViewerBaseModel):
         if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
             return True
         return False
+
+    def can_support_non_axis_cuts(self) -> bool:
+        ws = self._get_ws()
+        if WorkspaceInfo.can_support_dynamic_rebinning(ws):
+            ndims = ws.getNumDims()
+            if ndims == 3 and all(ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)):
+                # only support cut viewer for 3D Q MD workspaces that can be rebinned atm
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def can_support_nonorthogonal_axes(self) -> bool:
         """
@@ -118,18 +131,6 @@ class SliceViewerModel(SliceViewerBaseModel):
             pass
 
         return False
-
-    def can_rebin_original_workspace(self):
-        ws = self._get_ws()
-        if self.get_ws_type() == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(0):
-            has_same_dims = ws.getOriginalWorkspace(0).getNumDims() == ws.getNumDims()
-            # check if mdhisto altered since original ws BinMD - then not valid to rebin original
-            mdhisto_has_been_altered = False
-            if ws.getNumExperimentInfo() > 0 and ws.getExperimentInfo(0).run().hasProperty("mdhisto_was_modified"):
-                mdhisto_has_been_altered = bool(int(ws.getExperimentInfo(0).run().get("mdhisto_was_modified").value))
-            return has_same_dims and not mdhisto_has_been_altered
-        else:
-            return False
 
     def set_ws_name(self, new_name):
         self._ws_name = new_name
@@ -283,6 +284,39 @@ class SliceViewerModel(SliceViewerBaseModel):
             _keep_dimensions(ycut_name, yindex)
 
         return help_msg
+
+    def perform_non_axis_aligned_cut_to_workspace(self, vectors, extents, nbins):
+        projection_params = {}
+        # construct projection string for x-axis label
+        cens = np.mean(extents.reshape(2, len(vectors), order='F'), axis=0)  # in u{1..3} basis
+        ix = np.where(nbins > 1)[0][0]  # index of x-axis
+        ivecs = list(range(len(vectors)))
+        ivecs.pop(ix)
+        cen_vec = np.zeros(vectors[0].shape) # position at x = 0
+        for ivec in ivecs:
+            cen_vec = cen_vec + cens[ivec]*vectors[ivec]
+        proj_str = '(' + ' '.join([f'{np.round(c,2)}+{np.round(x,2)}x' if abs(x) > 0 else f'{np.round(c,2)}'
+                                        for c, x in zip(cen_vec, vectors[ix])]) + ')'
+        proj_str = proj_str.replace('+-', '-')
+        for ivec, vec in enumerate(vectors):
+            # calc length
+            length = None
+            if self.get_frame() == SpecialCoordinateSystem.HKL:
+                try:
+                    lattice = self._get_ws().getExperimentInfo(0).sample().getOrientedLattice()
+                    length = 2*np.pi/lattice.d(*vec)
+                except:
+                    pass
+            else:
+                length = np.sqrt(np.sum(vec**2))
+            unit_str = f'in {np.round(length,2)} Ang^-1' if length is not None else 'r.l.u.'
+            xlab = proj_str if ivec == ix else f'u{ivec+1}'
+            vec_str = ','.join(str(v) for v in vec)
+            projection_params[f'BasisVector{ivec}'] = ', '.join([xlab, unit_str, vec_str])
+
+        BinMD(InputWorkspace=self._get_ws(), AxisAligned=False, OutputExtents=extents,
+              OutputBins=nbins, NormalizeBasisVectors=False, OutputWorkspace=self._1Dcut_name, **projection_params)
+        return self._1Dcut_name
 
     def export_roi_to_workspace_mdhisto(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
@@ -440,21 +474,12 @@ class SliceViewerModel(SliceViewerBaseModel):
     def workspace_equals(self, ws_name):
         return self._ws_name == ws_name
 
-    # private api
-    def _get_ws(self):
-        return self._ws
-
-    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
-        """
-        Calculate angles between all combination of display axes
-        """
-
-        proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle
-        if self.can_support_nonorthogonal_axes():
-            expt_info = self._get_ws().getExperimentInfo(0)
-            lattice = expt_info.sample().getOrientedLattice()
-            if WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MDH:
-                ws = self._get_ws()
+    def get_proj_matrix(self):
+        ws = self._get_ws()
+        ws_type = WorkspaceInfo.get_ws_type(ws)
+        if not ws_type == WS_TYPE.MATRIX:
+            proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
+            if ws_type == WS_TYPE.MDH:
                 ndims = ws.getNumDims()
                 i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
                 irow_end = min(3, len(i_qdims))  # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
@@ -464,12 +489,26 @@ class SliceViewerModel(SliceViewerBaseModel):
             else:
                 # for event try to find axes from log
                 try:
-                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
-                    proj_matrix = proj_matrix.reshape(3, 3)
-                except (AttributeError, KeyError):  # run can be None so no .get()
+                    expt_info = ws.getExperimentInfo(0)
+                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
+                except (AttributeError, KeyError, ValueError):  # run can be None so no .get()
                     # assume orthogonal projection if no log exists (i.e. proj_matrix is identity)
                     pass
+            return proj_matrix
+        else:
+            return None
 
+    # private api
+    def _get_ws(self):
+        return self._ws
+
+    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
+        """
+        Calculate angles between all combination of display axes
+        """
+        if self.can_support_nonorthogonal_axes():
+            lattice = self._get_ws().getExperimentInfo(0).sample().getOrientedLattice()
+            proj_matrix = self.get_proj_matrix()
             # calculate angles for all combinations of axes
             angles_matrix = np.zeros((3, 3))
             for ix in range(1, 3):

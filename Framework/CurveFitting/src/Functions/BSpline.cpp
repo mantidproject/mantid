@@ -9,8 +9,9 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+#include "MantidCurveFitting/EigenVector.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 namespace Mantid::CurveFitting::Functions {
 
@@ -61,7 +62,7 @@ BSpline::BSpline() {
  */
 void BSpline::function1D(double *out, const double *xValues, const size_t nData) const {
   size_t np = nParams();
-  GSLVector B(np);
+  EigenVector B(np);
   double startX = getAttribute("StartX").asDouble();
   double endX = getAttribute("EndX").asDouble();
 
@@ -74,7 +75,8 @@ void BSpline::function1D(double *out, const double *xValues, const size_t nData)
     if (x < startX || x > endX) {
       out[i] = 0.0;
     } else {
-      gsl_bspline_eval(x, B.gsl(), m_bsplineWorkspace.get());
+      gsl_vector_view B_gsl = getGSLVectorView(B.mutator());
+      gsl_bspline_eval(x, &B_gsl.vector, m_bsplineWorkspace.get());
       double val = 0.0;
       for (size_t j = 0; j < np; ++j) {
         val += getParameter(j) * B.get(j);
@@ -102,7 +104,7 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
   }
 #endif
 
-  GSLMatrix B(k, order + 1);
+  EigenMatrix B(k, order + 1);
   double startX = getAttribute("StartX").asDouble();
   double endX = getAttribute("EndX").asDouble();
 
@@ -118,11 +120,16 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
       size_t jstart(0);
       size_t jend(0);
 #if GSL_MAJOR_VERSION < 2
-      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend, m_bsplineWorkspace.get(),
+      gsl_matrix_view B_gsl = getGSLMatrixView(B.mutator());
+      gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl.matrix, &jstart, &jend, m_bsplineWorkspace.get(),
                                      m_bsplineDerivWorkspace.get());
 #else
-      gsl_bspline_deriv_eval_nonzero(x, order, B.gsl(), &jstart, &jend, m_bsplineWorkspace.get());
+      EigenMatrix B_tr(B.tr());
+      gsl_matrix_view B_gsl_tr = getGSLMatrixView(B_tr.mutator());
+      gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl_tr.matrix, &jstart, &jend, m_bsplineWorkspace.get());
+      B = B_tr.tr();
 #endif
+
       double val = 0.0;
       for (size_t j = jstart; j <= jend; ++j) {
         val += getParameter(j) * B.get(j - jstart, order);
@@ -225,8 +232,10 @@ void BSpline::resetKnots() {
       resetGSLObjects();
       resetParameters();
     }
-    GSLVector bp(breakPoints);
-    gsl_bspline_knots(bp.gsl(), m_bsplineWorkspace.get());
+    EigenVector bp(breakPoints);
+
+    const gsl_vector_const_view bp_gsl = getGSLVectorView_const(bp.inspector());
+    gsl_bspline_knots(&bp_gsl.vector, m_bsplineWorkspace.get());
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));
   }

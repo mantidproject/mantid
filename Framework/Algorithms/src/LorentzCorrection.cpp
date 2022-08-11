@@ -78,6 +78,10 @@ std::map<std::string, std::string> LorentzCorrection::validateInputs() {
   // check units if the SCD option is selected
   if (processingType == TOF_SCD) {
     MatrixWorkspace_const_sptr wksp = this->getProperty(PropertyNames::INPUT_WKSP);
+    if (!wksp) {
+      result[PropertyNames::INPUT_WKSP] = "The workspace must be a MatrixWorkspace.";
+      return result;
+    }
     // code is a variant of private method from WorkspaceUnitValidator
     const auto unit = wksp->getAxis(0)->unit();
     if ((!unit) || (unit->unitID().compare("Wavelength"))) {

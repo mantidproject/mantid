@@ -23,6 +23,7 @@
 #pragma warning(default : 4180)
 #endif
 
+#include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <functional>
@@ -506,11 +507,10 @@ template <class T1, class T2> void EventList::minusHelper(std::vector<T1> &event
    * Using it caused a segault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
-  for (const auto &ev : more_events) {
-    // We call the constructor for T1. In the case of WeightedEventNoTime, the
-    // pulse time will just be ignored.
-    events.emplace_back(ev.tof(), ev.pulseTime(), ev.weight() * (-1.0), ev.errorSquared());
-  }
+  // We call the constructor for T1. In the case of WeightedEventNoTime, the
+  // pulse time will just be ignored.
+  std::transform(more_events.cbegin(), more_events.cend(), std::back_inserter(events),
+                 [](const auto &ev) { return T1(ev.tof(), ev.pulseTime(), ev.weight() * (-1.0), ev.errorSquared()); });
 }
 
 // --------------------------------------------------------------------------
@@ -2399,7 +2399,7 @@ void EventList::convertTof(std::function<double(double)> func, const int sorting
     this->reverse();
   }
 
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
 
   // Convert the list
@@ -2441,7 +2441,7 @@ void EventList::convertTof(const double factor, const double offset) {
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))
     this->reverse();
 
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
 
   // Convert the list
@@ -2523,7 +2523,7 @@ template <class T> void EventList::addPulsetimesHelper(std::vector<T> &events, c
  * @param seconds :: The value to shift the pulsetime by, in seconds
  */
 void EventList::addPulsetime(const double seconds) {
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
 
   // Convert the list
@@ -2548,7 +2548,7 @@ void EventList::addPulsetime(const double seconds) {
  * @param seconds :: A set of values to shift the pulsetime by, in seconds
  */
 void EventList::addPulsetimes(const std::vector<double> &seconds) {
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
   if (this->getNumberEvents() != seconds.size()) {
     throw std::runtime_error("");

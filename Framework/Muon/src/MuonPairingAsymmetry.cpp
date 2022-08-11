@@ -221,13 +221,25 @@ void MuonPairingAsymmetry::validateManualGroups(std::map<std::string, std::strin
     errors["Group1"] = "The two groups must be different.";
   }
 
-  WorkspaceGroup_sptr inputWS = this->getProperty("InputWorkspace");
-  validatePeriods(inputWS, errors);
+  if (WorkspaceGroup_sptr workspaceGroup = this->getProperty("InputWorkspace")) {
+    validatePeriods(workspaceGroup, errors);
+  } else {
+    errors["InputWorkspace"] = "The InputWorkspace must be a WorkspaceGroup.";
+  }
 }
 
 void MuonPairingAsymmetry::validateGroupsWorkspaces(std::map<std::string, std::string> &errors) {
   Workspace_sptr ws1 = this->getProperty("InputWorkspace1");
   Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
+  if (!ws1) {
+    errors["InputWorkspace1"] = "The InputWorkspace1 must be a Workspace.";
+  }
+  if (!ws2) {
+    errors["InputWorkspace2"] = "The InputWorkspace2 must be a Workspace.";
+  }
+  if (errors.count("InputWorkspace1") == 1 || errors.count("InputWorkspace2") == 1) {
+    return;
+  }
   if (ws1->isGroup() && !ws2->isGroup()) {
     errors["InputWorkspace1"] = "InputWorkspace2 should be multi period to match InputWorkspace1";
   }

@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, PropertyMode
+from mantid.api import (AlgorithmFactory, IMDWorkspace, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm,
+                        PropertyMode)
 from mantid.kernel import Direction, FloatPropertyWithValue, StringListValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.simpleapi import (PredictPeaks, CloneMDWorkspace,
                               CopySample, DeleteWorkspace, PredictSatellitePeaks,
@@ -79,7 +80,10 @@ class HB3APredictPeaks(PythonAlgorithm):
         issues = dict()
 
         input_ws = self.getProperty("InputWorkspace").value
-        if input_ws.getSpecialCoordinateSystem().name != "QSample":
+
+        if not isinstance(input_ws, IMDWorkspace):
+            issues['InputWorkspace'] = "The InputWorkspace must be an IMDWorkspace."
+        elif input_ws.getSpecialCoordinateSystem().name != "QSample":
             issues["InputWorkspace"] = "Input workspace expected to be in QSample, " \
                 "workspace is in '{}'".format(input_ws.getSpecialCoordinateSystem().name)
         elif input_ws.getNumDims() != 3:

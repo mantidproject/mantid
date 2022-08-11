@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 
@@ -93,6 +94,24 @@ MANTID_MPLCPP_DLL Common::Python::Object plot(const QStringList &workspaces,
                                               boost::optional<std::string> windowTitle = boost::none,
                                               bool errors = false, bool overplot = false, bool tiled = false);
 
+/**
+ * \overload plot(const std::vector<MatrixWorkspace_sptr> &workspaces,
+     boost::optional<std::vector<int>> spectrumNums,
+     boost::optional<std::vector<int>> wkspIndices,
+     boost::optional<Common::Python::Object> fig = boost::none,
+     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+     boost::optional<std::string> windowTitle = boost::none,
+     bool errors = false, bool overplot = false)
+ */
+MANTID_MPLCPP_DLL Common::Python::Object plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                                              boost::optional<std::vector<int>> spectrumNums,
+                                              boost::optional<std::vector<int>> wkspIndices,
+                                              boost::optional<Common::Python::Object> fig = boost::none,
+                                              boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+                                              boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+                                              boost::optional<std::string> windowTitle = boost::none,
+                                              bool errors = false, bool overplot = false, bool tiled = false);
 /**
  * Makes a call to mantidqt.plotting.plotsubplots.
  *

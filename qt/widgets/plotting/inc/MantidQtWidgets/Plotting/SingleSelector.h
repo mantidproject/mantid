@@ -8,8 +8,4 @@
 
 #include <QtGlobal>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Plotting/Qwt/SingleSelector.h"
-#else
 #include "MantidQtWidgets/Plotting/Mpl/SingleSelector.h"
-#endif

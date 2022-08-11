@@ -239,7 +239,8 @@ class ProjectRecovery(object):
         total_mantids = 0
         for proc in psutil.process_iter():
             try:
-                if self._is_mantid_workbench_process(proc.cmdline()):
+                # Ignore processes that have another workbench as a child (e.g. the error-reporter process)
+                if self._is_mantid_workbench_process(proc.cmdline()) and not self._has_child_workbench_process(proc):
                     total_mantids += 1
             except Exception:
                 # if we can't access the process properties then we assume it is not a mantid process
@@ -253,6 +254,13 @@ class ProjectRecovery(object):
         for line in cmdline:
             process_name = os.path.basename(os.path.normpath(line))
             if process_name in EXECUTABLE_NAMES:
+                return True
+        return False
+
+    @staticmethod
+    def _has_child_workbench_process(proc):
+        for child in proc.children(recursive=True):
+            if _is_mantid_workbench_process(child.cmdline()):
                 return True
         return False
     ######################################################

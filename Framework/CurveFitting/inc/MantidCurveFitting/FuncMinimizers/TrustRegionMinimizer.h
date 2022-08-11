@@ -12,8 +12,8 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FortranDefs.h"
-#include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 #include "MantidCurveFitting/RalNlls/Workspaces.h"
 
 namespace Mantid {

@@ -11,9 +11,12 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include <cmath>
+
+#include <gsl/gsl_blas.h>
 
 namespace Mantid::CurveFitting::FuncMinimisers {
 
@@ -97,8 +100,13 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatr
   if (J.len1() != m || J.len2() != n) {
     J.allocate(m, n);
   }
-  m_J.setJ(J.gsl());
+
+  DoubleFortranMatrix J_tr(J.transpose());
+  gsl_matrix_view J_tr_gsl = getGSLMatrixView(J_tr.mutator());
+  m_J.setJ(&J_tr_gsl.matrix);
   m_function->functionDeriv(domain, m_J);
+  J = J_tr.tr();
+
   for (int i = 1; i <= m; ++i) {
     double w = values.getFitWeight(i - 1);
     for (int j = 1; j <= n; ++j) {
@@ -544,7 +552,7 @@ std::pair<double, double> minMaxValues(const DoubleFortranVector &v) {
 double twoNorm(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return gsl_blas_dnrm2(v.gsl());
+  return v.norm();
 }
 
 /** Get the dot-product of two vectors of the same size.

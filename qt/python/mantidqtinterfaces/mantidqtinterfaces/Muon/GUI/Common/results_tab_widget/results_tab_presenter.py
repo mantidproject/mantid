@@ -55,7 +55,12 @@ class ResultsTabPresenter(QObject):
         # view lives on. This avoids errors from painting on non-gui threads.
 
         new_fit_name = ";"
-        if fit_info:
+        if fit_info and isinstance(fit_info, list):
+            if len(fit_info)>0:
+                new_fit_list = fit_info[0].output_workspace_names()
+                if new_fit_list and len(new_fit_list)>0:
+                    new_fit_name = new_fit_list[0]
+        elif fit_info:
             new_fit_list = fit_info.output_workspace_names()
             if new_fit_list and len(new_fit_list)>0:
                 new_fit_name = new_fit_list[0]

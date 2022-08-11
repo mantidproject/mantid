@@ -1,1 +1,0 @@
-- :ref:`DirectILLCollectData <algm-DirectILLCollectData` will now be able to load data with whitespaces in paths or file names

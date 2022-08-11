@@ -18,6 +18,7 @@ from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.saveprojectdialog.presenter import ProjectSaveDialogPresenter
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 class Project(AnalysisDataServiceObserver):
@@ -54,8 +55,8 @@ class Project(AnalysisDataServiceObserver):
         self.prompt_save_on_close = True
 
     def load_settings_from_config(self, config):
-        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
-        self.save_altered_workspaces_only = config.get('project', 'save_altered_workspaces_only')
+        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close', type=bool)
+        self.save_altered_workspaces_only = config.get('project', 'save_altered_workspaces_only', type=bool)
 
     @property
     def saved(self):
@@ -138,7 +139,9 @@ class Project(AnalysisDataServiceObserver):
             # If a project is > the value in the properties file, question the user if they want to continue.
             result = None
             if project_size > warning_size:
-                result = self._offer_large_size_confirmation()
+                # we have to create the message box in the main thread
+                result = QAppThreadCall(self._offer_large_size_confirmation)()
+
             if result is None or result != QMessageBox.Cancel:
                 plots_to_save = self.plot_gfm.figs
 

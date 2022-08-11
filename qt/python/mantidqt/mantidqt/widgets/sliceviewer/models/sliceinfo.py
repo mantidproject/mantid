@@ -50,6 +50,7 @@ class SliceInfo:
         self.range = range
         self._slicevalue_z, self._slicewidth_z = (None,) * 2
         self._display_x, self._display_y, self._display_z = (None,) * 3
+        self.i_non_q = np.array([idim for idim, qflag in enumerate(qflags) if not qflag])
 
         # initialise attributes
         self._init_display_indices(transpose, qflags)
@@ -76,31 +77,35 @@ class SliceInfo:
         """
         return self._nonorthogonal_axes_supported
 
+    def can_support_peak_overlay(self) -> bool:
+        return self._peak_overlay_supported
+
     def get_northogonal_transform(self) -> NonOrthogonalTransform:
         return self._transform
 
     def transform(self, point: Sequence) -> np.ndarray:
-        """Transform a point to the slice frame.
+        """Transform a 3-vector point (e.g. HLK, Qxyz) to the slice frame/display coordinates xy (z = slicepoint)
         It returns a ndarray(X,Y,Z) where X,Y are coordinates of X,Y of the display
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        return np.array((*self._transform.tr(point[self._display_x], point[self._display_y]),
-                         point[self._display_z]))
+        px = point[self.adjust_index_for_preceding_nonq_dims(self._display_x)]
+        py = point[self.adjust_index_for_preceding_nonq_dims(self._display_y)]
+        pz = point[self.adjust_index_for_preceding_nonq_dims(self._display_z)]
+        return np.array((*self._transform.tr(px, py), pz))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
-        """Does the inverse transform (inverse of self.transform) from slice
-        frame to data frame
-
-        :param point: A 3D point in the slice frame
         """
-        transform = np.zeros((3, 3))
-        transform[0][self._display_x] = 1
-        transform[1][self._display_y] = 1
-        transform[2][self._display_z] = 1
-        inv_trans = np.linalg.inv(transform)
-        point = np.dot(inv_trans, point)
-        return np.array((*self._transform.inv_tr(point[0], point[1]), point[2]))
+        Does the inverse transform (inverse of self.transform) from slice/display frame to data frame
+        :param point: A 3D point in the data frame
+        """
+        x, y = self._transform.inv_tr(point[0], point[1])  # apply inverse transform to get x,y in data frame
+        # populate data point accounting for order of axes displayed
+        data_point = np.zeros(3)
+        data_point[self.adjust_index_for_preceding_nonq_dims(self._display_x)] = x
+        data_point[self.adjust_index_for_preceding_nonq_dims(self._display_y)] = y
+        data_point[self.adjust_index_for_preceding_nonq_dims(self._display_z)] = point[2]
+        return data_point
 
     # private api
     def _init_display_indices(self, transpose: bool, qflags: Sequence[bool]):
@@ -137,12 +142,11 @@ class SliceInfo:
             self._slicewidth_z = z_range[1] - z_range[0]
 
     def _init_transform(self, qflags: Sequence[bool], axes_angles: Optional[np.ndarray] = None):
+        self._peak_overlay_supported = qflags[self._display_x] and qflags[self._display_y]
         # find transform for the chosen display indices
-        if isinstance(axes_angles, np.ndarray) and qflags[self._display_x] and qflags[self._display_y]:
-            # adjust index if non-Q dimension is before a Q the displayed axes
-            # force array to have dtype=bool otherwise ~ operator throws error on empty array when index is zero
-            ix = self._display_x - np.sum(~np.array(qflags[:self._display_x], dtype=bool))
-            iy = self._display_y - np.sum(~np.array(qflags[:self._display_y], dtype=bool))
+        if isinstance(axes_angles, np.ndarray) and self._peak_overlay_supported:
+            ix = self.adjust_index_for_preceding_nonq_dims(self._display_x)
+            iy = self.adjust_index_for_preceding_nonq_dims(self._display_y)
             angle = axes_angles[ix, iy]
             if abs(angle-(np.pi/2)) < 1e-5:
                 self._transform = OrthogonalTransform()  # use OrthogonalTransform for performance
@@ -152,3 +156,11 @@ class SliceInfo:
         else:
             self._transform = OrthogonalTransform()
             self._nonorthogonal_axes_supported = False
+
+    def adjust_index_for_preceding_nonq_dims(self, display_index: int) -> int:
+        """
+        Get index of q dimension corresponding to display index - i.e. ignoring non q dims.
+        :param display_index: index of dimension displayed
+        :return: index of q dim ignoring non q dims - i.e. index in range(0,3)
+        """
+        return int(display_index - np.sum(self.i_non_q < display_index))  # cast to int from numpy int32 type

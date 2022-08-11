@@ -15,6 +15,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <algorithm>
 #include <memory>
 #include <set>
 #include <unordered_set>
@@ -187,65 +188,46 @@ size_t EventWorkspaceCollection::getNumberEvents() const {
 
 void EventWorkspaceCollection::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   const HistogramData::BinEdges edges(2);
-  for (auto &ws : m_WsVec)
-    ws = create<EventWorkspace>(*ws, indexInfo, edges);
+  std::for_each(m_WsVec.begin(), m_WsVec.end(),
+                [&indexInfo, &edges](auto &ws) { ws = create<EventWorkspace>(*ws, indexInfo, edges); });
 }
 
 void EventWorkspaceCollection::setInstrument(const Geometry::Instrument_const_sptr &inst) {
-  for (auto &ws : m_WsVec) {
-    ws->setInstrument(inst);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [&inst](auto &ws) { ws->setInstrument(inst); });
 }
 void EventWorkspaceCollection::setMonitorWorkspace(const std::shared_ptr<API::MatrixWorkspace> &monitorWS) {
-  for (auto &ws : m_WsVec) {
-    ws->setMonitorWorkspace(monitorWS); // TODO, do we really set the same monitor on all periods???
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [&monitorWS](auto &ws) { ws->setMonitorWorkspace(monitorWS); });
+  // TODO, do we really set the same monitor on all periods???
 }
 void EventWorkspaceCollection::updateSpectraUsing(const API::SpectrumDetectorMapping &map) {
-  for (auto &ws : m_WsVec) {
-    ws->updateSpectraUsing(map);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [&map](auto &ws) { ws->updateSpectraUsing(map); });
 }
 
 void EventWorkspaceCollection::setGeometryFlag(const int flag) {
-  for (auto &ws : m_WsVec) {
-    ws->mutableSample().setGeometryFlag(flag);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [flag](auto &ws) { ws->mutableSample().setGeometryFlag(flag); });
 }
 
 void EventWorkspaceCollection::setThickness(const float flag) {
-  for (auto &ws : m_WsVec) {
-    ws->mutableSample().setThickness(flag);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [flag](auto &ws) { ws->mutableSample().setThickness(flag); });
 }
 void EventWorkspaceCollection::setHeight(const float flag) {
-  for (auto &ws : m_WsVec) {
-    ws->mutableSample().setHeight(flag);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [flag](auto &ws) { ws->mutableSample().setHeight(flag); });
 }
 void EventWorkspaceCollection::setWidth(const float flag) {
-  for (auto &ws : m_WsVec) {
-    ws->mutableSample().setWidth(flag);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [flag](auto &ws) { ws->mutableSample().setWidth(flag); });
 }
 
 void EventWorkspaceCollection::setTitle(const std::string &title) {
-  for (auto &ws : m_WsVec) {
-    ws->setTitle(title);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [&title](auto &ws) { ws->setTitle(title); });
 }
 
 void EventWorkspaceCollection::applyFilterInPlace(const boost::function<void(MatrixWorkspace_sptr)> &func) {
-  for (auto &ws : m_WsVec) {
-    func(ws);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [&func](auto &ws) { func(ws); });
 }
 
 void EventWorkspaceCollection::applyFilter(
     const boost::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func) {
-  for (auto &ws : m_WsVec) {
-    ws = func(ws);
-  }
+  std::for_each(m_WsVec.begin(), m_WsVec.end(), [&func](auto &ws) { ws = func(ws); });
 }
 
 //-----------------------------------------------------------------------------

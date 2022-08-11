@@ -327,8 +327,11 @@ void InstrumentActor::applyMaskWorkspace() {
   }
 
   // Mask bins
-  m_maskBinsData.mask(m_workspace);
-
+  try {
+    m_maskBinsData.mask(m_workspace);
+  } catch (std::logic_error &) {
+    m_messageHandler.giveUserWarning("An error occurred when applying the mask to bins.", "Mantid - Warning");
+  }
   clearMasks();
 }
 
@@ -351,8 +354,6 @@ void InstrumentActor::clearMasks() {
     resetColors();
   }
 }
-
-std::vector<size_t> InstrumentActor::getMonitors() const { return m_monitors; }
 
 Instrument_const_sptr InstrumentActor::getInstrument() const {
   auto sharedWorkspace = getWorkspace();
@@ -435,7 +436,7 @@ double InstrumentActor::getIntegratedCounts(size_t index) const {
   auto i = getWorkspaceIndex(index);
   if (i == INVALID_INDEX)
     return InstrumentActor::INVALID_VALUE;
-  return m_specIntegrs.at(i);
+  return m_integratedSignal.at(i);
 }
 
 /**
@@ -619,7 +620,7 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets, std::v
 
 /**
  * Recalculate the detector colors based on the integrated values in
- * m_specIntegrs and
+ * m_integratedSignal and
  * the masking information in ....
  */
 void InstrumentActor::resetColors() {
@@ -991,13 +992,13 @@ void InstrumentActor::setDataMinMaxRange(double vmin, double vmax) {
 
 void InstrumentActor::calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace) {
   // Use the workspace function to get the integrated spectra
-  workspace.getIntegratedSpectra(m_specIntegrs, m_BinMinValue, m_BinMaxValue, wholeRange());
+  workspace.getIntegratedSpectra(m_integratedSignal, m_BinMinValue, m_BinMaxValue, wholeRange());
   // replace any values that are not finite
   std::replace_if(
-      m_specIntegrs.begin(), m_specIntegrs.end(), [](double x) { return !std::isfinite(x); },
+      m_integratedSignal.begin(), m_integratedSignal.end(), [](double x) { return !std::isfinite(x); },
       InstrumentActor::INVALID_VALUE);
 
-  m_maskBinsData.subtractIntegratedSpectra(workspace, m_specIntegrs);
+  m_maskBinsData.subtractIntegratedSpectra(workspace, m_integratedSignal);
 }
 
 void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &xmax) {
@@ -1015,12 +1016,12 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
     monitorIndices.emplace(index);
   }
   // check that there is at least 1 non-monitor spectrum
-  if (monitorIndices.size() == m_specIntegrs.size()) {
+  if (monitorIndices.size() == m_integratedSignal.size()) {
     // there are only monitors - cannot skip them
     monitorIndices.clear();
   }
 
-  if (m_specIntegrs.empty()) {
+  if (m_integratedSignal.empty()) {
     // in case there are no spectra set some arbitrary values
     m_DataMinValue = 1.0;
     m_DataMaxValue = 10.0;
@@ -1030,10 +1031,10 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
     m_DataMaxValue = -DBL_MAX;
 
     const auto &spectrumInfo = workspace->spectrumInfo();
-    auto maskWksp = getMaskWorkspace();
+    auto maskWksp = getMaskWorkspaceIfExists();
 
     // Ignore monitors if multiple detectors aren't grouped.
-    for (size_t i = 0; i < m_specIntegrs.size(); i++) {
+    for (size_t i = 0; i < m_integratedSignal.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
       // Ignore monitors if they are masked on the view
       if (spectrumDefinition.size() == 1 &&
@@ -1041,7 +1042,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
            (maskWksp && maskWksp->isMasked(static_cast<int>(i)))))
         continue;
 
-      auto sum = m_specIntegrs[i];
+      auto sum = m_integratedSignal[i];
 
       if (sum == InstrumentActor::INVALID_VALUE)
         continue;
@@ -1150,18 +1151,7 @@ std::vector<std::string> InstrumentActor::getStringParameter(const std::string &
  * @return string representing the current state of the instrumet actor.
  */
 std::string InstrumentActor::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv;
-  const std::string currentColorMap = getCurrentColorMap().toStdString();
-
-  if (!currentColorMap.empty())
-    tsv.writeLine("FileName") << currentColorMap;
-
-  tsv.writeSection("binmasks", m_maskBinsData.saveToProject());
-  return tsv.outputLines();
-#else
   throw std::runtime_error("InstrumentActor::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -1169,23 +1159,8 @@ std::string InstrumentActor::saveToProject() const {
  * @param lines :: string representing the current state of the instrumet actor.
  */
 void InstrumentActor::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-  if (tsv.selectLine("FileName")) {
-    QString filename;
-    tsv >> filename;
-    loadColorMap(filename);
-  }
-
-  if (tsv.selectSection("binmasks")) {
-    std::string binMaskLines;
-    tsv >> binMaskLines;
-    m_maskBinsData.loadFromProject(binMaskLines);
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentActor::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 bool InstrumentActor::hasGridBank() const { return m_hasGrid; }

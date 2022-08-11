@@ -1744,9 +1744,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   // peak
   std::vector<std::string> param_vec;
   if (m_rawPeaksTable) {
-    std::vector<std::string> peak_params = m_peakFunction->getParameterNames();
-    for (const auto &peak_param : peak_params)
-      param_vec.emplace_back(peak_param);
+    param_vec = m_peakFunction->getParameterNames();
   } else {
     param_vec.emplace_back("centre");
     param_vec.emplace_back("width");

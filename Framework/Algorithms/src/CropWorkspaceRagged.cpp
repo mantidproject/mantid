@@ -11,6 +11,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <algorithm>
+
 namespace {
 std::vector<double> getSubVector(Mantid::MantidVec &data, const int64_t &lowerIndex, const int64_t &upperIndex) {
   auto low = std::next(data.begin(), lowerIndex);
@@ -61,18 +63,16 @@ std::map<std::string, std::string> CropWorkspaceRagged::validateInputs() {
   if (xMin.size() == 1 && xMax.size() == 1 && xMin[0] > xMax[0]) {
     issues["XMax"] = "XMax must be greater than XMin.";
   } else if (xMin.size() == 1 && xMax.size() > 1) {
-    for (auto max : xMax) {
-      if (max < xMin[0]) {
-        issues["XMax"] = "XMax must be greater than XMin.";
-        return issues;
-      }
+    auto it = std::find_if(xMax.cbegin(), xMax.cend(), [&xMin](auto max) { return max < xMin[0]; });
+    if (it != xMax.cend()) {
+      issues["XMax"] = "XMax must be greater than XMin.";
+      return issues;
     }
   } else if (xMin.size() > 1 && xMax.size() == 1) {
-    for (auto min : xMin) {
-      if (min > xMax[0]) {
-        issues["XMin"] = "XMin must be less than XMax.";
-        return issues;
-      }
+    auto it = std::find_if(xMin.cbegin(), xMin.cend(), [&xMax](auto min) { return min > xMax[0]; });
+    if (it != xMin.cend()) {
+      issues["XMin"] = "XMin must be less than XMax.";
+      return issues;
     }
   } else if (xMin.size() > 1 && xMax.size() > 1) {
     for (size_t k = 0; k < xMin.size(); k++) {

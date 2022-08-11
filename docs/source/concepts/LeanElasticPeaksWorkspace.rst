@@ -43,9 +43,9 @@ Output:
 
 .. testoutput:: findpeaksmd
 
-   Peak 0 - Q-sample = [5.50028,3.14201,0.999732] - bin count = 1000.0
-   Peak 1 - Q-sample = [3.08182,3.08072,3.08116] - bin count = 754.0
-   Peak 2 - Q-sample = [1.08179,0.918553,0.919687] - bin count = 257.0
+   Peak 0 - Q-sample = [5.50233,3.1408,1.00067] - bin count = 1000.0
+   Peak 1 - Q-sample = [2.91935,3.07936,2.91857] - bin count = 503.0
+   Peak 2 - Q-sample = [1.00319,1.00183,1.00097] - bin count = 181.0
 
 Now convert that MDEventWorkspace to MDHistoWorkspace and run FindPeaksMD on that.
 
@@ -68,9 +68,9 @@ Output:
 
 .. testoutput:: findpeaksmd
 
-   Peak 0 - Q-sample = [3.15,2.85,3.15] - bin count = 1.43
-   Peak 1 - Q-sample = [0.95,0.95,1.05] - bin count = 0.39
-   Peak 2 - Q-sample = [5.45,3.15,0.95] - bin count = 0.18
+   Peak 0 - Q-sample = [2.85,2.95,3.05] - bin count = 0.94
+   Peak 1 - Q-sample = [1.05,0.95,1.05] - bin count = 0.35
+   Peak 2 - Q-sample = [5.55,3.15,1.05] - bin count = 0.19
 
 
 PredictPeaks example

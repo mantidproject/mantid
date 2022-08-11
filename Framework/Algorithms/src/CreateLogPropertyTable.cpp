@@ -19,6 +19,7 @@
 
 #include "boost/shared_ptr.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <map>
 #include <vector>
@@ -94,9 +95,10 @@ void CreateLogPropertyTable::exec() {
     const std::string wsName = matrixWs->getName();
 
     // Throw if a run does not have a property.
-    for (const auto &propName : propNames)
-      if (!run.hasProperty(propName))
-        throw std::runtime_error("\"" + wsName + "\" does not have a run property of \"" + propName + "\".");
+    auto it = std::find_if(propNames.cbegin(), propNames.cend(),
+                           [&run](const auto &propName) { return !run.hasProperty(propName); });
+    if (it != propNames.cend())
+      throw std::runtime_error("\"" + wsName + "\" does not have a run property of \"" + (*it) + "\".");
   }
 
   // Set up output table.
