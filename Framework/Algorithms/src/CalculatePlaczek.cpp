@@ -169,7 +169,7 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
       sampleTempLog = run.getLogData("SampleTemp");
     }
     // ISIS logs use sample_temp
-    if (run.hasProperty("SampleTemp")) {
+    if (run.hasProperty("sample_temp")) {
       sampleTempLog = run.getLogData("sample_temp");
     }
     if (!sampleTempLog) {
@@ -427,15 +427,15 @@ double CalculatePlaczek::getSampleTemperature() {
     // get the sample temperature from sample log
     const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
     const auto run = inWS->run();
-    const auto sampleTempLogORNL = run.getLogData("SampleTemp");
-    const auto sampleTempLogISIS = run.getLogData("sample_temp");
-    if (sampleTempLogORNL) {
+    // SampleTemp only valid for ORNL runs
+    if (run.hasProperty("SampleTemp")) {
       sampleTemperature = run.getPropertyAsSingleValue("SampleTemp");
       const std::string sampleTempUnit = run.getProperty("SampleTemp")->units();
       if (sampleTempUnit == "C") {
         sampleTemperature = sampleTemperature + 273.15; // convert to K
       }
-    } else if (sampleTempLogISIS) {
+      // sample_temp only valid for ISIS runs
+    } else if (run.hasProperty("sample_temp")) {
       sampleTemperature = run.getPropertyAsSingleValue("sample_temp");
       const std::string sampleTempUnit = run.getProperty("sample_temp")->units();
       if (sampleTempUnit == "C") {
