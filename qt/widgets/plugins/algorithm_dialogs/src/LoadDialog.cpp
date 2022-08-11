@@ -86,7 +86,7 @@ void LoadDialog::createDynamicWidgets() {
 void LoadDialog::helpClicked() {
   const auto loaderName = getAlgorithm()->getPropertyValue("LoaderName");
   QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-  MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(), helpPage);
+  MantidQt::API::HelpWindow::showAlgorithm(helpPage);
 }
 
 /**

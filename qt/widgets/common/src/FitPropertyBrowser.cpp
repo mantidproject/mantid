@@ -3161,7 +3161,7 @@ std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_f
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    MantidQt::API::HelpWindow::showFitFunction(nullptr, handler->ifun()->name());
+    MantidQt::API::HelpWindow::showFitFunction(handler->ifun()->name());
   }
 }
 

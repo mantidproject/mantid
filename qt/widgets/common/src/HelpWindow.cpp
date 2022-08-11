@@ -25,9 +25,9 @@ Mantid::Kernel::Logger g_log("HelpWindow");
 
 using std::string;
 
-void HelpWindow::showPage(QWidget *parent, const std::string &url) { showPage(parent, QString(url.c_str())); }
+void HelpWindow::showPage(const std::string &url) { showPage(QString(url.c_str())); }
 
-void HelpWindow::showPage(QWidget *parent, const QString &url) {
+void HelpWindow::showPage(const QString &url) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
@@ -37,7 +37,7 @@ void HelpWindow::showPage(QWidget *parent, const QString &url) {
   }
 }
 
-void HelpWindow::showPage(QWidget *parent, const QUrl &url) {
+void HelpWindow::showPage(const QUrl &url) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
@@ -47,11 +47,11 @@ void HelpWindow::showPage(QWidget *parent, const QUrl &url) {
   }
 }
 
-void HelpWindow::showAlgorithm(QWidget *parent, const std::string &name, const int version) {
-  showAlgorithm(parent, QString(name.c_str()), version);
+void HelpWindow::showAlgorithm(const std::string &name, const int version) {
+  showAlgorithm(QString(name.c_str()), version);
 }
 
-void HelpWindow::showAlgorithm(QWidget *parent, const QString &name, const int version) {
+void HelpWindow::showAlgorithm(const QString &name, const int version) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
@@ -65,9 +65,9 @@ void HelpWindow::showAlgorithm(QWidget *parent, const QString &name, const int v
   }
 }
 
-void HelpWindow::showConcept(QWidget *parent, const std::string &name) { showConcept(parent, QString(name.c_str())); }
+void HelpWindow::showConcept(const std::string &name) { showConcept(QString(name.c_str())); }
 
-void HelpWindow::showConcept(QWidget *parent, const QString &name) {
+void HelpWindow::showConcept(const QString &name) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
@@ -77,7 +77,7 @@ void HelpWindow::showConcept(QWidget *parent, const QString &name) {
   }
 }
 
-void HelpWindow::showFitFunction(QWidget *parent, const std::string &name) {
+void HelpWindow::showFitFunction(const std::string &name) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
@@ -87,14 +87,11 @@ void HelpWindow::showFitFunction(QWidget *parent, const std::string &name) {
   }
 }
 
-void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name, const std::string &area,
-                                     const std::string &section) {
-  showCustomInterface(parent, QString::fromStdString(name), QString::fromStdString(area),
-                      QString::fromStdString(section));
+void HelpWindow::showCustomInterface(const std::string &name, const std::string &area, const std::string &section) {
+  showCustomInterface(QString::fromStdString(name), QString::fromStdString(area), QString::fromStdString(section));
 }
 
-void HelpWindow::showCustomInterface(QWidget *parent, const QString &name, const QString &area,
-                                     const QString &section) {
+void HelpWindow::showCustomInterface(const QString &name, const QString &area, const QString &section) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
