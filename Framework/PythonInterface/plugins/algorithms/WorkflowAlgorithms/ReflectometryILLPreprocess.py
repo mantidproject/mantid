@@ -735,36 +735,43 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def _calibrateDetectorAngleByDirectBeam(self, ws):
         """Perform detector position correction for reflected beams."""
-        direct_line = self.getProperty('DirectBeamForegroundCentre').value
         calibratedWSName = self._names.withSuffix('reflected_beam_calibration')
+        direct_line = self.getProperty('DirectBeamForegroundCentre').value
+        run = ws.getRun()
+        refl_line = run.getLogData('reduction.line_position').value
         if self._instrumentName == 'FIGARO':
             # Figaro requires an extra correction to its position equal to difference between direct and reflected
             # lines and their instrument centre
-            run = ws.getRun()
             pixel_width = common.pixelSize(self._instrumentName)
             sample_det_distance = run.getLogData('L2').value
             peak_centre = 127.5  # centre of the instrument
-            refl_line = run.getLogData('reduction.line_position').value
+            ref_down = run.getLogData('refdown').value
             dir_angle = (180.0 / np.pi) * atan((direct_line - peak_centre) * pixel_width / sample_det_distance)
             refl_angle = (180.0 / np.pi) * atan((refl_line - peak_centre) * pixel_width / sample_det_distance)
-            delta_angle = -dir_angle + refl_angle
+            sign = -1.0 if ref_down else 1.0
+            delta_angle = sign*(refl_angle - dir_angle)
+            line_position = int(refl_line)
         else:
+            line_position = direct_line
             delta_angle = 0.0
-        self._theta_zero = 2*self._theta_from_detector_angles() + delta_angle
-        kwargs = dict()
-        kwargs['DetectorCorrectionType'] = 'RotateAroundSample' \
-            if self._instrumentName == 'D17' else 'VerticalShift'
+            sign = 1.0
+        self._theta_zero = sign*(2.0 * sign * self._theta_from_detector_angles() + delta_angle)
+        # LinePosition parameter below used to be defined as direct_line for both D17 and FIGARO,
+        # but COSMOS for FIGARO assumes the foreground centre of the reflected beam to be exactly at the value given
+        # by the _theta_zero variable, and not with regards to the direct beam as for D17.
+        # For FIGARO, the direct beam position correction is handled by the delta_angle offset.
         calibratedWS = SpecularReflectionPositionCorrect(
             InputWorkspace=ws,
             OutputWorkspace=calibratedWSName,
             DetectorComponentName='detector',
-            LinePosition=direct_line,  # direct line position
+            LinePosition=line_position,  # specular line position
             TwoTheta=self._theta_zero,
             PixelSize=common.pixelSize(self._instrumentName),
+            DetectorCorrectionType='RotateAroundSample',
             DetectorFacesSample=True,
             EnableLogging=self._subalgLogging,
-            **kwargs
         )
+
         self._cleanup.cleanup(ws)
         return calibratedWS
 
