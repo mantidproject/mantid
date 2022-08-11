@@ -53,9 +53,9 @@ The following methods can be executed on a OSIRIS object:
 For information on creating a OSIRIS object see:
 :ref:`creating_osiris_object_isis-powder-diffraction-ref`
 
-.. _diffraction_focusing_osiris_isis-powder-diffraction-ref:
+.. _run_diffraction_focusing_osiris_isis-powder-diffraction-ref:
 
-diffraction_focusing
+run_diffraction_focusing
 ^^^^^^^^^^^^^^^^^^^^
 The *diffraction_focusing* method allows a user to process a series of runs into a
 focused dSpacing workspace. Whilst processing the runs the scripts can apply any corrections
@@ -132,10 +132,10 @@ for each set of run numbers the associated vanadium and empty runs for each dran
 
 Parameters
 -----------
-The following parameters for POLARIS are intended for regular use
+The following parameters for OSIRIS are intended for regular use
 when using the ISIS Powder scripts.
 
-.. _calibration_directory_polaris_isis-powder-diffraction-ref:
+.. _calibration_directory_osiris_isis-powder-diffraction-ref:
 
 calibration_directory
 ^^^^^^^^^^^^^^^^^^^^^
@@ -151,7 +151,6 @@ Example Input:
 ..  code-block:: python
 
   osiris_example = Osiris(calibration_directory=r"C:\path\to\calibration_dir", ...)
-
 
 .. _calibration_mapping_file_osiris_isis-powder-diffraction-ref:
 
@@ -169,7 +168,6 @@ Example Input:
 
   # Notice the filename always ends in .yaml
   osiris_example = Osiris(calibration_mapping_file=r"C:\path\to\file\calibration_mapping.yaml", ...)
-
 
 .. _config_file_osiris_isis-powder-diffraction-ref:
 
@@ -189,7 +187,6 @@ Example Input:
 
   # Notice the filename always ends in .yaml
   osiris_example = Osiris(config_file=r"C:\path\to\file\configuration.yaml", ...)
-
 
 .. _do_van_normalisation_osiris_isis-powder-diffraction-ref:
 
@@ -228,9 +225,9 @@ Example Input:
 
 ..  code-block:: python
 
-  polaris_example.focus(file_ext=".s01", ...)
+  osiris_example = Osiris(file_ext=".s01", ...)
 
-.. _merge_drange_polaris_isis_powder-diffraction-ref:
+.. _merge_drange_osiris_isis_powder-diffraction-ref:
 
 merge_drange
 ^^^^^^^^^^^^
@@ -245,12 +242,12 @@ Example Input:
 
   osiris_example = Osiris(merge_drange=True, ...)
 
-.. _file_ext_osiris_isis-powder-diffraction-ref:
+.. _run_number_osiris_isis-powder-diffraction-ref:
 
 run_number
 ^^^^^^^^^^
 Specifies the run number(s) to process when calling the
-:ref:`focus_polaris_isis-powder-diffraction-ref` method.
+:ref:`focus_osiris_isis-powder-diffraction-ref` method.
 
 This parameter accepts a single value or a range
 of values with the following syntax:
@@ -264,7 +261,7 @@ of values with the following syntax:
 These can be combined like so:
 *1-3, 5, 8-10* would process run numbers 1, 2, 3, 5, 8, 9, 10.
 
-In addition the :ref:`input_mode_polaris_isis-powder-diffraction-ref`
+In addition the :ref:`input_mode_osiris_isis-powder-diffraction-ref`
 parameter determines what effect a range of inputs has
 on the data to be processed
 
@@ -273,11 +270,11 @@ Example Input:
 ..  code-block:: python
 
   # Process run number 1, 3, 5, 6, 7
-  polaris_example.focus(run_number="1, 3, 5-7", ...)
+  osiris_example = Osiris(run_number="1, 3, 5-7", ...)
   # Or just a single run
-  polaris_example.focus(run_number=100, ...)
+  osiris_example = Osiris(run_number=100, ...)
 
-.. _user_name_polaris_isis-powder-diffraction-ref:
+.. _user_name_osiris_isis-powder-diffraction-ref:
 
 user_name
 ^^^^^^^^^
@@ -291,7 +288,7 @@ Example Input:
 
 ..  code-block:: python
 
-  polaris_example = Polaris(user_name="Mantid", ...)
+  osiris_example = Osiris(user_name="Mantid", ...)
 
 .. _subtract_empty_instrument_osiris_isis-powder-diffraction-ref:
 

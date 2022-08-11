@@ -186,6 +186,34 @@ class DrangeData(object):
         return focussed
 
 
+def load_raw(run_number_string, drange_sets, group, inst, file_ext):
+    """
+    :param run_number_string: string of run numbers for the sample
+    :param inst: The OSIRIS instrument object
+    """
+    input_ws_list = common.load_raw_files(run_number_string=run_number_string, instrument=inst, file_ext=file_ext)
+    for ws in input_ws_list:
+        drange = get_osiris_d_range(ws)
+        if group == 'sample':
+            drange_sets[drange].add_sample(ws.name())
+        elif group == 'vanadium':
+            drange_sets[drange].set_vanadium(ws.name())
+        elif group == 'empty':
+            drange_sets[drange].set_empty(ws.name())
+    _group_workspaces(input_ws_list, 'OSIRIS' + run_number_string + WORKSPACE_SUFFIX.grouped)
+    return input_ws_list
+
+
+def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
+    focussed = []
+    for drange in drange_sets:
+        processed = drange_sets[drange].process_workspace(subtract_empty=subtract_empty, vanadium_correct=van_norm,
+                                                          focus_calibration_file=calfile)
+        focussed.extend(processed)
+    _group_workspaces(focussed, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.focussed)
+    return focussed
+
+
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     all_run_numbers = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
     empty_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_run_numbers")
@@ -213,7 +241,7 @@ def get_empty_runs(inst_settings):
     return [_assign_drange_empty('drange'+str(i+1), all_run_numbers) for i in range(12)]
 
 
-def correct_drange_overlap(merged_ws, drange_sets):
+def _correct_drange_overlap(merged_ws, drange_sets):
     # Create scalar data to cope with where merge has combined overlapping data.
     data_x = (merged_ws.dataX(0)[1:] + merged_ws.dataX(0)[:-1]) / 2.0
     data_y = np.zeros(data_x.size)
@@ -230,39 +258,13 @@ def correct_drange_overlap(merged_ws, drange_sets):
     return merged_ws
 
 
-def run_empty_subtraction(run_number, drange_sets):
-    empty_subtracted_samples = []
-    for drange in drange_sets:
-        empty_subtracted_samples.extend(drange_sets[drange].subtract_container())
-    group_workspaces(empty_subtracted_samples, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.container_corrected)
-    return empty_subtracted_samples
-
-
-def run_vanadium_correction(run_number, drange_sets, calfile=''):
-    van_corrected_samples = []
-    for drange in drange_sets:
-        van_corrected_samples.extend(drange_sets[drange].van_correction(calfile))
-    group_workspaces(van_corrected_samples, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.vanadium_corrected)
-    return van_corrected_samples
-
-
-def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
-    focussed = []
-    for drange in drange_sets:
-        processed = drange_sets[drange].process_workspace(subtract_empty=subtract_empty, vanadium_correct=van_norm,
-                                                          focus_calibration_file=calfile)
-        focussed.extend(processed)
-    group_workspaces(focussed, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.focussed)
-    return focussed
-
-
-def merge_dspacing_runs(run_number, drange_sets, ws_group):
+def _merge_dspacing_runs(run_number, drange_sets, ws_group):
     merged = MergeRuns(InputWorkspaces=ws_group,
                        OutputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.merged)
-    return correct_drange_overlap(merged, drange_sets)
+    return _correct_drange_overlap(merged, drange_sets)
 
 
-def group_workspaces(ws_list, output):
+def _group_workspaces(ws_list, output):
     GroupWorkspaces(InputWorkspaces=ws_list, outputWorkspace=output)
 
 
@@ -278,21 +280,3 @@ def _get_run_numbers_for_key(current_mode_run_numbers, key):
     err_message = "this must be under the relevant Rietveld or PDF mode."
     return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key,
                                                 append_to_error_message=err_message)
-
-
-def load_raw(run_number_string, drange_sets, group, inst, file_ext):
-    """
-    :param run_number_string: string of run numbers for the sample
-    :param inst: The OSIRIS instrument object
-    """
-    input_ws_list = common.load_raw_files(run_number_string=run_number_string, instrument=inst, file_ext=file_ext)
-    for ws in input_ws_list:
-        drange = get_osiris_d_range(ws)
-        if group == 'sample':
-            drange_sets[drange].add_sample(ws.name())
-        elif group == 'vanadium':
-            drange_sets[drange].set_vanadium(ws.name())
-        elif group == 'empty':
-            drange_sets[drange].set_empty(ws.name())
-    group_workspaces(input_ws_list, 'OSIRIS' + run_number_string + WORKSPACE_SUFFIX.grouped)
-    return input_ws_list

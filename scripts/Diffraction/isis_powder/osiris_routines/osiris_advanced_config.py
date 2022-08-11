@@ -17,11 +17,11 @@ general_params = {
     "file_names": {
          "vanadium_absorb_filename": "osiris_absorp_sphere_10mm_newinst2_long.nxs",
          "grouping_filename": "osiris_grouping.cal",
-         "nxs_filename": "{instshort}{runno}{suffix}_{_long_mode}.nxs",
-         "gss_filename": "{instshort}{runno}{suffix}_{_long_mode}.gsas",
+         "nxs_filename": "{instshort}{runno}{suffix}.nxs",
+         "gss_filename": "{instshort}{runno}{suffix}.gsas",
          "dat_files_directory": "",
-         "tof_xye_filename": "{instshort}{runno}{suffix}_{_long_mode}_tof.xye",
-         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{_long_mode}_d.xye"
+         "tof_xye_filename": "{instshort}{runno}{suffix}_tof.xye",
+         "dspacing_xye_filename": "{instshort}{runno}{suffix}_d.xye"
     },
 
     "subtract_empty_instrument": True,
@@ -43,63 +43,6 @@ general_params = {
         -0.0006,  # Bank 14
     ],
     "custom_focused_bin_widths" : -0.0006
-}
-
-long_mode_off_params = {
-    "create_cal_rebin_1_params": "100,-0.0006,19950",
-    "monitor_lambda_crop_range": (0.03, 6.00),
-    "monitor_integration_range": (0.6, 5.0),
-    # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
-    "raw_data_tof_cropping": (0, 19995),
-    "vanadium_tof_cropping": (1400, 19990),
-    "focused_cropping_values": [
-        (1500, 19900),  # Bank 1
-        (1500, 19900),  # Bank 2
-        (1500, 19900),  # Bank 3
-        (1500, 19900),  # Bank 4
-        (1500, 19900),  # Bank 5
-        (1500, 19900),  # Bank 6
-        (1500, 19900),  # Bank 7
-        (1500, 19900),  # Bank 8
-        (1500, 19900),  # Bank 9
-        (1500, 19900),  # Bank 10
-        (1500, 19900),  # Bank 11
-        (1500, 19900),  # Bank 12
-        (1500, 19900),  # Bank 13
-        (1500, 19900)   # Bank 14
-    ],
-    "custom_focused_cropping_values": (1500, 19990),
-    "monitor_spline_coefficient": 20,
-    "spline_coefficient": 60
-}
-
-long_mode_on_params = {
-    "create_cal_rebin_1_params": "20300,-0.0006,39990",
-    "monitor_lambda_crop_range": (5.9, 12.0),
-    "monitor_integration_range": (6, 10),
-    # raw_data_tof_cropping needs to be have smaller/larger values than the bank TOF cropping values or
-    # you will get data that divides to 0 or inf
-    "raw_data_tof_cropping": (20280, 39000),
-    "vanadium_tof_cropping": (20295, 39000),
-    "focused_cropping_values": [
-        (20300, 38830),  # Bank 1
-        (20300, 38830),  # Bank 2
-        (20300, 38830),  # Bank 3
-        (20300, 38830),  # Bank 4
-        (20300, 38830),  # Bank 5
-        (20300, 38830),  # Bank 6
-        (20300, 38830),  # Bank 7
-        (20300, 38830),  # Bank 8
-        (20300, 38830),  # Bank 9
-        (20300, 38830),  # Bank 10
-        (20300, 38830),  # Bank 11
-        (20300, 38830),  # Bank 12
-        (20300, 38830),  # Bank 13
-        (20300, 38830)   # Bank 14
-    ],
-    "custom_focused_cropping_values": (20300, 38830),
-    "monitor_spline_coefficient": 20,
-    "spline_coefficient": 5
 }
 
 calibration_params = {
@@ -167,14 +110,8 @@ variable_help = {
 }
 
 
-def get_all_adv_variables(is_long_mode_on=False):
-    long_mode_params = long_mode_on_params if is_long_mode_on else long_mode_off_params
+def get_all_adv_variables():
     advanced_config_dict = {}
     advanced_config_dict.update(calibration_params)
     advanced_config_dict.update(general_params)
-    advanced_config_dict.update(long_mode_params)
     return advanced_config_dict
-
-
-def get_long_mode_dict(is_long_mode):
-    return long_mode_on_params if is_long_mode else long_mode_off_params
