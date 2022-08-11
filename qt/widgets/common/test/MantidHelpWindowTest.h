@@ -98,6 +98,6 @@ private:
 
   void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
 
-  std::size_t m_openAttempts{25u};
+  std::size_t m_openAttempts{1000u};
   std::string m_url{"qthelp://org.mantidproject/doc/interfaces/direct/MSlice.html"};
 };
