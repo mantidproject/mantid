@@ -14,6 +14,10 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 bool hasLinearDetector(Mantid::API::MatrixWorkspace_sptr &ws) {
+  // If it returns Full (e.g. a single rectangular detector), we do want to SumBanks
+  // If returns Partial (e.g. a rectangular detector and some point detectors), we don't want to SumBanks
+  // If returns None (e.g. no rectangular detectors), We don't want to SumBanks
+  // See a full explanation along with assumptions in issue #34270
   auto const detectorState = ws->getInstrument()->containsRectDetectors();
   return detectorState != Mantid::Geometry::Instrument::ContainsState::Full;
 }
