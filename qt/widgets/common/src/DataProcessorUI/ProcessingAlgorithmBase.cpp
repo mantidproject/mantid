@@ -71,7 +71,7 @@ std::vector<QString> ProcessingAlgorithmBase::convertStringToVector(const QStrin
   if (text.isEmpty())
     return std::vector<QString>();
 
-  auto items = text.split(QChar(','), QString::SkipEmptyParts);
+  auto items = text.split(QChar(','), Qt::SkipEmptyParts);
   return std::vector<QString>(items.begin(), items.end());
 }
 
@@ -84,7 +84,7 @@ std::set<QString> ProcessingAlgorithmBase::convertStringToSet(const QString &tex
   if (text.isEmpty())
     return std::set<QString>();
 
-  auto items = text.split(QChar(','), QString::SkipEmptyParts);
+  auto items = text.split(QChar(','), Qt::SkipEmptyParts);
   std::set<QString> out(items.begin(), items.end());
   return out;
 }
