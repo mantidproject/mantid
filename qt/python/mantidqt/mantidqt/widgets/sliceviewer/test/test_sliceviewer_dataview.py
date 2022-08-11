@@ -256,6 +256,18 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view._line_plots.plotter.delete_line_plot_lines.assert_not_called()
         self.view._line_plots.plotter.update_line_plot_labels.assert_not_called()
 
+    def test_get_default_scale_norm_conf_none(self):
+        self.view.conf = None
+        scale = self.view.get_default_scale_norm()
+        self.assertEqual(scale, 'Linear')
+
+    def test_get_default_scale_norm_scalenorm(self):
+        self.view.conf = mock.Mock()
+        self.view.conf.has = mock.Mock(return_value=True)
+        self.view.conf.get = mock.Mock(return_value='Log')
+        scale = self.view.get_default_scale_norm()
+        self.assertEqual(scale, 'SymmetricLog10')
+
 
 if __name__ == '__main__':
     unittest.main()
