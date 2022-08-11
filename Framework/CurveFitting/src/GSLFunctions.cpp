@@ -10,7 +10,6 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ICostFunction.h"
-#include <iostream>
 
 namespace Mantid::CurveFitting {
 
@@ -82,27 +81,12 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
  * @return A GSL status information
  */
 
-void print_gsl_matrix(const gsl_matrix *J) {
-  for (int j = 0; j < J->size1; j++) {   // rows
-    for (int i = 0; i < J->size2; i++) { // cols
-      std::cout << gsl_matrix_get(J, j, i) << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-}
-
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   auto *p = reinterpret_cast<struct GSL_FitData *>(params);
-  print_gsl_matrix(J); // TEMP
   gsl_matrix *J_tr = gsl_matrix_calloc(J->size2, J->size1);
-  // print_gsl_matrix(J_tr); // TEMP
   gsl_matrix_transpose_memcpy(J_tr, J);
-  // print_gsl_matrix(J_tr); // TEMP
   EigenMatrix m(J_tr->size2, J_tr->size1);
-  // std::copy(&J_tr->data[0], &J_tr->data[J_tr->size1 * J_tr->size2], &m.mutator().data()[0]); // TEMP
-  // std::cout << m << std::endl;
   p->J.setJ(&m);
 
   // update function parameters
@@ -152,17 +136,14 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   if (!values) {
     throw std::invalid_argument("FunctionValues expected");
   }
+
+  EigenMatrix m_tr = m.tr();
+  std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
+
   for (size_t iY = 0; iY < p->n; iY++)
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= values->getFitWeight(iY);
     }
-
-  // std::cout << m << std::endl;  //TEMP
-  EigenMatrix m_tr = m.tr();
-  // std::cout << m_tr << std::endl;  //TEMP
-  // print_gsl_matrix(J);            // TEMP
-  std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
-  print_gsl_matrix(J); // TEMP
 
   return GSL_SUCCESS;
 }
