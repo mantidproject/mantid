@@ -13,7 +13,6 @@
 #include <MantidCurveFitting/GSLFunctions.h>
 #include <gsl/gsl_blas.h>
 
-using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
 namespace {

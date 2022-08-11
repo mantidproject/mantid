@@ -9,7 +9,6 @@
 #include "MantidCurveFitting/EigenJacobian.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/GSLFunctions.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
