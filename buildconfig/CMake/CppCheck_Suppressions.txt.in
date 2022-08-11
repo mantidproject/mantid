@@ -118,7 +118,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithm
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:306
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:307
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/CostFunctions/CostFuncFitting.cpp:381
-constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/TrustRegionMinimizer.cpp:815
+constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/TrustRegionMinimizer.cpp:814
 uninitDerivedMemberVar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/BivariateNormal.cpp:65
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/Convolution.cpp:224
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Functions/CrystalElectricField.cpp:449

@@ -37,7 +37,7 @@ public:
   void test_EigenJacobian_get_and_set() {
     auto test_fn = generate_tst_fn();
     int size = 10;
-    int val = 5;
+    double val = 5;
 
     EigenJacobian J(*test_fn, size);
 
@@ -49,8 +49,8 @@ public:
 
   void test_EigenJacobian_add_number_to_column() {
     auto test_fn = generate_tst_fn();
-    int size = 35;
-    int val = 5;
+    double size = 35;
+    double val = 5;
 
     EigenJacobian J(*test_fn, size);
     J.addNumberToColumn(val, 0);
@@ -60,17 +60,17 @@ public:
     TS_ASSERT_EQUALS(J.get(29, 0), val);
     TS_ASSERT_EQUALS(J.get(size - 1, 0), val);
 
-    J.addNumberToColumn(val + 5, 1);
+    J.addNumberToColumn((size_t)val + 5, 1);
     TS_ASSERT_EQUALS(J.get(0, 1), val + 5);
     TS_ASSERT_EQUALS(J.get(9, 1), val + 5);
     TS_ASSERT_EQUALS(J.get(19, 1), val + 5);
     TS_ASSERT_EQUALS(J.get(29, 1), val + 5);
-    TS_ASSERT_EQUALS(J.get(size - 1, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get((size_t)size - 1, 1), (size_t)val + 5);
   }
 
   void test_EigenJacobian_Impl1_test_get_and_set() {
     int size = 10;
-    int val = 5;
+    double val = 5;
     int n_params = 3;
 
     JacobianImpl1<EigenMatrix> J;
@@ -92,8 +92,8 @@ public:
   }
 
   void test_EigenJacobian_Impl1_test_add_number_to_column() {
-    int size = 35;
-    int val = 5;
+    double size = 35;
+    double val = 5;
     int n_params = 3;
 
     JacobianImpl1<EigenMatrix> J;
