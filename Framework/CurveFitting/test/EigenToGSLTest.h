@@ -163,4 +163,55 @@ public:
     TS_ASSERT_EQUALS(J.get(29, 1), val + 5);
     TS_ASSERT_EQUALS(J.get(size - 1, 1), val + 5);
   }
+
+  void test_EigenJacobian_Impl1_test_get_and_set() {
+    int size = 10;
+    int val = 5;
+    int n_params = 3;
+
+    JacobianImpl1<EigenMatrix> J;
+
+    for (size_t i = 0; i < n_params; ++i) {
+      J.m_index.emplace_back(i);
+    }
+
+    EigenMatrix m(size, n_params);
+    J.setJ(&m);
+
+    J.set(5, 1, val);
+    J.set(9, 2, val * 3);
+    TS_ASSERT_EQUALS(J.get(5, 1), val);
+    TS_ASSERT_EQUALS(J.get(9, 2), val * 3);
+    TS_ASSERT_EQUALS(m(5, 1), val);
+    TS_ASSERT_EQUALS(m(9, 2), val * 3);
+  }
+
+  void test_EigenJacobian_Impl1_test_add_number_to_column() {
+    int size = 35;
+    int val = 5;
+    int n_params = 3;
+
+    JacobianImpl1<EigenMatrix> J;
+
+    for (size_t i = 0; i < n_params; ++i) {
+      J.m_index.emplace_back(i);
+    }
+
+    EigenMatrix m(size, n_params);
+    J.setJ(&m);
+
+    J.addNumberToColumn(val, 0);
+    TS_ASSERT_EQUALS(J.get(0, 0), val);
+    TS_ASSERT_EQUALS(J.get(9, 0), val);
+    TS_ASSERT_EQUALS(J.get(19, 0), val);
+    TS_ASSERT_EQUALS(J.get(29, 0), val);
+    TS_ASSERT_EQUALS(J.get(size - 1, 0), val);
+
+    J.addNumberToColumn(val + 5, 1);
+    TS_ASSERT_EQUALS(J.get(0, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(9, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(19, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(29, 1), val + 5);
+    TS_ASSERT_EQUALS(J.get(size - 1, 1), val + 5);
+  }
 };
