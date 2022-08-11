@@ -98,6 +98,7 @@ private:
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
 
   void updateWidgetEnabledState();
+  void updateSelectedRegionInModelFromView();
 
   void plotInstView();
   void plotRegionSelector();
