@@ -62,10 +62,14 @@ class Polaris(AbstractInst):
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
         cal_file_name = os.path.join(self._inst_settings.calibration_dir, self._inst_settings.grouping_file_name)
+        if self._inst_settings.sample_temp is None:
+            sample_temperature = None
+        else:
+            sample_temperature = str(self._inst_settings.sample_temp)
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
                                                   placzek_order=self._inst_settings.placzek_order,
-                                                  sample_temp=self._inst_settings.sample_temp,
+                                                  sample_temp=sample_temperature,
                                                   merge_banks=self._inst_settings.merge_banks,
                                                   q_lims=self._inst_settings.q_lims,
                                                   cal_file_name=cal_file_name,

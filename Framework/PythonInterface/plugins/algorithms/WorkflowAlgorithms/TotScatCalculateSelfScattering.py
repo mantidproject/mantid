@@ -46,9 +46,10 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         self.declareProperty(name='SampleMaterial', defaultValue={},
                              doc='Chemical formula for the sample material.')
         self.declareProperty(name='PlaczekOrder', defaultValue=1,
-                             doc='Placzek correction order to be used')
+                             doc='Placzek correction order to be used.')
         self.declareProperty(name='SampleTemp', defaultValue='',
-                             doc='Sample Temperature in Kelvin. Required for 2nd order Placzek correction.')
+                             doc='Sample Temperature in Kelvin. Required for 2nd order Placzek correction if not '
+                                 'using Sample Logs.')
 
     def PyExec(self):
         raw_ws = self.getProperty('InputWorkspace').value
@@ -83,14 +84,14 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         plackzek_order = self.getPropertyValue('PlaczekOrder')
         placzek_kwargs = {'InputWorkspace': raw_ws, 'IncidentSpectra': fit_spectra, 'ScalebyPackingFraction': False,
                           'Order': plackzek_order}
-        if plackzek_order == '2':
-            sample_temp = self.getPropertyValue('SampleTemp')
+        sample_temp = self.getPropertyValue('SampleTemp')
+        if plackzek_order == '2' and sample_temp:
             try:
                 if float(sample_temp):
                     placzek_kwargs.update({'SampleTemperature': float(sample_temp)})
             except ValueError:
                 raise RuntimeError("To calculate the second order Placzek correction you must provide "
-                                   "a sample_temp.")
+                                   "a valid sample temperature.")
         self_scattering_correction = CalculatePlaczek(**placzek_kwargs)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,

@@ -91,8 +91,6 @@ def generate_ts_pdf(run_number, focus_file_path, sample_details, placzek_order, 
 
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
     sample_geometry_json = sample_details.generate_sample_geometry()
-    # import pydevd_pycharm
-    # pydevd_pycharm.settrace('localhost', port=8080, stdoutToServer=True, stderrToServer=True)
     sample_material_json = sample_details.generate_sample_material()
 
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
