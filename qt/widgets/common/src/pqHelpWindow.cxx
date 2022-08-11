@@ -36,7 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QBuffer>
 #include <QFileInfo>
 #include <QHash>
-#include <QHelpContentWidget>
 #include <QHelpEngine>
 #include <QHelpIndexWidget>
 #include <QHelpSearchQueryWidget>
@@ -289,7 +288,6 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
   connect(this->m_helpEngine->searchEngine()->queryWidget(), SIGNAL(search()), this, SLOT(search()));
 
   // connect the index page to the content pane
-  connect(m_helpEngine->contentWidget(), SIGNAL(linkActivated(QUrl)), this, SLOT(showPage(QUrl)));
   connect(this->m_helpEngine->indexWidget(), SIGNAL(linkActivated(QUrl, QString)), this, SLOT(showPage(QUrl)));
 
 // setup the content pane
@@ -305,7 +303,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject, const Qt:
   connect(m_browser->page(), SIGNAL(linkHovered(QString, QString, QString)), this,
           SLOT(linkHovered(QString, QString, QString)));
 #else
-  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(QTHELP_SCHEME, new QtHelpUrlHandler(engine));
+  QWebEngineProfile::defaultProfile()->installUrlSchemeHandler(QTHELP_SCHEME, new QtHelpUrlHandler(engine, this));
   m_browser = new QWebEngineView(this);
   m_browser->setPage(new DelegatingWebPage(m_browser));
   connect(m_browser->page(), SIGNAL(linkClicked(QUrl)), this, SLOT(showLinkedPage(QUrl)));
