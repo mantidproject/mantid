@@ -480,12 +480,17 @@ class SliceViewerModel(SliceViewerBaseModel):
         if not ws_type == WS_TYPE.MATRIX:
             proj_matrix = np.eye(3)  # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
             if ws_type == WS_TYPE.MDH:
-                ndims = ws.getNumDims()
-                i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
-                irow_end = min(3, len(i_qdims))  # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
-                for icol, idim in enumerate(i_qdims):
-                    # copy first irow_end components of basis vec are always Q
-                    proj_matrix[0:irow_end, icol] = list(ws.getBasisVector(idim))[0:irow_end]
+                # for histo try to find axes from log
+                try:
+                    expt_info = ws.getExperimentInfo(0)
+                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
+                except:
+                    ndims = ws.getNumDims()
+                    i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
+                    irow_end = min(3, len(i_qdims))  # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
+                    for icol, idim in enumerate(i_qdims):
+                        # copy first irow_end components of basis vec are always Q
+                        proj_matrix[0:irow_end, icol] = list(ws.getBasisVector(idim))[0:irow_end]
             else:
                 # for event try to find axes from log
                 try:
