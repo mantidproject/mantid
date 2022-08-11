@@ -1584,6 +1584,12 @@ void IFunction::sortTies() {
     if (!tie) {
       continue;
     }
+    // Ignore height ties for Gaussian peaks as component of a CrystalFieldFunction
+    if (this->name() == "CrystalFieldFunction" && tie->ownerFunction()->name() == "Gaussian" &&
+        tie->parameterName() == "Height" && tie->asString().find("/Sigma") != std::string::npos) {
+      continue;
+    }
+
     TieNode newNode;
     newNode.left = getParameterIndex(*tie);
     auto const rhsParameters = tie->getRHSParameters();
