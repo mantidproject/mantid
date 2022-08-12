@@ -12,16 +12,10 @@
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <limits>
 #include <string>
-
-#include "MantidCurveFitting/GSLFunctions.h"
-#include <cmath>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
-
-#include <iostream>
 
 namespace Mantid::CurveFitting::NLLS {
 
