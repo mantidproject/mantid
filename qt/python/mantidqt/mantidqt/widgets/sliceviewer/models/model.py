@@ -492,7 +492,8 @@ class SliceViewerModel(SliceViewerBaseModel):
                     try:
                         expt_info = ws.getExperimentInfo(0)
                         proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
-                    except:
+                    except (AttributeError, KeyError, ValueError):
+                        # revert back to orthogonal projection
                         proj_matrix = np.eye(3)
             else:
                 # for event try to find axes from log
