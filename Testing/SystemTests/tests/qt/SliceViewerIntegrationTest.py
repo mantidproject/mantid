@@ -492,11 +492,14 @@ class SliceViewerTestAxesLimitsWithLogMatrixTransform(systemtesting.MantidSystem
     def runTest(self):
         HelperTestingClass.__init__(self)
         limits = (-10.0, 10.0, -9.0, 9.0)
-        ws_nonrotho = CreateMDWorkspace(Dimensions=3,
-                                        Extents=','.join([str(lim) for lim in limits]) + ',-8,8',
-                                        Names='A,B,C',
-                                        Units='r.l.u.,r.l.u.,r.l.u.',
-                                        Frames='HKL,HKL,HKL')
+        ws_nonrotho = CreateMDHistoWorkspace(Dimensionality=3,
+                                             Extents=','.join([str(lim) for lim in limits]) + ',-8,8',
+                                             NumberOfBins='6,7,8',
+                                             SignalInput=range(6*7*8),
+                                             ErrorInput=range(6*7*8),
+                                             Names='A,B,C',
+                                             Units='r.l.u.,r.l.u.,r.l.u.',
+                                             Frames='HKL,HKL,HKL')
         expt_info_nonortho = CreateSampleWorkspace()
         ws_nonrotho.addExperimentInfo(expt_info_nonortho)
         SetUB(ws_nonrotho, 1, 1, 2, 90, 90, 120)
@@ -504,8 +507,6 @@ class SliceViewerTestAxesLimitsWithLogMatrixTransform(systemtesting.MantidSystem
         ws_nonrotho.getExperimentInfo(0).run().addProperty('W_MATRIX', W_MATRIX, True)
         pres = SliceViewer(ws_nonrotho)
 
-        # set nonorthog view and retrieve new limits
-        pres.nonorthogonal_axes(True)
         W = pres.model.get_proj_matrix()
         assert_allclose(W.flatten(), W_MATRIX)
 
