@@ -14,7 +14,7 @@
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 
-class EigenToGSLTest : public CxxTest::TestSuite {
+class EigenJacobianTest : public CxxTest::TestSuite {
 public:
   std::shared_ptr<Functions::Gaussian> generate_tst_fn() {
     std::shared_ptr<Functions::Gaussian> fn = std::make_shared<Functions::Gaussian>();
@@ -36,8 +36,8 @@ public:
 
   void test_EigenJacobian_get_and_set() {
     auto test_fn = generate_tst_fn();
-    int size = 10;
-    double val = 5;
+    const size_t size = 10;
+    const double val = 5;
 
     EigenJacobian J(*test_fn, size);
 
@@ -49,8 +49,8 @@ public:
 
   void test_EigenJacobian_add_number_to_column() {
     auto test_fn = generate_tst_fn();
-    double size = 35;
-    double val = 5;
+    const size_t size = 35;
+    const double val = 5;
 
     EigenJacobian J(*test_fn, size);
     J.addNumberToColumn(val, 0);
@@ -60,7 +60,7 @@ public:
     TS_ASSERT_EQUALS(J.get(29, 0), val);
     TS_ASSERT_EQUALS(J.get(size - 1, 0), val);
 
-    J.addNumberToColumn((size_t)val + 5, 1);
+    J.addNumberToColumn(val + 5, 1);
     TS_ASSERT_EQUALS(J.get(0, 1), val + 5);
     TS_ASSERT_EQUALS(J.get(9, 1), val + 5);
     TS_ASSERT_EQUALS(J.get(19, 1), val + 5);
@@ -68,7 +68,7 @@ public:
     TS_ASSERT_EQUALS(J.get((size_t)size - 1, 1), (size_t)val + 5);
   }
 
-  void test_EigenJacobian_Impl1_test_get_and_set() {
+  void test_JacobianImpl1_get_and_set() {
     int size = 10;
     double val = 5;
     int n_params = 3;
@@ -91,10 +91,10 @@ public:
     TS_ASSERT_EQUALS(m(9, 2), val * 3);
   }
 
-  void test_EigenJacobian_Impl1_test_add_number_to_column() {
-    double size = 35;
-    double val = 5;
-    int n_params = 3;
+  void test_JacobianImpl1_add_number_to_column() {
+    const size_t size = 35;
+    const double val = 5;
+    const int n_params = 3;
 
     JacobianImpl1<EigenMatrix> J;
 
