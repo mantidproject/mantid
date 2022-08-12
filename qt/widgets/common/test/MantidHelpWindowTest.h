@@ -49,16 +49,24 @@ private:
     assertWidgetCreated();
 
     // Assert widget is closed
+    // We don't understand why sendPostedEvents doesn't work, why it needs to be a singleShot,
+    // and why processEvents needs to be called twice. Requires more investigation into the
+    // Qt code.
     QTimer::singleShot(0, helpInterface, &QWidget::close);
-    QApplication::sendPostedEvents();
-    QApplication::sendPostedEvents();
+    QApplication::instance()->processEvents();
+    QApplication::instance()->processEvents();
 
     assertNoTopLevelWidgets();
   }
 
   void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
 
-  void assertNoTopLevelWidgets() { TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size()); }
+  void assertNoTopLevelWidgets() {
+    for (auto const &widget : QApplication::topLevelWidgets()) {
+      std::cout << widget->metaObject()->className() << std::endl;
+    }
+    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
+  }
 
   std::size_t m_openAttempts{5u};
   std::string m_url{"qthelp://org.mantidproject/doc/interfaces/direct/MSlice.html"};
