@@ -495,7 +495,7 @@ class SliceViewerModelTest(unittest.TestCase):
 
         self.assertIsNone(model.get_axes_angles())
 
-    def test_calculate_axes_angles_uses_W_if_available(self):
+    def test_calculate_axes_angles_uses_W_if_available_MDEvent(self):
         # test MD event
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
@@ -511,6 +511,7 @@ class SliceViewerModelTest(unittest.TestCase):
         axes_angles = model.get_axes_angles(force_orthogonal=True)
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
 
+    def test_calculate_axes_angles_uses_W_if_available_MDHisto(self):
         #test MD histo
         ws = _create_mock_workspace(IMDHistoWorkspace,
                                     SpecialCoordinateSystem.HKL,
@@ -524,7 +525,7 @@ class SliceViewerModelTest(unittest.TestCase):
         for iy in range(1, 3):
             self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
 
-    def test_calculate_axes_angles_uses_identity_if_W_unavailable(self):
+    def test_calculate_axes_angles_uses_identity_if_W_unavailable_MDEvent(self):
         # test MD event
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
@@ -537,6 +538,7 @@ class SliceViewerModelTest(unittest.TestCase):
         for iy in range(1, 3):
             self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
 
+    def test_calculate_axes_angles_uses_identity_if_W_unavailable_MDHisto(self):
         #test MD histo
         ws = _create_mock_workspace(IMDHistoWorkspace,
                                     SpecialCoordinateSystem.HKL,
