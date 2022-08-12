@@ -496,6 +496,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertIsNone(model.get_axes_angles())
 
     def test_calculate_axes_angles_uses_W_if_available(self):
+        # test MD event
         ws = _create_mock_workspace(IMDEventWorkspace,
                                     SpecialCoordinateSystem.HKL,
                                     has_oriented_lattice=True)
@@ -510,8 +511,34 @@ class SliceViewerModelTest(unittest.TestCase):
         axes_angles = model.get_axes_angles(force_orthogonal=True)
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
 
+        #test MD histo
+        ws = _create_mock_workspace(IMDHistoWorkspace,
+                                    SpecialCoordinateSystem.HKL,
+                                    has_oriented_lattice=True)
+        ws.getExperimentInfo().run().get().value = [0, 1, 1, 0, 0, 1, 1, 0, 0]
+        model = SliceViewerModel(ws)
+
+        # should revert to orthogonal
+        axes_angles = model.get_axes_angles()
+        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
+        for iy in range(1, 3):
+            self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
+
     def test_calculate_axes_angles_uses_identity_if_W_unavailable(self):
+        # test MD event
         ws = _create_mock_workspace(IMDEventWorkspace,
+                                    SpecialCoordinateSystem.HKL,
+                                    has_oriented_lattice=True)
+        ws.getExperimentInfo().run().get.side_effect = KeyError
+        model = SliceViewerModel(ws)
+
+        axes_angles = model.get_axes_angles()
+        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
+        for iy in range(1, 3):
+            self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
+
+        #test MD histo
+        ws = _create_mock_workspace(IMDHistoWorkspace,
                                     SpecialCoordinateSystem.HKL,
                                     has_oriented_lattice=True)
         ws.getExperimentInfo().run().get.side_effect = KeyError
