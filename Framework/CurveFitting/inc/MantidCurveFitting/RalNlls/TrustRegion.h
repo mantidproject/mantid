@@ -15,7 +15,7 @@ namespace CurveFitting {
 namespace NLLS {
 
 void MANTID_CURVEFITTING_DLL matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A);
-void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn);
+void MANTID_CURVEFITTING_DLL getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn);
 double MANTID_CURVEFITTING_DLL norm2(const DoubleFortranVector &v);
 void MANTID_CURVEFITTING_DLL multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFortranVector &Jx);
 void MANTID_CURVEFITTING_DLL multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x,

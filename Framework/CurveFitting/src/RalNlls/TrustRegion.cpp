@@ -47,21 +47,11 @@ void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
  *  @param sn :: The smalles sv.
  */
 void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
+  Eigen::BDCSVD<Eigen::MatrixXd> svd(J.inspector());
+  auto S = svd.singularValues();
 
-  auto n = J.len2();
-  DoubleFortranMatrix U(J.transpose());
-  DoubleFortranMatrix V(n, n);
-  DoubleFortranVector S(n);
-  DoubleFortranVector work(n);
-
-  gsl_matrix_view U_gsl = getGSLMatrixView(U.mutator());
-  gsl_matrix_view V_gsl = getGSLMatrixView(V.mutator());
-  gsl_vector_view S_gsl = getGSLVectorView(S.mutator());
-  gsl_vector_view work_gsl = getGSLVectorView(work.mutator());
-  gsl_linalg_SV_decomp(&U_gsl.matrix, &V_gsl.matrix, &S_gsl.vector, &work_gsl.vector);
-
-  s1 = S(1);
-  sn = S(n);
+  s1 = S(0);
+  sn = S(S.size() - 1);
 }
 
 /** Compute the 2-norm of a vector which is a square root of the
