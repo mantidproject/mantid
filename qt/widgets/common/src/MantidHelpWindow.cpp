@@ -62,7 +62,7 @@ const QString COLLECTION_FILE("MantidProject.qhc");
 /**
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
-MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags)
+MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
     : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
   if (!helpWindowExists()) {

@@ -27,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow : public API::MantidHelpInterf
 public:
   static bool helpWindowExists() { return !g_helpWindow.isNull(); }
 
-  MantidHelpWindow(QWidget *parent = nullptr, const Qt::WindowFlags &flags = nullptr);
+  MantidHelpWindow(const Qt::WindowFlags &flags = nullptr);
 
   void showPage(const std::string &url = std::string()) override;
   void showPage(const QString &url) override;
