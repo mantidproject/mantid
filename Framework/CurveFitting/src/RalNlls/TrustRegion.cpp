@@ -21,6 +21,8 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
+#include <iostream>
+
 namespace Mantid::CurveFitting::NLLS {
 
 /** Too small values don't work well with numerical derivatives. */
@@ -191,22 +193,11 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
   // hf = hf + (1/yts) (y# - Sk d)^T y:
   alpha = 1 / yts;
-  // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
 
-  DoubleFortranMatrix hf_tr(hf.transpose());
-  gsl_matrix_view hf_gsl = getGSLMatrixView(hf_tr.mutator());
-  const gsl_vector_const_view ysharkSks_gsl = getGSLVectorView_const(w.ysharpSks.inspector());
-  const gsl_vector_const_view y_gsl = getGSLVectorView_const(w.y.inspector());
-
-  gsl_blas_dger(alpha, &ysharkSks_gsl.vector, &y_gsl.vector, &hf_gsl.matrix);
-  // hf = hf + (1/yts) y^T (y# - Sk d):
-  // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
-  gsl_blas_dger(alpha, &y_gsl.vector, &ysharkSks_gsl.vector, &hf_gsl.matrix);
-  // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
+  w.hf.mutator() = alpha * w.ysharpSks.mutator() * w.y.mutator().transpose() + w.hf.mutator();
+  w.hf.mutator() = alpha * w.y.mutator() * w.ysharpSks.mutator().transpose() + w.hf.mutator();
   alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
-  // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, &y_gsl.vector, &y_gsl.vector, &hf_gsl.matrix);
-  hf = hf_tr.tr();
+  w.hf.mutator() = alpha * w.y.mutator() * w.y.mutator().transpose() + w.hf.mutator();
 }
 
 /** Update the trust region radius which is hidden in NLLS_workspace w
