@@ -76,7 +76,7 @@ public:
     JacobianImpl1<EigenMatrix> J;
 
     J.m_index.reserve(n_params);
-    for (size_t i = 0; i < n_params; ++i) {
+    for (int i = 0; i < n_params; ++i) {
       J.m_index.emplace_back(i);
     }
 
