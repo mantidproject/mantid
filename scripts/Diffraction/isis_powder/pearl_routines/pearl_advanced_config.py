@@ -184,4 +184,4 @@ def get_all_adv_variables(is_long_mode_on=False):
 
 
 def get_long_mode_dict(is_long_mode):
-    return long_mode_on_params is is_long_mode else long_mode_off_params
+    return long_mode_on_params if is_long_mode else long_mode_off_params
