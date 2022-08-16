@@ -108,8 +108,12 @@ void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCor
 void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment const &experiment) {
   AlgorithmProperties::update("AnalysisMode", analysisModeToString(experiment.analysisMode()), properties);
   AlgorithmProperties::update("Debug", experiment.debug(), properties);
-  AlgorithmProperties::update("SummationType", summationTypeToString(experiment.summationType()), properties);
-  AlgorithmProperties::update("ReductionType", reductionTypeToString(experiment.reductionType()), properties);
+  SummationType summationType = experiment.summationType();
+  AlgorithmProperties::update("SummationType", summationTypeToString(summationType), properties);
+  // The ReductionType value is only relevant when the SummationType is SumInQ
+  ReductionType reductionType =
+      (summationType == SummationType::SumInQ) ? experiment.reductionType() : ReductionType::Normal;
+  AlgorithmProperties::update("ReductionType", reductionTypeToString(reductionType), properties);
   AlgorithmProperties::update("IncludePartialBins", experiment.includePartialBins(), properties);
   updateTransmissionStitchProperties(properties, experiment.transmissionStitchOptions());
   updateBackgroundSubtractionProperties(properties, experiment.backgroundSubtraction());

@@ -433,6 +433,12 @@ Experiment makeExperimentWithValidDuplicateCriteria() {
                     makeLookupTableWithTwoValidDuplicateCriteria());
 }
 
+Experiment makeExperimentWithReductionTypeSetForSumInLambda() {
+  return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInLambda, true, true,
+                    makeBackgroundSubtraction(), makePolarizationCorrections(), makeFloodCorrections(),
+                    makeTransmissionStitchOptions(), makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
+}
+
 /* Instrument */
 
 RangeInLambda makeWavelengthRange() { return RangeInLambda(2.3, 14.4); }

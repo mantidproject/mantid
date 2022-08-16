@@ -91,6 +91,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions makeEmptyTransmissionSt
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeEmptyExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperimentWithValidDuplicateCriteria();
+MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperimentWithReductionTypeSetForSumInLambda();
 
 /* Instrument */
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeWavelengthRange();
