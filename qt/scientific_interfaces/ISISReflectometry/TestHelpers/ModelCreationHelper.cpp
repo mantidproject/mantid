@@ -434,9 +434,10 @@ Experiment makeExperimentWithValidDuplicateCriteria() {
 }
 
 Experiment makeExperimentWithReductionTypeSetForSumInLambda() {
-  return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample, SummationType::SumInLambda, true, true,
-                    makeBackgroundSubtraction(), makePolarizationCorrections(), makeFloodCorrections(),
-                    makeTransmissionStitchOptions(), makeStitchOptions(), makeLookupTableWithTwoAnglesAndWildcard());
+  return Experiment(AnalysisMode::PointDetector, ReductionType::NonFlatSample, SummationType::SumInLambda, false, false,
+                    makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
+                    FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
+                    std::map<std::string, std::string>(), LookupTable());
 }
 
 /* Instrument */
