@@ -18,6 +18,8 @@ public:
   PlotPresenter(IPlotView *view, std::unique_ptr<PlotModel> model = nullptr);
   virtual ~PlotPresenter() = default;
 
+  virtual void clearModel();
+
   virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
   virtual void setScaleLinear(const AxisID axisID);

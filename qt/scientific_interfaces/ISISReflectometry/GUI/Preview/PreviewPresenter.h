@@ -81,6 +81,9 @@ public:
   void notifySumBanksCompleted() override;
   void notifyReductionCompleted() override;
 
+  void notifySumBanksAlgorithmError() override;
+  void notifyReductionAlgorithmError() override;
+
   // RegionSelectionObserver overrides
   void notifyRegionChanged() override;
 
@@ -95,11 +98,14 @@ private:
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
 
   void updateWidgetEnabledState();
+  void updateSelectedRegionInModelFromView();
 
   void plotInstView();
   void plotRegionSelector();
   void plotLinePlot();
   void runSumBanks();
   void runReduction();
+  void clearRegionSelector();
+  void clearReductionPlot();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
