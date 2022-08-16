@@ -511,7 +511,7 @@ class SliceViewerModelTest(unittest.TestCase):
         axes_angles = model.get_axes_angles(force_orthogonal=True)
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
 
-    def test_calculate_axes_angles_uses_W_if_available_MDHisto(self):
+    def test_calculate_axes_angles_uses_basis_vectors_even_if_WMatrix_log_available_MDHisto(self):
         #test MD histo
         ws = _create_mock_workspace(IMDHistoWorkspace,
                                     SpecialCoordinateSystem.HKL,
