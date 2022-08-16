@@ -491,7 +491,13 @@ class SliceViewerModel(SliceViewerBaseModel):
                     # for histo try to find axes from log
                     try:
                         expt_info = ws.getExperimentInfo(0)
-                        proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
+                        trans_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
+                        ndims = ws.getNumDims()
+                        i_qdims = [idim for idim in range(ndims) if ws.getDimension(idim).getMDFrame().isQ()]
+                        irow_end = min(3, len(i_qdims))
+                        for icol, idim in enumerate(i_qdims):
+                            # copy first irow_end components of basis vec are always Q
+                            proj_matrix[0:irow_end, icol] = trans_matrix[0:irow_end, icol]
                     except (AttributeError, KeyError, ValueError):
                         # revert back to orthogonal projection
                         proj_matrix = np.eye(3)
