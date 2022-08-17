@@ -16,6 +16,7 @@
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -39,9 +40,9 @@ public:
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
     DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
-  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
-                           std::vector<double> &resultX, std::vector<double> &resultY) {
-    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
+  void integrateCumulative(const Mantid::API::ISpectrum &h, double xmin, double xmax, std::vector<double> &resultX,
+                           std::vector<double> &resultY, const bool returnCumulative) {
+    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY, returnCumulative);
   }
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) {
     DiscusMultipleScatteringCorrection::getXMinMax(ws, xmin, xmax);
@@ -95,9 +96,8 @@ public:
     alg->setProperty("NeutronPathsMultiple", 10000);
     alg->setProperty("ImportanceSampling", true);
     alg->execute();
-    Mantid::API::WorkspaceGroup_sptr output =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-    Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    auto wsPtr = output->getItem("MuscatResults_Scatter_2");
     auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
 
     // validate that the max scatter angle is ~120 degrees (peak is at 120.0 but slight tail)
@@ -145,7 +145,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
       std::vector<std::string> wsNames = {"MuscatResults_Scatter_1_NoAbs",      "MuscatResults_Scatter_1",
                                           "MuscatResults_Scatter_1_Integrated", "MuscatResults_Scatter_2",
@@ -166,8 +166,7 @@ public:
     // generate a result corresponding to Figure 4 in the Mancinelli paper (flat
     // plate sample for once scattered neutrons) where there's an analytical solution
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
 
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
@@ -178,9 +177,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
       // calculate result analytically
       const int SPECTRUMINDEXTOTEST = 1;
@@ -196,8 +195,7 @@ public:
   void run_flat_plate_sample_multiple_scatter(int nPaths, bool importanceSampling) {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace =
-        SetupFlatPlateWorkspace(2, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS, DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
     // overwrite x with single point centered at wavelength=1 Angstrom. Algorithm used to take x units of wavelength
     // so this allows test values to be preserved
     Mantid::HistogramData::Points xv = {2 * M_PI};
@@ -215,11 +213,11 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
       // check single scatter result still matches analytical result
       const int SPECTRUMINDEXTOTEST = 1;
@@ -247,8 +245,7 @@ public:
   void test_flat_plate_sample_multiple_scatter_with_bin_interp() {
     // same set up as previous test but increase nscatter to 2
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace =
-        SetupFlatPlateWorkspace(2, 1, 1.0, 3, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS, DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(2, 1, 1.0, 3, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
     // overwrite x with points equivalent to wavelength=1,2,3 Angstroms. Algorithm used to take x units of wavelength
     // so this allows test values to be preserved
     Mantid::HistogramData::Points xv = {2 * M_PI / 3, M_PI, 2 * M_PI};
@@ -266,11 +263,11 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
       // check single scatter result still matches analytical result
       const int SPECTRUMINDEXTOTEST = 1;
@@ -280,14 +277,14 @@ public:
       const double analyticResult1 = calculateFlatPlateAnalyticalResult(xPoints[0], mat, twoTheta, THICKNESS);
       const double analyticResult2 = calculateFlatPlateAnalyticalResult(xPoints[2], mat, twoTheta, THICKNESS);
       const auto &singleScatterY = singleScatterResult->y(SPECTRUMINDEXTOTEST);
-      const double delta(1e-05);
+      const double delta(2e-05);
       TS_ASSERT_DELTA(singleScatterY[0], analyticResult1, delta);
       TS_ASSERT_DELTA(singleScatterY[2], analyticResult2, delta);
       // check interpolated point is somewhere in between
       TS_ASSERT(singleScatterY[1] < analyticResult1 || singleScatterY[1] < analyticResult2);
       TS_ASSERT(singleScatterY[1] > analyticResult1 || singleScatterY[1] > analyticResult2);
       // no analytical result for double scatter so just check against current result that we assume is correct
-      auto doubleScatterY = doubleScatterResult->y(SPECTRUMINDEXTOTEST);
+      auto &doubleScatterY = doubleScatterResult->y(SPECTRUMINDEXTOTEST);
       constexpr double expResult2 = 0.001997;
       constexpr double expResult0 = 0.001819;
       TS_ASSERT_DELTA(doubleScatterY[0], expResult0, delta);
@@ -317,9 +314,9 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
       // check single scatter result still matches analytical result
       const auto &mat = inputWorkspace->sample().getMaterial();
@@ -403,45 +400,56 @@ public:
 
   void test_integrateCumulative() {
     DiscusMultipleScatteringCorrectionHelper alg;
-    Mantid::HistogramData::Histogram test(Mantid::HistogramData::Points({0., 1., 2., 3.}),
-                                          Mantid::HistogramData::Frequencies({1., 1., 1., 2.}));
+    auto ws = Mantid::DataObjects::create<Workspace2D>(
+        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::Points({0., 1., 2., 3.}),
+                                            Mantid::HistogramData::Frequencies({1., 1., 1., 2.})));
     std::vector<double> testResultX, testResultY;
-    alg.integrateCumulative(test, 0., 2.2, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.2, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[3], 2.22);
     testResultX.clear();
     testResultY.clear();
-    TS_ASSERT_THROWS(alg.integrateCumulative(test, 0., 3.2, testResultX, testResultY), std::runtime_error &);
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.2, testResultX, testResultY, false);
+    TS_ASSERT_EQUALS(testResultY[0], 2.22);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0., 2.0, testResultX, testResultY);
+    TS_ASSERT_THROWS(alg.integrateCumulative(ws->getSpectrum(0), 0., 3.2, testResultX, testResultY, true),
+                     std::runtime_error &);
+    testResultX.clear();
+    testResultY.clear();
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0., 0., testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0., 0., testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 1., 0., testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 1., 0., testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0.5, 1.5, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0.5, 1.5, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 1.0);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test, 0.5, 0.9, testResultX, testResultY);
+    alg.integrateCumulative(ws->getSpectrum(0), 0.5, 0.9, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
     // bin edges tests
     testResultX.clear();
     testResultY.clear();
-    Mantid::HistogramData::Histogram test_edges(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
-                                                Mantid::HistogramData::Frequencies({1., 1., 2.}));
-    alg.integrateCumulative(test_edges, 0., 2.2, testResultX, testResultY);
+    auto ws_edges = Mantid::DataObjects::create<Workspace2D>(
+        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
+                                            Mantid::HistogramData::Frequencies({1., 1., 2.})));
+    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.2, testResultX, testResultY, true);
     TS_ASSERT_DELTA(testResultY[3], 2.4, 1E-10);
     testResultX.clear();
     testResultY.clear();
-    alg.integrateCumulative(test_edges, 0., 2.0, testResultX, testResultY);
+    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
+    testResultX.clear();
+    testResultY.clear();
+    alg.integrateCumulative(ws_edges->getSpectrum(0), 0., 2.0, testResultX, testResultY, false);
+    TS_ASSERT_EQUALS(testResultY[0], 2.0);
   }
 
   void test_inelastic_with_importance_sampling() {
@@ -509,9 +517,9 @@ public:
     alg->execute();
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
       // validate that the max scatter angle is ~61.5 degrees
       for (size_t i = 0; i < NTHETA; i++) {
@@ -548,19 +556,19 @@ public:
     }
   }
 
-  void run_test_inelastic_on_realistic_structure_factor(const DeltaEMode::Type emode, int nPaths,
-                                                        bool importanceSampling, bool simulateWSeparately,
-                                                        int numberSimulationPoints, double expWeightMinusOne,
-                                                        double expWeightPlusOne) {
+  void run_test_inelastic_on_realistic_structure_factor(
+      const DeltaEMode::Type emode, const double eInitial, int nPaths, bool importanceSampling,
+      bool simulateWSeparately, int numberSimulationPoints, double expWeightMinusOne, double expWeightPlusOne,
+      double delta, Mantid::API::MatrixWorkspace_sptr scatteringCrossSection = nullptr) {
     // run test on a realistic structure factor. Validate against results in original Discus paper
-
+    assert(emode != DeltaEMode::Elastic);
     // calculate the S(Q,w) values based on a Lorentzian
     double qmin = 0.; // 0.001
     double qmax = 4.0;
     int nqpts = 9;
-    double wmin = -5.85;
-    double wmax = 5.85;
-    int nwpts = 79; // negative w is given explicitly so ~double number of pts in Discus
+    double wmin = /* -11.7*/ -5.85;
+    double wmax = /*11.7*/ 5.85;
+    int nwpts = /*157*/ 79; // negative w is given explicitly so ~double number of pts in Discus
     double wwidth = (wmax - wmin) / (nwpts - 1);
     // D = 2.3E-05 #cm2 s - 1
     double D =
@@ -602,11 +610,10 @@ public:
     // results
     const int NTHETA = 18;
     const double ang_inc = 180.0 / NTHETA;
-    const double EInitial = 5.1;
     // sample occupies +y,-z and -y,+z regions ie \ when looking along positive x direction
     // the detectors are in a ring in the yz plane in positive y. All 4 Discus angles are on the same side of the sample
     auto inputWorkspace = SetupFlatPlateWorkspace(NTHETA, 1, ang_inc, nwpts, wmin - 0.5 * wwidth, wwidth, 0.05, 0.05,
-                                                  THICKNESS, -45.0, {1.0, 0.0, 0.0}, emode, EInitial);
+                                                  THICKNESS, -45.0, {1.0, 0.0, 0.0}, emode, eInitial);
     auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
 
     // override the material
@@ -629,49 +636,70 @@ public:
       alg->setProperty("NumberOfSimulationPoints", numberSimulationPoints);
     alg->setProperty("ImportanceSampling", importanceSampling);
     alg->setProperty("SimulateEnergiesIndependently", simulateWSeparately);
+    if (scatteringCrossSection)
+      alg->setProperty("ScatteringCrossSection", scatteringCrossSection);
     alg->execute();
 
     if (alg->isExecuted()) {
-      Mantid::API::WorkspaceGroup_sptr output =
+      auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
-      Mantid::API::Workspace_sptr wsPtr1 = output->getItem("MuscatResults_Scatter_1");
+      auto wsPtr1 = output->getItem("MuscatResults_Scatter_1");
       auto singleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr1);
-      Mantid::API::Workspace_sptr wsPtr2 = output->getItem("MuscatResults_Scatter_2");
+      auto wsPtr2 = output->getItem("MuscatResults_Scatter_2");
       auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr2);
 
-      const double delta(1e-04);
       const int SPECTRUMINDEXTOTEST = 2; // 20 degrees
       // check at the w=+/-1 points
-      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[33], expWeightMinusOne, delta);
-      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[46], expWeightPlusOne, delta);
+      double actualWeightMinusOne = doubleScatterResult->y(SPECTRUMINDEXTOTEST)[33];
+      double actualWeightPlusOne = doubleScatterResult->y(SPECTRUMINDEXTOTEST)[46];
+      TS_ASSERT_DELTA(actualWeightMinusOne, expWeightMinusOne, delta);
+      TS_ASSERT_DELTA(actualWeightPlusOne, expWeightPlusOne, delta);
       // double scatter intensity is larger than single at this point
-      TS_ASSERT(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[33] > singleScatterResult->y(SPECTRUMINDEXTOTEST)[33]);
-      TS_ASSERT(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[46] > singleScatterResult->y(SPECTRUMINDEXTOTEST)[46]);
+      TS_ASSERT(actualWeightMinusOne > singleScatterResult->y(SPECTRUMINDEXTOTEST)[33]);
+      // the weights at positive w can be zero so use >= here
+      TS_ASSERT(actualWeightPlusOne >= singleScatterResult->y(SPECTRUMINDEXTOTEST)[46]);
 
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
   }
 
   void test_direct_on_realistic_structure_factor_with_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, true, false, -1, 0.00022, 0.00017);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, true, false, -1, 0.00025, 0.00022,
+                                                     5E-05);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, false, -1, 0.00022, 0.00017);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, false, -1, 0.00025, 0.00022,
+                                                     1E-04);
   }
 
   void test_direct_on_realistic_structure_factor_without_importance_sampling_simulate_w_separately() {
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 1000, false, true, -1, 0.00022, 0.00017);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 5.1, 1000, false, true, -1, 0.00025, 0.00022,
+                                                     1E-04);
   }
 
   void test_indirect_on_realistic_structure_factor_without_importance_sampling() {
     // results are not vastly different to the direct geometry
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, -1, 0.00027, 0.00022);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 5.1, 1000, false, false, -1, 0.00024,
+                                                     0.00019, 1E-04);
   }
 
   void test_indirect_on_realistic_structure_factor_with_deltaE_interpolation() {
     // only run simulation on half of the deltaE bins (even indices) and interpolate the rest (odd indices)
-    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 1000, false, false, 40, 0.00027, 0.00022);
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Indirect, 5.1, 1000, false, false, 40, 0.00024,
+                                                     0.00019, 1E-04);
+  }
+
+  void test_direct_on_realistic_structure_factor_with_restricted_kinematic_range() {
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 0.1, 1000, true, false, -1, 0.00023, 0.0,
+                                                     1E-04);
+    auto scatteringCrossSectionWS = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3);
+    scatteringCrossSectionWS->getAxis(0)->unit() = UnitFactory::Instance().create("Momentum");
+    scatteringCrossSectionWS->mutableX(0) = {0.5, 1.0, 1.5};    // Ei=5.1 means ki=1.56
+    scatteringCrossSectionWS->mutableY(0) = {10.0, 15.0, 18.5}; // Ni has scattering cross section of 18.5 barns
+    // weight at w=-1 is suppressed
+    run_test_inelastic_on_realistic_structure_factor(DeltaEMode::Direct, 0.1, 1000, true, false, -1, 0.00005, 0.0,
+                                                     1E-05, scatteringCrossSectionWS);
   }
 
   void test_getxminmax() {
@@ -689,6 +717,77 @@ public:
     TS_ASSERT_THROWS(alg.getXMinMax(*ws, xmin, xmax), const std::runtime_error &);
   }
 
+  void test_SQ_normalisation() {
+    // run variation on elastic delta function test but with less scenarios to check normalisation behaviour
+    const double THICKNESS = 0.001; // metres
+
+    const int NTHETA = 900;
+    const double ang_inc = 180.0 / NTHETA;
+    auto inputWorkspace =
+        SetupFlatPlateWorkspace(1, NTHETA, ang_inc, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+
+    auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3);
+    SofQWorkspace->mutableX(0) = {0.9985, 0.9995, 1.0005};
+    // S(Q) zero everywhere apart from spike at Q=1. Height chosen here so that S(Q) properly normalised
+    // ie integral of QS(Q) ~2k^2 for k=1
+    SofQWorkspace->mutableY(0) = {0., 2000., 0.};
+    SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+
+    auto alg = std::make_shared<Mantid::Algorithms::DiscusMultipleScatteringCorrection>();
+    alg->initialize();
+    alg->setRethrows(true);
+    TS_ASSERT(alg->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("StructureFactorWorkspace", SofQWorkspace));
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    const int NSCATTERINGS = 2;
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 1000);
+    alg->setProperty("NeutronPathsMultiple", 1000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->execute();
+    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    Mantid::API::Workspace_sptr wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto doubleScatterResult = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+
+    SofQWorkspace->mutableY(0) = {0., 4000., 0.};
+    alg->setProperty("StructureFactorWorkspace", SofQWorkspace);
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 1000);
+    alg->setProperty("NeutronPathsMultiple", 1000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->execute();
+    output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto doubleScatterResult2 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+
+    SofQWorkspace->mutableY(0) = {0., 4000., 0.};
+    alg->setProperty("StructureFactorWorkspace", SofQWorkspace);
+    alg->setPropertyValue("OutputWorkspace", "MuscatResults");
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("NumberScatterings", NSCATTERINGS);
+    alg->setProperty("NeutronPathsSingle", 1000);
+    alg->setProperty("NeutronPathsMultiple", 1000);
+    alg->setProperty("ImportanceSampling", true);
+    alg->setProperty("NormalizeStructureFactors", true);
+    alg->execute();
+    output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    wsPtr = output->getItem("MuscatResults_Scatter_2");
+    auto doubleScatterResult3 = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+
+    // without normalisation - scaling S(Q) on a calc with a single material should scale the result by same factor.
+    // This is due to the S(Q) factor used for the track from final scatter to detector
+    TS_ASSERT_DELTA(doubleScatterResult2->y(0)[0], 2 * doubleScatterResult->y(0)[0], 1E-6);
+    // with normalisation - scaling a properly normalised S(Q) shouldn't make a difference
+    TS_ASSERT_DELTA(doubleScatterResult3->y(0)[0], doubleScatterResult->y(0)[0], 1E-6);
+
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
@@ -700,8 +799,7 @@ public:
     // before the call to validateInputs that happens inside alg->execute()
     auto alg = createAlgorithm();
     const double THICKNESS = 0.001; // metres
-    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Elastic);
+    auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWorkspace", inputWorkspace);
     auto inputWorkspaceGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
     Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestInputWSGroup", inputWorkspaceGroup);
@@ -812,29 +910,32 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
-  void test_invalid_SQW_no_negative_w_supplied_for_inelastic() {
-    DiscusMultipleScatteringCorrectionHelper alg;
+  void test_missing_structure_factor_for_material() {
+    Mantid::Algorithms::DiscusMultipleScatteringCorrection alg;
     const double THICKNESS = 0.001; // metres
+    // create workspace with sample shape and container
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  0., {0., 0., 1.}, DeltaEMode::Direct);
-    auto SofQWorkspaceWithOnlyPositiveW = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 1, 1000);
-    auto verticalAxis = std::make_unique<Mantid::API::NumericAxis>(2);
-    // Now set the axis q values
-    for (int i = 0; i < 2; ++i) {
-      verticalAxis->setValue(0, i * 1.0);
-    }
-    SofQWorkspaceWithOnlyPositiveW->replaceAxis(1, std::move(verticalAxis));
-    SofQWorkspaceWithOnlyPositiveW->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-    SofQWorkspaceWithOnlyPositiveW->getAxis(1)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+                                                  0., {0., 0., 1.}, DeltaEMode::Elastic, 0., true);
+    // create workspace group for structure factors so the isotropic defaulting doesn't kick in
+    auto SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 3);
+    SofQWorkspace->mutableX(0) = {0.9985, 0.9995, 1.0005, 1.0015};
+    // S(Q) zero everywhere apart from spike at Q=1
+    SofQWorkspace->mutableY(0) = {0., 100., 0.};
+    SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Ni", SofQWorkspace);
+    auto structureFactorsGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("DiscusTestSQGroup", structureFactorsGroup);
+    structureFactorsGroup->add(SofQWorkspace->getName());
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StructureFactorWorkspace", SofQWorkspaceWithOnlyPositiveW));
-    const int NSCATTERINGS = 2;
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
+    alg.setProperty("InputWorkspace", inputWorkspace);
+    alg.setProperty("StructureFactorWorkspace", structureFactorsGroup);
+    alg.setPropertyValue("OutputWorkspace", "MuscatResults");
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    // now add in missing S(Q) workspace and it should work
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("V", IsotropicSofQWorkspace);
+    structureFactorsGroup->add(IsotropicSofQWorkspace->getName());
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    Mantid::API::AnalysisDataService::Instance().remove("DiscusTestSQGroup");
   }
 
   void test_cant_run_withAlwaysStoreInADS_false() {
@@ -844,7 +945,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     auto inputWorkspace = SetupFlatPlateWorkspace(1, 1, 1.0, 1, 0.5, 1.0, 100 * THICKNESS, 100 * THICKNESS, THICKNESS,
-                                                  DeltaEMode::Elastic);
+                                                  0., {0., 0., 1.}, DeltaEMode::Elastic);
     alg.setProperty("InputWorkspace", inputWorkspace);
     alg.setProperty("StructureFactorWorkspace", IsotropicSofQWorkspace);
     alg.setPropertyValue("OutputWorkspace", "MuscatResults");
@@ -868,7 +969,8 @@ private:
   SetupFlatPlateWorkspace(const int nlat, const int nlong, const double anginc, const int nbins, const double xmin,
                           const double deltax, const double width, const double height, const double thickness,
                           const double angle = 0., const V3D axis = {0., 0., 1.},
-                          const DeltaEMode::Type EMode = DeltaEMode::Elastic, const double efixed = 5.0) {
+                          const DeltaEMode::Type EMode = DeltaEMode::Elastic, const double efixed = 5.0,
+                          const bool addContainer = false) {
     std::string unitName = "Momentum";
     if (EMode != DeltaEMode::Elastic) {
       unitName = "DeltaE";
@@ -880,6 +982,20 @@ private:
     auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
     flatPlateShape->setMaterial(mat);
     inputWorkspace->mutableSample().setShape(flatPlateShape);
+
+    if (addContainer) {
+      auto xmlShapeStreamFront =
+          ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., -(thickness / 2 + 0.0025)}, "front");
+      auto xmlShapeStreamBack =
+          ComponentCreationHelper::cuboidXML(0.005, 0.005, 0.0025, {0., 0., thickness / 2 + 0.0025}, "back");
+      std::string combinedXML = xmlShapeStreamFront + xmlShapeStreamBack + "<algebra val=\"back:front\"/>";
+      ShapeFactory shapeMaker;
+      auto holderShape = shapeMaker.createShape(combinedXML);
+      auto shape = std::shared_ptr<IObject>(holderShape->cloneWithMaterial(
+          Mantid::Kernel::Material("V", Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.07223)));
+      auto can = std::make_shared<Container>(shape);
+      inputWorkspace->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
+    }
 
     auto inst = inputWorkspace->getInstrument();
     auto &pmap = inputWorkspace->instrumentParameters();

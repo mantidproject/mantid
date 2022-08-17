@@ -1195,8 +1195,9 @@ class CrystalFieldSite(object):
         if self.crystalField.NumberOfSpectra > 1:
             differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
-                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x] and other.IntensityScaling[x] != 1.0:
-                    if self.crystalField.IntensityScaling[x] == 1.0:
+                if not (np.isclose(self.crystalField.IntensityScaling[x], other.IntensityScaling[x])
+                        or np.isclose(other.IntensityScaling[x], 1.0)):
+                    if np.isclose(self.crystalField.IntensityScaling[x], 1.0):
                         params['sp'+str(x)+'.IntensityScaling'] = other.IntensityScaling[x]
                     else:
                         differentIntensities = True
@@ -1497,7 +1498,7 @@ class CrystalFieldFit(object):
             fun = self._function
         for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
             parName = fun.getParamName(par_id)
-            if parName in CrystalField.field_parameter_names or "IntensityScaling" in parName:
+            if (parName in CrystalField.field_parameter_names or "IntensityScaling" in parName) and parName not in fun.getTies():
                 self._free_cef_parameters.append(par_id)
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):

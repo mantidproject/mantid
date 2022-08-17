@@ -16,6 +16,7 @@ class MockPlotPresenter : public PlotPresenter {
 public:
   MockPlotPresenter() : PlotPresenter(nullptr){};
 
+  MOCK_METHOD(void, clearModel, (), (override));
   MOCK_METHOD(void, setSpectrum, (const Mantid::API::MatrixWorkspace_sptr &, const size_t), (override));
   MOCK_METHOD(void, setScaleLinear, (const AxisID), (override));
   MOCK_METHOD(void, setScaleLog, (const AxisID), (override));

@@ -51,7 +51,8 @@ set_property(CACHE MANTID_QT_LIB PROPERTY STRINGS "OFF" "BUILD" "SYSTEM")
 if(NOT
    (ENABLE_WORKBENCH
     OR MANTID_QT_LIB STREQUAL "BUILD"
-    OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+    OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD"
+    OR ENABLE_DOCS)
 )
   message(FATAL_ERROR "Must select atleast one component to build")
 endif()
@@ -132,7 +133,7 @@ endif()
 include(Span)
 
 # Find OpenGL
-if(ENABLE_OPENGL)
+if(ENABLE_OPENGL AND (BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT))
   # Use legacy libGL library
   set(OpenGL_GL_PREFERENCE LEGACY)
   find_package(OpenGL REQUIRED)

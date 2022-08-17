@@ -110,6 +110,11 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def nonorthogonal_axes(self, state: bool) -> None:
         pass
 
+    def clear_workspace(self):
+        self._selectors = []
+        self.model.ws = None
+        self.view.clear_figure()
+
     def update_workspace(self, workspace) -> None:
         if WorkspaceInfo.get_ws_type(workspace) != WS_TYPE.MATRIX:
             raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
@@ -177,6 +182,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             artist.set_visible(False)
         selector.update()
         self._selectors.remove(selector)
+
+        if self.notifyee:
+            self.notifyee.notifyRegionChanged()
 
     def _find_selector_if(self, predicate: Callable) -> Selector:
         """

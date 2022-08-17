@@ -36,6 +36,10 @@ class RegionSelectorView(QWidget):
     def create_axes_orthogonal(self, redraw_on_zoom):
         self._data_view.create_axes_orthogonal(redraw_on_zoom=redraw_on_zoom)
 
+    def clear_figure(self):
+        self._data_view.clear_figure()
+        self._data_view.canvas.draw()
+
     @staticmethod
     def set_override_cursor(override: bool, override_cursor: Qt.CursorShape = Qt.SizeAllCursor) -> None:
         """

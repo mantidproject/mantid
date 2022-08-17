@@ -96,9 +96,11 @@ void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algo
     break;
   case AlgorithmType::SUM_BANKS:
     g_log.error(std::string("Error summing banks: ") + message);
+    m_notifyee->notifySumBanksAlgorithmError();
     break;
   case AlgorithmType::REDUCTION:
     g_log.error(std::string("Error performing reduction: ") + message);
+    m_notifyee->notifyReductionAlgorithmError();
     break;
   };
 }

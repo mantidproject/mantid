@@ -87,6 +87,27 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertFalse(region_selector._selectors[0].active)
         self.assertTrue(region_selector._selectors[1].active)
 
+    def test_clear_workspace_will_clear_all_the_selectors_and_model_workspace(self):
+        region_selector = RegionSelector(view=Mock())
+        mock_ws = Mock()
+
+        region_selector.update_workspace(mock_ws)
+        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black")
+
+        region_selector.clear_workspace()
+
+        self.assertEqual(0, len(region_selector._selectors))
+        self.assertEqual(None, region_selector.model.ws)
+
+    def test_clear_workspace_will_clear_the_figure_in_the_view(self):
+        mock_view = Mock()
+        region_selector = RegionSelector(view=mock_view)
+
+        region_selector.clear_workspace()
+
+        mock_view.clear_figure.assert_called_once_with()
+
     def test_get_region_with_two_signal_regions(self):
         region_selector, selector_one, selector_two = self._mock_selectors()
 
@@ -181,6 +202,20 @@ class RegionSelectorTest(unittest.TestCase):
 
         selector_two.set_active.assert_called_once_with(False)
         selector_two.update.assert_called_once_with()
+
+    def test_delete_key_pressed_will_notify_region_changed(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active, selector_two.active = False, True
+        selector_two.artists = []
+        mock_observer = Mock()
+        region_selector.subscribe(mock_observer)
+
+        event = Mock()
+        event.key = "delete"
+
+        region_selector.key_pressed(event)
+
+        mock_observer.notifyRegionChanged.assert_called_once()
 
     def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_exist(self):
         region_selector = RegionSelector(ws=Mock(), view=Mock())

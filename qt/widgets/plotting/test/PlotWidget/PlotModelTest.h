@@ -43,6 +43,18 @@ public:
     TS_ASSERT_EQUALS(model.getWorkspaces(), expectedWorkspaces);
   }
 
+  void test_clear_will_clear_the_model() {
+    auto model = PlotModel();
+    auto ws = createMatrixWorkspace(3);
+
+    model.setSpectrum(ws, 1);
+
+    model.clear();
+
+    TS_ASSERT(model.getWorkspaceIndices().empty());
+    TS_ASSERT(model.getWorkspaces().empty());
+  }
+
   void test_set_get_plot_error_bars() {
     auto model = PlotModel();
     model.setPlotErrorBars(true);

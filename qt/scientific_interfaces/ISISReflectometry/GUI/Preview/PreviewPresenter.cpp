@@ -128,6 +128,13 @@ void PreviewPresenter::notifyReductionCompleted() {
   plotLinePlot();
 }
 
+void PreviewPresenter::notifySumBanksAlgorithmError() {
+  clearRegionSelector();
+  clearReductionPlot();
+}
+
+void PreviewPresenter::notifyReductionAlgorithmError() { clearReductionPlot(); }
+
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
   m_view->setInstViewEditState(false);
@@ -179,12 +186,6 @@ void PreviewPresenter::notifyRegionChanged() {
   m_view->setRectangularROIState(false);
   m_view->setEditROIState(true);
 
-  // Set the selection from the view
-  m_model->setSelectedRegion(ROIType::Signal, m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)));
-  m_model->setSelectedRegion(ROIType::Background, m_regionSelector->getRegion(roiTypeToString(ROIType::Background)));
-  m_model->setSelectedRegion(ROIType::Transmission,
-                             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
-
   runReduction();
 }
 
@@ -232,10 +233,29 @@ void PreviewPresenter::runReduction() {
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
+  // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.
+  updateSelectedRegionInModelFromView();
   // Perform the reduction
   m_model->reduceAsync(*m_jobManager);
 }
 
 PreviewRow const &PreviewPresenter::getPreviewRow() const { return m_model->getPreviewRow(); }
+
+void PreviewPresenter::clearRegionSelector() {
+  m_regionSelector->clearWorkspace();
+  m_view->setRegionSelectorToolbarEnabled(false);
+}
+
+void PreviewPresenter::clearReductionPlot() {
+  m_plotPresenter->clearModel();
+  m_plotPresenter->plot();
+}
+
+void PreviewPresenter::updateSelectedRegionInModelFromView() {
+  m_model->setSelectedRegion(ROIType::Signal, m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)));
+  m_model->setSelectedRegion(ROIType::Background, m_regionSelector->getRegion(roiTypeToString(ROIType::Background)));
+  m_model->setSelectedRegion(ROIType::Transmission,
+                             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
+}
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
