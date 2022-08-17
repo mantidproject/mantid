@@ -49,6 +49,15 @@ public:
     checkExperimentSettings(*result);
   }
 
+  void testExperimentSettingsReductionTypeSetToNormalForSumInLambda() {
+    auto experiment = makeExperimentWithReductionTypeSetForSumInLambda();
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto row = makeEmptyRow();
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+    TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "Normal");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SummationType"), "SumInLambda");
+  }
+
   void testExperimentSettingsWithPreviewRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto theta = 0.7;
