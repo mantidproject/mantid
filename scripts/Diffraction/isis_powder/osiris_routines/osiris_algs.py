@@ -45,7 +45,7 @@ class WORKSPACE_SUFFIX(object):
     vanadium_corrected = '_vanadium_correction'
     pdf = '_pdf'
     merged = '_merged'
-    focussed = '_focussed'
+    focussed = '_focused'
     grouped = '_grouped'
     dspace = '_dspace'
 
@@ -154,7 +154,7 @@ class DrangeData(object):
     def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=''):
         processed = []
         for sample in self._sample:
-            outputname = sample+WORKSPACE_SUFFIX.pdf
+            outputname = sample+WORKSPACE_SUFFIX.focussed
             if subtract_empty:
                 sample = self.subtract_container_from_sample(sample)
             sample = self.calibrate_workspace(sample, focus_calibration_file)

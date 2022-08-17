@@ -17,14 +17,13 @@ general_params = {
     "file_names": {
          "vanadium_absorb_filename": "osiris_absorp_sphere_10mm_newinst2_long.nxs",
          "grouping_filename": "osiris_grouping.cal",
-         "nxs_filename": "{instshort}{runno}{suffix}.nxs",
-         "gss_filename": "{instshort}{runno}{suffix}.gsas",
+         "nxs_filename": "{instshort}{runno}{suffix}{unit}.nxs",
+         "gss_filename": "{instshort}{runno}{suffix}{unit}.gsas",
          "dat_files_directory": "",
-         "tof_xye_filename": "{instshort}{runno}{suffix}_tof.xye",
-         "dspacing_xye_filename": "{instshort}{runno}{suffix}_d.xye"
+         "xye_filename": "{instshort}{runno}{suffix}{unit}.xye",
     },
 
-    "subtract_empty_instrument": True,
+    "subtract_empty_can": True,
     "focused_bin_widths": [
         # Note you want these to be negative for logarithmic (dt / t) binning
         -0.0006,  # Bank 1

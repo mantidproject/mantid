@@ -7,8 +7,10 @@
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.osiris_routines import osiris_advanced_config, osiris_algs, osiris_param_mapping
-from isis_powder.routines import instrument_settings
+from isis_powder.routines import instrument_settings, common_output
 import copy
+import mantid.simpleapi as mantid
+import os
 
 
 class Osiris(AbstractInst):
@@ -65,13 +67,18 @@ class Osiris(AbstractInst):
                                                               self._drange_sets,
                                                               run_details.grouping_file_path,
                                                               van_norm=self._inst_settings.van_norm,
-                                                              subtract_empty=self._inst_settings.subtract_empty_inst)
+                                                              subtract_empty=self._inst_settings.subtract_empty_can)
         if self._inst_settings.merge_drange:
             focussed_runs = [osiris_algs._merge_dspacing_runs(self._inst_settings.run_number, self._drange_sets, focussed_runs)]
 
         return self._output_focused_ws(focussed_runs, run_details)
 
     def _get_run_details(self, run_number_string):
+        """
+        Returns a RunDetails object with various properties related to the current run set
+        :param run_number_string: The run number to look up the properties of
+        :return: A RunDetails object containing attributes relevant to that run_number_string
+        """
         run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
                                                                        self._inst_settings.file_extension)
 
@@ -82,3 +89,95 @@ class Osiris(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
         return self._run_details_cached_obj[run_number_string_key]
+
+    def _output_focused_ws(self, processed_spectra, run_details):
+        """
+        Takes a list of focused workspace banks and saves them out in an instrument appropriate format.
+        :param processed_spectra: The list of workspace banks to save out
+        :param run_details: The run details associated with this run
+        :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
+        :return: d-spacing group of the processed output workspaces
+        """
+        d_spacing_group, tof_group, q_squared_group = common_output.split_into_tof_d_spacing_q_squared_groups(
+            run_details=run_details, processed_spectra=processed_spectra)
+        save_data(workspace_group=d_spacing_group,
+                  output_paths=self._generate_out_file_paths(run_details=run_details, unit="_d_spacing"))
+        save_data(workspace_group=tof_group,
+                  output_paths=self._generate_out_file_paths(run_details=run_details, unit="_tof"))
+        save_data(workspace_group=q_squared_group,
+                  output_paths=self._generate_out_file_paths(run_details=run_details, unit="_q_squared"))
+
+        return d_spacing_group, tof_group
+
+    def _generate_out_file_paths(self, run_details, unit=""):
+        """
+        Generates the various output paths and file names to be used during saving or as workspace names
+        :param run_details: The run details associated with this run
+        :return: A dictionary containing the various output paths and generated output name
+        """
+        output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
+        output_directory = os.path.abspath(os.path.expanduser(output_directory))
+        dat_files_directory = output_directory
+        if self._inst_settings.dat_files_directory:
+            dat_files_directory = os.path.join(output_directory,
+                                               self._inst_settings.dat_files_directory)
+
+        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(
+            ".")
+        out_file_names = {"output_folder": output_directory}
+        format_options = {
+            "inst": self._inst_prefix,
+            "instlow": self._inst_prefix.lower(),
+            "instshort": self._inst_prefix_short,
+            "runno": run_details.output_run_string,
+            "fileext": file_type,
+            "_fileext": "_" + file_type if file_type else "",
+            "suffix": run_details.output_suffix if run_details.output_suffix else "",
+            "unit": unit
+        }
+        format_options = self._add_formatting_options(format_options)
+
+        output_formats = {
+            "nxs_filename": output_directory,
+            "gss_filename": output_directory,
+            "xye_filename": dat_files_directory,
+        }
+        for key, output_dir in output_formats.items():
+            filepath = os.path.join(output_dir,
+                                    getattr(self._inst_settings, key).format(**format_options))
+            out_file_names[key] = filepath
+
+        out_file_names['output_name'] = os.path.splitext(
+            os.path.basename(out_file_names['nxs_filename']))[0]
+        return out_file_names
+
+
+def save_data(workspace_group, output_paths):
+    """
+    Saves out data into nxs, GSAS and .dat formats. Requires the grouped workspace
+    and the dictionary of output paths generated by abstract_inst.
+    :param workspace_group: The workspace group
+    :param tof_group: The focused workspace group in TOF
+    :param output_paths: A dictionary containing the full paths to save to
+    :return: None
+    """
+    def ensure_dir_exists(filename):
+        dirname = os.path.dirname(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        return filename
+
+    mantid.SaveGSS(InputWorkspace=workspace_group,
+                   Filename=ensure_dir_exists(output_paths["gss_filename"]),
+                   SplitFiles=False,
+                   Append=False)
+    mantid.SaveNexusProcessed(InputWorkspace=workspace_group,
+                              Filename=ensure_dir_exists(output_paths["nxs_filename"]),
+                              Append=False)
+
+    for bank_index, ws in enumerate(workspace_group):
+        bank_index += 1  # Ensure we start a 1 when saving out
+        mantid.SaveFocusedXYE(InputWorkspace=ws,
+                              Filename=ensure_dir_exists(output_paths["xye_filename"]).format(bankno=bank_index),
+                              SplitFiles=False,
+                              IncludeHeader=False)

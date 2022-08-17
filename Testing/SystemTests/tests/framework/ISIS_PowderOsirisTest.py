@@ -28,7 +28,7 @@ output_folder_name = "output"
 # Relative to input folder
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "osiris_system_test_mapping.yaml")
-focussed_rel_path = os.path.join("1_1", "OSI119977-119988.nxs.md5")
+focussed_rel_path = os.path.join("1_1", "OSI119977.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -64,14 +64,14 @@ class DiffractionFocusingTest(systemtesting.MantidSystemTest):
 
 
 def run_diffraction_focusing():
-    sample_runs = "119977-119988"  # Choose full drange set in the cycle 1_1
+    sample_runs = "119977"  # Choose full drange set in the cycle 1_1
 
     osiris_inst_obj = setup_inst_object()
 
     # Run diffraction focusing
     osiris_inst_obj.run_diffraction_focusing(run_number=sample_runs,
                                              merge_drange=False,
-                                             subtract_empty_instrument=True,
+                                             subtract_empty_can=True,
                                              vanadium_normalisation=False)
     foccussed_ws = mantid.Load(Filename=focused_path)
 

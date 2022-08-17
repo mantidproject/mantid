@@ -8,14 +8,6 @@ from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.routines.common import PARAM_MAPPING
 
 
-class OSIRIS_FOCUS_MODES(object):
-    enum_friendly_name = "focus modes"
-    all = "all"
-    groups = "groups"
-    trans = "trans"
-    mods = "mods"
-
-
 # Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
     ParamMapEntry(ext_name="attenuation_files", int_name="attenuation_files"),
@@ -36,7 +28,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="custom_focused_bin_widths", int_name="custom_focused_bin_widths"),
     ParamMapEntry(ext_name="focused_cropping_values", int_name="tof_cropping_values"),
     ParamMapEntry(ext_name="custom_focused_cropping_values", int_name="custom_tof_cropping_values"),
-    ParamMapEntry(ext_name="focus_mode", int_name="focus_mode", enum_class=OSIRIS_FOCUS_MODES),
     ParamMapEntry(ext_name="generate_absorb_corrections", int_name="gen_absorb"),
     ParamMapEntry(ext_name="get_det_offsets_d_ref", int_name="d_reference"),
     ParamMapEntry(ext_name="get_det_offsets_step", int_name="get_det_offsets_step"),
@@ -56,7 +47,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="sample_empty", int_name="sample_empty", optional=True),
     ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale"),
     ParamMapEntry(ext_name="spline_coefficient", int_name="spline_coefficient"),
-    ParamMapEntry(ext_name="subtract_empty_instrument", int_name="subtract_empty_inst"),
+    ParamMapEntry(ext_name="subtract_empty_can", int_name="subtract_empty_can"),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),
     ParamMapEntry(ext_name="grouping_filename", int_name="grouping"),
     ParamMapEntry(ext_name="custom_grouping_filename", int_name="custom_grouping"),
@@ -66,6 +57,7 @@ attr_mapping = [
                   int_name="absorb_out_file",
                   optional=True),
     ParamMapEntry(ext_name="vanadium_tof_cropping", int_name="van_tof_cropping"),
-    ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm")
+    ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm"),
+    ParamMapEntry(ext_name="xye_filename", int_name="xye_filename")
 ]
 attr_mapping.extend(PARAM_MAPPING)
