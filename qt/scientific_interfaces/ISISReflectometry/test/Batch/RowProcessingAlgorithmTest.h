@@ -50,7 +50,8 @@ public:
   }
 
   void testExperimentSettingsReductionTypeSetToNormalForSumInLambda() {
-    auto model = Batch(makeExperimentWithReductionTypeSetForSumInLambda(), m_instrument, m_runsTable, m_slicing);
+    auto experiment = makeExperimentWithReductionTypeSetForSumInLambda();
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "Normal");
