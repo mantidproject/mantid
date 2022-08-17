@@ -85,5 +85,6 @@ private slots:
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
   void onAngleEdited();
+  void onApplyClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -367,4 +367,9 @@ void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
 }
+
+void BatchPresenter::notifyPreviewApplyRequested() {
+  auto const &previewRow = m_previewPresenter->getPreviewRow();
+  m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

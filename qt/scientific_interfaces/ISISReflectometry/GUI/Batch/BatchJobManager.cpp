@@ -9,6 +9,7 @@
 #include "GroupProcessingAlgorithm.h"
 #include "IReflAlgorithmFactory.h"
 #include "Reduction/PreviewRow.h"
+#include "Reduction/RowExceptions.h"
 #include "ReflAlgorithmFactory.h"
 #include "RowPreprocessingAlgorithm.h"
 #include "RowProcessingAlgorithm.h"

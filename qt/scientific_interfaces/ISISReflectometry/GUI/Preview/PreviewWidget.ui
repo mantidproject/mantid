@@ -261,7 +261,7 @@
       <widget class="QTableWidget" name="tableWidget_2"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="apply_button">
        <property name="text">
         <string>Apply</string>
        </property>
@@ -284,7 +284,7 @@
   <tabstop>rs_ads_export_button</tabstop>
   <tabstop>lp_ads_export_button</tabstop>
   <tabstop>tableWidget_2</tabstop>
-  <tabstop>pushButton_3</tabstop>
+  <tabstop>apply_button</tabstop>
  </tabstops>
  <resources>
   <include location="../../../../icons/resources/icons.qrc"/>

@@ -9,6 +9,7 @@
 #include "IGroup.h"
 #include "PreviewRow.h"
 #include "Row.h"
+#include "RowExceptions.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
@@ -18,7 +19,7 @@ namespace {
 constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
 bool equalWithinTolerance(double val1, double val2, double tolerance) {
-  return std::abs(val1 - val2) <= (tolerance + EPSILON);
+  return std::abs(val1 - val2) <= (tolerance + 2.0 * EPSILON);
 }
 } // namespace
 
@@ -113,13 +114,25 @@ boost::optional<LookupRow> LookupTable::findWildcardLookupRow() const {
     return *match;
 }
 
+void LookupTable::updateLookupRow(LookupRow lookupRow, double tolerance) {
+  auto match = std::find_if(m_lookupRows.begin(), m_lookupRows.end(),
+                            [&lookupRow, &tolerance](LookupRow const &candidate) -> bool {
+                              return candidate.hasEqualThetaAndTitle(lookupRow, tolerance);
+                            });
+  if (match != m_lookupRows.end()) {
+    (*match) = std::move(lookupRow);
+  } else {
+    throw RowNotFoundException("Lookup row not found.");
+  }
+}
+
 size_t LookupTable::getIndex(const LookupRow &lookupRow) const {
   if (auto found = std::find(m_lookupRows.cbegin(), m_lookupRows.cend(), lookupRow); found != m_lookupRows.cend()) {
     auto index = std::distance(m_lookupRows.cbegin(), found);
     assert(index >= 0);
     return static_cast<size_t>(index);
   }
-  throw std::out_of_range("Lookup row not found.");
+  throw RowNotFoundException("Lookup row not found.");
 }
 
 std::vector<LookupRow::ValueArray> LookupTable::toValueArray() const {

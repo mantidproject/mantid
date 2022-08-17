@@ -11,17 +11,11 @@
 #include "LookupRow.h"
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
-#include <exception>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class Row;
 class PreviewRow;
-
-struct MultipleRowsFoundException : public std::length_error {
-public:
-  MultipleRowsFoundException(std::string s) : std::length_error(std::move(s)){};
-};
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTable {
 public:
@@ -32,6 +26,7 @@ public:
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
   boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
+  void updateLookupRow(LookupRow lookupRow, double tolerance);
   size_t getIndex(LookupRow const &) const;
   std::vector<LookupRow> const &rows() const;
   std::vector<LookupRow::ValueArray> toValueArray() const;

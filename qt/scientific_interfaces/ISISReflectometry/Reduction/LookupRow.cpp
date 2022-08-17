@@ -5,6 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "LookupRow.h"
+#include "GUI/Preview/ROIType.h"
+
+namespace {
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -41,6 +46,32 @@ boost::optional<ProcessingInstructions> LookupRow::transmissionProcessingInstruc
 
 boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructions() const {
   return m_backgroundProcessingInstructions;
+}
+
+void LookupRow::setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions) {
+  switch (regionType) {
+  case ROIType::Signal:
+    m_processingInstructions = std::move(processingInstructions);
+    return;
+  case ROIType::Background:
+    m_backgroundProcessingInstructions = std::move(processingInstructions);
+    return;
+  case ROIType::Transmission:
+    m_transmissionProcessingInstructions = std::move(processingInstructions);
+    return;
+  }
+  throw std::invalid_argument("Unexpected ROIType provided");
+}
+
+bool LookupRow::hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const {
+  if (!m_theta.is_initialized() && !lookupRow.m_theta.is_initialized()) {
+    return m_titleMatcher == lookupRow.m_titleMatcher;
+  }
+  if (m_theta.is_initialized() && lookupRow.m_theta.is_initialized()) {
+    return std::abs(*m_theta - *lookupRow.m_theta) <= (tolerance + 2.0 * EPSILON) &&
+           m_titleMatcher == lookupRow.m_titleMatcher;
+  }
+  return false;
 }
 
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {

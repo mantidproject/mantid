@@ -105,6 +105,7 @@ public:
   MOCK_CONST_METHOD0(isBatchUnsaved, bool());
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
+  MOCK_METHOD0(notifyPreviewApplyRequested, void());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -171,6 +172,7 @@ public:
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD1(notifyPreviewApplyRequested, void(PreviewRow const &));
   MOCK_METHOD0(restoreDefaults, void());
   MOCK_METHOD(bool, hasValidSettings, (), (const, noexcept, override));
 };

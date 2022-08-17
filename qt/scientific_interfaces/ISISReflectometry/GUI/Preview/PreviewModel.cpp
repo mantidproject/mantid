@@ -93,6 +93,8 @@ std::optional<double> PreviewModel::getDefaultTheta() const {
   return std::nullopt;
 }
 
+PreviewRow const &PreviewModel::getPreviewRow() const { return *m_runDetails; }
+
 std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }

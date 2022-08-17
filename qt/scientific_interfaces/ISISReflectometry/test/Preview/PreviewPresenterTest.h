@@ -18,6 +18,7 @@
 #include "MockPreviewView.h"
 #include "PreviewPresenter.h"
 #include "ROIType.h"
+#include "Reduction/RowExceptions.h"
 #include "TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -335,6 +336,54 @@ public:
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
     presenter.notifyAutoreductionPaused();
+  }
+
+  void test_notify_apply_requested_notifies_main_presenter() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested()).Times(1);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+    presenter.notifyApplyRequested();
+  }
+
+  void test_get_preview_row() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto previewRow = PreviewRow({"12345"});
+
+    EXPECT_CALL(*mockModel, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    presenter.getPreviewRow();
+  }
+
+  void test_notify_apply_requested_will_catch_RowNotFoundException() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested())
+        .Times(1)
+        .WillRepeatedly(Throw(RowNotFoundException("Error message")));
+
+    presenter.notifyApplyRequested();
+  }
+
+  void test_notify_apply_requested_will_catch_MultipleRowsFoundException() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested())
+        .Times(1)
+        .WillRepeatedly(Throw(MultipleRowsFoundException("Error message")));
+
+    presenter.notifyApplyRequested();
   }
 
   void test_region_selector_and_reduction_plot_is_cleared_on_a_sum_banks_algorithm_error() {

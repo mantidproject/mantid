@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
+#include "GUI/Preview/ROIType.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
@@ -60,6 +61,8 @@ public:
   boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
   boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
+  void setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions);
+  bool hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const;
 
   MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator==(LookupRow const &lhs, LookupRow const &rhs);
   MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator!=(LookupRow const &lhs, LookupRow const &rhs);

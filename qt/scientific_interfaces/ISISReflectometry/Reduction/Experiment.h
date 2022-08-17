@@ -60,6 +60,8 @@ public:
   boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
 
+  void updateLookupRow(LookupRow lookupRow, double tolerance);
+
   boost::optional<size_t> getLookupRowIndexFromRow(Row const &row, double tolerance) const;
 
 private:

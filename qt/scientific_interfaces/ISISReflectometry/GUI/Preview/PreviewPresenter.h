@@ -76,6 +76,8 @@ public:
   void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
 
+  void notifyApplyRequested() override;
+
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
   void notifySumBanksCompleted() override;
@@ -86,6 +88,8 @@ public:
 
   // RegionSelectionObserver overrides
   void notifyRegionChanged() override;
+
+  PreviewRow const &getPreviewRow() const override;
 
 private:
   IPreviewView *m_view{nullptr};
