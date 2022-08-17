@@ -385,7 +385,7 @@ public:
 
     presenter.notifyApplyRequested();
   }
- 
+
   void test_region_selector_and_reduction_plot_is_cleared_on_a_sum_banks_algorithm_error() {
     auto mockView = makeView();
     auto mockModel = makeModel();
