@@ -42,7 +42,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="get_det_offsets_step", int_name="get_det_offsets_step"),
     ParamMapEntry(ext_name="get_det_offsets_x_min", int_name="get_det_offsets_x_min"),
     ParamMapEntry(ext_name="get_det_offsets_x_max", int_name="get_det_offsets_x_max"),
-    ParamMapEntry(ext_name="long_mode", int_name="long_mode"),
     ParamMapEntry(ext_name="merge_drange", int_name="merge_drange"),
     ParamMapEntry(ext_name="monitor_lambda_crop_range", int_name="monitor_lambda"),
     ParamMapEntry(ext_name="monitor_integration_range", int_name="monitor_integration_range"),

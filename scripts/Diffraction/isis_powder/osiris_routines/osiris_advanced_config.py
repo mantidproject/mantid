@@ -63,31 +63,6 @@ calibration_params = {
 }
 
 variable_help = {
-    "long_mode_<on/off>_params": {
-        "file_names": {
-            "vanadium_absorb_filename": "Takes the name of the calculated vanadium absorption corrections. This file "
-                                        " must be located in the top level of the calibration folder",
-
-            "grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
-                                 "This file must be located in the top level of the calibration folder.",
-        },
-
-        "monitor_lambda_crop_range": "The range in wavelength to crop a monitor workspace to before calculating "
-                                     "the current normalisation",
-        "monitor_integration_range": "The minimum and maximum values to consider whilst integrating the monitor "
-                                     "workspace",
-        "raw_data_tof_cropping": "The crop values for to apply when loading raw data. This step is applied before any "
-                                 "processing takes place. This is to crop from 40,000 microseconds in the "
-                                 "raw data to 20,000 microseconds worth of data",
-        "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium "
-                                   "calibration) workspace to. These are applied on a bank by bank basis. They must "
-                                   "be less than the values specified for raw_data_tof_cropping.",
-        "monitor_spline_coefficient": "The coefficient to use whilst calculating a spline from the monitor."
-                                      "workspace. This is used to normalise the workspace current.",
-        "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during "
-                              "a vanadium calibration."
-    },
-
     "general_params": {
         "monitor_spectrum_number": "The spectrum number the monitor is located at in the workspace",
     },
