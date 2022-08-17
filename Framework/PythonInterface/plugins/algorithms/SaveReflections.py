@@ -117,7 +117,9 @@ class SaveReflections(PythonAlgorithm):
         # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
         max_intens = max(workspace.column('Intens'))
         max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
-        scale = 1 if max_intens < 10**max_exponent else 10**(-(int(np.log10(max_intens))-max_exponent+1))
+        min_exponent = -2  # 2 decimal points in SHELX, FullProf, Jana2006 and GSAS-II
+        # find scale factor to scale intensity to largest value in the available width (e.g. 9999.99 for SHELX)
+        scale = 1 if max_intens < 10 ** max_exponent else ((10 ** max_exponent) - 10 ** min_exponent) / max_intens
         FORMAT_MAP[output_format]()(file_name, workspace, split_files, scale)
 
 
