@@ -20,7 +20,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
-typedef Eigen::Spline<double, 2> Spline;
+typedef Eigen::Spline<double, 1, 2> Spline1D;
 
 /**
 A wrapper around Eigen functions implementing a B-spline.
@@ -58,24 +58,20 @@ private:
   int getNBreakPoints();
   /// Populate a vector with a uniform set of break points
   std::vector<double> calcUniformBreakPoints(const double startX, const double endX);
-  /// Initialise the spline given a vector of knots and breakpoints
-  void initialiseSpline(std::vector<double> &knotVector, std::vector<double> &breakPoints);
   /// Generate a uniform knot vector
-  std::vector<double> generateUniformKnotVector(bool clamped = true);
+  std::vector<double> generateUniformKnotVector(const bool clamped = true);
   /// Get number of Knots
   int getNKnots();
   /// Get order of the spline
   int getOrder();
   /// Get number of spans (segments between knots)
   int getNSpans();
+  /// Get the degree of constituent polynomial functions
+  int getDegree();
   /// Generate a knot vector based upon break points
-  std::vector<double> generateKnotVector(std::vector<double> breakPoints);
-
-  // Test FN
-  EigenMatrix test_make_break_points_2d(std::vector<double> breakPoints);
-
-  /// --- Eigen Implementation Member Variables
-  Spline m_spline;
+  std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
+  /// evaluate non-zero basis functions, return which index to use as the base of the results vector.
+  int evaluateBasisFunctions(Spline1D &spline, EigenVector &B, const double x, int currentBBase) const;
 };
 
 } // namespace Functions

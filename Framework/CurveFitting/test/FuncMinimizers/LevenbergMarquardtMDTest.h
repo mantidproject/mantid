@@ -279,7 +279,7 @@ public:
     double endx = 3.14;
 
     std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
-    bsp->setAttributeValue("Order", 2);
+    bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 10);
     bsp->setAttributeValue("StartX", startx);
     bsp->setAttributeValue("EndX", endx);
