@@ -39,6 +39,7 @@ set(SRC_FILES
     src/CostFunctions/CostFuncPoisson.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
+    src/EigenBSpline.cpp
     src/EigenComplexMatrix.cpp
     src/EigenComplexVector.cpp
     src/EigenMatrix.cpp
@@ -283,6 +284,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/DiffSphere.h
     inc/MantidCurveFitting/Functions/DynamicKuboToyabe.h
+    inc/MantidCurveFitting/Functions/EigenBSpline.h
     inc/MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/ElasticDiffSphere.h
     inc/MantidCurveFitting/Functions/ElasticIsoRotDiff.h

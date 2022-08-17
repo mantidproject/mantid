@@ -14,6 +14,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
+#include "MantidCurveFitting/Functions/EigenBSpline.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 
 #include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
@@ -271,6 +272,29 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("a"), 1.0, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
+  }
+
+  void test_BSpline_Eigen_fit_uniform() {
+    double startx = -3.14;
+    double endx = 3.14;
+
+    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    bsp->setAttributeValue("Order", 2);
+    bsp->setAttributeValue("NBreak", 10);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-4, 1e-5);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->function(x, y);
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], sin(xx), 0.003);
+    }
   }
 
   void test_BSpline_fit_uniform() {
