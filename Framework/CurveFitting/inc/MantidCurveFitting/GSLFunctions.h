@@ -40,7 +40,7 @@ struct GSL_FitData {
   /// Initial function parameters
   gsl_vector *initFuncParams;
   /// Jacobi matrix interface
-  JacobianImpl1 J;
+  JacobianImpl1<EigenMatrix> J;
 
   // this is presently commented out in the implementation
   // gsl_matrix *holdCalculatedJacobian; ///< cache of the calculated jacobian

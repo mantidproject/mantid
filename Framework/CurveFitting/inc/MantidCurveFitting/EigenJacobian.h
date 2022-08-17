@@ -10,8 +10,6 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 
-#include <gsl/gsl_matrix.h>
-
 #include <stdexcept>
 #include <vector>
 
@@ -19,13 +17,11 @@ namespace Mantid {
 namespace CurveFitting {
 /**
 Two implementations of Jacobian.
--The first (EigenJacobian) using Eigen::Matrix.
-- The second (JacobianImpl1) using gsl_matrix.
 @author Anders Markvardsen, ISIS, RAL
 @date 14/05/2010
 */
 class EigenJacobian : public API::Jacobian {
-  /// The pointer to the the internal jacobian matrix
+  /// The internal jacobian matrix
   EigenMatrix m_J;
   /// Maps declared indeces to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
@@ -39,15 +35,16 @@ public:
     size_t np = 0; // number of active parameters
     for (size_t i = 0; i < fun.nParams(); ++i) {
       m_index[i] = static_cast<int>(np);
-      if (fun.isActive(i))
+      if (fun.isActive(i)) {
         ++np;
+      }
     }
     m_J.resize(ny, np);
   }
 
   EigenMatrix &matrix() { return m_J; }
 
-  /// Get the pointer to the GSL's jacobian
+  /// Get the map to the jacobian
   map_type &getJ() { return m_J.mutator(); }
 
   /// overwrite base method
@@ -58,10 +55,10 @@ public:
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
     if (iActiveP < m_J.size2()) {
       // add penalty to first and last point and every 10th point in between
-      m_J.mutator().data()[iActiveP] += value;
-      m_J.mutator().data()[(m_J.size1() - 1) * m_J.size2() + iActiveP] += value;
+      m_J.mutator().data()[iActiveP * m_J.size1()] += value;
+      m_J.mutator().data()[(iActiveP + 1) * m_J.size1() - 1] += value;
       for (size_t iY = 9; iY < m_J.size1() - 1; iY += 10)
-        m_J.mutator().data()[iY * m_J.size2() + iActiveP] += value;
+        m_J.mutator().data()[iActiveP * m_J.size1() + iY] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");
@@ -85,15 +82,15 @@ public:
 };
 
 /// The implementation of Jacobian
-class JacobianImpl1 : public API::Jacobian {
+template <class T> class JacobianImpl1 : public API::Jacobian {
 public:
-  /// The pointer to the GSL's internal jacobian matrix
-  gsl_matrix *m_J;
-  /// Maps declared indeces to active. For fixed (tied) parameters holds -1
+  /// The internal jacobian matrix
+  T *m_J;
+  /// Maps declared indices to active. For fixed (tied) parameters holds -1
   std::vector<int> m_index;
 
-  /// Set the pointer to the GSL's jacobian
-  void setJ(gsl_matrix *J) { m_J = J; }
+  /// Set the pointer to the jacobian
+  void setJ(T *J) { m_J = J; }
 
   /// overwrite base method
   /// @param value :: the value
@@ -101,12 +98,12 @@ public:
   ///  @throw runtime_error Thrown if column of Jacobian to add number to does
   ///  not exist
   void addNumberToColumn(const double &value, const size_t &iActiveP) override {
-    if (iActiveP < m_J->size2) {
+    if (iActiveP < m_J->size2()) {
       // add penalty to first and last point and every 10th point in between
-      m_J->data[iActiveP] += value;
-      m_J->data[(m_J->size1 - 1) * m_J->size2 + iActiveP] += value;
-      for (size_t iY = 9; iY < m_J->size1 - 1; iY += 10)
-        m_J->data[iY * m_J->size2 + iActiveP] += value;
+      m_J->mutator().data()[iActiveP * m_J->size1()] += value;
+      m_J->mutator().data()[(iActiveP + 1) * m_J->size1() - 1] += value;
+      for (size_t iY = 9; iY < m_J->size1() - 1; iY += 10)
+        m_J->mutator().data()[iActiveP * m_J->size1() + iY] += value;
     } else {
       throw std::runtime_error("Try to add number to column of Jacobian matrix "
                                "which does not exist.");
@@ -131,17 +128,17 @@ public:
     }
     int j = m_index[iP];
     if (j >= 0)
-      gsl_matrix_set(m_J, iY, j, value);
+      m_J->mutator().data()[j * m_J->size1() + iY] = value;
   }
   /// overwrite base method
   double get(size_t iY, size_t iP) override {
     int j = m_index[iP];
     if (j >= 0)
-      return gsl_matrix_get(m_J, iY, j);
+      return m_J->inspector().data()[j * m_J->size1() + iY];
     return 0.0;
   }
   /// overwrite base method
-  void zero() override { gsl_matrix_set_zero(m_J); }
+  void zero() override { m_J->zero(); }
 };
 
 } // namespace CurveFitting

@@ -409,6 +409,7 @@ set(TEST_FILES
     EigenComplexVectorTest.h
     EigenFortranMatrixTest.h
     EigenFortranVectorTest.h
+    EigenJacobianTest.h
     EigenMatrixTest.h
     EigenToGSLTest.h
     EigenVectorTest.h
