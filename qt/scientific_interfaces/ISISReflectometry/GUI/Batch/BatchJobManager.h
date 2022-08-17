@@ -49,8 +49,8 @@ public:
   void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
   void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
-  std::vector<std::string>
-  algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
+  std::vector<std::string> algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                                                           bool includeGrpRows) const override;
 
   boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) override;
   boost::optional<Item const &> notifyWorkspaceRenamed(std::string const &oldName, std::string const &newName) override;
@@ -75,7 +75,7 @@ protected:
 private:
   int itemsInSelection(Item::ItemCountFunction countFunction) const;
 
-  std::vector<std::string> getWorkspacesToSave(Group const &group) const;
+  std::vector<std::string> getWorkspacesToSave(Group const &group, bool includeRows) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
   size_t getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   template <typename T> bool isSelected(T const &item);
