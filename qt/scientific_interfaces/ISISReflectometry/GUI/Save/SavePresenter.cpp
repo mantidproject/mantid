@@ -125,6 +125,7 @@ void SavePresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;
+    m_view->enableSaveIndividualRowsCheckbox();
   } else {
     m_shouldAutosave = false;
     m_view->disallowAutosave();
@@ -132,7 +133,10 @@ void SavePresenter::enableAutosave() {
   }
 }
 
-void SavePresenter::disableAutosave() { m_shouldAutosave = false; }
+void SavePresenter::disableAutosave() {
+  m_shouldAutosave = false;
+  m_view->disableSaveIndividualRowsCheckbox();
+}
 
 void SavePresenter::notifySaveIndividualRowsEnabled() { m_shouldSaveIndividualRows = true; }
 

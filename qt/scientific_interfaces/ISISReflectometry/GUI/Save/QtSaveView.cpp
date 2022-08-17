@@ -142,6 +142,10 @@ void QtSaveView::disableSeparatorButtonGroup() {
   m_ui.tabRadioButton->setEnabled(false);
 }
 
+void QtSaveView::enableSaveIndividualRowsCheckbox() { m_ui.saveIndividualRowsCheckBox->setEnabled(true); }
+
+void QtSaveView::disableSaveIndividualRowsCheckbox() { m_ui.saveIndividualRowsCheckBox->setEnabled(false); }
+
 /** Returns the save path
  * @return :: The save path
  */
