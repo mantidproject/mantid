@@ -83,9 +83,9 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         n_spec = metadata.spectrum_amount()
         data_y = metadata.data_y()
-        wavelength = self._wavelength(metadata)
+        self._wavelength(metadata)
         data_e = metadata.data_e()
-        data_x = metadata.data_x(wavelength)
+        data_x = metadata.data_x()
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
@@ -151,7 +151,6 @@ class LoadSANS1MLZ(PythonAlgorithm):
             self.log().notice('Wavelength set to user input.')
         if (type(metadata.setup.wavelength) is str) or (metadata.setup.wavelength == 0.0):
             self.log().error('Wavelength not defined.')
-        return user_wavelength
 
     def _log_data_analyzing(self, metadata):
         """
