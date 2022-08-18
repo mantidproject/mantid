@@ -57,7 +57,6 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
   double endX = getAttribute("EndX").asDouble();
   const std::vector<double> breakPoints = getAttribute("BreakPoints").asVector();
   const std::vector<double> knots = getAttribute("Knots").asVector();
-  Spline1D spline(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
   B[0] = std::numeric_limits<double>::max();
 
   if (startX >= endX) {
@@ -69,7 +68,7 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
     if (x < startX || x > endX) {
       out[i] = 0.0;
     } else {
-      currentBBase = evaluateBasisFunctions(spline, B, x, currentBBase);
+      currentBBase = evaluateBasisFunctions(m_spline, B, x, currentBBase);
 
       double val = 0.0;
       for (size_t j = 0; j < np; ++j) {
@@ -80,7 +79,12 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
   }
 }
 
-int EigenBSpline::evaluateBasisFunctions(Spline1D &spline, EigenVector &B, const double x, int currentBBase) const {
+void EigenBSpline::initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints) {
+  m_spline = Spline1D(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
+}
+
+int EigenBSpline::evaluateBasisFunctions(const Spline1D &spline, EigenVector &B, const double x,
+                                         int currentBBase) const {
   auto res = spline.basisFunctions(x); // Calculate Non-Zero Basis Functions
 
   if (res.data()[0] >= B[currentBBase]) { // attempts to shift results along the vector when a particular basis function
@@ -104,51 +108,37 @@ int EigenBSpline::evaluateBasisFunctions(Spline1D &spline, EigenVector &B, const
  * @param order :: The order of the derivatives o calculate
  */
 void EigenBSpline::derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const {
+  // int splineOrder = getAttribute("Order").asInt();
 
-  //        int splineOrder = getAttribute("Order").asInt();
-  //        auto k = static_cast<size_t>(splineOrder);
-  //#if GSL_MAJOR_VERSION < 2
-  //        if (!m_bsplineDerivWorkspace) {
-  //            gsl_bspline_deriv_workspace* ws = gsl_bspline_deriv_alloc(k);
-  //            m_bsplineDerivWorkspace = std::shared_ptr<gsl_bspline_deriv_workspace>(ws,
-  //            ReleaseBSplineDerivativeWorkspace());
+  // EigenMatrix B(splineOrder, order + 1);
+  // double startX = getAttribute("StartX").asDouble();
+  // double endX = getAttribute("EndX").asDouble();
+
+  // if (startX >= endX) {
+  //    throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
+  //}
+
+  // for (size_t i = 0; i < nData; ++i) {
+  //    double x = xValues[i];
+  //    if (x < startX || x > endX) {
+  //        out[i] = 0.0;
+  //    }
+  //    else {
+  //        size_t jstart(0);
+  //        size_t jend(0);
+
+  //        EigenMatrix B_tr(B.tr());
+  //        gsl_matrix_view B_gsl_tr = getGSLMatrixView(B_tr.mutator());
+  //        gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl_tr.matrix, &jstart, &jend,
+  //        m_bsplineWorkspace.get()); B = B_tr.tr();
+
+  //        double val = 0.0;
+  //        for (size_t j = jstart; j <= jend; ++j) {
+  //            val += getParameter(j) * B.get(j - jstart, order);
   //        }
-  //#endif
-  //
-  //        EigenMatrix B(k, order + 1);
-  //        double startX = getAttribute("StartX").asDouble();
-  //        double endX = getAttribute("EndX").asDouble();
-  //
-  //        if (startX >= endX) {
-  //            throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
-  //        }
-  //
-  //        for (size_t i = 0; i < nData; ++i) {
-  //            double x = xValues[i];
-  //            if (x < startX || x > endX) {
-  //                out[i] = 0.0;
-  //            }
-  //            else {
-  //                size_t jstart(0);
-  //                size_t jend(0);
-  //#if GSL_MAJOR_VERSION < 2
-  //                gsl_matrix_view B_gsl = getGSLMatrixView(B.mutator());
-  //                gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl.matrix, &jstart, &jend, m_bsplineWorkspace.get(),
-  //                    m_bsplineDerivWorkspace.get());
-  //#else
-  //                EigenMatrix B_tr(B.tr());
-  //                gsl_matrix_view B_gsl_tr = getGSLMatrixView(B_tr.mutator());
-  //                gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl_tr.matrix, &jstart, &jend,
-  //                m_bsplineWorkspace.get()); B = B_tr.tr();
-  //#endif
-  //
-  //                double val = 0.0;
-  //                for (size_t j = jstart; j <= jend; ++j) {
-  //                    val += getParameter(j) * B.get(j - jstart, order);
-  //                }
-  //                out[i] = val;
-  //            }
-  //        }
+  //        out[i] = val;
+  //    }
+  //}
 }
 
 /** Set an attribute for the function
@@ -217,8 +207,7 @@ void EigenBSpline::resetKnots() {
     // create uniform knots in the interval [StartX, EndX]
     double startX = getAttribute("StartX").asDouble();
     double endX = getAttribute("EndX").asDouble();
-    // calc uniform break points - not used for uniform knots, but can be modified and then used
-    // for non-unform knots if required.
+    // calc uniform break points
     breakPoints = calcUniformBreakPoints(startX, endX);
     storeAttributeValue("BreakPoints", Attribute(breakPoints));
     // calc uniform knots
@@ -248,6 +237,7 @@ void EigenBSpline::resetKnots() {
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));
   }
+  initialiseSpline(knots, breakPoints);
 }
 
 /**
@@ -276,18 +266,6 @@ std::vector<double> EigenBSpline::calcUniformBreakPoints(const double startX, co
   std::generate(breakPoints.begin(), breakPoints.end(),
                 [n = 0, &interval, &startX]() mutable { return n++ * interval + startX; });
   return breakPoints;
-}
-
-EigenMatrix EigenBSpline::test_make_break_points_2d(std::vector<double> breakPoints) {
-  const int size = breakPoints.size();
-  EigenMatrix m(2, size);
-  for (int i = 0; i < size; i++) {
-    m(0, i) = breakPoints[i];
-    srand((unsigned)time(NULL));
-    m(1, i) = (double)rand() / RAND_MAX;
-  }
-
-  return m;
 }
 
 std::vector<double> EigenBSpline::generateUniformKnotVector(const bool clamped) {

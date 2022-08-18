@@ -71,7 +71,11 @@ private:
   /// Generate a knot vector based upon break points
   std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
   /// evaluate non-zero basis functions, return which index to use as the base of the results vector.
-  int evaluateBasisFunctions(Spline1D &spline, EigenVector &B, const double x, int currentBBase) const;
+  int evaluateBasisFunctions(const Spline1D &spline, EigenVector &B, const double x, int currentBBase) const;
+  /// initialise the m_spline variable with a given knot vector and breakpoints
+  void initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints);
+
+  Spline1D m_spline;
 };
 
 } // namespace Functions

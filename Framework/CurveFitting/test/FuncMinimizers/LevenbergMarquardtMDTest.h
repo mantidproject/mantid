@@ -320,6 +320,29 @@ public:
     }
   }
 
+  void test_BSpline_Eigen_fit_uniform_finer() {
+    double startx = -3.14;
+    double endx = 3.14;
+
+    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 20);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-6, 1e-7);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->function(x, y);
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], sin(xx), 0.0003);
+    }
+  }
+
   void test_BSpline_fit_uniform_finer() {
     double startx = -3.14;
     double endx = 3.14;
@@ -341,6 +364,35 @@ public:
       double xx = x[i];
       TS_ASSERT_DELTA(y[i], sin(xx), 0.0003);
     }
+  }
+
+  void test_BSpline_Eigen_fit_nonuniform() {
+    double startx = 0.0;
+    double endx = 6.28;
+
+    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 10);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    // this function changes faster at the lower end
+    // fit it with uniform break points first
+    double chi2 = fitBSpline(bsp, "sin(10/(x+1))");
+    TS_ASSERT_DELTA(chi2, 0.58, 0.005);
+
+    // now do a nonuniform fit. increase density of break points at lower end
+    std::vector<double> breaks = bsp->getAttribute("BreakPoints").asVector();
+    breaks[1] = 0.3;
+    breaks[2] = 0.5;
+    breaks[3] = 1.0;
+    breaks[4] = 1.5;
+    breaks[5] = 2.0;
+    breaks[6] = 3.0;
+    bsp->setAttributeValue("Uniform", false);
+    bsp->setAttributeValue("BreakPoints", breaks);
+    chi2 = fitBSpline(bsp, "sin(10/(x+1))");
+    TS_ASSERT_DELTA(chi2, 0.0055, 5e-5);
   }
 
   void test_BSpline_fit_nonuniform() {
