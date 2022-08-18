@@ -11,8 +11,6 @@
 #include "MantidAPI/FunctionFactory.h"
 
 #include <algorithm>
-#include <limits>
-#include <time.h>
 
 namespace Mantid::CurveFitting::Functions {
 
@@ -57,7 +55,6 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
   double endX = getAttribute("EndX").asDouble();
   const std::vector<double> breakPoints = getAttribute("BreakPoints").asVector();
   const std::vector<double> knots = getAttribute("Knots").asVector();
-  B[0] = std::numeric_limits<double>::max();
 
   if (startX >= endX) {
     throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
@@ -86,18 +83,23 @@ void EigenBSpline::initialiseSpline(const std::vector<double> &knots, const std:
 int EigenBSpline::evaluateBasisFunctions(const Spline1D &spline, EigenVector &B, const double x,
                                          int currentBBase) const {
   auto res = spline.basisFunctions(x); // Calculate Non-Zero Basis Functions
-
-  if (res.data()[0] >= B[currentBBase]) { // attempts to shift results along the vector when a particular basis function
-                                          // goes out of scope.
-    currentBBase++;
-  }
+  currentBBase = getSpanIndex(x, currentBBase);
   B.zero();
-
   for (int i = 0; i < res.size(); i++) { // Populate B
     B[currentBBase + i] = res.data()[i];
   }
-
   return currentBBase;
+}
+
+int EigenBSpline::getSpanIndex(const double x, const int currentBBase, const bool clamped) const {
+  auto knots = getAttribute("Knots").asVector();
+  const int clampedKnots = clamped ? getOrder() : 1;
+  for (int i = currentBBase + clampedKnots; i < knots.size(); i++) {
+    if (x < knots[i]) {
+      return i - clampedKnots;
+    }
+  }
+  return knots.size() - clampedKnots * 2;
 }
 
 /** Calculate the derivatives for a set of points on the spline
@@ -105,40 +107,34 @@ int EigenBSpline::evaluateBasisFunctions(const Spline1D &spline, EigenVector &B,
  * @param out :: The array to store the derivatives in
  * @param xValues :: The array of x values we wish to know the derivatives of
  * @param nData :: The size of the arrays
- * @param order :: The order of the derivatives o calculate
+ * @param order :: The order of the derivatives to calculate
  */
 void EigenBSpline::derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const {
-  // int splineOrder = getAttribute("Order").asInt();
+  int splineOrder = getAttribute("Order").asInt();
+  double startX = getAttribute("StartX").asDouble();
+  double endX = getAttribute("EndX").asDouble();
+  int jstart = 0;
 
-  // EigenMatrix B(splineOrder, order + 1);
-  // double startX = getAttribute("StartX").asDouble();
-  // double endX = getAttribute("EndX").asDouble();
+  if (startX >= endX) {
+    throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
+  }
 
-  // if (startX >= endX) {
-  //    throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
-  //}
+  for (size_t i = 0; i < nData; ++i) {
+    double x = xValues[i];
+    if (x < startX || x > endX) {
+      out[i] = 0.0;
+    } else {
+      jstart = getSpanIndex(x, jstart);
+      int jend = jstart + splineOrder;
 
-  // for (size_t i = 0; i < nData; ++i) {
-  //    double x = xValues[i];
-  //    if (x < startX || x > endX) {
-  //        out[i] = 0.0;
-  //    }
-  //    else {
-  //        size_t jstart(0);
-  //        size_t jend(0);
-
-  //        EigenMatrix B_tr(B.tr());
-  //        gsl_matrix_view B_gsl_tr = getGSLMatrixView(B_tr.mutator());
-  //        gsl_bspline_deriv_eval_nonzero(x, order, &B_gsl_tr.matrix, &jstart, &jend,
-  //        m_bsplineWorkspace.get()); B = B_tr.tr();
-
-  //        double val = 0.0;
-  //        for (size_t j = jstart; j <= jend; ++j) {
-  //            val += getParameter(j) * B.get(j - jstart, order);
-  //        }
-  //        out[i] = val;
-  //    }
-  //}
+      auto res = m_spline.basisFunctionDerivatives(x, order);
+      double val = 0.0;
+      for (size_t j = jstart; j < jend; ++j) {
+        val += getParameter(j) * res(order, j - jstart);
+      }
+      out[i] = val;
+    }
+  }
 }
 
 /** Set an attribute for the function
@@ -250,7 +246,7 @@ int EigenBSpline::getNBSplineCoefficients() { return getNBreakPoints() + getOrde
  * Return the number of break points as per the NBreak Atrribute;
  * @returns the number break points
  */
-int EigenBSpline::getNBreakPoints() { return getAttribute("NBreak").asInt(); }
+int EigenBSpline::getNBreakPoints() const { return getAttribute("NBreak").asInt(); }
 
 /**
  * Populate a provided vector with a set of uniform break points
@@ -281,13 +277,13 @@ std::vector<double> EigenBSpline::generateUniformKnotVector(const bool clamped) 
   return knots;
 };
 
-int EigenBSpline::getNKnots() { return getNSpans() + 1; };
+int EigenBSpline::getNKnots() const { return getNSpans() + 1; };
 
-int EigenBSpline::getOrder() { return getAttribute("Order").asInt(); }
+int EigenBSpline::getOrder() const { return getAttribute("Order").asInt(); }
 
-int EigenBSpline::getNSpans() { return getNBreakPoints() + getOrder(); }
+int EigenBSpline::getNSpans() const { return getNBreakPoints() + getOrder(); }
 
-int EigenBSpline::getDegree() { return getOrder() - 1; }
+int EigenBSpline::getDegree() const { return getOrder() - 1; }
 
 std::vector<double> EigenBSpline::generateKnotVector(const std::vector<double> &breakPoints) {
   const int nKnots = getNKnots();

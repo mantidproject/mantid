@@ -424,6 +424,30 @@ public:
     TS_ASSERT_DELTA(chi2, 0.0055, 5e-5);
   }
 
+  void test_BSpline_Eigen_derivative() {
+
+    double startx = -3.14;
+    double endx = 3.14;
+
+    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 30);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-7, 5e-8);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->derivative(x, y); // first derivative
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], cos(xx), 0.005);
+    }
+  }
+
   void test_BSpline_derivative() {
 
     double startx = -3.14;
@@ -448,6 +472,30 @@ public:
     }
   }
 
+  // void test_BSpline_Eigen_derivative_2() {
+
+  //  double startx = -3.14;
+  //  double endx = 3.14;
+
+  //  std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+  //  bsp->setAttributeValue("Order", 4);
+  //  bsp->setAttributeValue("NBreak", 30);
+  //  bsp->setAttributeValue("StartX", startx);
+  //  bsp->setAttributeValue("EndX", endx);
+
+  //  double chi2 = fitBSpline(bsp, "sin(x)");
+  //  TS_ASSERT_DELTA(chi2, 2e-10, 1e-10);
+
+  //  FunctionDomain1DVector x(startx, endx, 100);
+  //  FunctionValues y(x);
+  //  bsp->derivative(x, y, 2); // second derivative
+
+  //  for (size_t i = 0; i < x.size(); ++i) {
+  //    double xx = x[i];
+  //    TS_ASSERT_DELTA(y[i], -sin(xx), 0.005);
+  //  }
+  //}
+
   void test_BSpline_derivative_2() {
 
     double startx = -3.14;
@@ -471,6 +519,30 @@ public:
       TS_ASSERT_DELTA(y[i], -sin(xx), 0.005);
     }
   }
+
+  // void test_BSpline_Eigen_derivative_3() {
+
+  //  double startx = -3.14;
+  //  double endx = 3.14;
+
+  //  std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+  //  bsp->setAttributeValue("Order", 5);
+  //  bsp->setAttributeValue("NBreak", 20);
+  //  bsp->setAttributeValue("StartX", startx);
+  //  bsp->setAttributeValue("EndX", endx);
+
+  //  double chi2 = fitBSpline(bsp, "sin(x)");
+  //  TS_ASSERT_DELTA(chi2, 1e-11, 5e-12);
+
+  //  FunctionDomain1DVector x(startx, endx, 100);
+  //  FunctionValues y(x);
+  //  bsp->derivative(x, y, 3); // third derivative
+
+  //  for (size_t i = 0; i < x.size(); ++i) {
+  //    double xx = x[i];
+  //    TS_ASSERT_DELTA(y[i], -cos(xx), 0.012);
+  //  }
+  //}
 
   void test_BSpline_derivative_3() {
 

@@ -55,25 +55,27 @@ private:
   /// Get number of B-Spline coefficients
   int getNBSplineCoefficients();
   /// Get number of Break Points
-  int getNBreakPoints();
+  int getNBreakPoints() const;
   /// Populate a vector with a uniform set of break points
   std::vector<double> calcUniformBreakPoints(const double startX, const double endX);
   /// Generate a uniform knot vector
   std::vector<double> generateUniformKnotVector(const bool clamped = true);
   /// Get number of Knots
-  int getNKnots();
+  int getNKnots() const;
   /// Get order of the spline
-  int getOrder();
+  int getOrder() const;
   /// Get number of spans (segments between knots)
-  int getNSpans();
+  int getNSpans() const;
   /// Get the degree of constituent polynomial functions
-  int getDegree();
+  int getDegree() const;
   /// Generate a knot vector based upon break points
   std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
   /// evaluate non-zero basis functions, return which index to use as the base of the results vector.
   int evaluateBasisFunctions(const Spline1D &spline, EigenVector &B, const double x, int currentBBase) const;
   /// initialise the m_spline variable with a given knot vector and breakpoints
   void initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints);
+  /// get the index of the span/interval which x is in
+  int EigenBSpline::getSpanIndex(const double x, const int currentBBase, const bool clamped = true) const;
 
   Spline1D m_spline;
 };
