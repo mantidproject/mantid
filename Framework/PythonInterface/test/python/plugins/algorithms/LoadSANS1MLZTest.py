@@ -11,8 +11,9 @@ from plugins.algorithms.SANS1DataMLZ import SANSdata
 class LoadSANSMLZTest(unittest.TestCase):
     def setUp(self) -> None:
         # config.reset()
-        self.filename_001 = 'D0511339.001'
+        self.filename_001 = "D0122881.001"
         self.filename_002 = "D0665908.002"
+        # self.filename_002 = ""
 
     def test_LoadValidData001(self):
         """
@@ -39,23 +40,22 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual(16386, ws.getNumberHistograms())
         self.assertEqual(2, ws.getNumDims())
         # data array
-        self.assertEqual(519, ws.readY(8502))
-        self.assertEqual(427, ws.readY(8629))
+        self.assertEqual(1109, ws.readY(8502))
+        self.assertEqual(1160, ws.readY(8629))
         # sample logs
         run = ws.getRun()
 
-        self.assertEqual(6, run.getProperty('wavelength').value)
+        self.assertEqual(4.9, run.getProperty('wavelength').value)
 
-        self.assertEqual('D0511339/1', ws.getTitle())
+        self.assertEqual('D0122881/1', ws.getTitle())
         self.assertEqual(output_ws_name, ws.name())
 
-        self.assertEqual('', run.getProperty('position').value)
+        self.assertEqual(22, run.getProperty('position').value)
         self.assertEqual(0.0, run.getProperty('thickness').value)
-        self.assertEqual(6, run.getProperty('wavelength').value)
-        self.assertEqual(20.1500, run.getProperty('sample_detector_distance').value)
-        self.assertEqual(30, run.getProperty('duration').value)
-        self.assertEqual(97318, run.getProperty('monitor1').value)
-        self.assertEqual(201028, run.getProperty('monitor2').value)
+        self.assertEqual(1.4904, run.getProperty('sample_detector_distance').value)
+        self.assertEqual(3600.688081, run.getProperty('duration').value)
+        self.assertEqual(6392861, run.getProperty('monitor1').value)
+        self.assertEqual(14902342, run.getProperty('monitor2').value)
         self.assertEqual(0.0, run.getProperty('beamcenter_x').value)
         self.assertEqual(0.0, run.getProperty('beamcenter_y').value)
         self.assertEqual(0.0, run.getProperty('scaling').value)
@@ -111,8 +111,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual(16384, ws.getNumberHistograms())
         # self.assertEqual(2,  ws.getNumDims())
         # data array
-        self.assertEqual(519, ws.readY(8502))
-        self.assertEqual(427, ws.readY(8629))
+        self.assertEqual(1109, ws.readY(8502))
+        self.assertEqual(1160, ws.readY(8629))
 
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
@@ -126,6 +126,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         self._create_incomplete_dataFile(filename, 'independence ')
         alg_test = run_algorithm("LoadSANS1MLZ",
                                  Filename=filename,
+                                 Wavelength=4.6,
                                  OutputWorkspace=output_ws_name)
 
         ws = AnalysisDataService.retrieve(output_ws_name)
@@ -193,8 +194,6 @@ class LoadSANSMLZTest(unittest.TestCase):
             with open(filename, "w") as f:
                 f.write("\n\n\n\n")
                 f.write("%File\n\n")
-                f.write("DataSizeY=128\n")
-                f.write("DataSizeX=128\n")
                 f.write("FileName=data.001\n")
                 f.write("%Sample\n\n")
                 f.write("%Setup\n\n")
@@ -251,8 +250,9 @@ class SANS1DataClassTestHelper:
     @staticmethod
     def set_up(comment=False, file_type='001'):
         metadata = SANSdata()
-        filename_001 = "D0511339.001"
+        filename_001 = "D0122881.001"
         filename_002 = "D0665908.002"
+        # filename_002 = ""
         current_paths = ''
         filename = ''
         for i in config.getDataSearchDirs():
@@ -275,7 +275,7 @@ class SANS1DataClassFileSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
 
     def test_StartTime(self):
-        date = np.datetime64('2018-01-23T15:33:20')
+        date = np.datetime64('2015-01-13T11:10:28')
         self.assertEqual(date, self.metadata.file.run_start())
         date = np.datetime64('2010-04-27T07:30:25')
         self.metadata.file.info['FromDate'] = '04/27/2010'
@@ -283,7 +283,7 @@ class SANS1DataClassFileSectionTest(unittest.TestCase):
         self.assertEqual(date, self.metadata.file.run_start())
 
     def test_EndTime(self):
-        date = np.datetime64('2018-01-23T15:33:51')
+        date = np.datetime64('2015-01-13T12:10:29')
         self.assertEqual(date, self.metadata.file.run_end())
         date = np.datetime64('2010-04-27T07:30:25')
         self.metadata.file.info['ToDate'] = '04/27/2010'
@@ -291,13 +291,13 @@ class SANS1DataClassFileSectionTest(unittest.TestCase):
         self.assertEqual(date, self.metadata.file.run_end())
 
     def test_GetTitleName(self):
-        title = 'D0511339/1'
+        title = 'D0122881/1'
         self.assertEqual(title, self.metadata.file.get_title())
 
     def test_CheckSomeValues(self):
         self.assertEqual('SANSDRaw', self.metadata.file.info['Type'])
-        self.assertEqual('p9113', self.metadata.file.info['Proposal'])
-        self.assertEqual('128', self.metadata.file.info['DataSizeX'])
+        self.assertEqual('p8195', self.metadata.file.info['Proposal'])
+        self.assertEqual(128, self.metadata.file.info['DataSizeX'])
         self.assertEqual('16384', self.metadata.file.info['DataSize'])
 
 
@@ -307,11 +307,11 @@ class SANS1DataClassSampleSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
 
     def test_CheckSomeValues(self):
-        self.assertEqual('0.00', self.metadata.sample.info['Omega'])
-        self.assertEqual('-150.00', self.metadata.sample.info['BTableX'])
-        self.assertEqual('50.00', self.metadata.sample.info['BTableY'])
-        self.assertEqual('-10.00', self.metadata.sample.info['BTableZ'])
-        self.assertEqual('-0.00002', self.metadata.sample.info['Magnet'])
+        self.assertEqual('-0.00', self.metadata.sample.info['Omega'])
+        self.assertEqual('10.00', self.metadata.sample.info['BTableX'])
+        self.assertEqual('0.00', self.metadata.sample.info['BTableY'])
+        self.assertEqual('28.00', self.metadata.sample.info['BTableZ'])
+        self.assertEqual('', self.metadata.sample.info['Magnet'])
 
 
 class SANS1DataClassSetupSectionTest(unittest.TestCase):
@@ -321,10 +321,10 @@ class SANS1DataClassSetupSectionTest(unittest.TestCase):
 
     def test_CheckSomeValues(self):
         self.assertEqual('0.000000', self.metadata.setup.info['DetHAngle'])
-        self.assertEqual('500.0', self.metadata.setup.info['BeamstopX'])
-        self.assertEqual('500.0', self.metadata.setup.info['BeamstopY'])
-        self.assertEqual('1.060', self.metadata.setup.info['Polarization_m'])
-        self.assertEqual('1.064', self.metadata.setup.info['Polarization_c'])
+        self.assertEqual('495.00', self.metadata.setup.info['BeamstopX'])
+        self.assertEqual('497.00', self.metadata.setup.info['BeamstopY'])
+        self.assertEqual('0.000', self.metadata.setup.info['Polarization_m'])
+        self.assertEqual('26.554', self.metadata.setup.info['Polarization_c'])
 
 
 class SANS1DataClassCounterSectionTest(unittest.TestCase):
@@ -333,13 +333,13 @@ class SANS1DataClassCounterSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
 
     def test_MonitorExist(self):
-        self.assertEqual([97318.0, 201028.0], self.metadata.counter.get_monitors())
+        self.assertEqual([6392861.0, 14902342.0], self.metadata.counter.get_monitors())
 
     def test_CheckValues(self):
-        self.assertEqual(97318, self.metadata.counter.monitor1)
-        self.assertEqual(201028, self.metadata.counter.monitor2)
-        self.assertEqual(30, self.metadata.counter.duration)
-        self.assertEqual(261624, self.metadata.counter.sum_all_counts)
+        self.assertEqual(6392861, self.metadata.counter.monitor1)
+        self.assertEqual(14902342, self.metadata.counter.monitor2)
+        self.assertEqual(3600.688081, self.metadata.counter.duration)
+        self.assertEqual(18234082, self.metadata.counter.sum_all_counts)
 
 
 class SANS1DataClassCommentSectionTest(unittest.TestCase):
@@ -348,9 +348,9 @@ class SANS1DataClassCommentSectionTest(unittest.TestCase):
         self.metadata, self.filename = SANS1DataClassTestHelper.set_up(comment=True)
 
     def test_CheckValues(self):
-        self.assertEqual('4', self.metadata.comment.info['det1_x_value'])
-        self.assertEqual('-150.00', self.metadata.comment.info['st1_x_value'])
-        self.assertEqual('0', self.metadata.comment.info['det1_omg_value'])
+        self.assertEqual("'4.0 mm'", self.metadata.comment.info['det1_x_value'])
+        self.assertEqual("'10.00 mm'", self.metadata.comment.info['st1_x_value'])
+        self.assertEqual("'0.0 deg'", self.metadata.comment.info['det1_omg_value'])
 
 
 class SANS1DataClassCountsSectionTest(unittest.TestCase):
