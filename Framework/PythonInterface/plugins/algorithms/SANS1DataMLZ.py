@@ -117,8 +117,9 @@ class SetupSANS(DtClsSANS):
     section_name: str = 'Setup'
     pattern = re.compile(r'(%Setup\n)([^%]*)')
     wavelength: float = 0.0
-    wavelength_error: float = 0.15
+    wavelength_error_mult: float = 0.1      # wavelength error up to 10%
     sample_detector_distance: float = 0.0
+    collimation: float = 0.0
 
     def _assign_values(self):
         """
@@ -127,6 +128,7 @@ class SetupSANS(DtClsSANS):
         super()._assign_values()
         self._assign_value('Lambda', 'wavelength')
         self._assign_value('SD', 'sample_detector_distance')
+        self._assign_value('Collimation', 'collimation')
 
 
 @dataclass
@@ -265,12 +267,17 @@ class SANSdata:
         self._subsequence = [self.file, self.sample, self.setup,
                              self.counter, self.history, self.counts]
 
+        self.logs: dict = {
+            'notice': [],
+            'warning': []
+        }
+
     def get_subsequence(self) -> list:
         return self._subsequence
 
     def spectrum_amount(self) -> int:
-        n_rows = int(self.file.info['DataSizeY'])
-        n_bins = int(self.file.info['DataSizeX'])
+        n_rows = self.file.info['DataSizeY']
+        n_bins = self.file.info['DataSizeX']
         n_spec = n_rows * n_bins
         n_spec += len(self.counter.get_monitors())
         return n_spec
@@ -292,8 +299,8 @@ class SANSdata:
         if wavelength is None:
             wavelength = self.setup.wavelength
         data_x = np.zeros(2 * self.spectrum_amount())
-        data_x.fill(wavelength + self.setup.wavelength_error)
-        data_x[::2] -= self.setup.wavelength_error * 2
+        data_x.fill(wavelength * (1+self.setup.wavelength_error_mult))
+        data_x[::2] -= wavelength * (self.setup.wavelength_error_mult*2)
         return data_x
 
     def data_e(self) -> np.ndarray:
@@ -324,18 +331,21 @@ class SANSdata:
         with open(filename, 'r') as file_handler:
             unprocessed = file_handler.read()
         file_type = filename.split(".")[-1]
-        if file_type == "001":
-            pass
-        elif file_type == "002":
-            self.counts.data_type = '002'
-            self._subsequence = [self.file, self.sample, self.setup,
-                                 self.history, self.counts, self.errors]
-        else:
-            raise FileNotFoundError("Incorrect file")
-
+        self._preparations_regarding_file_type(file_type)
         self._initialize_info(unprocessed)
         if comment:
             self._find_comments(unprocessed)
+        self._check_data()
+
+    def _preparations_regarding_file_type(self, file_type):
+        if file_type == "001":
+            pass
+        else:
+            if file_type != '002':
+                self.logs['warning'].append(f"File type not as expected. Trying to process as .002.")
+            self.counts.data_type = '002'
+            self._subsequence = [self.file, self.sample, self.setup,
+                                 self.history, self.counts, self.errors]
 
     def _initialize_info(self, unprocessed):
         """
@@ -354,4 +364,42 @@ class SANSdata:
         """
         matches = self.comment.pattern.finditer(unprocessed)
         tmp = [match.groups()[1].split('\n') for match in matches]
-        self.comment.process_data(list(itertools.chain(*tmp)))
+        if len(tmp) != 0:
+            self.comment.process_data(list(itertools.chain(*tmp)))
+        else:
+            self.logs['warning'].append(f"Failed to find 'Comment *' sections.")
+
+    def _check_data_size(self):
+        for param in ('DataSizeY', 'DataSizeX'):
+            try:
+                self.file.info[param] = int(self.file.info[param])
+            except KeyError:
+                self.file.info[param] = 128
+                self.logs['notice'].append(f"{param} not included in datafile. {param} set to 128.")
+            except ValueError:
+                self.file.info[param] = 128
+                self.logs['notice'].append(f"{param} not defined in datafile. {param} set to 128.")
+
+    def _check_data(self):
+        self._check_data_size()
+        if (type(self.setup.collimation) is str) or (self.setup.collimation == 0.0):
+            self.logs['warning'].append(f"Collimation not defined in datafile.")
+
+        if (type(self.setup.sample_detector_distance) is str) or (self.setup.sample_detector_distance == 0.0):
+            self.logs['warning'].append(f"SD('sample detector distance') not defined in datafile.")
+
+        if (type(self.setup.wavelength) is str) or (self.setup.wavelength == 0.0):
+            self.logs['warning'].append(f"Lambda(wavelength) not defined in datafile. Wavelength set to user input.")
+
+        if self.file.type == '001':
+            if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
+                self.logs['warning'].append(f"Sum(sum of all counts) not defined in datafile.")
+
+            if (type(self.counter.duration) is str) or (self.counter.duration == 0.0):
+                self.logs['warning'].append(f"Time(duration of experiment) not defined in datafile.")
+
+            if (self.counter.monitor2 is None) or (self.counter.monitor2 == 0.0):
+                self.logs['warning'].append(f"Monitor2 not defined in datafile. Monitor2 set to 'None'.")
+
+            if (self.counter.monitor1 is None) or (self.counter.monitor1 == 0.0):
+                self.logs['notice'].append(f"Monitor1 not defined in datafile. Monitor1 set to 'None'.")

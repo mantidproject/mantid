@@ -50,6 +50,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         except TypeError as error:
             raise RuntimeError(str(error) + "\nprobably incorrect 'Counts' data")
         else:
+            self._log_data_analyzing(metadata)
             CreateWorkspace(OutputWorkspace=out_ws_name,
                             DataX=data_x, DataY=data_y,
                             DataE=data_e, NSpec=n_spec,
@@ -101,7 +102,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'det1_x_value': 'mm',
             'det1_z_value': 'mm',
             'wavelength': 'Angstrom',
-            'wavelength_error': 'Angstrom',
+            'wavelength_error_mult': '',
             'st1_x_value': '',
             'st1_x_offset': '',
             'st1_y_value': '',
@@ -122,6 +123,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'beamcenter_x': '',
             'beamcenter_y': '',
             'aperture': '',
+            'collimation': '',
         }
         logs = {"names": [], "values": [], "units": []}
         sections_tobe_logged = metadata.get_subsequence()
@@ -143,13 +145,23 @@ class LoadSANS1MLZ(PythonAlgorithm):
         return logs
 
     def _wavelength(self, metadata):
-        wavelength = metadata.setup.wavelength
         user_wavelength = float(self.getPropertyValue("Wavelength"))
-        if user_wavelength > metadata.setup.wavelength_error:
-            wavelength = user_wavelength
-        elif user_wavelength > 0.001:
-            self.log().notice('(wavelength < wavelength error) -> wavelength set to datafile value')
-        return wavelength
+        if user_wavelength > 0.001:
+            metadata.setup.wavelength = user_wavelength
+            self.log().notice('Wavelength set to user input.')
+        if (type(metadata.setup.wavelength) is str) or (metadata.setup.wavelength == 0.0):
+            self.log().error('Wavelength not defined.')
+        return user_wavelength
+
+    def _log_data_analyzing(self, metadata):
+        """
+        show the notifications raised during
+        analyzing SANS-1 datafile
+        """
+        for note in metadata.logs['notice']:
+            self.log().notice(note)
+        for warn in metadata.logs['warning']:
+            self.log().warning(warn)
 
     @staticmethod
     def create_labels():
