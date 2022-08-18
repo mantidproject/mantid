@@ -109,7 +109,7 @@ class SaveReflectionsTest(unittest.TestCase):
         file_name = os.path.join(self._test_dir, "test_fullprof_scaled.hkl")
         lines = self._test_helper_scale_large_intensities(output_format="Fullprof", file_name=file_name)
         intensity = float(lines[-1].split()[3])  # last line (only peak)
-        self.assertEqual(intensity, 2.5E7)
+        self.assertEqual(intensity, 99999999.99)
 
     def test_save_fullprof_format_constant_wavelength(self):
         # Arrange
@@ -158,7 +158,7 @@ class SaveReflectionsTest(unittest.TestCase):
         file_name = os.path.join(self._test_dir, "test_jana_scaled.hkl")
         lines = self._test_helper_scale_large_intensities(output_format="Jana", file_name=file_name)
         intensity = float(lines[-1].split()[3])  # last line (only peak)
-        self.assertEqual(intensity, 2.5E7)
+        self.assertEqual(intensity, 99999999.99)
 
     def test_save_jana_format_modulated_single_file(self):
         # Arrange
@@ -221,7 +221,7 @@ class SaveReflectionsTest(unittest.TestCase):
         file_name = os.path.join(self._test_dir, "test_gsas_scaled.hkl")
         lines = self._test_helper_scale_large_intensities(output_format="GSAS", file_name=file_name)
         intensity = float(lines[0].split()[3])  # first line (no header)
-        self.assertEqual(intensity, 2.5E3)
+        self.assertEqual(intensity, 9999.99)
 
     def test_save_GSAS_format_modulated(self):
         # Arrange
@@ -252,7 +252,7 @@ class SaveReflectionsTest(unittest.TestCase):
         file_name = os.path.join(self._test_dir, "test_shelx_scaled.hkl")
         lines = self._test_helper_scale_large_intensities(output_format="SHELX", file_name=file_name)
         intensity = float(lines[0].split()[3])  # first line (no header)
-        self.assertEqual(intensity, 2.5E3)
+        self.assertEqual(intensity, 9999.99)
 
     def test_save_SHELX_format_modulated(self):
         # Arrange
