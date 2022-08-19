@@ -11,8 +11,7 @@ ISIS Powder Diffraction Scripts - OSIRIS Reference
 
 Creating OSIRIS Object
 ------------------------
-This method assumes you are familiar with the concept of objects in Python.
-If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffraction-ref`
+This method assumes you are familiar with :ref:`intro_to_objects-isis-powder-diffraction-ref`
 
 To create a OSIRIS object the following parameters are required:
 
@@ -58,14 +57,14 @@ For information on creating a OSIRIS object see:
 run_diffraction_focusing
 ^^^^^^^^^^^^^^^^^^^^
 The *diffraction_focusing* method allows a user to process a series of runs into a
-focused dSpacing workspace. Whilst processing the runs the scripts can apply any corrections
+focused dSpace workspace. Whilst processing the runs the scripts can apply any corrections
 the user enables.
 
 On OSIRIS the following parameters are required when executing *create_vanadium*:
 
 - :ref:`calibration_mapping_file_osiris_isis-powder-diffraction-ref`
 - :ref:`vanadium_normalisation_osiris_isis-powder-diffraction-ref`
-- :ref:`subtract_empty_instrument_osiris_isis-powder-diffraction-ref`
+- :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref`
 - :ref:`merge_drange_osiris_isis-powder-diffraction-ref`
 
 Example
@@ -77,7 +76,7 @@ Example
 
   osiris_example.run_diffraction_focusing(run_number="119977-119988",
                                           merge_drange=True,
-                                          subtract_empty_instrument=True,
+                                          subtract_empty_can=True,
                                           vanadium_normalisation=True,
                                           calibration_mapping_file=cal_mapping_file)
 .. _calibration_mapping_osiris-isis-powder-ref:
@@ -85,14 +84,13 @@ Example
 Calibration Mapping File
 -------------------------
 The calibration mapping file holds the mapping between
-run numbers, current label, offset filename and the empty
-and vanadium numbers.
+run numbers, current label, offset filename, empty run numbers,
+and vanadium run numbers.
 
 For more details on the calibration mapping file see:
 :ref:`cycle_mapping_files_isis-powder-diffraction-ref`
 
-The layout on OSIRIS should look as follows for each block
-substituting the below values for appropriate values:
+The layout on OSIRIS should look as follows for each block:
 
 .. code-block:: yaml
   :linenos:
@@ -127,7 +125,7 @@ substituting the below values for appropriate values:
     empty_drange12 : "12"
     empty_run_numbers : "1-12"
 
-for each set of run numbers the associated vanadium and empty runs for each drange must be listed for their drange.
+for each set of run numbers the associated vanadium and empty runs for each drange must be listed separately.
 
 
 Parameters
@@ -144,7 +142,7 @@ Within the folder the following should be present:
 
 - Grouping .cal file (see: :ref:`grouping_file_name_osiris_isis-powder-diffraction-ref`)
 - Folder(s) with the label name specified in mapping file (e.g. "1_1")
-  - Inside each folder should be the offset file with name specified in mapping file
+  - Inside each folder should be the offset file with name specified in the mapping file
 
 Example Input:
 
@@ -210,7 +208,7 @@ file_ext
 ^^^^^^^^
 *Optional*
 
-Specifies a file extension to use when using the
+Specifies a file extension to use for the
 :ref:`diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
 
 This should be used to process partial runs. When
@@ -252,7 +250,7 @@ Specifies the run number(s) to process when calling the
 This parameter accepts a single value or a range
 of values with the following syntax:
 
-**-** : Indicates a range of runs inclusive
+**-** : Indicates an inclusive range of runs
 (e.g. *1-10* would process 1, 2, 3....8, 9, 10)
 
 **,** : Indicates a gap between runs
@@ -290,18 +288,15 @@ Example Input:
 
   osiris_example = Osiris(user_name="Mantid", ...)
 
-.. _subtract_empty_instrument_osiris_isis-powder-diffraction-ref:
+.. _subtract_empty_can_osiris_isis-powder-diffraction-ref:
 
-subtract_empty_instrument
-^^^^^^^^^^^^^^^^^^^^^^^^^
-Provides the option to disable subtracting empty instrument runs from
-the run being focused. This is useful for focusing empties, as
-subtracting an empty from itself, or subtracting the previous cycle's
-empty from this cycle's, creates meaningless data. Set to **False** to
-disable empty subtraction.
+subtract_empty_can
+^^^^^^^^^^^^^^^^^^
+Provides the option to disable subtracting empty canister runs from
+the run being focused. Set to **False** to disable empty subtraction.
 
 Example Input:
 
 .. code-block:: python
 
-  subtract_empty_instrument: True
+  subtract_empty_can: True

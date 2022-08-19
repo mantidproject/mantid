@@ -153,10 +153,10 @@ void GetDetectorOffsets::exec() {
     PARALLEL_CRITICAL(GetDetectorOffsets_setValue) {
       // Use the same offset for all detectors from this pixel
       for (const auto &det : dets) {
+        outputW->setValue(det, offset);
         const auto mapEntry = pixel_to_wi.find(det);
         if (mapEntry == pixel_to_wi.end())
           continue;
-        outputW->setValue(det, offset);
         const size_t workspaceIndex = mapEntry->second;
         if (mask == 1.) {
           // Being masked
