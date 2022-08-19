@@ -47,6 +47,9 @@ class DiffractionFocusingTest(systemtesting.MantidSystemTest):
     calibration_results = None
     existing_config = config['datasearch.directories']
 
+    def requiredFiles(self):
+        return _gen_required_files()
+
     def runTest(self):
         setup_mantid_paths()
         self.calibration_results = run_diffraction_focusing()
@@ -89,6 +92,17 @@ def setup_inst_object(with_container=False):
                       calibration_directory=calibration_dir, output_directory=output_dir)
 
     return inst_obj
+
+
+def _gen_required_files():
+    required_run_files = ["OSIRIS00082717.nxs", "OSIRIS00082718.nxs",  # empty can
+                          "OSIRIS00119963.nxs", "OSIRIS00119964.nxs",  # van
+                          "OSIRIS00119977.nxs", "OSIRIS00119978.nxs"]  # sample
+
+    # Generate file names of form "INSTxxxxx.nxs" - PEARL requires 000 padding
+    input_files = [os.path.join(input_dir, file) for file in required_run_files]
+    input_files.append(calibration_map_path)
+    return input_files
 
 
 def _try_delete(path):
