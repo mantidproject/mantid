@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidCurveFitting/Functions/BSpline.h"
+#include "MantidCurveFitting/Functions/EigenBSpline.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -85,7 +85,7 @@ private:
   API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// CubicSpline member used to perform smoothing
-  std::shared_ptr<Functions::BSpline> m_cspline;
+  std::shared_ptr<Functions::EigenBSpline> m_cspline;
   /// pointer to the input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;
   /// pointer to the input workspace converted to point data
