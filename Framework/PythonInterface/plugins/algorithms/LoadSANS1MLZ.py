@@ -1,4 +1,4 @@
-from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator
+from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator, StringListValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
 from mantid.simpleapi import CreateWorkspace, LoadInstrument, AddSampleLogMultiple, \
@@ -35,14 +35,20 @@ class LoadSANS1MLZ(PythonAlgorithm):
                              doc="Wavelength in Angstrom. If 0, the wavelength "
                                  "will be read from the data file.")
 
+        self.declareProperty(name='Mode',
+                             defaultValue='vector',
+                             validator=StringListValidator(['vector', '128x128']),
+                             doc='Choose workspace type.')
+
     def PyExec(self):
         filename = self.getPropertyValue("Filename")
         out_ws_name = self.getPropertyValue("OutputWorkspace")
+        workspace_mode = self.getPropertyValue('Mode')
         metadata = SANSdata()
 
         try:
             metadata.analyze_source(filename)
-            data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
+            data_x, data_y, data_e, n_spec = self.create_datasets(metadata, workspace_mode)
             logs = self.create_logs(metadata)
             y_unit, y_label, x_unit = self.create_labels()
         except FileNotFoundError as error:
@@ -64,7 +70,8 @@ class LoadSANS1MLZ(PythonAlgorithm):
             run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
                                    DateAndTime(metadata.file.run_end()))
 
-            LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
+            if workspace_mode != '128x128':
+                LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
 
             AddSampleLogMultiple(out_ws,
                                  LogNames=logs["names"],
@@ -74,18 +81,25 @@ class LoadSANS1MLZ(PythonAlgorithm):
             self.setProperty("OutputWorkspace", out_ws)
             DeleteWorkspace(out_ws)
 
-    def create_datasets(self, metadata: SANSdata) -> tuple:
+    def create_datasets(self, metadata: SANSdata, workspace_mode) -> tuple:
         """
         :return: DataX, DataY, DataE and number of spectra
         (including monitors)
         """
         self.log().debug('Creation data for workspace started')
 
-        n_spec = metadata.spectrum_amount()
-        data_y = metadata.data_y()
-        self._wavelength(metadata)
-        data_e = metadata.data_e()
-        data_x = metadata.data_x()
+        if workspace_mode == '128x128':
+            n_spec = 128
+            data_y = metadata.counts.data
+            self._wavelength(metadata)
+            data_e = np.sqrt(data_y)
+            data_x = range(128)
+        else:
+            n_spec = metadata.spectrum_amount()
+            data_y = metadata.data_y()
+            self._wavelength(metadata)
+            data_e = metadata.data_e()
+            data_x = metadata.data_x()
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
