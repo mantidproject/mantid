@@ -15,9 +15,7 @@
 namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
-
 using namespace Kernel;
-
 using namespace API;
 
 DECLARE_FUNCTION(EigenBSpline)
@@ -65,7 +63,7 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
     if (x < startX || x > endX) {
       out[i] = 0.0;
     } else {
-      currentBBase = evaluateBasisFunctions(m_spline, B, x, currentBBase);
+      currentBBase = evaluateBasisFunctions(B, x, currentBBase);
 
       double val = 0.0;
       for (size_t j = 0; j < np; ++j) {
@@ -76,13 +74,52 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
   }
 }
 
+/** Initialise the spline member variable
+ *
+ * @param knots :: Vector of knots
+ * @param breakPoints :: Vector of breakpoints to be passed as control points
+ */
 void EigenBSpline::initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints) {
-  m_spline = Spline1D(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
+  int degree = getDegree();
+  switch (degree) {
+  case 2:
+    m_spline2 = Spline2Degree(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
+    break;
+  case 3:
+    m_spline3 = Spline3Degree(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
+    break;
+  case 4:
+    m_spline4 = Spline4Degree(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
+    break;
+  default:
+    throw std::invalid_argument("Spline order must be between 3 and 5 inclusive");
+  }
 }
 
-int EigenBSpline::evaluateBasisFunctions(const Spline1D &spline, EigenVector &B, const double x,
-                                         int currentBBase) const {
-  auto res = spline.basisFunctions(x); // Calculate Non-Zero Basis Functions
+/** Evaluate the basis functions that make up the spline at point x
+ *
+ * @param B :: The EigenVector to store the results in
+ * @param x :: Position at which to evaluate the basis functions
+ * @param currentBBase :: The last return value from this function
+ * @returns :: The index to use as the base in the results vector. This corresponds to the
+ * index of the first basis vector being evaluated at point x, along the entire spline.
+ */
+int EigenBSpline::evaluateBasisFunctions(EigenVector &B, const double x, int currentBBase) const {
+  int degree = getDegree();
+  Eigen::Array<double, 1, Eigen::Dynamic> res;
+  switch (degree) {
+  case 2:
+    res = m_spline2.basisFunctions(x);
+    break;
+  case 3:
+    res = m_spline3.basisFunctions(x);
+    break;
+  case 4:
+    res = m_spline4.basisFunctions(x);
+    break;
+  default:
+    throw std::invalid_argument("Spline order must be between 3 and 5 inclusive");
+  }
   currentBBase = getSpanIndex(x, currentBBase);
   B.zero();
   for (int i = 0; i < res.size(); i++) { // Populate B
@@ -91,9 +128,18 @@ int EigenBSpline::evaluateBasisFunctions(const Spline1D &spline, EigenVector &B,
   return currentBBase;
 }
 
+/** Return the span to which point x corresponds
+ *
+ * @param x :: a position along the spline
+ * @param currentBBase :: The last return value from this function (for looping efficiency, given x will
+ * always be in accending order)
+ * @clamped :: if the spline is to be clamped or not (BSpline only currently supports clamped).
+ * @returns :: The index of the span to which point x corresponds, base 0, not including spans between the
+ * clamped knots.
+ */
 int EigenBSpline::getSpanIndex(const double x, const int currentBBase, const bool clamped) const {
   auto knots = getAttribute("Knots").asVector();
-  const int clampedKnots = clamped ? getOrder() : 1;
+  const int clampedKnots = clamped ? getClampedKnots() : 1;
   for (int i = currentBBase + clampedKnots; i < knots.size(); i++) {
     if (x < knots[i]) {
       return i - clampedKnots;
@@ -127,7 +173,7 @@ void EigenBSpline::derivative1D(double *out, const double *xValues, size_t nData
       jstart = getSpanIndex(x, jstart);
       int jend = jstart + splineOrder;
 
-      auto res = m_spline.basisFunctionDerivatives(x, order);
+      auto res = evaluateBasisFnDerivatives(x, order);
       double val = 0.0;
       for (size_t j = jstart; j < jend; ++j) {
         val += getParameter(j) * res(order, j - jstart);
@@ -135,6 +181,31 @@ void EigenBSpline::derivative1D(double *out, const double *xValues, size_t nData
       out[i] = val;
     }
   }
+}
+
+/** Calculate the derivatives of the basis functions for a specific point on the spline
+ *
+ * @param x :: A point on the spline
+ * @param derivOrder :: The order of the derivatives to calculate
+ * @returns :: An eigen matrix comprising of the derivatives for each basis function.
+ */
+EigenMatrix EigenBSpline::evaluateBasisFnDerivatives(const double x, const int derivOrder) const {
+  int degree = getDegree();
+  EigenMatrix res(derivOrder + 1, degree + 1);
+  switch (degree) {
+  case 2:
+    res.mutator() = m_spline2.basisFunctionDerivatives(x, derivOrder);
+    break;
+  case 3:
+    res.mutator() = m_spline3.basisFunctionDerivatives(x, derivOrder);
+    break;
+  case 4:
+    res.mutator() = m_spline4.basisFunctionDerivatives(x, derivOrder);
+    break;
+  default:
+    throw std::invalid_argument("Spline order must be between 3 and 5 inclusive");
+  }
+  return res;
 }
 
 /** Set an attribute for the function
@@ -160,7 +231,7 @@ void EigenBSpline::setAttribute(const std::string &attName, const API::IFunction
  * @return Names of all declared attributes in correct order.
  */
 std::vector<std::string> EigenBSpline::getAttributeNames() const {
-  return {"Uniform", "Order", "NBreak", "StartX", "EndX", "BreakPoints"};
+  return {"Uniform", "Order", "NBreak", "StartX", "EndX", "BreakPoints", "Knots"};
 }
 
 /**
@@ -193,7 +264,7 @@ void EigenBSpline::resetParameters() {
 }
 
 /**
- * Recalculate the B-spline knots
+ * Recalculate the B-spline knots and initialise spline variable
  */
 void EigenBSpline::resetKnots() {
   bool isUniform = getAttribute("Uniform").asBool();
@@ -207,7 +278,7 @@ void EigenBSpline::resetKnots() {
     breakPoints = calcUniformBreakPoints(startX, endX);
     storeAttributeValue("BreakPoints", Attribute(breakPoints));
     // calc uniform knots
-    knots = generateUniformKnotVector();
+    knots = generateKnotVector(breakPoints);
     setAttribute("Knots", Attribute(knots));
   } else {
     // set the break points from BreakPoints vector attribute, update other attributes
@@ -237,22 +308,9 @@ void EigenBSpline::resetKnots() {
 }
 
 /**
- * Get number of B-Spline Coefficients
- * @returns :: number of B-Spline Coefficients as int
- */
-int EigenBSpline::getNBSplineCoefficients() { return getNBreakPoints() + getOrder() - 2; }
-
-/**
- * Return the number of break points as per the NBreak Atrribute;
- * @returns the number break points
- */
-int EigenBSpline::getNBreakPoints() const { return getAttribute("NBreak").asInt(); }
-
-/**
  * Populate a provided vector with a set of uniform break points
  * @param startX :: A double representing the first x value of the range
  * @param endX :: A double representing the first last x value of the range
- * @param breakPoints :: a vector to populate
  * @returns :: a vector with a set of uniform break points
  */
 std::vector<double> EigenBSpline::calcUniformBreakPoints(const double startX, const double endX) {
@@ -264,30 +322,14 @@ std::vector<double> EigenBSpline::calcUniformBreakPoints(const double startX, co
   return breakPoints;
 }
 
-std::vector<double> EigenBSpline::generateUniformKnotVector(const bool clamped) {
-  const int nKnots = getNKnots();
-  const int clampedKnots = clamped ? getDegree() + 1 : 1;
-  const double startX = getAttribute("StartX").asDouble();
-  const double endX = getAttribute("EndX").asDouble();
-  const double interval = (endX - startX) / (nKnots - (2 * clampedKnots - 2) - 1);
-  std::vector<double> knots(nKnots);
-  std::generate(knots.begin(), knots.end(), [n = 1, &interval, &clampedKnots, &nKnots, &startX, &endX]() mutable {
-    return n <= clampedKnots ? (0 * n++) + startX : std::min(((n++) - clampedKnots) * interval + startX, endX);
-  });
-  return knots;
-};
-
-int EigenBSpline::getNKnots() const { return getNSpans() + 1; };
-
-int EigenBSpline::getOrder() const { return getAttribute("Order").asInt(); }
-
-int EigenBSpline::getNSpans() const { return getNBreakPoints() + getOrder(); }
-
-int EigenBSpline::getDegree() const { return getOrder() - 1; }
-
+/**
+ * Generate a knot vector given a vector of break points
+ * @param breakPoints :: A vector of breakpoints
+ * @returns :: Populated knot vector
+ */
 std::vector<double> EigenBSpline::generateKnotVector(const std::vector<double> &breakPoints) {
   const int nKnots = getNKnots();
-  const int clampedKnots = getDegree() + 1;
+  const int clampedKnots = getClampedKnots();
   std::vector<double> knots(nKnots);
 
   for (int i = 0; i < nKnots; i++) {
