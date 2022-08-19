@@ -19,7 +19,7 @@ The output is a histogram workspace with unit of wavelength (Angstrom).
 
 .. testcode:: ExLoad
 
-    ws = LoadSANS1MLZ("D0511339.001")
+    ws = LoadSANS1MLZ("D0122881.001")
     numHistograms = ws.getNumberHistograms()
     print('This workspace has {0} spectra.'.format(numHistograms))
 
@@ -38,7 +38,7 @@ Also main information such as: position, wavelength, thickness etc. are stored i
 
 .. testcode:: ExLoad
 
-    ws = LoadSANS1MLZ("D0511339.001")
+    ws = LoadSANS1MLZ("D0122881.001")
     run = ws.getRun()
 
     det_h_angle = run.getLogData('setup.DetHAngle').value   # ('section.variable')
@@ -52,7 +52,35 @@ Output:
 .. testoutput:: ExLoad
 
     DetHAngle is 0.0 degrees.
-    Wavelength is 6.0 Angstrom.
+    Wavelength is 4.9 Angstrom.
+
+LoadSANS1MLZ has 2 mods to load data:
+~~~~~~~~~~~
+
+* Vector mode (default) - counts from data file will be reshaped to 1 dimensional matrix and written to DataY section;
+  DataX contains wavelength - wavelength_error and  wavelength + wavelength_error; with this mode workspace has
+  `IDF <https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_ ‘SANS-1’.
+
+* 128x128 mode - counts from data file will be reshaped to (128, 128) dimensional matrix and write to DataY section
+  (this allows `plot functions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html>`_);
+  DataX will contain x position for each pixel of the detector; with this mode workspace doesn’t have IDF.
+
+
+
+**Example - Load a raw datafile with 128x128 mode**
+
+.. testcode:: ExLoad
+
+    ws = LoadSANS1MLZ(Filename='D0122881.001',
+                      Mode='128x128')
+    spectrum_5 = ws.readY(5)
+    print(spectrum_5[1:6])
+
+Output:
+
+.. testoutput:: ExLoad
+
+    [891. 863. 890. 836. 885.]
 
 .. include:: ../usagedata-note.txt
 
