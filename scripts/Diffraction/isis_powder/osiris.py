@@ -45,23 +45,12 @@ class Osiris(AbstractInst):
     def load_raw_runs(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
-        sample_ws_list = osiris_algs.load_raw(self._inst_settings.run_number, self._drange_sets,
-                                              'sample', self, run_details.file_extension)
-        vanadium_ws_list = osiris_algs.load_raw(run_details.vanadium_run_numbers, self._drange_sets,
-                                                'vanadium', self, run_details.file_extension)
-        empty_ws_list = osiris_algs.load_raw(run_details.empty_inst_runs, self._drange_sets,
-                                             'empty', self, run_details.file_extension)
-        return sample_ws_list, vanadium_ws_list, empty_ws_list
+        return self._load_raw_runs(run_details)
 
     def run_diffraction_focusing(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
-        osiris_algs.load_raw(self._inst_settings.run_number, self._drange_sets,
-                             'sample', self, run_details.file_extension)
-        osiris_algs.load_raw(run_details.vanadium_run_numbers, self._drange_sets,
-                             'vanadium', self, run_details.file_extension)
-        osiris_algs.load_raw(run_details.empty_inst_runs, self._drange_sets,
-                             'empty', self, run_details.file_extension)
+        self._load_raw_runs(run_details)
 
         focussed_runs = osiris_algs.run_diffraction_focussing(self._inst_settings.run_number,
                                                               self._drange_sets,
@@ -72,6 +61,19 @@ class Osiris(AbstractInst):
             focussed_runs = [osiris_algs._merge_dspacing_runs(self._inst_settings.run_number, self._drange_sets, focussed_runs)]
 
         return self._output_focused_ws(focussed_runs, run_details)
+
+    def _load_raw_runs(self, run_details):
+        sample_ws_list = osiris_algs.load_raw(self._inst_settings.run_number, self._drange_sets,
+                                              'sample', self, run_details.file_extension)
+        van_numbers = osiris_algs.get_van_runs_for_samples(self._inst_settings.run_number,
+                                                           self._inst_settings, self._drange_sets)
+        vanadium_ws_list = osiris_algs.load_raw(van_numbers, self._drange_sets,
+                                                'vanadium', self, run_details.file_extension)
+        empty_numbers = osiris_algs.get_empty_runs_for_samples(self._inst_settings.run_number,
+                                                               self._inst_settings, self._drange_sets)
+        empty_ws_list = osiris_algs.load_raw(empty_numbers, self._drange_sets,
+                                             'empty', self, run_details.file_extension)
+        return sample_ws_list, vanadium_ws_list, empty_ws_list
 
     def _get_run_details(self, run_number_string):
         """

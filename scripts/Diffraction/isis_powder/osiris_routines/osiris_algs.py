@@ -229,6 +229,26 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
                                      vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file)
 
 
+def get_van_runs_for_samples(run_number_string, inst_settings, drange_sets):
+    all_run_numbers = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    van_numbers = ""
+    for drange_set in drange_sets.values():
+        if drange_set.has_sample():
+            van_numbers += _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers,
+                                                    key="vanadium_" + drange_set.get_drange()) + ","
+    return van_numbers[:-1]
+
+
+def get_empty_runs_for_samples(run_number_string, inst_settings, drange_sets):
+    all_run_numbers = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    empty_numbers = ""
+    for drange_set in drange_sets.values():
+        if drange_set.has_sample():
+            empty_numbers += _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers,
+                                                      key="empty_" + drange_set.get_drange()) + ","
+    return empty_numbers[:-1]
+
+
 def get_vanadium_runs(inst_settings):
     all_run_numbers = get_cal_mapping_dict(inst_settings.run_number, inst_settings.cal_mapping_path)
     return [_assign_drange_vanadium('drange'+str(i+1), all_run_numbers) for i in range(12)]
