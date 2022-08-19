@@ -51,8 +51,6 @@ void EigenBSpline::function1D(double *out, const double *xValues, const size_t n
   int currentBBase = 0;
   double startX = getAttribute("StartX").asDouble();
   double endX = getAttribute("EndX").asDouble();
-  const std::vector<double> breakPoints = getAttribute("BreakPoints").asVector();
-  const std::vector<double> knots = getAttribute("Knots").asVector();
 
   if (startX >= endX) {
     throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
