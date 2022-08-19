@@ -92,7 +92,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             n_spec = 128
             data_y = metadata.counts.data
             self._wavelength(metadata)
-            data_e = np.sqrt(data_y)
+            data_e = np.sqrt(data_y) if metadata.counts.data_type == '001' else metadata.errors.data
             data_x = range(n_spec)
         else:
             n_spec = metadata.spectrum_amount()
