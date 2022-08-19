@@ -50,7 +50,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             metadata.analyze_source(filename)
             data_x, data_y, data_e, n_spec = self.create_datasets(metadata, workspace_mode)
             logs = self.create_logs(metadata)
-            y_unit, y_label, x_unit = self.create_labels()
+            y_unit, y_label, x_unit = self.create_labels(workspace_mode)
         except FileNotFoundError as error:
             raise RuntimeError(str(error))
         except TypeError as error:
@@ -93,7 +93,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             data_y = metadata.counts.data
             self._wavelength(metadata)
             data_e = np.sqrt(data_y)
-            data_x = range(128)
+            data_x = range(n_spec)
         else:
             n_spec = metadata.spectrum_amount()
             data_y = metadata.data_y()
@@ -177,10 +177,15 @@ class LoadSANS1MLZ(PythonAlgorithm):
             self.log().warning(warn)
 
     @staticmethod
-    def create_labels():
-        y_unit = "Counts"
-        y_label = "Counts"
-        x_unit = "Wavelength"
+    def create_labels(workspace_mode):
+        if workspace_mode != '128x128':
+            y_unit = ""
+            y_label = "Counts"
+            x_unit = "Wavelength"
+        else:
+            y_unit = ""
+            y_label = "Counts"
+            x_unit = ""
         return y_unit, y_label, x_unit
 
 
