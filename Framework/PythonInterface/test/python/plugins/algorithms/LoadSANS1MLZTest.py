@@ -135,54 +135,66 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         os.remove(filename)
 
-    def test_LoadValidData002(self):
+    def test_LoadValidData_128_128_mode(self):
         """
-        test: whether the workspace has been created, is the instrument correct 002 file
+        test: whether the workspace has been created;
         """
-        output_ws_name = "LoadSANS1MLZTest_Test5"
-
+        output_ws_name = "LoadSANS1MLZTest_Test8"
         alg_test = run_algorithm("LoadSANS1MLZ",
-                                 Filename=self.filename_002,
+                                 Filename=self.filename_001,
+                                 Mode='128x128',
                                  OutputWorkspace=output_ws_name)
 
-        ws = AnalysisDataService.retrieve(output_ws_name)
-        self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
-
         self.assertTrue(alg_test.isExecuted())
-        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
-    def test_VerifyValues002(self):
-        """
-        test: whether the values are correct
-        """
-        output_ws_name = "LoadSANS1MLZTest_Test6"
-        run_algorithm("LoadSANS1MLZ", Filename=self.filename_002, OutputWorkspace=output_ws_name)
-        ws = AnalysisDataService.retrieve(output_ws_name)
-        # dimensions
-        self.assertEqual(16384, ws.getNumberHistograms())
-        self.assertEqual(2, ws.getNumDims())
-        # data array
-        self.assertEqual(0.4174, ws.readY(11797))
-        self.assertEqual(0.4257, ws.readY(7043))
-        # sample logs
-        run = ws.getRun()
-
-        self.assertEqual(4.5010, run.getProperty('wavelength').value)
-
-        self.assertEqual('D0665908/2', ws.getTitle())
-        self.assertEqual(output_ws_name, ws.name())
-
-        self.assertEqual(5, run.getProperty('position').value)
-        self.assertEqual(0.0, run.getProperty('thickness').value)
-        self.assertAlmostEqual(1.112, run.getProperty('sample_detector_distance').value, 2)
-        self.assertEqual(0.0, run.getProperty('beamcenter_x').value)
-        self.assertEqual(0.0, run.getProperty('beamcenter_y').value)
-        self.assertEqual(1, run.getProperty('scaling').value)
-        self.assertEqual(1, run.getProperty('transmission').value)
-
-        det = ws.getDetector(91)
-        self.assertAlmostEqual(1.592, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 2)
-        run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
+    # def test_LoadValidData002(self):
+    #     """
+    #     test: whether the workspace has been created, is the instrument correct 002 file
+    #     """
+    #     output_ws_name = "LoadSANS1MLZTest_Test5"
+    #
+    #     alg_test = run_algorithm("LoadSANS1MLZ",
+    #                              Filename=self.filename_002,
+    #                              OutputWorkspace=output_ws_name)
+    #
+    #     ws = AnalysisDataService.retrieve(output_ws_name)
+    #     self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
+    #
+    #     self.assertTrue(alg_test.isExecuted())
+    #     run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
+    #
+    # def test_VerifyValues002(self):
+    #     """
+    #     test: whether the values are correct
+    #     """
+    #     output_ws_name = "LoadSANS1MLZTest_Test6"
+    #     run_algorithm("LoadSANS1MLZ", Filename=self.filename_002, OutputWorkspace=output_ws_name)
+    #     ws = AnalysisDataService.retrieve(output_ws_name)
+    #     # dimensions
+    #     self.assertEqual(16384, ws.getNumberHistograms())
+    #     self.assertEqual(2, ws.getNumDims())
+    #     # data array
+    #     self.assertEqual(0.4174, ws.readY(11797))
+    #     self.assertEqual(0.4257, ws.readY(7043))
+    #     # sample logs
+    #     run = ws.getRun()
+    #
+    #     self.assertEqual(4.5010, run.getProperty('wavelength').value)
+    #
+    #     self.assertEqual('D0665908/2', ws.getTitle())
+    #     self.assertEqual(output_ws_name, ws.name())
+    #
+    #     self.assertEqual(5, run.getProperty('position').value)
+    #     self.assertEqual(0.0, run.getProperty('thickness').value)
+    #     self.assertAlmostEqual(1.112, run.getProperty('sample_detector_distance').value, 2)
+    #     self.assertEqual(0.0, run.getProperty('beamcenter_x').value)
+    #     self.assertEqual(0.0, run.getProperty('beamcenter_y').value)
+    #     self.assertEqual(1, run.getProperty('scaling').value)
+    #     self.assertEqual(1, run.getProperty('transmission').value)
+    #
+    #     det = ws.getDetector(91)
+    #     self.assertAlmostEqual(1.592, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 2)
+    #     run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
     @staticmethod
     def _create_incomplete_dataFile(filename, param):
@@ -363,15 +375,15 @@ class SANS1DataClassCountsSectionTest(unittest.TestCase):
         self.assertEqual((128, 128), dim)
 
 
-class SANS1DataClassErrorsSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up(file_type='002')
-
-    def test_CheckValues(self):
-        self.assertEqual(float('6.058e-03'), self.metadata.errors.data[87][6])
-        self.assertEqual(float('6.181e-03'), self.metadata.errors.data[1455][5])
-        self.assertEqual(float('5.922e-03'), self.metadata.errors.data[625][0])
+# class SANS1DataClassErrorsSectionTest(unittest.TestCase):
+#
+#     def setUp(self) -> None:
+#         self.metadata, self.filename = SANS1DataClassTestHelper.set_up(file_type='002')
+#
+#     def test_CheckValues(self):
+#         self.assertEqual(float('6.058e-03'), self.metadata.errors.data[87][6])
+#         self.assertEqual(float('6.181e-03'), self.metadata.errors.data[1455][5])
+#         self.assertEqual(float('5.922e-03'), self.metadata.errors.data[625][0])
 
 
 if __name__ == '__main__':
