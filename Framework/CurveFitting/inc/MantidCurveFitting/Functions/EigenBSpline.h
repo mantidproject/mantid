@@ -58,7 +58,7 @@ public:
   /// initialise the m_spline variable with a given knot vector and breakpoints
   void initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints);
   /// get the index of the span/interval which x is in
-  int EigenBSpline::getSpanIndex(const double x, const int currentBBase, const bool clamped = true) const;
+  int getSpanIndex(const double x, const int currentBBase, const bool clamped = true) const;
   /// Evaluate derivatives up to a specified order for each non-zero basis function
   EigenMatrix evaluateBasisFnDerivatives(const double x, const int derivOrder) const;
 

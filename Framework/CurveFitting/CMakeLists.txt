@@ -62,7 +62,6 @@ set(SRC_FILES
     src/Functions/ActivationK.cpp
     src/Functions/ActivationmeV.cpp
     src/Functions/AsymmetricPearsonVII.cpp
-    src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
     src/Functions/BivariateNormal.cpp
@@ -252,7 +251,6 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ActivationK.h
     inc/MantidCurveFitting/Functions/ActivationmeV.h
     inc/MantidCurveFitting/Functions/AsymmetricPearsonVII.h
-    inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
     inc/MantidCurveFitting/Functions/BivariateNormal.h

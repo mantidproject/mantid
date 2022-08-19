@@ -161,7 +161,7 @@ public:
 
   void test_create_with_function_factory_uniform() {
     auto bsp = FunctionFactory::Instance().createInitialized(
-        "name=BSpline,Uniform=true,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
+        "name=EigenBSpline,Uniform=true,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
         "BreakPoints=(0.005,0.5,6.0)");
     TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.05);
     TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 66.6);
@@ -176,7 +176,7 @@ public:
 
   void test_create_with_function_factory_nonuniform() {
     auto bsp = FunctionFactory::Instance().createInitialized(
-        "name=BSpline,Uniform=false,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
+        "name=EigenBSpline,Uniform=false,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
         "BreakPoints=(0.005,0.5,6.0)");
     TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.005);
     TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 6.0);

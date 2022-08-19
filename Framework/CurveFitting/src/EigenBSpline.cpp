@@ -138,12 +138,13 @@ int EigenBSpline::evaluateBasisFunctions(EigenVector &B, const double x, int cur
 int EigenBSpline::getSpanIndex(const double x, const int currentBBase, const bool clamped) const {
   auto knots = getAttribute("Knots").asVector();
   const int clampedKnots = clamped ? getClampedKnots() : 1;
-  for (int i = currentBBase + clampedKnots; i < knots.size(); i++) {
+  int nKnots = static_cast<int>(knots.size());
+  for (int i = currentBBase + clampedKnots; i < nKnots; i++) {
     if (x < knots[i]) {
       return i - clampedKnots;
     }
   }
-  return knots.size() - clampedKnots * 2;
+  return nKnots - clampedKnots * 2;
 }
 
 /** Calculate the derivatives for a set of points on the spline
@@ -340,6 +341,6 @@ std::vector<double> EigenBSpline::generateKnotVector(const std::vector<double> &
     }
   }
   return knots;
-};
+}
 
 } // namespace Mantid::CurveFitting::Functions
