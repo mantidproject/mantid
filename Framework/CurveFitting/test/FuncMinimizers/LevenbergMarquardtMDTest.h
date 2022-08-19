@@ -13,13 +13,10 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidCurveFitting/Functions/EigenBSpline.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 
 #include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
-
-#include <gsl/gsl_version.h>
 
 #include <sstream>
 
@@ -33,18 +30,6 @@ using namespace Mantid::API;
 
 class LevenbergMarquardtMDTest : public CxxTest::TestSuite {
 public:
-  bool skipTests() override {
-// Skip this test suite if running on RHEL7.
-// Due to compatability issues, RHEL7 uses a different version of GSL to other platforms.
-// This causes this test to fail on RHEL7.
-// As RHEL7 is no longer supported, this test will be skipped on GSL verisons < 2.
-#if GSL_MAJOR_VERSION < 2
-    return true;
-#else
-    return false;
-#endif
-  }
-
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static LevenbergMarquardtMDTest *createSuite() { return new LevenbergMarquardtMDTest(); }
@@ -274,7 +259,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 
-  void test_BSpline_Eigen_fit_uniform() {
+  void test_EigenBSpline_fit_uniform() {
     double startx = -3.14;
     double endx = 3.14;
 
@@ -297,30 +282,7 @@ public:
     }
   }
 
-  void test_BSpline_fit_uniform() {
-    double startx = -3.14;
-    double endx = 3.14;
-
-    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
-    bsp->setAttributeValue("Order", 3);
-    bsp->setAttributeValue("NBreak", 10);
-    bsp->setAttributeValue("StartX", startx);
-    bsp->setAttributeValue("EndX", endx);
-
-    double chi2 = fitBSpline(bsp, "sin(x)");
-    TS_ASSERT_DELTA(chi2, 1e-4, 1e-5);
-
-    FunctionDomain1DVector x(startx, endx, 100);
-    FunctionValues y(x);
-    bsp->function(x, y);
-
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xx = x[i];
-      TS_ASSERT_DELTA(y[i], sin(xx), 0.003);
-    }
-  }
-
-  void test_BSpline_Eigen_fit_uniform_finer() {
+  void test_EigenBSpline_fit_uniform_finer() {
     double startx = -3.14;
     double endx = 3.14;
 
@@ -343,30 +305,7 @@ public:
     }
   }
 
-  void test_BSpline_fit_uniform_finer() {
-    double startx = -3.14;
-    double endx = 3.14;
-
-    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
-    bsp->setAttributeValue("Order", 3);
-    bsp->setAttributeValue("NBreak", 20);
-    bsp->setAttributeValue("StartX", startx);
-    bsp->setAttributeValue("EndX", endx);
-
-    double chi2 = fitBSpline(bsp, "sin(x)");
-    TS_ASSERT_DELTA(chi2, 1e-6, 1e-7);
-
-    FunctionDomain1DVector x(startx, endx, 100);
-    FunctionValues y(x);
-    bsp->function(x, y);
-
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xx = x[i];
-      TS_ASSERT_DELTA(y[i], sin(xx), 0.0003);
-    }
-  }
-
-  void test_BSpline_Eigen_fit_nonuniform() {
+  void test_EigenBSpline_fit_nonuniform() {
     double startx = 0.0;
     double endx = 6.28;
 
@@ -395,36 +334,7 @@ public:
     TS_ASSERT_DELTA(chi2, 0.0055, 5e-5);
   }
 
-  void test_BSpline_fit_nonuniform() {
-    double startx = 0.0;
-    double endx = 6.28;
-
-    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
-    bsp->setAttributeValue("Order", 3);
-    bsp->setAttributeValue("NBreak", 10);
-    bsp->setAttributeValue("StartX", startx);
-    bsp->setAttributeValue("EndX", endx);
-
-    // this function changes faster at the lower end
-    // fit it with uniform break points first
-    double chi2 = fitBSpline(bsp, "sin(10/(x+1))");
-    TS_ASSERT_DELTA(chi2, 0.58, 0.005);
-
-    // now do a nonuniform fit. increase density of break points at lower end
-    std::vector<double> breaks = bsp->getAttribute("BreakPoints").asVector();
-    breaks[1] = 0.3;
-    breaks[2] = 0.5;
-    breaks[3] = 1.0;
-    breaks[4] = 1.5;
-    breaks[5] = 2.0;
-    breaks[6] = 3.0;
-    bsp->setAttributeValue("Uniform", false);
-    bsp->setAttributeValue("BreakPoints", breaks);
-    chi2 = fitBSpline(bsp, "sin(10/(x+1))");
-    TS_ASSERT_DELTA(chi2, 0.0055, 5e-5);
-  }
-
-  void test_BSpline_Eigen_derivative() {
+  void test_EigenBSpline_derivative() {
 
     double startx = -3.14;
     double endx = 3.14;
@@ -448,31 +358,7 @@ public:
     }
   }
 
-  void test_BSpline_derivative() {
-
-    double startx = -3.14;
-    double endx = 3.14;
-
-    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
-    bsp->setAttributeValue("Order", 3);
-    bsp->setAttributeValue("NBreak", 30);
-    bsp->setAttributeValue("StartX", startx);
-    bsp->setAttributeValue("EndX", endx);
-
-    double chi2 = fitBSpline(bsp, "sin(x)");
-    TS_ASSERT_DELTA(chi2, 1e-7, 5e-8);
-
-    FunctionDomain1DVector x(startx, endx, 100);
-    FunctionValues y(x);
-    bsp->derivative(x, y); // first derivative
-
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xx = x[i];
-      TS_ASSERT_DELTA(y[i], cos(xx), 0.005);
-    }
-  }
-
-  void test_BSpline_Eigen_derivative_2() {
+  void test_EigenBSpline_derivative_2() {
 
     double startx = -3.14;
     double endx = 3.14;
@@ -496,60 +382,12 @@ public:
     }
   }
 
-  void test_BSpline_derivative_2() {
-
-    double startx = -3.14;
-    double endx = 3.14;
-
-    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
-    bsp->setAttributeValue("Order", 4);
-    bsp->setAttributeValue("NBreak", 30);
-    bsp->setAttributeValue("StartX", startx);
-    bsp->setAttributeValue("EndX", endx);
-
-    double chi2 = fitBSpline(bsp, "sin(x)");
-    TS_ASSERT_DELTA(chi2, 2e-10, 1e-10);
-
-    FunctionDomain1DVector x(startx, endx, 100);
-    FunctionValues y(x);
-    bsp->derivative(x, y, 2); // second derivative
-
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xx = x[i];
-      TS_ASSERT_DELTA(y[i], -sin(xx), 0.005);
-    }
-  }
-
-  void test_BSpline_Eigen_derivative_3() {
+  void test_EigenBSpline_derivative_3() {
 
     double startx = -3.14;
     double endx = 3.14;
 
     std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
-    bsp->setAttributeValue("Order", 5);
-    bsp->setAttributeValue("NBreak", 20);
-    bsp->setAttributeValue("StartX", startx);
-    bsp->setAttributeValue("EndX", endx);
-
-    double chi2 = fitBSpline(bsp, "sin(x)");
-    TS_ASSERT_DELTA(chi2, 1e-11, 5e-12);
-
-    FunctionDomain1DVector x(startx, endx, 100);
-    FunctionValues y(x);
-    bsp->derivative(x, y, 3); // third derivative
-
-    for (size_t i = 0; i < x.size(); ++i) {
-      double xx = x[i];
-      TS_ASSERT_DELTA(y[i], -cos(xx), 0.012);
-    }
-  }
-
-  void test_BSpline_derivative_3() {
-
-    double startx = -3.14;
-    double endx = 3.14;
-
-    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 5);
     bsp->setAttributeValue("NBreak", 20);
     bsp->setAttributeValue("StartX", startx);
