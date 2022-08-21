@@ -9,13 +9,13 @@
 Description
 -----------
 
-This loads the raw data files produced by the SANS-1 instruments at the MLZ.
+This algorithm loads raw data files produced by the SANS-1 instrument at MLZ into mantid workspaces.
 
-This loader reads the detector positions from the raw data file and places the detectors accordingly.
+The loader reads the detector positions from the raw data file and places the detectors accordingly <---What does this mean???
 
-The output is a histogram workspace with unit of wavelength (Angstrom).
+The output is a histogram workspace with a unit of wavelength (Angstrom). <--- Aren't the output dependent on the chosen "Mode"?
 
-**Example - Loads a 001 raw data file.**
+**Example - Loads a raw SANS-1 data file with extension .001.**
 
 .. testcode:: ExLoad
 
@@ -29,10 +29,10 @@ Output:
 
     This workspace has 16386 spectra.
 
-All information from all sections that contains in raw data file rescheduled to SampleLogs. To get access to
-this information you simply need to using the `keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
-key consist of section name and variable in that section.
-Also main information such as: position, wavelength, thickness etc. are stored in separate variables.
+The information from all sections of the raw data file is written to SampleLogs. To get access to
+this information you simply need to use the `keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
+the key consists of a section's title followed by a dot and the parameter of interest that belongs to that section.
+The most relevant information, such as: position, wavelength, thickness ect. <--- Be specific about etc. is stored in separate variables.
 
 **Example - Access to all information**
 
@@ -41,7 +41,7 @@ Also main information such as: position, wavelength, thickness etc. are stored i
     ws = LoadSANS1MLZ("D0122881.001")
     run = ws.getRun()
 
-    det_h_angle = run.getLogData('setup.DetHAngle').value   # ('section.variable')
+    det_h_angle = run.getLogData('setup.DetHAngle').value   # ('section.parameter')
     wavelength = run.getLogData('wavelength').value
 
     print(f"DetHAngle is {det_h_angle} degrees.")
@@ -54,20 +54,20 @@ Output:
     DetHAngle is 0.0 degrees.
     Wavelength is 4.9 Angstrom.
 
-LoadSANS1MLZ has 2 mods to load data:
-~~~~~~~~~~~
+2 modes of loading data are implemented in LoadSANS1MLZ:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Vector mode (default) - counts from data file will be reshaped to 1 dimensional matrix and written to DataY section;
-  DataX contains wavelength - wavelength_error and  wavelength + wavelength_error; with this mode workspace has
-  `IDF <https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_ ‘SANS-1’.
+* Vector mode (default) - counts from the loaded data file are stored as a 1D vector and written to the DataY section;
+  DataX contains two columns: 1) wavelength - wavelength_spread and 2) wavelength + wavelength_spread; with this mode workspace has
+  `IDF <https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_ ‘SANS-1’. <-- What do you mean "has"?
 
-* 128x128 mode - counts from data file will be reshaped to (128, 128) dimensional matrix and write to DataY section
+* Matrix mode - counts from the loaded data file are stored as a 2D matrix (128, 128) and written to the DataY section <--- Needs to be paraphrased
   (this allows `plot functions <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html>`_);
-  DataX will contain x position for each pixel of the detector; with this mode workspace doesn’t have IDF.
+  DataX will contain x position for each pixel of the detector; with this mode workspace doesn’t have IDF. <---again, what is "doesn't have"
 
 
 
-**Example - Load a raw datafile with 128x128 mode**
+**Example - Load a raw data file with Matrix mode**
 
 .. testcode:: ExLoad
 

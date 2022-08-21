@@ -27,7 +27,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
                              "Name of SANS experimental data file.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
-                             doc="Name of the workspace to store the experimental data.")
+                             doc="Name of the workspace to store experimental data.")
 
         self.declareProperty(name="Wavelength",
                              defaultValue=0.0,
@@ -54,7 +54,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         except FileNotFoundError as error:
             raise RuntimeError(str(error))
         except TypeError as error:
-            raise RuntimeError(str(error) + "\nprobably incorrect 'Counts' data")
+            raise RuntimeError(str(error) + "\nincorrect 'Counts' data")
         else:
             self._log_data_analyzing(metadata)
             CreateWorkspace(OutputWorkspace=out_ws_name,
@@ -111,7 +111,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         with main variables
         """
         self.log().debug('Creation sample logs started')
-        # units of measurement of main variables
+        # units of the most relevant variables
         essential_data_tobe_logged = {
             'det1_x_value': 'mm',
             'det1_z_value': 'mm',
@@ -134,8 +134,8 @@ class LoadSANS1MLZ(PythonAlgorithm):
             'transmission': '',
             'scaling': '',
             'probability': '',
-            'beamcenter_x': '',
-            'beamcenter_y': '',
+            'beamcenter_x': 'mm',
+            'beamcenter_y': 'mm',
             'aperture': '',
             'collimation': '',
         }
@@ -169,7 +169,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
     def _log_data_analyzing(self, metadata):
         """
         show the notifications raised during
-        analyzing SANS-1 datafile
+        the loading process of a SANS-1 datafile
         """
         for note in metadata.logs['notice']:
             self.log().notice(note)

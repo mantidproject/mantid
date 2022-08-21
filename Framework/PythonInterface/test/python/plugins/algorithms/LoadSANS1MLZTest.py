@@ -14,7 +14,7 @@ class LoadSANSMLZTest(unittest.TestCase):
 
     def test_LoadValidData001(self):
         """
-        test: whether the workspace has been created, is the instrument correct 001 file
+        test: whether the workspace has been created, is the instrument name correct
         """
         output_ws_name = "LoadSANS1MLZTest_Test1"
         alg_test = run_algorithm("LoadSANS1MLZ",
@@ -70,8 +70,8 @@ class LoadSANSMLZTest(unittest.TestCase):
         output_ws_name = "LoadSANS1MLZTest_Test3"
         filename = "sans-incomplete.001"
         parameters = {
-            'counts 128': "'Counts' section include incorrect data/amount of data",
-            'counts pr': "'Counts' section include incorrect data/amount of data",
+            'counts 128': "'Counts' section includes incorrect data",
+            'counts pr': "'Counts' section includes incorrect data",
             'section amount': "Failed to find 'File' section"
         }
 

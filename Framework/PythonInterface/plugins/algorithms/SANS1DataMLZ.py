@@ -105,7 +105,7 @@ class SampleSANS(DtClsSANS):
 
     def _assign_values(self):
         """
-        one of the methods to add variable with unique name
+        one of the methods to add a variable with unique name
         """
         super()._assign_values()
         self._assign_value('Position', 'position')
@@ -117,13 +117,13 @@ class SetupSANS(DtClsSANS):
     section_name: str = 'Setup'
     pattern = re.compile(r'(%Setup\n)([^%]*)')
     wavelength: float = 0.0
-    wavelength_error_mult: float = 0.1      # wavelength error up to 10%
+    wavelength_error_mult: float = 0.1      # wavelength spread up to 10%
     sample_detector_distance: float = 0.0
     collimation: float = 0.0
 
     def _assign_values(self):
         """
-        one of the methods to add variable with unique name
+        one of the methods to add avariable with unique name
         """
         super()._assign_values()
         self._assign_value('Lambda', 'wavelength')
@@ -161,7 +161,7 @@ class CounterSANS(DtClsSANS):
 
     def _assign_values(self):
         """
-        one of the methods to add variable with unique name
+        one of the methods to add a variable with unique name
         """
         super()._assign_values()
         self._assign_value('Sum', 'sum_all_counts')
@@ -183,7 +183,7 @@ class HistorySANS(DtClsSANS):
 
     def _assign_values(self):
         """
-        one of the methods to add variable with unique name
+        one of the methods to add a variable with unique name
         """
         super()._assign_values()
         self._assign_value('Transmission', 'transmission')
@@ -218,7 +218,7 @@ class CountsSANS(DtClsSANS):
             elif self.data_type == '002':
                 self._process_002(unprocessed)
         except ValueError:
-            raise FileNotFoundError("'Counts' section include incorrect data/amount of data")
+            raise FileNotFoundError("'Counts' section includes incorrect data")
 
     def _process_001(self, unprocessed):
         pattern = re.compile(r'\d+')
@@ -243,14 +243,14 @@ class ErrorsSANS(DtClsSANS):
         try:
             self.data = np.array([count for count in matches], dtype=float).reshape(2048, 8)
         except ValueError:
-            raise FileNotFoundError("'Errors' section include incorrect data/amount of data")
+            raise FileNotFoundError("'Errors' section includes incorrect data")
 
 
 class SANSdata:
     """
     This class describes the SANS-1_MLZ data structure and
     will be used for SANS-1 data read-in and write-out routines.
-    Data from each section of a raw datafile assigned to a
+    Data from each section of a raw datafile are assigned to a
     class that is named correspondingly.
     """
 
@@ -296,6 +296,7 @@ class SANSdata:
         # lines below won't work properly
         # Better to introduce a parameter n_columns and
         # use data_x = np.zeros(n_columns * n_spec), etc
+        # Should these comments be removed?
         if wavelength is None:
             wavelength = self.setup.wavelength
         data_x = np.zeros(2 * self.spectrum_amount())
@@ -326,7 +327,7 @@ class SANSdata:
 
     def analyze_source(self, filename: str, comment: bool = False):
         """
-        read the SANS-1.001/002 raw files into the SANS-1 data object
+        read SANS-1 .001/002 raw files into the SANS-1 data object
         """
         with open(filename, 'r') as file_handler:
             unprocessed = file_handler.read()
@@ -342,7 +343,7 @@ class SANSdata:
             pass
         else:
             if file_type != '002':
-                self.logs['warning'].append(f"File type not as expected. Trying to process as .002.")
+                self.logs['warning'].append(f"File type is not as expected. Algorithm will try to process the file as with extension .002.")
             self.counts.data_type = '002'
             self._subsequence = [self.file, self.sample, self.setup,
                                  self.history, self.counts, self.errors]
@@ -375,31 +376,31 @@ class SANSdata:
                 self.file.info[param] = int(self.file.info[param])
             except KeyError:
                 self.file.info[param] = 128
-                self.logs['notice'].append(f"{param} not included in datafile. {param} set to 128.")
+                self.logs['notice'].append(f"{param} is not specified in the datafile. {param} set to 128.")
             except ValueError:
                 self.file.info[param] = 128
-                self.logs['notice'].append(f"{param} not defined in datafile. {param} set to 128.")
+                self.logs['notice'].append(f"{param} is not specified in the datafile. {param} set to 128.")
 
     def _check_data(self):
         self._check_data_size()
         if (type(self.setup.collimation) is str) or (self.setup.collimation == 0.0):
-            self.logs['warning'].append(f"Collimation not defined in datafile.")
+            self.logs['warning'].append(f"Collimation is not specified in the datafile.")
 
         if (type(self.setup.sample_detector_distance) is str) or (self.setup.sample_detector_distance == 0.0):
-            self.logs['warning'].append(f"SD('sample detector distance') not defined in datafile.")
+            self.logs['warning'].append(f"SD ('sample detector distance') is not specified in the datafile.")
 
         if (type(self.setup.wavelength) is str) or (self.setup.wavelength == 0.0):
-            self.logs['warning'].append(f"Lambda(wavelength) not defined in datafile. Wavelength set to user input.")
+            self.logs['warning'].append(f"Lambda (wavelength) is not specified in the datafile. Wavelength is set to user's input.")
 
         if self.file.type == '001':
             if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
-                self.logs['warning'].append(f"Sum(sum of all counts) not defined in datafile.")
+                self.logs['warning'].append(f"Sum of all counts is not specified in the datafile.")
 
             if (type(self.counter.duration) is str) or (self.counter.duration == 0.0):
-                self.logs['warning'].append(f"Time(duration of experiment) not defined in datafile.")
+                self.logs['warning'].append(f"Duration of the measurement is not specified in the datafile.")
 
             if (self.counter.monitor2 is None) or (self.counter.monitor2 == 0.0):
-                self.logs['warning'].append(f"Monitor2 not defined in datafile. Monitor2 set to 'None'.")
+                self.logs['warning'].append(f"Monitor2 is not specified in the datafile. Monitor2 is set to 'None'.")
 
             if (self.counter.monitor1 is None) or (self.counter.monitor1 == 0.0):
-                self.logs['notice'].append(f"Monitor1 not defined in datafile. Monitor1 set to 'None'.")
+                self.logs['warning'].append(f"Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")
