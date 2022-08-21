@@ -23,12 +23,12 @@ DECLARE_ALGORITHM(SplineSmoothing)
 
 using namespace API;
 using namespace Kernel;
-using Functions::EigenBSpline;
+using Functions::BSpline;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 SplineSmoothing::SplineSmoothing()
-    : M_START_SMOOTH_POINTS(10), m_cspline(std::make_shared<EigenBSpline>()), m_inputWorkspace(),
+    : M_START_SMOOTH_POINTS(10), m_cspline(std::make_shared<BSpline>()), m_inputWorkspace(),
       m_inputWorkspacePointData(), m_derivativeWorkspaceGroup(new WorkspaceGroup) {}
 
 //----------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ void SplineSmoothing::exec() {
  * @param index :: index of the spectrum to smooth
  */
 void SplineSmoothing::smoothSpectrum(const int index) {
-  m_cspline = std::make_shared<EigenBSpline>();
+  m_cspline = std::make_shared<BSpline>();
   m_cspline->setAttributeValue("Uniform", false);
 
   // choose some smoothing points from input workspace

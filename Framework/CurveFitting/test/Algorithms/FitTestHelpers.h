@@ -62,7 +62,7 @@ static std::string generateFunctionDescrForFit(CurveBenchmarks ctype) {
   if (SingleB2BPeak == ctype)
     return "name=BackToBackExponential, X0=8500, S=800";
   else if (SmoothishGaussians == ctype)
-    return "name=EigenBSpline, Order=20, StartX=0, EndX=10";
+    return "name=BSpline, Order=20, StartX=0, EndX=10";
   else
     throw std::invalid_argument("Unknown curve type when trying to generate a "
                                 "function description string: " +

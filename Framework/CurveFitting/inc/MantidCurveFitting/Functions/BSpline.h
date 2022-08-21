@@ -16,22 +16,18 @@
 #include <memory>
 #include <unsupported/Eigen/Splines>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
-typedef Eigen::Spline<double, 1, 2> Spline2Degree;
-typedef Eigen::Spline<double, 1, 3> Spline3Degree;
-typedef Eigen::Spline<double, 1, 4> Spline4Degree;
+typedef Eigen::Spline<double, 1, Eigen::Dynamic> Spline1D;
 
 /**
 A wrapper around Eigen functions implementing a B-spline.
 This function can also calculate basis function derivatives.
 */
-class MANTID_CURVEFITTING_DLL EigenBSpline : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL BSpline : public BackgroundFunction {
 public:
   /// Constructor
-  EigenBSpline();
+  BSpline();
   /// overwrite IFunction base class methods
   std::string name() const override { return "BSpline"; }
   const std::string category() const override { return "Background"; }
@@ -54,13 +50,13 @@ public:
   /// Generate a knot vector based upon break points
   std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
   /// evaluate non-zero basis functions, return which index to use as the base of the results vector.
-  int evaluateBasisFunctions(EigenVector &B, const double x, int currentBBase) const;
+  size_t evaluateBasisFunctions(EigenVector &B, const double x, size_t currentBBase) const;
   /// initialise the m_spline variable with a given knot vector and breakpoints
   void initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints);
   /// get the index of the span/interval which x is in
-  int getSpanIndex(const double x, const int currentBBase, const bool clamped = true) const;
+  size_t getSpanIndex(const double x, const size_t currentBBase, const bool clamped = true) const;
   /// Evaluate derivatives up to a specified order for each non-zero basis function
-  EigenMatrix evaluateBasisFnDerivatives(const double x, const int derivOrder) const;
+  EigenMatrix evaluateBasisFnDerivatives(const double x, const size_t derivOrder) const;
 
   /// Get number of B-Spline coefficients
   inline int getNBSplineCoefficients() { return getNBreakPoints() + getOrder() - 2; }
@@ -75,12 +71,8 @@ public:
   /// Get the degree of constituent polynomial functions
   inline int getDegree() const { return getOrder() - 1; }
 
-  /// Member viarbles for spline of each compatable degree
-  Spline2Degree m_spline2;
-  Spline3Degree m_spline3;
-  Spline4Degree m_spline4;
+  /// Member variable for spline
+  Spline1D m_spline;
 };
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

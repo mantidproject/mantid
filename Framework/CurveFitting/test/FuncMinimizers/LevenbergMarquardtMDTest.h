@@ -259,11 +259,11 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
 
-  void test_EigenBSpline_fit_uniform() {
+  void test_BSpline_fit_uniform() {
     double startx = -3.14;
     double endx = 3.14;
 
-    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 10);
     bsp->setAttributeValue("StartX", startx);
@@ -282,11 +282,11 @@ public:
     }
   }
 
-  void test_EigenBSpline_fit_uniform_finer() {
+  void test_BSpline_fit_uniform_finer() {
     double startx = -3.14;
     double endx = 3.14;
 
-    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 20);
     bsp->setAttributeValue("StartX", startx);
@@ -305,11 +305,11 @@ public:
     }
   }
 
-  void test_EigenBSpline_fit_nonuniform() {
+  void test_BSpline_fit_nonuniform() {
     double startx = 0.0;
     double endx = 6.28;
 
-    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 10);
     bsp->setAttributeValue("StartX", startx);
@@ -334,12 +334,12 @@ public:
     TS_ASSERT_DELTA(chi2, 0.0055, 5e-5);
   }
 
-  void test_EigenBSpline_derivative() {
+  void test_BSpline_derivative() {
 
     double startx = -3.14;
     double endx = 3.14;
 
-    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 3);
     bsp->setAttributeValue("NBreak", 30);
     bsp->setAttributeValue("StartX", startx);
@@ -358,12 +358,12 @@ public:
     }
   }
 
-  void test_EigenBSpline_derivative_2() {
+  void test_BSpline_derivative_2() {
 
     double startx = -3.14;
     double endx = 3.14;
 
-    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 4);
     bsp->setAttributeValue("NBreak", 30);
     bsp->setAttributeValue("StartX", startx);
@@ -382,12 +382,12 @@ public:
     }
   }
 
-  void test_EigenBSpline_derivative_3() {
+  void test_BSpline_derivative_3() {
 
     double startx = -3.14;
     double endx = 3.14;
 
-    std::shared_ptr<EigenBSpline> bsp = std::make_shared<EigenBSpline>();
+    std::shared_ptr<BSpline> bsp = std::make_shared<BSpline>();
     bsp->setAttributeValue("Order", 5);
     bsp->setAttributeValue("NBreak", 20);
     bsp->setAttributeValue("StartX", startx);

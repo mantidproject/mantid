@@ -197,7 +197,7 @@ API::MatrixWorkspace_sptr WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspac
   g_log.debug() << "Spline break points " << nbreak << '\n';
 
   // define the spline
-  API::IFunction_sptr spline = API::FunctionFactory::Instance().createFunction("EigenBSpline");
+  API::IFunction_sptr spline = API::FunctionFactory::Instance().createFunction("BSpline");
   auto xInterval = getStartEnd(X, inputWS->isHistogramData());
   spline->setAttributeValue("StartX", xInterval.first);
   spline->setAttributeValue("EndX", xInterval.second);

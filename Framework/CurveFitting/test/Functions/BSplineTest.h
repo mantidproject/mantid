@@ -12,7 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::CurveFitting::Functions::EigenBSpline;
+using Mantid::CurveFitting::Functions::BSpline;
 
 class BSplineTest : public CxxTest::TestSuite {
 public:
@@ -22,7 +22,7 @@ public:
   static void destroySuite(BSplineTest *suite) { delete suite; }
 
   void test_category() {
-    EigenBSpline cfn;
+    BSpline cfn;
     cfn.initialize();
 
     std::vector<std::string> cats;
@@ -34,7 +34,7 @@ public:
   }
 
   void test_defaults() {
-    EigenBSpline bsp;
+    BSpline bsp;
     int order = bsp.getAttribute("Order").asInt();
     int nbreak = bsp.getAttribute("NBreak").asInt();
     size_t nparams = bsp.nParams();
@@ -48,20 +48,20 @@ public:
   }
 
   void test_nonpositive_order() {
-    EigenBSpline bsp;
+    BSpline bsp;
     TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), const std::invalid_argument &);
     TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), const std::invalid_argument &);
   }
 
   void test_nbreak_too_small() {
-    EigenBSpline bsp;
+    BSpline bsp;
     TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), const std::invalid_argument &);
     TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), const std::invalid_argument &);
     TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3), const std::invalid_argument &);
   }
 
   void test_set_uniform_break_points() {
-    EigenBSpline bsp;
+    BSpline bsp;
     TS_ASSERT_EQUALS(bsp.getAttribute("Uniform").asBool(), true);
     TS_ASSERT_EQUALS(bsp.getAttribute("NBreak").asInt(), 10);
     bsp.setAttributeValue("StartX", -10.0);
@@ -82,7 +82,7 @@ public:
   }
 
   void test_set_nonuniform_break_points() {
-    EigenBSpline bsp;
+    BSpline bsp;
     bsp.setAttributeValue("Uniform", false);
     std::vector<double> inputBreaks(8);
     inputBreaks[0] = 3.0;
@@ -110,7 +110,7 @@ public:
   }
 
   void test_try_set_nonuniform_break_points_with_wrong_order() {
-    EigenBSpline bsp;
+    BSpline bsp;
     bsp.setAttributeValue("Uniform", false);
     std::vector<double> inputBreaks(8);
     inputBreaks[0] = 3.0;
@@ -125,7 +125,7 @@ public:
   }
 
   void test_set_wrong_startx_endx() {
-    EigenBSpline bsp;
+    BSpline bsp;
     TS_ASSERT_EQUALS(bsp.getAttribute("Uniform").asBool(), true);
     TS_ASSERT_EQUALS(bsp.getAttribute("StartX").asDouble(), 0.0);
     TS_ASSERT_EQUALS(bsp.getAttribute("EndX").asDouble(), 1.0);
@@ -161,7 +161,7 @@ public:
 
   void test_create_with_function_factory_uniform() {
     auto bsp = FunctionFactory::Instance().createInitialized(
-        "name=EigenBSpline,Uniform=true,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
+        "name=BSpline,Uniform=true,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
         "BreakPoints=(0.005,0.5,6.0)");
     TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.05);
     TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 66.6);
@@ -176,7 +176,7 @@ public:
 
   void test_create_with_function_factory_nonuniform() {
     auto bsp = FunctionFactory::Instance().createInitialized(
-        "name=EigenBSpline,Uniform=false,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
+        "name=BSpline,Uniform=false,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
         "BreakPoints=(0.005,0.5,6.0)");
     TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.005);
     TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 6.0);
