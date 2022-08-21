@@ -1,0 +1,1 @@
+The `LoadSANS1MLZ  <https://docs.mantidproject.org/nightly/algorithms/LoadSANS1MLZ.html>`_ algorithm now can be used to load SANS-1 at MLZ generated files with extension ".001" and reduced files with extension ".002".
