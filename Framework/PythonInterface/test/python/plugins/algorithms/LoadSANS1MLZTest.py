@@ -132,14 +132,14 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         os.remove(filename)
 
-    def test_LoadValidData_128_128_mode(self):
+    def test_LoadValidData_matrix_mode(self):
         """
         test: whether the workspace has been created;
         """
         output_ws_name = "LoadSANS1MLZTest_Test8"
         alg_test = run_algorithm("LoadSANS1MLZ",
                                  Filename=self.filename_001,
-                                 Mode='128x128',
+                                 Mode='matrix',
                                  OutputWorkspace=output_ws_name)
 
         self.assertTrue(alg_test.isExecuted())

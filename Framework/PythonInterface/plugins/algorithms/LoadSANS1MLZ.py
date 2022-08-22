@@ -37,7 +37,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         self.declareProperty(name='Mode',
                              defaultValue='vector',
-                             validator=StringListValidator(['vector', '128x128']),
+                             validator=StringListValidator(['vector', 'matrix']),
                              doc='Choose workspace type.')
 
     def PyExec(self):
@@ -70,7 +70,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
                                    DateAndTime(metadata.file.run_end()))
 
-            if workspace_mode != '128x128':
+            if workspace_mode != 'matrix':
                 LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
 
             AddSampleLogMultiple(out_ws,
@@ -88,7 +88,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         """
         self.log().debug('Creation data for workspace started')
 
-        if workspace_mode == '128x128':
+        if workspace_mode == 'matrix':
             n_spec = 128
             data_y = metadata.counts.data
             self._wavelength(metadata)
@@ -178,7 +178,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     @staticmethod
     def create_labels(workspace_mode):
-        if workspace_mode != '128x128':
+        if workspace_mode != 'matrix':
             y_unit = ""
             y_label = "Counts"
             x_unit = "Wavelength"
