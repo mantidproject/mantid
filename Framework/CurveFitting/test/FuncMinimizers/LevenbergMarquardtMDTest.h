@@ -13,7 +13,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Functions/EigenBSpline.h"
+#include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 
 #include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"

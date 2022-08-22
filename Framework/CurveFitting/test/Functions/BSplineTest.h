@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/Functions/EigenBSpline.h"
+#include "MantidCurveFitting/Functions/BSpline.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -7,8 +7,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/Functions/EigenBSpline.h"
 
 #include <algorithm>
 
