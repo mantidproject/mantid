@@ -95,11 +95,9 @@ def setup_inst_object(with_container=False):
 
 
 def _gen_required_files():
-    required_run_files = ["OSIRIS00082717.nxs", "OSIRIS00082718.nxs",  # empty can
-                          "OSIRIS00119963.nxs", "OSIRIS00119964.nxs",  # van
-                          "OSIRIS00119977.nxs", "OSIRIS00119978.nxs"]  # sample
-
-    # Generate file names of form "INSTxxxxx.nxs" - PEARL requires 000 padding
+    required_run_files = ["OSIRIS82717.nxs", "OSIRIS82718.nxs",  # empty can
+                          "OSIRIS119963.nxs", "OSIRIS119964.nxs",  # van
+                          "OSIRIS119977.nxs", "OSIRIS119978.nxs"]  # sample
     input_files = [os.path.join(input_dir, file) for file in required_run_files]
     input_files.append(calibration_map_path)
     return input_files
