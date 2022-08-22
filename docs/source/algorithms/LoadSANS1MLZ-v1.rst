@@ -11,11 +11,24 @@ Description
 
 This algorithm loads raw data files produced by the SANS-1 instrument at MLZ into mantid workspaces.
 
-The loader reads the detector positions from the raw data file and places the detectors accordingly <---What does this mean???
+The loader reads out the detector positions from the instrument definition file (IDF) and places the
+detectors accordingly. The instrument view window can be activated by right clicking on the loaded
+workspace and selecting the "Show Instrument" option (available only in a `vector
+<https://docs.mantidproject.org/nightly/algorithms/LoadSANS1MLZ.html#two-modes-of-loading-data>`_  mode).
 
-The output is a histogram workspace with a unit of wavelength (Angstrom). <--- Aren't the output dependent on the chosen "Mode"?
+Whenever the loader is used in a `vector
+<https://docs.mantidproject.org/nightly/algorithms/LoadSANS1MLZ.html#two-modes-of-loading-data>`_  mode
+then the output is written to a 1D vector-shaped workspace. As a result, the data can be visualised by
+right clicking on the loaded workspace and selecting the "Show Instrument" option, which activates the
+`Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool.
 
-**Example - Loads a raw SANS-1 data file with extension .001.**
+Whenever the loader is used in a `matrix <https://docs.mantidproject.org/nightly/algorithms/LoadSANS1MLZ.html#two-modes-of-loading-data>`_
+mode, then the output is written to a 2D matrix workspace.
+In this case, the data can be visualised by right clicking on the loaded workspace and selecting
+"Show Slice Viewer" or one of the options under the "Plot" menu. At the same time, the "Show Instrument"
+and "Show Detectors" options will not be acessible.
+
+**Example - Loads raw SANS-1 data file with extension .001.**
 
 .. testcode:: ExLoad
 
@@ -29,8 +42,8 @@ Output:
 
     This workspace has 16386 spectra.
 
-The information from all sections of the raw data file is written to SampleLogs. To get access to
-this information you simply need to use the `keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
+The information from all sections of the raw data file is written to Sample Logs. To get access to
+Sample Logs, a user needs to use the `keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
 the key consists of a section's title followed by a dot and the parameter of interest that belongs to that section.
 The most relevant information, such as: position, wavelength, thickness ect. <--- Be specific about etc. is stored in separate variables.
 
@@ -54,8 +67,8 @@ Output:
     DetHAngle is 0.0 degrees.
     Wavelength is 4.9 Angstrom.
 
-2 modes of loading data are implemented in LoadSANS1MLZ:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Two modes of loading data:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Vector mode (default) - counts from the loaded data file are stored as a 1D vector and written to the DataY section;
   DataX contains two columns: 1) wavelength - wavelength_spread and 2) wavelength + wavelength_spread; with this mode workspace has
