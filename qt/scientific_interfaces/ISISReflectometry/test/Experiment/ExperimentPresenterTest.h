@@ -677,6 +677,23 @@ public:
     runTestThatPolarizationCorrectionsAreEnabledForInstrument("CRISP");
   }
 
+  void testNotifyPreviewApplyRequestedUpdatesProcessingInstructions() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setProcessingInstructions(ROIType::Signal, "10");
+    previewRow.setProcessingInstructions(ROIType::Background, "11");
+    previewRow.setProcessingInstructions(ROIType::Transmission, "12");
+    previewRow.setTheta(2.3);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
@@ -721,11 +738,14 @@ private:
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
+  std::unique_ptr<IExperimentOptionDefaults> makeDefaults() { return std::make_unique<MockExperimentOptionDefaults>(); }
+
   ExperimentPresenter makePresenter(
-      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>()) {
+      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>(),
+      Experiment experiment = makeEmptyExperiment()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter = ExperimentPresenter(&m_view, makeEmptyExperiment(), m_thetaTolerance, std::move(defaultOptions));
+    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
