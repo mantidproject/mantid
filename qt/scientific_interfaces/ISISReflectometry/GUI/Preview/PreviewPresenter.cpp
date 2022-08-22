@@ -106,7 +106,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   }
 
   if (hasLinearDetector(ws)) {
-    // TODO clear instrument view
+    m_view->resetInstView();
     m_model->setSummedWs(ws);
     notifySumBanksCompleted();
   } else {

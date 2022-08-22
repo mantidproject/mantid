@@ -25,8 +25,8 @@ using MantidQt::MantidWidgets::ProjectionSurface;
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_ui.setupUi(this);
-  m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
 
+  resetInstView();
   loadToolbarIcons();
   setupSelectRegionTypes();
   connectSignals();
@@ -117,6 +117,14 @@ void QtPreviewView::onApplyClicked() const { m_notifyee->notifyApplyRequested();
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
 double QtPreviewView::getAngle() const { return m_ui.angle_spin_box->value(); }
+
+void QtPreviewView::resetInstView() {
+  if (m_instDisplay) {
+    // Destruct the previous instance
+    m_instDisplay = nullptr;
+  }
+  m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
+}
 
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   // We need to recreate the surface so disconnect any existing signals first
