@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -692,6 +693,33 @@ public:
     TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
     TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
     TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+  }
+
+  void testNotifyPreviewApplyRequestedUpdatesProcessingInstructionsWithoutBackground() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    // The lookup row with angle 0.5 has background processing instructions set to boost::none
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setProcessingInstructions(ROIType::Signal, "10");
+    previewRow.setProcessingInstructions(ROIType::Transmission, "12");
+    previewRow.setTheta(0.5);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 0.5 is the second row in the look-up table
+    auto row = presenter.experiment().lookupTableRows()[1];
+    TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions(), boost::none);
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+  }
+
+  void testNotifyPreviewApplyRequestedMatchingRowNotFound() {
+    // makeExperimentWithValidDuplicateCriteria will create a model Experiment with two lookup rows and no wildcard
+    auto presenter = makePresenter(makeDefaults(), makeExperimentWithValidDuplicateCriteria());
+    auto previewRow = PreviewRow({"1234"});
+    // This angle doesn't match any in the experiment lookup table
+    previewRow.setTheta(10);
+
+    TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), RowNotFoundException const &);
   }
 
 private:
