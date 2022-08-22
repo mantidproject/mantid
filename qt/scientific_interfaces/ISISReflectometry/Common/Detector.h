@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-bool hasLinearDetector(Mantid::API::MatrixWorkspace_sptr &ws);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool hasLinearDetector(Mantid::API::MatrixWorkspace_sptr &ws);
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
