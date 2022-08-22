@@ -35,7 +35,7 @@ class DtClsSANS:
 
     def get_values_dict(self):
         """
-        :return: dictionary with main variables of helper class
+        :return: dictionary with the most relevant variables of helper class
         """
         values = asdict(self)
         del values['section_name']
@@ -123,7 +123,7 @@ class SetupSANS(DtClsSANS):
 
     def _assign_values(self):
         """
-        one of the methods to add avariable with unique name
+        one of the methods to add a variable with unique name
         """
         super()._assign_values()
         self._assign_value('Lambda', 'wavelength')
@@ -296,7 +296,7 @@ class SANSdata:
         # lines below won't work properly
         # Better to introduce a parameter n_columns and
         # use data_x = np.zeros(n_columns * n_spec), etc
-        # Should these comments be removed?
+        # To be resolved when the TOF mode has been implemented.
         if wavelength is None:
             wavelength = self.setup.wavelength
         data_x = np.zeros(2 * self.spectrum_amount())
@@ -343,7 +343,8 @@ class SANSdata:
             pass
         else:
             if file_type != '002':
-                self.logs['warning'].append(f"File type is not as expected. Algorithm will try to process the file as with extension .002.")
+                self.logs['warning'].append(f"File type is not as expected. "
+                                            f"Algorithm will try to process the file as with extension .002.")
             self.counts.data_type = '002'
             self._subsequence = [self.file, self.sample, self.setup,
                                  self.history, self.counts, self.errors]
@@ -390,7 +391,8 @@ class SANSdata:
             self.logs['warning'].append(f"SD ('sample detector distance') is not specified in the datafile.")
 
         if (type(self.setup.wavelength) is str) or (self.setup.wavelength == 0.0):
-            self.logs['warning'].append(f"Lambda (wavelength) is not specified in the datafile. Wavelength is set to user's input.")
+            self.logs['warning'].append(f"Lambda (wavelength) is not specified in the datafile."
+                                        f" Wavelength is set to user's input.")
 
         if self.file.type == '001':
             if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
@@ -403,4 +405,4 @@ class SANSdata:
                 self.logs['warning'].append(f"Monitor2 is not specified in the datafile. Monitor2 is set to 'None'.")
 
             if (self.counter.monitor1 is None) or (self.counter.monitor1 == 0.0):
-                self.logs['warning'].append(f"Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")
+                self.logs['notice'].append(f"Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")
