@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS File selector Presenter - Tab of DNS Reduction GUI.
+DNS file selector tab presenter of DNS Reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
@@ -14,6 +14,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
 
 
 class DNSFileSelectorPresenter(DNSObserver):
+
     def __init__(self,
                  name=None,
                  parent=None,
@@ -271,10 +272,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.hide_tof(hidden='_tof' not in self.modus)
 
     def process_commandline_request(self, command_dict):
-        start = int(command_dict['files'][0]['ffnmb'])
-        end = int(command_dict['files'][0]['lfnmb'])
+        start = int(command_dict['files'][0]['start'])
+        end = int(command_dict['files'][0]['end'])
         self._read_all(filtered=True, start=start, end=end)
-        self.model.check_fn_range(start, end)
+        self.model.check_file_number_range(start, end)
 
     def _expanded(self):
         self.num_columns = self.model.get_active_model_column_count()

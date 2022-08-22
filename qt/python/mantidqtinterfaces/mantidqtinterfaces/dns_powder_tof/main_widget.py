@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS GUI Main widget.
+DNS GUI main widget.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
@@ -20,8 +20,9 @@ from mantidqtinterfaces.dns_powder_tof.parameter_abo import ParameterAbo
 
 class DNSReductionGuiWidget(DNSWidget):
     """
-    Main DNS Gui widget, host, view, presenter, model.
+    Main DNS GUI widget, host, view, presenter, model.
     """
+
     def __init__(self, name=None, parent=None, app=None, within_mantid=None):
         super().__init__(name, parent)
         self.name = name

@@ -22,8 +22,9 @@ from qtpy.QtCore import QProcess
 class DNSReductionGUIView(QMainWindow):
     # pylint: disable=too-many-instance-attributes
     """
-    Main View for DNS reduction GUI.
+    Main view for DNS reduction GUI.
     """
+
     def __init__(self, parent=None, app=None, within_mantid=None):
         QMainWindow.__init__(self, parent=None)
         self.parent = parent

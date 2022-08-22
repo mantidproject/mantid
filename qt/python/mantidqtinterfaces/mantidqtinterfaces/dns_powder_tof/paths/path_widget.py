@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Path widget
+DNS path widget.
 """
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import DNSWidget
 from mantidqtinterfaces.dns_powder_tof.paths.path_model import DNSPathModel
 from mantidqtinterfaces.dns_powder_tof.paths.path_presenter import DNSPathPresenter

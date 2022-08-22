@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Common Presenter for DNS Script generators
+Common model for DNS script generators.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import DNSError
@@ -15,7 +16,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (create_di
 
 class DNSScriptGeneratorModel(DNSObsModel):
     """
-    Common Model for DNS Script generators
+    Common model for DNS script generators.
     """
 
     def __init__(self, parent):
@@ -35,8 +36,8 @@ class DNSScriptGeneratorModel(DNSObsModel):
         for i, line in enumerate(script):
             try:
                 exec(line)  # pylint: disable=exec-used
-            except DNSError as errormessage:
-                return str(errormessage)
+            except DNSError as error_message:
+                return str(error_message)
             self._update_progress(i)
             if self._progress_is_canceled:
                 return 'Warning script execution stopped, no valid data.'
@@ -47,24 +48,23 @@ class DNSScriptGeneratorModel(DNSObsModel):
 
     def script_maker(self, _options, _paths, _file_selector):
         """
-        Generation of a Mantid script to reduce DNS data
+        Generation of a Mantid script to reduce DNS data.
         """
         self._script = [""]
         error = ''
         return self._script, error
 
     # helper functions:
-
     @staticmethod
-    def get_auto_scriptname(fulldata):
-        sample_name = fulldata[0]['sample_name'].strip('_.')
-        file_numbers = [x['file_number'] for x in fulldata]
+    def get_auto_script_name(full_data):
+        sample_name = full_data[0]['sample_name'].strip('_.')
+        file_numbers = [x['file_number'] for x in full_data]
         return f"script_{sample_name}_from_{min(file_numbers)}" \
                f"_to_{max(file_numbers)}.py"
 
-    def get_filename(self, filename, fulldata, auto=False):
+    def get_filename(self, filename, full_data, auto=False):
         if auto:
-            return self.get_auto_scriptname(fulldata)
+            return self.get_auto_script_name(full_data)
         if filename:
             if not filename.endswith('.py'):
                 filename = ''.join((filename, '.py'))

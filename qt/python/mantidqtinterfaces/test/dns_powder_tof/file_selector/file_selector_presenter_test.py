@@ -372,10 +372,10 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
            'presenter.'
            'DNSFileSelectorPresenter._read_all')
     def test_process_commandline_request(self, mock_read):
-        command_dict = {'files': [{'ffnmb': 0, 'lfnmb': 10}]}
+        command_dict = {'files': [{'start': 0, 'end': 10}]}
         self.presenter.process_commandline_request(command_dict)
         mock_read.assert_called_once_with(filtered=True, start=0, end=10)
-        self.model.check_fn_range.assert_called_once_with(0, 10)
+        self.model.check_file_number_range.assert_called_once_with(0, 10)
 
 
 if __name__ == '__main__':

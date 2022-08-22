@@ -16,14 +16,15 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (load_txt,
 
 class DNSFile(ObjectDict):
     """
-    Class for reading, writing and storing data of a single dns datafile.
+    Class for reading, writing and storing data of a single DNS datafile.
     This is a dictionary, but can also be accessed like attributes.
     """
-    def __init__(self, datapath, filename):
-        super().__init__()
-        self.new_format = self.read(datapath, filename)
 
-    def write(self, datapath, filename):
+    def __init__(self, data_path, filename):
+        super().__init__()
+        self.new_format = self.read(data_path, filename)
+
+    def write(self, data_path, filename):
         # mostly stolen form nicos
         txt = ''
         separator = "#" + "-" * 74 + "\n"
@@ -147,10 +148,10 @@ class DNSFile(ObjectDict):
                 txt += f" {0:8d}"
             txt += "\n"
         txt = ''.join([line.rstrip() + '\n' for line in txt.splitlines()])
-        save_txt(txt, filename, datapath)
+        save_txt(txt, filename, data_path)
 
-    def read(self, datapath, filename):
-        txt = load_txt(filename, datapath)
+    def read(self, data_path, filename):
+        txt = load_txt(filename, data_path)
         if len(txt) < 138 or not txt[0].startswith('# DNS Data'):
             del txt
             return False

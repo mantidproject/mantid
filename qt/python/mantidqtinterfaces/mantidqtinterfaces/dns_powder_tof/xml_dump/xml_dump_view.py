@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS XML dump view.
+DNS xml dump view.
 """
 
 import platform
@@ -29,7 +29,6 @@ class DNSXMLDumpView(DNSView):
     """
     Widget that lets user save or load data reduction xml files.
     """
-    # Widget name
     name = "XmlDump"
     HAS_TAB = False
 

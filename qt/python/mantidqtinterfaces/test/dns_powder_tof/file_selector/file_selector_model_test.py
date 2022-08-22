@@ -276,7 +276,7 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         'DNSFile')
     def test_load_file_from_cache_or_new(self, mock_dnsfile):
         filename = get2files()[0]
-        # datapath = self.filepath
+        # data_path = self.filepath
         mydict = {filename: dns_file('a', filename)}
         testv = self.model._load_file_from_chache_or_new(mydict, filename, 'a')
         mock_dnsfile.assert_not_called()

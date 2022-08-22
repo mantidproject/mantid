@@ -6,16 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Observer Class, they share a common data model DNSReductionGui_model
-and are updated by DNSReductionGui_presenter.
+Model for DNS observer.
 """
 
 
 class DNSObsModel:
-    """
-    Defines a model for DNS Observers.
-    """
-
     def __init__(self, parent):
         super().__init__()
         self.parent = parent

@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Path Configuration Widget = View - Tab of DNS Reduction GUI
+DNS common script generator view of DNS reduction GUI.
 """
+
 from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtWidgets import QProgressDialog
@@ -15,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSScriptGeneratorView(DNSView):
     """
-        Common Widget for DNS Script generator, shows mantid script
+    Common view for DNS script generator, shows mantid script.
     """
     NAME = "Script Generator"
 
@@ -34,14 +36,13 @@ class DNSScriptGeneratorView(DNSView):
         # self connect signals
         self._map['generate_script'].clicked.connect(self._generate_script)
         self._map['copy_script'].clicked.connect(self._copy_to_clip)
-        self._map['automatic_filename'].stateChanged.connect(self._autom)
+        self._map['automatic_filename'].stateChanged.connect(self._auto_filename)
 
-    # Signals
-
+    # signals
     sig_generate_script = Signal()
     sig_progress_canceled = Signal()
 
-    def _autom(self, on):
+    def _auto_filename(self, on):
         self._map['script_filename'].setReadOnly(on)
 
     def _copy_to_clip(self):
@@ -57,9 +58,9 @@ class DNSScriptGeneratorView(DNSView):
     def _progress_canceled(self):
         self.sig_progress_canceled.emit()
 
-    def open_progress_dialog(self, numberofsteps):
+    def open_progress_dialog(self, number_of_steps):
         self.progress = QProgressDialog("Script running please wait",
-                                        "Abort Loading", 0, numberofsteps)
+                                        "Abort Loading", 0, number_of_steps)
         self.progress.setWindowModality(Qt.WindowModal)
         self.progress.setMinimumDuration(200)
         self.progress.open(self._progress_canceled)
@@ -70,13 +71,13 @@ class DNSScriptGeneratorView(DNSView):
     def set_progress(self, step):
         self.progress.setValue(step)
 
-    def set_script_output(self, scripttext):
-        self._map['script_output'].setPlainText(scripttext)
+    def set_script_output(self, script_text):
+        self._map['script_output'].setPlainText(script_text)
 
     def set_state(self, state_dict):
         """
-        sets the gui state from a dictionary containing the shortnames of
-        the widgets as keys and the values
+        Sets the GUI state from a dictionary containing the shortnames of
+        the widgets as keys and the values.
         """
         self.set_script_output(state_dict.get('script_text', ''))
         for key, target_object in self._map.items():

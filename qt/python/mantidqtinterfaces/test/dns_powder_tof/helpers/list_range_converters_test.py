@@ -8,7 +8,7 @@
 import unittest
 
 from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import (
-    get_normation, list_to_multirange, list_to_range)
+    get_normalisation, list_to_multirange, list_to_range)
 
 
 class list_range_convertersTest(unittest.TestCase):
@@ -33,11 +33,11 @@ class list_range_convertersTest(unittest.TestCase):
             ' + [*range(20, 27, 1)]')
 
     def test_get_normation(self):
-        testv = get_normation({'norm_monitor': True})
+        testv = get_normalisation({'norm_monitor': True})
         self.assertEqual(testv, 'monitor')
-        testv = get_normation({'norm_monitor': False})
+        testv = get_normalisation({'norm_monitor': False})
         self.assertEqual(testv, 'time')
-        testv = get_normation({})
+        testv = get_normalisation({})
         self.assertEqual(testv, 'time')
 
 

@@ -140,21 +140,21 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
 
     def test_get_vanastring(self):
         self.model._vana_cor = False
-        self.assertEqual(self.model._get_vanastring(), '')
+        self.assertEqual(self.model._get_vana_string(), '')
         self.model._vana_cor = True
-        self.assertEqual(self.model._get_vanastring()[10:20], " 'vana_tem")
+        self.assertEqual(self.model._get_vana_string()[10:20], " 'vana_tem")
 
     def test_get_backstring(self):
         self.model._bg_cor = False
-        self.assertEqual(self.model._get_backstring(), '')
+        self.assertEqual(self.model._get_back_string(), '')
         self.model._bg_cor = True
-        self.assertEqual(self.model._get_backstring()[10:20], " 'ecVanaFa")
+        self.assertEqual(self.model._get_back_string()[10:20], " 'ecVanaFa")
 
     def test_get_backtofstring(self):
         self.model._bg_cor = False
-        self.assertEqual(self.model._get_backtofstring(), '')
+        self.assertEqual(self.model._get_back_tof_string(), '')
         self.model._bg_cor = True
-        self.assertEqual(self.model._get_backtofstring()[10:20], " 'ecSample")
+        self.assertEqual(self.model._get_back_tof_string()[10:20], " 'ecSample")
 
     def test_get_parameter_lines(self):
         self.model._bg_cor = True
@@ -222,12 +222,12 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
 
     def test_get_normation_lines(self):
         self.model._tof_opt['norm_monitor'] = 0
-        testv = self.model._get_normation_lines()
+        testv = self.model._get_normalisation_lines()
         self.assertIsInstance(testv, list)
         self.assertEqual(len(testv), 1)
         self.assertEqual(testv, ['data1 = mtd["raw_data1"]'])
         self.model._tof_opt['norm_monitor'] = 1
-        testv = self.model._get_normation_lines()
+        testv = self.model._get_normalisation_lines()
         self.assertEqual(len(testv), 2)
         self.assertEqual(testv[0], '# normalize')
 
@@ -303,20 +303,20 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
     def test_get_bad_detec_lines(self):
         self.model._nb_vana_banks = 1
         self.model._nb_banks = 5
-        testv = self.model._get_bad_detec_lines()
+        testv = self.model._get_bad_det_lines()
         self.assertIsInstance(testv, list)
         self.assertIsInstance(testv[0], str)
         self.assertEqual(len(testv), 1)
         self.assertEqual(testv[0][33:41], 'coefs.ex')
         self.model._nb_vana_banks = 5
-        testv = self.model._get_bad_detec_lines()
+        testv = self.model._get_bad_det_lines()
         self.assertIsInstance(testv, list)
         self.assertIsInstance(testv[0], str)
         self.assertEqual(len(testv), 1)
         self.assertEqual(testv[0][33:41], 'coefs[0]')
         self.model._nb_vana_banks = 1
         self.model._nb_banks = 1
-        testv = self.model._get_bad_detec_lines()
+        testv = self.model._get_bad_det_lines()
         self.assertEqual(testv[0][33:41], 'coefs[0]')
         self.model._nb_banks = 5
 
@@ -324,9 +324,9 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
         self.model._nb_vana_banks = 1
         self.model._nb_banks = 5
         self.model._tof_opt['mask_bad_detectors'] = 0
-        self.assertEqual(self.model._get_mask_detec_lines(), [''])
+        self.assertEqual(self.model._get_mask_det_lines(), [''])
         self.model._tof_opt['mask_bad_detectors'] = 1
-        testv = self.model._get_mask_detec_lines()
+        testv = self.model._get_mask_det_lines()
         self.assertIsInstance(testv, list)
         self.assertEqual(len(testv), 5)
         self.assertEqual(testv[0], '# get list of bad detectors')
@@ -365,7 +365,7 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertIsInstance(testv, list)
         self.assertIsInstance(testv[0], str)
         self.assertEqual(len(testv), 5)
-        teststring = "convert_to_d_e('data1', Ei)"
+        teststring = "convert_to_de('data1', Ei)"
         self.assertEqual(testv[1], teststring)
 
     def test_get_save_lines(self):

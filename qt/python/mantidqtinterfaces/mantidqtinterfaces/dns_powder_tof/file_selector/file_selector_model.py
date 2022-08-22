@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Presenter for dns path panel.
+Presenter for DNS path panel.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_file import DNSFile
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treemodel import DNSTreeModel
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treemodel import DNSTreeModel, \
+    TreeItemEnum
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
     filter_filenames, load_txt, open_editor, return_filelist, save_txt,
@@ -136,21 +137,21 @@ class DNSFileSelectorModel(DNSObsModel):
                 data = line[0:-1].split(' ; ')
                 if len(data) < 15:
                     continue
-                dns_file.file_number = data[0]
-                dns_file.det_rot = float(data[1])
-                dns_file.sample_rot = float(data[2])
-                dns_file.field = data[3]
-                dns_file.temp_samp = float(data[4])
-                dns_file.sample = data[5]
-                dns_file.end_time = data[6]
-                dns_file.tof_channels = int(data[7])
-                dns_file.channel_width = float(data[8])
-                dns_file.filename = data[9]
-                dns_file.wavelength = float(data[10])
-                dns_file.selector_speed = float(data[11])
-                dns_file.scan_number = data[12]
-                dns_file.scan_command = data[13]
-                dns_file.scan_points = data[14]
+                dns_file.file_number = data[TreeItemEnum.number.value]
+                dns_file.det_rot = float(data[TreeItemEnum.det_rot.value])
+                dns_file.sample_rot = float(data[TreeItemEnum.sample_rot.value])
+                dns_file.field = data[TreeItemEnum.field.value]
+                dns_file.temp_sample = float(data[TreeItemEnum.temperature.value])
+                dns_file.sample = data[TreeItemEnum.sample.value]
+                dns_file.end_time = data[TreeItemEnum.time.value]
+                dns_file.tof_channels = int(data[TreeItemEnum.tof_channels.value])
+                dns_file.channel_width = float(data[TreeItemEnum.tof_channel_width.value])
+                dns_file.filename = data[TreeItemEnum.filename.value]
+                dns_file.wavelength = float(data[TreeItemEnum.wavelength.value])
+                dns_file.selector_speed = float(data[TreeItemEnum.selector_speed.value])
+                dns_file.scan_number = data[TreeItemEnum.scan_number.value]
+                dns_file.scan_command = data[TreeItemEnum.scan_command.value]
+                dns_file.scan_points = data[TreeItemEnum.scan_points.value]
                 dns_file.new_format = True
                 loaded[dns_file.filename] = dns_file
         except IndexError:
@@ -192,8 +193,8 @@ class DNSFileSelectorModel(DNSObsModel):
                 not_found += 1
         return not_found
 
-    def check_fn_range(self, ffnmb, lfnmb):
-        self.tree_model.check_fn_range(ffnmb, lfnmb)
+    def check_file_number_range(self, start, end):
+        self.tree_model.check_fn_range(start, end)
 
     def set_loading_canceled(self, canceled=True):
         self.loading_canceled = canceled

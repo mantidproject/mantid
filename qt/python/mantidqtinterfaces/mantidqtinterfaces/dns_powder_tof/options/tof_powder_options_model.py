@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-DNS TOF powder Options Presenter - Tab of DNS Reduction GUI
+DNS powder TOF options tab model of DNS Reduction GUI
 """
 
 from mantidqtinterfaces.dns_powder_tof.helpers.converters import (

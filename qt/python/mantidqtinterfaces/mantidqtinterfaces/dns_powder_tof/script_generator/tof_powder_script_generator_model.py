@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script generator for TOF powder data
+DNS script generator model for powder TOF data.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_tof_powder_dataset \
@@ -16,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_
 
 class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     # pylint: disable=too-many-instance-attributes
-    # having the options as instance attribues, is much better readable
+    # having the options as instance attributes, is much better readable
     # none of them are public
     def __init__(self, parent):
         super().__init__(parent)
@@ -56,40 +57,40 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             return 'Bin sizes make no sense.'
         if not self._validate_nb_vana_banks():
             return ('No vanadium files selected, but '
-                    'Vanadium correction option choosen.')
+                    'Vanadium correction option chosen.')
         if not self._validate_nb_empty_banks():
             return ('No Background files selected, but background'
-                    ' subtraction option choosen.')
+                    ' subtraction option chosen.')
         return ''
 
-    def _get_vanastring(self):
+    def _get_vana_string(self):
         if self._vana_cor:
             return (f"\n          'vana_temperature' : "
                     f"{self._tof_opt['vanadium_temperature']},")
         return ''
 
-    def _get_backstring(self):
+    def _get_back_string(self):
         if self._bg_cor:
             return ("\n          'ecVanaFactor'     : "
                     f"{self._tof_opt['vana_back_factor']},")
         return ''
 
-    def _get_backtofstring(self):
+    def _get_back_tof_string(self):
         if self._bg_cor:
             return ("\n          'ecSampleFactor'   : "
                     f"{self._tof_opt['sample_back_factor']},")
         return ''
 
     def _get_parameter_lines(self):
-        backstring = self._get_backstring()
-        vanastring = self._get_vanastring()
-        backtofstring = self._get_backtofstring()
+        back_string = self._get_back_string()
+        vana_string = self._get_vana_string()
+        back_tof_string = self._get_back_tof_string()
         return [
             f"params = {{ 'e_channel'        : {self._tof_opt['epp_channel']}"
             f", "
             f"\n          'wavelength'       : {self._tof_opt['wavelength']},"
             f"\n          'delete_raw'       : {self._tof_opt['delete_raw']},"
-            f"{vanastring}{backstring}{backtofstring} }}", ''
+            f"{vana_string}{back_string}{back_tof_string} }}", ''
         ]
 
     def _get_binning_lines(self):
@@ -148,7 +149,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         lines += ['']
         return lines
 
-    def _get_normation_lines(self):
+    def _get_normalisation_lines(self):
         if self._tof_opt['norm_monitor']:
             return [
                 '# normalize', 'data1 = MonitorEfficiencyCorUser("raw_data1")'
@@ -200,7 +201,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             ]
         return []
 
-    def _get_bad_detec_lines(self):
+    def _get_bad_det_lines(self):
         if self._nb_vana_banks > 1 or self._nb_vana_banks == self._nb_banks:
             return [
                 'badDetectors = np.where(np.array(coefs[0]'
@@ -211,10 +212,10 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             '.flatten() <= 0)[0]'
         ]
 
-    def _get_mask_detec_lines(self):
+    def _get_mask_det_lines(self):
         if self._tof_opt['mask_bad_detectors']:
             lines = ['# get list of bad detectors']
-            lines += self._get_bad_detec_lines()
+            lines += self._get_bad_det_lines()
             lines += [
                 'print("Following detectors will be masked: ",'
                 'badDetectors)',
@@ -236,7 +237,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             lines += self._get_vana_ec_subst_lines()
             lines += self._get_only_one_vana_lines()
             lines += self._get_epp_and_coef_lines()
-            lines += self._get_mask_detec_lines()
+            lines += self._get_mask_det_lines()
             lines += self._get_det_eff_cor_lines()
             lines += self._get_corr_epp_lines()
             return lines
@@ -259,8 +260,8 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_save_lines(self, paths):
         lines = []
-        sascii, nexus = self._check_if_to_save(paths)
-        if sascii:
+        ascii, nexus = self._check_if_to_save(paths)
+        if ascii:
             lines += [
                 "SaveAscii('data1_dE_S', '"
                 f"{paths['export_dir']}"
@@ -277,11 +278,11 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     @staticmethod
     def _check_if_to_save(paths):
-        sascii = (paths["ascii"] and paths["export"]
+        ascii = (paths["ascii"] and paths["export"]
                   and bool(paths["export_dir"]))
         nexus = (paths["nexus"] and paths["export"]
                  and bool(paths["export_dir"]))
-        return [sascii, nexus]
+        return [ascii, nexus]
 
     def _setup_sample_data(self, paths, file_selector):
         self._sample_data = DNSTofDataset(data=file_selector['full_data'],
@@ -317,14 +318,14 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         if error:
             return [''], error
 
-        # startin wrting script
+        # start writing script
         self._add_lines_to_script(self._get_header_lines())
         self._add_lines_to_script(self._get_sample_data_lines())
         self._add_lines_to_script(self._get_standard_data_lines())
         self._add_lines_to_script(self._get_parameter_lines())
         self._add_lines_to_script(self._get_binning_lines())
         self._add_lines_to_script(self._get_load_data_lines())
-        self._add_lines_to_script(self._get_normation_lines())
+        self._add_lines_to_script(self._get_normalisation_lines())
         self._add_lines_to_script(self._get_subtract_empty_lines())
         self._add_lines_to_script(self._get_vana_lines())
         self._add_lines_to_script(self._get_energy_print_lines())

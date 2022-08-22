@@ -21,6 +21,7 @@ class ParameterAbo:
     unique string and a method update which can get information from the gui
     parameters. They react on .get_option_dict() calls.
     """
+
     def __init__(self):
         self.observers = []  # we keep it as list since order is important
         self.gui_parameter = OrderedDict()  # ordered dictionary

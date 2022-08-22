@@ -68,9 +68,9 @@ class DNSXMLDumpModelTest(unittest.TestCase):
         self.assertEqual(testv, 'test')
 
     def test_dict_elm_to_xml(self):
-        testv = self.model._dict_elm_to_xml({})
+        testv = self.model._dict_element_to_xml({})
         self.assertIsInstance(testv, etree.Element)
-        testv = self.model._dict_elm_to_xml(self.testdic)
+        testv = self.model._dict_element_to_xml(self.testdic)
         self.assertIsInstance(testv, etree.Element)
         self.assertIsInstance(testv[0], etree.Element)
         self.assertIsInstance(testv[1], etree.Element)
@@ -83,16 +83,16 @@ class DNSXMLDumpModelTest(unittest.TestCase):
     @patch('mantidqtinterfaces.dns_powder_tof.xml_dump.'
            'xml_dump_model.save_txt')
     def test_dic_to_xml_file(self, mock_savetxt):
-        self.model.dic_to_xml_file(self.testdic, 'test.xml', {'mv': 1.0})
+        self.model.dict_to_xml_file(self.testdic, 'test.xml', {'mv': 1.0})
         mock_savetxt.assert_called_once()
         mock_savetxt.reset_mock()
-        self.model.dic_to_xml_file(self.testdic, '', {'mv': 1.0})
+        self.model.dict_to_xml_file(self.testdic, '', {'mv': 1.0})
         mock_savetxt.assert_not_called()
 
     def test_dictionary_to_xml_string(self):
         # this is not really a unittest, since it tests also if etree
         # returns right stuff
-        testv = self.model._dictionary_to_xml_string(self.testdic)
+        testv = self.model._dict_to_xml_string(self.testdic)
         teststr = ('<?xml version="1.0" ?>\n<document>\n  <a type="int">1'
                    '</a>\n  <c>\n    <c1 type="float">1.1</c1>\n    <c2 t'
                    'ype="float">2.2</c2>\n  </c>\n</document>\n')
@@ -124,12 +124,12 @@ class DNSXMLDumpModelTest(unittest.TestCase):
         self.assertFalse(testv)
 
     def test_check_instrument_name(self):
-        tree = self.model._dict_elm_to_xml(
+        tree = self.model._dict_element_to_xml(
             {'header': {
                 'instrument_name': 'DNS'
             }})
         self.assertTrue(self.model._check_instrument_name(tree))
-        tree = self.model._dict_elm_to_xml(
+        tree = self.model._dict_element_to_xml(
             {'header': {
                 'instrument_name': 'MLZ'
             }})
@@ -139,7 +139,7 @@ class DNSXMLDumpModelTest(unittest.TestCase):
         self.assertIsNone(self.model.xml_file_to_dict(''))
 
     def test_xml_to_dict(self):
-        tree = self.model._dict_elm_to_xml(self.testdic)
+        tree = self.model._dict_element_to_xml(self.testdic)
         testv = self.model._xml_to_dict(tree, {})
         self.assertEqual(
             testv, {

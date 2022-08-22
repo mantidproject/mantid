@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Path Configuration Widget = View - Tab of DNS Reduction GUI
+DNS powder TOF plotting tab of DNS reduction GUI.
 """
 
 import numpy as np
@@ -16,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
 class DNSTofPowderPlotView(DNSView):
     """
-        Widget for basic plotting of DNS powder TOF data
+    Widget for basic plotting of DNS powder TOF data.
     """
     NAME = 'Plotting'
 

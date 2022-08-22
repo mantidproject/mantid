@@ -6,15 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Custom Tree Item for DNS which is either a Scan or a File in DnsTreeModel.
+Custom tree item for DNS which is either a scan or a file in DnsTreeModel.
 """
 
 
 class DNSTreeItem:
     """
-    Custom Tree Item Class for DNS which is either a Scan
-    or a File in DnsTreeModel.
+    Custom tree item class for DNS, which is either a scan
+    or a file in DNSTreeModel.
     """
+
     def __init__(self, data, parent=None, checked=0):
         self.parent_item = parent
         self.item_data = data
@@ -54,9 +55,9 @@ class DNSTreeItem:
             return self.item_data
 
     def get_sample(self):
-        if self.hasChildren():  # if its a scan get sample from first datafile
-            return self.child(0).data(5)
-        return self.data(5)
+        if self.hasChildren():  # if it's a scan, get sample from the first datafile
+            return self.child(0).get_tree_item_data(TreeItemEnum.sample.value)
+        return self.get_tree_item_data(TreeItemEnum.sample.value)
 
     def get_sample_type(self):
         sample = self.get_sample()
@@ -90,3 +91,21 @@ class DNSTreeItem:
 
     def setData(self, data, column):
         self.item_data[column] = data
+
+
+class TreeItemEnum(Enum):
+    number = 0
+    det_rot = 1
+    sample_rot = 2
+    field = 3
+    temperature = 4
+    sample = 5
+    time = 6
+    tof_channels = 7
+    tof_channel_width = 8
+    filename = 9
+    wavelength = 10
+    selector_speed = 11
+    scan_number = 12
+    scan_command = 13
+    scan_points = 14

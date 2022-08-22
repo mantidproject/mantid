@@ -109,7 +109,7 @@ class DNSTofDatasetTest(unittest.TestCase):
     def test__get_datapath(self):
         entry = self.fulldata[0]
         path = '123'
-        testv = dns_tof_powder_dataset._get_datapath(entry, path)
+        testv = dns_tof_powder_dataset._get_data_path(entry, path)
         self.assertEqual(testv, os.path.join('123', 'service'))
 
     def test__convert_list_to_range(self):

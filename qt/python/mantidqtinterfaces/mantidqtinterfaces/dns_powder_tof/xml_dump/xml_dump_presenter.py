@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
- dns xml data dump presenter
+DNS xml data dump presenter.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
@@ -13,6 +14,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
 
 
 class DNSXMLDumpPresenter(DNSObserver):
+
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.last_filename = None
@@ -33,7 +35,7 @@ class DNSXMLDumpPresenter(DNSObserver):
         if xml_file_path:
             xml_header = self.view.get_file_header()
             options = self.param_dict
-            self.model.dic_to_xml_file(options, xml_file_path, xml_header)
+            self.model.dict_to_xml_file(options, xml_file_path, xml_header)
             self.last_filename = xml_file_path
             self.view.show_status_message(f'Saved as {xml_file_path}', 30)
         return xml_file_path
@@ -45,7 +47,7 @@ class DNSXMLDumpPresenter(DNSObserver):
         if self.last_filename is not None:
             xml_header = self.view.get_file_header()
             options = self.param_dict
-            self.model.dic_to_xml_file(options, self.last_filename, xml_header)
+            self.model.dict_to_xml_file(options, self.last_filename, xml_header)
             self.view.show_status_message(
                 f'Saved as {self.last_filename}', 30)
         else:

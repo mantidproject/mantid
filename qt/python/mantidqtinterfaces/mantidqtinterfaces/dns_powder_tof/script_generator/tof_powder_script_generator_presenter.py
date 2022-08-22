@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script generator for TOF powder data
+DNS script generator presenter for powder TOF data.
 """
 
 from mantidqtinterfaces.dns_powder_tof.script_generator.\

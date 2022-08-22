@@ -6,21 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Observer Class, they share a common data model DNSReductionGui_model
-and are updated by DNSReductionGui_presenter.
+DNS observer class. Observers share a common data model and are updated
+by presenter objects.
 """
 
 from collections import OrderedDict
 
 
-class DNSObserver():
+class DNSObserver:
     # pylint: disable=too-many-instance-attributes
     """
-    Common class definition for DNS Observers,
-    they have their own parameter dictionary and can have a view and a model,
-    its parent is the widget,
-    they are the only ones which communicate with their view and model
-    which are DI to them by the widget.
+    Common class definition for DNS Observers. All presenter classes are
+    children of the DNSObserver class. Each presenter class has its own
+    parameter dictionary and can have a view and a model. Presenters are
+    the only ones who communicate with their view and model through their
+    parent DNSWidget class. The latter provides the dependency injection
+    of view and model to the presenter.
     """
 
     def __init__(self, parent=None, name=None, view=None, model=None):
@@ -29,7 +30,17 @@ class DNSObserver():
         self.parent = parent
         self.view = view
         self.model = model
+        # the keys of the parameter dictionary will be filled with
+        # strings, each representing a unique presenter class.
+        # The values of the parameter dictionary will be filled with
+        # parameters (and their values) of the respective presenter.
+        # As a result param_dict will contain all info on the GUI's
+        # state.
         self.param_dict = OrderedDict()
+        # the keys of the own dictionary will be filled with
+        # strings, each representing a unique parameter inside a
+        # presenter. The values will represent the respective
+        # values corresponding to these parameters.
         self.own_dict = OrderedDict()
         self.modus = ''
         self.request_from_abo = None
@@ -59,8 +70,8 @@ class DNSObserver():
             self.own_dict.update(self.view.get_state())
         return self.own_dict
 
-    def raise_error(self, message, critical=False, info=False, doraise=True):
-        if doraise:
+    def raise_error(self, message, critical=False, info=False, do_raise=True):
+        if do_raise:
             self.view.raise_error(message, critical, info)
 
     def process_request(self):

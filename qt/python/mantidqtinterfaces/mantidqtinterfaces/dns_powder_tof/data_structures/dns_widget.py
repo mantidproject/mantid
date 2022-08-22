@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Widget, mainly for DI of view and model to presenter.
+DNS widget, mainly for dependency injection of view and model to presenter.
 """
 
 
@@ -14,6 +14,7 @@ class DNSWidget:
     """
     Widget that owns presenter, view and model.
     """
+
     def __init__(self, name, parent):
         self.parent = parent
         self.view = None

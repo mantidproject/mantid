@@ -65,11 +65,11 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.view.open_save_filename.return_value = ['', 2]
         testv = self.presenter.save_as_xml()
         self.assertEqual(testv, '')
-        self.model.dic_to_xml_file.assert_not_called()
+        self.model.dict_to_xml_file.assert_not_called()
         self.view.open_save_filename.return_value = ['test2.xml', 2]
         testv = self.presenter.save_as_xml()
         self.view.get_file_header.assert_called_once()
-        self.model.dic_to_xml_file.assert_called_once_with(
+        self.model.dict_to_xml_file.assert_called_once_with(
             OrderedDict(), 'test2.xml', {'manitd_version': 1.0})
         self.view.show_status_message.assert_called_once()
         self.assertEqual(testv, 'test2.xml')
@@ -86,8 +86,8 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
         self.presenter.save_xml()
         self.view.open_save_filename.assert_not_called()
         self.view.get_file_header.assert_called_once()
-        self.model.dic_to_xml_file(OrderedDict(), 'te.xml',
-                                   {'manitd_version': 1.0})
+        self.model.dict_to_xml_file(OrderedDict(), 'te.xml',
+                                    {'manitd_version': 1.0})
         self.view.show_status_message.assert_called_once()
 
     def test_get_xml_file_path_for_loading(self):

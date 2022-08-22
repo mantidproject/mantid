@@ -7,7 +7,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS TOF powder Options Presenter - Tab of DNS Reduction GUI.
+DNS powder TOF options tab common presenter of DNS reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
@@ -37,7 +37,7 @@ class DNSCommonOptionsPresenter(DNSObserver):
         }
         wavelength, errors = self.model.determine_wavelength(full_data)
         for key, value in errors.items():
-            self.raise_error(warnings[key], doraise=value)
+            self.raise_error(warnings[key], do_raise=value)
         if any(errors.values()):
             self.view.deactivate_get_wavelength()
         else:

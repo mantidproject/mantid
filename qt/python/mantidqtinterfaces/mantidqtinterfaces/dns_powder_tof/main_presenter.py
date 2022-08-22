@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Reduction GUI for DNS Instrument at MLZ.
+Main GUI presenter class.
 """
 
 
 class DNSReductionGUIPresenter:
     """
-    Main GUI presenter for dns, presenter is owned by main_view.
+    The presenter is owned by main_view.
     """
+
     def __init__(self,
                  name=None,
                  view=None,

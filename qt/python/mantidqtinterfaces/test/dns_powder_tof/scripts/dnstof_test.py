@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import call, patch
 
 from mantidqtinterfaces.dns_powder_tof.scripts.dnstof import \
-    convert_to_d_e, get_sqw, load_data, pre_load_data
+    convert_to_de, get_sqw, load_data, pre_load_data
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
     get_fake_tof_binning
 
@@ -29,7 +29,7 @@ class DNSScriptsTof(unittest.TestCase):
            'ConvertUnits')
     def test_convert_to_d_e(mock_convertunits, mock_converttodist,
                             mock_correctkikf):
-        convert_to_d_e('abc', 2)
+        convert_to_de('abc', 2)
         mock_convertunits.assert_called_once_with('abc',
                                                   Target='DeltaE',
                                                   EMode='Direct',

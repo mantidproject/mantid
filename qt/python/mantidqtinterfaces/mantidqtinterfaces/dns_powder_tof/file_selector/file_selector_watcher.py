@@ -6,6 +6,7 @@ class DNSFileSelectorWatcher(QWidget):
     """
     Watches a directory for new files.
     """
+
     def __init__(self, parent):
         super().__init__(parent)
         self.fs_watcher = QFileSystemWatcher()

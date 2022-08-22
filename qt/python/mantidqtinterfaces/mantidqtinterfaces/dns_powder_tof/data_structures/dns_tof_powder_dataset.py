@@ -36,13 +36,9 @@ def get_bank_positions(sample_data, rounding_limit=0.05):
     return new_arr
 
 
-def _get_max_key_length(dataset):
-    return max([len(a) for a in dataset.keys()]) + 6 + 4
-
-
-def _get_field_string(fields, llens):
+def _get_field_string(fields, line_indent):
     field_items = sorted(fields.items())
-    spacer = " " * (llens + 1)
+    spacer = "".rjust(line_indent)
     string_list = [(f"{spacer}{key:4.2f}: {value}")
                    for key, value in field_items]
     return ",\n".join(string_list)
@@ -57,7 +53,7 @@ def _get_sample_string(sample_name, llens):
     return f"'{sample_name:s}': {{".rjust(llens)
 
 
-def _get_datapath(entry, path):
+def _get_data_path(entry, path):
     proposal = get_proposal_from_filename(entry['filename'],
                                           entry['file_number'])
     return os.path.join(path, proposal)
@@ -84,7 +80,7 @@ def _get_closest_bank_key(banks, det_rot):
 def _create_new_datatype(dataset, datatype, det_rot, entry, path):
     dataset[datatype] = {
         det_rot: [entry['file_number']],
-        'path': _get_datapath(entry, path)
+        'path': _get_data_path(entry, path)
     }
 
 
@@ -99,7 +95,7 @@ def _add_or_create_filelist(dataset, datatype, det_rot, entry):
 
 class DNSTofDataset(ObjectDict):
     """
-    Class for storing data of a multiple dns datafiles.
+    Class for storing data of multiple DNS datafiles.
     This is a dictionary, but can also be accessed like attributes.
     """
     def __init__(self, data, path, is_sample=True):
@@ -114,7 +110,8 @@ class DNSTofDataset(ObjectDict):
         """
 
         dataset = self.data_dic
-        llens = _get_max_key_length(dataset)
+        tab_indent = 4
+        special_char_indent = 5
         dataset_string = '{\n'
         for sample_name, fields in dataset.items():
             dataset_string += _get_sample_string(sample_name, llens)
@@ -154,8 +151,6 @@ class DNSTofDataset(ObjectDict):
 
     def get_sample_filename(self):
         sample_filename = list(self.data_dic.keys())
-        # if len(sample_filename) > 1:
-        #    pass
         return sample_filename[0]
 
     def get_nb_sample_banks(self):
@@ -170,9 +165,8 @@ class DNSTofDataset(ObjectDict):
     @staticmethod
     def create_dataset(data, path):
         """
-        Creates a smaller dictionary used
-        in the reduction script of the form
-        dict[datatype][path/det_rot] = list(file_numbers).
+        Creates a smaller dictionary used in the reduction script of
+        the form: dict[datatype][path/det_rot] = list(file_numbers).
         """
         dataset = {}
         for entry in data:

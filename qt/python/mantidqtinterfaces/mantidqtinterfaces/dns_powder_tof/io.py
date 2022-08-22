@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-project Save for Reduction GUI for DNS Instrument at MLZ
+Project save for DNS reduction GUI.
 """
+
 from mantidqtinterfaces.dns_powder_tof.main_widget import DNSReductionGuiWidget
 
 
@@ -21,7 +23,6 @@ class InterfaceAttributes():
 
 
 class DNSReductionGuiWidgetEncoder(InterfaceAttributes):
-
     def encode(self, obj, project_path=None):
         # pylint: disable=unused-argument, no-self-use
         widget = obj.parent
@@ -33,7 +34,6 @@ class DNSReductionGuiWidgetEncoder(InterfaceAttributes):
 
 
 class DNSReductionGuiWidgetDecoder(InterfaceAttributes):
-
     def decode(self, obj_dict, project_path=None):
         # pylint: disable=unused-argument, no-self-use
         # Recreate the GUI in a base state

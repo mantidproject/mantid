@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
- dns xml data dump presenter
+DNS xml data dump model.
 """
 
 import xml.etree.ElementTree as etree
@@ -18,31 +19,30 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import save_txt
 
 
 class DNSXMLDumpModel(DNSObsModel):
-
-    def _convert_type(self, value, mytype):
+    def _convert_type(self, value, my_type):
         # pylint: disable=too-many-return-statements
         """
         Return a variable of the type described by
-        string :mytype from the string :value
+        string :my_type from the string :value
         """
-        if mytype == 'bool':
+        if my_type == 'bool':
             return value == 'True'
-        if mytype == 'int':
+        if my_type == 'int':
             return int(value)
-        if mytype == 'float':
+        if my_type == 'float':
             return float(value)
-        if mytype == 'emptylist':
+        if my_type == 'emptylist':
             return []
-        if mytype.endswith('list'):
+        if my_type.endswith('list'):
             return [
-                self._convert_type(x, mytype=mytype.split('list')[0])
+                self._convert_type(x, my_type=my_type.split('list')[0])
                 for x in value.strip('[]').split(',')
             ]
-        if mytype == 'None':
+        if my_type == 'None':
             return None
         return value
 
-    def _dict_elm_to_xml(self, dictionary, node=None):
+    def _dict_element_to_xml(self, dictionary, node=None):
         """
         Return an xml element for a given dictionary
         """
@@ -51,36 +51,38 @@ class DNSXMLDumpModel(DNSObsModel):
         for key, value in dictionary.items():
             sub = etree.SubElement(node, key)
             if isinstance(value, dict):
-                self._dict_elm_to_xml(value, node=sub)
+                self._dict_element_to_xml(value, node=sub)
             else:
                 sub.text = str(value)
                 sub.set('type', self._return_type(value))
         return node
 
-    def dic_to_xml_file(self, param_dict, filename, xml_header):
+    def dict_to_xml_file(self, param_dict, filename, xml_header):
         """
-        Write :dictionary to a xml file :filename
-        dictionary can contain bool, None, str, int, float and list of them,
-        or dicionaries, other types are converted to str and not converted back
-        if you try to read them
+        Write :param_dict to an xml file :filename.
+        Dictionary can contain bool, None, str, int, float and list of them,
+        or dictionaries, other types are converted to str and not converted back
+        if you try to read them.
         """
         dictionary = OrderedDict()
         dictionary['xml_header'] = xml_header
         dictionary.update(param_dict)
-        xmlstr = self._dictionary_to_xml_string(dictionary)
+        xml_str = self._dict_to_xml_string(dictionary)
         if filename:
-            save_txt(xmlstr, filename)
+            save_txt(xml_str, filename)
 
-    def _dictionary_to_xml_string(self, dictionary):
-        """returns an xmlstring for a given dicionary, parsed by minidom"""
-        xmlstr = etree.tostring(self._dict_elm_to_xml(dictionary))
-        xmlstr = minidom.parseString(xmlstr).toprettyxml(indent="  ")
-        return xmlstr
+    def _dict_to_xml_string(self, dictionary):
+        """
+        Returns an xml string for a given dictionary, parsed by minidom.
+        """
+        xml_str = etree.tostring(self._dict_element_to_xml(dictionary))
+        xml_str = minidom.parseString(xml_str).toprettyxml(indent="  ")
+        return xml_str
 
     def _return_type(self, value):
         # pylint: disable=too-many-return-statements
         """
-        Return a string describing the type of :value
+        Return a string describing the type of :value.
         """
         if isinstance(value, bool):  # bool is subtype of int
             return 'bool'
@@ -117,27 +119,27 @@ class DNSXMLDumpModel(DNSObsModel):
 
     def xml_file_to_dict(self, filename):
         """
-        Return a dictionary from a given :filename
-        works only with structures written by dic_to_xml_file
+        Return a dictionary from a given :filename.
+        Works only with structures written by dict_to_xml_file.
         """
         tree = self._load_file_to_xml_tree(filename)
         if tree and self._check_instrument_name(tree):
             return self._xml_to_dict(tree.getroot(), {}).get('document', {})
         return None
 
-    def _xml_to_dict(self, elm, dictionary):
+    def _xml_to_dict(self, element, dictionary):
         """
         Updates and returns the given dictionary with
-        values of xml tree element
+        values of xml tree element.
         """
-        children = list(elm)
+        children = list(element)
         if children:
             new_dict = OrderedDict()
-            dictionary.update({elm.tag: new_dict})
+            dictionary.update({element.tag: new_dict})
             for child in children:
                 self._xml_to_dict(child, new_dict)
         else:
             dictionary.update({
-                elm.tag: self._convert_type(elm.text, elm.get('type', 'str'))
+                element.tag: self._convert_type(element.text, element.get('type', 'str'))
             })
         return dictionary

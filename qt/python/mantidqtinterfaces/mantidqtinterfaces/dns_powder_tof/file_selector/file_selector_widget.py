@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS File Selector widget.
+DNS file selector widget.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import DNSWidget
@@ -21,6 +21,7 @@ from mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_watcher \
 
 
 class DNSFileSelectorWidget(DNSWidget):
+
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSFileSelectorView(parent=parent.view)

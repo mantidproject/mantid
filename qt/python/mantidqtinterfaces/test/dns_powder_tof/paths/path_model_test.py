@@ -33,10 +33,10 @@ class DNSPathModelTest(unittest.TestCase):
         mock_dnsfile.return_value = {'users': 'Thomas', 'proposal': 'p123',
                                      'new_format': True}
         mock_glob.return_value = iter((1, 2, 3))
-        testv = self.model.get_user_and_propnumber('')
+        testv = self.model.get_user_and_proposal_number('')
         self.assertEqual(testv, ['Thomas', 'p123'])
         mock_glob.side_effect = StopIteration()
-        testv = self.model.get_user_and_propnumber('')
+        testv = self.model.get_user_and_proposal_number('')
         self.assertEqual(testv, ['', ''])
 
     @patch('mantidqtinterfaces.dns_powder_tof.paths.path_model.os.remove')

@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS powder tof plot presenter
+DNS powder TOF plot presenter.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Path widget.
+DNS xml dump widget.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
@@ -20,6 +20,7 @@ from mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_view import \
 
 
 class DNSXMLDumpWidget(DNSWidget):
+
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSXMLDumpView(parent=parent.view)

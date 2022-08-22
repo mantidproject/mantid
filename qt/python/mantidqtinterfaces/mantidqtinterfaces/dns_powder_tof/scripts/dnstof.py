@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS script helpers for TOF powder reduction.
+DNS script helpers for powder TOF reduction.
 """
 
 # import mantid algorithms
@@ -16,7 +16,7 @@ from mantid.simpleapi import (BinMD, ConvertToDistribution, ConvertToMD,
                               LoadDNSLegacy, MergeMD, MergeRuns, mtd)
 
 
-def convert_to_d_e(gws, e_fixed):
+def convert_to_de(gws, e_fixed):
     """
     Converting to dE.
     """

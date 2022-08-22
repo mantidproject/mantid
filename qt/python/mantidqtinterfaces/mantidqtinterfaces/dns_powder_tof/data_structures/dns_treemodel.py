@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Custom Tree Model for DNS to store list of Scans with files as children.
+Custom tree model for DNS to store list of scans with files as children.
 """
 
 import numpy as np
@@ -20,6 +20,7 @@ class DNSTreeModel(QAbstractItemModel):
     QT Model to store DNS scan structure consisting of scans with files as
     children.
     """
+
     def __init__(self, data=None, parent=None):
         super().__init__(parent)
         self._scan = None
@@ -47,12 +48,13 @@ class DNSTreeModel(QAbstractItemModel):
         if not index.isValid():
             return QModelIndex()
         child_item = index.internalPointer()
+        # determine the parent of child_item
+        # using QT's parent() method
         parent_item = child_item.parent()
         if parent_item == self.rootItem:
             return QModelIndex()
         return self.createIndex(parent_item.row(), 0, parent_item)
 
-    #OKcomment: not used anywhere
     def headerData(self, section, orientation, role):  # overrides QT function
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self.rootItem.data(section)
@@ -322,9 +324,9 @@ class DNSTreeModel(QAbstractItemModel):
             child.setChecked()
 
     def check_fn_range(self, start, end):
-        fn_dict = self.get_file_number_dict()
+        file_number_dict = self.get_file_number_dict()
         for i in np.arange(start, end + 1, 1):
-            self.set_checked_from_index(fn_dict[i])
+            self.set_checked_from_index(file_number_dict[i])
 
     def setup_model_data(self, dns_files):
         """

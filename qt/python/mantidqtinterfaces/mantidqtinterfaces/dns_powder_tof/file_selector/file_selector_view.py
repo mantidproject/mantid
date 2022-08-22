@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS File selector View - Tab of DNS Reduction GUI.
+DNS file selector tab view of DNS reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui

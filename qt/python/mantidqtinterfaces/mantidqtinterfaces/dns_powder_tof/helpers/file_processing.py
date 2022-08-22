@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS file helpers
+DNS file processing helpers.
 """
 
 import glob

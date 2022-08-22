@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-presenter for dns path panel
+Model for DNS path panel.
 """
 
 import glob
@@ -24,12 +25,12 @@ class DNSPathModel(DNSObsModel):
         return os.getcwd()
 
     @staticmethod
-    def get_user_and_propnumber(dir_name):
+    def get_user_and_proposal_number(dir_name):
         try:
-            firstfilename = next(glob.iglob(f'{dir_name}/*.d_dat'))
+            first_filename = next(glob.iglob(f'{dir_name}/*.d_dat'))
         except StopIteration:
             return ['', '']
-        dns_file = DNSFile('', firstfilename)
+        dns_file = DNSFile('', first_filename)
         if dns_file['new_format']:
             return [dns_file['users'], dns_file['proposal']]
         return ['', '']

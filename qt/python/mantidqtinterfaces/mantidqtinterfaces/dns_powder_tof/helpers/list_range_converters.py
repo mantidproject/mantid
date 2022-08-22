@@ -8,12 +8,12 @@
 
 def list_to_range(value_list):
     """
-    Converting a list of filenumbers to a string with a python range command
+    Converting a list of file numbers to a string with a python range command.
     """
     if len(value_list) > 3:
         increment = value_list[1] - value_list[0]
-        arange = range(value_list[0], value_list[-1] + increment, increment)
-        if value_list == list(arange):
+        my_range = range(value_list[0], value_list[-1] + increment, increment)
+        if value_list == list(my_range):
             return f'[*range({value_list[0]}, {value_list[-1] + increment},' \
                    f' {increment})]'
     return str(value_list)
@@ -21,7 +21,7 @@ def list_to_range(value_list):
 
 def list_to_multirange(value_list):
     """
-    Creating a string with python range commands from list of filenumbers
+    Creating a string with python range commands from list of file numbers.
     """
     range_string = ''
     if len(value_list) > 5:
@@ -46,7 +46,7 @@ def list_to_multirange(value_list):
     return range_string
 
 
-def get_normation(options):
+def get_normalisation(options):
     if options.get('norm_monitor', False):
         return 'monitor'
     return 'time'

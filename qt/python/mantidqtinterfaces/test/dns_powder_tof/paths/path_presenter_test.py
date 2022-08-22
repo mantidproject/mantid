@@ -40,12 +40,12 @@ class DNSPathPresenterTest(unittest.TestCase):
         cls.view.open_file_dialog.return_value = 'C:/dummy/test.py'
         # model functions
         cls.model.get_start_path_for_dialog.return_value = 'C:/dummy'
-        cls.model.get_user_and_propnumber.return_value = ['Thomas', 'p123456']
+        cls.model.get_user_and_proposal_number.return_value = ['Thomas', 'p123456']
         # create presenter
         cls.presenter = DNSPathPresenter(view=cls.view, model=cls.model)
 
     def setUp(self):
-        self.model.get_user_and_propnumber.reset_mock()
+        self.model.get_user_and_proposal_number.reset_mock()
         self.view.set_data_path.reset_mock()
         self.view.set_prop_number.reset_mock()
         self.view.set_user.reset_mock()
@@ -74,7 +74,7 @@ class DNSPathPresenterTest(unittest.TestCase):
 
     def test_set_user_prop_from_datafile(self):
         self.presenter._set_user_prop_from_datafile(dir_name='C:/test')
-        self.model.get_user_and_propnumber.assert_called_once()
+        self.model.get_user_and_proposal_number.assert_called_once()
         self.view.set_prop_number.assert_called_once()
         self.view.set_user.assert_called_once()
         self.view.show_status_message.assert_not_called()

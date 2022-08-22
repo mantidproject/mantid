@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Class which is a dictionray that can be also access like attributes.
+Class which is a dictionary that can be also access like attributes.
 """
 
 
@@ -14,6 +14,7 @@ class ObjectDict(dict):
     """
     Class for storing data as a dictionary, but you can access attributes.
     """
+
     def __getattr__(self, name):
         if name in self:
             return self[name]

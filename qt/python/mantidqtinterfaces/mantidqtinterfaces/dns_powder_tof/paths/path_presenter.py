@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Presenter for dns path panel.
+Presenter for DNS path panel.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
@@ -41,7 +41,7 @@ class DNSPathPresenter(DNSObserver):
         self._set_user_prop_from_datafile(dir_name)
 
     def _set_user_prop_from_datafile(self, dir_name):
-        user, prop_nb = self.model.get_user_and_propnumber(dir_name)
+        user, prop_nb = self.model.get_user_and_proposal_number(dir_name)
         if prop_nb or user:
             self.view.set_prop_number(prop_nb)
             self.view.set_user(user)

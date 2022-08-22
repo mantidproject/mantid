@@ -30,6 +30,7 @@ class DNSModus:
     Defines the different reduction modes and which widgets are used in
     each mode.
     """
+
     def __init__(self, name, parent):
         super().__init__()
         self.parent = parent  # should be main widget
