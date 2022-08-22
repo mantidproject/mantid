@@ -12,7 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "Reduction/Detector.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
 
@@ -66,10 +65,6 @@ void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) 
   if (!matrixWs)
     throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
   row.setLoadedWs(matrixWs);
-  if (hasLinearDetector(matrixWs)) {
-    // TODO I think there is still some preprocessing to be done for LinearDetectors
-    row.setSummedWs(matrixWs);
-  }
   // TODO reset the rest of the workspaces associated with the workflow
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow

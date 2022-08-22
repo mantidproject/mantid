@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "Common/Detector.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ROIType.h"
-#include "Reduction/Detector.h"
 #include "Reduction/RowExceptions.h"
 #include <memory>
 
@@ -107,6 +107,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   if (hasLinearDetector(ws)) {
     // TODO clear instrument view
+    m_model->setSummedWs(ws);
     notifySumBanksCompleted();
   } else {
     // Notify the instrument view model that the workspace has changed before we get the surface

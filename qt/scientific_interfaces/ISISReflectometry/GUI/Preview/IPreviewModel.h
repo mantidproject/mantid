@@ -40,6 +40,8 @@ public:
   virtual std::optional<double> getDefaultTheta() const = 0;
   virtual PreviewRow const &getPreviewRow() const = 0;
 
+  virtual void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
+
   virtual void setTheta(double theta) = 0;
 
   virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
