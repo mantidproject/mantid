@@ -41,13 +41,10 @@ d_range_alice = {'drange1': [0.7, 2.5],
 
 
 class WORKSPACE_SUFFIX(object):
-    container_corrected = '_container_corrected'
-    vanadium_corrected = '_vanadium_correction'
-    pdf = '_pdf'
-    merged = '_merged'
-    focussed = '_focused'
-    grouped = '_grouped'
-    dspace = '_dspace'
+    CONTAINER_CORRECTED = '_container_corrected'
+    MERGED = '_merged'
+    FOCUSED = '_focused'
+    GROUPED = '_grouped'
 
 
 def get_osiris_d_range(run_ws):
@@ -60,10 +57,7 @@ class DrangeData(object):
     def __init__(self, drange):
         self._drange = drange
         self._sample = []
-        self._empty_subtracted = []
-        self._vanadium_corrected = []
         self._vanadium = ''
-        self._calibrated_vanadium = ''
         self._empty = ''
 
     def get_drange(self):
@@ -83,49 +77,12 @@ class DrangeData(object):
         self._vanadium = ws_name
         return
 
-    def get_vanadium(self):
-        return self._vanadium
-
     def set_empty(self, ws_name):
         self._empty = ws_name
         return
 
-    def get_empty(self):
-        return self._empty
-
-    def subtract_container(self):
-        corrected = []
-        for sample in self._sample:
-            empty_rb = RebinToWorkspace(WorkspaceToRebin=self._empty, WorkspaceToMatch=sample,
-                                        OutputWorkspace='empty_rb', StoreInADS=False)
-            Minus(LHSWorkspace=sample, RHSWorkspace=empty_rb,
-                  OutputWorkspace=sample + WORKSPACE_SUFFIX.container_corrected)
-            corrected.append(sample + WORKSPACE_SUFFIX.container_corrected)
-        return corrected
-
     def calibrate_vanadium(self, calibration_file=''):
         return self.calibrate_workspace(self._vanadium, calibration_file)
-
-    def van_correction(self, calibration_file=''):
-        van_calib = self.calibrate_workspace(self._vanadium, calibration_file)
-
-        samples = self._empty_subtracted if self._empty_subtracted else self._sample
-        corrected = []
-        for sample in samples:
-            sample_calib = self.calibrate_workspace(sample, calibration_file)
-            van_calib = RebinToWorkspace(WorkspaceToRebin=van_calib, WorkspaceToMatch=sample_calib,
-                                         OutputWorkspace='van_rb', StoreInADS=False)
-
-            if WORKSPACE_SUFFIX.container_corrected in sample:
-                samplename = sample.replace(WORKSPACE_SUFFIX.container_corrected, '')
-            else:
-                samplename = sample
-
-            Divide(LHSWorkspace=sample_calib, RHSWorkspace=van_calib,
-                   OutputWorkspace=samplename+WORKSPACE_SUFFIX.vanadium_corrected)
-            corrected.append(samplename+WORKSPACE_SUFFIX.vanadium_corrected)
-        self._vanadium_corrected = corrected
-        return self._vanadium_corrected
 
     def calibrate_workspace(self, ws, calibration_file=''):
         calibrate_ws = NormaliseByCurrent(InputWorkspace=ws,
@@ -134,7 +91,7 @@ class DrangeData(object):
         if calibration_file:
             calibrate_ws = DiffractionFocussing(InputWorkspace=calibrate_ws,
                                                 GroupingFileName=calibration_file,
-                                                OutputWorkspace='focussed',
+                                                OutputWorkspace='focused',
                                                 StoreInADS=False)
 
         calibrate_ws = ConvertUnits(InputWorkspace=calibrate_ws,
@@ -154,7 +111,7 @@ class DrangeData(object):
     def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=''):
         processed = []
         for sample in self._sample:
-            outputname = sample+WORKSPACE_SUFFIX.focussed
+            outputname = sample+WORKSPACE_SUFFIX.FOCUSED
             if subtract_empty:
                 sample = self.subtract_container_from_sample(sample)
             sample = self.calibrate_workspace(sample, focus_calibration_file)
@@ -172,18 +129,7 @@ class DrangeData(object):
         empty_rb = RebinToWorkspace(WorkspaceToRebin=self._empty, WorkspaceToMatch=sample,
                                     OutputWorkspace='empty_rb', StoreInADS=False)
         return Minus(LHSWorkspace=sample, RHSWorkspace=empty_rb,
-                     OutputWorkspace=sample + WORKSPACE_SUFFIX.container_corrected, StoreInADS=False)
-
-    def run_diffraction_focussing(self, calibration_file=''):
-        if self._vanadium_corrected:
-            samples = self._vanadium_corrected
-        else:
-            samples = [self.calibrate_workspace(sample) for sample in self._sample]
-        focussed = []
-        for sample in samples:
-            focussed.append(DiffractionFocussing(InputWorkspace=sample, GroupingFileName=calibration_file,
-                                                 OutputWorkspace=sample + WORKSPACE_SUFFIX.focussed))
-        return focussed
+                     OutputWorkspace=sample + WORKSPACE_SUFFIX.CONTAINER_CORRECTED, StoreInADS=False)
 
 
 def load_raw(run_number_string, drange_sets, group, inst, file_ext):
@@ -200,18 +146,18 @@ def load_raw(run_number_string, drange_sets, group, inst, file_ext):
             drange_sets[drange].set_vanadium(ws.name())
         elif group == 'empty':
             drange_sets[drange].set_empty(ws.name())
-    _group_workspaces(input_ws_list, 'OSIRIS' + run_number_string + WORKSPACE_SUFFIX.grouped)
+    _group_workspaces(input_ws_list, 'OSIRIS' + run_number_string + WORKSPACE_SUFFIX.GROUPED)
     return input_ws_list
 
 
 def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
-    focussed = []
+    focused = []
     for drange in drange_sets:
         processed = drange_sets[drange].process_workspace(subtract_empty=subtract_empty, vanadium_correct=van_norm,
                                                           focus_calibration_file=calfile)
-        focussed.extend(processed)
-    _group_workspaces(focussed, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.focussed)
-    return focussed
+        focused.extend(processed)
+    _group_workspaces(focused, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.FOCUSED)
+    return focused
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
@@ -226,7 +172,7 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
                                      grouping_file_name=grouping_file_name, empty_inst_run_number=empty_runs,
-                                     vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file)
+                                     vanadium_string=vanadium_runs)
 
 
 def get_van_runs_for_samples(run_number_string, inst_settings, drange_sets):
@@ -278,7 +224,7 @@ def _correct_drange_overlap(merged_ws, drange_sets):
 
 def _merge_dspacing_runs(run_number, drange_sets, ws_group):
     merged = MergeRuns(InputWorkspaces=ws_group,
-                       OutputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.merged)
+                       OutputWorkspace='OSIRIS' + run_number + WORKSPACE_SUFFIX.MERGED)
     return _correct_drange_overlap(merged, drange_sets)
 
 

@@ -102,12 +102,9 @@ class Osiris(AbstractInst):
         """
         d_spacing_group, tof_group, q_squared_group = common_output.split_into_tof_d_spacing_q_squared_groups(
             run_details=run_details, processed_spectra=processed_spectra)
-        save_data(workspace_group=d_spacing_group,
-                  output_paths=self._generate_out_file_paths(run_details=run_details, unit="_d_spacing"))
-        save_data(workspace_group=tof_group,
-                  output_paths=self._generate_out_file_paths(run_details=run_details, unit="_tof"))
-        save_data(workspace_group=q_squared_group,
-                  output_paths=self._generate_out_file_paths(run_details=run_details, unit="_q_squared"))
+        for unit, group in {"_d_spacing": d_spacing_group, "_tof": tof_group, "_q_squared": q_squared_group}.items():
+            save_data(workspace_group=group,
+                      output_paths=self._generate_out_file_paths(run_details=run_details, unit=unit))
 
         return d_spacing_group, tof_group
 
@@ -124,16 +121,12 @@ class Osiris(AbstractInst):
             dat_files_directory = os.path.join(output_directory,
                                                self._inst_settings.dat_files_directory)
 
-        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(
-            ".")
         out_file_names = {"output_folder": output_directory}
         format_options = {
             "inst": self._inst_prefix,
             "instlow": self._inst_prefix.lower(),
             "instshort": self._inst_prefix_short,
             "runno": run_details.output_run_string,
-            "fileext": file_type,
-            "_fileext": "_" + file_type if file_type else "",
             "suffix": run_details.output_suffix if run_details.output_suffix else "",
             "unit": unit
         }
@@ -178,7 +171,7 @@ def save_data(workspace_group, output_paths):
                               Append=False)
 
     for bank_index, ws in enumerate(workspace_group):
-        bank_index += 1  # Ensure we start a 1 when saving out
+        bank_index += 1  # Ensure we start at 1 when saving out
         mantid.SaveFocusedXYE(InputWorkspace=ws,
                               Filename=ensure_dir_exists(output_paths["xye_filename"]).format(bankno=bank_index),
                               SplitFiles=False,
