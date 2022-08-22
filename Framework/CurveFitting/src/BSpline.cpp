@@ -207,7 +207,7 @@ void BSpline::resetObjects() {
   if (nbreak < 2) {
     throw std::invalid_argument("BSpline: NBreak must be at least 2.");
   }
-  // TO DO - RESET ANY EIGEN CLASS VARIABLES
+  m_spline = Spline1D();
 }
 
 /**
