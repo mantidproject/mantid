@@ -109,8 +109,11 @@ boost::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(
 }
 
 void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &selection) {
+  if (selection.size() == 0) {
+    m_runDetails->setProcessingInstructions(regionType, boost::none);
+    return;
+  }
   // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices per
-  // TODO rectangle selection
   if (selection.size() % 2 != 0) {
     throw std::runtime_error("Program error: unexpected selection size; must be multiple of 2; got " +
                              std::to_string(selection.size()));

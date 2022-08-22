@@ -682,9 +682,9 @@ public:
     // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
     auto presenter = makePresenter(makeDefaults(), makeExperiment());
     auto previewRow = PreviewRow({"1234"});
-    previewRow.setProcessingInstructions(ROIType::Signal, "10");
-    previewRow.setProcessingInstructions(ROIType::Background, "11");
-    previewRow.setProcessingInstructions(ROIType::Transmission, "12");
+    previewRow.setProcessingInstructions(ROIType::Signal, std::string{"10"});
+    previewRow.setProcessingInstructions(ROIType::Background, std::string{"11"});
+    previewRow.setProcessingInstructions(ROIType::Transmission, std::string{"12"});
     previewRow.setTheta(2.3);
 
     presenter.notifyPreviewApplyRequested(previewRow);
@@ -695,21 +695,18 @@ public:
     TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
   }
 
-  void testNotifyPreviewApplyRequestedUpdatesProcessingInstructionsWithoutBackground() {
+  void testNotifyPreviewApplyRequestedClearsProcessingInstructionsWhenMissing() {
     // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
-    // The lookup row with angle 0.5 has background processing instructions set to boost::none
     auto presenter = makePresenter(makeDefaults(), makeExperiment());
     auto previewRow = PreviewRow({"1234"});
-    previewRow.setProcessingInstructions(ROIType::Signal, "10");
-    previewRow.setProcessingInstructions(ROIType::Transmission, "12");
-    previewRow.setTheta(0.5);
+    previewRow.setTheta(2.3);
 
     presenter.notifyPreviewApplyRequested(previewRow);
-    // Row with angle 0.5 is the second row in the look-up table
-    auto row = presenter.experiment().lookupTableRows()[1];
-    TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
-    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions(), boost::none);
-    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT(!row.processingInstructions());
+    TS_ASSERT(!row.backgroundProcessingInstructions());
+    TS_ASSERT(!row.transmissionProcessingInstructions());
   }
 
   void testNotifyPreviewApplyRequestedMatchingRowNotFound() {

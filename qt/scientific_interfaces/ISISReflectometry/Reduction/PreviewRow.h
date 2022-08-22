@@ -53,7 +53,7 @@ public:
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
-  void setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions);
+  void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
