@@ -710,6 +710,10 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   auto frame_count = static_cast<int>(eventCounter.numFrames());
   AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", frame_count);
 
+  // add the scan period in secs to the log
+  auto scan_period = (frame_count + 1) / m_dopplerFreq;
+  AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "ScanPeriod", scan_period);
+
   std::string filename = Base::getPropertyValue(FilenameStr);
   logManager.addProperty("filename", filename);
 
@@ -1034,6 +1038,10 @@ template <typename FD> void LoadEMU<FD>::loadParameters(const std::string &hdfFi
   MapNeXusToSeries<double>(entry, "instrument/hztubegap", 0.02, logm, m_startRun, "horizontal_tubes_gap", 1.0, 0);
   MapNeXusToSeries<int32_t>(entry, "monitor/bm1_counts", 0, logm, m_startRun, "MonitorCounts", 1, m_datasetIndex);
 
+  // add the reactor power to the log
+  MapNeXusToSeries<double>(entry, "instrument/source/power", 20.0, logm, m_startRun, "ReactorPower", 1.0,
+                           m_datasetIndex);
+
   // fix for source position when loading IDF
   MapNeXusToProperty<double>(entry, "instrument/doppler/tosource", 2.035, logm, "SourceSample", 1.0, 0);
 }
@@ -1048,7 +1056,8 @@ template <typename FD> void LoadEMU<FD>::loadEnvironParameters(const std::string
 
   // load the environment variables for the dataset loaded
   std::vector<std::string> tags = {"P01PS03", "P01PSP03", "T01S00", "T01S05", "T01S06",  "T01SP00", "T01SP06",
-                                   "T02S00",  "T02S04",   "T02S05", "T02S06", "T02SP00", "T02SP06"};
+                                   "T02S00",  "T02S04",   "T02S05", "T02S06", "T02SP00", "T02SP06", "T3S1",
+                                   "T3S2",    "T3S3",     "T3S4",   "T3SP1",  "T3SP2",   "T3SP3",   "T3SP4"};
 
   for (const auto &tag : tags) {
     MapNeXusToSeries<double>(entry, "data/" + tag, 0.0, logm, time_str, "env_" + tag, 1.0, m_datasetIndex);

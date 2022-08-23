@@ -83,6 +83,10 @@ public:
     TS_ASSERT_DELTA(logpm("DopplerFrequency"), 9.974, 1.0e-3);
     TS_ASSERT_DELTA(logpm("DopplerAmplitude"), 0.075, 1.0e-4);
 
+    TS_ASSERT_DELTA(logpm("ReactorPower"), 19.066, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("ScanPeriod"), 240.733, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("env_T3S1"), 0.0, 1.0e-3);
+
     // test some instrument parameters
     auto instr = output->getInstrument();
     auto iparam = [&instr](const std::string &tag) { return instr->getNumberParameter(tag)[0]; };
