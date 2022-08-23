@@ -13,7 +13,7 @@ by clicking on the **Generate Script** button.
 
 **Automatic Script Filename** checkbox is selected by default and the output
 script filename in this case will be set automatically to
-``script_samplename_from_firstfilenumber_to_lastfilenumber.py``. Alternatively,
+``script_{sample name}_from_{first file number}_to_{last file number}.py``. Alternatively,
 a user can deselect this box and set the output script filename manually. The
 script is saved to the **Script Directory** selected in the
 :ref:`Paths <dns_powder_tof_paths_tab-ref>` tab. The path is shown in the status
