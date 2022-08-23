@@ -122,9 +122,8 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
 
 void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
                                                                 ROIType regionType) {
-  if (auto const instructions = previewRow.getProcessingInstructions(regionType)) {
-    lookupRow.setProcessingInstructions(regionType, instructions.get());
-  }
+  auto const instructions = previewRow.getProcessingInstructions(regionType);
+  lookupRow.setProcessingInstructions(regionType, instructions);
 }
 
 void ExperimentPresenter::restoreDefaults() {

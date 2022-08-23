@@ -291,7 +291,7 @@ public:
     TS_ASSERT_EQUALS(3, table.rows().size());
 
     auto newLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
-    auto const signalProcessingInstructions = "5678";
+    auto const signalProcessingInstructions = std::string{"5678"};
     newLookupRow.setProcessingInstructions(ROIType::Signal, signalProcessingInstructions);
     table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance);
 

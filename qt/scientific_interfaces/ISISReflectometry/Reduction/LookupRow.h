@@ -61,7 +61,7 @@ public:
   boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
   boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
-  void setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions);
+  void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
   bool hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const;
 
   MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator==(LookupRow const &lhs, LookupRow const &rhs);

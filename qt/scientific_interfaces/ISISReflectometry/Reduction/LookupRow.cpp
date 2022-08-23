@@ -48,7 +48,8 @@ boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructi
   return m_backgroundProcessingInstructions;
 }
 
-void LookupRow::setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions) {
+void LookupRow::setProcessingInstructions(ROIType regionType,
+                                          boost::optional<ProcessingInstructions> processingInstructions) {
   switch (regionType) {
   case ROIType::Signal:
     m_processingInstructions = std::move(processingInstructions);
