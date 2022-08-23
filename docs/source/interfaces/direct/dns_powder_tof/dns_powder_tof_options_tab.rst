@@ -16,7 +16,7 @@ desired.
 The **Wavelength** value can be overwritten, for example for the cases when
 :math:`\lambda/2` was selected by the velocity selector.
 
-**Detector Efficiency Correction** norms the detector efficiency using standard
+**Detector Efficiency Correction** normalises the detector efficiency using standard
 vanadium data.
 
 Instrument background can be subtracted from vanadium and sample data,
