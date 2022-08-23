@@ -30,6 +30,7 @@ class DetectorInfo;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
+class RectangularDetector;
 /// Convenience typedef
 using InstrumentParameterCache =
     std::map<std::pair<std::string, const IComponent *>, std::shared_ptr<XMLInstrumentParameter>>;
@@ -204,6 +205,8 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
+  std::vector<const RectangularDetector *> findRectDetectors() const;
+
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
   std::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
@@ -220,6 +223,8 @@ public:
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const;
+
+  ContainsState findRectDetectorsImpl(boost::optional<std::vector<const RectangularDetector *>> &detectors) const;
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);

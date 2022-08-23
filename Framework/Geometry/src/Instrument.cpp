@@ -1050,7 +1050,16 @@ void Instrument::setValidFromDate(const Types::Core::DateAndTime &val) {
   m_ValidFrom = val;
 }
 
-Instrument::ContainsState Instrument::containsRectDetectors() const {
+Instrument::ContainsState Instrument::containsRectDetectors() const { return findRectDetectorsImpl(boost::none); }
+
+std::vector<const RectangularDetector *> Instrument::findRectDetectors() const {
+  std::vector<const RectangularDetector *> detectors;
+  findRectDetectorsImpl(detectors);
+  return detectors;
+}
+
+Instrument::ContainsState
+Instrument::findRectDetectorsImpl(boost::optional<std::vector<const RectangularDetector *>> &detectors) const {
   std::queue<IComponent_const_sptr> compQueue; // Search queue
 
   // Add all the direct children of the intrument
@@ -1085,9 +1094,10 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
       continue;
     }
 
-    if (dynamic_cast<const RectangularDetector *>(comp.get())) {
-      if (!foundRect)
-        foundRect = true;
+    if (auto detector = dynamic_cast<const RectangularDetector *>(comp.get())) {
+      foundRect = true;
+      if (detectors)
+        detectors->emplace_back(detector);
     } else {
       ICompAssembly_const_sptr assembly = std::dynamic_pointer_cast<const ICompAssembly>(comp);
 
