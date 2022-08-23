@@ -62,10 +62,15 @@ private:
   void assertWidgetCreated() { TS_ASSERT_LESS_THAN(0, QApplication::topLevelWidgets().size()); }
 
   void assertNoTopLevelWidgets() {
+    // The 'QtWebEngineWidgetUI::MessageBubbleWidget' widget is an internal web engine widget which sometimes sticks
+    // around after closing the Help Window on a Windows machine. It was decided to ignore it as it's not causing any
+    // problems, and we expect the MantidHelpWindow code is near end-of-life.
     for (auto const &widget : QApplication::topLevelWidgets()) {
-      std::cout << widget->metaObject()->className() << std::endl;
+      auto const widgetClass = std::string(widget->metaObject()->className());
+      if (widgetClass != "QtWebEngineWidgetUI::MessageBubbleWidget") {
+        TS_FAIL("Found a widget of type " + widgetClass);
+      }
     }
-    TS_ASSERT_EQUALS(0, QApplication::topLevelWidgets().size());
   }
 
   std::size_t m_openAttempts{5u};
