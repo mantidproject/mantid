@@ -65,19 +65,19 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_vana_string(self):
         if self._vana_cor:
-            return (f"\n          'vana_temperature' : "
-                    f"{self._tof_opt['vanadium_temperature']},")
+            return (f"          'vana_temperature': "
+                    f"{self._tof_opt['vanadium_temperature']},\n")
         return ''
 
     def _get_back_string(self):
         if self._bg_cor:
-            return ("\n          'ecVanaFactor'     : "
-                    f"{self._tof_opt['vana_back_factor']},")
+            return ("          'ecVanaFactor': "
+                    f"{self._tof_opt['vana_back_factor']},\n")
         return ''
 
     def _get_back_tof_string(self):
         if self._bg_cor:
-            return ("\n          'ecSampleFactor'   : "
+            return ("          'ecSampleFactor': "
                     f"{self._tof_opt['sample_back_factor']},")
         return ''
 
@@ -86,22 +86,20 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         vana_string = self._get_vana_string()
         back_tof_string = self._get_back_tof_string()
         return [
-            f"params = {{ 'e_channel'        : {self._tof_opt['epp_channel']}"
-            f", "
-            f"\n          'wavelength'       : {self._tof_opt['wavelength']},"
-            f"\n          'delete_raw'       : {self._tof_opt['delete_raw']},"
-            f"{vana_string}{back_string}{back_tof_string} }}", ''
+            f"params = {{'e_channel': {self._tof_opt['epp_channel']},\n"
+            f"          'wavelength': {self._tof_opt['wavelength']},\n"
+            f"          'delete_raw': {self._tof_opt['delete_raw']},\n"
+            f"{vana_string}{back_string}{back_tof_string}}}", ''
         ]
 
     def _get_binning_lines(self):
         return [
-            f"bins = {{'q_min' : {self._tof_opt['q_min']:7.3f}, "
-            f"'q_max' : {self._tof_opt['q_max']:7.3f}, "
-            f"'q_step' : {self._tof_opt['q_step']:7.3f},"
-            f"\n        'dE_min': {self._tof_opt['dE_min']:7.3f}, "
-            f"'dE_max': {self._tof_opt['dE_max']:7.3f}, "
-            f"'dE_step': {self._tof_opt['dE_step']:7.3f}"
-            f"}}", ''
+            f"bins = {{'q_min': {self._tof_opt['q_min']:4.3f},\n"
+            f"        'q_max': {self._tof_opt['q_max']:4.3f},\n"
+            f"        'q_step' : {self._tof_opt['q_step']:4.3f},\n"
+            f"        'dE_min': {self._tof_opt['dE_min']:4.3f},\n"
+            f"        'dE_max': {self._tof_opt['dE_max']:4.3f},\n"
+            f"        'dE_step': {self._tof_opt['dE_step']:4.3f}}}", ''
         ]
 
     @staticmethod

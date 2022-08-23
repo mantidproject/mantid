@@ -49,8 +49,8 @@ def _get_path_string(dataset, sample_name):
     return f"'path': '{path}',\n"
 
 
-def _get_sample_string(sample_name, llens):
-    return f"'{sample_name:s}': {{".rjust(llens)
+def _get_sample_string(sample_name):
+    return f"'{sample_name:s}': {{"
 
 
 def _get_data_path(entry, path):
@@ -108,15 +108,16 @@ class DNSTofDataset(ObjectDict):
         """
         Formatting the dictionary to a nicely indented string.
         """
-
         dataset = self.data_dic
         tab_indent = 4
         special_char_indent = 5
         dataset_string = '{\n'
         for sample_name, fields in dataset.items():
-            dataset_string += _get_sample_string(sample_name, llens)
+            dataset_string += "".rjust(tab_indent)
+            dataset_string += _get_sample_string(sample_name)
             dataset_string += _get_path_string(dataset, sample_name)
-            dataset_string += _get_field_string(fields, llens)
+            total_indent = tab_indent + special_char_indent + len(sample_name)
+            dataset_string += _get_field_string(fields, total_indent)
             dataset_string += "},\n"
         dataset_string += "}"
         return dataset_string
