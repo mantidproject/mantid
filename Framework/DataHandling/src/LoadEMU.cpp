@@ -711,7 +711,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   auto frame_count = static_cast<int>(eventCounter.numFrames());
   AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", frame_count);
 
-  // add the scan period in secs to the log
+  // add the scan period in secs to the log, inc by 1 to include events after last frame event
   auto scan_period = (frame_count + 1) / m_dopplerFreq;
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "ScanPeriod", scan_period);
 
