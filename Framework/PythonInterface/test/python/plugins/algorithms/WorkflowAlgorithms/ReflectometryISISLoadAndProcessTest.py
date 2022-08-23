@@ -520,11 +520,35 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['no_TOF_group', 'TOF_12345+67890', '12345', '67890']
         self._assert_run_algorithm_succeeds(args, outputs)
 
+    def test_sum_banks_is_run_for_2D_detector_workspace(self):
+        self._create_2D_detector_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        outputs = ['IvsQ_38415', 'IvsQ_binned_38415', 'TOF', 'TOF_38415']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryISISSumBanks', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)
+
+    def test_sum_banks_is_not_run_for_linear_detector_workspace(self):
+        self._create_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        outputs = ['IvsQ_38415', 'IvsQ_binned_38415', 'TOF', 'TOF_38415']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)
+
     # TODO test if no runNumber is on the WS
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
+                                   BankPixelWidth=2, XMin=200, OutputWorkspace=name)
+        AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
+
+    def _create_2D_detector_workspace(self, run_number, prefix='', suffix=''):
+        name = prefix + str(run_number) + suffix
+        ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=2, NumMonitors=2,
                                    BankPixelWidth=2, XMin=200, OutputWorkspace=name)
         AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
 

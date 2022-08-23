@@ -8,6 +8,8 @@
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         WorkspaceGroup)
 
+from mantid.geometry import ContainsState
+
 from mantid.simpleapi import MergeRuns
 
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
@@ -79,10 +81,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Convert run numbers to real workspaces
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
+        inputWorkspaces = self._sumBanks(inputWorkspaces)
         firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
         firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
+        firstTransWorkspaces = self._sumBanks(firstTransWorkspaces)
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
+        secondTransWorkspaces = self._sumBanks(secondTransWorkspaces)
         # Combine multiple input runs, if required
         inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
@@ -215,6 +220,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if not ws:
                 raise RuntimeError('Error loading run ' + run)
             workspaces.append(ws)
+        return workspaces
+
+    def _sumBanks(self, workspaces):
+        for workspace_name in workspaces:
+            workspace = AnalysisDataService.retrieve(workspace_name)
+            if workspace.getInstrument().containsRectDetectors() == ContainsState.Full:
+                args = {"InputWorkspace": workspace}
+                alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
+                alg.execute()
         return workspaces
 
     def _prefixedName(self, name, isTrans):
