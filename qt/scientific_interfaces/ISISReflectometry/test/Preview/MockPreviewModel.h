@@ -10,7 +10,10 @@
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "ROIType.h"
+#include "Reduction/PreviewRow.h"
 
+#include <boost/optional.hpp>
 #include <gmock/gmock.h>
 
 #include <string>
@@ -27,15 +30,16 @@ public:
   MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getReducedWs, (), (const, override));
   MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
-  MOCK_METHOD(ProcessingInstructions, getProcessingInstructions, (), (const, override));
+  MOCK_METHOD(boost::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
+  MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
+  MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
 
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
-  MOCK_METHOD(void, setSelectedRegion, (Selection const &), (override));
+  MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));
 
   MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
   MOCK_METHOD(void, reduceAsync, (IJobManager &), (override));
-  MOCK_METHOD(std::string, detIDsToString, (std::vector<Mantid::detid_t> const &), (const, override));
   MOCK_METHOD(void, exportSummedWsToAds, (), (const, override));
   MOCK_METHOD(void, exportReducedWsToAds, (), (const, override));
 };

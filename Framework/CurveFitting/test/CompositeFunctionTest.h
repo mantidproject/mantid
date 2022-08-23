@@ -21,12 +21,12 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 #include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidCurveFitting/GSLJacobian.h"
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 

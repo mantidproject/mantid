@@ -14,7 +14,7 @@
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
 #include "MantidAPI/RegionSelectorObserver.h"
-
+#include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
 #include <memory>
 
 namespace MantidQt::Widgets {
@@ -22,6 +22,7 @@ class IRegionSelector;
 }
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IBatchPresenter;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
                                                         public PreviewViewSubscriber,
@@ -47,13 +48,22 @@ public:
     std::unique_ptr<IJobManager> jobManager;
     std::unique_ptr<IInstViewModel> instViewModel;
     std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
+    std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> plotPresenter{nullptr};
   };
 
   PreviewPresenter(Dependencies dependencies);
   virtual ~PreviewPresenter() = default;
 
+  // IPreviewPresenter overrides
+  void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
+
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
+  void notifyUpdateAngle() override;
 
   void notifyInstViewZoomRequested() override;
   void notifyInstViewEditRequested() override;
@@ -61,24 +71,45 @@ public:
   void notifyInstViewShapeChanged() override;
 
   void notifyRegionSelectorExportAdsRequested() override;
-  void notify1DPlotExportAdsRequested() override;
+  void notifyLinePlotExportAdsRequested() override;
 
+  void notifyEditROIModeRequested() override;
   void notifyRectangularROIModeRequested() override;
+
+  void notifyApplyRequested() override;
 
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
   void notifySumBanksCompleted() override;
   void notifyReductionCompleted() override;
 
+  void notifySumBanksAlgorithmError() override;
+  void notifyReductionAlgorithmError() override;
+
   // RegionSelectionObserver overrides
   void notifyRegionChanged() override;
 
+  PreviewRow const &getPreviewRow() const override;
+
 private:
   IPreviewView *m_view{nullptr};
+  IBatchPresenter *m_mainPresenter{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
+  std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
+
+  void updateWidgetEnabledState();
+  void updateSelectedRegionInModelFromView();
+
+  void plotInstView();
+  void plotRegionSelector();
+  void plotLinePlot();
+  void runSumBanks();
+  void runReduction();
+  void clearRegionSelector();
+  void clearReductionPlot();
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

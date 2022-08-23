@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "PreviewModel.h"
+#include "ROIType.h"
 #include "test/ReflMockObjects.h"
 
 #include <cxxtest/TestSuite.h>
@@ -82,12 +83,28 @@ public:
     TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
   }
 
-  void test_set_selected_region_converts_to_processing_instructions_string() {
+  void test_set_selected_signal_region_converts_to_processing_instructions_string() {
     PreviewModel model;
     const IPreviewModel::Selection inputRoi{3.6, 11.4};
-    model.setSelectedRegion(inputRoi);
+    model.setSelectedRegion(ROIType::Signal, inputRoi);
     // Start and end are rounded to nearest integer and converted to a string
-    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions())
+    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions(ROIType::Signal))
+  }
+
+  void test_set_selected_background_region_converts_to_processing_instructions_string() {
+    PreviewModel model;
+    const IPreviewModel::Selection inputRoi{3.6, 11.4};
+    model.setSelectedRegion(ROIType::Background, inputRoi);
+    // Start and end are rounded to nearest integer and converted to a string
+    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions(ROIType::Background))
+  }
+
+  void test_set_selected_transmission_region_converts_to_processing_instructions_string() {
+    PreviewModel model;
+    const IPreviewModel::Selection inputRoi{3.6, 11.4};
+    model.setSelectedRegion(ROIType::Transmission, inputRoi);
+    // Start and end are rounded to nearest integer and converted to a string
+    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions(ROIType::Transmission))
   }
 
   void test_sum_banks() {
@@ -116,20 +133,6 @@ public:
     auto workspace = model.getReducedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);
-  }
-
-  void test_convert_detIDs_to_string() {
-    PreviewModel model;
-    auto const indices = std::vector<Mantid::detid_t>{99, 4, 5};
-    auto result = model.detIDsToString(indices);
-    TS_ASSERT_EQUALS(result, "99,4,5");
-  }
-
-  void test_convert_empty_detIDs_to_string() {
-    PreviewModel model;
-    auto const indices = std::vector<Mantid::detid_t>{};
-    auto result = model.detIDsToString(indices);
-    TS_ASSERT_EQUALS("", result);
   }
 
   void test_export_summed_ws_to_ads() {
@@ -170,6 +173,54 @@ public:
     PreviewModel model;
     // This should emit an error, but we cannot observe this from our test
     model.exportReducedWsToAds();
+  }
+
+  void test_get_set_loaded_workspace() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    TS_ASSERT_EQUALS(model.getLoadedWs(), ws);
+  }
+
+  void test_get_theta_from_workspace() {
+    PreviewModel model;
+    auto theta = 2.3;
+    auto ws = createWorkspace();
+    ws->mutableRun().addProperty("Theta", theta, true);
+    model.setLoadedWs(ws);
+
+    TS_ASSERT(model.getDefaultTheta());
+    TS_ASSERT_DELTA(*model.getDefaultTheta(), theta, 1e-6);
+  }
+
+  void test_get_theta_from_workspace_not_found() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    TS_ASSERT(!model.getDefaultTheta());
+  }
+
+  void test_get_theta_from_workspace_is_invalid() {
+    PreviewModel model;
+    auto thetas = std::vector<double>{0.0, -1.2, 0.00000000008};
+    for (auto theta : thetas) {
+      auto ws = createWorkspace();
+      ws->mutableRun().addProperty("Theta", theta, true);
+      model.setLoadedWs(ws);
+
+      TS_ASSERT(!model.getDefaultTheta());
+    }
+  }
+
+  void test_get_preview_row() {
+    PreviewModel model;
+    auto ws = createWorkspace();
+    model.setLoadedWs(ws);
+
+    PreviewRow const &previewRow = model.getPreviewRow();
+    TS_ASSERT_EQUALS(ws, previewRow.getLoadedWs())
   }
 
 private:

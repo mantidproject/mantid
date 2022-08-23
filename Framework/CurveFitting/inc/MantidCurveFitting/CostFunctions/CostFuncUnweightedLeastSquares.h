@@ -31,7 +31,7 @@ public:
   std::string shortName() const override { return "Chi-sq-unw."; }
 
 protected:
-  void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) override;
+  void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel) override;
   std::vector<double> getFitWeights(API::FunctionValues_sptr values) const override;
 
   double getResidualVariance() const;

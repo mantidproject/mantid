@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+import argparse
 import atexit
 import importlib
 import os
@@ -133,8 +134,7 @@ def start_error_reporter():
     Used to start the error reporter if the program has segfaulted.
     """
 
-    errorreports_main.main(["--application", APPNAME,
-                            "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN])
+    errorreports_main.main(["--application", APPNAME, "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN])
 
 
 def create_and_launch_workbench(app, command_line_options):
@@ -223,14 +223,20 @@ def create_and_launch_workbench(app, command_line_options):
         exit_value = -1
     finally:
         ORIGINAL_SYS_EXIT(exit_value)
-    ORIGINAL_SYS_EXIT(exit_value)
 
 
-def start(options):
-    """Main entry point for the application"""
-    workbench_process = multiprocessing.Process(target=initialise_qapp_and_launch_workbench, args=[options])
-    workbench_process.start()
-    workbench_process.join()
+def start(options: argparse.ArgumentParser):
+    """Start workbench based on the given options
 
-    if not options.no_error_reporter and (workbench_process.exitcode != 0 or workbench_process.exitcode is None):
-        start_error_reporter()
+    :param options: An object describing the command-line arguments passed in
+    """
+    if options.single_process:
+        initialise_qapp_and_launch_workbench(options)
+    else:
+        workbench_process = multiprocessing.Process(target=initialise_qapp_and_launch_workbench, args=[options])
+        workbench_process.start()
+        workbench_process.join()
+
+        exit_code = workbench_process.exitcode if workbench_process.exitcode is not None else 1
+        if not options.no_error_reporter and exit_code != 0:
+            start_error_reporter()

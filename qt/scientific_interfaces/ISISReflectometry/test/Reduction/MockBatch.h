@@ -26,6 +26,7 @@ public:
   MOCK_METHOD(Slicing const &, slicing, (), (const, override));
 
   MOCK_METHOD(boost::optional<LookupRow>, findLookupRow, (Row const &), (const, override));
+  MOCK_METHOD(boost::optional<LookupRow>, findLookupRow, (PreviewRow const &), (const, override));
   MOCK_METHOD(boost::optional<LookupRow>, findWildcardLookupRow, (), (const, override));
   MOCK_METHOD(boost::optional<Item &>, getItemWithOutputWorkspaceOrNone, (std::string const &), (override));
   MOCK_METHOD(bool, isInSelection, (const Item &, const std::vector<MantidWidgets::Batch::RowLocation> &), (override));

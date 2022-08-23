@@ -486,6 +486,15 @@ class SliceViewerModel(SliceViewerBaseModel):
                 for icol, idim in enumerate(i_qdims):
                     # copy first irow_end components of basis vec are always Q
                     proj_matrix[0:irow_end, icol] = list(ws.getBasisVector(idim))[0:irow_end]
+                # if determinant is zero, try to get the info from log or revert back to identity matrix
+                if np.isclose(np.linalg.det(proj_matrix),0):
+                    # for histo try to find axes from log
+                    try:
+                        expt_info = ws.getExperimentInfo(0)
+                        proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
+                    except (AttributeError, KeyError, ValueError):
+                        # revert back to orthogonal projection
+                        proj_matrix = np.eye(3)
             else:
                 # for event try to find axes from log
                 try:

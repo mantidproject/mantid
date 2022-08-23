@@ -37,7 +37,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
                                                       public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
+  BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<IJobRunner> jobRunner,
                  std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
@@ -92,6 +92,7 @@ public:
   std::string instrumentName() const override;
   int percentComplete() const override;
   std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
+  void notifyPreviewApplyRequested() override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;
@@ -120,7 +121,7 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
   std::unique_ptr<IPreviewPresenter> m_previewPresenter;
   bool m_unsavedBatchFlag;
-  IJobRunner *m_jobRunner;
+  std::unique_ptr<IJobRunner> m_jobRunner;
   MantidQt::MantidWidgets::IMessageHandler *m_messageHandler;
 
   friend class Encoder;

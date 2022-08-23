@@ -33,7 +33,7 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, IJobRunner *jobRunner,
+BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<IJobRunner> jobRunner,
                                std::unique_ptr<IRunsPresenter> runsPresenter,
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
@@ -44,7 +44,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, 
     : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
+      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(std::move(jobRunner)),
       m_messageHandler(messageHandler), m_jobManager(std::make_unique<BatchJobManager>(*m_model)) {
 
   m_jobRunner->subscribe(this);
@@ -55,6 +55,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<IBatch> model, 
   m_experimentPresenter->acceptMainPresenter(this);
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
+  m_previewPresenter->acceptMainPresenter(this);
 
   m_unsavedBatchFlag = false;
 
@@ -135,7 +136,8 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
-    auto const workspaces = m_jobManager->algorithmOutputWorkspacesToSave(algorithm);
+    auto const workspaces =
+        m_jobManager->algorithmOutputWorkspacesToSave(algorithm, m_savePresenter->shouldAutosaveGroupRows());
     m_savePresenter->saveWorkspaces(workspaces);
   }
 }
@@ -182,6 +184,7 @@ void BatchPresenter::resumeReduction() {
 
 void BatchPresenter::notifyReductionResumed() {
   // Notify child presenters
+  m_previewPresenter->notifyReductionResumed();
   m_savePresenter->notifyReductionResumed();
   m_eventPresenter->notifyReductionResumed();
   m_experimentPresenter->notifyReductionResumed();
@@ -196,6 +199,7 @@ void BatchPresenter::notifyReductionPaused() {
   // Update the model
   m_jobManager->notifyReductionPaused();
   // Notify child presenters
+  m_previewPresenter->notifyReductionPaused();
   m_savePresenter->notifyReductionPaused();
   m_eventPresenter->notifyReductionPaused();
   m_experimentPresenter->notifyReductionPaused();
@@ -227,6 +231,7 @@ void BatchPresenter::resumeAutoreduction() {
 
 void BatchPresenter::notifyAutoreductionResumed() {
   // Notify child presenters
+  m_previewPresenter->notifyAutoreductionResumed();
   m_savePresenter->notifyAutoreductionResumed();
   m_eventPresenter->notifyAutoreductionResumed();
   m_experimentPresenter->notifyAutoreductionResumed();
@@ -248,6 +253,7 @@ void BatchPresenter::pauseAutoreduction() {
 
 void BatchPresenter::notifyAutoreductionPaused() {
   // Notify child presenters
+  m_previewPresenter->notifyAutoreductionPaused();
   m_savePresenter->notifyAutoreductionPaused();
   m_eventPresenter->notifyAutoreductionPaused();
   m_experimentPresenter->notifyAutoreductionPaused();
@@ -360,5 +366,10 @@ void BatchPresenter::renameHandle(const std::string &oldName, const std::string 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
+}
+
+void BatchPresenter::notifyPreviewApplyRequested() {
+  auto const &previewRow = m_previewPresenter->getPreviewRow();
+  m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

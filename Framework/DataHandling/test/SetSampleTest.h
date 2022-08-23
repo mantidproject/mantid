@@ -791,6 +791,56 @@ public:
     TS_ASSERT(alg->isExecuted());
   }
 
+  void test_material_properties_correctly_set() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    auto sampleShape = ComponentCreationHelper::createSphere(0.5);
+    sampleShape->setID("mysample");
+    inputWS->mutableSample().setShape(sampleShape);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", "");
+    auto props = createMaterialProps();
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("CoherentXSection", 10.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("IncoherentXSection", 5.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("AttenuationXSection", 3.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("NumberDensity", 2.0), "");
+    props->declareProperty(std::make_unique<PropertyWithValue<double>>("EffectiveNumberDensity", 1.25), "");
+    alg->setProperty("Material", props);
+    alg->setProperty("Environment", "");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    const auto &material = inputWS->sample().getMaterial();
+    TS_ASSERT_EQUALS("V", material.name());
+    TS_ASSERT_EQUALS(10.0, material.cohScatterXSection());
+    TS_ASSERT_EQUALS(5.0, material.incohScatterXSection());
+    TS_ASSERT_EQUALS(3.0, material.absorbXSection());
+    TS_ASSERT_DELTA(2.0, material.numberDensity(), 1e-04);
+    TS_ASSERT_DELTA(1.25, material.numberDensityEffective(), 1e-04);
+  }
+
+  void test_run_Geometry_As_Sphere() {
+    using Mantid::Kernel::V3D;
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
+    setTestReferenceFrame(inputWS);
+
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry", createSphereGeometryProps());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    // New shape
+    const auto &sampleShape = inputWS->sample().getShape();
+    TS_ASSERT(sampleShape.hasValidShape());
+
+    // Check some random points inside sphere
+    // Check boundary
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0.049, 0., 0.)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0., 0.049, 0.)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0., 0., 0.049)));
+    // Check outside boundary
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0., 0., 0.06)));
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
@@ -1175,6 +1225,21 @@ private:
     props->declareProperty(std::make_unique<DoubleProperty>("OuterRadius", 0.4), "");
     props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
     props->declareProperty(std::make_unique<DoubleArrayProperty>("Axis", axis), "");
+    return props;
+  }
+
+  Mantid::Kernel::PropertyManager_sptr createSphereGeometryProps() {
+    using namespace Mantid::Kernel;
+    using DoubleArrayProperty = ArrayProperty<double>;
+    using DoubleProperty = PropertyWithValue<double>;
+    using StringProperty = PropertyWithValue<std::string>;
+
+    auto props = std::make_shared<PropertyManager>();
+    props->declareProperty(std::make_unique<StringProperty>("Shape", "Sphere"), "");
+    props->declareProperty(std::make_unique<DoubleProperty>("Radius", 5), "");
+    std::vector<double> center{0, 0, 1};
+    props->declareProperty(std::make_unique<DoubleArrayProperty>("Center", center), "");
+
     return props;
   }
 

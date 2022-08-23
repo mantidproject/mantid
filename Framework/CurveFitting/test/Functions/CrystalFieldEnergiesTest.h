@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/CrystalFieldEnergies.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 #include <map>
 
 using Mantid::CurveFitting::ComplexFortranMatrix;
@@ -18,7 +18,7 @@ using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::CrystalFieldEnergies;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::GSLVector;
+using Mantid::CurveFitting::EigenVector;
 
 class CrystalFieldEnergiesTest : public CxxTest::TestSuite {
 public:
@@ -41,7 +41,7 @@ public:
     bkq["B42"] = -3.8296;
     bkq["B44"] = -2.3210;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -56,7 +56,7 @@ public:
     bkq["IB42"] = -3.8296;
     bkq["IB44"] = -2.3210;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -74,7 +74,7 @@ public:
     bkq["IB43"] = -4.8296;
     bkq["IB44"] = -2.3210;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -89,7 +89,7 @@ public:
     bkq["B60"] = -3.8296;
     bkq["IB64"] = -2.3210;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -104,7 +104,7 @@ public:
     bkq["B60"] = -3.8296;
     bkq["B64"] = -2.3210;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -120,7 +120,7 @@ public:
     bkq["IB63"] = -2.3210;
     bkq["IB66"] = 3.2310;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -136,7 +136,7 @@ public:
     bkq["B63"] = -2.3210;
     bkq["B66"] = 3.2310;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -150,7 +150,7 @@ public:
     bkq["B60"] = -3.8296;
     bkq["B66"] = -2.3210;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -164,7 +164,7 @@ public:
     bkq["B60"] = -3.8296;
     bkq["B64"] = -21 * bkq["B60"];
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, emptyBme, evalues, evectors, hamiltonian);
@@ -184,7 +184,7 @@ public:
     bme["BmolY"] = 2;
     bme["BmolX"] = 3;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, bme, evalues, evectors, hamiltonian);
@@ -204,7 +204,7 @@ public:
     bme["BextY"] = 2;
     bme["BextZ"] = 3;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, bme, evalues, evectors, hamiltonian);
@@ -227,7 +227,7 @@ public:
     bme["BmolY"] = 2;
     bme["BmolZ"] = 1;
 
-    GSLVector evalues;
+    EigenVector evalues;
     ComplexMatrix evectors;
     ComplexMatrix hamiltonian;
     run(1, bkq, bme, evalues, evectors, hamiltonian);
@@ -236,7 +236,7 @@ public:
 
 private:
   bool run(int nre, const std::map<std::string, double> &bkq, const std::map<std::string, double> &bme,
-           GSLVector &evalues, ComplexMatrix &evectors, ComplexMatrix &hamiltonian) {
+           EigenVector &evalues, ComplexMatrix &evectors, ComplexMatrix &hamiltonian) {
     CrystalFieldEnergies alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -270,7 +270,7 @@ private:
 private:
   std::map<std::string, double> emptyBme;
 
-  void doTestEigensystem(GSLVector &en, ComplexMatrix &wf, ComplexMatrix &ham) {
+  void doTestEigensystem(EigenVector &en, ComplexMatrix &wf, ComplexMatrix &ham) {
     const size_t n = en.size();
     if (n <= 1)
       return;

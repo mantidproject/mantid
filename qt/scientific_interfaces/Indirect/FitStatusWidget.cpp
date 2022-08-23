@@ -36,19 +36,19 @@ QPalette getFitStatusColor(const std::string &status) {
 namespace MantidQt::CustomInterfaces::IDA {
 
 FitStatusWidget::FitStatusWidget(QWidget *parent) : QWidget(parent) {
-  auto fitInformationLayout = new QVBoxLayout(this);
+  auto fitInformationLayout = new QVBoxLayout();
 
-  auto fitStatusLayout = new QHBoxLayout(this);
-  auto fitStatusLabel = new QLabel(this);
+  auto fitStatusLayout = new QHBoxLayout();
+  auto fitStatusLabel = new QLabel();
   fitStatusLabel->setText(QString::fromStdString("Status:"));
-  m_fitStatus = new QLabel(this);
+  m_fitStatus = new QLabel();
   fitStatusLayout->addWidget(fitStatusLabel);
   fitStatusLayout->addWidget(m_fitStatus);
 
-  auto fitChiSquaredLayout = new QHBoxLayout(this);
-  auto fitChiSquaredLabel = new QLabel(this);
+  auto fitChiSquaredLayout = new QHBoxLayout();
+  auto fitChiSquaredLabel = new QLabel();
   fitChiSquaredLabel->setText(QString::fromStdString("Chi squared:"));
-  m_fitChiSquared = new QLabel(this);
+  m_fitChiSquared = new QLabel();
   fitChiSquaredLayout->addWidget(fitChiSquaredLabel);
   fitChiSquaredLayout->addWidget(m_fitChiSquared);
 

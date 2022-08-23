@@ -51,7 +51,7 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):
-        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)']:
+        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)', 'G_k(r)']:
             kwargs['pdf_type'] = 'G(r)'
             logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -161,3 +161,6 @@ class Polaris(AbstractInst):
         return absorb_corrections.apply_paalmanpings_absorb_and_subtract_empty(
             workspace=workspace, summed_empty=summed_empty, sample_details=sample_details,
             paalman_pings_events_per_point=paalman_pings_events_per_point)
+
+    def perform_abs_vanadium_norm(self):
+        return self._inst_settings.van_normalisation_method == "Absolute"

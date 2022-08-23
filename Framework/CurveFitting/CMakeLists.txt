@@ -31,8 +31,6 @@ set(SRC_FILES
     src/Algorithms/VesuvioCalculateGammaBackground.cpp
     src/Algorithms/VesuvioCalculateMS.cpp
     src/AugmentedLagrangianOptimizer.cpp
-    src/ComplexMatrix.cpp
-    src/ComplexVector.cpp
     src/Constraints/BoundaryConstraint.cpp
     src/CostFunctions/CostFuncFitting.cpp
     src/CostFunctions/CostFuncLeastSquares.cpp
@@ -41,6 +39,12 @@ set(SRC_FILES
     src/CostFunctions/CostFuncPoisson.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
+    src/EigenComplexMatrix.cpp
+    src/EigenComplexVector.cpp
+    src/EigenMatrix.cpp
+    src/EigenMatrixView.cpp
+    src/EigenVector.cpp
+    src/EigenVectorView.cpp
     src/FuncMinimizers/BFGS_Minimizer.cpp
     src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
     src/FuncMinimizers/DerivMinimizer.cpp
@@ -64,6 +68,7 @@ set(SRC_FILES
     src/Functions/Bk2BkExpConvPV.cpp
     src/Functions/ChebfunBase.cpp
     src/Functions/Chebyshev.cpp
+    src/Functions/ChudleyElliotSQE.cpp
     src/Functions/ComptonPeakProfile.cpp
     src/Functions/ComptonProfile.cpp
     src/Functions/ComptonScatteringCountRate.cpp
@@ -100,6 +105,7 @@ set(SRC_FILES
     src/Functions/ExpDecay.cpp
     src/Functions/ExpDecayMuon.cpp
     src/Functions/ExpDecayOsc.cpp
+    src/Functions/FickDiffusionSQE.cpp
     src/Functions/FlatBackground.cpp
     src/Functions/FullprofPolynomial.cpp
     src/Functions/FunctionQDepends.cpp
@@ -109,6 +115,7 @@ set(SRC_FILES
     src/Functions/GaussianComptonProfile.cpp
     src/Functions/GramCharlier.cpp
     src/Functions/GramCharlierComptonProfile.cpp
+    src/Functions/HallRossSQE.cpp
     src/Functions/IkedaCarpenterPV.cpp
     src/Functions/InelasticDiffRotDiscreteCircle.cpp
     src/Functions/InelasticDiffSphere.cpp
@@ -156,8 +163,6 @@ set(SRC_FILES
     src/Functions/Voigt.cpp
     src/Functions/ConvTempCorrection.cpp
     src/GSLFunctions.cpp
-    src/GSLMatrix.cpp
-    src/GSLVector.cpp
     src/GeneralDomainCreator.cpp
     src/HistogramDomainCreator.cpp
     src/IFittingAlgorithm.cpp
@@ -212,19 +217,24 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h
     inc/MantidCurveFitting/Algorithms/VesuvioCalculateMS.h
     inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
-    inc/MantidCurveFitting/ComplexMatrix.h
-    inc/MantidCurveFitting/ComplexVector.h
     inc/MantidCurveFitting/Constraints/BoundaryConstraint.h
     inc/MantidCurveFitting/CostFunctions/CostFuncFitting.h
     inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncPoisson.h
+    inc/MantidCurveFitting/EigenComplexMatrix.h
+    inc/MantidCurveFitting/EigenComplexVector.h
+    inc/MantidCurveFitting/EigenFortranDefs.h
+    inc/MantidCurveFitting/EigenFortranMatrix.h
+    inc/MantidCurveFitting/EigenFortranVector.h
+    inc/MantidCurveFitting/EigenJacobian.h
+    inc/MantidCurveFitting/EigenMatrix.h
+    inc/MantidCurveFitting/EigenMatrixView.h
+    inc/MantidCurveFitting/EigenVector.h
+    inc/MantidCurveFitting/EigenVectorView.h
     inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
-    inc/MantidCurveFitting/FortranDefs.h
-    inc/MantidCurveFitting/FortranMatrix.h
-    inc/MantidCurveFitting/FortranVector.h
     inc/MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h
     inc/MantidCurveFitting/FuncMinimizers/DampedGaussNewtonMinimizer.h
     inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
@@ -248,6 +258,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/Bk2BkExpConvPV.h
     inc/MantidCurveFitting/Functions/ChebfunBase.h
     inc/MantidCurveFitting/Functions/Chebyshev.h
+    inc/MantidCurveFitting/Functions/ChudleyElliotSQE.h
     inc/MantidCurveFitting/Functions/ComptonPeakProfile.h
     inc/MantidCurveFitting/Functions/ComptonProfile.h
     inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
@@ -279,6 +290,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ExpDecay.h
     inc/MantidCurveFitting/Functions/ExpDecayMuon.h
     inc/MantidCurveFitting/Functions/ExpDecayOsc.h
+    inc/MantidCurveFitting/Functions/FickDiffusionSQE.h
     inc/MantidCurveFitting/Functions/FlatBackground.h
     inc/MantidCurveFitting/Functions/FullprofPolynomial.h
     inc/MantidCurveFitting/Functions/FunctionQDepends.h
@@ -288,6 +300,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/GramCharlier.h
     inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
+    inc/MantidCurveFitting/Functions/HallRossSQE.h
     inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
     inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
@@ -335,9 +348,6 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/Voigt.h
     inc/MantidCurveFitting/Functions/ConvTempCorrection.h
     inc/MantidCurveFitting/GSLFunctions.h
-    inc/MantidCurveFitting/GSLJacobian.h
-    inc/MantidCurveFitting/GSLMatrix.h
-    inc/MantidCurveFitting/GSLVector.h
     inc/MantidCurveFitting/GeneralDomainCreator.h
     inc/MantidCurveFitting/HalfComplex.h
     inc/MantidCurveFitting/HistogramDomainCreator.h
@@ -389,17 +399,22 @@ set(TEST_FILES
     Algorithms/VesuvioCalculateGammaBackgroundTest.h
     Algorithms/VesuvioCalculateMSTest.h
     AugmentedLagrangianOptimizerTest.h
-    ComplexMatrixTest.h
-    ComplexVectorTest.h
     CompositeFunctionTest.h
     Constraints/BoundaryConstraintTest.h
     CostFunctions/CostFuncFittingTest.h
     CostFunctions/CostFuncUnweightedLeastSquaresTest.h
     CostFunctions/LeastSquaresTest.h
     CostFuncPoissonTest.h
+    EigenComplexMatrixTest.h
+    EigenComplexVectorTest.h
+    EigenFortranMatrixTest.h
+    EigenFortranVectorTest.h
+    EigenJacobianTest.h
+    EigenMatrixTest.h
+    EigenToGSLTest.h
+    EigenVectorTest.h
+    EigenViewTest.h
     FitMWTest.h
-    FortranMatrixTest.h
-    FortranVectorTest.h
     FuncMinimizers/BFGSTest.h
     FuncMinimizers/DampedGaussNewtonMinimizerTest.h
     FuncMinimizers/ErrorMessagesTest.h
@@ -423,6 +438,7 @@ set(TEST_FILES
     Functions/Bk2BkExpConvPVTest.h
     Functions/ChebfunBaseTest.h
     Functions/ChebyshevTest.h
+    Functions/ChudleyElliotSQETest.h
     Functions/ComptonPeakProfileTest.h
     Functions/ComptonProfileTest.h
     Functions/ComptonScatteringCountRateTest.h
@@ -451,6 +467,7 @@ set(TEST_FILES
     Functions/ExpDecayMuonTest.h
     Functions/ExpDecayOscTest.h
     Functions/ExpDecayTest.h
+    Functions/FickDiffusionSQETest.h
     Functions/FlatBackgroundTest.h
     Functions/FullprofPolynomialTest.h
     Functions/FunctionQDependsTest.h
@@ -459,6 +476,7 @@ set(TEST_FILES
     Functions/GaussianComptonProfileTest.h
     Functions/GaussianTest.h
     Functions/GramCharlierComptonProfileTest.h
+    Functions/HallRossSQETest.h
     Functions/IkedaCarpenterPVTest.h
     Functions/InelasticIsoRotDiffTest.h
     Functions/IsoRotDiffTest.h
@@ -503,8 +521,6 @@ set(TEST_FILES
     Functions/VesuvioResolutionTest.h
     Functions/VoigtTest.h
     Functions/ConvTempCorrectionTest.h
-    GSLMatrixTest.h
-    GSLVectorTest.h
     GeneralDomainCreatorTest.h
     GramCharlierTest.h
     HistogramDomainCreatorTest.h

@@ -1,21 +1,36 @@
 # ######################################################################################################################
 # Matplotlib-based implementation
 # ######################################################################################################################
-set(MPL_SRC_FILES src/Mpl/ContourPreviewPlot.cpp src/Mpl/ExternalPlotter.cpp src/Mpl/PeakPicker.cpp
-                  src/Mpl/PreviewPlot.cpp src/Mpl/RangeSelector.cpp src/Mpl/SingleSelector.cpp
+set(MPL_SRC_FILES
+    src/Mpl/ContourPreviewPlot.cpp
+    src/Mpl/ExternalPlotter.cpp
+    src/Mpl/PeakPicker.cpp
+    src/Mpl/PreviewPlot.cpp
+    src/Mpl/RangeSelector.cpp
+    src/Mpl/SingleSelector.cpp
+    src/PlotWidget/PlotModel.cpp
+    src/PlotWidget/PlotPresenter.cpp
+    src/PlotWidget/QtPlotView.cpp
 )
 
 set(MPL_MOC_FILES
     inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
-    inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
-    inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
+    inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
+    inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(MPL_INC_FILES
-    ${MPL_MOC_FILES} inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h inc/MantidQtWidgets/Plotting/AxisID.h
-    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h inc/MantidQtWidgets/Plotting/PeakPicker.h
+    ${MPL_MOC_FILES}
+    inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h
+    inc/MantidQtWidgets/Plotting/AxisID.h
+    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
+    inc/MantidQtWidgets/Plotting/PeakPicker.h
     inc/MantidQtWidgets/Plotting/PreviewPlot.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/IPlotView.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/PlotModel.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h
+    inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 
 set(MPL_UI_FILES inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
@@ -36,7 +51,9 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 
-set(TEST_FILES test/ContourPreviewPlotTest.h test/ExternalPlotterTest.h)
+set(TEST_FILES test/ContourPreviewPlotTest.h test/ExternalPlotterTest.h test/PlotWidget/PlotModelTest.h
+               test/PlotWidget/PlotPresenterTest.h
+)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestInitialization.h")
 # Testing target

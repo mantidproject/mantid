@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
+#include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/PreviewRow.h"
 #include "AlgorithmProperties.h"
@@ -43,6 +44,15 @@ void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties, RangeIn
   AlgorithmProperties::update("MomentumTransferMin", rangeInQ.min(), properties);
   AlgorithmProperties::update("MomentumTransferMax", rangeInQ.max(), properties);
   AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(), properties);
+}
+
+void updateProcessingInstructionsProperties(AlgorithmRuntimeProps &properties, PreviewRow const &previewRow) {
+  AlgorithmProperties::update("ProcessingInstructions", previewRow.getProcessingInstructions(ROIType::Signal),
+                              properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Background), properties);
+  AlgorithmProperties::update("TransmissionProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Transmission), properties);
 }
 
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
@@ -98,8 +108,12 @@ void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCor
 void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment const &experiment) {
   AlgorithmProperties::update("AnalysisMode", analysisModeToString(experiment.analysisMode()), properties);
   AlgorithmProperties::update("Debug", experiment.debug(), properties);
-  AlgorithmProperties::update("SummationType", summationTypeToString(experiment.summationType()), properties);
-  AlgorithmProperties::update("ReductionType", reductionTypeToString(experiment.reductionType()), properties);
+  SummationType summationType = experiment.summationType();
+  AlgorithmProperties::update("SummationType", summationTypeToString(summationType), properties);
+  // The ReductionType value is only relevant when the SummationType is SumInQ
+  ReductionType reductionType =
+      (summationType == SummationType::SumInQ) ? experiment.reductionType() : ReductionType::Normal;
+  AlgorithmProperties::update("ReductionType", reductionTypeToString(reductionType), properties);
   AlgorithmProperties::update("IncludePartialBins", experiment.includePartialBins(), properties);
   updateTransmissionStitchProperties(properties, experiment.transmissionStitchOptions());
   updateBackgroundSubtractionProperties(properties, experiment.backgroundSubtraction());
@@ -293,15 +307,14 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
-  // TODO need to find row by angle/title; for now it just uses the wildcard row
-  auto lookupRow = findWildcardLookupRow(model);
+  auto lookupRow = model.findLookupRow(previewRow);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
   }
   // Update properties from the preview tab
   properties->setProperty("InputWorkspace", previewRow.getSummedWs());
-  properties->setProperty("ProcessingInstructions", previewRow.getProcessingInstructions());
   properties->setProperty("ThetaIn", previewRow.theta());
+  updateProcessingInstructionsProperties(*properties, previewRow);
   return properties;
 }
 

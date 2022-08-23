@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import psutil
 import subprocess
 import sys
 import systemtesting
@@ -12,12 +13,9 @@ import systemtesting
 from mantid.kernel import ConfigService
 from tempfile import NamedTemporaryFile
 
-
 TEST_MESSAGE = "Hello Mantid!"
-
-EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
-                       "darwin": ["MantidWorkbench", "MantidWorkbenchNightly", "MantidWorkbenchUnstable"],
-                       "win32": ["MantidWorkbench.exe"]}
+EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"], "darwin": ["workbench"], "win32": ["workbench.exe"]}
+SUBPROCESS_TIMEOUT_SECS = 300
 
 
 def get_mantid_executables_for_platform(platform):
@@ -33,7 +31,29 @@ def get_mantid_executable_path(platform):
         workbench_exe = os.path.join(directory, executable)
         if os.path.exists(workbench_exe):
             return workbench_exe
-    raise RuntimeError(f"Could not find path to {workbench_exe}.")
+    raise RuntimeError(f"Could not find path to {workbench_exe}. Tried {get_mantid_executables_for_platform(platform)}")
+
+
+def start_and_wait_for_completion(args_list):
+    pids_before_open = set(psutil.pids())
+    process = subprocess.Popen(args_list,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+    exitcode = process.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
+    if sys.platform == 'win32':
+        # The setuptools generated .exe starts a new process using 'pythonw workbench-script.pyw'
+        # but this outer process does not wait for the child to finish so completes leaving workbench
+        # to continue. We attempt to find the python child process by looking at the created pids
+        # and we wait on that. A timeout is set just in case we pick the wrong process and we wait forever
+        pids_after_open = set(psutil.pids())
+        new_pids_created = pids_after_open - pids_before_open
+        for pid in new_pids_created:
+            proc = psutil.Process(pid)
+            if 'python' in proc.exe():
+                print(f"Found Python subprocess {proc.exe()}. Pid={pid}. Waiting for completion...")
+                proc.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
+
+    return exitcode
 
 
 def write_test_script(test_script, test_file):
@@ -54,25 +74,23 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     """
     A system test for testing that Mantid Workbench opens ok for Linux, MacOS and Windows.
     """
+
     def __init__(self):
         super(WorkbenchStartupTest, self).__init__()
 
         self._test_file = NamedTemporaryFile(suffix=".txt", delete=False).name.replace('\\', '/')
         self._test_script = NamedTemporaryFile(suffix=".py", delete=False).name.replace('\\', '/')
-
+        self._executable = get_mantid_executable_path(sys.platform)
         write_test_script(self._test_script, self._test_file)
 
-        self._executable = get_mantid_executable_path(sys.platform)
-
     def runTest(self):
-        process = subprocess.Popen([self._executable, "--execute", self._test_script, "--quit"],
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exitcode = start_and_wait_for_completion([self._executable, "--execute", self._test_script, "--quit"])
 
-        # Wait for the process to finish execution, and assert it was successfully
-        self.assertTrue(process.wait() == 0)
+        # Was the process successful
+        self.assertEqual(0, exitcode)
         # Assert that the test script runs successfully by writing to a .txt file
         with open(self._test_file, "r") as file:
-            self.assertTrue(file.readline() == TEST_MESSAGE)
+            self.assertEqual(TEST_MESSAGE, file.readline())
 
     def cleanup(self):
         remove_file(self._test_script)

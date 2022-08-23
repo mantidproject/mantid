@@ -96,7 +96,7 @@ add_sphinx_build_target(html "sphinx.ext.mathjax")
 add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 
 # qthelp if building workbench
-if(DOCS_QTHELP AND ENABLE_WORKBENCH)
+if(DOCS_QTHELP)
   find_package(
     Qt5
     COMPONENTS Help

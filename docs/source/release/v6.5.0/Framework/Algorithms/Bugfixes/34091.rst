@@ -1,0 +1,1 @@
+- :ref:`GenerateLogbook <algm-GenerateLogbook>` now does not stop the execution when optional headers are not defined in the relevant Instrument Parameter File but only send a warning that they are not available.

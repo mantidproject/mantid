@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>870</height>
+    <height>873</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,6 +44,13 @@
       <widget class="QLineEdit" name="workspace_line_edit"/>
      </item>
      <item>
+      <widget class="QPushButton" name="load_button">
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="angle_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -65,9 +72,12 @@
       <widget class="QDoubleSpinBox" name="angle_spin_box"/>
      </item>
      <item>
-      <widget class="QPushButton" name="load_button">
+      <widget class="QPushButton" name="update_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
-        <string>Load</string>
+        <string>Update</string>
        </property>
       </widget>
      </item>
@@ -170,12 +180,28 @@
            </widget>
           </item>
           <item>
+           <widget class="QToolButton" name="rs_edit_button">
+            <property name="toolTip">
+             <string>Edit a rectangular region of interest</string>
+            </property>
+            <property name="text">
+             <string>Edit ROI</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QToolButton" name="rs_rect_select_button">
             <property name="toolTip">
              <string>Select a rectangular region of interest</string>
             </property>
             <property name="text">
-             <string>Rectangular ROI</string>
+             <string/>
+            </property>
+            <property name="popupMode">
+             <enum>QToolButton::MenuButtonPopup</enum>
+            </property>
+            <property name="toolButtonStyle">
+             <enum>Qt::ToolButtonTextBesideIcon</enum>
             </property>
            </widget>
           </item>
@@ -202,7 +228,7 @@
       <widget class="QWidget" name="linePlotLayoutWidget">
        <layout class="QVBoxLayout" name="line_plot_layout">
         <item>
-         <widget class="QToolButton" name="plot_ads_export_button">
+         <widget class="QToolButton" name="lp_ads_export_button">
           <property name="toolTip">
            <string>Export the reduced workspace to the workspaces list</string>
           </property>
@@ -212,7 +238,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="MantidQt::MantidWidgets::QtPlotView" name="line_plot" native="true">
+          <property name="toolTip">
+           <string>Reduced data. Use right-click for plot options</string>
+          </property>
+          <property name="toolTipDuration">
+           <number>2000</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -228,7 +261,7 @@
       <widget class="QTableWidget" name="tableWidget_2"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="apply_button">
        <property name="text">
         <string>Apply</string>
        </property>
@@ -238,12 +271,20 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::QtPlotView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>plot_ads_export_button</tabstop>
-  <tabstop>treeView</tabstop>
+  <tabstop>rs_ads_export_button</tabstop>
+  <tabstop>lp_ads_export_button</tabstop>
   <tabstop>tableWidget_2</tabstop>
-  <tabstop>pushButton_3</tabstop>
+  <tabstop>apply_button</tabstop>
  </tabstops>
  <resources>
   <include location="../../../../icons/resources/icons.qrc"/>

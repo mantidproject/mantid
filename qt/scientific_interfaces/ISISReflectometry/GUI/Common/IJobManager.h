@@ -19,6 +19,9 @@ public:
   virtual void notifyLoadWorkspaceCompleted() = 0;
   virtual void notifySumBanksCompleted() = 0;
   virtual void notifyReductionCompleted() = 0;
+
+  virtual void notifySumBanksAlgorithmError() = 0;
+  virtual void notifyReductionAlgorithmError() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IJobManager {
