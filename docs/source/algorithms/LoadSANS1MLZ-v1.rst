@@ -13,7 +13,7 @@ This algorithm loads the raw data files produced by the SANS-1 instrument at MLZ
 
 The loader reads out the detector positions from the instrument definition file
 (`IDF <https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_) and places the
-detectors accordingly. The `instrument view window <https://www.mantidproject.org/Instrument_View>`_
+detectors accordingly. The `Instrument View <https://www.mantidproject.org/Instrument_View>`_ window
 can be activated by right clicking on the loaded workspace and selecting the "Show Instrument" option
 (available only in a :ref:`"vector" <modes>` mode).
 
@@ -36,9 +36,9 @@ The information from all sections of the raw data file is written to Sample Logs
 Sample Logs, a user needs to use the
 `keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
 the key consists of a section's title followed by a dot and the parameter of interest that belongs
-to that section. The most relevant information, such as: wavelength, collimation,
-sample_detector_distance, duration, monitor1, monitor2, thickness, position is stored in separate
-variables.
+to that section. The most relevant parameters, such as "wavelength", "collimation",
+"sample_detector_distance", "duration", "monitor1", "monitor2", "thickness" and "position" can be accessed
+directly using the parameter name.
 
 **Example - Access to the information**
 
@@ -64,18 +64,20 @@ Output:
 Two modes of loading data
 -------------------------
 
-* Whenever the loader is used in a :ref:`"vector" <vector example>` (default) mode  then the output
+* Whenever the loader is used in a ``vector`` (default) mode  then the output
   is written to a 1D vector-shaped workspace. As a result, the data can be visualised by right
   clicking on the loaded workspace and selecting the "Show Instrument" option, which activates the
-  `Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool. Also by selecting the
-  "Show Detectors" option, you can activate the "Detector table", it contains Workspace Indices,
-  Spectrum Numbers, Detector IDs and locations of the detectors, together with a flag showing which
-  are monitors.
+  `Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool. Also, by selecting the
+  "Show Detectors" option, you can activate the Detector Table, which contains Workspace Indices,
+  Spectrum Numbers, Detector IDs and locations of the detectors, together with a flag showing if
+  a detector is a monitor.
 
-* Whenever the loader is used in a :ref:`"matrix" <matrix example>` mode, then the output is written
+* Whenever the loader is used in a ``matrix`` mode, then the output is written
   to a 2D matrix workspace. In this case, the data can be visualised by right clicking on the loaded
-  workspace and selecting "Show Slice Viewer" or one of the options under the "Plot" menu. At the
-  same time, the "Show Instrument" and "Show Detectors" options will not be accessible.
+  workspace and selecting `Show Slice Viewer <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html>`_
+  or one of the options under the
+  `Plot <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html>`_
+  menu. At the same time, the "Show Instrument" and "Show Detectors" options will not be accessible.
 
 .. _matrix example:
 **Example - Load a raw data file with Matrix mode**

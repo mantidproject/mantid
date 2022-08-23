@@ -24,7 +24,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(FileProperty("Filename", "",
                                           FileAction.Load, ['.001', '.002']),
-                             "Name of SANS experimental data file.")
+                             "Name of SANS-1 experimental data file.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name of the workspace to store experimental data.")
@@ -94,12 +94,14 @@ class LoadSANS1MLZ(PythonAlgorithm):
             self._wavelength(metadata)
             data_e = np.sqrt(data_y) if metadata.counts.data_type == '001' else metadata.errors.data
             data_x = range(n_spec)
-        else:
+        elif workspace_mode == 'vector':
             n_spec = metadata.spectrum_amount()
             data_y = metadata.data_y()
             self._wavelength(metadata)
             data_e = metadata.data_e()
             data_x = metadata.data_x()
+        else:
+            raise RuntimeError('unsupported workspace mode type')
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
@@ -108,10 +110,12 @@ class LoadSANS1MLZ(PythonAlgorithm):
         """
         :return: logs with units
         warning! essential_data_tobe_logged should match
-        with main variables
+        with the most relevant parameters (defined in
+        SANS1DataMLZ file using the following format ->
+        'parameter_name: type = ...')
         """
         self.log().debug('Creation sample logs started')
-        # units of the most relevant variables
+        # units of the most relevant parameters
         essential_data_tobe_logged = {
             'det1_x_value': 'mm',
             'det1_z_value': 'mm',

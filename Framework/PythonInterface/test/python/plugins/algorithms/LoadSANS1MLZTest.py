@@ -106,7 +106,6 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
         # dimensions
         self.assertEqual(16384, ws.getNumberHistograms())
-        # self.assertEqual(2,  ws.getNumDims())
         # data array
         self.assertEqual(1109, ws.readY(8502))
         self.assertEqual(1160, ws.readY(8629))
@@ -211,8 +210,6 @@ class SANS1DataClassTestHelper:
     def set_up(comment=False, file_type='001'):
         metadata = SANSdata()
         filename_001 = "D0122881.001"
-        filename_002 = "D0665908.002"
-        # filename_002 = ""
         current_paths = ''
         filename = ''
         for i in config.getDataSearchDirs():
@@ -221,8 +218,6 @@ class SANS1DataClassTestHelper:
                 break
         if file_type == '001':
             filename = filename_001
-        elif file_type == '002':
-            filename = filename_002
 
         filename_path = current_paths + filename
         metadata.analyze_source(filename_path, comment)

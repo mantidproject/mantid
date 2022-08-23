@@ -12,11 +12,6 @@ class DtClsSANS:
     Parent dataclass for all subsequent dataclasses.
     All subsequent dataclasses are helper classes to describe
     each section of a SANS-1 datafile ('File', 'Sample', etc.);
-    A helper dataclass may be modified by adding a new variable
-    to it, provided that:
-     1. the variable has identical name as in the raw data file;
-     2. the variable has to be given an annotation and initial value,
-     example -> new_var: float = 0
     """
     section_name: str = ''
     info = {}
@@ -46,14 +41,6 @@ class DtClsSANS:
             self._assign_value(att)
 
     def _assign_value(self, att: str, unique_name: str = None):
-        """
-        if unique_name is None
-            :param att: helper class variable that already exist and match
-            with datafile variable name
-        else
-            :param att: name of variable in datafile
-            :param unique_name: helper class variable that already exist
-        """
         try:
             if unique_name:
                 setattr(self, unique_name, float(self.info[att]))
@@ -104,10 +91,6 @@ class SampleSANS(DtClsSANS):
     thickness: float = 0
 
     def _assign_values(self):
-        """
-        one of the methods to add a variable with unique name
-        """
-        super()._assign_values()
         self._assign_value('Position', 'position')
         self._assign_value('Thickness', 'thickness')
 
@@ -122,10 +105,6 @@ class SetupSANS(DtClsSANS):
     collimation: float = 0.0
 
     def _assign_values(self):
-        """
-        one of the methods to add a variable with unique name
-        """
-        super()._assign_values()
         self._assign_value('Lambda', 'wavelength')
         self._assign_value('SD', 'sample_detector_distance')
         self._assign_value('Collimation', 'collimation')
@@ -142,28 +121,19 @@ class CounterSANS(DtClsSANS):
     monitor2: float or None = None
 
     def get_monitors(self):
-        """
-        :return: [moni1, moni2]
-        if monitors don't exist
-            :return: []
-        """
         if self.monitor1 is None and self.monitor2 is None:
             return []
         return [self.monitor1, self.monitor2]
 
     def process_data(self, unprocessed):
         super().process_data(unprocessed)
-        # after assign value monitor can be '' ->
+        # after _assign_value() monitor can be assigned to '' ->
         if isinstance(self.monitor1, str):
             self.monitor1 = None
         if isinstance(self.monitor2, str):
             self.monitor2 = None
 
     def _assign_values(self):
-        """
-        one of the methods to add a variable with unique name
-        """
-        super()._assign_values()
         self._assign_value('Sum', 'sum_all_counts')
         self._assign_value('Time', 'duration')
         self._assign_value('Moni1', 'monitor1')
@@ -182,10 +152,6 @@ class HistorySANS(DtClsSANS):
     aperture: float = 0.0
 
     def _assign_values(self):
-        """
-        one of the methods to add a variable with unique name
-        """
-        super()._assign_values()
         self._assign_value('Transmission', 'transmission')
         self._assign_value('Scaling', 'scaling')
         self._assign_value('Probability', 'probability')
@@ -305,23 +271,16 @@ class SANSdata:
         return data_x
 
     def data_e(self) -> np.ndarray:
-        """
-        if .001:
-            :return: sqrt(data_y)
-        if .002:
-            :return: 1 dimensional error data array for mantid workspace
-        """
         if self.file.type == '002':
             data_e = np.append([], self.errors.data)
-        else:
+        elif self.file.type == '001':
             data_e = np.array(np.sqrt(self.counts.data.reshape(-1)))
             data_e = np.append(data_e, self.counter.get_monitors())
+        else:
+            raise FileNotFoundError('unsupported file type')
         return data_e
 
     def beamcenter_x_y(self) -> tuple:
-        """
-        :return: beamcenter x and y of raw data
-        """
         beamcenter_y, beamcenter_x = ndimage.center_of_mass(self.counts.data)
         return beamcenter_x, beamcenter_y
 
@@ -362,7 +321,7 @@ class SANSdata:
 
     def _find_comments(self, unprocessed):
         """
-        search for a comment sections
+        search for comment sections
         """
         matches = self.comment.pattern.finditer(unprocessed)
         tmp = [match.groups()[1].split('\n') for match in matches]
