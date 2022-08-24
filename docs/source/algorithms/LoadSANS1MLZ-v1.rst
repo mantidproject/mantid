@@ -93,7 +93,7 @@ Output:
 
 .. testoutput:: ExLoad
 
-    [891. 863. 890. 836. 885.]
+    [ 891.  863.  890.  836.  885.]
 
 .. include:: ../usagedata-note.txt
 
