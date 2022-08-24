@@ -13,7 +13,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
     """
 
     def category(self):
-        return 'Workflow\\MLZ\\SANS-1;DataHandling\\Text'
+        return 'Workflow\\MLZ\\SANSOne;DataHandling\\Text'
 
     def name(self):
         return "LoadSANS1_MLZ"
