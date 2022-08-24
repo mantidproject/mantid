@@ -15,6 +15,7 @@
 #include "MantidKernel/DateAndTime.h"
 
 #include <map>
+#include <queue>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -224,7 +225,10 @@ private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const;
 
-  ContainsState findRectDetectorsImpl(boost::optional<std::vector<const RectangularDetector *>> &detectors) const;
+  bool validateIsGridDetector(IComponent_const_sptr component) const;
+
+  void addInstrumentChildrenToQueue(std::queue<IComponent_const_sptr> &queue) const;
+  bool addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &queue, IComponent_const_sptr component) const;
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);
