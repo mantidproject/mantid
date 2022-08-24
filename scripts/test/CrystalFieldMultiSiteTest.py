@@ -600,7 +600,8 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.IB62")))
 
     def test_fit_gaussian_peaks(self):
-        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544, Temperature=44.0, FWHM=1.1)
+        origin = CrystalField.CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                                           Temperature=44.0, FWHM=1.1)
         x, y = origin.getSpectrum()
         ws = makeWorkspace(x, y)
 
