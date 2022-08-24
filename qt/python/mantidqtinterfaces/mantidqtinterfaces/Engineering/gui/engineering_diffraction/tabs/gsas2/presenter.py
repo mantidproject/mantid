@@ -4,26 +4,25 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT
+
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 
 class GSAS2Presenter(object):
-    def __init__(self, model, view):
+    def __init__(self, model, view, test=False):
         self.model = model
         self.view = view
 
         self.rb_num = None
         self.instrument = "ENGINX"
         self.current_plot_index = None
+        self.latest_load_parameters = None
         self.focus_run_observer_gsas2 = GenericObserverWithArgPassing(
             self.view.set_default_gss_files)
         self.prm_filepath_observer_gsas2 = GenericObserverWithArgPassing(
             self.view.set_default_prm_files)
-        self.connect_view_signals()
-
-        self.latest_load_parameters = None
+        if not test:
+            self.connect_view_signals()
 
     def connect_view_signals(self):
         self.view.set_refine_clicked(self.on_refine_clicked)
@@ -65,16 +64,6 @@ class GSAS2Presenter(object):
     def set_rb_num(self, rb_num):
         self.rb_num = rb_num
 
-    def set_instrument_override(self, instrument):
-        instrument = INSTRUMENT_DICT[instrument]
-        self.view.set_instrument_override(instrument)
-        self.instrument = instrument
-
-    def set_x_limits(self, current_histogram_index):
-        x_minimum = self.model.x_min[int(current_histogram_index)-1]
-        x_maximum = self.model.x_max[int(current_histogram_index)-1]
-        self.view.set_x_limits(x_minimum, x_maximum)
-
     def save_latest_load_parameters(self):
         self.latest_load_parameters = self.view.get_load_parameters()
 
@@ -85,6 +74,7 @@ class GSAS2Presenter(object):
     def plot_result(self, output_histogram_index):
         self.clear_plot()
         axes = self.view.get_axes()
+        plot_window_title = ""
         for ax in axes:
             plot_window_title = self.model.plot_result(int(output_histogram_index), ax)
         self.view.update_figure(plot_window_title)
@@ -94,3 +84,8 @@ class GSAS2Presenter(object):
     def clear_plot(self):
         self.view.clear_figure()
         self.current_plot_index = None
+
+    def set_x_limits(self, current_histogram_index):
+        x_minimum = self.model.x_min[int(current_histogram_index)-1]
+        x_maximum = self.model.x_max[int(current_histogram_index)-1]
+        self.view.set_x_limits(x_minimum, x_maximum)

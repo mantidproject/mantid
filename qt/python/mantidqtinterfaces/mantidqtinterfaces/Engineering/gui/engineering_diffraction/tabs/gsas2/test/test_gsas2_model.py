@@ -18,13 +18,10 @@ model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gs
 class TestGSAS2Model(unittest.TestCase):
     def setUp(self):
         self.model = GSAS2Model()
-        # setup a mock workspace
-        # self.mock_inst = mock.MagicMock()
 
     # @patch(model_path + '.settings.settings_helper.get_setting')
     # @patch(model_path + '.settings.settings_helper.get_setting')
     # def test_run_model(self, mock_timeout, mock_dSpacing_min):
-    #
     #     mock_timeout.return_value = "5"
     #     mock_dSpacing_min.return_value = "1"
     #     number_histograms = self.model.run_model(
@@ -35,31 +32,6 @@ class TestGSAS2Model(unittest.TestCase):
     #         ["Pawley", "3.65, 3.65, 3.65", True, True, True], "220321script3", "rb_number",
     #         [["18401"], ["50000"]])
     #     assert number_histograms == 1, "run_model failed!"
-
-    # @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
-    # @patch(data_model_path + ".Load")
-    # def test_loading_single_file_stores_workspace(self, mock_load, mock_update_logws_group):
-    #     mock_load.return_value = self.mock_ws
-    #
-    #     self.model.load_files("/ar/a_filename.whatever")
-    #
-    #     self.assertEqual(1, len(self.model._data_workspaces))
-    #     self.assertEqual(self.mock_ws, self.model._data_workspaces["a_filename"].loaded_ws)
-    #     mock_load.assert_called_with("/ar/a_filename.whatever", OutputWorkspace="a_filename")
-    #     mock_update_logws_group.assert_called_once()
-    #
-    # @patch(data_model_path + ".FittingDataModel.update_log_workspace_group")
-    # @patch(data_model_path + '.ADS')
-    # @patch(data_model_path + ".Load")
-    # def test_loading_single_file_already_loaded_untracked(self, mock_load, mock_ads, mock_update_logws_group):
-    #     mock_ads.doesExist.return_value = True
-    #     mock_ads.retrieve.return_value = self.mock_ws
-    #
-    #     self.model.load_files("/ar/a_filename.whatever")
-    #
-    #     self.assertEqual(1, len(self.model._data_workspaces))
-    #     mock_load.assert_not_called()
-    #     mock_update_logws_group.assert_called_once()
 
 
 if __name__ == '__main__':
