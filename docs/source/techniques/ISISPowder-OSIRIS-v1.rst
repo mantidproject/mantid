@@ -125,7 +125,7 @@ The layout on OSIRIS should look as follows for each block:
     empty_drange12 : "12"
     empty_run_numbers : "1-12"
 
-For each drange an empty canisters and vanadium run must be listed with the associated drange.
+For each drange, any empty canisters and vanadium runs must be listed with the associated drange.
 
 
 Parameters
