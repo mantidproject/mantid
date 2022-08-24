@@ -11,7 +11,6 @@
 #include "MantidPythonInterface/core/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/enum.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -36,11 +35,6 @@ GNU_DIAG_ON("conversion")
 
 void export_Instrument() {
   register_ptr_to_python<std::shared_ptr<Instrument>>();
-
-  boost::python::enum_<Instrument::ContainsState>("ContainsState")
-      .value("Full", Instrument::ContainsState::Full)
-      .value("Partial", Instrument::ContainsState::Partial)
-      .value("None", Instrument::ContainsState::None);
 
   class_<Instrument, bases<CompAssembly>, boost::noncopyable>("Instrument", no_init)
       .def("getSample", &Instrument::getSample, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
@@ -79,8 +73,5 @@ void export_Instrument() {
            "instrument")
 
       .def("getBaseInstrument", &Instrument::baseInstrument, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
-           "Return reference to the base instrument")
-
-      .def("containsRectDetectors", &Instrument::containsRectDetectors, arg("self"),
-           "Return Full if all detectors are rect., Partial if some, None if none");
+           "Return reference to the base instrument");
 }
