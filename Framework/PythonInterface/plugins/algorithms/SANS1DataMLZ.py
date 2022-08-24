@@ -1,20 +1,21 @@
-from dataclasses import dataclass, asdict
 from datetime import datetime
 import numpy as np
 from scipy import ndimage
 import re
 import itertools
+from copy import deepcopy
 
 
-@dataclass
 class DtClsSANS:
     """
-    Parent dataclass for all subsequent dataclasses.
-    All subsequent dataclasses are helper classes to describe
+    Parent class for all subsequent classes.
+    All subsequent classes are helper classes to describe
     each section of a SANS-1 datafile ('File', 'Sample', etc.);
     """
     section_name: str = ''
-    info = {}
+
+    def __init__(self):
+        self.info = {}
 
     def process_data(self, unprocessed):
         unprocessed = self._data_preparation(unprocessed)
@@ -32,8 +33,11 @@ class DtClsSANS:
         """
         :return: dictionary with the most relevant variables of helper class
         """
-        values = asdict(self)
-        del values['section_name']
+        values = deepcopy(self.__dict__)
+        if 'info' in values.keys():
+            del values['info']
+        if 'data' in values.keys():
+            del values['data']
         return values
 
     def _assign_values(self):
@@ -59,12 +63,14 @@ class DtClsSANS:
         return data.split('\n')
 
 
-@dataclass
 class FileSANS(DtClsSANS):
     section_name: str = 'File'
     pattern = re.compile(r'(%File\n)([^%]*)')
-    type = '001'
     _date_format = '%m/%d/%Y %I:%M:%S %p'
+
+    def __init__(self):
+        super().__init__()
+        self.type = '001'
 
     def run_start(self):
         return np.datetime64(datetime.strptime(self.info['FromDate'] + ' ' + self.info['FromTime'],
@@ -82,27 +88,36 @@ class FileSANS(DtClsSANS):
         super().process_data(unprocessed)
         self.type = self.info['FileName'].split('.')[1]
 
+    def get_values_dict(self):
+        values = super().get_values_dict()
+        del values['type']
+        return values
 
-@dataclass
+
 class SampleSANS(DtClsSANS):
     section_name: str = 'Sample'
     pattern = re.compile(r'(%Sample\n)([^%]*)')
-    position: int = 0
-    thickness: float = 0
+
+    def __init__(self):
+        super().__init__()
+        self.position: int = 0
+        self.thickness: float = 0
 
     def _assign_values(self):
         self._assign_value('Position', 'position')
         self._assign_value('Thickness', 'thickness')
 
 
-@dataclass
 class SetupSANS(DtClsSANS):
     section_name: str = 'Setup'
     pattern = re.compile(r'(%Setup\n)([^%]*)')
-    wavelength: float = 0.0
-    wavelength_error_mult: float = 0.1      # wavelength spread up to 10%
-    sample_detector_distance: float = 0.0
-    collimation: float = 0.0
+
+    def __init__(self):
+        super().__init__()
+        self.wavelength: float = 0.0
+        self.wavelength_error_mult: float = 0.1      # wavelength spread up to 10%
+        self.sample_detector_distance: float = 0.0
+        self.collimation: float = 0.0
 
     def _assign_values(self):
         self._assign_value('Lambda', 'wavelength')
@@ -110,15 +125,16 @@ class SetupSANS(DtClsSANS):
         self._assign_value('Collimation', 'collimation')
 
 
-@dataclass
 class CounterSANS(DtClsSANS):
     section_name: str = 'Counter'
     pattern = re.compile(r'(%Counter\n)([^%]*)')
 
-    sum_all_counts: float = 0
-    duration: float = 0
-    monitor1: float or None = None
-    monitor2: float or None = None
+    def __init__(self):
+        super().__init__()
+        self.sum_all_counts: float = 0
+        self.duration: float = 0
+        self.monitor1: float or None = None
+        self.monitor2: float or None = None
 
     def get_monitors(self):
         if self.monitor1 is None and self.monitor2 is None:
@@ -140,16 +156,18 @@ class CounterSANS(DtClsSANS):
         self._assign_value('Moni2', 'monitor2')
 
 
-@dataclass
 class HistorySANS(DtClsSANS):
     section_name: str = 'History'
     pattern = re.compile(r'(%History\n)([^%]*)')
-    transmission: float = 0.0
-    scaling: float = 0.0
-    probability: float = 0.0
-    beamcenter_x: float = 0.0
-    beamcenter_y: float = 0.0
-    aperture: float = 0.0
+
+    def __init__(self):
+        super().__init__()
+        self.transmission: float = 0.0
+        self.scaling: float = 0.0
+        self.probability: float = 0.0
+        self.beamcenter_x: float = 0.0
+        self.beamcenter_y: float = 0.0
+        self.aperture: float = 0.0
 
     def _assign_values(self):
         self._assign_value('Transmission', 'transmission')
@@ -160,7 +178,6 @@ class HistorySANS(DtClsSANS):
         self._assign_value('Aperture', 'aperture')
 
 
-@dataclass
 class CommentSANS(DtClsSANS):
     section_name: str = 'Comment'
     pattern = re.compile(r'(%Comment.*\n)([^%]*)')
@@ -170,12 +187,14 @@ class CommentSANS(DtClsSANS):
         return data
 
 
-@dataclass
 class CountsSANS(DtClsSANS):
     section_name: str = 'Counts'
     pattern = re.compile(r'(%Counts\n)([^%]*)')
-    data_type = '001'
-    data = np.ndarray(shape=(128, 128), dtype=float)
+
+    def __init__(self):
+        super().__init__()
+        self.data_type = '001'
+        self.data = np.ndarray(shape=(128, 128), dtype=float)
 
     def process_data(self, unprocessed):
         try:
@@ -185,6 +204,11 @@ class CountsSANS(DtClsSANS):
                 self._process_002(unprocessed)
         except ValueError:
             raise FileNotFoundError("'Counts' section includes incorrect data")
+
+    def get_values_dict(self):
+        values = super().get_values_dict()
+        del values['data_type']
+        return values
 
     def _process_001(self, unprocessed):
         pattern = re.compile(r'\d+')
@@ -197,11 +221,13 @@ class CountsSANS(DtClsSANS):
         self.data = np.array([count for count in matches], dtype=float).reshape(2048, 8)
 
 
-@dataclass
 class ErrorsSANS(DtClsSANS):
     section_name: str = 'Errors'
     pattern = re.compile(r'(%Errors\n)([^%]*)')
-    data = np.ndarray(shape=(2048, 8), dtype=float)
+
+    def __init__(self):
+        super().__init__()
+        self.data = np.ndarray(shape=(2048, 8), dtype=float)
 
     def process_data(self, unprocessed):
         pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
