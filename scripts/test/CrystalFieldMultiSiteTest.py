@@ -603,7 +603,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         origin = CrystalField.CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                                            Temperature=44.0, FWHM=1.1)
         x, y = origin.getSpectrum()
-        ws = makeWorkspace(x, y)
+        ws = CrystalField.fitting.makeWorkspace(x, y)
 
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
                   'Temperature': 44.0, 'FWHM': 1.1}
@@ -614,7 +614,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
         chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
 
-        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws,MaxIterations=10)
+        fit = CrystalField.CrystalFieldFit(Model=cf, InputWorkspace=ws,MaxIterations=10)
         fit.fit()
 
         self.assertGreater(cf.chi2, 0.0)
