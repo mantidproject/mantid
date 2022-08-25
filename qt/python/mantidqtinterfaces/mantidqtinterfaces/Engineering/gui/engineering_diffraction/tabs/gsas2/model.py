@@ -101,8 +101,11 @@ class GSAS2Model(object):
         gsas_result = self.report_on_outputs(runtime)
         if not gsas_result:
             return None
-        regions_or_histograms = self.load_basic_outputs(gsas_result)
-        return regions_or_histograms
+        self.load_basic_outputs(gsas_result)
+
+        if self.number_of_regions > self.number_histograms:
+            return self.number_of_regions
+        return self.number_histograms
 
     # ===============
     # Prepare Inputs
@@ -242,7 +245,7 @@ class GSAS2Model(object):
     def format_shell_output(self, title, shell_output_string):
         double_line = "-" * (len(title) + 2) + "\n" + "-" * (len(title) + 2)
         return "\n" * 3 + double_line + "\n " + title + " \n" + double_line + "\n" \
-               + shell_output_string + double_line + "\n" * 3
+               + shell_output_string + "\n" + double_line + "\n" * 3
 
     # ===========
     # Read Files
@@ -264,26 +267,6 @@ class GSAS2Model(object):
                         value_string = value_string.strip(" ")
         return value_string
 
-    def find_phase_names_in_lst(self, file_path):
-        phase_names = []
-        marker_string = "Phase name"
-        start_of_value = ":"
-        end_of_value = "="
-        strip_separator = ":"
-        with open(file_path, 'rt', encoding='utf-8') as file:
-            full_file_string = file.read().replace('\n', '')
-            where_marker = full_file_string.find(marker_string)
-            while where_marker != -1:
-                where_value_start = full_file_string.find(start_of_value, where_marker)
-                if where_value_start != -1:
-                    where_value_end = full_file_string.find(end_of_value, where_value_start + 1)
-                    phase_names.append(
-                        full_file_string[where_value_start: where_value_end].strip(strip_separator + " "))
-                    where_marker = full_file_string.find(marker_string, where_value_end)
-                else:
-                    where_marker = -1
-        return phase_names
-
     def find_basis_block_in_file(self, file_path, marker_string, start_of_value, end_of_value):
         with open(file_path, 'rt', encoding='utf-8') as file:
             full_file_string = file.read()
@@ -303,8 +286,6 @@ class GSAS2Model(object):
                         where_end_of_block = full_file_string.find(end_of_value, where_start_of_line)
                         # if "loop" not found then assume the end of the file is the end of this block
                         value_string = full_file_string[where_start_of_line: where_end_of_block]
-                        for remove_string in ["Biso", "Uiso"]:
-                            value_string = value_string.replace(remove_string, "")
         return value_string
 
     def read_basis(self, phase_file_path):
@@ -353,22 +334,10 @@ class GSAS2Model(object):
                 break  # only apply to first digit
         return roto_inverted_space_group
 
-    def read_gsas_lst_and_print_wR(self, result_filepath, histogram_data_files):
-        with open(result_filepath, 'rt', encoding='utf-8') as file:
-            result_string = file.read().replace('\n', '')
-            for loop_histogram in histogram_data_files:
-                where_loop_histogram = result_string.rfind(loop_histogram)
-                if where_loop_histogram != -1:
-                    where_loop_histogram_wR = result_string.find('Final refinement wR =', where_loop_histogram)
-                    if where_loop_histogram_wR != -1:
-                        where_loop_histogram_wR_end = result_string.find('%', where_loop_histogram_wR)
-                        logger.notice(loop_histogram)
-                        logger.notice(result_string[where_loop_histogram_wR: where_loop_histogram_wR_end + 1])
-
     def get_crystal_params_from_instrument(self, instrument):
         crystal_params = []
         if not self.number_of_regions:
-            crystal_params = self.find_in_file(instrument, "ICONS", "S", "INS", strip_separator="ICONS\t")
+            crystal_params = [self.find_in_file(instrument, "ICONS", "S", "INS", strip_separator="ICONS\t")]
 
         else:
             for region_index in range(1, self.number_of_regions+1):
@@ -377,7 +346,10 @@ class GSAS2Model(object):
                 crystal_params.append(loop_crystal_params)
         tof_min = []
         for loop_crystal_param_string in crystal_params:
-            list_crystal_params = loop_crystal_param_string.split("\t")
+            list_crystal_params = loop_crystal_param_string.split(" ")
+            if len(list_crystal_params) == 1:
+                list_crystal_params = list_crystal_params[0].split("\t")
+            list_crystal_params = list(filter(None, list_crystal_params))
             if len(list_crystal_params):
                 dif_c = float(list_crystal_params[0] or 0.0)
                 dif_a = float(list_crystal_params[1] or 0.0)
@@ -461,24 +433,9 @@ class GSAS2Model(object):
 
         return mantid_pawley_reflections
 
-    def check_for_output_file(self, temp_save_directory, name_of_project, file_extension, file_descriptor,
-                              gsas_error_string):
-        gsas_output_filename = name_of_project + file_extension
-        if gsas_output_filename not in os.listdir(temp_save_directory):
-            logger.error(
-                f"GSAS-II call must have failed, as the output {file_descriptor} file was not found.",
-                self.format_shell_output(title="Errors from GSAS-II", shell_output_string=gsas_error_string))
-            return None
-        return os.path.join(temp_save_directory, gsas_output_filename)
-
     # =========
     # X Limits
     # =========
-
-    def chop_to_limits(self, input_array, x, min_x, max_x):
-        input_array[x <= min_x] = np.nan
-        input_array[x >= max_x] = np.nan
-        return input_array
 
     def determine_x_limits(self):
         tof_min = self.determine_tof_min()
@@ -524,8 +481,8 @@ class GSAS2Model(object):
             self.x_max = [float(k) for k in users_limits[1]]
             if len(self.x_min) != self.number_histograms:
                 if len(self.x_min) == 1:
-                    self.x_min = [self.x_min] * self.number_histograms
-                    self.x_max = [self.x_max] * self.number_histograms
+                    self.x_min = self.x_min * self.number_histograms
+                    self.x_max = self.x_max * self.number_histograms
         else:
             self.x_min = self.data_x_min
             self.x_max = self.data_x_max
@@ -541,22 +498,70 @@ class GSAS2Model(object):
     # Handle Outputs
     # ===============
 
-    def report_on_outputs(self, runtime):
-        gsas_project_filepath = self.check_for_output_file(self.temporary_save_directory, self.project_name, ".gpx",
-                                                           "project file", self.err_call_gsas2)
-        gsas_result_filepath = self.check_for_output_file(self.temporary_save_directory, self.project_name, ".lst",
-                                                          "result", self.err_call_gsas2)
+    def read_gsas_lst_and_print_wR(self, result_filepath, histogram_data_files, test=False):
+        with open(result_filepath, 'rt', encoding='utf-8') as file:
+            result_string = file.read().replace('\n', '')
+            for loop_histogram in histogram_data_files:
+                where_loop_histogram = result_string.rfind(loop_histogram)
+                if where_loop_histogram != -1:
+                    where_loop_histogram_wR = result_string.find('Final refinement wR =', where_loop_histogram)
+                    if where_loop_histogram_wR != -1:
+                        where_loop_histogram_wR_end = result_string.find('%', where_loop_histogram_wR)
+                        logger.notice(loop_histogram)
+                        logged_lst_result = result_string[where_loop_histogram_wR: where_loop_histogram_wR_end + 1]
+                        logger.notice(logged_lst_result)
+                        if test:
+                            return logged_lst_result
+
+    def find_phase_names_in_lst(self, file_path):
+        phase_names = []
+        marker_string = "Phase name"
+        start_of_value = ":"
+        end_of_value = "="
+        strip_separator = ":"
+        with open(file_path, 'rt', encoding='utf-8') as file:
+            full_file_string = file.read().replace('\n', '')
+            where_marker = full_file_string.find(marker_string)
+            while where_marker != -1:
+                where_value_start = full_file_string.find(start_of_value, where_marker)
+                if where_value_start != -1:
+                    where_value_end = full_file_string.find(end_of_value, where_value_start + 1)
+                    phase_names.append(
+                        full_file_string[where_value_start: where_value_end].strip(strip_separator + " "))
+                    where_marker = full_file_string.find(marker_string, where_value_end)
+                else:
+                    where_marker = -1
+        return phase_names
+
+    def report_on_outputs(self, runtime, test=False):
+        gsas_project_filepath = self.check_for_output_file(".gpx", "project")
+        gsas_result_filepath = self.check_for_output_file(".lst", "result")
         if not gsas_project_filepath or not gsas_result_filepath:
             return None
-        logger.notice(f"\nGSAS-II call complete in {runtime} seconds.\n")
+        logged_success = f"\nGSAS-II call complete in {runtime} seconds.\n"
+        logger.notice(logged_success)
+        if test:
+            return gsas_result_filepath, logged_success
         return gsas_result_filepath
+
+    def check_for_output_file(self, file_extension, file_descriptor, test=False):
+
+        gsas_output_filename = self.project_name + file_extension
+        if gsas_output_filename not in os.listdir(self.temporary_save_directory):
+            logged_failure = f"GSAS-II call must have failed, as the output {file_descriptor} file was not found." \
+                + self.format_shell_output(title="Errors from GSAS-II", shell_output_string=self.err_call_gsas2)
+            logger.error(logged_failure)
+            if test:
+                return logged_failure
+            return None
+        return os.path.join(self.temporary_save_directory, gsas_output_filename)
 
     def organize_save_directories(self, rb_num_string):
         save_dir = os.path.join(output_settings.get_output_path())
         self.gsas2_save_dirs = [os.path.join(save_dir, "GSAS2", "")]
         save_directory = self.gsas2_save_dirs[0]
         if rb_num_string:
-            self.gsas2_save_dirs.append(os.path.join(save_dir, "User", rb_num_string, "GSAS2", ""))
+            self.gsas2_save_dirs.append(os.path.join(save_dir, "User", rb_num_string, "GSAS2", self.project_name, ""))
             # TODO: Once texture is supported, pass calibration observer like currently done for focus tab
             # if calibration.group == GROUP.TEXTURE20 or calibration.group == GROUP.TEXTURE30:
             #     calib_dirs.pop(0)  # only save to RB directory to limit number files saved
@@ -605,50 +610,49 @@ class GSAS2Model(object):
 
         self.create_lattice_parameter_table()
 
-        if self.number_of_regions > self.number_histograms:
-            return self.number_of_regions
-        return self.number_histograms
-
     def load_result(self, index_histograms):
-        workspace = self.load_gsas_histogram(self.user_save_directory, self.project_name,
-                                             index_histograms, self.x_min, self.x_max)
+        workspace = self.load_gsas_histogram(index_histograms)
         phase_names_list = self.find_phase_names_in_lst(
             os.path.join(self.user_save_directory, self.project_name + ".lst"))
 
         reflections = None
         if self.refinement_method == "Pawley":
-            reflections = self.load_gsas_reflections(self.user_save_directory, self.project_name,
-                                                     index_histograms, phase_names_list)
+            reflections = self.load_gsas_reflections(index_histograms, phase_names_list)
         return workspace, reflections
 
-    def load_gsas_histogram(self, temp_save_directory, name_of_project, histogram_index, min_x, max_x):
-        result_csv = os.path.join(temp_save_directory, name_of_project + f"_{histogram_index}.csv")
+    def chop_to_limits(self, input_array, x, min_x, max_x):
+        input_array[x <= min_x] = np.nan
+        input_array[x >= max_x] = np.nan
+        return input_array
+
+    def load_gsas_histogram(self, histogram_index):
+        result_csv = os.path.join(self.user_save_directory, self.project_name + f"_{histogram_index}.csv")
         my_data = np.transpose(np.genfromtxt(result_csv, delimiter=",", skip_header=39))
         # x  y_obs	weight	y_calc	y_bkg	Q
         x_values = my_data[0]
-        y_obs = self.chop_to_limits(np.array(my_data[1]), x_values, min_x[histogram_index - 1],
-                                    max_x[histogram_index - 1])
-        y_calc = self.chop_to_limits(np.array(my_data[3]), x_values, min_x[histogram_index - 1],
-                                     max_x[histogram_index - 1])
+        y_obs = self.chop_to_limits(np.array(my_data[1]), x_values, self.x_min[histogram_index - 1],
+                                    self.x_max[histogram_index - 1])
+        y_calc = self.chop_to_limits(np.array(my_data[3]), x_values, self.x_min[histogram_index - 1],
+                                     self.x_max[histogram_index - 1])
         y_diff = y_obs - y_calc
         y_diff -= np.max(np.ma.masked_invalid(y_diff))
-        y_bkg = self.chop_to_limits(np.array(my_data[4]), x_values, min_x[histogram_index - 1],
-                                    max_x[histogram_index - 1])
+        y_bkg = self.chop_to_limits(np.array(my_data[4]), x_values, self.x_min[histogram_index - 1],
+                                    self.x_max[histogram_index - 1])
         y_data = np.concatenate((y_obs, y_calc, y_diff, y_bkg))
 
         gsas_histogram = CreateWorkspace(OutputWorkspace=f"gsas_histogram_{histogram_index}",
                                          DataX=np.tile(my_data[0], 4), DataY=y_data, NSpec=4)
         return gsas_histogram
 
-    def load_gsas_reflections(self, temp_save_directory, name_of_project, histogram_index, phase_names):
+    def load_gsas_reflections(self, histogram_index, phase_names):
         loaded_reflections = []
         for phase_name in phase_names:
-            result_reflections_txt = os.path.join(temp_save_directory,
-                                                  name_of_project + f"_reflections_{histogram_index}_{phase_name}.txt")
+            result_reflections_txt = os.path.join(self.user_save_directory,
+                                                  self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt")
             loaded_reflections.append(np.loadtxt(result_reflections_txt))
         return loaded_reflections
 
-    def create_lattice_parameter_table(self):
+    def create_lattice_parameter_table(self, test=False):
         LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c",
                                 "angle_alpha", "angle_beta", "angle_gamma", "volume"]
         phase_names_list = self.find_phase_names_in_lst(
@@ -668,6 +672,8 @@ class GSAS2Model(object):
             for param in LATTICE_TABLE_PARAMS:
                 loop_parameters.append(float(parameter_dict[param]))
             table.addRow(loop_parameters)
+        if test:
+            return table
 
     # =========
     # Plotting
