@@ -29,8 +29,8 @@ def get_bank_positions(sample_data, rounding_limit=0.05):
         for compare in new_arr:
             if abs(compare - bank) < rounding_limit:
                 inside = True
-                break
-            inside = False
+            else:
+                inside = False
         if not inside:
             new_arr.append(bank)
     return new_arr
