@@ -15,7 +15,8 @@ general_params = {"file_names": {
          "gss_filename": "{instshort}{runno}{suffix}{unit}.gsas",
          "dat_files_directory": "",
          "xye_filename": "{instshort}{runno}{suffix}{unit}.xye",
-    }
+    },
+    "scale_empty_can": 1.0
 }
 
 

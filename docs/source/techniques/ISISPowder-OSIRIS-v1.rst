@@ -65,6 +65,7 @@ On OSIRIS the following parameters are required when executing *create_vanadium*
 - :ref:`calibration_mapping_file_osiris_isis-powder-diffraction-ref`
 - :ref:`vanadium_normalisation_osiris_isis-powder-diffraction-ref`
 - :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref`
+- :ref:`scale_empty_can_osiris_isis-powder-diffraction-ref`
 - :ref:`merge_drange_osiris_isis-powder-diffraction-ref`
 
 Example
@@ -299,4 +300,18 @@ Example Input:
 
 .. code-block:: python
 
-  subtract_empty_can: True
+  osiris_example = Osiris(subtract_empty_can=True, ...)
+
+.. _scale_empty_can_osiris_isis-powder-diffraction-ref:
+
+scale_empty_can
+^^^^^^^^^^^^^^^
+Provides the option to scale the empty canister run for subtraction if
+:ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref` is set to true.
+If not set the scale will default to 1.0.
+
+Example Input:
+
+.. code-block:: python
+
+  osiris_example = Osiris(scale_empty_can=1.5, ...)

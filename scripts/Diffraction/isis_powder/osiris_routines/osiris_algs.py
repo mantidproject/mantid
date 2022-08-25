@@ -108,12 +108,13 @@ class DrangeData(object):
                                      StoreInADS=False)
         return calibrate_ws
 
-    def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=''):
+    def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file='',
+                          scale_empty_can=1.0):
         processed = []
         for sample in self._sample:
             outputname = sample+WORKSPACE_SUFFIX.FOCUSED
             if subtract_empty:
-                sample = self.subtract_container_from_sample(sample)
+                sample = self.subtract_container_from_sample(sample, scale_empty_can)
             sample = self.calibrate_workspace(sample, focus_calibration_file)
             if vanadium_correct:
                 van = self.calibrate_vanadium(focus_calibration_file)
@@ -125,10 +126,10 @@ class DrangeData(object):
             processed.append(sample)
         return processed
 
-    def subtract_container_from_sample(self, sample):
+    def subtract_container_from_sample(self, sample, empty_scale):
         empty_rb = RebinToWorkspace(WorkspaceToRebin=self._empty, WorkspaceToMatch=sample,
                                     OutputWorkspace='empty_rb', StoreInADS=False)
-        return Minus(LHSWorkspace=sample, RHSWorkspace=empty_rb,
+        return Minus(LHSWorkspace=sample, RHSWorkspace=empty_rb*empty_scale,
                      OutputWorkspace=sample + WORKSPACE_SUFFIX.CONTAINER_CORRECTED, StoreInADS=False)
 
 
@@ -150,11 +151,13 @@ def load_raw(run_number_string, drange_sets, group, inst, file_ext):
     return input_ws_list
 
 
-def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
+def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False,
+                              scale_empty_can=1.0):
     focused = []
     for drange in drange_sets:
         processed = drange_sets[drange].process_workspace(subtract_empty=subtract_empty, vanadium_correct=van_norm,
-                                                          focus_calibration_file=calfile)
+                                                          focus_calibration_file=calfile,
+                                                          scale_empty_can=scale_empty_can)
         focused.extend(processed)
     _group_workspaces(focused, 'OSIRIS' + run_number + WORKSPACE_SUFFIX.FOCUSED)
     return focused

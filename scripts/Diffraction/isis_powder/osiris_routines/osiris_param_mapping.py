@@ -18,6 +18,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="output_directory", int_name="output_dir"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
     ParamMapEntry(ext_name="subtract_empty_can", int_name="subtract_empty_can"),
+    ParamMapEntry(ext_name="scale_empty_can", int_name="scale_empty_can"),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),
     ParamMapEntry(ext_name="grouping_filename", int_name="grouping"),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
