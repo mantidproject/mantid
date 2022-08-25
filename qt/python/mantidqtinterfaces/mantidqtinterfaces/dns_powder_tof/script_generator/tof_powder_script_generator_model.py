@@ -57,11 +57,13 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         if not self._validate_tof_options():
             return 'Bin sizes make no sense.'
         if not self._validate_nb_vana_banks():
-            return ('No vanadium files selected, but '
-                    'Vanadium correction option chosen.')
+            return ('Vanadium correction option is chosen, but '
+                    'the number of selected vanadium scans '
+                    'is either 0 or greater than 1.')
         if not self._validate_nb_empty_banks():
-            return ('No Background files selected, but background'
-                    ' subtraction option chosen.')
+            return ('Background subtraction option is chosen, but '
+                    'the number of selected background scans '
+                    'is either 0 or greater than 1.')
         return ''
 
     def _get_vana_string(self):
@@ -137,13 +139,13 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         if self._bg_cor:
             lines += [
                 'load_data(standard_data["'
-                f'{self._standard_data.get_empty_filename()}"], '
+                f'{self._standard_data.get_empty_scan_name()}"], '
                 '"raw_ec", params)'
             ]
         if self._vana_cor:
             lines += [
                 'load_data(standard_data["'
-                f'{self._standard_data.get_vana_filename()}"], '
+                f'{self._standard_data.get_vana_scan_name()}"], '
                 f'"raw_vanadium", params)'
             ]
         lines += ['']

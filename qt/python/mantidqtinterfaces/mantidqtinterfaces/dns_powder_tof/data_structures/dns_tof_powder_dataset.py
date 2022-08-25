@@ -98,6 +98,7 @@ class DNSTofDataset(ObjectDict):
     Class for storing data of multiple DNS datafiles.
     This is a dictionary, but can also be accessed like attributes.
     """
+
     def __init__(self, data, path, is_sample=True):
         super().__init__()
         self['is_sample'] = is_sample
@@ -128,27 +129,27 @@ class DNSTofDataset(ObjectDict):
             return len(dic.keys()) - 1
         return 0
 
-    def get_vana_filename(self):
-        vana_filename = [x for x in self.data_dic.keys() if '_vana' in x]
-        if len(vana_filename) == 0:
-            vana_filename = ''
-        elif len(vana_filename) > 1:
-            vana_filename = ''
+    def get_vana_scan_name(self):
+        vana_scan_name = [x for x in self.data_dic.keys() if '_vana' in x]
+        if len(vana_scan_name) == 0:
+            vana_scan_name = ''
+        elif len(vana_scan_name) > 1:
+            vana_scan_name = ''
         else:
-            vana_filename = vana_filename[0]
-        return vana_filename
+            vana_scan_name = vana_scan_name[0]
+        return vana_scan_name
 
-    def get_empty_filename(self):
-        empty_filename = [
+    def get_empty_scan_name(self):
+        empty_scan_name = [
             x for x in self.data_dic.keys() if ('_empty' in x or '_leer' in x)
         ]
-        if len(empty_filename) == 0:
-            empty_filename = ''
-        elif len(empty_filename) > 1:
-            empty_filename = ''
+        if len(empty_scan_name) == 0:
+            empty_scan_name = ''
+        elif len(empty_scan_name) > 1:
+            empty_scan_name = ''
         else:
-            empty_filename = empty_filename[0]
-        return empty_filename
+            empty_scan_name = empty_scan_name[0]
+        return empty_scan_name
 
     def get_sample_filename(self):
         sample_filename = list(self.data_dic.keys())
@@ -158,10 +159,10 @@ class DNSTofDataset(ObjectDict):
         return self._get_nb_banks(self.get_sample_filename())
 
     def get_nb_vana_banks(self):
-        return self._get_nb_banks(self.get_vana_filename())
+        return self._get_nb_banks(self.get_vana_scan_name())
 
     def get_nb_empty_banks(self):
-        return self._get_nb_banks(self.get_empty_filename())
+        return self._get_nb_banks(self.get_empty_scan_name())
 
     @staticmethod
     def create_dataset(data, path):

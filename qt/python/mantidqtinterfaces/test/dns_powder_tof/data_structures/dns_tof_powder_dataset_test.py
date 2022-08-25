@@ -78,24 +78,24 @@ class DNSTofDatasetTest(unittest.TestCase):
         self.assertEqual(testv, 1)
 
     def test__get_vana_filename(self):
-        testv = self.ds.get_vana_filename()
+        testv = self.ds.get_vana_scan_name()
         self.assertEqual(testv, '')
         self.set_standard()
-        testv = self.ds.get_vana_filename()
+        testv = self.ds.get_vana_scan_name()
         self.assertEqual(testv, '_vana')
         self.ds.data_dic = {'_vana': 1, '_vana2': 2}
-        testv = self.ds.get_vana_filename()
+        testv = self.ds.get_vana_scan_name()
         self.assertEqual(testv, '')
         self.set_sample()
 
     def test__get_empty_filename(self):
-        testv = self.ds.get_empty_filename()
+        testv = self.ds.get_empty_scan_name()
         self.assertEqual(testv, '')
         self.set_standard()
-        testv = self.ds.get_empty_filename()
+        testv = self.ds.get_empty_scan_name()
         self.assertEqual(testv, '_empty')
         self.ds.data_dic = {'_leer': 1, '_empty2': 2}
-        testv = self.ds.get_empty_filename()
+        testv = self.ds.get_empty_scan_name()
         self.assertEqual(testv, '')
         self.set_sample()
 
