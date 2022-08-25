@@ -7,9 +7,11 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::PythonInterface::std_vector_exporter;
 using namespace Mantid::Geometry;
 using namespace boost::python;
 
@@ -21,6 +23,10 @@ GET_POINTER_SPECIALIZATION(RectangularDetector)
  */
 void export_RectangularDetector() {
   register_ptr_to_python<std::shared_ptr<RectangularDetector>>();
+  register_ptr_to_python<const RectangularDetector *>();
+
+  // vector of RectangularDetector's
+  std_vector_exporter<const RectangularDetector *>::wrap("std_vector_rectangular_detector");
 
   class_<RectangularDetector, bases<CompAssembly, IObjComponent>, boost::noncopyable>("RectangularDetector", no_init)
       .def("xpixels", &RectangularDetector::xpixels, arg("self"), "Returns the number of pixels in the X direction")
