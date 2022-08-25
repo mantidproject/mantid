@@ -19,6 +19,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     # pylint: disable=too-many-instance-attributes
     # having the options as instance attributes, is much better readable
     # none of them are public
+
     def __init__(self, parent):
         super().__init__(parent)
         self._script = None
@@ -111,8 +112,9 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             "CorrectTOF",
             "from mantid.simpleapi import SaveAscii, SaveNexus, MaskDetectors",
             "from mantidqtinterfaces.dns_powder_tof.scripts.dnstof import "
-            "convert_to_d_e, get_sqw, "
-            "load_data", ''
+            "convert_to_de, get_sqw, "
+            "load_data",
+            "import numpy as np", ''
         ]
         return lines
 
@@ -163,7 +165,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             if self._tof_opt['subtract_sample_back']:
                 lines += [
                     "# subtract empty can",
-                    "data1 = data1 - ec* params['ecSampleFactor']", ''
+                    "data1 = data1 - ec * params['ecSampleFactor']", ''
                 ]
         return lines
 
@@ -177,7 +179,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_only_one_vana_lines(self):
         if self._nb_vana_banks != self._nb_banks:
             return [
-                '# only one vandium bank position', 'vanadium = vanadium[0]',
+                '# only one vanadium bank position', 'vanadium = vanadium[0]',
                 ''
             ]
         return []
@@ -185,9 +187,9 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     @staticmethod
     def _get_epp_and_coef_lines():
         return [
-            "# detector efficciency correction: compute coefficients",
-            "epptable = FindEPP(vanadium)",
-            "coefs = ComputeCalibrationCoefVan(vanadium, epptable,"
+            "# detector efficiency correction: compute coefficients",
+            "EPP_table = FindEPP(vanadium)",
+            "coefs = ComputeCalibrationCoefVan(vanadium, EPP_table,"
             " Temperature=params['vana_temperature'])"
         ]
 
@@ -195,7 +197,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         if self._tof_opt['correct_elastic_peak_position']:
             return [
                 '', '# correct TOF to get EPP at 0 meV',
-                'data1 = CorrectTOF(data1, epptable)', ''
+                'data1 = CorrectTOF(data1, EPP_table)', ''
             ]
         return []
 
@@ -251,7 +253,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     @staticmethod
     def _get_sqw_lines():
         return [
-            "# get S(q,w)", "convert_to_d_e('data1', Ei)", "",
+            "# get S(q,w)", "convert_to_de('data1', Ei)", "",
             "# merge al detector positions together",
             "get_sqw('data1_dE_S', 'data1', bins)"
         ]
@@ -312,7 +314,6 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         self._bg_cor = self._check_bg_cor()
         # validate if input binning makes sense, otherwise return
         error = self._error_in_input()
-        # print(self._error_in_input())
         if error:
             return [''], error
 
