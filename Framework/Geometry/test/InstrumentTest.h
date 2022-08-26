@@ -455,12 +455,12 @@ public:
   void testFindRectDetectors() {
     Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
 
-    std::vector<const RectangularDetector *> expectedDetectors{
-        dynamic_cast<const RectangularDetector *>(instr->getChild(0).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(1).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(2).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(3).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(4).get())};
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4))};
     TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
 
     // Add some non-rectangular component
@@ -470,7 +470,7 @@ public:
 
     Instrument_sptr instrNone = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
-    std::vector<const RectangularDetector *> expected{};
+    std::vector<RectangularDetector_const_sptr> expected{};
     TS_ASSERT_EQUALS(instrNone->findRectDetectors(), expected);
   }
 
@@ -480,22 +480,22 @@ public:
     CompAssembly *newAssembly1 = new CompAssembly("Assembly 1");
     CompAssembly *newAssembly2 = new CompAssembly("Assembly 2");
 
-    RectangularDetector *rectDet1 = new RectangularDetector("Rect Detector 1");
-    RectangularDetector *rectDet2 = new RectangularDetector("Rect Detector 2");
+    auto rectDet1 = std::make_shared<RectangularDetector>("Rect Detector 1");
+    auto rectDet2 = std::make_shared<RectangularDetector>("Rect Detector 2");
 
-    newAssembly2->add(rectDet2);
+    newAssembly2->add(rectDet2.get());
 
-    newAssembly1->add(rectDet1);
+    newAssembly1->add(rectDet1.get());
     newAssembly1->add(newAssembly2);
 
     instr->add(newAssembly1);
 
-    std::vector<const RectangularDetector *> expectedDetectors{
-        dynamic_cast<const RectangularDetector *>(instr->getChild(0).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(1).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(2).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(3).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(4).get()),
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4)),
         rectDet1,
         rectDet2};
     TS_ASSERT_EQUALS(instr->findRectDetectors().size(), 7);
@@ -705,12 +705,12 @@ private:
 
   void checkFindRectDetectorsIgnoresIrrelevantComponents(std::vector<std::string> const &componentNames) {
     Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
-    std::vector<const RectangularDetector *> expectedDetectors{
-        dynamic_cast<const RectangularDetector *>(instr->getChild(0).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(1).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(2).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(3).get()),
-        dynamic_cast<const RectangularDetector *>(instr->getChild(4).get())};
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4))};
     for (auto const &componentName : componentNames) {
       instr->add(new ObjComponent(componentName));
     }

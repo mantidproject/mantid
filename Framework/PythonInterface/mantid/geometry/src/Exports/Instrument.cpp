@@ -76,7 +76,5 @@ void export_Instrument() {
       .def("getBaseInstrument", &Instrument::baseInstrument, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
            "Return reference to the base instrument")
 
-      .def("findRectDetectors",
-           (std::vector<const RectangularDetector *>(Instrument::*)() const) & Instrument::findRectDetectors,
-           arg("self"), "Return a list of rectangular detectors.");
+      .def("findRectDetectors", &Instrument::findRectDetectors, arg("self"), "Return a list of rectangular detectors.");
 }
