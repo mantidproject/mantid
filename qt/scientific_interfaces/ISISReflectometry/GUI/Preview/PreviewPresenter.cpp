@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "Common/Detector.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
@@ -104,14 +105,20 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
-  // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->updateWorkspace(ws);
-  plotInstView();
-  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-  m_view->setInstViewToolbarEnabled(true);
-  notifyInstViewZoomRequested();
-  // Perform summing banks to update the next plot, if possible
-  runSumBanks();
+  if (hasLinearDetector(ws)) {
+    m_view->resetInstView();
+    m_model->setSummedWs(ws);
+    notifySumBanksCompleted();
+  } else {
+    // Notify the instrument view model that the workspace has changed before we get the surface
+    m_instViewModel->updateWorkspace(ws);
+    plotInstView();
+    // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+    m_view->setInstViewToolbarEnabled(true);
+    notifyInstViewZoomRequested();
+    // Perform summing banks to update the next plot, if possible
+    runSumBanks();
+  }
 }
 
 void PreviewPresenter::notifyUpdateAngle() { runReduction(); }

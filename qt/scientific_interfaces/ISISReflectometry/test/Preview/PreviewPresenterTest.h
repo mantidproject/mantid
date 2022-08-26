@@ -8,6 +8,7 @@
 
 #include "../../../../widgets/regionselector/test/MockRegionSelector.h"
 #include "../ReflMockObjects.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -117,6 +118,24 @@ public:
     TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
   }
 
+  void test_notify_load_workspace_updates_model_and_view_for_linear_detector() {
+    auto mockModel = makeModel();
+    auto mockView = makeView();
+    auto mockJobManager = makeJobManager();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectRegionSelectorToolbarEnabled(*mockView, false);
+    expectLoadWorkspaceCompletedForLinearDetector(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                         std::move(mockRegionSelector));
+    auto presenter = PreviewPresenter(std::move(deps));
+
+    expectRegionSelectorToolbarEnabled(*mockView, true);
+
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
   void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
@@ -201,7 +220,7 @@ public:
     auto mockJobManager = makeJobManager();
     auto mockRegionSelector = makeRegionSelector();
 
-    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto ws = createRectangularDetectorWorkspace();
     EXPECT_CALL(*mockModel, getSummedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(*mockRegionSelector, updateWorkspace(Eq(ws))).Times(1);
     expectRegionSelectorToolbarEnabled(*mockView, false);
@@ -467,6 +486,19 @@ private:
     EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
   }
 
+  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                                     MockJobManager &mockJobManager,
+                                                     MockRegionSelector &mockRegionSelector) {
+    auto ws = createLinearDetectorWorkspace();
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+
+    EXPECT_CALL(mockView, resetInstView()).Times(1);
+    EXPECT_CALL(mockModel, setSummedWs(ws)).Times(1);
+
+    expectRunReduction(mockView, mockModel, mockJobManager, mockRegionSelector);
+  }
+
   void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewView &mockView, MockPreviewModel &mockModel,
                                                          MockInstViewModel &mockInstViewModel) {
     expectInstViewModelUpdatedWithLoadedWorkspace(mockModel, mockInstViewModel);
@@ -476,7 +508,7 @@ private:
   }
 
   void expectLoadWorkspaceCompletedUpdatesAngle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
-    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto ws = createRectangularDetectorWorkspace();
     auto angle = 2.3;
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
@@ -486,7 +518,7 @@ private:
 
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
                                                      MockInstViewModel &mockInstViewModel) {
-    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto ws = createRectangularDetectorWorkspace();
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
@@ -597,5 +629,16 @@ private:
   void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {
     EXPECT_CALL(*mockPlotPresenter, clearModel()).Times(1);
     EXPECT_CALL(*mockPlotPresenter, plot()).Times(1);
+  }
+
+  Mantid::API::MatrixWorkspace_sptr createLinearDetectorWorkspace() {
+    return WorkspaceCreationHelper::create2DWorkspace(1, 1);
+  }
+
+  Mantid::API::MatrixWorkspace_sptr createRectangularDetectorWorkspace() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto rectangularInstrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    ws->setInstrument(rectangularInstrument);
+    return ws;
   }
 };

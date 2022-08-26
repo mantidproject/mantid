@@ -34,6 +34,7 @@ public:
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
   MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
 
+  MOCK_METHOD(void, setSummedWs, (MatrixWorkspace_sptr), (override));
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
   MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));

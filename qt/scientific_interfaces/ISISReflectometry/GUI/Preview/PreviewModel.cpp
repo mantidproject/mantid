@@ -99,6 +99,8 @@ std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_r
 
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
 
+void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
+
 void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
 void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
