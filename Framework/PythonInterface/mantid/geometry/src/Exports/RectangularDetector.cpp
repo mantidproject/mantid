@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
@@ -22,13 +21,13 @@ GET_POINTER_SPECIALIZATION(RectangularDetector)
  * appropriate Detector leaf type
  */
 void export_RectangularDetector() {
-  register_ptr_to_python<std::shared_ptr<RectangularDetector>>();
-  register_ptr_to_python<const RectangularDetector *>();
+  register_ptr_to_python<RectangularDetector_sptr>();
+  register_ptr_to_python<RectangularDetector_const_sptr>();
 
-  // vector of RectangularDetector's
-  std_vector_exporter<const RectangularDetector *>::wrap("std_vector_rectangular_detector");
+  // vector of RectangularDetector's without an internal proxy
+  std_vector_exporter<RectangularDetector_const_sptr, /*NoProxy=*/true>::wrap("std_vector_rectangular_detector");
 
-  class_<RectangularDetector, bases<CompAssembly, IObjComponent>, boost::noncopyable>("RectangularDetector", no_init)
+  class_<RectangularDetector, bases<GridDetector>, boost::noncopyable>("RectangularDetector", no_init)
       .def("xpixels", &RectangularDetector::xpixels, arg("self"), "Returns the number of pixels in the X direction")
       .def("ypixels", &RectangularDetector::ypixels, arg("self"), "Returns the number of pixels in the Y direction")
       .def("xstep", &RectangularDetector::xstep, arg("self"), "Returns the step size in the X direction")
