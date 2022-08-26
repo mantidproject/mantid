@@ -214,6 +214,18 @@ public:
     assertProperty(*result, "ScaleFactor", 2.2);
   }
 
+  void testSecondTransmissionRunClearedIfFirstTransmissionSet() {
+    auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
+    // Use an angle that will match per-theta defaults. They should be
+    // overridden by the cell values. Set first transmission run only.
+    auto row = Row({"12345", "12346"}, 2.3, TransmissionRunPair("92345", ""), RangeInQ(0.1, 0.09, 0.91), 2.2,
+                   ReductionOptionsMap(), ReductionWorkspaces({"12345", "12346"}, TransmissionRunPair("92345", "")));
+    auto result = RowProcessing::createAlgorithmRuntimeProps(model, row);
+
+    TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "92345");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "");
+  }
+
   void testAddingPropertyViaOptionsCell() {
     // This tests adding a property via the options cell on a row, for a
     // property that does not get set anywhere else on the GUI

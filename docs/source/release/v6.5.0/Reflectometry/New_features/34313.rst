@@ -1,0 +1,1 @@
+- If both transmission runs are set on the Experiment Settings tab, there was previously no way to override this to only use a single transmission run. This has been changed so that if you specify only the first transmission run on the Runs table, and leave the second blank, then only the first will be used.
