@@ -226,13 +226,16 @@ class GSAS2Model(object):
 
     def call_subprocess(self, command_string):
         try:
+            env = os.environ.copy()
+            env['PYTHONHOME'] = self.path_to_gsas2
             shell_process = subprocess.Popen(command_string.replace('"', '\\"'),
                                              shell=True,
                                              stdin=None,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE,
                                              close_fds=True,
-                                             universal_newlines=True)
+                                             universal_newlines=True,
+                                             env=env)
             shell_output = shell_process.communicate(timeout=self.timeout)
             return shell_output
         except subprocess.TimeoutExpired:
@@ -253,43 +256,48 @@ class GSAS2Model(object):
 
     def find_in_file(self, file_path, marker_string, start_of_value, end_of_value, strip_separator=None):
         value_string = None
-        with open(file_path, 'rt', encoding='utf-8') as file:
-            full_file_string = file.read().replace('\n', '')
-            where_marker = full_file_string.rfind(marker_string)
-            if where_marker != -1:
-                where_value_start = full_file_string.find(start_of_value, where_marker)
-                if where_value_start != -1:
-                    where_value_end = full_file_string.find(end_of_value, where_value_start + 1)
-                    value_string = full_file_string[where_value_start: where_value_end]
-                    if strip_separator:
-                        value_string = value_string.strip(strip_separator + " ")
-                    else:
-                        value_string = value_string.strip(" ")
+        if os.path.exists(file_path):
+            with open(file_path, 'rt', encoding='utf-8') as file:
+                full_file_string = file.read().replace('\n', '')
+                where_marker = full_file_string.rfind(marker_string)
+                if where_marker != -1:
+                    where_value_start = full_file_string.find(start_of_value, where_marker)
+                    if where_value_start != -1:
+                        where_value_end = full_file_string.find(end_of_value, where_value_start + 1)
+                        value_string = full_file_string[where_value_start: where_value_end]
+                        if strip_separator:
+                            value_string = value_string.strip(strip_separator + " ")
+                        else:
+                            value_string = value_string.strip(" ")
         return value_string
 
     def find_basis_block_in_file(self, file_path, marker_string, start_of_value, end_of_value):
-        with open(file_path, 'rt', encoding='utf-8') as file:
-            full_file_string = file.read()
-            where_marker = full_file_string.find(marker_string)
-            value_string = None
-            if where_marker != -1:
-                where_first_digit = -1
-                index = int(where_marker)
-                while index < len(full_file_string):
-                    if full_file_string[index].isdecimal():
-                        where_first_digit = index
-                        break
-                    index += 1
-                if where_first_digit != -1:
-                    where_start_of_line = full_file_string.rfind(start_of_value, 0, where_first_digit - 1)
-                    if where_start_of_line != -1:
-                        where_end_of_block = full_file_string.find(end_of_value, where_start_of_line)
-                        # if "loop" not found then assume the end of the file is the end of this block
-                        value_string = full_file_string[where_start_of_line: where_end_of_block]
+        value_string = None
+        if os.path.exists(file_path):
+            with open(file_path, 'rt', encoding='utf-8') as file:
+                full_file_string = file.read()
+                where_marker = full_file_string.find(marker_string)
+                if where_marker != -1:
+                    where_first_digit = -1
+                    index = int(where_marker)
+                    while index < len(full_file_string):
+                        if full_file_string[index].isdecimal():
+                            where_first_digit = index
+                            break
+                        index += 1
+                    if where_first_digit != -1:
+                        where_start_of_line = full_file_string.rfind(start_of_value, 0, where_first_digit - 1)
+                        if where_start_of_line != -1:
+                            where_end_of_block = full_file_string.find(end_of_value, where_start_of_line)
+                            # if "loop" not found then assume the end of the file is the end of this block
+                            value_string = full_file_string[where_start_of_line: where_end_of_block]
         return value_string
 
     def read_basis(self, phase_file_path):
         basis_string = self.find_basis_block_in_file(phase_file_path, "atom", "\n", "loop")
+        if not basis_string:
+            logger.error(f"Invalid Phase file format in {phase_file_path}")
+            return None
         list_of_lines = basis_string.split("\n")
         list_of_lines = [k for k in list_of_lines if k != ""]
         basis = []
@@ -345,7 +353,11 @@ class GSAS2Model(object):
                                                         strip_separator="ICONS\t")
                 crystal_params.append(loop_crystal_params)
         tof_min = []
+        file_mismatch = f"Different number of banks in {instrument} and {self.data_files}"
         for loop_crystal_param_string in crystal_params:
+            if not loop_crystal_param_string:
+                logger.error(file_mismatch)
+                return None
             list_crystal_params = loop_crystal_param_string.split(" ")
             if len(list_crystal_params) == 1:
                 list_crystal_params = list_crystal_params[0].split("\t")
@@ -355,6 +367,9 @@ class GSAS2Model(object):
                 dif_a = float(list_crystal_params[1] or 0.0)
                 t_zero = float(list_crystal_params[2] or 0.0)
                 tof_min.append((dif_c * self.dSpacing_min) + (dif_a * (self.dSpacing_min ** 2)) + t_zero)
+        if not tof_min:
+            logger.error(file_mismatch)
+            return None
         return tof_min
 
     # ===================
@@ -380,10 +395,13 @@ class GSAS2Model(object):
             cell_length_a = self.find_in_file(phase_file_path, '_cell_length_a', ' ', '_cell_length_b')
             cell_length_b = self.find_in_file(phase_file_path, '_cell_length_b', ' ', '_cell_length_c')
             cell_length_c = self.find_in_file(phase_file_path, '_cell_length_c', ' ', '_cell')
+            if not cell_length_a or not cell_length_b or not cell_length_c:
+                logger.error(f"Invalid Phase file format in {phase_file_path}")
+                return None
             cell_lengths = " ".join([cell_length_a, cell_length_b, cell_length_c])
         return cell_lengths
 
-    def create_pawley_reflections(self, cell_lengths, space_group, basis, dmin):
+    def create_pawley_reflections(self, cell_lengths, space_group, basis):
         generated_reflections = []
         try:
             for atom in basis:
@@ -391,7 +409,7 @@ class GSAS2Model(object):
 
                 generator = ReflectionGenerator(structure)
 
-                hkls = generator.getUniqueHKLsUsingFilter(dmin, 3.0, ReflectionConditionFilter.StructureFactor)
+                hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 3.0, ReflectionConditionFilter.StructureFactor)
                 dValues = generator.getDValues(hkls)
                 pg = structure.getSpaceGroup().getPointGroup()
                 # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
@@ -407,17 +425,17 @@ class GSAS2Model(object):
     def generate_reflections_from_space_group(self, phase_filepath, cell_lengths):
 
         space_group = self.read_space_group(phase_filepath)
+        found_basis = self.read_basis(phase_filepath)
+        if not found_basis:
+            return None
         try:
             mantid_pawley_reflections = self.create_pawley_reflections(cell_lengths, space_group,
-                                                                       self.read_basis(phase_filepath),
-                                                                       self.dSpacing_min)
+                                                                       found_basis)
         except ValueError:
             roto_inversion_space_group = self.insert_minus_before_first_digit(space_group)
             try:
-                mantid_pawley_reflections = self.create_pawley_reflections(cell_lengths,
-                                                                           roto_inversion_space_group,
-                                                                           self.read_basis(phase_filepath),
-                                                                           self.dSpacing_min)
+                mantid_pawley_reflections = self.create_pawley_reflections(cell_lengths, roto_inversion_space_group,
+                                                                           found_basis)
                 if mantid_pawley_reflections:
                     logger.warning(f"Note the roto-inversion space group {roto_inversion_space_group} has been "
                                    f"used rather than {space_group} read from {phase_filepath} as "
@@ -439,17 +457,25 @@ class GSAS2Model(object):
 
     def determine_x_limits(self):
         tof_min = self.determine_tof_min()
+        if not tof_min:
+            return None
         for workspace_index in range(len(self.x_min)):
             if tof_min[workspace_index] > self.x_min[workspace_index]:
                 self.x_min[workspace_index] = tof_min[workspace_index]
+        return True
 
     def determine_tof_min(self):
         tof_min = []
         if self.number_of_regions > 1 and len(self.instrument_files) == 1:
             tof_min = self.get_crystal_params_from_instrument(self.instrument_files[0])
+            if not tof_min:
+                return None
         elif self.number_of_regions == len(self.instrument_files):
             for input_instrument in self.instrument_files:
-                tof_min.append(self.get_crystal_params_from_instrument(input_instrument)[0])
+                loop_instrument_tof_min = self.get_crystal_params_from_instrument(input_instrument)
+                if not loop_instrument_tof_min:
+                    return None
+                tof_min.append(loop_instrument_tof_min[0])
         return tof_min
 
     def understand_data_structure(self):
@@ -486,7 +512,9 @@ class GSAS2Model(object):
         else:
             self.x_min = self.data_x_min
             self.x_max = self.data_x_max
-            self.determine_x_limits()
+            success = self.determine_x_limits()
+            if not success:
+                return None
             if not self.x_min:
                 logger.error("Could not determine Minimum and Maximum X values from input files. "
                              "Please set these values in the Plot Widget on the GSAS-II tab.")

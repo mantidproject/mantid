@@ -98,6 +98,7 @@ class TestGSAS2Model(unittest.TestCase):
     def test_read_basis(self):
         self.model.clear_input_components()
         self.assertEqual(self.model.read_basis(self.phase_file_path), ['Fe 0.0 0.0 0.0 1.0 0.025'])
+        self.assertEqual(self.model.read_basis("invalid_phase_file"), None)
 
     def test_choose_cell_lengths(self):
         self.model.clear_input_components()
@@ -105,6 +106,9 @@ class TestGSAS2Model(unittest.TestCase):
 
         self.model.override_cell_length_string = '3.65'
         self.assertEqual(self.model.choose_cell_lengths("phase_file_not_used"), '3.65 3.65 3.65')
+
+        self.model.override_cell_length_string = None
+        self.assertEqual(self.model.choose_cell_lengths("invalid_phase_file"), None)
 
     def test_generate_reflections_from_space_group(self):
         self.model.clear_input_components()
@@ -129,6 +133,12 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.clear_input_components()
         instrument_filepath = os.path.join(self.input_dir, 'template_ENGINX_241391_236516_North_bank.prm')
         self.assertEqual(self.model.get_crystal_params_from_instrument(instrument_filepath), [18324.41])
+
+    @patch(model_path + ".GSAS2Model.find_in_file")
+    def test_crystal_params_from_instrument_file_mismatch(self, mock_find_in_file):
+        self.model.clear_input_components()
+        mock_find_in_file.return_value = None
+        self.assertEqual(self.model.get_crystal_params_from_instrument("file_mismatch"), None)
 
     @patch(model_path + ".GSAS2Model.find_in_file")
     def test_crystal_params_from_instrument_split_on_tabs(self, mock_find_in_file):
