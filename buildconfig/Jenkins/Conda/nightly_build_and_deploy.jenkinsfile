@@ -206,7 +206,7 @@ pipeline {
           ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${GIT_COMMIT} ${WORKSPACE}/standalone-packages/*'
       }
     }
-    stage ('Delete old Conda nightly packages from Anaconda') {
+    stage ('Delete old non-main packages from Anaconda') {
       when {
         beforeAgent true
         beforeOptions true
@@ -219,10 +219,8 @@ pipeline {
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --package mantid --label ${ANACONDA_CHANNEL_LABEL}'
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --package mantidqt --label ${ANACONDA_CHANNEL_LABEL}'
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --package mantiddocs --label ${ANACONDA_CHANNEL_LABEL}'
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-nightlies.sh ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --package mantidworkbench --label ${ANACONDA_CHANNEL_LABEL}'
+        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
+         ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
       }
     }
     stage('Update conda-recipes') {
