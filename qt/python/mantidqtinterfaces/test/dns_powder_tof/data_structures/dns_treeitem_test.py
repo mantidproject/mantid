@@ -65,14 +65,14 @@ class DNSTreeItemTest(unittest.TestCase):
         self.assertEqual(testv, 10)
 
     def test_data(self):
-        testv = self.item.data()
+        testv = self.item.get_tree_item_data()
         self.assertEqual(testv, [
             'number', 'det_rot', 'sample_rot', 'field', 'temperature',
             'sample', 'time', 'tof_channels', 'tof_channel_width', 'filepath'
         ])
-        testv = self.item.data(100)
+        testv = self.item.get_tree_item_data(100)
         self.assertIsNone(testv)
-        testv = self.item.data(2)
+        testv = self.item.get_tree_item_data(2)
         self.assertEqual(testv, 'sample_rot')
 
     def test_get_sample(self):

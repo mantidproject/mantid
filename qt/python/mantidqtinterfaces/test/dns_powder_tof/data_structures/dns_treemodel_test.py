@@ -295,7 +295,7 @@ class DNSTreeModelTest(unittest.TestCase):
         scan = self.model._item_from_index(index)
         testv = self.model.add_number_of_children()
         self.assertEqual(testv, 2)
-        postfix = scan.data(0).split('#')[1].split('/')[0]
+        postfix = scan.get_tree_item_data(0).split('#')[1].split('/')[0]
         self.assertEqual(postfix, '1')
 
     def test_get_txt(self):

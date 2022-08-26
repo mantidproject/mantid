@@ -13,6 +13,7 @@ from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import QModelIndex, Qt, Signal
 from qtpy.QtWidgets import QProgressDialog
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItem
 
 
 class DNSFileSelectorView(DNSView):
@@ -220,10 +221,10 @@ class DNSFileSelectorView(DNSView):
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), False)
 
     def hide_tof(self, hidden=True):
-        self._standard_treeview.setColumnHidden(7, hidden)
-        self._standard_treeview.setColumnHidden(8, hidden)
-        self._sample_treeview.setColumnHidden(7, hidden)
-        self._sample_treeview.setColumnHidden(8, hidden)
+        self._standard_treeview.setColumnHidden(TreeItem.tof_channels.value, hidden)
+        self._standard_treeview.setColumnHidden(TreeItem.tof_channel_width.value, hidden)
+        self._sample_treeview.setColumnHidden(TreeItem.tof_channels.value, hidden)
+        self._sample_treeview.setColumnHidden(TreeItem.tof_channel_width.value, hidden)
 
     def is_scan_hidden(self, row):
         return self._treeview.isRowHidden(row, self._treeview.rootIndex())

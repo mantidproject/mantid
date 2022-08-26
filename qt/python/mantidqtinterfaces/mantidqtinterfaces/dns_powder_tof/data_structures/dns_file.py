@@ -96,7 +96,7 @@ class DNSFile(ObjectDict):
         txt += separator
         txt += "# Temperatures/Lakeshore      T\n"
         txt += f"#  T1                         {self['temp_tube']:6.3f} K\n"
-        txt += f"#  T2                         {self['temp_samp']:6.3f} K\n"
+        txt += f"#  T2                         {self['temp_sample']:6.3f} K\n"
         txt += f"#  sample_setpoint            {self['temp_set']:6.3f} K\n"
         txt += separator
 
@@ -187,7 +187,7 @@ class DNSFile(ObjectDict):
         self['C'] = float(txt[39][25:-16])
         self['ZT'] = float(txt[40][25:-16])
         self['temp_tube'] = float(txt[43][25:-3])
-        self['temp_samp'] = float(txt[44][25:-3])
+        self['temp_sample'] = float(txt[44][25:-3])
         self['temp_set'] = float(txt[45][25:-3])
         self['tof_channels'] = int(txt[48][25:-1])
         self['channel_width'] = float(txt[49][25:-11])

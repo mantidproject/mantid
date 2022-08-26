@@ -43,7 +43,7 @@ class DNSFileSelectorModel(DNSObsModel):
             datafiles = all_datafiles
         return datafiles
 
-    def set_datafiles_to_load(self, data_path, fn_range, filtered=False, watcher=False):
+    def set_datafiles_to_load(self, data_path, file_number_range, filtered=False, watcher=False):
         """
         Reading of new files, if filtered is True, only the files in the
         range specified.
@@ -51,9 +51,9 @@ class DNSFileSelectorModel(DNSObsModel):
         self.all_datafiles = return_filelist(data_path)
         datafiles = self._filter_out_already_loaded(self.all_datafiles, watcher)
         loaded = self._get_list_of_loaded_files(data_path, watcher)
-        datafiles, fn_range = self._filter_range(datafiles, fn_range, filtered)
+        datafiles, file_number_range = self._filter_range(datafiles, file_number_range, filtered)
         number_of_datafiles = len(datafiles)
-        return number_of_datafiles, loaded, datafiles, fn_range
+        return number_of_datafiles, loaded, datafiles, file_number_range
 
     def _get_start_end_file_numbers(self):
         if self.all_datafiles:
@@ -62,13 +62,13 @@ class DNSFileSelectorModel(DNSObsModel):
             return [start, end]
         return [0, 0]
 
-    def _filter_range(self, datafiles, fn_range, filtered=False):
-        start, end = fn_range
+    def _filter_range(self, datafiles, file_number_range, filtered=False):
+        start, end = file_number_range
         if start is None or end is None:
-            fn_range = self._get_start_end_file_numbers()
+            file_number_range = self._get_start_end_file_numbers()
         if filtered:
             datafiles = filter_filenames(datafiles, start, end)
-        return datafiles, fn_range
+        return datafiles, file_number_range
 
     def read_all(self, datafiles, data_path, loaded, watcher=False):
         """
@@ -81,7 +81,7 @@ class DNSFileSelectorModel(DNSObsModel):
             self.update_progress(i, len(datafiles))
             if self.loading_canceled:
                 break
-            dns_file = self._load_file_from_chache_or_new(
+            dns_file = self._load_file_from_cache_or_new(
                 loaded, filename, data_path)
             if dns_file.new_format:  # ignore files with old format
                 self.tree_model.setup_model_data([dns_file])
@@ -164,7 +164,7 @@ class DNSFileSelectorModel(DNSObsModel):
     def get_scan_range(self):
         return range(self.get_number_of_scans())
 
-    # Scan checking
+    # scan checking
     def check_last_scans(self, number_of_scans_to_check, complete,
                          not_hidden_rows):
         self.uncheck_all_scans()
@@ -204,7 +204,7 @@ class DNSFileSelectorModel(DNSObsModel):
             return self.standard_data
         return self.tree_model
 
-    # Data receiving
+    # data receiving
     def model_is_standard(self):
         return self.active_model == self.standard_data
 
@@ -219,7 +219,7 @@ class DNSFileSelectorModel(DNSObsModel):
         else:
             self.active_model = self.tree_model
 
-    # Scan filtering
+    # scan filtering
     def filter_scans_for_boxes(self, filters, is_tof):
         model = self.active_model
         hide_scans = self._filter_tof_scans(is_tof)
@@ -250,7 +250,7 @@ class DNSFileSelectorModel(DNSObsModel):
                 hide_scans.add(row)
         return hide_scans
 
-    # Opening data files in external editor
+    # opening data files in external editor
     def open_datafile(self, index, data_path, standard_path):
         filename = self.active_model.get_filename_from_index(index)
         if self.active_model == self.standard_data:
@@ -260,9 +260,9 @@ class DNSFileSelectorModel(DNSObsModel):
         if filename:
             open_editor(filename, path)
 
-    # Caching of filelist
+    # caching of filelist
     @staticmethod
-    def _load_file_from_chache_or_new(loaded, filename, data_path):
+    def _load_file_from_cache_or_new(loaded, filename, data_path):
         dns_file = loaded.get(filename, False)
         if not dns_file:
             dns_file = DNSFile(data_path, filename)

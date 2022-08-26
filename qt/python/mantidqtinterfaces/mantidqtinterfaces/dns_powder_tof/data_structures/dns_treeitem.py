@@ -9,6 +9,8 @@
 Custom tree item for DNS which is either a scan or a file in DnsTreeModel.
 """
 
+from enum import Enum
+
 
 class DNSTreeItem:
     """
@@ -45,7 +47,7 @@ class DNSTreeItem:
     def columnCount(self):
         return len(self.item_data)
 
-    def data(self, column=None):
+    def get_tree_item_data(self, column=None):
         if column is not None:
             try:
                 return self.item_data[column]
