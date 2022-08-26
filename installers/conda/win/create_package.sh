@@ -139,7 +139,8 @@ echo "Copy scripts into the package"
 mv $CONDA_ENV_PATH/Library/scripts $COPY_DIR/
 
 echo "Copy share files (includes mantid docs) to the package"
-mv $CONDA_ENV_PATH/Library/share/doc $COPY_DIR/share/
+mkdir $COPY_DIR/share
+mv $CONDA_ENV_PATH/share/doc/* $COPY_DIR/share/
 
 echo "Copy executable launcher"
 # MantidWorkbench-script.pyw is created by project.nsi on creation of the package
