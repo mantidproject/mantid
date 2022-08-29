@@ -22,8 +22,6 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
 class DNSFileSelectorModel(DNSObsModel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Model has this function to call back on parent.
-        # No idea how to avoid this.
         self.update_progress = parent.update_progress
         # Qt tree models
         self.tree_model = DNSTreeModel()

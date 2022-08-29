@@ -31,5 +31,5 @@ class DNSWidget:
     def has_presenter(self):
         return self.presenter is not None
 
-    def update_progress(self, i, end_i=None):
-        self.presenter.update_progress(i, end_i)
+    def update_progress(self, iteration_index, iteration_index_max=None):
+        self.presenter.update_progress(iteration_index, iteration_index_max)
