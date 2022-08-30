@@ -25,7 +25,7 @@ class DNSTofDatasetTest(unittest.TestCase):
     def setUpClass(cls):
         # has more data than the one below to test loops
         cls.fulldata = get_file_selector_fulldat()['full_data']
-        cls.standarddata = get_file_selector_fulldat()['standard_data']
+        cls.standarddata = get_file_selector_fulldat()['standard_data_tree_model']
         cls.ds = DNSTofDataset(data=cls.fulldata, path='C:/123',
                                is_sample=True)
 

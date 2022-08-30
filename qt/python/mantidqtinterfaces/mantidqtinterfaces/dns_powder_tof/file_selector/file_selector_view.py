@@ -251,11 +251,11 @@ class DNSFileSelectorView(DNSView):
             self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(),
                                                  True)
 
-    def set_tree_model(self, model, standard=False):
-        if standard:
-            self._standard_treeview.setModel(model)
-        else:
-            self._sample_treeview.setModel(model)
+    def set_standard_data_tree_model(self, model):
+        self._standard_treeview.setModel(model)
+
+    def set_sample_data_tree_model(self, model):
+        self._sample_treeview.setModel(model)
 
     def adjust_treeview_columns_width(self, num_columns):
         for i in range(num_columns):

@@ -295,7 +295,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _setup_standard_data(self, paths, file_selector):
         if self._tof_opt['corrections']:
             self._standard_data = DNSTofDataset(
-                data=file_selector['standard_data'],
+                data=file_selector['standard_data_tree_model'],
                 path=paths['standards_dir'],
                 is_sample=False)
             self._nb_vana_banks = self._standard_data.get_nb_vana_banks()

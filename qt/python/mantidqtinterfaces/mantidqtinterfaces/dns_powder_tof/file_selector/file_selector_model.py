@@ -24,9 +24,9 @@ class DNSFileSelectorModel(DNSObsModel):
         super().__init__(parent)
         self.update_progress = parent.update_progress
         # Qt tree models
-        self.tree_model = DNSTreeModel()
-        self.standard_data = DNSTreeModel()
-        self.active_model = self.tree_model
+        self.sample_data_tree_model = DNSTreeModel()
+        self.standard_data_tree_model = DNSTreeModel()
+        self.active_model = self.sample_data_tree_model
         self.old_data_set = None
         self.all_datafiles = None
         self.loading_canceled = False
@@ -82,7 +82,7 @@ class DNSFileSelectorModel(DNSObsModel):
             dns_file = self._load_file_from_cache_or_new(
                 loaded, filename, data_path)
             if dns_file.new_format:  # ignore files with old format
-                self.tree_model.setup_model_data([dns_file])
+                self.sample_data_tree_model.setup_model_data([dns_file])
         self.old_data_set = set(self.all_datafiles)
         self._add_number_of_files_per_scan()
         self._save_filelist(data_path)
@@ -91,7 +91,7 @@ class DNSFileSelectorModel(DNSObsModel):
         """
         Reading of standard files.
         """
-        model = self.standard_data
+        model = self.standard_data_tree_model
         datafiles = return_filelist(standard_path)
         model.clear_scans()
         for filename in datafiles:
@@ -108,11 +108,11 @@ class DNSFileSelectorModel(DNSObsModel):
         return False
 
     def _add_number_of_files_per_scan(self):
-        self.tree_model.add_number_of_children()
+        self.sample_data_tree_model.add_number_of_children()
 
     def _clear_scans_if_not_sequential(self, watcher):
         if not watcher:
-            self.tree_model.clear_scans()
+            self.sample_data_tree_model.clear_scans()
 
     def _get_list_of_loaded_files(self, data_path, watcher):
         if watcher:
@@ -182,40 +182,41 @@ class DNSFileSelectorModel(DNSObsModel):
 
     def check_by_file_numbers(self, file_numbers):
         not_found = 0
-        file_number_dict = self.tree_model.get_file_number_dict()
+        file_number_dict = self.sample_data_tree_model.get_file_number_dict()
         for file_number in file_numbers:
             try:
-                self.tree_model.set_checked_from_index(
+                self.sample_data_tree_model.set_checked_from_index(
                     file_number_dict[file_number])
             except KeyError:
                 not_found += 1
         return not_found
 
     def check_file_number_range(self, start, end):
-        self.tree_model.check_fn_range(start, end)
+        self.sample_data_tree_model.check_fn_range(start, end)
 
     def set_loading_canceled(self, canceled=True):
         self.loading_canceled = canceled
 
-    def get_model(self, standard=False):
-        if standard:
-            return self.standard_data
-        return self.tree_model
+    def get_standard_data_model(self):
+        return self.standard_data_tree_model
+
+    def get_sample_data_model(self):
+        return self.sample_data_tree_model
 
     # data receiving
     def model_is_standard(self):
-        return self.active_model == self.standard_data
+        return self.active_model == self.standard_data_tree_model
 
     def get_data(self, standard=False, full_info=True):
         if standard:
-            return self.standard_data.get_checked(full_info=True)
-        return self.tree_model.get_checked(full_info=full_info)
+            return self.standard_data_tree_model.get_checked(full_info=True)
+        return self.sample_data_tree_model.get_checked(full_info=full_info)
 
-    def set_model(self, standard=False):
+    def set_active_model(self, standard=False):
         if standard:
-            self.active_model = self.standard_data
+            self.active_model = self.standard_data_tree_model
         else:
-            self.active_model = self.tree_model
+            self.active_model = self.sample_data_tree_model
 
     # scan filtering
     def filter_scans_for_boxes(self, filters, is_tof):
@@ -251,7 +252,7 @@ class DNSFileSelectorModel(DNSObsModel):
     # opening data files in external editor
     def open_datafile(self, index, data_path, standard_path):
         filename = self.active_model.get_filename_from_index(index)
-        if self.active_model == self.standard_data:
+        if self.active_model == self.standard_data_tree_model:
             path = standard_path
         else:
             path = data_path
@@ -267,7 +268,7 @@ class DNSFileSelectorModel(DNSObsModel):
         return dns_file
 
     def _save_filelist(self, data_path):
-        txt = "".join(self.tree_model.get_txt())
+        txt = "".join(self.sample_data_tree_model.get_txt())
         try:
             save_txt(txt, 'last_filelist.txt', data_path)
         except PermissionError:

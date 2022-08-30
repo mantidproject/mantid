@@ -26,10 +26,9 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.watcher = watcher
         self.view = view
         # set sample data view
-        self.view.set_tree_model(self.model.get_model())
+        self.view.set_sample_data_tree_model(self.model.get_sample_data_model())
         # set standard data view
-        self.view.set_tree_model(self.model.get_model(standard=True),
-                                 standard=True)
+        self.view.set_standard_data_tree_model(self.model.get_standard_data_model())
 
         # adjust view to column width
         self.num_columns = self.model.get_active_model_column_count()
@@ -200,7 +199,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         if standard_set:
             self.view.sig_read_all.disconnect(self._read_all)
             self.view.sig_read_all.connect(self._read_standard)
-            self.model.set_model(standard=True)
+            self.model.set_active_model(standard=True)
             self._changed_to_standard()
             own_options = self.get_option_dict()
             if own_options['auto_select_standard']:
@@ -208,7 +207,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         else:
             self.view.sig_read_all.disconnect(self._read_standard)
             self.view.sig_read_all.connect(self._read_all)
-            self.model.set_model()
+            self.model.set_active_model()
             self._filter_scans()
 
     # change of modi
@@ -239,7 +238,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
         self.own_dict['full_data'] = self.model.get_data()
-        self.own_dict['standard_data'] = self.model.get_data(standard=True)
+        self.own_dict['standard_data_tree_model'] = self.model.get_data(standard=True)
         self.own_dict['selected_file_numbers'] = self.model.get_data(
             full_info=False)
         return self.own_dict
@@ -247,7 +246,7 @@ class DNSFileSelectorPresenter(DNSObserver):
     def process_request(self):
         own_options = self.get_option_dict()
         if (own_options['auto_select_standard'] and not
-                own_options['standard_data']):
+                own_options['standard_data_tree_model']):
             self._automatic_select_all_standard_files()
 
     def set_view_from_param(self):

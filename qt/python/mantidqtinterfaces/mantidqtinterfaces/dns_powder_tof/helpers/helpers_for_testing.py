@@ -83,7 +83,7 @@ file_selector_fulldat = {
         'sample_type': '4p1K_map',
         'selector_speed': 7032.0
     }],
-    'standard_data': [{
+    'standard_data_tree_model': [{
         'file_number': 788058,
         'det_rot': -9.0,
         'sample_rot': 295.0,

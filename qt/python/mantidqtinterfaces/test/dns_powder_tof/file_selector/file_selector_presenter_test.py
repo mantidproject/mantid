@@ -64,18 +64,20 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.model.reset_mock()
 
     def test___init__(self):
-        self.model.get_model.return_value = 1
+        self.model.get_sample_data_model.return_value = 1
         self.presenter = DNSFileSelectorPresenter(view=self.view,
                                                   model=self.model,
                                                   name='file_selector',
                                                   watcher=self.watcher)
         self.assertIsInstance(self.presenter, DNSFileSelectorPresenter)
         self.assertIsInstance(self.presenter, DNSObserver)
-        self.model.get_model.assert_any_call(standard=True)
-        self.assertEqual(self.model.get_model.call_count, 2)
-        self.view.set_tree_model.assert_any_call(1)
-        self.view.set_tree_model.assert_called_with(1, standard=True)
-        self.assertEqual(self.view.set_tree_model.call_count, 2)
+        self.model.get_standard_data_model.assert_any_call()
+        self.assertEqual(self.model.get_sample_data_model.call_count, 1)
+        self.assertEqual(self.model.get_standard_data_model.call_count, 1)
+        self.view.set_sample_data_tree_model.assert_any_call(1)
+        self.view.set_standard_data_tree_model.assert_any_call(1)
+        self.assertEqual(self.view.set_sample_data_tree_model.call_count, 1)
+        self.assertEqual(self.view.set_standard_data_tree_model.call_count, 1)
 
     @patch('mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_'
            'presenter.'
@@ -255,7 +257,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
             'auto_select_standard': False
         }
         self.presenter._dataset_changed(True)
-        self.model.set_model.assert_called_once_with(standard=True)
+        self.model.set_active_model.assert_called_once_with(standard=True)
         self.view.sig_read_all.disconnect.assert_called_once_with(
             self.presenter._read_all)
         self.view.sig_read_all.connect.assert_called_once_with(
@@ -263,7 +265,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.model.reset_mock()
         self.view.reset_mock()
         self.presenter._dataset_changed(False)
-        self.model.set_model.assert_called_once_with()
+        self.model.set_active_model.assert_called_once_with()
         self.view.sig_read_all.disconnect.assert_called_once_with(
             self.presenter._read_standard)
         self.view.sig_read_all.connect.assert_called_once_with(
@@ -325,7 +327,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         mock_auto.reset_mock()
         mock_get_option.return_value = {
             'auto_select_standard': True,
-            'standard_data': []
+            'standard_data_tree_model': []
         }
         self.presenter.process_request()
         mock_auto.assert_called_once()

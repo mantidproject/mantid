@@ -68,8 +68,8 @@ class DNSFileSelectorModelTest(unittest.TestCase):
 
     def test___init__(self):
         self.assertIsInstance(self.model, DNSObsModel)
-        self.assertIsInstance(self.model.tree_model, DNSTreeModel)
-        self.assertIsInstance(self.model.standard_data, DNSTreeModel)
+        self.assertIsInstance(self.model.sample_data_tree_model, DNSTreeModel)
+        self.assertIsInstance(self.model.standard_data_tree_model, DNSTreeModel)
         self.assertTrue(hasattr(self.model, 'all_datafiles'))
         self.assertTrue(hasattr(self.model, 'old_data_set'))
         self.assertTrue(hasattr(self.model, 'active_model'))
@@ -126,7 +126,7 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         self.assertFalse(self.model.loading_canceled)
         self.assertEqual(self.parent.update_progress.call_count, 3)
         self.assertEqual(len(self.model.old_data_set), 3)
-        self.assertEqual(self.model.tree_model.rowCount(), 3)  # three scans
+        self.assertEqual(self.model.sample_data_tree_model.rowCount(), 3)  # three scans
 
     @patch(
         'mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_model.'
@@ -154,9 +154,9 @@ class DNSFileSelectorModelTest(unittest.TestCase):
     def test_clear_scans_if_not_sequential(self):
         self.read3files()  # pylint: disable=no-value-for-parameter
         self.model._clear_scans_if_not_sequential(True)
-        self.assertEqual(self.model.tree_model.rowCount(), 3)
+        self.assertEqual(self.model.sample_data_tree_model.rowCount(), 3)
         self.model._clear_scans_if_not_sequential(False)
-        self.assertEqual(self.model.tree_model.rowCount(), 0)
+        self.assertEqual(self.model.sample_data_tree_model.rowCount(), 0)
 
     @patch(
         'mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_model.'
@@ -192,7 +192,7 @@ class DNSFileSelectorModelTest(unittest.TestCase):
     def test_check_last_scans(self):
         self.read3files()  # pylint: disable=no-value-for-parameter
         self.model.check_last_scans(1, False, [0, 1, 2])
-        self.assertEqual(self.model.tree_model.get_checked(False), [788058])
+        self.assertEqual(self.model.sample_data_tree_model.get_checked(False), [788058])
         self.model.check_last_scans(1, True, [0, 1, 2])
 
     def test_check_by_file_numbers(self):
@@ -208,27 +208,29 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         self.model.set_loading_canceled(False)
         self.assertFalse(self.model.loading_canceled)
 
-    def test_get_model(self):
-        tree_model = self.model.get_model()
+    def test_get_standard_data_model(self):
+        tree_model = self.model.get_standard_data_model()
         self.assertIsInstance(tree_model, DNSTreeModel)
-        self.assertEqual(self.model.tree_model, tree_model)
-        tree_model = self.model.get_model(standard=True)
+        self.assertEqual(self.model.standard_data_tree_model, tree_model)
+
+    def test_get_sample_data_model(self):
+        tree_model = self.model.get_sample_data_model()
         self.assertIsInstance(tree_model, DNSTreeModel)
-        self.assertEqual(self.model.standard_data, tree_model)
+        self.assertEqual(self.model.sample_data_tree_model, tree_model)
 
     def test_model_is_standard(self):
         self.assertFalse(self.model.model_is_standard())
-        self.model.active_model = self.model.standard_data
+        self.model.active_model = self.model.standard_data_tree_model
         self.assertTrue(self.model.model_is_standard())
 
     def test_set_model(self):
         self.model.active_model = ''
         self.assertFalse(self.model.model_is_standard())
-        self.model.set_model(standard=True)
+        self.model.set_active_model(standard=True)
         self.assertTrue(self.model.model_is_standard())
-        self.assertFalse(self.model.active_model == self.model.tree_model)
-        self.model.set_model()
-        self.assertTrue(self.model.active_model == self.model.tree_model)
+        self.assertFalse(self.model.active_model == self.model.sample_data_tree_model)
+        self.model.set_active_model()
+        self.assertTrue(self.model.active_model == self.model.sample_data_tree_model)
 
     def test_filter_scans_for_boxes(self):
         self.read3files()  # pylint: disable=no-value-for-parameter
@@ -262,12 +264,12 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         'mantidqtinterfaces.dns_powder_tof.file_selector.file_selector_model.'
         'DNSTreeModel.get_filename_from_index')
     def test_open_datafile(self, mock_index, mock_open):
-        self.model.active_model = self.model.standard_data
+        self.model.active_model = self.model.standard_data_tree_model
         mock_index.return_value = 'a'
         self.model.open_datafile(1, 'b', 'c')
         mock_open.assert_called_once_with('a', 'c')
         mock_open.reset_mock()
-        self.model.active_model = self.model.tree_model
+        self.model.active_model = self.model.sample_data_tree_model
         self.model.open_datafile(1, 'b', 'c')
         mock_open.assert_called_once_with('a', 'b')
 
