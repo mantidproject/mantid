@@ -24,18 +24,18 @@ class DNSTofDatasetTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # has more data than the one below to test loops
-        cls.fulldata = get_file_selector_fulldat()['full_data']
-        cls.standarddata = get_file_selector_fulldat()['standard_data_tree_model']
-        cls.ds = DNSTofDataset(data=cls.fulldata, path='C:/123',
+        cls.full_data = get_file_selector_full_data()['full_data']
+        cls.standard_data = get_file_selector_full_data()['standard_data_tree_model']
+        cls.ds = DNSTofDataset(data=cls.full_data, path='C:/123',
                                is_sample=True)
 
     def set_standard(self):
-        self.ds = DNSTofDataset(data=self.standarddata,
+        self.ds = DNSTofDataset(data=self.standard_data,
                                 path='C:/123',
                                 is_sample=False)
 
     def set_sample(self):
-        self.ds = DNSTofDataset(data=self.fulldata,
+        self.ds = DNSTofDataset(data=self.full_data,
                                 path='C:/123',
                                 is_sample=True)
 
@@ -46,77 +46,73 @@ class DNSTofDatasetTest(unittest.TestCase):
         self.assertEqual(self.ds.banks, [-9.0])
         self.assertIsInstance(self.ds.data_dic, dict)
 
-    def test__get_max_key_length(self):
-        testv = dns_tof_powder_dataset._get_max_key_length(self.ds.data_dic)
-        self.assertEqual(testv, 18)
-
     def test__get_field_string(self):
-        testv = dns_tof_powder_dataset._get_field_string({2.6: 1, 3.5: 2}, 3)
-        self.assertEqual(testv, "    2.60: 1,\n    3.50: 2")
+        test_v = dns_tof_powder_dataset._get_field_string({2.6: 1, 3.5: 2}, 3)
+        self.assertEqual(test_v, "   2.60: 1,\n   3.50: 2")
 
     def test__get_path_string(self):
-        testv = dns_tof_powder_dataset._get_path_string({'a': {
+        test_v = dns_tof_powder_dataset._get_path_string({'a': {
             'path': '123'
         }}, 'a')
-        self.assertEqual(testv, "'path': '123',\n")
+        self.assertEqual(test_v, "'path': '123',\n")
 
     def test__get_sample_string(self):
-        testv = dns_tof_powder_dataset._get_sample_string('abc', 2)
-        self.assertEqual(testv, "'abc': {")
+        test_v = dns_tof_powder_dataset._get_sample_string('abc')
+        self.assertEqual(test_v, "'abc': {")
 
     def test_format_dataset(self):
-        testv = self.ds.format_dataset()
+        test_v = self.ds.format_dataset()
         self.assertEqual(
-            testv,
-            "{\n     '4p1K_map': {'path': '" + os.path.join('C:/123', 'service') + "',\n               "
-            "    -9.00: [788058]},\n}")
+            test_v,
+            "{\n    '4p1K_map': {'path': '" + os.path.join('C:/123', 'service') + "',\n               "
+            "  -9.00: [788058]},\n}")
 
     def test__get_nb_banks(self):
-        testv = self.ds._get_nb_banks()
-        self.assertEqual(testv, 0)
-        testv = self.ds._get_nb_banks('4p1K_map')
-        self.assertEqual(testv, 1)
+        test_v = self.ds._get_nb_banks()
+        self.assertEqual(test_v, 0)
+        test_v = self.ds._get_nb_banks('4p1K_map')
+        self.assertEqual(test_v, 1)
 
     def test__get_vana_filename(self):
-        testv = self.ds.get_vana_scan_name()
-        self.assertEqual(testv, '')
+        test_v = self.ds.get_vana_scan_name()
+        self.assertEqual(test_v, '')
         self.set_standard()
-        testv = self.ds.get_vana_scan_name()
-        self.assertEqual(testv, '_vana')
+        test_v = self.ds.get_vana_scan_name()
+        self.assertEqual(test_v, '_vana')
         self.ds.data_dic = {'_vana': 1, '_vana2': 2}
-        testv = self.ds.get_vana_scan_name()
-        self.assertEqual(testv, '')
+        test_v = self.ds.get_vana_scan_name()
+        self.assertEqual(test_v, '')
         self.set_sample()
 
     def test__get_empty_filename(self):
-        testv = self.ds.get_empty_scan_name()
-        self.assertEqual(testv, '')
+        test_v = self.ds.get_empty_scan_name()
+        self.assertEqual(test_v, '')
         self.set_standard()
-        testv = self.ds.get_empty_scan_name()
-        self.assertEqual(testv, '_empty')
+        test_v = self.ds.get_empty_scan_name()
+        self.assertEqual(test_v, '_empty')
         self.ds.data_dic = {'_leer': 1, '_empty2': 2}
-        testv = self.ds.get_empty_scan_name()
-        self.assertEqual(testv, '')
+        test_v = self.ds.get_empty_scan_name()
+        self.assertEqual(test_v, '')
         self.set_sample()
 
     def test_get_sample_filename(self):
-        testv = self.ds.get_sample_filename()
-        self.assertEqual(testv, '4p1K_map')
+        test_v = self.ds.get_sample_filename()
+        self.assertEqual(test_v, '4p1K_map')
         self.ds.data_dic = {'4p1K_': 1, '4p1K_maa': 2}
-        self.assertIsInstance(testv, str)
+        self.assertIsInstance(test_v, str)
         self.set_sample()
 
-    def test__get_datapath(self):
-        entry = self.fulldata[0]
+    def test__get_data_path(self):
+        entry = self.full_data[0]
         path = '123'
-        testv = dns_tof_powder_dataset._get_data_path(entry, path)
-        self.assertEqual(testv, os.path.join('123', 'service'))
+        test_v = dns_tof_powder_dataset._get_data_path(entry, path)
+        self.assertEqual(test_v, os.path.join('123', 'service'))
 
     def test__convert_list_to_range(self):
-        testv = dns_tof_powder_dataset._convert_list_to_range(
+        test_v = dns_tof_powder_dataset._convert_list_to_range(
             get_fake_tof_datadic())
-        self.assertIsInstance(testv, dict)
-        self.assertEqual(testv, {
+        self.assertIsInstance(test_v, dict)
+        self.assertEqual(test_v, {
             'knso': {
                 'path': 'C:/data',
                 -6.0: 'range(0, 9, 1)',
@@ -125,7 +121,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         })
 
     def test__add_or_create_filelist(self):
-        entry = self.fulldata[0]
+        entry = self.full_data[0]
         dataset = get_fake_tof_datadic()
         det_rot = 0.0
         datatype = 'knso'
@@ -139,18 +135,18 @@ class DNSTofDatasetTest(unittest.TestCase):
         self.assertEqual(dataset['knso'][-5], [2, 3, 4, 788058])
 
     def test_create_dataset(self):
-        data = self.fulldata
+        data = self.full_data
         path = 'a'
-        testv = self.ds.create_dataset(data, path)
-        self.assertIsInstance(testv, dict)
+        test_v = self.ds.create_dataset(data, path)
+        self.assertIsInstance(test_v, dict)
         self.assertEqual(
-            testv, {'4p1K_map': {
+            test_v, {'4p1K_map': {
                 -9.0: '[788058]',
                 'path': os.path.join('a', 'service')
             }})
 
     def test__create_new_datatype(self):
-        entry = self.fulldata[0]
+        entry = self.full_data[0]
         dataset = get_fake_tof_datadic()
         datatype = 'xv'
         det_rot = -5
@@ -162,13 +158,13 @@ class DNSTofDatasetTest(unittest.TestCase):
         self.assertEqual(dataset['xv']['path'], os.path.join('C:/123', 'service'))
 
     def test__get_closest_bank_key(self):
-        testv = dns_tof_powder_dataset._get_closest_bank_key({0: 1, 2: 1}, 0.1)
-        self.assertEqual(testv, 0.1)
-        testv = dns_tof_powder_dataset._get_closest_bank_key({
+        test_v = dns_tof_powder_dataset._get_closest_bank_key({0: 1, 2: 1}, 0.1)
+        self.assertEqual(test_v, 0.1)
+        test_v = dns_tof_powder_dataset._get_closest_bank_key({
             0: 1,
             2: 1
         }, 2.01)
-        self.assertEqual(testv, 2)
+        self.assertEqual(test_v, 2)
 
 
 if __name__ == '__main__':

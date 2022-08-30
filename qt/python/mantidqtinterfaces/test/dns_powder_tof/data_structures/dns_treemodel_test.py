@@ -20,7 +20,7 @@ class DNSTreeModelTest(unittest.TestCase):
     def setUp(self):
         self.data = get_dataset()
         self.model = DNSTreeModel(data=self.data)
-        self.first_scancommand = get_first_scan_command()
+        self.first_scan_command = get_first_scan_command()
 
     def test___init__(self):
         self.assertIsInstance(self.model, QAbstractItemModel)
@@ -28,29 +28,29 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertIsInstance(self.model.rootItem, DNSTreeItem)
 
     def test_index(self):
-        testv = self.model.index(0, 1, QModelIndex())
-        self.assertIsInstance(testv, QModelIndex)
-        self.assertTrue(testv.isValid())
-        testv = self.model.index(100, 1, self.model._scan_index_from_row(0))
-        self.assertIsInstance(testv, QModelIndex)
-        self.assertFalse(testv.isValid())
-        testv = self.model.index(0, 1, self.model._scan_index_from_row(0))
-        self.assertIsInstance(testv, QModelIndex)
-        self.assertTrue(testv.isValid())
+        test_v = self.model.index(0, 1, QModelIndex())
+        self.assertIsInstance(test_v, QModelIndex)
+        self.assertTrue(test_v.isValid())
+        test_v = self.model.index(100, 1, self.model._scan_index_from_row(0))
+        self.assertIsInstance(test_v, QModelIndex)
+        self.assertFalse(test_v.isValid())
+        test_v = self.model.index(0, 1, self.model._scan_index_from_row(0))
+        self.assertIsInstance(test_v, QModelIndex)
+        self.assertTrue(test_v.isValid())
 
     def test_parent(self):
-        testv = self.model.parent(QModelIndex())
-        self.assertIsInstance(testv, QModelIndex)
-        self.assertFalse(testv.isValid())
+        test_v = self.model.parent(QModelIndex())
+        self.assertIsInstance(test_v, QModelIndex)
+        self.assertFalse(test_v.isValid())
         index = self.model._scan_index_from_row(0)
         test = self.model.parent(index)
         self.assertFalse(test.isValid())
 
     def test_headerData(self):
-        testv = self.model.headerData(1, None, None)
-        self.assertIsNone(testv)
-        testv = self.model.headerData(1, Qt.Horizontal, Qt.DisplayRole)
-        self.assertEqual(testv, 'det_rot')
+        test_v = self.model.headerData(1, None, None)
+        self.assertIsNone(test_v)
+        test_v = self.model.headerData(1, Qt.Horizontal, Qt.DisplayRole)
+        self.assertEqual(test_v, 'det_rot')
 
     def test_columnCount(self):
         parent = self.model._scan_index_from_row(1).parent()
@@ -59,15 +59,15 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertEqual(self.model.columnCount(parent), 10)
 
     def test_scan_command_from_row(self):
-        tesv = self.model._scan_command_from_row(0)
-        self.assertEqual(tesv, self.first_scancommand)
+        test_v = self.model._scan_command_from_row(0)
+        self.assertEqual(test_v, self.first_scan_command)
 
     def test_scan_expected_points_from_row(self):
-        tesv = self.model._scan_expected_points_from_row(0)
-        self.assertEqual(tesv, 340)
+        test_v = self.model._scan_expected_points_from_row(0)
+        self.assertEqual(test_v, 340)
         self.model.add_number_of_children()
-        tesv = self.model._scan_expected_points_from_row(0)
-        self.assertEqual(tesv, 340)
+        test_v = self.model._scan_expected_points_from_row(0)
+        self.assertEqual(test_v, 340)
 
     def test_number_of_scans(self):
         self.assertEqual(self.model.number_of_scans(), 2)
@@ -97,14 +97,14 @@ class DNSTreeModelTest(unittest.TestCase):
     def test_data(self):
         index = self.model._scan_index_from_row(0)
         role = Qt.CheckStateRole
-        testv = self.model.data(index, role)
-        self.assertEqual(testv, Qt.Unchecked)
+        test_v = self.model.data(index, role)
+        self.assertEqual(test_v, Qt.Unchecked)
         self.model.set_checked_from_index(index)
-        testv = self.model.data(index, role)
-        self.assertEqual(testv, Qt.Checked)
+        test_v = self.model.data(index, role)
+        self.assertEqual(test_v, Qt.Checked)
         role = Qt.DisplayRole
-        testv = self.model.data(index, role)
-        self.assertEqual(testv, self.first_scancommand)
+        test_v = self.model.data(index, role)
+        self.assertEqual(test_v, self.first_scan_command)
         role = None
         self.assertIsNone(self.model.data(index, role))
 
@@ -112,10 +112,10 @@ class DNSTreeModelTest(unittest.TestCase):
         index = QModelIndex()
         self.assertEqual(self.model.flags(index), Qt.NoItemFlags)
         index = self.model._scan_index_from_row(0)
-        testv = self.model.flags(index)
-        self.assertEqual(testv, (Qt.ItemIsEnabled
-                                 | Qt.ItemIsSelectable
-                                 | Qt.ItemIsUserCheckable))
+        test_v = self.model.flags(index)
+        self.assertEqual(test_v, (Qt.ItemIsEnabled
+                                  | Qt.ItemIsSelectable
+                                  | Qt.ItemIsUserCheckable))
 
     def test_scan_index_from_row(self):
         index = self.model._scan_index_from_row(0)
@@ -129,16 +129,16 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertTrue(index.isValid())
 
     def test_item_from_index(self):
-        testv = self.model._item_from_index(self.model._scan_index_from_row(0))
-        self.assertIsInstance(testv, DNSTreeItem)
+        test_v = self.model._item_from_index(self.model._scan_index_from_row(0))
+        self.assertIsInstance(test_v, DNSTreeItem)
 
     def test_get_filename_from_index(self):
         index = self.model._scan_index_from_row(0)
-        testv = self.model.get_filename_from_index(index)
-        self.assertEqual(testv, '')
+        test_v = self.model.get_filename_from_index(index)
+        self.assertEqual(test_v, '')
         index = self.model._index_from_row(0, index)
-        testv = self.model.get_filename_from_index(index)
-        self.assertEqual(testv, 'service_787463.d_dat')
+        test_v = self.model.get_filename_from_index(index)
+        self.assertEqual(test_v, 'service_787463.d_dat')
 
     def test_index_from_row(self):
         index = self.model._scan_index_from_row(0)
@@ -153,30 +153,30 @@ class DNSTreeModelTest(unittest.TestCase):
 
     def test_rowCount(self):
         index = self.model._scan_index_from_row(0)
-        testv = self.model.rowCount(parent=QModelIndex())
-        self.assertEqual(testv, 2)  # scans
-        testv = self.model.rowCount(parent=index)
-        self.assertEqual(testv, 1)  # datafiles in first scan
+        test_v = self.model.rowCount(parent=QModelIndex())
+        self.assertEqual(test_v, 2)  # scans
+        test_v = self.model.rowCount(parent=index)
+        self.assertEqual(test_v, 1)  # datafiles in first scan
 
     def test_get_or_create_parent_item(self):
         index = self.model._scan_index_from_row(0)
-        testv = self.model._get_or_create_parent_item(parent=None)
-        self.assertEqual(self.model.rootItem, testv)
-        testv = self.model._get_or_create_parent_item(parent=index)
-        self.assertNotEqual(self.model.rootItem, testv)
+        test_v = self.model._get_or_create_parent_item(parent=None)
+        self.assertEqual(self.model.rootItem, test_v)
+        test_v = self.model._get_or_create_parent_item(parent=index)
+        self.assertNotEqual(self.model.rootItem, test_v)
 
     def test_is_scan_tof(self):
         self.assertFalse(self.model.is_scan_tof(0))
         self.assertTrue(self.model.is_scan_tof(1))
 
     def test_get_checked(self):
-        testv = self.model.get_checked()
-        self.assertEqual(testv, [])
+        test_v = self.model.get_checked()
+        self.assertEqual(test_v, [])
         self.model.set_checked_scan(1, 2)
-        testv = self.model.get_checked()
-        self.assertEqual(testv, [788058])
-        testv = self.model.get_checked(True)
-        self.assertIsInstance(testv[0], dict)
+        test_v = self.model.get_checked()
+        self.assertEqual(test_v, [788058])
+        test_v = self.model.get_checked(True)
+        self.assertIsInstance(test_v[0], dict)
         self.model.set_checked_scan(1, 0)
 
     def test_check_scans_by_indexes(self):
@@ -193,18 +193,18 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_checked(), [787463])
 
     def test_get_complete_scan_rows(self):
-        testv = self.model.get_complete_scan_rows([0, 1])
-        self.assertEqual(testv, [1])
+        test_v = self.model.get_complete_scan_rows([0, 1])
+        self.assertEqual(test_v, [1])
 
     def test_setData(self):
         index = self.model._scan_index_from_row(0)
-        testv = self.model.setData(index, 0)
-        self.assertFalse(testv)
-        testv = self.model.setData(index, 0, role=Qt.CheckStateRole)
-        self.assertTrue(testv)
+        test_v = self.model.setData(index, 0)
+        self.assertFalse(test_v)
+        test_v = self.model.setData(index, 0, role=Qt.CheckStateRole)
+        self.assertTrue(test_v)
         index = self.model._index_from_row(1, index)
-        testv = self.model.setData(index, 0)
-        self.assertTrue(testv)
+        test_v = self.model.setData(index, 0)
+        self.assertTrue(test_v)
 
     def test_set_checked_scan(self):
         self.model.set_checked_scan(0, 2)
@@ -258,12 +258,12 @@ class DNSTreeModelTest(unittest.TestCase):
         self.assertTrue(self.model._new_scan_check(self.data[1]))
 
     def test_get_scan_text(self):
-        testv = self.model._get_scan_text(self.data[0])
-        self.assertEqual(testv[0], self.first_scancommand)
+        test_v = self.model._get_scan_text(self.data[0])
+        self.assertEqual(test_v[0], self.first_scan_command)
 
     def test_get_data_from_dns_file(self):
-        testv = self.model._get_data_from_dns_file(self.data[0])[0]
-        self.assertEqual(testv, '787463')
+        test_v = self.model._get_data_from_dns_file(self.data[0])[0]
+        self.assertEqual(test_v, '787463')
 
     def test_check_child_if_scan_is_checked(self):
         index = self.model._scan_index_from_row(0)
@@ -293,20 +293,20 @@ class DNSTreeModelTest(unittest.TestCase):
     def test_add_number_of_children(self):
         index = self.model._scan_index_from_row(0)
         scan = self.model._item_from_index(index)
-        testv = self.model.add_number_of_children()
-        self.assertEqual(testv, 2)
+        test_v = self.model.add_number_of_children()
+        self.assertEqual(test_v, 2)
         postfix = scan.get_tree_item_data(0).split('#')[1].split('/')[0]
         self.assertEqual(postfix, '1')
 
     def test_get_txt(self):
-        testv = self.model.get_txt()
-        self.assertEqual(testv[0][0:10], '787463 ; -')
+        test_v = self.model.get_txt()
+        self.assertEqual(test_v[0][0:10], '787463 ; -')
 
     def test_get_file_number_dict(self):
-        testv = self.model.get_file_number_dict()
-        self.assertIsInstance(testv, dict)
-        self.assertIsInstance(testv[788058], QModelIndex)
-        self.assertTrue(testv[788058].isValid())
+        test_v = self.model.get_file_number_dict()
+        self.assertIsInstance(test_v, dict)
+        self.assertIsInstance(test_v[788058], QModelIndex)
+        self.assertTrue(test_v[788058].isValid())
 
 
 if __name__ == '__main__':

@@ -99,7 +99,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return [
             f"bins = {{'q_min': {self._tof_opt['q_min']:4.3f},\n"
             f"        'q_max': {self._tof_opt['q_max']:4.3f},\n"
-            f"        'q_step' : {self._tof_opt['q_step']:4.3f},\n"
+            f"        'q_step': {self._tof_opt['q_step']:4.3f},\n"
             f"        'dE_min': {self._tof_opt['dE_min']:4.3f},\n"
             f"        'dE_max': {self._tof_opt['dE_max']:4.3f},\n"
             f"        'dE_step': {self._tof_opt['dE_step']:4.3f}}}", ''
@@ -108,15 +108,14 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     @staticmethod
     def _get_header_lines():
         lines = [
-            "from mantid.simpleapi import MonitorEfficiencyCorUser,"
-            " FindEPP, mtd",
-            "from mantid.simpleapi import ComputeCalibrationCoefVan, Divide,"
+            "from mantid.simpleapi import MonitorEfficiencyCorUser, "
+            "FindEPP, mtd",
+            "from mantid.simpleapi import ComputeCalibrationCoefVan, Divide, "
             "CorrectTOF",
             "from mantid.simpleapi import SaveAscii, SaveNexus, MaskDetectors",
             "from mantidqtinterfaces.dns_powder_tof.scripts.dnstof import "
-            "convert_to_de, get_sqw, "
-            "load_data",
-            "import numpy as np", ''
+            "convert_to_de, get_sqw, load_data",
+            "import numpy as np"
         ]
         return lines
 

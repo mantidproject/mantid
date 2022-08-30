@@ -94,7 +94,7 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         mock_return_filelist.return_value = get3files()
         self.model.old_data_set = get3files()[0]
         testv = self.model.set_datafiles_to_load(data_path='a',
-                                                 fn_range=[0, 1000000],
+                                                 file_number_range=[0, 1000000],
                                                  filtered=False,
                                                  watcher=True)
         self.assertEqual(
@@ -118,7 +118,7 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         self.assertEqual(testv, ([], [774714, 788058]))
         testv = self.model._filter_range(get3files(),
                                          filtered=True,
-                                         fn_range=[787463, 787463])
+                                         file_number_range=[787463, 787463])
         self.assertEqual(testv, ([get2files()[0]], [787463, 787463]))
 
     def test_read_all(self):
@@ -178,7 +178,7 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         mock_load.assert_called_once_with('last_filelist.txt', '123')
         self.assertIsInstance(testv['0'], ObjectDict)
         for name in [
-            'file_number', 'det_rot', 'sample_rot', 'field', 'temp_samp',
+            'file_number', 'det_rot', 'sample_rot', 'field', 'temp_sample',
             'sample', 'end_time', 'tof_channels', 'channel_width', 'filename',
             'wavelength', 'selector_speed', 'scan_number', 'scan_command',
             'scan_points', 'new_format'
@@ -280,10 +280,10 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         filename = get2files()[0]
         # data_path = self.filepath
         mydict = {filename: dns_file('a', filename)}
-        testv = self.model._load_file_from_chache_or_new(mydict, filename, 'a')
+        testv = self.model._load_file_from_cache_or_new(mydict, filename, 'a')
         mock_dnsfile.assert_not_called()
         self.assertIsInstance(testv, ObjectDict)
-        testv = self.model._load_file_from_chache_or_new({}, filename, 'a')
+        testv = self.model._load_file_from_cache_or_new({}, filename, 'a')
         mock_dnsfile.assert_called_once_with('a', filename)
 
     @patch(
