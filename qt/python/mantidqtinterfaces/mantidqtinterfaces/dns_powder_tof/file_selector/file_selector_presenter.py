@@ -59,13 +59,12 @@ class DNSFileSelectorPresenter(DNSObserver):
         Reading of new files, if filtered is True, only the files in the
         range specified by start and end.
         """
-        fn_range = [start, end]
+        file_number_range = [start, end]
         data_path = self.param_dict['paths']['data_dir']
-        nb_files, loaded, datafiles, fn_range = \
-            self.model.set_datafiles_to_load(data_path, fn_range, filtered,
+        number_of_files, loaded, datafiles, file_number_range_filtered = \
+            self.model.set_datafiles_to_load(data_path, file_number_range, filtered,
                                              watcher)
-
-        self.view.open_progress_dialog(nb_files)
+        self.view.open_progress_dialog(number_of_files)
         self.model.read_all(datafiles, data_path, loaded, watcher)
         self.view.set_first_column_spanned(self.model.get_scan_range())
         self._filter_scans()

@@ -49,9 +49,9 @@ class DNSFileSelectorModel(DNSObsModel):
         self.all_datafiles = return_filelist(data_path)
         datafiles = self._filter_out_already_loaded(self.all_datafiles, watcher)
         loaded = self._get_list_of_loaded_files(data_path, watcher)
-        datafiles, file_number_range = self._filter_range(datafiles, file_number_range, filtered)
+        datafiles, file_number_range_filtered = self._filter_range(datafiles, file_number_range, filtered)
         number_of_datafiles = len(datafiles)
-        return number_of_datafiles, loaded, datafiles, file_number_range
+        return number_of_datafiles, loaded, datafiles, file_number_range_filtered
 
     def _get_start_end_file_numbers(self):
         if self.all_datafiles:

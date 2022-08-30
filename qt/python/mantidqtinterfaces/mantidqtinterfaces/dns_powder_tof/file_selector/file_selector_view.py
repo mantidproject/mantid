@@ -24,29 +24,29 @@ class DNSFileSelectorView(DNSView):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self._content = load_ui(__file__,
+        self._ui = load_ui(__file__,
                                 'file_selector.ui',
-                                baseinstance=self)
+                           baseinstance=self)
 
-        self._sample_treeview = self._content.DNS_sample_view
+        self._sample_treeview = self._ui.DNS_sample_view
         self._sample_treeview.setUniformRowHeights(True)
         self._treeview = self._sample_treeview
-        self._standard_treeview = self._content.DNS_standard_view
+        self._standard_treeview = self._ui.DNS_standard_view
         self._standard_treeview.setUniformRowHeights(True)
 
         self._map = {
-            'filter_scans': self._content.cB_filter_scans,
-            'filter_free': self._content.cB_filter_free,
-            'autoload_new': self._content.cB_autoload_new,
-            'filter_free_text': self._content.lE_filter_free_text,
-            'filter_empty': self._content.cB_filter_empty,
-            'filter_cscans': self._content.cB_filter_cscans,
-            'filter_sample_rot': self._content.cB_filter_sample_rot,
-            'filter_nicr': self._content.cB_filter_nicr,
-            'filter_vanadium': self._content.cB_filter_vanadium,
-            'last_scans': self._content.sB_last_scans,
-            'filter_det_rot': self._content.cB_filter_det_rot,
-            'auto_select_standard': self._content.cB_auto_select_standard,
+            'filter_scans': self._ui.cB_filter_scans,
+            'filter_free': self._ui.cB_filter_free,
+            'autoload_new': self._ui.cB_autoload_new,
+            'filter_free_text': self._ui.lE_filter_free_text,
+            'filter_empty': self._ui.cB_filter_empty,
+            'filter_cscans': self._ui.cB_filter_cscans,
+            'filter_sample_rot': self._ui.cB_filter_sample_rot,
+            'filter_nicr': self._ui.cB_filter_nicr,
+            'filter_vanadium': self._ui.cB_filter_vanadium,
+            'last_scans': self._ui.sB_last_scans,
+            'filter_det_rot': self._ui.cB_filter_det_rot,
+            'auto_select_standard': self._ui.cB_auto_select_standard,
         }
 
         self._sample_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -59,27 +59,27 @@ class DNSFileSelectorView(DNSView):
         self._treeview.collapsed.connect(self._expanded)
 
         # buttons
-        self._content.pB_td_read_all.clicked.connect(self._read_all_clicked)
-        self._content.cB_filter_det_rot.stateChanged.connect(
+        self._ui.pB_td_read_all.clicked.connect(self._read_all_clicked)
+        self._ui.cB_filter_det_rot.stateChanged.connect(
             self._filter_scans_checked)
-        self._content.cB_filter_sample_rot.stateChanged.connect(
+        self._ui.cB_filter_sample_rot.stateChanged.connect(
             self._filter_scans_checked)
-        self._content.cB_filter_scans.stateChanged.connect(
+        self._ui.cB_filter_scans.stateChanged.connect(
             self._filter_scans_checked)
-        self._content.cB_filter_cscans.stateChanged.connect(
+        self._ui.cB_filter_cscans.stateChanged.connect(
             self._filter_scans_checked)
-        self._content.cB_filter_free.stateChanged.connect(
+        self._ui.cB_filter_free.stateChanged.connect(
             self._filter_scans_checked)
-        self._content.lE_filter_free_text.textChanged.connect(
+        self._ui.lE_filter_free_text.textChanged.connect(
             self._filter_scans_checked)
-        self._content.pB_expand_all.clicked.connect(self.expand_all)
-        self._content.pB_expand_none.clicked.connect(self._un_expand_all)
-        self._content.pB_check_all.clicked.connect(self._check_all)
-        self._content.pB_check_none.clicked.connect(self._uncheck_all)
-        self._content.pB_check_last_scan.clicked.connect(self._check_last)
-        self._content.pB_check_last_complete_scan.clicked.connect(
+        self._ui.pB_expand_all.clicked.connect(self.expand_all)
+        self._ui.pB_expand_none.clicked.connect(self._un_expand_all)
+        self._ui.pB_check_all.clicked.connect(self._check_all)
+        self._ui.pB_check_none.clicked.connect(self._uncheck_all)
+        self._ui.pB_check_last_scan.clicked.connect(self._check_last)
+        self._ui.pB_check_last_complete_scan.clicked.connect(
             self._check_last)
-        self._content.pB_check_selected.clicked.connect(self._check_selected)
+        self._ui.pB_check_selected.clicked.connect(self._check_selected)
 
         # check boxes
         self._map['filter_vanadium'].stateChanged.connect(
@@ -94,7 +94,7 @@ class DNSFileSelectorView(DNSView):
             self._auto_select_standard_clicked)
 
         # combo box
-        self._content.combB_directory.currentIndexChanged.connect(
+        self._ui.combB_directory.currentIndexChanged.connect(
             self.combo_changed)
 
         # hide standard files view
@@ -147,12 +147,12 @@ class DNSFileSelectorView(DNSView):
 
     def combo_changed(self, index):
         # index: 0 - Sample Data, 1 - Standard Data
-        self._content.groupBox_filter_by_scan.setHidden(index)
-        self._content.pB_check_last_scan.setHidden(index)
-        self._content.pB_check_last_complete_scan.setHidden(index)
-        self._content.sB_last_scans.setHidden(index)
-        self._content.cB_autoload_new.setHidden(index)
-        self._content.groupBox_filter_standard.setHidden(1 - index)
+        self._ui.groupBox_filter_by_scan.setHidden(index)
+        self._ui.pB_check_last_scan.setHidden(index)
+        self._ui.pB_check_last_complete_scan.setHidden(index)
+        self._ui.sB_last_scans.setHidden(index)
+        self._ui.cB_autoload_new.setHidden(index)
+        self._ui.groupBox_filter_standard.setHidden(1 - index)
         self._standard_treeview.setHidden(1 - index)
         self._sample_treeview.setHidden(index)
         self.cB_auto_select_standard.setHidden(1 - index)
@@ -200,7 +200,7 @@ class DNSFileSelectorView(DNSView):
         return filters
 
     def get_nb_scans_to_check(self):
-        return self._content.sB_last_scans.value()
+        return self._ui.sB_last_scans.value()
 
     def get_selected_indexes(self):
         return self._treeview.selectedIndexes()

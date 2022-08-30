@@ -93,12 +93,12 @@ class DNSFileSelectorModelTest(unittest.TestCase):
         mock_load.return_value = [1, 2]
         mock_return_filelist.return_value = get3files()
         self.model.old_data_set = get3files()[0]
-        testv = self.model.set_datafiles_to_load(data_path='a',
-                                                 file_number_range=[0, 1000000],
-                                                 filtered=False,
-                                                 watcher=True)
+        test_v = self.model.set_datafiles_to_load(data_path='a',
+                                                  file_number_range=[0, 1000000],
+                                                  filtered=False,
+                                                  watcher=True)
         self.assertEqual(
-            testv,
+            test_v,
             (2, [1, 2], ['service_787463.d_dat', 'service_788058.d_dat'
                          ], [0, 1000000]))
 
