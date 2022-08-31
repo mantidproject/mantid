@@ -13,10 +13,8 @@ import numpy as np
 from unittest.mock import patch
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model import \
     GSAS2Model
-from mantid import config
+from mantid.api import FileFinder
 from mantid.simpleapi import LoadNexus, CompareWorkspaces, ReplaceSpecialValues, mtd
-
-# from testhelpers import assertRaisesNothing
 
 model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.model"
 
@@ -35,11 +33,8 @@ def _try_delete(path):
 class TestGSAS2Model(unittest.TestCase):
     def setUp(self):
         self.model = GSAS2Model()
-        DIRS = config['datasearch.directories'].split(';')
-        self.input_dir = os.path.join(DIRS[0], "..", "SystemTest")
-        self.unit_test_dir = DIRS[0]
-        self.phase_file_path = os.path.join(self.unit_test_dir, 'gsas2_FE_GAMMA.cif')
-        self.lst_result_filepath = os.path.join(self.unit_test_dir, "gsas2_output.lst")
+        self.phase_file_path = FileFinder.getFullPath('gsas2_FE_GAMMA.cif')
+        self.lst_result_filepath = FileFinder.getFullPath("gsas2_output.lst")
         self.maxDiff = None
 
     def test_initial_validation(self):
@@ -123,16 +118,18 @@ class TestGSAS2Model(unittest.TestCase):
     def test_understand_data_structure(self):
         self.model.clear_input_components()
         # note this gss-ExtendedHeader.gsa test file is not widely relevant for this interface
-        self.model.data_files = [os.path.join(self.input_dir, "gss-ExtendedHeader.gsa")]
+        gsa_file_path = FileFinder.getFullPath('gss-ExtendedHeader.gsa')
+        self.model.data_files = [gsa_file_path]
         self.model.understand_data_structure()
         self.assertEqual(self.model.number_of_regions, 1)
         self.assertEqual(self.model.data_x_min, [41.7276698840232])
         self.assertEqual(self.model.data_x_max, [41.82791649202319])
 
-    def test_crystal_params_from_instrument_split_on_spaces(self):
+    @patch(model_path + ".GSAS2Model.find_in_file")
+    def test_crystal_params_from_instrument_split_on_spaces(self, mock_find_in_file):
         self.model.clear_input_components()
-        instrument_filepath = os.path.join(self.input_dir, 'template_ENGINX_241391_236516_North_bank.prm')
-        self.assertEqual(self.model.get_crystal_params_from_instrument(instrument_filepath), [18324.41])
+        mock_find_in_file.return_value = '18306.98      2.99     14.44'
+        self.assertEqual(self.model.get_crystal_params_from_instrument("unused_path"), [18324.41])
 
     @patch(model_path + ".GSAS2Model.find_in_file")
     def test_crystal_params_from_instrument_file_mismatch(self, mock_find_in_file):
@@ -328,13 +325,13 @@ class TestGSAS2Model(unittest.TestCase):
 
     def test_load_gsas_histogram(self):
         self.model.clear_input_components()
-        self.model.user_save_directory = self.unit_test_dir
+        self.model.user_save_directory = os.path.dirname(FileFinder.getFullPath("gsas2_output_1.csv"))
         self.model.project_name = "gsas2_output"
         self.model.x_min = [20000]
         self.model.x_max = [21000]
         histogram_workspace = self.model.load_gsas_histogram(1)
         ReplaceSpecialValues(InputWorkspace=histogram_workspace, OutputWorkspace=histogram_workspace, NaNValue=0)
-        expected_workspace = LoadNexus(os.path.join(self.unit_test_dir, "gsas2_output_workspace_1.nxs"))
+        expected_workspace = LoadNexus(FileFinder.getFullPath("gsas2_output_workspace_1.nxs"))
         ReplaceSpecialValues(InputWorkspace=expected_workspace, OutputWorkspace=expected_workspace, NaNValue=0)
         match_bool, _ = CompareWorkspaces(histogram_workspace, expected_workspace)
         self.assertTrue(match_bool)
@@ -342,7 +339,7 @@ class TestGSAS2Model(unittest.TestCase):
 
     def test_load_gsas2_reflections(self):
         self.model.clear_input_components()
-        self.model.user_save_directory = self.unit_test_dir
+        self.model.user_save_directory = os.path.dirname(FileFinder.getFullPath("gsas2_output_reflections_1_Fe_gamma.txt"))
         self.model.project_name = "gsas2_output"
         reflections = self.model.load_gsas_reflections(1, ["Fe_gamma"])
         expected_reflections = [np.array([38789.37179684, 33592.5813729,
@@ -355,10 +352,10 @@ class TestGSAS2Model(unittest.TestCase):
     def test_create_lattice_parameter_table(self, mock_find_phase_names):
         self.model.clear_input_components()
         mock_find_phase_names.return_value = ["Fe_gamma"]
-        self.model.user_save_directory = self.unit_test_dir
+        self.model.user_save_directory = os.path.dirname(FileFinder.getFullPath("gsas2_output.lst"))
         self.model.project_name = "gsas2_output"
         table_ws = self.model.create_lattice_parameter_table(test=True)
-        expected_table_ws = LoadNexus(os.path.join(self.unit_test_dir, "gsas2_output_table_workspace.nxs"))
+        expected_table_ws = LoadNexus(FileFinder.getFullPath("gsas2_output_table_workspace.nxs"))
 
         match_bool, _ = CompareWorkspaces(table_ws, expected_table_ws)
         self.assertTrue(match_bool)
