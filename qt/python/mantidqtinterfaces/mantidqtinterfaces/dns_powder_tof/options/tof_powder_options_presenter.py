@@ -40,7 +40,7 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
                          f"{errors['channel_widths']} in selected"
                          " datafiles.",
                          doraise=errors['chan_error'])
-        self.raise_error("Waning different number of tof channels"
+        self.raise_error("Warning different number of tof channels"
                          f" {errors['tof_channels']} in selected datafiles.",
                          doraise=errors['tof_error'])
         for key, value in binning.items():
