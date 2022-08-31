@@ -1581,9 +1581,10 @@ void IFunction::sortTies() {
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
     auto const tie = getTie(i);
-    if (!tie) {
+    if (!tie || ignoreTie(*tie)) {
       continue;
     }
+
     TieNode newNode;
     newNode.left = getParameterIndex(*tie);
     auto const rhsParameters = tie->getRHSParameters();

@@ -8,7 +8,9 @@
 
 #include "../../ISISReflectometry/Reduction/Experiment.h"
 #include "../../ISISReflectometry/Reduction/Instrument.h"
+#include "../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../ISISReflectometry/Reduction/ReductionJobs.h"
+
 #include "Common/DllConfig.h"
 
 namespace MantidQt {
@@ -91,6 +93,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions makeEmptyTransmissionSt
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeEmptyExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperimentWithValidDuplicateCriteria();
+MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperimentWithReductionTypeSetForSumInLambda();
 
 /* Instrument */
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeWavelengthRange();
@@ -100,6 +103,10 @@ MANTIDQT_ISISREFLECTOMETRY_DLL MonitorCorrections makeMonitorCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL DetectorCorrections makeDetectorCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL Instrument makeInstrument();
 MANTIDQT_ISISREFLECTOMETRY_DLL Instrument makeEmptyInstrument();
+
+/* Preview */
+MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers, double angle);
+
 } // namespace ModelCreationHelper
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

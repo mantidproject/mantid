@@ -166,6 +166,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_delegate.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py

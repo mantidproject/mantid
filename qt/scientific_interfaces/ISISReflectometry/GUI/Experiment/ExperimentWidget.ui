@@ -442,7 +442,7 @@
        </property>
        <item>
         <property name="text">
-         <string>Normal</string>
+         <string/>
         </property>
        </item>
        <item>

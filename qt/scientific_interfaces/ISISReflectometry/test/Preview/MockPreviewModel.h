@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "ROIType.h"
+#include "Reduction/PreviewRow.h"
 
 #include <boost/optional.hpp>
 #include <gmock/gmock.h>
@@ -31,7 +32,9 @@ public:
   MOCK_METHOD(std::vector<Mantid::detid_t>, getSelectedBanks, (), (const, override));
   MOCK_METHOD(boost::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
+  MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));
 
+  MOCK_METHOD(void, setSummedWs, (MatrixWorkspace_sptr), (override));
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::vector<Mantid::detid_t>), (override));
   MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));

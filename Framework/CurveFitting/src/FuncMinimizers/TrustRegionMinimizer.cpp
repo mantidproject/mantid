@@ -18,6 +18,8 @@
 
 #include <gsl/gsl_blas.h>
 
+#include <iostream>
+
 namespace Mantid::CurveFitting::FuncMinimisers {
 
 // clang-format off
@@ -101,11 +103,8 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatr
     J.allocate(m, n);
   }
 
-  DoubleFortranMatrix J_tr(J.transpose());
-  gsl_matrix_view J_tr_gsl = getGSLMatrixView(J_tr.mutator());
-  m_J.setJ(&J_tr_gsl.matrix);
+  m_J.setJ(&J);
   m_function->functionDeriv(domain, m_J);
-  J = J_tr.tr();
 
   for (int i = 1; i <= m; ++i) {
     double w = values.getFitWeight(i - 1);

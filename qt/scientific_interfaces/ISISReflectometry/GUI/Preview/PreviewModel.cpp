@@ -93,9 +93,13 @@ std::optional<double> PreviewModel::getDefaultTheta() const {
   return std::nullopt;
 }
 
+PreviewRow const &PreviewModel::getPreviewRow() const { return *m_runDetails; }
+
 std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
+
+void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
 
 void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
 void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
@@ -107,8 +111,11 @@ boost::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(
 }
 
 void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &selection) {
+  if (selection.size() == 0) {
+    m_runDetails->setProcessingInstructions(regionType, boost::none);
+    return;
+  }
   // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices per
-  // TODO rectangle selection
   if (selection.size() % 2 != 0) {
     throw std::runtime_error("Program error: unexpected selection size; must be multiple of 2; got " +
                              std::to_string(selection.size()));

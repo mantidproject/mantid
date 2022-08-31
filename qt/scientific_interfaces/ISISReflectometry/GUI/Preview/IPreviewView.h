@@ -39,6 +39,8 @@ public:
 
   virtual void notifyEditROIModeRequested() = 0;
   virtual void notifyRectangularROIModeRequested() = 0;
+
+  virtual void notifyApplyRequested() = 0;
 };
 
 class IPreviewView {
@@ -51,6 +53,7 @@ public:
   virtual std::string getWorkspaceName() const = 0;
   virtual double getAngle() const = 0;
   // Plotting
+  virtual void resetInstView() = 0;
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
   //  Instrument viewer toolbar

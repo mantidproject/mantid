@@ -13,6 +13,7 @@
 #include "../Reduction/MockBatch.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MockBatchView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -29,6 +30,12 @@ using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::StrictMock;
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+MATCHER_P(CheckRunNumbers, runNumbers, "") { return arg.runNumbers() == runNumbers; }
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class BatchPresenterTest : public CxxTest::TestSuite {
 public:
@@ -382,11 +389,27 @@ public:
     auto presenter = makePresenter(makeModel());
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(false));
     auto const workspaces = std::vector<std::string>{"test1", "test2"};
     auto row = makeRow();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
-    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm)).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, false)).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(1);
+    presenter->notifyAlgorithmComplete(algorithm);
+    verifyAndClear();
+  }
+
+  void testOutputWorkspacesSavedOnAlgorithmCompleteWithAutosaveGroupRows() {
+    auto presenter = makePresenter(makeModel());
+    IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(true));
+    auto const workspaces = std::vector<std::string>{"test1", "test2"};
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
+    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, true)).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(1);
     presenter->notifyAlgorithmComplete(algorithm);
     verifyAndClear();
@@ -399,7 +422,7 @@ public:
     auto row = makeRow();
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
-    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(_)).Times(0);
+    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(_, _)).Times(0);
     EXPECT_CALL(*m_savePresenter, saveWorkspaces(_)).Times(0);
     presenter->notifyAlgorithmComplete(algorithm);
     verifyAndClear();
@@ -535,6 +558,14 @@ public:
     auto presenter = makePresenter(std::move(mock));
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged()).Times(1);
     presenter->notifyRunsTransferred();
+  }
+
+  void testNotifyPreviewApplyRequested() {
+    auto presenter = makePresenter(makeModel());
+    auto const previewRow = PreviewRow({"12345"});
+    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+    EXPECT_CALL(*m_experimentPresenter, notifyPreviewApplyRequested(CheckRunNumbers(previewRow.runNumbers()))).Times(1);
+    presenter->notifyPreviewApplyRequested();
   }
 
 private:

@@ -23,6 +23,8 @@ public:
   virtual void notifySaveSelectedWorkspaces() = 0;
   virtual void notifyAutosaveDisabled() = 0;
   virtual void notifyAutosaveEnabled() = 0;
+  virtual void notifySaveIndividualRowsEnabled() = 0;
+  virtual void notifySaveIndividualRowsDisabled() = 0;
   virtual void notifySavePathChanged() = 0;
 };
 
@@ -74,6 +76,8 @@ public:
   virtual void disableQResolutionCheckBox() = 0;
   virtual void enableSeparatorButtonGroup() = 0;
   virtual void disableSeparatorButtonGroup() = 0;
+  virtual void enableSaveIndividualRowsCheckbox() = 0;
+  virtual void disableSaveIndividualRowsCheckbox() = 0;
 
   virtual void showFilterEditValid() = 0;
   virtual void showFilterEditInvalid() = 0;

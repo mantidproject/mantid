@@ -16,7 +16,7 @@ namespace ISISReflectometry {
 enum class ReductionType { DivergentBeam, NonFlatSample, Normal };
 
 inline ReductionType reductionTypeFromString(std::string const &reductionType) {
-  if (reductionType == "Normal")
+  if (reductionType.empty() || reductionType == "Normal")
     return ReductionType::Normal;
   else if (reductionType == "DivergentBeam")
     return ReductionType::DivergentBeam;

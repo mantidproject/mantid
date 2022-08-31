@@ -17,6 +17,11 @@ std::vector<Mantid::API::MatrixWorkspace_sptr> PlotModel::getWorkspaces() const 
 
 std::vector<int> PlotModel::getWorkspaceIndices() const { return m_workspaceIndices; }
 
+void PlotModel::clear() noexcept {
+  m_workspaces.clear();
+  m_workspaceIndices.clear();
+}
+
 void PlotModel::setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex) {
   m_workspaces = std::vector<MatrixWorkspace_sptr>{ws};
   m_workspaceIndices = std::vector<int>{static_cast<int>(wsIndex)};

@@ -136,7 +136,8 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
-    auto const workspaces = m_jobManager->algorithmOutputWorkspacesToSave(algorithm);
+    auto const workspaces =
+        m_jobManager->algorithmOutputWorkspacesToSave(algorithm, m_savePresenter->shouldAutosaveGroupRows());
     m_savePresenter->saveWorkspaces(workspaces);
   }
 }
@@ -365,5 +366,10 @@ void BatchPresenter::renameHandle(const std::string &oldName, const std::string 
 void BatchPresenter::clearADSHandle() {
   m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowModelChanged();
+}
+
+void BatchPresenter::notifyPreviewApplyRequested() {
+  auto const &previewRow = m_previewPresenter->getPreviewRow();
+  m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

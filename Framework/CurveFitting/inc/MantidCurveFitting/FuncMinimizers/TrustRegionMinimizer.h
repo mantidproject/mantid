@@ -54,7 +54,7 @@ private:
   /// Fitting parameters
   DoubleFortranVector m_x;
   /// The Jacobian
-  mutable JacobianImpl1 m_J;
+  mutable JacobianImpl1<DoubleFortranMatrix> m_J;
   /// Options
   NLLS::nlls_options m_options;
   /// Information about the fitting

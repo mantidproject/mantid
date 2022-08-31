@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "PreviewPresenter.h"
+#include "Common/Detector.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "ROIType.h"
+#include "Reduction/RowExceptions.h"
 #include <memory>
 
 using Mantid::API::MatrixWorkspace_sptr;
@@ -103,14 +105,20 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
-  // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->updateWorkspace(ws);
-  plotInstView();
-  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-  m_view->setInstViewToolbarEnabled(true);
-  notifyInstViewZoomRequested();
-  // Perform summing banks to update the next plot, if possible
-  runSumBanks();
+  if (hasLinearDetector(ws)) {
+    m_view->resetInstView();
+    m_model->setSummedWs(ws);
+    notifySumBanksCompleted();
+  } else {
+    // Notify the instrument view model that the workspace has changed before we get the surface
+    m_instViewModel->updateWorkspace(ws);
+    plotInstView();
+    // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+    m_view->setInstViewToolbarEnabled(true);
+    notifyInstViewZoomRequested();
+    // Perform summing banks to update the next plot, if possible
+    runSumBanks();
+  }
 }
 
 void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
@@ -126,6 +134,13 @@ void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
   plotLinePlot();
 }
+
+void PreviewPresenter::notifySumBanksAlgorithmError() {
+  clearRegionSelector();
+  clearReductionPlot();
+}
+
+void PreviewPresenter::notifyReductionAlgorithmError() { clearReductionPlot(); }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
@@ -178,16 +193,28 @@ void PreviewPresenter::notifyRegionChanged() {
   m_view->setRectangularROIState(false);
   m_view->setEditROIState(true);
 
-  // Set the selection from the view
-  m_model->setSelectedRegion(ROIType::Signal, m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)));
-  m_model->setSelectedRegion(ROIType::Background, m_regionSelector->getRegion(roiTypeToString(ROIType::Background)));
-  m_model->setSelectedRegion(ROIType::Transmission,
-                             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
-
   runReduction();
 }
 
 void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReducedWsToAds(); }
+
+void PreviewPresenter::notifyApplyRequested() {
+  try {
+    m_mainPresenter->notifyPreviewApplyRequested();
+  } catch (RowNotFoundException const &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Please add a row for this angle, add a wildcard row, or change the angle.";
+    g_log.error(msg.str());
+  } catch (MultipleRowsFoundException const &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Applying to multiple rows with the same angle is not supported.";
+    g_log.error(msg.str());
+  }
+}
 
 void PreviewPresenter::plotInstView() {
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
@@ -213,8 +240,29 @@ void PreviewPresenter::runReduction() {
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
+  // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.
+  updateSelectedRegionInModelFromView();
   // Perform the reduction
   m_model->reduceAsync(*m_jobManager);
+}
+
+PreviewRow const &PreviewPresenter::getPreviewRow() const { return m_model->getPreviewRow(); }
+
+void PreviewPresenter::clearRegionSelector() {
+  m_regionSelector->clearWorkspace();
+  m_view->setRegionSelectorToolbarEnabled(false);
+}
+
+void PreviewPresenter::clearReductionPlot() {
+  m_plotPresenter->clearModel();
+  m_plotPresenter->plot();
+}
+
+void PreviewPresenter::updateSelectedRegionInModelFromView() {
+  m_model->setSelectedRegion(ROIType::Signal, m_regionSelector->getRegion(roiTypeToString(ROIType::Signal)));
+  m_model->setSelectedRegion(ROIType::Background, m_regionSelector->getRegion(roiTypeToString(ROIType::Background)));
+  m_model->setSelectedRegion(ROIType::Transmission,
+                             m_regionSelector->getRegion(roiTypeToString(ROIType::Transmission)));
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -60,7 +60,8 @@ boost::optional<ProcessingInstructions> PreviewRow::getProcessingInstructions(RO
   throw std::invalid_argument("Unexpected ROIType provided");
 }
 
-void PreviewRow::setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions) {
+void PreviewRow::setProcessingInstructions(ROIType regionType,
+                                           boost::optional<ProcessingInstructions> processingInstructions) {
   switch (regionType) {
   case ROIType::Signal:
     m_processingInstructions = std::move(processingInstructions);

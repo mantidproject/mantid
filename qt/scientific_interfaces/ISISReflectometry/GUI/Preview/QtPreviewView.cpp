@@ -25,8 +25,8 @@ using MantidQt::MantidWidgets::ProjectionSurface;
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
   m_ui.setupUi(this);
-  m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
 
+  resetInstView();
   loadToolbarIcons();
   setupSelectRegionTypes();
   connectSignals();
@@ -69,9 +69,9 @@ void QtPreviewView::setupSelectRegionTypes() {
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
 
-void QtPreviewView::enableApplyButton() { m_ui.pushButton_3->setEnabled(true); }
+void QtPreviewView::enableApplyButton() { m_ui.apply_button->setEnabled(true); }
 
-void QtPreviewView::disableApplyButton() { m_ui.pushButton_3->setEnabled(false); }
+void QtPreviewView::disableApplyButton() { m_ui.apply_button->setEnabled(false); }
 
 void QtPreviewView::connectSignals() const {
   // Loading section
@@ -87,6 +87,8 @@ void QtPreviewView::connectSignals() const {
   connect(m_ui.rs_edit_button, SIGNAL(clicked()), this, SLOT(onEditROIClicked()));
   // Line plot toolbar
   connect(m_ui.lp_ads_export_button, SIGNAL(clicked()), this, SLOT(onLinePlotExportToAdsClicked()));
+  // Apply button
+  connect(m_ui.apply_button, SIGNAL(clicked()), this, SLOT(onApplyClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -110,9 +112,19 @@ void QtPreviewView::onLinePlotExportToAdsClicked() const { m_notifyee->notifyLin
 
 void QtPreviewView::onAngleEdited() { m_ui.update_button->setEnabled(true); }
 
+void QtPreviewView::onApplyClicked() const { m_notifyee->notifyApplyRequested(); }
+
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
 double QtPreviewView::getAngle() const { return m_ui.angle_spin_box->value(); }
+
+void QtPreviewView::resetInstView() {
+  if (m_instDisplay) {
+    // Destruct the previous instance
+    m_instDisplay = nullptr;
+  }
+  m_instDisplay = std::make_unique<MantidWidgets::InstrumentDisplay>(m_ui.inst_view_placeholder);
+}
 
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
   // We need to recreate the surface so disconnect any existing signals first

@@ -41,8 +41,10 @@ public:
   boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
   std::optional<double> getDefaultTheta() const override;
+  PreviewRow const &getPreviewRow() const override;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
+  void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) override;
   void setTheta(double theta) override;
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
   void setSelectedRegion(ROIType regionType, Selection const &selection) override;

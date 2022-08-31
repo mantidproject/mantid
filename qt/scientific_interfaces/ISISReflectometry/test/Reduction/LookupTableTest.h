@@ -9,6 +9,7 @@
 
 #include "../../../ISISReflectometry/Reduction/LookupTable.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "TestHelpers/ModelCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -278,7 +279,56 @@ public:
     auto const lookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
     auto table = LookupTable{ModelCreationHelper::makeLookupRow(angle, boost::regex(".*")),
                              ModelCreationHelper::makeLookupRow(angle, boost::regex("AA.*"))};
-    TS_ASSERT_THROWS(table.getIndex(lookupRow), std::out_of_range const &);
+    TS_ASSERT_THROWS(table.getIndex(lookupRow), RowNotFoundException const &);
+  }
+
+  void test_update_lookup_row_will_update_row_with_same_angle_and_title() {
+    auto constexpr angle = 2.3;
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")),
+                             ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
+
+    TS_ASSERT_EQUALS(3, table.rows().size());
+
+    auto newLookupRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("A.*"));
+    auto const signalProcessingInstructions = std::string{"5678"};
+    newLookupRow.setProcessingInstructions(ROIType::Signal, signalProcessingInstructions);
+    table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance);
+
+    TS_ASSERT_EQUALS(signalProcessingInstructions, *table.rows()[1].processingInstructions());
+    TS_ASSERT_EQUALS(3, table.rows().size());
+  }
+
+  void test_update_lookup_row_will_throw_if_row_with_same_angle_not_found() {
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")),
+                             ModelCreationHelper::makeLookupRow(2.3, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
+
+    auto newLookupRow = ModelCreationHelper::makeLookupRow(55.0, boost::regex("A.*"));
+
+    TS_ASSERT_THROWS(table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance),
+                     RowNotFoundException const &);
+  }
+
+  void test_update_lookup_row_will_throw_if_row_with_same_title_matcher_not_found() {
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")),
+                             ModelCreationHelper::makeLookupRow(2.3, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
+
+    auto newLookupRow = ModelCreationHelper::makeLookupRow(2.3, boost::regex("AB.*"));
+
+    TS_ASSERT_THROWS(table.updateLookupRow(std::move(newLookupRow), m_exactMatchTolerance),
+                     RowNotFoundException const &);
+  }
+
+  void test_update_lookup_row_will_not_throw_if_theta_different_but_inside_tolerance() {
+    auto table = LookupTable{ModelCreationHelper::makeLookupRow(1.2, boost::regex(".*")),
+                             ModelCreationHelper::makeLookupRow(2.31, boost::regex("A.*")),
+                             ModelCreationHelper::makeLookupRow(3.4, boost::regex("AA.*"))};
+
+    auto newLookupRow = ModelCreationHelper::makeLookupRow(2.30, boost::regex("A.*"));
+
+    table.updateLookupRow(std::move(newLookupRow), 0.01);
   }
 
 private:

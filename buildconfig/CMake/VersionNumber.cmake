@@ -27,7 +27,7 @@ endif()
 # The tweak is mean to keep in line with the pre-release numbering. https://semver.org/ examples: First release cadidate
 # for tweak 1 is "-1-rc.1" Second release cadidate for tweak 1 is "-1-rc.2" Actual tweak release is "-1"
 
-# set(VERSION_TWEAK "-1-rc.1")
+# set(VERSION_TWEAK "-2-rc.1")
 
 # pep440 is incompatible with semantic versioning https://www.python.org/dev/peps/pep-0440/ example: First release
 # cadidate for tweak 1 is ".1rc.1"

@@ -433,6 +433,13 @@ Experiment makeExperimentWithValidDuplicateCriteria() {
                     makeLookupTableWithTwoValidDuplicateCriteria());
 }
 
+Experiment makeExperimentWithReductionTypeSetForSumInLambda() {
+  return Experiment(AnalysisMode::PointDetector, ReductionType::NonFlatSample, SummationType::SumInLambda, false, false,
+                    makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
+                    FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
+                    std::map<std::string, std::string>(), LookupTable());
+}
+
 /* Instrument */
 
 RangeInLambda makeWavelengthRange() { return RangeInLambda(2.3, 14.4); }
@@ -458,4 +465,13 @@ Instrument makeEmptyInstrument() {
                     MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
                     DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
 }
+
+/* Preview */
+
+PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers, double theta) {
+  auto row = PreviewRow(runNumbers);
+  row.setTheta(theta);
+  return row;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper

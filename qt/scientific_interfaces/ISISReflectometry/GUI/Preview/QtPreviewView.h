@@ -41,6 +41,7 @@ public:
   std::string getWorkspaceName() const override;
   double getAngle() const override;
   // Plotting
+  void resetInstView() override;
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
   // Instrument viewer toolbar
@@ -85,5 +86,6 @@ private slots:
   void onEditROIClicked() const;
   void onAddRectangularROIClicked(QAction *regionType) const;
   void onAngleEdited();
+  void onApplyClicked() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

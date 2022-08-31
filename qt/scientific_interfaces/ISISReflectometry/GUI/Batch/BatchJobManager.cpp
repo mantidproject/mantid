@@ -9,6 +9,7 @@
 #include "GroupProcessingAlgorithm.h"
 #include "IReflAlgorithmFactory.h"
 #include "Reduction/PreviewRow.h"
+#include "Reduction/RowExceptions.h"
 #include "ReflAlgorithmFactory.h"
 #include "RowPreprocessingAlgorithm.h"
 #include "RowProcessingAlgorithm.h"
@@ -264,20 +265,32 @@ boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_s
   return *item;
 }
 
-std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm) const {
+std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm,
+                                                                          bool includeGrpRows) const {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
 
   if (item->isGroup())
-    return getWorkspacesToSave(dynamic_cast<Group &>(*item));
+    return getWorkspacesToSave(dynamic_cast<Group &>(*item), includeGrpRows);
   else
     return getWorkspacesToSave(dynamic_cast<Row &>(*item));
 
   return std::vector<std::string>();
 }
 
-std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group) const {
-  return std::vector<std::string>{group.postprocessedWorkspaceName()};
+std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group, bool includeRows) const {
+  auto workspaces = std::vector<std::string>{group.postprocessedWorkspaceName()};
+
+  if (includeRows) {
+    auto const &rows = group.rows();
+    for (auto &row : rows) {
+      if (row) {
+        workspaces.emplace_back(row.get().reducedWorkspaceNames().iVsQBinned());
+      }
+    }
+  }
+
+  return workspaces;
 }
 
 std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) const {

@@ -47,6 +47,7 @@ public:
    * @throws std::out_of_range
    */
   const IObject &getComponent(const size_t index) const;
+  const IObject_const_sptr getComponentPtr(const size_t index) const;
 
   Geometry::BoundingBox boundingBox() const;
 

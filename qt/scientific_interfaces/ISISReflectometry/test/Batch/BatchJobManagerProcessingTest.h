@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "BatchJobManagerTest.h"
 #include "test/Batch/MockReflAlgorithmFactory.h"
 

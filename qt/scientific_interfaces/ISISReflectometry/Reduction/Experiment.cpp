@@ -69,6 +69,10 @@ boost::optional<LookupRow> Experiment::findLookupRow(PreviewRow const &previewRo
 
 boost::optional<LookupRow> Experiment::findWildcardLookupRow() const { return m_lookupTable.findWildcardLookupRow(); }
 
+void Experiment::updateLookupRow(LookupRow lookupRow, double tolerance) {
+  m_lookupTable.updateLookupRow(std::move(lookupRow), tolerance);
+}
+
 boost::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
   if (auto const lookupRow = m_lookupTable.findLookupRow(row, tolerance)) {
     return m_lookupTable.getIndex(lookupRow.get());

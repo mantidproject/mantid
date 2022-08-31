@@ -11,10 +11,12 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -682,6 +684,18 @@ public:
     cf.setAttributeValue("PeakShape", "Lorentzian");
     TS_ASSERT_EQUALS(cf.getParameter("ion0.B20"), 1.0);
     TS_ASSERT_EQUALS(cf.getParameter("ion1.B20"), 2.0);
+  }
+
+  void test_ignore_height_tie_for_gaussian_peaks() {
+    CrystalFieldFunction cf;
+    Gaussian gaussian;
+    gaussian.initialize();
+    ParameterTie tie1(&gaussian, "Height", "2.0/Sigma");
+    ParameterTie tie2(&gaussian, "PeakCentre", "2.0/Sigma");
+    ParameterTie tie3(&gaussian, "Height", "2.0");
+    TS_ASSERT(cf.ignoreTie(tie1));
+    TS_ASSERT(!cf.ignoreTie(tie2));
+    TS_ASSERT(!cf.ignoreTie(tie3));
   }
 
 private:
