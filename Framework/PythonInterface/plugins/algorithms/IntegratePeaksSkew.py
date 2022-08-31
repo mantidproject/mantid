@@ -575,8 +575,13 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # check that peak is in a valid detector
             detid = detids[ipk]
             detector_info = ws.detectorInfo()
-            det_idx = detector_info.indexOf(detid)
-            if detector_info.isMonitor(det_idx) or detector_info.isMasked(det_idx):
+            invalid_detector = False
+            try:
+                det_idx = detector_info.indexOf(detid)
+                invalid_detector = detector_info.isMonitor(det_idx) or detector_info.isMasked(det_idx)
+            except IndexError:
+                invalid_detector = True  # no index when e.g. predicted peak outside detector (detid = -1)
+            if invalid_detector:
                 logger.error("Peak with index {ipk} is not in a valid detector (with ID {detid}).")
                 continue  # skip peak - don't plot as no data to retrieve
             # get data array in window around peak region
