@@ -63,21 +63,15 @@ class TotScatCalculateSelfScatteringTest(unittest.TestCase):
         raw_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(6, 100, True)
         mtd.addOrReplace("tot_scat_test", raw_ws)
 
-        # create a 3rd spectra required for Placzek order 2 corrections
-        lines = open(self.cal_file_path, 'r').readlines()
-        new_last_line = ("%i\t%i\t%f\t%i\t%i\n" % (4, 4, 0.0, 1, 3))
-        lines[-1] = new_last_line
-        open(self.cal_file_path, 'w').writelines(lines)
-
         correction_ws = TotScatCalculateSelfScattering(InputWorkspace="tot_scat_test",
                                                        CalFileName=self.cal_file_path,
                                                        SampleGeometry=self.geometry,
                                                        SampleMaterial=self.material,
                                                        PlaczekOrder=2,
                                                        SampleTemp="293")
-        self.assertEqual(correction_ws.getNumberHistograms(), 3)
+        self.assertEqual(correction_ws.getNumberHistograms(), 2)
 
-# fails if not enough spectra and no temperature provided
+# fails if no temperature provided
     def test_TotScatCalculateSelfScattering_placzek_2_fail(self):
         raw_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(6, 100, True)
         mtd.addOrReplace("tot_scat_test", raw_ws)

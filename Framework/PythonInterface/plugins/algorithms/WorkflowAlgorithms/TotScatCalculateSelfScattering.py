@@ -76,16 +76,17 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         min_x = np.min(x_data)
         max_x = np.max(x_data)
         width_x = (max_x - min_x) / x_data.size
+        placzek_order = self.getProperty('PlaczekOrder').value
         fit_spectra = FitIncidentSpectrum(InputWorkspace=monitor,
                                           BinningForCalc=[min_x, 1 * width_x, max_x],
                                           BinningForFit=[min_x, 10 * width_x, max_x],
-                                          FitSpectrumWith="CubicSpline")
+                                          FitSpectrumWith="CubicSpline",
+                                          DerivOrder=2 if placzek_order == 2 else 1)
 
-        plackzek_order = self.getPropertyValue('PlaczekOrder')
         placzek_kwargs = {'InputWorkspace': raw_ws, 'IncidentSpectra': fit_spectra, 'ScalebyPackingFraction': False,
-                          'Order': plackzek_order}
+                          'Order': placzek_order}
         sample_temp = self.getPropertyValue('SampleTemp')
-        if plackzek_order == '2' and sample_temp:
+        if placzek_order == 2 and sample_temp:
             try:
                 if float(sample_temp):
                     placzek_kwargs.update({'SampleTemperature': float(sample_temp)})
