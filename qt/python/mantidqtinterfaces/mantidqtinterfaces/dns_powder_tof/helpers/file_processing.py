@@ -23,7 +23,7 @@ def filter_filenames(all_datafiles, start, end):
     """
     filtered = []
     for filename in all_datafiles:
-        number = int(filename.split('_')[-2][:-2])
+        number = int(filename.replace('.d_dat', '').split('_')[-1])
         if end >= number >= start:
             filtered.append(filename)
     return filtered
