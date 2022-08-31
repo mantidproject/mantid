@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -313,7 +313,7 @@ def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8):
 
 
 def find_peak_limits(signal, error_sq, ilo, ihi):
-    # find initial background points in tof window using skew method (excl. points above mean)
+    # find initial background points in tof window using skew method
     ibg, _ = find_bg_pts_seed_skew(signal[ilo:ihi])
     # create mask and find largest contiguous region of peak bins
     skew_mask = np.ones(ihi - ilo, dtype=bool)
@@ -371,6 +371,44 @@ def find_peak_mask(signal, ixlo, ixhi, irow, icol, use_nearest):
         # throw warning if distance is greater than half window?
     peak_mask = labeled_array == peak_label
     return peak_mask, non_bg_mask, peak_label
+
+
+def plot_integrated_peak(fig, ax, xpk, ypk, epk_sq, image_data, peak_mask, irow, icol, ixlo, ixhi, ixlo_opt, ixhi_opt,
+                         pk, ipk, status, intens, sig, norm_func):
+    # limits for 1D plot
+    ipad = int((ixhi - ixlo) / 2)  # extra portion of data shown outside the 1D window
+    istart = max(min(ixlo, ixlo_opt) - ipad, 0)
+    iend = min(max(ixhi, ixhi_opt) + ipad, len(xpk) - 1)
+    # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
+    img = ax[0].imshow(image_data, norm=norm_func(vmax=image_data[peak_mask].mean()))
+    ax[0].plot(*np.where(peak_mask.T), 'xw')
+    ax[0].plot(icol, irow, 'or')
+    title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
+                rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
+                f"\n{status.value}"
+    ax[0].set_title(title_str)
+    ax[0].set_xlabel('dColumn')
+    ax[0].set_ylabel('dRow')
+    # 1D plot
+    ax[1].axvline(xpk[ixlo_opt], ls='--', color='b', label='Optimal window')
+    ax[1].axvline(xpk[ixhi_opt - 1], ls='--', color='b')
+    ax[1].errorbar(xpk[istart:iend], ypk[istart:iend], yerr=np.sqrt(epk_sq[istart:iend]),
+                   marker='o', markersize=3, capsize=2, ls='', color='k', label='data')
+    ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
+    ax[1].axvline(xpk[ixlo], ls=':', color='r', label='Initial window')
+    ax[1].axvline(xpk[ixhi - 1], ls=':', color='r')
+    ax[1].axhline(0, ls=':', color='k')
+    ax[1].legend(fontsize=7, loc=1, ncol=2)
+    # figure formatting
+    intens_over_sig = round(intens / sig, 2) if sig > 0 else 0
+    ax[1].set_title(f'I/sig = {intens_over_sig}')
+    ax[1].set_xlabel(r'TOF ($\mu$s)')
+    ax[1].set_ylabel('Intensity')
+    cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0], label='Intensity')
+    cbar.ax.tick_params(labelsize=7, which='both')
+    ax[1].relim()
+    ax[1].autoscale_view()
+    return cbar  # need object returned so can cleanup after fig saved to pdf
 
 
 class IntegratePeaksSkew(DataProcessorAlgorithm):
@@ -663,40 +701,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     epk_sq = np.sum(error[peak_mask] ** 2, axis=0)
                     ixlo_opt = ixlo
                     ixhi_opt = ixhi
-                # limits for 1D plot
-                ipad = int((ixhi - ixlo) / 2)  # extra portion of data shown outside the 1D window
-                istart = max(min(ixlo, ixlo_opt) - ipad, 0)
-                iend = min(max(ixhi, ixhi_opt) + ipad, len(xpk) - 1)
-                # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
                 image_data = signal[:, :, ixlo_opt:ixhi_opt].sum(axis=2)
-                img = ax[0].imshow(image_data, norm=LogNorm(vmax=image_data[peak_mask].mean()))
-                ax[0].plot(*np.where(peak_mask.T), 'xw')
-                ax[0].plot(icol, irow, 'or')
-                title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
-                            rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
-                            f"\n{status.value}"
-                ax[0].set_title(title_str)
-                ax[0].set_xlabel('dColumn')
-                ax[0].set_ylabel('dRow')
-                # 1D plot
-                ax[1].axvline(xpk[ixlo_opt], ls='--', color='b', label='Optimal window')
-                ax[1].axvline(xpk[ixhi_opt - 1], ls='--', color='b')
-                ax[1].errorbar(xpk[istart:iend], ypk[istart:iend], yerr=np.sqrt(epk_sq[istart:iend]),
-                               marker='o', markersize=3, capsize=2, ls='', color='k', label='data')
-                ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
-                ax[1].axvline(xpk[ixlo], ls=':', color='r', label='Initial window')
-                ax[1].axvline(xpk[ixhi - 1], ls=':', color='r')
-                ax[1].axhline(0, ls=':', color='k')
-                ax[1].legend(fontsize=7, loc=1, ncol=2)
-                # figure formatting
-                intens_over_sig = round(intens / sig, 2) if sig > 0 else 0
-                ax[1].set_title(f'I/sig = {intens_over_sig}')
-                ax[1].set_xlabel(r'TOF ($\mu$s)')
-                ax[1].set_ylabel('Intensity')
-                cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0], label='Intensity')
-                cbar.ax.tick_params(labelsize=7, which='both')
-                ax[1].relim()
-                ax[1].autoscale_view()
+                cbar = plot_integrated_peak(fig, ax, xpk, ypk, epk_sq, image_data, peak_mask, irow, icol, ixlo, ixhi,
+                                            ixlo_opt, ixhi_opt, pk, ipk, status, intens, sig, LogNorm)
                 pdf.savefig(fig, rasterized=False)
                 [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
                 cbar.remove()
