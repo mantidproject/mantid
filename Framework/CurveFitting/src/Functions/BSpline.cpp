@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
 
@@ -25,6 +26,7 @@ DECLARE_FUNCTION(BSpline)
  */
 BSpline::BSpline() {
   const size_t nbreak = 10;
+
   declareAttribute("Uniform", Attribute(true));
   declareAttribute("Order", Attribute(3));
   declareAttribute("NBreak", Attribute(static_cast<int>(nbreak)));
@@ -32,12 +34,13 @@ BSpline::BSpline() {
   declareAttribute("StartX", Attribute(0.0));
   declareAttribute("EndX", Attribute(1.0));
   declareAttribute("BreakPoints", Attribute(std::vector<double>(nbreak)));
-  declareAttribute("Knots", Attribute(std::vector<double>(getNKnots())));
 
   resetObjects();
   resetParameters();
   resetKnots();
 }
+
+void BSpline::resetValidators() {}
 
 /** Execute the function
  *
@@ -74,11 +77,10 @@ void BSpline::function1D(double *out, const double *xValues, const size_t nData)
 
 /** Initialise the spline member variable
  *
- * @param knots :: Vector of knots
  * @param breakPoints :: Vector of breakpoints to be passed as control points
  */
-void BSpline::initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints) {
-  m_spline = Spline1D(EigenVector(knots).mutator(), EigenVector(breakPoints).mutator());
+void BSpline::initialiseSpline(const std::vector<double> &breakPoints) {
+  m_spline = Spline1D(EigenVector(m_knots).mutator(), EigenVector(breakPoints).mutator());
 }
 
 /** Evaluate the basis functions that make up the spline at point x
@@ -111,11 +113,10 @@ size_t BSpline::evaluateBasisFunctions(EigenVector &B, const double x, size_t cu
  * clamped knots.
  */
 size_t BSpline::getSpanIndex(const double x, const size_t currentBBase, const bool clamped) const {
-  auto knots = getAttribute("Knots").asVector();
   const size_t clampedKnots = clamped ? static_cast<size_t>(getClampedKnots()) : 1u;
-  size_t nKnots = knots.size();
+  size_t nKnots = m_knots.size();
   for (size_t i = currentBBase + clampedKnots; i < nKnots; i++) {
-    if (x < knots[i]) {
+    if (x < m_knots[i]) {
       return i - clampedKnots;
     }
   }
@@ -192,7 +193,7 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
  * @return Names of all declared attributes in correct order.
  */
 std::vector<std::string> BSpline::getAttributeNames() const {
-  return {"Uniform", "Order", "NBreak", "StartX", "EndX", "BreakPoints", "Knots"};
+  return {"Uniform", "Order", "NBreak", "StartX", "EndX", "BreakPoints"};
 }
 
 /**
@@ -230,7 +231,6 @@ void BSpline::resetParameters() {
 void BSpline::resetKnots() {
   bool isUniform = getAttribute("Uniform").asBool();
   std::vector<double> breakPoints;
-  std::vector<double> knots;
   if (isUniform) {
     // create uniform knots in the interval [StartX, EndX]
     double startX = getAttribute("StartX").asDouble();
@@ -239,8 +239,7 @@ void BSpline::resetKnots() {
     breakPoints = calcUniformBreakPoints(startX, endX);
     storeAttributeValue("BreakPoints", Attribute(breakPoints));
     // calc uniform knots
-    knots = generateKnotVector(breakPoints);
-    setAttribute("Knots", Attribute(knots));
+    resetKnotVector(breakPoints);
   } else {
     // set the break points from BreakPoints vector attribute, update other attributes
     breakPoints = getAttribute("BreakPoints").asVector();
@@ -260,12 +259,11 @@ void BSpline::resetKnots() {
       resetObjects();
       resetParameters();
     }
-    knots = generateKnotVector(breakPoints);
-    setAttribute("Knots", Attribute(knots));
+    resetKnotVector(breakPoints);
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));
   }
-  initialiseSpline(knots, breakPoints);
+  initialiseSpline(breakPoints);
 }
 
 /**
@@ -284,25 +282,24 @@ std::vector<double> BSpline::calcUniformBreakPoints(const double startX, const d
 }
 
 /**
- * Generate a knot vector given a vector of break points
+ * Reset knot vector given a vector of break points
  * @param breakPoints :: A vector of breakpoints
- * @returns :: Populated knot vector
  */
-std::vector<double> BSpline::generateKnotVector(const std::vector<double> &breakPoints) {
+void BSpline::resetKnotVector(const std::vector<double> &breakPoints) {
   const int nKnots = getNKnots();
   const int clampedKnots = getClampedKnots();
-  std::vector<double> knots(nKnots);
+  m_knots.clear();
+  m_knots.resize(nKnots);
 
   for (int i = 0; i < nKnots; i++) {
     if (i < clampedKnots) {
-      knots[i] = breakPoints[0];
+      m_knots[i] = breakPoints[0];
     } else if (i >= nKnots - clampedKnots) {
-      knots[i] = breakPoints[breakPoints.size() - 1];
+      m_knots[i] = breakPoints[breakPoints.size() - 1];
     } else {
-      knots[i] = breakPoints[i - clampedKnots + 1];
+      m_knots[i] = breakPoints[i - clampedKnots + 1];
     }
   }
-  return knots;
 }
 
 } // namespace Mantid::CurveFitting::Functions

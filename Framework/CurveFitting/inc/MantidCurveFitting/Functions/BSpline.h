@@ -45,14 +45,16 @@ public:
   void resetParameters();
   /// Reset b-spline knots
   void resetKnots();
+  /// Reset Function Attribute Validators
+  void resetValidators();
   /// Populate a vector with a uniform set of break points
   [[nodiscard]] std::vector<double> calcUniformBreakPoints(const double startX, const double endX);
-  /// Generate a knot vector based upon break points
-  [[nodiscard]] std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
+  /// Reset knot vector based upon break points
+  void resetKnotVector(const std::vector<double> &breakPoints);
   /// evaluate non-zero basis functions, return which index to use as the base of the results vector.
   size_t evaluateBasisFunctions(EigenVector &B, const double x, size_t currentBBase) const;
-  /// initialise the m_spline variable with a given knot vector and breakpoints
-  void initialiseSpline(const std::vector<double> &knots, const std::vector<double> &breakPoints);
+  /// initialise the m_spline variable based on the knot vector and given a vector of breakpoints
+  void initialiseSpline(const std::vector<double> &breakPoints);
   /// get the index of the span/interval which x is in
   size_t getSpanIndex(const double x, const size_t currentBBase, const bool clamped = true) const;
   /// Evaluate derivatives up to a specified order for each non-zero basis function
@@ -73,6 +75,7 @@ public:
 
   /// Member variable for spline
   Spline1D m_spline;
+  std::vector<double> m_knots;
 };
 
 } // namespace Mantid::CurveFitting::Functions
