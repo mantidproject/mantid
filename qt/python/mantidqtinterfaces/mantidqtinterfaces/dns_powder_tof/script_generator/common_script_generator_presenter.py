@@ -39,7 +39,7 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         self.request_from_abo()  # pylint: disable=E1102
         # is registered in parameter abo
         # to ask for automatic data reduction
-        opt_name = self.name[0:-16] + 'options'
+        opt_name = self.name.replace('script_generator', 'options')
         options = self.param_dict[opt_name]
         paths = self.param_dict['paths']
         file_selector = self.param_dict['file_selector']
