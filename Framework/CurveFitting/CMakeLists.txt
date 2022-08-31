@@ -251,6 +251,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ActivationK.h
     inc/MantidCurveFitting/Functions/ActivationmeV.h
     inc/MantidCurveFitting/Functions/AsymmetricPearsonVII.h
+    inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
     inc/MantidCurveFitting/Functions/BivariateNormal.h
@@ -282,7 +283,6 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/DiffSphere.h
     inc/MantidCurveFitting/Functions/DynamicKuboToyabe.h
-    inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/ElasticDiffSphere.h
     inc/MantidCurveFitting/Functions/ElasticIsoRotDiff.h
