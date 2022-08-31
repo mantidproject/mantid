@@ -214,11 +214,13 @@ class DNSFileSelectorView(DNSView):
         }
         return filters
 
-    def hide_scan(self, row, hidden=True):
+    def hide_scan(self, row):
+        hidden = True
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), hidden)
 
     def show_scan(self, row):
-        self._treeview.setRowHidden(row, self._treeview.rootIndex(), False)
+        hidden = False
+        self._treeview.setRowHidden(row, self._treeview.rootIndex(), hidden)
 
     def hide_tof(self, hidden=True):
         self._standard_treeview.setColumnHidden(TreeItem.tof_channels.value, hidden)

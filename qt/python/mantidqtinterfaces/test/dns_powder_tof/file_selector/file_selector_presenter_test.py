@@ -215,7 +215,7 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
         self.view.hide_scan.assert_not_called()
         self.model.filter_scans_for_boxes.return_value = [1]
         self.presenter._filter_scans()
-        self.view.hide_scan.assert_called_once_with(1, hidden=True)
+        self.view.hide_scan.assert_called_once_with(1)
 
     def test_filter_standard(self):
         self.presenter.modus = '123'

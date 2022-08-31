@@ -169,7 +169,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         hide_scans = self.model.filter_scans_for_boxes(filters,
                                                        self._is_modus_tof())
         for row in hide_scans:
-            self.view.hide_scan(row, hidden=True)
+            self.view.hide_scan(row)
 
     def _filter_standard(self):
         """
@@ -181,7 +181,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         hide_scans = self.model.filter_standard_types(filters, active,
                                                       self._is_modus_tof())
         for row in hide_scans:
-            self.view.hide_scan(row, hidden=True)
+            self.view.hide_scan(row)
 
     # change of datasets
     def _changed_to_standard(self):
