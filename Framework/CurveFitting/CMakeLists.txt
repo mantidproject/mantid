@@ -39,7 +39,6 @@ set(SRC_FILES
     src/CostFunctions/CostFuncPoisson.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
-    src/BSpline.cpp
     src/EigenComplexMatrix.cpp
     src/EigenComplexVector.cpp
     src/EigenMatrix.cpp
@@ -62,6 +61,7 @@ set(SRC_FILES
     src/Functions/ActivationK.cpp
     src/Functions/ActivationmeV.cpp
     src/Functions/AsymmetricPearsonVII.cpp
+    src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
     src/Functions/BivariateNormal.cpp
