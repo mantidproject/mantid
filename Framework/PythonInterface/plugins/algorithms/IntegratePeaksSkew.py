@@ -508,6 +508,13 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         npk_min = self.getProperty("NPixMin").value
         if npk_min > (2 * drows + 1) * (2 * dcols + 1):
             issues["NPixMin"] = "NPixMin exceeds number of pixels in the window."
+        # check valid peak workspace
+        ws = self.getProperty("InputWorkspace").value
+        pk_ws = self.getProperty("PeaksWorkspace").value
+        if ws.getInstrument().getName() != pk_ws.getInstrument().getName():
+            issues["PeaksWorkspace"] = "PeaksWorkspace must have same instrument as the InputWorkspace."
+        if pk_ws.getNumberPeaks() < 1:
+            issues["PeaksWorkspace"] = "PeaksWorkspace must have at least 1 peak."
         return issues
 
     def PyExec(self):
