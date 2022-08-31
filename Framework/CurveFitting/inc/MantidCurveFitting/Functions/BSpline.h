@@ -46,9 +46,9 @@ public:
   /// Reset b-spline knots
   void resetKnots();
   /// Populate a vector with a uniform set of break points
-  std::vector<double> calcUniformBreakPoints(const double startX, const double endX);
+  [[nodiscard]] std::vector<double> calcUniformBreakPoints(const double startX, const double endX);
   /// Generate a knot vector based upon break points
-  std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
+  [[nodiscard]] std::vector<double> generateKnotVector(const std::vector<double> &breakPoints);
   /// evaluate non-zero basis functions, return which index to use as the base of the results vector.
   size_t evaluateBasisFunctions(EigenVector &B, const double x, size_t currentBBase) const;
   /// initialise the m_spline variable with a given knot vector and breakpoints
@@ -56,7 +56,7 @@ public:
   /// get the index of the span/interval which x is in
   size_t getSpanIndex(const double x, const size_t currentBBase, const bool clamped = true) const;
   /// Evaluate derivatives up to a specified order for each non-zero basis function
-  EigenMatrix evaluateBasisFnDerivatives(const double x, const size_t derivOrder) const;
+  [[nodiscard]] EigenMatrix evaluateBasisFnDerivatives(const double x, const size_t derivOrder) const;
 
   /// Get number of B-Spline coefficients
   inline int getNBSplineCoefficients() { return getNBreakPoints() + getOrder() - 2; }
