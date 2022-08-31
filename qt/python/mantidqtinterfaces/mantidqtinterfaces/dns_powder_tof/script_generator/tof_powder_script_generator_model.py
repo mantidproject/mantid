@@ -55,7 +55,8 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _error_in_input(self):
         if not self._validate_tof_options():
-            return 'Bin sizes make no sense.'
+            return ('Binning makes no sense. Make sure that dE and q steps are '
+                    'greater than zero, as well as q_max > q_min and dE_max > dE_min.')
         if not self._validate_nb_vana_banks():
             return ('Vanadium correction option is chosen, but '
                     'the number of selected vanadium scans '
