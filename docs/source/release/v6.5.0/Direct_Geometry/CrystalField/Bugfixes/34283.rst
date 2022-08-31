@@ -1,0 +1,1 @@
+- Fix for sortTies to prevent Mantid crash when fitting CrystalField multisite objects with Gaussian peaks.
