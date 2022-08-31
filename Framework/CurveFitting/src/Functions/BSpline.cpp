@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
@@ -27,20 +28,48 @@ DECLARE_FUNCTION(BSpline)
 BSpline::BSpline() {
   const size_t nbreak = 10;
 
+  auto orderValidator = BoundedValidator<int>();
+  orderValidator.setLower(1);
+  m_validators["Order"] = std::make_shared<BoundedValidator<int>>(orderValidator);
+  declareAttribute("Order", Attribute(3), orderValidator);
+
+  auto NBreakValidator = BoundedValidator<int>();
+  NBreakValidator.setLower(2);
+  m_validators["NBreak"] = std::make_shared<BoundedValidator<int>>(NBreakValidator);
+  declareAttribute("NBreak", Attribute(static_cast<int>(nbreak)), NBreakValidator);
+
+  auto startXValidator = BoundedValidator<double>();
+  startXValidator.setUpperExclusive(1.0);
+  m_validators["StartX"] = std::make_shared<BoundedValidator<double>>(startXValidator);
+  declareAttribute("StartX", Attribute(0.0), startXValidator);
+
+  auto endXValidator = BoundedValidator<double>();
+  endXValidator.setLowerExclusive(0.0);
+  m_validators["EndX"] = std::make_shared<BoundedValidator<double>>(endXValidator);
+  declareAttribute("EndX", Attribute(1.0), endXValidator);
+
+  auto breakPointsValidator = ArrayBoundedValidator<double>(0.0, 1.0);
+  m_validators["BreakPoints"] = std::make_shared<ArrayBoundedValidator<double>>(breakPointsValidator);
+  declareAttribute("BreakPoints", Attribute(std::vector<double>(nbreak)), breakPointsValidator);
+
   declareAttribute("Uniform", Attribute(true));
-  declareAttribute("Order", Attribute(3));
-  declareAttribute("NBreak", Attribute(static_cast<int>(nbreak)));
 
-  declareAttribute("StartX", Attribute(0.0));
-  declareAttribute("EndX", Attribute(1.0));
-  declareAttribute("BreakPoints", Attribute(std::vector<double>(nbreak)));
-
-  resetObjects();
+  m_spline = Spline1D();
   resetParameters();
   resetKnots();
 }
 
-void BSpline::resetValidators() {}
+void BSpline::resetValidators() {
+  auto startXValidator = dynamic_cast<BoundedValidator<double> *>(m_validators["StartX"].get());
+  startXValidator->setUpperExclusive(getAttribute("EndX").asDouble());
+
+  auto endXValidator = dynamic_cast<BoundedValidator<double> *>(m_validators["EndX"].get());
+  endXValidator->setLowerExclusive(getAttribute("StartX").asDouble());
+
+  auto breakPointsValidator = dynamic_cast<ArrayBoundedValidator<double> *>(m_validators["BreakPoints"].get());
+  breakPointsValidator->setLower(getAttribute("StartX").asDouble());
+  breakPointsValidator->setUpper(getAttribute("EndX").asDouble());
+}
 
 /** Execute the function
  *
@@ -54,10 +83,6 @@ void BSpline::function1D(double *out, const double *xValues, const size_t nData)
   size_t currentBBase = 0;
   double startX = getAttribute("StartX").asDouble();
   double endX = getAttribute("EndX").asDouble();
-
-  if (startX >= endX) {
-    throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
-  }
 
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
@@ -136,10 +161,6 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData, con
   size_t jstart = 0;
   size_t splineOrder = static_cast<size_t>(getAttribute("Order").asInt());
 
-  if (startX >= endX) {
-    throw std::invalid_argument("BSpline: EndX must be greater than StartX.");
-  }
-
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
     if (x < startX || x > endX) {
@@ -182,10 +203,11 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
 
   if (attName == "BreakPoints" || isUniform || attName == "StartX" || attName == "EndX") {
     resetKnots();
+    resetValidators();
   } else if (attName == "NBreak" || attName == "Order") {
-    resetObjects();
     resetParameters();
     resetKnots();
+    resetValidators();
   }
 }
 
@@ -194,21 +216,6 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
  */
 std::vector<std::string> BSpline::getAttributeNames() const {
   return {"Uniform", "Order", "NBreak", "StartX", "EndX", "BreakPoints"};
-}
-
-/**
- * Initialize the class objects.
- */
-void BSpline::resetObjects() {
-  int order = getAttribute("Order").asInt();
-  int nbreak = getAttribute("NBreak").asInt();
-  if (order <= 0) {
-    throw std::invalid_argument("BSpline: Order must be greater than zero.");
-  }
-  if (nbreak < 2) {
-    throw std::invalid_argument("BSpline: NBreak must be at least 2.");
-  }
-  m_spline = Spline1D();
 }
 
 /**
@@ -256,7 +263,6 @@ void BSpline::resetKnots() {
     // if number of break points change do necessary updates
     if (static_cast<size_t>(nbreaks) != breakPoints.size()) {
       storeAttributeValue("NBreak", Attribute(static_cast<int>(breakPoints.size())));
-      resetObjects();
       resetParameters();
     }
     resetKnotVector(breakPoints);

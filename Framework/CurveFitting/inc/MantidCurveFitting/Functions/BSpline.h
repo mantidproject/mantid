@@ -12,6 +12,7 @@
 #include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/EigenVector.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/IValidator.h"
 
 #include <memory>
 #include <unsupported/Eigen/Splines>
@@ -39,8 +40,6 @@ public:
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames() const override;
 
-  /// Initialize the class objects.
-  void resetObjects();
   /// Reset fitting parameters
   void resetParameters();
   /// Reset b-spline knots
@@ -76,6 +75,7 @@ public:
   /// Member variable for spline
   Spline1D m_spline;
   std::vector<double> m_knots;
+  std::unordered_map<std::string, Kernel::IValidator_sptr> m_validators;
 };
 
 } // namespace Mantid::CurveFitting::Functions
