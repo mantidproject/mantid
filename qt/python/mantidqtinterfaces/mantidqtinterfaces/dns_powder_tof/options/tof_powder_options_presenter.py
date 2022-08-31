@@ -36,7 +36,7 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
             return False
         binning, errors = self.model.estimate_q_and_binning(
             full_data, wavelength)
-        self.raise_error("Waning different channel_widths "
+        self.raise_error("Warning different channel_widths "
                          f"{errors['channel_widths']} in selected"
                          " datafiles.",
                          doraise=errors['chan_error'])
