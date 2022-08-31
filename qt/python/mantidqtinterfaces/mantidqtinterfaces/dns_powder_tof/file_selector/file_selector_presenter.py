@@ -125,16 +125,11 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     # scan selection
     def _automatic_select_all_standard_files(self):
-        was = not self.model.model_is_standard()
-        if was:  # if view is not standard we change to it and change back
-            self.view.combo_changed(1)
         self._read_standard()
         self._check_all_visible_scans()
         self.view.show_status_message(
             'automatically loaded all standard files',
             30)
-        if was:
-            self.view.combo_changed(0)
 
     def _check_all_visible_scans(self):
         self.model.check_scans_by_rows(self._get_non_hidden_rows())
