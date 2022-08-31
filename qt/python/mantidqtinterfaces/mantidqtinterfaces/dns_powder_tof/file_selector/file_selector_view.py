@@ -48,8 +48,8 @@ class DNSFileSelectorView(DNSView):
             'auto_select_standard': self._content.cB_auto_select_standard,
         }
 
-        self._treeview.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._treeview.customContextMenuRequested.connect(
+        self._sample_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._sample_treeview.customContextMenuRequested.connect(
             self._treeview_clicked)
         self._standard_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
         self._standard_treeview.customContextMenuRequested.connect(
