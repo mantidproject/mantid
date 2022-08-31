@@ -260,5 +260,6 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         det_edges_expected[:, -1] = True  # last tube in window is second from end of bank and ncols_edge=2
         self.assertTrue((det_edges == det_edges_expected).all())
 
+
 if __name__ == '__main__':
     unittest.main()

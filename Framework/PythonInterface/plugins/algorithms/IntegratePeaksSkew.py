@@ -7,7 +7,7 @@
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, MatrixWorkspaceProperty,
                         IPeaksWorkspaceProperty, FileProperty, FileAction, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty,
-                           PropertyCriterion)
+                           PropertyCriterion, logger)
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.ndimage import label
@@ -572,8 +572,15 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # copy pk to output peak workspace
             pk_ws_int.addPeak(pk)
             pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
+            # check that peak is in a valid detector
+            detid = detids[ipk]
+            detector_info = ws.detectorInfo()
+            det_idx = detector_info.indexOf(detid)
+            if detector_info.isMonitor(det_idx) or detector_info.isMasked(det_idx):
+                logger.error("Peak with index {ipk} is not in a valid detector (with ID {detid}).")
+                continue  # skip peak - don't plot as no data to retrieve
             # get data array in window around peak region
-            xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detids[ipk],
+            xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detid,
                                                                                                     bank_names[ipk],
                                                                                                     drows, dcols,
                                                                                                     nrows_edge,
