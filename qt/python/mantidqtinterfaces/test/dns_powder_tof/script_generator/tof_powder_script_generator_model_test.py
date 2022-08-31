@@ -17,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.script_generator. \
 from mantidqtinterfaces.dns_powder_tof.script_generator. \
     tof_powder_script_generator_model import DNSTofPowderScriptGeneratorModel
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
-    get_fake_tof_options, get_file_selector_fulldat, get_paths)
+    get_fake_tof_options, get_file_selector_full_data, get_paths)
 
 
 class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
@@ -403,7 +403,7 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(self.model._check_if_to_save(paths), [0, 0])
 
     def test_setup_sample_data(self):
-        file_selector = get_file_selector_fulldat()
+        file_selector = get_file_selector_full_data()
         paths = get_paths()
         self.model._sample_data = None
         self.model._nb_banks = None
@@ -417,7 +417,7 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
         self.model._sample_data.nb_banks = 5
 
     def test_setup_standard_data(self):
-        file_selector = get_file_selector_fulldat()
+        file_selector = get_file_selector_full_data()
         paths = get_paths()
         self.model._standard_data.empty_filename = None
         self.model._standard_data.vana_filename = None
@@ -449,7 +449,7 @@ class DNSTofPowderScriptGeneratorModelTest(unittest.TestCase):
     def test_script_maker(self):
         options = get_fake_tof_options()
         paths = get_paths()
-        file_selector = get_file_selector_fulldat()
+        file_selector = get_file_selector_full_data()
         test_v = self.model.script_maker(options, paths, file_selector)
         self.assertIsInstance(test_v[0], list)
         self.assertEqual(len(test_v[0]), 50)

@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
+
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
     ObjectDict
 
-datasetdic = [{
+dataset_dic = [{
     'file_number': '774714',
     'det_rot': -7.01,
     'sample_rot': 123.0,
@@ -68,7 +68,7 @@ datasetdic = [{
     'new_format': True
 }]
 
-file_selector_fulldat = {
+file_selector_full_data = {
     'full_data': [{
         'file_number': 788058,
         'det_rot': -9.0,
@@ -141,24 +141,24 @@ def get_paths():
     }
 
 
-def get_file_selector_fulldat():
-    return file_selector_fulldat
+def get_file_selector_full_data():
+    return file_selector_full_data
 
 
 # fake SC dataset with 2 scans for treeview tests
 def get_dataset():
-    newlist = []
-    for elm in datasetdic[1:]:
+    new_list = []
+    for elm in dataset_dic[1:]:
         dataset = ObjectDict()
         for key, value in elm.items():
             dataset[key] = value
-        newlist.append(dataset)
-    return newlist
+        new_list.append(dataset)
+    return new_list
 
 
 def dns_file(_dummy, filename):
     elm = [
-        dataset for dataset in datasetdic if dataset['filename'] == filename
+        dataset for dataset in dataset_dic if dataset['filename'] == filename
     ][0]
     dataset = ObjectDict()
     for key, value in elm.items():
@@ -180,12 +180,8 @@ def get_first_scan_command():
             "'z7_nsf'], tnsf=30.0) #340")
 
 
-def get_3filenames():
-    return [x['filename'] for x in datasetdic]
-
-
-def get_3file_numbers():
-    return [x['file_number'] for x in datasetdic]
+def get_3_filenames():
+    return [x['filename'] for x in dataset_dic]
 
 
 def get_fake_tof_binning():  # matches data 1,2 above
@@ -231,26 +227,6 @@ def get_fake_tof_options():
     return tof_opt
 
 
-#OKcomment: not used anywhere
-def get_fake_elastic_sc_options():
-    el_opt = {
-        'a': 2,
-        'b': 3,
-        'c': 4,
-        'alpha': 78,
-        'beta': 86,
-        'gamma': 85,
-        'hkl1': '1,2,3',
-        'hkl2': '2,3,4',
-        'omega_offset': 0,
-        'dx': 1,
-        'dy': 2,
-        'wavelength': 4.74
-    }
-    return el_opt
-
-
-#OKcomment: not used anywhere
 def get_fake_tof_errors():  # matches data 1,2 above
     return {
         'channel_widths': [2.0, 1.6],
@@ -260,65 +236,11 @@ def get_fake_tof_errors():  # matches data 1,2 above
     }
 
 
-#OKcomment: not used anywhere
-def get_fake_elastic_datadic():
-    return {
-        'knso': {
-            'path': 'C:/data',
-            'x_nsf': range(554574, 554634, 6),
-            'x_sf': range(554573, 554633, 6),
-            'y_nsf': range(554576, 554636, 6),
-            'y_sf': range(554575, 554635, 6),
-            'z_nsf': range(554578, 554638, 6),
-            'z_sf': range(554577, 554637, 6)
-        },
-    }
-
-
-def get_fake_tof_datadic():
+def get_fake_tof_data_dic():
     return {
         'knso': {
             'path': 'C:/data',
             -6.0: [0, 1, 2, 3, 4, 5, 6, 7, 8],
             -5.0: [2, 3, 4]
         }
-    }
-
-
-def get_elastic_standard_datadic():
-    return {
-        'vana': {
-            'path': 'C:/_knso_554573_to_554632_ip_vana',
-            'z_nsf': range(10, 20, 1),
-            'z_sf': range(0, 10, 1)
-        },
-        'nicr': {
-            'path': 'C:/_knso_554573_to_554632_ip_nicr',
-            'x_nsf': range(10, 20, 1),
-            'x_sf': range(0, 10, 1),
-            'y_nsf': range(30, 40, 1),
-            'y_sf': range(20, 30, 1),
-            'z_nsf': range(50, 60, 1),
-            'z_sf': range(40, 50, 1)
-        },
-        'empty': {
-            'path': 'C:/_knso_554573_to_554632_ip_empty',
-            'x_nsf': range(10, 20, 1),
-            'x_sf': range(0, 10, 1),
-            'y_nsf': range(30, 40, 1),
-            'y_sf': range(20, 30, 1),
-            'z_nsf': range(50, 60, 1),
-            'z_sf': range(40, 50, 1)
-        },
-    }
-
-
-def get_fake_elastic_sc_dataset():
-    return {
-        'ttheta': [0, 1, 2],
-        'omega': [4, 5],
-        'intensity': np.transpose(
-            np.asarray([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])),
-        'error': np.transpose(
-            np.asarray([[14.0, 15.0, 16.0], [17.0, 18.0, 19.0]]))
     }

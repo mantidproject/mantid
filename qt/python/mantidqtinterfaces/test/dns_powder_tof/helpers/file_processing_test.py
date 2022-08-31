@@ -17,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
     get_path_and_prefix, load_txt, open_editor, return_filelist,
     return_standard_zip, save_txt, unzip_latest_standard)
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
-    get_3filenames
+    get_3_filenames
 
 
 def mock_mtime(filename):
@@ -28,7 +28,7 @@ def mock_mtime(filename):
 class DNSfile_processingTest(unittest.TestCase):
 
     def setUp(self):
-        self.filenames = get_3filenames()
+        self.filenames = get_3_filenames()
 
     def test_filter_filenames(self):
         filtered = filter_filenames(self.filenames, 774714, 788058)

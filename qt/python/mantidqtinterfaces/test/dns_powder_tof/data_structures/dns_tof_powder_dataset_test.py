@@ -15,7 +15,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_tof_powder_dataset\
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
     ObjectDict
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import (
-    get_fake_tof_datadic, get_file_selector_fulldat)
+    get_fake_tof_data_dic, get_file_selector_full_data)
 
 
 class DNSTofDatasetTest(unittest.TestCase):
@@ -110,7 +110,7 @@ class DNSTofDatasetTest(unittest.TestCase):
 
     def test__convert_list_to_range(self):
         test_v = dns_tof_powder_dataset._convert_list_to_range(
-            get_fake_tof_datadic())
+            get_fake_tof_data_dic())
         self.assertIsInstance(test_v, dict)
         self.assertEqual(test_v, {
             'knso': {
@@ -122,7 +122,7 @@ class DNSTofDatasetTest(unittest.TestCase):
 
     def test__add_or_create_filelist(self):
         entry = self.full_data[0]
-        dataset = get_fake_tof_datadic()
+        dataset = get_fake_tof_data_dic()
         det_rot = 0.0
         datatype = 'knso'
         dns_tof_powder_dataset._add_or_create_filelist(dataset, datatype,
@@ -147,7 +147,7 @@ class DNSTofDatasetTest(unittest.TestCase):
 
     def test__create_new_datatype(self):
         entry = self.full_data[0]
-        dataset = get_fake_tof_datadic()
+        dataset = get_fake_tof_data_dic()
         datatype = 'xv'
         det_rot = -5
         path = 'C:/123'
