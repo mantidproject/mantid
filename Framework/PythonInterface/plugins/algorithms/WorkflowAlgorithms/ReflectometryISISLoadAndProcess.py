@@ -8,8 +8,6 @@
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         WorkspaceGroup)
 
-from mantid.geometry import ContainsState
-
 from mantid.simpleapi import MergeRuns
 
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
@@ -225,10 +223,30 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _sumBanks(self, workspaces):
         for workspace_name in workspaces:
             workspace = AnalysisDataService.retrieve(workspace_name)
-            if workspace.getInstrument().containsRectDetectors() == ContainsState.Full:
-                args = {"InputWorkspace": workspace}
-                alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
-                alg.execute()
+            is_group = isinstance(workspace, WorkspaceGroup)
+            if is_group:
+                workspace = workspace[0]
+
+            rect_detectors = workspace.getInstrument().findRectDetectors()
+            num_rect_detectors = len(rect_detectors)
+
+            if num_rect_detectors == 0:
+                continue
+
+            if num_rect_detectors != 1:
+                raise NotImplementedError(f"Not implemented for more than one rectangular detector, "
+                                          f"{num_rect_detectors} were found.")
+
+        # We don't sum banks for a linear detector
+            if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
+                continue
+
+            if is_group:
+                raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
+
+            args = {"InputWorkspace": workspace, "OutputWorkspace": workspace_name}
+            alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
+            alg.execute()
         return workspaces
 
     def _prefixedName(self, name, isTrans):

@@ -87,6 +87,7 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
                                               SumPixelsX=num_banks, SumPixelsY=1)
 
     def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
+        # TODO Use the findRectDetectors function to replace this implementation
         result = None
         inst = workspace.getInstrument()
         if not inst:
