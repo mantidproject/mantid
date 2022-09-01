@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, PropertyMode, Sample)
-from mantid.kernel import (VisibleWhenProperty, PropertyCriterion,
+from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, LogicOperator,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 from mantid.simpleapi import *
 
@@ -37,10 +37,13 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              doc='Sample Chemical formula')
 
+        container_condition = VisibleWhenProperty('Container', PropertyCriterion.IsEqualTo, '1')
         self.declareProperty(name='ContainerMassDensity', defaultValue=6.1,
                              doc='Container number density. Default=6.1')
+        self.setPropertySettings('ContainerMassDensity', container_condition)
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='V',
                              doc='Container Chemical formula')
+        self.setPropertySettings('ContainerChemicalFormula', container_condition)
 
         # set up shape options
 
@@ -51,6 +54,13 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
         cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
         annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
+
+        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition,
+                                                             LogicOperator.And)
+        container_cylinder_condition = VisibleWhenProperty(container_condition, cylinder_condition,
+                                                           LogicOperator.And)
+        container_annulus_condition = VisibleWhenProperty(container_condition, annulus_condition,
+                                                          LogicOperator.And)
 
         # height is common to all options
 
@@ -78,12 +88,12 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(name='Front', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Thickness of the FlatPlate front (cm)')
-        self.setPropertySettings('Front', flat_plate_condition)
+        self.setPropertySettings('Front', container_flat_plate_condition)
 
         self.declareProperty(name='Back', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Thickness of the FlatPlate back (cm)')
-        self.setPropertySettings('Back', flat_plate_condition)
+        self.setPropertySettings('Back', container_flat_plate_condition)
 
         # cylinder options
 
@@ -94,7 +104,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
 
         self.declareProperty(name='ContainerOuterRadius', defaultValue=0.6,
                              doc='Container outer radius. Default=0.6')
-        self.setPropertySettings('ContainerOuterRadius', cylinder_condition)
+        self.setPropertySettings('ContainerOuterRadius', container_cylinder_condition)
 
         # annulus options
 
@@ -111,22 +121,22 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(name='CanInnerRadius', defaultValue=0.45,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container inner radius. Default=0.5')
-        self.setPropertySettings('CanInnerRadius', annulus_condition)
+        self.setPropertySettings('CanInnerRadius', container_annulus_condition)
 
         self.declareProperty(name='CanInnerOuterRadius', defaultValue=0.5,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container inner radius. Default=0.5')
-        self.setPropertySettings('CanInnerOuterRadius', annulus_condition)
+        self.setPropertySettings('CanInnerOuterRadius', container_annulus_condition)
 
         self.declareProperty(name='CanOuterInnerRadius', defaultValue=0.6,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container outer inner radius. Default=0.6')
-        self.setPropertySettings('CanOuterInnerRadius', annulus_condition)
+        self.setPropertySettings('CanOuterInnerRadius', container_annulus_condition)
 
         self.declareProperty(name='CanOuterRadius', defaultValue=0.65,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container outer radius. Default=0.65')
-        self.setPropertySettings('CanOuterRadius', annulus_condition)
+        self.setPropertySettings('CanOuterRadius', container_annulus_condition)
 
         # MC options
 
