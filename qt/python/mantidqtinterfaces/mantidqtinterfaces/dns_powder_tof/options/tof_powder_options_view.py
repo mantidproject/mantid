@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Options Widget = View - Tab of DNS Reduction GUI.
+DNS powder TOF options tab view of DNS reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui
@@ -50,15 +50,7 @@ class DNSTofPowderOptionsView(DNSView):
         }
 
         # connect signals
-        self._content.pB_estimate.clicked.connect(self._estimate_q_and_binning)
-        self._map['wavelength'].valueChanged.connect(self.deactivate_get_wavelength)
-        self._map['get_wavelength'].stateChanged.connect(self._get_wavelength)
-        self._map['det_efficiency'].stateChanged.connect(
-            self._disable_sub_det_efficiency)
-        self._map['subtract_sample_back'].stateChanged.connect(
-            self._disable_sub_subtract_sample_back)
-        self._map['subtract_vana_back'].stateChanged.connect(
-            self._disable_sub_subtract_vana_back)
+        self._attach_signal_slots()
 
     # Signals
     sig_get_wavelength = Signal()
@@ -86,3 +78,14 @@ class DNSTofPowderOptionsView(DNSView):
     def _get_wavelength(self, state):
         if state:
             self.sig_get_wavelength.emit()
+
+    def _attach_signal_slots(self):
+        self._content.pB_estimate.clicked.connect(self._estimate_q_and_binning)
+        self._map['wavelength'].valueChanged.connect(self.deactivate_get_wavelength)
+        self._map['get_wavelength'].stateChanged.connect(self._get_wavelength)
+        self._map['det_efficiency'].stateChanged.connect(
+            self._disable_sub_det_efficiency)
+        self._map['subtract_sample_back'].stateChanged.connect(
+            self._disable_sub_subtract_sample_back)
+        self._map['subtract_vana_back'].stateChanged.connect(
+            self._disable_sub_subtract_vana_back)

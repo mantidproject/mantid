@@ -13,7 +13,7 @@ from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import QModelIndex, Qt, Signal
 from qtpy.QtWidgets import QProgressDialog
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItem
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItemEnum
 
 
 class DNSFileSelectorView(DNSView):
@@ -59,39 +59,10 @@ class DNSFileSelectorView(DNSView):
         self._treeview.collapsed.connect(self._expanded)
 
         # buttons
-        self._ui.pB_td_read_all.clicked.connect(self._read_all_clicked)
-        self._ui.cB_filter_det_rot.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_sample_rot.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_scans.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_cscans.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.cB_filter_free.stateChanged.connect(
-            self._filter_scans_checked)
-        self._ui.lE_filter_free_text.textChanged.connect(
-            self._filter_scans_checked)
-        self._ui.pB_expand_all.clicked.connect(self.expand_all)
-        self._ui.pB_expand_none.clicked.connect(self._un_expand_all)
-        self._ui.pB_check_all.clicked.connect(self._check_all)
-        self._ui.pB_check_none.clicked.connect(self._uncheck_all)
-        self._ui.pB_check_last_scan.clicked.connect(self._check_last)
-        self._ui.pB_check_last_complete_scan.clicked.connect(
-            self._check_last)
-        self._ui.pB_check_selected.clicked.connect(self._check_selected)
+        self._attach_button_signal_slots()
 
         # check boxes
-        self._map['filter_vanadium'].stateChanged.connect(
-            self._filter_standard_checked)
-        self._map['filter_nicr'].stateChanged.connect(
-            self._filter_standard_checked)
-        self._map['filter_empty'].stateChanged.connect(
-            self._filter_standard_checked)
-        self._map['autoload_new'].stateChanged.connect(
-            self._autoload_new_checked)
-        self._map['auto_select_standard'].stateChanged.connect(
-            self._auto_select_standard_clicked)
+        self._attach_checkbox_signal_slots()
 
         # combo box
         self._ui.combB_directory.currentIndexChanged.connect(
@@ -223,10 +194,10 @@ class DNSFileSelectorView(DNSView):
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), hidden)
 
     def hide_tof(self, hidden=True):
-        self._standard_treeview.setColumnHidden(TreeItem.tof_channels.value, hidden)
-        self._standard_treeview.setColumnHidden(TreeItem.tof_channel_width.value, hidden)
-        self._sample_treeview.setColumnHidden(TreeItem.tof_channels.value, hidden)
-        self._sample_treeview.setColumnHidden(TreeItem.tof_channel_width.value, hidden)
+        self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
+        self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channel_width.value, hidden)
+        self._sample_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
+        self._sample_treeview.setColumnHidden(TreeItemEnum.tof_channel_width.value, hidden)
 
     def is_scan_hidden(self, row):
         return self._treeview.isRowHidden(row, self._treeview.rootIndex())
@@ -262,3 +233,38 @@ class DNSFileSelectorView(DNSView):
     def adjust_treeview_columns_width(self, num_columns):
         for i in range(num_columns):
             self._treeview.resizeColumnToContents(i)
+
+    def _attach_button_signal_slots(self):
+        self._ui.pB_td_read_all.clicked.connect(self._read_all_clicked)
+        self._ui.cB_filter_det_rot.stateChanged.connect(
+            self._filter_scans_checked)
+        self._ui.cB_filter_sample_rot.stateChanged.connect(
+            self._filter_scans_checked)
+        self._ui.cB_filter_scans.stateChanged.connect(
+            self._filter_scans_checked)
+        self._ui.cB_filter_cscans.stateChanged.connect(
+            self._filter_scans_checked)
+        self._ui.cB_filter_free.stateChanged.connect(
+            self._filter_scans_checked)
+        self._ui.lE_filter_free_text.textChanged.connect(
+            self._filter_scans_checked)
+        self._ui.pB_expand_all.clicked.connect(self.expand_all)
+        self._ui.pB_expand_none.clicked.connect(self._un_expand_all)
+        self._ui.pB_check_all.clicked.connect(self._check_all)
+        self._ui.pB_check_none.clicked.connect(self._uncheck_all)
+        self._ui.pB_check_last_scan.clicked.connect(self._check_last)
+        self._ui.pB_check_last_complete_scan.clicked.connect(
+            self._check_last)
+        self._ui.pB_check_selected.clicked.connect(self._check_selected)
+
+    def _attach_checkbox_signal_slots(self):
+        self._map['filter_vanadium'].stateChanged.connect(
+            self._filter_standard_checked)
+        self._map['filter_nicr'].stateChanged.connect(
+            self._filter_standard_checked)
+        self._map['filter_empty'].stateChanged.connect(
+            self._filter_standard_checked)
+        self._map['autoload_new'].stateChanged.connect(
+            self._autoload_new_checked)
+        self._map['auto_select_standard'].stateChanged.connect(
+            self._auto_select_standard_clicked)

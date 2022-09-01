@@ -37,21 +37,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._old_data_set = set()
 
         # connect signals
-        self.view.sig_expanded.connect(self._expanded)
-
-        self.view.sig_read_all.connect(self._read_all)
-        self.view.sig_filters_clicked.connect(self._filter_scans)
-        self.view.sig_standard_filters_clicked.connect(self._filter_standard)
-        self.view.sig_check_all.connect(self._check_all_visible_scans)
-        self.view.sig_uncheck_all.connect(self._uncheck_all_scans)
-        self.view.sig_check_last.connect(self._check_last_scans)
-        self.view.sig_check_selected.connect(self._check_selected_scans)
-        self.view.sig_right_click.connect(self._right_click)
-        self.view.sig_progress_canceled.connect(self._cancel_loading)
-        self.view.sig_autoload_new_clicked.connect(self._autoload_new)
-        self.view.sig_auto_select_standard_clicked.connect(self._auto_select_standard)
-        self.view.sig_dataset_changed.connect(self._dataset_changed)
-        self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)
+        self._attach_signal_slots()
 
     # loading
     def _read_all(self, filtered=False, watcher=False, start=None, end=None):
@@ -95,8 +81,8 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _cancel_loading(self):
         self.model.set_loading_canceled(True)
 
-    def _set_start_end(self, fn_range):
-        start, end = fn_range
+    def _set_start_end(self, file_number_range):
+        start, end = file_number_range
         self.view.set_start_end_file_numbers_from_arguments(start, end)
 
     def _files_changed_by_watcher(self):
@@ -273,3 +259,20 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _expanded(self):
         self.num_columns = self.model.get_active_model_column_count()
         self.view.adjust_treeview_columns_width(self.num_columns)
+
+    def _attach_signal_slots(self):
+        self.view.sig_expanded.connect(self._expanded)
+
+        self.view.sig_read_all.connect(self._read_all)
+        self.view.sig_filters_clicked.connect(self._filter_scans)
+        self.view.sig_standard_filters_clicked.connect(self._filter_standard)
+        self.view.sig_check_all.connect(self._check_all_visible_scans)
+        self.view.sig_uncheck_all.connect(self._uncheck_all_scans)
+        self.view.sig_check_last.connect(self._check_last_scans)
+        self.view.sig_check_selected.connect(self._check_selected_scans)
+        self.view.sig_right_click.connect(self._right_click)
+        self.view.sig_progress_canceled.connect(self._cancel_loading)
+        self.view.sig_autoload_new_clicked.connect(self._autoload_new)
+        self.view.sig_auto_select_standard_clicked.connect(self._auto_select_standard)
+        self.view.sig_dataset_changed.connect(self._dataset_changed)
+        self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)
