@@ -87,12 +87,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                           'Order': placzek_order}
         sample_temp = self.getPropertyValue('SampleTemp')
         if placzek_order == 2 and sample_temp:
-            try:
-                if float(sample_temp):
-                    placzek_kwargs.update({'SampleTemperature': float(sample_temp)})
-            except ValueError:
-                raise RuntimeError("To calculate the second order Placzek correction you must provide "
-                                   "a valid sample temperature.")
+            placzek_kwargs.update({'SampleTemperature': sample_temp})
         self_scattering_correction = CalculatePlaczek(**placzek_kwargs)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,
