@@ -5,36 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, PropertyMode)
+                        WorkspaceGroupProperty, PropertyMode, Sample)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 from mantid.simpleapi import *
 
 
 class SimpleShapeDiscusInelastic(PythonAlgorithm):
-    # basic sample variables
-    _chemical_formula = None
-    _mass_density = None
-    _shape = None
-    _height = None
-
-    # MC variables
-    _single_paths = None
-    _multiple_paths = None
-    _scatterings = None
-    _output_ws = None
-
-    # flat plate variables
-    _width = None
-    _thickness = None
-    _angle = None
-
-    # cylinder variables
-    _radius = None
-
-    # annulus variables
-    _inner_radius = None
-    _outer_radius = None
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -52,16 +29,18 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='Name for results workspaces')
 
-        self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample mass density. Default=1.0')
+        self.declareProperty(name='Container', defaultValue=False,
+                             doc='Enable input of container data')
 
+        self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
+                             doc='Sample mass density. Default=1.0')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              doc='Sample Chemical formula')
 
-        self.declareProperty(name='Height', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Height of the sample environment (cm)')
+        self.declareProperty(name='ContainerMassDensity', defaultValue=6.1,
+                             doc='Container number density. Default=6.1')
+        self.declareProperty(name='ContainerChemicalFormula', defaultValue='V',
+                             doc='Container Chemical formula')
 
         # set up shape options
 
@@ -72,6 +51,12 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
         cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
         annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
+
+        # height is common to all options
+
+        self.declareProperty(name='Height', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Height of the sample environment (cm)')
 
         # flat plate options
 
@@ -90,12 +75,26 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                              doc='Angle of the FlatPlate sample environment with respect to the beam (degrees)')
         self.setPropertySettings('Angle', flat_plate_condition)
 
+        self.declareProperty(name='Front', defaultValue=0.1,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Thickness of the FlatPlate front (cm)')
+        self.setPropertySettings('Front', flat_plate_condition)
+
+        self.declareProperty(name='Back', defaultValue=0.1,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Thickness of the FlatPlate back (cm)')
+        self.setPropertySettings('Back', flat_plate_condition)
+
         # cylinder options
 
         self.declareProperty(name='SampleRadius', defaultValue=0.5,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius (cm). Default=0.5')
         self.setPropertySettings('SampleRadius', cylinder_condition)
+
+        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.6,
+                             doc='Container outer radius. Default=0.6')
+        self.setPropertySettings('ContainerOuterRadius', cylinder_condition)
 
         # annulus options
 
@@ -109,6 +108,26 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                              doc='Sample outer radius (cm). Default=0.6')
         self.setPropertySettings('SampleOuterRadius', annulus_condition)
 
+        self.declareProperty(name='CanInnerRadius', defaultValue=0.45,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container inner radius. Default=0.5')
+        self.setPropertySettings('CanInnerRadius', annulus_condition)
+
+        self.declareProperty(name='CanInnerOuterRadius', defaultValue=0.5,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container inner radius. Default=0.5')
+        self.setPropertySettings('CanInnerOuterRadius', annulus_condition)
+
+        self.declareProperty(name='CanOuterInnerRadius', defaultValue=0.6,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container outer inner radius. Default=0.6')
+        self.setPropertySettings('CanOuterInnerRadius', annulus_condition)
+
+        self.declareProperty(name='CanOuterRadius', defaultValue=0.65,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container outer radius. Default=0.65')
+        self.setPropertySettings('CanOuterRadius', annulus_condition)
+
         # MC options
 
         self.declareProperty(name='NeutronPathsSingle', defaultValue=1000,
@@ -120,37 +139,98 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(name='NumberScatterings', defaultValue=1,
                              validator=IntBoundedValidator(1),
                              doc='Number of scatterings. Default=1')
+        self.declareProperty(name='NormalizeStructureFactors', defaultValue=False,
+                             doc='Enable normalisation of structure factor')
 
     def PyExec(self):
 
         reduced_ws = self.getProperty('ReducedWorkspace').value
         sqw_ws = self.getProperty('SqwWorkspace').value
 
+        reduced_ws.setSample(Sample())
+
         if self._shape == 'FlatPlate':
             width = self.getProperty('Width').value
             thick = self.getProperty('Thickness').value
             angle = self.getProperty('Angle').value
 
-            SetSample(reduced_ws,
-                      Geometry={"Shape": 'FlatPlate', "Height": self._height,"Width": width, "Angle": angle,
-                                "Center": [0.,0.,0.], "Thick": thick},
-                      Material={"ChemicalFormula": self._chemical_formula, "MassDensity": self._mass_density})
+            if self._can:
+                front = self.getProperty('Front').value
+                back = self.getProperty('Back').value
+
+                SetSample(reduced_ws,
+                          Geometry={"Shape": 'FlatPlate', "Height": self._height, "Width": width, "Angle": angle,
+                                    "Center": [0., 0., 0.], "Thick": thick},
+                          Material={"ChemicalFormula": self._sam_chemical_formula,
+                                    "MassDensity": self._sam_mass_density},
+                          ContainerGeometry={"Shape": "FlatPlateHolder", "Height": self._height, "Width": width,
+                                             "Angle": angle, "Thick": thick, "FrontThick": front, "BackThick": back,
+                                             "Center": [0., 0., 0.]},
+                          ContainerMaterial={"ChemicalFormula": self._can_chemical_formula,
+                                             "MassDensity": self._can_mass_density})
+
+            else:
+                SetSample(reduced_ws,
+                          Geometry={"Shape": 'FlatPlate', "Height": self._height, "Width": width, "Angle": angle,
+                                    "Center": [0., 0., 0.], "Thick": thick},
+                          Material={"ChemicalFormula": self._sam_chemical_formula,
+                                    "MassDensity": self._sam_mass_density})
 
         if self._shape == 'Cylinder':
             sample_radius = self.getProperty('SampleRadius').value
 
-            SetSample(reduced_ws,
-                      Geometry={"Shape": "Cylinder", "Height": self._height,"Radius": sample_radius, "Center": [0.,0.,0.]},
-                      Material={"ChemicalFormula": self._chemical_formula, "MassDensity": self._mass_density})
+            if self._can:
+                container_radius = self.getProperty('ContainerOuterRadius').value
+
+                SetSample(reduced_ws,
+                          Geometry={"Shape": "Cylinder", "Height": self._height, "Radius": sample_radius,
+                                    "Center": [0., 0., 0.]},
+                          Material={"ChemicalFormula": self._sam_chemical_formula,
+                                    "MassDensity": self._sam_mass_density},
+                          ContainerGeometry={"Shape": "HollowCylinder", "Height": self._height,
+                                             "InnerRadius": sample_radius, "OuterRadius": container_radius,
+                                             "Center": [0., 0., 0.]},
+                          ContainerMaterial={"ChemicalFormula": self._can_chemical_formula,
+                                             "MassDensity": self._can_mass_density})
+
+            else:
+                SetSample(reduced_ws,
+                          Geometry={"Shape": "Cylinder", "Height": self._height, "Radius": sample_radius,
+                                    "Center": [0., 0., 0.]},
+                          Material={"ChemicalFormula": self._sam_chemical_formula,
+                                    "MassDensity": self._sam_mass_density})
 
         if self._shape == 'Annulus':
             sample_inner = self.getProperty('SampleInnerRadius').value
             sample_outer = self.getProperty('SampleOuterRadius').value
 
-            SetSample(reduced_ws,
-                      Geometry={"Shape": "HollowCylinder", "Height": self._height,
-                                "InnerRadius": sample_inner, "OuterRadius": sample_outer, "Center": [0.,0.,0.]},
-                      Material={"ChemicalFormula": self._chemical_formula, "MassDensity": self._mass_density})
+            if self._can:
+                can_inner = self.getProperty('CanInnerRadius').value
+                can_inner_outer = self.getProperty('CanInnerOuterRadius').value
+                can_outer_inner = self.getProperty('CanOuterInnerRadius').value
+                can_outer = self.getProperty('CanOuterRadius').value
+
+                SetSample(reduced_ws,
+                          Geometry={"Shape": "HollowCylinder", "Height": self._height,
+                                    "InnerRadius": sample_inner, "OuterRadius": sample_outer, "Center": [0., 0., 0.]},
+                          Material={"ChemicalFormula": self._sam_chemical_formula,
+                                    "MassDensity": self._sam_mass_density},
+                          ContainerGeometry={"Shape": "HollowCylinderHolder", "Height": self._height,
+                                             "InnerRadius": can_inner, "InnerOuterRadius": can_inner_outer,
+                                             "OuterInnerRadius": can_outer_inner, "OuterRadius": can_outer,
+                                             "Center": [0., 0., 0.]},
+                          ContainerMaterial={"ChemicalFormula": self._can_chemical_formula,
+                                             "MassDensity": self._can_mass_density})
+
+            else:
+                SetSample(reduced_ws,
+                          Geometry={"Shape": "HollowCylinder", "Height": self._height,
+                                    "InnerRadius": sample_inner, "OuterRadius": sample_outer, "Center": [0., 0., 0.]},
+                          Material={"ChemicalFormula": self._sam_chemical_formula,
+                                    "MassDensity": self._sam_mass_density})
+
+        logger.information('Geometry : %s' % self._shape)
+        #        Plot3DGeometryWorkspace(Workspace=reduced_ws)
 
         results_group_ws = DiscusMultipleScatteringCorrection(InputWorkspace=reduced_ws,
                                                               StructureFactorWorkspace=sqw_ws,
@@ -158,6 +238,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                                                               NeutronPathsSingle=self._single_paths,
                                                               NeutronPathsMultiple=self._multiple_paths,
                                                               NumberScatterings=self._scatterings,
+                                                              NormalizeStructureFactors=self._normalise,
                                                               startProgress=0.,
                                                               endProgress=1.)
 
@@ -165,8 +246,12 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
 
     def _setup(self):
 
-        self._chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-        self._mass_density = self.getProperty('SampleMassDensity').value
+        self._sam_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
+        self._sam_mass_density = self.getProperty('SampleMassDensity').value
+        self._can_chemical_formula = self.getPropertyValue('ContainerChemicalFormula')
+        self._can_mass_density = self.getProperty('ContainerMassDensity').value
+
+        self._can = self.getProperty('Container').value
 
         # shape options
         self._shape = self.getProperty('Shape').value
@@ -189,6 +274,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self._single_paths = self.getProperty('NeutronPathsSingle').value
         self._multiple_paths = self.getProperty('NeutronPathsMultiple').value
         self._scatterings = self.getProperty('NumberScatterings').value
+        self._normalise = self.getProperty('NormalizeStructureFactors').value
 
         # output
         self._output_ws = self.getPropertyValue('OutputWorkspace')
@@ -198,11 +284,17 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self._setup()
         issues = dict()
 
-        if not self._mass_density:
+        if not self._sam_mass_density:
             issues['SampleMassDensity'] = 'Please enter a non-zero number for sample mass density'
 
-        if not self._chemical_formula:
+        if not self._sam_chemical_formula:
             issues['SampleChemicalFormula'] = 'Please enter a chemical formula.'
+
+        if not self._can_mass_density:
+            issues['ContainerMassDensity'] = 'Please enter a non-zero number for sample mass density'
+
+        if not self._can_chemical_formula:
+            issues['ContainerChemicalFormula'] = 'Please enter a chemical formula.'
 
         if not self._height:
             issues['Height'] = 'Please enter a non-zero number for height'
