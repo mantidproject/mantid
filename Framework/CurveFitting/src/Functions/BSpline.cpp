@@ -202,10 +202,12 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
   bool isUniform = attName == "Uniform" && att.asBool();
   storeAttributeValue(attName, att);
 
-  if (attName == "BreakPoints" || isUniform || attName == "StartX" || attName == "EndX") {
-    if (attName == "BreakPoints") {
-      storeAttributeValue("NBreak", Attribute(static_cast<int>(att.asVector().size())));
-    }
+  if (attName == "BreakPoints") {
+    storeAttributeValue("NBreak", Attribute(static_cast<int>(att.asVector().size())));
+    resetParameters();
+    resetKnots();
+    resetValidators();
+  } else if (isUniform || attName == "StartX" || attName == "EndX") {
     resetKnots();
     resetValidators();
   } else if (attName == "NBreak" || attName == "Order") {
