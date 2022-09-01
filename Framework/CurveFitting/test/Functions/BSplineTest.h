@@ -49,15 +49,15 @@ public:
 
   void test_nonpositive_order() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", -3), const IFunction::ValidationException &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("Order", 0), const IFunction::ValidationException &);
   }
 
   void test_nbreak_too_small() {
     BSpline bsp;
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), const std::invalid_argument &);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3), const std::invalid_argument &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 1), IFunction::ValidationException &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", 0), IFunction::ValidationException &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("NBreak", -3), IFunction::ValidationException &);
   }
 
   void test_set_uniform_break_points() {
@@ -84,6 +84,8 @@ public:
   void test_set_nonuniform_break_points() {
     BSpline bsp;
     bsp.setAttributeValue("Uniform", false);
+    bsp.setAttribute("EndX", IFunction::Attribute(30.0));
+
     std::vector<double> inputBreaks(8);
     inputBreaks[0] = 3.0;
     inputBreaks[1] = 4.0;
@@ -95,8 +97,6 @@ public:
     inputBreaks[7] = 30.0;
     bsp.setAttributeValue("BreakPoints", inputBreaks);
 
-    TS_ASSERT_EQUALS(bsp.getAttribute("StartX").asDouble(), 3.0);
-    TS_ASSERT_EQUALS(bsp.getAttribute("EndX").asDouble(), 30.0);
     TS_ASSERT_EQUALS(bsp.getAttribute("NBreak").asInt(), 8);
 
     std::vector<double> breaks = bsp.getAttribute("BreakPoints").asVector();
@@ -112,6 +112,8 @@ public:
   void test_try_set_nonuniform_break_points_with_wrong_order() {
     BSpline bsp;
     bsp.setAttributeValue("Uniform", false);
+    bsp.setAttribute("EndX", IFunction::Attribute(30.0));
+
     std::vector<double> inputBreaks(8);
     inputBreaks[0] = 3.0;
     inputBreaks[1] = 4.0;
@@ -133,36 +135,22 @@ public:
     double startx = 10.0;
     double endx = -10.0;
 
-    bsp.setAttributeValue("StartX", startx);
-    bsp.setAttributeValue("EndX", endx);
+    // fails Endx < Startx (0.0)
+    TS_ASSERT_THROWS(bsp.setAttributeValue("EndX", endx), const IFunction::ValidationException &);
 
-    TS_ASSERT_EQUALS(bsp.getAttribute("StartX").asDouble(), startx);
-    TS_ASSERT_EQUALS(bsp.getAttribute("EndX").asDouble(), endx);
+    bsp.setAttribute("EndX", IFunction::Attribute(endx)); // set without validation
+    // fails Startx > Endx
+    TS_ASSERT_THROWS(bsp.setAttributeValue("StartX", startx), const IFunction::ValidationException &);
 
-    FunctionDomain1DVector x(startx, endx, 100);
-    FunctionValues y(x);
-
-    TS_ASSERT_THROWS(bsp.function(x, y), const std::invalid_argument &);
-
-    startx = 10.0;
-    endx = startx;
-
-    bsp.setAttributeValue("StartX", startx);
-    bsp.setAttributeValue("EndX", endx);
-
-    TS_ASSERT_EQUALS(bsp.getAttribute("StartX").asDouble(), startx);
-    TS_ASSERT_EQUALS(bsp.getAttribute("EndX").asDouble(), endx);
-
-    FunctionDomain1DVector x1(startx, endx, 100);
-    FunctionValues y1(x1);
-
-    TS_ASSERT_THROWS(bsp.function(x1, y1), const std::invalid_argument &);
+    // fails Startx = Endx
+    bsp.setAttributeValue("EndX", startx);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("StartX", startx), const IFunction::ValidationException &);
   }
 
   void test_create_with_function_factory_uniform() {
     auto bsp = FunctionFactory::Instance().createInitialized(
         "name=BSpline,Uniform=true,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
-        "BreakPoints=(0.005,0.5,6.0)");
+        "BreakPoints=(0.05,0.5,6.0)");
     TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.05);
     TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 66.6);
     TS_ASSERT_EQUALS(bsp->getAttribute("Uniform").asBool(), true);
@@ -177,14 +165,14 @@ public:
   void test_create_with_function_factory_nonuniform() {
     auto bsp = FunctionFactory::Instance().createInitialized(
         "name=BSpline,Uniform=false,Order=3,NBreak=3,StartX=0.05,EndX=66.6,"
-        "BreakPoints=(0.005,0.5,6.0)");
-    TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.005);
-    TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 6.0);
+        "BreakPoints=(0.05,0.5,6.0)");
+    TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.05);
+    TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 66.6);
     TS_ASSERT_EQUALS(bsp->getAttribute("Uniform").asBool(), false);
     TS_ASSERT_EQUALS(bsp->getAttribute("NBreak").asInt(), 3);
     std::vector<double> breaks = bsp->getAttribute("BreakPoints").asVector();
     TS_ASSERT_EQUALS(breaks.size(), 3);
-    TS_ASSERT_EQUALS(breaks[0], 0.005);
+    TS_ASSERT_EQUALS(breaks[0], 0.05);
     TS_ASSERT_EQUALS(breaks[1], 0.5);
     TS_ASSERT_EQUALS(breaks[2], 6.0);
   }
