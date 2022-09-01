@@ -1063,7 +1063,7 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     comp = compQueue.front();
     compQueue.pop();
 
-    if (!validateIsGridDetector(comp))
+    if (!validateComponentProperties(comp))
       continue;
 
     if (dynamic_cast<const RectangularDetector *>(comp.get())) {
@@ -1097,7 +1097,7 @@ std::vector<RectangularDetector_const_sptr> Instrument::findRectDetectors() cons
     comp = compQueue.front();
     compQueue.pop();
 
-    if (!validateIsGridDetector(comp))
+    if (!validateComponentProperties(comp))
       continue;
 
     if (auto const detector = std::dynamic_pointer_cast<const RectangularDetector>(comp)) {
@@ -1110,7 +1110,7 @@ std::vector<RectangularDetector_const_sptr> Instrument::findRectDetectors() cons
   return detectors;
 }
 
-bool Instrument::validateIsGridDetector(IComponent_const_sptr component) const {
+bool Instrument::validateComponentProperties(IComponent_const_sptr component) const {
   // Skip source, if has one
   if (m_sourceCache && m_sourceCache->getComponentID() == component->getComponentID())
     return false;
