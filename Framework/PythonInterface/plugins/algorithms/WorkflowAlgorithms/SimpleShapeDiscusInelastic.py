@@ -22,7 +22,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                              doc='Reduced Workspace')
         self.declareProperty(MatrixWorkspaceProperty('SqwWorkspace', '',
                                                      direction=Direction.Input),
-                             doc='S(Q,w) Workspace')
+                             doc='S(Q,w) Workspace for the sample')
         self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace',
                                                     defaultValue='MuscatResults',
                                                     direction=Direction.Output,
@@ -103,7 +103,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.setPropertySettings('SampleRadius', cylinder_condition)
 
         self.declareProperty(name='CanRadius', defaultValue=0.6,
-                             doc='Container outer radius. Default=0.6')
+                             doc='Container outer radius (cm). Default=0.6')
         self.setPropertySettings('CanRadius', container_cylinder_condition)
 
         # annulus options
@@ -120,12 +120,12 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
 
         self.declareProperty(name='CanInnerRadius', defaultValue=0.45,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Container inner radius. Default=0.5')
+                             doc='Container inner radius (cm). Default=0.5')
         self.setPropertySettings('CanInnerRadius', container_annulus_condition)
 
         self.declareProperty(name='CanOuterRadius', defaultValue=0.65,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Container outer radius. Default=0.65')
+                             doc='Container outer radius (cm). Default=0.65')
         self.setPropertySettings('CanOuterRadius', container_annulus_condition)
 
         # MC options
