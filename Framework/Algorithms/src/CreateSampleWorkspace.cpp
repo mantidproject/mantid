@@ -533,22 +533,15 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "monitor-shape");
 
   for (int monitorNumber = monitorsStart; monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
-    // Make a new bank
-    std::ostringstream monitorName;
-    monitorName << "monitor" << monitorNumber - monitorsStart + 1;
+    std::string monitorName = "monitor" + std::to_string(monitorNumber - monitorsStart + 1);
 
-    RectangularDetector *bank = new RectangularDetector(monitorName.str());
-    bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing, monitorNumber, true, 1);
+    Detector *detector = new Detector(monitorName, monitorNumber, monitorShape, testInst.get());
+    // Mark it as a monitor (add to the instrument cache)
+    testInst->markAsMonitor(detector);
 
-    std::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
-    if (detector) {
-      // Mark it as a monitor (add to the instrument cache)
-      testInst->markAsMonitor(detector.get());
-    }
-
-    testInst->add(bank);
+    testInst->add(detector);
     // Set the bank along the z-axis of the instrument, between the detectors.
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
+    detector->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component
