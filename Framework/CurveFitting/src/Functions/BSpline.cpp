@@ -215,7 +215,7 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
  * @return Names of all declared attributes in correct order.
  */
 std::vector<std::string> BSpline::getAttributeNames() const {
-  return {"Uniform", "Order", "NBreak", "StartX", "EndX", "BreakPoints"};
+  return {"Uniform", "Order", "NBreak", "EndX", "StartX", "BreakPoints"};
 }
 
 /**
