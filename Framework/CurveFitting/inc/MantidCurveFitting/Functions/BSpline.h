@@ -75,7 +75,6 @@ public:
   /// Member variable for spline
   Spline1D m_spline;
   std::vector<double> m_knots;
-  std::unordered_map<std::string, Kernel::IValidator_sptr> m_validators;
 };
 
 } // namespace Mantid::CurveFitting::Functions

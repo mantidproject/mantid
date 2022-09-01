@@ -30,26 +30,23 @@ BSpline::BSpline() {
 
   auto orderValidator = BoundedValidator<int>();
   orderValidator.setLower(1);
-  m_validators["Order"] = std::make_shared<BoundedValidator<int>>(orderValidator);
   declareAttribute("Order", Attribute(3), orderValidator);
 
   auto NBreakValidator = BoundedValidator<int>();
   NBreakValidator.setLower(2);
-  m_validators["NBreak"] = std::make_shared<BoundedValidator<int>>(NBreakValidator);
   declareAttribute("NBreak", Attribute(static_cast<int>(nbreak)), NBreakValidator);
 
   auto startXValidator = BoundedValidator<double>();
-  startXValidator.setUpperExclusive(1.0);
-  m_validators["StartX"] = std::make_shared<BoundedValidator<double>>(startXValidator);
+  startXValidator.setUpper(1.0);
+  startXValidator.setUpperExclusive(true);
   declareAttribute("StartX", Attribute(0.0), startXValidator);
 
   auto endXValidator = BoundedValidator<double>();
-  endXValidator.setLowerExclusive(0.0);
-  m_validators["EndX"] = std::make_shared<BoundedValidator<double>>(endXValidator);
+  endXValidator.setLower(0.0);
+  endXValidator.setLowerExclusive(true);
   declareAttribute("EndX", Attribute(1.0), endXValidator);
 
   auto breakPointsValidator = ArrayBoundedValidator<double>(0.0, 1.0);
-  m_validators["BreakPoints"] = std::make_shared<ArrayBoundedValidator<double>>(breakPointsValidator);
   declareAttribute("BreakPoints", Attribute(std::vector<double>(nbreak)), breakPointsValidator);
 
   declareAttribute("Uniform", Attribute(true));
@@ -60,15 +57,19 @@ BSpline::BSpline() {
 }
 
 void BSpline::resetValidators() {
-  auto startXValidator = dynamic_cast<BoundedValidator<double> *>(m_validators["StartX"].get());
-  startXValidator->setUpperExclusive(getAttribute("EndX").asDouble());
+  auto attStartX = getAttribute("StartX");
+  auto attEndX = getAttribute("EndX");
 
-  auto endXValidator = dynamic_cast<BoundedValidator<double> *>(m_validators["EndX"].get());
-  endXValidator->setLowerExclusive(getAttribute("StartX").asDouble());
+  auto startXValidator = dynamic_cast<BoundedValidator<double> *>(attStartX.getValidator().get());
+  startXValidator->setUpper(attEndX.asDouble());
 
-  auto breakPointsValidator = dynamic_cast<ArrayBoundedValidator<double> *>(m_validators["BreakPoints"].get());
-  breakPointsValidator->setLower(getAttribute("StartX").asDouble());
-  breakPointsValidator->setUpper(getAttribute("EndX").asDouble());
+  auto endXValidator = dynamic_cast<BoundedValidator<double> *>(attEndX.getValidator().get());
+  endXValidator->setLower(attStartX.asDouble());
+
+  auto breakPointsValidator =
+      dynamic_cast<ArrayBoundedValidator<double> *>(getAttribute("BreakPoints").getValidator().get());
+  breakPointsValidator->setLower(attStartX.asDouble());
+  breakPointsValidator->setUpper(attEndX.asDouble());
 }
 
 /** Execute the function
@@ -207,7 +208,6 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
   } else if (attName == "NBreak" || attName == "Order") {
     resetParameters();
     resetKnots();
-    resetValidators();
   }
 }
 
