@@ -282,13 +282,19 @@ def calc_snr(signal, error_sq):
     return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
 
-def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8):
+def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
     if ihi == ilo:
         ihi += 1
+    # increase window to RHS
+    nbg_rhs = nbg if signal.size - ihi > nbg + 1 else 0  # don't use bg if not enough points on rhs for one loop below
     nbad = 0
-    prev_IoverSig = calc_snr(signal[ilo:ihi], error_sq[ilo:ihi])
-    for istep_hi in range(1, signal.size - ihi):
-        this_IoverSig = calc_snr(signal[ilo:ihi + istep_hi], error_sq[ilo:ihi + istep_hi])
+    bg = max(signal[ihi:ihi + nbg_rhs].mean(), 0) if nbg_rhs > 0 else 0  # default to 0 if not enough elements to rhs
+    prev_IoverSig = calc_snr(signal[ilo:ihi] - bg, error_sq[ilo:ihi])
+    istep_hi = 0
+    for istep_hi in range(1, signal.size - ihi - nbg_rhs):
+        # set bg to be minimum bg observed in nbg window (good for double peaks) but force min value of 0 (post bg sub)
+        bg = max(min(signal[ihi + istep_hi:ihi + istep_hi + nbg_rhs].mean(), bg), 0) if nbg_rhs > 0 else 0
+        this_IoverSig = calc_snr(signal[ilo:ihi + istep_hi] - bg, error_sq[ilo:ihi + istep_hi])
         if this_IoverSig > prev_IoverSig:
             prev_IoverSig = this_IoverSig
             nbad = 0
@@ -297,10 +303,15 @@ def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8):
             if nbad > ntol:
                 break
     istep_hi -= nbad
+    # increase window to LHS
+    nbg_lhs = nbg if ilo > nbg else 0
     nbad = 0
-    prev_IoverSig = calc_snr(signal[ilo:ihi], error_sq[ilo:ihi])
-    for istep_lo in range(1, ilo):
-        this_IoverSig = calc_snr(signal[ilo - istep_lo:ihi], error_sq[ilo - istep_lo:ihi])
+    bg = signal[ilo - nbg_lhs:ilo].mean() if nbg_lhs > 0 else 0
+    prev_IoverSig = calc_snr(signal[ilo:ihi] - bg, error_sq[ilo:ihi])
+    istep_lo = 0
+    for istep_lo in range(1, ilo - nbg_lhs):
+        bg = max(min(signal[ilo - istep_lo - nbg_lhs:ilo - istep_lo].mean(), bg), 0) if nbg_lhs > 0 else 0
+        this_IoverSig = calc_snr(signal[ilo - istep_lo:ihi] - bg, error_sq[ilo - istep_lo:ihi])
         if this_IoverSig > prev_IoverSig:
             prev_IoverSig = this_IoverSig
             nbad = 0
