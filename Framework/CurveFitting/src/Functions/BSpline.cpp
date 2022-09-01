@@ -266,8 +266,6 @@ void BSpline::resetKnots() {
       resetParameters();
     }
     resetKnotVector(breakPoints);
-    storeAttributeValue("StartX", Attribute(breakPoints.front()));
-    storeAttributeValue("EndX", Attribute(breakPoints.back()));
   }
   initialiseSpline(breakPoints);
 }

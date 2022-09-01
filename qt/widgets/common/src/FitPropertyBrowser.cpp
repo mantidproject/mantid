@@ -1377,9 +1377,13 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
   }
 }
 
-void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h) {
+void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h, const bool vectorAttribute) {
   try {
-    h->setAttribute(prop);
+    if (vectorAttribute) {
+      h->setVectorAttribute(prop);
+    } else {
+      h->setAttribute(prop);
+    }
   } catch (IFunction::ValidationException &ve) {
     std::stringstream err_str;
     err_str << prop->propertyName().toStdString() << " - " << ve.what();
@@ -1992,7 +1996,7 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop) {
   PropertyHandler *h = getHandler()->findHandler(prop);
   if (!h)
     return;
-  h->setVectorAttribute(prop);
+  enactAttributeChange(prop, h, true);
 }
 
 /**
@@ -2003,7 +2007,7 @@ void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
   PropertyHandler *h = getHandler()->findHandler(prop);
   if (!h)
     return;
-  h->setVectorAttribute(prop);
+  enactAttributeChange(prop, h, true);
 }
 
 /**
