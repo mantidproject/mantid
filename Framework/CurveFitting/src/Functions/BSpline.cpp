@@ -203,6 +203,9 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
   storeAttributeValue(attName, att);
 
   if (attName == "BreakPoints" || isUniform || attName == "StartX" || attName == "EndX") {
+    if (attName == "BreakPoints") {
+      storeAttributeValue("NBreak", Attribute(static_cast<int>(att.asVector().size())));
+    }
     resetKnots();
     resetValidators();
   } else if (attName == "NBreak" || attName == "Order") {
@@ -254,7 +257,7 @@ void BSpline::resetKnots() {
     double prev = breakPoints[0];
     for (size_t i = 1; i < breakPoints.size(); ++i) {
       double next = breakPoints[i];
-      if (next <= prev) {
+      if (next < prev) {
         throw std::invalid_argument("BreakPoints must be in ascending order.");
       }
       prev = next;
