@@ -36,8 +36,12 @@ void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
 
 void updateTransmissionWorkspaceProperties(AlgorithmRuntimeProps &properties,
                                            TransmissionRunPair const &transmissionRuns) {
-  AlgorithmProperties::update("FirstTransmissionRunList", transmissionRuns.firstRunList(), properties);
-  AlgorithmProperties::update("SecondTransmissionRunList", transmissionRuns.secondRunList(), properties);
+  // Transmission runs come as a pair: if the first is set, use both; else use neither
+  if (transmissionRuns.firstRunList().empty()) {
+    return;
+  }
+  properties.setPropertyValue("FirstTransmissionRunList", transmissionRuns.firstRunList());
+  properties.setPropertyValue("SecondTransmissionRunList", transmissionRuns.secondRunList());
 }
 
 void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties, RangeInQ const &rangeInQ) {
