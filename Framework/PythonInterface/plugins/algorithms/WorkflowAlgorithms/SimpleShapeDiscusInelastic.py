@@ -102,9 +102,9 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                              doc='Sample radius (cm). Default=0.5')
         self.setPropertySettings('SampleRadius', cylinder_condition)
 
-        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.6,
+        self.declareProperty(name='CanRadius', defaultValue=0.6,
                              doc='Container outer radius. Default=0.6')
-        self.setPropertySettings('ContainerOuterRadius', container_cylinder_condition)
+        self.setPropertySettings('CanRadius', container_cylinder_condition)
 
         # annulus options
 
@@ -122,16 +122,6 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Container inner radius. Default=0.5')
         self.setPropertySettings('CanInnerRadius', container_annulus_condition)
-
-        self.declareProperty(name='CanInnerOuterRadius', defaultValue=0.5,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container inner radius. Default=0.5')
-        self.setPropertySettings('CanInnerOuterRadius', container_annulus_condition)
-
-        self.declareProperty(name='CanOuterInnerRadius', defaultValue=0.6,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Container outer inner radius. Default=0.6')
-        self.setPropertySettings('CanOuterInnerRadius', container_annulus_condition)
 
         self.declareProperty(name='CanOuterRadius', defaultValue=0.65,
                              validator=FloatBoundedValidator(0.0),
@@ -190,7 +180,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
             sample_radius = self.getProperty('SampleRadius').value
 
             if self._can:
-                container_radius = self.getProperty('ContainerOuterRadius').value
+                container_radius = self.getProperty('CanRadius').value
 
                 SetSample(reduced_ws,
                           Geometry={"Shape": "Cylinder", "Height": self._height, "Radius": sample_radius,
@@ -216,8 +206,8 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
 
             if self._can:
                 can_inner = self.getProperty('CanInnerRadius').value
-                can_inner_outer = self.getProperty('CanInnerOuterRadius').value
-                can_outer_inner = self.getProperty('CanOuterInnerRadius').value
+                can_inner_outer = self.getProperty('SampleInnerRadius').value
+                can_outer_inner = self.getProperty('SampleOuterRadius').value
                 can_outer = self.getProperty('CanOuterRadius').value
 
                 SetSample(reduced_ws,
@@ -275,10 +265,13 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
 
         # cylinder
         self._radius = self.getProperty('SampleRadius').value
+        self._can_radius = self.getProperty('CanRadius').value
 
         # annulus
         self._inner_radius = self.getProperty('SampleInnerRadius').value
         self._outer_radius = self.getProperty('SampleOuterRadius').value
+        self._can_inner_radius = self.getProperty('CanInnerRadius').value
+        self._can_outer_radius = self.getProperty('CanOuterRadius').value
 
         # MC parameters
         self._single_paths = self.getProperty('NeutronPathsSingle').value
@@ -289,7 +282,7 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         # output
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
-    def validateInputs(self):
+    def validateInputs(self): # noqa: C901
 
         self._setup()
         issues = dict()
@@ -328,6 +321,16 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
             # Geometry validation: outer radius > inner radius
             if not self._outer_radius > self._inner_radius:
                 issues['OuterRadius'] = 'Must be greater than InnerRadius'
+
+        if self._can:
+            if self._shape == 'Cylinder':
+                if self._container_outer_radius <= self._radius:
+                    issues['CanRadius'] = 'Must be greater than SampleRadius'
+            if self._shape == 'Annulus':
+                if self._can_inner_radius >= self._inner_radius:
+                    issues['CanInnerRadius'] = 'Must be less than SampleInnerRadius'
+                if self._can_outer_radius <= self._outer_radius:
+                    issues['CanOuterRadius'] = 'Must be greater than SampleOuterRadius'
 
         if not self._single_paths:
             issues['NeutronPathsSingle'] = 'Please enter a non-zero number for neutron paths single'
