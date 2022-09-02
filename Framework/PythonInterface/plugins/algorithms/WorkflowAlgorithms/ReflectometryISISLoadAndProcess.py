@@ -237,7 +237,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 raise NotImplementedError(f"Not implemented for more than one rectangular detector, "
                                           f"{num_rect_detectors} were found.")
 
-        # We don't sum banks for a linear detector
+            # We don't sum banks for a linear detector
             if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
                 continue
 
