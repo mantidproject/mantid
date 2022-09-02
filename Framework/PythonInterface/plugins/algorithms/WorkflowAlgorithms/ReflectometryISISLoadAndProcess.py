@@ -18,6 +18,7 @@ from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
 
 class Prop:
     RUNS = 'InputRunList'
+    ROI_DETECTOR_IDS = 'ROIDetectorIDs'
     FIRST_TRANS_RUNS = 'FirstTransmissionRunList'
     SECOND_TRANS_RUNS = 'SecondTransmissionRunList'
     SLICE = 'SliceWorkspace'
@@ -68,6 +69,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         self._reduction_properties = [] # cached list of properties copied from child alg
         self._declareRunProperties()
+        self._declareSumBanksProperties()
         self._declareSlicingProperties()
         self._declareReductionProperties()
         self._declareTransmissionProperties()
@@ -79,13 +81,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Convert run numbers to real workspaces
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
-        inputWorkspaces = self._sumBanks(inputWorkspaces)
+        roiDetectorIDs = self.getProperty(Prop.ROI_DETECTOR_IDS).value
+        inputWorkspaces = self._sumBanks(inputWorkspaces, roiDetectorIDs)
         firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
         firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
-        firstTransWorkspaces = self._sumBanks(firstTransWorkspaces)
+        firstTransWorkspaces = self._sumBanks(firstTransWorkspaces, roiDetectorIDs)
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
-        secondTransWorkspaces = self._sumBanks(secondTransWorkspaces)
+        secondTransWorkspaces = self._sumBanks(secondTransWorkspaces, roiDetectorIDs)
         # Combine multiple input runs, if required
         inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
@@ -140,6 +143,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.RELOAD, True,
                              doc='If true, reload input workspaces if they are of the incorrect type')
         self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the TOF workspaces')
+
+    def _declareSumBanksProperties(self):
+        """Copy properties from the child sum banks algorithm"""
+        properties = ['ROIDetectorIDs']
+        self.copyProperties('ReflectometryISISSumBanks', properties)
 
     def _declareSlicingProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
@@ -220,7 +228,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             workspaces.append(ws)
         return workspaces
 
-    def _sumBanks(self, workspaces):
+    def _sumBanks(self, workspaces, roiDetectorIDs):
         for workspace_name in workspaces:
             workspace = AnalysisDataService.retrieve(workspace_name)
             is_group = isinstance(workspace, WorkspaceGroup)
@@ -244,7 +252,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if is_group:
                 raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
 
-            args = {"InputWorkspace": workspace, "OutputWorkspace": workspace_name}
+            args = {"InputWorkspace": workspace, "ROIDetectorIDs": roiDetectorIDs, "OutputWorkspace": workspace_name}
             alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
             alg.execute()
         return workspaces
