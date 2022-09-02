@@ -170,12 +170,12 @@ class IntegratePeaksSkewTest(unittest.TestCase):
 
     def test_integration_with_non_square_window_nrows_ncols(self):
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 NRows=2, NCols=1, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
+                                 DRows=2, DCols=1, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
                                  UpdatePeakPosition=False, OutputWorkspace='out8')
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 10.84209, delta=1e-4)
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 NRows=1, NCols=2, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
+                                 DRows=1, DCols=2, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
                                  NPixMin=1, UpdatePeakPosition=False, OutputWorkspace='out8')
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 5.46125, delta=1e-4)  # only one pixel in peak
 

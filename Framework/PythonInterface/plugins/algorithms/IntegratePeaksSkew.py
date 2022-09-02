@@ -92,7 +92,8 @@ class InstrumentArrayConverter:
         return next_col_prefix, next_col_str, isLHS, isRHS
 
     def _get_detid_array_comp_assembly(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge=1):
-        ndet_per_spec = len(self.ws.getSpectrum(self.ws.getIndicesFromDetectorIDs([detid])[0]).getDetectorIDs())
+        ispec = self.ws.getIndicesFromDetectorIDs([detid])
+        ndet_per_spec = len(self.ws.getSpectrum(ispec[0]).getDetectorIDs())
         nrows = bank[0].nelements()
         ncols = bank.nelements()
 
@@ -282,7 +283,7 @@ def calc_snr(signal, error_sq):
     return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
 
-def optimise_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
+def optimise_tof_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
     if ihi == ilo:
         ihi += 1
     # increase window to RHS
@@ -336,7 +337,7 @@ def find_peak_limits(signal, error_sq, ilo, ihi):
         ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
     istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ilo
     # expand window to maximise I/sig (good for when peak not entirely in window)
-    return optimise_window_intens_over_sig(signal, error_sq, istart, iend + 1)  #
+    return optimise_tof_window_intens_over_sig(signal, error_sq, istart, iend + 1)  #
 
 
 def focus_data_in_detector_mask(signal, error, peak_mask, non_bg_mask, ixpk):
@@ -436,7 +437,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
     def summary(self):
         return "Integrates single-crystal peaks in a MatrixWorkspace by identifying the peak pixels in a window on " \
                "the detector by minimising the skew of the points in the background. The TOF extent of the peak is " \
-               "determined by maximising I/sig for the peak pixels identified using the skew method. "
+               "determined by maximising I/:math:`\\sigma` for the peak pixels identified using the skew method. "
 
     def PyInit(self):
         # Input
@@ -449,12 +450,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="A PeaksWorkspace containing the peaks to integrate.")
 
         #   window parameters
-        self.declareProperty(name="NRows", defaultValue=8, direction=Direction.Input,
+        self.declareProperty(name="DRows", defaultValue=8, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
-                             doc="Half number of rows in the window on detector.")
-        self.declareProperty(name="NCols", defaultValue=8, direction=Direction.Input,
+                             doc="Determines the size of the window around a peak on the detector. "
+                                 "The number of rows in the window are NRows = 2*DRows + 1.")
+        self.declareProperty(name="DCols", defaultValue=8, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
-                             doc="Half number of columns in the window on detector.")
+                             doc="Determines the size of the window around a peak on the detector. "
+                                 "The number of columns in the window are NCols = 2*DCols + 1.")
         self.declareProperty(name='FractionalTOFWindow', defaultValue=0.0, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0.0, upper=1.0),
                              doc="dTOF/TOF window best chosen from forward-scattering bank with worst resolution.")
@@ -476,8 +479,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "parameters). A new optimal TOF window is then found using the new peak mask."
                                  "Note this can be helpful if resolution parameters or peak centres are not very "
                                  "accurate.")
-        self.setPropertyGroup("NRows", "Integration Window Parameters")
-        self.setPropertyGroup("NCols", "Integration Window Parameters")
+        self.setPropertyGroup("DRows", "Integration Window Parameters")
+        self.setPropertyGroup("DCols", "Integration Window Parameters")
         self.setPropertyGroup('FractionalTOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
@@ -546,8 +549,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
         # check peak size limits are consistent with window size
-        drows = self.getProperty("NRows").value
-        dcols = self.getProperty("NCols").value
+        drows = self.getProperty("DRows").value
+        dcols = self.getProperty("DCols").value
         nrow_max = self.getProperty("NRowMax").value
         ncol_max = self.getProperty("NColMax").value
         if nrow_max > 2 * drows + 1:
@@ -574,8 +577,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         frac_tof_window = self.getProperty('FractionalTOFWindow').value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = self.getProperty("ThetaWidth").value
-        drows = self.getProperty("NRows").value
-        dcols = self.getProperty("NCols").value
+        drows = self.getProperty("DRows").value
+        dcols = self.getProperty("DCols").value
         optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
