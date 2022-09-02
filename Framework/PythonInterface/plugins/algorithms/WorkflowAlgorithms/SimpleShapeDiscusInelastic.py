@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, PropertyMode, Sample)
-from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, LogicOperator,
+from mantid.kernel import (VisibleWhenProperty, Property, PropertyCriterion, LogicOperator,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
 from mantid.simpleapi import *
 
@@ -32,14 +32,14 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(name='Container', defaultValue=False,
                              doc='Enable input of container data')
 
-        self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
-                             doc='Sample mass density. Default=1.0')
+        self.declareProperty(name='SampleMassDensity', defaultValue=Property.EMPTY_DBL,
+                             validator=FloatBoundedValidator(0.0), doc='Sample mass density')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              doc='Sample Chemical formula')
 
         container_condition = VisibleWhenProperty('Container', PropertyCriterion.IsEqualTo, '1')
-        self.declareProperty(name='ContainerMassDensity', defaultValue=6.1,
-                             doc='Container number density. Default=6.1')
+        self.declareProperty(name='ContainerMassDensity', defaultValue=Property.EMPTY_DBL,
+                             validator=FloatBoundedValidator(0.0), doc='Container number density')
         self.setPropertySettings('ContainerMassDensity', container_condition)
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='V',
                              doc='Container Chemical formula')
