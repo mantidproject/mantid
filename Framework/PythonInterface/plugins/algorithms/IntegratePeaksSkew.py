@@ -620,6 +620,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
                                    f"another programme and that the user has permission to write to that directory.")
         irows_delete = []
+        thetas = []  # for fitting optimal TOF resolution parameters
+        frac_tof_widths = []  # for fitting optimal TOF resolution parameters
         for ipk, pk in enumerate(pk_ws):
             # copy pk to output peak workspace
             pk_ws_int.addPeak(pk)
@@ -706,6 +708,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     intens = L * np.sum(ypk[ixlo_opt:ixhi_opt])
                     sig = L * np.sqrt(np.sum(epk_sq[ixlo_opt:ixhi_opt]))
                     integrated = True
+                    # append theta and frac width for estimating TOF resolution parameters
+                    thetas.append(th)
+                    frac_tof_widths.append((xpk[ixhi_opt] - xpk[ixlo_opt])/pk.getTOF())
             # update peak with new intens and sig
             pk.setIntensity(intens)
             pk.setSigmaIntensity(sig)
@@ -727,6 +732,13 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         if plot_filename:
             plt.close(fig)
             pdf.close()
+        # estimate TOF resolution params
+        if len(thetas) > 1:
+            # linear fit to (dT/T)^2 vs. cot(theta)^2
+            m, c = np.polyfit(1/(np.tan(thetas)**2), np.array(frac_tof_widths)**2, deg=1)
+            logger.notice(f"Estimated resolution parameters:"
+                          f"\nBackscatteringTOFResolution = {np.sqrt(c)}"
+                          f"\nThetaWidth = {np.sqrt(m)}")
         # assign output
         self.setProperty("OutputWorkspace", pk_ws_int)
 
