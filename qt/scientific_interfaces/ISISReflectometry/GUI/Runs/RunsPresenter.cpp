@@ -495,11 +495,26 @@ std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWork
 }
 
 IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
+  auto instrument = m_view->getSearchInstrument();
+
+#ifndef NDEBUG
+  // Debug version to allow testing with a fake instrument
+  bool useFakeInstrument = false;
+  auto &config = Mantid::Kernel::ConfigService::Instance();
+  auto facility = config.getString("default.facility");
+  if (facility == "TEST_LIVE") {
+    // If the developer has set the facility to TEST_LIVE, use the default instrument
+    // Note that you must set the facility _after_ opening the interface, and also
+    // run the FakeISISHistoDAE or similar for it to work
+    useFakeInstrument = true;
+    instrument = config.getString("default.instrument");
+  }
+#endif
+
   auto alg = AlgorithmManager::Instance().create("StartLiveData");
   alg->initialize();
   alg->setChild(true);
   alg->setLogging(false);
-  auto const instrument = m_view->getSearchInstrument();
   auto const inputWorkspace = "TOF_live";
   auto const updateInterval = m_view->getLiveDataUpdateInterval();
   alg->setProperty("Instrument", instrument);
@@ -507,8 +522,15 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", static_cast<double>(updateInterval));
+#ifndef NDEBUG
+  if (!useFakeInstrument) {
+    alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
+    alg->setProperty("PostProcessingProperties", liveDataReductionOptions(inputWorkspace, instrument));
+  }
+#else
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties", liveDataReductionOptions(inputWorkspace, instrument));
+#endif
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {
