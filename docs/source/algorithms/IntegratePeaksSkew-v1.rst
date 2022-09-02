@@ -27,13 +27,13 @@ for step-scans with monochromatic x-rays [3]_) starting from a seed of bins iden
 The user can then optionally use the optimal TOF extent to repeat the procedure to find the detectors contributing to
 the peak.
 
-Technically this algorithm does not use the a seed-skew algorithm that grows a seed, rather non-background points found
-by minimising the skew of the background, subsequently nearest-neighbour connected regions are found in the
+Technically this algorithm does not use the seed-skew algorithm to grow an initial seed, rather non-background points
+are found by minimising the skew of the background, subsequently nearest-neighbour connected regions are found in the
 non-background points and a single region is assigned to the peak (by proximity to the expected peak position).
 
 Note this algorithm applies the Lorentz correction to the integrated intensity.
 
-The algorithm proceeds as follows:
+For each peak the algorithm proceeds as follows:
 
 1.  Calculates an initial TOF window using the input parameter ``FractionalTOFWindow`` or (if ``FractionalTOFWindow = 0``)
     evaluating a resolution function of the form
@@ -45,12 +45,14 @@ The algorithm proceeds as follows:
     where :math:`dTOF` refers to the integration window size rather than the FWHM of a peak, the parameter
     ``BackscatteringTOFResolution`` is the fractional window size (:math:`dTOF/TOF`) of a peak at backscattering
     (equivalent to :math:`\sqrt{(\frac{dt_0}{t_0})^2 + (\frac{dL}{L})^2}`) and ``ThetaWidth`` :math:`= d\theta`
-    (which is adjusted to reproduce the window size required for peaks at larger scattering angles).
+    (which is adjusted to reproduce the window size required for peaks at larger scattering angles). After execution the
+    algorithm will print to the log estimates for these parameters given the scattering angle dependence of the final TOF
+    window found for the peaks successfully integrated.
 
 2. Integrate the data over the range :math:`TOF_{peak} \pm 0.5*dTOF`
 
 3. Find the detectors contributing to the background by minimising the skew of the integrated intensity of detectors in
-   a square window of side length ``2*NPixels + 1``.
+   a rectangular window of dimensions ``(2*DRow + 1) x (2*DCol + 1)``.
 
 4. Take the peak mask (detectors which contribute to the peak) to be the contiguous region of nearest-neighbour
    connected detectors not contributing to the background that contains the peak detector ID
@@ -64,10 +66,33 @@ The algorithm proceeds as follows:
 
 7. Increase the TOF window until the ratio of :math:`I/\sigma` reaches a maximum.
 
-8. If ``OptimiseMask=True`` then steps 4-7 will be repeated using the optimal TOF window to find the detectors
+8. If ``OptimiseMask=True`` then steps 3-7 will be repeated using the optimal TOF window to find the detectors
    contributing to the peak.
 
 9. The bins contributing to the peak in the focused spectrum are summed (with the errors added in quadrature).
+
+Assumptions about the instrument
+--------------------------------
+
+This algorithm supports instruments with detector banks of two types: :ref:`RectangularDetector <RectangularDetector>`
+(e.g. SXD, TOPAZ) and a more generic type ``CompAssembly`` (e.g WISH) - for which the behaviour of the algorithm is
+slightly different.
+
+For :ref:`RectangularDetector <RectangularDetector>` the window around the peak on the detector is truncated at the
+window edge - it is assumed that banks are not adjacent and that a peak can only reside in a single bank.
+
+For ``CompAssembly`` banks, if the window on the detector exceed the boundaries of a bank, the algorithm will look for
+pixels in nearby banks for which the column components are adjacent. For example on WISH the column components are tubes,
+if a tube on one bank is adjacent to a tube from another bank the detector window will include pixels from both banks
+(it will not be truncated). The algorithm does not look for pixels in tubes above/below the top/bottom of a tube.
+
+In addition the instrument definition for ``CompAssembly`` banks must obey the following rules (which hold for the
+WISH instrument):
+
+1. Row and column components must have names that end with an integer index (e.g. ``pixel066`` and ``tube152``).
+
+2. The index must start from 1 (i.e. the first tube in a bank would be ``tube001`` not ``tube000``)
+
 
 Peak mask validation
 --------------------
