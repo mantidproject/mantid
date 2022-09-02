@@ -176,4 +176,17 @@ public:
     TS_ASSERT_EQUALS(breaks[1], 0.5);
     TS_ASSERT_EQUALS(breaks[2], 6.0);
   }
+
+  void test_create_with_function_factory_default() {
+    auto bsp = FunctionFactory::Instance().createInitialized("name=BSpline");
+    TS_ASSERT_EQUALS(bsp->getAttribute("StartX").asDouble(), 0.0);
+    TS_ASSERT_EQUALS(bsp->getAttribute("EndX").asDouble(), 1.0);
+    TS_ASSERT_EQUALS(bsp->getAttribute("Uniform").asBool(), true);
+    TS_ASSERT_EQUALS(bsp->getAttribute("NBreak").asInt(), 10);
+    std::vector<double> breaks = bsp->getAttribute("BreakPoints").asVector();
+    TS_ASSERT_EQUALS(breaks.size(), 10);
+    TS_ASSERT_EQUALS(breaks[0], 0.0);
+    TS_ASSERT_DELTA(breaks[1], 0.111, 0.001);
+    TS_ASSERT_EQUALS(breaks[9], 1.0);
+  }
 };
