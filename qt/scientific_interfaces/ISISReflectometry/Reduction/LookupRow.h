@@ -27,7 +27,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow {
 public:
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 11;
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 12;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
 
   enum Column {
@@ -43,14 +43,16 @@ public:
     QSTEP = 7,
     SCALE = 8,
     RUN_SPECTRA = 9,
-    BACKGROUND_SPECTRA = 10
+    BACKGROUND_SPECTRA = 10,
+    ROI_DETECTOR_IDS = 11
   };
 
   LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
             TransmissionRunPair tranmissionRuns,
             boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
             boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
-            boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
+            boost::optional<ProcessingInstructions> backgroundProcessingInstructions,
+            boost::optional<ProcessingInstructions> roiDetectorIDs);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
@@ -61,6 +63,7 @@ public:
   boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
   boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
+  boost::optional<ProcessingInstructions> roiDetectorIDs() const;
   void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
   bool hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const;
 
@@ -76,6 +79,7 @@ private:
   boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   boost::optional<ProcessingInstructions> m_processingInstructions;
   boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
+  boost::optional<ProcessingInstructions> m_roiDetectorIDs;
 };
 
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);

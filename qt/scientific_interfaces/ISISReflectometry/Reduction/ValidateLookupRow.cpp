@@ -117,6 +117,14 @@ LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellTe
   return optionalInstructionsOrNoneIfError;
 }
 
+ValidatorT<boost::optional<std::string>> LookupRowValidator::parseROIDetectorIDs(CellText const &cellText) {
+  auto optionalROIDetectorsOrNoneIfError =
+      ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::ROI_DETECTOR_IDS]);
+  if (!optionalROIDetectorsOrNoneIfError.is_initialized())
+    m_invalidColumns.insert(LookupRow::Column::ROI_DETECTOR_IDS);
+  return optionalROIDetectorsOrNoneIfError;
+}
+
 void LookupRowValidator::validateThetaAndRegex() {
   // If either value didn't even parse, there's nothing further to check, so return
   if (!m_thetaOrInvalid.is_initialized() || !m_titleMatcherOrInvalid.is_initialized())
@@ -142,10 +150,12 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
   auto maybeScaleFactor = parseScaleFactor(cellText);
   auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
   auto maybeBackgroundProcessingInstructions = parseBackgroundProcessingInstructions(cellText);
+  auto maybeROIDetectorIDs = parseROIDetectorIDs(cellText);
 
-  auto maybeDefaults = makeIfAllInitialized<LookupRow>(
-      m_thetaOrInvalid, m_titleMatcherOrInvalid, maybeTransmissionRuns, maybeTransmissionProcessingInstructions,
-      maybeQRange, maybeScaleFactor, maybeProcessingInstructions, maybeBackgroundProcessingInstructions);
+  auto maybeDefaults = makeIfAllInitialized<LookupRow>(m_thetaOrInvalid, m_titleMatcherOrInvalid, maybeTransmissionRuns,
+                                                       maybeTransmissionProcessingInstructions, maybeQRange,
+                                                       maybeScaleFactor, maybeProcessingInstructions,
+                                                       maybeBackgroundProcessingInstructions, maybeROIDetectorIDs);
 
   if (maybeDefaults.is_initialized())
     return ValidationResult<LookupRow, std::unordered_set<int>>(maybeDefaults.get());

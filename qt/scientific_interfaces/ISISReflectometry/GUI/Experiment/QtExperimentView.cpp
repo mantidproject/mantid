@@ -33,7 +33,8 @@ std::unordered_map<int, std::string> ColumnPropertyNames{
     {LookupRow::QSTEP, "MomentumTransferStep"},
     {LookupRow::SCALE, "ScaleFactor"},
     {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
-    {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"}};
+    {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"},
+    {LookupRow::ROI_DETECTOR_IDS, "ROIDetectorIDs"}};
 
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
