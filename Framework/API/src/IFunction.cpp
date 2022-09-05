@@ -1465,10 +1465,8 @@ void IFunction::storeAttributeValue(const std::string &name, const API::IFunctio
   if (hasAttribute(name)) {
     auto att = m_attrs[name];
     const Kernel::IValidator_sptr validatorClone = att.getValidator();
-    if (validatorClone != nullptr) {
-      value.setValidator(validatorClone);
-      value.evaluateValidator();
-    }
+    value.setValidator(validatorClone);
+    value.evaluateValidator();
 
     m_attrs[name] = value;
   } else {

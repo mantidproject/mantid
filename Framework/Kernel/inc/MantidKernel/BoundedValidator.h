@@ -134,25 +134,34 @@ private:
     error << "";
     // it is allowed not to have a lower bound, if not then you don't need to
     // check
-    if (m_hasLowerBound &&
-        (value < (m_lowerBound - m_error) || (value == (m_lowerBound - m_error) && m_lowerExclusive))) {
+    if (m_hasLowerBound && (value < (errorAdjustment(m_lowerBound, -1)) ||
+                            (value == (errorAdjustment(m_lowerBound, -1)) && m_lowerExclusive))) {
       error << "Selected value " << value << " is ";
       (m_lowerExclusive) ? error << "<=" : error << "<";
       error << " the lower bound (" << m_lowerBound << ")";
     }
-    if (m_hasUpperBound &&
-        (value > (m_upperBound + m_error) || (value == (m_upperBound + m_error) && m_upperExclusive))) {
+    if (m_hasUpperBound && (value > (errorAdjustment(m_upperBound, 1)) ||
+                            (value == (errorAdjustment(m_upperBound, 1)) && m_upperExclusive))) {
       error << "Selected value " << value << " is ";
       (m_upperExclusive) ? error << ">=" : error << ">";
       error << " the upper bound (" << m_upperBound << ")";
     }
-    if (error.str() != "" && m_error != 0) {
+    if (error.str() != "" && m_error != (TYPE)0) {
       error << " +/- (" << m_error << ")";
     }
-
     return error.str();
   }
+
+  TYPE errorAdjustment(const TYPE &boundingValue, const int coeff) const { return boundingValue; }
 };
+
+template <>
+inline double BoundedValidator<double>::errorAdjustment(const double &boundingValue, const int coeff) const {
+  return boundingValue + m_error * coeff;
+}
+template <> inline long BoundedValidator<long>::errorAdjustment(const long &boundingValue, const int coeff) const {
+  return boundingValue + m_error * coeff;
+}
 
 } // namespace Kernel
 } // namespace Mantid

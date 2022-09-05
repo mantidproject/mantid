@@ -34,7 +34,7 @@ private:
   std::pair<double, double> getStartEnd(const Mantid::HistogramData::HistogramX &X, bool isHistogram) const;
   API::MatrixWorkspace_sptr copyInput(const API::MatrixWorkspace_sptr &inputWS, size_t wsIndex);
   API::MatrixWorkspace_sptr smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS, size_t wsIndex);
-  void WienerSmooth::setSplineDataBounds(API::IFunction_sptr &spline, const double startX, const double endX);
+  void setSplineDataBounds(API::IFunction_sptr &spline, const double startX, const double endX);
 };
 
 } // namespace Algorithms
