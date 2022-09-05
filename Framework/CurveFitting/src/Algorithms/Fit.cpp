@@ -95,11 +95,11 @@ void Fit::initConcrete() {
 std::map<std::string, std::string> Fit::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  const auto possibleOperators = Mantid::API::Expression::DEFAULT_OPS_STR;
+  const auto &possibleOperators = Mantid::API::Expression::DEFAULT_OPS_STR;
   std::string constraints = getPropertyValue("Constraints");
   if (constraints.size() > 0) {
     auto operatorPresent = false;
-    for (auto op : possibleOperators) {
+    for (const auto &op : possibleOperators) {
       const auto it = constraints.find_first_of(op);
       if (it <= constraints.size()) {
         operatorPresent = true;
