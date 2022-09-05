@@ -513,7 +513,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
 
   auto alg = AlgorithmManager::Instance().create("StartLiveData");
   alg->initialize();
-  alg->setChild(true);
+  alg->setChild(false);
   alg->setLogging(false);
   auto const inputWorkspace = "TOF_live";
   auto const updateInterval = m_view->getLiveDataUpdateInterval();
