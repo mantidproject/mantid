@@ -537,7 +537,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_2D_detector_workspace(38415, 'TOF_')
         args = self._default_options
         args['InputRunList'] = '38415'
-        outputs = ['IvsQ_38415', 'IvsQ_binned_38415', 'TOF', 'TOF_38415']
+        outputs = ['IvsQ_38415', 'IvsQ_binned_38415', 'TOF', 'TOF_38415', 'TOF_38415_summed_segment']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryISISSumBanks', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)

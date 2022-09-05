@@ -82,7 +82,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
         roiDetectorIDs = self.getProperty(Prop.ROI_DETECTOR_IDS).value
-        inputWorkspaces = self._sumBanks(inputWorkspaces, roiDetectorIDs)
+        summedSegmentWorkspaces = self._sumBanks(inputWorkspaces, roiDetectorIDs)
         firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
         firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
         firstTransWorkspaces = self._sumBanks(firstTransWorkspaces, roiDetectorIDs)
@@ -90,7 +90,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
         secondTransWorkspaces = self._sumBanks(secondTransWorkspaces, roiDetectorIDs)
         # Combine multiple input runs, if required
-        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
+        inputWorkspace = self._sumWorkspaces(summedSegmentWorkspaces, False)
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
         secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
         # Slice the input workspace, if required
@@ -111,6 +111,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # input run when slicing)
         if self._slicingEnabled():
             tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
+        # Add summed segment workspaces to TOF group
+        for workspace_name in inputWorkspaces:
+            summed_seg_name = _summedSegmentWorkspace(workspace_name)
+            if AnalysisDataService.doesExist(summed_seg_name):
+                tofWorkspaces.add(summed_seg_name)
         # Create the group
         self._group_workspaces(tofWorkspaces, "TOF")
 
@@ -228,34 +233,45 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             workspaces.append(ws)
         return workspaces
 
-    def _sumBanks(self, workspaces, roiDetectorIDs):
-        for workspace_name in workspaces:
+    def _sumBanks(self, workspace_names, roiDetectorIDs):
+        output_workspace_names = workspace_names.copy()
+        for i, workspace_name in enumerate(workspace_names):
             workspace = AnalysisDataService.retrieve(workspace_name)
-            is_group = isinstance(workspace, WorkspaceGroup)
-            if is_group:
-                workspace = workspace[0]
+            if self._has_single_2D_rectangular_detector(workspace):
+                output_workspace_names[i] = _summedSegmentWorkspace(workspace_name)
+                args = {"InputWorkspace": workspace,
+                        "ROIDetectorIDs": roiDetectorIDs,
+                        "OutputWorkspace": output_workspace_names[i]}
+                alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
+                alg.setAlwaysStoreInADS(True)
+                alg.execute()
+        return output_workspace_names
 
-            rect_detectors = workspace.getInstrument().findRectDetectors()
-            num_rect_detectors = len(rect_detectors)
+    @staticmethod
+    def _has_single_2D_rectangular_detector(workspace) -> bool:
+        """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""
+        is_group = isinstance(workspace, WorkspaceGroup)
+        if is_group:
+            workspace = workspace[0]
 
-            if num_rect_detectors == 0:
-                continue
+        rect_detectors = workspace.getInstrument().findRectDetectors()
+        num_rect_detectors = len(rect_detectors)
 
-            if num_rect_detectors != 1:
-                raise NotImplementedError(f"Not implemented for more than one rectangular detector, "
-                                          f"{num_rect_detectors} were found.")
+        if num_rect_detectors == 0:
+            return False
 
-            # We don't sum banks for a linear detector
-            if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
-                continue
+        if num_rect_detectors != 1:
+            raise NotImplementedError(f"Not implemented for more than one rectangular detector, "
+                                      f"{num_rect_detectors} were found.")
 
-            if is_group:
-                raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
+        # We don't sum banks for a linear detector
+        if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
+            return False
 
-            args = {"InputWorkspace": workspace, "ROIDetectorIDs": roiDetectorIDs, "OutputWorkspace": workspace_name}
-            alg = self.createChildAlgorithm('ReflectometryISISSumBanks', **args)
-            alg.execute()
-        return workspaces
+        if is_group:
+            raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
+
+        return True
 
     def _prefixedName(self, name, isTrans):
         """Add a prefix for TOF workspaces onto the given name"""
@@ -546,6 +562,11 @@ def _monitorWorkspace(workspace):
     return workspace + '_monitors'
 
 
+def _summedSegmentWorkspace(workspace):
+    """Return the associated summed segment workspace name for the given workspace"""
+    return workspace + '_summed_segment'
+
+
 def _getRunNumberAsString(workspace):
     """Get the run number for a workspace. If it's a workspace group, get
     the run number from the first child workspace."""
@@ -580,6 +601,8 @@ def _removeWorkspace(workspace_name):
     # If a corresponding monitors workspace also exists, remove that too
     if AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
         _removeWorkspace(_monitorWorkspace(workspace_name))
+    if AnalysisDataService.doesExist(_summedSegmentWorkspace(workspace_name)):
+        _removeWorkspace(_summedSegmentWorkspace(workspace_name))
 
 
 AlgorithmFactory.subscribe(ReflectometryISISLoadAndProcess)
