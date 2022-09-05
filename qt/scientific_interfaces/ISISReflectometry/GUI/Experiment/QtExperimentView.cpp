@@ -657,7 +657,7 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
         textFromCell(table.item(row, Col::TRANS_SPECTRA)), textFromCell(table.item(row, Col::QMIN)),
         textFromCell(table.item(row, Col::QMAX)), textFromCell(table.item(row, Col::QSTEP)),
         textFromCell(table.item(row, Col::SCALE)), textFromCell(table.item(row, Col::RUN_SPECTRA)),
-        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
+        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA)), textFromCell(table.item(row, Col::ROI_DETECTOR_IDS))});
   }
   return rows;
 }
