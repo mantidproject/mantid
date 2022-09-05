@@ -132,19 +132,14 @@ public:
     TS_ASSERT_EQUALS(bsp.getAttribute("StartX").asDouble(), 0.0);
     TS_ASSERT_EQUALS(bsp.getAttribute("EndX").asDouble(), 1.0);
 
-    double startx = 10.0;
-    double endx = -10.0;
-
     // fails Endx < Startx (0.0)
-    TS_ASSERT_THROWS(bsp.setAttributeValue("EndX", endx), const IFunction::ValidationException &);
+    TS_ASSERT_THROWS(bsp.setAttributeValue("EndX", -1.0), const IFunction::ValidationException &);
 
-    bsp.setAttribute("EndX", IFunction::Attribute(endx)); // set without validation
-    // fails Startx > Endx
-    TS_ASSERT_THROWS(bsp.setAttributeValue("StartX", startx), const IFunction::ValidationException &);
+    // fails Startx > Endx (1.0)
+    TS_ASSERT_THROWS(bsp.setAttributeValue("StartX", 2.0), const IFunction::ValidationException &);
 
-    // fails Startx = Endx
-    bsp.setAttributeValue("EndX", startx);
-    TS_ASSERT_THROWS(bsp.setAttributeValue("StartX", startx), const IFunction::ValidationException &);
+    // fails Startx (1.0) = Endx (1.0)
+    TS_ASSERT_THROWS(bsp.setAttributeValue("StartX", 1.0), const IFunction::ValidationException &);
   }
 
   void test_create_with_function_factory_uniform() {

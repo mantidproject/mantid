@@ -47,6 +47,7 @@ BSpline::BSpline() {
   declareAttribute("EndX", Attribute(1.0), endXValidator);
 
   auto breakPointsValidator = ArrayBoundedValidator<double>(0.0, 1.0);
+  breakPointsValidator.setError(1e-8);
   declareAttribute("BreakPoints", Attribute(std::vector<double>(nbreak)), breakPointsValidator);
 
   declareAttribute("Uniform", Attribute(true));
@@ -206,10 +207,9 @@ void BSpline::setAttribute(const std::string &attName, const API::IFunction::Att
     storeAttributeValue("NBreak", Attribute(static_cast<int>(att.asVector().size())));
     resetParameters();
     resetKnots();
-    resetValidators();
   } else if (isUniform || attName == "StartX" || attName == "EndX") {
-    resetKnots();
     resetValidators();
+    resetKnots();
   } else if (attName == "NBreak" || attName == "Order") {
     resetParameters();
     resetKnots();

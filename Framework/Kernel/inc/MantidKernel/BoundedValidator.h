@@ -97,6 +97,9 @@ public:
     clearUpper();
   }
 
+  /// Set the allowed error
+  void setError(const TYPE &value) noexcept { m_error = value; }
+
   /// Clone the current state
   IValidator_sptr clone() const override { return std::make_shared<BoundedValidator>(*this); }
 
@@ -115,6 +118,8 @@ private:
   TYPE m_lowerBound;
   /// the upper bound
   TYPE m_upperBound;
+  /// the allowed error
+  TYPE m_error = (TYPE)0;
 
   /** Checks that the value is within any upper and lower limits
    *
@@ -129,16 +134,22 @@ private:
     error << "";
     // it is allowed not to have a lower bound, if not then you don't need to
     // check
-    if (m_hasLowerBound && (value < m_lowerBound || (value == m_lowerBound && m_lowerExclusive))) {
+    if (m_hasLowerBound &&
+        (value < (m_lowerBound - m_error) || (value == (m_lowerBound - m_error) && m_lowerExclusive))) {
       error << "Selected value " << value << " is ";
       (m_lowerExclusive) ? error << "<=" : error << "<";
       error << " the lower bound (" << m_lowerBound << ")";
     }
-    if (m_hasUpperBound && (value > m_upperBound || (value == m_upperBound && m_upperExclusive))) {
+    if (m_hasUpperBound &&
+        (value > (m_upperBound + m_error) || (value == (m_upperBound + m_error) && m_upperExclusive))) {
       error << "Selected value " << value << " is ";
       (m_upperExclusive) ? error << ">=" : error << ">";
       error << " the upper bound (" << m_upperBound << ")";
     }
+    if (error.str() != "" && m_error != 0) {
+      error << " +/- (" << m_error << ")";
+    }
+
     return error.str();
   }
 };
