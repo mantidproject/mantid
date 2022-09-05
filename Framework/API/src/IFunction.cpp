@@ -1457,7 +1457,7 @@ void IFunction::init() {
 }
 
 /**
- *  Set a value to a named attribute
+ *  Set a value to a named attribute, retaining validator
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
@@ -1465,7 +1465,10 @@ void IFunction::storeAttributeValue(const std::string &name, const API::IFunctio
   if (hasAttribute(name)) {
     auto att = m_attrs[name];
     const Kernel::IValidator_sptr validatorClone = att.getValidator();
-    value.setValidator(validatorClone);
+    if (validatorClone != nullptr) {
+      value.setValidator(validatorClone);
+      value.evaluateValidator();
+    }
 
     m_attrs[name] = value;
   } else {
