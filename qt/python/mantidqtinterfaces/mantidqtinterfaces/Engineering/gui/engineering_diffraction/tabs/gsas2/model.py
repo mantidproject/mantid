@@ -182,9 +182,9 @@ class GSAS2Model(object):
     # ===============
 
     def call_gsas2(self):
-        call_gsas2 = self.format_gsas2_call()
+        command_string_list = self.format_gsas2_call()
         start = time.time()
-        gsas2_called = self.call_subprocess(call_gsas2)
+        gsas2_called = self.call_subprocess(command_string_list)
         if not gsas2_called:
             return None
         self.out_call_gsas2, self.err_call_gsas2 = gsas2_called
@@ -217,19 +217,17 @@ class GSAS2Model(object):
         gsas2_python_path = os.path.join(self.path_to_gsas2, "bin", "python")
         if platform.system() == "Windows":
             gsas2_python_path = os.path.join(self.path_to_gsas2, "python")
-
-        call = (gsas2_python_path + " "
-                + os.path.abspath(os.path.join(os.path.dirname(__file__), "call_G2sc.py")) + " "
-                + parse_inputs.Gsas2Inputs_to_json(gsas2_inputs)
-                )
+        call = [gsas2_python_path,
+                os.path.abspath(os.path.join(os.path.dirname(__file__), "call_G2sc.py")),
+                parse_inputs.Gsas2Inputs_to_json(gsas2_inputs)]
         return call
 
-    def call_subprocess(self, command_string):
+    def call_subprocess(self, command_string_list):
         try:
             env = os.environ.copy()
             env['PYTHONHOME'] = self.path_to_gsas2
-            shell_process = subprocess.Popen(command_string.replace('"', '\\"'),
-                                             shell=True,
+            shell_process = subprocess.Popen(command_string_list,
+                                             shell=False,
                                              stdin=None,
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE,
