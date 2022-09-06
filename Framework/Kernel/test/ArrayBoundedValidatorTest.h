@@ -158,8 +158,7 @@ public:
     const string end(")");
     const string greaterThan(" is > the upper bound (");
     const string lessThan(" is < the lower bound (");
-    const string errorStart(" +/- (");
-    const string errorEnd(")");
+    const string errorStart(" +/- ");
 
     ArrayBoundedValidator<double> vd(0.0, 10.0);
     vd.setError(0.5);
@@ -168,11 +167,11 @@ public:
     TS_ASSERT_EQUALS(vd.isValid(ad), "");
 
     vector<double> adel{-1.0, -0.25, 1.0, 2.0, 10.0, 10.5};
-    TS_ASSERT_EQUALS(vd.isValid(adel), index_start + "0" + index_end + start + "-1" + lessThan + "0" + end +
-                                           errorStart + "0.5" + errorEnd);
+    TS_ASSERT_EQUALS(vd.isValid(adel),
+                     index_start + "0" + index_end + start + "-1" + lessThan + "0" + errorStart + "0.5" + end);
 
     vector<double> adeu{-0.5, -0.25, 1.0, 2.0, 10.0, 11.0};
-    TS_ASSERT_EQUALS(vd.isValid(adeu), index_start + "5" + index_end + start + "11" + greaterThan + "10" + end +
-                                           errorStart + "0.5" + errorEnd);
+    TS_ASSERT_EQUALS(vd.isValid(adeu),
+                     index_start + "5" + index_end + start + "11" + greaterThan + "10" + errorStart + "0.5" + end);
   }
 };
