@@ -31,6 +31,7 @@ const auto TWO_ROW_EXP_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "batch_2_e
 const auto EIGHT_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "8_col_batch.json");
 const auto NINE_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "9_col_batch.json");
 const auto TEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "10_col_batch.json");
+const auto ELEVEN_COL_BATCH_FILE = fileFinder.getFullPath(DIR_PATH + "11_col_batch.json");
 
 } // namespace
 
@@ -122,6 +123,22 @@ public:
     tester.testBatch(gui, &mwv, map);
   }
 
+  void test_decodeLegacyElevenColBatchFile() {
+    QtMainWindowView mwv;
+    mwv.initLayout();
+    auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
+    Decoder decoder;
+    // Decode from the old 9-column format
+    auto oldMap = MantidQt::API::loadJSONFromFile(QString::fromStdString(ELEVEN_COL_BATCH_FILE));
+    decoder.decodeBatch(&mwv, 0, oldMap);
+
+    // Check that the result matches the new format
+    QList<QVariant> expectedRowValues{"0.5", ".*", "13463", "13464", "4", "0.01", "0.1", "0.02", "", "4", "5", ""};
+    CoderCommonTester tester;
+    constexpr auto rowIndex = int{0};
+    tester.checkPerAngleDefaultsRowEquals(gui, expectedRowValues, rowIndex);
+  }
+
   void test_decodeLegacyTenColBatchFile() {
     QtMainWindowView mwv;
     mwv.initLayout();
@@ -132,7 +149,7 @@ public:
     decoder.decodeBatch(&mwv, 0, oldMap);
 
     // Check that the result matches the new format
-    QList<QVariant> expectedRowValues{"0.5", "", "13463", "13464", "4", "0.01", "0.1", "0.02", "", "4", "5"};
+    QList<QVariant> expectedRowValues{"0.5", "", "13463", "13464", "4", "0.01", "0.1", "0.02", "", "4", "5", ""};
     CoderCommonTester tester;
     constexpr auto rowIndex = int{0};
     tester.checkPerAngleDefaultsRowEquals(gui, expectedRowValues, rowIndex);
@@ -148,7 +165,7 @@ public:
     decoder.decodeBatch(&mwv, 0, oldMap);
 
     // Check that the result matches the new format
-    QList<QVariant> expectedRowValues{"0.5", "", "13463", "13464", "4", "0.01", "0.1", "0.02", "", "4", ""};
+    QList<QVariant> expectedRowValues{"0.5", "", "13463", "13464", "4", "0.01", "0.1", "0.02", "", "4", "", ""};
     CoderCommonTester tester;
     constexpr auto rowIndex = int{0};
     tester.checkPerAngleDefaultsRowEquals(gui, expectedRowValues, rowIndex);
