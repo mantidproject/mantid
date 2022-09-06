@@ -108,6 +108,8 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     auto lookupRowCopy = *foundRow;
 
+    lookupRowCopy.setRoiDetectorIDs(std::move(previewRow.getSelectedBanks()));
+
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
@@ -123,7 +125,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
 void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
                                                                 ROIType regionType) {
   auto const instructions = previewRow.getProcessingInstructions(regionType);
-  lookupRow.setProcessingInstructions(regionType, instructions);
+  lookupRow.setProcessingInstructions(regionType, std::move(instructions));
 }
 
 void ExperimentPresenter::restoreDefaults() {

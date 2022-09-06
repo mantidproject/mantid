@@ -52,6 +52,10 @@ boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructi
 
 boost::optional<ProcessingInstructions> LookupRow::roiDetectorIDs() const { return m_roiDetectorIDs; }
 
+void LookupRow::setRoiDetectorIDs(boost::optional<ProcessingInstructions> selectedBanks) {
+  m_roiDetectorIDs = std::move(selectedBanks);
+}
+
 void LookupRow::setProcessingInstructions(ROIType regionType,
                                           boost::optional<ProcessingInstructions> processingInstructions) {
   switch (regionType) {
