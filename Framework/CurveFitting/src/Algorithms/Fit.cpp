@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -91,15 +92,37 @@ void Fit::initConcrete() {
                   "Output is an empty string).");
 }
 
+std::map<std::string, std::string> Fit::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  const auto &possibleOperators = Mantid::API::Expression::DEFAULT_OPS_STR;
+  std::string constraints = getPropertyValue("Constraints");
+  if (constraints.size() > 0) {
+    auto operatorPresent = false;
+    for (const auto &op : possibleOperators) {
+      const auto it = constraints.find_first_of(op);
+      if (it <= constraints.size()) {
+        operatorPresent = true;
+        break;
+      }
+    }
+    if (!operatorPresent) {
+      issues["Constraints"] = "No operator is present in the constraint.";
+    }
+  }
+
+  return issues;
+}
+
 /// Read in the properties specific to Fit.
 void Fit::readProperties() {
   std::string ties = getPropertyValue("Ties");
   if (!ties.empty()) {
     m_function->addTies(ties);
   }
-  std::string contstraints = getPropertyValue("Constraints");
-  if (!contstraints.empty()) {
-    m_function->addConstraints(contstraints);
+  std::string constraints = getPropertyValue("Constraints");
+  if (!constraints.empty()) {
+    m_function->addConstraints(constraints);
   }
   m_function->registerFunctionUsage(isChild());
 
