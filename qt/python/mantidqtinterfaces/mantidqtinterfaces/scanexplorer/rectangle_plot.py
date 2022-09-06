@@ -244,11 +244,11 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param new_x1: the x coordinate of the new opposing corner
         @param new_y1: the y coordinate of that opposing corner
         """
-        rectangle_patch.set_bounds(new_x0, new_y0, new_x1 - new_x0, new_y1 - new_y0)
-        peak = self._find_peak(self.current_rectangle)
-        self._show_peak(self.current_rectangle, peak)
+        peak = self._find_peak(rectangle_patch)
+        self._show_peak(rectangle_patch, peak)
 
-        if self._manager.get_current_rectangle() == rectangle_patch:
+        if self.current_rectangle == rectangle_patch:
+            # TODO reuse values form the patch directly
             self._selector.extents = (new_x0, new_x1, new_y0, new_y1)
 
     def _update_plot_values(self):
@@ -512,6 +512,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         x_step = (xmax - xmin) / arr.shape[1]
         y_step = (ymax - ymin) / arr.shape[0]
+        # calculating the step this way can introduce a slight deviation on the peak position, because for convenience
+        # we are then working on the matplotlib array of the data instead of the data itself
+
         x0, y0 = rect.get_xy()
         x1 = x0 + rect.get_width()
         y1 = y0 + rect.get_height()
