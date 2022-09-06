@@ -102,7 +102,9 @@ class RectanglesManager(QWidget):
             return
 
         controller, rectangle = self.rectangles[index]
-        self.sig_controller_updated.emit(rectangle, *controller.get_values())
+        x0, y0, x1, y1 = controller.get_values()
+        rectangle.set_bounds(x0, y0, x1 - x0, y1 - y0)
+        self.sig_controller_updated.emit(rectangle, x0, y0, x1, y1)
 
     def manage_table_width(self):
         """
