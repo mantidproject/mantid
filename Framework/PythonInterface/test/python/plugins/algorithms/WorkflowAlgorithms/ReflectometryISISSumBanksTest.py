@@ -59,6 +59,16 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues['InputWorkspace'], 'The input workspace must contain a rectangular detector')
 
+    def test_validate_inputs_succeeds_if_single_rectangular_detectors(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty('InputWorkspace', test_ws)
+
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 0)
+
     def test_mask_workspace(self):
         roi_detector_id = 200
         test_ws = CreateSampleWorkspace(StoreInADS=False)
