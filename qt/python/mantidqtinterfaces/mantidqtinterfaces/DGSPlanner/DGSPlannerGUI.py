@@ -52,7 +52,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.ol = mantid.geometry.OrientedLattice()
         self.masterDict = dict()  # holds info about instrument and ranges
         self.updatedInstrument = False
-        self.instrumentWAND = False
+        self.instrumentElastic = False
         self.updatedOL = False
         self.wg = None  # workspace group
         self.instrumentWidget = InstrumentSetupWidget.InstrumentSetupWidget(self)
@@ -150,7 +150,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.trajfig.clear()
 
     def eiWavelengthUpdateEvent(self):
-        if self.masterDict['instrument'] == 'WAND\u00B2':
+        if self.instrumentElastic:
             ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
             offset = ei * 0.01
             lowerBound = - offset
@@ -159,30 +159,14 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.dimensionWidget.set_editMax4(upperBound)
 
     def instrumentUpdateEvent(self):
-        if self.masterDict['instrument'] == 'WAND\u00B2':
-            self.instrumentWAND = True
-            # change the ui accordingly
+        changeToElastic = True if self.masterDict['instrument'] in ['WAND\u00B2'] else False
+        if changeToElastic:
             self.dimensionWidget.toggleDeltaE(False)
-            self.instrumentWidget.setLabelEi('Input Wavelength')
-            self.instrumentWidget.setEiVal(str(1.488))
-
-            self.instrumentWidget.setGoniometerNames(['s1', 'sgl', 'sgu'])
-            self.instrumentWidget.setGoniometerDirections(['0,1,0', '1,0,0', '0,0,1'])
-            self.instrumentWidget.setGoniometerRotationSense([1, -1, -1])
-            self.instrumentWidget.updateAll()
-
-            self.eiWavelengthUpdateEvent()
-        else:
-            if self.instrumentWAND:
-                self.instrumentWAND = False
-                self.dimensionWidget.toggleDeltaE(True)
-                self.instrumentWidget.setLabelEi('Incident Energy')
-                self.instrumentWidget.setEiVal(str(10.0))
-
-                self.instrumentWidget.setGoniometerNames(['psi', 'gl', 'gs'])
-                self.instrumentWidget.setGoniometerDirections(['0,1,0', '0,0,1', '1,0,0'])
-                self.instrumentWidget.setGoniometerRotationSense([1, 1, 1])
-                self.instrumentWidget.updateAll()
+            self.instrumentElastic = True
+        elif self.instrumentElastic:
+            self.dimensionWidget.toggleDeltaE(True)
+            self.instrumentElastic = False
+        self.eiWavelengthUpdateEvent()
 
     @QtCore.Slot(dict)
     def updateParams(self, d):

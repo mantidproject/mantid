@@ -336,9 +336,19 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         if self.instrument in ["WAND\u00B2"]:
             self.labelDetZ.show()
             self.editDetZ.show()
+            self.setLabelEi('Input Wavelength')
+            self.setEiVal(str(1.488))
+            self.setGoniometerNames(['s1', 'sgl', 'sgu'])
+            self.setGoniometerDirections(['0,1,0', '1,0,0', '0,0,1'])
+            self.setGoniometerRotationSense([1, -1, -1])
         else:
             self.labelDetZ.hide()
             self.editDetZ.hide()
+            self.setLabelEi('Incident Energy')
+            self.setEiVal(str(10.0))
+            self.setGoniometerNames(['psi', 'gl', 'gs'])
+            self.setGoniometerDirections(['0,1,0', '0,0,1', '1,0,0'])
+            self.setGoniometerRotationSense([1, 1, 1])
         self.updateAll(**d)
 
     def updateFast(self,*dummy_args):
