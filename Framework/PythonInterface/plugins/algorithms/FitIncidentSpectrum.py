@@ -24,8 +24,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
     def summary(self):
         return 'Calculate a fit for an incident spectrum using different methods. ' \
-               'Outputs a workspace containing the functionalized fit and its first ' \
-               'derivative.'
+               'Outputs a workspace containing the functionalized fit, its first ' \
+               'derivative and (optionally) its second derivative.'
 
     def version(self):
         return 1
@@ -67,7 +67,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             doc='The method for fitting the incident spectrum.')
 
         self.declareProperty(name='DerivOrder', defaultValue=1, validator=IntListValidator([1,2]),
-                             doc='Whether to return the first or second derivative of the fit function')
+                             doc='Whether to return the first or first and second derivative of the fit function')
 
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
