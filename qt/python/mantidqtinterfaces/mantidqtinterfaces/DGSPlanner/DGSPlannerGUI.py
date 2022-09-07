@@ -283,8 +283,13 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     if reply == QtWidgets.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
-                sp = list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
-                tomask = sp[1::4] + sp[2::4] + sp[3::4]
+                sp = numpy.arange(mantid.mtd["__temp_instrument"].getNumberHistograms())
+                if self.masterDict['instrument'] == 'WAND\u00B2':
+                    sp = sp.reshape(-1,512)
+                    tomask = sp[:,1::4].ravel().tolist() + sp[:,2::4].ravel().tolist() + sp[:,3::4].ravel().tolist()\
+                           + sp[1::4,:].ravel().tolist() + sp[2::4,:].ravel().tolist() + sp[3::4,:].ravel().tolist()
+                else:
+                    tomask = sp[1::4].tolist() + sp[2::4].tolist() + sp[3::4].tolist()
                 mantid.simpleapi.MaskDetectors("__temp_instrument", SpectraList=tomask)
 
             progressDialog = QtWidgets.QProgressDialog(self)
