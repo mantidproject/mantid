@@ -182,7 +182,7 @@ class InstrumentArrayConverter:
         icol_peak = np.where(dcol_vec == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def get_peak_region_array(self, peak, detid, bank_name, drows, dcols, nrows_edge, ncols_edge):
+    def get_peak_region_array(self, peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge):
         """
         :param peak: peak object
         :param detid: detector id of peak (from peak table)
@@ -197,6 +197,7 @@ class InstrumentArrayConverter:
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
+        drows, dcols = nrows // 2, ncols // 2
         detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols,
                                                                             nrows_edge, ncols_edge)
         # get signal and error from each spectrum
@@ -450,14 +451,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="A PeaksWorkspace containing the peaks to integrate.")
 
         #   window parameters
-        self.declareProperty(name="DRows", defaultValue=8, direction=Direction.Input,
-                             validator=IntBoundedValidator(lower=1),
-                             doc="Determines the size of the window around a peak on the detector. "
-                                 "The number of rows in the window are NRows = 2*DRows + 1.")
-        self.declareProperty(name="DCols", defaultValue=8, direction=Direction.Input,
-                             validator=IntBoundedValidator(lower=1),
-                             doc="Determines the size of the window around a peak on the detector. "
-                                 "The number of columns in the window are NCols = 2*DCols + 1.")
+        self.declareProperty(name="NRows", defaultValue=17, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=3),
+                             doc="Number of row components in the window around a peak on the detector. "
+                                 "For WISH row components correspond to pixels along a single tube.")
+        self.declareProperty(name="NCols", defaultValue=17, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=3),
+                             doc="Number of column components in the window around a peak on the detector. "
+                                 "For WISH column components correspond to tubes.")
         self.declareProperty(name='FractionalTOFWindow', defaultValue=0.0, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0.0, upper=1.0),
                              doc="dTOF/TOF window best chosen from forward-scattering bank with worst resolution.")
@@ -479,8 +480,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "parameters). A new optimal TOF window is then found using the new peak mask."
                                  "Note this can be helpful if resolution parameters or peak centres are not very "
                                  "accurate.")
-        self.setPropertyGroup("DRows", "Integration Window Parameters")
-        self.setPropertyGroup("DCols", "Integration Window Parameters")
+        self.setPropertyGroup("NRows", "Integration Window Parameters")
+        self.setPropertyGroup("NCols", "Integration Window Parameters")
         self.setPropertyGroup('FractionalTOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
@@ -549,16 +550,21 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
         # check peak size limits are consistent with window size
-        drows = self.getProperty("DRows").value
-        dcols = self.getProperty("DCols").value
+        nrows = self.getProperty("NRows").value
+        ncols = self.getProperty("NCols").value
+        # check wondow dimensions are odd
+        if not nrows % 2:
+            issues["NRows"] = "NRows must be an odd number."
+        if not ncols % 2:
+            issues["NCols"] = "NCols must be an odd number."
         nrow_max = self.getProperty("NRowMax").value
         ncol_max = self.getProperty("NColMax").value
-        if nrow_max > 2 * drows + 1:
+        if nrow_max > nrows:
             issues["NRowMax"] = "NRowMax exceeds window size."
-        if ncol_max > 2 * dcols + 1:
+        if ncol_max > 2 * ncols:
             issues["NColMax"] = "NColMax exceeds window size."
         npk_min = self.getProperty("NPixMin").value
-        if npk_min > (2 * drows + 1) * (2 * dcols + 1):
+        if npk_min > nrows * ncols:
             issues["NPixMin"] = "NPixMin exceeds number of pixels in the window."
         # check valid peak workspace
         ws = self.getProperty("InputWorkspace").value
@@ -577,8 +583,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         frac_tof_window = self.getProperty('FractionalTOFWindow').value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = self.getProperty("ThetaWidth").value
-        drows = self.getProperty("DRows").value
-        dcols = self.getProperty("DCols").value
+        nrows = self.getProperty("NRows").value
+        ncols = self.getProperty("NCols").value
         optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
@@ -641,7 +647,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # get data array in window around peak region
             xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detid,
                                                                                                     bank_names[ipk],
-                                                                                                    drows, dcols,
+                                                                                                    nrows, ncols,
                                                                                                     nrows_edge,
                                                                                                     ncols_edge)
             # get TOF window using resolution parameters

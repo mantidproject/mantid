@@ -52,7 +52,7 @@ For each peak the algorithm proceeds as follows:
 2. Integrate the data over the range :math:`TOF_{peak} \pm 0.5*dTOF`
 
 3. Find the detectors contributing to the background by minimising the skew of the integrated intensity of detectors in
-   a rectangular window of dimensions ``(2*DRow + 1) x (2*DCol + 1)``.
+   a rectangular window of dimensions ``NRow x NCol``.
 
 4. Take the peak mask (detectors which contribute to the peak) to be the contiguous region of nearest-neighbour
    connected detectors not contributing to the background that contains the peak detector ID
@@ -92,6 +92,9 @@ WISH instrument):
 1. Row and column components must have names that end with an integer index (e.g. ``pixel066`` and ``tube152``).
 
 2. The index must start from 1 (i.e. the first tube in a bank would be ``tube001`` not ``tube000``)
+
+3. Any n-1 detector-spectrum mapping groups only row components (i.e. pixels in the same tube) - in this case
+   ``NRow`` will correspond to the number of spectra along a tube.
 
 
 Peak mask validation
