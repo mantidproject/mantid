@@ -1242,7 +1242,7 @@ void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex, const MaskList 
  *
  * @param workspaceIndex workspace index to be unmasked
  */
-void MatrixWorkspace::setUnmaskedIndex(const size_t workspaceIndex) { m_masks.erase(workspaceIndex); }
+void MatrixWorkspace::setUnmaskedBins(const size_t workspaceIndex) { m_masks.erase(workspaceIndex); }
 
 /** Sets the internal monitor workspace to the provided workspace.
  *  This method is intended for use by data-loading algorithms.

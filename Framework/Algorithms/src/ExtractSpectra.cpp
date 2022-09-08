@@ -248,7 +248,7 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i
     if (filteredMask.size() > 0)
       workspace.setMaskedBins(i, filteredMask);
     else
-      workspace.setUnmaskedIndex(i);
+      workspace.setUnmaskedBins(i);
   }
 }
 
