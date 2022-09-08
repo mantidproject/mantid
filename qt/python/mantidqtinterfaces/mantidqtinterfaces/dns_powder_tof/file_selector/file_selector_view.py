@@ -189,8 +189,7 @@ class DNSFileSelectorView(DNSView):
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), True)
 
     def show_scan(self, row):
-        hidden = False
-        self._treeview.setRowHidden(row, self._treeview.rootIndex(), hidden)
+        self._treeview.setRowHidden(row, self._treeview.rootIndex(), False)
 
     def hide_tof(self, hidden=True):
         self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
