@@ -48,7 +48,7 @@ private slots:
 
 private:
   void connectSignals();
-  void plotRqwContour(std::string const &sampleName);
+  void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
 
   std::unique_ptr<IndirectSqwModel> m_model;

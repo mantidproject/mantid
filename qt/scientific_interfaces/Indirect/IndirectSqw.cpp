@@ -74,7 +74,7 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName.toStdString());
     m_model->setEFixed(getInstrumentDetail("Efixed").toStdString());
-    plotRqwContour(dataName.toStdString());
+    plotRqwContour();
     m_view->setDefaultQAndEnergy();
   }
 }
@@ -114,7 +114,7 @@ void IndirectSqw::sqwAlgDone(bool error) {
  *
  * Creates a colour 2D plot of the data
  */
-void IndirectSqw::plotRqwContour(std::string const &sampleName) {
+void IndirectSqw::plotRqwContour() {
   try {
     auto const rqwWorkspace = m_model->getRqwWorkspace();
     if (rqwWorkspace)

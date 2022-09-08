@@ -115,7 +115,7 @@ void IndirectSqwModel::setEWidth(double eWidth) { m_eWidth = eWidth; }
 
 void IndirectSqwModel::setEMax(double eMax) { m_eHigh = eMax; }
 
-void IndirectSqwModel::setEFixed(std::string eFixed) { m_eFixed = eFixed; }
+void IndirectSqwModel::setEFixed(const std::string &eFixed) { m_eFixed = eFixed; }
 
 void IndirectSqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
 

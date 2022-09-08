@@ -32,7 +32,7 @@ public:
   void setEMin(double eMin);
   void setEWidth(double eWidth);
   void setEMax(double eMax);
-  void setEFixed(std::string eFixed);
+  void setEFixed(const std::string &eFixed);
   void setRebinInEnergy(bool scale);
   std::string getOutputWorkspace();
   MatrixWorkspace_sptr getRqwWorkspace();
