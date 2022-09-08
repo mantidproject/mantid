@@ -140,5 +140,13 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
         AnalysisDataService.remove('output_ws')
 
+    def _find_detectors_to_calibrate(self, specular_pixel_id, det_info, comp_info):
+        """Finds the workspace indices of the detectors that should be calibrated"""
+        spec_detector_idx = det_info.indexOf(specular_pixel_id)
+        current_component_idx = comp_info.parent(spec_detector_idx)  # How much further up the hierarchy do we need to go?
+        # Not sure if this conversion from numpy int64 to Python int64 will be necessary
+        # I think these indexes need to be converted to workspace indexes rather than detector/component info indexes?
+        return [idx.item() for idx in comp_info.detectorsInSubtree(current_component_idx)]
+
 
 AlgorithmFactory.subscribe(ReflectometryISISCalibration)
