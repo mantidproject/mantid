@@ -8,15 +8,15 @@
 #
 # Optional args:
 #   --channel: The channel to remove from (defaults to mantid)
-#   --package: The package to remove from the channel (defaults to mantid)
 #   --label: The label to remove from the channel (defaults to nightly)
+#
+# All remaining arguments are package names to remove
+
 WORKSPACE=$1
-shift
-ANACONDA_TOKEN=$1
-shift
+ANACONDA_TOKEN=$2
+shift 2
 
 CHANNEL=mantid
-PACKAGE=mantid
 LABEL=nightly
 
 # Handle flag inputs
@@ -27,17 +27,14 @@ do
             CHANNEL="$2"
             shift
             ;;
-        --package)
-            PACKAGE="$2"
-            shift
-            ;;
         --label)
             LABEL="$2"
             shift
             ;;
         *)
-            echo "Argument not accepted: $1"
-            exit 1
+            # Flags must come first so we have it
+            # non-flag arguments so stop processing
+            break
             ;;
   esac
   shift
@@ -53,33 +50,40 @@ CONDA_ENV_NAME=mantid-anaconda-delete
 RECIPES_DIR=$WORKSPACE/conda-recipes
 SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 
-# Setup Mambaforge
+###
+# Delete a single named package from the given channel and label
+function delete_package() {
+  channel=$1
+  package_name=$2
+  label=$3
+
+  file_url="https://api.anaconda.org/package/$channel/$package_name/files"
+  echo Get from url: $file_url
+  all_packages=$(curl -s -X GET $file_url)
+
+  latest_version=$(echo $all_packages | jq -r '.[-1].version')
+  echo Latest Version: $latest_version
+
+  packages_to_delete=$(echo $all_packages | jq -r ".[] | select(.labels == [\"$label\"] and .version != \"$latest_version\") | .full_name")
+  echo Packages to delete: $packages_to_delete
+
+  packages_not_to_delete=$(echo $all_packages | jq -r ".[] | select(.labels == [\"$label\"] and .version == \"$latest_version\") | .full_name")
+  echo Packages not to delete: $packages_not_to_delete
+
+  for package_file in $packages_to_delete; do
+      echo Deleting package: $package_file
+      curl -s -X DELETE -H "Authorization: token $ANACONDA_TOKEN" "https://api.anaconda.org/dist/$package_file"
+  done
+}
+###
+
+# Setup Mambaforge and a conda environment
 $SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
-
-# Remove conda env if it exists
 $EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
-
-# Create env with anaconda-client installed
 $EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME curl jq -y
-
-# Activate Conda environment
 . $WORKSPACE/mambaforge/etc/profile.d/conda.sh
 conda activate $CONDA_ENV_NAME
 
-FILE_URL="https://api.anaconda.org/package/$CHANNEL/$PACKAGE/files"
-echo Get from url: $FILE_URL
-ALL_PACKAGES=$(curl -s -X GET $FILE_URL)
-
-LATEST_VERSION=$(echo $ALL_PACKAGES | jq -r '.[-1].version')
-echo Latest Version: $LATEST_VERSION
-
-PACKAGES_TO_DELETE=$(echo $ALL_PACKAGES | jq -r ".[] | select(.labels == [\"$LABEL\"] and .version != \"$LATEST_VERSION\") | .full_name")
-echo Packages to delete: $PACKAGES_TO_DELETE
-
-PACKAGES_NOT_TO_DELETE=$(echo $ALL_PACKAGES | jq -r ".[] | select(.labels == [\"$LABEL\"] and .version == \"$LATEST_VERSION\") | .full_name")
-echo Packages not to delete: $PACKAGES_NOT_TO_DELETE
-
-for package in $PACKAGES_TO_DELETE; do
-    echo Deleting package: $package
-    curl -s -X DELETE -H "Authorization: token $ANACONDA_TOKEN" "https://api.anaconda.org/dist/$package"
+for name in "$@"; do
+  delete_package $CHANNEL $name $LABEL
 done

@@ -23,6 +23,7 @@ shift
 # Optional flag to update a local repo without pushing the changes
 LOCAL_ONLY=false
 RELEASE_VERSION=false
+RECIPES_TAG=main
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -30,6 +31,9 @@ do
     case "$1" in
         --local-only) LOCAL_ONLY=true ;;
         --release-version) RELEASE_VERSION=true ;;
+        --recipes-tag)
+            RECIPES_TAG="$2"
+            shift ;;
         *)
             echo "Argument not accepted: $1"
             exit 1
@@ -85,7 +89,7 @@ rm -rf $SOURCE_FILE
 # Clone conda-recipes
 if [[ $LOCAL_ONLY  == false ]]; then
     if [ -d "conda-recipes" ]; then rm -rf conda-recipes; fi
-    git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git
+    git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git -b $RECIPES_TAG
 fi
 
 cd conda-recipes
@@ -98,6 +102,7 @@ function replace_version_data() {
 
 replace_version_data recipes/mantid/meta.yaml
 replace_version_data recipes/mantidqt/meta.yaml
+replace_version_data recipes/mantiddocs/meta.yaml
 replace_version_data recipes/mantidworkbench/meta.yaml
 
 if [[ $LOCAL_ONLY  == false ]]; then

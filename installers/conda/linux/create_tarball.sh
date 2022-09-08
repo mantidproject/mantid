@@ -17,7 +17,6 @@ set -e
 HERE="$(dirname "$0")"
 BUILD_DIR=_bundle_build
 CONDA_EXE=mamba
-CONDA_PACKAGE=mantidworkbench
 BUNDLE_PREFIX=mantidworkbench
 BUNDLE_EXTENSION=.tar.xz
 ICON_DIR="$HERE/../../../images"
@@ -133,10 +132,10 @@ mkdir -p "$bundle_contents"
 # Create conda environment internally. --copy ensures no symlinks are used
 bundle_conda_prefix="$bundle_contents"
 
-echo "Creating Conda environment in '$bundle_conda_prefix' from '$CONDA_PACKAGE'"
+echo "Creating Conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
   --channel "$conda_channel" --channel conda-forge --yes \
-  "$CONDA_PACKAGE" \
+  mantidworkbench \
   jq  # used for processing the version string
 echo
 
