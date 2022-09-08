@@ -177,7 +177,7 @@ The function performs the following processing:
 
 - converts the x units of the workspace group containing the differential cross section to momentum transfer
 - calculates the Placzek self scattering algorithm using the workflow algorithm :ref:`algm-TotScatCalculateSelfScattering`.
-  This internally calculates a per detector Placzek correction using :ref:`algm-CalculatePlaczekSelfScattering-v1` and then focusses the correction using :ref:`algm-GroupDetectors`
+  This internally calculates a per detector Placzek correction using :ref:`algm-CalculatePlaczek` and then focusses the correction using :ref:`algm-GroupDetectors`
 - subtracts the Placzek self scattering correction from the differential cross section
 - converts the differential cross-section into an :math:`S(Q) - 1` distribution using the following equation. This is based on equations 5, 9 and 19 in [#Keen]_:
 
@@ -219,6 +219,8 @@ The output PDF can be customized with the following parameters:
   when a fourier filter is performed this is set to 1000 to minimise loss of detail while still being computationally
   efficient.
 - By calling with `debug=True` which will retain the intermediate self scattering correction workspace.
+- By calling with `placzek_order` the Placzek correction order can be specified, with the option of 1 or 2 (defaults to 1).
+- By calling with `sample_temp` the user can override the sample temperature provided in the logs. It defaults to using values from the logs if available.
 
 Example
 =======
