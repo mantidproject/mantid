@@ -1,0 +1,1 @@
+* Fixed issue with DGSPlanner introduced by diffractometer instrument WAND\ :sup:`2`
