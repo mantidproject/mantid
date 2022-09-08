@@ -57,6 +57,9 @@ public:
   /// Clear upper bound value
   void clearUpper() noexcept;
 
+  /// Set the allowed error
+  void setError(const TYPE &value) noexcept;
+
 private:
   std::string checkValidity(const std::vector<TYPE> &value) const override;
 
