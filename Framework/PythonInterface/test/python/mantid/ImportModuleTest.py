@@ -20,11 +20,5 @@ class ImportModuleTest(unittest.TestCase):
         import mantid
         self.assertEqual(False, mantid.__gui__)
 
-    def test_fleaky(self):
-        import random
-        rand_num = random.randint(0, 2)
-        print (rand_num)
-        self.assertEqual(1, rand_num)
-
 if __name__ == '__main__':
     unittest.main()
