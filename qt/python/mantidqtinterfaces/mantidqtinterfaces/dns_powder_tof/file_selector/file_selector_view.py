@@ -186,8 +186,7 @@ class DNSFileSelectorView(DNSView):
         return filters
 
     def hide_scan(self, row):
-        hidden = True
-        self._treeview.setRowHidden(row, self._treeview.rootIndex(), hidden)
+        self._treeview.setRowHidden(row, self._treeview.rootIndex(), True)
 
     def show_scan(self, row):
         hidden = False
