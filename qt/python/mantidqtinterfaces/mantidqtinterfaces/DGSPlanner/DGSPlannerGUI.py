@@ -159,13 +159,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.dimensionWidget.set_editMax4(upperBound)
 
     def instrumentUpdateEvent(self):
-        changeToElastic = True if self.masterDict['instrument'] in ['WAND\u00B2'] else False
-        if changeToElastic:
-            self.dimensionWidget.toggleDeltaE(False)
-            self.instrumentElastic = True
-        elif self.instrumentElastic:
-            self.dimensionWidget.toggleDeltaE(True)
-            self.instrumentElastic = False
+        changeToElastic = self.masterDict['instrument'] in ['WAND\u00B2']
+        if changeToElastic != self.instrumentElastic:
+            self.instrumentElastic = changeToElastic
+            self.dimensionWidget.toggleDeltaE(not changeToElastic)
         self.eiWavelengthUpdateEvent()
 
     @QtCore.Slot(dict)
