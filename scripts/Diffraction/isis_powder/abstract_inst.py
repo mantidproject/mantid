@@ -275,7 +275,7 @@ class AbstractInst(object):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing group of the processed output workspaces
         """
-        d_spacing_group, tof_group, _ = common_output.split_into_tof_d_spacing_q_squared_groups(
+        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(
             run_details=run_details, processed_spectra=processed_spectra)
         common_output.save_focused_data(
             d_spacing_group=d_spacing_group,

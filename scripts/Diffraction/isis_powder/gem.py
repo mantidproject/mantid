@@ -140,7 +140,7 @@ class Gem(AbstractInst):
                                                                              output_mode=output_mode)
         else:
             d_spacing_group, \
-                tof_group, _ = common_output.split_into_tof_d_spacing_q_squared_groups(
+                tof_group = common_output.split_into_tof_d_spacing_groups(
                     run_details=run_details, processed_spectra=processed_spectra)
 
         if self._is_vanadium:

@@ -8,7 +8,7 @@ import mantid.simpleapi as mantid
 import os
 
 
-def split_into_tof_d_spacing_q_squared_groups(run_details, processed_spectra):
+def split_into_tof_d_spacing_groups(run_details, processed_spectra, include_q_squared=False):
     """
     Splits a processed list containing all focused banks into TOF and
     d-spacing groups. It also sets the names of the output workspaces
@@ -16,7 +16,8 @@ def split_into_tof_d_spacing_q_squared_groups(run_details, processed_spectra):
     123-130-ResultTOF-3
     :param run_details: The run details associated with this run
     :param processed_spectra: A list containing workspaces, one entry per focused bank.
-    :return: A workspace group for dSpacing, TOF, and QSquared in that order
+    :param include_q_squared: a boolian indicating if the QSquared unit should be output
+    :return: A workspace group for dSpacing and TOF in that order and QSquared if requested
     """
     d_spacing_output = []
     tof_output = []
@@ -35,8 +36,9 @@ def split_into_tof_d_spacing_q_squared_groups(run_details, processed_spectra):
                                 Target="dSpacing"))
         tof_output.append(
             mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
-        q_squared_output.append(
-            mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=q_squared_out_name, Target="QSquared"))
+        if include_q_squared:
+            q_squared_output.append(
+                mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=q_squared_out_name, Target="QSquared"))
 
     # Group the outputs
     d_spacing_group_name = run_number + ext + "-ResultD"
@@ -44,10 +46,11 @@ def split_into_tof_d_spacing_q_squared_groups(run_details, processed_spectra):
                                              OutputWorkspace=d_spacing_group_name)
     tof_group_name = run_number + ext + "-ResultTOF"
     tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
-    q_squared_group_name = run_number + ext + "-ResultQ"
-    q_squared_tof_group = mantid.GroupWorkspaces(InputWorkspaces=q_squared_output, OutputWorkspace=q_squared_group_name)
-
-    return d_spacing_group, tof_group, q_squared_tof_group
+    if include_q_squared:
+        q_squared_group_name = run_number + ext + "-ResultQ"
+        q_squared_tof_group = mantid.GroupWorkspaces(InputWorkspaces=q_squared_output, OutputWorkspace=q_squared_group_name)
+        return d_spacing_group, tof_group, q_squared_tof_group
+    return d_spacing_group, tof_group
 
 
 def save_focused_data(d_spacing_group, tof_group, output_paths, q_squared=None):

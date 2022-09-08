@@ -100,8 +100,8 @@ class Osiris(AbstractInst):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing group of the processed output workspaces
         """
-        d_spacing_group, tof_group, q_squared_group = common_output.split_into_tof_d_spacing_q_squared_groups(
-            run_details=run_details, processed_spectra=processed_spectra)
+        d_spacing_group, tof_group, q_squared_group = common_output.split_into_tof_d_spacing_groups(
+            run_details=run_details, processed_spectra=processed_spectra, include_q_squared=True)
         for unit, group in {"_d_spacing": d_spacing_group, "_tof": tof_group, "_q_squared": q_squared_group}.items():
             save_data(workspace_group=group,
                       output_paths=self._generate_out_file_paths(run_details=run_details, unit=unit))
