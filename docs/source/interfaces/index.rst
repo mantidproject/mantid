@@ -26,3 +26,4 @@ Interfaces
    muon/*
    reflectometry/*
    utility/*
+   direct/dns_powder_tof/*
