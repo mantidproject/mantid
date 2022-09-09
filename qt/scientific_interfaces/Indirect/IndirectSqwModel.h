@@ -43,7 +43,6 @@ private:
   std::string m_inputWorkspace;
   std::string m_baseName;
   std::string m_eFixed;
-  double m_scaleValue;
   double m_qLow;
   double m_qWidth = 0.05;
   double m_qHigh;
