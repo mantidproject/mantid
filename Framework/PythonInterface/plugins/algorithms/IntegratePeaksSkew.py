@@ -469,10 +469,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "contribution, dT0/T0, and uncertainty in path length dL/L which is assumed constant "
                                  "for all pixels).")
         self.setPropertySettings("BackscatteringTOFResolution", condition_to_use_resn)
-        self.declareProperty(name="ThetaWidth", defaultValue=0.015, direction=Direction.Input,
+        self.declareProperty(name="ThetaWidth", defaultValue=0.0015, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0),
-                             doc="dTheta resolution (estimated from width at forward scattering minus contribution "
-                                 "from moderator, dT0/T0, and path length dL/L).")
+                             doc="dTheta resolution (estimated from width at forward scattering minus "
+                                 "contribution from moderator, dT0/T0, and path length dL/L).")
         self.setPropertySettings("ThetaWidth", condition_to_use_resn)
         self.declareProperty(name="OptimiseMask", defaultValue=False, direction=Direction.Input,
                              doc="Redo peak mask using optimal TOF window discovered (the original mask is found from "
@@ -742,9 +742,17 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         if len(thetas) > 1:
             # linear fit to (dT/T)^2 vs. cot(theta)^2
             m, c = np.polyfit(1/(np.tan(thetas)**2), np.array(frac_tof_widths)**2, deg=1)
-            logger.notice(f"Estimated resolution parameters:"
-                          f"\nBackscatteringTOFResolution = {np.sqrt(c)}"
-                          f"\nThetaWidth = {np.sqrt(m)}")
+            if m > 0 and c > 0:
+                logger.notice(f"Estimated resolution parameters:"
+                              f"\nBackscatteringTOFResolution = {np.sqrt(c)}"
+                              f"\nThetaWidth = {np.sqrt(m)}")
+            else:
+                logger.warning(f"Resolution parameters could not be estimated - the provided TOF window parameters are"
+                               f"likely to be suboptimal (probably the resulting window is too large). Please inspect "
+                               f"the results and check the parameters against the minimum and average "
+                               f"fractional TOF window found:"
+                               f"\nmin(dTOF/TOF) = {np.min(frac_tof_widths)}"
+                               f"\nmean(dTOF/TOF) = {np.mean(frac_tof_widths)}.")
         # assign output
         self.setProperty("OutputWorkspace", pk_ws_int)
 
