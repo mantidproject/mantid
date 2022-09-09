@@ -679,24 +679,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         detids = pk_ws.column('DetID')
         bank_names = pk_ws.column('BankName')
         tofs = pk_ws.column('TOF')
-        if plot_filename:
-            import matplotlib.pyplot as plt
-            from matplotlib.backends.backend_pdf import PdfPages
-            from matplotlib.colors import LogNorm
-            fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
-            fig.subplots_adjust(wspace=0.5)  # ensure plenty spaxce between subplots (want to avoid slow tight_layout)
-            try:
-                pdf = PdfPages(plot_filename)
-            except OSError:
-                raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
-                                   f"another programme and that the user has permission to write to that directory.")
         irows_delete = []
         thetas = []  # for fitting optimal TOF resolution parameters
         frac_tof_widths = []  # for fitting optimal TOF resolution parameters
+        peak_data_collection = []  # for peak_data objects to be plotted
         for ipk, pk in enumerate(pk_ws):
-            # copy pk to output peak workspace
-            pk_ws_int.addPeak(pk)
-            pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
             # check that peak is in a valid detector
             detid = detids[ipk]
             detector_info = ws.detectorInfo()
@@ -709,6 +696,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             if invalid_detector:
                 logger.error("Peak with index {ipk} is not in a valid detector (with ID {detid}).")
                 continue  # skip peak - don't plot as no data to retrieve
+            # copy pk to output peak workspace
+            pk_ws_int.addPeak(pk)
+            pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
             # get data array in window around peak region
             xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(pk, detid,
                                                                                                     bank_names[ipk],
@@ -745,17 +735,28 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             else:
                 pk.setIntensity(0.0)
                 pk.setSigmaIntensity(0.0)
-            if plot_filename:
-                cbar = peak_data.plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
-                pdf.savefig(fig)
-                [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
-                cbar.remove()
+            peak_data_collection.append(peak_data)
             # update progress
             prog_reporter.report("Integrating Peaks")
+        # delete rows
         self.child_DeleteTableRows(TableWorkspace=pk_ws_int, Rows=irows_delete)
-        if plot_filename:
-            plt.close(fig)
-            pdf.close()
+        if plot_filename and pk_ws_int.getNumberPeaks() > 0:
+            import matplotlib.pyplot as plt
+            from matplotlib.backends.backend_pdf import PdfPages
+            from matplotlib.colors import LogNorm
+            fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
+            fig.subplots_adjust(wspace=0.5)  # ensure plenty spaxce between subplots (want to avoid slow tight_layout)
+            try:
+                with PdfPages(plot_filename) as pdf:
+                    for ipk, pk in enumerate(pk_ws_int):
+                        cbar = peak_data_collection[ipk].plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
+                        pdf.savefig(fig)
+                        [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
+                        cbar.remove()
+                    plt.close(fig)
+            except OSError:
+                raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
+                                   f"another programme and that the user has permission to write to that directory.")
         # estimate TOF resolution params
         if len(thetas) > 1:
             # linear fit to (dT/T)^2 vs. cot(theta)^2
