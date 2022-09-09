@@ -1,0 +1,96 @@
+#!/bin/bash -ex
+
+# This script expects to be in a POSIX environment, the script clones the conda-recipes
+# repo and then runs conda builds based on passed args. By default it only clones the
+# source, you need to pass a flag to actually build something useful. If building a
+# package dependent on a different one it will build and produce that package too.
+#
+# Script usage:
+# package-standalone WORKSPACE [options]
+#
+# Example command to build all of the packages:
+# package-standalone $WORKSPACE --package-suffix Nightly
+#
+# Expected args:
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#                 (mantid repo). Windows Caveat: Only use / for this argument do
+#                 not use \\ or \ in the path.
+#
+# Possible parameters:
+#   --package-suffix: An optional suffix to pass to the standalone package step.
+
+# Setup expected variables
+WORKSPACE=$1
+if [[ -z "$WORKSPACE" ]]; then
+    echo "A workspace argument is required"
+    exit 1
+fi
+shift
+if [[ $OSTYPE == "msys"* ]]; then
+    if [[ "$WORKSPACE" == *'\'* ]]; then
+        echo "You have \ or \\ in your Workspace path, this is not supported on Windows."
+        exit 1
+    fi
+    WORKSPACE=${WORKSPACE////\\} # Replace // with \
+    # Require git settings so that paths can be checked out with longer file names than 260 characters
+    if [[ ! $(git config --system --get core.longpaths) == true ]]; then
+        echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
+        exit 1
+    fi
+fi
+EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
+if [[ $OSTYPE == "msys" ]]; then
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
+else
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+fi
+
+# Parse options
+STANDALONE_PACKAGE_SUFFIX=
+while [ ! $# -eq 0 ]
+do
+    case "$1" in
+        --package-suffix)
+            STANDALONE_PACKAGE_SUFFIX="$2"
+            shift ;;
+        *)
+            echo "Argument not accepted: $1"
+            exit 1
+            ;;
+  esac
+  shift
+done
+
+# Setup Mambaforge & environment if it is not already there
+$WORKSPACE/buildconfig/Jenkins/Conda/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
+CONDA_ENV_NAME=standalone-package-env
+$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
+# Create env with conda-build so we can build a local channel
+$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME conda-build mamba -y
+. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
+conda activate $CONDA_ENV_NAME
+
+# Build packages
+# Setup a local conda channel to find our locally built packages package. It is
+# assumed the raw .bz2 artefacts have been copied into the directory below
+LOCAL_CHANNEL_PATH=$WORKSPACE/conda-bld
+conda index $LOCAL_CHANNEL_PATH
+
+# Jenkins Pipeline expects packages in the root workspace directory
+cd $WORKSPACE
+PACKAGING_SCRIPTS_DIR=$WORKSPACE/installers/conda
+LOCAL_CHANNEL=file://$LOCAL_CHANNEL_PATH
+PACKAGING_ARGS="-c ${LOCAL_CHANNEL}"
+if [ -n "${STANDALONE_PACKAGE_SUFFIX}" ]; then
+    PACKAGING_ARGS="${PACKAGING_ARGS} -s ${STANDALONE_PACKAGE_SUFFIX}"
+fi
+if [[ $OSTYPE == 'msys'* ]]; then
+    rm -fr *.exe
+    ${PACKAGING_SCRIPTS_DIR}/win/create_package.sh $PACKAGING_ARGS
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    rm -fr *.dmg
+    ${PACKAGING_SCRIPTS_DIR}/osx/create_bundle.sh $PACKAGING_ARGS
+else
+    rm -fr *.tar.xz
+    ${PACKAGING_SCRIPTS_DIR}/linux/create_tarball.sh $PACKAGING_ARGS
+fi
