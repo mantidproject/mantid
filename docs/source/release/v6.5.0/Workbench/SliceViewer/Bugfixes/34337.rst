@@ -1,0 +1,2 @@
+- Fixes a bug in the SliceViewer where a workspace is replaced by an algorithm
+  with more than one output workspace.
