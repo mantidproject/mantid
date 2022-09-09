@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from mantid.simpleapi import SANSILLParameterScan
-from mantid.api import MatrixWorkspace
+from mantid.api import MatrixWorkspace, mtd
 from mantid.kernel import logger
 
 
@@ -27,29 +27,34 @@ class ScanExplorerModel:
         """
         name = Path(file_name).stem + "_scan"
 
-        try:
-            out = SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=name, NormaliseBy="None")
-        except RuntimeError:
-            logger.error("Cannot process given sample file. Please check the provided file can be processed as a scan. "
-                         "See error above for more info.")
-            return
-
-        self.presenter.create_slice_viewer(out)
+        if self._process_scan(file_name=file_name, output=name):
+            self.presenter.create_slice_viewer(mtd[name])
 
     def process_background(self, background_file_name: str):
         """
         Process the background without treatment.
+        @param background_file_name: the name of the file to use as background, containing only one point of a scan.
         """
         name = "_" + Path(background_file_name).stem
 
-        try:
-            SANSILLParameterScan(SampleRun=background_file_name, OutputWorkspace=name, NormaliseBy="None")
-        except RuntimeError:
-            logger.error("Cannot process background file. Please check the provided file can be processed as a scan. "
-                         "See error above for more info.")
-            return
+        if self._process_scan(file_name=background_file_name, output=name):
+            self.presenter.set_bg_ws(name)
 
-        self.presenter.set_bg_ws(name)
+    @staticmethod
+    def _process_scan(file_name: str, output: str) -> bool:
+        """
+        Runs basic parameter scan on the filename, catching errors.
+        @param file_name: the name of the file to process
+        @param output: the name of the workspace to create
+        @return whether the algorithm ran without issues
+        """
+        try:
+            SANSILLParameterScan(SampleRun=file_name, OutputWorkspace=output, NormaliseBy="None")
+        except RuntimeError:
+            logger.error("Cannot process file. Please check the provided file can be processed as a scan. "
+                         "See error above for more info.")
+            return False
+        return True
 
     @staticmethod
     def roi_integration(ws: MatrixWorkspace, rectangles: list, bg_ws=None) -> (list, list):
