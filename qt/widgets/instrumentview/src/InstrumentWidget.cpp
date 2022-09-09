@@ -1024,7 +1024,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  HelpWindow::showPage(nullptr, std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
+  HelpWindow::showPage(std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
 }
 
 void InstrumentWidget::set3DAxesState(bool on) {

@@ -53,8 +53,7 @@ void SampleTransmission::initLayout() {
  * Opens the Qt help page for the interface.
  */
 void SampleTransmission::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Sample Transmission Calculator"),
-                                                 QString("general"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Sample Transmission Calculator"), QString("general"));
 }
 
 /**

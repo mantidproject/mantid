@@ -420,7 +420,7 @@ void MantidEV::setDefaultState_slot() {
  * Go to MantidEV help page when help menu item is chosen
  */
 void MantidEV::help_slot() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("SCD Event Data Reduction"), QString("diffraction"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("SCD Event Data Reduction"), QString("diffraction"));
 }
 
 /**
