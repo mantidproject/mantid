@@ -26,8 +26,8 @@ message(STATUS "Added target ('check') for unit tests")
 
 # Configure a variable to hold the required test timeout value for all tests
 set(TESTING_TIMEOUT
-    300
-    CACHE STRING "Timeout in seconds for each test (default 300=5minutes)"
+    1200
+    CACHE STRING "Timeout in seconds for each test (default 1200=20minutes)"
 )
 
 # if we are building the framework or mantidqt we need these
