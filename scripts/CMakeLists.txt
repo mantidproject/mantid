@@ -30,6 +30,7 @@ foreach(_dir ${_pth_dirs})
 endforeach()
 list(APPEND _pth_list_dev ${CMAKE_CURRENT_BINARY_DIR})
 list(APPEND _pth_list_dev ${MSLICE_DEV})
+list(APPEND _pth_list_dev ${VESUVIO_DEV})
 list(APPEND _pth_list_install "${_scripts_rel_path}/ExternalInterfaces")
 
 # development copy
