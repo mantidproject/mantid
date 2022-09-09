@@ -52,7 +52,7 @@ IndirectSqwModel::IndirectSqwModel() {}
 void IndirectSqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   if (m_rebinInEnergy) {
     std::string eRebinString = std::to_string(m_eLow) + "," + std::to_string(m_eWidth) + "," + std::to_string(m_eHigh);
-    auto const eRebinWsName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_r";
+    auto const eRebinWsName = m_baseName + "_r";
     auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
     energyRebinAlg->initialize();
     energyRebinAlg->setProperty("InputWorkspace", m_inputWorkspace);
@@ -65,8 +65,8 @@ void IndirectSqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *
 void IndirectSqwModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   std::string qRebinString = std::to_string(m_qLow) + "," + std::to_string(m_qWidth) + "," + std::to_string(m_qHigh);
 
-  auto const sqwWsName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_sqw";
-  auto const eRebinWsName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_r";
+  auto const sqwWsName = getOutputWorkspace();
+  auto const eRebinWsName = m_baseName + "_r";
 
   auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
   sqwAlg->initialize();
@@ -84,7 +84,7 @@ void IndirectSqwModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *
 }
 
 void IndirectSqwModel::setupAddSampleLogAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
-  auto const sqwWsName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_sqw";
+  auto const sqwWsName = getOutputWorkspace();
   // Add sample log for S(Q, w) algorithm used
   auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
   sampleLogAlg->initialize();
@@ -100,7 +100,8 @@ void IndirectSqwModel::setupAddSampleLogAlgorithm(MantidQt::API::BatchAlgorithmR
 
 void IndirectSqwModel::setInputWorkspace(const std::string &workspace) {
   m_inputWorkspace = workspace;
-  m_outputWorkspaceName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_sqw";
+  // remove _red suffix from inpur workspace for outputs
+  m_baseName = m_inputWorkspace.substr(0, m_inputWorkspace.find("_red", m_inputWorkspace.length() - 4));
 }
 
 void IndirectSqwModel::setQMin(double qMin) { m_qLow = qMin; }
@@ -119,7 +120,7 @@ void IndirectSqwModel::setEFixed(const std::string &eFixed) { m_eFixed = eFixed;
 
 void IndirectSqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
 
-std::string IndirectSqwModel::getOutputWorkspace() { return m_outputWorkspaceName; }
+std::string IndirectSqwModel::getOutputWorkspace() { return m_baseName + "_sqw"; }
 
 MatrixWorkspace_sptr IndirectSqwModel::getRqwWorkspace() {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";

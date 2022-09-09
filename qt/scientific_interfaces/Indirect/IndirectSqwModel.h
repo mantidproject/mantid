@@ -41,7 +41,7 @@ public:
 
 private:
   std::string m_inputWorkspace;
-  std::string m_outputWorkspaceName;
+  std::string m_baseName;
   std::string m_eFixed;
   double m_scaleValue;
   double m_qLow;

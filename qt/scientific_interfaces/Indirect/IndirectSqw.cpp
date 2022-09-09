@@ -36,8 +36,6 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
   connectSignals();
 }
 
-IndirectSqw::~IndirectSqw() = default;
-
 void IndirectSqw::setup() {}
 
 /**
@@ -89,7 +87,6 @@ bool IndirectSqw::validate() {
 }
 
 void IndirectSqw::run() {
-  // m_model->setupAlgorithm();
   m_model->setupRebinAlgorithm(m_batchAlgoRunner);
   m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
   m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);

@@ -25,7 +25,7 @@ class DLLExport IndirectSqw : public IndirectDataReductionTab {
 
 public:
   IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
-  ~IndirectSqw() override;
+  ~IndirectSqw() = default;
 
   void setup() override;
   void run() override;

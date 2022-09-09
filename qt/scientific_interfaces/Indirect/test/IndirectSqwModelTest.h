@@ -22,9 +22,11 @@ public:
 
   void setUp() override { m_model = std::make_unique<IndirectSqwModel>(); }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void test_algorrithm_set_up() {
     // The Moments algorithm is a python algorithm and so can not be called in
-    m_workspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
+    m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_red", m_workspace);
     m_model->setInputWorkspace("Workspace_name_red");
     m_model->setEMin(-0.4);
@@ -38,12 +40,16 @@ public:
   }
 
   void test_output_workspace() {
+    m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_red", m_workspace);
     m_model->setInputWorkspace("Workspace_name_red");
     auto outputWorkspaceName = m_model->getOutputWorkspace();
     TS_ASSERT(outputWorkspaceName == "Workspace_name_sqw");
   }
 
   void test_setupRebinAlgorithm() {
+    m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_red", m_workspace);
     MantidQt::API::BatchAlgorithmRunner batch;
     m_model->setInputWorkspace("Workspace_name_red");
     m_model->setEMin(-0.4);
@@ -52,35 +58,53 @@ public:
     m_model->setRebinInEnergy(true);
     m_model->setupRebinAlgorithm(&batch);
     batch.executeBatch();
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_r"));
   }
 
-  void test_setupRebinAlgorithmFalse() {
+  void test_setupAlgorithmsERebinFalse() {
+    m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_red", m_workspace);
     MantidQt::API::BatchAlgorithmRunner batch;
+
     m_model->setInputWorkspace("Workspace_name_red");
     m_model->setEMin(-0.4);
     m_model->setEWidth(0.005);
     m_model->setEMax(0.4);
-    m_model->setRebinInEnergy(false);
-    m_model->setupRebinAlgorithm(&batch);
-    batch.executeBatch();
-  }
-
-  void test_setupSofQWAlgorithm() {
-    MantidQt::API::BatchAlgorithmRunner batch;
-    m_model->setInputWorkspace("Workspace_name_red");
     m_model->setQMin(0.8);
     m_model->setQWidth(0.05);
     m_model->setQMax(1.8);
     m_model->setEFixed("0.4");
-    m_model->setupSofQWAlgorithm(&batch);
-    batch.executeBatch();
-  }
+    m_model->setRebinInEnergy(false);
 
-  void test_setupAddSampleLogAlgorithm() {
-    MantidQt::API::BatchAlgorithmRunner batch;
-    m_model->setInputWorkspace("Workspace_name_red");
+    m_model->setupRebinAlgorithm(&batch);
+    m_model->setupSofQWAlgorithm(&batch);
     m_model->setupAddSampleLogAlgorithm(&batch);
     batch.executeBatch();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("Workspace_name_r"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_sqw"));
+  }
+
+  void test_setupAlgorithmsERebinTrue() {
+    m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_red", m_workspace);
+    MantidQt::API::BatchAlgorithmRunner batch;
+
+    m_model->setInputWorkspace("Workspace_name_red");
+    m_model->setEMin(-0.4);
+    m_model->setEWidth(0.005);
+    m_model->setEMax(0.4);
+    m_model->setQMin(0.8);
+    m_model->setQWidth(0.05);
+    m_model->setQMax(1.8);
+    m_model->setEFixed("0.4");
+    m_model->setRebinInEnergy(true);
+
+    m_model->setupRebinAlgorithm(&batch);
+    m_model->setupSofQWAlgorithm(&batch);
+    m_model->setupAddSampleLogAlgorithm(&batch);
+    batch.executeBatch();
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_r"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_sqw"));
   }
 
 private:
