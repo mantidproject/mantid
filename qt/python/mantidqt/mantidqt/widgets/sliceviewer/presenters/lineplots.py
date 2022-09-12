@@ -127,9 +127,7 @@ class LinePlots:
         """
         # ensure plot labels are in sync with main axes
         self._axx.relim()
-        self._axx.autoscale(axis='y')
         self._axy.relim()
-        self._axy.autoscale(axis='x')
 
     def update_line_plot_labels(self):
         """
