@@ -458,7 +458,27 @@ class PeakData:
         istart = max(min(self.ixlo, self.ixlo_opt) - ipad, 0)
         iend = min(max(self.ixhi, self.ixhi_opt) + ipad, len(self.xpk) - 1)
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
-        if ax[0].images:
+        if not ax[0].images:
+            # 2D colorfill
+            img = ax[0].imshow(image_data, norm=norm_func(vmax=image_data[self.peak_mask].mean()))
+            ax[0].plot(*np.where(self.peak_mask.T), 'xw', label='mask')
+            ax[0].plot(self.icol, self.irow, 'or', label='cen')
+            ax[0].set_xlabel('dColumn')
+            ax[0].set_ylabel('dRow')
+            # 1D focused spectrum
+            ax[1].axvline(self.xpk[self.ixlo_opt], ls='--', color='b', label='Optimal window')
+            ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls='--', color='b')
+            ax[1].errorbar(self.xpk[istart:iend], self.ypk[istart:iend], yerr=np.sqrt(self.epk_sq[istart:iend]),
+                           marker='o', markersize=3, ls='', color='k', label='data')
+            ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
+            ax[1].axvline(self.xpk[self.ixlo], ls=':', color='r', label='Initial window')
+            ax[1].axvline(self.xpk[self.ixhi - 1], ls=':', color='r')
+            ax[1].axhline(0, ls=':', color='k')
+            ax[1].legend(fontsize=7, loc=1, ncol=2)
+            ax[1].set_xlabel(r'TOF ($\mu$s)')
+            ax[1].set_ylabel('Intensity')
+        else:
+            # update 2D colorfill
             img = ax[0].images[0]
             img.set_data(image_data)
             img.set_norm(norm_func(vmax=image_data[self.peak_mask].mean()))
@@ -468,33 +488,31 @@ class PeakData:
             ax[0].lines[1].set_xdata(self.icol)
             ax[0].lines[1].set_ydata(self.irow)
             img.set_extent([-0.5, image_data.shape[1]-0.5, image_data.shape[0]-0.5, -0.5])
-        else:
-            img = ax[0].imshow(image_data, norm=norm_func(vmax=image_data[self.peak_mask].mean()))
-            ax[0].plot(*np.where(self.peak_mask.T), 'xw', label='mask')
-            ax[0].plot(self.icol, self.irow, 'or', label='cen')
-            ax[0].set_xlabel('dColumn')
-            ax[0].set_ylabel('dRow')
+            # update 1D focused spectrum
+            # vlines
+            xlo, xhi, data, xtof, xlo_init, xhi_init, y0 = ax[1].lines
+            xlo.set_xdata([self.xpk[self.ixlo_opt]])
+            xhi.set_xdata([self.xpk[self.ixhi_opt - 1]])
+            xlo_init.set_xdata([self.xpk[self.ixlo]])
+            xhi_init.set_xdata([self.xpk[self.ixhi - 1]])
+            xtof.set_xdata([pk.getTOF()])
+            # spectrum
+            yerr = np.sqrt(self.epk_sq[istart:iend])
+            data.set_xdata(self.xpk[istart:iend])
+            data.set_ydata(self.ypk[istart:iend])
+            ax[1].collections[0].set_segments(
+                [np.array([[x, ybot], [x, ytop]]) for x, ybot, ytop in
+                 zip(data.get_xdata(), data.get_ydata() - yerr, data.get_ydata() + yerr)])
+        # format 2D colorfill
         title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
                     rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
                     f"\n{self.status.value}"
         ax[0].set_title(title_str)
-        # 1D plot
-        ax[1].axvline(self.xpk[self.ixlo_opt], ls='--', color='b', label='Optimal window')
-        ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls='--', color='b')
-        ax[1].errorbar(self.xpk[istart:iend], self.ypk[istart:iend], yerr=np.sqrt(self.epk_sq[istart:iend]),
-                       marker='o', markersize=3, capsize=2, ls='', color='k', label='data')
-        ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
-        ax[1].axvline(self.xpk[self.ixlo], ls=':', color='r', label='Initial window')
-        ax[1].axvline(self.xpk[self.ixhi - 1], ls=':', color='r')
-        ax[1].axhline(0, ls=':', color='k')
-        ax[1].legend(fontsize=7, loc=1, ncol=2)
-        # figure formatting
-        intens_over_sig = round(self.intens / self.sig, 2) if self.sig > 0 else 0
-        ax[1].set_title(f'I/sig = {intens_over_sig}')
-        ax[1].set_xlabel(r'TOF ($\mu$s)')
-        ax[1].set_ylabel('Intensity')
         cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0], label='Intensity')
         cbar.ax.tick_params(labelsize=7, which='both')
+        # format 1D
+        intens_over_sig = round(self.intens / self.sig, 2) if self.sig > 0 else 0
+        ax[1].set_title(f'I/sig = {intens_over_sig}')
         ax[1].relim()
         ax[1].autoscale_view()
         return cbar  # need object returned so can cleanup after fig saved to pdf
@@ -762,8 +780,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     for ipk, pk in enumerate(pk_ws_int):
                         cbar = peak_data_collection[ipk].plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
                         pdf.savefig(fig)
-                        # [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
-                        ax[1].clear()
                         cbar.remove()
                     plt.close(fig)
             except OSError:
