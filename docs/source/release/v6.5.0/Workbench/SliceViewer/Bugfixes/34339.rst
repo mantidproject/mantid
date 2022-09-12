@@ -1,0 +1,3 @@
+* For 3d+ datasets, SliceViewer will now automatically open to the zero-slice if present
+* Ensure that all nan and all inf slices work while using log-scaling
+* Fix zoom issue where the wrong extents are used on attached lineplots
