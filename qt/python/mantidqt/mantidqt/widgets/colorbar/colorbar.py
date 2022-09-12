@@ -314,7 +314,6 @@ class ColorbarWidget(QWidget):
 
         log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
         try:
-            mask = np.isfinite(data)
             if log_normalisation:
                 mask = np.logical_and(np.isfinite(data), np.greater(data, 0))
             else:
