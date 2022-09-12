@@ -89,6 +89,7 @@ set(PYTHON_PLUGINS
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/IntegratePeaksProfileFitting.py
+    algorithms/IntegratePeaksSkew.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
