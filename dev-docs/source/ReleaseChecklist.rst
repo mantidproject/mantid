@@ -298,9 +298,9 @@ Code Freeze
 
 **Create the Release Branch (once most PR's are merged)**
 
-*  Ensure the `main build and system test
-   <https://builds.mantidproject.org/view/Main%20Pipeline/>`__
-   jobs have passed for all build environments for this release.
+*  Ensure the latest `main nightly deployment pipeline
+   https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/`__
+   has passed for all build environments.
 *  Run `open-release-testing
    <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs by clicking ``Build Now``.
