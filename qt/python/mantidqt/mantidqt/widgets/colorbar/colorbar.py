@@ -314,17 +314,15 @@ class ColorbarWidget(QWidget):
 
         log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
         try:
-            try:
-                masked_data = data[~data.mask]
-                # Use smallest positive value as vmin for log scale, matplotlib takes care of the data skipping part
-                masked_data = masked_data[masked_data > 0] if log_normalisation else masked_data
-                # If any dimension is zero then we have no data in the display area
-                data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
-
-                return (0.1, 1.0) if data_is_empty else (masked_data.min(), masked_data.max())
-            except (AttributeError, IndexError):
-                data = data[np.nonzero(data)] if log_normalisation else data
-                return np.nanmin(data), np.nanmax(data)
+            mask = np.isfinite(data)
+            if log_normalisation:
+                mask = np.logical_and(np.isfinite(data), np.greater(data, 0))
+            else:
+                mask = np.isfinite(data)
+            if data[mask].any():
+                return data[mask].min(), data[mask].max()
+            else:
+                return (0.1, 1.0)
         except (ValueError, RuntimeWarning):
             # All values are masked
             return None
