@@ -458,15 +458,26 @@ class PeakData:
         istart = max(min(self.ixlo, self.ixlo_opt) - ipad, 0)
         iend = min(max(self.ixhi, self.ixhi_opt) + ipad, len(self.xpk) - 1)
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
-        img = ax[0].imshow(image_data, norm=norm_func(vmax=image_data[self.peak_mask].mean()))
-        ax[0].plot(*np.where(self.peak_mask.T), 'xw')
-        ax[0].plot(self.icol, self.irow, 'or')
+        if ax[0].images:
+            img = ax[0].images[0]
+            img.set_data(image_data)
+            img.set_norm(norm_func(vmax=image_data[self.peak_mask].mean()))
+            xmask, ymask = np.where(self.peak_mask.T)
+            ax[0].lines[0].set_xdata(xmask)
+            ax[0].lines[0].set_ydata(ymask)
+            ax[0].lines[1].set_xdata(self.icol)
+            ax[0].lines[1].set_ydata(self.irow)
+            img.set_extent([-0.5, image_data.shape[1]-0.5, image_data.shape[0]-0.5, -0.5])
+        else:
+            img = ax[0].imshow(image_data, norm=norm_func(vmax=image_data[self.peak_mask].mean()))
+            ax[0].plot(*np.where(self.peak_mask.T), 'xw', label='mask')
+            ax[0].plot(self.icol, self.irow, 'or', label='cen')
+            ax[0].set_xlabel('dColumn')
+            ax[0].set_ylabel('dRow')
         title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
                     rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
                     f"\n{self.status.value}"
         ax[0].set_title(title_str)
-        ax[0].set_xlabel('dColumn')
-        ax[0].set_ylabel('dRow')
         # 1D plot
         ax[1].axvline(self.xpk[self.ixlo_opt], ls='--', color='b', label='Optimal window')
         ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls='--', color='b')
@@ -745,13 +756,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             from matplotlib.backends.backend_pdf import PdfPages
             from matplotlib.colors import LogNorm
             fig, ax = plt.subplots(1, 2, subplot_kw={'projection': 'mantid'})
-            fig.subplots_adjust(wspace=0.5)  # ensure plenty spaxce between subplots (want to avoid slow tight_layout)
+            fig.subplots_adjust(wspace=0.5)  # ensure plenty space between subplots (want to avoid slow tight_layout)
             try:
                 with PdfPages(plot_filename) as pdf:
                     for ipk, pk in enumerate(pk_ws_int):
                         cbar = peak_data_collection[ipk].plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
                         pdf.savefig(fig)
-                        [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
+                        # [subax.clear() for subax in ax]  # clear axes for next figure rather than make new one (quicker)
+                        ax[1].clear()
                         cbar.remove()
                     plt.close(fig)
             except OSError:
