@@ -497,7 +497,7 @@ std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWork
 IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   auto alg = AlgorithmManager::Instance().create("StartLiveData");
   alg->initialize();
-  alg->setChild(true);
+  alg->setChild(false);
   alg->setLogging(false);
   auto const instrument = m_view->getSearchInstrument();
   auto const inputWorkspace = "TOF_live";
@@ -588,6 +588,8 @@ void RunsPresenter::finishHandle(const IAlgorithm *alg) {
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
+  g_log.warning("Live data monitor stopped; re-starting the monitor.");
+  startMonitor();
 }
 
 /** Handler called when the monitor algorithm errors
@@ -598,5 +600,9 @@ void RunsPresenter::errorHandle(const IAlgorithm *alg, const std::string &what) 
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
+  if (what != "Algorithm terminated") {
+    g_log.warning("Live data error: " + what + "; re-starting the monitor.");
+    startMonitor();
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

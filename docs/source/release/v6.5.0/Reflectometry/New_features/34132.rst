@@ -1,0 +1,1 @@
+- When running the live data monitor from the ISIS Reflectometry interface, it will now be automatically restarted if it stops unexpectedly.
