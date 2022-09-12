@@ -300,10 +300,11 @@ Code Freeze
 
 *  Ensure the latest `main nightly deployment pipeline
    https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/`__
-   has passed for all build environments.
-*  Run `open-release-testing
+   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
+   the next steps.
+*  Click ``Build Now`` on `open-release-testing
    <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
-   to create the release branch and prepare build jobs by clicking ``Build Now``.
+   to create the ``release-next`` branch and disable the main nightly deployment jobs.
 *  Check the state of all open pull requests for this milestone and decide which
    should be kept for the release, liaise with the Release Manager on this. Move any
    pull requests not targeted for release out of the milestone, and then change the base branch
