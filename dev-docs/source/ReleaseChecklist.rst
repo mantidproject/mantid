@@ -304,7 +304,7 @@ Code Freeze
    the next steps.
 *  Click ``Build Now`` on `open-release-testing
    <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
-   to create the ``release-next`` branch and disable the main nightly deployment jobs.
+   to create the ``release-next`` branch and to prepare build jobs.
 *  Check the state of all open pull requests for this milestone and decide which
    should be kept for the release, liaise with the Release Manager on this. Move any
    pull requests not targeted for release out of the milestone, and then change the base branch
@@ -318,13 +318,13 @@ Code Freeze
     python update-pr-base-branch.py [milestone] [newbase] --token [generated_token]
     python update-pr-base-branch.py "Release 6.1" "release-next" --token fake123gener8ed456token
 
-*  Inform other developers that release-next has been created by posting to the
+*  Inform other developers that ``release-next`` has been created by posting to the
    *\#announcements* slack channel. You can use an adapted version of the
    following announcement:
 
   .. code
 
-  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
+  The release branch for <version>, called ``release-next``, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
 
 **Create Release Notes Skeleton**
 
