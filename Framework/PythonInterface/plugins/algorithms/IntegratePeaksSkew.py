@@ -632,7 +632,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              "Optional file path in which to write diagnostic plots (note this will slow the "
                              "execution of algorithm).")
         self.setPropertyGroup("OutputFile", "Plotting")
-
+        # Corrections
+        self.declareProperty(name="LorentzCorrection", defaultValue=True, direction=Direction.Input,
+                             doc="Correct the integrated intensity by multiplying by the Lorentz factor "
+                                 "sin(theta)^2 / lambda^4 - do not do this if the data have already been corrected.")
+        self.setPropertyGroup("LorentzCorrection", "Corrections")
         # Output
         self.declareProperty(IPeaksWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue="",
@@ -694,6 +698,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         update_peak_pos = self.getProperty("UpdatePeakPosition").value
         # plotting
         plot_filename = self.getProperty("OutputFile").value
+        # corrections
+        do_lorz_cor = self.getProperty("LorentzCorrection").value
 
         array_converter = InstrumentArrayConverter(ws)
 
@@ -751,9 +757,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
                     # normalise by bin width before final integration
                 # calc Lorz correction
-                th = pk.getScattering() / 2
-                wl = pk.getWavelength()
-                L = (np.sin(th) ** 2) / (wl ** 4)  # at updated peak pos if applicable
+                th = pk.getScattering() / 2  # used for estimating resolution as well as Lorz Correction
+                if do_lorz_cor:
+                    L = (np.sin(th) ** 2) / (pk.getWavelength() ** 4)  # at updated peak pos if applicable
+                else:
+                    L = 1
                 # set peak object intensity
                 pk.setIntensity(L * peak_data.intens)
                 pk.setSigmaIntensity(L * peak_data.sig)

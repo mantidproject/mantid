@@ -179,6 +179,15 @@ class IntegratePeaksSkewTest(unittest.TestCase):
                                  NPixMin=1, UpdatePeakPosition=False, OutputWorkspace='out8')
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 5.46125, delta=1e-4)  # only one pixel in peak
 
+    def test_lorentz_correction_false(self):
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
+                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
+                                 LorentzCorrection=False, OutputWorkspace='out9')
+        # check intensity of first peak (only valid peak)
+        pk = out.getPeak(0)
+        self.assertAlmostEqual(pk.getIntensity(), 224, delta=1e-2)
+        self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7635, delta=1e-4)
+
     def test_nrows_edge_ncols_edge_in_array_converter(self):
         array_converter = InstrumentArrayConverter(self.ws)
         ipk = 0
