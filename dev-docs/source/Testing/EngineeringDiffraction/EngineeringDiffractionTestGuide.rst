@@ -17,7 +17,7 @@ will be needed as older runs may be deleted.
 Overview
 ^^^^^^^^
 The Engineering Diffraction interface allows scientists using the EnginX instrument to interactively
-process their data. There are 3 tabs which are ordered according to the main steps performed.
+process their data. There are 4 tabs in total but only the first 3 need testing (the GSAS II tab is being evaluated by the users and is in an extended beta testing phase).
 These are:
 
 - Calibration - This is where a cerium oxide run are entered to calibrate the subsequent data.
@@ -107,7 +107,7 @@ This test covers the Cropping functionality in the Calibration tab.
 
 1. Change the RB Number to "North", this is purely to separate the cropped output files into their own space.
 
-2. Go to the Calibration tab and tick the Crop Calibration option. In the drop down "Region of Interest" select `1 (North)`.
+2. Go to the Calibration tab, select "Create New Calibration" and tick the Crop Calibration option. In the drop down "Region of Interest" select `1 (North)`.
 
 3. Check the "Plot Calibrated Workspace" checkbox and click calibrate.
 
@@ -119,10 +119,10 @@ This test covers the Cropping functionality in the Calibration tab.
 
 7. Change the RB number to "Custom".
 
-8. Repeat steps 2-5 this time using Custom Spectra `1200-1400` (these spectrum number correspond to the South Bank). Please note that some custom spectra values may
+8. Repeat steps 2-5 this time setting "Region Of Interest" to "Crop to Spectra" and using Custom Spectra `1200-1400` (these spectrum number correspond to the South Bank). Please note that some custom spectra values may
    cause the algorithms to fail.
 
-9. Repeat steps 2-5 with the Texture grouping - there should be 20 spectra per run.
+9. Repeat steps 2-5 with "Region of Interest" set to "Texture (20 spec)" - there should be 20 spectra per run.
 
 
 Test 4
@@ -149,9 +149,9 @@ Test 5
 
 This tests the removal of focused runs from the fitting tab.
 
-1. Having loaded multiple runs, select a row in the UI table and then click the `Remove Selected` button below the table. The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the log tables with each row corresponding to the run in the same row of the UI table. The workspace of the focussed run that was removed from the UI will still exist in the ADS.
+1. Having loaded multiple runs, select a row in the UI table and then click the `Remove Selected` button below the table. The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the table workspaces inside the "_logs" workspace group with each row corresponding to the run in the same row of the UI table. The workspaces called "ENGINX\_...._TOF" and "ENGINX\_...._TOG_bgsub" will be deleted from the ADS
 
-2. Try clicking the `Remove All` button, the UI table should be empty and the log workspaces no longer present.
+2. Try clicking the `Remove All` button, the UI table should be empty and the workspace group with name ending "_logs" should no longer be present.
 
 3. Try loading in a run again, the UI should still be able to access the workspace and remember the log values - check there are no calls to ``AverageLogData`` in the log (should be visible at notice level).
 
