@@ -247,8 +247,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 alg.execute()
         return output_workspace_names
 
-    @staticmethod
-    def _has_single_2D_rectangular_detector(workspace) -> bool:
+    def _has_single_2D_rectangular_detector(self, workspace) -> bool:
         """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""
         is_group = isinstance(workspace, WorkspaceGroup)
         if is_group:
@@ -271,7 +270,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if is_group:
             raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
 
+        if not self._spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
+            return False
+
         return True
+
+    @staticmethod
+    def _spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
+        """Returns true if the detectors in a rectangular bank are found in a workspace."""
+        def _safe_get_id(ws_index):
+            try:
+                return workspace.getDetector(ws_index).getID()
+            except Exception:
+                return None
+
+        workspace_det_ids = [_safe_get_id(i) for i in range(workspace.getNumberHistograms())]
+        return all(det_id in workspace_det_ids for det_id in [rectangular_detector.minDetectorID(),
+                                                              rectangular_detector.maxDetectorID()])
 
     def _prefixedName(self, name, isTrans):
         """Add a prefix for TOF workspaces onto the given name"""
