@@ -465,6 +465,8 @@ class PeakData:
             ax[0].plot(self.icol, self.irow, 'or', label='cen')
             ax[0].set_xlabel('dColumn')
             ax[0].set_ylabel('dRow')
+            cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0], label='Intensity')
+            cbar.ax.tick_params(labelsize=7, which='both')
             # 1D focused spectrum
             ax[1].axvline(self.xpk[self.ixlo_opt], ls='--', color='b', label='Optimal window')
             ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls='--', color='b')
@@ -480,8 +482,8 @@ class PeakData:
         else:
             # update 2D colorfill
             img = ax[0].images[0]
+            img.set_norm(norm_func(vmin=image_data[image_data > 0].min(), vmax=image_data[self.peak_mask].mean()))
             img.set_data(image_data)
-            img.set_norm(norm_func(vmax=image_data[self.peak_mask].mean()))
             xmask, ymask = np.where(self.peak_mask.T)
             ax[0].lines[0].set_xdata(xmask)
             ax[0].lines[0].set_ydata(ymask)
@@ -508,14 +510,11 @@ class PeakData:
                     rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
                     f"\n{self.status.value}"
         ax[0].set_title(title_str)
-        cbar = fig.colorbar(img, orientation='horizontal', ax=ax[0], label='Intensity')
-        cbar.ax.tick_params(labelsize=7, which='both')
         # format 1D
         intens_over_sig = round(self.intens / self.sig, 2) if self.sig > 0 else 0
         ax[1].set_title(f'I/sig = {intens_over_sig}')
         ax[1].relim()
         ax[1].autoscale_view()
-        return cbar  # need object returned so can cleanup after fig saved to pdf
 
 
 class IntegratePeaksSkew(DataProcessorAlgorithm):
@@ -778,13 +777,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             try:
                 with PdfPages(plot_filename) as pdf:
                     for ipk, pk in enumerate(pk_ws_int):
-                        cbar = peak_data_collection[ipk].plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
+                        peak_data_collection[ipk].plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
                         pdf.savefig(fig)
-                        cbar.remove()
-                    plt.close(fig)
             except OSError:
                 raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
                                    f"another programme and that the user has permission to write to that directory.")
+            plt.close(fig)
         # estimate TOF resolution params
         if len(thetas) > 1:
             # linear fit to (dT/T)^2 vs. cot(theta)^2
