@@ -34,8 +34,6 @@ namespace MantidQt::CustomInterfaces {
  */
 IndirectSqwView::IndirectSqwView(QWidget *parent) {
   m_uiForm.setupUi(parent);
-  m_dblManager = new QtDoublePropertyManager();
-  m_dblEdFac = new DoubleEditorFactory(this);
 
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
 
