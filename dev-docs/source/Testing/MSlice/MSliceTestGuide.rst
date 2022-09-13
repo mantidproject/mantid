@@ -112,10 +112,21 @@ Taking Cuts
    :align: center
    :width: 80%
 
-2. Modifying a Cut
+2. Changing the intensity of a Cut
+##################################
+#. Navigate to the ``Intensity`` menu on the cut plot
+#. Select ``Chi''(Q,E)`` and set a value of ``100``
+#. The y axis of the cut plot should change to a higher maximal value
+
+.. figure:: ../../../../docs/source/images/cut_q_chi.png
+   :alt: cut_q_chi.png
+   :align: center
+   :width: 80%
+
+3. Modifying a Cut
 ##################
 
-#. Check that the menu item ``Intensity`` is disabled as well as the item ``Recoil lines`` within the menu item ``Information``.
+#. Check that the menu item ``Recoil lines`` is disabled within the menu item ``Information``.
 #. Modify the step size on the ``Cut`` tab to ``0.02`` and click ``Plot Over``. A second cut should appear on the cut plot in a different colour.
 #. Click on Plot Options on the cut plot and modify settings
 #. Ensure that the cut plot changes accordingly
@@ -136,7 +147,7 @@ Taking Cuts
    :align: center
    :width: 80%
 
-3. Interactive Cuts
+4. Interactive Cuts
 ###################
 
 #. Navigate to the ``Slice`` tab of the ``Workspace Manager`` tab
@@ -160,7 +171,7 @@ Taking Cuts
    :align: center
    :width: 80%
 
-4. Overplot Bragg Peaks
+5. Overplot Bragg Peaks
 #######################
 
 #. Navigate to the ``Information`` menu on the cut plot
@@ -172,14 +183,20 @@ Taking Cuts
    :align: center
    :width: 80%
 
-5. Generate a Script
+6. Generate a Script
 ####################
 
+#. Navigate to the ``Cut`` tab
+#. In the row labelled ``along``, set the ``from`` value to ``0`` and the ``to`` value to ``10``
+#. In the row labelled ``over``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
+#. Click ``Plot``. A new window with a cut plot should open.
+#. Navigate to the ``Information`` menu on the cut plot
+#. Select ``Aluminium`` from the submenu for ``Bragg peaks``. Green lines should appear on the cut plot with a respective legend entry.
 #. Navigate to the ``File`` menu on a cut plot. Please note that this needs to be a cut plot created via the ``Cut`` tab and not an interactive cut.
 #. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
 #. Run the script and check that the same cut plot is displayed
 
-6. Waterfall Plots
+7. Waterfall Plots
 ##################
 
 #. Navigate to the ``Cut`` tab

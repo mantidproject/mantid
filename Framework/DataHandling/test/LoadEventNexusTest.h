@@ -1066,6 +1066,18 @@ public:
     TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
   }
 
+  void test_load_fails_on_empty_pulse_times() {
+    // Some ISIS runs can contain no pulse times.
+    // LoadEventNexus should not cause a crash in these cases; for now just fail to load.
+    LoadEventNexus loader;
+
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setPropertyValue("Filename", "LARMOR00067436.nxs");
+    TS_ASSERT_THROWS(loader.execute(), const std::invalid_argument &);
+  }
+
   void test_load_ILL_no_triggers() {
     // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
     // But some of these nexuses don't have any triggers either, so they are modified to be allowed to be loaded.

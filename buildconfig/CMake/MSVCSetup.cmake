@@ -162,8 +162,6 @@ endif()
 # Configure Mantid startup scripts
 # ######################################################################################################################
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
-# build version
-set(MANTIDPYTHON_PREAMBLE "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%PATH%")
 
 configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY)
 # place it in the appropriate directory
@@ -172,8 +170,6 @@ file(
   OUTPUT ${MSVC_BIN_DIR}/mantidpython.bat
   INPUT ${PROJECT_BINARY_DIR}/mantidpython.bat.in
 )
-# install version
-set(MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%PATH%")
 
 configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY)
 
