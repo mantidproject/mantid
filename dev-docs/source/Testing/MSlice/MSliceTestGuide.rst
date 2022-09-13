@@ -126,7 +126,7 @@ Taking Cuts
 3. Modifying a Cut
 ##################
 
-#. Check that the menu item ``Recoil lines` is disabled within the menu item ``Information``.
+#. Check that the menu item ``Recoil lines`` is disabled within the menu item ``Information``.
 #. Modify the step size on the ``Cut`` tab to ``0.02`` and click ``Plot Over``. A second cut should appear on the cut plot in a different colour.
 #. Click on Plot Options on the cut plot and modify settings
 #. Ensure that the cut plot changes accordingly
