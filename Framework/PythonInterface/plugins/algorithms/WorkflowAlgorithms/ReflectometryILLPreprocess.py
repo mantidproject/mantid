@@ -769,7 +769,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             PixelSize=common.pixelSize(self._instrumentName),
             DetectorCorrectionType='RotateAroundSample',
             DetectorFacesSample=True,
-            EnableLogging=self._subalgLogging,
+            EnableLogging=self._subalgLogging
         )
 
         self._cleanup.cleanup(ws)
