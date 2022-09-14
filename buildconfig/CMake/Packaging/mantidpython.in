@@ -29,13 +29,6 @@ else
     LOCAL_QT_API="pyqt5" # force to use qt5
 fi
 
-# Find private sip module if it exists. Required by qtpy
-if [ -f "${INSTALLDIR}/lib/PyQt4/sip.so" ]; then
-  if [ "$LOCAL_QT_API" = "pyqt" ] || [ "$LOCAL_QT_API" = "pyqt4" ]; then
-    LOCAL_PYTHONPATH=$LOCAL_PYTHONPATH:${INSTALLDIR}/lib/PyQt4
-  fi
-fi
-
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
     set -- @WRAPPER_PREFIX@@Python_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
