@@ -57,6 +57,11 @@ Both the processed direct beam, and its summed foreground are cached.
 Care must be taken when enabling the caching, since if the same direct beam must be used with different options (e.g. different wavelength ranges) for different reflected beams, the caching will result in an error in subsequent reduction steps due to incompatibility of the workspaces.
 In such case the caching must be disabled, or one has to clean the cache manually by deleting the corresponding workspaces.
 
+Gravity correction
+------------------
+
+Gravity correction is relevant for data reduction at FIGARO. Its execution is steered by a switch: `CorrectGravity`. The correction follows the algorithm described in Ref. [#Gutfreund]_, and the application to data is split in two separate steps. The first step corrects the wavelength axis of both direct and reflected beams, and takes place in :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, where also the corrected by gravity reflection angle is calculated. The second and final step corrects the reflection angle, and is applied to data in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
+
 Workflow
 --------
 
