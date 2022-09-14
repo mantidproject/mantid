@@ -19,7 +19,7 @@ if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
-SETUP_TOOLS_VERS=`@PYTHON_EXECUTABLE@ -m pip show setuptools | grep Version | cut -d. -f1 | cut -d' ' -f2`
+SETUP_TOOLS_VERS=$(@PYTHON_EXEC_LOCAL@ -c "from setuptools import __version__; print(__version__)" | cut -d . -f1)
 if [ "$SETUP_TOOLS_VERS" -ge "49" ]; then
    # Print red so people notice it when they get a stack trace
    echo "\e[31mSetup tools is >= 49. You may run into issues with a clean build.\e[0m"
@@ -31,4 +31,4 @@ fi
 LD_PRELOAD=${LOCAL_PRELOAD} \
     PYTHONPATH=${LOCAL_PYTHONPATH} @QT_QPA@ \
     @WRAPPER_PREFIX@$VGLRUN $GDB \
-    @PYTHON_EXECUTABLE@ @PYTHON_ARGS@ $INSTALLDIR/bin/@MANTIDWORKBENCH_EXEC@ "$@"@WRAPPER_POSTFIX@
+    @PYTHON_EXEC_LOCAL@ @PYTHON_ARGS@ $INSTALLDIR/bin/@MANTIDWORKBENCH_EXEC@ "$@"@WRAPPER_POSTFIX@

@@ -190,6 +190,12 @@ set(PYTHON_ARGS "-Wdefault::DeprecationWarning -Werror:::mantid -Werror:::mantid
 
 set(LOCAL_PYPATH "\${INSTALLDIR}/bin")
 
+if(CONDA_ENV)
+  set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
+else()
+  set(PYTHON_EXEC_LOCAL "${PYTHON_EXECUTABLE}")
+endif()
+
 # used by mantidworkbench
 if(ENABLE_WORKBENCH)
   set(MANTIDWORKBENCH_EXEC workbench) # what the actual thing is called
@@ -216,6 +222,11 @@ unset(PYTHON_ARGS)
 
 # used by mantidplot and mantidworkbench
 set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
+if(CONDA_BUILD)
+  set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
+else()
+  set(PYTHON_EXEC_LOCAL "${PYTHON_EXECUTABLE}")
+endif()
 
 if(ENABLE_WORKBENCH)
   set(MANTIDWORKBENCH_EXEC workbench) # what the actual thing is called
