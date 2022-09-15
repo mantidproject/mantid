@@ -53,77 +53,72 @@ For a full release, ``C:\MantidInstall\`` is likely the correct install path. Ta
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
-
 2. Does the **error reporter** appear? Is there a useful stacktrace? [If the errorreport won't send, the user can check with "Show Details"]
-
 
 3. Try launching from a command prompt:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	C:\MantidInstall\bin\MantidWorkbench
+      C:\MantidInstall\bin\MantidWorkbench
 
-If this does not work, try launching with:
+   If this does not work, try launching with:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd C:\MantidInstall\bin
-	set QT_PLUGIN_PATH=%CD%\..\plugins\qt5
-	set PYTHONPATH=%CD%;%PYTHONPATH%
-	python -m workbench.app.main
-
+      cd C:\MantidInstall\bin
+      set QT_PLUGIN_PATH=%CD%\..\plugins\qt5
+      set PYTHONPATH=%CD%;%PYTHONPATH%
+      python -m workbench.app.main
 
 4. Does **Qt** import correctly? In a command prompt / terminal window, run the following:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    C:\MantidInstall\bin\mantidpython.bat --classic
-    import qtpy.QtCore
-
+       C:\MantidInstall\bin\mantidpython.bat --classic
+       import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    C:\MantidInstall\bin\mantidpython.bat --classic
-    import mantid.simpleapi
-
+       C:\MantidInstall\bin\mantidpython.bat --classic
+       import mantid.simpleapi
 
 6. Turn off **Server Checks**: Open ``C:\MantidInstall\bin\Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
-	c. Usage Reporting: ``usagereports.enabled = 0``
-	d. Project Recovery: ``projectRecovery.enabled=false``
 
+   a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+   b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
+   c. Usage Reporting: ``usagereports.enabled = 0``
+   d. Project Recovery: ``projectRecovery.enabled=false``
 
 7. Try renaming **Config Files**:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd %APPDATA%\mantidproject
-	mv mantidproject.ini mantidproject.ini.backup
-	# Try again to start workbench, if that doesn't work ...
+      cd %APPDATA%\mantidproject
+      mv mantidproject.ini mantidproject.ini.backup
+      # Try again to start workbench, if that doesn't work ...
 
-	cd %APPDATA%\mantidproject
-	mv mantid mantidbackup
-	# Try again to start workbench
+      cd %APPDATA%\mantidproject
+      mv mantid mantidbackup
+      # Try again to start workbench
 
-Advanced options:
+**Advanced options:**
 
 8. Check the PATH for conflicts with Mantid:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	echo %PATH%
+      echo %PATH%
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    cd C:\MantidInstall\bin\
-    python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
+       cd C:\MantidInstall\bin\
+       python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything outside of ``C:\MantidInstall`` could be a problem.
 
-If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``set PYTHONNOUSERSITE=1``
+   If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``set PYTHONNOUSERSITE=1``
 
 10.  Try to open workbench. After it fails, open **Event Viewer** (just search in the Windows menu bar) and selected ``Windows Logs->Application``. Double-click on the relevant error line/s and send the crash information to the dev team.
 
@@ -139,81 +134,74 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
-
 2. Does the **error reporter** appear? Is there a useful stacktrace? [If the errorreport won't send, the user can check with "Show Details"]
-
 
 3. Try launching from the terminal:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	/opt/Mantid/bin/mantidworkbench
-
+      /opt/Mantid/bin/mantidworkbench
 
 4. Does **Qt** import correctly? In terminal, run the following:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /opt/Mantid/bin/mantidpython --classic
-    import qtpy.QtCore
-
+      /opt/Mantid/bin/mantidpython --classic
+      import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /opt/Mantid/bin/mantidpython --classic
-    import mantid.simpleapi
-
+      /opt/Mantid/bin/mantidpython --classic
+      import mantid.simpleapi
 
 6. Try renaming **Config Files**:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd $HOME/.config/mantidproject
-	mv mantidproject.ini mantidproject.ini.backup
-	# Try again to start workbench, if that doesn't work ...
+      cd $HOME/.config/mantidproject
+      mv mantidproject.ini mantidproject.ini.backup
+      # Try again to start workbench, if that doesn't work ...
 
-	cd $HOME
-	mv .mantid .mantidbackup
-	# Try again to start workbench
-
+      cd $HOME
+      mv .mantid .mantidbackup
+      # Try again to start workbench
 
 7. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
-	c. Usage Reporting: ``usagereports.enabled = 0``
-	d. Project Recovery: ``projectRecovery.enabled=false``
+
+   a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+   b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
+   c. Usage Reporting: ``usagereports.enabled = 0``
+   d. Project Recovery: ``projectRecovery.enabled=false``
 
 
-Advanced Options:
-
+**Advanced Options:**
 
 8. Check the PATH for conflicts with Mantid: e.g. Anything relating to ``.local`` could be a problem.
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	echo $PATH
+      echo $PATH
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    cd /opt/Mantid/bin/
-    python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
-
+      cd /opt/Mantid/bin/
+      python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
    If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
-10. Check the terminal output for an error ``Failed to create history session``. This can happen if the sqlite database has not been unlocked, e.g. from a previous crashed session. To work around this, replace the original with a new copy. The warning should give the location of the database, e.g. ``~/.ipython/profile_default/history.sqlite``
+10. Check the terminal output for an error ``Failed to create history session``.
 
-    Ensure there are no Mantid sessions running, then make a copy of the database as follows (replace the path if it is different from above):
+    This can happen if the sqlite database has not been unlocked, e.g. from a previous crashed session. To work around this, replace the original with a new copy. The warning should give the location of the database, e.g. ``~/.ipython/profile_default/history.sqlite``. Ensure there are no Mantid sessions running, then make a copy of the database as follows (replace the path if it is different):
 
-.. code-block:: shell
+    .. code-block:: shell
 
-   cd ~/.ipython/profile_default/
-   mv history.sqlite history.sqlite.orig
-   cp history.sqlite.orig history.sqlite
+       cd ~/.ipython/profile_default/
+       mv history.sqlite history.sqlite.orig
+       cp history.sqlite.orig history.sqlite
 
 11. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
 
@@ -225,76 +213,70 @@ MacOS
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
-
 2. Does the **error reporter** appear? Is there a useful stacktrace? [If the errorreport won't send, the user can check with "Show Details"]
-
 
 3. Try launching from terminal, by running the following:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-   open --stdout=workbench_bundle.log --stderr=workbench_bundle.log /Applications/MantidWorkbench.app
+      open --stdout=workbench_bundle.log --stderr=workbench_bundle.log /Applications/MantidWorkbench.app
 
-If this does not work, try launching with:
+   If this does not work, try launching with:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-   cd /Applications/MantidWorkbench.app/Contents/MacOS
-   ../Resources/python -m workbench.app.main
+      cd /Applications/MantidWorkbench.app/Contents/MacOS
+      ../Resources/python -m workbench.app.main
 
+4. Does **Qt** import correctly?
 
-1. Does **Qt** import correctly?
+   .. code-block:: shell
 
-.. code-block:: shell
-
-   /Applications/MantidWorkbench.app/Contents/Resources/python
-   import qtpy.QtCore
-
+      /Applications/MantidWorkbench.app/Contents/Resources/python
+      import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /Applications/MantidWorkbench.app/Contents/Resources/python
-    import mantid.simpleapi
-
+       /Applications/MantidWorkbench.app/Contents/Resources/python
+       import mantid.simpleapi
 
 6. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
-	c. Usage Reporting: ``usagereports.enabled = 0``
-	d. Project Recovery: ``projectRecovery.enabled=false``
 
+   a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+   b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
+   c. Usage Reporting: ``usagereports.enabled = 0``
+   d. Project Recovery: ``projectRecovery.enabled=false``
 
 7. Try renaming **Config files**:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd $HOME/.config/mantidproject
-	mv mantidproject.ini mantidproject.ini.backup
-	# Try again to start workbench, if that doesn't work ...
+      cd $HOME/.config/mantidproject
+      mv mantidproject.ini mantidproject.ini.backup
+      # Try again to start workbench, if that doesn't work ...
 
-	cd ~
-	mv .mantid .mantidbackup
-	# Try again to start workbench
+      cd ~
+      mv .mantid .mantidbackup
+      # Try again to start workbench
 
-Advanced Options:
 
+**Advanced Options:**
 
 8. Check the PATH for conflicts with Mantid: e.g. Anything relating to ``.local`` could be a problem.
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	echo $PATH
+      echo $PATH
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    cd /Applications/MantidWorkbench.app/Contents/Resources/
-    python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
-
+      cd /Applications/MantidWorkbench.app/Contents/Resources/
+      python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
-If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
+   If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
 10. Further diagnosis for process monitoring: `dtrace <http://dtrace.org/>`_.
