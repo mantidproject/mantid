@@ -203,9 +203,19 @@ Advanced Options:
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
-If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
+   If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
-10. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
+10. Check the terminal output for an error ``Failed to create history session``. This can happen if the sqlite database has not been unlocked, e.g. from a previous crashed session. To work around this, replace the original with a new copy. The warning should give the location of the database, e.g. ``~/.ipython/profile_default/history.sqlite``
+
+    Ensure there are no Mantid sessions running, then make a copy of the database as follows (replace the path if it is different from above):
+
+.. code-block:: shell
+
+   cd ~/.ipython/profile_default/
+   mv history.sqlite history.sqlite.orig
+   cp history.sqlite.orig history.sqlite
+
+11. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
 
 
 .. _Trouble_MacOS:
