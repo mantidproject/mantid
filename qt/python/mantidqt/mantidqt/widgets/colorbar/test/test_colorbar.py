@@ -73,3 +73,42 @@ class ColorbarWidgetTest(TestCase):
 
             self.assertEqual(self.widget.cmin_value, expected_c_min)
             self.assertEqual(self.widget.cmax_value, c_max)
+
+    def test_that_all_zero_slice_with_log_normalisation_gives_valid_clim(self):
+        image = plt.imshow(self.data*0, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.norm.setCurrentIndex(NORM_OPTS.index("Log"))
+        c_min, c_max = self.widget._calculate_clim()
+
+        self.assertEqual(c_min, 0.1)
+        self.assertEqual(c_max, 1)
+
+    def test_that_all_nan_slice_with_log_normalisation_gives_valid_clim(self):
+        image = plt.imshow(self.data*np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        for normalisation_index in range(len(NORM_OPTS)):
+            self.widget.norm.setCurrentIndex(normalisation_index)
+            c_min, c_max = self.widget._calculate_clim()
+
+            self.assertEqual(c_min, 0.1)
+            self.assertEqual(c_max, 1)
+
+    def test_mixed_slice_gives_valid_clim(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        for normalisation_index in range(len(NORM_OPTS)):
+            self.widget.norm.setCurrentIndex(normalisation_index)
+            c_min, c_max = self.widget._calculate_clim()
+            expected_c_min = 0 if normalisation_index != NORM_OPTS.index("Log") else 1
+
+            self.assertEqual(c_min, expected_c_min)
+            self.assertEqual(c_max, 99)
