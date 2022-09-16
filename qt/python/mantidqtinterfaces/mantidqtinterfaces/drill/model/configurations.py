@@ -420,7 +420,8 @@ class RundexSettings(object):
                 "ReflFitStartWorkspaceIndex",
                 "ReflFitEndWorkspaceIndex",
                 "ReflFitWavelengthLowerBound",
-                "ReflFitWavelengthUpperBound"
+                "ReflFitWavelengthUpperBound",
+                "CorrectGravity"
                 ],
             REFL_NPOL : [
                 "DirectFlatBackground",
@@ -453,7 +454,8 @@ class RundexSettings(object):
                 "ReflFitStartWorkspaceIndex",
                 "ReflFitEndWorkspaceIndex",
                 "ReflFitWavelengthLowerBound",
-                "ReflFitWavelengthUpperBound"
+                "ReflFitWavelengthUpperBound",
+                "CorrectGravity"
                 ],
             POWDER_DSCAN: [
                 "NormaliseTo",
