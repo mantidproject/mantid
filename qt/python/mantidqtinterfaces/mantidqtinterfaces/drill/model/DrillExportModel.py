@@ -20,7 +20,8 @@ import os
 class DrillExportModel:
 
     """
-    Dictionnary containing algorithms and activation state.
+    Dictionnary containing algorithm (name, extension) tuples and activation
+    state.
     """
     _exportAlgorithms = None
 
