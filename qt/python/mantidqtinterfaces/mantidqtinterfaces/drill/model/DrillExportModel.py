@@ -59,10 +59,7 @@ class DrillExportModel:
         self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
         self._exportExtensions = dict()
         self._exportDocs = dict()
-        for a in self._exportAlgorithms.keys():
-            if a in RundexSettings.EXPORT_ALGO_EXTENSION:
-                self._exportExtensions[a] = \
-                    RundexSettings.EXPORT_ALGO_EXTENSION[a]
+        for (a, _) in self._exportAlgorithms.keys():
             try:
                 alg = AlgorithmManager.createUnmanaged(a)
                 self._exportDocs[a] = alg.summary()
@@ -79,7 +76,7 @@ class DrillExportModel:
         Returns:
             list(str): names of algorithms
         """
-        return [algo for algo in self._exportAlgorithms.keys()]
+        return [algo for (algo, _) in self._exportAlgorithms.keys()]
 
     def getAlgorithmExtentions(self):
         """
@@ -88,7 +85,7 @@ class DrillExportModel:
         Returns:
             dict(str:str): dictionnary algo:extension
         """
-        return {k:v for k,v in self._exportExtensions.items()}
+        return {algo:ext for (algo,ext) in self._exportAlgorithms.keys()}
 
     def getAlgorithmDocs(self):
         """
@@ -106,8 +103,9 @@ class DrillExportModel:
         Args:
             algorithm: name of the algo
         """
-        if algorithm in self._exportAlgorithms:
-            return self._exportAlgorithms[algorithm]
+        extension = ""
+        if (algorithm, extension) in self._exportAlgorithms:
+            return self._exportAlgorithms[(algorithm, extension)]
         else:
             return False
 
@@ -118,8 +116,9 @@ class DrillExportModel:
         Args:
             algorithm (str): name of the algo
         """
-        if algorithm in self._exportAlgorithms:
-            self._exportAlgorithms[algorithm] = True
+        extension = ""
+        if (algorithm, extension) in self._exportAlgorithms:
+            self._exportAlgorithms[(algorithm, extension)] = True
 
     def inactivateAlgorithm(self, algorithm):
         """
@@ -128,8 +127,9 @@ class DrillExportModel:
         Args:
             algorithm (str): name of the algo
         """
-        if algorithm in self._exportAlgorithms:
-            self._exportAlgorithms[algorithm] = False
+        extension = ""
+        if (algorithm, extension) in self._exportAlgorithms:
+            self._exportAlgorithms[(algorithm, extension)] = False
 
     def _validCriteria(self, ws, algo):
         """
