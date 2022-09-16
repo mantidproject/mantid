@@ -15,7 +15,7 @@ from mantid.api import MatrixWorkspace, mtd
 from mantid.kernel import logger
 
 
-class ScanExplorerModel:
+class SimpleScanViewerModel:
 
     def __init__(self, presenter=None):
         self.presenter = presenter

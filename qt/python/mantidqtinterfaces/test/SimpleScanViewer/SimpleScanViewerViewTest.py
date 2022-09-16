@@ -15,7 +15,7 @@ from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import config
 
-from mantidqtinterfaces.scanexplorer.view import ScanExplorerView
+from mantidqtinterfaces.simplescanviewer.view import SimpleScanViewerView
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerDataView
 
 app = QApplication(sys.argv)
@@ -30,11 +30,11 @@ class SimpleScanViewerViewTest(unittest.TestCase):
         config['default.instrument'] = "D16"
 
         patch = mock.patch(
-                'mantidqtinterfaces.scanexplorer.presenter.ScanExplorerPresenter')
+                'mantidqtinterfaces.simplescanviewer.presenter.SimpleScanViewerPresenter')
         self.mocked_presenter = patch.start()
         self.addCleanup(patch.stop)
 
-        self.view = ScanExplorerView()
+        self.view = SimpleScanViewerView()
         self.view.presenter = self.mocked_presenter
 
     def tearDown(self) -> None:

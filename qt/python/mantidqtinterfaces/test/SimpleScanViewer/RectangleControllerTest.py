@@ -15,7 +15,7 @@ from matplotlib.widgets import Rectangle
 from mantid.simpleapi import config
 from mantid.api import mtd
 
-from mantidqtinterfaces.scanexplorer.rectangle_controller import RectangleController, RectanglesManager
+from mantidqtinterfaces.simplescanviewer.rectangle_controller import RectangleController, RectanglesManager
 
 app = QApplication(sys.argv)
 

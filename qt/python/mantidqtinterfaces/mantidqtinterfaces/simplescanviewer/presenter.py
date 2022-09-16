@@ -15,18 +15,18 @@ from mantid.kernel import logger, config
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.gui_helper import show_interface_help
 
-from .model import ScanExplorerModel
-from .view import ScanExplorerView
+from .model import SimpleScanViewerModel
+from .view import SimpleScanViewerView
 
 
-class ScanExplorerPresenter:
+class SimpleScanViewerPresenter:
 
     def __init__(self):
         self._ws: MatrixWorkspace = None  # the workspace containing the data shown
         self._bg_ws: MatrixWorkspace = None  # the workspace containing the background, if there is one.
 
-        self.view = ScanExplorerView(presenter=self)
-        self.model = ScanExplorerModel(presenter=self)
+        self.view = SimpleScanViewerView(presenter=self)
+        self.model = SimpleScanViewerModel(presenter=self)
 
         self.view.sig_file_selected.connect(self.on_file_selected)
         self.view.file_line_edit.returnPressed.connect(self.on_line_edited)

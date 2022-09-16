@@ -19,7 +19,7 @@ from .rectangle_plot import MultipleRectangleSelectionLinePlot
 from .rectangle_controller import RectanglesManager
 
 
-class ScanExplorerView(QMainWindow):
+class SimpleScanViewerView(QMainWindow):
 
     """Index of the slice viewer widget in the splitter. Used to replace it when needed."""
     SLICE_VIEWER_SPLITTER_INDEX = 0
@@ -112,7 +112,7 @@ class ScanExplorerView(QMainWindow):
         self.splitter.addWidget(bar_widget)
 
         # register startup
-        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "ScanExplorer", False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "SimpleScanViewer", False)
 
     def manage_buttons(self):
         """

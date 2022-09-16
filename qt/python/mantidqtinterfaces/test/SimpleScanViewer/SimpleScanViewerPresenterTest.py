@@ -15,7 +15,7 @@ from qtpy.QtWidgets import QApplication
 from mantid.simpleapi import config, CreateSampleWorkspace, CreateWorkspace
 from mantid.api import mtd, AlgorithmManager
 
-from mantidqtinterfaces.scanexplorer.presenter import ScanExplorerPresenter
+from mantidqtinterfaces.simplescanviewer.presenter import SimpleScanViewerPresenter
 
 app = QApplication(sys.argv)
 
@@ -28,11 +28,11 @@ class SimpleScanViewerPresenterTest(unittest.TestCase):
         config['default.instrument'] = "D16"
 
         patch = mock.patch(
-                'mantidqtinterfaces.scanexplorer.model.ScanExplorerModel')
+                'mantidqtinterfaces.simplescanviewer.model.SimpleScanViewerModel')
         self.mocked_model = patch.start()
         self.addCleanup(patch.stop)
 
-        self.presenter = ScanExplorerPresenter()
+        self.presenter = SimpleScanViewerPresenter()
 
     def tearDown(self) -> None:
         config['default.facility'] = self.facility

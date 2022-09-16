@@ -11,23 +11,23 @@ import sys
 from mantid.kernel import config, logger
 
 if config['default.facility'] != 'ILL':
-    logger.error('ScanExplorer is enabled only if the facility is set to ILL.')
+    logger.error('The scan viewer is enabled only if the facility is set to ILL.')
 else:
     from mantidqt.gui_helper import get_qapplication
-    from mantidqtinterfaces.scanexplorer.presenter import ScanExplorerPresenter
+    from mantidqtinterfaces.simplescanviewer.presenter import SimpleScanViewerPresenter
 
     app, within_mantid = get_qapplication()
-    if 'scanExplorer' not in globals():
-        scan_explorer = ScanExplorerPresenter()
+    if 'SimpleScanViewer' not in globals():
+        scan_viewer = SimpleScanViewerPresenter()
     else:
-        scan_explorer = globals()["scanExplorer"]
+        scan_viewer = globals()["SimpleScanViewer"]
         try:
-            visible = scan_explorer.isVisible()
+            visible = scan_viewer.isVisible()
         except:
             # underlying Qt object has been deleted
             visible = False
         if not visible:
-            scan_explorer = ScanExplorerPresenter()
-    scan_explorer.show()
+            scan_viewer = SimpleScanViewerPresenter()
+    scan_viewer.show()
     if not within_mantid:
         sys.exit(app.exec_())
