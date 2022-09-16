@@ -87,8 +87,8 @@ class DrillExportDialog(QDialog):
         Set the check state of algorithm.
 
         Args:
-            sates (dict(str:bool)): for each algorithm name, a bool to set its
-                                    check state
+            sates (dict((str, str): bool)): activation state for each algorithm
+                                            (name, ext) tuple
         """
         for a,s in states.items():
             if a in self._widgets:
@@ -99,7 +99,7 @@ class DrillExportDialog(QDialog):
         Get the check state of algorithms.
 
         Returns:
-            dict(str:bool): for each algorithm name, a bool to set its check
-                            state
+            dict((str, str): bool): activation state for each algorithm
+                                    (name, ext) tuple
         """
         return {a:w.isChecked() for a,w in self._widgets.items()}
