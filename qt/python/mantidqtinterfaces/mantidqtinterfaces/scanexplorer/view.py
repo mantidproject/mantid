@@ -28,7 +28,7 @@ class ScanExplorerView(QMainWindow):
     FILE_EXTENSION_FILTER = "*.nxs"
 
     """Signal sent when a file is selected to be loaded in the file dialog."""
-    sig_files_selected = Signal(str)
+    sig_file_selected = Signal(str)
 
     """Signal sent when a file is selected as a background in the dialog."""
     sig_background_selected = Signal(str)
@@ -212,14 +212,7 @@ class ScanExplorerView(QMainWindow):
         """
         Slot triggered by clicking on set/replace background workspace. Open a window to select the workspace.
         """
-        base_directory = self.presenter.get_base_directory()
-
-        dialog = QFileDialog()
-        dialog.setFileMode(QFileDialog.ExistingFiles)
-        file_path, _ = dialog.getOpenFileName(parent=self,
-                                              caption="Open file",
-                                              directory=base_directory,
-                                              filter=self.FILE_EXTENSION_FILTER)
+        file_path = self._open_file_dialog()
         if file_path:
             self.sig_background_selected.emit(file_path)
 
@@ -245,6 +238,15 @@ class ScanExplorerView(QMainWindow):
         """
         Open a new directory manager window so the user can select files.
         """
+        file_path = self._open_file_dialog()
+        if file_path:
+            self.sig_file_selected.emit(file_path)
+
+    def _open_file_dialog(self) -> str:
+        """
+        Open a file dialog.
+        @return the file selected by the user.
+        """
         base_directory = self.presenter.get_base_directory()
 
         dialog = QFileDialog()
@@ -253,8 +255,8 @@ class ScanExplorerView(QMainWindow):
                                               caption="Open file",
                                               directory=base_directory,
                                               filter=self.FILE_EXTENSION_FILTER)
-        if file_path:
-            self.sig_files_selected.emit(file_path)
+
+        return file_path
 
     def open_alg_dialog(self):
         """

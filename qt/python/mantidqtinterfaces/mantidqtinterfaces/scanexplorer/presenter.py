@@ -28,7 +28,7 @@ class ScanExplorerPresenter:
         self.view = ScanExplorerView(presenter=self)
         self.model = ScanExplorerModel(presenter=self)
 
-        self.view.sig_files_selected.connect(self.on_file_selected)
+        self.view.sig_file_selected.connect(self.on_file_selected)
         self.view.file_line_edit.returnPressed.connect(self.on_line_edited)
         self.view.sig_background_selected.connect(self.model.process_background)
 
