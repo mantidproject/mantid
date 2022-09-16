@@ -76,16 +76,7 @@ class DrillExportModel:
         Returns:
             list(str): names of algorithms
         """
-        return [algo for (algo, _) in self._exportAlgorithms.keys()]
-
-    def getAlgorithmExtentions(self):
-        """
-        Get the extension used for the output file of each export algorithm.
-
-        Returns:
-            dict(str:str): dictionnary algo:extension
-        """
-        return {algo:ext for (algo,ext) in self._exportAlgorithms.keys()}
+        return [(algo, ext) for (algo, ext) in self._exportAlgorithms.keys()]
 
     def getAlgorithmDocs(self):
         """
