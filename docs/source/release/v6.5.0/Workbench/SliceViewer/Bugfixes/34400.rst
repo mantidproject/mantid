@@ -1,0 +1,1 @@
+* Added check on toggling non-orthogonal view off that ensures the non axis cutting tool is not enabled if the workspace does not support non axis cuts (e.g. is 4D)
