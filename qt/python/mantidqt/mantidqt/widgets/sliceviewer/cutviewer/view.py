@@ -25,6 +25,7 @@ class CutViewerView(QWidget):
     """Displays a table view of the PeaksWorkspace along with controls
     to interact with the peaks.
     """
+
     def __init__(self, presenter, canvas, frame, parent=None):
         """
         :param painter: An object responsible for drawing the representation of the cut
@@ -94,7 +95,7 @@ class CutViewerView(QWidget):
 
     def update_step(self, irow):
         _, extents, nbins = self.get_bin_params()
-        self.set_step(irow, (extents[1, irow]-extents[0, irow])/nbins[irow])
+        self.set_step(irow, (extents[1, irow] - extents[0, irow]) / nbins[irow])
 
     def set_nbin(self, irow, nbin):
         self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))
@@ -112,7 +113,7 @@ class CutViewerView(QWidget):
 
     def set_slicepoint(self, slicept, width):
         self.table.blockSignals(True)
-        self.set_extent(2, slicept - width/2, slicept + width/2)
+        self.set_extent(2, slicept - width / 2, slicept + width / 2)
         self.set_step(2, width)
         self.table.blockSignals(False)
 
@@ -155,7 +156,8 @@ class CutViewerView(QWidget):
         col_headers = ['a*', 'b*', 'c*'] if self.frame == SpecialCoordinateSystem.HKL else ['Qx', 'Qy', 'Qz']
         col_headers.extend(['start', 'stop', 'nbins', 'step'])
         table_widget.setHorizontalHeaderLabels(col_headers)
-        table_widget.setFixedHeight(table_widget.verticalHeader().defaultSectionSize()*(table_widget.rowCount()+1))  # +1 to include headers
+        table_widget.setFixedHeight(
+            table_widget.verticalHeader().defaultSectionSize() * (table_widget.rowCount() + 1))  # +1 to include headers
         for icol in range(table_widget.columnCount()):
             table_widget.setColumnWidth(icol, 50)
         table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -166,7 +168,6 @@ class CutViewerView(QWidget):
 
     def _setup_figure_widget(self):
         fig, _, _, _ = create_subplots(1)
-        fig.axes[0].autoscale(enable=True, tight=False)
         self.figure = fig
         self.figure.canvas = FigureCanvas(self.figure)
         toolbar = MantidNavigationToolbar(self.figure.canvas, self)
@@ -183,7 +184,7 @@ class CutViewerView(QWidget):
                     item.setData(Qt.EditRole, int(1))
                 else:
                     item.setData(Qt.EditRole, float(1))
-                if irow == self.table.rowCount()-1:
+                if irow == self.table.rowCount() - 1:
                     item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # disable editing in last row (out of plane dim)
                     item.setBackground(QColor(250, 250, 250))
                 else:
@@ -192,7 +193,7 @@ class CutViewerView(QWidget):
 
     def _format_cut_figure(self):
         self.figure.axes[0].ignore_existing_data_limits = True
-        self.figure.axes[0].autoscale_view()
+        self.figure.axes[0].autoscale(axis='both', tight=False)
         self._format_cut_xlabel()
         for textobj in self.figure.findobj(text.Text):
             textobj.set_fontsize(8)
