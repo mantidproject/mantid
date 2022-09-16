@@ -25,11 +25,6 @@ class DrillExportModel:
     _exportAlgorithms = None
 
     """
-    Dictionnary of export file extensions.
-    """
-    _exportExtensions = None
-
-    """
     Dictionnary of export algorithm short doc.
     """
     _exportDocs = None
@@ -57,7 +52,6 @@ class DrillExportModel:
             acquisitionMode (str): acquisition mode
         """
         self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
-        self._exportExtensions = dict()
         self._exportDocs = dict()
         for (a, _) in self._exportAlgorithms.keys():
             try:
