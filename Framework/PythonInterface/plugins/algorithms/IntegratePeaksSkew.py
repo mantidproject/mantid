@@ -222,16 +222,22 @@ class PeakData:
     This class is used to hold data and integration parameters for single-crystal Bragg peaks
     """
 
-    def __init__(self, xpk, signal, error, irow, icol, det_edges, dets, tof, dTOF):
+    def __init__(self, xpk, signal, error, irow, icol, det_edges, dets, peak, dTOF):
+        # extract peak properties
+        self.hkl = peak.getIntHKL()  # used for plot title
+        self.wl = peak.getWavelength()
+        self.theta = peak.getScattering()/2
+        self.tof = peak.getTOF()
+        # set data
         self.xpk = xpk
         self.signal, self.error = signal, error
         self.irow, self.icol = irow, icol
         self.det_edges = det_edges
         self.dets = dets
-        self.tof = tof
-        self.ixlo = np.argmin(abs(xpk - (tof - 0.5 * dTOF)))
-        self.ixhi = np.argmin(abs(xpk - (tof + 0.5 * dTOF)))
-        self.ixpk = np.argmin(abs(xpk - tof))
+        # set initial integration limits
+        self.ixlo = np.argmin(abs(xpk - (self.tof - 0.5 * dTOF)))
+        self.ixhi = np.argmin(abs(xpk - (self.tof + 0.5 * dTOF)))
+        self.ixpk = np.argmin(abs(xpk - self.tof))
         self.ixlo_opt, self.ixhi_opt = self.ixlo, self.ixhi
         self.ypk, self.epk_sq = None, None
         self.peak_mask, self.non_bg_mask = None, None
@@ -444,15 +450,25 @@ class PeakData:
         self.irow, self.icol = np.where(self.dets == det)
         # update tof
         imax = np.argmax(self.ypk[self.ixlo_opt:self.ixhi_opt]) + self.ixlo_opt
-        return det, self.xpk[imax]
+        self.tof = self.xpk[imax]
+        return det, self.tof
 
-    def get_dTOF(self):
-        return self.xpk[self.ixhi_opt] - self.xpk[self.ixlo_opt]
+    def get_dTOF_over_TOF(self):
+        return (self.xpk[self.ixhi_opt] - self.xpk[self.ixlo_opt])/self.tof
 
-    def plot_integrated_peak(self, fig, ax, ipk, pk, norm_func):
+    def plot_integrated_peak(self, fig, ax, ipk, norm_func):
         if self.status is not PEAK_MASK_STATUS.VALID:
             self.focus_data_in_detector_mask()  # focus data on invalid peak mask found
         image_data = self.signal[:, :, self.ixlo_opt:self.ixhi_opt].sum(axis=2)
+        # get color axis limits (for LogNorm scale)
+        if np.any(image_data > 0):
+            vmin = image_data[image_data > 0].min()
+            vmax = image_data.mean()
+            if vmax <= vmin:
+                vmax = image_data.max()
+        else:
+            vmin, vmax = 1, 1
+        norm = norm_func(vmin=vmin, vmax=vmax)
         # limits for 1D plot
         ipad = int((self.ixhi - self.ixlo) / 2)  # extra portion of data shown outside the 1D window
         istart = max(min(self.ixlo, self.ixlo_opt) - ipad, 0)
@@ -460,7 +476,7 @@ class PeakData:
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
         if not ax[0].images:
             # 2D colorfill
-            img = ax[0].imshow(image_data, norm=norm_func(vmax=image_data[self.peak_mask].mean()))
+            img = ax[0].imshow(image_data, norm=norm)
             ax[0].plot(*np.where(self.peak_mask.T), 'xw', label='mask')
             ax[0].plot(self.icol, self.irow, 'or', label='cen')
             ax[0].set_xlabel('dColumn')
@@ -472,7 +488,7 @@ class PeakData:
             ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls='--', color='b')
             ax[1].errorbar(self.xpk[istart:iend], self.ypk[istart:iend], yerr=np.sqrt(self.epk_sq[istart:iend]),
                            marker='o', markersize=3, ls='', color='k', label='data')
-            ax[1].axvline(pk.getTOF(), ls='--', color='k', label='Centre')
+            ax[1].axvline(self.tof, ls='--', color='k', label='Centre')
             ax[1].axvline(self.xpk[self.ixlo], ls=':', color='r', label='Initial window')
             ax[1].axvline(self.xpk[self.ixhi - 1], ls=':', color='r')
             ax[1].axhline(0, ls=':', color='k')
@@ -482,7 +498,7 @@ class PeakData:
         else:
             # update 2D colorfill
             img = ax[0].images[0]
-            img.set_norm(norm_func(vmin=image_data[image_data > 0].min(), vmax=image_data[self.peak_mask].mean()))
+            img.set_norm(norm)
             img.set_data(image_data)
             xmask, ymask = np.where(self.peak_mask.T)
             ax[0].lines[0].set_xdata(xmask)
@@ -497,7 +513,7 @@ class PeakData:
             xhi.set_xdata([self.xpk[self.ixhi_opt - 1]])
             xlo_init.set_xdata([self.xpk[self.ixlo]])
             xhi_init.set_xdata([self.xpk[self.ixhi - 1]])
-            xtof.set_xdata([pk.getTOF()])
+            xtof.set_xdata([self.tof])
             # spectrum
             yerr = np.sqrt(self.epk_sq[istart:iend])
             data.set_xdata(self.xpk[istart:iend])
@@ -506,8 +522,9 @@ class PeakData:
                 [np.array([[x, ybot], [x, ytop]]) for x, ybot, ytop in
                  zip(data.get_xdata(), data.get_ydata() - yerr, data.get_ydata() + yerr)])
         # format 2D colorfill
-        title_str = f"{ipk} ({str(pk.getIntHKL())[1:-1]}) " \
-                    rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$" \
+        title_str = f"{ipk} ({str(self.hkl)[1:-1]}) " \
+                    rf"$\lambda$={np.round(self.wl, 2)} $\AA$ " \
+                    rf"$2\theta={np.round(2*np.degrees(self.theta), 1)}^\circ$"\
                     f"\n{self.status.value}"
         ax[0].set_title(title_str)
         # format 1D
@@ -567,6 +584,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="dTheta resolution (estimated from width at forward scattering minus "
                                  "contribution from moderator, dT0/T0, and path length dL/L).")
         self.setPropertySettings("ThetaWidth", condition_to_use_resn)
+        self.declareProperty(name="ScaleThetaWidthByWavelength", defaultValue=False, direction=Direction.Input,
+                             doc="If true the ThetaWidth will be multiplied by the wavelength of a peak. If the "
+                                 "ThetaWidth is dominated by the beam divergence, which is proportional to "
+                                 "wavelength, set this to true.")
+        self.setPropertySettings("ScaleThetaWidthByWavelength", condition_to_use_resn)
         self.declareProperty(name="OptimiseMask", defaultValue=False, direction=Direction.Input,
                              doc="Redo peak mask using optimal TOF window discovered (the original mask is found from "
                                  "the integrated intensity over a TOF window determined from the resolution "
@@ -578,6 +600,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup('FractionalTOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
+        self.setPropertyGroup("ScaleThetaWidthByWavelength", "Integration Window Parameters")
         self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
         # peak mask validators
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
@@ -680,6 +703,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         frac_tof_window = self.getProperty('FractionalTOFWindow').value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = self.getProperty("ThetaWidth").value
+        scale_dth = self.getProperty("ScaleThetaWidthByWavelength").value
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
         optimise_mask = self.getProperty("OptimiseMask").value
@@ -703,20 +727,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
 
         array_converter = InstrumentArrayConverter(ws)
 
-        # setup progress bar
-        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=pk_ws.getNumberPeaks())
-
         # Empty table workspace (clone and delete so as to preserve UB, sample, history etc.)
         pk_ws_int = self.child_CloneWorkspace(InputWorkspace=pk_ws, OutputWorkspace="_temp")  # temp for ws in/out same
         self.child_DeleteTableRows(TableWorkspace=pk_ws_int, Rows=range(pk_ws_int.getNumberPeaks()))
         # get spectrum indices for all peaks in table
         detids = pk_ws.column('DetID')
         bank_names = pk_ws.column('BankName')
-        tofs = pk_ws.column('TOF')
         irows_delete = []
-        thetas = []  # for fitting optimal TOF resolution parameters
-        frac_tof_widths = []  # for fitting optimal TOF resolution parameters
-        peak_data_collection = []  # for peak_data objects to be plotted
+        peak_data_collection = []  # for PeakData objects to be stored for plotting and resolution param estimation
+
+        # setup progress bar
+        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=pk_ws.getNumberPeaks())
+
         for ipk, pk in enumerate(pk_ws):
             # check that peak is in a valid detector
             detid = detids[ipk]
@@ -739,12 +761,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                                                                                     nrows, ncols,
                                                                                                     nrows_edge,
                                                                                                     ncols_edge)
-            # get TOF window using resolution parameters
-            if frac_tof_window > 0:
-                dTOF = tofs[ipk] * frac_tof_window
-            else:
-                dTOF = tofs[ipk] * np.sqrt(dt0_over_t0 ** 2 + (dth / np.tan(pk.getScattering() / 2)) ** 2)
-            peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, tofs[ipk], dTOF)
+            dTOF = self.calc_initial_dTOF(pk, frac_tof_window, dt0_over_t0, dth, scale_dth)
+            peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
             peak_data.integrate_peak(use_nearest, integrate_on_edge, optimise_mask, npk_min, density_min, nrow_max,
                                      ncol_max, min_npixels_per_vacancy, max_nvacancies)
 
@@ -755,19 +773,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     irows_delete.append(pk_ws_int.getNumberPeaks() - 1)
                     self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=tof, DetectorID=int(det))
                     pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
-                    # normalise by bin width before final integration
                 # calc Lorz correction
-                th = pk.getScattering() / 2  # used for estimating resolution as well as Lorz Correction
                 if do_lorz_cor:
-                    L = (np.sin(th) ** 2) / (pk.getWavelength() ** 4)  # at updated peak pos if applicable
+                    L = (np.sin(pk.getScattering() / 2) ** 2) / (pk.getWavelength() ** 4)  # at updated peak pos
                 else:
                     L = 1
                 # set peak object intensity
                 pk.setIntensity(L * peak_data.intens)
                 pk.setSigmaIntensity(L * peak_data.sig)
-                # append theta and frac width for estimating TOF resolution parameters
-                thetas.append(th)
-                frac_tof_widths.append(peak_data.get_dTOF() / pk.getTOF())
             else:
                 pk.setIntensity(0.0)
                 pk.setSigmaIntensity(0.0)
@@ -776,6 +789,29 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             prog_reporter.report("Integrating Peaks")
         # delete rows
         self.child_DeleteTableRows(TableWorkspace=pk_ws_int, Rows=irows_delete)
+
+        # estimate TOF resolution params
+        thetas = np.array([pk_data.theta for pk_data in peak_data_collection])
+        cot_th_sq = (1 / np.tan(thetas)) ** 2
+        wavelengths = np.array([pk_data.wl for pk_data in peak_data_collection])
+        frac_tof_widths = np.array([pk_data.get_dTOF_over_TOF() for pk_data in peak_data_collection])
+        did_fit = False
+        if len(thetas) > 1:
+            # robust estimation of params for (dT/T)^2 = slope*cot(theta)^2 + intercept
+            # if scale_dth cot(th) -> wl*cot(th)
+            xvals = (wavelengths**2)*cot_th_sq if scale_dth else cot_th_sq
+            slope, intercept = np.polyfit(xvals, frac_tof_widths ** 2, deg=1)
+            if slope > 0 and intercept > 0:
+                logger.notice(f"Estimated resolution parameters:"
+                              f"\nBackscatteringTOFResolution = {np.sqrt(intercept)}"
+                              f"\nThetaWidth = {np.sqrt(slope)}")
+                did_fit = True
+            else:
+                logger.warning("Resolution parameters could not be estimated - the provided TOF window parameters are"
+                               "likely to be suboptimal (probably the resulting window is too large). Please inspect "
+                               "the results (if an OutputFile has been specified the optimal TOF windows found will be "
+                               "plotted on the last page.")
+        # do plotting
         if plot_filename and pk_ws_int.getNumberPeaks() > 0:
             import matplotlib.pyplot as plt
             from matplotlib.backends.backend_pdf import PdfPages
@@ -784,30 +820,60 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             fig.subplots_adjust(wspace=0.5)  # ensure plenty space between subplots (want to avoid slow tight_layout)
             try:
                 with PdfPages(plot_filename) as pdf:
-                    for ipk, pk in enumerate(pk_ws_int):
-                        peak_data_collection[ipk].plot_integrated_peak(fig, ax, ipk, pk, LogNorm)
+                    for ipk, pk_data in enumerate(peak_data_collection):
+                        pk_data.plot_integrated_peak(fig, ax, ipk, LogNorm)
                         pdf.savefig(fig)
+                    # prepare axes to plot observed TOF windows
+                    ax[0].images[-1].colorbar.remove()
+                    for subax in ax:
+                        subax.clear()
+                        subax.set_aspect('auto')
+                    self.plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
+                                             did_fit, intercept, slope)
+                    pdf.savefig(fig)
             except OSError:
                 raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
                                    f"another programme and that the user has permission to write to that directory.")
             plt.close(fig)
-        # estimate TOF resolution params
-        if len(thetas) > 1:
-            # linear fit to (dT/T)^2 vs. cot(theta)^2
-            m, c = np.polyfit(1/(np.tan(thetas)**2), np.array(frac_tof_widths)**2, deg=1)
-            if m > 0 and c > 0:
-                logger.notice(f"Estimated resolution parameters:"
-                              f"\nBackscatteringTOFResolution = {np.sqrt(c)}"
-                              f"\nThetaWidth = {np.sqrt(m)}")
-            else:
-                logger.warning(f"Resolution parameters could not be estimated - the provided TOF window parameters are"
-                               f"likely to be suboptimal (probably the resulting window is too large). Please inspect "
-                               f"the results and check the parameters against the minimum and average "
-                               f"fractional TOF window found:"
-                               f"\nmin(dTOF/TOF) = {np.min(frac_tof_widths)}"
-                               f"\nmean(dTOF/TOF) = {np.mean(frac_tof_widths)}.")
+
         # assign output
         self.setProperty("OutputWorkspace", pk_ws_int)
+
+    @staticmethod
+    def calc_initial_dTOF(pk, frac_tof_window, dt0_over_t0, dth, scale_dth):
+        wl = pk.getWavelength()
+        tof = pk.getTOF()
+        # get TOF window using resolution parameters
+        if frac_tof_window > 0:
+            dTOF = tof * frac_tof_window
+        else:
+            dth_pk = dth*wl if scale_dth else dth
+            dTOF = tof * np.sqrt(dt0_over_t0 ** 2 + (dth_pk / np.tan(pk.getScattering() / 2)) ** 2)
+        return dTOF
+
+    @staticmethod
+    def plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth, did_fit,
+                            intercept, slope):
+        # plot dTOF/TOF vs theta
+        line = ax[0].scatter(np.degrees(thetas), frac_tof_widths, c=wavelengths)
+        ax[0].set_xlabel(r'$\theta (degrees)$')
+        ax[0].set_ylabel(r'$dTOF/TOF$')
+        fig.colorbar(line, orientation='horizontal',  label=r'$\lambda (\AA)$')
+        # plot (dTOF/TOF)^2 vs cot(th)^2 or (wl*cot(th))^2
+        if scale_dth:
+            ax[1].scatter((wavelengths**2)*cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
+            ax[1].set_xlabel(r'$(\lambda\cot(\theta))^2$')
+        else:
+            ax[1].scatter(cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
+            ax[1].set_xlabel(r'$\cot(\theta)^2$')
+        ax[1].set_ylabel(r'$(dTOF/TOF)^2$')
+        # plot the fit if performed
+        if did_fit:
+            xlim = np.array(ax[1].get_xlim())
+            ax[1].plot(xlim, slope * xlim + intercept, '-k', label='fit')
+            xvals = np.linspace(min(thetas), max(thetas))
+            if not scale_dth:
+                ax[0].plot(np.degrees(xvals), np.sqrt(intercept * (1 / np.tan(xvals) ** 2) + slope), '-k', label='fit')
 
     def child_CloneWorkspace(self, **kwargs):
         alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
