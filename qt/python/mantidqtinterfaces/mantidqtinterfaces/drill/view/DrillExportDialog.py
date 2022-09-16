@@ -25,7 +25,8 @@ class DrillExportDialog(QDialog):
     _presenter = None
 
     """
-    Dictionnary of algorithm names and their corresponding QCheckBox.
+    Dictionnary of algorithm (names, ext) tuples and their corresponding
+    QCheckBox.
     """
     _widgets = None
 
