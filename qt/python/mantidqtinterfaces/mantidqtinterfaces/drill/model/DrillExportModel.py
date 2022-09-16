@@ -92,11 +92,10 @@ class DrillExportModel:
         Get the state of a specific algorithm.
 
         Args:
-            algorithm: name of the algo
+            algorithm (str, str): name of the algo and output file extension
         """
-        extension = ""
-        if (algorithm, extension) in self._exportAlgorithms:
-            return self._exportAlgorithms[(algorithm, extension)]
+        if algorithm in self._exportAlgorithms:
+            return self._exportAlgorithms[algorithm]
         else:
             return False
 
@@ -105,22 +104,20 @@ class DrillExportModel:
         Activate a spefific algorithm.
 
         Args:
-            algorithm (str): name of the algo
+            algorithm (str, str)): name of the algo and output file extension
         """
-        extension = ""
-        if (algorithm, extension) in self._exportAlgorithms:
-            self._exportAlgorithms[(algorithm, extension)] = True
+        if algorithm in self._exportAlgorithms:
+            self._exportAlgorithms[algorithm] = True
 
     def inactivateAlgorithm(self, algorithm):
         """
         Inactivate a specific algorithm.
 
         Args:
-            algorithm (str): name of the algo
+            algorithm (str, str): name of the algo and output file extension
         """
-        extension = ""
-        if (algorithm, extension) in self._exportAlgorithms:
-            self._exportAlgorithms[(algorithm, extension)] = False
+        if algorithm in self._exportAlgorithms:
+            self._exportAlgorithms[algorithm] = False
 
     def _validCriteria(self, ws, algo):
         """
