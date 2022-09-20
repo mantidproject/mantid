@@ -7,7 +7,8 @@ SANS Changes
 
 New Features
 ------------
-- The ILL SANS workflow now adds more metadata to the reduced sample workspace. The sample logs now include information about empty container, empty beam, absorber, etc. workspaces names and files that were used to create them. In addition, sample transmission is now overwritten after transmission correction is done as sample.transmission, and stitching factors are added to the sample logs of the stitching output workspace as stitch_scaling_factors.
+- The ILL SANS workflow now adds more metadata to the reduced sample workspace. The sample logs now include information about empty container, empty beam, absorber, etc. plus the workspaces names and files that were used to create them.
+- Sample transmission is now overwritten after transmission correction is done as sample, transmission, and stitching factors are added to the sample logs of the stitching output workspace as ``stitch_scale_factors``.
 - Support loading and reducing data for the new detector for D16 at ILL.
 
 Bugfixes
