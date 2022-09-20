@@ -111,7 +111,10 @@ pipeline {
               }
             }
             agent { label "${PLATFORM}" }
-            options { timestamps () }
+            options {
+            timestamps ()
+            retry(3)
+             }
             steps {
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
@@ -147,7 +150,10 @@ pipeline {
                }
             }
             agent { label "${PLATFORM}" }
-            options { timestamps() }
+            options {
+            timestamps()
+             retry(3)
+             }
             steps {
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
