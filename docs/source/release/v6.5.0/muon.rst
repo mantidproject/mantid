@@ -27,7 +27,7 @@ Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ############
-- Fixed a bug in Model Analysis where string logs were not being displayed correctly.
+- Fixed a bug in :ref:`Model Analysis <feature_flag_options>` where string logs were not being displayed correctly.
 
 
 ALC
