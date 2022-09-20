@@ -7,6 +7,7 @@
 import io
 import numpy as np
 from math import sqrt
+from typing import List
 
 from .textparser import TextParser
 from .abinitioloader import AbInitioLoader
@@ -25,7 +26,6 @@ class DMOL3Loader(AbInitioLoader):
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "DMOL3"
         self._norm = 0
-        self._parser = TextParser()
 
     def read_vibrational_or_phonon_data(self):
         """
@@ -41,10 +41,10 @@ class DMOL3Loader(AbInitioLoader):
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
             # There may be some intermediate resume calculations.
             try:
-                self._parser.find_last(file_obj=dmol3_file, msg="$cell vectors")
+                TextParser.find_last(file_obj=dmol3_file, msg="$cell vectors")
             except EOFError:  # for non-period calc, go to final coordinates instead
                 dmol3_file.seek(0)
-                self._parser.find_last(file_obj=dmol3_file, msg="$coordinates")
+                TextParser.find_last(file_obj=dmol3_file, msg="$coordinates")
 
             # read lattice vectors
             self._read_lattice_vectors(obj_file=dmol3_file, data=data)
@@ -55,7 +55,7 @@ class DMOL3Loader(AbInitioLoader):
             self._num_atoms = len(data['atoms'])
 
             # read frequencies, corresponding atomic displacements and construct k-points data
-            self._parser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
+            TextParser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
             self._read_modes(file_obj=dmol3_file, data=data)
 
             # save data to hdf file
@@ -64,7 +64,8 @@ class DMOL3Loader(AbInitioLoader):
             # return AbinsData object
             return self._rearrange_data(data=data)
 
-    def _read_lattice_vectors(self, obj_file=None, data=None):
+    @classmethod
+    def _read_lattice_vectors(cls, obj_file=None, data=None):
         """
         Reads lattice vectors from .outmol DMOL3 file.
         :param obj_file: file object from which we read
@@ -73,7 +74,7 @@ class DMOL3Loader(AbInitioLoader):
         pos = obj_file.tell()
 
         try:
-            self._parser.find_first(file_obj=obj_file, msg="$cell vectors")
+            TextParser.find_first(file_obj=obj_file, msg="$cell vectors")
 
         except EOFError:  # No unit cell for non-periodic calculations; set to zero
             data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
@@ -83,14 +84,15 @@ class DMOL3Loader(AbInitioLoader):
             vectors = []
             for i in range(dim):
                 line = obj_file.readline().split()
-                vector = [self._convert_to_angstroms(string=s) for s in line]
+                vector = [cls._convert_to_angstroms(string=s) for s in line]
                 vectors.append(vector)
 
                 data["unit_cell"] = np.asarray(vectors).astype(dtype=FLOAT_TYPE)
 
         obj_file.seek(pos)
 
-    def _convert_to_angstroms(self, string=None):
+    @staticmethod
+    def _convert_to_angstroms(string: str):
         """
         :param string: string with number
         :returns: converted coordinate of lattice vector to Angstroms
@@ -108,10 +110,10 @@ class DMOL3Loader(AbInitioLoader):
         """
         atoms = {}
         atom_indx = 0
-        self._parser.find_first(file_obj=file_obj, msg="$coordinates")
+        TextParser.find_first(file_obj=file_obj, msg="$coordinates")
         end_msgs = ["$end", "----------------------------------------------------------------------"]
 
-        while not self._parser.block_end(file_obj=file_obj, msg=end_msgs):
+        while not TextParser.block_end(file_obj=file_obj, msg=end_msgs):
 
             line = file_obj.readline()
             entries = line.split()
@@ -144,8 +146,8 @@ class DMOL3Loader(AbInitioLoader):
         zdisp = []
 
         # parse block with frequencies and atomic displacements
-        while not (self._parser.block_end(file_obj=file_obj, msg=end_msgs)
-                   or self._parser.file_end(file_obj=file_obj)):
+        while not (TextParser.block_end(file_obj=file_obj, msg=end_msgs)
+                   or TextParser.file_end(file_obj=file_obj)):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
@@ -206,7 +208,7 @@ class DMOL3Loader(AbInitioLoader):
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
         """
-        self._parser.move_to(file_obj=file_obj, msg=":")
+        TextParser.move_to(file_obj=file_obj, msg=":")
         items = file_obj.readline().replace(b"\n", b" ").split()
         length = len(items)
         freq.extend([float(items[i]) for i in range(1, length, 2)])
@@ -219,11 +221,11 @@ class DMOL3Loader(AbInitioLoader):
         :param ydisp: list with y coordinates which we update
         :param zdisp: list with z coordinates which we update
         """
-        self._parser.move_to(file_obj=file_obj, msg=" x ")
+        TextParser.move_to(file_obj=file_obj, msg=" x ")
 
         atom_mass = None
 
-        while not self._parser.file_end(file_obj=file_obj):
+        while not TextParser.file_end(file_obj=file_obj):
 
             pos = file_obj.tell()
             line = file_obj.readline()
@@ -265,17 +267,17 @@ class DMOL3Loader(AbInitioLoader):
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
 
-    def _read_masses_from_file(self, obj_file):
+    def _read_masses_from_file(self, obj_file) -> List[float]:
         masses = []
         pos = obj_file.tell()
-        self._parser.find_first(file_obj=obj_file, msg="Zero point vibrational energy:      ")
+        TextParser.find_first(file_obj=obj_file, msg="Zero point vibrational energy:      ")
 
         end_msg = "Molecular Mass:"
         key = "Atom"
         end_msg = bytes(end_msg, "utf8")
         key = bytes(key, "utf8")
 
-        while not self._parser.file_end(file_obj=obj_file):
+        while not TextParser.file_end(file_obj=obj_file):
             line = obj_file.readline()
             if end_msg in line:
                 break
