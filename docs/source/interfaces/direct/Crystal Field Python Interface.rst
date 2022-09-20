@@ -418,6 +418,8 @@ A complete list of minimizers available for ``scipy.optimize.minimize`` can be f
 
 If the minimizer is not overwritten, 'L-BFGS-B' is set as a default for ``scipy.optimize.minimize`` and 'Levenberg-Marquardt' for Mantid fitting.
 
+.. _gofit-fitting:
+
 GOFit fitting
 ~~~~~~~~~~~~~
 The algorithms contained within the `GOFit package <https://github.com/ralna/GOFit>`_ can also be used from the Crystal Field API. This package is designed for the global
