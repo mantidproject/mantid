@@ -47,13 +47,12 @@ class CustomTextElidingDelegate(QStyledItemDelegate):
             state_selected = option.state & QStyle.State_Selected
             if state_selected:
                 painter.setPen(QColor("white"))
-            elif foreground_colour is not None:
-                painter.setPen(foreground_colour)
-
-            if state_selected:
                 painter.fillRect(option.rect, option.palette.highlight())
-            elif background_colour is not None:
-                painter.fillRect(option.rect, background_colour)
+            else:
+                if foreground_colour is not None:
+                    painter.setPen(foreground_colour)
+                if background_colour is not None:
+                    painter.fillRect(option.rect, background_colour)
 
             padding = self._padding
             opt.rect = option.rect.adjusted(padding, padding, -padding, -padding)
