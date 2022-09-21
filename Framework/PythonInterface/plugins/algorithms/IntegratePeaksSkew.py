@@ -736,8 +736,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         irows_delete = []
         peak_data_collection = []  # for PeakData objects to be stored for plotting and resolution param estimation
 
-        # setup progress bar
-        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=pk_ws.getNumberPeaks())
+        # setup progress bar ~ 60% as plotting take bit less time than integrating the peaks
+        end_frac = 0.5 if plot_filename else 1.0
+        prog_reporter = Progress(self, start=0.0, end=end_frac, nreports=pk_ws.getNumberPeaks())
 
         for ipk, pk in enumerate(pk_ws):
             # check that peak is in a valid detector
@@ -812,7 +813,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                "the results (if an OutputFile has been specified the optimal TOF windows found will be "
                                "plotted on the last page.")
         # do plotting
-        if plot_filename and pk_ws_int.getNumberPeaks() > 0:
+        num_int_pks = pk_ws_int.getNumberPeaks()
+        if plot_filename and num_int_pks > 0:
+            prog_reporter.resetNumSteps(num_int_pks, end_frac, 1.0)
             import matplotlib.pyplot as plt
             from matplotlib.backends.backend_pdf import PdfPages
             from matplotlib.colors import LogNorm
@@ -823,6 +826,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     for ipk, pk_data in enumerate(peak_data_collection):
                         pk_data.plot_integrated_peak(fig, ax, ipk, LogNorm)
                         pdf.savefig(fig)
+                        prog_reporter.report("Plotting Peaks")
                     # prepare axes to plot observed TOF windows
                     ax[0].images[-1].colorbar.remove()
                     for subax in ax:
