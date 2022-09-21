@@ -191,7 +191,7 @@ Example Input:
 do_van_normalisation
 ^^^^^^^^^^^^^^^^^^^^
 Indicates whether to divide the focused workspace within
-:ref:`diffraction_focusing_osiris_isis-powder-diffraction-ref` mode with an
+:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` mode with an
 associated vanadium run.
 
 Accepted values are: **True** or **False**
@@ -209,7 +209,7 @@ file_ext
 *Optional*
 
 Specifies a file extension to use for the
-:ref:`diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
+:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
 
 This should be used to process partial runs. When
 processing full runs (i.e. completed runs) it should not
@@ -225,12 +225,12 @@ Example Input:
 
   osiris_example = Osiris(file_ext=".s01", ...)
 
-.. _merge_drange_osiris_isis_powder-diffraction-ref:
+.. _merge_drange_osiris_isis-powder-diffraction-ref:
 
 merge_drange
 ^^^^^^^^^^^^
 Indicates whether to merge summed workspaces of different dranges after running the
-:ref:`diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
+:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
 
 Accepted values are: **True** or **False**
 
@@ -245,7 +245,7 @@ Example Input:
 run_number
 ^^^^^^^^^^
 Specifies the run number(s) to process when calling the
-:ref:`focus_osiris_isis-powder-diffraction-ref` method.
+:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
 
 This parameter accepts a single value or a range
 of values with the following syntax:
