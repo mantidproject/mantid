@@ -250,7 +250,8 @@ class DMOL3Loader(AbInitioLoader):
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
 
-    def _read_masses_from_file(self, obj_file) -> List[float]:
+    @staticmethod
+    def _read_masses_from_file(obj_file) -> List[float]:
         masses = []
 
         with TextParser.save_excursion(obj_file):

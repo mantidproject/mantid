@@ -78,6 +78,49 @@ DUMMY CONTENT
         self.assertEqual(list(range(len(atoms))),
                          [atom['sort'] for _, atom in atoms.items()])
 
+    def test_read_masses(self):
+
+        # usual case: break on Molecular Mass:
+        file_with_masses = BytesIO(b"""
+    z     -0.5431      -0.4170      -0.0002      -0.0001      -0.3565      -0.0000       0.0000       0.0000       0.0000
+
+ STANDARD THERMODYNAMIC QUANTITIES AT   298.15 K  AND     1.00 ATM
+
+   Zero point vibrational energy:       38.528 kcal/mol
+
+   Atom    1 Element F  Has Mass   18.50000
+   Atom    2 Element F  Has Mass   18.50000
+   Atom    3 Element F  Has Mass   21.00000
+   Atom    4 Element F  Has Mass   22.00000
+   Molecular Mass:   564.166320 amu
+   Principal axes and moments of inertia in atomic units:
+                               1              2              3
+    Eigenvalues --        8975.59891    26615.40273    29256.87074
+          X                  0.82797        0.50000        0.25389
+""")
+
+        # If not found, parser should still break cleanly at file end
+        file_with_masses_noend = BytesIO(b"""
+    z     -0.5431      -0.4170      -0.0002      -0.0001      -0.3565      -0.0000       0.0000       0.0000       0.0000
+
+ STANDARD THERMODYNAMIC QUANTITIES AT   298.15 K  AND     1.00 ATM
+
+   Zero point vibrational energy:       38.528 kcal/mol
+
+   Atom    1 Element F  Has Mass   18.50000
+   Atom    2 Element F  Has Mass   18.50000
+   Atom    3 Element F  Has Mass   21.00000
+   Atom    4 Element F  Has Mass   22.00000
+   Principal axes and moments of inertia in atomic units:
+                               1              2              3
+    Eigenvalues --        8975.59891    26615.40273    29256.87074
+          X                  0.82797        0.50000        0.25389
+""")
+
+        for file_stream in (file_with_masses, file_with_masses_noend):
+            masses = DMOL3Loader._read_masses_from_file(file_stream)
+            assert_allclose(masses, [18.5, 18.5, 21., 22.])
+
 
 class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
     """Check entire input files against expected outputs"""
