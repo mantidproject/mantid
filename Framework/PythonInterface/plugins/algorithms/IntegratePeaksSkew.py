@@ -878,6 +878,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             xvals = np.linspace(min(thetas), max(thetas))
             if not scale_dth:
                 ax[0].plot(np.degrees(xvals), np.sqrt(intercept * (1 / np.tan(xvals) ** 2) + slope), '-k', label='fit')
+            # add resolution parameters to the plot title
+            ax[1].set_title(rf"$d\theta$={np.sqrt(slope):.2E}" + "\n$dT_{bk}/T_{bk}$" + f" = {np.sqrt(intercept):.2E}")
 
     def child_CloneWorkspace(self, **kwargs):
         alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
