@@ -55,7 +55,7 @@ For information on creating a OSIRIS object see:
 .. _run_diffraction_focusing_osiris_isis-powder-diffraction-ref:
 
 run_diffraction_focusing
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 The *diffraction_focusing* method allows a user to process a series of runs into a
 focused dSpace workspace. Whilst processing the runs the scripts can apply any corrections
 the user enables.
