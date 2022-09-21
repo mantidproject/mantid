@@ -16,7 +16,7 @@ This method assumes you are familiar with :ref:`intro_to_objects-isis-powder-dif
 To create a OSIRIS object the following parameters are required:
 
 - :ref:`calibration_directory_osiris_isis-powder-diffraction-ref`
-- :ref:`output_directory_osiris_isis-powder-diffraction-ref`
+- output_directory
 - :ref:`user_name_osiris_isis-powder-diffraction-ref`
 
 Optionally a configuration file may be specified if one exists
@@ -63,7 +63,7 @@ the user enables.
 On OSIRIS the following parameters are required when executing *create_vanadium*:
 
 - :ref:`calibration_mapping_file_osiris_isis-powder-diffraction-ref`
-- :ref:`vanadium_normalisation_osiris_isis-powder-diffraction-ref`
+- vanadium_normalisation
 - :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref`
 - :ref:`merge_drange_osiris_isis-powder-diffraction-ref`
 
@@ -140,7 +140,7 @@ calibration_directory
 This parameter should be the full path to the calibration folder.
 Within the folder the following should be present:
 
-- Grouping .cal file (see: :ref:`grouping_file_name_osiris_isis-powder-diffraction-ref`)
+- Grouping .cal file
 - Folder(s) with the label name specified in mapping file (e.g. "1_1")
   - Inside each folder should be the offset file with name specified in the mapping file
 
@@ -259,9 +259,8 @@ of values with the following syntax:
 These can be combined like so:
 *1-3, 5, 8-10* would process run numbers 1, 2, 3, 5, 8, 9, 10.
 
-In addition the :ref:`input_mode_osiris_isis-powder-diffraction-ref`
-parameter determines what effect a range of inputs has
-on the data to be processed
+In addition the input_mode parameter determines what effect a range of inputs
+has on the data to be processed
 
 Example Input:
 
@@ -279,8 +278,6 @@ user_name
 Specifies the name of the current user when creating a
 new OSIRIS object. This is only used when saving data to
 sort data into respective user folders.
-See :ref:`output_directory_osiris_isis-powder-diffraction-ref`
-for more details.
 
 Example Input:
 
