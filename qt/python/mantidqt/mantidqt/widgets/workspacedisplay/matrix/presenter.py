@@ -153,7 +153,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
         ws = table.model().ws
         num_rows = ws.getNumberHistograms()
-        table_ws = _create_empty_table_workspace(name=ws.name() + "_bins", row_count=num_rows)
+        table_ws = _create_empty_table_workspace(name=ws.name() + "_bins", num_rows=num_rows)
         table_ws.addColumn("double", "X")
         num_cols = 3 if self.hasDx else 2
         for i, col in enumerate(selected_cols):
