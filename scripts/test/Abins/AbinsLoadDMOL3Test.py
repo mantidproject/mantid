@@ -18,15 +18,11 @@ import abins.test_helpers
 class AbinsLoadDMOL3InternalsTest(unittest.TestCase):
     """Check fragments of DMOL3 parser separately from whole file"""
     def test_read_lattice_vectors(self):
-        data = {}
-
         file_without_vectors = BytesIO(b'No vectors in this file')
-        DMOL3Loader._read_lattice_vectors(obj_file=file_without_vectors,
-                                          data=data)
+        unit_cell = DMOL3Loader._read_lattice_vectors(
+            file_without_vectors)
 
-        self.assertEqual(list(data.keys()), ['unit_cell'])
-
-        assert_allclose(data['unit_cell'], np.zeros((3, 3)))
+        assert_allclose(unit_cell, np.zeros((3, 3)))
 
         file_with_vectors = BytesIO(b"""
 INCOOR, atomic coordinates in au (for archive):
@@ -41,11 +37,9 @@ F             2.22656413759532   -1.33383475061772   -1.80983568538814
 F             2.42243481736875    8.68442407988897    6.67097246055480
 F            -2.34542583215868   10.72867081788549    2.94943237944894
 """)
-        DMOL3Loader._read_lattice_vectors(obj_file=file_with_vectors,
-                                          data=data)
+        unit_cell = DMOL3Loader._read_lattice_vectors(file_with_vectors)
 
-        self.assertEqual(list(data.keys()), ['unit_cell'])
-        assert_allclose(data['unit_cell'],
+        assert_allclose(unit_cell,
                         np.array([[ 8.859     ,  0.        ,  0.        ],
                                   [-4.4295    ,  7.67211905,  0.        ],
                                   [ 0.        ,  0.        ,  5.038     ]]))

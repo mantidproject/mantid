@@ -47,7 +47,7 @@ class DMOL3Loader(AbInitioLoader):
                 TextParser.find_last(file_obj=dmol3_file, msg="$coordinates")
 
             # read lattice vectors
-            self._read_lattice_vectors(obj_file=dmol3_file, data=data)
+            data['unit_cell'] = self._read_lattice_vectors(dmol3_file)
 
             # read info about atoms and construct atom data
             masses = self._read_masses_from_file(obj_file=dmol3_file)
@@ -65,26 +65,28 @@ class DMOL3Loader(AbInitioLoader):
             return self._rearrange_data(data=data)
 
     @classmethod
-    def _read_lattice_vectors(cls, obj_file=None, data=None):
+    def _read_lattice_vectors(cls, file_obj):
         """
         Reads lattice vectors from .outmol DMOL3 file.
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        pos = obj_file.tell()
+        pos = file_obj.tell()
 
         try:
-            TextParser.find_first(file_obj=obj_file, msg="$cell vectors")
+            TextParser.find_first(file_obj=file_obj, msg="$cell vectors")
 
         except EOFError:  # No unit cell for non-periodic calculations; set to zero
-            data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
+            unit_cell = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
         else:
-            vectors = [obj_file.readline().split() for _ in range(3)]
-            data["unit_cell"] = np.asarray(vectors, dtype=FLOAT_TYPE)
-            data["unit_cell"] *= ATOMIC_LENGTH_2_ANGSTROM
+            vectors = [file_obj.readline().split() for _ in range(3)]
+            unit_cell = np.asarray(vectors, dtype=FLOAT_TYPE)
+            unit_cell *= ATOMIC_LENGTH_2_ANGSTROM
 
-        obj_file.seek(pos)
+        file_obj.seek(pos)
+
+        return unit_cell
 
     def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
         """
