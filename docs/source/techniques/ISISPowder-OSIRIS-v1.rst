@@ -300,3 +300,6 @@ Example Input:
 .. code-block:: python
 
   subtract_empty_can: True
+
+
+.. categories:: Techniques
