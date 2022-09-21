@@ -14,8 +14,7 @@ This algorithm loads the raw data files produced by the SANS-1 instrument at MLZ
 The loader reads out the detector positions from the instrument definition file
 (`IDF <https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_) and places the
 detectors accordingly. The `Instrument View <https://www.mantidproject.org/Instrument_View>`_ window
-can be activated by right clicking on the loaded workspace and selecting the "Show Instrument" option
-(available only in a :ref:`"vector" <modes>` mode).
+can be activated by right clicking on the loaded workspace and selecting the "Show Instrument".
 
 .. _vector example:
 **Example - Loads raw SANS-1 data file with extension .001.**
@@ -60,40 +59,21 @@ Output:
     DetHAngle is 0.0 degrees.
     Wavelength is 4.9 Angstrom.
 
-.. _modes:
-Two modes of loading data
+Data visualization
 -------------------------
 
-* Whenever the loader is used in a ``vector`` (default) mode  then the output
-  is written to a 1D vector-shaped workspace. As a result, the data can be visualised by right
-  clicking on the loaded workspace and selecting the "Show Instrument" option, which activates the
-  `Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool. Also, by selecting the
-  "Show Detectors" option, you can activate the Detector Table, which contains Workspace Indices,
-  Spectrum Numbers, Detector IDs and locations of the detectors, together with a flag showing if
-  a detector is a monitor.
+Whenever the loader is used  then the output is written to
+a 2D matrix workspace as a vector. As a result, the data can be visualised by right
+clicking on the loaded workspace and selecting the "Show Instrument" option, which activates the
+`Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool. Also, by selecting the
+"Show Detectors" option, you can activate the Detector Table, which contains Workspace Indices,
+Spectrum Numbers, Detector IDs and locations of the detectors, together with a flag showing if
+a detector is a monitor.
 
-* Whenever the loader is used in a ``matrix`` mode, then the output is written
-  to a 2D matrix workspace. In this case, the data can be visualised by right clicking on the loaded
-  workspace and selecting `Show Slice Viewer <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html>`_
-  or one of the options under the
-  `Plot <https://docs.mantidproject.org/nightly/tutorials/mantid_basic_course/loading_and_displaying_data/04_displaying_2D_data.html>`_
-  menu. At the same time, the "Show Instrument" and "Show Detectors" options will not be accessible.
 
-.. _matrix example:
-**Example - Load a raw data file with Matrix mode**
-
-.. testcode:: ExLoad
-
-    ws = LoadSANS1MLZ(Filename='D0122881.001',
-                      Mode='matrix')
-    spectrum_5 = ws.readY(5)
-    print(spectrum_5[1:6])
-
-Output:
-
-.. testoutput:: ExLoad
-
-    [ 891.  863.  890.  836.  885.]
+.. figure:: /images/LoadSANS1MLZ_data_visualization.png
+    :align: center
+    :width: 1000
 
 .. include:: ../usagedata-note.txt
 

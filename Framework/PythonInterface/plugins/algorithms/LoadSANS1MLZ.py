@@ -1,4 +1,4 @@
-from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator, StringListValidator
+from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
 from mantid.simpleapi import CreateWorkspace, LoadInstrument, AddSampleLogMultiple, \
@@ -35,22 +35,16 @@ class LoadSANS1MLZ(PythonAlgorithm):
                              doc="Wavelength in Angstrom. If 0, the wavelength "
                                  "will be read from the data file.")
 
-        self.declareProperty(name='Mode',
-                             defaultValue='vector',
-                             validator=StringListValidator(['vector', 'matrix']),
-                             doc='Choose workspace type.')
-
     def PyExec(self):
         filename = self.getPropertyValue("Filename")
         out_ws_name = self.getPropertyValue("OutputWorkspace")
-        workspace_mode = self.getPropertyValue('Mode')
         metadata = SANSdata()
 
         try:
             metadata.analyze_source(filename)
-            data_x, data_y, data_e, n_spec = self.create_datasets(metadata, workspace_mode)
+            data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
             logs = self.create_logs(metadata)
-            y_unit, y_label, x_unit = self.create_labels(workspace_mode)
+            y_unit, y_label, x_unit = self.create_labels()
         except FileNotFoundError as error:
             raise RuntimeError(str(error))
         except TypeError as error:
@@ -70,8 +64,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
                                    DateAndTime(metadata.file.run_end()))
 
-            if workspace_mode != 'matrix':
-                LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
+            LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
 
             AddSampleLogMultiple(out_ws,
                                  LogNames=logs["names"],
@@ -81,27 +74,18 @@ class LoadSANS1MLZ(PythonAlgorithm):
             self.setProperty("OutputWorkspace", out_ws)
             DeleteWorkspace(out_ws)
 
-    def create_datasets(self, metadata: SANSdata, workspace_mode) -> tuple:
+    def create_datasets(self, metadata: SANSdata) -> tuple:
         """
         :return: DataX, DataY, DataE and number of spectra
         (including monitors)
         """
         self.log().debug('Creation data for workspace started')
 
-        if workspace_mode == 'matrix':
-            n_spec = 128
-            data_y = metadata.counts.data
-            self._wavelength(metadata)
-            data_e = np.sqrt(data_y) if metadata.counts.data_type == '001' else metadata.errors.data
-            data_x = range(n_spec)
-        elif workspace_mode == 'vector':
-            n_spec = metadata.spectrum_amount()
-            data_y = metadata.data_y()
-            self._wavelength(metadata)
-            data_e = metadata.data_e()
-            data_x = metadata.data_x()
-        else:
-            raise RuntimeError('unsupported workspace mode type')
+        n_spec = metadata.spectrum_amount()
+        data_y = metadata.data_y()
+        self._wavelength(metadata)
+        data_e = metadata.data_e()
+        data_x = metadata.data_x()
 
         self.log().debug('Creation data for workspace successful')
         return data_x, data_y, data_e, n_spec
@@ -164,7 +148,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     def _wavelength(self, metadata):
         user_wavelength = float(self.getPropertyValue("Wavelength"))
-        if user_wavelength > 0.001:
+        if not self.getProperty("Wavelength").isDefault:
             metadata.setup.wavelength = user_wavelength
             self.log().notice('Wavelength set to user input.')
         if (type(metadata.setup.wavelength) is str) or (metadata.setup.wavelength == 0.0):
@@ -181,15 +165,10 @@ class LoadSANS1MLZ(PythonAlgorithm):
             self.log().warning(warn)
 
     @staticmethod
-    def create_labels(workspace_mode):
-        if workspace_mode != 'matrix':
-            y_unit = ""
-            y_label = "Counts"
-            x_unit = "Wavelength"
-        else:
-            y_unit = ""
-            y_label = "Counts"
-            x_unit = ""
+    def create_labels():
+        y_unit = ""
+        y_label = "Counts"
+        x_unit = "Wavelength"
         return y_unit, y_label, x_unit
 
 
