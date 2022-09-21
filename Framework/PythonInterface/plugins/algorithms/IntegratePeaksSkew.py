@@ -11,7 +11,7 @@ from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.ndimage import label
-from scipy.stats import moment
+from scipy.stats import moment, siegelslopes
 from mantid.geometry import RectangularDetector, GridDetector
 import re
 from enum import Enum
@@ -800,7 +800,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # robust estimation of params for (dT/T)^2 = slope*cot(theta)^2 + intercept
             # if scale_dth cot(th) -> wl*cot(th)
             xvals = (wavelengths**2)*cot_th_sq if scale_dth else cot_th_sq
-            slope, intercept = np.polyfit(xvals, frac_tof_widths ** 2, deg=1)
+            slope, intercept = siegelslopes(frac_tof_widths ** 2, xvals)
             if slope > 0 and intercept > 0:
                 logger.notice(f"Estimated resolution parameters:"
                               f"\nBackscatteringTOFResolution = {np.sqrt(intercept)}"
