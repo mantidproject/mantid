@@ -80,25 +80,11 @@ class DMOL3Loader(AbInitioLoader):
             data["unit_cell"] = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
         else:
-            dim = 3
-            vectors = []
-            for i in range(dim):
-                line = obj_file.readline().split()
-                vector = [cls._convert_to_angstroms(string=s) for s in line]
-                vectors.append(vector)
-
-                data["unit_cell"] = np.asarray(vectors).astype(dtype=FLOAT_TYPE)
+            vectors = [obj_file.readline().split() for _ in range(3)]
+            data["unit_cell"] = np.asarray(vectors, dtype=FLOAT_TYPE)
+            data["unit_cell"] *= ATOMIC_LENGTH_2_ANGSTROM
 
         obj_file.seek(pos)
-
-    @staticmethod
-    def _convert_to_angstroms(string: str):
-        """
-        :param string: string with number
-        :returns: converted coordinate of lattice vector to Angstroms
-        """
-        au2ang = ATOMIC_LENGTH_2_ANGSTROM
-        return float(string) * au2ang
 
     def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
         """
