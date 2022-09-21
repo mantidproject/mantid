@@ -51,8 +51,10 @@ class DMOL3Loader(AbInitioLoader):
 
             # read info about atoms and construct atom data
             masses = self._read_masses_from_file(obj_file=dmol3_file)
-            self._read_atomic_coordinates(file_obj=dmol3_file, data=data, masses_from_file=masses)
-            self._num_atoms = len(data['atoms'])
+            atoms = self._read_atomic_coordinates(file_obj=dmol3_file)
+            self.check_isotopes_substitution(atoms=atoms, masses=masses)
+            self._num_atoms = len(atoms)
+            data['atoms'] = atoms
 
             # read frequencies, corresponding atomic displacements and construct k-points data
             TextParser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
@@ -86,38 +88,33 @@ class DMOL3Loader(AbInitioLoader):
 
         return unit_cell
 
-    def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
+    @staticmethod
+    def _read_atomic_coordinates(file_obj: io.BufferedReader) -> dict:
         """
         Reads atomic coordinates from .outmol DMOL3 file.
 
-        :param file_obj: file object from which we read
-        :param data: Python dictionary to which atoms data should be added
-        :param masses_from_file: masses read from an ab initio output file
+        :param file_obj: open file handle to DMOL3 output data
         """
         atoms = {}
-        atom_indx = 0
+        atom_index = 0
         TextParser.find_first(file_obj=file_obj, msg="$coordinates")
-        end_msgs = ["$end", "----------------------------------------------------------------------"]
+        end_msgs = ["$end", "------------------------------------------------"]
 
-        while not TextParser.block_end(file_obj=file_obj, msg=end_msgs):
+        while not TextParser.block_end(file_obj, msg=end_msgs):
+            symbol, *coord = file_obj.readline().split()
 
-            line = file_obj.readline()
-            entries = line.split()
-
-            symbol = str(entries[0].decode("utf-8").capitalize())
+            symbol = symbol.decode("utf-8").capitalize()
             atom = Atom(symbol=symbol)
-            # We change unit of atomic displacements from atomic length units to Angstroms
-            au2ang = ATOMIC_LENGTH_2_ANGSTROM
-            float_type = FLOAT_TYPE
 
-            atoms["atom_{}".format(atom_indx)] = {"symbol": symbol, "mass": atom.mass, "sort": atom_indx,
-                                                  "coord": np.asarray(entries[1:]).astype(dtype=float_type) * au2ang}
+            # Convert coordinate units from Bohr to Angstrom
+            coord = np.asarray(coord,
+                               dtype=FLOAT_TYPE) * ATOMIC_LENGTH_2_ANGSTROM
 
-            atom_indx += 1
+            atoms[f"atom_{atom_index}"] = {"symbol": symbol, "mass": atom.mass,
+                                           "sort": atom_index, "coord": coord}
+            atom_index += 1
 
-        self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file)
-
-        data["atoms"] = atoms
+        return atoms
 
     def _read_modes(self, file_obj=None, data=None):
         """

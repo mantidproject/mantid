@@ -105,7 +105,7 @@ class TextParser:
             return False
 
     @staticmethod
-    def block_end(file_obj: BufferedReader, msg: Sequence[str]) -> bool:
+    def block_end(file_obj: BufferedReader, *, msg: Sequence[str]) -> bool:
         """
         Checks for msg which terminates block.
 
