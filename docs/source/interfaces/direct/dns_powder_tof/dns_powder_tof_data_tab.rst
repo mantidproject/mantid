@@ -6,6 +6,7 @@ DNS Data Tab
 .. image::  ../../../images/DNS_interface_powder_tof_data_tab.png
    :align: center
    :height: 400px
+
 \
 
 This tab is a file browser for the DNS datafiles.

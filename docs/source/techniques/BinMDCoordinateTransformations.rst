@@ -17,7 +17,7 @@ Binning an MDWorkspace
 
 - Begin with an initial :ref:`MDWorkspace` called ``original_ws`` with two dimensions, ``Qx`` and ``Qy``.
 - The :ref:`algm-BinMD` algorithm can transform these coordinates into a new coordinate space with, for example, a
-rotation and a translation:
+  rotation and a translation:
 
 .. figure:: ../images/BinMDCoordinateTransformations/BinMD_Coordinate_Transforms.png
    :alt: Coordinate transform line example
@@ -44,7 +44,7 @@ rotation and a translation:
 Binning a Line From an MDHistoWorkspace
 ---------------------------------------
 
-It is possible to call :ref:`BinMD` on an :ref:`MDHistoWorkspace` that has already been binned.
+It is possible to call :ref:`algm-BinMD` on an :ref:`MDHistoWorkspace` that has already been binned.
 For example, if you are viewing ``binned_ws`` in the :ref:`sliceviewer`, you can use the
 :ref:`Non-axis aligned cutting tool <sliceviewer_nonaxiscuts>` to bin a line from that.
 

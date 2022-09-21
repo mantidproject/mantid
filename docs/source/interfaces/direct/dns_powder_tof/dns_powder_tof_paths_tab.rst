@@ -6,6 +6,7 @@ DNS Paths Tab
 .. image::  ../../../images/DNS_interface_powder_tof_overview.png
    :align: center
    :height: 400px
+
 \
 
 In this tab you can set the path to the datafiles for processing, as well as to the locations where the output files will be stored.
