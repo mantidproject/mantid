@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from contextlib import contextmanager
 from io import BufferedReader
 import re
 from typing import Sequence
@@ -15,6 +16,17 @@ class TextParser:
     """
     File parsing tools: wraps a few methods for buffer navigation
     """
+    @staticmethod
+    @contextmanager
+    def save_excursion(file_obj):
+        """Temporarily save the position in file and return when leaving context"""
+        pos = file_obj.tell()
+        try:
+            yield pos
+
+        finally:
+            file_obj.seek(pos)
+
     @classmethod
     def find_first(cls, *,
                    file_obj: BufferedReader,

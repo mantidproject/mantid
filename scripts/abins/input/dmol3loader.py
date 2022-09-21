@@ -71,20 +71,18 @@ class DMOL3Loader(AbInitioLoader):
         :param obj_file: file object from which we read
         :param data: Python dictionary to which found lattice vectors should be added
         """
-        pos = file_obj.tell()
+        with TextParser.save_excursion(file_obj):
+            try:
+                TextParser.find_first(file_obj=file_obj, msg="$cell vectors")
 
-        try:
-            TextParser.find_first(file_obj=file_obj, msg="$cell vectors")
+            except EOFError:
+                # No unit cell for non-periodic calculations; set to zero
+                unit_cell = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
 
-        except EOFError:  # No unit cell for non-periodic calculations; set to zero
-            unit_cell = np.zeros(shape=(3, 3), dtype=FLOAT_TYPE)
-
-        else:
-            vectors = [file_obj.readline().split() for _ in range(3)]
-            unit_cell = np.asarray(vectors, dtype=FLOAT_TYPE)
-            unit_cell *= ATOMIC_LENGTH_2_ANGSTROM
-
-        file_obj.seek(pos)
+            else:
+                vectors = [file_obj.readline().split() for _ in range(3)]
+                unit_cell = np.asarray(vectors, dtype=FLOAT_TYPE)
+                unit_cell *= ATOMIC_LENGTH_2_ANGSTROM
 
         return unit_cell
 
@@ -257,19 +255,21 @@ class DMOL3Loader(AbInitioLoader):
 
     def _read_masses_from_file(self, obj_file) -> List[float]:
         masses = []
-        pos = obj_file.tell()
-        TextParser.find_first(file_obj=obj_file, msg="Zero point vibrational energy:      ")
 
-        end_msg = "Molecular Mass:"
-        key = "Atom"
-        end_msg = bytes(end_msg, "utf8")
-        key = bytes(key, "utf8")
+        with TextParser.save_excursion(obj_file):
+            TextParser.find_first(file_obj=obj_file,
+                                  msg="Zero point vibrational energy:      ")
 
-        while not TextParser.file_end(file_obj=obj_file):
-            line = obj_file.readline()
-            if end_msg in line:
-                break
-            if key in line:
-                masses.append(float(line.split()[-1]))
-        obj_file.seek(pos)
+            end_msg = "Molecular Mass:"
+            key = "Atom"
+            end_msg = bytes(end_msg, "utf8")
+            key = bytes(key, "utf8")
+
+            while not TextParser.file_end(file_obj=obj_file):
+                line = obj_file.readline()
+                if end_msg in line:
+                    break
+                if key in line:
+                    masses.append(float(line.split()[-1]))
+
         return masses
