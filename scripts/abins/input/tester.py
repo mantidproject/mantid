@@ -64,13 +64,16 @@ class Tester(object):
         correct_k_points = correct_data["datasets"]["k_points_data"]
         items = data["datasets"]["k_points_data"]
 
+        from numpy.testing import assert_allclose
+
         for k in correct_k_points["frequencies"]:
             correct_frequencies, correct_displacements = self._cull_imaginary_modes(
                 correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"][k])
             calc_frequencies, calc_displacements = self._cull_imaginary_modes(
                 items["frequencies"][k], items["atomic_displacements"][k])
             self.assertEqual(True, np.allclose(correct_frequencies, calc_frequencies))
-            self.assertEqual(True, np.allclose(correct_displacements, calc_displacements))
+            assert_allclose(correct_displacements, calc_displacements)
+            #self.assertEqual(True, np.allclose(correct_displacements, calc_displacements))
             self.assertEqual(True, np.allclose(correct_k_points["k_vectors"][k], items["k_vectors"][k]))
             self.assertEqual(correct_k_points["weights"][k], items["weights"][k])
 
@@ -106,7 +109,10 @@ class Tester(object):
             read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension.upper())
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)
 
-        loaded_data = ab_initio_loader.load_formatted_data().extract()
+        abins_data = ab_initio_loader.load_formatted_data()
+        self.assertTrue(abins_data.get_kpoints_data().is_normalised())
+
+        loaded_data = abins_data.extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
