@@ -116,12 +116,12 @@ class SetupSANS(DtClsSANS):
         super().__init__()
         self.wavelength: float = 0.0
         self.wavelength_error_mult: float = 0.1      # wavelength spread up to 10%
-        self.sample_detector_distance: float = 0.0
+        self.l2: float = 0.0
         self.collimation: float = 0.0
 
     def _assign_values(self):
         self._assign_value('Lambda', 'wavelength')
-        self._assign_value('SD', 'sample_detector_distance')
+        self._assign_value('SD', 'l2')
         self._assign_value('Collimation', 'collimation')
 
 
@@ -165,16 +165,12 @@ class HistorySANS(DtClsSANS):
         self.transmission: float = 0.0
         self.scaling: float = 0.0
         self.probability: float = 0.0
-        self.beamcenter_x: float = 0.0
-        self.beamcenter_y: float = 0.0
         self.aperture: float = 0.0
 
     def _assign_values(self):
         self._assign_value('Transmission', 'transmission')
         self._assign_value('Scaling', 'scaling')
         self._assign_value('Probability', 'probability')
-        self._assign_value('BeamcenterX', 'beamcenter_x')
-        self._assign_value('BeamcenterY', 'beamcenter_y')
         self._assign_value('Aperture', 'aperture')
 
 
@@ -372,8 +368,8 @@ class SANSdata:
         if (type(self.setup.collimation) is str) or (self.setup.collimation == 0.0):
             self.logs['warning'].append(f"Collimation is not specified in the datafile.")
 
-        if (type(self.setup.sample_detector_distance) is str) or (self.setup.sample_detector_distance == 0.0):
-            self.logs['warning'].append(f"SD ('sample detector distance') is not specified in the datafile.")
+        if (type(self.setup.l2) is str) or (self.setup.l2 == 0.0):
+            self.logs['warning'].append(f"SD - sample detector distance ('l2') is not specified in the datafile.")
 
         if (type(self.setup.wavelength) is str) or (self.setup.wavelength == 0.0):
             self.logs['warning'].append(f"Lambda (wavelength) is not specified in the datafile."

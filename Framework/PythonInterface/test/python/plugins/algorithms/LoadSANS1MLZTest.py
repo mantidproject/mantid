@@ -49,12 +49,10 @@ class LoadSANSMLZTest(unittest.TestCase):
 
         self.assertEqual(22, run.getProperty('position').value)
         self.assertEqual(0.0, run.getProperty('thickness').value)
-        self.assertEqual(1.4904, run.getProperty('sample_detector_distance').value)
+        self.assertEqual(1.4904, run.getProperty('l2').value)
         self.assertEqual(3600.688081, run.getProperty('duration').value)
         self.assertEqual(6392861, run.getProperty('monitor1').value)
         self.assertEqual(14902342, run.getProperty('monitor2').value)
-        self.assertEqual(0.0, run.getProperty('beamcenter_x').value)
-        self.assertEqual(0.0, run.getProperty('beamcenter_y').value)
         self.assertEqual(0.0, run.getProperty('scaling').value)
         self.assertEqual(0.0, run.getProperty('transmission').value)
 

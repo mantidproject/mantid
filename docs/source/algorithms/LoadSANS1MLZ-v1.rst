@@ -36,7 +36,7 @@ Sample Logs, a user needs to use the
 `keys method <https://docs.mantidproject.org/nightly/tutorials/python_in_mantid/further_alg_ws/04_run_logs.html>`_;
 the key consists of a section's title followed by a dot and the parameter of interest that belongs
 to that section. The most relevant parameters, such as "wavelength", "collimation",
-"sample_detector_distance", "duration", "monitor1", "monitor2", "thickness" and "position" can be accessed
+"l2", "duration", "monitor1", "monitor2", "thickness" and "position" can be accessed
 directly using the parameter name.
 
 **Example - Access to the information**
