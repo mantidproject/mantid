@@ -62,18 +62,22 @@ Output:
 Data visualization
 -------------------------
 
-Whenever the loader is used  then the output is written to
-a 2D matrix workspace as a vector. As a result, the data can be visualised by right
-clicking on the loaded workspace and selecting the "Show Instrument" option, which activates the
-`Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool. Also, by selecting the
-"Show Detectors" option, you can activate the Detector Table, which contains Workspace Indices,
-Spectrum Numbers, Detector IDs and locations of the detectors, together with a flag showing if
-a detector is a monitor.
+Whenever the loader is used then the output is written to a 2D Workspace. As a result, the data
+can be visualised by right clicking on the loaded workspace and selecting the "Show Instrument"
+option, which activates the `Instrument View <https://www.mantidproject.org/Instrument_View>`_ tool.
 
-
-.. figure:: /images/LoadSANS1MLZ_data_visualization.png
+.. figure:: /images/LoadSANS1MLZ_show_instrument.png
     :align: center
     :width: 1000
+
+By selecting the "Show Detectors" option, you can activate the Detector Table, which contains
+Workspace Indices, Spectrum Numbers, Detector IDs and locations of the detectors, together with
+a flag showing if a detector is a monitor.
+
+
+.. figure:: /images/LoadSANS1MLZ_show_detectors.png
+    :align: center
+    :width: 1400
 
 .. include:: ../usagedata-note.txt
 
