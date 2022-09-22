@@ -9,8 +9,9 @@ from plugins.algorithms.SANS1DataMLZ import SANSdata
 
 
 class LoadSANSMLZTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.filename_001 = "D0122881.001"
+
+    filename_001: str = "D0122881.001"
+    filename_incomplete: str = "sans-incomplete.001"
 
     def test_LoadValidData001(self):
         """
@@ -66,7 +67,6 @@ class LoadSANSMLZTest(unittest.TestCase):
         check is exceptions definition is correct
         """
         output_ws_name = "LoadSANS1MLZTest_Test3"
-        filename = "sans-incomplete.001"
         parameters = {
             'counts 128': "'Counts' section includes incorrect data",
             'counts pr': "'Counts' section includes incorrect data",
@@ -74,10 +74,9 @@ class LoadSANSMLZTest(unittest.TestCase):
         }
 
         for param in parameters.keys():
-            self._create_incomplete_dataFile(filename, param)
+            self._create_incomplete_dataFile(self.filename_incomplete, param)
             self.assertRaisesRegex(RuntimeError, parameters[param], LoadSANS1MLZ,
-                                   Filename=filename, OutputWorkspace=output_ws_name)
-            os.remove(filename)
+                                   Filename=self.filename_incomplete, OutputWorkspace=output_ws_name)
 
     def test_LoadValidData_noMonitors001(self):
         """
@@ -86,17 +85,15 @@ class LoadSANSMLZTest(unittest.TestCase):
         output_ws_name = "LoadSANS1MLZTest_Test4"
         current_paths = config.getDataSearchDirs()[0]
         filename_path = current_paths + self.filename_001
-        file_inv = "sans-incomplete.001"
-        with open(file_inv, "w") as f:
+        with open(self.filename_incomplete, "w") as f:
             with open(filename_path, "r") as fs:
                 t = fs.readlines()
                 f.writelines(t[:150])
                 f.writelines(t[153:])
         alg_test = run_algorithm("LoadSANS1MLZ",
-                                 Filename=file_inv,
+                                 Filename=self.filename_incomplete,
                                  OutputWorkspace=output_ws_name,
                                  Wavelength=3.2)
-        os.remove(file_inv)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
@@ -115,11 +112,10 @@ class LoadSANSMLZTest(unittest.TestCase):
         test: process incomplete data file;
         """
         output_ws_name = "LoadSANS1MLZTest_Test7"
-        filename = "sans-incomplete.001"
 
-        self._create_incomplete_dataFile(filename, 'independence ')
+        self._create_incomplete_dataFile(self.filename_incomplete, 'independence ')
         alg_test = run_algorithm("LoadSANS1MLZ",
-                                 Filename=filename,
+                                 Filename=self.filename_incomplete,
                                  Wavelength=4.6,
                                  OutputWorkspace=output_ws_name)
 
@@ -127,7 +123,6 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual('SANS-1_MLZ', ws.getInstrument().getName())
 
         self.assertTrue(alg_test.isExecuted())
-        os.remove(filename)
 
     @staticmethod
     def _create_incomplete_dataFile(filename, param):
@@ -189,31 +184,23 @@ class LoadSANSMLZTest(unittest.TestCase):
                 f.write("%Sample\n\n")
                 f.write("%Counter\n\n")
 
-
-class SANS1DataClassTestHelper:
-
     @staticmethod
-    def set_up(comment=False, file_type='001'):
+    def remove_incomplete_dataFile(filename):
+        os.remove(filename)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.remove_incomplete_dataFile(cls.filename_incomplete)
+
+
+class SANS1DataClassTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        filename = "D0122881.001"
         metadata = SANSdata()
-        filename_001 = "D0122881.001"
-        current_paths = ''
-        filename = ''
-        for i in config.getDataSearchDirs():
-            if i.split('/')[-2] == 'UnitTest':
-                current_paths = i
-                break
-        if file_type == '001':
-            filename = filename_001
-
-        filename_path = current_paths + filename
-        metadata.analyze_source(filename_path, comment)
-        return metadata, filename
-
-
-class SANS1DataClassFileSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
+        metadata.analyze_source(cls.get_file_absolute_path(filename),
+                                comment=True)
+        cls.metadata = metadata
 
     def test_StartTime(self):
         date = np.datetime64('2015-01-13T11:10:28')
@@ -235,73 +222,50 @@ class SANS1DataClassFileSectionTest(unittest.TestCase):
         title = 'D0122881/1'
         self.assertEqual(title, self.metadata.file.get_title())
 
-    def test_CheckSomeValues(self):
+    def test_CheckFileSectionValues(self):
         self.assertEqual('SANSDRaw', self.metadata.file.info['Type'])
         self.assertEqual('p8195', self.metadata.file.info['Proposal'])
         self.assertEqual(128, self.metadata.file.info['DataSizeX'])
         self.assertEqual('16384', self.metadata.file.info['DataSize'])
 
-
-class SANS1DataClassSampleSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
-
-    def test_CheckSomeValues(self):
+    def test_CheckSampleSectionValues(self):
         self.assertEqual('-0.00', self.metadata.sample.info['Omega'])
         self.assertEqual('10.00', self.metadata.sample.info['BTableX'])
         self.assertEqual('0.00', self.metadata.sample.info['BTableY'])
         self.assertEqual('28.00', self.metadata.sample.info['BTableZ'])
         self.assertEqual('', self.metadata.sample.info['Magnet'])
 
-
-class SANS1DataClassSetupSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
-
-    def test_CheckSomeValues(self):
+    def test_CheckSetupSectionValues(self):
         self.assertEqual('0.000000', self.metadata.setup.info['DetHAngle'])
         self.assertEqual('495.00', self.metadata.setup.info['BeamstopX'])
         self.assertEqual('497.00', self.metadata.setup.info['BeamstopY'])
         self.assertEqual('0.000', self.metadata.setup.info['Polarization_m'])
         self.assertEqual('26.554', self.metadata.setup.info['Polarization_c'])
 
-
-class SANS1DataClassCounterSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
-
     def test_MonitorExist(self):
         self.assertEqual([6392861.0, 14902342.0], self.metadata.counter.get_monitors())
 
-    def test_CheckValues(self):
+    def test_CheckCounterSectionValues(self):
         self.assertEqual(6392861, self.metadata.counter.monitor1)
         self.assertEqual(14902342, self.metadata.counter.monitor2)
         self.assertEqual(3600.688081, self.metadata.counter.duration)
         self.assertEqual(18234082, self.metadata.counter.sum_all_counts)
 
-
-class SANS1DataClassCommentSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up(comment=True)
-
-    def test_CheckValues(self):
+    def test_CheckCommentSectionValues(self):
         self.assertEqual("'4.0 mm'", self.metadata.comment.info['det1_x_value'])
         self.assertEqual("'10.00 mm'", self.metadata.comment.info['st1_x_value'])
         self.assertEqual("'0.0 deg'", self.metadata.comment.info['det1_omg_value'])
 
-
-class SANS1DataClassCountsSectionTest(unittest.TestCase):
-
-    def setUp(self) -> None:
-        self.metadata, self.filename = SANS1DataClassTestHelper.set_up()
-
     def test_Dimensions(self):
         dim = self.metadata.counts.data.shape
         self.assertEqual((128, 128), dim)
+
+    @staticmethod
+    def get_file_absolute_path(filename):
+        path = next(i for i in config.getDataSearchDirs()
+                    if os.path.isfile(os.path.join(i, filename)))
+        path = os.path.join(path, filename)
+        return path
 
 
 if __name__ == '__main__':
