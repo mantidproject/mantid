@@ -1,0 +1,1 @@
+- Changes :ref:`algm-LoadEventNexus` to skip pulsetime lookup on 0 event sections, preventing the crash of legacy files.

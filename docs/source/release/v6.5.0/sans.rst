@@ -12,6 +12,5 @@ New Features
 
 Bugfixes
 --------
-- Changes :ref:`algm-LoadEventNexus` to skip pulsetime lookup on 0 event sections, preventing the crash of legacy files.
 
 :ref:`Release 6.5.0 <v6.5.0>`
