@@ -25,6 +25,7 @@ class PEAK_MASK_STATUS(Enum):
     DENSITY_MIN = "Peak mask density is below limit"
     VACANCY_MAX = "Peak mask has too many vacancies"
     ON_EDGE = "Peak mask is on the detector edge"
+    NBINS_MIN = "Peak does not have enough TOF bins"
     NO_PEAK = "No peak detected."
 
 
@@ -245,7 +246,7 @@ class PeakData:
         self.intens, self.sig = 0, 0
 
     def integrate_peak(self, use_nearest, integrate_on_edge, optimise_mask, npk_min, density_min, nrow_max, ncol_max,
-                       min_npixels_per_vacancy, max_nvacancies):
+                       min_npixels_per_vacancy, max_nvacancies, min_nbins):
         self.peak_mask, self.non_bg_mask, peak_label = self.find_peak_mask(self.ixlo, self.ixhi, use_nearest)
         self.status = self._is_peak_mask_valid(self.peak_mask, peak_label, npk_min, density_min, nrow_max,
                                                ncol_max, min_npixels_per_vacancy, max_nvacancies, integrate_on_edge)
@@ -269,14 +270,13 @@ class PeakData:
                     self.non_bg_mask = np.logical_and(self.non_bg_mask, opt_non_bg_mask)
                     self.focus_data_in_detector_mask()
                     self.find_peak_limits(min(self.ixlo, self.ixlo_opt), max(self.ixhi, self.ixhi_opt))
-            # do integration
-            dx = np.diff(self.xpk)
-            self.ypk[1:] = self.ypk[1:] * dx
-            self.ypk[0] = self.ypk[0] * dx[0]  # assume first has same dx as adjacent bin
-            self.epk_sq[1:] = self.epk_sq[1:] * (dx ** 2)
-            self.epk_sq[0] = self.epk_sq[0] * (dx[0] ** 2)
-            self.intens = np.sum(self.ypk[self.ixlo_opt:self.ixhi_opt])
-            self.sig = np.sqrt(np.sum(self.epk_sq[self.ixlo_opt:self.ixhi_opt]))
+            if self.ixhi_opt - self.ixlo_opt < min_nbins:
+                self.status = PEAK_MASK_STATUS.NBINS_MIN
+            else:
+                # do integration
+                self.scale_intensity_by_bin_width()
+                self.intens = np.sum(self.ypk[self.ixlo_opt:self.ixhi_opt])
+                self.sig = np.sqrt(np.sum(self.epk_sq[self.ixlo_opt:self.ixhi_opt]))
 
     def find_peak_mask(self, ixlo, ixhi, use_nearest):
         _, ipeak2D = self.find_bg_pts_seed_skew(self.signal[:, :, ixlo:ixhi].sum(axis=2).flatten())
@@ -386,6 +386,14 @@ class PeakData:
         # subtract bg from focused peak
         self.ypk = self.ypk - ybg  # removes background and powder lines (roughly line up in tof)
         self.epk_sq = self.epk_sq + ebg_sq
+
+    def scale_intensity_by_bin_width(self):
+        # multiply by bin width (as eventually want integrated intensity)
+        dx = np.diff(self.xpk)
+        self.ypk[1:] = self.ypk[1:] * dx
+        self.ypk[0] = self.ypk[0] * dx[0]  # assume first has same dx as adjacent bin
+        self.epk_sq[1:] = self.epk_sq[1:] * (dx ** 2)
+        self.epk_sq[0] = self.epk_sq[0] * (dx[0] ** 2)
 
     def find_peak_limits(self, ilo, ihi):
         # find initial background points in tof window using skew method
@@ -602,7 +610,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
         self.setPropertyGroup("ScaleThetaWidthByWavelength", "Integration Window Parameters")
         self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
-        # peak mask validators
+        # peak validation
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
                              doc="Integrate peaks that contain pixels on edge of the detector.")
         self.declareProperty(name="NRowsEdge", defaultValue=1, direction=Direction.Input,
@@ -632,6 +640,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.declareProperty(name="NPixPerVacancyMin", defaultValue=1, direction=Direction.Input,
                              validator=IntBoundedValidator(lower=1),
                              doc="Minimum number of pixels in a vacancy")
+        self.declareProperty(name="NTOFBinsMin", defaultValue=4, direction=Direction.Input,
+                             validator=IntBoundedValidator(lower=1),
+                             doc="Minimum number of TOF bins in a peak")
         self.setPropertyGroup("IntegrateIfOnEdge", "Peak Mask Validation")
         self.setPropertyGroup("NRowsEdge", "Peak Mask Validation")
         self.setPropertyGroup("NColsEdge", "Peak Mask Validation")
@@ -641,6 +652,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("NColMax", "Peak Mask Validation")
         self.setPropertyGroup("NVacanciesMax", "Peak Mask Validation")
         self.setPropertyGroup("NPixPerVacancyMin", "Peak Mask Validation")
+        self.setPropertyGroup("NTOFBinsMin", "Peak Mask Validation")
         # peak finding
         self.declareProperty(name="UseNearestPeak", defaultValue=False, direction=Direction.Input,
                              doc="Find nearest peak pixel if peak position is in a background pixel.")
@@ -717,6 +729,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ncol_max = self.getProperty("NColMax").value
         max_nvacancies = self.getProperty("NVacanciesMax").value
         min_npixels_per_vacancy = self.getProperty("NPixPerVacancyMin").value
+        min_nbins = self.getProperty("NTOFBinsMin").value
         # peak finding
         use_nearest = self.getProperty("UseNearestPeak").value
         update_peak_pos = self.getProperty("UpdatePeakPosition").value
@@ -765,7 +778,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             dTOF = self.calc_initial_dTOF(pk, frac_tof_window, dt0_over_t0, dth, scale_dth)
             peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
             peak_data.integrate_peak(use_nearest, integrate_on_edge, optimise_mask, npk_min, density_min, nrow_max,
-                                     ncol_max, min_npixels_per_vacancy, max_nvacancies)
+                                     ncol_max, min_npixels_per_vacancy, max_nvacancies, min_nbins)
 
             if peak_data.status is PEAK_MASK_STATUS.VALID:
                 if update_peak_pos:
