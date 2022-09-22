@@ -2,7 +2,7 @@ from mantid.kernel import Direction, DateAndTime, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
 from mantid.simpleapi import CreateWorkspace, LoadInstrument, AddSampleLogMultiple, \
-    AnalysisDataService, DeleteWorkspace
+    AnalysisDataService, DeleteWorkspace, MoveInstrumentComponent
 from SANS1DataMLZ import SANSdata
 import numpy as np
 
@@ -65,6 +65,9 @@ class LoadSANS1MLZ(PythonAlgorithm):
                                    DateAndTime(metadata.file.run_end()))
 
             LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
+            MoveInstrumentComponent(Workspace=out_ws,
+                                    ComponentName="detector",
+                                    Z=str(metadata.setup.l2), RelativePosition=False)
 
             AddSampleLogMultiple(out_ws,
                                  LogNames=logs["names"],
@@ -83,7 +86,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
         n_spec = metadata.spectrum_amount()
         data_y = metadata.data_y()
-        self._wavelength(metadata)
+        self._set_wavelength(metadata)
         data_e = metadata.data_e()
         data_x = metadata.data_x()
 
@@ -144,7 +147,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         self.log().debug('Creation sample logs successful')
         return logs
 
-    def _wavelength(self, metadata):
+    def _set_wavelength(self, metadata):
         user_wavelength = float(self.getPropertyValue("Wavelength"))
         if not self.getProperty("Wavelength").isDefault:
             metadata.setup.wavelength = user_wavelength

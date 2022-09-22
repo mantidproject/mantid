@@ -58,7 +58,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual(0.0, run.getProperty('transmission').value)
 
         det = ws.getDetector(0)
-        self.assertAlmostEqual(2.07, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 2)
+        self.assertAlmostEqual(25.9118, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 4)
         run_algorithm("DeleteWorkspace", Workspace=output_ws_name)
 
     def test_LoadInvalidData001(self):

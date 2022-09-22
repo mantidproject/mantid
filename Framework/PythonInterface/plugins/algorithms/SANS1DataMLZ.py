@@ -116,7 +116,7 @@ class SetupSANS(DtClsSANS):
         super().__init__()
         self.wavelength: float = 0.0
         self.wavelength_error_mult: float = 0.1      # wavelength spread up to 10%
-        self.l2: float = 0.0
+        self.l2: float = 20.0
         self.collimation: float = 0.0
 
     def _assign_values(self):
