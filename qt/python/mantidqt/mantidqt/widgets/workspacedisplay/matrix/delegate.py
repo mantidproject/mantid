@@ -7,8 +7,8 @@
 from typing import Optional
 
 from qtpy.QtCore import Qt, QObject, QModelIndex
-from qtpy.QtGui import QPainter
-from qtpy.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem)
+from qtpy.QtGui import QPainter, QColor
+from qtpy.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem, QStyle)
 
 
 class CustomTextElidingDelegate(QStyledItemDelegate):
@@ -44,10 +44,16 @@ class CustomTextElidingDelegate(QStyledItemDelegate):
         try:
             painter.setClipRect(opt.rect)
             foreground_colour, background_colour = index.data(Qt.ForegroundRole), index.data(Qt.BackgroundRole)
-            if foreground_colour is not None:
-                painter.setPen(foreground_colour)
-            if background_colour is not None:
-                painter.fillRect(option.rect, background_colour)
+            state_selected = option.state & QStyle.State_Selected
+            if state_selected:
+                painter.setPen(QColor("white"))
+                painter.fillRect(option.rect, option.palette.highlight())
+            else:
+                if foreground_colour is not None:
+                    painter.setPen(foreground_colour)
+                if background_colour is not None:
+                    painter.fillRect(option.rect, background_colour)
+
             padding = self._padding
             opt.rect = option.rect.adjusted(padding, padding, -padding, -padding)
             painter.drawText(opt.rect, int(Qt.AlignLeft | Qt.AlignVCenter),
