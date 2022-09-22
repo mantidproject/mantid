@@ -11,7 +11,7 @@ from unittest import mock
 
 from qtpy.QtCore import QModelIndex, Qt, QRect
 from qtpy.QtGui import QColor, QStandardItemModel, QPainter
-from qtpy.QtWidgets import QStyleOptionViewItem
+from qtpy.QtWidgets import QStyleOptionViewItem, QStyle
 from mantidqt.widgets.workspacedisplay.matrix.delegate import CustomTextElidingDelegate
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -92,6 +92,26 @@ class CustomTextElidingDelegateTest(unittest.TestCase):
         painter.fillRect.assert_called_once()
         # the background color object seems different but we only care about value equality
         self.assertEqual(background, painter.fillRect.call_args[0][1])
+
+    def test_custom_eliding_delegate_changes_back_and_foreground_color_if_selected(self):
+        padding = 3
+        delegate = CustomTextElidingDelegate(padding)
+        painter = mock.MagicMock(spec=QPainter)
+        # we cannot mock the style & index as they are passed to a C++ type that expects real types
+        style, model = QStyleOptionViewItem(), QStandardItemModel(1, 1)
+        style.rect = QRect(0, 0, 99, 29)  # give a non-zero sized rectangle to paint in
+        style.state = QStyle.State_Selected  # set selected
+        text, background = str(math.pi), QColor(5, 5, 5)
+        model.setData(model.index(0, 0), text, Qt.DisplayRole)
+        model.setData(model.index(0, 0), background, Qt.BackgroundRole)
+
+        delegate.paint(painter, style, model.index(0, 0))
+
+        painter.setPen.assert_called_once()
+        painter.fillRect.assert_called_once()
+
+        self.assertEqual(style.palette.highlight(), painter.fillRect.call_args[0][1])
+        self.assertEqual(QColor("white"), painter.setPen.call_args[0][0])
 
 
 if __name__ == "__main__":
