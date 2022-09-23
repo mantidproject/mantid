@@ -11,6 +11,7 @@ Interface Overview
 .. image::  ../../../images/DNS_interface_powder_tof_overview.png
    :align: center
    :height: 400px
+
 \
 
 This interface can be used to perform the data reduction of DNS Powder TOF data at MLZ. The interface can be accessed from the main menu of MantidWorkbench by clicking on "Interfaces" → "Direct" and selecting "DNS Reduction". It can also be initialized standalone by running the python file ``DNS_Reduction.py`` in ``qt/python/mantidqtinterfaces/mantidqtinterfaces``.

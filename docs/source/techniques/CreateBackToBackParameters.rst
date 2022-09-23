@@ -94,7 +94,7 @@ So the exercise is to convert fullprof
 
 Into the parameters :math:`A`, :math:`B` and :math:`S` of :ref:`BackToBackExponential<func-BackToBackExponential>`.
 From comparing the formula for the fitting function :ref:`BackToBackExponential<func-BackToBackExponential>` with
-formulas in the :ref:`fullprof manual <http://www.ill.eu/sites/fullprof/>`the conversion equations are estimated to be:
+formulas in the `Fullprof manual <http://www.ill.eu/sites/fullprof/>`_ the conversion equations are estimated to be:
 
 .. math::
 

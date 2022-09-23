@@ -6,6 +6,7 @@ DNS Script Generator Tab
 .. image::  ../../../images/DNS_interface_powder_tof_script_generator_tab.png
    :align: center
    :height: 400px
+
 \
 
 This tab enables a user to generate and run a mantid script for data reduction
