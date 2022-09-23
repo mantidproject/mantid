@@ -14,7 +14,9 @@ New Features
 
 .. image::  ../../images/mantid_memory_bar.png
             :align: center
-|
+
+\
+
 - The ``FitPropertyBrowser`` has been extended to allow for Function Attribute Validators. This allows the value of attributes to be restricted in numerous ways such as being bounded by a numeric min/max value or to be selected from a list of values using a drop down menu.
 - Add support for the new :ref:`SANSILLReduction <algm-SANSILLReduction>` algorithm in DrILL.
 - When loading and saving a project or a script, the working directory of the dialogs is now set to the current default save directory.

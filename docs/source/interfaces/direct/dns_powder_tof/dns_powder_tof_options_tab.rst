@@ -6,6 +6,7 @@ DNS Powder TOF Options Tab
 .. image::  ../../../images/DNS_interface_powder_tof_options_tab.png
    :align: center
    :height: 400px
+
 \
 
 This tab of the powder TOF mode defines the options for the reduction script.
