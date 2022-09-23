@@ -23,10 +23,11 @@ Set Up
 Default Settings
 ----------------
 
-#. In the ``Options`` menu, change ``Default Energy Units`` from ``meV`` to ``cm-1`` and ``Cut algorithm default`` from ``Integration (Sum Counts)`` to ``Rebin (Averages Counts)``
+#. In the ``Options`` menu, change ``Default Energy Units`` from ``meV`` to ``cm-1`` and ``Cut algorithm default`` from ``Rebin (Averages Counts)`` to ``Integration (Sum Counts)``.
 #. The ``en`` setting on the ``Slice`` tab changes from ``meV`` to ``cm-1`` and the values in the row labelled ``y`` change.
 #. Navigate to the ``Cut`` tab
-#. Verify that ``en`` is set to ``cm-1`` and ``Cut Algorithm`` to ``Rebin (Averages Counts)``
+#. Verify that ``en`` is set to ``cm-1`` and ``Cut Algorithm`` to ``Integration (Sum Counts)``
+#. Change both settings back to their original values, ``Default Energy Units`` to ``meV`` and ``Cut algorithm default`` to ``Rebin (Averages Counts)``.
 
 Taking Slices
 -------------
@@ -187,7 +188,7 @@ Taking Cuts
 ####################
 
 #. Navigate to the ``Cut`` tab
-#. In the row labelled ``along``, set the ``from`` value to ``0`` and the ``to`` value to ``10``
+#. In the row labelled ``along``, select ``|Q|`` and set the ``from`` value to ``0`` and the ``to`` value to ``10``
 #. In the row labelled ``over``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
 #. Click ``Plot``. A new window with a cut plot should open.
 #. Navigate to the ``Information`` menu on the cut plot
