@@ -352,7 +352,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
     def _create_and_format_diffusion_workspace(x_data, y_data, e_data, output_name, x_axis_is_temperature):
         create_workspace(x_data, y_data, e_data, 1, 'Diffusion', output_name)
 
-        unit = ('Temperature', 'K') if x_axis_is_temperature else ('Run No', 'last 3 digits')
+        unit = ('Temperature', 'K') if x_axis_is_temperature else ('Run No', ' last 3 digits')
         x_axis = mtd[output_name].getAxis(0).setUnit("Label")
         x_axis.setLabel(unit[0], unit[1])
 
