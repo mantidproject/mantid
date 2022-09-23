@@ -303,7 +303,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-            data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
+            if self.model.can_support_non_axis_cuts():
+                data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
 
