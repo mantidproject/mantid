@@ -26,10 +26,10 @@ Bugfixes
 - :ref:`ExtractSpectra <algm-ExtractSpectra>` now checks if the bins flagged as masked are still there after processing, and if they are not, the masking flag is unchecked for that spectrum.
 - Single valued workspaces can now be saved by :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and are properly loaded by :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>`.
 - If an event nexus file is loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>` with ``LoadAllLogs=True``, any duplicate log entries no longer give an error. Log entries that are nested lower than two levels down are also properly distinguished.
+- Fix a crash that could happen in :ref:`LoadEventNexus <algm-LoadEventNexus>` if there are no pulse times.
 - :ref:`GenerateLogbook <algm-GenerateLogbook>` now does not stop the execution when optional headers are not defined in the relevant :ref:`Instrument Parameter File <InstrumentParameterFile>`, but only sends a warning that they are not available.
 - Fixed an issue in :ref:`Fit <algm-Fit>` where a lack of operator between parameter and value caused a hard crash. The input string is now validated.
 - Fixed bug in documentation of :ref:`GroupToXResolution <algm-GroupToXResolution>` where the figures showing the algorithm output were all blank.
-- Fix a crash that could happen in :ref:`LoadEventNexus <algm-LoadEventNexus>` if there are no pulse times.
 
 Fit Functions
 -------------
