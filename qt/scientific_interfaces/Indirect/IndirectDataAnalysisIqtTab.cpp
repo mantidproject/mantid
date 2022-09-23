@@ -333,9 +333,11 @@ void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
     return;
 
-  if (!checkParametersMatch(sampleName, resolutionName, "analyser").empty() ||
-      !checkParametersMatch(sampleName, resolutionName, "reflection").empty())
-    return;
+  if (!isTechniqueDirect(getADSMatrixWorkspace(sampleName), getADSMatrixWorkspace(resolutionName))) {
+    if (!checkParametersMatch(sampleName, resolutionName, "analyser").empty() ||
+        !checkParametersMatch(sampleName, resolutionName, "reflection").empty())
+      return;
+  }
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);
   double energyMax = m_dblManager->value(m_properties["EHigh"]);

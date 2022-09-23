@@ -73,7 +73,11 @@ rm -rf $CONDA_ENV_PATH
 mkdir $COPY_DIR
 
 echo "Creating conda env from mantidworkbench and jq"
-"$CONDA_EXE" create --prefix $CONDA_ENV_PATH mantidworkbench m2w64-jq notebook --copy -c $CONDA_CHANNEL -c conda-forge -y
+"$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
+  --copy --channel $CONDA_CHANNEL --channel conda-forge -y \
+  mantidworkbench \
+  notebook \
+  m2w64-jq
 echo "Conda env created"
 
 # Determine version information
@@ -88,54 +92,55 @@ $CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
 mkdir $COPY_DIR/bin
-cp $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/Lib $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/Scripts $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/tcl $COPY_DIR/bin/ -r
-cp $CONDA_ENV_PATH/python*.* $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/msvc*.* $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/DLLs $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Lib $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Scripts $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/tcl $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/python*.* $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/msvc*.* $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/ucrt*.* $COPY_DIR/bin/
 
 echo "Copy all DLLs from env/Library/bin to package/bin"
-cp $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/bin/*.dll $COPY_DIR/bin/
 
 echo "Copy Mantid specific files from env/Library/bin to package/bin"
-cp $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
-cp $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/bin/Mantid.properties $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/bin/MantidNexusParallelLoader.exe $COPY_DIR/bin/
+mv $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
 
 echo "Copy Mantid icon files from source to package/bin"
 cp $THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_workbench.ico
 cp $THIS_SCRIPT_DIR/../../../images/mantid_notebook$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_notebook.ico
 
 echo "Copy Instrument details to the package"
-cp $CONDA_ENV_PATH/Library/instrument $COPY_DIR/ -r
+mv $CONDA_ENV_PATH/Library/instrument $COPY_DIR/
 
 echo "Constructing package/lib/qt5"
 mkdir -p $COPY_DIR/lib/qt5/bin
-cp $CONDA_ENV_PATH/Library/bin/QtWebEngineProcess.exe $COPY_DIR/lib/qt5/bin
+mv $CONDA_ENV_PATH/Library/bin/QtWebEngineProcess.exe $COPY_DIR/lib/qt5/bin
 cp $THIS_SCRIPT_DIR/../common/qt.conf $COPY_DIR/lib/qt5/bin
-cp $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/ -r
+mv $CONDA_ENV_PATH/Library/resources $COPY_DIR/lib/qt5/
 mkdir -p $COPY_DIR/lib/qt5/translations/qtwebengine_locales
-cp $CONDA_ENV_PATH/Library/translations/qtwebengine_locales/en*.pak $COPY_DIR/lib/qt5/translations/qtwebengine_locales/
+mv $CONDA_ENV_PATH/Library/translations/qtwebengine_locales/en*.pak $COPY_DIR/lib/qt5/translations/qtwebengine_locales/
 
 echo "Copy plugins to the package"
 mkdir $COPY_DIR/plugins
 mkdir $COPY_DIR/plugins/qt5
-cp $CONDA_ENV_PATH/Library/plugins/platforms $COPY_DIR/plugins/qt5/ -r
-cp $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/ -r
-cp $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/ -r
-cp $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/ -r
-cp $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/ -r
-cp $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5
-cp $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
-cp $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/ -r
+mv $CONDA_ENV_PATH/Library/plugins/platforms $COPY_DIR/plugins/qt5/
+mv $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/
+mv $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/
+mv $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/
+mv $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/
+mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5
+mv $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
+mv $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/
 
 echo "Copy scripts into the package"
-cp $CONDA_ENV_PATH/Library/scripts $COPY_DIR/ -r
+mv $CONDA_ENV_PATH/Library/scripts $COPY_DIR/
 
 echo "Copy share files (includes mantid docs) to the package"
-cp $CONDA_ENV_PATH/Library/share/doc $COPY_DIR/share/ -r
+mkdir $COPY_DIR/share
+mv $CONDA_ENV_PATH/share/doc/* $COPY_DIR/share/
 
 echo "Copy executable launcher"
 # MantidWorkbench-script.pyw is created by project.nsi on creation of the package

@@ -230,6 +230,8 @@ public:
     TS_ASSERT_EQUALS(ps.isValid("T"), "");
     TS_ASSERT_EQUALS(ps.isValid("TA"), start + "TA" + greaterThan + "T" + end);
 
+    TS_ASSERT_THROWS(ps.setError("ERROR"), std::invalid_argument &);
+
     ps.clearLower();
     TS_ASSERT_EQUALS(ps.isValid("AZ"), "");
     TS_ASSERT_EQUALS(ps.isValid("B"), "");

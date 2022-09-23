@@ -18,7 +18,7 @@
 namespace Mantid {
 
 namespace Kernel {
-template <class C, class Base> class Instantiator;
+template <class C, class Base, typename... Args> class Instantiator;
 }
 
 namespace Geometry {

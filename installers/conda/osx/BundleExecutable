@@ -21,4 +21,4 @@ echo "Using bundled conda-environment in '$PREFIX'"
 echo "Using Python: '$(which python)'"
 
 # Start
-"$PREFIX/bin/MantidWorkbench" "$@"
+python "$PREFIX/bin/workbench" "$@"

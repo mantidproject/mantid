@@ -236,9 +236,9 @@ void SelectFunctionDialog::rejectFunction() {
 void SelectFunctionDialog::helpClicked() const {
   auto function = getFunction();
   if (!function.isEmpty()) {
-    MantidQt::API::HelpWindow::showFitFunction(nullptr, function.toStdString());
+    MantidQt::API::HelpWindow::showFitFunction(function.toStdString());
   } else { // No function selected open fit function index
-    MantidQt::API::HelpWindow::showFitFunction(nullptr, "");
+    MantidQt::API::HelpWindow::showFitFunction("");
   }
 }
 

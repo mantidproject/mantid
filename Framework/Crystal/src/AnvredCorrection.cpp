@@ -80,9 +80,9 @@ void AnvredCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<InstrumentValidator>();
 
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator),
-                  "The X values for the input workspace must be in units of "
-                  "wavelength or TOF");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, wsValidator),
+      "The X values for the input workspace must be in units of wavelength or TOF");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "Output workspace name");
 
@@ -125,8 +125,13 @@ std::map<std::string, std::string> AnvredCorrection::validateInputs() {
   const double radius = getProperty("Radius");
   if (radius == EMPTY_DBL()) {
     // check that if radius isn't supplied that the radius can be accessed from the sample
-    m_inputWS = getProperty("InputWorkspace");
-    const auto &sampleShape = m_inputWS->sample().getShape();
+    Mantid::API::MatrixWorkspace_sptr inputWorkspace = this->getProperty("InputWorkspace");
+    if (!inputWorkspace) {
+      result["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+      return result;
+    }
+
+    const auto &sampleShape = inputWorkspace->sample().getShape();
     if (!sampleShape.hasValidShape() ||
         sampleShape.shapeInfo().shape() != Geometry::detail::ShapeInfo::GeometryShape::SPHERE) {
       result["Radius"] = "Please supply a radius or provide a workspace with a spherical sample set.";

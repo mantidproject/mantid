@@ -502,12 +502,9 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
 
 // Adds the fit result workspaces to the qlistwidget in the browser
 void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
-  auto name = outputName();
-  std::vector<std::string> workspaceNames;
-  workspaceNames.reserve(3);
-  workspaceNames.emplace_back(name + "_NormalisedCovarianceMatrix");
-  workspaceNames.emplace_back(name + "_Parameters");
-  workspaceNames.emplace_back(name + "_Workspace");
+  const auto outName = outputName();
+  const std::vector<std::string> workspaceNames{outName + "_NormalisedCovarianceMatrix", outName + "_Parameters",
+                                                outName + "_Workspace"};
 
   for (const auto &name : workspaceNames) {
     // check if already in the list
@@ -1380,9 +1377,13 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
   }
 }
 
-void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h) {
+void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h, const bool vectorAttribute) {
   try {
-    h->setAttribute(prop);
+    if (vectorAttribute) {
+      h->setVectorAttribute(prop);
+    } else {
+      h->setAttribute(prop);
+    }
   } catch (IFunction::ValidationException &ve) {
     std::stringstream err_str;
     err_str << prop->propertyName().toStdString() << " - " << ve.what();
@@ -1995,7 +1996,7 @@ void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop) {
   PropertyHandler *h = getHandler()->findHandler(prop);
   if (!h)
     return;
-  h->setVectorAttribute(prop);
+  enactAttributeChange(prop, h, true);
 }
 
 /**
@@ -2006,7 +2007,7 @@ void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
   PropertyHandler *h = getHandler()->findHandler(prop);
   if (!h)
     return;
-  h->setVectorAttribute(prop);
+  enactAttributeChange(prop, h, true);
 }
 
 /**
@@ -3164,7 +3165,7 @@ std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_f
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    MantidQt::API::HelpWindow::showFitFunction(nullptr, handler->ifun()->name());
+    MantidQt::API::HelpWindow::showFitFunction(handler->ifun()->name());
   }
 }
 

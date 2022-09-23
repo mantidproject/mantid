@@ -27,6 +27,7 @@ set(TEST_FILES
     Options/OptionsDialogPresenterTest.h
     Common/ClipboardTest.h
     Common/DecoderTest.h
+    Common/DetectorTest.h
     Common/EncoderTest.h
     Common/PlotterTestQt5.h
     Experiment/ExperimentPresenterTest.h
@@ -62,7 +63,7 @@ mtd_add_qt_tests(
             Mantid::PythonInterfaceCore
             Python::Python
   MTD_QT_LINK_LIBS MantidScientificInterfacesISISReflectometry MantidQtWidgetsCommon MantidQtWidgetsPlotting
-                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp
+                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp MantidQtWidgetsRegionSelector
   PARENT_DEPENDENCIES GUITests
 )
 

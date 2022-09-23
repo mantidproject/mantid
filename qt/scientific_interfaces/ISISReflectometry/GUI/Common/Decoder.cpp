@@ -447,17 +447,18 @@ void Decoder::decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &m
   gui->m_ui.filterEdit->setText(map[QString("filterEdit")].toString());
   gui->m_ui.regexCheckBox->setChecked(map[QString("regexCheckBox")].toBool());
   gui->m_ui.saveReductionResultsCheckBox->setChecked(map[QString("saveReductionResultsCheckBox")].toBool());
+  gui->m_ui.saveIndividualRowsCheckBox->setChecked(map[QString("saveIndividualRowsCheckBox")].toBool());
 }
 
 void Decoder::decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map) {
   gui->m_ui.disabledSlicingButton->setChecked(map[QString("disabledSlicingButton")].toBool());
   gui->m_ui.uniformEvenButton->setChecked(map[QString("uniformEvenButton")].toBool());
-  gui->m_ui.uniformEvenEdit->setValue(static_cast<int>(map[QString("uniformEvenEdit")].toDouble()));
   gui->m_ui.uniformButton->setChecked(map[QString("uniformButton")].toBool());
-  gui->m_ui.uniformEdit->setValue(map[QString("uniformEdit")].toDouble());
   gui->m_ui.customButton->setChecked(map[QString("customButton")].toBool());
-  gui->m_ui.customEdit->setText(map[QString("customEdit")].toString());
   gui->m_ui.logValueButton->setChecked(map[QString("logValueButton")].toBool());
+  gui->m_ui.uniformEvenEdit->setValue(static_cast<int>(map[QString("uniformEvenEdit")].toDouble()));
+  gui->m_ui.uniformEdit->setValue(map[QString("uniformEdit")].toDouble());
+  gui->m_ui.customEdit->setText(map[QString("customEdit")].toString());
   gui->m_ui.logValueEdit->setText(map[QString("logValueEdit")].toString());
   gui->m_ui.logValueTypeEdit->setText(map[QString("logValueTypeEdit")].toString());
 }

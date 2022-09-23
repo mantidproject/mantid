@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -677,6 +678,47 @@ public:
     runTestThatPolarizationCorrectionsAreEnabledForInstrument("CRISP");
   }
 
+  void testNotifyPreviewApplyRequestedUpdatesProcessingInstructions() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setProcessingInstructions(ROIType::Signal, std::string{"10"});
+    previewRow.setProcessingInstructions(ROIType::Background, std::string{"11"});
+    previewRow.setProcessingInstructions(ROIType::Transmission, std::string{"12"});
+    previewRow.setTheta(2.3);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+  }
+
+  void testNotifyPreviewApplyRequestedClearsProcessingInstructionsWhenMissing() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setTheta(2.3);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT(!row.processingInstructions());
+    TS_ASSERT(!row.backgroundProcessingInstructions());
+    TS_ASSERT(!row.transmissionProcessingInstructions());
+  }
+
+  void testNotifyPreviewApplyRequestedMatchingRowNotFound() {
+    // makeExperimentWithValidDuplicateCriteria will create a model Experiment with two lookup rows and no wildcard
+    auto presenter = makePresenter(makeDefaults(), makeExperimentWithValidDuplicateCriteria());
+    auto previewRow = PreviewRow({"1234"});
+    // This angle doesn't match any in the experiment lookup table
+    previewRow.setTheta(10);
+
+    TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), RowNotFoundException const &);
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
@@ -721,11 +763,14 @@ private:
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
+  std::unique_ptr<IExperimentOptionDefaults> makeDefaults() { return std::make_unique<MockExperimentOptionDefaults>(); }
+
   ExperimentPresenter makePresenter(
-      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>()) {
+      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>(),
+      Experiment experiment = makeEmptyExperiment()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter = ExperimentPresenter(&m_view, makeEmptyExperiment(), m_thetaTolerance, std::move(defaultOptions));
+    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }

@@ -46,32 +46,32 @@ public:
   static void destroySuite(PreviewJobManagerTest *suite) { delete suite; }
 
   void test_subscribe_to_job_runner() {
-    auto mockJobRunner = MockJobRunner();
-    auto jobManager = makeJobManager(&mockJobRunner);
+    auto mockJobRunner = makeJobRunner();
+    auto jobManager = makeJobManager(std::move(mockJobRunner));
   }
 
   void test_start_preprocessing() {
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto previewRow = makePreviewRow();
     auto stubAlg = makeConfiguredAlg();
 
     expectPreprocessingAlgCreated(*mockAlgFactory, previewRow, stubAlg);
-    expectAlgorithmExecuted(stubAlg, mockJobRunner);
+    expectAlgorithmExecuted(stubAlg, *mockJobRunner);
 
-    auto jobManager = makeJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    auto jobManager = makeJobManager(std::move(mockJobRunner), std::move(mockAlgFactory));
     jobManager.startPreprocessing(previewRow);
   }
 
   void test_notify_preprocessing_algorithm_complete_notifies_subscriber() {
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
     auto previewRow = makePreviewRow();
     auto stubAlg = makeConfiguredPreprocessAlg(previewRow);
 
     EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(1);
 
-    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
     auto stubAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(stubAlg);
     jobManager.notifyAlgorithmComplete(stubAlgRef);
 
@@ -86,13 +86,13 @@ public:
     auto items = std::array<Item *, 2>{&row, &group};
 
     for (auto *item : items) {
-      auto mockJobRunner = MockJobRunner();
+      auto mockJobRunner = makeJobRunner();
       auto mockSubscriber = MockJobManagerSubscriber();
       auto configuredAlg = makeConfiguredAlg(*item);
 
       EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(0);
 
-      auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+      auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
       auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
       jobManager.notifyAlgorithmComplete(configuredAlgRef);
     }
@@ -100,19 +100,32 @@ public:
 
   void test_start_sum_banks() {
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto previewRow = makePreviewRow();
     auto stubAlg = makeConfiguredAlg();
 
     expectSumBanksAlgorithmCreated(*mockAlgFactory, previewRow, stubAlg);
-    expectAlgorithmExecuted(stubAlg, mockJobRunner);
+    expectAlgorithmExecuted(stubAlg, *mockJobRunner);
 
-    auto jobManager = makeJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    auto jobManager = makeJobManager(std::move(mockJobRunner), std::move(mockAlgFactory));
     jobManager.startSumBanks(previewRow);
   }
 
+  void test_start_reduction() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = makeJobRunner();
+    auto previewRow = makePreviewRow();
+    auto stubAlg = makeConfiguredAlg();
+
+    expectReductionAlgorithmCreated(*mockAlgFactory, previewRow, stubAlg);
+    expectAlgorithmExecuted(stubAlg, *mockJobRunner);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), std::move(mockAlgFactory));
+    jobManager.startReduction(previewRow);
+  }
+
   void test_notify_sum_banks_algorithm_complete_notifies_subscriber() {
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
 
     auto previewRow = makePreviewRow();
@@ -120,7 +133,23 @@ public:
 
     EXPECT_CALL(mockSubscriber, notifySumBanksCompleted).Times(1);
 
-    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
+    auto stubAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(stubAlg);
+    jobManager.notifyAlgorithmComplete(stubAlgRef);
+
+    assertUpdateItemCallbackWasCalled();
+  }
+
+  void test_notify_reduction_algorithm_complete_notifies_subscriber() {
+    auto mockJobRunner = makeJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    auto previewRow = makePreviewRow();
+    auto stubAlg = makeConfiguredReductionAlg(previewRow);
+
+    EXPECT_CALL(mockSubscriber, notifyReductionCompleted).Times(1);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
     auto stubAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(stubAlg);
     jobManager.notifyAlgorithmComplete(stubAlgRef);
 
@@ -128,48 +157,76 @@ public:
   }
 
   void test_notify_algorithm_complete_throws_with_unknown_algorithm() {
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
     auto previewRow = makePreviewRow();
     auto configuredAlg = makeConfiguredAlg(previewRow);
 
-    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
     auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
 
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmComplete(configuredAlgRef), std::logic_error const &);
   }
 
   void test_notify_algorithm_error_throws_with_unknown_algorithm() {
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
     auto previewRow = makePreviewRow();
     auto configuredAlg = makeConfiguredAlg(previewRow);
 
-    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
     auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
 
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmError(configuredAlgRef, ""), std::logic_error const &);
   }
 
+  void test_notify_algorithm_error_will_notify_when_sum_banks_algorithm_error_occurs() {
+    auto mockJobRunner = makeJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto previewRow = makePreviewRow();
+    auto sumBanksAlg = makeConfiguredSumBanksAlg(previewRow);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(sumBanksAlg);
+
+    EXPECT_CALL(mockSubscriber, notifySumBanksAlgorithmError).Times(1);
+
+    jobManager.notifyAlgorithmError(configuredAlgRef, "");
+  }
+
+  void test_notify_algorithm_error_will_notify_when_reduction_algorithm_error_occurs() {
+    auto mockJobRunner = makeJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto previewRow = makePreviewRow();
+    auto sumBanksAlg = makeConfiguredReductionAlg(previewRow);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(sumBanksAlg);
+
+    EXPECT_CALL(mockSubscriber, notifyReductionAlgorithmError).Times(1);
+
+    jobManager.notifyAlgorithmError(configuredAlgRef, "");
+  }
+
   void test_notify_algorithm_complete_catches_runtime_errors() {
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
     auto row = makePreviewRow();
     auto configuredAlg = makeConfiguredAlg(row, makeStubAlg(), updateFuncThatThrowsExpectedError);
 
     EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(0);
 
-    auto jobManager = makeJobManager(&mockJobRunner);
+    auto jobManager = makeJobManager(std::move(mockJobRunner));
     auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
 
     jobManager.notifyAlgorithmComplete(configuredAlgRef);
   }
 
   void test_notify_algorithm_complete_does_not_catch_unexpected_errors() {
-    auto mockJobRunner = MockJobRunner();
+    auto mockJobRunner = makeJobRunner();
     auto row = makePreviewRow();
     auto configuredAlg = makeConfiguredAlg(row, makeStubAlg(), updateFuncThatThrowsUnexpectedError);
-    auto jobManager = makeJobManager(&mockJobRunner);
+    auto jobManager = makeJobManager(std::move(mockJobRunner));
     auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
 
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmComplete(configuredAlgRef), std::invalid_argument const &);
@@ -186,15 +243,23 @@ private:
     const std::string name() const override { return "ReflectometryISISSumBanks"; }
   };
 
+  class StubAlgReduction : public StubAlgorithm {
+  public:
+    const std::string name() const override { return "ReflectometryReductionOneAuto"; }
+  };
+
+  std::unique_ptr<MockJobRunner> makeJobRunner() { return std::make_unique<MockJobRunner>(); }
+
   PreviewJobManager
-  makeJobManager(MockJobRunner *mockJobRunner,
+  makeJobManager(std::unique_ptr<MockJobRunner> mockJobRunner,
                  std::unique_ptr<IReflAlgorithmFactory> algFactory = std::make_unique<MockReflAlgorithmFactory>()) {
     EXPECT_CALL(*mockJobRunner, subscribe(NotNull())).Times(1);
-    return PreviewJobManager(mockJobRunner, std::move(algFactory));
+    return PreviewJobManager(std::move(mockJobRunner), std::move(algFactory));
   }
 
-  PreviewJobManager makeJobManager(MockJobRunner *mockJobRunner, MockJobManagerSubscriber &mockSubscriber) {
-    auto jobManager = makeJobManager(mockJobRunner);
+  PreviewJobManager makeJobManager(std::unique_ptr<MockJobRunner> mockJobRunner,
+                                   MockJobManagerSubscriber &mockSubscriber) {
+    auto jobManager = makeJobManager(std::move(mockJobRunner));
     jobManager.subscribe(&mockSubscriber);
     return jobManager;
   }
@@ -230,6 +295,10 @@ private:
     return makeConfiguredAlg(item, std::make_shared<StubAlgSumBanks>());
   }
 
+  std::shared_ptr<ConfiguredAlgorithm> makeConfiguredReductionAlg(Item &item) {
+    return makeConfiguredAlg(item, std::make_shared<StubAlgReduction>());
+  }
+
   void expectPreprocessingAlgCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
                                      IConfiguredAlgorithm_sptr const &alg) {
     EXPECT_CALL(mockAlgFactory, makePreprocessingAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
@@ -238,6 +307,11 @@ private:
   void expectSumBanksAlgorithmCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
                                       IConfiguredAlgorithm_sptr const &alg) {
     EXPECT_CALL(mockAlgFactory, makeSumBanksAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
+  }
+
+  void expectReductionAlgorithmCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
+                                       IConfiguredAlgorithm_sptr const &alg) {
+    EXPECT_CALL(mockAlgFactory, makeReductionAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
   }
 
   void expectAlgorithmExecuted(IConfiguredAlgorithm_sptr const &alg, MockJobRunner &mockJobRunner) {

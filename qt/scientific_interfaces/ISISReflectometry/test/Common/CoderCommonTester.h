@@ -259,6 +259,8 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.regexCheckBox->isChecked(), map[QString("regexCheckBox")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.saveReductionResultsCheckBox->isChecked(),
                      map[QString("saveReductionResultsCheckBox")].toBool())
+    TS_ASSERT_EQUALS(gui->m_ui.saveIndividualRowsCheckBox->isChecked(),
+                     map[QString("saveIndividualRowsCheckBox")].toBool())
   }
 
   void testEvent(const QtEventView *gui, const QMap<QString, QVariant> &map) {

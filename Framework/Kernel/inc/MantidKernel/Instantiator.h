@@ -19,7 +19,7 @@ namespace Kernel {
     @author Nick Draper, Tessella Support Services plc
     @date 10/10/2007
 */
-template <class Base>
+template <class Base, typename... Args>
 class DLLExport AbstractInstantiator
 /// The base class for instantiators
 {
@@ -31,11 +31,11 @@ public:
   virtual ~AbstractInstantiator() = default;
 
   /// Creates an instance of a concrete subclass of Base.
-  virtual std::shared_ptr<Base> createInstance() const = 0;
+  virtual std::shared_ptr<Base> createInstance(Args... args) const = 0;
 
   /// Creates an instance of a concrete subclass of Base, which is
   /// not wrapped in a shared_ptr
-  virtual Base *createUnwrappedInstance() const = 0;
+  virtual Base *createUnwrappedInstance(Args... args) const = 0;
 
 private:
   /// Private copy constructor
@@ -50,7 +50,8 @@ private:
 // For the Instantiator to work, the class of which
 // instances are to be instantiated must have a no-argument
 // constructor.
-template <class C, class Base> class DLLExport Instantiator : public AbstractInstantiator<Base> {
+template <class C, class Base, typename... Args>
+class DLLExport Instantiator : public AbstractInstantiator<Base, Args...> {
 public:
   /// Creates the Instantiator.
   Instantiator() = default;
@@ -58,13 +59,13 @@ public:
   /** Creates an instance of a concrete subclass of Base.
    *  @return A pointer to the base type
    */
-  std::shared_ptr<Base> createInstance() const override { return std::make_shared<C>(); }
+  std::shared_ptr<Base> createInstance(Args... args) const override { return std::make_shared<C>(args...); }
 
   /** Creates an instance of a concrete subclass of Base that is not wrapped in
    * a shared_ptr.
    *  @return A bare pointer to the base type
    */
-  Base *createUnwrappedInstance() const override { return static_cast<Base *>(new C()); }
+  Base *createUnwrappedInstance(Args... args) const override { return static_cast<Base *>(new C(args...)); }
 };
 
 } // namespace Kernel

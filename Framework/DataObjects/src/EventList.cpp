@@ -2399,7 +2399,7 @@ void EventList::convertTof(std::function<double(double)> func, const int sorting
     this->reverse();
   }
 
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
 
   // Convert the list
@@ -2441,7 +2441,7 @@ void EventList::convertTof(const double factor, const double offset) {
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))
     this->reverse();
 
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
 
   // Convert the list
@@ -2523,7 +2523,7 @@ template <class T> void EventList::addPulsetimesHelper(std::vector<T> &events, c
  * @param seconds :: The value to shift the pulsetime by, in seconds
  */
 void EventList::addPulsetime(const double seconds) {
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
 
   // Convert the list
@@ -2548,7 +2548,7 @@ void EventList::addPulsetime(const double seconds) {
  * @param seconds :: A set of values to shift the pulsetime by, in seconds
  */
 void EventList::addPulsetimes(const std::vector<double> &seconds) {
-  if (this->getNumberEvents() <= 0)
+  if (this->getNumberEvents() == 0)
     return;
   if (this->getNumberEvents() != seconds.size()) {
     throw std::runtime_error("");

@@ -452,6 +452,93 @@ public:
     TS_ASSERT_EQUALS(instr->containsRectDetectors(), Instrument::ContainsState::Partial);
   }
 
+  void testContainsRectDetectorsIgnoresMonitors() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3, 0.008, 5.0, true);
+    TS_ASSERT_EQUALS(instr->containsRectDetectors(), Instrument::ContainsState::Full);
+  }
+
+  void testFindRectDetectors() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4))};
+    TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
+
+    // Add some non-rectangular component
+    instr->add(new Component("Component"));
+
+    TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
+
+    Instrument_sptr instrNone = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+
+    std::vector<RectangularDetector_const_sptr> expected{};
+    TS_ASSERT_EQUALS(instrNone->findRectDetectors(), expected);
+  }
+
+  void testFindRectDetectorsRecursive() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+
+    auto rectDet1 = new RectangularDetector("Rect Detector 1");
+    auto rectDet2 = new RectangularDetector("Rect Detector 2");
+
+    CompAssembly *newAssembly1 = new CompAssembly("Assembly 1");
+    CompAssembly *newAssembly2 = new CompAssembly("Assembly 2");
+
+    newAssembly2->add(rectDet2);
+
+    newAssembly1->add(rectDet1);
+    newAssembly1->add(newAssembly2);
+
+    instr->add(newAssembly1);
+
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4)),
+        std::dynamic_pointer_cast<const RectangularDetector>(newAssembly1->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(newAssembly2->getChild(0))};
+    TS_ASSERT_EQUALS(instr->findRectDetectors().size(), 7);
+    TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
+
+    instr->add(new Component("Component"));
+
+    TS_ASSERT_EQUALS(instr->findRectDetectors().size(), 7);
+    TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
+  }
+
+  void testFindRectDetectorsIgnoresSlits() { checkFindRectDetectorsIgnoresIrrelevantComponents({"slit1", "slitA"}); }
+
+  void testFindRectDetectorsWithMisnamedSlit() {
+    // Slits are identified by the first 4 letters being "slit"; check it works ok with fewer letters than this.
+    checkFindRectDetectorsIgnoresIrrelevantComponents({"sli"});
+  }
+
+  void testFindRectDetectorsIgnoresSupermirrors() {
+    checkFindRectDetectorsIgnoresIrrelevantComponents({"supermirror"});
+  }
+
+  void testFindRectDetectorsWithMisnamedSupermirror() {
+    // We currently look for an exact match on the text "supermirror"
+    checkFindRectDetectorsIgnoresIrrelevantComponents({"supermirror1"});
+  }
+
+  void testFindRectDetectorsIgnoresMonitors() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3, 0.008, 5.0, true);
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4))};
+    TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
+  }
+
   void test_detectorIndex() {
     auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     TS_ASSERT_EQUALS(i->detectorIndex(4), 0);
@@ -630,6 +717,21 @@ private:
     instr->markAsSource(source);
 
     return instr;
+  }
+
+  void checkFindRectDetectorsIgnoresIrrelevantComponents(std::vector<std::string> const &componentNames) {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    std::vector<RectangularDetector_const_sptr> expectedDetectors{
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(0)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(1)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(2)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(3)),
+        std::dynamic_pointer_cast<const RectangularDetector>(instr->getChild(4))};
+    for (auto const &componentName : componentNames) {
+      instr->add(new ObjComponent(componentName));
+    }
+    // If it's not identified as a supermirror it will count as non-rectangular
+    TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
   }
 
   Instrument instrument;

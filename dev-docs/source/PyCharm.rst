@@ -19,7 +19,9 @@ Setup Python development environment with Conda
 
 The assumption has been made that you have setup and built Mantid already, if you have not, please do so before hand by following, `this guide <GettingStarted/GettingStarted.html>`_.
 
-At any point in these instructions where ``RelWithDebInfo`` is used (including in file paths), you can replace it with any other build type such as ``Debug`` or ``Release``. We use ``RelWithDebInfo`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
+At any point in these instructions where ``DebugWithRelRuntime`` is used (including in file paths),
+you can replace it with any other build type such as ``Debug`` or ``Release``.
+We use ``DebugWithRelRuntime`` for Conda specific builds to allow debugging due to ``Debug`` not being functional with the ``Release ABIs``.
 
 - Open PyCharm
 - If no project has been selected already, open the Mantid source code as a project.
@@ -45,7 +47,7 @@ At any point in these instructions where ``RelWithDebInfo`` is used (including i
     - ``{SOURCE}/qt/Python``
 
 - In the file tree select your build directory and mark as Excluded by clicking the ``Excluded`` button whilst it's selected.
-- On Windows, select the ``{BUILD}/bin/RelWithDeb`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.
+- On Windows, select the ``{BUILD}/bin/DebugWithRelRuntime`` file and mark as Source by clicking the ``Sources`` button whilst it's selected.
 - On Linux or MacOS, select your ``{BUILD}/bin`` directory and mark as Source by clicking the ``Sources`` button whilst it's selected.
 - Click Apply, and then Ok to close the window.
 
@@ -60,8 +62,9 @@ Now that your Python development environment has been setup we can setup the deb
 - Click the ``+`` icon top left
 - Select Python
 - Name it something to do with ``Workbench``
-- In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` Python script, on Windows enter ``{BUILD}/bin/RelWithDebInfo/workbench-script.pyw``, ``.pyw`` files will not appear in the search window as it only shows ``.py`` files, so you cannot search for it with the GUI.
-- In the ``Working directory:`` box, on Linux/MacOS enter the ``{BUILD}/bin`` directory, on Windows enter ``{BUILD}/bin/RelWithDebInfo`` directory.
+- In the ``Script Path:`` box, on Linux/MacOS enter the ``{BUILD}/bin/workbench`` Python script, on Windows enter ``{BUILD}/bin/DebugWithRelRuntime/workbench-script.pyw``, ``.pyw`` files will not appear in the search window as it only shows ``.py`` files, so you cannot search for it with the GUI.
+- In the ``Working directory:`` box, on Linux/MacOS enter the ``{BUILD}/bin`` directory, on Windows enter ``{BUILD}/bin/DebugWithRelRuntime`` directory.
+- In the ``Parameters`` box add ``--single-process`` so that the multiprocess startup is disabled and breakpoints can be attached to the primary process.
 - Ensure the ``Python Interpreter:`` box is your Python version following by ``(mantid-developer)``, this ensures it runs using your Conda environment.
 - Click Ok and exit out the window.
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.

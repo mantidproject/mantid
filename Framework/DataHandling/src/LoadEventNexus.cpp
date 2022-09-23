@@ -466,6 +466,9 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
   auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
+  if (pulse_times.empty()) {
+    throw std::invalid_argument("Cannot find run start; event_time_zero contains no pulse times");
+  }
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
   return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
@@ -886,7 +889,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
       if (nxStat != NX_ERROR) {
         LoadHelper loadHelper;
-        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun());
+        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
         NXclose(&nxHandle);
       }
     }

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, PropertyMode)
-from mantid.geometry import RectangularDetector
 from mantid.kernel import Direction
 
 
@@ -52,7 +51,9 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         else:
             summed_workspace = self.sum_banks(input_workspace)
 
-        self.setProperty(self._OUTPUT_WS, summed_workspace)
+        result = self._prepend_monitors(input_workspace, summed_workspace)
+
+        self.setProperty(self._OUTPUT_WS, result)
 
     def validateInputs(self):
         issues = dict()
@@ -85,25 +86,31 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
                                               SumPixelsX=num_banks, SumPixelsY=1)
 
     def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
-        result = None
-        inst = workspace.getInstrument()
-        if not inst:
+        instrument = workspace.getInstrument()
+        if not instrument:
             raise RuntimeError('The input workspace must have an instrument')
 
-        for idx in range(inst.nelements()):
-            component = inst[idx]
-            if type(component) == RectangularDetector:
-                if result:
-                    raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
-                result = component
-        if not result:
+        rect_detectors = instrument.findRectDetectors()
+        if len(rect_detectors) == 0:
             raise RuntimeError('The input workspace must contain a rectangular detector')
-        return result
+        if len(rect_detectors) > 1:
+            raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
+        return rect_detectors[0]
 
     def _run_child_with_out_props(self, *args, **kwargs) -> MatrixWorkspace:
         alg = self.createChildAlgorithm(*args, **kwargs)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
+    def _prepend_monitors(self, input_workspace, summed_workspace):
+        crop_alg = self.createChildAlgorithm("ExtractMonitors", InputWorkspace=input_workspace,
+                                             MonitorWorkspace="__preview_summed_ws_monitors")
+        crop_alg.execute()
+        monitor_workspace = crop_alg.getProperty("MonitorWorkspace").value
+
+        append_alg = self.createChildAlgorithm("AppendSpectra", InputWorkspace1=monitor_workspace, InputWorkspace2=summed_workspace)
+        append_alg.execute()
+        return append_alg.getProperty("OutputWorkspace").value
 
 
 AlgorithmFactory.subscribe(ReflectometryISISSumBanks)

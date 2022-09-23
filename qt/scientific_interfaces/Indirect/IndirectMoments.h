@@ -52,7 +52,6 @@ private slots:
 private:
   void plotNewData(QString const &filename);
   void setFileExtensionsByName(bool filter) override;
-  Ui::IndirectMoments m_uiForm;
   std::unique_ptr<IndirectMomentsModel> m_model;
   std::unique_ptr<IndirectMomentsView> m_view;
 };

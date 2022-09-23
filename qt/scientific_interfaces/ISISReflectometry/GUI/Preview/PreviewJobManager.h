@@ -11,17 +11,20 @@
 #include "GUI/Common/IJobManager.h"
 #include "GUI/Common/IJobRunner.h"
 
+#include <memory>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IBatch;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewJobManager final : public IJobManager, public JobRunnerSubscriber {
 public:
-  PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory);
+  PreviewJobManager(std::unique_ptr<IJobRunner> jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory);
 
   // IJobManager overrides
   void subscribe(JobManagerSubscriber *notifyee) override;
   void startPreprocessing(PreviewRow &row) override;
   void startSumBanks(PreviewRow &row) override;
+  void startReduction(PreviewRow &row) override;
 
   // JobRunnerSubscriber overrides
   void notifyBatchComplete(bool) override;
@@ -31,7 +34,7 @@ public:
   void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &) override;
 
 private:
-  IJobRunner *m_jobRunner;
+  std::unique_ptr<IJobRunner> m_jobRunner;
   std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
   JobManagerSubscriber *m_notifyee;
 

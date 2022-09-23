@@ -34,6 +34,7 @@ void QtSaveView::initLayout() {
   connect(m_ui.filterEdit, SIGNAL(textChanged(const QString &)), this, SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(requestWorkspaceParams()));
   connect(m_ui.saveReductionResultsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onAutosaveChanged(int)));
+  connect(m_ui.saveIndividualRowsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onSaveIndividualRowsChanged(int)));
   connect(m_ui.savePathEdit, SIGNAL(editingFinished()), this, SLOT(onSavePathChanged()));
   connect(m_ui.savePathBrowseButton, SIGNAL(clicked()), this, SLOT(browseToSaveDirectory()));
 }
@@ -62,6 +63,7 @@ void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.filterEdit);
   connectSettingsChange(*m_ui.regexCheckBox);
   connectSettingsChange(*m_ui.saveReductionResultsCheckBox);
+  connectSettingsChange(*m_ui.saveIndividualRowsCheckBox);
   connectSettingsChange(*m_ui.headerCheckBox);
   connectSettingsChange(*m_ui.qResolutionCheckBox);
   connectSettingsChange(*m_ui.commaRadioButton);
@@ -93,6 +95,14 @@ void QtSaveView::onAutosaveChanged(int state) {
     Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
         Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "SaveTab", "DisableAutosave"}, false);
     m_notifyee->notifyAutosaveDisabled();
+  }
+}
+
+void QtSaveView::onSaveIndividualRowsChanged(int state) {
+  if (state == Qt::CheckState::Checked) {
+    m_notifyee->notifySaveIndividualRowsEnabled();
+  } else {
+    m_notifyee->notifySaveIndividualRowsDisabled();
   }
 }
 
@@ -131,6 +141,10 @@ void QtSaveView::disableSeparatorButtonGroup() {
   m_ui.spaceRadioButton->setEnabled(false);
   m_ui.tabRadioButton->setEnabled(false);
 }
+
+void QtSaveView::enableSaveIndividualRowsCheckbox() { m_ui.saveIndividualRowsCheckBox->setEnabled(true); }
+
+void QtSaveView::disableSaveIndividualRowsCheckbox() { m_ui.saveIndividualRowsCheckBox->setEnabled(false); }
 
 /** Returns the save path
  * @return :: The save path

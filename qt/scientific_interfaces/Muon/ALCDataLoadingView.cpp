@@ -165,7 +165,7 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.dataPlot->clear();
-  auto _log = log();
+
   // If x scale is run number, ensure plain format
   if (log() == "run_number")
     m_ui.dataPlot->tickLabelFormat("x", "plain", false);
@@ -290,7 +290,7 @@ void ALCDataLoadingView::setTimeRange(double tMin, double tMax) {
 }
 
 void ALCDataLoadingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
 void ALCDataLoadingView::disableAll() {

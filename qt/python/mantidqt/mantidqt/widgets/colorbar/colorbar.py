@@ -210,6 +210,7 @@ class ColorbarWidget(QWidget):
         self.colorbar.mappable.set_norm(self.get_norm())
         self.set_mappable(self.colorbar.mappable)
         self.update_clim_validator()
+        self.update_clim()
         self.scaleNormChanged.emit()
 
     def get_norm(self):
@@ -306,21 +307,21 @@ class ColorbarWidget(QWidget):
     def _calculate_clim(self) -> tuple:
         """Calculate the colorbar limits to use when autoscale is turned on."""
         axes = self.colorbar.mappable
-        data = axes.get_array_clipped_to_bounds() if hasattr(axes, "get_array_clipped_to_bounds") else axes.get_array()
+        try:
+            data = axes.get_array_clipped_to_bounds()
+        except AttributeError:
+            data = axes.get_array()
 
         log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
         try:
-            try:
-                masked_data = data[~data.mask]
-                # Use smallest positive value as vmin for log scale, matplotlib takes care of the data skipping part
-                masked_data = masked_data[masked_data > 0] if log_normalisation else masked_data
-                # If any dimension is zero then we have no data in the display area
-                data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
-
-                return (0.0, 0.0) if data_is_empty else (masked_data.min(), masked_data.max())
-            except (AttributeError, IndexError):
-                data = data[np.nonzero(data)] if log_normalisation else data
-                return np.nanmin(data), np.nanmax(data)
+            if log_normalisation:
+                mask = np.logical_and(np.isfinite(data), np.greater(data, 0))
+            else:
+                mask = np.isfinite(data)
+            if data[mask].any():
+                return data[mask].min(), data[mask].max()
+            else:
+                return (0.1, 1.0)
         except (ValueError, RuntimeWarning):
             # All values are masked
             return None

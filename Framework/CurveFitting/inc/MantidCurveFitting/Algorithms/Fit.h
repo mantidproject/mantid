@@ -92,6 +92,7 @@ public:
 private:
   void initConcrete() override;
   void execConcrete() override;
+  std::map<std::string, std::string> validateInputs() override;
   void readProperties();
   void initializeMinimizer(size_t maxIterations);
   size_t runMinimizer();

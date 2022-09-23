@@ -89,6 +89,7 @@ set(PYTHON_PLUGINS
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/IntegratePeaksProfileFitting.py
+    algorithms/IntegratePeaksSkew.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
@@ -148,6 +149,7 @@ set(PYTHON_PLUGINS
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
     algorithms/PelicanReduction.py
+    algorithms/PelicanCrystalProcessing.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py

@@ -1,0 +1,1 @@
+- SliceViewer will now support `W_MATRIX` log for nonorthogonal axes with MDHistoWorkspaces. This prevents a bug related where basis vectors are used to calculate the projection.

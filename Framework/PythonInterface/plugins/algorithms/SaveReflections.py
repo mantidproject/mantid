@@ -117,7 +117,9 @@ class SaveReflections(PythonAlgorithm):
         # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
         max_intens = max(workspace.column('Intens'))
         max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
-        scale = 1 if max_intens < 10**max_exponent else 10**(-(int(np.log10(max_intens))-max_exponent+1))
+        min_exponent = -2  # 2 decimal points in SHELX, FullProf, Jana2006 and GSAS-II
+        # find scale factor to scale intensity to largest value in the available width (e.g. 9999.99 for SHELX)
+        scale = 1 if max_intens < 10 ** max_exponent else ((10 ** max_exponent) - 10 ** min_exponent) / max_intens
         FORMAT_MAP[output_format]()(file_name, workspace, split_files, scale)
 
 
@@ -385,6 +387,53 @@ class JanaFormat(object):
 # ------------------------------------------------------------------------------------------------------
 
 
+class SHELXFormat(object):
+    """Writes a PeaksWorkspace to an ASCII file in the format required
+    by the SHELX crystallographic refinement program.
+    For constant wavelength workspaces this is an ASCII file
+    consisting of 4 columns: H, K, L, intensity, sigma.
+    For TOF Laue there are two extra columns: scaleID and wavelength.
+    """
+
+    def __call__(self, file_name, workspace, split_files, scale):
+        """
+        Write a PeaksWorkspace to an ASCII file using this formatter.
+        :param file_name: the file name to output data to.
+        :param workspace: the PeaksWorkspace to write to file.
+        :param scale: scale peaks to fit in column width
+        """
+        if has_modulated_indexing(workspace):
+            raise RuntimeError(
+                "Cannot currently save modulated structures to GSAS or SHELX formats")
+
+        with open(file_name, 'w') as f_handle:
+            self.write_peaks(f_handle, workspace, scale)
+
+    def write_peaks(self, f_handle, workspace, scale):
+        """Write all the peaks in the workspace to file.
+
+        :param f_handle: handle to the file to write to.
+        :param workspace: the PeaksWorkspace to save to file.
+        """
+        col_format = "{:>4.0f}{:>4.0f}{:>4.0f}{:>8.2f}{:>8.2f}"  # H, K, L, Intens, Sig
+        is_CW = np.std([pk.getWavelength() for pk in workspace]) < 0.01  # constant wavelength
+        if not is_CW:
+            col_format += "{:>4.0f}{:>8.4f}"  # scaleID, wavelength
+        col_format += "\n"
+        for i, peak in enumerate(workspace):
+            hkl, _ = get_intHKLM(peak, workspace)  # no mnp as not modulated
+            data = hkl + [peak.getIntensity() * scale, peak.getSigmaIntensity() * scale]
+            if not is_CW:
+                data.extend([1, peak.getWavelength()])  # hard code scaleID=1
+            line = col_format.format(*data)
+            f_handle.write(line)
+        # write row of zeros to end file
+        f_handle.write(col_format.format(*len(data)*[0.0]))
+
+
+# ------------------------------------------------------------------------------------------------------
+
+
 class SaveHKLFormat(object):
     """Writes a PeaksWorkspace to an ASCII file in the format output from
     the SaveHKL algorithm.
@@ -419,7 +468,7 @@ FORMAT_MAP = {
     ReflectionFormat.Fullprof: FullprofFormat,
     ReflectionFormat.GSAS: SaveHKLFormat,
     ReflectionFormat.Jana: JanaFormat,
-    ReflectionFormat.SHELX: SaveHKLFormat
+    ReflectionFormat.SHELX: SHELXFormat
 }
 
 AlgorithmFactory.subscribe(SaveReflections)

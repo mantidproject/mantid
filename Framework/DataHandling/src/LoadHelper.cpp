@@ -125,9 +125,11 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  *NXopengroup
  * @param runDetails  :: where to add properties
  * @param entryName :: entry name to load properties from
+ * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  *
  */
-void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName) {
+void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName,
+                                       bool useFullPath) {
   std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
@@ -144,7 +146,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
-      recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr, 1 /* level */);
+      recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr, 1 /* level */, useFullPath);
       NXclosegroup(nxfileID);
     }
   }
@@ -160,12 +162,11 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
  * @param parent_name :: nexus caller name
  * @param parent_class :: nexus caller class
  * @param level       :: current level in nexus tree
+ * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  *
  */
 void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
-                                                 std::string &parent_class, int level) {
-
-  std::string indent_str(level * 2, ' '); // Two space by indent level
+                                                 std::string &parent_class, int level, bool useFullPath) {
 
   // Link ?
 
@@ -188,13 +189,14 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
       NXstatus opendata_status;
       NXstatus getinfo_status;
 
+      std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
         if (std::string(nxclass) != "ILL_data_scan_vars" && std::string(nxclass) != "NXill_data_scan_vars") {
           // Go down to one level, if the group is known to nexus
-          std::string p_nxname(nxname); // current names can be useful for next level
+          std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
           std::string p_nxclass(nxclass);
 
-          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level + 1);
+          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname, p_nxclass, level + 1, useFullPath);
         }
 
         NXclosegroup(nxfileID);
@@ -206,7 +208,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
           int dims[4] = {0, 0, 0, 0};
           int type;
 
-          std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
           // Get the value
           if ((getinfo_status = NXgetinfo(nxfileID, &rank, dims, &type)) == NX_OK) {
             // Note, we choose to only build properties on small float arrays
@@ -300,7 +301,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                         std::string indexed_property_name =
                             property_name + std::string("_") + std::to_string(dim_index);
 
-                        if (!runDetails.hasProperty(property_name)) {
+                        if (!runDetails.hasProperty(indexed_property_name)) {
                           if (units_status != NX_ERROR)
                             runDetails.addProperty(indexed_property_name, property_double_value,
                                                    std::string(units_sbuf));

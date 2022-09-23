@@ -23,7 +23,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         config['default.instrument'] = 'INTER'
         # Set some commonly used properties
         self._default_options = {
-            'ProcessingInstructions' : '4',
+            'ProcessingInstructions' : '3',
             'ThetaIn' : 0.5,
             'WavelengthMin' : 2,
             'WavelengthMax' : 5,
@@ -76,6 +76,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_input_run_is_loaded_if_not_in_ADS(self):
         args = self._default_options
         args['InputRunList'] = '13460'
+        args['ProcessingInstructions'] = '4'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
@@ -103,6 +104,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_workspace(13460, 'TEST_')
         args = self._default_options
         args['InputRunList'] = '13460'
+        args['ProcessingInstructions'] = '4'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TEST_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
@@ -120,6 +122,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_loading_run_with_instrument_prefix_in_name(self):
         args = self._default_options
         args['InputRunList'] = 'INTER13460'
+        args['ProcessingInstructions'] = '4'
         outputs = ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF_13460', 'TOF']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryISISPreprocess', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
@@ -128,6 +131,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_loading_workspace_group(self):
         args = self._default_options
         args['InputRunList'] = 'POLREF14966'
+        args['ProcessingInstructions'] = '4'
         outputs = ['IvsLam_14966', 'IvsLam_14966_1', 'IvsLam_14966_2',
                    'IvsQ_14966', 'IvsQ_14966_1', 'IvsQ_14966_2',
                    'IvsQ_binned_14966', 'IvsQ_binned_14966_1', 'IvsQ_binned_14966_2',
@@ -320,6 +324,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options.copy()
         args.update(self._default_slice_options_dummy_run)
         args['InputRunList'] = '38415'
+        args['ProcessingInstructions'] = '4'
         outputs = self._expected_dummy_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         # Note that the child sliced workspaces don't include the full history - this
@@ -333,6 +338,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_dummy_run)
         args['InputRunList'] = '38415'
+        args['ProcessingInstructions'] = '4'
         outputs = [
              'IvsQ_38415', 'IvsQ_38415_1', 'IvsQ_38415_2', 'IvsQ_38415_3',
              'IvsQ_binned_38415', 'IvsQ_binned_38415_1', 'IvsQ_binned_38415_2',
@@ -349,6 +355,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args['InputRunList'] = '38415'
+        args['ProcessingInstructions'] = '4'
         outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -360,6 +367,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args['InputRunList'] = '38415'
+        args['ProcessingInstructions'] = '4'
         outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -371,6 +379,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args['InputRunList'] = '38415'
+        args['ProcessingInstructions'] = '4'
         outputs = self._expected_real_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -381,6 +390,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_event_workspace(38415, 'TOF_')
         args = self._default_options
         args['InputRunList'] = '38415'
+        args['ProcessingInstructions'] = '4'
         args['SliceWorkspace'] = True
         outputs = ['IvsQ_38415', 'IvsQ_38415_sliced_0_4200', 'IvsQ_binned_38415',
                    'IvsQ_binned_38415_sliced_0_4200', 'IvsLam_38415',
@@ -396,6 +406,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
         args['NumberOfSlices'] = 3
+        args['ProcessingInstructions'] = '4'
         outputs = self._expected_dummy_time_sliced_outputs
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -409,6 +420,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['SliceWorkspace'] = True
         args['LogName'] = 'proton_charge'
         args['LogValueInterval'] = 60
+        args['ProcessingInstructions'] = '4'
         slice1 = '_sliced_Log.proton_charge.From.-30.To.30.Value-change-direction:both'
         slice2 = '_sliced_Log.proton_charge.From.30.To.90.Value-change-direction:both'
         slice3 = '_sliced_Log.proton_charge.From.90.To.150.Value-change-direction:both'
@@ -429,6 +441,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '38415'
         args['SliceWorkspace'] = True
         args['LogName'] = 'proton_charge'
+        args['ProcessingInstructions'] = '4'
         sliceName = '_sliced_Log.proton_charge.From.0.To.100.Value-change-direction:both'
         outputs = ['IvsQ_38415', 'IvsQ_38415'+sliceName, 'IvsQ_binned_38415',
                    'IvsQ_binned_38415'+sliceName, 'IvsLam_38415', 'IvsLam_38415'+sliceName,
@@ -520,9 +533,33 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['no_TOF_group', 'TOF_12345+67890', '12345', '67890']
         self._assert_run_algorithm_succeeds(args, outputs)
 
+    def test_sum_banks_is_run_for_2D_detector_workspace(self):
+        self._create_2D_detector_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        outputs = ['IvsQ_38415', 'IvsQ_binned_38415', 'TOF', 'TOF_38415', 'TOF_38415_summed_segment']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryISISSumBanks', 'ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)
+
+    def test_sum_banks_is_not_run_for_linear_detector_workspace(self):
+        self._create_workspace(38415, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '38415'
+        outputs = ['IvsQ_38415', 'IvsQ_binned_38415', 'TOF', 'TOF_38415']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
+        self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)
+
     # TODO test if no runNumber is on the WS
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
+        name = prefix + str(run_number) + suffix
+        ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
+                                   BankPixelWidth=1, XMin=200, OutputWorkspace=name)
+        AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
+
+    def _create_2D_detector_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
                                    BankPixelWidth=2, XMin=200, OutputWorkspace=name)
@@ -531,19 +568,19 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def _create_workspace_wavelength(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
-                                   BankPixelWidth=2, XMin=200, XUnit="Wavelength", OutputWorkspace=name)
+                                   BankPixelWidth=1, XMin=200, XUnit="Wavelength", OutputWorkspace=name)
         AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
 
     def _create_event_workspace(self, run_number, prefix='', includeMonitors=True):
         name = prefix + str(run_number)
         CreateSampleWorkspace(WorkspaceType='Event',NumBanks=1, NumMonitors=3,
-                              BankPixelWidth=2, XMin=200, OutputWorkspace=name)
+                              BankPixelWidth=1, XMin=200, OutputWorkspace=name)
         if includeMonitors:
             CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=0, EndWorkspaceIndex=2,
                           OutputWorkspace=name + '_monitors')
             Rebin(InputWorkspace=name + '_monitors', Params='0,200,20000',
                   OutputWorkspace=name + '_monitors', PreserveEvents=False)
-        CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=3, EndWorkspaceIndex=4,
+        CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=3, EndWorkspaceIndex=3,
                       OutputWorkspace=name)
         AddSampleLog(Workspace=name, LogName='run_number', LogText=str(run_number))
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)

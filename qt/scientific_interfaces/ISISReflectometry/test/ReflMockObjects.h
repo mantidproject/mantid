@@ -87,6 +87,7 @@ public:
   MOCK_METHOD0(notifyBatchLoaded, void());
   MOCK_METHOD1(notifyRowContentChanged, void(Row &));
   MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
+  MOCK_METHOD0(notifyRunsTransferred, void());
 
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
@@ -104,6 +105,7 @@ public:
   MOCK_CONST_METHOD0(isBatchUnsaved, bool());
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
+  MOCK_METHOD0(notifyPreviewApplyRequested, void());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -170,6 +172,7 @@ public:
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD1(notifyPreviewApplyRequested, void(PreviewRow const &));
   MOCK_METHOD0(restoreDefaults, void());
   MOCK_METHOD(bool, hasValidSettings, (), (const, noexcept, override));
 };
@@ -191,6 +194,7 @@ public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
+  MOCK_CONST_METHOD0(shouldAutosaveGroupRows, bool());
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
@@ -294,12 +298,16 @@ public:
   MOCK_METHOD1(subscribe, void(JobManagerSubscriber *notifyee));
   MOCK_METHOD1(startPreprocessing, void(PreviewRow &row));
   MOCK_METHOD1(startSumBanks, void(PreviewRow &row));
+  MOCK_METHOD1(startReduction, void(PreviewRow &row));
 };
 
 class MockJobManagerSubscriber : public JobManagerSubscriber {
 public:
   MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
   MOCK_METHOD0(notifySumBanksCompleted, void());
+  MOCK_METHOD0(notifyReductionCompleted, void());
+  MOCK_METHOD0(notifySumBanksAlgorithmError, void());
+  MOCK_METHOD0(notifyReductionAlgorithmError, void());
 };
 
 class MockEncoder : public IEncoder {
@@ -349,8 +357,8 @@ public:
   MOCK_METHOD1(algorithmStarted, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr, std::string const &));
-  MOCK_CONST_METHOD1(algorithmOutputWorkspacesToSave,
-                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_CONST_METHOD2(algorithmOutputWorkspacesToSave,
+                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr, bool));
   MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &>(std::string const &));
   MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());

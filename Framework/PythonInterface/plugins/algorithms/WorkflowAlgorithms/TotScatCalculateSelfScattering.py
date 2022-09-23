@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import (CalculatePlaczekSelfScattering, ConvertUnits, CreateWorkspace,
+from mantid.simpleapi import (CalculatePlaczek, ConvertUnits, CreateWorkspace,
                               DeleteWorkspace, Divide, ExtractSpectra, FitIncidentSpectrum,
                               LoadCalFile, SetSample, GroupDetectors, Rebin)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty)
@@ -45,15 +45,17 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                              doc='Geometry of the sample material.')
         self.declareProperty(name='SampleMaterial', defaultValue={},
                              doc='Chemical formula for the sample material.')
-        self.declareProperty(name='CrystalDensity', defaultValue=0.0,
-                             doc='The crystalographic density of the material.')
+        self.declareProperty(name='PlaczekOrder', defaultValue=1,
+                             doc='Placzek correction order to be used.')
+        self.declareProperty(name='SampleTemp', defaultValue='',
+                             doc='Sample Temperature in Kelvin. Required for 2nd order Placzek correction if not '
+                                 'using Sample Logs.')
 
     def PyExec(self):
         raw_ws = self.getProperty('InputWorkspace').value
         sample_geometry = self.getPropertyValue('SampleGeometry')
         sample_material = self.getPropertyValue('SampleMaterial')
         cal_file_name = self.getPropertyValue('CalFileName')
-        crystal_density = self.getPropertyValue('CrystalDensity')
         SetSample(InputWorkspace=raw_ws,
                   Geometry=sample_geometry,
                   Material=sample_material)
@@ -74,14 +76,19 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         min_x = np.min(x_data)
         max_x = np.max(x_data)
         width_x = (max_x - min_x) / x_data.size
+        placzek_order = self.getProperty('PlaczekOrder').value
         fit_spectra = FitIncidentSpectrum(InputWorkspace=monitor,
                                           BinningForCalc=[min_x, 1 * width_x, max_x],
                                           BinningForFit=[min_x, 10 * width_x, max_x],
-                                          FitSpectrumWith="CubicSpline")
-        self_scattering_correction = CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
-                                                                    IncidentSpectra=fit_spectra,
-                                                                    CrystalDensity=crystal_density,
-                                                                    Version=1)
+                                          FitSpectrumWith="CubicSpline",
+                                          DerivOrder=2 if placzek_order == 2 else 1)
+
+        placzek_kwargs = {'InputWorkspace': raw_ws, 'IncidentSpectra': fit_spectra, 'ScalebyPackingFraction': False,
+                          'Order': placzek_order}
+        sample_temp = self.getPropertyValue('SampleTemp')
+        if placzek_order == 2 and sample_temp:
+            placzek_kwargs.update({'SampleTemperature': sample_temp})
+        self_scattering_correction = CalculatePlaczek(**placzek_kwargs)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,
                                                   Target="MomentumTransfer", EMode='Elastic')

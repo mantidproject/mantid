@@ -22,10 +22,10 @@ class VesuvioResolution(VesuvioBase):
         return 'Calculates the resolution function for VESUVIO'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty(name='Workspace',
-                                               defaultValue='',
-                                               direction=Direction.Input),
-                             doc='Sample workspace')
+        self.declareProperty(MatrixWorkspaceProperty(name='Workspace',
+                                                     defaultValue='',
+                                                     direction=Direction.Input),
+                             doc='Sample matrix workspace')
 
         self.declareProperty(name='WorkspaceIndex', defaultValue=0,
                              doc='Workspace index to use for resolution')
@@ -55,7 +55,9 @@ class VesuvioResolution(VesuvioBase):
         sample_ws = self.getProperty('Workspace').value
         workspace_index = self.getProperty('WorkspaceIndex').value
 
-        if workspace_index > sample_ws.getNumberHistograms() - 1:
+        if not isinstance(sample_ws, MatrixWorkspace):
+            issues['Workspace'] = 'The Workspace must be a MatrixWorkspace'
+        elif workspace_index > sample_ws.getNumberHistograms() - 1:
             issues['WorkspaceIndex'] = 'Workspace index is out of range'
 
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')

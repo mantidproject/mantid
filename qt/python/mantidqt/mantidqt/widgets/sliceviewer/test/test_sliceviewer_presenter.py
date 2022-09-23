@@ -482,6 +482,18 @@ class SliceViewerTest(unittest.TestCase):
         self.view.setWindowTitle.assert_called_with(self.model.get_title())
         presenter.new_plot.assert_called_once()
 
+    def test_refresh_queued_flag_reset_upon_refresh_view(self):
+        presenter, _ = _create_presenter(self.model,
+                                         self.view,
+                                         mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter.new_plot = mock.Mock()
+        presenter.view.refresh_queued = True
+
+        presenter.refresh_view()
+        self.assertFalse(presenter.view.refresh_queued)
+
     def test_clear_observer_peaks_presenter_not_none(self):
         presenter, _ = _create_presenter(self.model,
                                          self.view,

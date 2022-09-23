@@ -53,6 +53,8 @@ public:
   virtual void notifyBatchLoaded() = 0;
   virtual void notifyRowContentChanged(Row &changedRow) = 0;
   virtual void notifyGroupNameChanged(Group &changedGroup) = 0;
+  virtual void notifyRunsTransferred() = 0;
+  virtual void notifyPreviewApplyRequested() = 0;
 
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;

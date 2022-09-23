@@ -118,14 +118,15 @@ class HB2AReduce(PythonAlgorithm):
             if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) == 0):
                 issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
 
-            if self.getProperty("Exp").value == Property.EMPTY_INT:
-                exp_list = sorted(e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts))
-                                  if 'exp' in e)
-                if len(exp_list) > 1:
-                    exps = ','.join(e.replace('exp', '') for e in exp_list)
-                    issues[
-                        "Exp"] = 'Multiple experiments found in IPTS-{}. You must set Exp to one of {}'.format(
-                            ipts, exps)
+            directory = f'/HFIR/HB2A/IPTS-{ipts}'
+            if os.path.isdir(directory):
+                if self.getProperty("Exp").value == Property.EMPTY_INT:
+                    exp_list = sorted(e for e in os.listdir(directory) if 'exp' in e)
+                    if len(exp_list) > 1:
+                        exps = ','.join(e.replace('exp', '') for e in exp_list)
+                        issues["Exp"] = f'Multiple experiments found in IPTS-{ipts}. You must set Exp to one of {exps}'
+            else:
+                issues["IPTS"] = f"Failed to find the directory: {directory}"
 
         # validate output format options
         # Def_x    GSAS    XYE
@@ -141,14 +142,15 @@ class HB2AReduce(PythonAlgorithm):
                 if not filenames:
                     ipts = self.getProperty("IPTS").value
                     exp = self.getProperty("Exp").value
-                    if self.getProperty("Exp").value == Property.EMPTY_INT:
-                        exp = int([
-                            e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e
-                        ][0].replace('exp', ''))
-                    filenames = [
-                        '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(
-                            ipts, exp, scan) for scan in self.getProperty("ScanNumbers").value
-                    ]
+                    directory = f'/HFIR/HB2A/IPTS-{ipts}'
+                    if os.path.isdir(directory):
+                        if self.getProperty("Exp").value == Property.EMPTY_INT:
+                            exp = int([e for e in os.listdir(directory) if 'exp' in e][0].replace('exp', ''))
+                        filenames = [f"{directory}/exp{exp}/Datafiles/HB2A_exp{exp:04}_scan{scan:04}.dat"
+                                     for scan in self.getProperty("ScanNumbers").value]
+                    else:
+                        issues["IPTS"] = f"Failed to find the directory: {directory}"
+
                 filenames = filenames if isinstance(filenames, list) else [filenames]
                 _target = "# def_x = 2theta"
                 for fn in filenames:

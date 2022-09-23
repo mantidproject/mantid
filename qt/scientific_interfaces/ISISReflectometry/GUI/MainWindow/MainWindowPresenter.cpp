@@ -286,8 +286,7 @@ void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter, std::str
 }
 
 void MainWindowPresenter::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, std::string("ISIS Reflectometry"),
-                                                 std::string("reflectometry"));
+  MantidQt::API::HelpWindow::showCustomInterface(std::string("ISIS Reflectometry"), std::string("reflectometry"));
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {

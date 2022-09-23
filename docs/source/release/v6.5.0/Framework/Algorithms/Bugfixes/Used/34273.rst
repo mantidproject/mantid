@@ -1,0 +1,1 @@
+- Fixed bug in documentation of :ref:`GroupToXResolution <algm-GroupToXResolution>` where the figures showing the algorithm output were all blank.

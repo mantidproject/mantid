@@ -9,6 +9,7 @@
 #include "GroupProcessingAlgorithm.h"
 #include "IReflAlgorithmFactory.h"
 #include "Reduction/PreviewRow.h"
+#include "Reduction/RowExceptions.h"
 #include "ReflAlgorithmFactory.h"
 #include "RowPreprocessingAlgorithm.h"
 #include "RowProcessingAlgorithm.h"
@@ -55,7 +56,7 @@ int BatchJobManager::itemsInSelection(Item::ItemCountFunction countFunction) con
   auto const &locations = m_rowLocationsToProcess;
   return std::accumulate(
       locations.cbegin(), locations.cend(), 0,
-      [&jobs, &locations, countFunction](int &count, MantidWidgets::Batch::RowLocation const &location) {
+      [&jobs, &locations, countFunction](int const count, MantidWidgets::Batch::RowLocation const &location) {
         return count + countItemsForLocation(jobs, location, locations, countFunction);
       });
 }
@@ -215,7 +216,7 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmsForProcessingRo
 void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
   IConfiguredAlgorithm_sptr algorithm;
   try {
-    algorithm = m_algFactory->makeReductionAlgorithm(row);
+    algorithm = m_algFactory->makeRowProcessingAlgorithm(row);
   } catch (MultipleRowsFoundException const &) {
     row.setError("The title and angle specified matches multiple rows in the Experiment Settings tab");
     // Mark the item as skipped so we don't reprocess it in the current round of
@@ -264,20 +265,32 @@ boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_s
   return *item;
 }
 
-std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm) const {
+std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm,
+                                                                          bool includeGrpRows) const {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
 
   if (item->isGroup())
-    return getWorkspacesToSave(dynamic_cast<Group &>(*item));
+    return getWorkspacesToSave(dynamic_cast<Group &>(*item), includeGrpRows);
   else
     return getWorkspacesToSave(dynamic_cast<Row &>(*item));
 
   return std::vector<std::string>();
 }
 
-std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group) const {
-  return std::vector<std::string>{group.postprocessedWorkspaceName()};
+std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group, bool includeRows) const {
+  auto workspaces = std::vector<std::string>{group.postprocessedWorkspaceName()};
+
+  if (includeRows) {
+    auto const &rows = group.rows();
+    for (auto &row : rows) {
+      if (row) {
+        workspaces.emplace_back(row.get().reducedWorkspaceNames().iVsQBinned());
+      }
+    }
+  }
+
+  return workspaces;
 }
 
 std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) const {

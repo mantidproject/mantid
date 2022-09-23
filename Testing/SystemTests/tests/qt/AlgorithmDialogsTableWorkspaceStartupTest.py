@@ -16,8 +16,5 @@ class AlgorithmDialogsTableWorkspaceStartupTest(AlgorithmDialogsStartupTestBase)
 
     def _setup_test(self) -> None:
         self._workspace_type = "TableWorkspace"
-        # These algorithms currently fail to open when the given workspace type is auto-selected from the ADS
-        self._exclude_algorithms = ["HB2AReduce", "MaskAngle", "MuonPairingAsymmetry", "TOFTOFCropWorkspace",
-                                    "VesuvioResolution"]
 
         CreateEmptyTableWorkspace(OutputWorkspace="ws")

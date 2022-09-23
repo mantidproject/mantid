@@ -503,6 +503,14 @@ public:
     verifyAndClear();
   }
 
+  void testTransferUpdatesLookupIndexes() {
+    auto presenter = makePresenter();
+    auto expectedJobs = expectGetValidSearchResult();
+    EXPECT_CALL(m_mainPresenter, notifyRunsTransferred()).Times(1);
+    presenter.notifyTransfer();
+    verifyAndClear();
+  }
+
   void testChangeInstrumentOnViewNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");

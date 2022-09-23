@@ -384,6 +384,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         if not self.view:
             return
 
+        self.view.refresh_queued = False
+
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
         ws = self.model.ws
@@ -422,6 +424,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
+
+    def key_pressed(self, event) -> None:
+        pass
+
+    def mouse_moved(self, event) -> None:
+        pass
 
     def deactivate_zoom_pan(self):
         self.view.data_view.deactivate_zoom_pan()

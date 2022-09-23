@@ -23,20 +23,30 @@ class FunctionWrapper(object):
                 return wrapper(fun, *args, **kwargs)
         return FunctionWrapper(fun, **kwargs)
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, params_to_optimize=None, **kwargs):
         """
         Called when creating an instance
 
-        :param name:   name of fitting function to create or
-                       an Ifunction object to wrap.
-        :param kwargs: standard argument for initializing fit
-                       function
+        :param name:   name of fitting function to create or an Ifunction object to wrap.
+        :param params_to_optimize:   names of the parameters you want to optimize. The omitted parameters will remain
+                       fixed at their initial value.
+        :param kwargs: standard argument for initializing fit function
         """
         if not isinstance(name, str):
             self.fun = name
         else:
             self.fun = FunctionFactory.createFunction(name)
         self.init_paramgeters_and_attributes(**kwargs)
+
+        def set_parameters_by_index(params):
+            for i in range(len(params)):
+                self.fun.setParameter(i, params[i])
+
+        def set_parameters_by_name(params):
+            for i, param_name in enumerate(params_to_optimize):
+                self.fun.setParameter(param_name, params[i])
+
+        self._set_parameters = set_parameters_by_index if params_to_optimize is None else set_parameters_by_name
 
     def init_paramgeters_and_attributes(self, **kwargs):
         # Deal with attributes first
@@ -175,8 +185,8 @@ class FunctionWrapper(object):
         else:
             x_list = [x]
 
-        for i in range(len(params)):
-            self.fun.setParameter(i, params[i])
+        self._set_parameters(params)
+
         y = x_list[:]
         ws = self._execute_algorithm('CreateWorkspace', DataX=x_list, DataY=y)
         out = self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=ws)

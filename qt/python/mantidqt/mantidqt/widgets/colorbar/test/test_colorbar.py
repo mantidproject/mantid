@@ -10,7 +10,7 @@ import numpy as np
 from unittest import TestCase
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
+from mantidqt.widgets.colorbar.colorbar import ColorbarWidget, NORM_OPTS
 from matplotlib.colors import LogNorm, Normalize, SymLogNorm
 
 
@@ -39,25 +39,76 @@ class ColorbarWidgetTest(TestCase):
         self.widget.set_mappable(image)
 
     def test_that_masked_data_in_log_mode_will_cause_a_switch_back_to_linear_normalisation(self):
-        normalisation_index = 1  # Log
         image = plt.imshow(self.data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1.0))
         masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1.0))
 
         self.widget.set_mappable(image)
-        self.widget.norm.setCurrentIndex(normalisation_index)
+        self.widget.norm.setCurrentIndex(NORM_OPTS.index("Log"))
         self.widget.set_mappable(masked_image)
 
-        self.assertEqual(self.widget.norm.currentIndex(), 0)  # Linear
+        self.assertEqual(self.widget.norm.currentIndex(), NORM_OPTS.index("Linear"))
         self.assertTrue(isinstance(masked_image.norm, Normalize))
 
     def test_that_masked_data_in_symmetric_log_mode_will_cause_a_switch_back_to_linear_normalisation(self):
-        normalisation_index = 2  # SymmetricLog10
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1.0))
         masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1.0))
 
         self.widget.set_mappable(image)
-        self.widget.norm.setCurrentIndex(normalisation_index)
+        self.widget.norm.setCurrentIndex(NORM_OPTS.index("SymmetricLog10"))
         self.widget.set_mappable(masked_image)
 
-        self.assertEqual(self.widget.norm.currentIndex(), 0)  # Linear
+        self.assertEqual(self.widget.norm.currentIndex(), NORM_OPTS.index("Linear"))
         self.assertTrue(isinstance(masked_image.norm, Normalize))
+
+    def test_that_switching_normalisation_will_autoscale_the_colorbar_limits_appropriately(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        c_min, c_max = self.widget._calculate_clim()
+
+        for normalisation_index in range(len(NORM_OPTS)):
+            self.widget.norm.setCurrentIndex(normalisation_index)
+            expected_c_min = c_min if normalisation_index != NORM_OPTS.index("Log") else max(c_min, 1)
+
+            self.assertEqual(self.widget.cmin_value, expected_c_min)
+            self.assertEqual(self.widget.cmax_value, c_max)
+
+    def test_that_all_zero_slice_with_log_normalisation_gives_valid_clim(self):
+        image = plt.imshow(self.data*0, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.norm.setCurrentIndex(NORM_OPTS.index("Log"))
+        c_min, c_max = self.widget._calculate_clim()
+
+        self.assertEqual(c_min, 0.1)
+        self.assertEqual(c_max, 1)
+
+    def test_that_all_nan_slice_with_log_normalisation_gives_valid_clim(self):
+        image = plt.imshow(self.data*np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        for normalisation_index in range(len(NORM_OPTS)):
+            self.widget.norm.setCurrentIndex(normalisation_index)
+            c_min, c_max = self.widget._calculate_clim()
+
+            self.assertEqual(c_min, 0.1)
+            self.assertEqual(c_max, 1)
+
+    def test_mixed_slice_gives_valid_clim(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        for normalisation_index in range(len(NORM_OPTS)):
+            self.widget.norm.setCurrentIndex(normalisation_index)
+            c_min, c_max = self.widget._calculate_clim()
+            expected_c_min = 0 if normalisation_index != NORM_OPTS.index("Log") else 1
+
+            self.assertEqual(c_min, expected_c_min)
+            self.assertEqual(c_max, 99)

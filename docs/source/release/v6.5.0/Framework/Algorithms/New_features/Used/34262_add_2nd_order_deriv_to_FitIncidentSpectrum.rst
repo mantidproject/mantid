@@ -1,0 +1,1 @@
+- The algorithm :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>` is now able to return the second derivative of the fitted function in addition to the standard outputs of the fitted function and its first derivative

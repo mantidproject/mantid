@@ -1457,12 +1457,17 @@ void IFunction::init() {
 }
 
 /**
- *  Set a value to a named attribute
+ *  Set a value to a named attribute, retaining validator
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
 void IFunction::storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value) {
   if (hasAttribute(name)) {
+    auto att = m_attrs[name];
+    const Kernel::IValidator_sptr validatorClone = att.getValidator();
+    value.setValidator(validatorClone);
+    value.evaluateValidator();
+
     m_attrs[name] = value;
   } else {
     throw std::invalid_argument("ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" + name + "'");
@@ -1581,9 +1586,10 @@ void IFunction::sortTies() {
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
     auto const tie = getTie(i);
-    if (!tie) {
+    if (!tie || ignoreTie(*tie)) {
       continue;
     }
+
     TieNode newNode;
     newNode.left = getParameterIndex(*tie);
     auto const rhsParameters = tie->getRHSParameters();

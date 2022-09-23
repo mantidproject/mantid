@@ -192,7 +192,7 @@ public:
 
   /**
    * Atribute visitor class. It provides a separate access method
-   * for each attribute type. When applied to a particular attribue
+   * for each attribute type. When applied to a particular attribute
    * the appropriate method will be used. The child classes must
    * implement the virtual AttributeVisitor::apply methods. See
    * implementation of Attribute::value() method for an example.
@@ -213,15 +213,15 @@ public:
     T operator()(std::vector<double> &v) const { return apply(v); }
 
   protected:
-    /// Implement this mathod to access attribute as string
+    /// Implement this method to access attribute as string
     virtual T apply(std::string &) const = 0;
-    /// Implement this mathod to access attribute as double
+    /// Implement this method to access attribute as double
     virtual T apply(double &) const = 0;
-    /// Implement this mathod to access attribute as int
+    /// Implement this method to access attribute as int
     virtual T apply(int &) const = 0;
-    /// Implement this mathod to access attribute as bool
+    /// Implement this method to access attribute as bool
     virtual T apply(bool &) const = 0;
-    /// Implement this mathod to access attribute as vector
+    /// Implement this method to access attribute as vector
     virtual T apply(std::vector<double> &) const = 0;
 
     /// Evaluates the validator associated with attribute this visitor is to visit.
@@ -554,6 +554,8 @@ public:
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
+  /// Ignore a tie
+  virtual bool ignoreTie(const ParameterTie &) const { return false; }
   /// Put all ties in order in which they will be applied correctly.
   void sortTies();
   /// Write a parameter tie to a string

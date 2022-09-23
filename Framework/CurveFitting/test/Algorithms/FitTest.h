@@ -104,6 +104,19 @@ public:
     alg->initialize();
     TS_ASSERT_THROWS(alg->setPropertyValue("Function", ""), const std::invalid_argument &);
   }
+  // Test that Fit throws the std::invalid_argument exception instead of segmentation fault
+  // when an invalid constraint is provided.
+  void test_invalid_constraint() {
+    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Fit fit;
+    fit.initialize();
+
+    fit.setProperty("Function", "name=LinearBackground");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Constraints", "invalid");
+    TS_ASSERT_THROWS(fit.execute(), std::runtime_error &);
+    API::AnalysisDataService::Instance().clear();
+  }
 
   // Test that Fit copies minimizer's output properties to Fit
   // Test that minimizer's iterate(iter) method is called maxIteration times

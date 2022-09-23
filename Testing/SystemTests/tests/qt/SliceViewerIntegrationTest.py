@@ -31,7 +31,7 @@ from numpy.testing import assert_allclose
 
 
 class MockConfig(object):
-    def get(self, name):
+    def get(self, name, type=None):
         if name == SCALENORM:
             return "Log"
 

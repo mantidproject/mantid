@@ -608,7 +608,7 @@ bool FitScriptGeneratorModel::checkFunctionExistsInAllDomains() const {
 }
 
 bool FitScriptGeneratorModel::checkFunctionIsSameForAllDomains() const {
-  if (numberOfDomains() <= 0u || m_fitDomains[0u]->getFunctionCopy() == nullptr) {
+  if (numberOfDomains() == 0u || m_fitDomains[0u]->getFunctionCopy() == nullptr) {
     return false;
   }
 

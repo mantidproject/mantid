@@ -95,6 +95,19 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
 
         self._test_corrections_workspace(results)
 
+    def test_annulus_with_container(self):
+
+        kwargs = self._annulus_arguments
+        results = SimpleShapeDiscusInelastic(ReducedWorkspace=self._red_ws,
+                                             SqwWorkspace=self._sqw_ws,
+                                             SampleInnerRadius=1.0,
+                                             CanInnerRadius=0.9,
+                                             CanOuterRadius=2.1,
+                                             Container=True,
+                                             **kwargs)
+
+        self._test_corrections_workspace(results)
+
 
     # ------------------------------------- Failure Cases --------------------
 

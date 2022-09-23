@@ -539,7 +539,6 @@ protected:
     m_browser->m_attributeSizeManager->setValue(sizeProp, static_cast<int>(v.size()));
     m_browser->addProperty(prop, sizeProp);
     m_browser->m_attributeSizeManager->blockSignals(false);
-    sizeProp->setEnabled(false);
 
     m_browser->m_attributeVectorDoubleManager->blockSignals(true);
     QString parName = "value[%1]";
@@ -550,6 +549,7 @@ protected:
     }
     m_browser->m_attributeVectorDoubleManager->blockSignals(false);
 
+    sizeProp->setEnabled(false);
     m_browser->m_browser->setExpanded(aprop.item, false);
     return aprop;
   }
@@ -1994,9 +1994,9 @@ void FunctionTreeView::tieChanged(QtProperty *prop) {
 
 /// Called when a constraint property changes
 void FunctionTreeView::constraintChanged(QtProperty *prop) {
-  for (const auto &constraint : m_constraints) {
-    const bool isLower = constraint.lower == prop;
-    const bool isUpper = constraint.upper == prop;
+  for (const auto &constr : m_constraints) {
+    const bool isLower = constr.lower == prop;
+    const bool isUpper = constr.upper == prop;
     if (isLower || isUpper) {
       auto paramProp = getParentParameterProperty(prop);
       QString functionIndex, constraint;

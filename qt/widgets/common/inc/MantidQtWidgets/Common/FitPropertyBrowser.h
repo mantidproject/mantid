@@ -381,7 +381,7 @@ protected slots:
 
   virtual void doubleChanged(QtProperty *prop);
 
-  void enactAttributeChange(QtProperty *prop, PropertyHandler *h);
+  void enactAttributeChange(QtProperty *prop, PropertyHandler *h, const bool vectorAttribute = false);
 
 private slots:
   /// Called when one of the parameter values gets changed

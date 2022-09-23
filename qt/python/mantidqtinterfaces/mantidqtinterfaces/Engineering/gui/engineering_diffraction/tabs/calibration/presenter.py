@@ -15,7 +15,7 @@ from Engineering.EnggUtils import GROUP
 
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
-from mantidqt.utils.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable, GenericObservable
 
 
 class CalibrationPresenter(object):
@@ -24,7 +24,7 @@ class CalibrationPresenter(object):
         self.view = view
         self.worker = None
         self.calibration_notifier = self.CalibrationNotifier(self)
-
+        self.prm_filepath_notifier_gsas2 = GenericObservable()
         self.current_calibration = CalibrationInfo()
 
         self.connect_view_signals()
@@ -97,6 +97,7 @@ class CalibrationPresenter(object):
         self.calibration_notifier.notify_subscribers(self.current_calibration)
         set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                     "last_calibration_path", self.current_calibration.get_prm_filepath())
+        self.prm_filepath_notifier_gsas2.notify_subscribers(self.model.get_last_prm_files_gsas2())
 
     def set_field_value(self):
         self.view.set_sample_text(self.current_calibration.get_sample())
@@ -170,6 +171,9 @@ class CalibrationPresenter(object):
 
     def show_cropping(self, show):
         self.view.set_cropping_widget_visibility(show)
+
+    def add_prm_gsas2_subscriber(self, obs):
+        self.prm_filepath_notifier_gsas2.add_subscriber(obs)
 
     # -----------------------
     # Observers / Observables

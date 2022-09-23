@@ -253,10 +253,12 @@ void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog
 
 void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
-  auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
-  const FqFitParameters parameter = createFqFitParameters(workspace);
-  setActiveParameterType(type);
-  updateParameterOptions(dialog, parameter);
+  if (!workspaceName.empty() && m_adsInstance.doesExist(workspaceName)) {
+    auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+    const FqFitParameters parameter = createFqFitParameters(workspace);
+    setActiveParameterType(type);
+    updateParameterOptions(dialog, parameter);
+  }
 }
 
 void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameter) {

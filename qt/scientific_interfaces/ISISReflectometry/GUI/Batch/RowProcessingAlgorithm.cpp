@@ -5,23 +5,26 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowProcessingAlgorithm.h"
+#include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
+#include "../../Reduction/PreviewRow.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using MantidQt::API::AlgorithmRuntimeProps;
+using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
 } // namespace
-
-namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
-
-using API::IConfiguredAlgorithm_sptr;
-using Mantid::API::IAlgorithm_sptr;
-using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
 
 namespace { // unnamed namespace
 // These functions update properties in an AlgorithmRuntimeProps for specific
@@ -33,14 +36,27 @@ void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
 
 void updateTransmissionWorkspaceProperties(AlgorithmRuntimeProps &properties,
                                            TransmissionRunPair const &transmissionRuns) {
-  AlgorithmProperties::update("FirstTransmissionRunList", transmissionRuns.firstRunList(), properties);
-  AlgorithmProperties::update("SecondTransmissionRunList", transmissionRuns.secondRunList(), properties);
+  // Transmission runs come as a pair: if the first is set, use both; else use neither
+  if (transmissionRuns.firstRunList().empty()) {
+    return;
+  }
+  properties.setPropertyValue("FirstTransmissionRunList", transmissionRuns.firstRunList());
+  properties.setPropertyValue("SecondTransmissionRunList", transmissionRuns.secondRunList());
 }
 
 void updateMomentumTransferProperties(AlgorithmRuntimeProps &properties, RangeInQ const &rangeInQ) {
   AlgorithmProperties::update("MomentumTransferMin", rangeInQ.min(), properties);
   AlgorithmProperties::update("MomentumTransferMax", rangeInQ.max(), properties);
   AlgorithmProperties::update("MomentumTransferStep", rangeInQ.step(), properties);
+}
+
+void updateProcessingInstructionsProperties(AlgorithmRuntimeProps &properties, PreviewRow const &previewRow) {
+  AlgorithmProperties::update("ProcessingInstructions", previewRow.getProcessingInstructions(ROIType::Signal),
+                              properties);
+  AlgorithmProperties::update("BackgroundProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Background), properties);
+  AlgorithmProperties::update("TransmissionProcessingInstructions",
+                              previewRow.getProcessingInstructions(ROIType::Transmission), properties);
 }
 
 void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
@@ -96,8 +112,12 @@ void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties, FloodCor
 void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment const &experiment) {
   AlgorithmProperties::update("AnalysisMode", analysisModeToString(experiment.analysisMode()), properties);
   AlgorithmProperties::update("Debug", experiment.debug(), properties);
-  AlgorithmProperties::update("SummationType", summationTypeToString(experiment.summationType()), properties);
-  AlgorithmProperties::update("ReductionType", reductionTypeToString(experiment.reductionType()), properties);
+  SummationType summationType = experiment.summationType();
+  AlgorithmProperties::update("SummationType", summationTypeToString(summationType), properties);
+  // The ReductionType value is only relevant when the SummationType is SumInQ
+  ReductionType reductionType =
+      (summationType == SummationType::SumInQ) ? experiment.reductionType() : ReductionType::Normal;
+  AlgorithmProperties::update("ReductionType", reductionTypeToString(reductionType), properties);
   AlgorithmProperties::update("IncludePartialBins", experiment.includePartialBins(), properties);
   updateTransmissionStitchProperties(properties, experiment.transmissionStitchOptions());
   updateBackgroundSubtractionProperties(properties, experiment.backgroundSubtraction());
@@ -241,8 +261,75 @@ boost::optional<LookupRow> findWildcardLookupRow(IBatch const &model) {
   }
   return lookupRow;
 }
+
+// Set properties from the batch model
+void updatePropertiesFromBatchModel(AlgorithmRuntimeProps &properties, IBatch const &model) {
+  // Update properties from settings in the event, experiment and instrument tabs
+  updateEventProperties(properties, model.slicing());
+  updateExperimentProperties(properties, model.experiment());
+  updateInstrumentProperties(properties, model.instrument());
+}
 } // unnamed namespace
 
+namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction {
+/** Create a configured algorithm for processing a row. The algorithm
+ * properties are set from the reduction configuration model and the
+ * cell values in the given row.
+ * @param model : the reduction configuration model
+ * @param row : the row from the preview tab
+ */
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row,
+                                                    Mantid::API::IAlgorithm_sptr alg) {
+  // Create the algorithm
+  if (!alg) {
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+  }
+  alg->setRethrows(true);
+  alg->setAlwaysStoreInADS(false);
+  alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
+
+  // Set the algorithm properties from the model
+  auto properties = createAlgorithmRuntimeProps(model, row);
+
+  // Return the configured algorithm
+  auto jobAlgorithm =
+      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowOnAlgorithmComplete, &row);
+  return jobAlgorithm;
+}
+
+/** This function gets the canonical set of properties for performing the reduction, either using defaults for all runs
+ * or for a specific run if that run's Row is passed. It starts with the most generic set of defaults, overrides them
+ * from the lookup table if a match is found there, and then finally overrides them with the specific run's settings if
+ * the user has specified them on the Runs table.
+ *
+ * @param model : the Batch model containing all of the default settings and the lookup table
+ * @param row : optional run details from the Runs table
+ * @returns : a custom PropertyManager class with all of the algorithm properties set
+ */
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                   PreviewRow const &previewRow) {
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  updatePropertiesFromBatchModel(*properties, model);
+  // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
+  auto lookupRow = model.findLookupRow(previewRow);
+  if (lookupRow) {
+    updateLookupRowProperties(*properties, *lookupRow);
+  }
+  // Update properties from the preview tab
+  properties->setProperty("InputWorkspace", previewRow.getSummedWs());
+  properties->setProperty("ThetaIn", previewRow.theta());
+  updateProcessingInstructionsProperties(*properties, previewRow);
+  return properties;
+}
+
+void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
+  auto &row = dynamic_cast<PreviewRow &>(item);
+  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  row.setReducedWs(outputWs);
+}
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
+
+namespace MantidQt::CustomInterfaces::ISISReflectometry::RowProcessing {
 /** Create a configured algorithm for processing a row. The algorithm
  * properties are set from the reduction configuration model and the
  * cell values in the given row.
@@ -276,9 +363,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
                                                                                    boost::optional<Row const &> row) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
-  updateEventProperties(*properties, model.slicing());
-  updateExperimentProperties(*properties, model.experiment());
-  updateInstrumentProperties(*properties, model.instrument());
+  updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
   auto lookupRow = row ? findLookupRow(*row, model) : findWildcardLookupRow(model);
   if (lookupRow) {

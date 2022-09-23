@@ -318,7 +318,6 @@ void MDWSTransform::setQ3DDimensionsNames(MDWSDescription &TargWSDescription, Cn
     dimNames[1] = "K";
     dimNames[2] = "L";
 
-    Kernel::MDUnit_uptr mdUnit = std::make_unique<Kernel::InverseAngstromsUnit>();
     TargWSDescription.setCoordinateSystem(Mantid::Kernel::HKL);
     TargWSDescription.setFrame(Geometry::HKL::HKLName);
     break;

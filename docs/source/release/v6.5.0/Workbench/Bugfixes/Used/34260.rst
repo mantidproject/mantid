@@ -1,0 +1,3 @@
+- Fix a change in behaviour after upgrading Qt where floating point numbers in
+  the matrix data view were not displayed unless the column was wide enough to show
+  all digits.

@@ -1,0 +1,1 @@
+- The I(q,t) tab in Indirect Data Analysis can now be ran with direct data

@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
+#include <QPointer>
 #include <QWidget>
 #include <string>
 
@@ -24,10 +25,9 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow : public API::MantidHelpInterf
   Q_OBJECT
 
 public:
-  static bool helpWindowExists() { return g_helpWindow != nullptr; }
+  static bool helpWindowExists() { return !g_helpWindow.isNull(); }
 
-  MantidHelpWindow(QWidget *parent = nullptr, const Qt::WindowFlags &flags = nullptr);
-  ~MantidHelpWindow() override;
+  MantidHelpWindow(const Qt::WindowFlags &flags = nullptr);
 
   void showPage(const std::string &url = std::string()) override;
   void showPage(const QString &url) override;
@@ -55,7 +55,7 @@ private:
       determined this is an empty string. */
   std::string m_cacheFile;
   /// The window that renders the help information
-  static pqHelpWindow *g_helpWindow;
+  static QPointer<pqHelpWindow> g_helpWindow;
 
   /// Whether this is the very first startup of the helpwindow.
   bool m_firstRun;

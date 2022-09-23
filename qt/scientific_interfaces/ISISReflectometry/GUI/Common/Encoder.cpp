@@ -330,6 +330,7 @@ QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
   saveMap.insert(QString("regexCheckBox"), QVariant(gui->m_ui.regexCheckBox->isChecked()));
   saveMap.insert(QString("saveReductionResultsCheckBox"),
                  QVariant(gui->m_ui.saveReductionResultsCheckBox->isChecked()));
+  saveMap.insert(QString("saveIndividualRowsCheckBox"), QVariant(gui->m_ui.saveIndividualRowsCheckBox->isChecked()));
   return saveMap;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

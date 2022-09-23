@@ -1,0 +1,1 @@
+- If an event nexus file is loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>` with LoadAllLogs=True any duplicate log entries no longer give an error. Log entries that are nested lower than two levels down are also properly distinguished

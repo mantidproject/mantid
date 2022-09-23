@@ -75,7 +75,7 @@ void BaseCustomInstrumentView::openHelp() {
   if (m_helpPage == "") {
     return;
   }
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString::fromStdString(m_helpPage));
+  MantidQt::API::HelpWindow::showCustomInterface(QString::fromStdString(m_helpPage));
 }
 
 std::string BaseCustomInstrumentView::getFile() {
