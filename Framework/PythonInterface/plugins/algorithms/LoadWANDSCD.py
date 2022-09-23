@@ -225,10 +225,10 @@ class LoadWANDSCD(PythonAlgorithm):
                          bc[3::4, 1::4] + bc[::4, 2::4] + bc[1::4, 2::4] + bc[2::4, 2::4] + bc[3::4, 2::4] + bc[::4, 3::4] + \
                          bc[1::4, 3::4] + bc[2::4, 3::4] + bc[3::4, 3::4]
                 data_array[n] = bc
-                s1_array.append(f['/entry/DASlogs/HB2C:Mot:s1.RBV/average_value'][()][0])
-                duration_array.append(float(f['/entry/duration'][()][0]))
-                run_number_array.append(float(f['/entry/run_number'][()][0]))
-                monitor_count_array.append(float(f['/entry/monitor1/total_counts'][()][0]))
+                s1_array.append(f['/entry/DASlogs/HB2C:Mot:s1.RBV/average_value'][0])
+                duration_array.append(float(f['/entry/duration'][0]))
+                run_number_array.append(float(f['/entry/run_number'][0]))
+                monitor_count_array.append(float(f['/entry/monitor1/total_counts'][0]))
 
         progress.report('Creating MDHistoWorkspace')
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
