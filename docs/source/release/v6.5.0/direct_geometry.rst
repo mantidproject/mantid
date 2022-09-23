@@ -22,13 +22,13 @@ CrystalField
 
 New features
 ############
-- It is now possible to use the algorithms from the GOFit optimization package directly with the `Crystal Field API <https://docs.mantidproject.org/nightly/interfaces/direct/Crystal%20Field%20Python%20Interface.html#gofit-fitting>`_.
+- It is now possible to use the algorithms from the :ref:`GOFit optimization package <gofit-fitting>` directly with the :ref:`Crystal Field API <Crystal Field Python Interface>`.
 - :ref:`PelicanCrystalProcessing <algm-PelicanCrystalProcessing>` generates a collection of nxspe files from a run sequence that can be used by programs such as Horace.
 
 Bugfixes
 ############
 - Fix for bug that caused runtime errors when trying to fix a tied parameter in the two step fitting process.
-- Fix for sortTies to prevent Mantid crash when fitting CrystalField multisite objects with Gaussian peaks.
+- Fix for ``sortTies`` to prevent a crash when fitting CrystalField multisite objects with Gaussian peaks.
 
 
 MSlice
