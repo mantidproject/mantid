@@ -165,7 +165,7 @@ In the ``Beam centre`` tab:
 
 #. Make a note of the four values representing the front/main detector centre positions.
 #. Check that detector is set to ``main-detector`` and click run.
-#. A plot should appear - make sure to show it if it is behind a another window. It should be updated with four lines, which gradually get closer together. This might take a while to run.
+#. A plot should appear - make sure to show it if it is behind another window. It should be updated with four lines, which gradually get closer together. This might take a while to run.
 #. Check the values in the first two text boxes at the top (Centre Position - Rear) have changed when it has finished running.
 #. Change the detector to ``Hab`` and re-run the test.
 #. Four more lines should appear on the same plot. This time, in the values at the top, only the values for the front should have changed.
