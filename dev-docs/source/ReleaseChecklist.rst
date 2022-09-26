@@ -169,6 +169,34 @@ Beta Testing Begins
    release. This can be a collage of images if there is not a big 'headline' feature
    or change.
 
+Beta Testing Begins
+###################
+
+* Initial amalgamation of the the release notes:
+
+    * ``git pull`` on ``release-next``.
+    * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`_.
+    * Navigate to tour Mantid 'build' directory and open ``command-prompt.bat``.
+    * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_ and run, parsing the correct version number.
+
+    .. code-block:: bash
+
+        python release_editor.py --release 6.5.0
+
+    * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories.
+    * Look over the files to make sure they look roughly correct then submit a PR to be merged into ``release-next``.
+
+* Making changes:
+
+    * For each file which needs changes, create a new branch (example name ``6.5_workbench_release_notes``) and work on changes to then be merged back into ``release-next``.
+    * Each time a new branch is made from ``release-next`` remember to pull changes and watch out for any new bugfix or new feature release notes which have been since added (they should be outside of the 'used' directory). The text from these files needs to be manually coppied into the main release note page, and the file itself moved to the relevant 'used' folder.
+    * If new notes come into after you have created the relevant branch then wait until that branch has been merged. It can be best to wait until a number have built up and move them all in a new PR.
+
+* Images:
+
+    * Images or GIFs should be added to highlight important and/or visual changes.
+    * An image for the 'headline' feature (or a collage if there is none) should be added to the main page.
+
 Beta Testing Ends
 #################
 
