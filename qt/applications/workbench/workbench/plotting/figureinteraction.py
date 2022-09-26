@@ -687,10 +687,17 @@ class FigureInteraction(object):
             return
 
         is_moving = any([marker.is_marker_moving() for marker in self.markers])
-        hovering_over = sum([1 for marker in self.markers if marker.is_above(x_pos, y_pos)])
+        above_markers = [marker for marker in self.markers if marker.is_above(x_pos, y_pos)]
+        hovering_over = len(above_markers)
+        # hovering_over = sum([1 for marker in self.markers if marker.is_above(x_pos, y_pos)])
         if not is_moving:
             if hovering_over == 1:
-                QApplication.setOverrideCursor(Qt.PointingHandCursor)
+                m = above_markers[0]
+                print(m.marker_type)
+                if m.marker_type == 'XSingle':
+                    QApplication.setOverrideCursor(Qt.SizeHorCursor)
+                else:
+                    QApplication.setOverrideCursor(Qt.PointingHandCursor)
             elif hovering_over > 1:
                 QApplication.setOverrideCursor(Qt.CrossCursor)
             else:
