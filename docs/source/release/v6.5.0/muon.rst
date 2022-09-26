@@ -27,7 +27,7 @@ Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ############
-- Fixed a bug in Model Analysis where string logs were not being displayed correctly.
+- Fixed a bug in the :ref:`Model Fitting tab <muon_model_fitting_tab-ref>` where string logs were not being displayed correctly.
 
 
 ALC
