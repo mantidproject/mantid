@@ -16,7 +16,7 @@ This method assumes you are familiar with :ref:`intro_to_objects-isis-powder-dif
 To create a OSIRIS object the following parameters are required:
 
 - :ref:`calibration_directory_osiris_isis-powder-diffraction-ref`
-- output_directory
+- :ref:`output_directory_osiris_isis-powder-diffraction-ref`
 - :ref:`user_name_osiris_isis-powder-diffraction-ref`
 
 Optionally a configuration file may be specified if one exists
@@ -63,7 +63,7 @@ the user enables.
 On OSIRIS the following parameters are required when executing *create_vanadium*:
 
 - :ref:`calibration_mapping_file_osiris_isis-powder-diffraction-ref`
-- vanadium_normalisation
+- :ref:`do_van_normalisation_osiris_isis-powder-diffraction-ref`
 - :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref`
 - :ref:`merge_drange_osiris_isis-powder-diffraction-ref`
 
@@ -239,6 +239,26 @@ Example Input:
 ..  code-block:: python
 
   osiris_example = Osiris(merge_drange=True, ...)
+
+.. _output_directory_osiris_isis-powder-diffraction-ref:
+
+output_directory
+^^^^^^^^^^^^^^^^
+Specifies the path to the output directory to save resulting files
+into. The script will automatically create a folder
+with the label determined from the
+:ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
+and within that create another folder for the current
+:ref:`user_name_polaris_isis-powder-diffraction-ref`.
+
+Within this folder processed data will be saved out in
+several formats.
+
+Example Input:
+
+..  code-block:: python
+
+  osiris_example = Osiris(output_directory=r"C:\path\to\output_dir", ...)
 
 .. _run_number_osiris_isis-powder-diffraction-ref:
 
