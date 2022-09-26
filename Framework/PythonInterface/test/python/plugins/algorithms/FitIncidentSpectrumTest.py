@@ -109,9 +109,9 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         # check values at peak at wavelength~1.0 A
-        self.assertEqual(fit_wksp.readY(0)[8], 43064.085162668904)
-        self.assertEqual(fit_wksp.readY(1)[8], -9772.88981292931)
-        self.assertEqual(fit_wksp.readY(2)[8], -494934.7687858478)
+        self.assertAlmostEqual(fit_wksp.readY(0)[8], 43064.09, 2)
+        self.assertAlmostEqual(fit_wksp.readY(1)[8], -9772.89, 2)
+        self.assertAlmostEqual(fit_wksp.readY(2)[8], -494934.77, 2)
 
 if __name__ == '__main__':
     unittest.main()
