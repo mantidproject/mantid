@@ -173,14 +173,14 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         logs = ws.run()
         reflectedForeground = self._foreground(logs)
         instrument = ws.getInstrument()
-        instrumentName = common.instrumentName(ws)
+        instrumentName = common.instrument_name(ws)
         sumType = logs.getProperty(common.SampleLogs.SUM_TYPE).value
-        pixelSize = common.pixelSize(instrumentName)
-        detResolution = common.detectorResolution()
-        chopperSpeed = common.chopperSpeed(logs, instrument)
-        chopperOpening = common.chopperOpeningAngle(logs, instrument)
+        pixelSize = common.pixel_size(instrumentName)
+        detResolution = common.detector_resolution()
+        chopperSpeed = common.chopper_speed(logs, instrument)
+        chopperOpening = common.chopper_opening_angle(logs, instrument)
         chopperRadius = instrument.getNumberParameter('chopper_radius')[0]
-        chopperPairDist = common.chopperPairDistance(logs, instrument)
+        chopperPairDist = common.chopper_pair_distance(logs, instrument)
         tofBinWidth = self._TOFChannelWidth(logs)
         qWSName = self._names.withSuffix('in_momentum_transfer')
         qWS = ReflectometryMomentumTransfer(
@@ -207,9 +207,9 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         """Correct reflectivity values if chopper openings between RB and DB differ."""
 
         def opening(instrument, logs, Xs):
-            chopperGap = common.chopperPairDistance(logs, instrument)
-            chopperPeriod = 60. / common.chopperSpeed(logs, instrument)
-            openingAngle = common.chopperOpeningAngle(logs, instrument)
+            chopperGap = common.chopper_pair_distance(logs, instrument)
+            chopperPeriod = 60. / common.chopper_speed(logs, instrument)
+            openingAngle = common.chopper_opening_angle(logs, instrument)
             return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
 
         instrument = ws.getInstrument()

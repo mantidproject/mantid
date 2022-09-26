@@ -1,32 +1,126 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.kernel import UnitConversion, DeltaEModeType
-from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Multiply, mtd
-import scipy.constants as constants
+from mantid.geometry import Instrument
+from mantid.simpleapi import DeleteWorkspace, mtd
+from mantid.api import Run, MatrixWorkspace
+from typing import Union
 import h5py
 import numpy
 
 
-def sample_angle(run):
-    """Return the sample theta angle in degrees."""
-    if isinstance(run, list):
-        run = run[0]
-    with h5py.File(run, "r") as nexus:
-        if nexus.get('entry0/instrument/SAN') is not None:
-            return float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
-        elif nexus.get('entry0/instrument/san') is not None:
-            return float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+def chopper_opening_angle(sample_logs: Run, instrument: Instrument) -> float:
+    """Return the chopper opening angle in degrees.
+
+    Keyword arguments:
+    sample_logs -- run object holding workspace metadata
+    instrument -- instrument object holding instrument parameters
+    """
+    instr_name = instrument.getName()
+    if instr_name == 'D17':
+        duration = sample_logs.getProperty('duration').value
+        if duration > 30.0:
+            chopper1_phase_name = instrument.getStringParameter('chopper1_phase')[0]
+            chopper2_phase_name = instrument.getStringParameter('chopper2_phase')[0]
         else:
-            raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
+            chopper1_phase_name = instrument.getStringParameter('chopper1_phase_alt')[0]
+            chopper2_phase_name = instrument.getStringParameter('chopper2_phase_alt')[0]
+        chopper1_phase = sample_logs.getProperty(chopper1_phase_name).value
+        chopper_window = sample_logs.getProperty('ChopperWindow').value
+        if chopper1_phase > 360.:
+            # Workaround for broken old D17 NeXus files.
+            chopper1_phase = sample_logs.getProperty('VirtualChopper.chopper2_speed_average').value
+        chopper2_phase = sample_logs.getProperty(chopper2_phase_name).value
+        open_offset = sample_logs.getProperty('VirtualChopper.open_offset').value
+        return chopper_window - (chopper2_phase - chopper1_phase) - open_offset
+    else:
+        first_chopper = int(sample_logs.getProperty('ChopperSetting.firstChopper').value)
+        secondChopper = int(sample_logs.getProperty('ChopperSetting.secondChopper').value)
+        phase1_entry = 'CH{}.phase'.format(first_chopper)
+        phase2_entry = 'CH{}.phase'.format(secondChopper)
+        if sample_logs.hasProperty(phase1_entry):
+            chopper1_phase = sample_logs.getProperty(phase1_entry).value
+        else:
+            phase_entry = 'chopper{}.phase'.format(first_chopper)
+            chopper1_phase = sample_logs.getProperty(phase_entry).value
+        if sample_logs.hasProperty(phase2_entry):
+            chopper2_phase = sample_logs.getProperty(phase2_entry).value
+        else:
+            phase_entry = 'chopper{}.phase'.format(secondChopper)
+            chopper2_phase = sample_logs.getProperty(phase_entry).value
+        if chopper1_phase > 360.:
+            # CH1.phase on FIGARO is set to an arbitrary value (999.9)
+            chopper1_phase = 0.
+        if sample_logs.hasProperty('CollAngle.open_offset'):
+            open_offset = sample_logs.getProperty('CollAngle.open_offset').value
+        else:
+            open_offset = sample_logs.getProperty('CollAngle.openOffset').value
+        return 45. - (chopper2_phase - chopper1_phase) - open_offset
 
 
-def detector_angle(run):
-    """Return the detector angle in degrees."""
+def chopper_pair_distance(sample_logs: Run, instrument: Instrument) -> float:
+    """Return the gap distance in metres between the two choppers.
+
+    Keyword arguments:
+    sample_logs -- run object holding workspace metadata
+    instrument -- instrument object holding instrument parameters
+    """
+    instr_name = instrument.getName()
+    if instr_name == 'D17':
+        # in [m], enforced by the loader
+        return sample_logs.getProperty('Distance.ChopperGap').value
+    else:
+        return sample_logs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
+
+
+def chopper_speed(sample_logs: Run, instrument: Instrument) -> float:
+    """Return the chopper speed.
+
+    Keyword arguments:
+    sample_logs -- run object holding workspace metadata
+    instrument -- instrument object holding instrument parameters
+    """
+    instr_name = instrument.getName()
+    if instr_name == 'D17':
+        duration = sample_logs.getProperty('duration').value
+        if duration > 30.0:
+            chopper1_speed_name = instrument.getStringParameter('chopper1_speed')[0]
+        else:
+            chopper1_speed_name = instrument.getStringParameter('chopper1_speed_alt')[0]
+        return sample_logs.getProperty(chopper1_speed_name).value
+    else:
+        first_chopper = int(sample_logs.getProperty('ChopperSetting.firstChopper').value)
+        speed_entry = 'CH{}.rotation_speed'.format(first_chopper)
+        if sample_logs.hasProperty(speed_entry):
+            return sample_logs.getProperty(speed_entry).value
+        speed_entry = 'chopper{}.rotation_speed'.format(first_chopper)
+        if sample_logs.hasProperty(speed_entry):
+            return sample_logs.getProperty(speed_entry).value
+
+
+def deflection_angle(sample_logs: Run) -> float:
+    """Return the deflection angle in degree.
+
+    Keyword arguments:
+    sample_logs -- run object holding workspace metadata
+    """
+    if sample_logs.hasProperty('CollAngle.actual_coll_angle'):
+        # Must be FIGARO
+        return sample_logs.getProperty('CollAngle.actual_coll_angle').value
+    else:
+        return 0.0
+
+
+def detector_angle(run: Union[str, list]) -> float:
+    """Return the detector angle in degrees .Throws a runtime error if the metadata with detector angle is not found.
+
+    Keyword arguments:
+    run -- numor string or list of numor strings
+    """
     if isinstance(run, list):
         run = run[0]
     with h5py.File(run, "r") as nexus:
@@ -40,165 +134,80 @@ def detector_angle(run):
             raise RuntimeError('Cannot retrieve detector angle from Nexus file {}.'.format(run))
 
 
-def chopperOpeningAngle(sampleLogs, instrument):
-    """Return the chopper opening angle in degrees."""
-    instrumentName = instrument.getName()
-    if instrumentName == 'D17':
-        duration = sampleLogs.getProperty('duration').value
-        if duration > 30.0:
-            chopper1PhaseName = instrument.getStringParameter('chopper1_phase')[0]
-            chopper2PhaseName = instrument.getStringParameter('chopper2_phase')[0]
-        else:
-            chopper1PhaseName = instrument.getStringParameter('chopper1_phase_alt')[0]
-            chopper2PhaseName = instrument.getStringParameter('chopper2_phase_alt')[0]
-        chopper1Phase = sampleLogs.getProperty(chopper1PhaseName).value
-        chopperWindow = sampleLogs.getProperty('ChopperWindow').value
-        if chopper1Phase > 360.:
-            # Workaround for broken old D17 NeXus files.
-            chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
-        chopper2Phase = sampleLogs.getProperty(chopper2PhaseName).value
-        openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
-        return chopperWindow - (chopper2Phase - chopper1Phase) - openoffset
-    else:
-        firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
-        secondChopper = int(sampleLogs.getProperty('ChopperSetting.secondChopper').value)
-        phase1Entry = 'CH{}.phase'.format(firstChopper)
-        phase2Entry = 'CH{}.phase'.format(secondChopper)
-        if sampleLogs.hasProperty(phase1Entry):
-            chopper1Phase = sampleLogs.getProperty(phase1Entry).value
-        else:
-            phaseEntry = 'chopper{}.phase'.format(firstChopper)
-            chopper1Phase = sampleLogs.getProperty(phaseEntry).value
-        if sampleLogs.hasProperty(phase2Entry):
-            chopper2Phase = sampleLogs.getProperty(phase2Entry).value
-        else:
-            phaseEntry = 'chopper{}.phase'.format(secondChopper)
-            chopper2Phase = sampleLogs.getProperty(phaseEntry).value
-        if chopper1Phase > 360.:
-            # CH1.phase on FIGARO is set to an arbitrary value (999.9)
-            chopper1Phase = 0.
-        if sampleLogs.hasProperty('CollAngle.open_offset'):
-            openoffset = sampleLogs.getProperty('CollAngle.open_offset').value
-        else:
-            openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
-        return 45. - (chopper2Phase - chopper1Phase) - openoffset
-
-
-def chopperPairDistance(sampleLogs, instrument):
-    """Return the gap between the two choppers."""
-    instrumentName = instrument.getName()
-    if instrumentName == 'D17':
-        # in [m], enforced by the loader
-        return sampleLogs.getProperty('Distance.ChopperGap').value
-    else:
-        return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
-
-
-def chopperSpeed(sampleLogs, instrument):
-    """Return the chopper speed."""
-    instrumentName = instrument.getName()
-    if instrumentName == 'D17':
-        duration = sampleLogs.getProperty('duration').value
-        if duration > 30.0:
-            chopper1SpeedName = instrument.getStringParameter('chopper1_speed')[0]
-        else:
-            chopper1SpeedName = instrument.getStringParameter('chopper1_speed_alt')[0]
-        return sampleLogs.getProperty(chopper1SpeedName).value
-    else:
-        firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
-        speedEntry = 'CH{}.rotation_speed'.format(firstChopper)
-        if sampleLogs.hasProperty(speedEntry):
-            return sampleLogs.getProperty(speedEntry).value
-        speedEntry = 'chopper{}.rotation_speed'.format(firstChopper)
-        if sampleLogs.hasProperty(speedEntry):
-            return sampleLogs.getProperty(speedEntry).value
-
-
-def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
-    """Correct reflectivity values if chopper openings between RB and DB differ."""
-    def opening(instrument, logs, Xs):
-        chopperGap = chopperPairDistance(logs, instrument)
-        chopperPeriod = 60. / chopperSpeed(logs, instrument)
-        openingAngle = chopperOpeningAngle(logs, instrument)
-        return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
-    instrument = ws.getInstrument()
-    Xs = ws.readX(0)
-    if ws.isHistogramData():
-        Xs = (Xs[:-1] + Xs[1:]) / 2.
-    reflectedOpening = opening(instrument, ws.run(), Xs)
-    directOpening = opening(instrument, directWS.run(), Xs)
-    corFactorWSName = names.withSuffix('chopper_opening_correction_factors')
-    corFactorWS = CreateWorkspace(
-        OutputWorkspace=corFactorWSName,
-        DataX=ws.readX(0),
-        DataY=directOpening / reflectedOpening,
-        UnitX=ws.getAxis(0).getUnit().unitID(),
-        ParentWorkspace=ws,
-        EnableLogging=logging)
-    correctedWSName = names.withSuffix('corrected_by_chopper_opening')
-    correctedWS = Multiply(
-        LHSWorkspace=ws,
-        RHSWorkspace=corFactorWS,
-        OutputWorkspace=correctedWSName,
-        EnableLogging=logging)
-    cleanup.cleanup(corFactorWS)
-    cleanup.cleanup(ws)
-    return correctedWS
-
-
-def detectorResolution():
+def detector_resolution() -> float:
     """Return the detector resolution in mm."""
     return 0.0022
 
 
-def pixelSize(instrumentName):
-    """Return the pixel size in mm."""
-    return 0.001195 if instrumentName == 'D17' else 0.0012
+def instrument_name(ws: MatrixWorkspace) -> str:
+    """Return the instrument's name validating it is either D17 or FIGARO.
 
-
-def deflectionAngle(sampleLogs):
-    """Return the deflection angle in degree."""
-    if sampleLogs.hasProperty('CollAngle.actual_coll_angle'):
-        # Must be FIGARO
-        return sampleLogs.getProperty('CollAngle.actual_coll_angle').value
-    else:
-        return 0.0
-
-
-def slitSizeLogEntry(instrumentName, slitNumber):
-    """Return the sample log entry which contains the slit size for the given slit"""
-    if slitNumber not in [1, 2]:
-        raise RuntimeError('Slit number out of range.')
-    entry = 'VirtualSlitAxis.s{}w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S{}H_actual_height'
-    return entry.format(slitNumber + 1)
-
-
-def inTOF(value, l1, l2):
-    """Return the number (tof) converted to wavelength"""
-    return UnitConversion.run('Wavelength', 'TOF', value, l1, l2, 0., DeltaEModeType.Elastic, 0.)
-
-
-def instrumentName(ws):
-    """Return the instrument's name validating it is either D17 or FIGARO."""
+    Keyword arguments:
+    ws -- workspace object with defined instrument
+    """
     name = ws.getInstrument().getName()
     if name != 'D17' and name != 'FIGARO':
         raise RuntimeError('Unrecognized instrument {}. Only D17 and FIGARO are supported.'.format(name))
     return name
 
 
-def slitSizes(ws):
+def pixel_size(instr_name: str) -> float:
+    """Return the pixel size in mm.
+
+    Keyword arguments:
+    instr_name -- instrument name
+    """
+    return 0.001195 if instr_name == 'D17' else 0.0012
+
+
+def sample_angle(run: Union[str, list]) -> float:
+    """Return the sample theta angle in degrees. Throws a runtime error if the metadata with sample angle is not found.
+
+    Keyword arguments:
+    run -- numor string or list of numor strings
+    """
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/SAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/san') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
+
+
+def slit_size_log_entry(instr_name: str, slit_number: int) -> str:
+    """Return the sample log entry which contains the slit size for the given slit.
+
+    Keyword arguments:
+    instr_name -- instrument name
+    slit_number -- id of the slit, either 1 or 2
+    """
+    if slit_number not in [1, 2]:
+        raise RuntimeError('Slit number out of range.')
+    entry = 'VirtualSlitAxis.s{}w_actual_width' if instr_name == 'D17' else 'VirtualSlitAxis.S{}H_actual_height'
+    return entry.format(slit_number + 1)
+
+
+def slit_sizes(ws: MatrixWorkspace) -> None:
+    """Sets slit sizes with appropriate units to sample logs.
+
+    Keyword arguments:
+    ws -- workspace object from which metadata is extracted
+    """
     run = ws.run()
-    instrName = instrumentName(ws)
-    slit2width = run.get(slitSizeLogEntry(instrName, 1))
-    slit3width = run.get(slitSizeLogEntry(instrName, 2))
-    if slit2width is None or slit3width is None:
+    instr_name = instrument_name(ws)
+    slit2_width = run.get(slit_size_log_entry(instr_name, 1))
+    slit3_width = run.get(slit_size_log_entry(instr_name, 2))
+    if slit2_width is None or slit3_width is None:
         run.addProperty(SampleLogs.SLIT2WIDTH, str('-'), '', True)
         run.addProperty(SampleLogs.SLIT3WIDTH, str('-'), '', True)
     else:
-        slit2widthUnit = slit2width.units
-        slit3widthUnit = slit3width.units
-        slit3w = slit3width.value
-        if instrumentName(ws) != 'D17':
+        slit2_width_unit = slit2_width.units
+        slit3_width_unit = slit3_width.units
+        slit3w = slit3_width.value
+        if instr_name != 'D17':
             bgs3 = float(run.getProperty('BGS3.value').value)
             if bgs3 >= 150.:
                 slit3w += 0.08
@@ -208,9 +217,9 @@ def slitSizes(ws):
                 slit3w -= 0.12
             elif bgs3 < -150.:
                 slit3w -= 0.24
-        slit2w = slit2width.value
-        run.addProperty(SampleLogs.SLIT2WIDTH, float(slit2w), slit2widthUnit, True)
-        run.addProperty(SampleLogs.SLIT3WIDTH, float(slit3w), slit3widthUnit, True)
+        slit2w = slit2_width.value
+        run.addProperty(SampleLogs.SLIT2WIDTH, float(slit2w), slit2_width_unit, True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, float(slit3w), slit3_width_unit, True)
 
 
 class SampleLogs:
@@ -229,55 +238,44 @@ class WSCleanup:
     OFF = 'Cleanup OFF'
     ON = 'Cleanup ON'
 
-    def __init__(self, cleanupMode, deleteAlgorithmLogging):
+    def __init__(self, cleanup_mode: str, delete_algorithm_logging: bool):
         """Initialize an instance of the class."""
-        self._deleteAlgorithmLogging = deleteAlgorithmLogging
-        self._doDelete = cleanupMode == self.ON
+        self._delete_algorithm_logging = delete_algorithm_logging
+        self._do_delete = cleanup_mode == self.ON
         self._protected = set()
-        self._toBeDeleted = set()
+        self._to_be_deleted = set()
 
-    def cleanup(self, *args):
+    def cleanup(self, *args) -> None:
         """Delete the workspaces listed in *args."""
         for ws in args:
             self._delete(ws)
 
-    def cleanupLater(self, *args):
+    def cleanup_later(self, *args) -> None:
         """Mark the workspaces listed in *args to be cleaned up later."""
         for arg in args:
-            self._toBeDeleted.add(str(arg))
+            self._to_be_deleted.add(str(arg))
 
-    def finalCleanup(self):
+    def final_cleanup(self) -> None:
         """Delete all workspaces marked to be cleaned up later."""
-        for ws in self._toBeDeleted:
+        for ws in self._to_be_deleted:
             self._delete(ws)
 
-    def protect(self, *args):
+    def protect(self, *args) -> None:
         """Mark the workspaces listed in *args to be never deleted."""
         for arg in args:
             self._protected.add(str(arg))
 
-    def _delete(self, ws):
-        """Delete the given workspace in ws if it is not protected, and
-        deletion is actually turned on.
+    def _delete(self, ws: str) -> None:
+        """Delete the given workspace in ws if it is not protected, and deletion is actually turned on.
+
+        Keyword arguments:
+        ws -- name of the workspace to be deleted
         """
-        if not self._doDelete:
+        if not self._do_delete:
             return
         try:
             ws = str(ws)
         except RuntimeError:
             return
         if ws not in self._protected and mtd.doesExist(ws):
-            DeleteWorkspace(Workspace=ws, EnableLogging=self._deleteAlgorithmLogging)
-
-
-class WSNameSource:
-    """A class to provide names for intermediate workspaces."""
-
-    def __init__(self, prefix, cleanupMode):
-        """Initialize an instance of the class."""
-        self._names = set()
-        self._prefix = '__' + prefix if cleanupMode == WSCleanup.ON else prefix
-
-    def withSuffix(self, suffix):
-        """Returns a workspace name with given suffix applied."""
-        return self._prefix + '_' + suffix + '_'
+            DeleteWorkspace(Workspace=ws, EnableLogging=self._delete_algorithm_logging)

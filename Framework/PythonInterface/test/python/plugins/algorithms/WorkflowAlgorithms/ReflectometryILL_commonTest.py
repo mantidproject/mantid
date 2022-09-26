@@ -21,12 +21,12 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         mtd.add('ws', ws)
         illhelpers.add_slit_configuration_D17(ws, 0.03, 0.02)
         run = ws.run()
-        instrName = common.instrumentName(ws)
-        slit2width = run.get(common.slitSizeLogEntry(instrName, 1))
-        slit3width = run.get(common.slitSizeLogEntry(instrName, 2))
-        common.slitSizes(ws)
-        self.assertEqual(slit2width.value, run.getProperty(common.SampleLogs.SLIT2WIDTH).value)
-        self.assertEqual(slit3width.value, run.getProperty(common.SampleLogs.SLIT3WIDTH).value)
+        instr_name = common.instrument_name(ws)
+        slit2_width = run.get(common.slit_size_log_entry(instr_name, 1))
+        slit3_width = run.get(common.slit_size_log_entry(instr_name, 2))
+        common.slit_sizes(ws)
+        self.assertEqual(slit2_width.value, run.getProperty(common.SampleLogs.SLIT2WIDTH).value)
+        self.assertEqual(slit3_width.value, run.getProperty(common.SampleLogs.SLIT3WIDTH).value)
         mtd.clear()
 
 

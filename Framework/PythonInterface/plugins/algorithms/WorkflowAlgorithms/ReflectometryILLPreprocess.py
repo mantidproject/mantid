@@ -511,7 +511,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         # the calculation below is reimplementation of the code in the LoadILLReflectometry that performs the same operation
         sign = -1.0 if self._instrumentName == 'D17' else 1.0
-        pixel_width = common.pixelSize(self._instrumentName)
+        pixel_width = common.pixel_size(self._instrumentName)
         offset_width = (127.5 - peak_centre) * pixel_width
         offset_angle = sign * atan(offset_width / distance)
         angle = offset_angle
@@ -605,7 +605,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _normaliseToSlits(self, ws):
         """Normalise ws to slit opening and update slit widths."""
         # Update slit width in any case for later re-use.
-        common.slitSizes(ws)
+        common.slit_sizes(ws)
         slitNorm = self.getProperty(Prop.SLIT_NORM).value
         if slitNorm == SlitNorm.OFF:
             return ws
@@ -742,7 +742,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self._instrumentName == 'FIGARO':
             # Figaro requires an extra correction to its position equal to difference between direct and reflected
             # lines and their instrument centre
-            pixel_width = common.pixelSize(self._instrumentName)
+            pixel_width = common.pixel_size(self._instrumentName)
             sample_det_distance = run.getLogData('L2').value
             peak_centre = 127.5  # centre of the instrument
             ref_down = run.getLogData('refdown').value
@@ -766,7 +766,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             DetectorComponentName='detector',
             LinePosition=line_position,  # specular line position
             TwoTheta=self._theta_zero,
-            PixelSize=common.pixelSize(self._instrumentName),
+            PixelSize=common.pixel_size(self._instrumentName),
             DetectorCorrectionType='RotateAroundSample',
             DetectorFacesSample=True,
             EnableLogging=self._subalgLogging

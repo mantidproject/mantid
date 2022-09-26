@@ -182,9 +182,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         reflectedForeground = self._foregroundIndices(ws)
         directWS = self.getProperty(Prop.DIRECT_WS).value
         directForeground = self._foregroundIndices(directWS)
-        instrumentName = common.instrumentName(ws)
-        pixelSize = common.pixelSize(instrumentName)
-        detResolution = common.detectorResolution()
+        instrumentName = common.instrument_name(ws)
+        pixelSize = common.pixel_size(instrumentName)
+        detResolution = common.detector_resolution()
         ReflectometryBeamStatistics(
             ReflectedBeamWorkspace=ws,
             ReflectedForeground=reflectedForeground,
@@ -343,8 +343,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         # fractional foreground centre
         linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
         l2 = ws.run().getProperty('L2').value
-        instr = common.instrumentName(ws)
-        pixelSize = common.pixelSize(instr)
+        instr = common.instrument_name(ws)
+        pixelSize = common.pixel_size(instr)
         # the distance between the fractional and integer foreground centres along the detector plane
         dist = pixelSize * (linePosition - beamPosIndex)
         if dist != 0.:
