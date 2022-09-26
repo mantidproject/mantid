@@ -14,5 +14,4 @@ New Features
 Bugfixes
 --------
 
-
 :ref:`Release 6.5.0 <v6.5.0>`
