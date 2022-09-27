@@ -139,11 +139,12 @@ class FitInteractiveTool(QObject):
         if should_redraw:
             self.canvas.draw()
 
-    def update_cursor(self, event):
+    def update_hover_cursor(self, event):
         """
-        Change cursor to horizontal arrows when hovering over peak marker components.
+        Change cursor to horizontal arrows when hovering over markers.
         :param event: A MPL mouse event.
         """
+        # when clicking and dragging, the marker class controls the cursor
         if event.button is not None:
             return
 
