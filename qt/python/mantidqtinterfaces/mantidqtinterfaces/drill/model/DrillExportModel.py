@@ -219,7 +219,7 @@ class DrillExportModel:
             return
 
         tasks = list()
-        for algo,active in self._exportAlgorithms.items():
+        for (algo, ext), active in self._exportAlgorithms.items():
             if not active:
                 continue
             if not self._validCriteria(outputWs, algo):
@@ -233,8 +233,7 @@ class DrillExportModel:
                     continue
 
                 filename = os.path.join(
-                        exportPath,
-                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
+                        exportPath, wsName + ext)
                 name = wsName + ":" + filename
                 if wsName not in self._exports:
                     self._exports[wsName] = set()
