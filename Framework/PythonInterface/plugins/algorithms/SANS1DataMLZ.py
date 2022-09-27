@@ -68,10 +68,6 @@ class FileSANS(DtClsSANS):
     pattern = re.compile(r'(%File\n)([^%]*)')
     _date_format = '%m/%d/%Y %I:%M:%S %p'
 
-    def __init__(self):
-        super().__init__()
-        self.type = '001'
-
     def run_start(self):
         return np.datetime64(datetime.strptime(self.info['FromDate'] + ' ' + self.info['FromTime'],
                                                self._date_format))
@@ -83,15 +79,6 @@ class FileSANS(DtClsSANS):
     def get_title(self):
         file_name = self.info['FileName'].split('.')
         return f"{file_name[0]}/{int(file_name[1])}"
-
-    def process_data(self, unprocessed):
-        super().process_data(unprocessed)
-        self.type = self.info['FileName'].split('.')[1]
-
-    def get_values_dict(self):
-        values = super().get_values_dict()
-        del values['type']
-        return values
 
 
 class SampleSANS(DtClsSANS):
@@ -189,49 +176,18 @@ class CountsSANS(DtClsSANS):
 
     def __init__(self):
         super().__init__()
-        self.data_type = '001'
         self.data = np.ndarray(shape=(128, 128), dtype=float)
 
     def process_data(self, unprocessed):
         try:
-            if self.data_type == '001':
-                self._process_001(unprocessed)
-            elif self.data_type == '002':
-                self._process_002(unprocessed)
+            self._process_001(unprocessed)
         except ValueError:
             raise FileNotFoundError("'Counts' section includes incorrect data")
-
-    def get_values_dict(self):
-        values = super().get_values_dict()
-        del values['data_type']
-        return values
 
     def _process_001(self, unprocessed):
         pattern = re.compile(r'\d+')
         matches = pattern.findall(unprocessed)
         self.data = np.array([count for count in matches], dtype=float).reshape(128, 128)
-
-    def _process_002(self, unprocessed):
-        pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
-        matches = pattern.findall(unprocessed)
-        self.data = np.array([count for count in matches], dtype=float).reshape(2048, 8)
-
-
-class ErrorsSANS(DtClsSANS):
-    section_name: str = 'Errors'
-    pattern = re.compile(r'(%Errors\n)([^%]*)')
-
-    def __init__(self):
-        super().__init__()
-        self.data = np.ndarray(shape=(2048, 8), dtype=float)
-
-    def process_data(self, unprocessed):
-        pattern = re.compile(r'[-+]?\d+\.\d*e[-+]\d*')
-        matches = pattern.findall(unprocessed)
-        try:
-            self.data = np.array([count for count in matches], dtype=float).reshape(2048, 8)
-        except ValueError:
-            raise FileNotFoundError("'Errors' section includes incorrect data")
 
 
 class SANSdata:
@@ -250,7 +206,6 @@ class SANSdata:
         self.history: HistorySANS = HistorySANS()
         self.comment: CommentSANS = CommentSANS()
         self.counts: CountsSANS = CountsSANS()
-        self.errors: ErrorsSANS = ErrorsSANS()
 
         self._subsequence = [self.file, self.sample, self.setup,
                              self.counter, self.history, self.counts]
@@ -293,13 +248,8 @@ class SANSdata:
         return data_x
 
     def data_e(self) -> np.ndarray:
-        if self.file.type == '002':
-            data_e = np.append([], self.errors.data)
-        elif self.file.type == '001':
-            data_e = np.array(np.sqrt(self.counts.data.reshape(-1)))
-            data_e = np.append(data_e, self.counter.get_monitors())
-        else:
-            raise FileNotFoundError('unsupported file type')
+        data_e = np.array(np.sqrt(self.counts.data.reshape(-1)))
+        data_e = np.append(data_e, self.counter.get_monitors())
         return data_e
 
     def beamcenter_x_y(self) -> tuple:
@@ -308,27 +258,14 @@ class SANSdata:
 
     def analyze_source(self, filename: str, comment: bool = False):
         """
-        read SANS-1 .001/002 raw files into the SANS-1 data object
+        read SANS-1 .001 raw files into the SANS-1 data object
         """
         with open(filename, 'r') as file_handler:
             unprocessed = file_handler.read()
-        file_type = filename.split(".")[-1]
-        self._preparations_regarding_file_type(file_type)
         self._initialize_info(unprocessed)
         if comment:
             self._find_comments(unprocessed)
         self._check_data()
-
-    def _preparations_regarding_file_type(self, file_type):
-        if file_type == "001":
-            pass
-        else:
-            if file_type != '002':
-                self.logs['warning'].append(f"File type is not as expected. "
-                                            f"Algorithm will try to process the file as with extension .002.")
-            self.counts.data_type = '002'
-            self._subsequence = [self.file, self.sample, self.setup,
-                                 self.history, self.counts, self.errors]
 
     def _initialize_info(self, unprocessed):
         """
@@ -375,15 +312,14 @@ class SANSdata:
             self.logs['warning'].append(f"Lambda (wavelength) is not specified in the datafile."
                                         f" Wavelength is set to user's input.")
 
-        if self.file.type == '001':
-            if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
-                self.logs['warning'].append(f"Sum of all counts is not specified in the datafile.")
+        if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
+            self.logs['warning'].append(f"Sum of all counts is not specified in the datafile.")
 
-            if (type(self.counter.duration) is str) or (self.counter.duration == 0.0):
-                self.logs['warning'].append(f"Duration of the measurement is not specified in the datafile.")
+        if (type(self.counter.duration) is str) or (self.counter.duration == 0.0):
+            self.logs['warning'].append(f"Duration of the measurement is not specified in the datafile.")
 
-            if (self.counter.monitor2 is None) or (self.counter.monitor2 == 0.0):
-                self.logs['warning'].append(f"Monitor2 is not specified in the datafile. Monitor2 is set to 'None'.")
+        if (self.counter.monitor2 is None) or (self.counter.monitor2 == 0.0):
+            self.logs['warning'].append(f"Monitor2 is not specified in the datafile. Monitor2 is set to 'None'.")
 
-            if (self.counter.monitor1 is None) or (self.counter.monitor1 == 0.0):
-                self.logs['notice'].append(f"Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")
+        if (self.counter.monitor1 is None) or (self.counter.monitor1 == 0.0):
+            self.logs['notice'].append(f"Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")

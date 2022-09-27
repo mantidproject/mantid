@@ -23,7 +23,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty("Filename", "",
-                                          FileAction.Load, ['.001', '.002']),
+                                          FileAction.Load, ['.001']),
                              "Name of SANS-1 experimental data file.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
@@ -47,8 +47,6 @@ class LoadSANS1MLZ(PythonAlgorithm):
             y_unit, y_label, x_unit = self.create_labels()
         except FileNotFoundError as error:
             raise RuntimeError(str(error))
-        except TypeError as error:
-            raise RuntimeError(str(error) + "\nincorrect 'Counts' data")
         else:
             self._log_data_analyzing(metadata)
             CreateWorkspace(OutputWorkspace=out_ws_name,
