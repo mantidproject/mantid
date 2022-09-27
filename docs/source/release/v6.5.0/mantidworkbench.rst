@@ -12,7 +12,7 @@ New Features
 
 Bugfixes
 --------
-- Scaling for waterfall plots has been fixed for scaling in log scale plots.
+- Log-scaling has been fixed in waterfall plots.
 - Opening multiple instances of Mantid in quick succession will no longer cause errors in the shared settings.
 - A large number of crashes, caused by opening an Algorithm Dialog and populating it with a :ref:`WorkspaceGroup <WorkspaceGroup>`, have been fixed.
 - It is no longer possible to crash mantid when opening an interface's help documentation for the second time.
