@@ -477,7 +477,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _finalize(self, ws: MatrixWorkspace) -> None:
         """Set OutputWorkspace to ws and clean up.
 
-        Keyword parameters:
+        Keyword arguments:
         ws -- workspace to be set as output of this algorithm
         """
         self.setProperty(Prop.OUTPUT_WS, ws)
@@ -487,7 +487,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _flat_bkg_ranges(self, ws: MatrixWorkspace) -> MatrixWorkspace:
         """Return spectrum number ranges for flat background fitting.
 
-        Keyword parameters:
+        Keyword arguments:
         ws -- workspace used to extract flat background ranges from
         """
         sign = self._workspace_index_direction(ws)
@@ -527,7 +527,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Performs simple gravity correction by replacing the wavelength X-axis and providing the corrected
         grazing angle, which is applied to data at a later stage. The algorithm below is reimplemented from COSMOS.
 
-        Keyword parameters:
+        Keyword arguments:
         ws -- reflected or direct beam workspace to be corrected for gravity
         """
         mm2m = 1e-3  # millimetre to metre conversion factor
@@ -766,7 +766,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         """Rotates the instrument of the provided workspace by the given angle around the sample, and then rotates
         the instrument around its own axis to maintain perpendicular orientation versus the incoming beam.
 
-        Keyword parameters:
+        Keyword arguments:
         ws -- workspace of which the instrument is going to be rotated
         peak_centre -- fitted peak centre in fractional tube number
         original_centre -- peak centre before the refitting
@@ -855,7 +855,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _water_calibration(self, ws: MatrixWorkspace) -> MatrixWorkspace:
         """Divide ws by a (water) reference workspace.
 
-        Keyword parameters:
+        Keyword arguments:
         ws -- workspace to be calibrated by water reference
         """
         if self.getProperty(Prop.WATER_REFERENCE).isDefault:
