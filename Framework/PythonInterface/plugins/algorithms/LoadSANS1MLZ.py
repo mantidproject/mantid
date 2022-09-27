@@ -146,6 +146,9 @@ class LoadSANS1MLZ(PythonAlgorithm):
         return logs
 
     def _set_wavelength(self, metadata):
+        """
+        check if a custom wavelength provided
+        """
         user_wavelength = float(self.getPropertyValue("Wavelength"))
         if not self.getProperty("Wavelength").isDefault:
             metadata.setup.wavelength = user_wavelength

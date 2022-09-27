@@ -18,6 +18,11 @@ class DtClsSANS:
         self.info = {}
 
     def process_data(self, unprocessed):
+        """
+        process data to better access
+        data saved to dictionary 'info' and
+        can be obtained by info['name']
+        """
         unprocessed = self._data_preparation(unprocessed)
         tmp_dict = {}
         for value in unprocessed:
@@ -45,6 +50,10 @@ class DtClsSANS:
             self._assign_value(att)
 
     def _assign_value(self, att: str, unique_name: str = None):
+        """
+        assign to class parameter
+        corresponding info['att']
+        """
         try:
             if unique_name:
                 setattr(self, unique_name, float(self.info[att]))
@@ -207,6 +216,7 @@ class SANSdata:
         self.comment: CommentSANS = CommentSANS()
         self.counts: CountsSANS = CountsSANS()
 
+        # main sections that should be in the datafile
         self._subsequence = [self.file, self.sample, self.setup,
                              self.counter, self.history, self.counts]
 
@@ -301,6 +311,10 @@ class SANSdata:
                 self.logs['notice'].append(f"{param} is not specified in the datafile. {param} set to 128.")
 
     def _check_data(self):
+        """
+        logging if there were any problems
+        during the data processing
+        """
         self._check_data_size()
         if (type(self.setup.collimation) is str) or (self.setup.collimation == 0.0):
             self.logs['warning'].append(f"Collimation is not specified in the datafile.")
