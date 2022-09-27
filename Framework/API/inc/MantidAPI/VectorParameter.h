@@ -112,12 +112,8 @@ bool VectorParameter<Derived, ElemType>::operator!=(const Derived &other) const 
 @param other : object to act as source of copy.
 */
 template <typename Derived, typename ElemType>
-VectorParameter<Derived, ElemType>::VectorParameter(const VectorParameter<Derived, ElemType> &other)
-    : m_size(other.m_size), m_isValid(other.m_isValid) {
-  m_arry = new ElemType[other.getSize()];
-  for (size_t i = 0; i < other.getSize(); i++) {
-    this->m_arry[i] = other.m_arry[i];
-  }
+VectorParameter<Derived, ElemType>::VectorParameter(const VectorParameter<Derived, ElemType> &other) {
+  *this = other;
 }
 
 template <typename Derived, typename ElemType>

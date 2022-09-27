@@ -24,16 +24,14 @@ GeometryHandler::GeometryHandler(const std::shared_ptr<CSGObject> &obj)
 GeometryHandler::GeometryHandler(CSGObject *obj)
     : m_triangulator(new detail::GeometryTriangulator(obj)), m_csgObj(obj) {}
 
-GeometryHandler::GeometryHandler(const MeshObject &obj)
-    : m_triangulator(new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
+GeometryHandler::GeometryHandler(const MeshObject &obj) { *this = obj; }
 
 GeometryHandler &GeometryHandler::operator=(const MeshObject &obj) {
   m_triangulator = std::make_unique<detail::GeometryTriangulator>(detail::makeRenderingMesh(obj));
   return *this;
 }
 
-GeometryHandler::GeometryHandler(const MeshObject2D &obj)
-    : m_triangulator(new detail::GeometryTriangulator(detail::makeRenderingMesh(obj))) {}
+GeometryHandler::GeometryHandler(const MeshObject2D &obj) { *this = obj; }
 
 GeometryHandler &GeometryHandler::operator=(const MeshObject2D &obj) {
   m_triangulator = std::make_unique<detail::GeometryTriangulator>(detail::makeRenderingMesh(obj));
@@ -52,16 +50,11 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
     m_shapeInfo = handler.m_shapeInfo;
 }
 
-GeometryHandler &GeometryHandler::operator=(const GeometryHandler &handler) {
-  if (handler.m_csgObj) {
-    m_csgObj = handler.m_csgObj;
-    if (handler.m_triangulator)
-      m_triangulator.reset(new detail::GeometryTriangulator(m_csgObj));
-  }
-  if (handler.m_objComp)
-    m_objComp = handler.m_objComp;
-  if (handler.m_shapeInfo)
-    m_shapeInfo = handler.m_shapeInfo;
+GeometryHandler &GeometryHandler::operator=(GeometryHandler handler) {
+  std::swap(this->m_csgObj, handler.m_csgObj);
+  std::swap(this->m_triangulator, handler.m_triangulator);
+  std::swap(this->m_objComp, handler.m_objComp);
+  std::swap(this->m_shapeInfo, handler.m_shapeInfo);
   return *this;
 }
 

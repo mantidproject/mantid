@@ -72,7 +72,7 @@ public:
   GeometryHandler(const MeshObject2D &obj);
   GeometryHandler &operator=(const MeshObject2D &obj);
   GeometryHandler(const GeometryHandler &handler);
-  GeometryHandler &operator=(const GeometryHandler &handler);
+  GeometryHandler &operator=(GeometryHandler handler);
   std::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
   void render() const;     ///< Render Object or ObjComponent

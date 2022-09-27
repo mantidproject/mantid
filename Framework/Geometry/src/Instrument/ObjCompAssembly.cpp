@@ -60,24 +60,14 @@ ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference) : 
 /** Copy constructor
  *  @param ass :: assembly to copy
  */
-ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
-    : ICompAssembly(ass), IObjComponent(ass), ObjComponent(ass), m_group(ass.m_group) {
-  // Need to do a deep copy
-  comp_it it;
-  for (it = m_group.begin(); it != m_group.end(); ++it) {
-    auto *c = dynamic_cast<ObjComponent *>((*it)->clone());
-    if (!c) {
-      throw Kernel::Exception::InstrumentDefinitionError(
-          "ObjCompAssembly cannot contain components of non-ObjComponent type");
-    }
-    *it = c;
-    // Move copied component object's parent from old to new ObjCompAssembly
-    (*it)->setParent(this);
-  }
+ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &assem)
+    : ICompAssembly(assem), IObjComponent(assem), ObjComponent(assem) {
+  *this = assem;
 }
 
 ObjCompAssembly &ObjCompAssembly::operator=(const ObjCompAssembly &assem) {
   m_group = assem.m_group;
+
   // Need to do a deep copy
   comp_it it;
   for (it = m_group.begin(); it != m_group.end(); ++it) {
@@ -90,6 +80,7 @@ ObjCompAssembly &ObjCompAssembly::operator=(const ObjCompAssembly &assem) {
     // Move copied component object's parent from old to new ObjCompAssembly
     (*it)->setParent(this);
   }
+
   return *this;
 }
 

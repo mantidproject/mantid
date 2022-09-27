@@ -114,7 +114,7 @@ AffineMatrixParameter *AffineMatrixParameter::clone() const {
 bool AffineMatrixParameter::isValid() const { return m_isValid; }
 
 //----------------------------------------------------------------------------------------------
-/** Assignemnt operator.
+/** Assignment operator.
  * @param other : another affine matrix to assign from.
  * @return ref to assigned object
  */

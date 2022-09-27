@@ -99,8 +99,9 @@ bool SingleValueParameter<Derived, ValType>::operator!=(const Derived &other) co
 @param other : ref to object to use as origin for the new instance.
 */
 template <typename Derived, typename ValType>
-SingleValueParameter<Derived, ValType>::SingleValueParameter(const SingleValueParameter<Derived, ValType> &other)
-    : m_value(other.m_value), m_isValid(other.m_isValid) {}
+SingleValueParameter<Derived, ValType>::SingleValueParameter(const SingleValueParameter<Derived, ValType> &other) {
+  *this = other;
+}
 
 template <typename Derived, typename ValType>
 SingleValueParameter<Derived, ValType> &

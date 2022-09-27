@@ -22,9 +22,7 @@ namespace Mantid::API {
 /** Copy constructor
  *
  * @param other :: other workspace to copy    */
-MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos &other) {
-  this->copyExperimentInfos(other);
-}
+MultipleExperimentInfos::MultipleExperimentInfos(const MultipleExperimentInfos &other) { *this = other; }
 
 MultipleExperimentInfos &MultipleExperimentInfos::operator=(const MultipleExperimentInfos &other) {
   this->copyExperimentInfos(other);
