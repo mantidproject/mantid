@@ -23,27 +23,6 @@ using namespace MantidQt::CustomInterfaces;
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-std::string checkInstrumentParametersMatch(const Instrument_const_sptr &sampleInstrument,
-                                           const Instrument_const_sptr &resolutionInstrument,
-                                           std::string const &parameter) {
-  if (!sampleInstrument->hasParameter(parameter))
-    return "Could not find the " + parameter + " for the sample workspace.";
-  if (!resolutionInstrument->hasParameter(parameter))
-    return "Could not find the " + parameter + " for the resolution workspaces.";
-  if (sampleInstrument->getStringParameter(parameter)[0] != resolutionInstrument->getStringParameter(parameter)[0])
-    return "The sample and resolution must have matching " + parameter + "s.";
-  return "";
-}
-
-void addErrorMessage(UserInputValidator &uiv, std::string const &message) {
-  if (!message.empty())
-    uiv.addErrorMessage(QString::fromStdString(message) + "\n");
-}
-
 /**
  * Calculate the number of bins in the sample & resolution workspaces
  * @param wsName The sample workspace name
