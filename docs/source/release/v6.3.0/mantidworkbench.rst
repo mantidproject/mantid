@@ -16,7 +16,6 @@ New and Improved
 - The instrument is now loaded in a background thread when opening the instrument viewer which prevents running scripts from hanging.
 - The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
 - The algorithm browser has been tidied to reduce the number of single algorithm categories.
-- Normalisation (by maximum value) is available in Superplot
 - Table workspaces can now have read-only columns added to them (`ws.addReadOnlyColumn(<TYPE>, <NAME>)`). Existing columns can also be set to be read-only (`ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)`).
 - Cells containing vector data in a table workspace can now be viewed in the table workspace display.
 
