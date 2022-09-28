@@ -90,8 +90,8 @@ pipeline {
             }
             post {
               always {
-                publish_test_reports()
                 archive_ctest_log()
+                publish_test_reports()
               }
             }
           }
