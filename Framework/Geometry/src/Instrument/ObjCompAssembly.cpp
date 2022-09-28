@@ -58,7 +58,7 @@ ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference) : 
 }
 
 /** Copy constructor
- *  @param ass :: assembly to copy
+ *  @param assem :: assembly to copy
  */
 ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &assem)
     : ICompAssembly(assem), IObjComponent(assem), ObjComponent(assem) {

@@ -200,9 +200,33 @@ public:
   }
 
   void testCopyConstructor() {
-    Component *parent = new Component("Parent", V3D(1, 1, 1));
+    auto parent = std::make_unique<Component>("Parent", V3D(1, 1, 1));
     // name and parent
-    CompAssembly q("Child", parent);
+    CompAssembly q("Child", parent.get());
+    q.setPos(V3D(5, 6, 7));
+    q.setRot(Quat(1, 1, 1, 1));
+    Component gc1("Grandchild1");
+    q.addCopy(&gc1);
+    Component *gc2 = new Component("Grandchild2");
+    q.add(gc2);
+    Component gc3("Grandchild3");
+    q.addCopy(&gc3);
+    TS_ASSERT_EQUALS(q.nelements(), 3);
+    CompAssembly copy(q);
+    TS_ASSERT_EQUALS(q.getName(), copy.getName());
+    TS_ASSERT_EQUALS(q.getParent()->getName(), copy.getParent()->getName());
+    TS_ASSERT_EQUALS(q.nelements(), copy.nelements());
+    TS_ASSERT_EQUALS(q[0]->getName(), copy[0]->getName());
+    TS_ASSERT_EQUALS(q[2]->getName(), copy[2]->getName());
+    TS_ASSERT_EQUALS(q.getRelativePos(), copy.getRelativePos());
+    TS_ASSERT_EQUALS(q.getPos(), copy.getPos());
+    TS_ASSERT_EQUALS(q.getRelativeRot(), copy.getRelativeRot());
+  }
+
+  void testCopyAssignmentOperator() {
+    auto parent = std::make_unique<Component>("Parent", V3D(1, 1, 1));
+    // name and parent
+    CompAssembly q("Child", parent.get());
     q.setPos(V3D(5, 6, 7));
     q.setRot(Quat(1, 1, 1, 1));
     Component gc1("Grandchild1");
@@ -221,7 +245,6 @@ public:
     TS_ASSERT_EQUALS(q.getRelativePos(), copy.getRelativePos());
     TS_ASSERT_EQUALS(q.getPos(), copy.getPos());
     TS_ASSERT_EQUALS(q.getRelativeRot(), copy.getRelativeRot());
-    delete parent;
   }
 
   void testClone() {
