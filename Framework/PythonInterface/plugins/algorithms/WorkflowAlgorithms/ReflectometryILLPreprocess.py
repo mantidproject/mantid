@@ -8,8 +8,8 @@ from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, I
                            IntArrayProperty, IntBoundedValidator, StringListValidator, PropertyCriterion)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty, MultipleFileProperty,
                         PropertyMode, WorkspaceUnitValidator)
-from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits, Divide, ExtractMonitors, Fit,
-                              Integration, LoadAndMerge, logger, Minus, MoveInstrumentComponent, mtd, Scale,
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits, CreateWorkspace, Divide, ExtractMonitors,
+                              Fit, Integration, LoadAndMerge, logger, Minus, MoveInstrumentComponent, mtd, Scale,
                               SpecularReflectionPositionCorrect, RebinToWorkspace, RotateInstrumentComponent, Transpose)
 import ReflectometryILL_common as common
 import ILL_utilities as utils
