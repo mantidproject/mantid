@@ -68,19 +68,13 @@ class LoadSANSMLZTest(unittest.TestCase):
     def test_LoadInvalidData001(self):
         """
         test: trying to process incorrect data file;
-        check is exceptions definition is correct
+        check is exception definition is correct
         """
         output_ws_name = "LoadSANS1MLZTest_Test3"
-        parameters = {
-            'counts 128': "'Counts' section includes incorrect data",
-            'counts pr': "'Counts' section includes incorrect data",
-            'section amount': "Failed to find 'File' section"
-        }
 
-        for param in parameters.keys():
-            self._create_incomplete_dataFile(self.filename_incomplete, param)
-            self.assertRaisesRegex(RuntimeError, parameters[param], LoadSANS1MLZ,
-                                   Filename=self.filename_incomplete, OutputWorkspace=output_ws_name)
+        self._create_incomplete_dataFile(self.filename_incomplete, 'section amount')
+        self.assertRaisesRegex(RuntimeError, "Failed to find 'File' section", LoadSANS1MLZ,
+                               Filename=self.filename_incomplete, OutputWorkspace=output_ws_name)
 
     def test_LoadValidData_noMonitors001(self):
         """
@@ -134,26 +128,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         creates an incomplete data file
         """
         prm = param.split(' ')
-        if prm[0] == 'counts':
-            with open(filename, "w") as f:
-                f.write("\n\n\n\n")
-                f.write("%File\n\n")
-                f.write("FileName=data.001\n")
-                f.write("%Sample\n\n")
-                f.write("%Setup\n\n")
-                f.write("%Counter\n\n")
-                f.write("%History\n\n")
-                f.write("%Comment\n\n")
-                f.write("%Counts\n\n")
-                if prm[1] == 'pr':
-                    s = ('1, ' * 127 + '1\n') * 50
-                    s = s + ('1, ' * 126 + '1\n')
-                    s = s + ('1, ' * 127 + '1\n') * 77
-                elif prm[1] == '128':
-                    s = ('1, ' * 127 + '1\n') * 127
-                f.write(s)
-
-        elif prm[0] == 'section':
+        if prm[0] == 'section':
             with open(filename, "w") as f:
                 f.write("\n\n\n\n")
                 if prm[1] == 'name':

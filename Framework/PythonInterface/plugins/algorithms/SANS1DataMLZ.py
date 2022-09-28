@@ -188,12 +188,6 @@ class CountsSANS(DtClsSANS):
         self.data = np.ndarray(shape=(128, 128), dtype=float)
 
     def process_data(self, unprocessed):
-        try:
-            self._process_001(unprocessed)
-        except ValueError:
-            raise FileNotFoundError("'Counts' section includes incorrect data")
-
-    def _process_001(self, unprocessed):
         pattern = re.compile(r'\d+')
         matches = pattern.findall(unprocessed)
         self.data = np.array([count for count in matches], dtype=float).reshape(128, 128)
@@ -285,7 +279,7 @@ class SANSdata:
             matches = section.pattern.finditer(unprocessed)
             match = next(matches, False)
             if not match:
-                raise FileNotFoundError(f"Failed to find '{section.section_name}' section")
+                raise RuntimeError(f"Failed to find '{section.section_name}' section")
             section.process_data(match.groups()[1])
 
     def _find_comments(self, unprocessed):

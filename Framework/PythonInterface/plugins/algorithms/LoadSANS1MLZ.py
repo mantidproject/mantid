@@ -40,40 +40,37 @@ class LoadSANS1MLZ(PythonAlgorithm):
         out_ws_name = self.getPropertyValue("OutputWorkspace")
         metadata = SANSdata()
 
-        try:
-            metadata.analyze_source(filename)
-            data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
-            logs = self.create_logs(metadata)
-            y_unit, y_label, x_unit = self.create_labels()
-        except FileNotFoundError as error:
-            raise RuntimeError(str(error))
-        else:
-            self._log_data_analyzing(metadata)
-            CreateWorkspace(OutputWorkspace=out_ws_name,
-                            DataX=data_x, DataY=data_y,
-                            DataE=data_e, NSpec=n_spec,
-                            UnitX=x_unit)
-            out_ws = AnalysisDataService.retrieve(out_ws_name)
-            out_ws.setYUnit(y_unit)
-            out_ws.setYUnitLabel(y_label)
+        metadata.analyze_source(filename)
+        data_x, data_y, data_e, n_spec = self.create_datasets(metadata)
+        logs = self.create_logs(metadata)
+        y_unit, y_label, x_unit = self.create_labels()
 
-            run = out_ws.mutableRun()
-            run.addProperty('run_title', metadata.file.get_title(), True)
-            run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
-                                   DateAndTime(metadata.file.run_end()))
+        self._log_data_analyzing(metadata)
+        CreateWorkspace(OutputWorkspace=out_ws_name,
+                        DataX=data_x, DataY=data_y,
+                        DataE=data_e, NSpec=n_spec,
+                        UnitX=x_unit)
+        out_ws = AnalysisDataService.retrieve(out_ws_name)
+        out_ws.setYUnit(y_unit)
+        out_ws.setYUnitLabel(y_label)
 
-            LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
-            MoveInstrumentComponent(Workspace=out_ws,
-                                    ComponentName="detector",
-                                    Z=str(metadata.setup.l2), RelativePosition=False)
+        run = out_ws.mutableRun()
+        run.addProperty('run_title', metadata.file.get_title(), True)
+        run.setStartAndEndTime(DateAndTime(metadata.file.run_start()),
+                               DateAndTime(metadata.file.run_end()))
 
-            AddSampleLogMultiple(out_ws,
-                                 LogNames=logs["names"],
-                                 LogValues=logs["values"],
-                                 LogUnits=logs["units"])
+        LoadInstrument(out_ws, InstrumentName='sans-1', RewriteSpectraMap=True)
+        MoveInstrumentComponent(Workspace=out_ws,
+                                ComponentName="detector",
+                                Z=str(metadata.setup.l2), RelativePosition=False)
 
-            self.setProperty("OutputWorkspace", out_ws)
-            DeleteWorkspace(out_ws)
+        AddSampleLogMultiple(out_ws,
+                             LogNames=logs["names"],
+                             LogValues=logs["values"],
+                             LogUnits=logs["units"])
+
+        self.setProperty("OutputWorkspace", out_ws)
+        DeleteWorkspace(out_ws)
 
     def create_datasets(self, metadata: SANSdata) -> tuple:
         """
