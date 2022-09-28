@@ -737,10 +737,10 @@ void LoadPSIMuonBin::readInTemperatureFileHeader(const std::string &contents) {
   std::string line = "";
   for (const auto charecter : contents) {
     if (charecter == '\n') {
-      if (!line.empty() && line[0] == '!' && lineNo > uselessLines) {
-        processHeaderLine(line);
-      } else if (line.empty() || line[0] != '!') {
+      if (line.empty() || line[0] != '!') {
         return;
+      } else if (lineNo > uselessLines) {
+        processHeaderLine(line);
       }
       ++lineNo;
       line = "";

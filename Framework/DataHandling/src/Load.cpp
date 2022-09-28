@@ -38,7 +38,7 @@ namespace {
  * @returns true if there is exactly one string, else false.
  */
 bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
-  return fileNames.size() == 1 ? fileNames[0u].size() == 1 : false;
+  return fileNames.size() == 1 && fileNames[0u].size() == 1;
 }
 
 /**
