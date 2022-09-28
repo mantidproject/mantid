@@ -61,11 +61,10 @@ ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference) : 
  *  @param ass :: assembly to copy
  */
 ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
-    : ICompAssembly(ass), IObjComponent(ass), ObjComponent(ass) {
-  group = ass.group;
+    : ICompAssembly(ass), IObjComponent(ass), ObjComponent(ass), m_group(ass.m_group) {
   // Need to do a deep copy
   comp_it it;
-  for (it = group.begin(); it != group.end(); ++it) {
+  for (it = m_group.begin(); it != m_group.end(); ++it) {
     auto *c = dynamic_cast<ObjComponent *>((*it)->clone());
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
@@ -82,10 +81,10 @@ ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
 ObjCompAssembly::~ObjCompAssembly() {
   // Iterate over pointers in group, deleting them
   // std::vector<IComponent*>::iterator it;
-  for (auto &component : group) {
+  for (auto &component : m_group) {
     delete component;
   }
-  group.clear();
+  m_group.clear();
 }
 
 /** Clone method
@@ -111,9 +110,9 @@ int ObjCompAssembly::add(IComponent *comp) {
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
     }
     comp->setParent(this);
-    group.emplace_back(c);
+    m_group.emplace_back(c);
   }
-  return static_cast<int>(group.size());
+  return static_cast<int>(m_group.size());
 }
 
 /** AddCopy method
@@ -136,9 +135,9 @@ int ObjCompAssembly::addCopy(IComponent *comp) {
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
     }
     newcomp->setParent(this);
-    group.emplace_back(c);
+    m_group.emplace_back(c);
   }
-  return static_cast<int>(group.size());
+  return static_cast<int>(m_group.size());
 }
 
 /** AddCopy method
@@ -163,9 +162,9 @@ int ObjCompAssembly::addCopy(IComponent *comp, const std::string &n) {
     }
     newcomp->setParent(this);
     newcomp->setName(n);
-    group.emplace_back(c);
+    m_group.emplace_back(c);
   }
-  return static_cast<int>(group.size());
+  return static_cast<int>(m_group.size());
 }
 
 /** Return the number of components in the assembly
@@ -179,7 +178,7 @@ int ObjCompAssembly::nelements() const {
     }
     return objCompAss->nelements();
   } else
-    return static_cast<int>(group.size());
+    return static_cast<int>(m_group.size());
 }
 
 /** Get a pointer to the ith component in the assembly. Note standard C/C++
@@ -204,7 +203,7 @@ std::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
     return ParComponentFactory::create(child_base->operator[](i), m_map);
   } else {
     // Unparamterized - return the normal one
-    return std::shared_ptr<IComponent>(group[i], NoDeleting());
+    return std::shared_ptr<IComponent>(m_group[i], NoDeleting());
   }
 }
 
@@ -356,7 +355,7 @@ size_t ObjCompAssembly::registerContents(Mantid::Geometry::ComponentVisitor &vis
  *  @return The shape of the outline: "cylinder", "box", ...
  */
 std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
-  if (group.empty()) {
+  if (m_group.empty()) {
     throw Kernel::Exception::InstrumentDefinitionError("Empty ObjCompAssembly");
   }
 
@@ -370,7 +369,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height, innerRadius;
-  std::shared_ptr<const IObject> obj = group.front()->shape();
+  std::shared_ptr<const IObject> obj = m_group.front()->shape();
   if (!obj) {
     throw Kernel::Exception::InstrumentDefinitionError("Found ObjComponent without shape");
   }
@@ -389,12 +388,12 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // find the 'moments of inertia' of the assembly
   double Ixx = 0, Iyy = 0, Izz = 0, Ixy = 0, Ixz = 0, Iyz = 0;
   V3D Cmass; // 'center of mass' of the assembly
-  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
+  for (const_comp_it it = m_group.begin(); it != m_group.end(); ++it) {
     V3D p = (**it).getRelativePos();
     Cmass += p;
   }
   Cmass /= nelements();
-  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
+  for (const_comp_it it = m_group.begin(); it != m_group.end(); ++it) {
     V3D p = (**it).getRelativePos();
     double x = p.X() - Cmass.X(), x2 = x * x;
     double y = p.Y() - Cmass.Y(), y2 = y * y;
@@ -456,7 +455,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // positive displacements are positive numbers and negative ones are negative
   double hxn = 0, hyn = 0, hzn = 0;
   double hxp = 0, hyp = 0, hzp = 0;
-  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
+  for (const_comp_it it = m_group.begin(); it != m_group.end(); ++it) {
     // displacement vector of a detector
     V3D p = (**it).getRelativePos() - Cmass;
     // its projection on the vx axis
@@ -493,7 +492,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // coordinates are correct
   bool firstAtBottom; // first detector is at the bottom of the outline shape
   // the bottom end is the one with the negative displacement from the centre
-  firstAtBottom = ((**group.begin()).getRelativePos() - Cmass).scalar_prod(vz) < 0;
+  firstAtBottom = ((**m_group.begin()).getRelativePos() - Cmass).scalar_prod(vz) < 0;
 
   // form the input string for the ShapeFactory
   std::ostringstream obj_str;

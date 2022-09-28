@@ -1,0 +1,2 @@
+- Fixed bug that caused opening of a second slice plot when changing the intensity while an interactive cut plot is open.
+- Fixed error occurring when closing interactive cut plot.

@@ -29,7 +29,7 @@ public:
   LogarithmScale() : m_base(M_E){};
   const std::string name() const override { return "LogarithmScale"; }
   void transform(std::vector<double> &gd) override;
-  void setBase(double &base);
+  void setBase(const double base);
   /// The scaling transformation. First and last elements of the grid remain
   /// unchanged
 

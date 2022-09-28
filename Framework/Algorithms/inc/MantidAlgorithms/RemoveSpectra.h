@@ -17,7 +17,7 @@ using namespace Mantid::Indexing;
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL RemoveSpectra : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveSpectra final : public API::Algorithm {
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveSpectra"; }
   /// Summary of algorithms purpose

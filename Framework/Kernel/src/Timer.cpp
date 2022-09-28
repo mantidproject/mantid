@@ -17,7 +17,7 @@ namespace Mantid::Kernel {
 /** Constructor.
  *  Instantiating the object starts the timer.
  */
-Timer::Timer() { m_start = std::chrono::high_resolution_clock::now(); }
+Timer::Timer() : m_start(std::chrono::high_resolution_clock::now()) {}
 
 /** Returns the wall-clock time elapsed in seconds since the Timer object's
  *creation, or the last call to elapsed

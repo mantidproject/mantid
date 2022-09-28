@@ -1,0 +1,45 @@
+digraph Beam {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+    BeamRadius
+    BeamCenter
+    DarkCurrentWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+    OutputFluxWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    FindCenterOfMassPosition
+    MoveInstrumentComponent
+    CalculateFlux
+  }
+
+  Runs -> LoadAndMerge
+  LoadAndMerge -> Divide
+  NormaliseBy -> Divide
+  Divide -> Minus
+  DarkCurrentWorkspace -> Minus
+  Minus -> FindCenterOfMassPosition
+  BeamRadius -> FindCenterOfMassPosition
+  FindCenterOfMassPosition -> BeamCenter
+  BeamCenter -> MoveInstrumentComponent
+  MoveInstrumentComponent -> OutputWorkspace
+  OutputWorkspace -> CalculateFlux
+  CalculateFlux -> OutputFluxWorkspace
+}

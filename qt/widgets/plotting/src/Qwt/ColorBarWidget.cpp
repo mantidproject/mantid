@@ -466,7 +466,5 @@ std::string ColorBarWidget::saveToProject() const {
   return tsv.outputLines();
 }
 
-ColorBarWidget::~ColorBarWidget() {}
-
 } // namespace MantidWidgets
 } // namespace MantidQt

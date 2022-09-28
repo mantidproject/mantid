@@ -16,6 +16,7 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
+from workbench.config import CONF
 from ..config import DEFAULT_SCRIPT_CONTENT
 from ..config.fonts import text_font
 from ..plugins.base import PluginWidget
@@ -28,6 +29,7 @@ ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
 # QSettings key for session tabs
 TAB_SETTINGS_KEY = "Editors/SessionTabs"
 ZOOM_LEVEL_KEY = "Editors/ZoomLevel"
+ENABLE_COMPLETION_KEY = "Editors/completion_enabled"
 
 
 class MultiFileEditor(PluginWidget):
@@ -40,10 +42,14 @@ class MultiFileEditor(PluginWidget):
         if not font:
             font = text_font()
 
+        completion_enabled = True
+        if CONF.has(ENABLE_COMPLETION_KEY):
+            completion_enabled = CONF.get(ENABLE_COMPLETION_KEY, type=bool)
+
         # layout
         self.editors = MultiPythonFileInterpreter(font=font,
                                                   default_content=DEFAULT_SCRIPT_CONTENT,
-                                                  parent=self)
+                                                  parent=self, completion_enabled=completion_enabled)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -112,12 +118,12 @@ class MultiFileEditor(PluginWidget):
 
     def readSettings(self, settings):
         try:
-            prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
-            zoom_level = settings.get(ZOOM_LEVEL_KEY)
-        except KeyError:
+            prev_session_tabs = settings.get(TAB_SETTINGS_KEY, type=list)
+            zoom_level = settings.get(ZOOM_LEVEL_KEY, type=int)
+        except (KeyError, TypeError):
             return
         self.restore_session_tabs(prev_session_tabs)
-        self.editors.current_editor().editor.zoomTo(int(zoom_level))
+        self.editors.current_editor().editor.zoomTo(zoom_level)
 
     def writeSettings(self, settings):
         settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)

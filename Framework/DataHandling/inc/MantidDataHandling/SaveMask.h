@@ -16,7 +16,7 @@ namespace DataHandling {
 
   @date 2011-11-09
 */
-class DLLExport SaveMask : public API::Algorithm {
+class DLLExport SaveMask final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMask"; };

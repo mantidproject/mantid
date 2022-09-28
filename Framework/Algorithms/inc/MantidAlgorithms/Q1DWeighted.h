@@ -52,7 +52,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL Q1DWeighted : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Q1DWeighted final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "Q1DWeighted"; }
@@ -95,7 +95,7 @@ private:
      * @param other the wedge to compare to
      * @return
      */
-    bool isSymmetric(Wedge &other) {
+    bool isSymmetric(const Wedge &other) {
       double diffAngle = std::fabs(std::fmod(this->angleMiddle - other.angleMiddle, M_PI));
 
       double epsilon = 1e-3;
@@ -113,7 +113,7 @@ private:
 
   void getTableShapes();
   void getViewportParams(const std::string &, std::map<std::string, std::vector<double>> &);
-  void getWedgeParams(std::vector<std::string> &, std::map<std::string, std::vector<double>> &);
+  void getWedgeParams(const std::vector<std::string> &, const std::map<std::string, std::vector<double>> &);
   bool checkIfSymetricalWedge(Wedge &Wedge);
   void checkIfSuperposedWedges();
 

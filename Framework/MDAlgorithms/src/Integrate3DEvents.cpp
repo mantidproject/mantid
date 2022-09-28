@@ -48,7 +48,7 @@ using Mantid::Kernel::V3D;
 Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list, Kernel::DblMatrix UBinv,
     double radius, const bool useOnePercentBackgroundCorrection)
-    : m_UBinv(std::move(UBinv)), m_radius(radius), maxOrder(0), crossterm(0),
+    : m_UBinv(std::move(UBinv)), m_radius(radius), maxOrder(0), crossterm(false),
       m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);
@@ -1145,7 +1145,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D QLabFrame, const std::vector<double> &r) {
+double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame, const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the trajectory as a vector

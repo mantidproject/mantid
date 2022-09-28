@@ -195,7 +195,7 @@ bool FABADAMinimizer::iterate(size_t /*iteration*/) {
   // Do one iteration of FABADA's algorithm for each parameter.
   for (size_t i = 0; i < m; i++) {
 
-    GSLVector newParameters = m_parameters;
+    EigenVector newParameters = m_parameters;
 
     if (!m_fitFunction->isFixed(i)) {
       // Calculate the step from a Gaussian
@@ -411,7 +411,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex, double &new
  * @param newParameters :: the value of the parameters after applying ties
  * @param newValue :: new value of the current parameter
  */
-void FABADAMinimizer::tieApplication(const size_t &parameterIndex, GSLVector &newParameters, double &newValue) {
+void FABADAMinimizer::tieApplication(const size_t &parameterIndex, EigenVector &newParameters, double &newValue) {
   // Fulfill the ties of the other parameters
   for (size_t j = 0; j < m_nParams; ++j) {
     if (j != parameterIndex) {
@@ -455,7 +455,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex, GSLVector &ne
  * @param newParameters :: new value of the fitting parameters
  */
 void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex, const double &chi2New,
-                                            GSLVector &newParameters) {
+                                            const EigenVector &newParameters) {
 
   // If new Chi square value is lower, jumping directly to new parameter
   if (chi2New < m_chi2) {
@@ -1066,9 +1066,9 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     // the chosen by the user and for all temperatures have the same
     // number of iterations
     m_leftRefrPoints = getProperty("NumRefrigerationSteps");
-    if (m_leftRefrPoints <= 0) {
+    if (m_leftRefrPoints == 0) {
       g_log.warning() << "Wrong value for the number of refrigeration"
-                         " points (<= 0). Therefore, default value (5 points) taken.\n";
+                         " points (== 0). Therefore, default value (5 points) taken.\n";
       m_leftRefrPoints = 5;
     }
 

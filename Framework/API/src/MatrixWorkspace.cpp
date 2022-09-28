@@ -115,10 +115,9 @@ MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
       m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other), m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit),
-      m_YUnitLabel(other.m_YUnitLabel), m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks),
-      m_indexInfoNeedsUpdate(false) {
-  m_indexInfo = std::make_unique<Indexing::IndexInfo>(other.indexInfo());
+    : IMDWorkspace(other), ExperimentInfo(other), m_indexInfo(std::make_unique<Indexing::IndexInfo>(other.indexInfo())),
+      m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit), m_YUnitLabel(other.m_YUnitLabel),
+      m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
@@ -129,7 +128,7 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
-MatrixWorkspace::~MatrixWorkspace() {}
+MatrixWorkspace::~MatrixWorkspace() = default;
 
 /** Returns a const reference to the IndexInfo object of the workspace.
  *
@@ -1237,6 +1236,13 @@ std::vector<size_t> MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIn
 void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins) {
   m_masks[workspaceIndex] = maskedBins;
 }
+
+/**
+ * Removes the mask from an index. Not thread safe.
+ *
+ * @param workspaceIndex workspace index to be unmasked
+ */
+void MatrixWorkspace::setUnmaskedBins(const size_t workspaceIndex) { m_masks.erase(workspaceIndex); }
 
 /** Sets the internal monitor workspace to the provided workspace.
  *  This method is intended for use by data-loading algorithms.

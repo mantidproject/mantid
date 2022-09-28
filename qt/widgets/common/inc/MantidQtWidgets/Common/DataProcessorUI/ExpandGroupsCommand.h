@@ -18,7 +18,7 @@ ExpandGroupsCommand defines the action "Expand All Groups"
 class ExpandGroupsCommand : public CommandBase {
 public:
   ExpandGroupsCommand(DataProcessorPresenter *tablePresenter) : CommandBase(tablePresenter) {}
-  virtual ~ExpandGroupsCommand() {}
+  virtual ~ExpandGroupsCommand() = default;
 
   void execute() override { m_presenter->notify(DataProcessorPresenter::ExpandAllGroupsFlag); };
   QString name() override { return QString("Expand All Groups"); }

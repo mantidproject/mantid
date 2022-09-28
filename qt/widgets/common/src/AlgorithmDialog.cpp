@@ -402,7 +402,7 @@ const QString &AlgorithmDialog::getOptionalMessage() const { return m_strMessage
  */
 void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay) {
   QLabel *inputMessage = new QLabel(this);
-  inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  inputMessage->setFrameStyle(static_cast<int>(QFrame::Panel) | static_cast<int>(QFrame::Sunken));
   QPalette pal = inputMessage->palette();
   pal.setColor(inputMessage->backgroundRole(), QColor(255, 255, 224)); // Light yellow
   pal.setColor(inputMessage->foregroundRole(), Qt::black);
@@ -712,7 +712,7 @@ void AlgorithmDialog::helpClicked() {
     version = m_algorithm->version();
 
   // bring up the help window
-  HelpWindow::showAlgorithm(this->nativeParentWidget(), m_algName, version);
+  HelpWindow::showAlgorithm(m_algName, version);
 }
 
 //-------------------------------------------------------------------------------------------------

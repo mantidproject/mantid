@@ -42,7 +42,7 @@ protected:
 
 public:
   Sphere();
-  Sphere(Kernel::V3D centre, double radius);
+  Sphere(const Kernel::V3D &centre, double radius);
   std::unique_ptr<Sphere> clone() const;
   /// Effective typename
   std::string className() const override { return "Sphere"; }

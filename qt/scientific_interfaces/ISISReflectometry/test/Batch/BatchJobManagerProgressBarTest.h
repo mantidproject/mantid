@@ -125,30 +125,30 @@ public:
   void testProgressForTwoRowGroupWithEverythingComplete() {
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
     jobManager.m_processAll = true;
-    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 0, 0)->setSuccess();
     getRow(jobManager, 0, 1)->setSuccess();
+    getGroup(jobManager, 0).setSuccess();
     TS_ASSERT_EQUALS(jobManager.percentComplete(), 100);
   }
 
   void testProgressForTwoGroupsWithOneGroupComplete() {
     auto jobManager = makeJobManager(twoGroupsWithTwoRowsModel());
     jobManager.m_processAll = true;
-    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 0, 0)->setSuccess();
     getRow(jobManager, 0, 1)->setSuccess();
+    getGroup(jobManager, 0).setSuccess();
     TS_ASSERT_EQUALS(jobManager.percentComplete(), 50);
   }
 
   void testProgressForTwoGroupsWithBothGroupsComplete() {
     auto jobManager = makeJobManager(twoGroupsWithTwoRowsModel());
     jobManager.m_processAll = true;
-    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 0, 0)->setSuccess();
     getRow(jobManager, 0, 1)->setSuccess();
-    getGroup(jobManager, 1).setSuccess();
+    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 1, 0)->setSuccess();
     getRow(jobManager, 1, 1)->setSuccess();
+    getGroup(jobManager, 1).setSuccess();
     TS_ASSERT_EQUALS(jobManager.percentComplete(), 100);
   }
 
@@ -259,18 +259,18 @@ public:
 
   void testProgressOfSelectionForTwoRowGroupWithEverythingComplete() {
     auto jobManager = makeJobManager(oneGroupWithTwoRowsModel());
-    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 0, 0)->setSuccess();
     getRow(jobManager, 0, 1)->setSuccess();
+    getGroup(jobManager, 0).setSuccess();
     selectGroup(jobManager, 0);
     TS_ASSERT_EQUALS(jobManager.percentComplete(), 100);
   }
 
   void testProgressOfSelectionForTwoGroupsWithOneGroupComplete() {
     auto jobManager = makeJobManager(twoGroupsWithTwoRowsModel());
-    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 0, 0)->setSuccess();
     getRow(jobManager, 0, 1)->setSuccess();
+    getGroup(jobManager, 0).setSuccess();
     selectGroup(jobManager, 0);
     selectGroup(jobManager, 1);
     TS_ASSERT_EQUALS(jobManager.percentComplete(), 50);
@@ -296,12 +296,12 @@ public:
 
   void testProgressOfSelectionForTwoGroupsWithBothGroupsComplete() {
     auto jobManager = makeJobManager(twoGroupsWithTwoRowsModel());
-    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 0, 0)->setSuccess();
     getRow(jobManager, 0, 1)->setSuccess();
-    getGroup(jobManager, 1).setSuccess();
+    getGroup(jobManager, 0).setSuccess();
     getRow(jobManager, 1, 0)->setSuccess();
     getRow(jobManager, 1, 1)->setSuccess();
+    getGroup(jobManager, 1).setSuccess();
     selectGroup(jobManager, 0);
     selectGroup(jobManager, 1);
     TS_ASSERT_EQUALS(jobManager.percentComplete(), 100);

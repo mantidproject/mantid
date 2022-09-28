@@ -19,6 +19,14 @@ public:
     TS_ASSERT_EQUALS(initialString.str(), Mantid::JsonHelpers::jsonToString(json))
   }
 
+  void testJsonToStringWithEscapedQuotes() {
+    // Check that escaped quotes inside json string values are preserved.
+    std::stringstream initialString("{\"string with quotes\":\"filename = \\\"file.txt\\\" \"}");
+    Json::Value json;
+    initialString >> json;
+    TS_ASSERT_EQUALS(initialString.str(), Mantid::JsonHelpers::jsonToString(json))
+  }
+
   void testStringToJson() {
     const std::string initialString = "{\"bar\":2,\"baz\":3.1400000000000001,\"foo\":1,\"hello world\":\"HelloWorld\"}";
     const Json::Value json = Mantid::JsonHelpers::stringToJson(initialString);

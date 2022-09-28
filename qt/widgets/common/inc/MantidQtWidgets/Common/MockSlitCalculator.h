@@ -13,7 +13,7 @@
 class MockSlitCalculator : public MantidQt::MantidWidgets::ISlitCalculator {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(setCurrentInstrumentName, void(std::string));
+  MOCK_METHOD1(setCurrentInstrumentName, void(const std::string &));
   MOCK_METHOD0(processInstrumentHasBeenChanged, void());
   MOCK_METHOD0(show, void());
   GNU_DIAG_ON_SUGGEST_OVERRIDE

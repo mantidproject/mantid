@@ -32,7 +32,7 @@ Required Properties:
 @author
 @date 11/07/2008
 */
-class MANTID_MUON_DLL MuonRemoveExpDecay : public API::Algorithm {
+class MANTID_MUON_DLL MuonRemoveExpDecay final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveExpDecay"; }

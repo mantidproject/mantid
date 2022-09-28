@@ -18,7 +18,7 @@ namespace MDAlgorithms {
 
 /** ConvertCWSDExpToMomentum : TODO: DESCRIPTION
  */
-class DLLExport ConvertCWSDExpToMomentum : public API::Algorithm {
+class DLLExport ConvertCWSDExpToMomentum final : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
 

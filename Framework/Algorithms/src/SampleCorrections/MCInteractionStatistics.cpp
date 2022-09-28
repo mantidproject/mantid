@@ -7,6 +7,8 @@
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/V3D.h"
+
+#include <algorithm>
 #include <iomanip>
 
 namespace Mantid {
@@ -69,13 +71,12 @@ void MCInteractionStatistics::UpdateScatterPointCounts(int componentIndex, bool 
  * @param toStart Vector from scatter point to point on beam profile where
  * @param scatteredDirec Vector from scatter point to detector
  */
-void MCInteractionStatistics::UpdateScatterAngleStats(V3D toStart, V3D scatteredDirec) {
+void MCInteractionStatistics::UpdateScatterAngleStats(const V3D &toStart, const V3D &scatteredDirec) {
   double scatterAngleDegrees = scatteredDirec.angle(-toStart) * 180. / M_PI;
   double delta = scatterAngleDegrees - m_scatterAngleMean;
   int totalScatterPoints = m_sampleScatterPoints.usedPointCount;
-  for (const auto &stat : m_envScatterPoints) {
-    totalScatterPoints += stat.usedPointCount;
-  }
+  std::for_each(m_envScatterPoints.cbegin(), m_envScatterPoints.cend(),
+                [&totalScatterPoints](const auto &stat) { totalScatterPoints += stat.usedPointCount; });
   m_scatterAngleMean += delta / totalScatterPoints;
   m_scatterAngleM2 += delta * (scatterAngleDegrees - m_scatterAngleMean);
   m_scatterAngleSD = sqrt(m_scatterAngleM2 / totalScatterPoints);

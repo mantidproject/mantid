@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** Segfault : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL Segfault : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Segfault final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

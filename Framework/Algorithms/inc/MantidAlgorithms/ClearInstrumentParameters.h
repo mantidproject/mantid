@@ -18,7 +18,7 @@ namespace Algorithms {
   @author Harry Jeffery, ISIS, RAL
   @date 30/7/2014
 */
-class MANTID_ALGORITHMS_DLL ClearInstrumentParameters : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ClearInstrumentParameters final : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;

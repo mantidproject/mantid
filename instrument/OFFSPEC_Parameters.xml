@@ -50,9 +50,13 @@
 
   <parameter name="TransRunEndOverlap"> 
     <value val="12.0"/>
-    
   </parameter>
-  <parameter name="ProcessingInstructions" type="string"> 
+
+  <parameter name="TransmissionScaleRHS">
+    <value val="0"/>
+  </parameter>
+
+  <parameter name="ProcessingInstructions" type="string">
     <value val="390-415"/>
   </parameter>
   

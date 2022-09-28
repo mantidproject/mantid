@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections
 from mantid.api import mtd
+from mantid.simpleapi import SetSample, DirectILLReduction
 import numpy
 import numpy.testing
 from testhelpers import assert_almost_equal, illhelpers, run_algorithm
@@ -60,6 +61,72 @@ class DirectILLReductionTest(unittest.TestCase):
         }
         run_algorithm('DirectILLReduction', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
+
+    def testAbsoluteUnits(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
+        geometry = {
+            'Shape': 'HollowCylinder',
+            'Height': 4.0,
+            'InnerRadius': 1.9,
+            'OuterRadius': 2.0,
+            'Center': [0.0, 0.0, 0.0]}
+        material = {
+            'ChemicalFormula': 'Cd S',
+            'SampleNumberDensity': 0.01}
+        SetSample(self._TEST_WS_NAME, geometry, material)
+        vgeometry = {
+            'Shape': 'HollowCylinder',
+            'Height': 4.0,
+            'InnerRadius': 1.9,
+            'OuterRadius': 2.0,
+            'Center': [0.0, 0.0, 0.0]}
+        vmaterial = {
+            'ChemicalFormula': 'V',
+            'SampleNumberDensity': 0.1}
+        SetSample(self._VANADIUM_WS_NAME, vgeometry, vmaterial)
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'SubalgorithmLogging': 'Logging ON',
+            'AbsoluteUnitsNormalisation': 'Absolute Units ON',
+            'IntegratedVanadiumWorkspace': self._VANADIUM_WS_NAME,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLReduction', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+
+    def testAbsoluteUnitsNoSampleMaterial(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': 'outWS',
+            'SubalgorithmLogging': 'Logging ON',
+            'AbsoluteUnitsNormalisation': 'Absolute Units ON',
+            'IntegratedVanadiumWorkspace': self._VANADIUM_WS_NAME
+        }
+        self.assertRaises(RuntimeError,DirectILLReduction,**algProperties)
+
+    def testAbsoluteUnitsNoVanadiumMaterial(self):
+        _add_natural_angle_step_parameter(self._TEST_WS_NAME)
+        geometry = {
+            'Shape': 'HollowCylinder',
+            'Height': 4.0,
+            'InnerRadius': 1.9,
+            'OuterRadius': 2.0,
+            'Center': [0.0, 0.0, 0.0]}
+        material = {
+            'ChemicalFormula': 'Cd S',
+            'SampleNumberDensity': 0.01}
+        SetSample(self._TEST_WS_NAME, geometry, material)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': 'outWS',
+            'SubalgorithmLogging': 'Logging ON',
+            'AbsoluteUnitsNormalisation': 'Absolute Units ON',
+            'IntegratedVanadiumWorkspace': self._VANADIUM_WS_NAME
+        }
+        self.assertRaises(RuntimeError,DirectILLReduction,**algProperties)
 
     def testDetectorGrouping(self):
         ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)

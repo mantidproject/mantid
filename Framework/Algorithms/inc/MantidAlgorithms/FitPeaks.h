@@ -62,7 +62,7 @@ private:
 };
 } // namespace FitPeaksAlgorithm
 
-class MANTID_ALGORITHMS_DLL FitPeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FitPeaks final : public API::Algorithm {
 public:
   FitPeaks();
 

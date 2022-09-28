@@ -37,8 +37,8 @@ namespace Mantid {
 namespace Kernel {
 
 template <class _CharT, class _Traits> class __save_flags {
-  typedef std::basic_ios<_CharT, _Traits> __stream_type;
-  typedef typename __stream_type::fmtflags fmtflags;
+  using __stream_type = std::basic_ios<_CharT, _Traits>;
+  using fmtflags = typename __stream_type::fmtflags;
 
   __stream_type &__stream_;
   fmtflags __fmtflags_;
@@ -61,14 +61,14 @@ public:
 template <class _RealType = double> class DLLExport normal_distribution {
 public:
   // types
-  typedef _RealType result_type;
+  using result_type = _RealType;
 
   class DLLExport param_type {
     result_type __mean_;
     result_type __stddev_;
 
   public:
-    typedef normal_distribution distribution_type;
+    using distribution_type = normal_distribution;
 
     INLINE_VISIBILITY
     explicit param_type(result_type __mean = 0, result_type __stddev = 1) : __mean_(__mean), __stddev_(__stddev) {}
@@ -178,9 +178,9 @@ std::basic_ostream<_CharT, _Traits> &operator<<(std::basic_ostream<_CharT, _Trai
 template <class _CharT, class _Traits, class _RT>
 std::basic_istream<_CharT, _Traits> &operator>>(std::basic_istream<_CharT, _Traits> &__is,
                                                 normal_distribution<_RT> &__x) {
-  typedef normal_distribution<_RT> _Eng;
-  typedef typename _Eng::result_type result_type;
-  typedef typename _Eng::param_type param_type;
+  using _Eng = normal_distribution<_RT>;
+  using result_type = typename _Eng::result_type;
+  using param_type = typename _Eng::param_type;
   __save_flags<_CharT, _Traits> __lx(__is);
   __is.flags(std::ios_base::dec | std::ios_base::skipws);
   result_type __mean;

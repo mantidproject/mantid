@@ -85,6 +85,7 @@ private slots:
   void glOptionChanged(bool /*on*/);
   void showMenuToolTip(QAction * /*action*/);
   void setUCorrection();
+  void toggleTooltip(bool /*activate*/);
   void toggleLayerDisplay(bool on);
   void setVisibleLayer(int layer);
 
@@ -133,6 +134,7 @@ private: // members
   QAction *m_lighting;
   QAction *m_GLView; ///< toggle between OpenGL and simple view
   QAction *m_UCorrection;
+  QAction *m_tooltipInfo;
   QActionGroup *m_precisionActionGroup;
   QList<QAction *> m_precisionActions;
 

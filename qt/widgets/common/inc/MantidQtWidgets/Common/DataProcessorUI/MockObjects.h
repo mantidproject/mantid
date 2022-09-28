@@ -39,7 +39,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockDataProcessorView : public DataProcessorView {
 public:
   MockDataProcessorView() {}
-  ~MockDataProcessorView() override {}
+  ~MockDataProcessorView() override = default;
 
   // Prompt
   MOCK_METHOD0(requestNotebookPath, QString());
@@ -107,7 +107,7 @@ class MockMainPresenter : public DataProcessorMainPresenter {
 
 public:
   MockMainPresenter() {}
-  ~MockMainPresenter() override {}
+  ~MockMainPresenter() override = default;
 
   // Notify
   MOCK_METHOD1(notifyADSChanged, void(const QSet<QString> &));
@@ -143,7 +143,7 @@ class MockDataProcessorPresenter : public DataProcessorPresenter {
 
 public:
   MockDataProcessorPresenter(){};
-  ~MockDataProcessorPresenter() override {}
+  ~MockDataProcessorPresenter() override = default;
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(QString const &name));

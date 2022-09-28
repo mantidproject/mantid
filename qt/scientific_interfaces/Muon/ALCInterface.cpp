@@ -25,6 +25,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 
+#include <algorithm>
+
 using namespace Mantid::API;
 
 namespace {
@@ -226,14 +228,8 @@ void ALCInterface::exportResults() {
     results["Peaks_FitResults"] = peaksResults->clone();
 
   // Check if any of the above is not empty
-  bool nothingToExport = true;
-  for (auto &result : results) {
-
-    if (result.second) {
-      nothingToExport = false;
-      break;
-    }
-  }
+  bool nothingToExport =
+      std::none_of(results.cbegin(), results.cend(), [](const auto &result) { return result.second; });
 
   // There is something to export
   if (!nothingToExport) {

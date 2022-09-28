@@ -36,7 +36,7 @@ public:
   void resetState();
   void resetSkippedItems();
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
-  std::vector<Group> selectedGroups() const;
+  std::vector<const Group *> selectedGroups() const;
   std::vector<Row> selectedRows() const;
 
 private:

@@ -42,7 +42,7 @@ Required Properties:
 @author
 @date 11/07/2008
 */
-class MANTID_MUON_DLL PlotAsymmetryByLogValue : public API::Algorithm {
+class MANTID_MUON_DLL PlotAsymmetryByLogValue final : public API::Algorithm {
 public:
   /// Default constructor
   PlotAsymmetryByLogValue();

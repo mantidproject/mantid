@@ -117,7 +117,7 @@ public:
 
   explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = true);
+                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = false);
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -193,6 +193,9 @@ public:
   void waitForThread() const;
   /// Whether the window has been fully initialized
   bool isFinished() const;
+
+  /// Whether the side tab is currently visible or is folded
+  bool isTabFolded() const;
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -298,6 +301,7 @@ protected:
 
   // GUI elements
   QLabel *mInteractionInfo;
+
   QTabWidget *mControlsTab;
   /// Control tabs
   QList<InstrumentWidgetTab *> m_tabs;

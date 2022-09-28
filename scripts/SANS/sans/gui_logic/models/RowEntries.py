@@ -4,41 +4,65 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
+from mantid.py36compat import dataclass
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.models.RowOptionsModel import RowOptionsModel
 from mantid.kernel import Logger
 
 
+@dataclass(eq=False)
 class _UserEntries(object):
     """
     POD type for the row entries found on the main GUI
     """
+
     def __init__(self):
-        self.can_direct = None
-        self.can_scatter = None
-        self.can_transmission = None
+        self.can_direct: int = None
+        self.can_scatter: int = None
+        self.can_transmission: int = None
 
-        self.sample_direct = None
-        self.sample_scatter = None
-        self.sample_transmission = None
+        self.sample_direct: int = None
+        self.sample_scatter: int = None
+        self.sample_transmission: int = None
 
-        self.output_name = None
-        self.user_file = None
+        self.output_name: str = None
+        self.user_file: str = None
 
-        self.sample_height = None
-        self._sample_shape = None
-        self.sample_thickness = None
-        self.sample_width = None
+        self.sample_height: float = None
+        self._sample_shape: SampleShape = None
+        self.sample_thickness: float = None
+        self.sample_width: float = None
 
-        self.can_direct_period = None
-        self.can_scatter_period = None
-        self.can_transmission_period = None
+        self.can_direct_period: str = None
+        self.can_scatter_period: str = None
+        self.can_transmission_period: str = None
 
-        self.sample_direct_period = None
-        self.sample_scatter_period = None
-        self.sample_transmission_period = None
+        self.sample_direct_period: str = None
+        self.sample_scatter_period: str = None
+        self.sample_transmission_period: str = None
+
+    def __eq__(self, other):
+        # Running with Python 3.6 does not automatically generate the __annotations__
+        # member, causing dataclass to skip our fields. Instead we can manually do this
+        # for the moment
+        if isinstance(other, _UserEntries):
+            return (self.can_direct, self.can_scatter, self.can_transmission,
+                    self.sample_direct, self.sample_scatter, self.sample_transmission,
+                    self.output_name, self.user_file,
+                    self.sample_height, self._sample_shape, self.sample_thickness, self.sample_width,
+                    self.can_direct_period, self.can_scatter_period, self.can_transmission_period,
+                    self.sample_direct, self.sample_scatter_period, self.sample_transmission_period) == \
+                   (other.can_direct, other.can_scatter, other.can_transmission,
+                    other.sample_direct, other.sample_scatter, other.sample_transmission,
+                    other.output_name, other.user_file,
+                    other.sample_height, other._sample_shape, other.sample_thickness, other.sample_width,
+                    other.can_direct_period, other.can_scatter_period, other.can_transmission_period,
+                    other.sample_direct, other.sample_scatter_period, other.sample_transmission_period)
+
+    def __hash__(self):
+        # We want to store "duplicate" hashable types
+        return id(self)
 
 
 class RowEntries(_UserEntries):
@@ -58,6 +82,14 @@ class RowEntries(_UserEntries):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    def __eq__(self, other):
+        if isinstance(other, RowEntries):
+            return (self.tool_tip, self.state) == (other.tool_tip, other.state) \
+                   and super().__eq__(other)
+
+    def __hash__(self):
+        return id(self)
+
     @property
     def file_information(self):
         # TODO this should be removed from row entries - it's an internal state not a GUI one
@@ -71,7 +103,7 @@ class RowEntries(_UserEntries):
     @options.setter
     def options(self, value):
         assert isinstance(value, RowOptionsModel), \
-            "Expected a RowOptionsModel, got %r" %value
+            "Expected a RowOptionsModel, got %r" % value
         self._options = value
 
     @property

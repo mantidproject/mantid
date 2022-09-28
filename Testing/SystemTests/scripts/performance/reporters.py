@@ -41,14 +41,14 @@ class TextResultReporter(ResultReporter):
         Print the results to standard out
         '''
         nstars = 30
-        print '*' * nstars
+        print('*' * nstars)
         for (name, val) in result.data.items():
             str_val = str(val)
             str_val = str_val.replace("\n", " ")
             if len(str_val) > 50:
                 str_val = str_val[:50] + " . . . "
-            print '    ' + name.ljust(15) + '->  ', str_val
-        print '*' * nstars
+            print('    ' + name.ljust(15) + '->  ', str_val)
+        print('*' * nstars)
 
 
 #########################################################################

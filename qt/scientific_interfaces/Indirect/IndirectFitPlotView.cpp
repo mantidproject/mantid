@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotView.h"
 
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/numeric/conversion/cast.hpp>
@@ -13,9 +14,6 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <limits>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtIcons/Icon.h"
 
 namespace {
 
@@ -26,8 +24,6 @@ QHash<QString, QVariant> tightLayoutKwargs() {
 }
 
 } // namespace
-
-#endif
 
 namespace MantidQt::CustomInterfaces::IDA {
 
@@ -63,12 +59,8 @@ void IndirectFitPlotView::createSplitterWithPlots() {
 }
 
 void IndirectFitPlotView::createSplitter() {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   auto const dragIcon = Icons::getIcon("mdi.dots-horizontal");
   m_splitter = std::make_unique<Splitter>(dragIcon);
-#else
-  m_splitter = std::make_unique<QSplitter>();
-#endif
   m_splitter->setOrientation(Qt::Vertical);
   m_splitter->setStyleSheet("QSplitter::handle { background-color: transparent; }");
 }
@@ -91,10 +83,8 @@ PreviewPlot *IndirectFitPlotView::createPlot(PreviewPlot *plot, QSize const &min
   plot->setProperty("showLegend", QVariant(true));
   plot->setProperty("canvasColour", QVariant(QColor(255, 255, 255)));
 
-  // Avoids squished plots for >qt5
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  // Avoids squished plots
   plot->setTightLayout(tightLayoutKwargs());
-#endif
 
   return plot;
 }
@@ -290,9 +280,7 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
   backRangeSelector->setUpperBound(10.0);
 
   connect(backRangeSelector, SIGNAL(valueChanged(double)), this, SIGNAL(backgroundChanged(double)));
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   connect(backRangeSelector, SIGNAL(resetScientificBounds()), this, SLOT(setBackgroundBounds()));
-#endif
 }
 
 void IndirectFitPlotView::setBackgroundBounds() {

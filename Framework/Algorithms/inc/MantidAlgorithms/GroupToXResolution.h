@@ -15,7 +15,7 @@ namespace Algorithms {
 /** GroupToXResolution : Groups points within intervals defined by Dx into a
  * single point.
  */
-class MANTID_ALGORITHMS_DLL GroupToXResolution : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GroupToXResolution final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

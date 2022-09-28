@@ -9,7 +9,7 @@
 from matplotlib.collections import PolyCollection
 
 from mantid.plots import datafunctions
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
+from mantid.plots.utility import convert_color_to_hex
 from mantidqt.widgets.waterfallplotfillareadialog.view import WaterfallPlotFillAreaDialogView
 
 

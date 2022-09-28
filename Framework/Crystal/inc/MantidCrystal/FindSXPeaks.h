@@ -35,7 +35,7 @@ using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
   @author L C Chapon, ISIS, Rutherford Appleton Laboratory
   @date 11/08/2009
 */
-class MANTID_CRYSTAL_DLL FindSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindSXPeaks final : public API::Algorithm {
 public:
   /// Default constructor
   FindSXPeaks();

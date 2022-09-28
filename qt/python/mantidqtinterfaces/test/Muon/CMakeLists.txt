@@ -34,6 +34,8 @@ set(TEST_PY_FILES
     elemental_analysis/PeriodicTableModel_test.py
     elemental_analysis/PeriodicTablePresenter_test.py
     elemental_analysis_2/elemental_analysis_context_test.py
+    elemental_analysis_2/elemental_analysis_data_context_test.py
+    elemental_analysis_2/elemental_analysis_eagroup_context_test.py
     elemental_analysis_2/elemental_analysis_main_GUI_test.py
     elemental_analysis_2/EA_loading_tab/elemental_analysis_loadutils_test.py
     elemental_analysis_2/EA_loading_tab/elemental_analysis_load_model_test.py
@@ -49,6 +51,7 @@ set(TEST_PY_FILES
     elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
     elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
     external_plotting_model_test.py
+    feature_flags/add_fitting_test.py
     feature_flags/add_grouping_workspaces_test.py
     feature_flags/add_model_analysis_test.py
     feature_flags/add_raw_plots_test.py

@@ -9,10 +9,15 @@
 Description
 -----------
 
-Takes an input workspace and alters the binning so that all it's spectra
-match that of the **first spectrum** of the second workspace. This
-algorithm simply builds a parameter list that is passed to the
-:ref:`algm-Rebin` algorithm, which actually does the work.
+If the two input workspaces have the same number of histograms, each histogram
+in WorkspaceToRebin is rebinned so that its bin edges match the histogram with
+the same workspace index in WorkspaceToMatch.
+
+If the two input workspaces have different numbers of histograms, each histogram
+in WorkspaceToRebin is rebinned to match the first histogram in WorkspaceToMatch.
+
+The algorithm uses the same code as the :ref:`algm-Rebin` algorithm, to actually
+do the work.
 
 .. categories::
 

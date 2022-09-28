@@ -20,7 +20,7 @@ class LoadElementalAnalysisRunTest(unittest.TestCase):
         alg.setProperty('GroupWorkspace', '1')
         errors = alg.validateInputs()
         self.assertTrue("Run" in errors)
-        self.assertEquals(len(errors), 1)
+        self.assertEqual(len(errors), 1)
         self.assertFalse(AnalysisDataService.doesExist("1"))
 
 

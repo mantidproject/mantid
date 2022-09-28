@@ -17,6 +17,6 @@ IndirectToolsTab::IndirectToolsTab(QWidget *parent) : IndirectTab(parent) {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectToolsTab::~IndirectToolsTab() {}
+IndirectToolsTab::~IndirectToolsTab() = default;
 
 } // namespace MantidQt::CustomInterfaces

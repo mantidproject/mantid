@@ -31,7 +31,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 09/04/2009
 */
-class MANTID_ALGORITHMS_DLL Qxy : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Qxy final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "Qxy"; }

@@ -20,7 +20,7 @@
 #include "boost/shared_ptr.hpp"
 namespace Mantid {
 namespace MDAlgorithms {
-class DLLExport CompactMD : public API::Algorithm {
+class DLLExport CompactMD final : public API::Algorithm {
 public:
   void init() override;
   void exec() override;

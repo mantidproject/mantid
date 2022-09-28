@@ -27,7 +27,7 @@ namespace Algorithms {
  @author Stuart Campbell, ORNL
  @date 10/12/2010
  */
-class MANTID_ALGORITHMS_DLL ConvertToMatrixWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertToMatrixWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertToMatrixWorkspace"; }

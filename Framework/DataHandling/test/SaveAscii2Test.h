@@ -42,7 +42,7 @@ public:
     m_filename_nohead = "SaveAsciiTest2FileWithoutHeader.dat";
     m_name = "SaveAscii2WS";
   }
-  ~SaveAscii2Test() override {}
+  ~SaveAscii2Test() override = default;
 
   void testExec() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave;

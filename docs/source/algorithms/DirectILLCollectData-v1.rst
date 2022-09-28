@@ -97,7 +97,7 @@ Some optional input and output workspaces come in pairs. If the input workspace 
 
 * *IncidentEnergyWorkspace* --- *OutputIncidentEnergyWorkspace*: single-valued workspace containing calibrated incident energy, used for incident energy calibration.
 * *FlatBkgWorkspace* --- *OutputFlatBkgWorkspace*: a MatrixWorkspace containing the flat backgrounds. Used for flat background subtraction. Note that *FlatBkgScaling* is not applied to *OutputFlatBkgWorkspace*.
-* *ElasticChannelWorkspace* --- *OutputElasticChannelWorkspace*: a single-valued workspace containing the index of the nominal elastic channel. Used for the TOF axis adjustment.
+* *ElasticChannelWorkspace* --- *OutputElasticChannelWorkspace*: a single-valued workspace containing the index of the nominal elastic channel (can be a floating-point number). Used for the TOF axis adjustment.
 
 Raw output workspace
 ^^^^^^^^^^^^^^^^^^^^
@@ -109,17 +109,17 @@ ILL's instrument specific defaults
 
 The following settings are used when the :literal:`AUTO` keyword is encountered:
 
-+---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
-| Property                  | IN4                     | IN5                    | IN6                     | PANTHER                | Others                  |
-+===========================+=========================+========================+=========================+========================+=========================+
-| EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Calculate EPP          | Fit EPP                 |
-+---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
-| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Fit Elastic Channel    | Default Elastic Channel |
-+---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
-| IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   |
-+---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
-| FlatBkg                   | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             |
-+---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+--------------------------
+| Property                  | IN4                     | IN5                    | IN6                     | PANTHER                | SHARP                   | Others                  |
++===========================+=========================+========================+=========================+========================+=========================+=========================+
+| EPPCreationMethod         | Fit EPP                 | Calculate EPP          | Fit EPP                 | Calculate EPP          | Fit EPP                 | Fit EPP                 |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| ElasticChannel            | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Fit Elastic Channel    | Fit Elastic Channel     | Default Elastic Channel |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| IncidentEnergyCalibration | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration OFF | Energy Calibration ON   | Energy Calibration ON   |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+-------------------------+
+| FlatBkg                   | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             | Flat Bkg OFF           | Flat Bkg ON             | Flat Bkg ON             |
++---------------------------+-------------------------+------------------------+-------------------------+------------------------+-------------------------+-------------------------+
 
 Usage
 -----
@@ -161,7 +161,7 @@ Output:
 
     Number of histograms in 'raw': 397, and in 'preprocessed': 396
     Wavelength from sample logs: 3.06A
-    'raw' wavelength at channel 150: 1.63A (incorrect!)
+    'raw' wavelength at channel 150: 1.64A (incorrect!)
     'preprocessed' wavelength at channel 150: 3.04A
 
 .. categories::

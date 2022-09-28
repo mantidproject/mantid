@@ -16,7 +16,7 @@ namespace Algorithms {
   algorithm of Jerry Mayers.
   See https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 */
-class MANTID_ALGORITHMS_DLL MayersSampleCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrection final : public API::Algorithm {
 public:
   MayersSampleCorrection();
 

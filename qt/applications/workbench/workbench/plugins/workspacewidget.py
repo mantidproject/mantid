@@ -19,7 +19,7 @@ from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow

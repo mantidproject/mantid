@@ -83,6 +83,8 @@ public:
   void disableQResolutionCheckBox() override;
   void enableSeparatorButtonGroup() override;
   void disableSeparatorButtonGroup() override;
+  void enableSaveIndividualRowsCheckbox() override;
+  void disableSaveIndividualRowsCheckbox() override;
 
   void error(const std::string &title, const std::string &prompt);
   void warning(const std::string &title, const std::string &prompt);
@@ -108,6 +110,7 @@ public slots:
 
   void onSavePathChanged();
   void onAutosaveChanged(int state);
+  void onSaveIndividualRowsChanged(int state);
 
 private slots:
   void onSettingsChanged();

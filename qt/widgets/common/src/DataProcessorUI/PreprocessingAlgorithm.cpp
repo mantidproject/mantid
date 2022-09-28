@@ -61,7 +61,6 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name, const QStrin
 PreprocessingAlgorithm::PreprocessingAlgorithm() : m_prefix(), m_separator(), m_lhs(), m_rhs(), m_outProperty() {}
 
 // Destructor
-PreprocessingAlgorithm::~PreprocessingAlgorithm() {}
 
 // Returns the name of the lhs input property
 QString PreprocessingAlgorithm::lhsProperty() const { return m_lhs; }

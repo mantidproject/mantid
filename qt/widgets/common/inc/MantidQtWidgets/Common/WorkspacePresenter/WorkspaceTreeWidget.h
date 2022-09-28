@@ -102,7 +102,7 @@ public:
   void showWorkspaceData() override;
   void saveToProgram() override;
   void showInstrumentView() override;
-  void plotSpectrum(std::string type) override;
+  void plotSpectrum(const std::string &type) override;
   void showColourFillPlot() override;
   void showDetectorsTable() override;
   void showBoxDataTable() override;

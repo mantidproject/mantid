@@ -719,7 +719,7 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Open each file when there are multiple
     std::ofstream fileStream;
@@ -738,9 +738,9 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
       throw std::runtime_error("Failed to close the file at " + m_outFileNames[fileIndex] +
                                " - this file may be empty, corrupted or incorrect.");
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 void SaveGSS::writeRALFHeader(std::stringstream &out, int bank, const HistogramData::Histogram &histo) const {

@@ -83,8 +83,8 @@
        <widget class="QPushButton" name="pbSettings">
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
@@ -102,8 +102,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
@@ -124,8 +124,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>40</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">

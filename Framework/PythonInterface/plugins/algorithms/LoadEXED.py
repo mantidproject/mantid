@@ -85,7 +85,7 @@ class LoadEXED(PythonAlgorithm):
         # nbins=int(parms_dict['NTC'])
         xdata = np.array(det_tbc)
         xdata_mon = np.linspace(xdata[0], xdata[-1], len(xdata))
-        ydata = data.astype(np.float)
+        ydata = data.astype(float)
         ydata = ydata.reshape(nrows, -1)
         edata = np.sqrt(ydata)
         # CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,

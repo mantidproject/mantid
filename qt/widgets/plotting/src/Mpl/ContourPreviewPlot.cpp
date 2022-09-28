@@ -80,7 +80,7 @@ void ContourPreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotif
  * @param nf A pointer to the notification object
  */
 void ContourPreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
-  if (auto oldWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
       if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWorkspace)) {
         m_canvas->draw();
@@ -104,7 +104,6 @@ void ContourPreviewPlot::setWorkspace(const MatrixWorkspace_sptr &workspace) {
     auto axes = m_canvas->gca<MantidAxes>();
     axes.pcolormesh(workspace);
 
-    axes.relim();
     m_canvas->draw();
   } else {
     g_log.warning("Cannot plot a null workspace.");

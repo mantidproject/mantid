@@ -75,8 +75,6 @@ class DrillExportModelTest(unittest.TestCase):
     def test_init(self):
         self.assertDictEqual(self.exportModel._exportAlgorithms,
                              self.EXPORT_ALGORITHMS["a1"])
-        self.mTasksPool.signals.taskError.connect.assert_called_once()
-        self.mTasksPool.signals.taskSuccess.connect.assert_called_once()
         self.assertEqual(self.exportModel._exports, {})
         self.assertEqual(self.exportModel._successExports, {})
 
@@ -120,13 +118,13 @@ class DrillExportModelTest(unittest.TestCase):
         self.exportModel._logSuccessExport = mock.Mock()
         self.exportModel._exports = {"workspace1": {"filename1", "filename2"},
                                      "workspace2": {"filename3"}}
-        self.exportModel._onTaskSuccess("workspace1:filename1")
+        self.exportModel._onTaskSuccess("workspace1", "filename1")
         self.assertDictEqual(self.exportModel._successExports,
                              {"workspace1": {"filename1"}})
         self.assertDictEqual(self.exportModel._exports,
                              {"workspace1": {"filename2"},
                               "workspace2": {"filename3"}})
-        self.exportModel._onTaskSuccess("workspace1:filename2")
+        self.exportModel._onTaskSuccess("workspace1", "filename2")
         self.assertDictEqual(self.exportModel._successExports,
                              {"workspace1": {"filename1", "filename2"}})
         self.assertDictEqual(self.exportModel._exports,
@@ -137,7 +135,8 @@ class DrillExportModelTest(unittest.TestCase):
         self.exportModel._logSuccessExport = mock.Mock()
         self.exportModel._exports = {"workspace1": {"filename1", "filename2"},
                                      "workspace2": {"filename3"}}
-        self.exportModel._onTaskError("workspace2:filename3", "error message")
+        self.exportModel._onTaskError("workspace2", "filename3",
+                                      "error message")
         self.mLogger.error.assert_called()
         self.assertDictEqual(self.exportModel._exports,
                              {"workspace1": {"filename1", "filename2"}})

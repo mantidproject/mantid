@@ -143,7 +143,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         # Get the properties for the child algorithm, apart from a list of known
         # exclusions
         child_alg = create_algorithm('ReflectometryISISLoadAndProcess')
-        excluded = ['InputRunList', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
+        excluded = ['InputRunList', 'ROIDetectorIDs', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
                     'OutputWorkspaceFirstTransmission', 'OutputWorkspaceSecondTransmission',
                     'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
         child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
@@ -154,10 +154,14 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             assert False, "The following child properties are not implemented in the parent algorithm:\n" \
             + str(child_props.difference(actual_props))
 
-    def test_instrument_was_set_on_input_and_output_workspace(self):
+    def test_instrument_was_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), self._instrument_name)
         self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
+
+    def test_instrument_was_not_set_on_input_workspace(self):
+        workspace = self._run_algorithm_with_defaults()
+        # The input workspace should be unchanged
+        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), "")
 
     def test_sample_log_values_were_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()

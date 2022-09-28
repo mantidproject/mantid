@@ -28,7 +28,7 @@ To see the Instrument View
 Different projections
 =====================
 
-There are two ways to display the instrument geometry: the 3D view and
+There are two ways to display the instrument geometry: the Full 3D view and
 an "unwrapped" view. An "unwrapped" view shows a projection of the
 instrument onto a surface (a cylinder or a sphere) unfolded onto the
 screen. Use this drop-down menu to select the type of the projection
@@ -68,7 +68,7 @@ Rotate the instrument by left-clicking and dragging.
 
 Pan the view by right-clicking and dragging.
 
-Zoom in and out by rotating the wheel or holding down the middle button
+Zoom in and out by scrolling or holding down the middle button
 and dragging up and down.
 
 Zooming in 2D

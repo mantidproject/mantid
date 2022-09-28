@@ -33,7 +33,7 @@ namespace DataHandling {
 
   @date 2011-11-17
 */
-class DLLExport LoadDetectorsGroupingFile : public API::Algorithm {
+class DLLExport LoadDetectorsGroupingFile final : public API::Algorithm {
 public:
   ///
   const std::string name() const override { return "LoadDetectorsGroupingFile"; };

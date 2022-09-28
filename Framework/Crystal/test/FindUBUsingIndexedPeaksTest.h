@@ -253,8 +253,8 @@ public:
     V3D current_err = latt.getVecErr(0);
 
     for (size_t i = 0; i < 3; i++) {
-      TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-5);
-      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-5);
+      TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-4);
+      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-4);
     }
 
     // Now with CommonUBForAll=True, should have same mod vectors but larger errors
@@ -270,8 +270,8 @@ public:
     current_err = latt.getVecErr(0);
 
     for (size_t i = 0; i < 3; i++) {
-      TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-5);
-      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-5);
+      TS_ASSERT_DELTA(correct_vec[i], current_vec[i], 1e-4);
+      TS_ASSERT_DELTA(correct_err[i], current_err[i], 1e-4);
     }
 
     // Remove workspace from the data service.

@@ -16,7 +16,7 @@ namespace MDAlgorithms {
 
 /** Save a MDEventWorkspace to a .nxs file.
  */
-class DLLExport ChangeQConvention : public API::Algorithm {
+class DLLExport ChangeQConvention final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeQConvention"; };

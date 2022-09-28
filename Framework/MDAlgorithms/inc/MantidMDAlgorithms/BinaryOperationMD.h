@@ -38,6 +38,7 @@ public:
   }
 
 protected:
+  ~BinaryOperationMD() = default;
   /// Is the operation commutative?
   virtual bool commutative() const = 0;
 

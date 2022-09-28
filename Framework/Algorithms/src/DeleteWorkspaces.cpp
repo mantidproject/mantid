@@ -38,8 +38,9 @@ void DeleteWorkspaces::exec() {
       auto deleteAlg = createChildAlgorithm("DeleteWorkspace", -1, -1, false);
       deleteAlg->initialize();
       deleteAlg->setPropertyValue("Workspace", wsName);
-      bool success = deleteAlg->execute();
-      if (!deleteAlg->isExecuted() || !success) {
+      auto success = deleteAlg->execute();
+      auto executed = deleteAlg->isExecuted();
+      if (!executed || !success) {
         g_log.error() << "Failed to delete " << wsName << ".\n";
       }
     }

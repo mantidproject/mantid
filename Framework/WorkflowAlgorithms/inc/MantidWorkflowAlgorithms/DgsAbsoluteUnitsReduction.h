@@ -17,7 +17,7 @@ namespace WorkflowAlgorithms {
 
 @date 2012-11-10
  */
-class DLLExport DgsAbsoluteUnitsReduction : public API::Algorithm {
+class DLLExport DgsAbsoluteUnitsReduction final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

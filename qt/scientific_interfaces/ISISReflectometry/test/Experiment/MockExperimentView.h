@@ -92,13 +92,12 @@ public:
   MOCK_METHOD1(setFloodWorkspace, void(std::string const &));
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD1(setStitchOptions, void(std::string const &));
-  MOCK_METHOD2(showOptionLoadErrors, void(std::vector<InstrumentParameterTypeMissmatch> const &,
-                                          std::vector<MissingInstrumentParameterValue> const &));
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(addLookupRow, void());
   MOCK_METHOD1(removeLookupRow, void(int));
   MOCK_METHOD1(showLookupRowsNotUnique, void(double));
+  MOCK_METHOD3(setTooltip, void(int, int, std::string const &));
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -41,7 +41,7 @@ private:
 
 /** ProcessBackground : Process background obtained from LeBailFit
  */
-class MANTID_CURVEFITTING_DLL ProcessBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL ProcessBackground final : public API::Algorithm {
 public:
   ProcessBackground();
 

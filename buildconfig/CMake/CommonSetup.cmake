@@ -16,69 +16,69 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
   endif()
 endif()
 
-find_package(CxxTest)
-if(CXXTEST_FOUND)
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
-  make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
-  message(STATUS "Added target ('check') for unit tests")
-else()
-  message(STATUS "Could NOT find CxxTest - unit testing not available")
-endif()
-
-# Avoid the linker failing by including GTest before marking all libs as shared and before we set our warning flags in
-# GNUSetup
-include(GoogleTest)
-include(PyUnitTest)
-enable_testing()
-
-# build f2py fortran routines
-if(ENABLE_F2PY_ROUTINES)
-  include(f2pylibraries)
-endif()
-
-# We want shared libraries everywhere
-set(BUILD_SHARED_LIBS On)
-
-# This allows us to group targets logically in Visual Studio
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Look for stdint and add define if found
-include(CheckIncludeFiles)
-check_include_files(stdint.h stdint)
-if(stdint)
-  add_definitions(-DHAVE_STDINT_H)
-endif(stdint)
-
-# Configure a variable to hold the required test timeout value for all tests
-set(TESTING_TIMEOUT
-    300
-    CACHE STRING "Timeout in seconds for each test (default 300=5minutes)"
-)
-
 option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
 option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
 option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
 
-# ######################################################################################################################
-# Look for dependencies Do NOT add include_directories commands here. They will affect every target.
-# ######################################################################################################################
-set(BOOST_VERSION_REQUIRED 1.65.0)
-set(Boost_NO_BOOST_CMAKE TRUE)
-# Unless specified see if the boost169 package is installed
-if(EXISTS /usr/lib64/boost169 AND NOT (BOOST_LIBRARYDIR OR BOOST_INCLUDEDIR))
-  message(STATUS "Using boost169 package in /usr/lib64/boost169")
-  set(BOOST_INCLUDEDIR /usr/include/boost169)
-  set(BOOST_LIBRARYDIR /usr/lib64/boost169)
-endif()
-find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED COMPONENTS date_time regex serialization filesystem system)
-add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
-# Need this defined globally for our log time values
-add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
-# Silence issues with deprecated allocator methods in boost regex
-add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
+message(STATUS "Added target ('check') for unit tests")
+
+# Configure a variable to hold the required test timeout value for all tests
+set(TESTING_TIMEOUT
+    1200
+    CACHE STRING "Timeout in seconds for each test (default 1200=20minutes)"
+)
 
 # if we are building the framework or mantidqt we need these
 if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
+  find_package(CxxTest)
+  if(NOT CXXTEST_FOUND)
+    message(STATUS "Could NOT find CxxTest - unit testing not available")
+  endif()
+
+  # Avoid the linker failing by including GTest before marking all libs as shared and before we set our warning flags in
+  # GNUSetup
+  include(GoogleTest)
+  include(PyUnitTest)
+  enable_testing()
+
+  # build f2py fortran routines
+  if(ENABLE_F2PY_ROUTINES)
+    include(f2pylibraries)
+  endif()
+
+  # We want shared libraries everywhere
+  set(BUILD_SHARED_LIBS On)
+
+  # This allows us to group targets logically in Visual Studio
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+  # Look for stdint and add define if found
+  include(CheckIncludeFiles)
+  check_include_files(stdint.h stdint)
+  if(stdint)
+    add_definitions(-DHAVE_STDINT_H)
+  endif(stdint)
+
+  # ####################################################################################################################
+  # Look for dependencies Do NOT add include_directories commands here. They will affect every target.
+  # ####################################################################################################################
+  set(BOOST_VERSION_REQUIRED 1.65.0)
+  set(Boost_NO_BOOST_CMAKE TRUE)
+  # Unless specified see if the boost169 package is installed
+  if(EXISTS /usr/lib64/boost169 AND NOT (BOOST_LIBRARYDIR OR BOOST_INCLUDEDIR))
+    message(STATUS "Using boost169 package in /usr/lib64/boost169")
+    set(BOOST_INCLUDEDIR /usr/include/boost169)
+    set(BOOST_LIBRARYDIR /usr/lib64/boost169)
+  endif()
+  find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED COMPONENTS date_time regex serialization filesystem system)
+  add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+  # Need this defined globally for our log time values
+  add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
+  # Silence issues with deprecated allocator methods in boost regex
+  add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
+
   find_package(Poco 1.4.6 REQUIRED)
   add_definitions(-DPOCO_ENABLE_CPP11)
   find_package(TBB REQUIRED)
@@ -124,6 +124,11 @@ if(BUILD_MANTIDFRAMEWORK)
       REQUIRED
     )
   endif()
+endif()
+
+if(ENABLE_WORKBENCH)
+  include(PyUnitTest)
+  enable_testing()
 endif()
 
 find_package(Doxygen) # optional
@@ -254,11 +259,11 @@ endif()
 
 mark_as_advanced(MtdVersion_WC_LAST_CHANGED_DATE MtdVersion_WC_LAST_CHANGED_DATETIME)
 
-if(NOT NOT_GIT_REPO) # i.e This is a git repository!
-                     # #################################################################################################
-                     # Create the file containing the patch version number for use by cpack The patch number make have
-                     # been overridden by VersionNumber so create the file used by cpack here
-                     # #################################################################################################
+if(NOT NOT_GIT_REPO AND NOT CONDA_BUILD) # i.e This is a git repository!
+  # ####################################################################################################################
+  # Create the file containing the patch version number for use by cpack The patch number make have been overridden by
+  # VersionNumber so create the file used by cpack here
+  # ####################################################################################################################
   configure_file(
     ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake.in
     ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake
@@ -410,8 +415,6 @@ if(ENABLE_PRECOMMIT)
       )
     endif()
   endif()
-else()
-  message(AUTHOR_WARNING "Pre-commit not enabled by CMake, please enable manually.")
 endif()
 
 # ######################################################################################################################

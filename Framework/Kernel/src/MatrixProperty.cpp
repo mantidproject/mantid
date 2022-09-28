@@ -32,7 +32,7 @@ template <typename TYPE>
 MatrixProperty<TYPE>::MatrixProperty(const MatrixProperty &rhs) : PropertyWithValue<HeldType>(rhs) {}
 
 /// Destructor
-template <typename TYPE> MatrixProperty<TYPE>::~MatrixProperty() {}
+template <typename TYPE> MatrixProperty<TYPE>::~MatrixProperty() = default;
 
 ///@cond
 // Symbol definitions

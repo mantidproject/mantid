@@ -137,14 +137,14 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     // Copy all the Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const auto index = static_cast<size_t>(i);
       outputWS->setSharedY(index, inputWS->sharedY(index));
       outputWS->setSharedE(index, inputWS->sharedE(index));
       prog.report();
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   // Do the specified spectra only
@@ -160,7 +160,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
 
     if (spectra[i] > static_cast<int>(numSpectra)) {
@@ -188,9 +188,9 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->mutableE(specNum) /= normConst;
     norm[i] = normConst;
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (extraData) {
     unnormWS->setYUnit("Asymmetry");
     setProperty("OutputUnNormWorkspace", unnormWS);

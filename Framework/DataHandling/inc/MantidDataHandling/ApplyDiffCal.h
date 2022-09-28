@@ -17,7 +17,7 @@ namespace DataHandling {
 
 /** ApplyDiffCal :
  */
-class DLLExport ApplyDiffCal : public API::Algorithm {
+class DLLExport ApplyDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

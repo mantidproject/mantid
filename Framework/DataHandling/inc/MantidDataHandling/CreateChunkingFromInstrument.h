@@ -15,7 +15,7 @@ namespace DataHandling {
 
 /** CreateChunkingFromInstrument : TODO: DESCRIPTION
  */
-class DLLExport CreateChunkingFromInstrument : public API::Algorithm {
+class DLLExport CreateChunkingFromInstrument final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

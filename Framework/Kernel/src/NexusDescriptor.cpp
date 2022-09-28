@@ -128,7 +128,7 @@ NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
   }
 }
 
-NexusDescriptor::~NexusDescriptor() {}
+NexusDescriptor::~NexusDescriptor() = default;
 
 /// Returns the name & type of the first entry in the file
 const std::pair<std::string, std::string> &NexusDescriptor::firstEntryNameType() const { return m_firstEntryNameType; }

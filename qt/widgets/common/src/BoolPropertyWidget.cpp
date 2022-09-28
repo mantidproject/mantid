@@ -33,7 +33,7 @@ BoolPropertyWidget::BoolPropertyWidget(Mantid::Kernel::PropertyWithValue<bool> *
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-BoolPropertyWidget::~BoolPropertyWidget() {}
+BoolPropertyWidget::~BoolPropertyWidget() = default;
 
 //----------------------------------------------------------------------------------------------
 /** @return the value of the property, as typed in the GUI, as a string */

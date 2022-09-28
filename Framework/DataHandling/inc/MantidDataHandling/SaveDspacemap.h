@@ -18,7 +18,7 @@ namespace DataHandling {
  * @author Janik Zikovsky (code from Vickie Lynch)
  * @date 2011-05-12
  */
-class DLLExport SaveDspacemap : public API::Algorithm {
+class DLLExport SaveDspacemap final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveDspacemap"; };

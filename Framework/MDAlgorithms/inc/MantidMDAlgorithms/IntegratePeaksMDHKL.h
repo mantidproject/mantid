@@ -22,7 +22,7 @@ namespace MDAlgorithms {
  * @author Vickie Lynch
  * @date 2016-06-23
  */
-class DLLExport IntegratePeaksMDHKL : public API::Algorithm {
+class DLLExport IntegratePeaksMDHKL final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMDHKL"; };

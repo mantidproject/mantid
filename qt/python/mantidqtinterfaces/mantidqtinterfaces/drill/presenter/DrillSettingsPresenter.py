@@ -44,6 +44,7 @@ class DrillSettingsPresenter:
             self._dialog.setSettingValue(name, value)
         self._dialog.valueChanged.connect(self.onValueChanged)
         self._dialog.rejected.connect(self.onRejected)
+        self._dialog.applied.connect(self.onApplied)
         self._dialog.show()
 
     def onValueChanged(self, parameterName):
@@ -74,4 +75,15 @@ class DrillSettingsPresenter:
         """
         for name in self._initialValues:
             value = self._initialValues[name]
+            try:
+                self._parameters[name].checked.disconnect()
+            except:
+                pass
             self._parameters[name].setValue(value)
+
+    def onApplied(self):
+        """
+        Triggered when the apply button is pressed. This removes the initial
+        values kept in memory.
+        """
+        self._initialValues = dict()

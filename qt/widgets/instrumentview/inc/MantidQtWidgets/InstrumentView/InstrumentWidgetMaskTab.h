@@ -138,6 +138,8 @@ protected:
   QColor getShapeFillColor() const;
   /// Add a double property to the shape property browser
   QtProperty *addDoubleProperty(const QString &name) const;
+  /// Show a modal message box
+  virtual void showMessageBox(const QString &message);
 
 private:
   /// Save masks applied to the view but not to the workspace

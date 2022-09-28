@@ -23,7 +23,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-08-16
 */
-class DLLExport MergeMDFiles : public API::Algorithm {
+class DLLExport MergeMDFiles final : public API::Algorithm {
 public:
   MergeMDFiles();
   ~MergeMDFiles() override;

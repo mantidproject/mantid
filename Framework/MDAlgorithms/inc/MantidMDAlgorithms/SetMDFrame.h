@@ -17,7 +17,7 @@ namespace MDAlgorithms {
     dimension of MDWorkspaes.The algorithm should primarily be used to
     introduce the correct MDFrame type to workspaces based on legacy files.
 */
-class MANTID_MDALGORITHMS_DLL SetMDFrame : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL SetMDFrame final : public API::Algorithm {
 public:
   static const std::string mdFrameSpecifier;
 

@@ -34,9 +34,7 @@ using namespace API;
 SeqDomainSpectrumCreator::SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
                                                    const std::string &workspacePropertyName)
     : IDomainCreator(manager, std::vector<std::string>(1, workspacePropertyName), SeqDomainSpectrumCreator::Sequential),
-      m_matrixWorkspace() {
-  m_workspacePropertyName = m_workspacePropertyNames.front();
-}
+      m_workspacePropertyName(m_workspacePropertyNames.front()), m_matrixWorkspace() {}
 
 /**
  * Creates a sequential domain corresponding to the assigned MatrixWorkspace

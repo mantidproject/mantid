@@ -40,8 +40,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>530</width>
-         <height>592</height>
+         <width>547</width>
+         <height>663</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -834,8 +834,8 @@
        <widget class="QPushButton" name="pbSettings">
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>6567567</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
@@ -856,8 +856,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>6567567</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
@@ -892,9 +892,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::FileFinderWidget</class>
+   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
+   <header>IndirectPlotOptionsView.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
@@ -902,10 +903,9 @@
    <header>IndirectInstrumentConfig.h</header>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>IndirectPlotOptionsView.h</header>
-   <container>1</container>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

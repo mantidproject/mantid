@@ -107,8 +107,8 @@ protected:
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
   void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &bounds,
-                        const boost::optional<QPair<double, double>> &range = boost::none);
+                        const QPair<double, double> &range,
+                        const boost::optional<QPair<double, double>> &bounds = boost::none);
   /// Sets the min of the range selector if it is less than the max
   void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);

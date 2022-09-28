@@ -15,7 +15,7 @@ namespace Reflectometry {
 /** FindReflectometryLines2 : Finds fractional workspace index
   corresponding to reflected or direct line in a line detector workspace.
 */
-class MANTID_REFLECTOMETRY_DLL FindReflectometryLines2 : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL FindReflectometryLines2 final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

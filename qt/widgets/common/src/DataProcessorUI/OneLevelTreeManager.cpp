@@ -61,7 +61,6 @@ OneLevelTreeManager::OneLevelTreeManager(DataProcessorPresenter *presenter, cons
 /**
  * Destructor
  */
-OneLevelTreeManager::~OneLevelTreeManager() {}
 
 bool OneLevelTreeManager::isMultiLevel() const { return false; }
 

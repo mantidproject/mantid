@@ -30,7 +30,7 @@ namespace MDAlgorithms {
  * @author
  * @date 2011-06-02
  */
-class DLLExport FindPeaksMD : public API::Algorithm {
+class DLLExport FindPeaksMD final : public API::Algorithm {
 public:
   FindPeaksMD();
   /// Algorithm's name for identification

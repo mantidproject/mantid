@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @date 2011-12-22
 */
-class MANTID_ALGORITHMS_DLL ExportTimeSeriesLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExportTimeSeriesLog final : public API::Algorithm {
 public:
   const std::string name() const override { return "ExportTimeSeriesLog"; };
 

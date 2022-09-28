@@ -282,8 +282,8 @@ Or using an arbitrary function `my_func`::
 
 Finally, the :ref:`PyChop` interface may be used to generate the resolution function for a particular spectrometer::
 
-    from mantidqtinterfaces.PyChop import PyChop2
-    marires = PyChop2('MARI')
+    from pychop.Instruments import Instrument
+    marires = Instrument('MARI')
     marires.setChopper('S')
     marires.setFrequency(250)
     marires.setEi(30)
@@ -304,7 +304,7 @@ resolution model at the peak position :math:`E`.
 Defining Multiple Spectra
 -------------------------
 
-A `CrystalField` object can be configured to work with multiple spectra. In this case some many of the object's properties
+A `CrystalField` object can be configured to work with multiple spectra. In this case many of the object's properties
 become lists. Here is an example of defining a `CrystalField` object with two spectra::
 
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
@@ -387,8 +387,77 @@ Then call `fit()` method::
 
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
 
-The crystal field fit function is derived from the standard Mantid fit function and allows using the fit properties described in :ref:`algorithm page <algm-Fit>`.
+The crystal field fit function is derived from the standard Mantid fit function and can be used with all properties described in :ref:`Fit <algm-Fit>`.
 
+Two step fitting
+~~~~~~~~~~~~~~~~
+Alternatively, a two step fitting process can be used. Please note that this fitting process is much slower than the standard fitting described above.
+In this two step process only crystal field parameters are fitted in the first step and only peak parameters in the second step.
+
+Two step fitting is only available for single ions at the moment. It can be used both for a single spectrum or multiple spectra.
+
+There are two versions of two step fitting. One version is entirely based on the standard Mantid fit function and attempts to fit all free field
+parameters at the same time in the first step. It is used by calling the two_step_fit() method for an instance of the `CrystalFieldFit` class::
+
+    fit.two_step_fit()
+
+The other version, two_step_fit_sc(), applies ``scipy.optimize.minimize`` to fit each of the free field parameters sequentially in the first step but uses
+Mantid fitting for the peak parameters::
+
+    fit.two_step_fit_sc()
+
+Both methods allow overwriting the maximal number of iterations both per step and overall as well as the minimizer used for fitting per step.
+For example::
+
+    fit.two_step_fit(OverwriteMaxIterations=[2,10], OverwriteMinimizers=['BFGS', 'Levenberg-Marquardt'], Iterations=30)
+
+runs the first step for up to 2 iterations with the 'BFGS' minimizer and then the second step for up to 10 iterations with the 'Levenberg-Marquardt' minimizer.
+The whole fitting process is limited to 30 iterations.
+
+A complete list of minimizers available for ``scipy.optimize.minimize`` can be found at: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+
+If the minimizer is not overwritten, 'L-BFGS-B' is set as a default for ``scipy.optimize.minimize`` and 'Levenberg-Marquardt' for Mantid fitting.
+
+.. _gofit-fitting:
+
+GOFit fitting
+~~~~~~~~~~~~~
+The algorithms contained within the `GOFit package <https://github.com/ralna/GOFit>`_ can also be used from the Crystal Field API. This package is designed for the global
+optimization of parameters using a non-linear least squares cost function. For more information about the algorithms used in this implementation, please see the related
+`RAL Technical Report <https://epubs.stfc.ac.uk/work/51662496>`_.
+
+The GOFit package contains `three optimization algorithms <https://github.com/ralna/GOFit/blob/master/docs/algorithms.md>`_ called ``regularisation``, ``multistart`` and
+``alternating``. Please note that the fitting process for ``multistart`` and ``alternating`` can be slow due to the residuals being evaluated in python.
+
+Before you can use the GOFit package in Mantid, you will need to ``pip install gofit`` into your environment because it is an external dependency. Alternatively, run the
+following code in the Mantid workbench script window::
+
+    import subprocess, sys
+    rv = subprocess.run([sys.executable, '-m', 'pip', 'install', '--user', 'gofit'], capture_output=True)
+    print(rv.stdout.decode())
+    print(rv.stderr.decode())
+
+Mantid has to be restarted for the changes to take effect. Please note that the script above requires Python 3.7 or higher.
+
+Once installed, it should be possible to import the package and perform a fit using the ``regularisation`` algorithm by passing a GOFit callable into the Crystal Field API::
+
+    import gofit
+    fit.gofit(algorithm_callable=gofit.regularisation, jacobian=True, maxit=500)
+
+The ``multistart`` algorithm requires you to pass in parameter_bounds and the number of samples::
+
+    parameter_bounds = {'B20': (-0.3013,0.3013), 'B22': (-0.5219,0.5219), 'B40': (-0.004624,0.004624), 'B42': (-0.02068,0.02068), 'B44': (-0.02736,0.02736),
+                        'B60': (-0.0001604,0.0001604), 'B62': (-0.001162,0.001162), 'B64': (-0.001273,0.001273), 'B66': (-0.001724,0.001724),
+                        'IntensityScaling': (0.,10.), 'f0.FWHM': (0.1,5.0), 'f1.FWHM': (0.1,5.0), 'f2.FWHM': (0.1,5.0), 'f3.FWHM': (0.1,5.0), 'f4.FWHM': (0.1,7.0)}
+
+    fit.gofit(algorithm_callable=gofit.multistart, parameter_bounds=parameter_bounds, samples=100, jacobian=True, maxit=500, scaling=True)
+
+The ``alternating`` algorithm also requires you to pass in parameter_bounds and the number of samples::
+
+    fit.gofit(algorithm_callable=gofit.alternating, parameter_bounds=parameter_bounds, samples=100, maxit=500)
+
+A full list of possible arguments for these algorithm can be found `here <https://github.com/ralna/GOFit/blob/master/docs/algorithms.md>`_. The output from these fits
+should be a matrix workspace containing the fitted data, and a table workspace containing the fitted parameters.
 
 Multiple Ions
 -------------
@@ -767,9 +836,19 @@ Calculating Physical Properties
 -------------------------------
 
 In addition to the inelastic neutron spectrum, various physical properties arising from the crystal field interaction
-can be calculated. These include the crystal field contribution to the magnetic heat capacity, the magnetic
-susceptibility, and magnetisation. The calculated values can be invoked using the `getHeatCapacity()`,
-`getSusceptibility()` and `getMagneticMoment()` methods.
+can be calculated. These include (but are not necessarily limited to):
+
+- the crystal field contribution to the magnetic heat capacity;
+- magnetic susceptibility;
+- magnetic moment (and subsequently magnetisation)
+- the dipole transition matrix (and individual components).
+
+The calculated values can be invoked using the respective functions:
+
+- `getHeatCapacity()`;
+- `getSusceptibility()`;
+- `getMagneticMoment()`;
+- `getDipoleMatrix()` (+ `getDipoleMatrixComponent(<'X', 'Y' or 'Z'>)`).
 
 To calculate the heat capacity use::
 
@@ -793,7 +872,7 @@ To calculate the heat capacity use::
     Cv = cf.getHeatCapacity(ws, 1)  # Uses the second spectrum's x-values for T (e.g. 450<T<900)
     plot(*Cv)
 
-All the physical properties methods returns a tuple of `(x, y)` values. The heat capacity is calculated in
+All the physical properties methods (excluding dipole matrix functions) returns a tuple of `(x, y)` values. The heat capacity is calculated in
 Jmol\ :sup:`-1`\ K\ :sup:`-1`\ .
 The theory is described in :ref:`CrystalFieldHeatCapacity <func-CrystalFieldHeatCapacity>`.
 
@@ -841,11 +920,21 @@ Please note that if cgs units are used, then the magnetic field must be specifie
 (1T == 10000G). Note also that the cgs unit "emu/mol" in this case is "erg/Gauss/mol" quantifying a molar magnetic
 moment.
 
-Finally, please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
+Please note that the calculation result is the molar magnetic moment. Thus to get the magnetisation, you
 should divide this by the molar volume of the material.
 By default, the calculation temperature is 1K, and the applied magnetic field is 1T along [001]. For further details
 and a description of the theory, see the :ref:`CrystalFieldMagnetisation <func-CrystalFieldMagnetisation>` and
 :ref:`CrystalFieldMoment <func-CrystalFieldMoment>` pages.
+
+To calculate the dipole transition matrix (and components)::
+
+    import matplotlib.pyplot as plt
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0)
+    A = cf.getDipoleMatrix()       # Calculates the dipole transition matrix, which is equal to the sum of its components::
+    Ax = cf.getDipoleMatrixComponent('X') # Calculates the component of the dipole transition matrix in the x direction
+    Ay = cf.getDipoleMatrixComponent('Y') # Calculates the component of the dipole transition matrix in the Y direction
+    Az = cf.getDipoleMatrixComponent('Z') # Calculates the component of the dipole transition matrix in the Z direction
+
 
 Fitting Physical Properties
 ---------------------------

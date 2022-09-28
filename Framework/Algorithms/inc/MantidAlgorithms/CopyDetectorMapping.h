@@ -21,7 +21,7 @@ namespace Algorithms {
 
     @author Dan Nixon
 */
-class MANTID_ALGORITHMS_DLL CopyDetectorMapping : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyDetectorMapping final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CopyDetectorMapping"; }

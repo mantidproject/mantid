@@ -34,7 +34,7 @@ Required Properties:
 data to be added.</LI>
 </UL>
 */
-class DLLExport LoadIDFFromNexus : public API::Algorithm {
+class DLLExport LoadIDFFromNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadIDFFromNexus();

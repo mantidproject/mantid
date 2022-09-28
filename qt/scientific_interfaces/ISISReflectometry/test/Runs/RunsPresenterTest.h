@@ -503,6 +503,14 @@ public:
     verifyAndClear();
   }
 
+  void testTransferUpdatesLookupIndexes() {
+    auto presenter = makePresenter();
+    auto expectedJobs = expectGetValidSearchResult();
+    EXPECT_CALL(m_mainPresenter, notifyRunsTransferred()).Times(1);
+    presenter.notifyTransfer();
+    verifyAndClear();
+  }
+
   void testChangeInstrumentOnViewNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
@@ -636,18 +644,46 @@ public:
     verifyAndClear();
   }
 
-  void testNotifyRowOutputsChanged() {
+  void testRowStateChangedOnReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged()).Times(1);
-    presenter.notifyRowOutputsChanged();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
-  void testNotifyRowOutputsChangedItem() {
+  void testRowStateChangedOnReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyReductionPaused();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testRowStateChangedOnAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testNotifyRowModelChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged()).Times(1);
+    presenter.notifyRowModelChanged();
+    verifyAndClear();
+  }
+
+  void testNotifyRowModelChangedItem() {
     auto presenter = makePresenter();
     auto row = makeRow();
-    EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged(_)).Times(1);
-    presenter.notifyRowOutputsChanged(row);
+    EXPECT_CALL(*m_runsTablePresenter, notifyRowModelChanged(_)).Times(1);
+    presenter.notifyRowModelChanged(row);
     verifyAndClear();
   }
 
@@ -763,6 +799,22 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyRowContentChanged() {
+    auto presenter = makePresenter();
+    auto row = makeRow(0.5);
+    EXPECT_CALL(m_mainPresenter, notifyRowContentChanged(row));
+    presenter.notifyRowContentChanged(row);
+    verifyAndClear();
+  }
+
+  void testNotifyGroupNameChanged() {
+    auto presenter = makePresenter();
+    auto group = makeGroupWithOneRow();
+    EXPECT_CALL(m_mainPresenter, notifyGroupNameChanged(group));
+    presenter.notifyGroupNameChanged(group);
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;
@@ -775,12 +827,8 @@ private:
   };
 
   RunsPresenterFriend makePresenter() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    IPythonRunner *pythonRunner = new MockPythonRunner();
-    Plotter plotter(pythonRunner);
-#else
     Plotter plotter;
-#endif
+
     auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
     auto presenter = RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
                                          m_instruments, &m_messageHandler);
@@ -925,7 +973,7 @@ private:
     auto group = Group(groupName);
     group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
                         ReductionWorkspaces({run}, TransmissionRunPair())));
-    jobs.appendGroup(group);
+    jobs.appendGroup(std::move(group));
     return jobs;
   }
 

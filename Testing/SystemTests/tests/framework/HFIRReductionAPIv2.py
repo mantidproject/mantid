@@ -6,40 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 from reduction_workflow.command_interface import AppendDataFile, Reduce
-
-import os
-
-
-def do_cleanup():
-    Files = ["BioSANS_test_data_reduction.log",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iqxy.dat"]
-    for filename in Files:
-        absfile = FileFinder.getFullPath(filename)
-        if os.path.exists(absfile):
-            os.remove(absfile)
-    return True
 
 
 class HFIRReductionAPIv2(systemtesting.MantidSystemTest):
     """
         Simple reduction example
     """
-
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
-
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -60,15 +43,14 @@ class HFIRAbsoluteScalingReference(systemtesting.MantidSystemTest):
     """
         Test absolute scaling using a reference data set
     """
-
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
         MonitorNormalization()
@@ -91,15 +73,14 @@ class HFIRAbsoluteScalingValue(systemtesting.MantidSystemTest):
     """
         Test absolute scaling using a reference data set
     """
-
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
         MonitorNormalization()

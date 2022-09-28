@@ -33,8 +33,8 @@ namespace API {
 class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace, public Mantid::API::ExperimentInfo {
 public:
   /// Ctor
-  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
-    convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  IPeaksWorkspace()
+      : ITableWorkspace(), ExperimentInfo(), m_convention(Kernel::ConfigService::Instance().getString("Q.convention")) {
   }
 
   /// Returns a clone of the workspace
@@ -169,7 +169,7 @@ public:
   //---------------------------------------------------------------------------------------------
   virtual void saveNexus(::NeXus::File *file) const = 0;
 
-  std::string convention;
+  std::string m_convention;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

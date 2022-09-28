@@ -1,0 +1,2 @@
+* For 3d+ datasets, SliceViewer will now automatically open to the zero-slice if present
+* Ensure that all nan/inf and all zero slices work while using log-scaling

@@ -16,7 +16,7 @@ namespace MDAlgorithms {
 
 /** Save a MDEventWorkspace to a .nxs file.
  */
-class DLLExport SaveMD2 : public API::Algorithm {
+class DLLExport SaveMD2 final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMD"; };

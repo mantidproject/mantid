@@ -24,6 +24,7 @@ physical MD workspace of an experimental results (e.g Q-space).
 class DLLExport PreprocessDetectorsToMD : public API::Algorithm {
 public:
   PreprocessDetectorsToMD();
+  virtual ~PreprocessDetectorsToMD() = default;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "PreprocessDetectorsToMD"; };

@@ -122,7 +122,7 @@ void Projection::setOffset(size_t nd, double offset) {
     m_offsets[nd] = offset;
 }
 
-void Projection::setAxis(size_t nd, V3D axis) {
+void Projection::setAxis(size_t nd, const V3D &axis) {
   if (nd >= 3)
     throw std::invalid_argument("given axis out of range");
   else

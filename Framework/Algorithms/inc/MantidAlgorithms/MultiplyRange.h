@@ -29,7 +29,7 @@ namespace Algorithms {
     @author Robert Dalgliesh, ISIS, RAL
     @date 12/1/2010
  */
-class MANTID_ALGORITHMS_DLL MultiplyRange : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MultiplyRange final : public API::Algorithm {
 public:
   const std::string name() const override { return "MultiplyRange"; }
   /// Summary of algorithms purpose

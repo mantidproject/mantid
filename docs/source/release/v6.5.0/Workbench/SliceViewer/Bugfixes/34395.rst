@@ -1,0 +1,1 @@
+* Fix bug with axes limits of 1D cut viewer plot not autoscaling on cut update after the user had zoomed or panned

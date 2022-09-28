@@ -37,7 +37,7 @@ class LoadUtilsTest(unittest.TestCase):
         self.assertEqual(mock_join.call_count, expected_len)
 
     def test_get_detector_num_from_ws(self):
-        self.assertEquals(lutils.get_detector_num_from_ws(self.test_ws_name), "1")
+        self.assertEqual(lutils.get_detector_num_from_ws(self.test_ws_name), "1")
 
     def test_get_detectors_num(self):
         self.assertEqual(lutils.get_detectors_num(self.test_path), "1")
@@ -59,7 +59,7 @@ class LoadUtilsTest(unittest.TestCase):
             lutils.get_run_type(self.bad_path)
 
     def test_get_filename(self):
-        self.assertEquals(lutils.get_filename(self.test_path, self.test_run), self.test_ws_name)
+        self.assertEqual(lutils.get_filename(self.test_path, self.test_run), self.test_ws_name)
 
     def test_get_filename_returns_none_if_given_bad_path(self):
         self.assertEqual(lutils.get_filename(self.bad_path, self.test_run), None)
@@ -78,7 +78,7 @@ class LoadUtilsTest(unittest.TestCase):
             mantid.CreateSampleWorkspace(OutputWorkspace=workspace)
             expected_output.append("{}; Detector {}".format(self.test_run, detector))
 
-        self.assertEquals(lutils.merge_workspaces(self.test_run, workspaces), sorted(expected_output))
+        self.assertEqual(lutils.merge_workspaces(self.test_run, workspaces), sorted(expected_output))
         # check call works with empty workspace list
         self.assertEqual(lutils.merge_workspaces(self.test_run, []), sorted(expected_output))
 
@@ -162,13 +162,13 @@ class LoadUtilsTest(unittest.TestCase):
     def test_flatten_run_data(self):
         test_1 = ["1_det_1", "1_det_2"]
         test_2 = ["2_det_1", "2_det_2"]
-        self.assertEquals(lutils.flatten_run_data(test_1, test_2), [test_1, test_2])
+        self.assertEqual(lutils.flatten_run_data(test_1, test_2), [test_1, test_2])
 
     def test_replace_workspace_name_suffix(self):
         tests = {self.test_ws_name: "suffix", "_".join([self.test_ws_name, "test"]): "suffix"}
 
         for workspace_name, suffix in tests.items():
-            self.assertEquals(lutils.replace_workspace_name_suffix(workspace_name, suffix),
+            self.assertEqual(lutils.replace_workspace_name_suffix(workspace_name, suffix),
                               self.var_ws_name.format(1, suffix))
 
 

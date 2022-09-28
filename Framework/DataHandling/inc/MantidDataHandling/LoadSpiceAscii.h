@@ -17,7 +17,7 @@ namespace DataHandling {
 
 /** LoadSpiceAscii : TODO: DESCRIPTION
  */
-class DLLExport LoadSpiceAscii : public API::Algorithm {
+class DLLExport LoadSpiceAscii final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

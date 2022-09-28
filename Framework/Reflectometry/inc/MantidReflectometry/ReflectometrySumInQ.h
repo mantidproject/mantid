@@ -26,7 +26,7 @@ namespace Reflectometry {
   along lines of constant Q by projecting to "virtual lambda" at a
   reference angle.
 */
-class MANTID_REFLECTOMETRY_DLL ReflectometrySumInQ : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometrySumInQ final : public API::Algorithm {
 public:
   struct Angles {
     double horizon{std::numeric_limits<double>::quiet_NaN()};

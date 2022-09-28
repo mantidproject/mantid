@@ -46,7 +46,7 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop, QWidget *
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-TextPropertyWidget::~TextPropertyWidget() {}
+TextPropertyWidget::~TextPropertyWidget() = default;
 
 //----------------------------------------------------------------------------------------------
 /** @return the value of the property, as typed in the GUI, as a string */

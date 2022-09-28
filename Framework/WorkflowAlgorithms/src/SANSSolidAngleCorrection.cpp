@@ -108,7 +108,7 @@ void SANSSolidAngleCorrection::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int i = 0; i < numHists; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     outputWS->setSharedX(i, inputWS->sharedX(i));
 
     if (!spectrumInfo.hasDetectors(i)) {
@@ -151,9 +151,9 @@ void SANSSolidAngleCorrection::exec() {
       EOut[j] = fabs(EIn[j] * corr);
     }
     progress.report("Solid Angle Correction");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   setProperty("OutputMessage", "Solid angle correction applied");
 }
 
@@ -175,7 +175,7 @@ void SANSSolidAngleCorrection::execEvent() {
   const auto &spectrumInfo = outputEventWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputEventWS))
   for (int i = 0; i < numberOfSpectra; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
@@ -201,9 +201,9 @@ void SANSSolidAngleCorrection::execEvent() {
     EventList &el = outputEventWS->getSpectrum(i);
     el *= corr;
     progress.report("Solid Angle Correction");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputMessage", "Solid angle correction applied");
 }

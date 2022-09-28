@@ -90,6 +90,14 @@ class DrillModel(QObject):
     """
     newSample = Signal(DrillSample)
 
+    """
+    Sent when instrument and/or acquisition mode changed.
+    Args:
+        str: name of the instrument
+        str: name of the acquisition mode
+    """
+    newMode = Signal(str, str)
+
     def __init__(self):
         super(DrillModel, self).__init__()
         self.instrument = None
@@ -107,9 +115,6 @@ class DrillModel(QObject):
         self.tasksPool = DrillAlgorithmPool()
 
         # setup the thread pool
-        self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
-        self.tasksPool.signals.taskSuccess.connect(self._onTaskSuccess)
-        self.tasksPool.signals.taskError.connect(self._onTaskError)
         self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
         self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
 
@@ -191,6 +196,7 @@ class DrillModel(QObject):
         self.exportModel = DrillExportModel(self.acquisitionMode)
         self._initController()
         self._initProcessingParameters()
+        self.newMode.emit(self.instrument, self.acquisitionMode)
 
     def getAcquisitionMode(self):
         """
@@ -438,13 +444,64 @@ class DrillModel(QObject):
         params.update(sample.getParameterValues())
         # remove empty params
         for (k, v) in list(params.items()):
-            if v is None or v == "DEFAULT":
+            if v is None or v == "DEFAULT" or v == "":
                 del params[k]
         # add the output workspace param
         if "OutputWorkspace" not in params or params["OutputWorkspace"] == "":
             params["OutputWorkspace"] = "sample_" + str(index + 1)
         sample.setOutputName(params["OutputWorkspace"])
         return params
+
+    def processGroupByGroup(self, indexes):
+        """
+        Create and submit a task per group. Parameter values are appended if the
+        configuration says so. Otherwise, the value from the master sample is
+        taken.
+
+        Args:
+            indexes (list(int)): list of sample indexes
+        """
+        groups = list()
+        for index in indexes:
+            sample = self._samples[index]
+            group = sample.getGroup()
+            if group is not None and group not in groups:
+                groups.append(group)
+        tasks = list()
+        if not groups:
+            return False
+        for group in groups:
+            processingParams = dict()
+            samples = group.getSamples()
+            master = group.getMaster()
+            for sample in samples:
+                sParameters = sample.getParameterValues()
+                for name, value in sParameters.items():
+                    if name in RundexSettings.GROUPED_COLUMNS[self.acquisitionMode]:
+                        if name in processingParams:
+                            processingParams[name] += ("," + str(value))
+                        else:
+                            processingParams[name] = str(value)
+                    elif sample == master:
+                        processingParams[name] = value
+                    elif master is None:
+                        processingParams[name] = value
+            for p in self._parameters:
+                if p.getName() not in processingParams:
+                    processingParams[p.getName()] = p.getValue()
+            task = DrillTask(group.getName(), self.algorithm, **processingParams)
+            for sample in samples:
+                task.addStartedCallback(sample.onProcessStarted)
+                task.addSuccessCallback(sample.onProcessSuccess)
+                task.addErrorCallback(sample.onProcessError)
+                if sample == master:
+                    # needed for the auto export
+                    # here we need to export only one sample per group
+                    sample.setOutputName(processingParams["OutputWorkspace"])
+
+            tasks.append(task)
+        self.tasksPool.addProcesses(tasks)
+        return True
 
     def process(self, elements):
         """
@@ -464,7 +521,11 @@ class DrillModel(QObject):
             if not self._samples[e].isValid():
                 return False
             kwargs = self.getProcessingParameters(e)
-            tasks.append(DrillTask(str(e), self.algorithm, **kwargs))
+            task = DrillTask(str(e), self.algorithm, **kwargs)
+            task.addStartedCallback(self._samples[e].onProcessStarted)
+            task.addSuccessCallback(self._samples[e].onProcessSuccess)
+            task.addErrorCallback(self._samples[e].onProcessError)
+            tasks.append(task)
         self.tasksPool.addProcesses(tasks)
         return True
 
@@ -487,36 +548,6 @@ class DrillModel(QObject):
                 sampleIndexes += [sample.getIndex()
                                   for sample in group.getSamples()]
         return self.process(sampleIndexes)
-
-    def _onTaskStarted(self, ref):
-        """
-        Called each time a task starts.
-
-        Args:
-            ref (int): sample index
-        """
-        self._samples[int(ref)].onProcessStarted()
-
-    def _onTaskSuccess(self, ref):
-        """
-        Called when a task finished with success.
-
-        Args:
-            ref (int): sample index
-        """
-        self._samples[int(ref)].onProcessSuccess()
-        self.exportModel.run(self._samples[int(ref)])
-
-    def _onTaskError(self, ref, msg):
-        """
-        Called when a processing fails. This method logs a message and fires the
-        corresponding signal.
-
-        Args:
-            ref (int): sample index
-            msg (str): error msg
-        """
-        self._samples[int(ref)].onProcessError(msg)
 
     def _onProcessingProgress(self, progress):
         """
@@ -616,6 +647,7 @@ class DrillModel(QObject):
                 self._samples[i].setIndex(i)
                 i += 1
         sample.setController(self.controller)
+        sample.setExporter(self.exportModel)
         self.newSample.emit(sample)
         return sample
 

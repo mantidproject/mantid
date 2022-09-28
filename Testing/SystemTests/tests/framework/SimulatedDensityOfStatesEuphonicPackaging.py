@@ -30,7 +30,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
     """"Install Euphonic library to temporary prefix and check results"""
 
     def skipTests(self):
-        return not sys.platform.startswith("linux")
+        return sys.platform.startswith("darwin")
 
     @staticmethod
     def _add_libs_from_prefix(prefix_path):
@@ -114,7 +114,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
 
         process = subprocess.run([sys.executable, "-m", "pip", "install",
                                   "--prefix", tmp_prefix,
-                                  "euphonic[phonopy_reader]"],
+                                  "euphonic[phonopy_reader]==0.6.5"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT,
                                  env=env)

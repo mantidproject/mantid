@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport LoadDetectorInfo : public API::Algorithm {
+class DLLExport LoadDetectorInfo final : public API::Algorithm {
 public:
   LoadDetectorInfo();
 

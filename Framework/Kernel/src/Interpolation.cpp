@@ -27,10 +27,9 @@ struct LessOrEqualFunctor {
 
 /** Constructor default to linear interpolation and x-unit set to TOF
  */
-Interpolation::Interpolation() : m_method("linear") {
-  m_xUnit = UnitFactory::Instance().create("TOF");
-  m_yUnit = UnitFactory::Instance().create("TOF");
-}
+Interpolation::Interpolation()
+    : m_method("linear"), m_xUnit(UnitFactory::Instance().create("TOF")),
+      m_yUnit(UnitFactory::Instance().create("TOF")) {}
 
 /** Get iterator of item that is next larger than the supplied x value
  * @param key :: the x value to base the search on

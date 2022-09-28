@@ -55,6 +55,10 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def validate(self):
         return self.outputFile + '.p2d', self.reference
 
+    def skipTests(self):
+        # disabled
+        return True
+
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""
         return "PG3_4844_event.nxs"

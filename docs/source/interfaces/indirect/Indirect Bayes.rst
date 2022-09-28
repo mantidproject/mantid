@@ -88,7 +88,7 @@ normalised to unity so that the amplitudes represent their integrated areas.
 For a Lorentzian, the Fourier transform does the conversion:
 :math:`1/(x^{2}+\delta^{2}) \Leftrightarrow exp[-2\pi(\delta k)]`.  If :math:`x`
 is identified with energy :math:`E` and :math:`2\pi k` with :math:`t/\hbar`
-where t is time then: :math:`1/[E^{2}+(\hbar / \tau)^{2}] \Leftrightarrow exp[−t
+where t is time then: :math:`1/[E^{2}+(\hbar / \tau)^{2}] \Leftrightarrow exp[-t
 /\tau]` and :math:`\sigma` is identified with :math:`\hbar / \tau`.  The program
 estimates the quasielastic components of each of the groups of spectra and
 requires the resolution file and optionally the normalisation file created by

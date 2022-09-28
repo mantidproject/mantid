@@ -15,7 +15,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range, bool bothOrNoneMustBeSet) {
+boost::optional<RangeInLambda> rangeOrNone(const RangeInLambda &range, const bool bothOrNoneMustBeSet) {
   if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
     return boost::none;
   else

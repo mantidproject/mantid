@@ -37,7 +37,7 @@ namespace Algorithms {
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 11/08/2009
  */
-class MANTID_ALGORITHMS_DLL Max : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Max final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Max"; }

@@ -1,0 +1,45 @@
+digraph Container {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+    BeamCenter
+    TransmissionWorkspace
+    DarkCurrentWorkspace
+    EmptyBeamWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+    Minus
+    MoveInstrumentComponent
+    ApplyTransmissionCorrection
+    Divide2 [label="Divide"]
+  }
+
+  Runs -> LoadAndMerge
+  LoadAndMerge -> Divide
+  NormaliseBy -> Divide
+  Divide -> Minus
+  DarkCurrentWorkspace -> Minus
+  Minus -> MoveInstrumentComponent
+  EmptyBeamWorkspace -> BeamCenter
+  BeamCenter -> MoveInstrumentComponent
+  MoveInstrumentComponent -> ApplyTransmissionCorrection
+  TransmissionWorkspace -> ApplyTransmissionCorrection
+  ApplyTransmissionCorrection -> Divide2 [label="SolidAngle"]
+  Divide2 -> OutputWorkspace
+}

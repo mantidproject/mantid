@@ -18,7 +18,7 @@ namespace MantidWidgets {
 */
 class EXPORT_OPT_MANTIDQT_COMMON IWorkspaceFitControl {
 public:
-  virtual ~IWorkspaceFitControl() {}
+  virtual ~IWorkspaceFitControl() = default;
   virtual void setWorkspaceName(const QString &wsName) = 0;
   virtual void setStartX(double start) = 0;
   virtual void setEndX(double end) = 0;

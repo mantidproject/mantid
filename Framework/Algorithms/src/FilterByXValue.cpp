@@ -89,7 +89,7 @@ void FilterByXValue::exec() {
   // Loop over the workspace, removing the events that don't pass the filter
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int spec = 0; spec < numSpec; ++spec) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     EventList &events = outputWS->getSpectrum(spec);
     // Sort to make getting the tof min/max faster (& since maskTof will sort
@@ -111,9 +111,9 @@ void FilterByXValue::exec() {
     }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 } // namespace Mantid::Algorithms

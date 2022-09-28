@@ -1,0 +1,1 @@
+- Fixed an issue in :ref:`Fit <algm-Fit>`, where a lack of operator between parameter and value caused a hard crash. Now, the input string is validated.

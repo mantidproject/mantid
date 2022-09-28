@@ -79,7 +79,7 @@ void MultiplyRange::exec() {
   // Loop over spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < histogramCount; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     outputWS->setHistogram(i, inputWS->histogram(i));
     auto &newY = outputWS->mutableY(i);
     auto &newE = outputWS->mutableE(i);
@@ -92,9 +92,9 @@ void MultiplyRange::exec() {
                    std::bind(std::multiplies<double>(), _1, factor));
 
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 } // namespace Mantid::Algorithms

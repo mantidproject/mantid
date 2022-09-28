@@ -35,7 +35,7 @@ public:
 
   SaveDaveGrpTest() { saver = AlgorithmManager::Instance().create("SaveDaveGrp"); }
 
-  ~SaveDaveGrpTest() override {}
+  ~SaveDaveGrpTest() override = default;
 
   void testName() { TS_ASSERT_EQUALS(saver->name(), "SaveDaveGrp"); }
 

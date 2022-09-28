@@ -46,11 +46,8 @@ void MantidQt::API::FindFilesThreadPoolManager::destroyThreadPool() {
     tp.reset();
 }
 
-FindFilesThreadPoolManager::FindFilesThreadPoolManager() {
-  // Default allocator function. This just creates a new worker
-  // on the heap.
-  m_workerAllocator = [](const FindFilesSearchParameters &parameters) { return new FindFilesWorker(parameters); };
-}
+FindFilesThreadPoolManager::FindFilesThreadPoolManager()
+    : m_workerAllocator([](const FindFilesSearchParameters &parameters) { return new FindFilesWorker(parameters); }) {}
 
 /** Set the allocator function for the thread pool.
  *

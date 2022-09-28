@@ -26,6 +26,7 @@ from mantid.plots.datafunctions import get_axes_labels, get_bins, get_distributi
     get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_normalize_by_bin_width, \
     get_spectrum_normalisation
 from mantid.plots.utility import MantidAxType
+from mantid.plots.quad_mesh_wrapper import QuadMeshWrapper
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
@@ -61,7 +62,8 @@ def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     X, Y = numpy.meshgrid(x, y)
     xx, yy = nonortho_tr(X, Y)
     _setLabels2D(axes, workspace, indices, transpose)
-    return axes.pcolormesh(xx, yy, z, *args, **kwargs)
+    mesh = axes.pcolormesh(xx, yy, z, *args, **kwargs)
+    return QuadMeshWrapper(mesh)
 
 
 def _setLabels1D(axes,
@@ -440,8 +442,12 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     maxi = numpy.max([numpy.max(i) for i in z])
     if 'vmin' in kwargs:
         mini = kwargs['vmin']
+        # Passing normalized and vmin or vmax is not supported in matplotlib
+        del kwargs['vmin']
     if 'vmax' in kwargs:
         maxi = kwargs['vmax']
+        # Passing normalized and vmin or vmax is not supported in matplotlib
+        del kwargs['vmax']
     if 'norm' not in kwargs:
         kwargs['norm'] = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
     else:

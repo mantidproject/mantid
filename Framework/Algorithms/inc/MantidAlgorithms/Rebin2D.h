@@ -23,6 +23,8 @@ Rebins both axes of a two-dimensional workspace to the given parameters.
 */
 class MANTID_ALGORITHMS_DLL Rebin2D : public API::Algorithm {
 public:
+  virtual ~Rebin2D() = default;
+
   /// Algorithm's name for identification
   const std::string name() const override { return "Rebin2D"; }
   /// Summary of algorithms purpose

@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, \
-    CalibrationObserver, output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+    CalibrationObserver
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
@@ -25,6 +26,7 @@ class FocusPresenter(object):
 
         # Observable Setup
         self.focus_run_notifier = GenericObservable()
+        self.focus_run_notifier_gsas2 = GenericObservable()
 
         # Connect view signals to local methods.
         self.view.set_on_focus_clicked(self.on_focus_clicked)
@@ -42,6 +44,9 @@ class FocusPresenter(object):
 
     def add_focus_subscriber(self, obs):
         self.focus_run_notifier.add_subscriber(obs)
+
+    def add_focus_gsas2_subscriber(self, obs):
+        self.focus_run_notifier_gsas2.add_subscriber(obs)
 
     def on_focus_clicked(self):
         if not self._validate():
@@ -74,6 +79,7 @@ class FocusPresenter(object):
     def _on_worker_success(self):
         self.emit_enable_button_signal()
         self.focus_run_notifier.notify_subscribers(self.model.get_last_focused_files())
+        self.focus_run_notifier_gsas2.notify_subscribers(self.model.get_last_focused_files_gsas2())
 
     def set_instrument_override(self, instrument):
         instrument = INSTRUMENT_DICT[instrument]

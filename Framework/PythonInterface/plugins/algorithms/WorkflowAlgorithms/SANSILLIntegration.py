@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, NumericAxis, ITableWorkspaceProperty
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
     IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator, FloatArrayOrderedPairsValidator, \
@@ -50,8 +50,8 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 if run.hasProperty('ProcessedAs'):
                     processed = run.getLogData('ProcessedAs').value
-                    if processed != 'Sample':
-                        issues['InputWorkspace'] = 'The input workspace is not processed as sample.'
+                    if processed != 'Sample' and processed != 'Water' and processed != 'Solvent':
+                        issues['InputWorkspace'] = 'The input workspace is not processed as sample, water or solvent.'
                 else:
                     issues['InputWorkspace'] = 'The input workspace is not processed by SANSILLReduction'
             instrument = self.getProperty('InputWorkspace').value.getInstrument()
@@ -70,8 +70,7 @@ class SANSILLIntegration(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input,
-                             validator=WorkspaceUnitValidator('Wavelength')),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The input workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -190,8 +189,9 @@ class SANSILLIntegration(PythonAlgorithm):
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._lambda_range = self.getProperty('WavelengthRange').value
-        self._is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' and \
-                       mtd[self._input_ws].getInstrument().getName() == 'D33' # D33 only
+        instrument = mtd[self._input_ws].getInstrument()
+        run = mtd[self._input_ws].getRun()
+        self._is_tof = instrument.getName() == 'D33' and 'tof_mode' in run and run['tof_mode'].value == 'TOF'
         if self._is_tof:
             cut_input_ws = self._input_ws+'_cut'
             CropWorkspaceRagged(InputWorkspace=self._input_ws,
@@ -223,6 +223,9 @@ class SANSILLIntegration(PythonAlgorithm):
             DeleteWorkspace(self._input_ws)
 
     def _integrate(self, in_ws, out_ws, panel=None):
+        """
+        Performs the integration based on the requested type
+        """
         if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
             self._integrate_iq(in_ws, out_ws, panel)
         elif self._output_type == 'I(Qx,Qy)':
@@ -342,7 +345,8 @@ class SANSILLIntegration(PythonAlgorithm):
         if 'selector.wavelength_res' in run:
             delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
         elif 'selector.wave_lenght_res' in run:
-            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+            # note the typo in the log name that is in some nexus file
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01
         else:
             raise RuntimeError("Wavelength resolution log not available.")
         if run.hasProperty('collimation.sourceAperture'):
@@ -384,15 +388,20 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
 
-    def _resolution_direct_beam(self):
+    def _setup_directbeam_resolution(self):
+        """
+        Calculates resolution based on the direct beam width (LAMP method)
+        """
         if self._is_tof:
             raise RuntimeError('TOF resolution is not supported yet')
         run = mtd[self._input_ws].getRun()
         wavelength = run.getLogData('wavelength').value
         if 'selector.wavelength_res' in run:
             delta_wavelength = run.getLogData('selector.wavelength_res').value * 0.01
+        elif 'selector.wavelenght_res' in run: # typo in some nexus files
+            delta_wavelength = run.getLogData('selector.wavelenght_res').value * 0.01
         elif 'selector.wave_lenght_res' in run:
-            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # sic! log name for at least some D22 data
+            delta_wavelength = run.getLogData('selector.wave_lenght_res').value * 0.01 # typo in some nexus files
         else:
             raise RuntimeError("Wavelength resolution log not available.")
         if 'BeamWidthX' in run:
@@ -403,7 +412,7 @@ class SANSILLIntegration(PythonAlgorithm):
 
     def _integrate_iqxy(self, ws_in, ws_out):
         """
-        Calls Qxy
+        Calls Qxy to transform to reciprocal space in 2D
         """
         max_qxy = self.getProperty('MaxQxy').value
         delta_q = self.getProperty('DeltaQ').value
@@ -430,7 +439,7 @@ class SANSILLIntegration(PythonAlgorithm):
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
         elif self._resolution == 'DirectBeam':
-            self._resolution_direct_beam()
+            self._setup_directbeam_resolution()
         run = mtd[ws_in].getRun()
         q_min_name = 'qmin'
         q_max_name = 'qmax'
@@ -480,12 +489,9 @@ class SANSILLIntegration(PythonAlgorithm):
                 # (because of possible symmetry choices)
                 n_wedges = mtd[wedge_ws].size()
             if self._resolution != 'None':
-                x = mtd[ws_out].readX(0)
-                mid_x = (x[1:] + x[:-1]) / 2
-                res = self._deltaQ(mid_x)
-                mtd[ws_out].setDx(0, res)
+                res = self._set_resolution(ws_out)
                 for wedge in range(n_wedges):
-                    mtd[wedge_ws].getItem(wedge).setDx(0, res)
+                    self._set_resolution(mtd[wedge_ws][wedge].name(), res)
             if n_wedges != 0:
                 self.setProperty('WedgeWorkspace', mtd[wedge_ws])
         elif self._output_type == 'I(Phi,Q)':
@@ -509,12 +515,18 @@ class SANSILLIntegration(PythonAlgorithm):
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
             mtd[ws_out].replaceAxis(1, azimuth_axis)
             DeleteWorkspace(wedge_ws)
-            if self._resolution != 'None':
-                x = mtd[ws_out].readX(0)
+            self._set_resolution(ws_out)
+
+    def _set_resolution(self, ws, res=None):
+        '''Calculates, sets as dX and returns the resolution'''
+        if self._resolution != 'None':
+            if res is None:
+                x = mtd[ws].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
-                for i in range(mtd[ws_out].getNumberHistograms()):
-                    mtd[ws_out].setDx(i, res)
+            for i in range(mtd[ws].getNumberHistograms()):
+                mtd[ws].setDx(i, res)
+        return res
 
 
 # Register algorithm with Mantid

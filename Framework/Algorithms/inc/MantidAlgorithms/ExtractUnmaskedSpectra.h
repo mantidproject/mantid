@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** ExtractUnmaskedSpectra : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL ExtractUnmaskedSpectra : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExtractUnmaskedSpectra final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

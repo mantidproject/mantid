@@ -20,7 +20,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class MANTID_CRYSTAL_DLL CentroidPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CentroidPeaks final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaks"; };

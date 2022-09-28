@@ -19,7 +19,7 @@ using namespace Geometry;
 
 /** MultipleScatteringCorrection : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL MultipleScatteringCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MultipleScatteringCorrection final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MultipleScatteringCorrection"; };

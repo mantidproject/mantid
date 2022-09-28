@@ -37,12 +37,9 @@ const std::string TRANSMISSION_ERROR("TransmissionError");
 } // namespace
 
 void ApplyTransmissionCorrection::init() {
-  auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
-  wsValidator->add<HistogramValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::Input, wsValidator),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "Workspace to apply the transmission correction to");
-  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::TRANSMISSION_WKSP, "", Direction::Output,
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::TRANSMISSION_WKSP, "", Direction::Input,
                                                         PropertyMode::Optional),
                   "Workspace containing the transmission values [optional]");
   declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
@@ -124,7 +121,7 @@ void ApplyTransmissionCorrection::exec() {
     // Loop through the spectra and apply correction
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *corrWS))
     for (int i = 0; i < numHists; i++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding'\n";
@@ -149,9 +146,9 @@ void ApplyTransmissionCorrection::exec() {
       }
 
       progress.report("Calculating transmission correction");
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // apply the correction
     MatrixWorkspace_sptr outputWS = inputWS * corrWS;

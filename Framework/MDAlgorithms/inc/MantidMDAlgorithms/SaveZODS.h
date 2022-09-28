@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2012-01-27
 */
-class DLLExport SaveZODS : public API::Algorithm {
+class DLLExport SaveZODS final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

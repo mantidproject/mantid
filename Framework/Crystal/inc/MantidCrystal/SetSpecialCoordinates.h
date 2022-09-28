@@ -21,7 +21,7 @@ namespace Crystal {
   Set the special coordinates on an IMDWorspace or peaksworkspace. Also print
  out any existing special coordinates.
 */
-class MANTID_CRYSTAL_DLL SetSpecialCoordinates : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetSpecialCoordinates final : public API::Algorithm {
 public:
   SetSpecialCoordinates();
 

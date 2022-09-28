@@ -55,6 +55,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         ConvertWANDSCDtoQTest_dummy2 = CreateSingleValuedWorkspace()
         ConvertWANDSCDtoQTest_norm.addExperimentInfo(ConvertWANDSCDtoQTest_dummy2)
         ConvertWANDSCDtoQTest_norm.getExperimentInfo(0).run().addProperty('monitor_count', [100000.], True)
+        ConvertWANDSCDtoQTest_norm.getExperimentInfo(0).run().addProperty('duration', [3600.], True)
 
     @classmethod
     def tearDownClass(cls):
@@ -80,20 +81,20 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         d0 = ConvertWANDSCDtoQTest_out.getDimension(0)
         self.assertEqual(d0.name, 'Q_sample_x')
         self.assertEqual(d0.getNBins(), 101)
-        self.assertAlmostEquals(d0.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d0.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d0.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d0.getMaximum(), 8.08, 5)
 
         d1 = ConvertWANDSCDtoQTest_out.getDimension(1)
         self.assertEqual(d1.name, 'Q_sample_y')
         self.assertEqual(d1.getNBins(), 11)
-        self.assertAlmostEquals(d1.getMinimum(), -0.88, 5)
-        self.assertAlmostEquals(d1.getMaximum(), 0.88, 5)
+        self.assertAlmostEqual(d1.getMinimum(), -0.88, 5)
+        self.assertAlmostEqual(d1.getMaximum(), 0.88, 5)
 
         d2 = ConvertWANDSCDtoQTest_out.getDimension(2)
         self.assertEqual(d2.name, 'Q_sample_z')
         self.assertEqual(d2.getNBins(), 101)
-        self.assertAlmostEquals(d2.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d2.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d2.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d2.getMaximum(), 8.08, 5)
 
         self.assertEqual(ConvertWANDSCDtoQTest_out.getNumExperimentInfo(), 1)
 
@@ -136,7 +137,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         # Test whether Qy is scaled by ObliquityParallaxCoefficient correctly
         proportion = Test_cop_max_Qy/Test_out_max_Qy
 
-        self.assertAlmostEquals(proportion, 1.5, 5)
+        self.assertAlmostEqual(proportion, 1.5, 5)
 
         ConvertWANDSCDtoQTest_out.delete()
         ConvertWANDSCDtoQTest_cop.delete()
@@ -164,25 +165,51 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         d0 = ConvertWANDSCDtoQTest_out.getDimension(0)
         self.assertEqual(d0.name, '[H,H,0]')
         self.assertEqual(d0.getNBins(), 101)
-        self.assertAlmostEquals(d0.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d0.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d0.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d0.getMaximum(), 8.08, 5)
 
         d1 = ConvertWANDSCDtoQTest_out.getDimension(1)
         self.assertEqual(d1.name, '[H,-H,0]')
         self.assertEqual(d1.getNBins(), 101)
-        self.assertAlmostEquals(d1.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d1.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d1.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d1.getMaximum(), 8.08, 5)
 
         d2 = ConvertWANDSCDtoQTest_out.getDimension(2)
         self.assertEqual(d2.name, '[0,0,L]')
         self.assertEqual(d2.getNBins(), 101)
-        self.assertAlmostEquals(d2.getMinimum(), -8.08, 5)
-        self.assertAlmostEquals(d2.getMaximum(), 8.08, 5)
+        self.assertAlmostEqual(d2.getMinimum(), -8.08, 5)
+        self.assertAlmostEqual(d2.getMaximum(), 8.08, 5)
 
         self.assertEqual(ConvertWANDSCDtoQTest_out.getNumExperimentInfo(), 1)
 
         ConvertWANDSCDtoQTest_out.delete()
 
+    def test_errorbar_scale_NormaliseBy(self):
+
+        ConvertWANDSCDtoQTest_None = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data',
+                                                      NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
+                                                      Frame='HKL', KeepTemporaryWorkspaces=True,
+                                                      NormaliseBy='None',
+                                                      BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-8.08,8.08,101', BinningDim2='-8.08,8.08,101',
+                                                      Uproj='1,1,0', Vproj='1,-1,0', Wproj='0,0,1')
+
+        Test_None_intens = ConvertWANDSCDtoQTest_None.getSignalArray().copy()
+        Test_None_sig = np.sqrt(ConvertWANDSCDtoQTest_None.getErrorSquaredArray())
+
+        ConvertWANDSCDtoQTest_Time = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data',
+                                                      NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
+                                                      Frame='HKL', KeepTemporaryWorkspaces=True,
+                                                      NormaliseBy='Time',
+                                                      BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-8.08,8.08,101', BinningDim2='-8.08,8.08,101',
+                                                      Uproj='1,1,0', Vproj='1,-1,0', Wproj='0,0,1')
+
+        Test_Time_intens = ConvertWANDSCDtoQTest_Time.getSignalArray().copy()
+        Test_Time_sig = np.sqrt(ConvertWANDSCDtoQTest_Time.getErrorSquaredArray())
+
+        self.assertAlmostEqual(np.nanmax(Test_None_intens/Test_None_sig),
+                               np.nanmax(Test_Time_intens/Test_Time_sig))
 
 if __name__ == '__main__':
     unittest.main()

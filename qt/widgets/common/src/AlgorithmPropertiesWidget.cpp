@@ -78,7 +78,7 @@ AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget() {}
+AlgorithmPropertiesWidget::~AlgorithmPropertiesWidget() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Sets the AlgorithmInputHistoryImpl object holding all histories.

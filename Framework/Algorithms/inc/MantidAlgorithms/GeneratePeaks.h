@@ -23,7 +23,7 @@ namespace Algorithms {
 
   @date 2012-04-10
 */
-class MANTID_ALGORITHMS_DLL GeneratePeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GeneratePeaks final : public API::Algorithm {
 public:
   GeneratePeaks();
 

@@ -14,12 +14,38 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
-    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {}
+    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {
+  setAllRowParents();
+}
 
 Group::Group(
 
     std::string name)
     : m_name(std::move(name)), m_rows() {}
+
+Group::Group(const Group &old_group)
+    : IGroup(old_group), m_name(old_group.m_name), m_postprocessedWorkspaceName(old_group.m_postprocessedWorkspaceName),
+      m_rows(old_group.m_rows) {
+  setAllRowParents();
+}
+
+Group::Group(Group &&old_group) noexcept {
+  swap(*this, old_group);
+  setAllRowParents();
+}
+
+Group &Group::operator=(Group &&old_group) noexcept {
+  swap(*this, old_group);
+  setAllRowParents();
+  return *this;
+}
+
+Group &Group::operator=(Group const &old_group) {
+  Group group_copy(old_group);
+  swap(*this, group_copy);
+  setAllRowParents();
+  return *this;
+}
 
 bool Group::isGroup() const { return true; }
 
@@ -60,8 +86,7 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
     return false;
 
   // If all rows are valid and complete then we're ready to postprocess
-  return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row) { return row && row->success(); });
+  return allChildRowsSucceeded();
 }
 
 std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
@@ -97,7 +122,11 @@ std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }
 
 void Group::appendRow(boost::optional<Row> const &row) {
   Item::resetState();
+  if (row) {
+    row->setParent(this);
+  }
   m_rows.emplace_back(row);
+  notifyChildStateChanged();
 }
 
 void Group::setOutputNames(std::vector<std::string> const &outputNames) {
@@ -112,11 +141,16 @@ void Group::resetOutputs() { m_postprocessedWorkspaceName = ""; }
 void Group::appendEmptyRow() {
   Item::resetState();
   m_rows.emplace_back(boost::none);
+  notifyChildStateChanged();
 }
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
   Item::resetState();
+  if (row) {
+    row->setParent(this);
+  }
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
+  notifyChildStateChanged();
 }
 
 /** Insert a row into a group and sort rows by the angle column. If the
@@ -131,6 +165,7 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
   // If the row is not sortable, or there is nothing in the list yet, append it
   if (!row.is_initialized() || m_rows.size() == 0) {
     appendRow(row);
+    notifyChildStateChanged();
     return static_cast<int>(m_rows.size() - 1);
   }
 
@@ -143,13 +178,18 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
   };
   auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(), row->theta(), valueLessThanRowTheta);
   auto const insertedRowIndex = std::distance(m_rows.cbegin(), insertIter);
+  if (row) {
+    row->setParent(this);
+  }
   m_rows.insert(insertIter, row); // invalidates iterator
+  notifyChildStateChanged();
   return static_cast<int>(insertedRowIndex);
 }
 
 void Group::removeRow(int rowIndex) {
   Item::resetState();
   m_rows.erase(m_rows.begin() + rowIndex);
+  notifyChildStateChanged();
 }
 
 void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
@@ -157,7 +197,11 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
     return;
 
   Item::resetState();
+  if (row) {
+    row->setParent(this);
+  }
   m_rows[rowIndex] = row;
+  notifyChildStateChanged();
 }
 
 boost::optional<Row> const &Group::operator[](int rowIndex) const { return m_rows[rowIndex]; }
@@ -182,11 +226,10 @@ int Group::totalItems() const {
   // Include the group if postprocessing is applicable
   auto initCount = hasPostprocessing() ? 1 : 0;
   // Include all valid rows
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, boost::optional<Row> const &row) {
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](auto count, auto const &row) {
     if (row.is_initialized())
       return count + 1;
-    else
-      return count;
+    return count;
   });
 }
 
@@ -194,12 +237,32 @@ int Group::completedItems() const {
   // Include the group if it has been postprocessing
   auto initCount = complete() ? 1 : 0;
   // Include all valid rows that have been processed
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, boost::optional<Row> const &row) {
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](auto count, auto const &row) {
     if (row.is_initialized() && row->complete())
       return count + 1;
-    else
-      return count;
+    return count;
   });
+}
+
+void Group::setAllRowParents() {
+  std::for_each(m_rows.cbegin(), m_rows.cend(), [this](boost::optional<Row> const &row) {
+    if (row)
+      row->setParent(this);
+  });
+}
+
+void Group::notifyChildStateChanged() {
+  if (!m_rows.empty() && allChildRowsSucceeded()) {
+    setChildrenSuccess();
+  } else {
+    resetState(false);
+  }
+}
+
+void Group::setChildrenSuccess() { m_itemState.setChildrenSuccess(); }
+
+bool Group::allChildRowsSucceeded() const {
+  return std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); });
 }
 
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }

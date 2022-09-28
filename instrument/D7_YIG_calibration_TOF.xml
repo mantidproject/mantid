@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D7">
+
+  <component-link name="detector">
+    <parameter name="wavelength">
+      <value val="5.7"/>
+    </parameter>  
+  </component-link>
+  <component-link name="bank2">
+    <parameter name="gradient">
+      <value val="1.0" />
+    </parameter>
+    <parameter name="offset">
+      <value val="0" />
+    </parameter>
+    <parameter name="twoTheta_pixel_1">
+      <value val="22.4783" />
+    </parameter>
+    <parameter name="twoTheta_pixel_2">
+      <value val="21.602" />
+    </parameter>
+    <parameter name="twoTheta_pixel_3">
+      <value val="20.4054" />
+    </parameter>
+    <parameter name="twoTheta_pixel_4">
+      <value val="19.7376" />
+    </parameter>
+    <parameter name="twoTheta_pixel_5">
+      <value val="18.4165" />
+    </parameter>
+    <parameter name="twoTheta_pixel_6">
+      <value val="17.7725" />
+    </parameter>
+    <parameter name="twoTheta_pixel_7">
+      <value val="16.4527" />
+    </parameter>
+    <parameter name="twoTheta_pixel_8">
+      <value val="15.5965" />
+    </parameter>
+    <parameter name="twoTheta_pixel_9">
+      <value val="14.4122" />
+    </parameter>
+    <parameter name="twoTheta_pixel_10">
+      <value val="13.6983" />
+    </parameter>
+    <parameter name="twoTheta_pixel_11">
+      <value val="12.3652" />
+    </parameter>
+    <parameter name="twoTheta_pixel_12">
+      <value val="11.6869" />
+    </parameter>
+    <parameter name="twoTheta_pixel_13">
+      <value val="10.3858" />
+    </parameter>
+    <parameter name="twoTheta_pixel_14">
+      <value val="9.74875" />
+    </parameter>
+    <parameter name="twoTheta_pixel_15">
+      <value val="8.36294" />
+    </parameter>
+    <parameter name="twoTheta_pixel_16">
+      <value val="7.69699" />
+    </parameter>
+    <parameter name="twoTheta_pixel_17">
+      <value val="6.29039" />
+    </parameter>
+    <parameter name="twoTheta_pixel_18">
+      <value val="5.53806" />
+    </parameter>
+    <parameter name="twoTheta_pixel_19">
+      <value val="4.32068" />
+    </parameter>
+    <parameter name="twoTheta_pixel_20">
+      <value val="3.5896" />
+    </parameter>
+    <parameter name="twoTheta_pixel_21">
+      <value val="2.19578" />
+    </parameter>
+    <parameter name="twoTheta_pixel_22">
+      <value val="1.57389" />
+    </parameter>
+    <parameter name="twoTheta_pixel_23">
+      <value val="0.340957" />
+    </parameter>
+    <parameter name="twoTheta_pixel_24">
+      <value val="-0.452817" />
+    </parameter>
+    <parameter name="twoTheta_pixel_25">
+      <value val="-1.64746" />
+    </parameter>
+    <parameter name="twoTheta_pixel_26">
+      <value val="-1.99724" />
+    </parameter>
+    <parameter name="twoTheta_pixel_27">
+      <value val="-3.46697" />
+    </parameter>
+    <parameter name="twoTheta_pixel_28">
+      <value val="-4.46736" />
+    </parameter>
+    <parameter name="twoTheta_pixel_29">
+      <value val="-5.46775" />
+    </parameter>
+    <parameter name="twoTheta_pixel_30">
+      <value val="-6.46815" />
+    </parameter>
+    <parameter name="twoTheta_pixel_31">
+      <value val="-7.46854" />
+    </parameter>
+    <parameter name="twoTheta_pixel_32">
+      <value val="-8.46893" />
+    </parameter>
+    <parameter name="twoTheta_pixel_33">
+      <value val="-9.46932" />
+    </parameter>
+    <parameter name="twoTheta_pixel_34">
+      <value val="-10.4697" />
+    </parameter>
+    <parameter name="twoTheta_pixel_35">
+      <value val="-11.4701" />
+    </parameter>
+    <parameter name="twoTheta_pixel_36">
+      <value val="-12.4705" />
+    </parameter>
+    <parameter name="twoTheta_pixel_37">
+      <value val="-13.4709" />
+    </parameter>
+    <parameter name="twoTheta_pixel_38">
+      <value val="-14.4713" />
+    </parameter>
+    <parameter name="twoTheta_pixel_39">
+      <value val="-15.4717" />
+    </parameter>
+    <parameter name="twoTheta_pixel_40">
+      <value val="-16.4721" />
+    </parameter>
+    <parameter name="twoTheta_pixel_41">
+      <value val="-17.4724" />
+    </parameter>
+    <parameter name="twoTheta_pixel_42">
+      <value val="-18.4728" />
+    </parameter>
+    <parameter name="twoTheta_pixel_43">
+      <value val="-19.4732" />
+    </parameter>
+    <parameter name="twoTheta_pixel_44">
+      <value val="-20.4736" />
+    </parameter>
+  </component-link>
+  
+  <component-link name="bank3">
+    <parameter name="gradient">
+      <value val="1.0" />
+    </parameter>
+    <parameter name="offset">
+      <value val="0" />
+    </parameter>
+    <parameter name="twoTheta_pixel_1">
+      <value val="22.4135" />
+    </parameter>
+    <parameter name="twoTheta_pixel_2">
+      <value val="21.7881" />
+    </parameter>
+    <parameter name="twoTheta_pixel_3">
+      <value val="20.5103" />
+    </parameter>
+    <parameter name="twoTheta_pixel_4">
+      <value val="19.7662" />
+    </parameter>
+    <parameter name="twoTheta_pixel_5">
+      <value val="18.5454" />
+    </parameter>
+    <parameter name="twoTheta_pixel_6">
+      <value val="17.8027" />
+    </parameter>
+    <parameter name="twoTheta_pixel_7">
+      <value val="16.4865" />
+    </parameter>
+    <parameter name="twoTheta_pixel_8">
+      <value val="15.8151" />
+    </parameter>
+    <parameter name="twoTheta_pixel_9">
+      <value val="14.5139" />
+    </parameter>
+    <parameter name="twoTheta_pixel_10">
+      <value val="13.7792" />
+    </parameter>
+    <parameter name="twoTheta_pixel_11">
+      <value val="12.5273" />
+    </parameter>
+    <parameter name="twoTheta_pixel_12">
+      <value val="11.776" />
+    </parameter>
+    <parameter name="twoTheta_pixel_13">
+      <value val="10.5019" />
+    </parameter>
+    <parameter name="twoTheta_pixel_14">
+      <value val="9.7886" />
+    </parameter>
+    <parameter name="twoTheta_pixel_15">
+      <value val="8.49825" />
+    </parameter>
+    <parameter name="twoTheta_pixel_16">
+      <value val="7.77243" />
+    </parameter>
+    <parameter name="twoTheta_pixel_17">
+      <value val="6.54456" />
+    </parameter>
+    <parameter name="twoTheta_pixel_18">
+      <value val="5.8707" />
+    </parameter>
+    <parameter name="twoTheta_pixel_19">
+      <value val="4.59944" />
+    </parameter>
+    <parameter name="twoTheta_pixel_20">
+      <value val="3.82854" />
+    </parameter>
+    <parameter name="twoTheta_pixel_21">
+      <value val="2.60272" />
+    </parameter>
+    <parameter name="twoTheta_pixel_22">
+      <value val="1.8811" />
+    </parameter>
+    <parameter name="twoTheta_pixel_23">
+      <value val="0.652425" />
+    </parameter>
+    <parameter name="twoTheta_pixel_24">
+      <value val="-0.0482755" />
+    </parameter>
+    <parameter name="twoTheta_pixel_25">
+      <value val="-1.34785" />
+    </parameter>
+    <parameter name="twoTheta_pixel_26">
+      <value val="-2.12289" />
+    </parameter>
+    <parameter name="twoTheta_pixel_27">
+      <value val="-3.44257" />
+    </parameter>
+    <parameter name="twoTheta_pixel_28">
+      <value val="-4.1689" />
+    </parameter>
+    <parameter name="twoTheta_pixel_29">
+      <value val="-5.3617" />
+    </parameter>
+    <parameter name="twoTheta_pixel_30">
+      <value val="-6.11019" />
+    </parameter>
+    <parameter name="twoTheta_pixel_31">
+      <value val="-7.39045" />
+    </parameter>
+    <parameter name="twoTheta_pixel_32">
+      <value val="-8.10586" />
+    </parameter>
+    <parameter name="twoTheta_pixel_33">
+      <value val="-9.30454" />
+    </parameter>
+    <parameter name="twoTheta_pixel_34">
+      <value val="-9.98551" />
+    </parameter>
+    <parameter name="twoTheta_pixel_35">
+      <value val="-11.3351" />
+    </parameter>
+    <parameter name="twoTheta_pixel_36">
+      <value val="-12.0874" />
+    </parameter>
+    <parameter name="twoTheta_pixel_37">
+      <value val="-13.285" />
+    </parameter>
+    <parameter name="twoTheta_pixel_38">
+      <value val="-14.1233" />
+    </parameter>
+    <parameter name="twoTheta_pixel_39">
+      <value val="-15.3333" />
+    </parameter>
+    <parameter name="twoTheta_pixel_40">
+      <value val="-16.0187" />
+    </parameter>
+    <parameter name="twoTheta_pixel_41">
+      <value val="-17.2998" />
+    </parameter>
+    <parameter name="twoTheta_pixel_42">
+      <value val="-18.0214" />
+    </parameter>
+    <parameter name="twoTheta_pixel_43">
+      <value val="-19.2679" />
+    </parameter>
+    <parameter name="twoTheta_pixel_44">
+      <value val="-19.9878" />
+    </parameter>
+  </component-link>
+
+  <component-link name="bank4">
+    <parameter name="gradient">
+      <value val="1.0" />
+    </parameter>
+    <parameter name="offset">
+      <value val="0" />
+    </parameter>
+    <parameter name="twoTheta_pixel_1">
+      <value val="20.0777" />
+    </parameter>
+    <parameter name="twoTheta_pixel_2">
+      <value val="19.4074" />
+    </parameter>
+    <parameter name="twoTheta_pixel_3">
+      <value val="18.0143" />
+    </parameter>
+    <parameter name="twoTheta_pixel_4">
+      <value val="17.248" />
+    </parameter>
+    <parameter name="twoTheta_pixel_5">
+      <value val="16.0132" />
+    </parameter>
+    <parameter name="twoTheta_pixel_6">
+      <value val="15.2638" />
+    </parameter>
+    <parameter name="twoTheta_pixel_7">
+      <value val="14.0631" />
+    </parameter>
+    <parameter name="twoTheta_pixel_8">
+      <value val="13.2552" />
+    </parameter>
+    <parameter name="twoTheta_pixel_9">
+      <value val="12.0185" />
+    </parameter>
+    <parameter name="twoTheta_pixel_10">
+      <value val="11.2422" />
+    </parameter>
+    <parameter name="twoTheta_pixel_11">
+      <value val="10.011" />
+    </parameter>
+    <parameter name="twoTheta_pixel_12">
+      <value val="9.31951" />
+    </parameter>
+    <parameter name="twoTheta_pixel_13">
+      <value val="8.02795" />
+    </parameter>
+    <parameter name="twoTheta_pixel_14">
+      <value val="7.30886" />
+    </parameter>
+    <parameter name="twoTheta_pixel_15">
+      <value val="6.0879" />
+    </parameter>
+    <parameter name="twoTheta_pixel_16">
+      <value val="5.29473" />
+    </parameter>
+    <parameter name="twoTheta_pixel_17">
+      <value val="4.05088" />
+    </parameter>
+    <parameter name="twoTheta_pixel_18">
+      <value val="3.25626" />
+    </parameter>
+    <parameter name="twoTheta_pixel_19">
+      <value val="2.01415" />
+    </parameter>
+    <parameter name="twoTheta_pixel_20">
+      <value val="1.3145" />
+    </parameter>
+    <parameter name="twoTheta_pixel_21">
+      <value val="0.0228881" />
+    </parameter>
+    <parameter name="twoTheta_pixel_22">
+      <value val="-0.780819" />
+    </parameter>
+    <parameter name="twoTheta_pixel_23">
+      <value val="-1.98941" />
+    </parameter>
+    <parameter name="twoTheta_pixel_24">
+      <value val="-2.66111" />
+    </parameter>
+    <parameter name="twoTheta_pixel_25">
+      <value val="-3.94875" />
+    </parameter>
+    <parameter name="twoTheta_pixel_26">
+      <value val="-4.72809" />
+    </parameter>
+    <parameter name="twoTheta_pixel_27">
+      <value val="-5.95318" />
+    </parameter>
+    <parameter name="twoTheta_pixel_28">
+      <value val="-6.71924" />
+    </parameter>
+    <parameter name="twoTheta_pixel_29">
+      <value val="-7.9519" />
+    </parameter>
+    <parameter name="twoTheta_pixel_30">
+      <value val="-8.70171" />
+    </parameter>
+    <parameter name="twoTheta_pixel_31">
+      <value val="-9.93019" />
+    </parameter>
+    <parameter name="twoTheta_pixel_32">
+      <value val="-10.731" />
+    </parameter>
+    <parameter name="twoTheta_pixel_33">
+      <value val="-11.9212" />
+    </parameter>
+    <parameter name="twoTheta_pixel_34">
+      <value val="-12.6659" />
+    </parameter>
+    <parameter name="twoTheta_pixel_35">
+      <value val="-13.9654" />
+    </parameter>
+    <parameter name="twoTheta_pixel_36">
+      <value val="-14.7011" />
+    </parameter>
+    <parameter name="twoTheta_pixel_37">
+      <value val="-15.9085" />
+    </parameter>
+    <parameter name="twoTheta_pixel_38">
+      <value val="-16.5913" />
+    </parameter>
+    <parameter name="twoTheta_pixel_39">
+      <value val="-17.9272" />
+    </parameter>
+    <parameter name="twoTheta_pixel_40">
+      <value val="-18.7219" />
+    </parameter>
+    <parameter name="twoTheta_pixel_41">
+      <value val="-20.0089" />
+    </parameter>
+    <parameter name="twoTheta_pixel_42">
+      <value val="-20.678" />
+    </parameter>
+    <parameter name="twoTheta_pixel_43">
+      <value val="-21.9672" />
+    </parameter>
+    <parameter name="twoTheta_pixel_44">
+      <value val="-22.7118" />
+    </parameter>
+  </component-link>
+
+</parameter-file>

@@ -15,10 +15,7 @@
 
 #include <sstream>
 
-namespace Mantid
-{
-namespace Kernel
-{
+namespace Mantid::Kernel {
 
 const char* MantidVersion::version()
 {
@@ -112,5 +109,4 @@ std::string MantidVersion::paperCitation()
   return "http://dx.doi.org/10.1016/j.nima.2014.07.029";
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -19,7 +19,7 @@ type
 of the file (raw, nxs, ...) and use the specialized loading algorithm to load
 it.
  */
-class DLLExport Load : public API::Algorithm {
+class DLLExport Load final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Load"; }

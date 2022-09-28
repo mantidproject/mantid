@@ -16,7 +16,7 @@ namespace Algorithms {
   between incident beam and the polarization direction. It assumes scattering
   in the horizontal plane
 */
-class MANTID_ALGORITHMS_DLL HyspecScharpfCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL HyspecScharpfCorrection final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

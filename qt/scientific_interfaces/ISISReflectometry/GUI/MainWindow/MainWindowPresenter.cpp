@@ -20,6 +20,8 @@
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
 #include "Reduction/Batch.h"
 
+#include <algorithm>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using Mantid::API::AlgorithmManager;
@@ -149,19 +151,13 @@ void MainWindowPresenter::notifyUpdateInstrumentRequested() {
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
 bool MainWindowPresenter::isAnyBatchProcessing() const {
-  for (const auto &batchPresenter : m_batchPresenters) {
-    if (batchPresenter->isProcessing())
-      return true;
-  }
-  return false;
+  return std::any_of(m_batchPresenters.cbegin(), m_batchPresenters.cend(),
+                     [](const auto &batchPresenter) { return batchPresenter->isProcessing(); });
 }
 
 bool MainWindowPresenter::isAnyBatchAutoreducing() const {
-  for (const auto &batchPresenter : m_batchPresenters) {
-    if (batchPresenter->isAutoreducing())
-      return true;
-  }
-  return false;
+  return std::any_of(m_batchPresenters.cbegin(), m_batchPresenters.cend(),
+                     [](auto const &batchPresenter) { return batchPresenter->isAutoreducing(); });
 }
 
 bool MainWindowPresenter::isWarnProcessAllChecked() const {
@@ -290,8 +286,7 @@ void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter, std::str
 }
 
 void MainWindowPresenter::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, std::string("ISIS Reflectometry"),
-                                                 std::string("reflectometry"));
+  MantidQt::API::HelpWindow::showCustomInterface(std::string("ISIS Reflectometry"), std::string("reflectometry"));
 }
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {

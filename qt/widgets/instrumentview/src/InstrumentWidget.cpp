@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
@@ -56,6 +57,7 @@
 #include <QSplitter>
 #include <QStackedLayout>
 #include <QString>
+#include <QTabWidget>
 #include <QTemporaryFile>
 #include <QThread>
 #include <QUrl>
@@ -85,7 +87,7 @@ struct WorkspaceReplacementFlagHolder {
   ~WorkspaceReplacementFlagHolder() { m_worskpaceReplacementFlag = false; }
 
 private:
-  WorkspaceReplacementFlagHolder();
+  WorkspaceReplacementFlagHolder() = delete;
   bool &m_worskpaceReplacementFlag;
 };
 
@@ -534,6 +536,12 @@ void InstrumentWidget::waitForThread() const {
 bool InstrumentWidget::isFinished() const { return m_finished; }
 
 /**
+ * @brief InstrumentWidget::isTabFolded
+ * @return whether the side tab menu is folded or currently visible
+ */
+bool InstrumentWidget::isTabFolded() const { return mControlsTab->visibleRegion().isEmpty(); }
+
+/**
  * Update the info text displayed at the bottom of the window.
  */
 void InstrumentWidget::updateInfoText(const QString &text) {
@@ -754,6 +762,10 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
       m_xIntegration->setRange(minRange, maxRange);
     } else {
       m_xIntegration->setRange(0, 0);
+    }
+  } else {
+    if (minRange > 0 || maxRange > 0) {
+      m_xIntegration->setWholeRange();
     }
   }
 
@@ -1012,7 +1024,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
+  HelpWindow::showPage(std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
 }
 
 void InstrumentWidget::set3DAxesState(bool on) {

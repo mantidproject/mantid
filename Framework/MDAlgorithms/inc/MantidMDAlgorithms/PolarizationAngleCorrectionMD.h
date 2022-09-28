@@ -19,7 +19,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-08
 */
-class MANTID_MDALGORITHMS_DLL PolarizationAngleCorrectionMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL PolarizationAngleCorrectionMD final : public API::Algorithm {
 public:
   PolarizationAngleCorrectionMD()
       : mIsQSample(false), mQxIndex(4), mQzIndex(4), mPolarizationAngle(0.), mPrecision(1.) {}

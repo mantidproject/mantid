@@ -9,6 +9,7 @@
 #
 import __future__
 import ast
+import warnings
 
 try:
     import builtins
@@ -72,6 +73,11 @@ def get_future_import_compiler_flags(code_str):
             # Just pass and let the ImportError be raised on script execution
             pass
     return flags
+
+
+def hide_warnings_in_script_editor():
+    warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will "
+                                              "likely fail.")
 
 
 class PythonCodeExecution(QObject):
@@ -140,6 +146,7 @@ class PythonCodeExecution(QObject):
         flags = get_future_import_compiler_flags(code_str)
         with AddedToSysPath([os.path.dirname(filename)]):
             executor = CodeExecution(self._editor)
+            hide_warnings_in_script_editor()
             executor.execute(code_str, filename, flags, self.globals_ns, line_offset)
 
     def reset_context(self):

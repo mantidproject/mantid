@@ -33,10 +33,10 @@ class QuatTest(unittest.TestCase):
         q = Quat(90.0, v)
         c = 1.0/math.sqrt(2.0)
         s = c/math.sqrt(3.0)
-        self.assertAlmostEquals(q[0],c,)
-        self.assertAlmostEquals(q[1],s)
-        self.assertAlmostEquals(q[2],s)
-        self.assertAlmostEquals(q[3],s)
+        self.assertAlmostEqual(q[0],c,)
+        self.assertAlmostEqual(q[1],s)
+        self.assertAlmostEqual(q[2],s)
+        self.assertAlmostEqual(q[3],s)
 
     def test_index_operator(self):
         q = Quat(2,3,4,5)
@@ -47,11 +47,11 @@ class QuatTest(unittest.TestCase):
 
     def test_len(self):
         q = Quat(1,2,3,4);
-        self.assertAlmostEquals(q.len(),math.sqrt(30.0))
+        self.assertAlmostEqual(q.len(),math.sqrt(30.0))
 
     def test_len2(self):
         q = Quat(1,2,3,4);
-        self.assertAlmostEquals(q.len2(),30.0)
+        self.assertAlmostEqual(q.len2(),30.0)
 
     def test_rotate(self):
         a = math.sqrt(2.0)/2.0

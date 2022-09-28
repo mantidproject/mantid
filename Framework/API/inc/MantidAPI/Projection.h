@@ -50,7 +50,7 @@ public:
   /// Set the offset for a given dimension
   void setOffset(size_t nd, double offset);
   /// Set the axis vector for a given dimension
-  void setAxis(size_t nd, Kernel::V3D axis);
+  void setAxis(size_t nd, const Kernel::V3D &axis);
   /// Set the unit for a given dimension
   void setUnit(size_t nd, ProjectionUnit unit);
 

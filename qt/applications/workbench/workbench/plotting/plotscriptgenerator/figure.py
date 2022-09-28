@@ -5,11 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from distutils.version import LooseVersion
 
+import matplotlib
 from matplotlib import rcParams
 from numpy import isclose
 
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
+from mantid.plots.utility import convert_color_to_hex
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 BASE_SUBPLOTS_COMMAND = "plt.subplots({})"
@@ -34,13 +36,17 @@ def get_subplots_command_kwargs(fig):
         'facecolor': convert_color_to_hex(fig.get_facecolor()),
         'figsize': [fig.get_figwidth(), fig.get_figheight()],
         'frameon': fig.frameon,
-        'ncols': ax.numCols,
-        'nrows': ax.numRows,
         'num': fig.get_label(),
         'subplot_kw': {
             'projection': 'mantid'
         },
     }
+    if LooseVersion('3.1.3') < LooseVersion(matplotlib.__version__):
+        kwargs['ncols'] = ax.get_gridspec().ncols
+        kwargs['nrows'] = ax.get_gridspec().nrows
+    else:
+        kwargs['ncols'] = ax.numCols
+        kwargs['nrows'] = ax.numRows
     return kwargs
 
 

@@ -47,7 +47,7 @@ protected:
   double phi(double twoTheta);
 
   void initializeFixedParameters(double radius, size_t elementCount, double elementWidth, double newEfficiency);
-  void initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta);
+  void initializeCalibratedParameters(const Kernel::V2D &position, double centerTwoTheta);
 
   /* These detector parameters are fixed and specific to the geometry or result
    * from it directly */

@@ -11,6 +11,7 @@
 #include "MantidKernel/V2D.h"
 #include <cfloat>
 #include <cmath>
+#include <cxxtest/BenchmarkUtil.h>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Geometry::ConvexPolygon;
@@ -187,6 +188,7 @@ public:
     double totalArea{0.0};
     for (size_t i = 0; i < ntests; ++i) {
       totalArea += test.area();
+      CxxTest::doNotOptimize(&totalArea);
     }
   }
 };

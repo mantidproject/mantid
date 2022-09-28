@@ -13,7 +13,7 @@ using namespace Mantid::Kernel;
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectSettingsModel::IndirectSettingsModel() {}
+IndirectSettingsModel::IndirectSettingsModel() = default;
 
 void IndirectSettingsModel::setFacility(std::string const &facility) {
   auto const savedFacility = getFacility();

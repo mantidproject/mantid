@@ -20,7 +20,7 @@ public:
   enum class Style { PERCENTAGE, ENDLESS };
 
   ProgressableView() : m_style{Style::PERCENTAGE}, m_min(0), m_max(100) {}
-  virtual ~ProgressableView() {}
+  virtual ~ProgressableView() = default;
 
   virtual void setProgress(int progress) = 0;
   virtual void clearProgress() = 0;

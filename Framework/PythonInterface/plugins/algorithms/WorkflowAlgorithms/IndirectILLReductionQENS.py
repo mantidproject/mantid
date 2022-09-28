@@ -33,6 +33,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _runs = None
     _spectrum_axis = None
     _discard_sds = None
+    _group_detectors = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -140,6 +141,12 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
                              doc='Whether to discard the spectra of single detectors.')
 
+        self.declareProperty(name='GroupDetectors', defaultValue=True,
+                             doc='Group the pixels using the range, tube-by-tube (default) or in a custom way; \n'
+                                 'it is not recommended to group the detectors at this stage, \n'
+                                 'in order to get absorption corrections right, \n'
+                                 'however the default value is True for backwards compatibility.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -148,6 +155,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         if (uo == 5 or uo == 7) and not self.getPropertyValue('AlignmentRun'):
             issues['AlignmentRun'] = 'Given UnmirrorOption requires alignment run to be set'
+
+        if (uo != 0) and not self.getProperty('GroupDetectors').value:
+            issues['UnmirrorOption'] = 'Currently UnmirrorOption=0 is required when GroupDetectors is switched off'
 
         if self.getPropertyValue('CalibrationRun'):
             range = self.getProperty('CalibrationPeakRange').value
@@ -177,6 +187,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._peak_range = self.getProperty('CalibrationPeakRange').value
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
         self._discard_sds = self.getProperty('DiscardSingleDetectors').value
+        self._group_detectors = self.getProperty('GroupDetectors').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 
         suffix = ''
@@ -199,6 +210,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._common_args['CropDeadMonitorChannels'] = self.getProperty('CropDeadMonitorChannels').value
         self._common_args['SpectrumAxis'] = self._spectrum_axis
         self._common_args['DiscardSingleDetectors'] = self._discard_sds
+        self._common_args['GroupDetectors'] = self._group_detectors
 
         if self._sum_all_runs is True:
             self.log().notice('All the sample runs will be summed')

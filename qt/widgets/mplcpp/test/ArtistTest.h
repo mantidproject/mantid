@@ -26,14 +26,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(Artist drawer(pyartist));
   }
 
-  void testSetCallsArtistSet() {
+  void testSetCallsArtistSetForSingleProperty() {
+    auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
+    Artist label(textModule.attr("Text")());
+    label.set("color", "r");
+
+    TS_ASSERT_EQUALS("r", label.pyobj().attr("get_color")());
+  }
+
+  void testSetCallsArtistSetForDictProperties() {
     auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
     Artist label(textModule.attr("Text")());
     Python::Dict kwargs;
     kwargs["color"] = "r";
+    kwargs["alpha"] = 0.5;
     label.set(kwargs);
 
     TS_ASSERT_EQUALS("r", label.pyobj().attr("get_color")());
+    TS_ASSERT_EQUALS(0.5, label.pyobj().attr("get_alpha")());
   }
 
   void testArtistCallsRemoveOnPyObject() {

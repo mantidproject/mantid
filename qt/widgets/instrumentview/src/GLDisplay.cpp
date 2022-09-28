@@ -54,7 +54,7 @@ GLDisplay::GLDisplay(QWidget *parent)
   setMouseTracking(true);
 }
 
-GLDisplay::~GLDisplay() {}
+GLDisplay::~GLDisplay() = default;
 
 void GLDisplay::setSurface(std::shared_ptr<ProjectionSurface> surface) {
   m_surface = std::move(surface);

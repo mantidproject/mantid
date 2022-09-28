@@ -48,7 +48,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_ALGORITHMS_DLL CalculateEfficiency : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateEfficiency final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }
@@ -73,7 +73,7 @@ private:
                           double sum, double error, int nPixels, double min_eff, double max_eff);
 
   void maskComponent(API::MatrixWorkspace &ws, const std::string &componentName);
-  void maskEdges(const API::MatrixWorkspace_sptr &ws, int high, int low, int left, int right,
+  void maskEdges(const API::MatrixWorkspace_sptr &ws, int left, int right, int high, int low,
                  const std::string &componentName);
 };
 

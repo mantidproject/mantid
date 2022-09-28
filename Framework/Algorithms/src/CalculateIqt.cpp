@@ -164,13 +164,13 @@ MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(const MatrixWorksp
     PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
     for (auto i = 0; i < nIterations - 1; ++i) {
       errorCalculationProg.report("Calculating Monte Carlo errors...");
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       auto simulated = doSimulation(sample->clone(), resolution, rebinParams, mTwister);
       PARALLEL_CRITICAL(emplace_back)
       simulatedWorkspaces.emplace_back(simulated);
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
     return setErrorsToStandardDeviation(simulatedWorkspaces);
   }
   return setErrorsToZero(simulatedWorkspaces);
@@ -286,11 +286,11 @@ CalculateIqt::setErrorsToStandardDeviation(const std::vector<MatrixWorkspace_spt
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     outputWorkspace->mutableE(i) = standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   return outputWorkspace;
 }
 
@@ -298,11 +298,11 @@ MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(const std::vector<MatrixWorks
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     outputWorkspace->mutableE(i) = 0;
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   return outputWorkspace;
 }
 

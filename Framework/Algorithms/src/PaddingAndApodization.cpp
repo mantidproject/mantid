@@ -92,7 +92,7 @@ void PaddingAndApodization::exec() {
     // Copy all the Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       if (std::find(spectra.begin(), spectra.end(), i) != spectra.end()) {
         const auto index = static_cast<size_t>(i);
@@ -100,9 +100,9 @@ void PaddingAndApodization::exec() {
         outputWS->setSharedE(index, inputWS->sharedE(index));
       }
       prog.report();
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
   const std::string method = getProperty("ApodizationFunction");
   const double decayConstant = getProperty("DecayConstant");
@@ -112,7 +112,7 @@ void PaddingAndApodization::exec() {
   auto specLength = static_cast<int>(spectra.size());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
 
     if (spectra[i] > static_cast<int>(numSpectra)) {
@@ -123,9 +123,9 @@ void PaddingAndApodization::exec() {
     outputWS->setHistogram(specNum, applyApodizationFunction(addPadding(inputWS->histogram(specNum), padding),
                                                              decayConstant, apodizationFunction));
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   setProperty("OutputWorkspace", outputWS);
 }
 

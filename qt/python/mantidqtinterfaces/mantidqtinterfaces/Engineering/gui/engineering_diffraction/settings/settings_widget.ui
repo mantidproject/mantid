@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>630</width>
-    <height>184</height>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,52 +58,165 @@ QGroupBox:title {
       <string>Fitting</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-	  <item row="0" column="0">
-	   <widget class="QLabel" name="log_list_label"></widget>
-	  </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="log_list_label"/>
+      </item>
       <item row="1" column="0">
        <widget class="QListWidget" name="log_list">
-		<property name="verticalScrollBarPolicy">
-		  <enum>Qt::ScrollBarAlwaysOn</enum>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOn</enum>
         </property>
        </widget>
       </item>
-	  <item row="2" column="0">
-	   <widget class="QLabel" name="primary_log_label"></widget>
-	  </item>
-	  <item row="3" column="0">
-       <widget class="QComboBox" name="primary_log">
-       </widget>
+      <item row="2" column="0">
+       <widget class="QLabel" name="primary_log_label"/>
       </item>
-	  <item row="3" column="1">
-	   <layout class="QVBoxLayout" name="SeqFitOrder_layout">
-	    <item>
+      <item row="3" column="0">
+       <widget class="QComboBox" name="primary_log"/>
+      </item>
+      <item row="3" column="1">
+       <layout class="QVBoxLayout" name="SeqFitOrder_layout">
+        <item>
          <widget class="QCheckBox" name="check_ascending">
           <property name="text">
            <string>Ascending</string>
           </property>
-		  <property name="checked">
+          <property name="checked">
            <bool>true</bool>
           </property>
-	    </widget>
-	    </item>
-		<item>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="check_descending">
           <property name="text">
            <string>Descending</string>
           </property>
-		  <property name="checked">
+          <property name="checked">
            <bool>false</bool>
           </property>
-	    </widget>
-	    </item>
-	   </layout>
-	  </item>
-	  <item row="4" column="0">
-	   <widget class="QLabel" name="peak_list_label"></widget>
-	  </item>
-	  <item row="5" column="0">
-       <widget class="QComboBox" name="peak_list"></widget>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="peak_list_label"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QComboBox" name="peak_list"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="group_gsas2">
+     <property name="title">
+      <string>GSAS II</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="FileFinderWidget" name="finder_path_to_gsas2" native="true"/>
+      </item>
+      <item row="1" column="0">
+       <layout class="QGridLayout" name="gridLayout_18" rowstretch="0,0,0" columnstretch="0,0,0,0,0,0">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="verticalSpacing">
+         <number>6</number>
+        </property>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Timeout Interval</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>seconds</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="timeout_lineedit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>dmin</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="dSpacing_min_lineedit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>Å</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

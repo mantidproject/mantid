@@ -32,9 +32,9 @@ class WorkspaceHistoryGenerationTest(unittest.TestCase):
 
         history_list = get_workspace_history_list("ws")
 
-        self.assertEquals(len(history_list), 1)
+        self.assertEqual(len(history_list), 1)
         commands = generate_commands(history_list[0])
-        self.assertEquals(commands[0],
+        self.assertEqual(commands[0],
                           "CreateSampleWorkspace(OutputWorkspace='ws')")
 
     def test_guarantee_unique_lines(self):
@@ -46,8 +46,8 @@ class WorkspaceHistoryGenerationTest(unittest.TestCase):
         script = guarantee_unique_lines(script)
 
         commands = generate_commands(script)
-        self.assertEquals(len(commands), 1)
-        self.assertEquals(commands[0], "CreateSampleWorkspace(OutputWorkspace='ws')")
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0], "CreateSampleWorkspace(OutputWorkspace='ws')")
 
     def test_get_all_workspace_history_from_ads(self):
         CreateSampleWorkspace(OutputWorkspace="ws")
@@ -57,7 +57,7 @@ class WorkspaceHistoryGenerationTest(unittest.TestCase):
         script = get_all_workspace_history_from_ads()
 
         commands = generate_commands(script)
-        self.assertEquals(len(commands), 3)
-        self.assertEquals(commands[0], "CreateSampleWorkspace(OutputWorkspace='ws')")
-        self.assertEquals(commands[1], "CreateSampleWorkspace(OutputWorkspace='ws1')")
-        self.assertEquals(commands[2], "GroupWorkspaces(InputWorkspaces='ws,ws1', OutputWorkspace='Group')")
+        self.assertEqual(len(commands), 3)
+        self.assertEqual(commands[0], "CreateSampleWorkspace(OutputWorkspace='ws')")
+        self.assertEqual(commands[1], "CreateSampleWorkspace(OutputWorkspace='ws1')")
+        self.assertEqual(commands[2], "GroupWorkspaces(InputWorkspaces='ws,ws1', OutputWorkspace='Group')")

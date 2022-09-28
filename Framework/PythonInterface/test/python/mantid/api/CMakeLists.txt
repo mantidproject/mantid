@@ -23,6 +23,7 @@ set(TEST_PY_FILES
     FunctionPropertyTest.py
     IEventWorkspaceTest.py
     IFunction1DTest.py
+    IFunction1DValidatorTest.py
     IMaskWorkspaceTest.py
     IPeakFunctionTest.py
     IPeaksWorkspaceTest.py

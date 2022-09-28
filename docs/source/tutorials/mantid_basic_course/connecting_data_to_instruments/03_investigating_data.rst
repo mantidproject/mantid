@@ -72,12 +72,18 @@ With the Integrate option the mini-plot displays the counts integrated
 over time of flight vs detector position in the tube.
 
 | |MiniplotIntegrate.png|
-| Detector positions can be shown as detector IDs, or distance form a
+| Detector positions can be shown as detector IDs, or distance from a
   tube's end, or the φ angle. Switch between the units using the
   mini-plot's context menu.
 
 .. figure:: /images/DetectorPositionOptions.png
    :alt: DetectorPositionOptions.png
+
+Data integration slider
+-----------------------
+
+Edit the range over the X-axis (e.g. Time) that the data is displayed by altering the data integration
+slider at the bottom of the Instrument Viewer. Drag the ends of the slider or input exact start and end values.
 
 
 Navigate
@@ -112,12 +118,13 @@ Edit a shape
 ------------
 
 #. Switch on the editing tool |PickTabEditButton.png|.
+   This tool is automatically selected after drawing a shape.
 #. Click on a shape you would like to edit. The selected shape displays
    control points as small white rectangles.
 #. Drag the control points to resize the shape.
 #. To translate the shape click inside its shaded area and drag.
 
-To select multiple shapes draw a rubber band around them.
+To select multiple shapes draw a box around them.
 
 .. figure:: /images/SelectMuplipleShapes.png
    :alt: SelectMuplipleShapes.png

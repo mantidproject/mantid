@@ -36,6 +36,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
     _common_args = {}
     _all_runs = None
     _discard_sds = None
+    _group_detectors = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -142,6 +143,12 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                                  'spectrum will be used for this. The intensities will be integrated symmetrically '
                                  'around each peak.')
 
+        self.declareProperty(name='GroupDetectors', defaultValue=True,
+                             doc='Group the pixels using the range, tube-by-tube (default) or in a custom way; \n'
+                             'it is not recommended to group the detectors at this stage, \n'
+                             'in order to get absorption corrections right, \n'
+                             'however the default value is True for backwards compatibility.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -177,6 +184,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._back_calib_option = self.getPropertyValue('CalibrationBackgroundOption')
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
         self._discard_sds = self.getProperty('DiscardSingleDetectors').value
+        self._group_detectors = self.getProperty('GroupDetectors').value
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
@@ -185,6 +193,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['SpectrumAxis'] = self._spectrum_axis
         self._common_args['DiscardSingleDetectors'] = self._discard_sds
+        self._common_args['GroupDetectors'] = self._group_detectors
 
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 

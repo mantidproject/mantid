@@ -13,8 +13,9 @@ from mantidqt.utils.qt import import_qt
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantid.api import AnalysisDataService as ADS
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from mantid.simpleapi import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
@@ -88,6 +89,12 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         """
         Override the base class method. Hide the peak editing tool.
         """
+        for ax in self.canvas.figure.get_axes():
+            try:
+                for ws_name, artists in ax.tracked_workspaces.items():
+                    self.ws_is_valid(ws_name, True)
+            except AttributeError:  # scripted plots have no tracked_workspaces
+                pass
         super(EngDiffFitPropertyBrowser, self).show()
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
 
@@ -97,6 +104,12 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         """
         super(EngDiffFitPropertyBrowser, self).hide()
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
+
+    def ws_is_valid(self, ws_name, warn):
+        is_valid = ADS.retrieve(ws_name).getAxis(0).getUnit().caption() == 'Time-of-flight'
+        if not is_valid and warn:
+            logger.warning(f"Workspace {ws_name} will not be available for fitting because it doesn't have units of TOF")
+        return is_valid
 
     def _get_allowed_spectra(self):
         """
@@ -109,10 +122,10 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             try:
                 for ws_name, artists in ax.tracked_workspaces.items():
                     # don't allow existing output workspaces (fitted curves) to be added
-                    if ws_name not in output_wsnames and \
-                            ADS.retrieve(ws_name).getAxis(0).getUnit().caption() == 'Time-of-flight':
-                        spectrum_list = [artist.spec_num for artist in artists]
-                        allowed_spectra[ws_name] = spectrum_list
+                    if ws_name not in output_wsnames:
+                        if self.ws_is_valid(ws_name, False):
+                            spectrum_list = [artist.spec_num for artist in artists]
+                            allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
         return allowed_spectra

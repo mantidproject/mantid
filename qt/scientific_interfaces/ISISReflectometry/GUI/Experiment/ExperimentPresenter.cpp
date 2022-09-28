@@ -10,6 +10,8 @@
 #include "LookupTableValidator.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/ParseReflectometryStrings.h"
+#include "Reduction/PreviewRow.h"
+#include "Reduction/RowExceptions.h"
 #include "Reduction/ValidateLookupRow.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -21,7 +23,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 ExperimentPresenter::ExperimentPresenter(IExperimentView *view, Experiment experiment, double defaultsThetaTolerance,
                                          std::unique_ptr<IExperimentOptionDefaults> experimentDefaults)
     : m_experimentDefaults(std::move(experimentDefaults)), m_view(view), m_model(std::move(experiment)),
-      m_thetaTolerance(defaultsThetaTolerance) {
+      m_thetaTolerance(defaultsThetaTolerance), m_validationResult(m_model) {
   m_view->subscribe(this);
 }
 
@@ -30,8 +32,8 @@ void ExperimentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { 
 Experiment const &ExperimentPresenter::experiment() const { return m_model; }
 
 void ExperimentPresenter::notifySettingsChanged() {
-  auto validationResult = updateModelFromView();
-  showValidationResult(validationResult);
+  updateModelFromView();
+  showValidationResult();
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -63,13 +65,9 @@ void ExperimentPresenter::notifyRemoveLookupRowRequested(int index) {
   notifySettingsChanged();
 }
 
-void ExperimentPresenter::notifyLookupRowChanged(int, int column) {
-  auto validationResult = updateModelFromView();
-  showValidationResult(validationResult);
-  if (column == 0 && !validationResult.isValid() &&
-      validationResult.assertError().lookupTableValidationErrors().fullTableError() ==
-          ThetaValuesValidationError::NonUniqueTheta)
-    m_view->showLookupRowsNotUnique(m_thetaTolerance);
+void ExperimentPresenter::notifyLookupRowChanged(int /*row*/, int /*column*/) {
+  updateModelFromView();
+  showValidationResult();
   m_mainPresenter->notifySettingsChanged();
 }
 
@@ -104,6 +102,28 @@ void ExperimentPresenter::notifyAutoreductionResumed() { updateWidgetEnabledStat
 void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   restoreDefaults();
+}
+
+void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
+  if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
+    auto lookupRowCopy = *foundRow;
+
+    updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
+    updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
+    updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Transmission);
+
+    m_model.updateLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
+    updateViewFromModel();
+  } else {
+    throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
+                               "' in the Lookup Table.");
+  }
+}
+
+void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
+                                                                ROIType regionType) {
+  auto const instructions = previewRow.getProcessingInstructions(regionType);
+  lookupRow.setProcessingInstructions(regionType, instructions);
 }
 
 void ExperimentPresenter::restoreDefaults() {
@@ -234,6 +254,8 @@ std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView
   return std::map<std::string, std::string>();
 }
 
+bool ExperimentPresenter::hasValidSettings() const noexcept { return m_validationResult.isValid(); }
+
 ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
   auto validate = LookupTableValidator();
   auto lookupTableValidationResult = validate(m_view->getLookupTable(), m_thetaTolerance);
@@ -257,28 +279,41 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
   }
 }
 
-ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
-  auto validationResult = validateExperimentFromView();
-  if (validationResult.isValid()) {
-    m_model = validationResult.assertValid();
+void ExperimentPresenter::updateModelFromView() {
+  m_validationResult = validateExperimentFromView();
+  if (m_validationResult.isValid()) {
+    m_model = m_validationResult.assertValid();
     updateWidgetEnabledState();
   }
-  return validationResult;
 }
 
 void ExperimentPresenter::showLookupTableErrors(LookupTableValidationError const &errors) {
   m_view->showAllLookupRowsAsValid();
   for (auto const &validationError : errors.errors()) {
-    for (auto const &column : validationError.invalidColumns())
+    for (auto const &column : validationError.invalidColumns()) {
+      if (errors.fullTableError()) {
+        showFullTableError(errors.fullTableError().get(), validationError.row(), column);
+      }
       m_view->showLookupRowAsInvalid(validationError.row(), column);
+    }
   }
 }
 
-void ExperimentPresenter::showValidationResult(ExperimentValidationResult const &result) {
-  if (result.isValid()) {
+void ExperimentPresenter::showFullTableError(LookupCriteriaError const &tableError, int row, int column) {
+  if (tableError == LookupCriteriaError::NonUniqueSearchCriteria)
+    m_view->setTooltip(row, column,
+                       "Error: Duplicated search criteria. No more than one row may have the same angle and title.");
+  if (tableError == LookupCriteriaError::MultipleWildcards)
+    m_view->setTooltip(
+        row, column,
+        "Error: Multiple wildcard rows. Only a single row in the table may have a blank angle and title cell.");
+}
+
+void ExperimentPresenter::showValidationResult() {
+  if (m_validationResult.isValid()) {
     m_view->showAllLookupRowsAsValid();
   } else {
-    auto errors = result.assertError();
+    auto errors = m_validationResult.assertError();
     showLookupTableErrors(errors.lookupTableValidationErrors());
   }
 }

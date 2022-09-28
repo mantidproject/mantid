@@ -14,7 +14,7 @@ namespace CurveFitting {
 /** CrystalFieldEnergies : Calculates crystal field energies
   and wave functions for rare earth ions given the field parameters.
 */
-class MANTID_CURVEFITTING_DLL CrystalFieldEnergies : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL CrystalFieldEnergies final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

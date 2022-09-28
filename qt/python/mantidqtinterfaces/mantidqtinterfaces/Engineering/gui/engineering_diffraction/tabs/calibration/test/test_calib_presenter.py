@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 from unittest import mock
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 tab_path = 'mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration'
 
@@ -41,6 +41,21 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
         self.presenter.cropping_widget.get_group.return_value = GROUP.NORTH
+        self.presenter.instrument = "ENGINX"
+        self.view.get_sample_filename.return_value = "193749"
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+
+        self.presenter.update_calibration_from_view()
+
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
+        self.presenter.current_calibration.set_cal_file.assert_not_called()
+        self.presenter.current_calibration.set_spectra_list.assert_not_called()
+
+    def test_update_calibration_from_view_cropped_to_texture30(self):
+        self.view.get_load_checked.return_value = False
+        self.view.get_crop_checked.return_value = True
+        self.presenter.cropping_widget.get_group.return_value = GROUP.TEXTURE30
         self.presenter.instrument = "ENGINX"
         self.view.get_sample_filename.return_value = "193749"
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())

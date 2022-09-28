@@ -139,16 +139,17 @@ void InternetHelper::createRequest(Poco::URI &uri) {
   }
 }
 
-int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri, std::ostream &responseStream) {
+InternetHelper::HTTPStatus InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri,
+                                                                 std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
-  int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << '\n';
+  const auto retStatus = static_cast<HTTPStatus>(m_response->getStatus());
+  g_log.debug() << "Answer from web: " << static_cast<int>(retStatus) << " " << m_response->getReason() << '\n';
 
-  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTPStatus::OK || (retStatus == HTTPStatus::CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
@@ -163,14 +164,15 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI 
   }
 }
 
-int InternetHelper::processRelocation(const HTTPResponse &response, std::ostream &responseStream) {
+InternetHelper::HTTPStatus InternetHelper::processRelocation(const HTTPResponse &response,
+                                                             std::ostream &responseStream) {
   std::string newLocation = response.get("location", "");
   if (!newLocation.empty()) {
     g_log.information() << "url relocated to " << newLocation << "\n";
     return this->sendRequest(newLocation, responseStream);
   } else {
     g_log.warning("Apparent relocation did not give new location\n");
-    return response.getStatus();
+    return static_cast<HTTPStatus>(response.getStatus());
   }
 }
 
@@ -178,19 +180,17 @@ int InternetHelper::processRelocation(const HTTPResponse &response, std::ostream
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendRequest(const std::string &url, std::ostream &responseStream) {
+InternetHelper::HTTPStatus InternetHelper::sendRequest(const std::string &url, std::ostream &responseStream) {
 
   // send the request
   Poco::URI uri(url);
   if (uri.getPath().empty())
     uri = url + "/";
-  int retval;
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
-    retval = sendHTTPSRequest(uri.toString(), responseStream);
+    return static_cast<HTTPStatus>(sendHTTPSRequest(uri.toString(), responseStream));
   } else {
-    retval = sendHTTPRequest(uri.toString(), responseStream);
+    return static_cast<HTTPStatus>(sendHTTPRequest(uri.toString(), responseStream));
   }
-  return retval;
 }
 
 /**
@@ -216,9 +216,8 @@ void InternetHelper::logDebugRequestSending(const std::string &schemeName, const
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
-  int retStatus = 0;
-
+InternetHelper::HTTPStatus InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
+  InternetHelper::HTTPStatus retStatus{InternetHelper::HTTPStatus::BAD_REQUEST};
   logDebugRequestSending("http", url);
 
   Poco::URI uri(url);
@@ -244,8 +243,8 @@ int InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &respon
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
-  int retStatus = 0;
+InternetHelper::HTTPStatus InternetHelper::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
+  InternetHelper::HTTPStatus retStatus{InternetHelper::HTTPStatus::BAD_REQUEST};
 
   logDebugRequestSending("https", url);
 
@@ -302,7 +301,7 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
 /** Process any headers from the response stream
 Basic implementation does nothing.
 */
-void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse & /*unused*/) {}
+void InternetHelper::processResponseHeaders(const HTTPResponse & /*unused*/) {}
 
 /** Process any HTTP errors states.
 
@@ -313,9 +312,10 @@ void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse & /*un
 @exception Mantid::Kernel::Exception::InternetError : Coded for the failure
 state.
 */
-int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url) {
-  int retStatus = res.getStatus();
-  g_log.debug() << "Answer from web: " << res.getStatus() << " " << res.getReason() << '\n';
+InternetHelper::HTTPStatus InternetHelper::processErrorStates(const HTTPResponse &res, std::istream &rs,
+                                                              const std::string &url) {
+  const auto retStatus = static_cast<HTTPStatus>(res.getStatus());
+  g_log.debug() << "Answer from web: " << static_cast<int>(res.getStatus()) << " " << res.getReason() << '\n';
 
   // get github api rate limit information if available;
   int rateLimitRemaining;
@@ -327,30 +327,31 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::
     rateLimitRemaining = -1;
   }
 
-  if (retStatus == HTTP_OK) {
+  if (retStatus == HTTPStatus::OK) {
     throw Exception::InternetError("Response was ok, processing should never "
                                    "have entered processErrorStates",
-                                   retStatus);
-  } else if (retStatus == HTTP_FOUND) {
+                                   static_cast<int>(retStatus));
+  } else if (retStatus == HTTPStatus::FOUND) {
     throw Exception::InternetError("Response was HTTP_FOUND, processing should "
                                    "never have entered processErrorStates",
-                                   retStatus);
-  } else if (retStatus == HTTP_MOVED_PERMANENTLY) {
+                                   static_cast<int>(retStatus));
+  } else if (retStatus == HTTPStatus::MOVED_PERMANENTLY) {
     throw Exception::InternetError("Response was HTTP_MOVED_PERMANENTLY, "
                                    "processing should never have entered "
                                    "processErrorStates",
-                                   retStatus);
-  } else if (retStatus == HTTP_NOT_MODIFIED) {
-    throw Exception::InternetError("Not modified since provided date" + rateLimitReset.toSimpleString(), retStatus);
-  } else if ((retStatus == HTTP_FORBIDDEN) && (rateLimitRemaining == 0)) {
+                                   static_cast<int>(retStatus));
+  } else if (retStatus == HTTPStatus::NOT_MODIFIED) {
+    throw Exception::InternetError("Not modified since provided date" + rateLimitReset.toSimpleString(),
+                                   static_cast<int>(retStatus));
+  } else if ((retStatus == HTTPStatus::FORBIDDEN) && (rateLimitRemaining == 0)) {
     throw Exception::InternetError("The Github API rate limit has been reached, try again after " +
                                        rateLimitReset.toSimpleString() + " GMT",
-                                   retStatus);
+                                   static_cast<int>(retStatus));
   } else {
     std::stringstream info;
     std::stringstream ss;
     Poco::StreamCopier::copyStream(rs, ss);
-    if (retStatus == HTTP_NOT_FOUND)
+    if (retStatus == HTTPStatus::NOT_FOUND)
       info << "Failed to download " << url << " with the link "
            << "<a href=\"" << url << "\">.\n"
            << "Hint. Check that link is correct</a>";
@@ -360,8 +361,9 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::
       info << ss.str();
       g_log.debug() << ss.str();
     }
-    throw Exception::InternetError(info.str() + ss.str(), retStatus);
+    throw Exception::InternetError(info.str() + ss.str(), static_cast<int>(retStatus));
   }
+  return retStatus; // must return to follow contract
 }
 
 /** Download a url and fetch it inside the local path given.
@@ -384,13 +386,12 @@ url_file.
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
 */
-int InternetHelper::downloadFile(const std::string &urlFile, const std::string &localFilePath) {
-  int retStatus = 0;
+InternetHelper::HTTPStatus InternetHelper::downloadFile(const std::string &urlFile, const std::string &localFilePath) {
   g_log.debug() << "DownloadFile from \"" << urlFile << "\" to file: \"" << localFilePath << "\"\n";
 
   Poco::TemporaryFile tempFile;
   Poco::FileStream tempFileStream(tempFile.path());
-  retStatus = sendRequest(urlFile, tempFileStream);
+  const auto retStatus = sendRequest(urlFile, tempFileStream);
   tempFileStream.close();
 
   // if there have been no errors move it to the final location, and turn off
@@ -418,9 +419,9 @@ void InternetHelper::setTimeout(int seconds) {
 /// Checks the HTTP status to decide if this is a relocation
 /// @param response the HTTP status
 /// @returns true if the return code is considered a relocation
-bool InternetHelper::isRelocated(const int response) {
-  return ((response == HTTP_FOUND) || (response == HTTP_MOVED_PERMANENTLY) || (response == HTTP_TEMPORARY_REDIRECT) ||
-          (response == HTTP_SEE_OTHER));
+bool InternetHelper::isRelocated(const HTTPStatus &response) {
+  return ((response == HTTPStatus::FOUND) || (response == HTTPStatus::MOVED_PERMANENTLY) ||
+          (response == HTTPStatus::TEMPORARY_REDIRECT) || (response == HTTPStatus::SEE_OTHER));
 }
 
 /// Throw an exception occurs when the computer
@@ -535,7 +536,9 @@ const std::string &InternetHelper::getBody() { return m_body; }
 /** Gets the body set for future requests
  * @returns A string of the content type
  **/
-int InternetHelper::getResponseStatus() { return m_response->getStatus(); }
+InternetHelper::HTTPStatus InternetHelper::getResponseStatus() {
+  return static_cast<HTTPStatus>(m_response->getStatus());
+}
 
 /** Gets the body set for future requests
  * @returns A string of the content type

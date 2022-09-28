@@ -25,7 +25,7 @@ public:
   /// Constructor
   LoadNXcanSAS();
   /// Virtual dtor
-  ~LoadNXcanSAS() override {}
+  ~LoadNXcanSAS() override = default;
   const std::string name() const override { return "LoadNXcanSAS"; }
   /// Summary of algorithms purpose
   const std::string summary() const override { return "Loads an HDF5 NXcanSAS file into a MatrixWorkspace."; }

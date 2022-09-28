@@ -30,7 +30,7 @@ N1 Bins. The output workspace is data points, not histograms.
 @author Michael Whitty, STFC ISIS
 @date 09/09/2010
  */
-class MANTID_ALGORITHMS_DLL Transpose : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Transpose final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "Transpose"; }

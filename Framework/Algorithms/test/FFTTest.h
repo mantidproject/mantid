@@ -39,7 +39,7 @@ public:
   static void destroySuite(FFTTest *suite) { delete suite; }
 
   FFTTest() : dX(0.2), h(sqrt(M_PI / 3)), a(M_PI * M_PI / 3), tolerance(0.001) {}
-  ~FFTTest() override {}
+  ~FFTTest() override = default;
 
   void testForward() {
     const int N = 100;

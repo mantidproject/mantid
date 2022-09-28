@@ -30,7 +30,7 @@ DECLARE_ALGORITHM(LoadSwans)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadSwans::LoadSwans() {}
+LoadSwans::LoadSwans() = default;
 
 //----------------------------------------------------------------------------------------------
 
@@ -200,9 +200,8 @@ std::vector<double> LoadSwans::loadMetaData() {
       auto tokenizer = Mantid::Kernel::StringTokenizer(
           line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       metadata.reserve(tokenizer.size());
-      for (const auto &token : tokenizer) {
-        metadata.emplace_back(boost::lexical_cast<double>(token));
-      }
+      std::transform(tokenizer.cbegin(), tokenizer.cend(), std::back_inserter(metadata),
+                     [](const auto &token) { return boost::lexical_cast<double>(token); });
     }
   }
   if (metadata.size() < 6) {

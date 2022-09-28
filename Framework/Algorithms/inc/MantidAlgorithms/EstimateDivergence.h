@@ -15,7 +15,7 @@ namespace Algorithms {
 /** EstimateDivergence : Calculate the instrument divergence according to
   Windsor.
 */
-class MANTID_ALGORITHMS_DLL EstimateDivergence : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EstimateDivergence final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

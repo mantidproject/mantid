@@ -31,7 +31,7 @@ private:
     bool isPointContained(const std::vector<Mantid::coord_t> &) override { return true; }
     // Unhide base class methods (avoids Intel compiler warning)
     using MDImplicitFunction::isPointContained;
-    ~MockImplicitFunction() override {}
+    ~MockImplicitFunction() override = default;
   };
 
 public:

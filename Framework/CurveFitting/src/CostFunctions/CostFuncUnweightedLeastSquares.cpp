@@ -20,7 +20,7 @@ DECLARE_COSTFUNCTION(CostFuncUnweightedLeastSquares, Unweighted least squares)
 
 CostFuncUnweightedLeastSquares::CostFuncUnweightedLeastSquares() : CostFuncLeastSquares() {}
 
-void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) {
+void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel) {
   CostFuncLeastSquares::calActiveCovarianceMatrix(covar, epsrel);
 
   double variance = getResidualVariance();

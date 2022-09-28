@@ -22,7 +22,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-04-13 18:11:53.496539
  */
-class DLLExport IntegratePeaksMD : public API::Algorithm {
+class DLLExport IntegratePeaksMD final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMD"; };
@@ -49,7 +49,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
-  bool detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
+  bool detectorQ(const Mantid::Kernel::V3D &QLabFrame, double r);
 
   /// Instrument reference
   Geometry::Instrument_const_sptr inst;

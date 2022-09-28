@@ -26,7 +26,7 @@ DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent) : QLineEdit(pa
   setValue(mgr->value(property));
 }
 
-DoubleEditor::~DoubleEditor() {}
+DoubleEditor::~DoubleEditor() = default;
 
 void DoubleEditor::setValue(const double &d) { setText(formatValue(d)); }
 

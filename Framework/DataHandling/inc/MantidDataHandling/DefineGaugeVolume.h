@@ -22,7 +22,7 @@ namespace DataHandling {
     @author Russell Taylor, Tessella
     @date 04/10/2010
 */
-class DLLExport DefineGaugeVolume : public API::Algorithm {
+class DLLExport DefineGaugeVolume final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "DefineGaugeVolume"; }

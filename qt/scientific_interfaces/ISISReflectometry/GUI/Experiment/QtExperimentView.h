@@ -54,7 +54,6 @@ public:
   void setLookupTable(std::vector<LookupRow::ValueArray> rows) override;
   void showLookupRowAsInvalid(int row, int column) override;
   void showLookupRowAsValid(int row) override;
-  void showLookupRowsNotUnique(double thetaTolerance) override;
   void showStitchParametersValid() override;
   void showStitchParametersInvalid() override;
 
@@ -81,9 +80,6 @@ public:
 
   std::string getStitchOptions() const override;
   void setStitchOptions(std::string const &stitchOptions) override;
-
-  void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                            std::vector<MissingInstrumentParameterValue> const &missingValues) override;
 
   void showAllLookupRowsAsValid() override;
 
@@ -117,6 +113,8 @@ public:
   void addLookupRow() override;
   void removeLookupRow(int rowIndex) override;
 
+  void setTooltip(int row, int column, std::string const &text) override;
+
 public slots:
   /// Adds another row to the per-angle options table
   void onRestoreDefaultsRequested();
@@ -127,6 +125,9 @@ public slots:
   void onLookupRowChanged(int row, int column);
 
 private:
+  bool setTooltipFromMap(int column, std::unordered_map<int, std::string> const &tooltips);
+  void setTooltipFromAlgorithm(int column, std::unordered_map<int, std::string> const &properties,
+                               const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableColumns(QTableWidget &table, const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);

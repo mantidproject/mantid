@@ -20,7 +20,7 @@ namespace Algorithms {
   @author Michael Whitty
   @date 24/01/2011
 */
-class MANTID_ALGORITHMS_DLL IdentifyNoisyDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IdentifyNoisyDetectors final : public API::Algorithm {
 public:
   const std::string name() const override { return "IdentifyNoisyDetectors"; } ///< @return the algorithms name
   /// Summary of algorithms purpose

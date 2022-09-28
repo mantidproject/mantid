@@ -17,14 +17,15 @@ def _rayleigh(x, sigma):
 
 
 def _generate_sample_ws(ws_name):
-    data_x = np.arange(0, 10, 0.01)
+    data_x = np.append(np.arange(0, 2.5, 0.001), np.arange(2.501, 7.5, 0.01))
+    data_x = np.append(data_x, np.arange(7.51, 10, 0.001))
     data_y = _rayleigh(data_x, 1)
 
     # Create the workspace and give it some units
     CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y, \
                     UnitX='MomentumTransfer', VerticalAxisUnit='QSquared', VerticalAxisValues='0.2')
     # Centre the peak over 0
-    ScaleX(InputWorkspace=ws_name, Factor=-1, Operation="Add", OutputWorkspace=ws_name)
+    ScaleX(InputWorkspace=ws_name, Factor=-5, Operation="Add", OutputWorkspace=ws_name)
 
     return mtd[ws_name]
 
@@ -60,12 +61,6 @@ class SymmetriseTest(unittest.TestCase):
         @param workspace Workspace to check
         """
         tolerance = 1e-15
-
-        # Test that each pair of points moving inwards are equal
-        data_x = workspace.dataX(0)
-        for idx in range(0, int(len(data_x) / 2)):
-            delta = abs(data_x[idx]) - abs(data_x[-(idx + 1)])
-            self.assertLess(abs(delta), tolerance)
 
         # Test that the axis and values were preserved
         sample_x_axis = self._sample_ws.getAxis(0)
@@ -175,6 +170,16 @@ class SymmetriseTest(unittest.TestCase):
                           OutputWOrkspace='__Symmetrise_TestWS',
                           XMin=0.05, XMax=0.2,
                           SpectraRange=[1, 2])
+
+    def test_handle_different_bin_width_in_sample_ws(self):
+        """
+        Tests validation on entering a maximum spectra number higher then that of the workspace.
+        """
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
+                                      XMin=2.1, XMax=3.3,
+                                      SpectraRange=[1, 1])
+
+        self._validate_workspace(symm_test_out_ws)
 
 
 if __name__ == '__main__':

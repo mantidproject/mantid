@@ -121,7 +121,6 @@ void LoadILLPolarizedDiffraction::exec() {
   Progress progress(this, 0, 1, 3);
 
   m_fileName = getPropertyValue("Filename");
-  m_outputWorkspaceGroup = std::make_shared<API::WorkspaceGroup>();
   m_wavelength = 0;
 
   progress.report("Loading the detector polarization analysis data");
@@ -131,9 +130,9 @@ void LoadILLPolarizedDiffraction::exec() {
   loadMetaData();
 
   progress.report("Sorting polarisations");
-  sortPolarisations();
+  auto outputWorkspaceGroup = sortPolarisations();
 
-  setProperty("OutputWorkspace", m_outputWorkspaceGroup);
+  setProperty("OutputWorkspace", outputWorkspaceGroup);
 }
 
 /**
@@ -153,8 +152,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     std::string start_time = entry.getString("start_time");
     start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
 
-    // init the workspace with proper number of histograms and number of
-    // channels
+    // init the workspace with proper number of histograms and number of channels
     auto workspace = initStaticWorkspace(entry);
 
     // load the instrument
@@ -179,7 +177,11 @@ void LoadILLPolarizedDiffraction::loadData() {
       for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
         unsigned int counts = data(pixel_no, 0, channel_no);
         spectrum[channel_no] = counts;
-        errors[channel_no] = std::sqrt(counts);
+        if (counts == 0) {
+          errors[channel_no] = 1.0;
+        } else {
+          errors[channel_no] = std::sqrt(counts);
+        }
       }
       workspace->mutableX(pixel_no) = axis;
     }
@@ -195,7 +197,11 @@ void LoadILLPolarizedDiffraction::loadData() {
       for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
         unsigned int counts = monitorData(0, 0, channel_no);
         spectrum[channel_no] = counts;
-        errors[channel_no] = std::sqrt(counts);
+        if (counts == 0) {
+          errors[channel_no] = 1.0;
+        } else {
+          errors[channel_no] = std::sqrt(counts);
+        }
       }
       workspace->mutableX(monitor_no) = axis;
     }
@@ -210,7 +216,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     }
 
     // adds the current entry workspace to the output group
-    m_outputWorkspaceGroup->addWorkspace(workspace);
+    m_outputWorkspaceGroup.push_back(workspace);
     entry.close();
   }
   dataRoot.close();
@@ -226,9 +232,9 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
   NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
-    for (auto workspaceId = 0; workspaceId < m_outputWorkspaceGroup->getNumberOfEntries(); ++workspaceId) {
+    for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
-          std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId));
+          std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
       m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(), entryName);
       if (m_wavelength != 0) {
@@ -483,28 +489,35 @@ LoadILLPolarizedDiffraction::transposeMonochromatic(const API::MatrixWorkspace_s
 }
 
 /**
- * Ensures that the order of flipper state values is 'ON' and then 'OFF' for each polarisation orientation
+ * Ensures that the order of flipper state values is 'ON' and then 'OFF' for each polarisation orientation,
+ * and that polarisations are in the following order: Z, X, Y, X-Y, X+Y.
  */
-void LoadILLPolarizedDiffraction::sortPolarisations() {
-  if (m_outputWorkspaceGroup->getNumberOfEntries() < 2) {
-    return;
-  }
-  auto sortedGroup = std::make_shared<API::WorkspaceGroup>();
-  for (auto workspaceId = 0; workspaceId < (m_outputWorkspaceGroup->getNumberOfEntries() - 1); workspaceId += 2) {
-    MatrixWorkspace_sptr ws1 =
-        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId));
-    auto polarisation = ws1->mutableRun().getLogData("POL.actual_stateB1B2")->value();
-    MatrixWorkspace_sptr ws2 =
-        std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup->getItem(workspaceId + 1));
-    if (polarisation != "ON") { // need to reverse order of SF ("ON") and NSF ("OFF")
-      sortedGroup->addWorkspace(ws2);
-      sortedGroup->addWorkspace(ws1);
-    } else {
-      sortedGroup->addWorkspace(ws1);
-      sortedGroup->addWorkspace(ws2);
+API::WorkspaceGroup_sptr LoadILLPolarizedDiffraction::sortPolarisations() {
+  auto outputGroupSize = static_cast<int>(m_outputWorkspaceGroup.size());
+  API::WorkspaceGroup_sptr sortedGroup = std::make_shared<API::WorkspaceGroup>();
+  if (outputGroupSize < 2) {
+    sortedGroup->addWorkspace(std::move(m_outputWorkspaceGroup[0]));
+  } else {
+    std::vector<int> sortedWorkspaceIds(outputGroupSize);
+    std::map<const std::string, int> polarisationsOrder{{"OFF", 0}, {"ZPO", 1},     {"XPO", 3},
+                                                        {"YPO", 5}, {"XPO-YPO", 7}, {"XPO+YPO", 9}};
+    for (auto workspaceId = 0; workspaceId < outputGroupSize; workspaceId++) {
+      auto ws = m_outputWorkspaceGroup[workspaceId];
+      auto flipperState = ws->mutableRun().getLogData("POL.actual_stateB1B2")->value();
+      std::string polarisation = ws->mutableRun().getLogData("POL.actual_state")->value();
+      int sortedId = 0;
+      if (polarisationsOrder.count(polarisation) > 0) {
+        sortedId = polarisationsOrder[polarisation];
+        if (flipperState == "ON")
+          sortedId--;
+      }
+      sortedWorkspaceIds[workspaceId] = sortedId;
+    }
+    for (auto workspaceId : sortedWorkspaceIds) {
+      sortedGroup->addWorkspace(std::move(m_outputWorkspaceGroup[workspaceId]));
     }
   }
-  m_outputWorkspaceGroup = sortedGroup;
+  return sortedGroup;
 }
 
 } // namespace Mantid::DataHandling

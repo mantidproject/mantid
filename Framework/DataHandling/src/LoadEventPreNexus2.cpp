@@ -444,7 +444,7 @@ void LoadEventPreNexus2::unmaskVetoEventIndex() {
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(event_indices.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     uint64_t eventindex = event_indices[i];
     if (eventindex > static_cast<uint64_t>(max_events)) {
@@ -458,9 +458,9 @@ void LoadEventPreNexus2::unmaskVetoEventIndex() {
     if (eventindexcheck > static_cast<uint64_t>(max_events)) {
       g_log.information() << "Check: Pulse " << i << ": unphysical event index = " << eventindexcheck << "\n";
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 //------------------------------------------------------------------------------------------------
@@ -662,10 +662,8 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
   }
 
   // determine maximum pixel id
-  detid_max = 0; // seems like a safe lower bound
-  for (const auto detID : detIDs)
-    if (detID > detid_max)
-      detid_max = detID;
+  const auto it = std::max_element(detIDs.cbegin(), detIDs.cend());
+  detid_max = it == detIDs.cend() ? 0 : *it;
 
   // For slight speed up
   loadOnlySomeSpectra = (!this->spectra_list.empty());
@@ -762,7 +760,7 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
 
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (parallelProcessing) )
     for (int blockNum = 0; blockNum < int(numBlocks); blockNum++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       // Find the workspace for this particular thread
       EventWorkspace_sptr ws;
@@ -797,9 +795,9 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
       // Report progress
       prog->report("Load Event PreNeXus");
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     g_log.debug() << tim << " to load the data.\n";
 
@@ -807,7 +805,7 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
     // MERGE WORKSPACES BACK TOGETHER
     //-------------------------------------------------------------------------
     if (parallelProcessing) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
       // Merge all workspaces, index by index.
@@ -836,9 +834,9 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
         prog->report("Merging Workspaces");
       }
       g_log.debug() << tim << " to merge workspaces together.\n";
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     //-------------------------------------------------------------------------
     // Clean memory

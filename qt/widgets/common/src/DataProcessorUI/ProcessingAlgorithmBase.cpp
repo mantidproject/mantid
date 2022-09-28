@@ -27,7 +27,6 @@ ProcessingAlgorithmBase::ProcessingAlgorithmBase()
       m_OutputWsProperties() {}
 
 /** Destructor */
-ProcessingAlgorithmBase::~ProcessingAlgorithmBase() {}
 
 /** Counts the number of input/output workspace properties */
 void ProcessingAlgorithmBase::countWsProperties() {

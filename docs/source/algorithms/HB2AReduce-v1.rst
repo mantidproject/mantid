@@ -21,6 +21,8 @@ You can either specify the filenames of data you want to reduce or provide the I
 
 You can specify any number of filenames or scan numbers (in a comma separated list).
 
+Two ways for normalizing reduced data are provided, namely with monitor counts and collection time. The default one would be with monitor count, meaning the value specified with ``OutputWorkspace`` parameter would be used as the name of the generated workspace and stem name of output file (if specified) with monitor counts normalization. Along with that, an alternative workspace and corresponding output file would be generated, with '_norm_time' appended to the specified name.
+
 Vanadium
 ########
 

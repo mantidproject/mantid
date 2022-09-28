@@ -8,7 +8,8 @@
 
 from matplotlib import rcParams
 from matplotlib.font_manager import FontProperties
-from mantid.plots.legend import LegendProperties, convert_color_to_hex
+from mantid.plots.legend import LegendProperties
+from mantid.plots.utility import convert_color_to_hex
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 # Default values of all options that are accessible via the legend tab in the plot settings.

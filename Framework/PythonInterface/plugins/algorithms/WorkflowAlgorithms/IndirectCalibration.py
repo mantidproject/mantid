@@ -48,6 +48,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
                                                 validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the background.')
 
+        self.declareProperty(name='ScaleByFactor', defaultValue=False,
+                             doc='Set to True to enable Scaling, if false output will be normalised to 1.')
+
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor by which to scale the result.')
 
@@ -182,9 +185,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._peak_range = self.getProperty('PeakRange').value
         self._back_range = self.getProperty('BackgroundRange').value
         self._spec_range = self.getProperty('DetectorRange').value
-
+        self._scale_by_factor = self.getProperty('ScaleByFactor').value
         self._intensity_scale = self.getProperty('ScaleFactor').value
-        if self._intensity_scale == 1.0:
+        if not self._scale_by_factor:
             self._intensity_scale = None
 
     def _add_logs(self):

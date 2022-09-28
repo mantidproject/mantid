@@ -109,6 +109,22 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for changing the Evaluation type."""
         self.fit_function_options.set_slot_for_evaluation_type_changed(slot)
 
+    def set_slot_for_plot_guess_type_changed(self, slot) -> None:
+        """Connect the slot for changing the Evaluation type."""
+        self.fit_function_options.set_slot_for_plot_guess_type_changed(slot)
+
+    def set_slot_for_plot_guess_points_updated(self, slot) -> None:
+        """Connect the slot for the start x option."""
+        self.fit_function_options.set_slot_for_plot_guess_points_updated(slot)
+
+    def set_slot_for_plot_guess_start_x_updated(self, slot) -> None:
+        """Connect the slot for the start x option."""
+        self.fit_function_options.set_slot_for_plot_guess_start_x_updated(slot)
+
+    def set_slot_for_plot_guess_end_x_updated(self, slot) -> None:
+        """Connect the slot for the end x option."""
+        self.fit_function_options.set_slot_for_plot_guess_end_x_updated(slot)
+
     def set_slot_for_use_raw_changed(self, slot) -> None:
         """Connect the slot for the Use raw option."""
         self.fit_function_options.set_slot_for_use_raw_changed(slot)
@@ -201,6 +217,36 @@ class BasicFittingView(ui_form, base_widget):
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
         self.fit_function_options.end_x = value
+
+    @property
+    def plot_guess_type(self) -> str:
+        """Returns the selected start X."""
+        return self.fit_function_options.plot_guess_type
+
+    @property
+    def plot_guess_points(self) -> int:
+        """Returns the selected start X."""
+        return self.fit_function_options.plot_guess_points
+
+    @property
+    def plot_guess_start_x(self) -> float:
+        """Returns the selected start X."""
+        return self.fit_function_options.plot_guess_start_x
+
+    @plot_guess_start_x.setter
+    def plot_guess_start_x(self, value: float) -> None:
+        """Sets the selected start X."""
+        self.fit_function_options.plot_guess_start_x = value
+
+    @property
+    def plot_guess_end_x(self) -> float:
+        """Returns the selected start X."""
+        return self.fit_function_options.plot_guess_end_x
+
+    @plot_guess_end_x.setter
+    def plot_guess_end_x(self, value: float) -> None:
+        """Sets the selected start X."""
+        self.fit_function_options.plot_guess_end_x = value
 
     @property
     def exclude_range(self) -> bool:
@@ -315,6 +361,15 @@ class BasicFittingView(ui_form, base_widget):
         """Shows the normalised covariance matrix in a separate table display window."""
         self.fit_function_options.show_normalised_covariance_matrix(covariance_ws, workspace_name)
 
+    def show_plot_guess_points(self, show: bool = True) -> None:
+        self.fit_function_options.show_plot_guess_points(show)
+
+    def show_plot_guess_start_x(self, show: bool = True) -> None:
+        self.fit_function_options.show_plot_guess_start_x(show)
+
+    def show_plot_guess_end_x(self, show: bool = True) -> None:
+        self.fit_function_options.show_plot_guess_end_x(show)
+
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""
         self.setEnabled(False)
@@ -322,3 +377,9 @@ class BasicFittingView(ui_form, base_widget):
     def enable_view(self) -> None:
         """Enable all widgets in this fitting widget."""
         self.setEnabled(self.workspace_selector.number_of_datasets() != 0)
+
+    def show_fit_script_generator(self) ->None:
+        """
+        Show the fit script generator in the fitting interface
+        """
+        self.fit_controls.show_fit_script_generator()

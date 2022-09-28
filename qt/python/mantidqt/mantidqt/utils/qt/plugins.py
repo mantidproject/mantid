@@ -31,6 +31,12 @@ def setup_library_paths_win():
     from qtpy import QT_VERSION
     from qtpy.QtCore import QCoreApplication
 
+    conda_prefix = os.environ.get("CONDA_PREFIX", "")
+    if conda_prefix != "":
+        conda_qt_plugins = osp.join(conda_prefix, "Library", "plugins")
+        QCoreApplication.addLibraryPath(conda_qt_plugins)
+        return
+
     # package build
     pkg_qt_plugins = osp.dirname(sys.executable) + f'\\..\\plugins\\qt{QT_VERSION[0]}'
     if osp.isdir(pkg_qt_plugins):

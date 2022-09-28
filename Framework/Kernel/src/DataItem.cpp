@@ -25,7 +25,7 @@ DataItem::DataItem(const DataItem & /*other*/) : m_lock(std::make_unique<Poco::R
  * Destructor. Required in cpp do avoid linker errors when other projects try to
  * inherit from DataItem
  */
-DataItem::~DataItem() {}
+DataItem::~DataItem() = default;
 
 void DataItem::readLock() { getLock()->readLock(); }
 void DataItem::unlock() { getLock()->unlock(); }

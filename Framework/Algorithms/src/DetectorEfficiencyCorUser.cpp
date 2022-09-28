@@ -69,7 +69,7 @@ void DetectorEfficiencyCorUser::exec() {
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto effFormula = retrieveFormula(i);
     // Calculate Efficiency for E = Ei
     double e;
@@ -80,9 +80,9 @@ void DetectorEfficiencyCorUser::exec() {
 
     prog.report("Detector Efficiency correction...");
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   this->setProperty("OutputWorkspace", this->m_outputWS);
 }
@@ -95,7 +95,8 @@ void DetectorEfficiencyCorUser::exec() {
  * @param parser :: muParser used to evalute f(e)
  * @param index :: the workspace index of the histogram to correct
  */
-void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser) {
+void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e,
+                                                 const mu::Parser &parser) {
   const auto &xIn = m_inputWS->points(index);
   const auto &yIn = m_inputWS->y(index);
   const auto &eIn = m_inputWS->e(index);

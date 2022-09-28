@@ -282,7 +282,7 @@ void LoadILLPolarizationFactors::exec() {
   const auto factorTags = factor_list();
   PARALLEL_FOR_IF(Kernel::threadSafe(*refWS))
   for (int i = 0; i < static_cast<int>(factorTags.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto tag = factorTags[i];
     const auto &fDef = fittingData.at(tag);
     auto source = make_histogram(fDef.limits, maxWavelength);
@@ -295,9 +295,9 @@ void LoadILLPolarizationFactors::exec() {
     outH.setSharedE(target.sharedE());
     outWS->setHistogram(i, outH);
     outVertAxis->setLabel(i, to_string(tag));
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   outWS->replaceAxis(1, std::move(outVertAxis));
   setUnits(*outWS);
   outWS->setTitle("Polarization efficiency factors");

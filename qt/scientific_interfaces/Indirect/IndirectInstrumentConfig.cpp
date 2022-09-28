@@ -42,7 +42,7 @@ IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent)
   m_instrumentSelector->fillWithInstrumentsFromFacility();
 }
 
-IndirectInstrumentConfig::~IndirectInstrumentConfig() {}
+IndirectInstrumentConfig::~IndirectInstrumentConfig() = default;
 
 /**
  * Gets the list of techniques used to filter instruments by.

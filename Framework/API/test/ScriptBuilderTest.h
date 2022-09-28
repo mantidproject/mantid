@@ -37,7 +37,7 @@ public:
   class SubAlgorithm : public Algorithm {
   public:
     SubAlgorithm() : Algorithm() {}
-    ~SubAlgorithm() override {}
+    ~SubAlgorithm() override = default;
     const std::string name() const override { return "SubAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -100,7 +100,7 @@ public:
   class NewlineAlgorithm : public Algorithm {
   public:
     NewlineAlgorithm() : Algorithm() {}
-    ~NewlineAlgorithm() override {}
+    ~NewlineAlgorithm() override = default;
     const std::string name() const override { return "Foo\n\rBar"; }
     const std::string summary() const override { return "Test"; }
     int version() const override { return 1; }
@@ -130,7 +130,7 @@ public:
   class NestedAlgorithm : public DataProcessorAlgorithm {
   public:
     NestedAlgorithm() : DataProcessorAlgorithm() {}
-    ~NestedAlgorithm() override {}
+    ~NestedAlgorithm() override = default;
     const std::string name() const override { return "NestedAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -162,7 +162,7 @@ public:
   class TopLevelAlgorithm : public DataProcessorAlgorithm {
   public:
     TopLevelAlgorithm() : DataProcessorAlgorithm() {}
-    ~TopLevelAlgorithm() override {}
+    ~TopLevelAlgorithm() override = default;
     const std::string name() const override { return "TopLevelAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -192,7 +192,7 @@ public:
   class AlgorithmWithDynamicProperty : public Algorithm {
   public:
     AlgorithmWithDynamicProperty() : Algorithm() {}
-    ~AlgorithmWithDynamicProperty() override {}
+    ~AlgorithmWithDynamicProperty() override = default;
     const std::string name() const override { return "AlgorithmWithDynamicProperty"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }

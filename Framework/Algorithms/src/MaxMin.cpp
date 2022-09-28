@@ -93,7 +93,7 @@ void MaxMin::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
   // Loop over spectra
   for (int i = MinSpec; i <= MaxSpec; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     int newindex = i - MinSpec;
     // Copy over spectrum and detector number info
     outputWorkspace->getSpectrum(newindex).copyInfoFrom(localworkspace->getSpectrum(i));
@@ -139,9 +139,9 @@ void MaxMin::exec() {
     outputWorkspace->mutableX(newindex)[1] = *(X.begin() + d + 1); // This is safe since X is of dimension Y+1
     outputWorkspace->mutableY(newindex)[0] = *maxY;
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);

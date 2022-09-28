@@ -32,10 +32,12 @@
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/Hint.h"
 #include "Reduction/PreviewRow.h"
@@ -83,6 +85,10 @@ public:
   MOCK_METHOD1(notifySetRoundPrecision, void(int &));
   MOCK_METHOD0(notifyResetRoundPrecision, void());
   MOCK_METHOD0(notifyBatchLoaded, void());
+  MOCK_METHOD1(notifyRowContentChanged, void(Row &));
+  MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
+  MOCK_METHOD0(notifyRunsTransferred, void());
+
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
@@ -99,6 +105,7 @@ public:
   MOCK_CONST_METHOD0(isBatchUnsaved, bool());
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
+  MOCK_METHOD0(notifyPreviewApplyRequested, void());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -112,8 +119,8 @@ public:
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
   MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
-  MOCK_METHOD0(notifyRowOutputsChanged, void());
-  MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
+  MOCK_METHOD0(notifyRowModelChanged, void());
+  MOCK_METHOD1(notifyRowModelChanged, void(boost::optional<Item const &>));
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
@@ -126,6 +133,8 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(notifyTableChanged, void());
+  MOCK_METHOD1(notifyRowContentChanged, void(Row &));
+  MOCK_METHOD1(notifyGroupNameChanged, void(Group &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyBatchLoaded, void());
@@ -163,7 +172,9 @@ public:
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD1(notifyPreviewApplyRequested, void(PreviewRow const &));
   MOCK_METHOD0(restoreDefaults, void());
+  MOCK_METHOD(bool, hasValidSettings, (), (const, noexcept, override));
 };
 
 class MockInstrumentPresenter : public IInstrumentPresenter {
@@ -183,6 +194,7 @@ public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
+  MOCK_CONST_METHOD0(shouldAutosaveGroupRows, bool());
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
@@ -194,7 +206,7 @@ public:
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
-  ~MockProgressBase() override {}
+  ~MockProgressBase() override = default;
 };
 
 /**** Catalog ****/
@@ -210,7 +222,7 @@ public:
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
   MOCK_CONST_METHOD1(transformArchivePath, std::string(const std::string &));
-  ~MockICatalogInfo() override {}
+  ~MockICatalogInfo() override = default;
 };
 
 class MockSearcher : public ISearcher {
@@ -286,12 +298,16 @@ public:
   MOCK_METHOD1(subscribe, void(JobManagerSubscriber *notifyee));
   MOCK_METHOD1(startPreprocessing, void(PreviewRow &row));
   MOCK_METHOD1(startSumBanks, void(PreviewRow &row));
+  MOCK_METHOD1(startReduction, void(PreviewRow &row));
 };
 
 class MockJobManagerSubscriber : public JobManagerSubscriber {
 public:
   MOCK_METHOD0(notifyLoadWorkspaceCompleted, void());
   MOCK_METHOD0(notifySumBanksCompleted, void());
+  MOCK_METHOD0(notifyReductionCompleted, void());
+  MOCK_METHOD0(notifySumBanksAlgorithmError, void());
+  MOCK_METHOD0(notifyReductionAlgorithmError, void());
 };
 
 class MockEncoder : public IEncoder {
@@ -302,6 +318,7 @@ public:
 class MockDecoder : public IDecoder {
 public:
   MOCK_METHOD3(decodeBatch, void(const IMainWindowView *, int, const QMap<QString, QVariant> &));
+  MOCK_CONST_METHOD1(decodeVersion, size_t(const QMap<QString, QVariant> &));
 };
 
 class MockPythonRunner : public IPythonRunner {
@@ -340,8 +357,8 @@ public:
   MOCK_METHOD1(algorithmStarted, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr, std::string const &));
-  MOCK_CONST_METHOD1(algorithmOutputWorkspacesToSave,
-                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
+  MOCK_CONST_METHOD2(algorithmOutputWorkspacesToSave,
+                     std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr, bool));
   MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &>(std::string const &));
   MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());

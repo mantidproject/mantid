@@ -33,7 +33,7 @@ void sortFunctionList(QStringList &list) {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-SingleFunctionTemplateModel::SingleFunctionTemplateModel() {}
+SingleFunctionTemplateModel::SingleFunctionTemplateModel() = default;
 
 SingleFunctionTemplateModel::SingleFunctionTemplateModel(
     std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation)

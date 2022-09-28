@@ -53,8 +53,13 @@ class CroppingPresenter(object):
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = True
             self.set_custom_widgets_visibility(False, True)
-        else:  # texture
-            self.group = GROUP.TEXTURE
+        elif index ==4:  # texture 20 grouping
+            self.group = GROUP.TEXTURE20
+            self.custom_calfile_enabled = False
+            self.custom_spectra_enabled = False
+            self.set_custom_widgets_visibility(False, False)
+        else:
+            self.group = GROUP.TEXTURE30
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = False
             self.set_custom_widgets_visibility(False, False)

@@ -30,8 +30,8 @@ namespace {
  * as accuracy to convert into integers
  */
 double nearInt(double val, double eps, double mult) noexcept {
-  if (val > 0) {
-    if (val < 1) {
+  if (val > 0.0) {
+    if (val < 1.0) {
       mult /= val;
     } else {
       if (std::abs(val - std::round(val)) > eps) {
@@ -52,7 +52,7 @@ namespace Mantid::Kernel {
   @param theta :: The theta value (in degrees) = the polar angle away from the
   +Z axis.
   @param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points
-  along +X and rotates counter-clockwise in the XY plane
+  along +X and rotates clockwise in the XY plane
 */
 void V3D::spherical(const double R, const double theta, const double phi) noexcept {
   constexpr double deg2rad = M_PI / 180.0;
@@ -65,7 +65,7 @@ void V3D::spherical(const double R, const double theta, const double phi) noexce
   @param R :: The R value (distance)
   @param polar :: the polar angle (in radians) away from the +Z axis.
   @param azimuth :: the azimuthal angle (in radians), where 0 points along +X
-  and rotates counter-clockwise in the XY plane
+  and rotates clockwise in the XY plane
 */
 void V3D::spherical_rad(const double R, const double polar, const double azimuth) noexcept {
   m_pt[2] = R * cos(polar);

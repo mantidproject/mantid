@@ -51,6 +51,10 @@ template <int Class> struct IndexType {
   }
 };
 
+template <int Class> inline std::ostream &operator<<(std::ostream &os, const IndexType<Class> &value) {
+  return (os << value.value);
+}
+
 // The index of the fitting Domain, i.e. ignores workspaces and spectra
 using FitDomainIndex = IndexType<0>;
 // Used to index spectra in workspaces

@@ -18,10 +18,12 @@ set(TEST_FILES
     IndirectFitPlotPresenterTest.h
     IndirectFitPropertyBrowserTest.h
     IndirectFittingModelTest.h
+    IndirectMomentsModelTest.h
     IndirectPlotOptionsModelTest.h
     IndirectPlotOptionsPresenterTest.h
     IndirectSettingsModelTest.h
     IndirectSettingsPresenterTest.h
+    IndirectSqwModelTest.h
     IqtFitModelTest.h
 )
 

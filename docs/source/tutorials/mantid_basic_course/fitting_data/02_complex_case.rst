@@ -28,9 +28,9 @@ Three things happens when you click on the Fit Toolbar button:
 
 -  The Fit Property Browser, by default, will position itself on the
    left of the plot window
--  Right-click fitting options becomes available on the plot window
-   -  Fit function items are adding to the plot, initially the two green vertical
-   dashed lines
+-  Fitting options become available by right-clicking on the plot
+-  Fit function items are added to the plot, initially the two green vertical
+   dashed lines marking the start and end of the fitting range.
 
 .. figure:: /images/FirstStartMantidPlotFitting_MBC.png
    :alt: FirstStartMantidPlotFitting_MBC.png
@@ -127,7 +127,8 @@ You may set up a custom model, which you can save and reload later.
 
 |SaveSetup.png| |ArrowRight.png| |SaveSetupDialog.png|
 
-After saving the model it can be imported using "Setup > Custom Setup" (note this replaces all functions in the browser).
+Save the setup with a memorable name. Clear the Model.
+Next, try to import your setup under "Setup > Custom Setup" (note this replaces all functions in the browser).
 
 
 Tying and constraining fit parameters
@@ -141,7 +142,8 @@ of other parameters (from any of the selected functions).
 **Fixing** is basically tying a parameter to a number (constant).
 
 **Constraining** a parameter keeps its value above a lower bound,
-below an upper bound, or both!
+below an upper bound, or both! The parameter value obeys the constraint within the error.
+e.g. If a parameter is constrained to be positive, the result could be `-1.0` if the error is `-1.1`.
 
 To set a constraint/tie right-click on a parameter name:
 

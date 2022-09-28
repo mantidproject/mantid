@@ -570,7 +570,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(const API::MatrixWorkspa
 
     PARALLEL_FOR_IF(Kernel::threadSafe(input))
     for (int i = 0; i < nhists; ++i) { // NOLINT
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       if (checkForMask && spectrumInfo.hasDetectors(hists[i])) {
         if (spectrumInfo.isMasked(hists[i]) || spectrumInfo.isMonitor(hists[i]))
@@ -589,9 +589,9 @@ std::vector<double> DetectorDiagnostic::calculateMedian(const API::MatrixWorkspa
       // Now we have a good value
       PARALLEL_CRITICAL(DetectorDiagnostic_median_d) { medianInput.emplace_back(yValue); }
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     if (medianInput.empty()) {
       g_log.information("some group has no valid histograms. Will use 0 for median.");

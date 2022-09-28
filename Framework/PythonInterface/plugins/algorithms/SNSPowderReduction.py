@@ -512,7 +512,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if can_run_ws_name in mtd:
                 hstry = mtd[can_run_ws_name].getHistory()
                 if not hstry.empty():
-                    alg = hstry.getAlgorithm(0)
+                    alg = hstry.getAlgorithmHistory(0)
                     if alg.name() == "SNSPowderReduction":
                         if alg.getPropertyValue("TypeOfCorrection") != self._absMethod:
                             self.log().information(
@@ -1075,7 +1075,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         assert self.does_workspace_exist(wksp_name)
 
         # Reset characterization run numbers in the property manager
-        if PropertyManagerDataService.doesExist('__snspowderreduction'):
+        if '__snspowderreduction' in PropertyManagerDataService:
             PropertyManagerDataService.remove('__snspowderreduction')
 
         # Determine characterization
@@ -1089,7 +1089,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
         # convert the result into a dict
-        return PropertyManagerDataService.retrieve("__snspowderreduction")
+        return PropertyManagerDataService["__snspowderreduction"]
 
     def _save(self, wksp, info, normalized, pdfgetn):
         prefix = str(wksp)

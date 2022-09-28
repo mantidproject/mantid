@@ -125,7 +125,7 @@ void VesuvioCalculateMS::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
@@ -147,9 +147,9 @@ void VesuvioCalculateMS::exec() {
     // the output spectrum objects have references to where the data will be
     // stored
     calculateMS(rng, i, totalsc->getSpectrum(i), multsc->getSpectrum(i));
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("TotalScatteringWS", totalsc);
   setProperty("MultipleScatteringWS", multsc);

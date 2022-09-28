@@ -20,9 +20,7 @@ namespace MantidQt::MantidWidgets {
  */
 ImageInfoWidget::ImageInfoWidget(QWidget *parent)
     : IImageInfoWidget(parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-#endif
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   horizontalHeader()->hide();
   verticalHeader()->hide();

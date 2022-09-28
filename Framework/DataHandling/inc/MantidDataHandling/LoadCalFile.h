@@ -24,7 +24,7 @@ namespace DataHandling {
  * @author Janik Zikovsky
  * @date 2011-05-09
  */
-class DLLExport LoadCalFile : public API::Algorithm {
+class DLLExport LoadCalFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadCalFile"; };

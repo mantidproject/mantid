@@ -17,6 +17,7 @@ namespace Algorithms {
  */
 class MANTID_ALGORITHMS_DLL PDFFourierTransform2 : public API::Algorithm {
 public:
+  virtual ~PDFFourierTransform2() = default;
   /// Algorithm's name for identification
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -32,6 +33,9 @@ public:
   const std::string category() const override;
   /// @copydoc Algorithm::validateInputs()
   std::map<std::string, std::string> validateInputs() override;
+  void convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R, std::vector<double> &DFOfR,
+                               const std::vector<double> &DR, const std::string &PDFType, const double &rho0,
+                               const double &cohScatLen);
 
 protected:
   size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y);
@@ -46,12 +50,11 @@ private:
   double determineRho0();
   void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q, std::vector<double> &DFOfQ,
                          const std::vector<double> &DQ);
-  void convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R, std::vector<double> &DFOfR,
-                               const std::vector<double> &DR);
   void convertFromSQMinus1(HistogramData::HistogramY &FOfQ, const HistogramData::HistogramX &Q,
                            HistogramData::HistogramE &DFOfQ);
   void convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, const HistogramData::HistogramX &R,
-                                 HistogramData::HistogramE &DFOfR);
+                                 HistogramData::HistogramE &DFOfR, const std::string &PDFType, const double &rho0,
+                                 const double &cohScatLen);
 };
 
 } // namespace Algorithms

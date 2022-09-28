@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 #include <utility>
@@ -180,13 +181,13 @@ void ApplyAbsorptionCorrections::run() {
   setRunIsRunning(true);
 
   // Create / Initialize algorithm
-  auto absCorProps = std::unique_ptr<MantidQt::API::AlgorithmRuntimeProps>();
+  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps->setPropertyValue("SampleWorkspace", m_sampleWorkspaceName);
+  absCorProps->setProperty("SampleWorkspace", sampleWs);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
@@ -239,10 +240,9 @@ void ApplyAbsorptionCorrections::run() {
 
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-  auto const corrections = getADSWorkspace<WorkspaceGroup>(correctionsWsName.toStdString());
   bool interpolateAll = false;
-  for (std::size_t i = 0; i < corrections->size(); i++) {
-    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+  for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
 
     // Check for matching binning
     const auto factorBlocksize = factorWs->blocksize();
@@ -275,8 +275,7 @@ void ApplyAbsorptionCorrections::run() {
         return;
       }
     }
-
-    applyCorrAlg->setProperty("CorrectionsWorkspace", correctionsWsName.toStdString());
+    applyCorrAlg->setProperty("CorrectionsWorkspace", m_correctionsGroupName);
   }
 
   // Generate output workspace name
@@ -424,15 +423,39 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
 bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
-  // Validate the sample workspace
-  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
+  // Check input not empty
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
 
-  // Validate the container workspace
-  if (m_uiForm.ckUseCan->isChecked())
-    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
+  if (uiv.isAllInputValid()) {
+    // Validate the sample workspace
+    validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
 
-  // Validate the corrections workspace
-  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
+    // Validate the container workspace
+    if (m_uiForm.ckUseCan->isChecked())
+      validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
+
+    // Validate the corrections workspace
+    validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
+
+    // Check sample has the same number of Histograms as each of the workspaces in the corrections group
+    m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
+    if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {
+      m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+      for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+        MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
+
+        const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
+        const size_t containerHist = factorWs->getNumberHistograms();
+
+        if (sampleHist != containerHist) {
+          uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+        }
+      }
+    } else {
+      uiv.addErrorMessage("Please check the Corrections Workspace that has been selected.");
+    }
+  }
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())

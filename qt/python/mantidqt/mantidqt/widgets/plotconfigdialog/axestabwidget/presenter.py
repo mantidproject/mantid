@@ -82,18 +82,18 @@ class AxesTabWidgetPresenter:
 
             # If the grid is enabled update it
             if ax.show_minor_gridlines:
-                if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
+                if ax.xaxis._major_tick_kw['gridOn'] and ax.yaxis._major_tick_kw['gridOn']:
                     ax.grid(True, which='minor')
-                elif ax.xaxis._gridOnMajor:
+                elif ax.xaxis._major_tick_kw['gridOn']:
                     ax.grid(True, axis='x', which='minor')
-                elif ax.yaxis._gridOnMajor:
+                elif ax.yaxis._major_tick_kw['gridOn']:
                     ax.grid(True, axis='y', which='minor')
             else:
                 ax.grid(False, which='minor')
 
         if "xlabel" in self.current_view_props:
             ax.set_xlabel(self.current_view_props['xlabel'])
-            ax.set_xscale(self.current_view_props['xscale'])
+            ax.set_xscale(self.current_view_props['xscale'].lower())  # As of mpl 3.5 scale settings must be lowercase
 
             if self.current_view_props['xautoscale']:
                 if ax.images:
@@ -108,7 +108,7 @@ class AxesTabWidgetPresenter:
 
         if "ylabel" in self.current_view_props:
             ax.set_ylabel(self.current_view_props['ylabel'])
-            ax.set_yscale(self.current_view_props['yscale'])
+            ax.set_yscale(self.current_view_props['yscale'].lower())
 
             if self.current_view_props['yautoscale']:
                 if ax.images:

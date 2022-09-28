@@ -89,7 +89,7 @@ namespace DataHandling {
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
 */
-class DLLExport GroupDetectors2 : public API::Algorithm {
+class DLLExport GroupDetectors2 final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupDetectors"; };

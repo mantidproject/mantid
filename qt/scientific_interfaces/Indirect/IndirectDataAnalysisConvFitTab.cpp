@@ -63,6 +63,9 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
   m_fitStrings["Lorentzian"] = "L";
   m_fitStrings["StretchedExpFT"] = "SFT";
   m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
+  m_fitStrings["FickDiffusionSQE"] = "FickDiff";
+  m_fitStrings["ChudleyElliotSQE"] = "ChudElliot";
+  m_fitStrings["HallRossSQE"] = "HallRoss";
   m_fitStrings["DiffRotDiscreteCircle"] = "DC";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
@@ -72,25 +75,6 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
   m_fitStrings["IsoRotDiff"] = "IRD";
   m_fitStrings["ElasticIsoRotDiff"] = "EIRD";
   m_fitStrings["InelasticIsoRotDiff"] = "IIRD";
-
-  auto &functionFactory = FunctionFactory::Instance();
-  auto lorentzian = functionFactory.createFunction("Lorentzian");
-  auto stretchedExpFT = functionFactory.createFunction("StretchedExpFT");
-  auto teixeiraWater = functionFactory.createFunction("TeixeiraWaterSQE");
-
-  auto diffSphere = functionFactory.createFunction("DiffSphere");
-  auto elasticDiffSphere = functionFactory.createFunction("ElasticDiffSphere");
-  auto inelasticDiffSphere = functionFactory.createFunction("InelasticDiffSphere");
-
-  auto diffRotDiscCircle = functionFactory.createFunction("DiffRotDiscreteCircle");
-  auto elasticDiffRotDiscCircle = functionFactory.createFunction("ElasticDiffRotDiscreteCircle");
-  auto inelasticDiffRotDiscCircle = functionFactory.createFunction("InelasticDiffRotDiscreteCircle");
-
-  auto isoRotDiff = functionFactory.createFunction("IsoRotDiff");
-  auto elasticIsoRotDiff = functionFactory.createFunction("ElasticIsoRotDiff");
-  auto inelasticIsoRotDiff = functionFactory.createFunction("InelasticIsoRotDiff");
-
-  auto deltaFunction = functionFactory.createFunction("DeltaFunction");
 
   // Instrument resolution
   m_properties["InstrumentResolution"] = m_dblManager->addProperty("InstrumentResolution");

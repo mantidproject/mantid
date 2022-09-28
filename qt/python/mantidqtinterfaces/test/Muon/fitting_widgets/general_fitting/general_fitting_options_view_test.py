@@ -7,24 +7,19 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_fitting_options_view import GeneralFittingOptionsView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class GeneralFittingOptionsViewTest(unittest.TestCase, QtWidgetFinder):
+class GeneralFittingOptionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = GeneralFittingOptionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_can_be_initialized_without_an_error(self):
         self.view = GeneralFittingOptionsView()

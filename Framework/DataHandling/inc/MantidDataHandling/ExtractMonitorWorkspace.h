@@ -16,7 +16,7 @@ namespace DataHandling {
     hold a reference to the monitor workspace after running this algorithm.
     If no monitor workspace is present the algorithm will fail.
 */
-class DLLExport ExtractMonitorWorkspace : public API::Algorithm {
+class DLLExport ExtractMonitorWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

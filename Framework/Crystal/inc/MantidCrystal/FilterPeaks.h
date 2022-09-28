@@ -16,7 +16,7 @@ namespace Crystal {
 /** FilterPeaks : Filter a peaks workspace based on a set number of queries to
   provide a new, filtered peaks workspace.
 */
-class MANTID_CRYSTAL_DLL FilterPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FilterPeaks final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -82,7 +82,7 @@ private:
    */
   template <typename Comparator>
   void filterPeaksStr(const Mantid::API::IPeaksWorkspace &inputWS, Mantid::API::IPeaksWorkspace &filteredWS,
-                      const FilterFunctionStr &filterFunction, const std::string filterValue) {
+                      const FilterFunctionStr &filterFunction, const std::string &filterValue) {
     Comparator operatorFunc;
     for (int i = 0; i < inputWS.getNumberPeaks(); ++i) {
       const Geometry::IPeak &currentPeak = inputWS.getPeak(i);

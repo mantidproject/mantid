@@ -68,13 +68,24 @@ const std::string ParallaxCorrection::summary() const {
   return "Performs parallax correction for tube based SANS instruments.";
 }
 
+/// Validate inputs @see Algorithm::validateInputs
+std::map<std::string, std::string> ParallaxCorrection::validateInputs() {
+  std::map<std::string, std::string> results;
+  const std::vector<double> angleOffsets = getProperty("AngleOffsets");
+  const std::vector<std::string> componentNames = getProperty("ComponentNames");
+  if (angleOffsets.size() != componentNames.size() && angleOffsets.size() != 1) {
+    results["AngleOffsets"] = "Angle offsets should have one value or as many "
+                              "as there are components";
+  }
+  return results;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ParallaxCorrection::init() {
   auto validator = std::make_shared<Kernel::CompositeValidator>();
   validator->add(std::make_unique<API::InstrumentValidator>());
-  validator->add(std::make_unique<API::WorkspaceUnitValidator>("Wavelength"));
   auto lengthValidator = std::make_shared<Kernel::ArrayLengthValidator<std::string>>();
   lengthValidator->setLengthMin(1);
   declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "",
@@ -85,6 +96,10 @@ void ParallaxCorrection::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "An output workspace.");
+
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("AngleOffsets", std::vector<double>{0.0}),
+                  "The values of offset angles [degrees] to be subtracted from "
+                  "the scattering angle (per component).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -94,9 +109,11 @@ void ParallaxCorrection::init() {
  * @param indices : the workspaces indices corresponding to the bank
  * @param parallax : the correction formula for the bank
  * @param direction : the tube direction in the bank
+ * @param angleOffset : the tilt angle that needs to be subtracted from 2thetas before evaluating the formula
  */
 void ParallaxCorrection::performCorrection(const API::MatrixWorkspace_sptr &outWS, const std::vector<size_t> &indices,
-                                           const std::string &parallax, const std::string &direction) {
+                                           const std::string &parallax, const std::string &direction,
+                                           const double angleOffset) {
   double t;
   mu::Parser muParser;
   muParser.DefineVar("t", &t);
@@ -110,6 +127,7 @@ void ParallaxCorrection::performCorrection(const API::MatrixWorkspace_sptr &outW
     } else {
       t = std::fabs(std::atan2(pos.Y(), pos.Z()));
     }
+    t -= angleOffset * M_PI / 180.;
     const double correction = muParser.Eval();
     if (correction > 0.) {
       auto &spectrum = outWS->mutableY(wsIndex);
@@ -131,13 +149,17 @@ void ParallaxCorrection::exec() {
   if (inputWorkspace != outputWorkspace) {
     outputWorkspace = inputWorkspace->clone();
   }
+  const std::vector<double> angleOffsets = getProperty("AngleOffsets");
   const std::vector<std::string> componentNames = getProperty("ComponentNames");
   const auto &instrument = inputWorkspace->getInstrument();
   const auto &detectorInfo = outputWorkspace->detectorInfo();
   const auto &allDetIDs = detectorInfo.detectorIDs();
   const auto &componentInfo = outputWorkspace->componentInfo();
   auto progress = std::make_unique<API::Progress>(this, 0., 1., componentNames.size());
+  size_t componentIndex = 0;
   for (const auto &componentName : componentNames) {
+    const double angleOffset = angleOffsets[(angleOffsets.size() == 1) ? 0 : componentIndex];
+    ++componentIndex;
     progress->report("Performing parallax correction for component " + componentName);
     const auto component = instrument->getComponentByName(componentName);
     if (!component) {
@@ -157,8 +179,7 @@ void ParallaxCorrection::exec() {
                     << componentName << ". Reason: " << valid << "\n";
       continue;
     }
-    const auto componentIndex = componentInfo.indexOfAny(componentName);
-    const auto &detectorIndices = componentInfo.detectorsInSubtree(componentIndex);
+    const auto &detectorIndices = componentInfo.detectorsInSubtree(componentInfo.indexOfAny(componentName));
     if (detectorIndices.empty()) {
       g_log.error() << "No detectors found in component " << componentName << "\n";
       continue;
@@ -168,7 +189,7 @@ void ParallaxCorrection::exec() {
     std::transform(detectorIndices.cbegin(), detectorIndices.cend(), std::back_inserter(detIDs),
                    [&allDetIDs](size_t i) { return allDetIDs[i]; });
     const auto indices = outputWorkspace->getIndicesFromDetectorIDs(detIDs);
-    performCorrection(outputWorkspace, indices, parallax, direction);
+    performCorrection(outputWorkspace, indices, parallax, direction, angleOffset);
   }
   setProperty("OutputWorkspace", outputWorkspace);
 }

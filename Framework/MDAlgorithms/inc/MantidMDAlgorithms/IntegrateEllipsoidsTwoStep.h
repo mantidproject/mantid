@@ -23,7 +23,7 @@ namespace MDAlgorithms {
   IntegrateEllipsoidsTwoStep provides a two pass peak integration algorithm.
 */
 
-class DLLExport IntegrateEllipsoidsTwoStep : public API::Algorithm {
+class DLLExport IntegrateEllipsoidsTwoStep final : public API::Algorithm {
 public:
   /// Get the name of this algorithm
   const std::string name() const override;

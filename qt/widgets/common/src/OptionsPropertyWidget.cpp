@@ -20,7 +20,7 @@ namespace MantidQt::API {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-OptionsPropertyWidget::~OptionsPropertyWidget() {}
+OptionsPropertyWidget::~OptionsPropertyWidget() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

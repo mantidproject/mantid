@@ -10,6 +10,7 @@
 
 #include <deque>
 #include <memory>
+#include <string>
 
 namespace MantidQt::API {
 class IConfiguredAlgorithm;
@@ -37,7 +38,7 @@ public:
  *
  * IJobRunner is an interface to a class that provides functionality to run a batch algorithm queue
  */
-class IJobRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL IJobRunner {
 public:
   virtual ~IJobRunner() = default;
   virtual void subscribe(JobRunnerSubscriber *notifyee) = 0;

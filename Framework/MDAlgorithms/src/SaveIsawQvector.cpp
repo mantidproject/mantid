@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 
-#include <fstream>
-
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -15,6 +13,9 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
+
+#include <algorithm>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -109,8 +110,9 @@ void SaveIsawQvector::exec() {
     coord_map[2] = 1;
   }
   if (this->getProperty("RightHanded")) {
-    for (double &coord_sign : coord_signs)
-      coord_sign *= -1.; // everything changes sign
+    // everything changes sign
+    std::transform(std::cbegin(coord_signs), std::cend(coord_signs), std::begin(coord_signs),
+                   [](const auto value) { return -value; });
   }
 
   // units conersion helper

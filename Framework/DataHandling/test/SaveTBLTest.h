@@ -30,7 +30,7 @@ public:
 
   SaveTBLTest() : m_name("SaveTBLTestWS"), m_filename("SaveTBLTest.tbl"), m_abspath() {}
 
-  ~SaveTBLTest() override {}
+  ~SaveTBLTest() override = default;
 
   void testNoQuotes() {
     ITableWorkspace_sptr ws = CreatePopulatedWorkspace();

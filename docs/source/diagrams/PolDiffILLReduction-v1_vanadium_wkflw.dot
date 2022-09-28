@@ -5,6 +5,8 @@ digraph Vanadium {
     $decision_style
     AverageCounts
     SelfAttenuationMethod
+    TimeOfFlight1 [label="Time-of-flight"]
+    TimeOfFlight2 [label="Time-of-flight"]
   }
 
   subgraph params {
@@ -45,7 +47,10 @@ digraph Vanadium {
   CadmiumWorkspace -> Minus
   EmptyContainerWorkspace -> Minus
   Transmission -> Minus
-  Minus -> Multiply
+  Minus -> TimeOfFlight1
+  TimeOfFlight1 -> FrameOverlapCorrection
+  FrameOverlapCorrection -> Multiply
+  TimeOfFlight1 -> Multiply
   QuartzWorkspace -> Multiply
   Multiply -> SelfAttenuationMethod
   SelfAttenuationMethod -> PaalmanPingsMonteCarloAbsorption
@@ -57,9 +62,13 @@ digraph Vanadium {
   PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
   SelfAttenuationMethod -> SampleSelfAttenuationFactors
   SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
-  ApplyPaalmanPingsCorrection -> AverageCounts
-  SelfAttenuationMethod -> AverageCounts
-  Divide2 -> AverageCounts
+  SelfAttenuationMethod -> TimeOfFlight2
+  ApplyPaalmanPingsCorrection -> TimeOfFlight2
+  Divide2 -> TimeOfFlight2
+  TimeOfFlight2 -> AverageCounts
+  TimeOfFlight2 -> EnergyEfficiencyCorrection
+  EnergyEfficiencyCorrection -> ElasticPeakCalibration
+  ElasticPeakCalibration -> AverageCounts
   AverageCounts -> Divide3
   AverageCounts -> Plus
   Plus -> Divide3

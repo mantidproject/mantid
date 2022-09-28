@@ -7,20 +7,24 @@
 # pylint: disable=invalid-name
 from os import path
 from mantidqt.utils.observer_pattern import Observable
+from Engineering.EnggUtils import CALIB_DIR
 
-CALIB_FOLDER = path.join(path.dirname(path.dirname(path.dirname(path.dirname(path.realpath(__file__))))), "calib")
 DEFAULT_FULL_INST_CALIB = "ENGINX_full_instrument_calibration_193749.nxs"
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "logs": str,
-                 "primary_log": str, "sort_ascending": bool, "default_peak": str}
+                 "primary_log": str, "sort_ascending": bool, "default_peak": str,
+                 "path_to_gsas2": str, "timeout": str, "dSpacing_min": str}
 
 DEFAULT_SETTINGS = {
-    "full_calibration": path.join(CALIB_FOLDER, DEFAULT_FULL_INST_CALIB),
+    "full_calibration": path.join(CALIB_DIR, DEFAULT_FULL_INST_CALIB),
     "save_location": path.join(path.expanduser("~"), "Engineering_Mantid"),
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
     "sort_ascending": True,
-    "default_peak": "BackToBackExponential"
+    "default_peak": "BackToBackExponential",
+    "path_to_gsas2": "/opt/gsas2",  # default on IDAaaS
+    "timeout": "10",  # seconds
+    "dSpacing_min": "1.0"  # angstroms
 }
 
 ALL_LOGS = ','.join(
@@ -89,6 +93,9 @@ class SettingsPresenter(object):
         self.settings["primary_log"] = self.view.get_primary_log()
         self.settings["sort_ascending"] = self.view.get_ascending_checked()
         self.settings["default_peak"] = self.view.get_peak_function()
+        self.settings["path_to_gsas2"] = self.view.get_path_to_gsas2()
+        self.settings["timeout"] = self.view.get_timeout()
+        self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
 
     def _show_settings_in_view(self):
         self._validate_settings()
@@ -98,11 +105,15 @@ class SettingsPresenter(object):
         self.view.set_primary_log_combobox(self.settings["primary_log"])
         self.view.set_ascending_checked(self.settings["sort_ascending"])
         self.view.set_peak_function(self.settings["default_peak"])
+        self.view.set_path_to_gsas2(self.settings["path_to_gsas2"])
+        self.view.set_timeout(self.settings["timeout"])
+        self.view.set_dSpacing_min(self.settings["dSpacing_min"])
         self._find_files()
 
     def _find_files(self):
         self.view.find_full_calibration()
         self.view.find_save()
+        self.view.find_path_to_gsas2()
 
     def _save_settings_to_file(self):
         self._validate_settings()
@@ -129,12 +140,18 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("default_peak")
         if not self.settings["default_peak"] in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
+        self.check_and_populate_with_default("full_calibration")
+        if not path.isfile(self.settings["full_calibration"]):
+            self.settings["full_calibration"] = DEFAULT_SETTINGS["full_calibration"]
         self.check_and_populate_with_default("save_location")
         self.check_and_populate_with_default("logs")
-        self.check_and_populate_with_default("full_calibration")
+
         self.check_and_populate_with_default("primary_log")
         # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")
+        self.check_and_populate_with_default("path_to_gsas2")
+        self.check_and_populate_with_default("timeout")
+        self.check_and_populate_with_default("dSpacing_min")
 
     # -----------------------
     # Observers / Observables

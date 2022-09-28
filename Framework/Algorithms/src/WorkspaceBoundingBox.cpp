@@ -18,7 +18,7 @@ WorkspaceBoundingBox::WorkspaceBoundingBox() {
   m_spectrumInfo = nullptr; // certain functionality is not available
 }
 
-WorkspaceBoundingBox::~WorkspaceBoundingBox() {}
+WorkspaceBoundingBox::~WorkspaceBoundingBox() = default;
 
 Kernel::V3D &WorkspaceBoundingBox::position(int index) const {
   if (m_cachedPositionIndex != index) {

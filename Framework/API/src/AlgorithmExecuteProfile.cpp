@@ -27,5 +27,9 @@ bool Algorithm::execute() {
       Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister, name());
   return executeInternal();
 }
+void Algorithm::addTimer(const std::string &name, const Kernel::time_point_ns &begin,
+                         const Kernel::time_point_ns &end) {
+  Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister.addTime(name, begin, end);
+}
 } // namespace API
 } // namespace Mantid

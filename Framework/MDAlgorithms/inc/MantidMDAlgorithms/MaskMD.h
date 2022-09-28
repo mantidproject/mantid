@@ -20,7 +20,7 @@ std::vector<std::string> MANTID_MDALGORITHMS_DLL parseDimensionNames(const std::
 
   @date 2012-03-01
 */
-class MANTID_MDALGORITHMS_DLL MaskMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL MaskMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

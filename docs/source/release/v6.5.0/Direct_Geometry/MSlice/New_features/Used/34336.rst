@@ -1,0 +1,3 @@
+- Added ability to correct intensity of cuts.
+- Updated documentation.
+- Updated quick options for lines to consider new colour mapping and line width changes.

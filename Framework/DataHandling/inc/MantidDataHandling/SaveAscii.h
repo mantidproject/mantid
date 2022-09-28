@@ -21,7 +21,7 @@ are saved in columns.
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
 */
-class DLLExport SaveAscii : public API::Algorithm {
+class DLLExport SaveAscii final : public API::Algorithm {
 public:
   /// Default constructor
   SaveAscii();

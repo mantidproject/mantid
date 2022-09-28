@@ -21,7 +21,7 @@ namespace Crystal {
    given lhs peak if
     the tolerance is too large/the peaks are close together.
 */
-class MANTID_CRYSTAL_DLL CombinePeaksWorkspaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CombinePeaksWorkspaces final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

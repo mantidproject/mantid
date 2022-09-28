@@ -62,7 +62,7 @@ Fit results
 
 After a successful fit the results can be examined in three ways.
 
-A. A **plot of the fitted model** will be added to the graph which now
+A. A **plot of the fitted model** will be added to the graph that now
    shows the :blue:`Original data`, the :orange:`Calculated fit` and the :green:`Difference between them`.
 
 B. The Fit Function property browser will show the **fitted parameters**

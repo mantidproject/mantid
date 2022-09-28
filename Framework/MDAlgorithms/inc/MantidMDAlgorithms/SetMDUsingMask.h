@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-10
 */
-class DLLExport SetMDUsingMask : public API::Algorithm {
+class DLLExport SetMDUsingMask final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

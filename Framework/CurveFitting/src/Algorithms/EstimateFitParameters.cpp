@@ -110,7 +110,7 @@ class BestParameters {
   /// Maximum size of the store
   size_t m_size;
   /// Actual storage.
-  std::map<double, GSLVector> m_params;
+  std::map<double, EigenVector> m_params;
 
 public:
   /// Constructor
@@ -118,7 +118,7 @@ public:
   /// Test a cost function value if corresponding parameters must be stored.
   bool isOneOfBest(double value) const { return m_params.size() < m_size || value < m_params.rbegin()->first; }
   /// Insert a set of parameters to the store.
-  void insertParams(double value, const GSLVector &params) {
+  void insertParams(double value, const EigenVector &params) {
     if (m_params.size() == m_size) {
       auto it = m_params.find(m_params.rbegin()->first);
       m_params.erase(it);
@@ -126,8 +126,8 @@ public:
     m_params[value] = params;
   }
   /// Return all stored parameters, drop function values.
-  std::vector<GSLVector> getParams() const {
-    std::vector<GSLVector> res;
+  std::vector<EigenVector> getParams() const {
+    std::vector<EigenVector> res;
     res.reserve(m_params.size());
     std::transform(m_params.begin(), m_params.end(), std::back_inserter(res), [](const auto &it) { return it.second; });
     return res;
@@ -143,17 +143,17 @@ public:
 /// @param constraints :: Additional constraints.
 /// @param nSamples :: A number of samples to generate.
 /// @param seed :: A seed for the random number generator.
-std::vector<GSLVector> runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
-                                     const std::vector<std::pair<double, double>> &ranges,
-                                     const std::vector<std::unique_ptr<IConstraint>> &constraints,
-                                     const size_t nSamples, const size_t nOutput, const unsigned int seed) {
+std::vector<EigenVector> runMonteCarlo(CostFunctions::CostFuncFitting &costFunction,
+                                       const std::vector<std::pair<double, double>> &ranges,
+                                       const std::vector<std::unique_ptr<IConstraint>> &constraints,
+                                       const size_t nSamples, const size_t nOutput, const unsigned int seed) {
   std::mt19937 rng;
   if (seed != 0) {
     rng.seed(seed);
   }
   double value = costFunction.val() + getConstraints(constraints);
   auto nParams = costFunction.nParams();
-  GSLVector params;
+  EigenVector params;
   costFunction.getParameters(params);
   BestParameters bestParams(nOutput);
   bestParams.insertParams(value, params);
@@ -222,9 +222,9 @@ void runCrossEntropy(CostFunctions::CostFuncFitting &costFunction, const std::ve
   if (seed != 0) {
     rng.seed(seed);
   }
-  // Sets of function parameters (GSLVector) and corresponding values of the
+  // Sets of function parameters (EigenVector) and corresponding values of the
   // cost function (double)
-  using ParameterSet = std::pair<double, GSLVector>;
+  using ParameterSet = std::pair<double, EigenVector>;
   std::vector<ParameterSet> sampleSets(nSamples);
   // Function for comparing parameter sets.
   auto compareSets = [](const ParameterSet &p1, const ParameterSet &p2) { return p1.first < p2.first; };
@@ -254,8 +254,8 @@ void runCrossEntropy(CostFunctions::CostFuncFitting &costFunction, const std::ve
     // Find nSelection smallest values.
     std::partial_sort(sampleSets.begin(), sampleSets.begin() + nSelection, sampleSets.end(), compareSets);
     // Estimate new distribution parameters from the sample of nSelection sets.
-    GSLVector means(nParams);
-    GSLVector variances(nParams);
+    EigenVector means(nParams);
+    EigenVector variances(nParams);
     for (size_t isam = 0; isam < nSelection; ++isam) {
       auto &paramSet = sampleSets[isam];
       for (size_t i = 0; i < nParams; ++i) {

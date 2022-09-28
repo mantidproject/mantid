@@ -15,7 +15,6 @@ namespace DataProcessor {
 PreprocessMap::PreprocessMap() : m_map() {}
 
 // Destructor
-PreprocessMap::~PreprocessMap() {}
 
 /** Add a column that needs pre-processing
  * @param column :: the name of the column that needs pre-processing

@@ -18,6 +18,7 @@
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/kernel.h"
+#include "MantidPythonInterface/core/PythonLoggingChannel.h"
 #include "MantidPythonInterface/core/PythonStdoutChannel.h"
 
 // See
@@ -45,6 +46,9 @@ BOOST_PYTHON_MODULE(_kernel) {
   // Import numpy for this DLL
   _import_array();
   // register the python logger with poco
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+    "PythonLoggingChannel",
+    new Poco::Instantiator<Poco::PythonLoggingChannel, Poco::Channel>);
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
     "PythonStdoutChannel",
     new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);

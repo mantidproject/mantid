@@ -1,0 +1,29 @@
+digraph DarkCurrent {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+  }
+
+  Runs -> LoadAndMerge
+  NormaliseBy -> Divide
+  LoadAndMerge -> Divide
+  Divide -> OutputWorkspace
+}

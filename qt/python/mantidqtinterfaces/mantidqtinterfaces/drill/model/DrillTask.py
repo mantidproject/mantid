@@ -18,20 +18,9 @@ class DrillTaskSignals(QObject):
     """
 
     """
-    Sent when the task starts.
-    Args:
-        object: the task
-    """
-    started = Signal(object)
-
-    """
     Sent when the task finishes.
-    Args:
-        object: the task
-        int: return value (0: success)
-        str: error message
     """
-    finished = Signal(object, int, str)
+    finished = Signal(object)
 
     """
     Sent when the task progress is updated.
@@ -52,9 +41,27 @@ class DrillTask(QRunnable):
     """
     _name = None
 
+    """
+    Callbacks for task start.
+    """
+    _startCallbacks = None
+
+    """
+    Callbacks in case of success.
+    """
+    _successCallbacks = None
+
+    """
+    Callbacks in case of error.
+    """
+    _errorCallbacks = None
+
     def __init__(self, name, alg, **kwargs):
         super(DrillTask, self).__init__()
         self._name = name
+        self._startCallbacks = list()
+        self._successCallbacks = list()
+        self._errorCallbacks = list()
         self.signals = DrillTaskSignals()
         self.algName = alg
         self.alg = None
@@ -69,12 +76,40 @@ class DrillTask(QRunnable):
         """
         return self._name
 
+    def addStartedCallback(self, callback):
+        """
+        Add a callback in the start callbaks list.
+
+        Args:
+            callback (function): callback
+        """
+        self._startCallbacks.append(callback)
+
+    def addSuccessCallback(self, callback):
+        """
+        Add a callback in the success callbaks list.
+
+        Args:
+            callback (function): callback
+        """
+        self._successCallbacks.append(callback)
+
+    def addErrorCallback(self, callback):
+        """
+        Add a callback in the error callbacks list.
+
+        Args:
+            callback (function): callback
+        """
+        self._errorCallbacks.append(callback)
+
     def run(self):
         """
         Override QRunnable::run. Provide the running part of the task that will
         start in an other thread.
         """
-        self.signals.started.emit(self)
+        for f in self._startCallbacks:
+            f()
         self.alg = sapi.AlgorithmManager.create(self.algName)
         errors = list()
         for (k, v) in self.properties.items():
@@ -83,15 +118,13 @@ class DrillTask(QRunnable):
             except Exception as e:
                 errors.append(str(e))
         if errors:
-            self.signals.finished.emit(self, 1, " - ".join(errors))
+            self._onFinished(1, " - ".join(errors))
             return
         # setup the observer
         self.observer = DrillAlgorithmObserver()
         self.observer.observeFinish(self.alg)
         self.observer.observeError(self.alg)
-        self.observer.signals.finished.connect(
-                lambda ret, msg : self.signals.finished.emit(self, ret, msg)
-                )
+        self.observer.signals.finished.connect(self._onFinished)
         self.observer.observeProgress(self.alg)
         self.observer.signals.progress.connect(
                 lambda p : self.signals.progress.emit(self, p)
@@ -99,11 +132,28 @@ class DrillTask(QRunnable):
         try:
             ret = self.alg.execute()
             if not ret:
-                self.signals.finished.emit(self, 1, "")
+                self._onFinished(1, "")
         except Exception as ex:
-            self.signals.finished.emit(self, 1, str(ex))
+            self._onFinished(1, str(ex))
         except KeyboardInterrupt:
             pass
+
+    def _onFinished(self, returnCode, errorMsg=""):
+        """
+        To be called when task is finished. If will call the adapted callbacks
+        and emit the finish signal.
+
+        Args:
+            returnCode (int): return code of the task
+            errorMsg (str): optionnal error message
+        """
+        if returnCode == 0:
+            for fct in self._successCallbacks:
+                fct()
+        else:
+            for fct in self._errorCallbacks:
+                fct(errorMsg)
+        self.signals.finished.emit(self)
 
     def cancel(self):
         """
@@ -113,4 +163,4 @@ class DrillTask(QRunnable):
         """
         if self.alg and self.alg.isRunning():
             self.alg.cancel()
-            self.signals.finished.emit(self, 1, "Processing cancelled")
+            self._onFinished(1, "Processing cancelled")

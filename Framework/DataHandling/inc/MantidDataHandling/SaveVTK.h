@@ -39,7 +39,7 @@ namespace DataHandling {
    @author Martyn Gigg, Tessella Support Services plc
    @date 05/11/2008
 */
-class DLLExport SaveVTK : public API::Algorithm {
+class DLLExport SaveVTK final : public API::Algorithm {
 
 public:
   /// Default constructor

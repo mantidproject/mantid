@@ -9,15 +9,19 @@
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ExperimentOptionDefaults.h"
+#include "GUI/Preview/ROIType.h"
 #include "IExperimentPresenter.h"
 #include "IExperimentView.h"
 #include "LookupTableValidationError.h"
 #include "Reduction/Experiment.h"
+#include "Reduction/PreviewRow.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+class LookupRow;
 
 class ExperimentValidationErrors {
 public:
@@ -61,7 +65,10 @@ public:
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyPreviewApplyRequested(PreviewRow const &previewRow) override;
   void restoreDefaults() override;
+
+  bool hasValidSettings() const noexcept override;
 
 protected:
   std::unique_ptr<IExperimentOptionDefaults> m_experimentDefaults;
@@ -79,11 +86,12 @@ private:
 
   std::map<std::string, std::string> stitchParametersFromView();
 
-  ExperimentValidationResult updateModelFromView();
+  void updateModelFromView();
   void updateViewFromModel();
 
-  void showValidationResult(ExperimentValidationResult const &result);
+  void showValidationResult();
   void showLookupTableErrors(LookupTableValidationError const &errors);
+  void showFullTableError(LookupCriteriaError const &tableError, int row, int column);
 
   void updateWidgetEnabledState();
   void updateSummationTypeEnabledState();
@@ -91,12 +99,15 @@ private:
   void updatePolarizationCorrectionEnabledState();
   void updateFloodCorrectionEnabledState();
 
+  void updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow, ROIType regionType);
+
   bool isProcessing() const;
   bool isAutoreducing() const;
 
-  IExperimentView *m_view;
+  IExperimentView *m_view = nullptr;
   Experiment m_model;
-  double m_thetaTolerance;
+  double m_thetaTolerance = 0;
+  ExperimentValidationResult m_validationResult;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

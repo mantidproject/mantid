@@ -273,7 +273,7 @@ template <typename MDE, size_t nd> void BinMD::binByIterating(typename MDEventWo
 
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for (int chunk = 0; chunk < int(m_binDimensions[chunkDimension]->getNBins()); chunk += chunkNumBins) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       // Region of interest for this chunk.
       std::vector<size_t> chunkMin(m_outD);
       std::vector<size_t> chunkMax(m_outD);
@@ -326,9 +326,9 @@ template <typename MDE, size_t nd> void BinMD::binByIterating(typename MDEventWo
         if (this->m_cancel)
           break;
       } // for each box in the vector
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     } // for each chunk in parallel
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Now the implicit function
     if (implicitFunction) {

@@ -103,9 +103,9 @@ boost::optional<Python::Object> workbenchPlot(QStringList const &workspaceNames,
 
 namespace MantidQt::Widgets::MplCpp {
 
-ExternalPlotter::ExternalPlotter() {}
+ExternalPlotter::ExternalPlotter() = default;
 
-ExternalPlotter::~ExternalPlotter() {}
+ExternalPlotter::~ExternalPlotter() = default;
 
 /**
  * Calls plotSpectra with no kwargs

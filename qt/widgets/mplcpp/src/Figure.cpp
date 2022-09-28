@@ -95,7 +95,7 @@ void Figure::show() {
  */
 void Figure::setWindowTitle(const char *title) {
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  this->pyobj().attr("canvas").attr("set_window_title")(title);
+  this->pyobj().attr("canvas").attr("manager").attr("set_window_title")(title);
 }
 
 /**

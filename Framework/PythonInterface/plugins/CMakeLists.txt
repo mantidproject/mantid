@@ -4,6 +4,7 @@
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
     algorithms/Abins.py
+    algorithms/Abins2D.py
     algorithms/AlignAndFocusPowderFromFiles.py
     algorithms/AlignComponents.py
     algorithms/AngularAutoCorrelationsSingleAxis.py
@@ -76,6 +77,7 @@ set(PYTHON_PLUGINS
     algorithms/GetEiT0atSNS.py
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
+    algorithms/GroupBySampleChangerPosition.py
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
     algorithms/HB3AFindPeaks.py
@@ -87,6 +89,7 @@ set(PYTHON_PLUGINS
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/IntegratePeaksProfileFitting.py
+    algorithms/IntegratePeaksSkew.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
@@ -146,6 +149,7 @@ set(PYTHON_PLUGINS
     algorithms/PearlMCAbsorption.py
     algorithms/PEARLTransfit.py
     algorithms/PelicanReduction.py
+    algorithms/PelicanCrystalProcessing.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
@@ -208,6 +212,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py
+    algorithms/WorkflowAlgorithms/DirectILLAutoProcess.py
     algorithms/WorkflowAlgorithms/DirectILLCollectData.py
     algorithms/WorkflowAlgorithms/DirectILLDiagnostics.py
     algorithms/WorkflowAlgorithms/DirectILLIntegrateVanadium.py
@@ -293,15 +298,19 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANSDirectBeamTransmission.py
     algorithms/WorkflowAlgorithms/SANSFitShiftScale.py
     algorithms/WorkflowAlgorithms/SANSILLAutoProcess.py
+    algorithms/WorkflowAlgorithms/SANSILLCommon.py
     algorithms/WorkflowAlgorithms/SANSILLIntegration.py
+    algorithms/WorkflowAlgorithms/SANSILLMultiProcess.py
     algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
     algorithms/WorkflowAlgorithms/SANSILLReduction.py
+    algorithms/WorkflowAlgorithms/SANSILLReduction2.py
     algorithms/WorkflowAlgorithms/SANSMask.py
     algorithms/WorkflowAlgorithms/SANSPatchSensitivity.py
     algorithms/WorkflowAlgorithms/SANSReduction.py
     algorithms/WorkflowAlgorithms/SANSStitch.py
     algorithms/WorkflowAlgorithms/SavePlot1D.py
     algorithms/WorkflowAlgorithms/SaveVulcanGSS.py
+    algorithms/WorkflowAlgorithms/SimpleShapeDiscusInelastic.py
     algorithms/WorkflowAlgorithms/SimpleShapeMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/SimulatedDensityOfStates.py
     algorithms/WorkflowAlgorithms/SingleCrystalDiffuseReduction.py

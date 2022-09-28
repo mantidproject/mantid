@@ -140,8 +140,8 @@ std::string ConventionalCell::GetDescription() const {
  *  @param allowPermutations Allow permutations of conventional cells for
  *                           related UBs with better fit to peaks.
  */
-void ConventionalCell::init(const Kernel::DblMatrix &UB, ReducedCell &form_0, ReducedCell &form_i,
-                            bool allowPermutations) {
+void ConventionalCell::init(const Kernel::DblMatrix &UB, const ReducedCell &form_0, ReducedCell &form_i,
+                            const bool allowPermutations) {
   scalars_error = form_0.WeightedDistance(form_i);
   cell_type = form_i.GetCellType();
   centering = form_i.GetCentering();

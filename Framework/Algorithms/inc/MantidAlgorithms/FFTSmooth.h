@@ -21,7 +21,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 07/07/2009
  */
-class MANTID_ALGORITHMS_DLL FFTSmooth : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL FFTSmooth final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   FFTSmooth() { this->useAlgorithm("FFTSmooth", 2); }

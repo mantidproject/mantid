@@ -756,14 +756,14 @@ interface method (*parse_line* which takes a single line to parse)
 needs to be provided.
 
 For an overview of the user file commands, please see the
-`user file documentation <https://www.mantidproject.org/SANS_User_File_Commands>`_ .
+:ref:`user file documentation <ISIS_SANS_User_File_QRes-ref>`.
 
 Director for *ISISCommandInterface* (CLI)
 *****************************************
 
 The *ISISCommandInterface* is used by some of the power users among the instrument scientists. It is
 an efficient way to customize reductions which require small tweaks between different reductions.
-Please consult the `scripting documentation <https://www.mantidproject.org/Scripting_SANS_Reductions>`_
+Please consult the :ref:`scripting documentation <ScriptingSANSReductions>`
 for the *ISISCommandInterface* for more information.
 
 The principal component which sets up the state behind the scene is *CommandInterfaceStateDirector*. It has to deal

@@ -93,6 +93,11 @@ def check(label, modest, axes, thresh=2.e-5):
 
     assert rms < thresh
 
+def set_bounds(modest, ax, x0, x1, y0, y1):
+    modest.axes.set_xlim(x0, x1)
+    ax.axes.set_xlim(x0, x1)
+    modest.axes.set_ylim(y0, y1)
+    ax.axes.set_ylim(y0, y1)
 
 class ModestImageTest(unittest.TestCase):
     def test_default(self):
@@ -230,16 +235,75 @@ class ModestImageTest(unittest.TestCase):
         ax = init(mi.AxesImage, data)
 
         #change axes and redraw, forces modest image resampling
-        modest.axes.set_xlim(20, 25)
-        ax.axes.set_xlim(20, 25)
-        modest.axes.set_ylim(20, 25)
-        ax.axes.set_ylim(20, 25)
+        x0, x1, y0, y1 = 20, 25, 20, 25
+        set_bounds(modest, ax, x0, x1, y0, y1)
         ax.axes.figure.canvas.draw()
         modest.axes.figure.canvas.draw()
         np.testing.assert_array_equal(modest.get_array(),
                                       ax.get_array())
 
+    def test_get_array_clipped_to_bounds_with_full_image(self):
+        """ get_array_clipped_to_bounds should return the full data if the axes limits are not set"""
+        data = default_data()
+        modest = init(ModestImage, data)
+        ax = init(mi.AxesImage, data)
 
+        result = modest.get_array_clipped_to_bounds()
+
+        np.testing.assert_array_equal(result, ax.get_array())
+
+    def test_get_array_clipped_to_bounds(self):
+        """ get_array_clipped_to_bounds should return the data clipped to the axes limits"""
+        data = default_data()
+        modest = init(ModestImage, data)
+        ax = init(mi.AxesImage, data)
+        x0, x1, y0, y1 = 20, 25, 30, 35
+        set_bounds(modest, ax, x0, x1, y0, y1)
+
+        result = modest.get_array_clipped_to_bounds()
+
+        expected = data[y0:y1+1:1, x0:x1+1:1]
+        np.testing.assert_array_equal(result, expected)
+
+    def test_get_array_clipped_to_bounds_of_1x1_pixels(self):
+        """ test get_array_clipped_to_bounds with limits of 1 pixel"""
+        data = default_data()
+        modest = init(ModestImage, data)
+        ax = init(mi.AxesImage, data)
+        x0, x1, y0, y1 = 20, 21, 30, 31
+        set_bounds(modest, ax, x0, x1, y0, y1)
+
+        result = modest.get_array_clipped_to_bounds()
+
+        expected = data[y0:y1+1:1, x0:x1+1:1]
+        np.testing.assert_array_equal(result, expected)
+
+    def test_get_array_clipped_to_bounds_for_out_of_bounds_extents(self):
+        """ test get_array_clipped_to_bounds with out of bounds extents"""
+        data = default_data()
+        modest = init(ModestImage, data)
+        ax = init(mi.AxesImage, data)
+        x0, x1, y0, y1 = 320, 330, 330, 340
+        set_bounds(modest, ax, x0, x1, y0, y1)
+
+        result = modest.get_array_clipped_to_bounds()
+
+        # No data returned
+        np.testing.assert_array_equal(result.shape, (0, 0))
+
+    def test_get_array_clipped_to_bounds_for_partially_out_of_bounds_value(self):
+        """ test get_array_clipped_to_bounds with partially out of bounds extents"""
+        data = default_data()
+        modest = init(ModestImage, data)
+        ax = init(mi.AxesImage, data)
+        x0, x1, y0, y1 = 290, 310, 295, 315
+        set_bounds(modest, ax, x0, x1, y0, y1)
+
+        result = modest.get_array_clipped_to_bounds()
+
+        # The data range up to the axes limits is included
+        expected = data[y0:300:1, x0:300:1]
+        np.testing.assert_array_equal(result, expected)
 
     def test_extent(self):
 

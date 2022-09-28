@@ -106,7 +106,6 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist, const Pre
 
 /** Destructor
  */
-QDataProcessorWidget::~QDataProcessorWidget() {}
 
 /**
 Initialise the Interface
@@ -118,13 +117,9 @@ void QDataProcessorWidget::createTable() {
   auto *header = new QHeaderView(Qt::Horizontal);
   header->setStretchLastSection(true);
   header->setStyleSheet("QHeaderView {font-size:11pt;}");
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  header->setMovable(true);
-  header->setResizeMode(QHeaderView::ResizeToContents);
-#else
   header->setSectionsMovable(true);
   header->setSectionResizeMode(QHeaderView::ResizeToContents);
-#endif
+
   ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes

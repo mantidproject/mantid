@@ -19,7 +19,7 @@ namespace MDAlgorithms {
 
   @date 2012-01-19
 */
-class DLLExport CompareMDWorkspaces : public API::Algorithm {
+class DLLExport CompareMDWorkspaces final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

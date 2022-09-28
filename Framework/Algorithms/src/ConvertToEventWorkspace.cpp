@@ -55,7 +55,7 @@ void ConvertToEventWorkspace::exec() {
   Progress prog(this, 0.0, 1.0, inWS->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS))
   for (int iwi = 0; iwi < int(inWS->getNumberHistograms()); iwi++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto wi = size_t(iwi);
 
     // The input spectrum (a histogram)
@@ -68,9 +68,9 @@ void ConvertToEventWorkspace::exec() {
     el.createFromHistogram(&inSpec, GenerateZeros, GenerateMultipleEvents, MaxEventsPerBin);
 
     prog.report("Converting");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Set the output
   setProperty("OutputWorkspace", std::move(outWS));

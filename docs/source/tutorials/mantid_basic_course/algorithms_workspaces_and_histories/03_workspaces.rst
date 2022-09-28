@@ -6,7 +6,7 @@ What is a Bin?, What is a Workspace? and the Power of Rebin
 
 Most data within Mantid are Histogram-like, so imagine a plot: There is an X-axis with a measured/calculated
 unit, such as Time-of-Flight (TOF) in μs. The Y-axis is the Counts (How many neutrons / positrons were detected
-at each TOF value?) and will have the inverse unit of the X-axis, such as (μs):sup:`-1`.
+at each TOF value?) and will have the inverse unit of the X-axis, such as μs :superscript:`-1`.
 
 But in a Histogram we cut the X-axis into set range blocks, and plot the Total Count (Y) within each block (range in X). Each set range or block is referred to as a "Bin". The Bins may be of equal length or varying length (see right).
 

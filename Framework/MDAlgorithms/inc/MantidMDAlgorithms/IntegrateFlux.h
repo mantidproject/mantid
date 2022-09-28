@@ -26,7 +26,7 @@ namespace MDAlgorithms {
   Calculates indefinite integral of the spectra in the input workspace sampled
   at a regular grid.
 */
-class DLLExport IntegrateFlux : public API::Algorithm {
+class DLLExport IntegrateFlux final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

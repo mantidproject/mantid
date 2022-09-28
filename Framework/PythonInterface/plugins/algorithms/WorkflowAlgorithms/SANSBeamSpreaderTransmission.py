@@ -67,7 +67,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
     def PyExec(self):  # noqa: C901
         # Get the reduction property manager
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         # Build the name we are going to give the transmission workspace
         sample_scatt = self.getPropertyValue("SampleScatteringFilename")

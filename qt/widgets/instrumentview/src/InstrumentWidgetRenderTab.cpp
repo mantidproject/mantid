@@ -12,10 +12,6 @@
 #include "MantidQtWidgets/InstrumentView/UCorrectionDialog.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
-
 #include <QAction>
 #include <QActionGroup>
 #include <QCheckBox>
@@ -87,7 +83,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(InstrumentWidget *instrWind
   setupGridBankMenu(renderControlsLayout);
 }
 
-InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() {}
+InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() = default;
 
 void InstrumentWidgetRenderTab::connectInstrumentWidgetSignals() const {
   // Connect to InstrumentWindow signals
@@ -188,6 +184,11 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   m_UCorrection = new QAction("U Correction", this);
   m_UCorrection->setToolTip("Manually set the limits on the horizontal axis.");
   connect(m_UCorrection, SIGNAL(triggered()), this, SLOT(setUCorrection()));
+  m_tooltipInfo = new QAction("Tooltip", this);
+  m_tooltipInfo->setToolTip("Show detector info in a tooltip when hovering.");
+  m_tooltipInfo->setCheckable(true);
+  m_tooltipInfo->setChecked(false);
+  connect(m_tooltipInfo, SIGNAL(toggled(bool)), this, SLOT(toggleTooltip(bool)));
 
   // Create "Use OpenGL" action
   m_GLView = new QAction("Use OpenGL", this);
@@ -210,6 +211,7 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
   displaySettingsMenu->addAction(m_UCorrection);
+  displaySettingsMenu->addAction(m_tooltipInfo);
 
   displaySettings->setMenu(displaySettingsMenu);
   connect(displaySettingsMenu, SIGNAL(hovered(QAction *)), this, SLOT(showMenuToolTip(QAction *)));
@@ -608,6 +610,8 @@ void InstrumentWidgetRenderTab::resetView() {
   m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
   m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
   m_instrWidget->getSurface()->freezeRotation(m_freezeRotation->isChecked());
+  toggleTooltip(m_tooltipInfo->isChecked());
+  m_instrWidget->setWireframe(m_wireframe->isChecked());
 }
 
 /**
@@ -721,6 +725,8 @@ void InstrumentWidgetRenderTab::displaySettingsAboutToshow() {
 void InstrumentWidgetRenderTab::setSurfaceType(int index) {
   if ((int)m_instrWidget->getSurfaceType() != index) {
     m_instrWidget->setSurfaceType(index);
+    toggleTooltip(m_tooltipInfo->isChecked());
+    m_instrWidget->setWireframe(m_wireframe->isChecked());
   }
 }
 
@@ -813,6 +819,13 @@ void InstrumentWidgetRenderTab::setUCorrection() {
 }
 
 /**
+ * @brief InstrumentWidgetRenderTab::toggleToolTip
+ * Change whether or not to display a tooltip with basic info when hovering over the instrument
+ * @param activate : the new status
+ */
+void InstrumentWidgetRenderTab::toggleTooltip(bool activate) { getSurface()->toggleToolTip(activate); }
+
+/**
  * Get current value for the u-correction for a RotationSurface.
  * Return 0 if it's not a RotationSurface.
  */
@@ -829,116 +842,15 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
  * Save widget render tab to a project file.
  * @return string representing the current state of the project file.
  */
-std::string MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-
-  API::TSVSerialiser tab;
-
-  tab.writeLine("AxesView") << mAxisCombo->currentIndex();
-  tab.writeLine("AutoScaling") << m_autoscaling->isChecked();
-  tab.writeLine("DisplayAxes") << m_displayAxes->isChecked();
-  tab.writeLine("FlipView") << m_flipCheckBox->isChecked();
-  tab.writeLine("DisplayDetectorsOnly") << m_displayDetectorsOnly->isChecked();
-  tab.writeLine("DisplayWireframe") << m_wireframe->isChecked();
-  tab.writeLine("DisplayLighting") << m_lighting->isChecked();
-  tab.writeLine("UseOpenGL") << m_GLView->isChecked();
-  tab.writeLine("UseUCorrection") << m_UCorrection->isChecked();
-
-  // peak options
-  auto surface = getSurface();
-  tab.writeLine("ShowLabels") << surface->getShowPeakLabelsFlag();
-  tab.writeLine("ShowRows") << surface->getShowPeakRowsFlag();
-  tab.writeLine("LabelPrecision") << surface->getPeakLabelPrecision();
-  tab.writeLine("ShowRelativeIntensity");
-  tab << surface->getShowPeakRelativeIntensityFlag();
-
-  const auto colorMap = m_colorBarWidget->saveToProject();
-  tab.writeSection("colormap", colorMap);
-
-  API::TSVSerialiser tsv;
-  tsv.writeSection("rendertab", tab.outputLines());
-  return tsv.outputLines();
-#else
-  return "";
-#endif
-}
+std::string MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const { return ""; }
 
 /**
  * Load the state of the render tab from a project file.
  * @param lines :: lines defining the state of the render tab
  */
 void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-
-  if (!tsv.selectSection("rendertab"))
-    return;
-
-  std::string tabLines;
-  tsv >> tabLines;
-  API::TSVSerialiser tab(tabLines);
-
-  bool autoScaling, displayAxes, flipView, displayDetectorsOnly, displayWireframe, displayLighting, useOpenGL,
-      useUCorrection;
-  int axesView;
-
-  tab.selectLine("AxesView");
-  tab >> axesView;
-  tab.selectLine("AutoScaling");
-  tab >> autoScaling;
-  tab.selectLine("DisplayAxes");
-  tab >> displayAxes;
-  tab.selectLine("FlipView");
-  tab >> flipView;
-  tab.selectLine("DisplayDetectorsOnly");
-  tab >> displayDetectorsOnly;
-  tab.selectLine("DisplayWireframe");
-  tab >> displayWireframe;
-  tab.selectLine("DisplayLighting");
-  tab >> displayLighting;
-  tab.selectLine("UseOpenGL");
-  tab >> useOpenGL;
-  tab.selectLine("UseUCorrection");
-  tab >> useUCorrection;
-
-  mAxisCombo->setCurrentIndex(axesView);
-  m_autoscaling->setChecked(autoScaling);
-  m_displayAxes->setChecked(displayAxes);
-  m_flipCheckBox->setChecked(flipView);
-  m_displayDetectorsOnly->setChecked(displayDetectorsOnly);
-  m_wireframe->setChecked(displayWireframe);
-  m_lighting->setChecked(displayLighting);
-  m_GLView->setChecked(useOpenGL);
-  m_UCorrection->setChecked(useUCorrection);
-
-  // peak options
-  auto surface = getSurface();
-  bool showLabels, showRows, showRelativeIntensity;
-  int labelPrecision;
-
-  tab.selectLine("ShowLabels");
-  tab >> showLabels;
-  tab.selectLine("ShowRows");
-  tab >> showRows;
-  tab.selectLine("LabelPrecision");
-  tab >> labelPrecision;
-  tab.selectLine("ShowRelativeIntensity");
-  tab >> showRelativeIntensity;
-
-  surface->setShowPeakLabelsFlag(showLabels);
-  surface->setShowPeakRowsFlag(showRows);
-  surface->setPeakLabelPrecision(labelPrecision);
-  surface->setShowPeakRelativeIntensityFlag(showRelativeIntensity);
-
-  if (tab.selectSection("colormap")) {
-    std::string colorMapLines;
-    tab >> colorMapLines;
-    m_colorBarWidget->loadFromProject(colorMapLines);
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentActor::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidQt::MantidWidgets

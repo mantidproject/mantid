@@ -34,7 +34,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 16/07/2008
  */
-class MANTID_ALGORITHMS_DLL Regroup : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Regroup final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Regroup"; }
@@ -56,7 +56,7 @@ private:
   void exec() override;
 
   void rebin(const HistogramData::HistogramX &xold, const HistogramData::HistogramY &yold,
-             const HistogramData::HistogramE &eold, std::vector<int> &xoldIndex, HistogramData::HistogramY &ynew,
+             const HistogramData::HistogramE &eold, const std::vector<int> &xoldIndex, HistogramData::HistogramY &ynew,
              HistogramData::HistogramE &enew, bool distribution);
 };
 

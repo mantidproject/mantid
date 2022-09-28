@@ -39,20 +39,30 @@ namespace { // anonymous namespace
 // calculate summation term w/ neutron mass over molecular mass ratio
 // NOTE:
 //  - this is directly borrowed from the original CalculatePlaczekSelfScattering
-double calculateSummationTerm(const Kernel::Material &material) {
+std::pair<double, double> calculateSummationTerm(const Kernel::Material &material) {
+  std::pair<double, double> s;
   // add together the weighted sum
   const auto &formula = material.chemicalFormula();
-  auto sumLambda = [](double sum, auto &formula_unit) {
+  auto sumLambda_first = [](double sum, const auto &formula_unit) {
     return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / formula_unit.atom->mass;
   };
-  const double unnormalizedTerm = std::accumulate(formula.begin(), formula.end(), 0.0, sumLambda);
+  auto sumLambda_second = [](double sum, const auto &formula_unit) {
+    const double mass_sq = formula_unit.atom->mass * formula_unit.atom->mass;
+    return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / mass_sq;
+  };
+  const double unnormalizedTermFirst = std::accumulate(formula.begin(), formula.end(), 0.0, sumLambda_first);
+  const double unnormalizedTermSecond = std::accumulate(formula.begin(), formula.end(), 0.0, sumLambda_second);
 
   // neutron mass converted to atomic mass comes out of the sum
   constexpr double neutronMass = PhysicalConstants::NeutronMass / PhysicalConstants::AtomicMassUnit;
+  constexpr double neutronMassSq = neutronMass * neutronMass;
   // normalizing by totalStoich (number of atoms) comes out of the sum
   const double totalStoich = material.totalAtoms();
   // converting scattering cross section to scattering length square comes out of the sum
-  return neutronMass * unnormalizedTerm / (4. * M_PI * totalStoich);
+  s.first = neutronMass * unnormalizedTermFirst / (4. * M_PI * totalStoich);
+  s.second = neutronMassSq * unnormalizedTermSecond / (4. * M_PI * totalStoich);
+
+  return s;
 }
 
 } // anonymous namespace
@@ -153,9 +163,16 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
   // Case1: cannot locate sample temperature
   if (isDefault("SampleTemperature") && (order == 2)) {
     const auto run = inWS->run();
-    const auto sampleTempLogORNL = run.getLogData("SampleTemp");
-    const auto sampleTempLogISIS = run.getLogData("sample_temp");
-    if (sampleTempLogORNL && sampleTempLogISIS) {
+    Mantid::Kernel::Property *sampleTempLog = NULL;
+    // ORNL logs use SampleTemp
+    if (run.hasProperty("SampleTemp")) {
+      sampleTempLog = run.getLogData("SampleTemp");
+    }
+    // ISIS logs use sample_temp
+    if (run.hasProperty("sample_temp")) {
+      sampleTempLog = run.getLogData("sample_temp");
+    }
+    if (!sampleTempLog) {
       issues["SampleTemperature"] = "Cannot locate sample temperature in the run.";
     }
   }
@@ -167,28 +184,30 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
     // we need three spectra here
     if (numHist < 3) {
       issues["IncidentSpectra"] = "Need three spectra here for second order calculation.";
-    }
-    // make sure all are not empty
-    if (incidentWS->readY(0).empty()) {
-      issues["IncidentSpectra"] = "Flux is empty";
-    }
-    if (incidentWS->readY(1).empty()) {
-      issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
-    }
-    if (incidentWS->readY(2).empty()) {
-      issues["IncidentSpectra"] = "Second order derivate of the incident spectrum is empty";
+    } else {
+      // if there are the correct number of spectra make sure all are not empty
+      if (incidentWS->readY(0).empty()) {
+        issues["IncidentSpectra"] = "Flux is empty";
+      }
+      if (incidentWS->readY(1).empty()) {
+        issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+      }
+      if (incidentWS->readY(2).empty()) {
+        issues["IncidentSpectra"] = "Second order derivate of the incident spectrum is empty";
+      }
     }
   } else {
     // we are at first order here
     if (numHist < 2) {
       issues["IncidentSpectra"] = "Need two spectra here for first order calculation.";
-    }
-    // make sure all are not empty
-    if (incidentWS->readY(0).empty()) {
-      issues["IncidentSpectra"] = "Flux is empty";
-    }
-    if (incidentWS->readY(1).empty()) {
-      issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+    } else {
+      // if there are the correct number of spectra make sure all are not empty
+      if (incidentWS->readY(0).empty()) {
+        issues["IncidentSpectra"] = "Flux is empty";
+      }
+      if (incidentWS->readY(1).empty()) {
+        issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+      }
     }
   }
 
@@ -200,28 +219,30 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
       // we need three spectra here
       if (numHistEff < 3) {
         issues["EfficiencySpectra"] = "Need three spectra here for second order calculation.";
-      }
-      // make sure all are not empty
-      if (efficiencyWS->readY(0).empty()) {
-        issues["EfficiencySpectra"] = "Detector efficiency is empty";
-      }
-      if (efficiencyWS->readY(1).empty()) {
-        issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
-      }
-      if (efficiencyWS->readY(2).empty()) {
-        issues["EfficiencySpectra"] = "Second order derivate of the efficiency spectrum is empty";
+      } else {
+        // if there are the correct number of spectra make sure all are not empty
+        if (efficiencyWS->readY(0).empty()) {
+          issues["EfficiencySpectra"] = "Detector efficiency is empty";
+        }
+        if (efficiencyWS->readY(1).empty()) {
+          issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+        }
+        if (efficiencyWS->readY(2).empty()) {
+          issues["EfficiencySpectra"] = "Second order derivate of the efficiency spectrum is empty";
+        }
       }
     } else {
       // we are at first order here
       if (numHistEff < 2) {
         issues["EfficiencySpectra"] = "Need two spectra here for first order calculation.";
-      }
-      // make sure all are not empty
-      if (efficiencyWS->readY(0).empty()) {
-        issues["EfficiencySpectra"] = "Detector efficiency is empty";
-      }
-      if (efficiencyWS->readY(1).empty()) {
-        issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+      } else {
+        // if there are the correct number of spectra make sure all are not empty
+        if (efficiencyWS->readY(0).empty()) {
+          issues["EfficiencySpectra"] = "Detector efficiency is empty";
+        }
+        if (efficiencyWS->readY(1).empty()) {
+          issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+        }
       }
     }
   }
@@ -267,7 +288,7 @@ void CalculatePlaczek::exec() {
   const auto xLambda = incidentWS->getSpectrum(0).points();
   // pre-compute the coefficients
   // - calculate summation term w/ neutron mass over molecular mass ratio
-  const double summationTerm = calculateSummationTerm(inWS->sample().getMaterial());
+  const std::pair<double, double> summationTerms = calculateSummationTerm(inWS->sample().getMaterial());
   const double packingFraction = getPackingFraction(inWS);
   // NOTE:
   // - when order==1, we don't care what's inside sampleTemperature.
@@ -293,7 +314,7 @@ void CalculatePlaczek::exec() {
   const int64_t numHist = specInfo.size();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t specIndex = 0; specIndex < numHist; specIndex++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto &y = outputWS->mutableY(specIndex); // x-axis is directly copied from incident flux
     // only perform calculation for components that
     // - is monitor
@@ -324,12 +345,12 @@ void CalculatePlaczek::exec() {
         // -- calculate first order correction
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
-        double inelasticPlaczekCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerm;
+        double inelasticPlaczekCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerms.first;
         // -- calculate second order correction
         if (order == 2) {
-          const double k = 2 * M_PI / xLambda[xIndex];                       // wave vector in 1/angstrom
-          const double energy = (1 / E_mev_toNeutronWavenumberSq) * (k * k); // in meV
-          const double kBToverE = kBT / energy;                              // unitless
+          const double k = 2 * M_PI / xLambda[xIndex];                 // wave vector in 1/angstrom
+          const double energy = E_mev_toNeutronWavenumberSq * (k * k); // in meV
+          const double kBToverE = kBT / energy;                        // unitless
           // NOTE: see the equation A1.15 in Howe et al. The analysis of liquid structure, 1989
           const double bracket_1 = (8 * f - 9) * (f - 1) * phi1[xIndex]            //
                                    - 3 * f * (2 * f - 3) * eps1[xIndex]            //
@@ -337,14 +358,14 @@ void CalculatePlaczek::exec() {
                                    + (1 - f) * (1 - f) * phi2[xIndex]              //
                                    + f * f * eps2[xIndex]                          //
                                    + 3 * (4 * f - 5) * (f - 1);
-          const double P2_part1 = summationTerm * (kBToverE / 2.0 + kBToverE * sinHalfAngleSq * bracket_1);
+          const double P2_part1 = summationTerms.first * (kBToverE / 2.0 + kBToverE * sinHalfAngleSq * bracket_1);
           const double bracket_2 = (4 * f - 7) * (f - 1) * phi1[xIndex]            //
                                    + f * (7 - 2 * f) * eps1[xIndex]                //
                                    + 2 * f * (1 - f) * phi1[xIndex] * eps1[xIndex] //
                                    + (1 - f) * (1 - f) * phi2[xIndex]              //
                                    + f * f * eps2[xIndex]                          //
                                    + (2 * f * f - 7 * f + 8);
-          const double P2_part2 = 2 * sinHalfAngleSq * summationTerm * (1 + sinHalfAngleSq * bracket_2);
+          const double P2_part2 = 2 * sinHalfAngleSq * summationTerms.second * (1 + sinHalfAngleSq * bracket_2);
           // added to the factor
           inelasticPlaczekCorrection += P2_part1 + P2_part2;
         }
@@ -357,12 +378,9 @@ void CalculatePlaczek::exec() {
         y[xIndex] = 0;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  // consolidate output to workspace
-  outputWS->setDistribution(false);
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // set output
   setProperty("OutputWorkspace", outputWS);
@@ -409,15 +427,15 @@ double CalculatePlaczek::getSampleTemperature() {
     // get the sample temperature from sample log
     const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
     const auto run = inWS->run();
-    const auto sampleTempLogORNL = run.getLogData("SampleTemp");
-    const auto sampleTempLogISIS = run.getLogData("sample_temp");
-    if (sampleTempLogORNL) {
+    // SampleTemp only valid for ORNL runs
+    if (run.hasProperty("SampleTemp")) {
       sampleTemperature = run.getPropertyAsSingleValue("SampleTemp");
       const std::string sampleTempUnit = run.getProperty("SampleTemp")->units();
       if (sampleTempUnit == "C") {
         sampleTemperature = sampleTemperature + 273.15; // convert to K
       }
-    } else if (sampleTempLogISIS) {
+      // sample_temp only valid for ISIS runs
+    } else if (run.hasProperty("sample_temp")) {
       sampleTemperature = run.getPropertyAsSingleValue("sample_temp");
       const std::string sampleTempUnit = run.getProperty("sample_temp")->units();
       if (sampleTempUnit == "C") {

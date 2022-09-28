@@ -20,7 +20,7 @@ namespace Algorithms {
 /** CreateSampleWorkspace : This algorithm is intended for the creation of
   sample workspaces for usage examples and other situations
 */
-class MANTID_ALGORITHMS_DLL CreateSampleWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateSampleWorkspace final : public API::Algorithm {
 public:
   CreateSampleWorkspace();
 

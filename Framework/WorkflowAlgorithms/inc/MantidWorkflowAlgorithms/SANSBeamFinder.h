@@ -18,7 +18,7 @@ namespace WorkflowAlgorithms {
 /** Beam Finder for SANS instruments
  */
 
-class DLLExport SANSBeamFinder : public API::Algorithm {
+class DLLExport SANSBeamFinder final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFinder"; }

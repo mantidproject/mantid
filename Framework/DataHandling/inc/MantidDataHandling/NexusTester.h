@@ -17,7 +17,7 @@ namespace DataHandling {
 
   @date 2012-04-24
 */
-class DLLExport NexusTester : public API::Algorithm {
+class DLLExport NexusTester final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -15,7 +15,7 @@ namespace Algorithms {
 /** MuonGroupDetectors : applies detector grouping to a workspace. (Muon
   version)
 */
-class MANTID_MUON_DLL MuonGroupDetectors : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupDetectors final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

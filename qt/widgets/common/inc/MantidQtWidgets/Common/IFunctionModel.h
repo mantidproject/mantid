@@ -23,7 +23,7 @@ using namespace Mantid::API;
 
 class EXPORT_OPT_MANTIDQT_COMMON IFunctionModel {
 public:
-  virtual ~IFunctionModel() {}
+  virtual ~IFunctionModel() = default;
   void setFunctionString(const QString &funStr);
   QString getFunctionString() const;
   QString getFitFunctionString() const;

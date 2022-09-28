@@ -18,7 +18,7 @@ Theory
 The measured spectrum :math:`I(Q, \omega)` is proportional to the four
 dimensional convolution of the scattering law :math:`S(Q, \omega)` with the
 resolution function :math:`R(Q, \omega)` of the spectrometer via :math:`I(Q,
-\omega) = S(Q, \omega) ⊗ R(Q, \omega)`, so :math:`S(Q, \omega)` can be obtained,
+\omega) = S(Q, \omega) \circledast R(Q, \omega)`, so :math:`S(Q, \omega)` can be obtained,
 in principle, by a deconvolution in :math:`Q` and :math:`\omega`. The method
 employed here is based on the Fourier Transform (FT) technique [6,7]. On Fourier
 transforming the equation becomes :math:`I(Q, t) = S(Q, t) x R(Q, t)` where the

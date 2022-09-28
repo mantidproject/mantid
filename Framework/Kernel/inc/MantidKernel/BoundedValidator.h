@@ -23,21 +23,27 @@ namespace Kernel {
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 */
+
+namespace {
+constexpr int LOWER_BOUND = -1;
+constexpr int UPPER_BOUND = 1;
+} // namespace
+
 template <class TYPE> class DLLExport BoundedValidator final : public TypedValidator<TYPE> {
 public:
   /// No-arg Constructor
   BoundedValidator() noexcept
       : TypedValidator<TYPE>(), m_hasLowerBound(false), m_hasUpperBound(false), m_lowerExclusive(false),
-        m_upperExclusive(false), m_lowerBound(TYPE()), m_upperBound(TYPE()) {}
+        m_upperExclusive(false), m_lowerBound(TYPE()), m_upperBound(TYPE()), m_hasError(false) {}
 
   /** Constructor
    * @param lowerBound :: The lower bounding value
    * @param upperBound :: The upper bounding value
    * @param exclusive :: make bounds exclusive (default inclusive)
    */
-  BoundedValidator(const TYPE lowerBound, const TYPE upperBound, bool exclusive = false) noexcept
+  BoundedValidator(const TYPE &lowerBound, const TYPE &upperBound, bool exclusive = false) noexcept
       : TypedValidator<TYPE>(), m_hasLowerBound(true), m_hasUpperBound(true), m_lowerExclusive(exclusive),
-        m_upperExclusive(exclusive), m_lowerBound(lowerBound), m_upperBound(upperBound) {}
+        m_upperExclusive(exclusive), m_lowerBound(lowerBound), m_upperBound(upperBound), m_hasError(false) {}
 
   /// Return if it has a lower bound
   bool hasLower() const noexcept { return m_hasLowerBound; }
@@ -97,6 +103,12 @@ public:
     clearUpper();
   }
 
+  /// Set the allowed error
+  void setError(const TYPE &value) {
+    m_error = value;
+    m_hasError = true;
+  }
+
   /// Clone the current state
   IValidator_sptr clone() const override { return std::make_shared<BoundedValidator>(*this); }
 
@@ -115,6 +127,10 @@ private:
   TYPE m_lowerBound;
   /// the upper bound
   TYPE m_upperBound;
+  /// the allowed error
+  TYPE m_error;
+  /// Has an error set true/false
+  bool m_hasError;
 
   /** Checks that the value is within any upper and lower limits
    *
@@ -129,19 +145,45 @@ private:
     error << "";
     // it is allowed not to have a lower bound, if not then you don't need to
     // check
-    if (m_hasLowerBound && (value < m_lowerBound || (value == m_lowerBound && m_lowerExclusive))) {
+    if (m_hasLowerBound && (value < (errorAdjustment(m_lowerBound, LOWER_BOUND)) ||
+                            (value == (errorAdjustment(m_lowerBound, LOWER_BOUND)) && m_lowerExclusive))) {
       error << "Selected value " << value << " is ";
       (m_lowerExclusive) ? error << "<=" : error << "<";
-      error << " the lower bound (" << m_lowerBound << ")";
+      error << " the lower bound (" << m_lowerBound;
+      (error.str() != "" && m_hasError) ? error << " +/- " << m_error << ")" : error << ")";
     }
-    if (m_hasUpperBound && (value > m_upperBound || (value == m_upperBound && m_upperExclusive))) {
+
+    if (m_hasUpperBound && (value > (errorAdjustment(m_upperBound, UPPER_BOUND)) ||
+                            (value == (errorAdjustment(m_upperBound, UPPER_BOUND)) && m_upperExclusive))) {
       error << "Selected value " << value << " is ";
       (m_upperExclusive) ? error << ">=" : error << ">";
-      error << " the upper bound (" << m_upperBound << ")";
+      error << " the upper bound (" << m_upperBound;
+      (error.str() != "" && m_hasError) ? error << " +/- " << m_error << ")" : error << ")";
     }
     return error.str();
   }
+
+  TYPE errorAdjustment(const TYPE &boundingValue, const int boundID) const {
+    (void)boundID; // avoid unused variable warning.
+    return boundingValue;
+  }
 };
+
+template <> inline void BoundedValidator<std::string>::setError(const std::string &value) {
+  (void)value; // avoid unused variable warning.
+  throw std::invalid_argument("BoundedValidator<std::string> does not support error.");
+}
+template <>
+inline double BoundedValidator<double>::errorAdjustment(const double &boundingValue, const int boundID) const {
+  double adjValue;
+  m_hasError ? adjValue = boundingValue + m_error *boundID : adjValue = boundingValue;
+  return adjValue;
+}
+template <> inline int BoundedValidator<int>::errorAdjustment(const int &boundingValue, const int boundID) const {
+  int adjValue;
+  m_hasError ? adjValue = boundingValue + m_error *boundID : adjValue = boundingValue;
+  return adjValue;
+}
 
 } // namespace Kernel
 } // namespace Mantid

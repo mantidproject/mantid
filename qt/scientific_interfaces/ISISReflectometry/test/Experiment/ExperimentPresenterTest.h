@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -360,10 +361,12 @@ public:
     presenter.notifyLookupRowChanged(row, column);
 
     // Check the model contains the per-theta defaults returned by the view
-    auto const lookupTable = presenter.experiment().lookupTable();
-    TS_ASSERT_EQUALS(lookupTable.size(), 2);
-    TS_ASSERT_EQUALS(lookupTable[0], defaultsWithFirstAngle());
-    TS_ASSERT_EQUALS(lookupTable[1], defaultsWithSecondAngle());
+    auto const lookupRows = presenter.experiment().lookupTableRows();
+    TS_ASSERT_EQUALS(lookupRows.size(), 2);
+    if (lookupRows.size() == 2) {
+      TS_ASSERT_EQUALS(lookupRows[0].thetaOrWildcard(), defaultsWithFirstAngle().thetaOrWildcard());
+      TS_ASSERT_EQUALS(lookupRows[1].thetaOrWildcard(), defaultsWithSecondAngle().thetaOrWildcard());
+    }
     verifyAndClear();
   }
 
@@ -389,7 +392,17 @@ public:
 
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
-    runTestForInvalidOptionsTable(optionsTable, {0, 1}, LookupRow::Column::THETA);
+    for (auto row = 0; row < 2; ++row) {
+      for (auto col = 0; col < 2; ++col) {
+        EXPECT_CALL(
+            m_view,
+            setTooltip(
+                row, col,
+                "Error: Multiple wildcard rows. Only a single row in the table may have a blank angle and title cell."))
+            .Times(1);
+      }
+    }
+    runTestForInvalidOptionsTable(optionsTable, {0, 1}, {LookupRow::Column::THETA, LookupRow::Column::TITLE});
   }
 
   void testSetFirstTransmissionRun() {
@@ -399,7 +412,7 @@ public:
 
   void testSetSecondTransmissionRun() {
     OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::FIRST_TRANS);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::FIRST_TRANS});
   }
 
   void testSetBothTransmissionRuns() {
@@ -414,7 +427,7 @@ public:
 
   void testSetTransmissionProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithTransProcessingInstructionsInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::TRANS_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::TRANS_SPECTRA});
   }
 
   void testSetQMin() {
@@ -424,7 +437,7 @@ public:
 
   void testSetQMinInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMinInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QMIN);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::QMIN});
   }
 
   void testSetQMax() {
@@ -434,7 +447,7 @@ public:
 
   void testSetQMaxInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQMaxInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QMAX);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::QMAX});
   }
 
   void testSetQStep() {
@@ -444,7 +457,7 @@ public:
 
   void testSetQStepInvalid() {
     OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::QSTEP);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::QSTEP});
   }
 
   void testSetScale() {
@@ -454,7 +467,7 @@ public:
 
   void testSetScaleInvalid() {
     OptionsTable const optionsTable = {optionsRowWithScaleInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::SCALE);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::SCALE});
   }
 
   void testSetProcessingInstructions() {
@@ -464,7 +477,7 @@ public:
 
   void testSetProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithProcessingInstructionsInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::RUN_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::RUN_SPECTRA});
   }
 
   void testSetBackgroundProcessingInstructionsValid() {
@@ -474,7 +487,7 @@ public:
 
   void testSetBackgroundProcessingInstructionsInvalid() {
     OptionsTable const optionsTable = {optionsRowWithBackgroundProcessingInstructionsInvalid()};
-    runTestForInvalidOptionsTable(optionsTable, 0, LookupRow::Column::BACKGROUND_SPECTRA);
+    runTestForInvalidOptionsTable(optionsTable, 0, {LookupRow::Column::BACKGROUND_SPECTRA});
   }
 
   void testChangingSettingsNotifiesMainPresenter() {
@@ -557,29 +570,32 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInView() {
-    auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                               std::string("390-415"), std::string("370-389,416-430"));
+    auto lookupRow = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                               0.7, std::string("390-415"), std::string("370-389,416-430"));
     auto model = makeModelWithLookupRow(std::move(lookupRow));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     auto const expected = std::vector<LookupRow::ValueArray>{
-        {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000", "390-415", "370-389,416-430"}};
+        {"", "", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000", "390-415", "370-389,416-430"}};
     EXPECT_CALL(m_view, setLookupTable(expected)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesLookupRowInModel() {
-    auto model =
-        makeModelWithLookupRow(LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
-                                         0.7, std::string("390-415"), std::string("370-389,416-430")));
+    auto model = makeModelWithLookupRow(LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+                                                  RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                                                  std::string("370-389,416-430")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
-                              std::string("390-415"), std::string("370-389,416-430"));
-    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().size(), 1);
-    TS_ASSERT_EQUALS(presenter.experiment().lookupTable().front(), expected);
+    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+                              0.7, std::string("390-415"), std::string("370-389,416-430"));
+    auto lookupRows = presenter.experiment().lookupTableRows();
+    TS_ASSERT_EQUALS(lookupRows.size(), 1);
+    if (lookupRows.size() == 1) {
+      TS_ASSERT_EQUALS(lookupRows.front(), expected);
+    }
     verifyAndClear();
   }
 
@@ -662,6 +678,47 @@ public:
     runTestThatPolarizationCorrectionsAreEnabledForInstrument("CRISP");
   }
 
+  void testNotifyPreviewApplyRequestedUpdatesProcessingInstructions() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setProcessingInstructions(ROIType::Signal, std::string{"10"});
+    previewRow.setProcessingInstructions(ROIType::Background, std::string{"11"});
+    previewRow.setProcessingInstructions(ROIType::Transmission, std::string{"12"});
+    previewRow.setTheta(2.3);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+  }
+
+  void testNotifyPreviewApplyRequestedClearsProcessingInstructionsWhenMissing() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setTheta(2.3);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT(!row.processingInstructions());
+    TS_ASSERT(!row.backgroundProcessingInstructions());
+    TS_ASSERT(!row.transmissionProcessingInstructions());
+  }
+
+  void testNotifyPreviewApplyRequestedMatchingRowNotFound() {
+    // makeExperimentWithValidDuplicateCriteria will create a model Experiment with two lookup rows and no wildcard
+    auto presenter = makePresenter(makeDefaults(), makeExperimentWithValidDuplicateCriteria());
+    auto previewRow = PreviewRow({"1234"});
+    // This angle doesn't match any in the experiment lookup table
+    previewRow.setTheta(10);
+
+    TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), RowNotFoundException const &);
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
@@ -686,8 +743,7 @@ private:
   }
 
   Experiment makeModelWithLookupRow(LookupRow lookupRow) {
-    auto lookupTable = LookupTable();
-    lookupTable.emplace_back(std::move(lookupRow));
+    auto lookupTable = LookupTable({std::move(lookupRow)});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                       BackgroundSubtraction(), makeEmptyPolarizationCorrections(), makeFloodCorrections(),
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), std::move(lookupTable));
@@ -707,11 +763,14 @@ private:
                       makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(), makeLookupTable());
   }
 
+  std::unique_ptr<IExperimentOptionDefaults> makeDefaults() { return std::make_unique<MockExperimentOptionDefaults>(); }
+
   ExperimentPresenter makePresenter(
-      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>()) {
+      std::unique_ptr<IExperimentOptionDefaults> defaultOptions = std::make_unique<MockExperimentOptionDefaults>(),
+      Experiment experiment = makeEmptyExperiment()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter = ExperimentPresenter(&m_view, makeEmptyExperiment(), m_thetaTolerance, std::move(defaultOptions));
+    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -841,36 +900,38 @@ private:
 
   // These functions create various rows in the per-theta defaults tables,
   // either as an input array of strings or an output model
-  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
+  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "", "13463", ""}; }
   LookupRow defaultsWithFirstAngle() {
-    return LookupRow(0.5, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none, boost::none,
-                     boost::none);
+    return LookupRow(0.5, boost::none, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none,
+                     boost::none, boost::none);
   }
 
-  OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
+  OptionsRow optionsRowWithSecondAngle() { return {"2.3", "", "13463", "13464"}; }
   LookupRow defaultsWithSecondAngle() {
-    return LookupRow(2.3, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none, boost::none,
-                     boost::none);
+    return LookupRow(2.3, boost::none, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
+                     boost::none, boost::none);
   }
-  OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
-  OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
-  OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "13464"}; }
-  OptionsRow optionsRowWithBothTransmissionRuns() { return {"", "13463", "13464"}; }
-  OptionsRow optionsRowWithTransProcessingInstructions() { return {"", "", "", "1-4"}; }
-  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() { return {"", "", "", "bad"}; }
-  OptionsRow optionsRowWithQMin() { return {"", "", "", "", "0.008"}; }
-  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "0.1"}; }
-  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "", "0.02"}; }
-  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "", "1.4"}; }
-  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "", "1-4"}; }
-  OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithBackgroundProcessingInstructions() { return {"", "", "", "", "", "", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithWildcard() { return {"", "", "13463", "13464"}; }
+  OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "", "13463"}; }
+  OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "", "13464"}; }
+  OptionsRow optionsRowWithBothTransmissionRuns() { return {"", "", "13463", "13464"}; }
+  OptionsRow optionsRowWithTransProcessingInstructions() { return {"", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithTransProcessingInstructionsInvalid() { return {"", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQMin() { return {"", "", "", "", "", "0.008"}; }
+  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "", "", "0.1"}; }
+  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "", "", "0.02"}; }
+  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "", "", "1.4"}; }
+  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "", "", "1-4"}; }
+  OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithBackgroundProcessingInstructions() {
+    return {"", "", "", "", "", "", "", "", "", "", "1-4"};
+  }
   OptionsRow optionsRowWithBackgroundProcessingInstructionsInvalid() {
-    return {"", "", "", "", "", "", "", "", "", "bad"};
+    return {"", "", "", "", "", "", "", "", "", "", "bad"};
   }
 
   void runTestForValidOptionsTable(OptionsTable const &optionsTable) {
@@ -881,27 +942,37 @@ private:
     verifyAndClear();
   }
 
-  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, const std::vector<int> &rows, int column) {
+  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, const std::vector<int> &rows,
+                                     std::vector<int> columns) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    for (auto row : rows)
-      EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
+    for (auto row : rows) {
+      for (auto col : columns) {
+        EXPECT_CALL(m_view, showLookupRowAsInvalid(row, col)).Times(1);
+      }
+    }
     presenter.notifyLookupRowChanged(1, 1);
+    TS_ASSERT(!presenter.hasValidSettings());
     verifyAndClear();
   }
 
-  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, int row, int column) {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showLookupRowAsInvalid(row, column)).Times(1);
-    presenter.notifyLookupRowChanged(1, 1);
-    verifyAndClear();
+  void runTestForInvalidOptionsTable(OptionsTable const &optionsTable, int row, std::vector<int> columns) {
+    runTestForInvalidOptionsTable(optionsTable, std::vector<int>{row}, columns);
   }
 
   void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
-    EXPECT_CALL(m_view, showLookupRowsNotUnique(m_thetaTolerance)).Times(1);
+    for (auto row = 0; row < 2; ++row) {
+      for (auto col = 0; col < 2; ++col) {
+        EXPECT_CALL(m_view, showLookupRowAsInvalid(row, col)).Times(1);
+        EXPECT_CALL(
+            m_view,
+            setTooltip(row, col,
+                       "Error: Duplicated search criteria. No more than one row may have the same angle and title."))
+            .Times(1);
+      }
+    }
     presenter.notifyLookupRowChanged(0, 0);
     verifyAndClear();
   }

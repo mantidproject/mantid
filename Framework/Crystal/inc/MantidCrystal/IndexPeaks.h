@@ -15,7 +15,7 @@ namespace Crystal {
  * Implements an algorithm for indexing main and satellites peaks
  * in single crystal peaks.
  */
-class MANTID_CRYSTAL_DLL IndexPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IndexPeaks final : public API::Algorithm {
 public:
   const std::string name() const override { return "IndexPeaks"; }
   const std::string summary() const override {

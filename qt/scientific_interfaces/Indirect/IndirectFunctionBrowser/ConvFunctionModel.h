@@ -113,6 +113,9 @@ private:
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildLorentzianFunctionString() const;
   std::string buildTeixeiraFunctionString() const;
+  std::string buildFickFunctionString() const;
+  std::string buildChudleyElliotString() const;
+  std::string buildHallRossString() const;
   std::string buildPeaksFunctionString() const;
   std::string buildLorentzianPeaksString() const;
   std::string buildFitTypeString() const;

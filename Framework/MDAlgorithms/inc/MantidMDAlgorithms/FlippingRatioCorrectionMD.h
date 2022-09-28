@@ -16,7 +16,7 @@ namespace MDAlgorithms {
 /** FlippingRatioCorrectionMD : Algorithm to correct
  *  MDEvents for flipping ratio
  */
-class MANTID_MDALGORITHMS_DLL FlippingRatioCorrectionMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL FlippingRatioCorrectionMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

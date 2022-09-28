@@ -33,7 +33,7 @@ public:
   const std::string category() const override { return "General"; }
 
   /// Get peak parameters
-  double getPeakParameter(std::string) override;
+  double getPeakParameter(const std::string &) override;
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
   void calculateParameters(bool explicitoutput) const override;

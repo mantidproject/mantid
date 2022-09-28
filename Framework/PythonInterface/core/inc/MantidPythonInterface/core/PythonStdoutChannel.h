@@ -9,7 +9,7 @@
 //
 // Similar to console channel for logging. The output is on std::cout instead of
 // std::clog (which is the same as std::cerr)
-// Usage: use in it Mantid.properties or mantid.user.properties instead of
+// Usage: use it in Mantid.properties or mantid.user.properties instead of
 // ConsoleChannel class
 //
 //

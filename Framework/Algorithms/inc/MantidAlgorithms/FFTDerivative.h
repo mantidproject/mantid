@@ -52,7 +52,8 @@ private:
   void execComplexFFT();
   void symmetriseSpectrum(const HistogramData::Histogram &in, HistogramData::HistogramX &symX,
                           HistogramData::HistogramY &symY, const size_t nx, const size_t ny);
-  void multiplyTransform(HistogramData::HistogramX &nu, HistogramData::HistogramY &re, HistogramData::HistogramY &im);
+  void multiplyTransform(const HistogramData::HistogramX &nu, HistogramData::HistogramY &re,
+                         HistogramData::HistogramY &im);
 };
 
 } // namespace Algorithms

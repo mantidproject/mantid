@@ -14,6 +14,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 
+#include <algorithm>
 #include <cmath>
 
 using Mantid::Kernel::Quat;
@@ -28,8 +29,8 @@ public:
 
 class Corners {
 public:
-  Corners() {}
-  Corners(V3D bottomLeft, V3D bottomRight, V3D topRight, V3D topLeft)
+  Corners() = default;
+  Corners(const V3D &bottomLeft, const V3D &bottomRight, const V3D &topRight, const V3D &topLeft)
       : m_bottomLeft(bottomLeft), m_bottomRight(bottomRight), m_topRight(topRight), m_topLeft(topLeft) {}
 
   void translate(const Mantid::Kernel::V3D &position) {
@@ -168,8 +169,7 @@ void rotateHexahedron(std::vector<V3D> &hex, const Quat &rotation) {
 }
 
 void offsetHexahedronPosition(std::vector<V3D> &hex, const V3D &offset) {
-  for (auto &pos : hex)
-    pos += offset;
+  std::transform(hex.cbegin(), hex.cend(), hex.begin(), [&offset](const auto &pos) { return pos + offset; });
 }
 
 void render2DTexture(const Corners &corners, size_t nX, size_t nY, const Mantid::Kernel::V3D &bottomLeftOffset,

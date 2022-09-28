@@ -114,7 +114,38 @@ public:
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
+    const double l2 = inputWs->spectrumInfo().l2(13);
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("L2", l2))
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outputWs = alg->getProperty("OutputWorkspace");
+    assertTOFShift(outputWs, inputWs, actualEi, actualWavelength, TOFShift);
+  }
+
+  void test_CorrectionUsingElasticBinIndexWithOffsetAndL2() {
+    const size_t blocksize = 512;
+    const double x0 = 1402;
+    const double dx = 0.23;
+    const size_t eppIndex = blocksize / 3;
+    const double eppOffset = 0.5;
+    const double eppTOF = x0 + static_cast<double>(eppIndex + eppOffset) * dx + dx / 2;
+    auto inputWs = createInputWorkspace(blocksize, x0, dx, eppTOF);
+    const double length = flightLengthIN4(inputWs);
+    const double nominalEi = incidentEnergy(eppTOF, length);
+    inputWs->mutableRun().addProperty("EI", nominalEi, true);
+    const double nominalWavelength = wavelength(nominalEi, length);
+    inputWs->mutableRun().addProperty("wavelength", nominalWavelength, true);
+    const double actualEi = 1.05 * nominalEi;
+    const double actualElasticTOF = tof(actualEi, length);
+    const double actualWavelength = wavelength(actualEi, length);
+    const double TOFShift = actualElasticTOF - eppTOF;
+    auto alg = createCorrectTOFAxisAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(eppIndex + eppOffset)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     const double l2 = inputWs->spectrumInfo().l2(13);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("L2", l2))
@@ -146,7 +177,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -202,7 +233,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(elasticBin)))
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }

@@ -19,7 +19,7 @@ using namespace Mantid::Kernel;
 class testalg : public Algorithm {
 public:
   testalg() : Algorithm() {}
-  ~testalg() override {}
+  ~testalg() override = default;
   const std::string name() const override { return "testalg"; } ///< Algorithm's name for identification
   int version() const override { return 1; }                    ///< Algorithm's version for identification
   const std::string category() const override { return "Cat"; } ///< Algorithm's category for identification

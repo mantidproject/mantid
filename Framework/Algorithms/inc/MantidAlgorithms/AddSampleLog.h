@@ -31,7 +31,7 @@ namespace Algorithms {
     to the sample during the experiment. This algorithm allows one named log
     to be entered.
 */
-class MANTID_ALGORITHMS_DLL AddSampleLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddSampleLog final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "AddSampleLog"; }

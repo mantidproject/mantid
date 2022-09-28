@@ -14,7 +14,7 @@ import builtins
 import os
 
 from mantid.api import FrameworkManager, AlgorithmManager
-from mantid.kernel import ConfigService, logger
+from mantid.kernel import (ConfigService, logger, UsageService, FeatureType)
 from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
@@ -24,7 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QByteArray, QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
                             QSplashScreen, QMessageBox)  # noqa
@@ -60,7 +60,7 @@ def _get_splash_image():
 
     # the proportion of the whole window size for the splash screen
     splash_screen_scaling = 0.25
-    return QPixmap(':/images/MantidSplashScreen_4k.jpg').scaled(int(width * splash_screen_scaling),
+    return QPixmap(':/images/MantidSplashScreen_4k.png').scaled(int(width * splash_screen_scaling),
                                                                 int(height * splash_screen_scaling),
                                                                 Qt.KeepAspectRatio,
                                                                 Qt.SmoothTransformation)
@@ -187,8 +187,8 @@ class MainWindow(QMainWindow):
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
-        prompt = CONF.get('project/prompt_on_deleting_workspace')
-        self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
+        prompt = CONF.get('project/prompt_on_deleting_workspace', type=bool)
+        self.workspacewidget.workspacewidget.enableDeletePrompt(prompt)
         self.widgets.append(self.workspacewidget)
 
         self.set_splash("Loading memory widget")
@@ -223,6 +223,9 @@ class MainWindow(QMainWindow):
         self.config_updated()
 
         self.override_python_input()
+
+        # Ensure windows created after the main window have their own menu bars (on mac)
+        QCoreApplication.setAttribute(Qt.AA_DontUseNativeMenuBar, True)
 
     def post_mantid_init(self):
         """Run any setup that requires mantid
@@ -470,8 +473,8 @@ class MainWindow(QMainWindow):
     def populate_layout_menu(self):
         self.view_menu_layouts.clear()
         try:
-            layout_dict = CONF.get("MainWindow/user_layouts")
-        except KeyError:
+            layout_dict = CONF.get("MainWindow/user_layouts", type=dict)
+        except (KeyError, TypeError):
             layout_dict = {}
         layout_keys = sorted(layout_dict.keys())
         layout_options = []
@@ -600,7 +603,6 @@ class MainWindow(QMainWindow):
             if self.project_recovery is not None:
                 self.project_recovery.stop_recovery_thread()
                 self.project_recovery.closing_workbench = True
-                self.project_recovery.remove_current_pid_folder()
 
             # Cancel memory widget thread
             if self.memorywidget is not None:
@@ -612,6 +614,18 @@ class MainWindow(QMainWindow):
             if self.workspacecalculator is not None:
                 self.workspacecalculator.view.closeEvent(event)
 
+            if self.project_recovery is not None:
+                # Do not merge this block with the above block that
+                # starts with the same check.
+                # We deliberately split the call to stop the recovery
+                # thread and removal of the checkpoints folder to
+                # allow for the maximum amount of time for the recovery
+                # thread to finish. Any errors here are ignored as exceptions
+                # on shutdown cannot be handled in a meaningful way.
+                # Future runs of project recovery will clean any stale points
+                # after a month
+                self.project_recovery.remove_current_pid_folder(ignore_errors=True)
+
             event.accept()
         else:
             # Cancel was pressed when closing an editor
@@ -621,7 +635,8 @@ class MainWindow(QMainWindow):
     def open_file(self):
         # todo: when more file types are added this should
         # live in its own type
-        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", "", "Python (*.py)")
+        defaultSaveDirectory = ConfigService['defaultsave.directory']
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open File...", defaultSaveDirectory, "Python (*.py)")
         if not filepath:
             return
         self.editor.open_file_in_new_tab(filepath)
@@ -711,6 +726,7 @@ class MainWindow(QMainWindow):
         self.interface_manager.showConceptHelp('')
 
     def open_mantid_help(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature.Interface, ["Mantid Help"], False)
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):
@@ -727,16 +743,15 @@ class MainWindow(QMainWindow):
         qapp = QApplication.instance()
 
         # get the saved window geometry
-        window_size = settings.get('MainWindow/size')
-        if not isinstance(window_size, QSize):
-            window_size = QSize(*window_size)
-        window_pos = settings.get('MainWindow/position')
-        if not isinstance(window_pos, QPoint):
-            window_pos = QPoint(*window_pos)
+        window_size = settings.get('MainWindow/size', type=QSize)
+        window_pos = settings.get('MainWindow/position', type=QPoint)
         if settings.has('MainWindow/font'):
-            font_string = settings.get('MainWindow/font').split(',')
+            font_string = settings.get('MainWindow/font', type=str).split(',')
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
+
+        # reset font for ipython console to ensure it stays monospace
+        self.ipythonconsole.console.reset_font()
 
         # make sure main window is smaller than the desktop
         desktop = QDesktopWidget()
@@ -765,7 +780,7 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+            if not self.restoreState(settings.get('MainWindow/state', type=QByteArray), SAVE_STATE_VERSION):
                 logger.warning(
                     "The previous layout of workbench is not compatible with this version, reverting to default layout."
                 )

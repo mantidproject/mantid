@@ -8,6 +8,7 @@
 #
 #
 # std imports
+from distutils.version import LooseVersion
 from unittest import TestCase, main
 
 # third party imports
@@ -48,7 +49,8 @@ def set_figure_as_current_figure(initial_fig):
     fig_manager = mock.MagicMock()
     fig_manager.canvas.figure = initial_fig
     _pylab_helpers.Gcf.figs.update({1: fig_manager})
-    _pylab_helpers.Gcf._activeQue.append(fig_manager)
+    if LooseVersion("3.1.3") > LooseVersion(matplotlib.__version__):
+        _pylab_helpers.Gcf._activeQue.append(fig_manager)
 
 
 class TiledPlotsTest(TestCase):

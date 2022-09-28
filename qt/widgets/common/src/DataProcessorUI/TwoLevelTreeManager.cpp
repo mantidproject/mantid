@@ -70,7 +70,6 @@ TwoLevelTreeManager::TwoLevelTreeManager(DataProcessorPresenter *presenter, cons
 /**
  * Destructor
  */
-TwoLevelTreeManager::~TwoLevelTreeManager() {}
 
 bool TwoLevelTreeManager::isMultiLevel() const { return true; }
 /**

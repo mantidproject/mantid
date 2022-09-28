@@ -59,20 +59,23 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
     def tearDownClass(cls):
         mtd.clear()
 
-    def _flat_plate_test(self, test_func):
+    def _flat_plate_test(self, test_func, sparse=False):
         self._test_arguments['SampleWidth'] = 2.0
         self._test_arguments['SampleThickness'] = 2.0
         self._test_arguments['SampleCenter'] = 1.0
         self._test_arguments['SampleAngle'] = -10.0
+        self._test_arguments['SparseInstrument'] = sparse
         test_func('FlatPlate')
 
-    def _cylinder_test(self, test_func):
+    def _cylinder_test(self, test_func, sparse=False):
         self._test_arguments['SampleRadius'] = 0.5
+        self._test_arguments['SparseInstrument'] = sparse
         test_func('Cylinder')
 
-    def _annulus_test(self, test_func):
+    def _annulus_test(self, test_func, sparse=False):
         self._test_arguments['SampleInnerRadius'] = 1.2
         self._test_arguments['SampleOuterRadius'] = 1.8
+        self._test_arguments['SparseInstrument'] = sparse
         test_func('Annulus')
 
     def _preset_with_override_material_test(self, test_func):
@@ -120,9 +123,9 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
             self.assertEqual(corr_ws.getAxis(1).getUnit().unitID(), spectrum_axis)
 
     def _test_corrections_workspaces(self, workspaces, spectrum_axis=None, with_container=False):
-        self.assertNotEquals(workspaces, None)
+        self.assertNotEqual(workspaces, None)
         self.assertTrue(isinstance(workspaces, WorkspaceGroup))
-        self.assertEquals(workspaces.getNumberOfEntries(), 4 if with_container else 1)
+        self.assertEqual(workspaces.getNumberOfEntries(), 4 if with_container else 1)
 
         for workspace in workspaces:
             self._test_corrections_workspace(workspace, spectrum_axis)
@@ -207,11 +210,20 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
     def test_flat_plate_with_container(self):
         self._flat_plate_test(self._run_correction_with_container_test)
 
+    def test_flat_plate_with_container_sparse(self):
+        self._flat_plate_test(self._run_correction_with_container_test, True)
+
     def test_cylinder_with_container(self):
         self._cylinder_test(self._run_correction_with_container_test)
 
+    def test_cylinder_with_container_sparse(self):
+        self._cylinder_test(self._run_correction_with_container_test, True)
+
     def test_annulus_with_container(self):
         self._annulus_test(self._run_correction_with_container_test)
+
+    def test_annulus_with_container_sparse(self):
+        self._annulus_test(self._run_correction_with_container_test, True)
 
     def test_flat_plate_indirect_elastic(self):
         self._flat_plate_test(self._run_indirect_elastic_test)

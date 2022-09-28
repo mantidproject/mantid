@@ -16,7 +16,7 @@ namespace Algorithms {
 
 /** CalculateDIFC : Calculate the DIFC for every pixel
  */
-class MANTID_ALGORITHMS_DLL CalculateDIFC : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateDIFC final : public API::Algorithm {
 public:
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override;

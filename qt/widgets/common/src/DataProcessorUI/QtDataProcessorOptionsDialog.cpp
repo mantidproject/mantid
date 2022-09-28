@@ -21,7 +21,6 @@ QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(DataProcessorView *vi
 }
 
 /** Destructor */
-QtDataProcessorOptionsDialog::~QtDataProcessorOptionsDialog() {}
 
 /** Initialise the ui */
 void QtDataProcessorOptionsDialog::initLayout() {

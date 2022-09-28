@@ -70,7 +70,7 @@ protected:
   }
 
   BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs = ReductionJobs()) {
-    return makeJobManager(reductionJobs, nullptr);
+    return makeJobManager(std::move(reductionJobs), nullptr);
   }
 
   BatchJobManagerFriend makeJobManager(std::unique_ptr<IReflAlgorithmFactory> mockFactory) {

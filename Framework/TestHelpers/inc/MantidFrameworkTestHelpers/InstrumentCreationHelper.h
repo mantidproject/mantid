@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 
 namespace Mantid {
 namespace API {
@@ -30,5 +31,5 @@ void addSource(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kern
 void addMonitor(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position, const int ID,
                 const std::string &name);
 void addDetector(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position, const int ID,
-                 const std::string &name);
+                 const std::string &name, Mantid::Geometry::ObjCompAssembly *compAss = nullptr);
 } // namespace InstrumentCreationHelper

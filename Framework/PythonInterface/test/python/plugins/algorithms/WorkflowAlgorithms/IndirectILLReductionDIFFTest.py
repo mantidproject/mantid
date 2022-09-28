@@ -70,7 +70,7 @@ class IndirectILLReductionDIFF(unittest.TestCase):
         self.assertEqual(ws.blocksize(), bsize, "{0} should contain {1} bins".format(name, bsize))
         self.assertTrue(ws.getSampleDetails(), "{0} should have sample logs".format(name))
         self.assertTrue(ws.getHistory().lastAlgorithm(), "{0} should have history".format(name))
-        self.assertEquals(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), "MomentumTransfer")
 
 
 if __name__ == '__main__':

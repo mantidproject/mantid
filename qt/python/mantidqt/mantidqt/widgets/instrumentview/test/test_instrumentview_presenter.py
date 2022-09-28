@@ -20,13 +20,54 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         self.ws = mock.NonCallableMock()
         self.presenter = InstrumentViewPresenter(ws=self.ws, view=self.mock_view)
 
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
-    def test_ws_name_passed_in_constructor(self, mock_view):
+    def test_ws_name_passed_in_constructor(self, mock_view, mock_ads):
+        mock_ads.retrieve.return_value = mock.NonCallableMock()
+
         ws = mock.NonCallableMock()
         presenter = InstrumentViewPresenter(ws)
 
         mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
                                           name=str(ws), window_flags=mock.ANY)
+
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
+    def test_constructor_works_with_ws_name(self, mock_view, mock_ads):
+        """
+        Check that the InstrumentViewPresenter constructs correctly when passing the name
+        of the workspace rather than the workspace object.
+        """
+        mock_ads.retrieve.return_value = mock.NonCallableMock()
+        ws_name = "my_workspace"
+        presenter = InstrumentViewPresenter(ws_name)
+        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
+                                          name=ws_name, window_flags=mock.ANY)
+
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
+    def test_ws_is_readlocked(self, mock_view, mock_ads):
+        """
+        Verify that a readlock is acquired on the workspace to prevent crashes when a
+        workspace is being written to while the instrument viewer is loading.
+        """
+        ws = mock.NonCallableMock()
+        mock_ads.retrieve.return_value = ws
+        InstrumentViewPresenter(ws)
+        ws.readLock.assert_called_once()
+        ws.unlock.assert_called_once()
+
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
+    def test_ws_unlocks_if_instrument_view_throws_exception(self, mock_view, mock_ads):
+        ws = mock.NonCallableMock()
+        mock_ads.retrieve.return_value = ws
+        # Get our mock InstrumentView to throw an exception.
+        mock_view.side_effect = KeyError('instrument view threw an exception')
+        with self.assertRaises(KeyError):
+            InstrumentViewPresenter(ws)
+        # Make sure workspace is unlocked if exception is thrown.
+        ws.unlock.assert_called_once()
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentViewManager")
     def test_constructor_registers_with_inst_view_manager(self, mock_manager):

@@ -34,7 +34,7 @@ public:
   virtual size_t registerRectangularBank(const ICompAssembly &bank) = 0;
   virtual size_t registerStructuredBank(const ICompAssembly &bank) = 0;
   virtual size_t registerObjComponentAssembly(const ObjCompAssembly &obj) = 0;
-  virtual ~ComponentVisitor() {}
+  virtual ~ComponentVisitor() = default;
 };
 } // namespace Geometry
 } // namespace Mantid

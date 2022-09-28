@@ -5,7 +5,7 @@ Conv Fit
 
 The measured data :math:`I(Q, \omega)` is proportional to the convolution of the
 scattering law :math:`S(Q, \omega)` with the resolution function :math:`R(Q,
-\omega)` of the spectrometer via :math:`I(Q, \omega) = S(Q, \omega) ⊗  R(Q,
+\omega)` of the spectrometer via :math:`I(Q, \omega) = S(Q, \omega) \circledast R(Q,
 \omega)`. The traditional method of analysis has been to fit the measured
 :math:`I(Q, \omega)` with an appropriate set of functions related to the form of
 :math:`S(Q, \omega)` predicted by theory.

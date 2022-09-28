@@ -130,7 +130,7 @@ if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   # Replace hdiutil command to retry on detach failure
   set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CMAKE_MACOSX_RPATH 1)
-  set(CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png)
+  set(CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/installers/conda/osx/dmg_background.png)
   string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
   set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)

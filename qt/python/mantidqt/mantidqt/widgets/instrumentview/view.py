@@ -97,6 +97,9 @@ class InstrumentView(QWidget, ObservingView):
     def wait(self):
         return self.widget.waitForThread()
 
+    def save_image(self, filename):
+        return self.widget.saveImage(filename)
+
     def closeEvent(self, event):
         # ordering of close events is different depending on
         # whether workspace is deleted or window is closed

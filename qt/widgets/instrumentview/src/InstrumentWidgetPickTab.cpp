@@ -5,9 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -201,6 +198,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_zoom->setIcon(QIcon(":/PickTools/zoom.png"));
   m_zoom->setToolTip("Zoom in and out");
 
+  m_whole = new QPushButton();
+  m_whole->setCheckable(true);
+  m_whole->setAutoExclusive(true);
+  m_whole->setToolTip("Select whole instrument");
+  m_whole->setIcon(QIcon(":/PickTools/selection-whole.png"));
+
   m_one = new QPushButton();
   m_one->setCheckable(true);
   m_one->setAutoExclusive(true);
@@ -290,15 +293,17 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_sector, 0, 6);
   toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_one, 1, 0);
-  toolBox->addWidget(m_tube, 1, 1);
-  toolBox->addWidget(m_peakAdd, 1, 2);
-  toolBox->addWidget(m_peakErase, 1, 3);
-  toolBox->addWidget(m_peakCompare, 1, 4);
-  toolBox->addWidget(m_peakAlign, 1, 5);
+  toolBox->addWidget(m_whole, 1, 1);
+  toolBox->addWidget(m_tube, 1, 2);
+  toolBox->addWidget(m_peakAdd, 1, 3);
+  toolBox->addWidget(m_peakErase, 1, 4);
+  toolBox->addWidget(m_peakCompare, 1, 5);
+  toolBox->addWidget(m_peakAlign, 1, 6);
   toolBox->setColumnStretch(8, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_whole, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_tube, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakAdd, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_peakErase, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -455,6 +460,7 @@ void InstrumentWidgetPickTab::integrateTimeBins() {
 void InstrumentWidgetPickTab::setSelectionType() {
   ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   auto plotType = m_plotController->getPlotType();
+  auto surface = m_instrWidget->getSurface();
   if (m_zoom->isChecked()) {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Navigation");
@@ -464,6 +470,12 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_activeTool->setText("Tool: Pixel selection");
     surfaceMode = ProjectionSurface::PickSingleMode;
     plotType = DetectorPlotController::Single;
+  } else if (m_whole->isChecked()) {
+    m_selectionType = WholeInstrument;
+    m_activeTool->setText("Tool: Whole instrument selection");
+    surfaceMode = ProjectionSurface::MoveMode;
+    surface->clearMask();
+    m_instrWidget->updateInstrumentView(true);
   } else if (m_tube->isChecked()) {
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
@@ -531,18 +543,15 @@ void InstrumentWidgetPickTab::setSelectionType() {
     plotType = DetectorPlotController::Single;
   }
   m_plotController->setPlotType(plotType);
-  auto surface = m_instrWidget->getSurface();
   if (surface) {
-    auto previousInteractionMode = surface->getInteractionMode();
     surface->setInteractionMode(surfaceMode);
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode != previousInteractionMode) {
-      if (interactionMode == ProjectionSurface::EditShapeMode || interactionMode == ProjectionSurface::MoveMode) {
-        updatePlotMultipleDetectors();
-      } else {
-        m_plot->clearAll();
-        m_plot->replot();
-      }
+    // if switch to MoveMode then keep the plot
+    if (interactionMode == ProjectionSurface::EditShapeMode || interactionMode == ProjectionSurface::MoveMode) {
+      updatePlotMultipleDetectors();
+    } else {
+      m_plot->clearAll();
+      m_plot->replot();
     }
     setPlotCaption();
   }
@@ -708,6 +717,9 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
   case PixelSelect:
     m_one->setChecked(true);
     break;
+  case WholeInstrumentSelect:
+    m_whole->setChecked(true);
+    break;
   case TubeSelect:
     m_tube->setChecked(true);
     break;
@@ -739,7 +751,7 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
 }
 
 void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
-  if (canUpdateTouchedDetector()) {
+  if (canUpdateTouchedDetector() && !m_instrWidget->isTabFolded()) {
     m_infoController->displayInfo(pickID);
     m_plotController->setPlotData(pickID);
     m_plotController->updatePlot();
@@ -747,10 +759,12 @@ void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
 }
 
 void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
-  m_infoController->displayInfo(pickID);
-  m_plotController->setPlotData(pickID);
-  m_plotController->zoomOutOnPlot();
-  m_plotController->updatePlot();
+  if (!m_instrWidget->isTabFolded()) {
+    m_infoController->displayInfo(pickID);
+    m_plotController->setPlotData(pickID);
+    m_plotController->zoomOutOnPlot();
+    m_plotController->updatePlot();
+  }
 }
 
 void InstrumentWidgetPickTab::comparePeaks(
@@ -787,14 +801,14 @@ void InstrumentWidgetPickTab::shapeCreated() {
  * selected with drawn shapes.
  */
 void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
-  if (!isVisible())
+  if (!isVisible() || m_instrWidget->isTabFolded())
     return;
   const ProjectionSurface &surface = *getSurface();
   if (surface.hasMasks()) {
     std::vector<size_t> dets;
     surface.getMaskedDetectors(dets);
     m_plotController->setPlotData(dets);
-  } else {
+  } else if (m_selectionType == InstrumentWidgetPickTab::WholeInstrument) {
     std::vector<Mantid::detid_t> dets;
     const auto &actor = m_instrWidget->getInstrumentActor();
     const auto &detInfo = actor.detectorInfo();
@@ -808,8 +822,9 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
       if (!detInfo.isMonitor(detector))
         detsIds.push_back(detector);
     }
-
     m_plotController->setPlotData(detsIds);
+  } else {
+    m_plotController->clear();
   }
   m_plot->replot();
 }
@@ -847,53 +862,15 @@ void InstrumentWidgetPickTab::savePlotToWorkspace() { m_plotController->savePlot
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-
-  if (!tsv.selectSection("picktab"))
-    return;
-
-  std::string tabLines;
-  tsv >> tabLines;
-  API::TSVSerialiser tab(tabLines);
-
-  // load active push button
-  std::vector<QPushButton *> buttons{m_zoom,      m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
-                                     m_free_draw, m_one,  m_tube,    m_peakAdd,   m_peakErase};
-
-  tab.selectLine("ActiveTools");
-  for (auto button : buttons) {
-    bool value;
-    tab >> value;
-    button->setChecked(value);
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("MaskBinsData::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 /** Save the state of the pick tab to a Mantid project file
  * @return a string representing the state of the pick tab
  */
 std::string InstrumentWidgetPickTab::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv, tab;
-
-  // save active push button
-  std::vector<QPushButton *> buttons{m_zoom,      m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
-                                     m_free_draw, m_one,  m_tube,    m_peakAdd,   m_peakErase};
-
-  tab.writeLine("ActiveTools");
-  for (auto button : buttons) {
-    tab << button->isChecked();
-  }
-
-  tsv.writeSection("picktab", tab.outputLines());
-  return tsv.outputLines();
-#else
   throw std::runtime_error("MaskBinsData::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 //=====================================================================================//
@@ -1256,8 +1233,10 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
  * Update the miniplot for a selected detector.
  */
 void DetectorPlotController::updatePlot() {
-  m_plot->recalcAxisDivs();
-  m_plot->replot();
+  if (!m_instrWidget->isTabFolded()) {
+    m_plot->recalcAxisDivs();
+    m_plot->replot();
+  }
 }
 
 /**
@@ -1610,7 +1589,7 @@ void DetectorPlotController::savePlotToWorkspace() {
   std::vector<Mantid::detid_t> detids;
   // unit id for x vector in the created workspace
   std::string unitX;
-  foreach (QString label, labels) {
+  for (const QString &label : labels) {
     std::vector<double> x, y, e;
     // split the label to get the detector id and selection type
     QStringList parts = label.split(QRegExp("[()]"));
@@ -1731,18 +1710,6 @@ QString DetectorPlotController::getTubeXUnitsName() const {
  * Return symbolic name of units of current TubeXUnit.
  */
 QString DetectorPlotController::getTubeXUnitsUnits() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  switch (m_tubeXUnits) {
-  case LENGTH:
-    return "(m)";
-  case PHI:
-    return "(radians)";
-  case OUT_OF_PLANE_ANGLE:
-    return "(radians)";
-  default:
-    return "";
-  }
-#else
   switch (m_tubeXUnits) {
   case LENGTH:
     return "m";
@@ -1753,15 +1720,9 @@ QString DetectorPlotController::getTubeXUnitsUnits() const {
   default:
     return "";
   }
-#endif
 }
 
-void DetectorPlotController::setTubeXUnits(TubeXUnits units) {
-  m_tubeXUnits = units;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  m_plot->setXLabel(getTubeXUnitsName() + " " + getTubeXUnitsUnits());
-#endif
-}
+void DetectorPlotController::setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
 
 /**
  * Get the plot caption for the current plot type.
@@ -1863,11 +1824,6 @@ void DetectorPlotController::addPeak(double x, double y) {
 /**
  * Zoom out back to the natural home of the mini plot
  */
-void DetectorPlotController::zoomOutOnPlot() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-// Do nothing if in Qt4 or below.
-#else
-  m_plot->zoomOutOnPlot();
-#endif
-}
+void DetectorPlotController::zoomOutOnPlot() { m_plot->zoomOutOnPlot(); }
+
 } // namespace MantidQt::MantidWidgets

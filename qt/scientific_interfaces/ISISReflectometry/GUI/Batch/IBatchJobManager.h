@@ -37,8 +37,8 @@ public:
   virtual void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) = 0;
-  virtual std::vector<std::string>
-  algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const = 0;
+  virtual std::vector<std::string> algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                                                                   bool includeGrpRows) const = 0;
   virtual boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) = 0;
   virtual boost::optional<Item const &> notifyWorkspaceRenamed(std::string const &oldName,
                                                                std::string const &newName) = 0;

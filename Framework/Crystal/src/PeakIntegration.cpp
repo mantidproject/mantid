@@ -127,7 +127,7 @@ void PeakIntegration::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *peaksW, *outputW))
   for (int i = MinPeaks; i < NumberPeaks; i++) {
 
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     // Direct ref to that peak
     Peak &peak = peaksW->getPeaks()[i];
@@ -262,10 +262,10 @@ void PeakIntegration::exec() {
     peak.setSigmaIntensity(sigI);
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
 
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Save the output
   setProperty("OutPeaksWorkspace", peaksW);

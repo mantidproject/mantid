@@ -86,7 +86,7 @@ void LoadDialog::createDynamicWidgets() {
 void LoadDialog::helpClicked() {
   const auto loaderName = getAlgorithm()->getPropertyValue("LoaderName");
   QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-  MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(), helpPage);
+  MantidQt::API::HelpWindow::showAlgorithm(helpPage);
 }
 
 /**
@@ -134,7 +134,7 @@ void LoadDialog::accept() {
   // wasn't attempted for the new contents. Force one here.
   // The widget does nothing if the contents have not changed so it will be
   // quick for this case
-  auto preventLoadRequestsWhileAlive = PreventLoadRequests(*this);
+  PreventLoadRequests preventLoadRequestsWhileAlive(*this);
   m_form.fileWidget->findFiles();
   while (m_form.fileWidget->isSearching() || m_populating)
     QApplication::instance()->processEvents();

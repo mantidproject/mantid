@@ -49,7 +49,7 @@ public:
   virtual void getMillerIndex(int &h, int &k, int &l);
 
   /// Get peak parameters
-  virtual double getPeakParameter(std::string) = 0;
+  virtual double getPeakParameter(const std::string &) = 0;
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
   virtual void calculateParameters(bool explicitoutput) const = 0;

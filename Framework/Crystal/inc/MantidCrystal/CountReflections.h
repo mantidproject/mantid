@@ -22,7 +22,7 @@ namespace Crystal {
   based on point group symmetry and do not depend on intensities. For those
   statistics look at SortHKL.
 */
-class MANTID_CRYSTAL_DLL CountReflections : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CountReflections final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -104,7 +104,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         output_ws = self.getPropertyValue("OutputWorkspace")
         #output_ws = '__'+output_ws+'_reduced'
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         property_list = [p.name for p in property_manager.getProperties()]
 
@@ -307,7 +307,7 @@ class HFIRSANSReduction(PythonAlgorithm):
     def process_data_file(self, workspace):
         output_msg = ""
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
         property_list = [p.name for p in property_manager.getProperties()]
 
         # Dark current subtraction
@@ -374,7 +374,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             Simple execution of an algorithm on the given workspace
         """
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         output_msg = ""
         if output_workspace is None:

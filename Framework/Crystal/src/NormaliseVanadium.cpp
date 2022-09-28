@@ -65,7 +65,7 @@ void NormaliseVanadium::exec() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *correctionFactors))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    //    PARALLEL_START_INTERUPT_REGION //FIXME: Restore
+    //    PARALLEL_START_INTERRUPT_REGION //FIXME: Restore
 
     // Get a reference to the Y's in the output WS for storing the factors
     auto &Y = correctionFactors->mutableY(i);
@@ -112,9 +112,9 @@ void NormaliseVanadium::exec() {
 
     prog.report();
 
-    //    PARALLEL_END_INTERUPT_REGION
+    //    PARALLEL_END_INTERRUPT_REGION
   }
-  //  PARALLEL_CHECK_INTERUPT_REGION
+  //  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", correctionFactors);
 }

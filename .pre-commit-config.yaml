@@ -3,6 +3,10 @@ default_language_version:
 
 exclude: ^$|instrument/
 
+ci:
+  autofix_prs: false
+  skip: [clang-format]
+
 repos:
 
   # Run fast code improvement/checks before running PR specific helpers.

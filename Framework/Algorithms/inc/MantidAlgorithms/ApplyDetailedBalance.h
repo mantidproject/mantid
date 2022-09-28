@@ -18,7 +18,7 @@ namespace Algorithms {
   @author Andrei Savici, ORNL
   @date 2011-09-01
 */
-class MANTID_ALGORITHMS_DLL ApplyDetailedBalance : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ApplyDetailedBalance final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDetailedBalance"; };

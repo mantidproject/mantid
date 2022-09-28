@@ -66,7 +66,7 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
 /**
  * Destructor
  */
-BinDialog::~BinDialog() {}
+BinDialog::~BinDialog() = default;
 
 /** Set the values in the GUI. */
 void BinDialog::setIntegralMinMax(double minBin, double maxBin, bool useEverything) {

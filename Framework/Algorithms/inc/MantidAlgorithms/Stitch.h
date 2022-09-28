@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** Stitches overlapping spectra from multiple 2D workspaces.
  */
-class MANTID_ALGORITHMS_DLL Stitch : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Stitch final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

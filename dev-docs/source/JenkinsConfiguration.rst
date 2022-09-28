@@ -43,6 +43,7 @@ Windows
 -------
 
 Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``.
+For conda-build we need to ensure that we can have long paths, on Windows 10 and up it is possible using a registry key. Change "Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled (Type: REG_DWORD)" to 1
 
 Agent Connection
 ^^^^^^^^^^^^^^^^

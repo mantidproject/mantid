@@ -21,7 +21,7 @@ Required Properties:
 <LI> Filename - The filename to use for the saved data </LI>
 </UL>
 */
-class DLLExport SavePDFGui : public API::Algorithm {
+class DLLExport SavePDFGui final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

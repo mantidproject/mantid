@@ -28,9 +28,13 @@ def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
     vanaMaterial = vanaWS.sample().getMaterial()
     vanaNumberDensity = vanaMaterial.numberDensity
     vanaCrossSection = vanaMaterial.totalScatterXSection()
+    if vanaNumberDensity == 0 or math.isnan(vanaNumberDensity) or math.isinf(vanaNumberDensity):
+        raise RuntimeError('Invalid vanadium number density, consider setting the material before: {}'.format(vanaNumberDensity))
+    if sampleNumberDensity == 0 or math.isnan(sampleNumberDensity) or math.isinf(sampleNumberDensity):
+        raise RuntimeError('Invalid sample number density, consider setting the sample material before: {}'.format(sampleNumberDensity))
+    if vanaCrossSection <= 0 or math.isnan(vanaCrossSection) or math.isinf(vanaCrossSection):
+        raise RuntimeError('Invalid vanadium cross-section, consider setting the material before: {}'.format(vanaCrossSection))
     factor = vanaNumberDensity / sampleNumberDensity * vanaCrossSection
-    if factor <= 0 or math.isnan(factor) or math.isinf(factor):
-        raise RuntimeError('Invalid absolute units normalisation factor: {}'.format(factor))
     report.notice('Absolute units scaling factor: {}'.format(factor))
     scaledWSName = wsNames.withSuffix('absolute_units')
     scaledWS = Scale(InputWorkspace=ws,
@@ -497,7 +501,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                   EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(mainWS)
         if self.getProperty(common.PROP_ABSOLUTE_UNITS).value == common.ABSOLUTE_UNITS_ON:
-            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS)
+            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS, self._names, self._cleanup, self._report, self._subalgLogging)
         return vanaNormalizedWS
 
     def _outputWSConvertedToTheta(self, mainWS):
@@ -537,7 +541,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # out of range from the original ragged workspace in delta E.
         # The mask is later respected by the detector grouping
         # to get the normalisation right also in the non-overlapping regions.
-        if mainWS.getInstrument().getName() in ['IN5', 'PANTHER']:
+        if mainWS.getInstrument().getName() in ['IN5', 'PANTHER', 'SHARP']:
             rebinnedWS = MaskNonOverlappingBins(InputWorkspace=rebinnedWS, ComparisonWorkspace=mainWS, RaggedInputs='Ragged',
                                                 OutputWorkspace=rebinnedWS.name(), MaskPartiallyOverlapping=True)
         self._cleanup.cleanup(mainWS)

@@ -48,7 +48,7 @@ public:
       Mantid::API::MDNormalization preferredNormalization = Mantid::API::MDNormalization::VolumeNormalization,
       Mantid::API::MDNormalization preferredNormalizationHisto = Mantid::API::MDNormalization::VolumeNormalization);
   MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) = delete;
-  ~MDEventWorkspace() override;
+  virtual ~MDEventWorkspace() override = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MDEventWorkspace> clone() const { return std::unique_ptr<MDEventWorkspace>(doClone()); }

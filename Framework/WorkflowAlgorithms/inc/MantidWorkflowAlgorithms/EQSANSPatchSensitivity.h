@@ -17,7 +17,7 @@ namespace WorkflowAlgorithms {
     Calculate the detector sensitivity and patch the pixels that are masked in a
    second workspace.
 */
-class DLLExport EQSANSPatchSensitivity : public API::Algorithm {
+class DLLExport EQSANSPatchSensitivity final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSPatchSensitivity"; }

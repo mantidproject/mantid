@@ -25,6 +25,8 @@ class MemoryWidget(PluginWidget):
         self.presenter = MemoryPresenter(self.view)
 
         layout = QVBoxLayout()
+        self.view.mantid_memory_bar.setMinimumHeight(30)
+        layout.addWidget(self.view.mantid_memory_bar)
         self.view.memory_bar.setMinimumHeight(30)
         layout.addWidget(self.view.memory_bar)
 
@@ -32,8 +34,8 @@ class MemoryWidget(PluginWidget):
         self.setWindowTitle(self.get_plugin_title())
         # The following are chosen as a good value after
         # testing how it looks for different values
-        self.setMinimumHeight(50)
-        self.setMaximumHeight(55)
+        self.setMinimumHeight(80)
+        self.setMaximumHeight(85)
 
     # ----------------- Plugin API --------------------
 

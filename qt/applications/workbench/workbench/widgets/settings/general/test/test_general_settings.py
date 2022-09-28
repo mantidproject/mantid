@@ -83,6 +83,9 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.total_number_checkpoints,
                                    presenter.view.total_number_checkpoints.valueChanged)
 
+        self.assert_connected_once(presenter.view.completion_enabled,
+                                   presenter.view.completion_enabled.stateChanged)
+
     def test_font_dialog_signals(self):
         presenter = GeneralSettings(None)
         with patch.object(presenter.view, 'create_font_dialog', MagicMock()) as font_dialog:
@@ -181,11 +184,11 @@ class GeneralSettingsTest(unittest.TestCase):
         # load current setting is called automatically in the constructor
         GeneralSettings(None)
 
-        # calls().__bool__() are the calls to bool() on the retrieved value from ConfigService.getString
-        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value),
-                                        call().__bool__(),
-                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value),
-                                        call().__bool__()])
+        # 'any_order' is used to avoid having to assert call().__index__ is called due to 'get' returning a mock object
+        mock_CONF.get.assert_has_calls([call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool),
+                                        call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool),
+                                        call(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool),
+                                        call(GeneralProperties.COMPLETION_ENABLED.value, type=bool)], any_order=True)
 
         mock_ConfigService.getString.assert_has_calls([call(GeneralProperties.PR_RECOVERY_ENABLED.value),
                                                        call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
@@ -307,6 +310,19 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_ConfigService.setString.assert_called_once_with(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, "False")
 
     @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_completion_enabled_modified(self, mock_CONF):
+        presenter = GeneralSettings(None)
+        # reset any effects from the constructor
+        mock_CONF.setString.reset_mock()
+
+        presenter.action_completion_enabled_modified(True)
+        mock_CONF.set.assert_called_once_with(GeneralProperties.COMPLETION_ENABLED.value, True)
+        mock_CONF.set.reset_mock()
+
+        presenter.action_completion_enabled_modified(False)
+        mock_CONF.set.assert_called_once_with(GeneralProperties.COMPLETION_ENABLED.value, False)
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
     def test_fill_layout_display(self, mock_CONF):
         presenter = GeneralSettings(None, view=Mock())
         # setup CONF.get returns dictionary
@@ -353,7 +369,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.save_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict),
+                 call(GeneralProperties.USER_LAYOUT.value, type=dict)]
         mock_CONF.get.assert_has_calls(calls)
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
@@ -374,7 +391,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.load_layout()
 
-        mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value)
+        mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, type=dict)
         mock_parent.restoreState.assert_called_once_with(test_dict['a'], SAVE_STATE_VERSION)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -393,7 +410,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.delete_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict),
+                 call(GeneralProperties.USER_LAYOUT.value, type=dict)]
         mock_CONF.get.assert_has_calls(calls)
         mock_CONF.set.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, {})
         mock_parent.populate_layout_menu.assert_called_once_with()

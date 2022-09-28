@@ -21,7 +21,7 @@ namespace WorkflowAlgorithms {
     Set up the reduction options for HFIR reduction.
 */
 
-class DLLExport SetupHFIRReduction : public API::Algorithm {
+class DLLExport SetupHFIRReduction final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SetupHFIRReduction"; }

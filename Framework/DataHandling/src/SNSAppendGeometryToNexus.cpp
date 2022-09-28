@@ -170,7 +170,7 @@ void SNSAppendGeometryToNexus::exec() {
   // Open the NeXus file
   ::NeXus::File nxfile(m_filename, NXACC_RDWR);
 
-  // typedef std::map<std::string,std::string> string_map_t;
+  // using string_map_t = std::map<std::string,std::string>;
   std::map<std::string, std::string>::const_iterator root_iter;
   std::map<std::string, std::string> entries = nxfile.getEntries();
 

@@ -11,7 +11,7 @@ Exercise 1
 -  Open the Instrument View
 -  Make sure the colour map is set to "jet" and the display type to "Spherical Z".
 -  Change the colour scale to *SymmetricLog10* set the scale range to be between
-   100 and 5e4
+   100 and 5e4 (5e4 is equivalent to 50000)
 -  Go to the *Pick* tab, choose *Add single crystal peak*
    |PickTabAddPeakButton.png| go to a Bragg peak and left-click. The
    mini-plot should now be showing a plot of counts vs TOF for that

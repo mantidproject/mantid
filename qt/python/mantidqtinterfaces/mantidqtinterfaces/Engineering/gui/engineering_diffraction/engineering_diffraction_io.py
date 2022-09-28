@@ -8,6 +8,8 @@ from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.simpleapi import logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.engineering_diffraction import EngineeringDiffractionGui
 
+import sys
+
 IO_VERSION = 1
 
 SETTINGS_KEYS_TYPES = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
@@ -61,7 +63,13 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
             logger.error("Engineering Diffraction Interface encoder used different version, restoration may fail")
 
         ws_names = obj_dic.get("data_workspaces", None)  # workspaces are in ADS, need restoring into interface
-        gui = EngineeringDiffractionGui()
+        if 'workbench' in sys.modules:
+            from workbench.config import get_window_config
+
+            parent, flags = get_window_config()
+        else:
+            parent, flags = None, None
+        gui = EngineeringDiffractionGui(parent=parent, window_flags=flags)
         presenter = gui.presenter
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
         presenter.settings_presenter.model.set_settings_dict(obj_dic["settings_dict"])

@@ -18,7 +18,7 @@ namespace Algorithms {
  *  This can occur when dealing with different time regimes for detectors
  *  and monitors.
  */
-class MANTID_ALGORITHMS_DLL UnwrapMonitorsInTOF : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapMonitorsInTOF final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

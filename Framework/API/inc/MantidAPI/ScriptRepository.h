@@ -99,7 +99,7 @@ class MANTID_API_DLL ScriptRepoException : public std::exception {
 public:
   /// default constructor
   ScriptRepoException(const std::string &info = std::string("Unknown Exception"))
-      : _system_error(""), _user_info(info), _file_path(""){};
+      : m_systemError(""), m_userInfo(info), m_filepath(""){};
 
   ScriptRepoException(const std::string &info, const std::string &system, const std::string &file = std::string(),
                       int line = -1);
@@ -109,15 +109,15 @@ public:
 
   /// Returns the error description with technical details on the origin and
   /// cause.
-  const std::string &systemError() const { return _system_error; };
+  const std::string &systemError() const { return m_systemError; };
   /// Returns the file and position where the error was caused.
-  const std::string &filePath() const { return _file_path; };
+  const std::string &filePath() const { return m_filepath; };
 
 private:
   /// The message returned by what()
-  std::string _system_error;
-  std::string _user_info;
-  std::string _file_path;
+  std::string m_systemError;
+  std::string m_userInfo;
+  std::string m_filepath;
 };
 
 //----------------------------------------------------------------------

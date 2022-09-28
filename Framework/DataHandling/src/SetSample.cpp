@@ -92,6 +92,8 @@ const std::string FLAT_PLATE("FlatPlate");
 const std::string CYLINDER("Cylinder");
 /// Static HollowCylinder string
 const std::string HOLLOW_CYLINDER("HollowCylinder");
+/// Static Sphere string
+const std::string SPHERE("Sphere");
 /// Static FlatPlateHolder string
 const std::string FLAT_PLATE_HOLDER("FlatPlateHolder");
 /// Static HollowCylinderHolder string
@@ -201,11 +203,7 @@ std::string axisXML(const std::vector<double> &axis) {
  * @throws Exception::NotFoundError if the property does not exist
  */
 double getPropertyAsDouble(const Kernel::PropertyManager &args, const std::string &name) {
-  try {
-    return args.getProperty(name);
-  } catch (std::runtime_error &) {
-    return static_cast<int>(args.getProperty(name));
-  }
+  return std::stod(args.getPropertyValue(name));
 }
 
 /**
@@ -213,17 +211,18 @@ double getPropertyAsDouble(const Kernel::PropertyManager &args, const std::strin
  * vector<double> or a vector<int> property and casts accordingly
  * @param args A reference to the property manager
  * @param name The name of the property
- * @return The value of the property as a double
+ * @return The value of the property as a vector<double>
  * @throws Exception::NotFoundError if the property does not exist
  */
 std::vector<double> getPropertyAsVectorDouble(const Kernel::PropertyManager &args, const std::string &name) {
-  try {
-    return args.getProperty(name);
-  } catch (std::runtime_error &) {
-    std::vector<int> intValues = args.getProperty(name);
-    std::vector<double> dblValues(std::begin(intValues), std::end(intValues));
-    return dblValues;
+  std::string vectorAsString = args.getPropertyValue(name);
+  std::vector<double> vectorOfDoubles;
+  std::stringstream ss(vectorAsString);
+  std::string elementAsString;
+  while (std::getline(ss, elementAsString, ',')) {
+    vectorOfDoubles.push_back(std::stod(elementAsString));
   }
+  return vectorOfDoubles;
 }
 
 /**
@@ -299,10 +298,6 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors, con
         }
       }
     } else {
-      // for the predefined 3 shapes height is mandatory
-      if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
-        errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
-      }
       if (shape == ShapeArgs::FLAT_PLATE || shape == ShapeArgs::FLAT_PLATE_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::WIDTH)) {
           errors[flavour] = "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
@@ -310,10 +305,16 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors, con
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::THICK)) {
           errors[flavour] = "For " + shape + " shape " + ShapeArgs::THICK + " is required";
         }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
+        }
       }
       if (shape == ShapeArgs::CYLINDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::RADIUS)) {
           errors[flavour] = "For " + shape + " shape " + ShapeArgs::RADIUS + " is required";
+        }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
         }
       }
       if (shape == ShapeArgs::HOLLOW_CYLINDER || shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
@@ -322,6 +323,9 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors, con
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::OUTER_RADIUS)) {
           errors[flavour] = "For " + shape + " shape " + ShapeArgs::OUTER_RADIUS + " is required";
+        }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
         }
       }
       if (shape == ShapeArgs::FLAT_PLATE_HOLDER) {
@@ -334,6 +338,9 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors, con
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::BACK_THICK)) {
           errors[flavour] = "For " + shape + " shape " + ShapeArgs::BACK_THICK + " is required";
         }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
+        }
       }
       if (shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::INNER_OUTER_RADIUS)) {
@@ -341,6 +348,14 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors, con
         }
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::OUTER_INNER_RADIUS)) {
           errors[flavour] = "For " + shape + " shape " + ShapeArgs::OUTER_INNER_RADIUS + " is required";
+        }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
+        }
+      }
+      if (shape == ShapeArgs::SPHERE) {
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::RADIUS)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::RADIUS + " is required";
         }
       }
     }
@@ -686,7 +701,7 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
     materialParams.massDensity = materialArgs.getProperty("MassDensity");
   }
   if (materialArgs.existsProperty("EffectiveNumberDensity")) {
-    materialParams.numberDensityEffective = materialArgs.getProperty("numberDensityEffective");
+    materialParams.numberDensityEffective = materialArgs.getProperty("EffectiveNumberDensity");
   }
   if (materialArgs.existsProperty("PackingFraction")) {
     materialParams.packingFraction = materialArgs.getProperty("packingFraction");
@@ -721,7 +736,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
-      if (rotationMatrix != Kernel::Matrix<double>(3, 3, 1) && !sampleEnv) {
+      if (rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv) {
         // Only add goniometer tag if rotationMatrix is not the Identity,
         // and this shape is not defined within a sample environment
         xml = Geometry::ShapeFactory().addGoniometerTag(rotationMatrix, xml);
@@ -812,12 +827,14 @@ std::string SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &a
     result = createFlatPlateHolderXML(args, refFrame);
   } else if (boost::algorithm::ends_with(shape, ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
     result = createHollowCylinderHolderXML(args, refFrame);
+  } else if (boost::algorithm::ends_with(shape, ShapeArgs::SPHERE)) {
+    result = createSphereXML(args);
   } else {
     std::stringstream msg;
     msg << "Unknown 'Shape' argument '" << shape << "' provided in 'Geometry' property. Allowed values are "
         << ShapeArgs::CSG << ", " << ShapeArgs::FLAT_PLATE << ", " << ShapeArgs::CYLINDER << ", "
         << ShapeArgs::HOLLOW_CYLINDER << ", " << ShapeArgs::FLAT_PLATE_HOLDER << ", "
-        << ShapeArgs::HOLLOW_CYLINDER_HOLDER;
+        << ShapeArgs::HOLLOW_CYLINDER_HOLDER << ", " << ShapeArgs::SPHERE;
     throw std::invalid_argument(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
@@ -847,6 +864,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   const double widthInCM = getPropertyAsDouble(args, ShapeArgs::WIDTH);
   const double heightInCM = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
   const double thickInCM = getPropertyAsDouble(args, ShapeArgs::THICK);
+
   // Convert to half-"width" in metres
   const double szX = (widthInCM * 5e-3);
   const double szY = (heightInCM * 5e-3);
@@ -858,10 +876,10 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   auto lbb = makeV3D(szX, -szY, szZ);
   auto rfb = makeV3D(-szX, -szY, -szZ);
   if (args.existsProperty(ShapeArgs::ANGLE)) {
+    const double angleInDegrees = getPropertyAsDouble(args, ShapeArgs::ANGLE);
     Goniometer gr;
     const auto upAxis = makeV3D(0, 1, 0);
-    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(), args.getProperty(ShapeArgs::ANGLE), Geometry::CCW,
-                Geometry::angDegrees);
+    gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(), angleInDegrees, Geometry::CCW, Geometry::angDegrees);
     auto &rotation = gr.getR();
     lfb.rotate(rotation);
     lft.rotate(rotation);
@@ -870,7 +888,7 @@ std::string SetSample::createFlatPlateXML(const Kernel::PropertyManager &args, c
   }
   std::vector<double> center = {0., 0., 0.};
   if (args.existsProperty(ShapeArgs::CENTER)) {
-    center = args.getProperty(ShapeArgs::CENTER);
+    center = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
     const V3D centrePos(center[0] * 0.01, center[1] * 0.01, center[2] * 0.01);
     // translate to true center after rotation
     lfb += centrePos;
@@ -1029,6 +1047,26 @@ std::string SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args
   } else {
     xmlShapeStream << "<radius val=\"" << outerRadius << "\"/>";
   }
+  xmlShapeStream << "</" << tag << ">";
+  return xmlShapeStream.str();
+}
+
+/**
+ * Create the XML required to define a sphere from the given args
+ * @param args A user-supplied dict of args
+ * @return The XML definition string
+ */
+std::string SetSample::createSphereXML(const Kernel::PropertyManager &args) const {
+  const double radius = static_cast<double>(args.getProperty(ShapeArgs::RADIUS)) * 0.01;
+  std::vector<double> center = getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+  std::transform(center.begin(), center.end(), center.begin(), [](double val) { return val *= 0.01; });
+
+  std::ostringstream xmlShapeStream;
+  const std::string tag{"sphere"};
+  const auto id = "sphere";
+  xmlShapeStream << "<" << tag << " id=\"" << id << "\"> "
+                 << "<center x=\"" << center[0] << "\" y=\"" << center[1] << "\" z=\"" << center[2] << "\" /> "
+                 << "<radius val=\"" << radius << "\" /> ";
   xmlShapeStream << "</" << tag << ">";
   return xmlShapeStream.str();
 }

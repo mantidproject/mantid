@@ -167,8 +167,8 @@ class SaveGSSCWTest(unittest.TestCase):
                     # shall be two float to compare with
                     y_i = float(y_str)
                     e_i = float(e_str)
-                    self.assertAlmostEquals(y_i, expected_data[point_index][1], places=2)
-                    self.assertAlmostEquals(e_i, expected_data[point_index][2], places=2)
+                    self.assertAlmostEqual(y_i, expected_data[point_index][1], places=2)
+                    self.assertAlmostEqual(e_i, expected_data[point_index][2], places=2)
                 else:
                     # outside of given data range: two empty string
                     assert y_str.strip() == e_str.strip() == ''

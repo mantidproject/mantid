@@ -117,7 +117,7 @@ void UnwrapSNS::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << workspaceIndex << " is not available.\n";
@@ -150,9 +150,9 @@ void UnwrapSNS::exec() {
       std::copy(eIn.begin(), eIn.begin() + pivot, eOut.begin() + lengthFirstPartE);
     }
     m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   m_inputWS.reset();
   this->runMaskDetectors();

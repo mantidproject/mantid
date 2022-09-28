@@ -29,22 +29,17 @@ Logger g_log("InstrumentInfo");
  * @param inst Pointer to InstrumentInfo that this LiveListenerInfo belongs to
  * @param elem The Poco::XML::Element to read the data from
  */
-LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Element *elem) {
-  m_name = elem->getAttribute("name");
-  if (m_name.empty()) {
+LiveListenerInfo::LiveListenerInfo(InstrumentInfo *inst, const Poco::XML::Element *elem)
+    : m_name(elem->getAttribute("name")), m_address(elem->getAttribute("address")),
+      m_listener(elem->getAttribute("listener")) {
+
+  if (m_name.empty())
     g_log.error() << "Listener connection name for " << inst->name()
                   << "is not defined. This listener will not be selectable.\n";
-  }
-
-  m_address = elem->getAttribute("address");
-  if (m_address.empty()) {
+  if (m_address.empty())
     g_log.error() << "Listener address for " << inst->name() << " is not defined.\n";
-  }
-
-  m_listener = elem->getAttribute("listener");
-  if (m_listener.empty()) {
+  if (m_listener.empty())
     g_log.error() << "Listener class for " << inst->name() << " is not defined.\n";
-  }
 }
 
 /**

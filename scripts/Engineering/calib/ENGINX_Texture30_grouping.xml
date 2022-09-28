@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<detector-grouping idf-date="1900-01-31T23:59:59" instrument="ENGIN-X">
+	<group ID="0">
+		<detids>200001-200100</detids>
+	</group>
+	<group ID="1">
+		<detids>100001-100080</detids>
+	</group>
+	<group ID="2">
+		<detids>100081-100120, 101001-101041</detids>
+	</group>
+	<group ID="3">
+		<detids>101042-101120</detids>
+	</group>
+	<group ID="4">
+		<detids>102001-102080</detids>
+	</group>
+	<group ID="5">
+		<detids>102081-102120, 103001-103041</detids>
+	</group>
+	<group ID="6">
+		<detids>103042-103120</detids>
+	</group>
+	<group ID="7">
+		<detids>104001-104080</detids>
+	</group>
+	<group ID="8">
+		<detids>104081-104120, 105001-105041</detids>
+	</group>
+	<group ID="9">
+		<detids>105042-105120</detids>
+	</group>
+	<group ID="10">
+		<detids>106001-106080</detids>
+	</group>
+	<group ID="11">
+		<detids>106081-106120, 107001-107041</detids>
+	</group>
+	<group ID="12">
+		<detids>107042-107120</detids>
+	</group>
+	<group ID="13">
+		<detids>108001-108080</detids>
+	</group>
+	<group ID="14">
+		<detids>108081-108120, 109001-109041</detids>
+	</group>
+	<group ID="15">
+		<detids>109042-109120</detids>
+	</group>
+
+	<group ID="16">
+		<detids>110001-110080</detids>
+	</group>
+	<group ID="17">
+		<detids>110081-110120, 111001-111041</detids>
+	</group>
+	<group ID="18">
+		<detids>111042-111120</detids>
+	</group>
+	<group ID="19">
+		<detids>112001-112080</detids>
+	</group>
+	<group ID="20">
+		<detids>112081-112120, 113001-113041</detids>
+	</group>
+	<group ID="21">
+		<detids>113042-113120</detids>
+	</group>
+	<group ID="22">
+		<detids>114001-114080</detids>
+	</group>
+	<group ID="23">
+		<detids>114081-114120, 115001-115041</detids>
+	</group>
+	<group ID="24">
+		<detids>115042-115120</detids>
+	</group>
+	<group ID="25">
+		<detids>116001-116080</detids>
+	</group>
+	<group ID="26">
+		<detids>116081-116120, 117001-117041</detids>
+	</group>
+	<group ID="27">
+		<detids>117042-117120</detids>
+	</group>
+	<group ID="28">
+		<detids>118001-118080</detids>
+	</group>
+	<group ID="29">
+		<detids>118081-118120, 119001-119041</detids>
+	</group>
+	<group ID="30">
+		<detids>119042-119120</detids>
+	</group>
+</detector-grouping>

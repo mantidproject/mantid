@@ -41,15 +41,15 @@ ALL_SYMBOLS = ["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", 
 
 SMALL_K = 1.0e-1  # norm of k vector below this value is considered zero
 
-K_2_HARTREE = constants.codata.value("kelvin-hartree relationship")  # K * K_2_HARTREE =  Hartree
+K_2_HARTREE = constants.value("kelvin-hartree relationship")  # K * K_2_HARTREE =  Hartree
 
 # here we have to multiply by 100 because frequency is expressed in cm^-1
-CM1_2_HARTREE = constants.codata.value("inverse meter-hartree relationship") * 100.0  # cm-1 * CM1_2_HARTREE =  Hartree
+CM1_2_HARTREE = constants.value("inverse meter-hartree relationship") * 100.0  # cm-1 * CM1_2_HARTREE =  Hartree
 
-ATOMIC_LENGTH_2_ANGSTROM = constants.codata.value(
+ATOMIC_LENGTH_2_ANGSTROM = constants.value(
     "atomic unit of length") / constants.angstrom  # 1 a.u. = 0.52917721067 Angstrom
 
-M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
+M_2_HARTREE = constants.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
 # ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
@@ -90,7 +90,7 @@ S_LAST_INDEX = 1
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
 with warnings.catch_warnings(record=True) as warning_list:
     warnings.simplefilter("always")
-    H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
+    H_BAR = constants.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
     if len(warning_list) >= 1 and isinstance(warning_list[0].message, ConstantWarning):
         H_BAR = constants.hbar  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
 
@@ -99,11 +99,11 @@ H_BAR_DECOMPOSITION = math.frexp(H_BAR)
 M2_TO_ANGSTROM2 = 1.0 / constants.angstrom ** 2  # m^2 = 10^20 A^2
 M2_TO_ANGSTROM2_DECOMPOSITION = math.frexp(M2_TO_ANGSTROM2)
 
-KG2AMU = constants.codata.value("kilogram-atomic mass unit relationship")  # kg = 6.022140857e+26 amu
+KG2AMU = constants.value("kilogram-atomic mass unit relationship")  # kg = 6.022140857e+26 amu
 KG2AMU_DECOMPOSITION = math.frexp(KG2AMU)
 
 # here we divide by 100 because we need relation between hertz and inverse cm
-HZ2INV_CM = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
+HZ2INV_CM = constants.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
 HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 
 # Conversion factor from VASP internal units
@@ -153,8 +153,11 @@ ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "V
 AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml", "yaml", "castep_bin", "hdf5"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA", "Lagrange"]
-TWO_DIMENSIONAL_INSTRUMENTS = []
+TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS = ["MAPS", "MARI", "MERLIN"]
+TWO_DIMENSIONAL_INSTRUMENTS = ["Ideal2D", "PANTHER"] + TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS
 ALL_INSTRUMENTS = ONE_DIMENSIONAL_INSTRUMENTS + TWO_DIMENSIONAL_INSTRUMENTS
+
+ENERGY_BIN_PADDING = 1.05  # When bins are based on E_init
 
 ONE_DIMENSIONAL_SPECTRUM = 1
 
@@ -164,10 +167,6 @@ GAMMA_POINT = 0
 BUF = 65536
 
 CRYSTAL = False
-
-# Bin limits for q rebinning during semi-empirical powder sum
-Q_BEGIN = 0.7
-Q_END = 30.0
 
 # definition of momentum transfer range
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1

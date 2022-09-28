@@ -55,10 +55,10 @@ Options
 ~~~~~~~
 
 Sample
-  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the sample.
+  Either a reduced file (_red.nxs) or workspace (_red), an :math:`S(Q,\omega)` file (_sqw.nxs) or workspace (_sqw), or an ELF file (_elf.nxs) or workspace (_elf) that represents the sample.
 
 Container
-  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the container.
+  Either a reduced file (_red.nxs) or workspace (_red), an :math:`S(Q,\omega)` file (_sqw.nxs) or workspace (_sqw), or an ELF file (_elf.nxs) or workspace (_elf) that represents the container.
 
 Scale Container by Factor
   Allows the container's intensity to be scaled by a given scale factor before being used in the corrections calculation.
@@ -98,13 +98,10 @@ Options
 ~~~~~~~
 
 Sample Input
-  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+  A reduced file (*_red.nxs*) or workspace (*_red*).
 
 Use Container
-  If checked allows you to select a workspace for the container in the format of
-  either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+  If checked allows you to select a workspace for the container in a reduced file (*_red.nxs*) or workspace (*_red*).
 
 Corrections Details
   These options will be automatically preset to the default values read from the sample workspace,
@@ -274,8 +271,7 @@ Options
 ~~~~~~~
 
 Workspace Input
-  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+  A reduced file (*_red.nxs*) or workspace (*_red*).
 
 Number Wavelengths
   The number of wavelength points for which a simulation is attempted.
@@ -414,6 +410,8 @@ Container Radius
 Sample Height
   Height of the sample in :math:`cm`.
 
+.. _indirect_apply_absorp_correct:
+
 Apply Absorption Corrections
 ----------------------------
 
@@ -450,8 +448,7 @@ Options
 ~~~~~~~
 
 Sample
-  Either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
-  \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
+  A reduced file (*_red.nxs*) or workspace (*_red*).
 
 Corrections
   The calculated corrections workspace produced from one of the preview two tabs.

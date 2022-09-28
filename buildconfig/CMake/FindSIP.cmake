@@ -44,12 +44,8 @@ Directory holding the SIP C++ header file.
 #]=======================================================================]
 include(FindPackageHandleStandardArgs)
 
-if(EXISTS "$ENV{CONDA_PREFIX}")
-  set(_path_opt NO_DEFAULT_PATH)
-endif()
-
 # First look for sip-build, indicating the newer v6 build system
-find_program(SIP_BUILD_EXECUTABLE sip-build ${_path_opt})
+find_program(SIP_BUILD_EXECUTABLE NAMES sip-build)
 
 if(SIP_BUILD_EXECUTABLE)
 
@@ -61,7 +57,7 @@ if(SIP_BUILD_EXECUTABLE)
   )
 
   # module generator
-  find_program(SIP_MODULE_EXECUTABLE sip-module)
+  find_program(SIP_MODULE_EXECUTABLE NAMES sip-module)
 
   # pyproject.toml template
   find_file(SIP_PYPROJECT_TOML_TEMPLATE NAME pyproject.toml.in PATHS ${CMAKE_MODULE_PATH}/sip-build)

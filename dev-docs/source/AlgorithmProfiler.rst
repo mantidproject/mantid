@@ -20,20 +20,29 @@ To build mantid version with profiling functionality enabled run ``cmake`` with 
 in the running directory. This file contains the time stamps for start and finish of executed algorithms with
 ~nanosecond precision in a very simple text format.
 
+Adding more detailed information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+More detailed information can be added to individual function calls in C++ with the help of ``std::chrono``.
+At the top of the fuction create a "start time"
+
+.. code-block:: c++
+
+   const auto startTime = std::chrono::high_resolution_clock::now();
+
+Then at the bottom of the section being timed, add it to the profiling output
+
+.. code-block:: c++
+
+   addTimer("createOutputWorkspacesSplitters", startTime, std::chrono::high_resolution_clock::now());
+
+where ``createOutputWorkspacesSplitters`` is the name that will appear, similar to a child algorithm.
+The names in the report will be suffixed with ``1`` because the tool thinks they are the "default version" of a child algorithm.
+
+An example of this can be found in `FilterEvents.cpp <https://github.com/mantidproject/mantid/blob/main/Framework/Algorithms/src/FilterEvents.cpp>`_.
+
 Analysing tool
 ^^^^^^^^^^^^^^
 
 The project is available here: https://github.com/nvaytet/mantid-profiler. It provides the nice graphical
 tool to interpret the information contained in the dumped file.
-
-Windows development
-^^^^^^^^^^^^^^^^^^^
-
-Precise timers are different for Linux and Windows (chrono is not good enough), so we need to treat them
-separately. The suggestion is either to modify files ``Framework/API/inc/MantidAPI/AlgoTimeRegister.h`` and
-``Framework/API/src/AlgoTimeRegister.cpp`` by including ``#ifdef __WIN32``, or create the specific files with
-the ``AlgoTimeRegister`` class defined for Windows.  In the second case an inclusion of OS specific files should be
-done correctly in ``Framework/API/CMakeLists.txt`  using ``${CMAKE_SYSTEM_NAME} MATCHES "Windows"``,
-``Framework/API/src/AlgorithmExecuteProfile.cpp`` needs to be modified or substituted according to the type of OS.
-``QueryPerformanceCounter`` supposed to be used on windows, instead of ``clock_gettime``.
-

@@ -33,7 +33,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 01/09/2009
 */
-class MANTID_ALGORITHMS_DLL ConvertSpectrumAxis : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertSpectrumAxis final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpectrumAxis"; }

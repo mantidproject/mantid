@@ -20,7 +20,7 @@ namespace Mantid {
 
 namespace DataHandling {
 
-class MANTID_DATAHANDLING_DLL SaveNexusGeometry : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveNexusGeometry final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

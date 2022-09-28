@@ -19,7 +19,7 @@ namespace DataHandling {
   @author Harry Jeffery, ISIS, RAL
   @date 17/7/2014
 */
-class DLLExport SaveParameterFile : public API::Algorithm {
+class DLLExport SaveParameterFile final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

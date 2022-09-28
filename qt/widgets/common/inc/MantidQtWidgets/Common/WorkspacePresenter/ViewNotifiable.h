@@ -17,7 +17,7 @@ namespace MantidWidgets {
 
 class ViewNotifiable {
 public:
-  virtual ~ViewNotifiable() {}
+  virtual ~ViewNotifiable() = default;
 
   enum class Flag {
     LoadWorkspace,

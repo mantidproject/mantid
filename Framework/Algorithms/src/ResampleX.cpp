@@ -338,16 +338,16 @@ void ResampleX::exec() {
         // do the rebinning
         PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
-          PARALLEL_START_INTERUPT_REGION
+          PARALLEL_START_INTERRUPT_REGION
           BinEdges xValues(0);
           const double delta = this->determineBinning(xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
           outputEventWS->setHistogram(wkspIndex, xValues);
           prog.report(name()); // Report progress
-          PARALLEL_END_INTERUPT_REGION
+          PARALLEL_END_INTERRUPT_REGION
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        PARALLEL_CHECK_INTERRUPT_REGION
       }
     }    // end if (m_preserveEvents)
     else // event workspace -> matrix workspace
@@ -362,7 +362,7 @@ void ResampleX::exec() {
       // Go through all the histograms and set the data
       PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
       for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
 
         // Set the X axis for each output histogram
         MantidVec xValues;
@@ -382,9 +382,9 @@ void ResampleX::exec() {
 
         // Report progress
         prog.report(name());
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
 
       // Copy all the axes
       for (int i = 1; i < inputWS->axes(); i++) {
@@ -425,7 +425,7 @@ void ResampleX::exec() {
     Progress prog(this, 0.0, 1.0, numSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       // get const references to input Workspace arrays (no copying)
       // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
       const MantidVec &XValues = inputWS->readX(wkspIndex);
@@ -454,9 +454,9 @@ void ResampleX::exec() {
       outputWS->setBinEdges(wkspIndex, XValues_new);
 
       prog.report(name());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
     outputWS->setDistribution(m_isDistribution);
 
     // Now propagate any masking correctly to the output workspace

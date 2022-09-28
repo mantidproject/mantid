@@ -15,10 +15,9 @@ namespace Mantid::NexusGeometry::detail {
 
 TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape, const Eigen::Vector3d &firstDetectorPosition,
                          int firstDetectorId)
-    : m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
+    : m_axis(Kernel::toVector3d(pixelShape.getGeometryHandler()->shapeInfo().points()[1])),
+      m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
       m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()) {
-  // Get axis along which cylinder lies
-  m_axis = Kernel::toVector3d(pixelShape.getGeometryHandler()->shapeInfo().points()[1]);
   // Set position and id of first detector in tube
   m_positions.emplace_back(firstDetectorPosition);
   m_detIDs.emplace_back(firstDetectorId);

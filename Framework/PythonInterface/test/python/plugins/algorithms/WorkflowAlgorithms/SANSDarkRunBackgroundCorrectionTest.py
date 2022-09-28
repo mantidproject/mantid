@@ -206,7 +206,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
+        self.assertAlmostEqual(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                  for i in range(0, len(data))])
@@ -250,7 +250,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
+        self.assertAlmostEqual(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
@@ -297,7 +297,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),5)
+        self.assertAlmostEqual(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(),5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])
@@ -340,7 +340,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                                       out_ws_name, applyToMonitors, applyToDetectors, selected_monitor)
 
         # Assert
-        self.assertAlmostEquals(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
+        self.assertAlmostEqual(ws.getNumberHistograms(), scatter_ws.getNumberHistograms(), 5)
 
         comparison = lambda data, expected : all([self.assertAlmostEqual(data[i], expected, 5, "Should be equal")
                                                   for i in range(0, len(data))])

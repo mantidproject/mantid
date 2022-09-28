@@ -534,6 +534,62 @@ public:
     TS_ASSERT(!maybeRow.is_initialized());
   }
 
+  void test_set_all_row_parents() {
+    auto group = makeGroupWithThreeRows();
+    for (auto &row : group.mutableRows()) {
+      row->setParent(nullptr);
+    }
+    for (auto const &row : group.rows()) {
+      TS_ASSERT_EQUALS(row->getParent(), nullptr)
+    }
+
+    group.setAllRowParents();
+
+    for (auto const &row : group.rows()) {
+      TS_ASSERT_EQUALS(row->getParent(), &group)
+    }
+  }
+
+  void test_update_parent_when_all_rows_complete() {
+    auto group = makeGroupWithTwoCompleteRows();
+    group.notifyChildStateChanged();
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
+  }
+
+  void test_update_parent_when_some_rows_complete() {
+    auto group = makeGroupWithTwoRows();
+    group.mutableRows()[0]->setSuccess();
+    group.notifyChildStateChanged();
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+  }
+
+  void test_update_parent_when_no_rows_complete() {
+    auto group = makeGroupWithTwoRows();
+    group.notifyChildStateChanged();
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
+  }
+
+  void test_move_updates_all_row_parents() {
+    auto group = makeGroupWithThreeRows();
+    auto movedGroup = std::move(group);
+
+    for (auto const &row : movedGroup.rows()) {
+      TS_ASSERT_EQUALS(row->getParent(), &movedGroup)
+    }
+  }
+
+  void test_copy_updates_all_row_parents() {
+    auto group = makeGroupWithThreeRows();
+    auto groupCopy = group;
+
+    for (auto const &row : group.rows()) {
+      TS_ASSERT_EQUALS(row->getParent(), &group)
+    }
+    for (auto const &row : groupCopy.rows()) {
+      TS_ASSERT_EQUALS(row->getParent(), &groupCopy)
+    }
+  }
+
 private:
   Group makeGroupWithThreeRows() {
     return Group("three_row_group", std::vector<boost::optional<Row>>{makeRow("12345", 0.1), makeRow("12346", 0.2),

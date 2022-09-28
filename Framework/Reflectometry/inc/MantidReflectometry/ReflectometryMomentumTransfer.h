@@ -16,7 +16,7 @@ namespace Reflectometry {
 /** Converts wavelength to momentum transfer and calculates the Qz
   resolution for reflectometers at continuous beam sources.
 */
-class MANTID_REFLECTOMETRY_DLL ReflectometryMomentumTransfer : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometryMomentumTransfer final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

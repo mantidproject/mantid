@@ -352,6 +352,7 @@ public:
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
   std::vector<size_t> maskedBinsIndices(const size_t &workspaceIndex) const;
   void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
+  void setUnmaskedBins(const size_t workspaceIndex);
 
   // Methods handling the internal monitor workspace
   virtual void setMonitorWorkspace(const std::shared_ptr<MatrixWorkspace> &monitorWS);

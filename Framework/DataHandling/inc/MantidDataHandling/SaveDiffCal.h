@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /** SaveDiffCal : TODO: DESCRIPTION
  */
-class DLLExport SaveDiffCal : public API::Algorithm {
+class DLLExport SaveDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

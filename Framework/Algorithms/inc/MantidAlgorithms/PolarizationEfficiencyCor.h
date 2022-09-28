@@ -18,7 +18,7 @@ namespace Algorithms {
   calls either PolarizationCorrectionFredrikze or PolarizationCorrectionWildes
   inetrnally.
 */
-class MANTID_ALGORITHMS_DLL PolarizationEfficiencyCor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationEfficiencyCor final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

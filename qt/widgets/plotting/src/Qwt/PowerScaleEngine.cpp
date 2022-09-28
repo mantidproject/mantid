@@ -37,8 +37,6 @@ QwtScaleTransformation *PowerScaleEngine::transformation() const {
   return new QwtScaleTransformation(QwtScaleTransformation::Other);
 }
 
-PowerScaleEngine::~PowerScaleEngine() {}
-
 /*!
     Align and divide an interval
 
@@ -215,8 +213,6 @@ QwtDoubleInterval PowerScaleEngine::align(const QwtDoubleInterval &interval, dou
 
 //! Create a clone of the transformation
 QwtScaleTransformation *PowerScaleTransformation::copy() const { return new PowerScaleTransformation(d_engine); }
-
-PowerScaleTransformation::~PowerScaleTransformation() {}
 
 /*
  * Transform a value between 2 linear intervals

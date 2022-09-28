@@ -36,7 +36,7 @@ namespace DataHandling {
    to mask </LI>
     </UL>
 */
-class DLLExport MaskDetectors : public API::Algorithm {
+class DLLExport MaskDetectors final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskDetectors"; };

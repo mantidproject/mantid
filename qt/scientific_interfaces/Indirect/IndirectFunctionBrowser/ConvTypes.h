@@ -26,6 +26,9 @@ using namespace Mantid::API;
 enum class FitType {
   None,
   TeixeiraWater,
+  FickDiffusion,
+  ChudleyElliot,
+  HallRoss,
   StretchedExpFT,
   DiffSphere,
   ElasticDiffSphere,
@@ -70,6 +73,17 @@ enum class ParamID {
   TW_DIFFCOEFF,
   TW_TAU,
   TW_CENTRE,
+  FD_HEIGHT,
+  FD_DIFFCOEFF,
+  FD_CENTRE,
+  CE_HEIGHT,
+  CE_TAU,
+  CE_L,
+  CE_CENTRE,
+  HR_HEIGHT,
+  HR_TAU,
+  HR_L,
+  HR_CENTRE,
   DELTA_HEIGHT,
   DELTA_CENTER,
   TEMPERATURE,
@@ -142,7 +156,7 @@ struct TemplateSubType {
   virtual QList<ParamID> getParameterIDs(int typeIndex) const = 0;
   virtual QStringList getParameterNames(int typeIndex) const = 0;
   virtual QList<std::string> getParameterDescriptions(int typeIndex) const = 0;
-  virtual ~TemplateSubType() {}
+  virtual ~TemplateSubType() = default;
 };
 
 struct TemplateSubTypeDescriptor {
@@ -166,10 +180,12 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     return out;
   }
   int getTypeIndex(const QString &typeName) const override {
-    for (auto &&it : g_typeMap) {
-      if (it.second.name == typeName)
-        return static_cast<int>(it.first);
-    }
+    const auto it = std::find_if(g_typeMap.cbegin(), g_typeMap.cend(),
+                                 [&typeName](auto &&it) { return it.second.name == typeName; });
+
+    if (it != g_typeMap.cend())
+      return static_cast<int>((*it).first);
+
     return static_cast<int>(FitType::None);
   }
   int getNTypes() const override { return static_cast<int>(g_typeMap.size()); }

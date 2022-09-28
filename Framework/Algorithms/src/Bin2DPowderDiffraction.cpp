@@ -209,7 +209,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int64_t snum = 0; snum < numSpectra; ++snum) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!spectrumInfo.isMasked(snum)) {
       double theta = 0.5 * spectrumInfo.twoTheta(snum);
       double sin_theta = sin(theta);
@@ -249,9 +249,9 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
       }
     }
     prog.report("Binning event data...");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   size_t idx = 0;
   for (const auto &yVec : newYValues) {
     outputWS->setCounts(idx, yVec);

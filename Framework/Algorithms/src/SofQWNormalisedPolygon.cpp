@@ -355,7 +355,7 @@ void SofQWNormalisedPolygon::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     if (spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
@@ -405,9 +405,9 @@ void SofQWNormalisedPolygon::exec() {
       g_log.debug(logStream.str());
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   FractionalRebinning::finalizeFractionalRebin(*outputWS);
   outputWS->finalize();

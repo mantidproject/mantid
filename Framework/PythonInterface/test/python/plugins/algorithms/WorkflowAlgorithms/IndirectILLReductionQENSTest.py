@@ -70,6 +70,15 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
 
         self._check_workspace_group(mtd['out_red'], 1, 18, 1024)
 
+    def test_no_grouping(self):
+        args = {'Run': self._run_one_wing,
+                'GroupDetectors': False,
+                'UnmirrorOption': 0,
+                'OutputWorkspace': 'out'}
+        alg_test = run_algorithm('IndirectILLReductionQENS', **args)
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionQENS not executed")
+        self._check_workspace_group(mtd['out_red'], 1, 128*16+2+1, 1024)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),

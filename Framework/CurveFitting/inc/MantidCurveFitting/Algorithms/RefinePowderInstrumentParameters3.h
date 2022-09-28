@@ -23,7 +23,7 @@ namespace Algorithms {
 
 /** RefinePowderInstrumentParameters3 :
  */
-class MANTID_CURVEFITTING_DLL RefinePowderInstrumentParameters3 : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL RefinePowderInstrumentParameters3 final : public API::Algorithm {
 public:
   RefinePowderInstrumentParameters3();
 

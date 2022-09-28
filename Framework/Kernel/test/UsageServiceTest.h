@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <json/json.h>
 
+using Mantid::Kernel::InternetHelper;
 using Mantid::Kernel::UsageServiceImpl;
 
 class TestableUsageService : public UsageServiceImpl {
@@ -26,11 +27,11 @@ public:
 
 protected:
   /// sends a report over the internet
-  int sendReport(const std::string &message, const std::string &url) override {
+  InternetHelper::HTTPStatus sendReport(const std::string &message, const std::string &url) override {
     UNUSED_ARG(message);
     UNUSED_ARG(url);
     // do nothing
-    return 200;
+    return InternetHelper::HTTPStatus::OK;
   }
 };
 

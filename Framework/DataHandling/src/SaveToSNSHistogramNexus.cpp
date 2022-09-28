@@ -279,7 +279,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
     for (int y = 0; y < ypixels; y++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       // Get the workspace index for the detector ID at this spot
       size_t wi = 0;
       try {
@@ -306,9 +306,9 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
         }
       }
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     fillTime += tim1.elapsed();
 

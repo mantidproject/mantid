@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from qtpy.QtWidgets import QDockWidget, QWidget, QHeaderView, QTreeWidgetItem, \
+from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, \
                            QToolButton
 from qtpy.QtGui import QColor
 from qtpy.QtCore import *
@@ -161,7 +161,8 @@ class SuperplotViewSide(QDockWidget):
         ws_list.setMinimumSize(QSize(size0 + size1, 0))
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
                                                   "WorkspaceGroup",
-                                                  "EventWorkspace"])
+                                                  "EventWorkspace",
+                                                  "RebinnedOutput"])
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
@@ -222,17 +223,17 @@ class SuperplotViewBottom(QDockWidget):
         self.resized.emit()
 
 
-class SuperplotView(QWidget):
+class SuperplotView:
 
     _presenter = None
     _side_view = None
     _bottom_view = None
 
     def __init__(self, presenter, parent=None):
-        super().__init__(parent)
+        self._parent = parent
         self._presenter = presenter
-        self._side_view = SuperplotViewSide(self)
-        self._bottom_view = SuperplotViewBottom(self)
+        self._side_view = SuperplotViewSide(parent)
+        self._bottom_view = SuperplotViewBottom(parent)
 
         side = self._side_view
         side.visibilityChanged.connect(self._presenter.on_visibility_changed)
@@ -254,11 +255,14 @@ class SuperplotView(QWidget):
                 self._presenter.on_mode_changed)
         bottom.resized.connect(self._presenter.on_resize)
 
-    def get_side_widget(self):
-        return self._side_view
-
-    def get_bottom_widget(self):
-        return self._bottom_view
+    def show(self):
+        """
+        Show the superplot view. This will add the two dockwidgets to their
+        respective position.
+        """
+        self._parent.addDockWidget(Qt.LeftDockWidgetArea, self._side_view)
+        self._parent.addDockWidget(Qt.BottomDockWidgetArea, self._bottom_view)
+        self._bottom_view.setFocus()
 
     def close(self):
         self._side_view.close()

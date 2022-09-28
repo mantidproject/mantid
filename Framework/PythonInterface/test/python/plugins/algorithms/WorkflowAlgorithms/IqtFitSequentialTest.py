@@ -77,7 +77,7 @@ class IqtFitSequentialTest(unittest.TestCase):
         sub_ws = groupWS.getItem(0)
         nbins = sub_ws.blocksize()
         nhists = sub_ws.getNumberHistograms()
-        self.assertEqual(nbins, 58)
+        self.assertEqual(nbins, 59)
         self.assertEqual(nhists, 3)
 
         # Check histogram names
@@ -124,16 +124,16 @@ class IqtFitSequentialTest(unittest.TestCase):
         sub_ws = groupWS.getItem(0)
         # Check Data
         data = sub_ws.readY(0)
-        self.assertEqual(round(data[0], 6), 0.797069)
-        self.assertEqual(round(data[-1],6), 0.039044)
+        self.assertEqual(round(data[0], 6), 1.0)
+        self.assertEqual(round(data[-1], 6), 0.039044)
         # Check Calc
         calc = sub_ws.readY(1)
-        self.assertEqual(round(calc[0], 6), 0.870524)
-        self.assertEqual(round(calc[-1],6), 0.033886)
+        self.assertEqual(round(calc[0], 6), 1.0)
+        self.assertEqual(round(calc[-1], 6), 0.033886)
         # Check Diff
         diff = sub_ws.readY(2)
-        self.assertEqual(round(diff[0], 6),-0.073455)
-        self.assertEqual(round(diff[-1],6), 0.005157)
+        self.assertEqual(round(diff[0], 6), 0.0)
+        self.assertEqual(round(diff[-1], 6), 0.005157)
 
     def _validate_sample_log_values(self, matrixWS):
         run = matrixWS.getRun()

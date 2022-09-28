@@ -104,7 +104,7 @@ LoadRawHelper::LoadRawHelper()
       m_bmspeclist(false), m_total_specs(0), m_logCreator() {}
 
 /// Destructor
-LoadRawHelper::~LoadRawHelper() {}
+LoadRawHelper::~LoadRawHelper() = default;
 
 /// Initialisation method.
 void LoadRawHelper::init() {

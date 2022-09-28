@@ -60,7 +60,8 @@ class FigureErrorsManager(object):
         if isinstance(ax, MantidAxes) and ax.is_waterfall():
             datafunctions.convert_single_line_to_waterfall(ax, curve_index)
 
-        ax.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
 
         # Inverts either the current state of hide_errors
         # or the make_visible kwarg that forces a state:

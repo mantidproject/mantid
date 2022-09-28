@@ -33,20 +33,14 @@ Logger g_log("InstrumentInfo");
  * @param elem :: The Poco::XML::Element to read the data from
  * @throw std::runtime_error if name or at least one technique are not defined
  */
-InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem) : m_facility(f) {
+InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem)
+    : m_facility(f), m_name(elem->getAttribute("name")), m_shortName(elem->getAttribute("shortname")),
+      m_delimiter(elem->getAttribute("delimiter")) {
 
-  m_name = elem->getAttribute("name");
-
-  // The string to separate the instrument name and the run number.
-  m_delimiter = elem->getAttribute("delimiter");
-  if (m_delimiter.empty()) {
+  if (m_delimiter.empty())
     m_delimiter = f->delimiter();
-  }
-
-  m_shortName = elem->getAttribute("shortname");
-  if (m_shortName.empty()) {
+  if (m_shortName.empty())
     m_shortName = m_name;
-  }
 
   fillTechniques(elem);
   fillLiveData(elem);
@@ -161,11 +155,10 @@ const LiveListenerInfo &InstrumentInfo::liveListenerInfo(std::string name) const
     return m_listeners.front();
 
   // Name specified, find requested connection
-  for (auto &listener : m_listeners) {
-    // Names are compared case insensitively
-    if (boost::iequals(listener.name(), name))
-      return listener;
-  }
+  auto it = std::find_if(m_listeners.cbegin(), m_listeners.cend(),
+                         [&name](const auto &listener) { return boost::iequals(listener.name(), name); });
+  if (it != m_listeners.end())
+    return *it;
 
   // The provided name was not valid / did not match any listeners
   throw std::runtime_error("Could not find connection " + name + " for instrument " + m_name);

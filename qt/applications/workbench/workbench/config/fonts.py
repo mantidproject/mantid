@@ -24,7 +24,7 @@ def is_ubuntu() -> bool:
     if sys.platform.startswith('linux') and osp.isfile('/etc/lsb-release'):
         with open('/etc/lsb-release') as handle:
             release_info = handle.read()
-            return bool('Ubuntu' in release_info)
+            return bool('Ubuntu' in release_info or 'neon' in release_info)
     else:
         return False
 

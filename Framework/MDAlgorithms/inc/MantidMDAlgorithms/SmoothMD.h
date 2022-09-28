@@ -23,7 +23,7 @@ DLLExport std::vector<double> renormaliseKernel(std::vector<double> kernel, cons
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
  */
-class DLLExport SmoothMD : public API::Algorithm {
+class DLLExport SmoothMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -45,7 +45,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         super(FittingDataView, self).__init__(parent)
         self.setupUi(self)
         # file finder
-        self.finder_data.readSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.readSettings(
+            output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
         self.finder_data.setUseNativeWidget(False)
         self.proxy_model = FileFilterProxyModel()
         self.finder_data.setProxyModel(self.proxy_model)
@@ -58,7 +59,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.update_file_filter(self.combo_region.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
-        self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
+        self.finder_data.saveSettings(
+            output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
 
     # =================
     # Slot Connectors

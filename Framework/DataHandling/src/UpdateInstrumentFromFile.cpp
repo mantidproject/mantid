@@ -25,6 +25,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
+#include <algorithm>
 #include <fstream>
 
 namespace Mantid::DataHandling {
@@ -260,8 +261,8 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     if (isSpectrum) {
       if (auto group = dynamic_cast<const Geometry::DetectorGroup *>(det)) {
         const auto detIDs = group->getDetectorIDs();
-        for (const auto detID : group->getDetectorIDs())
-          indices.emplace_back(detectorInfo.indexOf(detID));
+        std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(indices),
+                       [detectorInfo](const auto detID) { return detectorInfo.indexOf(detID); });
       } else {
         indices.emplace_back(detectorInfo.indexOf(det->getID()));
       }

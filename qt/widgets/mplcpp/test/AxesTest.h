@@ -135,9 +135,18 @@ public:
     TS_ASSERT_DELTA(14, std::get<1>(ylimits), 1e-5);
   }
 
-  void testTextAddsTextAddGivenCoordinate() {
+  void testTextAddsTextAtGivenCoordinate() {
     Axes axes(pyAxes());
     const auto artist = axes.text(0.5, 0.4, "test", "left");
+
+    TS_ASSERT_EQUALS("test", artist.pyobj().attr("get_text")());
+    TS_ASSERT_EQUALS(0.5, artist.pyobj().attr("get_position")()[0]);
+    TS_ASSERT_EQUALS(0.4, artist.pyobj().attr("get_position")()[1]);
+  }
+
+  void testTextAddsTextWithTransform() {
+    Axes axes(pyAxes());
+    const auto artist = axes.text(0.5, 0.4, "test", "left", axes.getXAxisTransform());
 
     TS_ASSERT_EQUALS("test", artist.pyobj().attr("get_text")());
     TS_ASSERT_EQUALS(0.5, artist.pyobj().attr("get_position")()[0]);
@@ -165,6 +174,14 @@ public:
   void testSetYScaleWithUnknownScaleTypeThrows() {
     Axes axes(pyAxes());
     TS_ASSERT_THROWS(axes.setYScale("notascaletype"), const std::invalid_argument &);
+  }
+
+  void testgetXAxisTransformReturnsExpectedObject() {
+    Axes axes(pyAxes());
+    const auto transform = axes.getXAxisTransform();
+    auto transformedPt = transform.pyobj().attr("transform")(Python::NewRef(Py_BuildValue("(ff)", 0.5, 0.5)));
+    TS_ASSERT_EQUALS(320, transformedPt[0]);
+    TS_ASSERT_EQUALS(240, transformedPt[1]);
   }
 
 private:

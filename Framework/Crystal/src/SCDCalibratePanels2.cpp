@@ -528,7 +528,7 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // prepare local copies to work with
     const std::string bankname = *std::next(m_BankNames.begin(), i);
     const std::string pwsBankiName = "_pws_" + bankname;
@@ -710,9 +710,9 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     g_log.notice() << calilog.str();
 
     // -- cleanup
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**
@@ -1491,7 +1491,7 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
   // Use OPENMP to speed up the profiling
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int bankIndex = 0; bankIndex < static_cast<int>(m_BankNames.size()); ++bankIndex) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // prepare local copies to work with
     const std::string bankname = *std::next(m_BankNames.begin(), bankIndex);
     const std::string pwsBankiName = "_pws_" + bankname;
@@ -1595,9 +1595,9 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
         << filenamebase << "\n"
         << "END of profiling objective func for " << bankname << "\n";
     g_log.notice() << msg.str();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**

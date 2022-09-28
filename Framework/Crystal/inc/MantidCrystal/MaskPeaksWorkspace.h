@@ -22,7 +22,7 @@ namespace Crystal {
  @author Vickie Lynch, SNS, ORNL
  @date 02/08/2011
  */
-class MANTID_CRYSTAL_DLL MaskPeaksWorkspace : public API::Algorithm {
+class MANTID_CRYSTAL_DLL MaskPeaksWorkspace final : public API::Algorithm {
 public:
   /// Default constructor
   MaskPeaksWorkspace();

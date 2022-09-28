@@ -36,6 +36,7 @@ Required Properties:
 */
 class MANTID_MUON_DLL AsymmetryCalc : public API::Algorithm {
 public:
+  virtual ~AsymmetryCalc() = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AsymmetryCalc"; }
   /// Summary of algorithms purpose

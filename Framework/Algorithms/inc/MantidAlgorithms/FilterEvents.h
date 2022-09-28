@@ -26,7 +26,7 @@ class TimeAtSampleStrategy;
 
   @date 2012-04-04
 */
-class MANTID_ALGORITHMS_DLL FilterEvents : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FilterEvents final : public API::Algorithm {
 
   enum TOFCorrectionType { NoneCorrect, CustomizedCorrect, DirectCorrect, ElasticCorrect, IndirectCorrect };
   enum TOFCorrectionOp { MultiplyOp, ShiftOp };

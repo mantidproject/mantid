@@ -19,7 +19,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-08-15
 */
-class DLLExport CloneMDWorkspace : public API::Algorithm {
+class DLLExport CloneMDWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CloneMDWorkspace"; };
@@ -40,7 +40,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd> void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr &ws);
 };
 
 } // namespace MDAlgorithms

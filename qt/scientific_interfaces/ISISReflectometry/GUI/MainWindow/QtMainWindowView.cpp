@@ -59,6 +59,8 @@ Initialise the Interface
 void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
 
+  m_ui.mainTabs->setUsesScrollButtons(true);
+
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequested(int)));
   connect(m_ui.newBatch, SIGNAL(triggered(bool)), this, SLOT(onNewBatchRequested(bool)));
@@ -70,11 +72,8 @@ void QtMainWindowView::initLayout() {
   auto instruments = std::vector<std::string>({{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter plotter(this);
-#else
   Plotter plotter;
-#endif
+
   auto makeRunsTablePresenter = RunsTablePresenterFactory(instruments, thetaTolerance, std::move(plotter));
 
   auto messageHandler = this;
@@ -88,9 +87,9 @@ void QtMainWindowView::initLayout() {
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
   auto makePreviewPresenter = PreviewPresenterFactory();
 
-  auto makeBatchPresenter =
-      std::make_unique<BatchPresenterFactory>(std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter,
-                                              makeInstrumentPresenter, makePreviewPresenter, makeSaveSettingsPresenter);
+  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
+      std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter, makeInstrumentPresenter,
+      makePreviewPresenter, makeSaveSettingsPresenter, messageHandler);
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);

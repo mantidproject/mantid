@@ -43,6 +43,8 @@ class MANTID_ALGORITHMS_DLL TOFSANSResolution : public API::Algorithm {
 public:
   /// Defatult constructor
   TOFSANSResolution();
+  /// Default destructor
+  virtual ~TOFSANSResolution() = default;
   /// Algorithm's name
   const std::string name() const override { return "TOFSANSResolution"; }
   /// Summary of algorithms purpose

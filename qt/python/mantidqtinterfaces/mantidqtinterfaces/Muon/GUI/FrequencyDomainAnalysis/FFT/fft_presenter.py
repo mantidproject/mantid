@@ -193,6 +193,7 @@ class FFTPresenter(object):
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace_label):
         run = re.search('[0-9]+', input_workspace).group()
         fft_workspace = mantid.AnalysisDataService.retrieve(fft_workspace_label)
+        fft_workspace.setYUnitLabel("Intensity")
         Im_run = ""
         if imaginary_input_workspace != "":
             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()

@@ -372,7 +372,7 @@ static inline const char *GetCstring(const String *str) {
 // `vector_downward` usage.
 class Allocator {
 public:
-  virtual ~Allocator() {}
+  virtual ~Allocator() = default;
 
   // Allocate `size` bytes of memory.
   virtual uint8_t *allocate(size_t size) = 0;

@@ -31,6 +31,7 @@ namespace API {
 */
 class MANTID_API_DLL ParallelAlgorithm : public API::Algorithm {
 protected:
+  ~ParallelAlgorithm() = default;
   Parallel::ExecutionMode
   getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 };

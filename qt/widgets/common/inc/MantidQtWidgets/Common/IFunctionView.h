@@ -27,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IFunctionView : public QWidget {
   Q_OBJECT
 public:
   IFunctionView(QWidget *parent = nullptr) : QWidget(parent) {}
-  virtual ~IFunctionView() {}
+  virtual ~IFunctionView() = default;
   virtual void clear() = 0;
   virtual void setFunction(IFunction_sptr fun) = 0;
   virtual bool hasFunction() const = 0;

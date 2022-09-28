@@ -3,7 +3,7 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-	    name="DNS-PSD" valid-from="2018-05-01 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2018-07-11 10:17:17">
+	    name="DNS-PSD" valid-from="2021-11-01 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2021-11-30 11:33:00">
   <!-- Author: t.mueller@fz-juelich.de -->
   <defaults>
     <length unit="meter" />
@@ -17,6 +17,14 @@
     </reference-frame>
   </defaults>
   <!-- chopper -->
+  <component type="chopper">
+    <location />
+    <parameter name="channel" type='int'>
+        <value val="2"/>
+    </parameter>
+  </component>
+  <type name="chopper">   
+  </type>
   <component type="moderator">
     <location z="-0.4" />
   </component>
@@ -28,7 +36,7 @@
   <type name="sample-position" is="SamplePos" />
   <!-- Detector IDs -->
   <idlist idname="psd_detectors">
-    <id start="1000" end="123879" />
+    <id start="1000" end="132071" />
   </idlist>
   <!-- Detector list def -->
   <component type="psd_detectors" idlist="psd_detectors">
@@ -62,13 +70,13 @@
   <!-- Definition of the PSD detector bank (made of 128 tubes each with 960 pixel) -->
   <type name="psd_banks">
     <component type="psd_tube">
-      <locations r="0.878000" t="5.5000000" t-end="145.532" p="0.0" name="psdtube_" n-elements="128" />
+      <locations r="0.87000" t="5.5000000" t-end="145.532" p="0.0" name="psdtube_" n-elements="128" />
     </component>
   </type> 
   <!-- Definition of psd_tube -->
   <type name="psd_tube">
     <component type="psd_pixel">
-     <locations y="-0.513" y-end="0.447" n-elements="960" name="psdpixel_"/>
+     <locations y="-0.456" y-end="0.544" n-elements="1024" name="psdpixel_"/>
     </component>
   </type>
   <type name="psd_pixel" is="detector">

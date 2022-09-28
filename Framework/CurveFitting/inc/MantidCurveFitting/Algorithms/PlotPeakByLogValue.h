@@ -41,7 +41,7 @@ Required Properties:
 @author Roman Tolchenov, Tessella plc
 @date 01/06/2010
 */
-class MANTID_CURVEFITTING_DLL PlotPeakByLogValue : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL PlotPeakByLogValue final : public API::Algorithm {
   /** Structure to identify data for fitting
    */
 

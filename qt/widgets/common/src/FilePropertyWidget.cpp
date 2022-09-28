@@ -37,7 +37,7 @@ FilePropertyWidget::FilePropertyWidget(Mantid::Kernel::Property *prop, QWidget *
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilePropertyWidget::~FilePropertyWidget() {}
+FilePropertyWidget::~FilePropertyWidget() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Slot called when the browse button is clicked */

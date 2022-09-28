@@ -7,7 +7,6 @@
 import os
 import mantid
 from .base import AlgorithmBaseDirective
-from mantiddoc.tools.git_last_modified import get_file_last_modified_time
 
 
 class SourceLinkError(Exception):
@@ -63,7 +62,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
 
     def execute(self):
         """
-        Called by Sphinx when the ..sourcelink:: directive is encountered.
+        Called by Sphinx when the .. sourcelink:: directive is encountered.
         """
         file_paths = {}
         error_string = ""
@@ -81,26 +80,20 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             if file_paths[extension] is None:
                 try:
                     fname = self.find_source_file(file_name, extension)
-                    file_paths[extension] = (
-                            fname, get_file_last_modified_time(self.git_cache, self.source_root, fname)) \
-                            if fname is not None else None
+                    file_paths[extension] = fname if fname is not None else None
                 except SourceLinkError as err:
                     error_string += str(err) + "\n"
-
             elif file_paths[extension].lower() == "none":
                 # the users has specifically chosen to suppress this - set it to a "proper" None
                 # but do not search for this file
                 file_paths[extension] = None
-
             else:
                 # prepend the base framework directory
                 fname = os.path.join(self.source_root, file_paths[extension])
-                file_paths[extension] = (fname,
-                                         get_file_last_modified_time(self.git_cache,
-                                                                     self.source_root, fname))
-                if not os.path.exists(file_paths[extension][0]):
+                file_paths[extension] = fname
+                if not os.path.exists(file_paths[extension]):
                     error_string += "Cannot find {} file at {}\n".format(
-                        extension, file_paths[extension][0])
+                        extension, file_paths[extension])
 
         # throw accumulated errors now if you have any
         if error_string != "":
@@ -215,11 +208,10 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         Outputs the source link for a file to the rst page
         """
-        _, f_name = os.path.split(filepath[0])
+        _, f_name = os.path.split(filepath)
 
-        self.add_rst("{}: `{} <{}>`_ *(last modified: {})*\n\n".format(
-            self.file_types[extension], f_name, self.convert_path_to_github_url(filepath[0]),
-            filepath[1]))
+        self.add_rst("{}: `{} <{}>`_\n\n".format(
+            self.file_types[extension], f_name, self.convert_path_to_github_url(filepath)))
 
     def convert_path_to_github_url(self, file_path):
         """

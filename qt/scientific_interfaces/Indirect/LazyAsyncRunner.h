@@ -8,11 +8,8 @@
 
 #include "DllConfig.h"
 
-#include <QtCore>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QtConcurrent>
-#endif
+#include <QtCore>
 
 #include <boost/optional.hpp>
 

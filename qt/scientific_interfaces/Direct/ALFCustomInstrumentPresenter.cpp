@@ -36,8 +36,8 @@ void ALFCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
 
 void ALFCustomInstrumentPresenter::loadSideEffects() { m_analysisPane->clearCurrentWS(); }
 
-typedef std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>> instrumentSetUp;
-typedef std::vector<std::tuple<std::string, Observer *>> instrumentObserverOptions;
+using instrumentSetUp = std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>>;
+using instrumentObserverOptions = std::vector<std::tuple<std::string, Observer *>>;
 
 /**
 * This creates the custom instrument widget

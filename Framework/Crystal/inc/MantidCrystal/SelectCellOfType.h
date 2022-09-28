@@ -19,7 +19,7 @@ namespace Crystal {
     @author Dennis Mikkelson
     @date   2012-02-09
   */
-class MANTID_CRYSTAL_DLL SelectCellOfType : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SelectCellOfType final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SelectCellOfType"; };

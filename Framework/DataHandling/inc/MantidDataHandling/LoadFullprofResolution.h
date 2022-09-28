@@ -23,7 +23,7 @@ namespace DataHandling {
 /** LoadFullprofResolution : Load Fullprof resolution (.irf) file to
 TableWorkspace(s)
 */
-class DLLExport LoadFullprofResolution : public API::Algorithm {
+class DLLExport LoadFullprofResolution final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadFullprofResolution"; }

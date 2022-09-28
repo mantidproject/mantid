@@ -47,8 +47,7 @@ public:
   SimpleMDEvent(std::vector<float> coordinates, const float &signal, const float &error)
       : mCoordinates(std::move(coordinates)), mSignal(signal), mError(error) {}
 
-  SimpleMDEvent(const SimpleMDEvent &other)
-      : mCoordinates(other.mCoordinates), mSignal(other.mSignal), mError(other.mError) {}
+  SimpleMDEvent(const SimpleMDEvent &other) = default;
 
   // pretty output
   std::string str() const {
@@ -67,7 +66,7 @@ public:
 
   float getError() const { return mError; }
 
-  bool operator()(SimpleMDEvent &event1, const SimpleMDEvent &event2) { return event1 < event2; }
+  bool operator()(const SimpleMDEvent &event1, const SimpleMDEvent &event2) const { return event1 < event2; }
 
   /**
    * @brief override operator <
@@ -126,8 +125,6 @@ public:
     return less;
   }
 
-  bool operator()(const SimpleMDEvent &lx, const SimpleMDEvent &rx) const { return lx < rx; }
-
   SimpleMDEvent &operator=(const SimpleMDEvent &event2) {
     // coordiate
     size_t numdirs = mCoordinates.size();
@@ -144,7 +141,7 @@ public:
 float SimpleMDEvent::s_tolerance(static_cast<float>(1E-7));
 
 //----------------------------------------------------------------------------------------------
-bool compareSimpleEvents(SimpleMDEvent &self, const SimpleMDEvent &other) { return (self < other); }
+bool compareSimpleEvents(const SimpleMDEvent &self, const SimpleMDEvent &other) { return self < other; }
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareMDWorkspaces)
@@ -299,7 +296,7 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
 
   PRAGMA_OMP( parallel for if (!filebacked))
   for (int ibox = 0; ibox < num_boxes; ibox++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // No need to compare because the boxes are not same already
     if (!boxes_same) {
       continue;
@@ -327,9 +324,9 @@ void CompareMDWorkspaces::compareMDEventWorkspaces(typename MDEventWorkspace<MDE
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // for box
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // throw altogether
   if (!boxes_same) {

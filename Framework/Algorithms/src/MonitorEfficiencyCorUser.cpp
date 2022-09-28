@@ -80,13 +80,13 @@ void MonitorEfficiencyCorUser::exec() {
   double factor = 1 / eff0;
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS, *m_inputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_outputWS->setHistogram(i, m_inputWS->histogram(i) * factor);
 
     prog.report("Detector Efficiency correction...");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", m_outputWS);
 }

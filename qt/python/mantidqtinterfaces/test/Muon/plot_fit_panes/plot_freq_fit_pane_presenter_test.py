@@ -39,27 +39,39 @@ class PlotFreqFitPanePresenterTest(unittest.TestCase):
         self.view.get_plot_type = mock.Mock(return_value="Frequency")
         self.presenter.update_freq_units = mock.Mock()
         self.presenter.update_freq_units.notify_subscribers = mock.Mock()
+        self.presenter.update_maxent_plot = mock.Mock()
+        self.presenter.update_maxent_plot.notify_subscribers = mock.Mock()
         self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
 
         self.presenter.handle_data_type_changed()
         self.presenter.update_freq_units.notify_subscribers.assert_called_once_with()
+        self.presenter.update_maxent_plot.notify_subscribers.assert_called_once_with()
         self.figure_presenter.set_plot_range.assert_called_once_with([1, 3])
         self.assertEqual(self.context.frequency_context.x_label, "Frequency")
 
     def test_update_fit_pane_freq(self):
         self.context.frequency_context.unit = mock.Mock(return_value="MHz")
-        self.presenter.handle_data_type_changed = mock.Mock()
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.presenter.update_freq_units = mock.Mock()
+        self.presenter.update_freq_units.notify_subscribers = mock.Mock()
+
         self.presenter._update_fit_pane()
 
-        self.presenter.handle_data_type_changed.assert_called_once_with()
+        self.figure_presenter.set_plot_range.assert_called_once_with([1, 3])
+        self.presenter.update_freq_units.notify_subscribers.assert_called_once_with()
+
         self.view.set_plot_type.assert_called_once_with("Frequency")
 
     def test_update_fit_pane_field(self):
         self.context.frequency_context.unit = mock.Mock(return_value="Gauss")
-        self.presenter.handle_data_type_changed = mock.Mock()
+        self.context.frequency_context.range = mock.MagicMock(return_value=[1,3])
+        self.presenter.update_freq_units = mock.Mock()
+        self.presenter.update_freq_units.notify_subscribers = mock.Mock()
+
         self.presenter._update_fit_pane()
 
-        self.presenter.handle_data_type_changed.assert_called_once_with()
+        self.figure_presenter.set_plot_range.assert_called_once_with([1, 3])
+        self.presenter.update_freq_units.notify_subscribers.assert_called_once_with()
         self.view.set_plot_type.assert_called_once_with("Field")
 
 

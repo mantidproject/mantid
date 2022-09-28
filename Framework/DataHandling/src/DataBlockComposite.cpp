@@ -269,7 +269,7 @@ void DataBlockComposite::truncate(specnum_t specMin, specnum_t specMax) {
   // original: |-----|      |--------|   |------|
   // spec_min:         | or | or | or|
   // result:                 this one
-  auto isNotCompletelyCutOffFromMin = [&specMin](DataBlock &block) {
+  auto isNotCompletelyCutOffFromMin = [&specMin](const DataBlock &block) {
     return (specMin <= block.getMinSpectrumID()) || (specMin <= block.getMaxSpectrumID());
   };
 
@@ -277,7 +277,7 @@ void DataBlockComposite::truncate(specnum_t specMin, specnum_t specMax) {
   // original: |-----|      |--------|         |------|
   // spec_min:              | or | or| or  |
   // result:                 this one
-  auto isNotCompletelyCutOffFromMax = [&specMax](DataBlock &block) {
+  auto isNotCompletelyCutOffFromMax = [&specMax](const DataBlock &block) {
     return (block.getMinSpectrumID() <= specMax) || (block.getMaxSpectrumID() <= specMax);
   };
 

@@ -124,7 +124,7 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin, MatrixWorkspace_sptr
   // rebin
   PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
   for (int i = 0; i < numHist; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto &edges = matchingX ? toMatch->histogram(0).binEdges() : toMatch->histogram(i).binEdges();
     if (m_isEvents) {
       outputWSEvents->getSpectrum(i).setHistogram(edges);
@@ -132,9 +132,9 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin, MatrixWorkspace_sptr
       outputWS->setHistogram(i, HistogramData::rebin(toRebin->histogram(i), edges));
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -153,7 +153,7 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin, API::Matrix
   // histogram
   PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
   for (int i = 0; i < numHist; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto &edges = matchingX ? toMatch->histogram(0).binEdges() : toMatch->histogram(i).binEdges();
 
     // TODO this should be in HistogramData/Rebin
@@ -163,9 +163,9 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin, API::Matrix
 
     outputWS->setHistogram(i, edges, Counts(std::move(y_data)), CountStandardDeviations(std::move(e_data)));
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", std::move(outputWS));
 }

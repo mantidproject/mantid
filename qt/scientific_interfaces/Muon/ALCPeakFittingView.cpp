@@ -16,7 +16,7 @@ namespace MantidQt::CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
-ALCPeakFittingView::~ALCPeakFittingView() {}
+ALCPeakFittingView::~ALCPeakFittingView() = default;
 
 IFunction_const_sptr ALCPeakFittingView::function(QString index) const { return m_ui.peaks->getFunctionByIndex(index); }
 
@@ -111,7 +111,7 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
 }
 
 void ALCPeakFittingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
 void ALCPeakFittingView::displayError(const QString &message) { QMessageBox::critical(m_widget, "Error", message); }

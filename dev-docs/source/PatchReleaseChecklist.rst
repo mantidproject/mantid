@@ -138,6 +138,8 @@ Once the testing has passed:
   deploy an MPI version of the patch release.
 * Create new DOI using the scripts in the codebase and instructions on
   :ref:`release checklist <ReleaseChecklist>`.
+* Open a PR to update the relevant metadata in the ``CITATION.cff`` file as
+  explained in the :ref:`release checklist <ReleaseChecklist>`.
 * Send an email, including the text of the release notes, to the
   following lists
 * ``nobugs@nobugsconference.org``

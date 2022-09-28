@@ -2,6 +2,27 @@
 {#   Remove search box when in embedded mode (qthelp etc) #}
 {#   Point the main logo anchor to www.mantidproject.org in standard mode and the master document in embedded mode #}
 
+{%- macro relbar() %}
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>{{ _('Navigation') }}</h3>
+      <ul>
+        {%- block rootrellink %}
+        <li class="nav-item nav-item-0"><a href="{{ pathto(master_doc) }}">{{ "Documentation" }}</a>{{ reldelim1 }}</li>
+        {%- endblock %}
+        {% if master_doc != pagename %}
+          {%- for parent in parents %}
+            <li class="nav-item nav-item-{{ loop.index }}"><a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>{{ parent.title }}</a>{{ reldelim1 }}</li>
+          {% endfor %}
+        {% endif %}
+        {% if title != "Mantid" %}
+          {% block relbaritems %}
+            <li class="nav-item nav-item-this"><a href="{{ link|e }}">{{ title }}</a></li>
+          {% endblock %}
+        {% endif %}
+      </ul>
+    </div>
+{%- endmacro %}
+
   <div id="navbar" class="{{ theme_navbar_class }} navbar-default {% if theme_navbar_fixed_top == 'true' -%} navbar-fixed-top{%- endif -%}">
     <div class="container">
       <div class="navbar-header">
@@ -55,4 +76,5 @@
           {%- endif -%}
         </div>
     </div>
+    <p> {%- block relbar %}{{ relbar() }}{% endblock %} </p>
   </div>

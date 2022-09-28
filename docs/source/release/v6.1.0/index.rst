@@ -25,7 +25,7 @@ Other highlights from this release include:
 - Sectors drawn in the instrument viewer can now be used to define wedges for azimuthal averaging of 2D SANS data using :ref:`Q1DWeighted <algm-Q1DWeighted>`.
 - :ref:`ConvertUnits <algm-ConvertUnits>` algorithm has been extended to use diffractometer constants from instrument calibration.
 - New algorithm :ref:`GeneratePythonFitScript <algm-GeneratePythonFitScript>` allows the creation of a python script for sequential fitting.
-- New algorithm :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` to calculate multiple scattering corrections.
+- New algorithm :ref:`CalculateMultipleScattering <algm-DiscusMultipleScatteringCorrection>` to calculate multiple scattering corrections.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

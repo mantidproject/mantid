@@ -15,7 +15,7 @@ namespace Algorithms {
 /** LineProfile : Calculates a horizontal or vertical line profile over
   a MatrixWorkspace.
 */
-class MANTID_ALGORITHMS_DLL LineProfile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL LineProfile final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

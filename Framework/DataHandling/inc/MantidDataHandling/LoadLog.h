@@ -55,7 +55,7 @@ namespace DataHandling {
     @author Anders Markvardsen, ISIS, RAL
     @date 26/09/2007
 */
-class DLLExport LoadLog : public API::Algorithm {
+class DLLExport LoadLog final : public API::Algorithm {
 public:
   /// Default constructor
   LoadLog();

@@ -17,7 +17,7 @@ namespace Algorithms {
  Algorithm to create a flood correction workspace for reflectometry
  data reduction.
  */
-class MANTID_ALGORITHMS_DLL CreateFloodWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateFloodWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;

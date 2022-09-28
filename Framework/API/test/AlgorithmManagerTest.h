@@ -22,7 +22,7 @@ using namespace Mantid::API;
 class AlgTest : public Algorithm {
 public:
   AlgTest() : Algorithm() {}
-  ~AlgTest() override {}
+  ~AlgTest() override = default;
   void init() override {}
   void exec() override {}
   const std::string name() const override { return "AlgTest"; }
@@ -34,7 +34,7 @@ public:
 class AlgTestFail : public Algorithm {
 public:
   AlgTestFail() : Algorithm() {}
-  ~AlgTestFail() override {}
+  ~AlgTestFail() override = default;
   void init() override {}
   void exec() override {}
   const std::string name() const override { return "AlgTest"; }
@@ -46,7 +46,7 @@ public:
 class AlgTestPass : public Algorithm {
 public:
   AlgTestPass() : Algorithm() {}
-  ~AlgTestPass() override {}
+  ~AlgTestPass() override = default;
   void init() override {}
   void exec() override {}
   const std::string name() const override { return "AlgTest"; }
@@ -58,7 +58,7 @@ public:
 class AlgTestSecond : public Algorithm {
 public:
   AlgTestSecond() : Algorithm() {}
-  ~AlgTestSecond() override {}
+  ~AlgTestSecond() override = default;
   void init() override {}
   void exec() override {}
   const std::string name() const override { return "AlgTestSecond"; }
@@ -74,7 +74,7 @@ private:
 
 public:
   AlgRunsForever() : Algorithm(), isRunningFlag(true) {}
-  ~AlgRunsForever() override {}
+  ~AlgRunsForever() override = default;
   void init() override {}
   void exec() override {}
   const std::string name() const override { return "AlgRunsForever"; }

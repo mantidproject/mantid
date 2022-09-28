@@ -60,7 +60,7 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<
 /**
  * Destructor
  */
-FunctionBrowser::~FunctionBrowser() {}
+FunctionBrowser::~FunctionBrowser() = default;
 
 /**
  * Clear the contents

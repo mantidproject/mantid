@@ -8,20 +8,20 @@ import unittest
 
 from mantid.api import FrameworkManager
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (EVALUATE_AS_TABLE_ROW,
                                                                                                         EXCLUDE_RANGE_TABLE_ROW,
                                                                                                         EXCLUDE_START_X_TABLE_ROW,
                                                                                                         EXCLUDE_END_X_TABLE_ROW,
-                                                                                                        RAW_DATA_TABLE_ROW)
-
-from qtpy.QtWidgets import QApplication
+                                                                                                        RAW_DATA_TABLE_ROW,
+                                                                                                        PLOT_GUESS_POINTS,
+                                                                                                        PLOT_GUESS_START_X,
+                                                                                                        PLOT_GUESS_END_X)
 
 
 @start_qapplication
-class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
+class BasicFittingViewTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -31,11 +31,9 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.dataset_names = ["MUSR62260; Group; fwd; Asymmetry; MA", "MUSR62260; Group; bwd; Asymmetry; MA"]
         self.view = BasicFittingView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_plot_guess_checkbox_can_be_ticked_as_expected(self):
         self.view.plot_guess = True
@@ -197,6 +195,33 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.function_name = new_function_name
 
         self.assertEqual(self.view.function_name, new_function_name)
+
+    def test_that_show_plot_guess_points_will_show_plot_guess_points_row(self):
+        self.view = BasicFittingView()
+
+        self.view.show_plot_guess_points(True)
+        self.assertFalse(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_POINTS))
+
+        self.view.show_plot_guess_points(False)
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_POINTS))
+
+    def test_that_show_plot_guess_start_x_will_show_plot_guess_start_x_row(self):
+        self.view = BasicFittingView()
+
+        self.view.show_plot_guess_start_x(True)
+        self.assertFalse(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_START_X))
+
+        self.view.show_plot_guess_start_x(False)
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_START_X))
+
+    def test_that_show_plot_guess_end_x_will_show_plot_guess_end_x_row(self):
+        self.view = BasicFittingView()
+
+        self.view.show_plot_guess_end_x(True)
+        self.assertFalse(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_END_X))
+
+        self.view.show_plot_guess_end_x(False)
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_END_X))
 
 
 if __name__ == '__main__':

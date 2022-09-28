@@ -77,6 +77,10 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
   std::map<std::string, std::string> result;
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (!inputWS) {
+    result["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+    return result;
+  }
   const auto unit = inputWS->getAxis(0)->unit()->caption();
   const auto unitErrorMsg =
       "GetDetectorOffsets only supports input workspaces with units 'Bins of Shift' or 'd-Spacing', your unit was : " +
@@ -132,7 +136,7 @@ void GetDetectorOffsets::exec() {
   auto &spectrumInfo = maskWS->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
   for (int64_t wi = 0; wi < nspec; ++wi) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Fit the peak
     double offset = fitSpectra(wi);
     double mask = 0.0;
@@ -166,9 +170,9 @@ void GetDetectorOffsets::exec() {
       }
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Return the output
   setProperty("OutputWorkspace", outputW);

@@ -27,7 +27,7 @@ std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::Para
                                                          {IqtFunctionModel::ParamID::BG_A0, "A0"}};
 }
 
-IqtFunctionModel::IqtFunctionModel() {}
+IqtFunctionModel::IqtFunctionModel() = default;
 
 void IqtFunctionModel::clearData() {
   m_numberOfExponentials = 0;
@@ -557,7 +557,7 @@ void IqtFunctionModel::estimateExpParameters() {
     auto const &x = m_estimationData[i].x;
     auto const &y = m_estimationData[i].y;
     auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-    if (lifeTime <= 0)
+    if (!(lifeTime > 0))
       lifeTime = 1.0;
     auto const height = y[0] * exp(x[0] / lifeTime);
     setLocalParameterValue(*heightName1, i, height);

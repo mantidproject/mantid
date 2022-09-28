@@ -271,7 +271,8 @@ class MainWindowTest(unittest.TestCase):
         self.main_window.writeSettings.assert_called()
         mock_plt_close.assert_called_with('all')
         mock_QApplication.instance().closeAllWindows.assert_called()
-        self.main_window.project_recovery.assert_has_calls([call.stop_recovery_thread(), call.remove_current_pid_folder()])
+        self.main_window.project_recovery.assert_has_calls([call.stop_recovery_thread(),
+                                                            call.remove_current_pid_folder(ignore_errors=True)])
         self.assertTrue(self.main_window.project_recovery.closing_workbench)
         self.main_window.interface_manager.closeHelpWindow.assert_called()
         mock_event.accept.assert_called()

@@ -68,8 +68,8 @@ class Transform2Test(unittest.TestCase):
 
     def test_new_data(self):
         self.widget.handle_new_data_loaded()
-        self.assertEquals(self.widget._maxent._presenter.runChanged.call_count,1)
-        self.assertEquals(self.widget._fft._presenter.runChanged.call_count,1)
+        self.assertEqual(self.widget._maxent._presenter.runChanged.call_count,1)
+        self.assertEqual(self.widget._fft._presenter.runChanged.call_count,1)
 
     def test_new_instrument(self):
         self.mock_widgets()
@@ -80,7 +80,7 @@ class Transform2Test(unittest.TestCase):
     def test_handle_new_group_pair(self):
         self.mock_widgets()
         self.widget.handle_new_group_pair()
-        self.assertEquals(self.widget._fft.runChanged.call_count, 1)
+        self.assertEqual(self.widget._fft.runChanged.call_count, 1)
 
     def test_disable_view(self):
         self.widget.disable_view()

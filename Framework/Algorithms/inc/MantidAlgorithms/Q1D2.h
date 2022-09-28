@@ -23,7 +23,7 @@ namespace Algorithms {
     @author Steve Williams ISIS Rutherford Appleton Laboratory
     @date 10/12/2010
 */
-class MANTID_ALGORITHMS_DLL Q1D2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Q1D2 final : public API::Algorithm {
 public:
   /// Default constructor
   Q1D2();

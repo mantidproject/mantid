@@ -26,8 +26,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <algorithm>
 #include <cmath>
 #include <ctime>
+#include <iterator>
 #include <numeric>
 #include <stdexcept>
 
@@ -103,9 +105,8 @@ void CreateSampleWorkspace::init() {
   m_preDefinedFunctionmap.emplace("User Defined", "");
   std::vector<std::string> functionOptions;
   functionOptions.reserve(m_preDefinedFunctionmap.size());
-  for (const auto &preDefinedFunction : m_preDefinedFunctionmap) {
-    functionOptions.emplace_back(preDefinedFunction.first);
-  }
+  std::transform(m_preDefinedFunctionmap.cbegin(), m_preDefinedFunctionmap.cend(), std::back_inserter(functionOptions),
+                 [](const auto &preDefinedFunction) { return preDefinedFunction.first; });
   declareProperty("Function", "One Peak", std::make_shared<StringListValidator>(functionOptions),
                   "Preset options of the data to fill the workspace with");
   declareProperty("UserDefinedFunction", "", "Parameters defining the fitting function and its initial values");
@@ -532,22 +533,15 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "monitor-shape");
 
   for (int monitorNumber = monitorsStart; monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
-    // Make a new bank
-    std::ostringstream monitorName;
-    monitorName << "monitor" << monitorNumber - monitorsStart + 1;
+    std::string monitorName = "monitor" + std::to_string(monitorNumber - monitorsStart + 1);
 
-    RectangularDetector *bank = new RectangularDetector(monitorName.str());
-    bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing, monitorNumber, true, 1);
+    Detector *detector = new Detector(monitorName, monitorNumber, monitorShape, testInst.get());
+    // Mark it as a monitor (add to the instrument cache)
+    testInst->markAsMonitor(detector);
 
-    std::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
-    if (detector) {
-      // Mark it as a monitor (add to the instrument cache)
-      testInst->markAsMonitor(detector.get());
-    }
-
-    testInst->add(bank);
+    testInst->add(detector);
     // Set the bank along the z-axis of the instrument, between the detectors.
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
+    detector->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component

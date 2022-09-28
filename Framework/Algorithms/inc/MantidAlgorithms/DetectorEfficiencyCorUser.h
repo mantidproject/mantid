@@ -34,7 +34,7 @@ namespace Algorithms {
 
  Formula_eff must be defined in the instrument parameters file.
  */
-class MANTID_ALGORITHMS_DLL DetectorEfficiencyCorUser : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorEfficiencyCorUser final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -53,7 +53,7 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  void correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser);
+  void correctHistogram(const size_t index, const double eff0, double &e, const mu::Parser &parser);
 
   double evaluate(const mu::Parser &parser) const;
 

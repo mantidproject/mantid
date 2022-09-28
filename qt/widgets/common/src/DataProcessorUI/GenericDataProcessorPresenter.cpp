@@ -216,7 +216,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(WhiteList whitelist
 /**
  * Destructor
  */
-GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 namespace {
 std::vector<std::string> toStdStringVector(const std::set<QString> &in) {

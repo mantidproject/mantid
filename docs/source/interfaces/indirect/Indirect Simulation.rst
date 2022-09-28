@@ -104,6 +104,8 @@ Plot Spectra
 Save Result
   Saves the result in the default save directory.
 
+.. _DensityOfStates_Interface:
+
 DensityOfStates
 ---------------
 

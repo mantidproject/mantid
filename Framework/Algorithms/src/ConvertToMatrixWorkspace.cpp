@@ -53,7 +53,7 @@ void ConvertToMatrixWorkspace::exec() {
     // ...but not the data, so do that here.
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
     for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const auto &inSpec = inputWorkspace->getSpectrum(i);
       auto &outSpec = outputWorkspace->getSpectrum(i);
 
@@ -62,9 +62,9 @@ void ConvertToMatrixWorkspace::exec() {
 
       prog.report("Binning");
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     outputWorkspace = getProperty("OutputWorkspace");
     if (inputWorkspace == outputWorkspace) {

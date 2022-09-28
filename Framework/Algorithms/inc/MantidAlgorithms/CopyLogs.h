@@ -26,7 +26,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC, RAL
   @date 11/10/2013
 */
-class MANTID_ALGORITHMS_DLL CopyLogs : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyLogs final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

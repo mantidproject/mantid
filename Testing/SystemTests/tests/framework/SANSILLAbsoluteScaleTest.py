@@ -33,32 +33,32 @@ class D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
         LoadNexusProcessed(Filename='D11_mask.nxs', OutputWorkspace='mask')
 
         # Process the dark current Cd/B4C for water
-        SANSILLReduction(Run='010455', ProcessAs='Absorber', OutputWorkspace='Cdw')
+        SANSILLReduction(Run='010455', ProcessAs='Absorber', OutputWorkspace='Cdw', Version=1)
 
         # Process the empty beam for water
         SANSILLReduction(Run='010414', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw',
-                         FluxOutputWorkspace='Flw')
+                         FluxOutputWorkspace='Flw', Version=1)
         # Water container transmission
         SANSILLReduction(Run='010446', ProcessAs='Transmission', AbsorberInputWorkspace='Cdw',
-                         BeamInputWorkspace='Dbw', OutputWorkspace='wc_tr')
+                         BeamInputWorkspace='Dbw', OutputWorkspace='wc_tr', Version=1)
         # Water container
         SANSILLReduction(Run='010454', ProcessAs='Container', AbsorberInputWorkspace='Cdw',
-                         BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
+                         BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc', Version=1)
         # Water transmission
         SANSILLReduction(Run='010445', ProcessAs='Transmission', AbsorberInputWorkspace='Cdw',
-                         BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
+                         BeamInputWorkspace='Dbw', OutputWorkspace='w_tr', Version=1)
         # Water as reference
         SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
                          ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
-                         SensitivityOutputWorkspace='sens', OutputWorkspace='reference', FluxInputWorkspace='Flw')
+                         SensitivityOutputWorkspace='sens', OutputWorkspace='reference', FluxInputWorkspace='Flw', Version=1)
         # Water as sample with sensitivity and flux
         SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
                          ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
-                         SensitivityInputWorkspace='sens', OutputWorkspace='water_with_sens_flux', FluxInputWorkspace='Flw')
+                         SensitivityInputWorkspace='sens', OutputWorkspace='water_with_sens_flux', FluxInputWorkspace='Flw', Version=1)
         # Water with itself as reference and flux
         SANSILLReduction(Run='010453', ProcessAs='Sample', AbsorberInputWorkspace='Cdw', MaskedInputWorkspace='mask',
                          ContainerInputWorkspace='wc', BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
-                         ReferenceInputWorkspace='reference', OutputWorkspace='water_with_reference', FluxInputWorkspace='Flw')
+                         ReferenceInputWorkspace='reference', OutputWorkspace='water_with_reference', FluxInputWorkspace='Flw', Version=1)
 
         # Group the worksaces
         GroupWorkspaces(InputWorkspaces=['sens', 'reference', 'water_with_reference', 'water_with_sens_flux'],
@@ -84,25 +84,25 @@ class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
         LoadNexusProcessed(Filename='D11_mask.nxs', OutputWorkspace='mask')
 
         # Calculate flux for water
-        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Dbw', FluxOutputWorkspace='flw')
+        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Dbw', FluxOutputWorkspace='flw', Version=1)
 
         # Reduce water with flux normalisation
         SANSILLReduction(Run='010453', ProcessAs='Sample', MaskedInputWorkspace='mask',
-                         OutputWorkspace='water_with_flux', FluxInputWorkspace='flw')
+                         OutputWorkspace='water_with_flux', FluxInputWorkspace='flw', Version=1)
 
         # Reduce water without flux normalisation
-        SANSILLReduction(Run='010453', ProcessAs='Sample', MaskedInputWorkspace='mask', OutputWorkspace='water_wo_flux')
+        SANSILLReduction(Run='010453', ProcessAs='Sample', MaskedInputWorkspace='mask', OutputWorkspace='water_wo_flux', Version=1)
 
         # Calculate flux for sample
-        SANSILLReduction(Run='010413', ProcessAs='Beam', OutputWorkspace='Db', FluxOutputWorkspace='fl')
+        SANSILLReduction(Run='010413', ProcessAs='Beam', OutputWorkspace='Db', FluxOutputWorkspace='fl', Version=1)
 
         # Reduce sample with flux normalisation and flux normalised water reference
         SANSILLReduction(Run='010569', ProcessAs='Sample', MaskedInputWorkspace='mask',
-                         OutputWorkspace='sample_with_flux', FluxInputWorkspace='fl', ReferenceInputWorkspace='water_with_flux')
+                         OutputWorkspace='sample_with_flux', FluxInputWorkspace='fl', ReferenceInputWorkspace='water_with_flux', Version=1)
 
         # Reduce sample without flux normalisation and not flux normalised water reference
         SANSILLReduction(Run='010569', ProcessAs='Sample', MaskedInputWorkspace='mask',
-                         OutputWorkspace='sample_wo_flux', ReferenceInputWorkspace='water_wo_flux')
+                         OutputWorkspace='sample_wo_flux', ReferenceInputWorkspace='water_wo_flux', Version=1)
 
         # Now the sample_with_flux and sample_wo_flux should be approximately at the same scale
         result1, _ = CompareWorkspaces(Workspace1='sample_with_flux', Workspace2='sample_wo_flux', Tolerance=0.1)
@@ -112,13 +112,13 @@ class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
         # Reduce water, but normalise it to the sample flux
         # Commit f25a6cd5 removed the rescaling by the distance ratio squared in the algorithm
         SANSILLReduction(Run='010453', ProcessAs='Sample', MaskedInputWorkspace='mask',
-                         OutputWorkspace='water_with_sample_flux', FluxInputWorkspace='fl')
+                         OutputWorkspace='water_with_sample_flux', FluxInputWorkspace='fl', Version=1)
 
         # Reduce sample with flux normalisation and sample flux normalised water reference
         # Here there is no additional scaling, since both are already normalised
         SANSILLReduction(Run='010569', ProcessAs='Sample', MaskedInputWorkspace='mask',
                          OutputWorkspace='sample_with_flux_water_with_sample_flux',
-                         FluxInputWorkspace='fl', ReferenceInputWorkspace='water_with_sample_flux')
+                         FluxInputWorkspace='fl', ReferenceInputWorkspace='water_with_sample_flux', Version=1)
 
         # Before f25a6cd5 this output should still be at the same scale as the two above
         # (basically it is the same scaling, just happening in different place)
@@ -141,6 +141,7 @@ class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
             'MaskedInputWorkspace' : 'mask',
             'OutputWorkspace' : 'sample_with_flux_water_wo_flux',
             'FluxInputWorkspace' : 'fl',
-            'ReferenceInputWorkspace' : 'water_wo_flux'
+            'ReferenceInputWorkspace' : 'water_wo_flux',
+            'Version' : 1
         }
         self.assertRaises(RuntimeError, SANSILLReduction, **kwargs)

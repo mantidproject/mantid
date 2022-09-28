@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Batch.h"
+#include "Reduction/RowExceptions.h"
 
 #include <utility>
 
@@ -27,11 +28,15 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
   return m_runsTable.selectedRowLocations();
 }
 
-std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
-
-LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
-  return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
+boost::optional<LookupRow> Batch::findLookupRow(Row const &row) const {
+  return experiment().findLookupRow(row, runsTable().thetaTolerance());
 }
+
+boost::optional<LookupRow> Batch::findLookupRow(PreviewRow const &previewRow) const {
+  return experiment().findLookupRow(previewRow, runsTable().thetaTolerance());
+}
+
+boost::optional<LookupRow> Batch::findWildcardLookupRow() const { return experiment().findWildcardLookupRow(); }
 
 void Batch::resetState() { m_runsTable.resetState(); }
 
@@ -40,4 +45,41 @@ void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
+
+void Batch::updateLookupIndex(Row &row) {
+  try {
+    row.setLookupIndex(experiment().getLookupRowIndexFromRow(row, runsTable().thetaTolerance()));
+  } catch (MultipleRowsFoundException &e) {
+    row.setError(e.what());
+  }
+}
+
+void Batch::updateLookupIndexesOfGroup(Group &group) {
+  for (auto &row : group.mutableRows()) {
+    if (row.is_initialized()) {
+      updateLookupIndex(row.get());
+    }
+  }
+}
+
+void Batch::updateLookupIndexesOfTable() {
+  for (auto &group : m_runsTable.mutableReductionJobs().mutableGroups()) {
+    updateLookupIndexesOfGroup(group);
+  }
+}
+
+bool Batch::isInSelection(const Item &item,
+                          const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
+}
+
+bool Batch::isInSelection(const Row &item, const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
+}
+
+bool Batch::isInSelection(const Group &item,
+                          const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) {
+  return m_runsTable.isInSelection(item, selectedRowLocations);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

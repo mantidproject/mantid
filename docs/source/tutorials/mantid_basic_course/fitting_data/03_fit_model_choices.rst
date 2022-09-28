@@ -17,8 +17,10 @@ Multiple peaks + background
 ===========================
 
 It is possible to fit overlapping peaks on a common
-background. Just follow the steps described earlier and add more peaks
-to the model. The peaks don't have to be of the same type.
+background. Load the file `GEM38370_Focussed` and plot spectrum number 6.
+Zoom in on the 3 peaks around 2.15 Angstroms. Add 3 Gaussian peaks and a Linear Background.
+As can be seen in the screenshot below, the peaks don't have to be of the same type. Run the Fit
+and inspect the results.
 
 .. figure:: /images/FittingMultiplePeaks.png
    :alt: FittingMultiplePeaks.png
@@ -31,7 +33,8 @@ Non peak model + background
 
 Fitting is not limited to peaks. You can
 select any other function from our list via right-click "Add other
-function".
+function". Load `EMU00020884` and plot spectrum number 6. Add the other function : `ExpDecayOsc`.
+Run the Fit an inspect the results. You may need to edit the fitting range (StartX and EndX) to get a good fit!
 
 .. figure:: /images/AddOtherFunctionOptionEMU.png
    :alt: AddOtherFunctionOption.png
@@ -51,8 +54,9 @@ parameters, except for "x" which is the argument.
    :alt: AddedUserFunction.png
    :width: 350px
 
-The formula can simply be entered into Fit Property
-Browser or with the help of the User Function Dialog:
+The formula can simply be entered into Fit Property Browser.
+Alternatively, click on the `...` button in the Formula input box
+to open the User Function Dialog:
 
 .. figure:: /images/UserFunctionDialog.png
    :alt: UserFunctionDialog.png

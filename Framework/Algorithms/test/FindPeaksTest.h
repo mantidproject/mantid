@@ -220,7 +220,7 @@ public:
     const std::vector<double> WIDTHS{0.0007, 0.0009, 0.0001, 0.0012, 0.0013, 0.0012, 0.0013, 0.0011, 0.0015,
                                      0.0030, 0.0023, 0.0038, 0.0021, 0.0034, 0.0042, 0.0062, 0.0099};
     // peaks that have different values on differnt operating systems
-    const std::vector<int> BAD{1, 4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
+    const std::vector<int> BAD{1, 3, 4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
 
     loadNexusProcessed("PG3_4866_focussed_vanadium.nxs", WKSP_NAME_INPUT);
 
@@ -269,7 +269,11 @@ public:
         tol_width = 0.001;
       }
       // super-special peaks
-      if (i == 4) {
+      if (i == 0) {
+        tol_height = 30.;
+      } else if (i == 3) {
+        tol_height = 30.;
+      } else if (i == 4) {
         tol_height = 19.;
       } else if (i == 5) {
         tol_height = 55.;
@@ -309,7 +313,6 @@ public:
     /*
     for (size_t i = 0; i < vecnames.size(); ++i)
       cout << "Column " << i << " : " << vecnames[i] << "\n";
-
     size_t numrows = tablews->rowCount();
     cout << "Number of rows = " << numrows << "\n";
     */

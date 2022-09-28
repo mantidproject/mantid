@@ -9,6 +9,7 @@ are for use in unit tests only!
 """
 
 
+from contextlib import contextmanager
 from distutils.version import LooseVersion
 
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
@@ -267,3 +268,18 @@ else:
             pass
         if round(abs(desired - actual), decimal) != 0:
             raise AssertionError(_build_err_msg())
+
+
+@contextmanager
+def temporary_config():
+    """
+    Creates a backup of the current system configuration and restores
+    is when the context is existed.
+    """
+    try:
+        config = mantid.kernel.ConfigService.Instance()
+        backup = {key: config[key] for key in config.keys()}
+        yield
+    finally:
+        for key, val in backup.items():
+            config[key] = val

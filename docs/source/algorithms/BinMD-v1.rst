@@ -101,8 +101,7 @@ MDHistoWorkspace! Of course, your basis vectors can be aligned with the
 dimensions, which is equivalent.
 
 For more details on the coordinate transformations applied in this case,
-please see `BinMD Coordinate
-Transformations <http://www.mantidproject.org/BinMD_Coordinate_Transformations>`__.
+please see :ref:`BinMDCoordinateTransformations`.
 
 .. figure:: /images/BinMD_Coordinate_Transforms_withLine.png
    :alt: BinMD_Coordinate_Transforms_withLine.png
@@ -122,7 +121,7 @@ Output:
 
 .. testoutput:: AxisAligned
 
-    Number of events = 250734
+    Number of events = 250334
 
 The output looks like the following in the :ref:`sliceviewer`:
 

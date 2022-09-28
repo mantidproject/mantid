@@ -17,15 +17,19 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (chec
                                                                             get_pair_phasequad_name,
                                                                             get_run_numbers_as_string_from_workspace_name)
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (BasicFittingContext,
+                                                                                                X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_create_workspace_without_storing
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
+import numpy as np
 import re
 from typing import List, NamedTuple
 
@@ -368,14 +372,44 @@ class BasicFittingModel:
         self.fitting_context.plot_guess = plot_guess
 
     @property
-    def plot_guess(self) -> bool:
-        """Returns true if plot guess is turned on."""
-        return self.fitting_context.plot_guess
+    def plot_guess_type(self) -> str:
+        """Returns the guess plot range type."""
+        return self.fitting_context.plot_guess_type
 
-    @plot_guess.setter
-    def plot_guess(self, plot_guess: bool) -> None:
-        """Sets that the plot guess should or should not be plotted."""
-        self.fitting_context.plot_guess = plot_guess
+    @plot_guess_type.setter
+    def plot_guess_type(self, plot_guess_type: str) -> None:
+        """Sets the guess plot range type."""
+        self.fitting_context.plot_guess_type = plot_guess_type
+
+    @property
+    def plot_guess_points(self) -> int:
+        """Returns the number of points to use in the guess plot."""
+        return self.fitting_context.plot_guess_points
+
+    @plot_guess_points.setter
+    def plot_guess_points(self, plot_guess_points: int) -> None:
+        """Sets the number of points to use in the guess plot."""
+        self.fitting_context.plot_guess_points = plot_guess_points
+
+    @property
+    def plot_guess_start_x(self) -> float:
+        """Returns the start x to use in the guess plot."""
+        return self.fitting_context.plot_guess_start_x
+
+    @plot_guess_start_x.setter
+    def plot_guess_start_x(self, plot_guess_start_x: float) -> None:
+        """Sets the start x to use in the guess plot."""
+        self.fitting_context.plot_guess_start_x = plot_guess_start_x
+
+    @property
+    def plot_guess_end_x(self) -> float:
+        """Returns the end x to use in the guess plot."""
+        return self.fitting_context.plot_guess_start_x
+
+    @plot_guess_end_x.setter
+    def plot_guess_end_x(self, plot_guess_end_x: float) -> None:
+        """Sets the end x to use in the guess plot."""
+        self.fitting_context.plot_guess_end_x = plot_guess_end_x
 
     @property
     def function_name(self) -> str:
@@ -783,14 +817,27 @@ class BasicFittingModel:
 
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
+        if self.fitting_context.plot_guess_type == X_FROM_FIT_RANGE:
+            data_ws = retrieve_ws(self.current_dataset_name)
+            data = np.linspace(self.current_start_x, self.current_end_x, data_ws.getNumberBins())
+        elif self.fitting_context.plot_guess_type == X_FROM_DATA_RANGE:
+            data_ws = retrieve_ws(self.current_dataset_name)
+            data = np.linspace(data_ws.dataX(0)[0], data_ws.dataX(0)[-1], self.fitting_context.plot_guess_points)
+        elif self.fitting_context.plot_guess_type == X_FROM_CUSTOM:
+            data = np.linspace(self.fitting_context.plot_guess_start_x, self.fitting_context.plot_guess_end_x,
+                               self.fitting_context.plot_guess_points)
+        else:
+            raise ValueError(f"Plot guess type '{self.fitting_context.plot_guess_type}' is not recognised.")
+
+        extended_workspace = run_create_workspace_without_storing(x_data=data, y_data=data,
+                                                                  name='extended_workspace')
+
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace=self.current_dataset_name,
+                EvaluateFunction(InputWorkspace=extended_workspace,
                                  Function=fit_function,
-                                 StartX=self.current_start_x,
-                                 EndX=self.current_end_x,
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")

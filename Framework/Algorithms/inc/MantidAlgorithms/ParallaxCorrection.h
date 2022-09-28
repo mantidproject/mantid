@@ -15,7 +15,7 @@ namespace Algorithms {
 /** ParallaxCorrection : Performs geometrical correction for parallax effect in
  * tube based SANS instruments.
  */
-class MANTID_ALGORITHMS_DLL ParallaxCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ParallaxCorrection final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -25,8 +25,9 @@ public:
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
   void performCorrection(const API::MatrixWorkspace_sptr &, const std::vector<size_t> &, const std::string &,
-                         const std::string &);
+                         const std::string &, const double);
 };
 
 } // namespace Algorithms

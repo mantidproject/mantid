@@ -15,12 +15,12 @@ namespace Algorithms {
     @author Matt Clarke, ISIS, RAL
     @date 09/11/2007
  */
-class HelloWorldAlgorithm : public API::Algorithm {
+class HelloWorldAlgorithm final : public API::Algorithm {
 public:
   /// no arg constructor
   HelloWorldAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  ~HelloWorldAlgorithm() override {}
+  ~HelloWorldAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "HelloWorldAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

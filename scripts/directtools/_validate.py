@@ -16,8 +16,8 @@ def _isDOS(workspace):
 def _isSofQW(workspace):
     """Return True if workspace looks like a valid S(Q,E) workspace, False otherwise."""
     validUnits = ['q', 'Energy transfer']
-    unit1 = workspace.getAxis(0).getUnit().name()
-    unit2 = workspace.getAxis(1).getUnit().name()
+    unit1 = workspace.getAxis(0).getUnit().caption()
+    unit2 = workspace.getAxis(1).getUnit().caption()
     return unit1 != unit2 and unit1 in validUnits and unit2 in validUnits
 
 

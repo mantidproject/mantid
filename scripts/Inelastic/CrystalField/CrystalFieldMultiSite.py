@@ -6,8 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 
-from CrystalField import CrystalField, Function
-from .fitting import islistlike
+from mantid.api import AlgorithmManager
+from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
+from mantid.simpleapi import FunctionFactory, plotSpectrum
+import CrystalField
+from collections import OrderedDict
 
 
 def makeWorkspace(xArray, yArray, child=True, ws_name='dummy'):
@@ -18,7 +21,6 @@ def makeWorkspace(xArray, yArray, child=True, ws_name='dummy'):
     @param child: if true, the workspace won't appear in the ADS
     @param ws_name: name of the workspace
     """
-    from mantid.api import AlgorithmManager
     alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
     alg.initialize()
     alg.setChild(child)
@@ -31,7 +33,7 @@ def makeWorkspace(xArray, yArray, child=True, ws_name='dummy'):
 
 def get_parameters_for_add(cf, new_ion_index):
     """get params from crystalField object to append"""
-    ion_prefix = 'ion{}.'.format(new_ion_index)
+    ion_prefix = f'ion{new_ion_index}.'
     return get_parameters(cf, ion_prefix, '')
 
 
@@ -39,15 +41,15 @@ def get_parameters_for_add_from_multisite(cfms, new_ion_index):
     """get params from crystalFieldMultiSite object to append"""
     params = {}
     for i in range(len(cfms.Ions)):
-        ion_prefix = 'ion{}.'.format(new_ion_index + i)
-        existing_prefix = 'ion{}.'.format(i) if cfms._isMultiSite() else ''
+        ion_prefix = f'ion{new_ion_index + i}.'
+        existing_prefix = f'ion{i}.' if cfms._isMultiSite() else ''
         params.update(get_parameters(cfms, ion_prefix, existing_prefix))
     return params
 
 
 def get_parameters(crystal_field, ion_prefix, existing_prefix):
     params = {}
-    for bparam in CrystalField.field_parameter_names:
+    for bparam in CrystalField.CrystalField.field_parameter_names:
         params[ion_prefix + bparam] = crystal_field[existing_prefix + bparam]
     return params
 
@@ -55,8 +57,6 @@ def get_parameters(crystal_field, ion_prefix, existing_prefix):
 class CrystalFieldMultiSite(object):
 
     def __init__(self, Ions, Symmetries, **kwargs):
-        from collections import OrderedDict
-
         self._makeFunction()
 
         bg_params = {}
@@ -132,7 +132,6 @@ class CrystalFieldMultiSite(object):
         return len(self.Ions) > 1
 
     def _makeFunction(self):
-        from mantid.simpleapi import FunctionFactory
         self.function = FunctionFactory.createFunction('CrystalFieldFunction')
 
     def getParameter(self, param):
@@ -144,14 +143,14 @@ class CrystalFieldMultiSite(object):
             ws = arg2
             ws_index = 0
             if self.Temperatures[i] < 0:
-                raise RuntimeError('You must first define a valid temperature for spectrum {}'.format(i))
+                raise RuntimeError(f'You must first define a valid temperature for spectrum {i}')
         elif isinstance(arg2, int):
             i = 0
             ws = arg1
             ws_index = arg2
         else:
-            raise TypeError('expected int for one argument in GetSpectrum, got {0} and {1}'.format(
-                arg1.__class__.__name__, arg2.__class__.__name__))
+            raise TypeError(f'expected int for one argument in GetSpectrum, got {arg1.__class__.__name__} and '
+                            f'{arg2.__class__.__name__}')
 
         if isinstance(ws, list) or isinstance(ws, np.ndarray):
             ws = self._convertToWS(ws)
@@ -162,9 +161,9 @@ class CrystalFieldMultiSite(object):
         peaks = np.array([])
         for idx in range(len(self.Ions)):
             blm = {}
-            for bparam in CrystalField.field_parameter_names:
-                blm[bparam] = self.function.getParameterValue('ion{}.'.format(idx) + bparam)
-            _cft = CrystalField(self.Ions[idx], 'C1', Temperature=self.Temperatures[i], **blm)
+            for bparam in CrystalField.CrystalField.field_parameter_names:
+                blm[bparam] = self.function.getParameterValue(f'ion{idx}.' + bparam)
+            _cft = CrystalField.CrystalField(self.Ions[idx], 'C1', Temperature=self.Temperatures[i], **blm)
             peaks = np.append(peaks, _cft.getPeakList()[0])
         return np.min(peaks), np.max(peaks)
 
@@ -224,8 +223,6 @@ class CrystalFieldMultiSite(object):
         """
         if isinstance(workspace, list) or isinstance(workspace, np.ndarray):
             workspace = self._convertToWS(workspace)
-
-        from mantid.api import AlgorithmManager
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.initialize()
         alg.setChild(True)
@@ -253,7 +250,7 @@ class CrystalFieldMultiSite(object):
         """Create dict for ion intensity scalings"""
         if abundances is not None:
             for ion_index in range(len(self.Ions)):
-                self._abundances['ion{}'.format(ion_index)]  = abundances[ion_index]
+                self._abundances[f'ion{ion_index}']  = abundances[ion_index]
             max_ion = max(self._abundances, key=lambda key: self._abundances[key])
             ties = {}
             for ion in self._abundances.keys():
@@ -265,7 +262,7 @@ class CrystalFieldMultiSite(object):
             self.ties(ties)
         else:
             for ion_index in range(len(self.Ions)):
-                self._abundances['ion{}'.format(ion_index)]  = 1.0
+                self._abundances[f'ion{ion_index}']  = 1.0
 
     def update(self, func):
         """
@@ -305,13 +302,12 @@ class CrystalFieldMultiSite(object):
 
     def plot(self, *args):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...) with additional name argument"""
-        from mantid.simpleapi import plotSpectrum
-        ws_name = args[3] if len(args) == 4 else 'CrystalFieldMultiSite_{}'.format(self.Ions)
+        ws_name = args[3] if len(args) == 4 else f'CrystalFieldMultiSite_{self.Ions}'
         xArray, yArray = self.getSpectrum(*args)
         if len(args) > 0:
-            ws_name += '_{}'.format(args[0])
+            ws_name += f'_{args[0]}'
             if isinstance(args[0], int):
-                ws_name += '_{}'.format(args[1])
+                ws_name += f'_{args[1]}'
         makeWorkspace(xArray, yArray, child=False, ws_name=ws_name)
         plotSpectrum(ws_name, 0)
 
@@ -335,7 +331,7 @@ class CrystalFieldMultiSite(object):
         @param background: A function passed as the background. Can be a string or FunctionWrapper e.g.
                 'name=LinearBackground,A0=1' or LinearBackground(A0=1)
         """
-        self._background = Function(self.function, prefix='bg.')
+        self._background = CrystalField.Function(self.function, prefix='bg.')
         if len(kwargs) == 2:
             self._setCompositeBackground(kwargs['peak'], kwargs['background'])
         elif len(kwargs) == 1:
@@ -346,11 +342,9 @@ class CrystalFieldMultiSite(object):
             else:
                 raise RuntimeError('_setBackground expects peak or background arguments only')
         else:
-            raise RuntimeError('_setBackground takes 1 or 2 arguments, got {}'.format(len(kwargs)))
+            raise RuntimeError(f'_setBackground takes 1 or 2 arguments, got {len(kwargs)}')
 
     def _setSingleBackground(self, background, property_name):
-        from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
-
         if isinstance(background, str):
             self._setBackgroundUsingString(background, property_name)
         elif isinstance(background, CompositeFunctionWrapper):
@@ -358,18 +352,18 @@ class CrystalFieldMultiSite(object):
                 peak, background = str(background).split(';')
                 self._setCompositeBackground(peak, background)
             else:
-                raise ValueError("composite function passed to background must have "
-                                 "exactly 2 functions, got {}".format(len(background)))
+                raise ValueError(f"composite function passed to background must have "
+                                 f"exactly 2 functions, got {len(background)}")
         elif isinstance(background, FunctionWrapper):
-            setattr(self._background, property_name, Function(self.function, prefix='bg.'))
+            setattr(self._background, property_name, CrystalField.Function(self.function, prefix='bg.'))
             self.function.setAttributeValue('Background', str(background))
         else:
             raise TypeError("background argument(s) must be string or function object(s)")
 
     def _setCompositeBackground(self, peak, background):
-        self._background.peak = Function(self.function, prefix='bg.f0.')
-        self._background.background = Function(self.function, prefix='bg.f1.')
-        self.function.setAttributeValue('Background', '{0};{1}'.format(peak, background))
+        self._background.peak = CrystalField.Function(self.function, prefix='bg.f0.')
+        self._background.background = CrystalField.Function(self.function, prefix='bg.f1.')
+        self.function.setAttributeValue('Background', f'{peak};{background}')
 
     def _setBackgroundUsingString(self, background, property_name):
         number_of_functions = background.count(';') + 1
@@ -377,11 +371,11 @@ class CrystalFieldMultiSite(object):
             peak, background = background.split(';')
             self._setCompositeBackground(peak, background)
         elif number_of_functions == 1:
-            setattr(self._background, property_name, Function(self.function, prefix='bg.'))
+            setattr(self._background, property_name, CrystalField.Function(self.function, prefix='bg.'))
             self.function.setAttributeValue('Background', background)
         else:
-            raise ValueError("string passed to background must have exactly 1 or 2 functions, got {}".format(
-                number_of_functions))
+            raise ValueError(f"string passed to background must have exactly 1 or 2 functions, got "
+                             f"{number_of_functions}")
 
     def _combine_multisite(self, other):
         """Used to add two CrystalFieldMultiSite"""
@@ -410,9 +404,8 @@ class CrystalFieldMultiSite(object):
             other = other.crystalField
         elif isinstance(other, CrystalFieldMultiSite):
             return self._combine_multisite(other)
-        if not isinstance(other, CrystalField):
-            raise TypeError('Unsupported operand type(s) for +: '
-                            'CrystalFieldMultiSite and {}'.format(other.__class__.__name__))
+        if not isinstance(other, CrystalField.CrystalField):
+            raise TypeError(f'Unsupported operand type(s) for +: CrystalFieldMultiSite and {other.__class__.__name__}')
         ions = self.Ions + [other.Ion]
         symmetries = self.Symmetries + [other.Symmetry]
         abundances = list(self._abundances.values()) + [scale_factor]
@@ -427,9 +420,8 @@ class CrystalFieldMultiSite(object):
         if hasattr(other, 'abundance'):  # is CrystalFieldSite
             scale_factor = other.abundance
             other = other.crystalField
-        if not isinstance(other, CrystalField):
-            raise TypeError('Unsupported operand type(s) for +: '
-                            'CrystalFieldMultiSite and {}'.format(other.__class__.__name__))
+        if not isinstance(other, CrystalField.CrystalField):
+            raise TypeError(f'Unsupported operand type(s) for +: CrystalFieldMultiSite and {other.__class__.__name__}')
         ions = [other.Ion] + self.Ions
         symmetries = [other.Symmetry] + self.Symmetries
         abundances = [scale_factor] + list(self._abundances.values())
@@ -533,7 +525,7 @@ class CrystalFieldMultiSite(object):
 
     @FWHMs.setter
     def FWHMs(self, value):
-        if islistlike(value):
+        if CrystalField.fitting.islistlike(value):
             if len(value) != len(self.Temperatures):
                 value = [value[0]] * len(self.Temperatures)
         else:
@@ -555,11 +547,10 @@ class CrystalFieldMultiSite(object):
 
     @ResolutionModel.setter
     def ResolutionModel(self, value):
-        from .function import ResolutionModel
         if hasattr(value, 'model'):
             self._resolutionModel = value
         else:
-            self._resolutionModel = ResolutionModel(value)
+            self._resolutionModel = CrystalField.ResolutionModel(value)
         nSpec = len(self.Temperatures)
         if nSpec > 1:
             if not self._resolutionModel.multi or self._resolutionModel.NumberOfSpectra != nSpec:

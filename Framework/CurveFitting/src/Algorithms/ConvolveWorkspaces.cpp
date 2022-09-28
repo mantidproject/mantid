@@ -58,7 +58,7 @@ void ConvolveWorkspaces::exec() {
   // Now convolve the histograms
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *ws2, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_progress->report();
     outputWS->setSharedX(i, ws1->sharedX(i));
     auto &Yout = outputWS->mutableY(i);
@@ -84,9 +84,9 @@ void ConvolveWorkspaces::exec() {
     for (size_t j = 0; j < N; j++) {
       Yout[j] = out.getCalculated(j);
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
 }

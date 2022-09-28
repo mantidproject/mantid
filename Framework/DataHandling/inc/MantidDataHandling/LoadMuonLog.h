@@ -39,7 +39,7 @@ Required Properties:
 @author Ronald Fowler, based on LoadLog by Anders Markvardsen, ISIS, RAL
 @date 11/08/2008
 */
-class DLLExport LoadMuonLog : public API::Algorithm {
+class DLLExport LoadMuonLog final : public API::Algorithm {
 public:
   /// Default constructor
   LoadMuonLog();

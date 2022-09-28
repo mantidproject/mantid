@@ -16,7 +16,7 @@ namespace DataHandling {
   axis (X, Y, Z) is calculated from the instrument geometry as the axis
   perpendicular to the plane defined by the beam and "up" vectors.
 */
-class DLLExport RotateSource : public API::Algorithm {
+class DLLExport RotateSource final : public API::Algorithm {
 public:
   const std::string name() const override { return "RotateSource"; };
   int version() const override { return 1; };

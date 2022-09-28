@@ -35,6 +35,7 @@ class MANTID_API_DLL SerialAlgorithm : public API::Algorithm {
 protected:
   Parallel::ExecutionMode
   getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
+  ~SerialAlgorithm() = default;
 };
 
 } // namespace API

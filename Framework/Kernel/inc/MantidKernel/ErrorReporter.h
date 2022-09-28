@@ -11,6 +11,7 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/InternetHelper.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -31,13 +32,13 @@ public:
   ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share,
                 std::string name, std::string email, std::string textBox, std::string stacktrace);
   /// Sends an error report
-  int sendErrorReport();
+  Kernel::InternetHelper::HTTPStatus sendErrorReport();
   /// Generates an error string in json format
   virtual std::string generateErrorMessage() const;
 
 protected:
   /// Sends report using Internet Helper
-  virtual int sendReport(const std::string &message, const std::string &url);
+  virtual Kernel::InternetHelper::HTTPStatus sendReport(const std::string &message, const std::string &url);
 
 private:
   const std::string m_application;

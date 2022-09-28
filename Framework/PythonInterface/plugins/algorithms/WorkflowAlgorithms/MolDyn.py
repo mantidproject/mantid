@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -13,8 +13,6 @@ import os
 
 
 class MolDyn(PythonAlgorithm):
-
-    _mtd_plot = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\DataHandling;Simulation'
@@ -58,10 +56,8 @@ class MolDyn(PythonAlgorithm):
 
         return issues
 
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-branches
     def PyExec(self):
-        from IndirectImport import import_mantidplot
-        self._mtd_plot = import_mantidplot()
 
         output_ws_name = self.getPropertyValue('OutputWorkspace')
         version, data_name, _ = self._get_version_and_data_path()
@@ -153,7 +149,7 @@ class MolDyn(PythonAlgorithm):
             else:
                 raise RuntimeError('Unknown input data')
 
-        return (version, data, extension)
+        return version, data, extension
 
     def _create_res_ws(self, num_sample_hist):
         """
@@ -233,7 +229,7 @@ class MolDyn(PythonAlgorithm):
         for i in range(0, num_hist):
             plot_list.append(i)
 
-        self._mtd_plot.plotSpectrum(ws_name, plot_list)
+        plotSpectrum(ws_name, plot_list)
 
 
 # Register algorithm with Mantid

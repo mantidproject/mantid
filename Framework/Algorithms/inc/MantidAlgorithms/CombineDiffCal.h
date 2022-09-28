@@ -16,7 +16,7 @@ namespace Algorithms {
 /** CombineDiffCal : Calibrate groups of pixels after cross correlation so that diffraction peaks can be adjusted to the
  * correct positions
  */
-class MANTID_ALGORITHMS_DLL CombineDiffCal : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CombineDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

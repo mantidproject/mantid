@@ -76,7 +76,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
   out_detector_list.resize(numberDetectors, 0);
   int id = 0;
 
-  int ndet = 0;
   // get data from map into Nexus Muon format
   for (int i = 0; i < numberSpec; i++) {
     // Workspace index
@@ -91,7 +90,6 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
     // points to start of detector list for the next spectrum
     out_detector_index[i + 1] = int32_t(out_detector_index[i] + ndet1);
     out_detector_count[i] = int32_t(ndet1);
-    ndet += ndet1;
 
     std::set<detid_t>::const_iterator it;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
@@ -240,7 +238,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   m_eventWorkspace = std::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
-      (workspaceID.find("RebinnedOutput") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
+      (workspaceID.find("RebinnedOutput") == std::string::npos) &&
+      (workspaceID.find("WorkspaceSingleValue") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
       !offsetsWorkspace && !maskWorkspace)
     throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
                                          "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
@@ -464,7 +463,7 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const 
   // --- Fill in the combined event arrays ----
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int wi = 0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(wi);
 
     // This is where it will land in the output array.
@@ -484,9 +483,9 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const 
     }
     m_progress->reportIncrement(el.getNumberEvents(), "Copying EventList");
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   /*Default = DONT compress - much faster*/
   bool CompressNexus = getProperty("CompressNexus");

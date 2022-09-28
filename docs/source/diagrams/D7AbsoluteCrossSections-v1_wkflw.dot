@@ -41,6 +41,7 @@ digraph Sample {
     Divide5 [label="Absolute normalisation"]
     Plus [label="Average counts"]
     Plus2 [label="QRebin"]
+    SOfQWNormalisedPolygon
     SumOverlappingTubes
   }
 
@@ -82,9 +83,12 @@ digraph Sample {
   SingleCrystal -> Plus2
   OutputUnits -> ConvertTo2Theta
   OutputUnits -> ConvertToQ
+  OutputUnits -> ConvertToSofQW
   Plus2 -> OutputWorkspace
   ConvertToQ -> OutputWorkspace
   ConvertTo2Theta -> OutputWorkspace
+  ConvertToSofQW -> SOfQWNormalisedPolygon
+  SOfQWNormalisedPolygon -> OutputWorkspace
 }
 
 

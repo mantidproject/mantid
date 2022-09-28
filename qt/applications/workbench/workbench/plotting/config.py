@@ -10,6 +10,8 @@
 # system imports
 
 # 3rd-party imports
+import warnings
+
 import matplotlib as mpl
 import matplotlib._pylab_helpers as _pylab_helpers
 from qtpy.QtWidgets import QApplication
@@ -37,6 +39,8 @@ def initialize_matplotlib():
     reset_rcparams_to_default()
     # Set figure DPI scaling to monitor DPI
     mpl.rcParams['figure.dpi'] = QApplication.instance().desktop().physicalDpiX()
+    # Hide warning made by matplotlib before checking our backend.
+    warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
 
 
 def init_mpl_gcf():

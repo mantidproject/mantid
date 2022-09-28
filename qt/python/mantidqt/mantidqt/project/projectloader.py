@@ -63,7 +63,7 @@ class ProjectLoader(object):
         if workspace_success:
             # Load plots
             if self.project_reader.plot_list is not None:
-                self.plot_loader.load_plots(self.project_reader.plot_list)
+                QAppThreadCall(self.plot_loader.load_plots)(self.project_reader.plot_list)
 
             # Load interfaces
             if self.project_reader.interface_list is not None:

@@ -26,7 +26,7 @@ Required Properties:
 @author Michael Reuter, SNS
 @date October 25, 2010
 */
-class DLLExport LoadNexusMonitors : public API::Algorithm, public API::DeprecatedAlgorithm {
+class DLLExport LoadNexusMonitors final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadNexusMonitors() { this->useAlgorithm("LoadNexusMonitors", 2); }

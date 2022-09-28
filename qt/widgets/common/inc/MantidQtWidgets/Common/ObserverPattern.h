@@ -62,7 +62,7 @@ public:
    * @param func:: the void function we want to call when the observer
    * sends a notify signal
    **/
-  void setSlot(std::function<void()> &func) { m_slot = func; };
+  void setSlot(const std::function<void()> &func) { m_slot = func; };
   /**
    * Calls the function/slot
    **/

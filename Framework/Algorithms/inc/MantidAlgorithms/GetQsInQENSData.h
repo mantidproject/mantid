@@ -25,7 +25,7 @@ namespace Algorithms {
     <LI> Qvalues - The Q-values extracted from the input workspace </LI>
     </UL>
 */
-class MANTID_ALGORITHMS_DLL GetQsInQENSData : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetQsInQENSData final : public API::Algorithm {
 public:
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Inelastic\\Indirect"; }

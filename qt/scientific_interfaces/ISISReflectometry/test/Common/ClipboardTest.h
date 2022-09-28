@@ -125,8 +125,7 @@ public:
   void testCreateGroupForRootForEmptyGroup() {
     auto clipboard = clipboardWithAGroup();
     auto result = clipboard.createGroupForRoot(0);
-    auto expected = Group("test group");
-    TS_ASSERT_EQUALS(result, expected);
+    TS_ASSERT(result.rows().empty());
   }
 
   void testCreateRowsForAllRootsThrowsForGroup() {
@@ -163,10 +162,8 @@ public:
   void testCreateGroupForRootForMultiRowGroup() {
     auto clipboard = clipboardWithTwoMultiRowGroups();
     auto result = clipboard.createGroupForRoot(1);
-    auto expected = Group("groupB");
-    expected.appendRow(makeRow("12345", 0.5));
-    expected.appendRow(makeRow("22345", 2.5));
-    TS_ASSERT_EQUALS(result, expected);
+    auto expectedRows = std::vector<boost::optional<Row>>{makeRow("12345", 0.5), makeRow("22345", 2.5)};
+    TS_ASSERT_EQUALS(result.rows(), expectedRows);
   }
 
   void testCreateRowsForAllRootsThrowsForMultiGroupClipboard() {

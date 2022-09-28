@@ -129,14 +129,14 @@ void SetUncertainties::exec() {
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
     for (int64_t i = 0; i < numHists; ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       // copy  X/Y/E
       outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
       outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else if (inputWorkspace != outputWorkspace) {
     outputWorkspace = inputWorkspace->clone();
   }
@@ -145,7 +145,7 @@ void SetUncertainties::exec() {
   Progress prog(this, 0.0, 1.0, numHists);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < numHists; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // copy the E or set to zero depending on the mode
     if (errorType == ONE_IF_ZERO || customError) {
     } else {
@@ -162,9 +162,9 @@ void SetUncertainties::exec() {
       }
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   setProperty("OutputWorkspace", outputWorkspace);
 }
 

@@ -27,12 +27,16 @@ set(TEST_FILES
     Options/OptionsDialogPresenterTest.h
     Common/ClipboardTest.h
     Common/DecoderTest.h
+    Common/DetectorTest.h
     Common/EncoderTest.h
     Common/PlotterTestQt5.h
     Experiment/ExperimentPresenterTest.h
     Experiment/LookupTableValidatorTest.h
     Experiment/ExperimentOptionDefaultsTest.h
+    Reduction/BatchLookupIndexTest.h
+    Reduction/LookupTableTest.h
     Reduction/ReductionJobsMergeTest.h
+    Reduction/RowTest.h
     Reduction/ParseReflectometryStringsTest.h
     Reduction/ValidateLookupRowTest.h
     Reduction/GroupTest.h
@@ -59,7 +63,7 @@ mtd_add_qt_tests(
             Mantid::PythonInterfaceCore
             Python::Python
   MTD_QT_LINK_LIBS MantidScientificInterfacesISISReflectometry MantidQtWidgetsCommon MantidQtWidgetsPlotting
-                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp
+                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp MantidQtWidgetsRegionSelector
   PARENT_DEPENDENCIES GUITests
 )
 

@@ -55,6 +55,7 @@ public:
   /// Set matrix workspace
   void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
                           double endX) override;
+  void setStepSizeMethod(const StepSizeMethod stepSizeMethod) override;
 
   /// Function you want to fit to.
   void function(const FunctionDomain &domain, FunctionValues &values) const override;
@@ -220,6 +221,9 @@ protected:
 
   /// Declare a single attribute
   void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
+  /// Declare a single attribute, with a validator
+  void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                        const Kernel::IValidator &validator);
   /// Writes itself into a string
   std::string writeToString(const std::string &parentLocalAttributesStr = "") const override;
 

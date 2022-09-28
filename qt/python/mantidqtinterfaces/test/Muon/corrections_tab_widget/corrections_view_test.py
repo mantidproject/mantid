@@ -7,24 +7,19 @@
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_view import CorrectionsView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class CorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
+class CorrectionsViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = CorrectionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_is_disabled_when_initialized(self):
         self.assertTrue(not self.view.isEnabled())

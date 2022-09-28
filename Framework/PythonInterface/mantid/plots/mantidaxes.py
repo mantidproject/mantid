@@ -7,6 +7,10 @@
 #  This file is part of the mantid package
 from collections.abc import Iterable
 import copy
+from distutils.version import LooseVersion
+from functools import wraps
+
+import matplotlib
 import numpy as np
 import re
 
@@ -27,8 +31,7 @@ from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, axesfunctions, axesfunctions3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.datafunctions import get_normalize_by_bin_width
-from mantid.plots.utility import (artists_hidden, autoscale_on_update,
-                                  legend_set_draggable, MantidAxType)
+from mantid.plots.utility import (artists_hidden, autoscale_on_update, legend_set_draggable, MantidAxType)
 
 
 WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
@@ -39,6 +42,7 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 
 
 def plot_decorator(func):
+    @wraps(func)
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
         func_name = func.__name__
@@ -668,7 +672,6 @@ class MantidAxes(Axes):
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or \
                             (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
-
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
                                                      axesfunctions.plot(self, normalize_by_bin_width=is_normalized,
@@ -680,7 +683,12 @@ class MantidAxes(Axes):
                                                      kwargs.get('ExperimentInfo', None))
             return artist
         else:
-            return Axes.plot(self, *args, **kwargs)
+            lines = Axes.plot(self, *args, **kwargs)
+            # matplotlib 3.5.0 operates a lazy process for updating the view limits where they get updated
+            # on call to ax.draw instead of ax.plot. This doesn't work nicely with the Mantid requirement
+            # to toggle autoscale on and off so access the view limits here to update immediately
+            self.viewLim
+            return lines
 
     @plot_decorator
     def scatter(self, *args, **kwargs):
@@ -752,7 +760,6 @@ class MantidAxes(Axes):
                 # this gets pushed back onto the containers list
                 try:
                     with autoscale_on_update(self, _autoscale_on):
-                        # this gets pushed back onto the containers list
                         if new_kwargs:
                             container_new = axesfunctions.errorbar(self, workspace, **new_kwargs)
                         else:
@@ -783,22 +790,25 @@ class MantidAxes(Axes):
                         legend_set_draggable(self.legend(), True)
 
                 return container_new
-
             workspace = args[0]
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
-            is_normalized = normalize_by_bin_width or \
-                            (hasattr(workspace, 'isDistribution') and workspace.isDistribution())
-
+            is_normalized = normalize_by_bin_width or (hasattr(workspace, 'isDistribution')
+                                                       and workspace.isDistribution())
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(workspace,
-                                                     axesfunctions.errorbar(self, normalize_by_bin_width = is_normalized,
+                                                     axesfunctions.errorbar(self, normalize_by_bin_width=is_normalized,
                                                                             *args, **kwargs),
                                                      _data_update, spec_num, is_normalized,
                                                      MantidAxes.is_axis_of_type(MantidAxType.SPECTRUM, kwargs))
             return artist
         else:
-            return Axes.errorbar(self, *args, **kwargs)
+            errorbar_container =  Axes.errorbar(self, *args, **kwargs)
+            # matplotlib 3.5.0 operates a lazy process for updating the view limits where they get updated
+            # on call to ax.draw instead of ax.errorbar. This doesn't work nicely with the Mantid requirement
+            # to toggle autoscale on and off so access the view limits here to update immediately
+            self.viewLim
+            return errorbar_container
 
     @plot_decorator
     def axhline(self, *args, **kwargs):
@@ -1118,7 +1128,8 @@ class MantidAxes(Axes):
         self.waterfall_x_offset = x_offset
         self.waterfall_y_offset = y_offset
 
-        self.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            self.add_line(cap)
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
         self.get_figure().canvas.draw()
@@ -1205,6 +1216,13 @@ class MantidAxes(Axes):
             datafunctions.waterfall_remove_fill(self)
 
     def set_xscale(self, *args, **kwargs):
+        is_waterfall = self.is_waterfall()
+        if is_waterfall:
+            # The waterfall must be turned off before the log can be changed or the offset will not scale correctly
+            fill = self.waterfall_has_fill()
+            x_offset = self.waterfall_x_offset
+            y_offset = self.waterfall_y_offset
+            self.set_waterfall(False)
         has_minor_ticks = not isinstance(self.xaxis.minor.locator, NullLocator)
 
         super().set_xscale(*args, **kwargs)
@@ -1213,8 +1231,16 @@ class MantidAxes(Axes):
             self.minorticks_on()
         else:
             self.minorticks_off()
+        if is_waterfall:
+            self.set_waterfall(True, x_offset=x_offset, y_offset=y_offset, fill=fill)
 
     def set_yscale(self, *args, **kwargs):
+        is_waterfall = self.is_waterfall()
+        if is_waterfall:
+            fill = self.waterfall_has_fill()
+            x_offset = self.waterfall_x_offset
+            y_offset = self.waterfall_y_offset
+            self.set_waterfall(False)
         has_minor_ticks = not isinstance(self.yaxis.minor.locator, NullLocator)
 
         super().set_yscale(*args, **kwargs)
@@ -1223,6 +1249,8 @@ class MantidAxes(Axes):
             self.minorticks_on()
         else:
             self.minorticks_off()
+        if is_waterfall:
+            self.set_waterfall(True, x_offset=x_offset, y_offset=y_offset, fill=fill)
 
     def grid_on(self):
         return self.xaxis._major_tick_kw.get('gridOn', False) and self.yaxis._major_tick_kw.get('gridOn', False)
@@ -1238,7 +1266,7 @@ class MantidAxes(Axes):
         cb = colorbar
         cb.mappable = mappable
         mappable.colorbar = cb
-        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
+        mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.update_normal)
         cb.update_normal(mappable)
 
     def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):
@@ -1290,27 +1318,25 @@ class MantidAxes3D(Axes3D):
     name = 'mantid3d'
 
     def __init__(self, *args, **kwargs):
+        if LooseVersion('3.4.0') <= LooseVersion(matplotlib.__version__):
+            kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
-
-        # Remove the connection for when you click on the plot as this is dealt with in figureinteraction.py to stop
-        # it interfering with double-clicking on the axes.
-        self.figure.canvas.mpl_disconnect(self._cids[1])
 
     def set_title(self, *args, **kwargs):
         # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called
         # instead.
         return Axes.set_title(self, *args, **kwargs)
 
-    def set_xlim3d(self, *args):
-        super().set_xlim3d(*args)
+    def set_xlim3d(self, *args, **kwargs):
+        super().set_xlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(0)
 
-    def set_ylim3d(self, *args):
-        super().set_ylim3d(*args)
+    def set_ylim3d(self, *args, **kwargs):
+        super().set_ylim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(1)
 
-    def set_zlim3d(self, *args):
-        super().set_zlim3d(*args)
+    def set_zlim3d(self, *args, **kwargs):
+        super().set_zlim3d(*args, **kwargs)
         self._set_overflowing_data_to_nan(2)
 
     def autoscale(self, *args, **kwargs):
@@ -1334,11 +1360,16 @@ class MantidAxes3D(Axes3D):
             else:
                 axis_index_list = [axis_index]
 
-            for axis_index in axis_index_list:
-                axis_data = self.original_data_surface[axis_index].copy()
-                axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
-                axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
-                self.collections[0]._vec[axis_index] = axis_data
+            # if original_data_surface does not match current collections then we shouldn't add it back,
+            # delete attribute and skip adding back.
+            if self.collections[0]._vec[axis_index_list[0]].size != self.original_data_surface[axis_index_list[0]].size:
+                delattr(self, 'original_data_surface')
+            else:
+                for axis_index in axis_index_list:
+                    axis_data = self.original_data_surface[axis_index].copy()
+                    axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                    axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                    self.collections[0]._vec[axis_index] = axis_data
 
         if hasattr(self, 'original_data_wireframe'):
 

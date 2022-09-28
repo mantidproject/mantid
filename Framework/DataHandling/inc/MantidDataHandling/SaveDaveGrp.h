@@ -26,7 +26,7 @@ namespace DataHandling {
   @author Andrei Savici, ORNL
   @date 2011-07-22
 */
-class DLLExport SaveDaveGrp : public API::Algorithm {
+class DLLExport SaveDaveGrp final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveDaveGrp"; };

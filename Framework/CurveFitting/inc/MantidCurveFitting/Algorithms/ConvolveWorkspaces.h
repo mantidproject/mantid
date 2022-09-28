@@ -24,10 +24,10 @@ namespace Algorithms {
 /** Convolution of two workspaces
  */
 
-class MANTID_CURVEFITTING_DLL ConvolveWorkspaces : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL ConvolveWorkspaces final : public API::Algorithm {
 public:
   ConvolveWorkspaces() : API::Algorithm() {}
-  ~ConvolveWorkspaces() override {}
+  ~ConvolveWorkspaces() override = default;
   /// Algorithm's name
   const std::string name() const override { return "ConvolveWorkspaces"; }
   /// Summary of algorithms purpose

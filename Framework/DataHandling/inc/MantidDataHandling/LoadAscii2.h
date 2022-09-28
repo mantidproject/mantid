@@ -69,7 +69,7 @@ protected:
   /// Fill the given vector with the data values
   void fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const;
   // write the values in the current line to teh end fo teh current spectra
-  void addToCurrentSpectra(std::list<std::string> &columns);
+  void addToCurrentSpectra(const std::list<std::string> &columns);
   // check that the nubmer of columns in the current line match the number found
   // previously
   void checkLineColumns(const size_t &cols) const;

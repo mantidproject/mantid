@@ -447,7 +447,7 @@ namespace Mantid::DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXcanSAS)
 
 /// constructor
-LoadNXcanSAS::LoadNXcanSAS() {}
+LoadNXcanSAS::LoadNXcanSAS() = default;
 
 int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();

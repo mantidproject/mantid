@@ -84,7 +84,6 @@ public:
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
-  std::vector<size_t> getMonitors() const;
   std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   /// Get the associated data workspace
   std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
@@ -256,7 +255,7 @@ private:
   mutable MaskBinsData m_maskBinsData;
   QString m_currentCMap;
   /// integrated spectra
-  std::vector<double> m_specIntegrs;
+  std::vector<double> m_integratedSignal;
   /// The workspace data and bin range limits
   double m_WkspBinMinValue, m_WkspBinMaxValue;
   // The user requested data and bin ranges

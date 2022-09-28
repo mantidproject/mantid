@@ -14,7 +14,7 @@ namespace CurveFitting {
 namespace Algorithms {
 //---------------------------------------------------------------------------
 
-class MANTID_CURVEFITTING_DLL EstimatePeakErrors : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL EstimatePeakErrors final : public API::Algorithm {
 public:
   EstimatePeakErrors();
 

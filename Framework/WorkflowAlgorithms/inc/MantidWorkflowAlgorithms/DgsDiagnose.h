@@ -16,7 +16,7 @@ namespace WorkflowAlgorithms {
  * for performing detector diagnostics and then runs the diagnostic
  * algorithm.
  */
-class DLLExport DgsDiagnose : public API::Algorithm {
+class DLLExport DgsDiagnose final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -151,9 +151,25 @@ public:
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), unitx);
   }
 
+  void test_Bin_Errors() {
+    auto outputWS = runAlgorithm("HET");
+
+    const Mantid::MantidVec &bins = outputWS->readE(0);
+    for (size_t i = 0; i < bins.size(); ++i) {
+      TS_ASSERT_DELTA(bins[i], sqrt(outputWS->readY(0)[i]), 1e-10);
+    }
+
+    // Re-run to verify errors are 0 when flag is unset
+    outputWS = runAlgorithm("HET", "", "", false);
+    const Mantid::MantidVec &binsNoErr = outputWS->readE(0);
+    for (size_t i = 0; i < binsNoErr.size(); ++i) {
+      TS_ASSERT_DELTA(binsNoErr[i], 0.0, 1e-10);
+    }
+  }
+
 private:
   Mantid::API::MatrixWorkspace_sptr runAlgorithm(const std::string &inst, const std::string &unitx = "",
-                                                 const std::string &maptable = "") {
+                                                 const std::string &maptable = "", bool setErrors = true) {
     using namespace Mantid::API;
     auto alg = createAlgorithm(m_wsName);
 
@@ -163,6 +179,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("UnitX", unitx));
     if (!maptable.empty())
       TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("DetectorTableFilename", maptable));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SetErrors", setErrors));
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
 

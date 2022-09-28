@@ -116,7 +116,7 @@ void DeadTimeCorrection::exec() {
   Progress progress(this, 0.0, 1.0, grouped->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWorkspace))
   for (int index = 0; index < static_cast<int>(grouped->getNumberHistograms()); ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     progress.report("Performing the correction for the group at index " + std::to_string(index));
     auto correction = grouped->readY(index);
     for (size_t bin = 0; bin < correction.size(); bin++) {
@@ -143,9 +143,9 @@ void DeadTimeCorrection::exec() {
         errors *= correction;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   setProperty("OutputWorkspace", outputWorkspace);
 }
 

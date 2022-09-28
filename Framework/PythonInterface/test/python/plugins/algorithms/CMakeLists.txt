@@ -54,6 +54,7 @@ set(TEST_PY_FILES
     FractionalIndexingTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
+    GroupBySampleChangerPositionTest.py
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
     HB3AFindPeaksTest.py
@@ -65,6 +66,7 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py

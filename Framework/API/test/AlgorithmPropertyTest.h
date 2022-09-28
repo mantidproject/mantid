@@ -23,7 +23,7 @@ private:
   class SimpleSum : public Algorithm {
   public:
     SimpleSum() : Algorithm() {}
-    ~SimpleSum() override {}
+    ~SimpleSum() override = default;
     const std::string name() const override { return "SimpleSum"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Dummy"; }

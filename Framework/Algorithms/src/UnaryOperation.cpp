@@ -67,7 +67,7 @@ void UnaryOperation::exec() {
   // function
   PARALLEL_FOR_IF(Kernel::threadSafe(*in_work, *out_work))
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Copy the X values over
     out_work->setSharedX(i, in_work->sharedX(i));
     // Get references to the data
@@ -85,9 +85,9 @@ void UnaryOperation::exec() {
     }
 
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /// Executes the algorithm for events
@@ -111,7 +111,7 @@ void UnaryOperation::execEvent() {
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // switch to weighted events if needed, and use the appropriate helper
     // function
     auto &evlist = outputWS->getSpectrum(i);
@@ -132,9 +132,9 @@ void UnaryOperation::execEvent() {
     }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   outputWS->clearMRU();
   auto inputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);

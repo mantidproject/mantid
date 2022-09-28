@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "Common/Map.h"
+#include "IGroup.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
@@ -19,7 +20,8 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
          ReductionWorkspaces reducedWorkspaceNames)
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
       m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
-      m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)) {
+      m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)),
+      m_lookupIndex(boost::none), m_parent(nullptr) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
@@ -43,6 +45,8 @@ ReductionOptionsMap const &Row::reductionOptions() const { return m_reductionOpt
 
 ReductionWorkspaces const &Row::reducedWorkspaceNames() const { return m_reducedWorkspaceNames; }
 
+boost::optional<size_t> const &Row::lookupIndex() const { return m_lookupIndex; }
+
 void Row::setOutputNames(std::vector<std::string> const &outputNames) {
   if (outputNames.size() != 3)
     throw std::runtime_error("Invalid number of output workspaces for row");
@@ -51,6 +55,8 @@ void Row::setOutputNames(std::vector<std::string> const &outputNames) {
 }
 
 void Row::setOutputQRange(RangeInQ qRange) { m_qRangeOutput = std::move(qRange); }
+
+void Row::setLookupIndex(boost::optional<size_t> lookupIndex) { m_lookupIndex = std::move(lookupIndex); }
 
 void Row::resetOutputs() {
   m_reducedWorkspaceNames.resetOutputNames();
@@ -63,6 +69,16 @@ bool Row::hasOutputWorkspace(std::string const &wsName) const { return m_reduced
 
 void Row::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
+}
+
+void Row::setParent(IGroup *parent) const { m_parent = parent; }
+
+IGroup *Row::getParent() const { return m_parent; }
+
+void Row::updateParent() {
+  if (m_parent) {
+    m_parent->notifyChildStateChanged();
+  }
 }
 
 Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) const {
@@ -85,6 +101,31 @@ int Row::completedItems() const {
     return 1;
 
   return 0;
+}
+
+void Row::resetState(bool resetChildren) {
+  Item::resetState(resetChildren);
+  updateParent();
+}
+
+void Row::setStarting() {
+  Item::setStarting();
+  updateParent();
+}
+
+void Row::setRunning() {
+  Item::setRunning();
+  updateParent();
+}
+
+void Row::setSuccess() {
+  Item::setSuccess();
+  updateParent();
+}
+
+void Row::setError(std::string const &msg) {
+  Item::setError(msg);
+  updateParent();
 }
 
 bool operator!=(Row const &lhs, Row const &rhs) { return !(lhs == rhs); }

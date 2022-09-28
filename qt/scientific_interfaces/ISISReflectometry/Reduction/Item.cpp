@@ -24,10 +24,10 @@ void Item::resetState(bool resetChildren) {
 
 void Item::setSkipped(bool skipped) { m_skipped = skipped; }
 
-bool Item::success() const { return m_itemState.state() == State::ITEM_COMPLETE; }
+bool Item::success() const { return m_itemState.state() == State::ITEM_SUCCESS; }
 
 bool Item::complete() const {
-  return m_itemState.state() == State::ITEM_COMPLETE || m_itemState.state() == State::ITEM_ERROR ||
+  return m_itemState.state() == State::ITEM_SUCCESS || m_itemState.state() == State::ITEM_ERROR ||
          m_itemState.state() == State::ITEM_WARNING;
 }
 
@@ -49,11 +49,12 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
 
   switch (state()) {
   case State::ITEM_NOT_STARTED:
+  case State::ITEM_CHILDREN_SUCCESS: // fall through
     return true;
   case State::ITEM_STARTING:
-  case State::ITEM_RUNNING:  // fall through
-  case State::ITEM_COMPLETE: // fall through
-  case State::ITEM_WARNING:  // fall through
+  case State::ITEM_RUNNING: // fall through
+  case State::ITEM_SUCCESS: // fall through
+  case State::ITEM_WARNING: // fall through
     return false;
   case State::ITEM_ERROR:
     return reprocessFailed;

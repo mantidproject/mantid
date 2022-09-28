@@ -45,7 +45,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 01/03/2009
 */
-class MANTID_ALGORITHMS_DLL CreateCalFileByNames : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateCalFileByNames final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CreateCalFileByNames"; }

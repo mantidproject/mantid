@@ -20,7 +20,7 @@ convert to energy transfer process.
 
 @date 2012-07-25
  */
-class DLLExport DgsProcessDetectorVanadium : public API::Algorithm {
+class DLLExport DgsProcessDetectorVanadium final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

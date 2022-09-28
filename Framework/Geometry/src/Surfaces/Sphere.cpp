@@ -42,7 +42,9 @@ Sphere::Sphere() : Sphere({0, 0, 0}, 0.0) {}
  * @param centre
  * @param radius
  */
-Sphere::Sphere(Kernel::V3D centre, double radius) : Quadratic(), m_centre{centre}, m_radius{radius} { setBaseEqn(); }
+Sphere::Sphere(const Kernel::V3D &centre, double radius) : Quadratic(), m_centre{centre}, m_radius{radius} {
+  setBaseEqn();
+}
 
 /**
  * Makes a clone (implicit virtual copy constructor)

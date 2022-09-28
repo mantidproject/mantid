@@ -185,6 +185,6 @@ const std::vector<double> &NumericAxis::getValues() const { return m_values; }
 /**
  * Sets values vectors to zero size
  */
-NumericAxis::NumericAxis() {}
+NumericAxis::NumericAxis() = default;
 
 } // namespace Mantid::API

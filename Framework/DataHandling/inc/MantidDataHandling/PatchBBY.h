@@ -27,7 +27,7 @@ to recognise a file as the one containing Bilby data.
 @date 22/01/2016
 */
 
-class DLLExport PatchBBY : public API::Algorithm {
+class DLLExport PatchBBY final : public API::Algorithm {
 public:
   // description
   int version() const override { return 1; }

@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /** LoadDiffCal : TODO: DESCRIPTION
  */
-class DLLExport LoadDiffCal : public API::Algorithm {
+class DLLExport LoadDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

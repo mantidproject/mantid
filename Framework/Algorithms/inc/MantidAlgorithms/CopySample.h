@@ -29,7 +29,7 @@ will copy to all samples. The following information can be copied:
   @author Andrei Savici, ORNL
   @date 2011-08-11
 */
-class MANTID_ALGORITHMS_DLL CopySample : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopySample final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CopySample"; };

@@ -33,7 +33,7 @@ namespace {
 class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
   LiveDataAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
-  ~LiveDataAlgInputHistoryImpl() override {}
+  ~LiveDataAlgInputHistoryImpl() override = default;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<LiveDataAlgInputHistoryImpl>;
@@ -49,7 +49,7 @@ using LiveDataAlgInputHistory = Mantid::Kernel::SingletonHolder<LiveDataAlgInput
 class LiveDataPostProcessingAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
   LiveDataPostProcessingAlgInputHistoryImpl() : AbstractAlgorithmInputHistory("LiveDataPostProcessingAlgorithms") {}
-  ~LiveDataPostProcessingAlgInputHistoryImpl() override {}
+  ~LiveDataPostProcessingAlgInputHistoryImpl() override = default;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<LiveDataPostProcessingAlgInputHistoryImpl>;

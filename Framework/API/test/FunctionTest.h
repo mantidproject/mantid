@@ -40,7 +40,7 @@ public:
     }
   }
 
-  ~MocMatrixWorkspace() override {}
+  ~MocMatrixWorkspace() override = default;
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace

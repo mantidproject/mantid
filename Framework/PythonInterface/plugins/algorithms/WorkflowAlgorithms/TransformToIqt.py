@@ -46,12 +46,12 @@ class TransformToIqt(PythonAlgorithm):
                              doc="Name for the resolution workspace.")
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5,
-                             doc='Minimum energy for fit. Default=-0.5')
+                             doc='Minimum energy for fit.')
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
-                             doc='Maximum energy for fit. Default=0.5')
+                             doc='Maximum energy for fit.')
         self.declareProperty(name='BinReductionFactor', defaultValue=10.0,
                              doc='Decrease total number of spectrum points by this ratio through merging of '
-                                 'intensities from neighbouring bins. Default=1')
+                                 'intensities from neighbouring bins.')
 
         self.declareProperty('NumberOfIterations', DEFAULT_ITERATIONS, IntBoundedValidator(lower=1),
                              doc="Number of randomised simulations for monte-carlo error calculation.")

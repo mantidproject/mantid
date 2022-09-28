@@ -19,8 +19,8 @@ set(UI_FILES DataComparison.ui MantidEV.ui SampleTransmission.ui StepScan.ui)
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesGeneral
   QT_VERSION 5
-  SRC StepScan.cpp
-  MOC StepScan.h
+  SRC FitScriptGenerator.cpp StepScan.cpp
+  MOC FitScriptGenerator.h StepScan.h
   NOMOC StepScan.h
   UI StepScan.ui
   DEFS IN_MANTIDQT_INTERFACESGENERAL PRECOMPILED PrecompiledHeader.h

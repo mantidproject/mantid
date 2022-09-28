@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL CreateLogPropertyTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateLogPropertyTable final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateLogPropertyTable"; };

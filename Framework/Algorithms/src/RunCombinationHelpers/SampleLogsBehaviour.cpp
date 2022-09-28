@@ -433,7 +433,7 @@ void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue, double o
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
+void SampleLogsBehaviour::updateTimeSeriesProperty(const MatrixWorkspace &addeeWS, const MatrixWorkspace &outWS,
                                                    const std::string &name) {
   auto timeSeriesProp = outWS.run().getTimeSeriesProperty<double>(name);
   try {
@@ -459,7 +459,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS, Mat
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
+void SampleLogsBehaviour::updateListProperty(const MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
                                              const std::string &name) {
   const std::string addeeWSVal = addeeWS.getLog(name)->value();
   const std::string outWSVal = outWS.run().getProperty(name)->value();

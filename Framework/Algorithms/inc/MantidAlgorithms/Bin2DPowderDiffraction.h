@@ -20,7 +20,7 @@ namespace Algorithms {
   J. Appl. Cryst. (2015) 48, 1627-1636 and
   J. Appl. Cryst. (2017) 50, 866-875
 */
-class MANTID_ALGORITHMS_DLL Bin2DPowderDiffraction : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Bin2DPowderDiffraction final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

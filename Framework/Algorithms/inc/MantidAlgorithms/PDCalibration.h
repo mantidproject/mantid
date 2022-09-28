@@ -19,7 +19,7 @@ namespace Algorithms {
 
 /** PDCalibration : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL PDCalibration : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PDCalibration final : public API::Algorithm {
 public:
   PDCalibration();
   ~PDCalibration();

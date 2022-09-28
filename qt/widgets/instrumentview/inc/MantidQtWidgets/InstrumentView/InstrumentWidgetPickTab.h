@@ -59,10 +59,21 @@ public:
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to
   ///               select peak markers. Selected peaks can be deleted by
   ///               pressing the delete key.
-  enum SelectionType { Single = 0, AddPeak, ErasePeak, ComparePeak, AlignPeak, SingleDetectorSelection, Tube, Draw };
+  enum SelectionType {
+    Single = 0,
+    AddPeak,
+    ErasePeak,
+    ComparePeak,
+    AlignPeak,
+    SingleDetectorSelection,
+    WholeInstrument,
+    Tube,
+    Draw
+  };
   enum ToolType {
     Zoom,
     PixelSelect,
+    WholeInstrumentSelect,
     TubeSelect,
     PeakSelect,
     PeakErase,
@@ -124,6 +135,7 @@ private:
   MiniPlot *m_plot;              ///< Miniplot to display data in the detectors
   QLabel *m_activeTool;          ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;           ///< Button switching on navigation mode
+  QPushButton *m_whole;          ///< Button switching on whole instrument selection mode
   QPushButton *m_one;            ///< Button switching on single detector selection mode
   QPushButton *m_tube;           ///< Button switching on detector's parent selection mode
   QPushButton *m_peakAdd;        ///< Button switching on peak creation mode

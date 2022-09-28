@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 
 #include <boost/math/distributions/chi_squared.hpp>
 #include <utility>
@@ -62,10 +62,9 @@ public:
            const API::FunctionDomain &domain, API::FunctionValues &values, double chi0,
            std::vector<int> &freeParameters)
       : m_fixedParameterIndex(fixedParameterIndex), m_domain(domain), m_values(values), m_chi0(chi0),
-        m_function(std::move(inputFunction)), m_ws(std::move(inputWS)), m_workspaceIndex(workspaceIndex),
-        m_freeParameters(freeParameters) {
+        m_fitalg(AlgorithmFactory::Instance().create("Fit", -1)), m_function(std::move(inputFunction)),
+        m_ws(std::move(inputWS)), m_workspaceIndex(workspaceIndex), m_freeParameters(freeParameters) {
     // create a fitting algorithm based on least squares (which is the default)
-    m_fitalg = AlgorithmFactory::Instance().create("Fit", -1);
     m_fitalg->setChild(true);
   }
   /// Calculate the value of chi squared along the chosen direction at a
@@ -237,12 +236,12 @@ void ProfileChiSquared1D::execConcrete() {
   auto nameColumn = errorsTable->addColumn("str", "Parameter");
   auto valueColumn = errorsTable->addColumn("double", "Value");
   auto minValueColumn = errorsTable->addColumn("double", "Value at Min");
-  auto leftErrColumn = errorsTable->addColumn("double", "Left Error (1-sigma)");
-  auto rightErrColumn = errorsTable->addColumn("double", "Right Error (1-sigma)");
-  auto leftErrColumn_2 = errorsTable->addColumn("double", "Left Error (2-sigma)");
-  auto rightErrColumn_2 = errorsTable->addColumn("double", "Right Error (2-sigma )");
-  auto leftErrColumn_3 = errorsTable->addColumn("double", "Left Error (3-sigma)");
-  auto rightErrColumn_3 = errorsTable->addColumn("double", "Right Error (3-sigma )");
+  errorsTable->addColumn("double", "Left Error (1-sigma)");
+  errorsTable->addColumn("double", "Right Error (1-sigma)");
+  errorsTable->addColumn("double", "Left Error (2-sigma)");
+  errorsTable->addColumn("double", "Right Error (2-sigma )");
+  errorsTable->addColumn("double", "Left Error (3-sigma)");
+  errorsTable->addColumn("double", "Right Error (3-sigma )");
   auto quadraticErrColumn = errorsTable->addColumn("double", "Quadratic Error (1-sigma)");
   errorsTable->setRowCount(freeParameters.size());
   declareProperty(
@@ -265,8 +264,8 @@ void ProfileChiSquared1D::execConcrete() {
 
   // Parameter bounds that define a volume in the parameter
   // space within which the chi squared is being examined.
-  GSLVector lBounds(nParams);
-  GSLVector rBounds(nParams);
+  EigenVector lBounds(nParams);
+  EigenVector rBounds(nParams);
 
   // Number of points in lines for plotting
   size_t n = 100;
@@ -368,24 +367,24 @@ void ProfileChiSquared1D::execConcrete() {
 
   // Square roots of the diagonals of the covariance matrix give
   // the standard deviations in the quadratic approximation of the chi^2.
-  GSLMatrix V = getCovarianceMatrix();
+  EigenMatrix V = getCovarianceMatrix();
   for (size_t i = 0; i < freeParameters.size(); ++i) {
     int ip = freeParameters[i];
     quadraticErrColumn->fromDouble(i, sqrt(V.get(ip, ip)));
   }
 }
 
-GSLMatrix ProfileChiSquared1D::getCovarianceMatrix() {
+EigenMatrix ProfileChiSquared1D::getCovarianceMatrix() {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   auto nParams = m_function->nParams();
   m_domainCreator->createDomain(domain, values);
   unfixParameters();
-  GSLJacobian J(*m_function, values->size());
+  EigenJacobian J(*m_function, values->size());
   m_function->functionDeriv(*domain, J);
   refixParameters();
   // Calculate the hessian at the current point.
-  GSLMatrix H;
+  EigenMatrix H;
   H.resize(nParams, nParams);
   for (size_t i = 0; i < nParams; ++i) {
     for (size_t j = i; j < nParams; ++j) {
@@ -401,7 +400,7 @@ GSLMatrix ProfileChiSquared1D::getCovarianceMatrix() {
     }
   }
   // Covariance matrix is inverse of hessian
-  GSLMatrix V(H);
+  EigenMatrix V(H);
   V.invert();
   return V;
 }

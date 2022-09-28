@@ -15,7 +15,7 @@ namespace Crystal {
 /** FindClusterFaces : Algorithm to find faces of clusters in an
   MDHistoWorkspace (image)
 */
-class MANTID_CRYSTAL_DLL FindClusterFaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindClusterFaces final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -9,7 +9,7 @@
 
 namespace Mantid::Geometry {
 /// Constructor
-PeakTransformSelector::PeakTransformSelector() {}
+PeakTransformSelector::PeakTransformSelector() = default;
 
 /**
 Register a peak transform factory as a candidate.

@@ -9,7 +9,10 @@
 Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
 """
+from distutils.version import LooseVersion
+
 import matplotlib
+
 rcParams = matplotlib.rcParams
 
 import matplotlib.image as mi  # noqa: E402
@@ -60,7 +63,7 @@ class ModestImage(MantidImage):
         self._A = cbook.safe_masked_invalid(A)
 
         if self._A.dtype != np.uint8 and not np.can_cast(self._A.dtype,
-                                                         np.float):
+                                                         float):
             raise TypeError("Image data can not convert to float")
 
         if self._A.ndim not in (2, 3) or (self._A.ndim == 3 and self._A.shape[-1] not in (3, 4)):
@@ -86,6 +89,25 @@ class ModestImage(MantidImage):
     def get_array(self):
         """Override to return the full-resolution array"""
         return self._full_res
+
+    def get_array_clipped_to_bounds(self):
+        # Get the extents of the axes and transform to pixel coordinates
+        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
+        transform=self._world2pixel
+        ind0 = transform.transform([min(xlim), min(ylim)])
+        ind1 = transform.transform([max(xlim), max(ylim)])
+
+        # Add 0.5 to get the edge of the pixel. Also add 1 to the max values which need to be one past the end
+        # for when we slice.
+        y0 = max(int(np.floor(ind0[1] + 0.5)), 0)
+        y1 = max(int(np.floor(ind1[1] + 0.5)) + 1, 0)
+        x0 = max(int(np.floor(ind0[0] + 0.5)), 0)
+        x1 = max(int(np.floor(ind1[0] + 0.5)) + 1, 0)
+
+        # Clip the data to the extents
+        data = self._full_res[y0:y1, x0:x1]
+        data = cbook.safe_masked_invalid(data)
+        return data
 
     @property
     def _pixel2world(self):
@@ -248,8 +270,11 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     # to tightly fit the image, regardless of dataLim.
     im.set_extent(im.get_extent())
 
-    axes.images.append(im)
-    im._remove_method = lambda h: axes.images.remove(h)
+    if LooseVersion(matplotlib.__version__) <= LooseVersion("3.1.3"):
+        axes.images.append(im)
+        im._remove_method = lambda h: axes.images.remove(h)
+    else:
+        axes.add_image(im)
 
     return im
 

@@ -5,25 +5,28 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,relative-import
-from . import InstrumentSetupWidget
-from . import ClassicUBInputWidget
-from . import MatrixUBInputWidget
-from . import DimensionSelectorWidget
-from qtpy import QtCore, QtWidgets
-import sys
-import mantid
-from .ValidateOL import ValidateOL
-import matplotlib
-from mantidqt.gui_helper import show_interface_help
-from mantidqt.MPLwidgets import *
-from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
-from matplotlib.figure import Figure
-from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from mpl_toolkits.axisartist import Subplot
-from mantid.kernel import UnitConversion, Elastic
-import numpy
 import copy
 import os
+import sys
+from distutils.version import LooseVersion
+
+import matplotlib
+import numpy
+from mantidqt.MPLwidgets import *
+from mantidqt.gui_helper import show_interface_help
+from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
+from matplotlib.figure import Figure
+from mpl_toolkits.axisartist import Subplot
+from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
+from qtpy import QtCore, QtWidgets
+
+import mantid
+from mantid.kernel import UnitConversion, Elastic
+from . import ClassicUBInputWidget
+from . import DimensionSelectorWidget
+from . import InstrumentSetupWidget
+from . import MatrixUBInputWidget
+from .ValidateOL import ValidateOL
 
 
 def float2Input(x):
@@ -49,7 +52,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.ol = mantid.geometry.OrientedLattice()
         self.masterDict = dict()  # holds info about instrument and ranges
         self.updatedInstrument = False
-        self.instrumentWAND = False
+        self.instrumentElastic = False
         self.updatedOL = False
         self.wg = None  # workspace group
         self.instrumentWidget = InstrumentSetupWidget.InstrumentSetupWidget(self)
@@ -102,7 +105,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
-        if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
+        if LooseVersion('2.1.0') > LooseVersion(matplotlib.__version__):
             self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
         self.toolbar = MantidNavigationToolbar(self.canvas, self)
@@ -147,7 +150,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.trajfig.clear()
 
     def eiWavelengthUpdateEvent(self):
-        if self.masterDict['instrument'] == 'WAND\u00B2':
+        if self.instrumentElastic:
             ei = UnitConversion.run('Wavelength', 'Energy', self.masterDict['Ei'], 0, 0, 0, Elastic, 0)
             offset = ei * 0.01
             lowerBound = - offset
@@ -156,30 +159,11 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.dimensionWidget.set_editMax4(upperBound)
 
     def instrumentUpdateEvent(self):
-        if self.masterDict['instrument'] == 'WAND\u00B2':
-            self.instrumentWAND = True
-            # change the ui accordingly
-            self.dimensionWidget.toggleDeltaE(False)
-            self.instrumentWidget.setLabelEi('Input Wavelength')
-            self.instrumentWidget.setEiVal(str(1.488))
-
-            self.instrumentWidget.setGoniometerNames(['s1', 'sgl', 'sgu'])
-            self.instrumentWidget.setGoniometerDirections(['0,1,0', '1,0,0', '0,0,1'])
-            self.instrumentWidget.setGoniometerRotationSense([1, -1, -1])
-            self.instrumentWidget.updateAll()
-
-            self.eiWavelengthUpdateEvent()
-        else:
-            if self.instrumentWAND:
-                self.instrumentWAND = False
-                self.dimensionWidget.toggleDeltaE(True)
-                self.instrumentWidget.setLabelEi('Incident Energy')
-                self.instrumentWidget.setEiVal(str(10.0))
-
-                self.instrumentWidget.setGoniometerNames(['psi', 'gl', 'gs'])
-                self.instrumentWidget.setGoniometerDirections(['0,1,0', '0,0,1', '1,0,0'])
-                self.instrumentWidget.setGoniometerRotationSense([1, 1, 1])
-                self.instrumentWidget.updateAll()
+        changeToElastic = self.masterDict['instrument'] in ['WAND\u00B2']
+        if changeToElastic != self.instrumentElastic:
+            self.instrumentElastic = changeToElastic
+            self.dimensionWidget.toggleDeltaE(not changeToElastic)
+        self.eiWavelengthUpdateEvent()
 
     @QtCore.Slot(dict)
     def updateParams(self, d):
@@ -296,8 +280,13 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     if reply == QtWidgets.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
-                sp = list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
-                tomask = sp[1::4] + sp[2::4] + sp[3::4]
+                sp = numpy.arange(mantid.mtd["__temp_instrument"].getNumberHistograms())
+                if self.masterDict['instrument'] == 'WAND\u00B2':
+                    sp = sp.reshape(-1,512)
+                    tomask = sp[:,1::4].ravel().tolist() + sp[:,2::4].ravel().tolist() + sp[:,3::4].ravel().tolist()\
+                           + sp[1::4,:].ravel().tolist() + sp[2::4,:].ravel().tolist() + sp[3::4,:].ravel().tolist()
+                else:
+                    tomask = sp[1::4].tolist() + sp[2::4].tolist() + sp[3::4].tolist()
                 mantid.simpleapi.MaskDetectors("__temp_instrument", SpectraList=tomask)
 
             progressDialog = QtWidgets.QProgressDialog(self)

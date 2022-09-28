@@ -101,7 +101,7 @@ void FindDetectorsPar::exec() {
   // Loop over the spectra
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < nHist; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Check that we aren't writing a monitor...
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
@@ -117,9 +117,9 @@ void FindDetectorsPar::exec() {
     if (i % progStep == 0) {
       progress.report();
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   this->extractAndLinearize(Detectors);
   // if necessary set up table workspace with detectors parameters.

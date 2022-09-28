@@ -30,7 +30,7 @@ data.</li>
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
 */
-class DLLExport LoadSpec : public API::Algorithm {
+class DLLExport LoadSpec final : public API::Algorithm {
 public:
   LoadSpec();
   const std::string name() const override { return "LoadSpec"; }

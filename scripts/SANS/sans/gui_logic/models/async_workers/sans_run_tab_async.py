@@ -52,6 +52,10 @@ class SansRunTabAsync(IQtAsync):
                 self._mark_row_error(row, e)
                 continue
 
+            if len(errors) > 0:
+                self._mark_row_error(row, errors[row])
+                continue
+
             assert len(states) == 1
             # XXX: Replace this when get_states_func stops returning a dict of len 1
             state = list(states.values())[0]

@@ -23,7 +23,7 @@ namespace Algorithms {
   Constructs a hollow sample shape, defines material for the sample and runs the
   MonteCarloAbsorption algorithm.
 */
-class MANTID_ALGORITHMS_DLL AnnularRingAbsorption : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AnnularRingAbsorption final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

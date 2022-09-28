@@ -66,7 +66,7 @@ public:
   virtual void showWorkspaceData() = 0;
   virtual void showInstrumentView() = 0;
   virtual void saveToProgram() = 0;
-  virtual void plotSpectrum(std::string type) = 0;
+  virtual void plotSpectrum(const std::string &type) = 0;
   virtual void showColourFillPlot() = 0;
   virtual void showDetectorsTable() = 0;
   virtual void showBoxDataTable() = 0;

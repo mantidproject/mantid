@@ -36,6 +36,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
+  ~LiveDataAlgorithm() = default;
   void initProps();
 
   Mantid::Types::Core::DateAndTime getStartTime() const;

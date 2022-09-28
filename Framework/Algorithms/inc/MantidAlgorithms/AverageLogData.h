@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** AverageLogData : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL AverageLogData : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AverageLogData final : public API::Algorithm {
 public:
   AverageLogData();
   ~AverageLogData() override;

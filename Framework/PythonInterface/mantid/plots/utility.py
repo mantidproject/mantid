@@ -12,6 +12,7 @@ from enum import Enum
 from distutils.version import LooseVersion
 
 # 3rd party imports
+from matplotlib import colors
 from matplotlib.legend import Legend
 from matplotlib import cm, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
@@ -65,7 +66,6 @@ def artists_hidden(artists):
 def autoscale_on_update(ax, state, axis='both'):
     """
     Context manager to temporarily change value of autoscale_on_update
-
     :param matplotlib.axes.Axes ax: The axes to disable autoscale on
     :param bool state: True turns auto-scaling on, False off
     :param str axis: {'both', 'x', 'y'} The axis to set the scaling on
@@ -164,9 +164,11 @@ def row_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().rowspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().rowspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
-        return ax.rowNum
+        # An 'inset' axes does not have a rowNum, so return None
+        return ax.rowNum if hasattr(ax, 'rowNum') else None
 
 
 def col_num(ax):
@@ -175,9 +177,11 @@ def col_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().colspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().colspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
-        return ax.colNum
+        # An 'inset' axes does not have a colNum, so return None
+        return ax.colNum if hasattr(ax, 'colNum') else None
 
 
 def zoom_axis(ax, coord, x_or_y, factor):
@@ -253,3 +257,12 @@ def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', c
 
     for i in range(number_colors):
         yield cmap(float(i) / number_colors)
+
+
+def convert_color_to_hex(color):
+    """Convert a matplotlib color to its hex form"""
+    try:
+        return colors.cnames[color]
+    except (KeyError, TypeError):
+        rgb = colors.colorConverter.to_rgb(color)
+        return colors.rgb2hex(rgb)

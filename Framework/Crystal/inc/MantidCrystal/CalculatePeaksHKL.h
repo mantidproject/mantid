@@ -16,7 +16,7 @@ namespace Crystal {
  rounding or optimization
  *  of the UB Matrix.
 */
-class MANTID_CRYSTAL_DLL CalculatePeaksHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CalculatePeaksHKL final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -48,6 +48,7 @@ set(SRC_FILES
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
+    src/LoadDNSEvent.cpp
     src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
@@ -67,6 +68,7 @@ set(SRC_FILES
     src/LoadILLPolarizationFactors.cpp
     src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
+    src/LoadILLSALSA.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
@@ -215,6 +217,7 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
+    inc/MantidDataHandling/BitStream.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
@@ -263,6 +266,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
+    inc/MantidDataHandling/LoadDNSEvent.h
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
@@ -282,6 +286,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
     inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
+    inc/MantidDataHandling/LoadILLSALSA.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
@@ -472,6 +477,7 @@ set(TEST_FILES
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
+    LoadDNSEventTest.h
     LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h
@@ -489,6 +495,7 @@ set(TEST_FILES
     LoadILLPolarizationFactorsTest.h
     LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
+    LoadILLSALSATest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
     LoadILLTest.h

@@ -8,7 +8,7 @@
 import unittest
 from unittest import mock
 
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, MatrixWorkspace
 
 from mantidqt.widgets.superplot.model import SuperplotModel
 
@@ -39,6 +39,7 @@ class SuperplotModelTest(unittest.TestCase):
         self.m_obs.signals.sig_ws_replaced.connect.assert_called_once()
 
     def test_add_workspace(self):
+        self.m_mtd.__getitem__.return_value = mock.Mock(spec=MatrixWorkspace)
         self.m_mtd.__contains__.return_value = False
         self.model.add_workspace("ws1")
         self.assertEqual(self.model._workspaces, [])
@@ -49,10 +50,12 @@ class SuperplotModelTest(unittest.TestCase):
         self.assertEqual(self.model._workspaces, ["ws1"])
         self.model.add_workspace("ws2")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2"])
-        self.m_mtd.__getitem__.return_value = mock.Mock(spec=WorkspaceGroup)
-        self.m_mtd.__getitem__.return_value.getNames.return_value = ["ws2",
-                                                                     "ws3",
-                                                                     "ws4"]
+        d = {"g1": mock.Mock(spec=WorkspaceGroup),
+             "ws2": mock.Mock(spec=MatrixWorkspace),
+             "ws3": mock.Mock(spec=MatrixWorkspace),
+             "ws4": mock.Mock(spec=MatrixWorkspace)}
+        d["g1"].getNames.return_value = ["ws2", "ws3", "ws4"]
+        self.m_mtd.__getitem__.side_effect = d.__getitem__
         self.model.add_workspace("g1")
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3", "ws4"])
 

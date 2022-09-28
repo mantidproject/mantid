@@ -31,7 +31,7 @@ including the list of available workspaces in the ADS, and populate the menus
 */
 class DataProcessorMainPresenter {
 public:
-  virtual ~DataProcessorMainPresenter() {}
+  virtual ~DataProcessorMainPresenter() = default;
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface

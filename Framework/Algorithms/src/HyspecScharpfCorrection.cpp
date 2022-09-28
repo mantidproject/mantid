@@ -109,7 +109,7 @@ void HyspecScharpfCorrection::exec() {
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto &yOut = m_outputWS->mutableY(i);
     auto &eOut = m_outputWS->mutableE(i);
 
@@ -138,9 +138,9 @@ void HyspecScharpfCorrection::exec() {
       yOut[j] = yIn[j] * factor;
       eOut[j] = eIn[j] * factor;
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   this->setProperty("OutputWorkspace", m_outputWS);
 }
 
@@ -168,7 +168,7 @@ void HyspecScharpfCorrection::execEvent() {
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     prog.report();
     // continue if no detectors, if monitor, or is masked
     if ((!spectrumInfo.hasDetectors(i)) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
@@ -194,9 +194,9 @@ void HyspecScharpfCorrection::execEvent() {
       ScharpfEventHelper(evlist.getWeightedEventsNoTime(), thPlane);
       break;
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 template <class T> void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector, double thPlane) {

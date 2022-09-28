@@ -26,7 +26,7 @@ namespace MantidWidgets {
 */
 class EXPORT_OPT_MANTIDQT_COMMON IFunctionBrowser {
 public:
-  virtual ~IFunctionBrowser() {}
+  virtual ~IFunctionBrowser() = default;
   virtual QString getFunctionString() = 0;
   virtual void updateParameters(const Mantid::API::IFunction &fun) = 0;
   virtual void clear() = 0;

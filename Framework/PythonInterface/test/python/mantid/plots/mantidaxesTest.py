@@ -16,8 +16,7 @@ import unittest
 
 from mantid.kernel import config
 from mantid.plots import datafunctions
-from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 from mantid.plots.axesfunctions import get_colorplot_extents
 from unittest.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
@@ -284,7 +283,7 @@ class MantidAxesTest(unittest.TestCase):
             axes.images[0].set_cmap(new_cmap)
 
         def extra_checks(axes):
-            self.assertEquals(new_cmap, axes.images[0].get_cmap().name)
+            self.assertEqual(new_cmap, axes.images[0].get_cmap().name)
 
         self._do_image_replace_common_bins(self.ax.imshow,
                                            lambda ax: ax.images,
@@ -298,7 +297,7 @@ class MantidAxesTest(unittest.TestCase):
             axes.images[0].set_interpolation(interpolation)
 
         def extra_checks(axes):
-            self.assertEquals(interpolation, axes.images[0].get_interpolation())
+            self.assertEqual(interpolation, axes.images[0].get_interpolation())
 
         self._do_image_replace_common_bins(self.ax.imshow,
                                            lambda ax: ax.images,
@@ -634,6 +633,34 @@ class MantidAxesTest(unittest.TestCase):
         # Check that the lines have the same x and y data.
         self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
         self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
+
+    def test_converting_waterfall_plot_scale(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        # Plot the same line twice.
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        x_lin_1 = ax.get_lines()[1].get_xdata()[0]
+        y_lin_1 = ax.get_lines()[1].get_ydata()[0]
+
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        x_log = ax.get_lines()[1].get_xdata()[0]
+        y_log = ax.get_lines()[1].get_ydata()[0]
+
+        ax.set_xscale("linear")
+        ax.set_yscale("linear")
+        x_lin_2 = ax.get_lines()[1].get_xdata()[0]
+        y_lin_2 = ax.get_lines()[1].get_ydata()[0]
+
+        self.assertTrue(ax.is_waterfall())
+        # Check the lines' data are different now that it is a log scale waterfall plot.
+        self.assertNotEqual(x_lin_1, x_log)
+        self.assertNotEqual(y_lin_1, y_log)
+        self.assertEqual(x_lin_1, x_lin_2)
+        self.assertEqual(y_lin_1, y_lin_2)
 
     def test_create_fill_creates_fills_for_waterfall_plot(self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})

@@ -12,6 +12,8 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
 
+#include <algorithm>
+
 namespace Mantid::DataObjects {
 using std::set;
 using std::size_t;
@@ -186,14 +188,9 @@ bool MaskWorkspace::isMasked(const std::set<detid_t> &detectorIDs) const {
     return false;
   }
 
-  bool masked(true);
-  for (auto detectorID : detectorIDs) {
-    if (!this->isMasked(detectorID)) {
-      masked = false;
-      break; // allows space for a debug print statement
-    }
-  }
-  return masked;
+  const auto it = std::find_if_not(detectorIDs.cbegin(), detectorIDs.cend(),
+                                   [this](const auto detectorID) { return this->isMasked(detectorID); });
+  return it == detectorIDs.cend();
 }
 
 /**

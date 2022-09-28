@@ -1416,6 +1416,7 @@ class ReductionPackage(object):
         # -------------------------------------------------------
         self.reduced_lab = None
         self.reduced_hab = None
+        self.reduced_hab_scaled = None
         self.reduced_merged = None
 
         # -------------------------------------------------------

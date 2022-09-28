@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1100</width>
-    <height>1100</height>
+    <height>1027</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -92,10 +92,22 @@
      <layout class="QHBoxLayout" name="layout_bottom">
       <item>
        <widget class="QPushButton" name="pbSettings">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
        </widget>
@@ -113,8 +125,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>25</width>
-          <height>25</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
@@ -138,8 +150,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>30</width>
-          <height>25</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">

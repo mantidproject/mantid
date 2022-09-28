@@ -14,7 +14,7 @@ from qtpy.QtCore import Qt
 
 from mantid.plots.mantidaxes import MantidAxes
 from mantid.plots.datafunctions import errorbars_hidden
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
+from mantid.plots.utility import convert_color_to_hex
 
 LINESTYLE_MAP = {'-': 'solid', '--': 'dashed', '-.': 'dashdot', ':': 'dotted',
                  'None': 'None'}

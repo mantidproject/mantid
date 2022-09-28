@@ -59,7 +59,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
 
     def PyExec(self):
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         # Get instrument to use with FileFinder
         self.instrument = ''

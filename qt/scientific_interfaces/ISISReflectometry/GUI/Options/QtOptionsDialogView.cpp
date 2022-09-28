@@ -18,7 +18,7 @@ QtOptionsDialogView::QtOptionsDialogView(QWidget *parent) {
   initBindings();
 }
 
-QtOptionsDialogView::~QtOptionsDialogView() {}
+QtOptionsDialogView::~QtOptionsDialogView() = default;
 
 /** Initialise the ui */
 void QtOptionsDialogView::initLayout() {

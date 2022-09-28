@@ -59,7 +59,7 @@ struct Parameter {
   int movedirection = 0;
 };
 
-class MANTID_CURVEFITTING_DLL LeBailFit : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL LeBailFit final : public API::Algorithm {
 public:
   /// Enumerate
   enum FunctionMode { CALCULATION, FIT, BACKGROUNDPROCESS, MONTECARLO };

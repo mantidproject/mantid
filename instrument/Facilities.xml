@@ -703,6 +703,10 @@
     <technique>SANS</technique>
   </instrument>
 
+  <instrument name="D16B">
+    <technique>SANS</technique>
+  </instrument>
+
   <instrument name="D22">
     <technique>SANS</technique>
   </instrument>
@@ -755,6 +759,10 @@
 
   <instrument name="D19">
     <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="SALSA">
+    <technique>Strain analyzer</technique>
   </instrument>
 
 </facility>

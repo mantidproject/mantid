@@ -57,8 +57,6 @@ void IndirectCorrections::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
-    connect(tab.second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
@@ -75,11 +73,7 @@ void IndirectCorrections::initLayout() {
 /**
  * Allow Python to be called locally.
  */
-void IndirectCorrections::initLocalPython() {
-  QString pyInput = "from mantid.simpleapi import *";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-  loadSettings();
-}
+void IndirectCorrections::initLocalPython() { loadSettings(); }
 
 /**
  * Load the settings saved for this interface.

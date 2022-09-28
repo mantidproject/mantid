@@ -19,7 +19,7 @@ using namespace MantidQt::CustomInterfaces;
 IndirectSimulation::IndirectSimulation(QWidget *parent)
     : IndirectInterface(parent), m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
-IndirectSimulation::~IndirectSimulation() {}
+IndirectSimulation::~IndirectSimulation() = default;
 
 void IndirectSimulation::initLayout() {
   m_uiForm.setupUi(this);
@@ -36,8 +36,6 @@ void IndirectSimulation::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectSimulationTab *>::iterator iter;
   for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 

@@ -278,7 +278,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName, const std::string &au
  * Use writeNexusProcessedDataEvent if writing an EventWorkspace.
  */
 int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr &localworkspace,
-                                           const bool &uniformSpectra, const std::vector<int> &spec,
+                                           const bool &uniformSpectra, const std::vector<int> &indices,
                                            const char *group_name, bool write2Ddata) const {
   NXstatus status;
 
@@ -292,7 +292,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   if (nHist < 1)
     return (2);
   const size_t nSpectBins = localworkspace->y(0).size();
-  const size_t nSpect = spec.size();
+  const size_t nSpect = indices.size();
   int dims_array[2] = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
 
   // Set the axis labels and values
@@ -319,7 +319,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   std::vector<double> axis2;
   if (nSpect < nHist)
     for (size_t i = 0; i < nSpect; i++)
-      axis2.emplace_back((*sAxis)(spec[i]));
+      axis2.emplace_back((*sAxis)(indices[i]));
   else
     for (size_t i = 0; i < sAxis->length(); i++)
       axis2.emplace_back((*sAxis)(i));
@@ -333,8 +333,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array, m_nexuscompression, asize);
     NXopendata(fileID, name.c_str());
     for (size_t i = 0; i < nSpect; i++) {
-      int s = spec[i];
-      NXputslab(fileID, localworkspace->y(s).rawData().data(), start, asize);
+      NXputslab(fileID, localworkspace->y(indices[i]).rawData().data(), start, asize);
       start[0]++;
     }
     if (m_progress != nullptr)
@@ -356,8 +355,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     NXopendata(fileID, name.c_str());
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
-      int s = spec[i];
-      NXputslab(fileID, localworkspace->e(s).rawData().data(), start, asize);
+      NXputslab(fileID, localworkspace->e(indices[i]).rawData().data(), start, asize);
       start[0]++;
     }
 
@@ -372,8 +370,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
       NXopendata(fileID, name.c_str());
       start[0] = 0;
       for (size_t i = 0; i < nSpect; i++) {
-        int s = spec[i];
-        NXputslab(fileID, rebin_workspace->readF(s).data(), start, asize);
+        NXputslab(fileID, rebin_workspace->readF(indices[i]).data(), start, asize);
         start[0]++;
       }
 
@@ -396,8 +393,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
       start[0] = 0;
       asize[1] = dims_array[1];
       for (size_t i = 0; i < nSpect; i++) {
-        int s = spec[i];
-        NXputslab(fileID, localworkspace->dx(s).rawData().data(), start, asize);
+
+        NXputslab(fileID, localworkspace->dx(indices[i]).rawData().data(), start, asize);
         start[0]++;
       }
     }
@@ -420,7 +417,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->x(i).rawData().data(), start, asize);
+      NXputslab(fileID, localworkspace->x(indices[i]).rawData().data(), start, asize);
       start[0]++;
     }
   }

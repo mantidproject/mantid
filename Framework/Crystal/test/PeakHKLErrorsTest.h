@@ -34,7 +34,7 @@ private:
 public:
   Jacob(int nparams, int npoints) { M = Kernel::Matrix<double>(nparams, npoints); }
 
-  ~Jacob() override {}
+  ~Jacob() override = default;
   void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
 
   double get(size_t iY, size_t iP) override { return M[iP][iY]; }

@@ -49,7 +49,7 @@ namespace DataHandling {
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveSPE : public API::Algorithm {
+class DLLExport SaveSPE final : public API::Algorithm {
 public:
   /// Constructor
   SaveSPE();
