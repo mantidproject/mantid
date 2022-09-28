@@ -254,12 +254,14 @@ class RundexSettings(object):
             REFL_POL: {
                 ("SaveNexusProcessed", ".nxs"): False,
                 ("SaveAscii", ".txt"): False,
-                ("SaveReflectometryAscii", ".mft"): True
+                ("SaveReflectometryAscii", ".mft"): True,
+                ("SaveReflectometryAscii", ".lam"): False
                 },
             REFL_NPOL: {
                 ("SaveNexusProcessed", ".nxs"): False,
                 ("SaveAscii", ".txt"): False,
-                ("SaveReflectometryAscii", ".mft"): True
+                ("SaveReflectometryAscii", ".mft"): True,
+                ("SaveReflectometryAscii", ".lam"): False
                 },
             POWDER_DSCAN: {
                 ("SaveNexusProcessed", ".nxs"): False,

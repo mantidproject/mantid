@@ -189,45 +189,6 @@ class DrillExportModel:
                       .format(wsName, filenames))
         del self._successExports[wsName]
 
-    def _createTasks(self, wsName, algo, exportPath, extension):
-        """
-        Create a list of drill tasks for exporting data.
-
-        Args:
-            wsName: string with name of the workspace to be saved
-            algo: string with algorithm name to be used
-            exportPath: string path for the output file
-            extension: list of strings or string with desired extension(s)
-        """
-        tasks = list()
-        extensions = extension
-        if not isinstance(extension, list):
-            extensions = [extension]
-        for ext in extensions:
-            filename = os.path.join(exportPath,
-                                    wsName + ext)
-            name = wsName + ":" + filename
-            if wsName not in self._exports:
-                self._exports[wsName] = set()
-
-            self._exports[wsName].add(filename)
-            kwargs = {}
-            if 'Ascii' in algo:
-                log_list = mtd[wsName].getInstrument().getStringParameter('log_list_to_save')
-                if log_list:
-                    log_list = log_list[0].split(',')
-                    kwargs['LogList'] = [log.strip() for log in log_list]  # removes white spaces
-                if 'Reflectometry' in algo:
-                    kwargs['WriteHeader'] = True
-                    kwargs['FileExtension'] = ext
-                    kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value').value
-                else:
-                    kwargs['WriteXError'] = True
-            task = DrillTask(name, algo, InputWorkspace=wsName,
-                             FileName=filename, **kwargs)
-            tasks.append(task)
-        return tasks
-
     def run(self, sample):
         """
         Run the export algorithms on a sample. For each export algorithm, the
@@ -284,7 +245,8 @@ class DrillExportModel:
                         kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
-                        kwargs['FileExtension'] = 'custom'
+                        kwargs['FileExtension'] = ext
+                        kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value')
                     else:
                         kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,
