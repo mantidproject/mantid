@@ -143,6 +143,18 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                 return False
         return True
 
+    def updateGon(self,axes):
+        self.beginResetModel()
+        self.labels = axes['gonioLabels']
+        self.dirstrings = axes['gonioDirs']
+        self.senses = axes['gonioSenses']
+        self.minvalues = axes['gonioMinvals']
+        self.maxvalues = axes['gonioMaxvals']
+        self.steps = axes['gonioSteps']
+        self.gonioColumns=['Name','Direction','Sense (+/-1)','Minim(deg)','Maxim(deg)','Step(deg)']
+        self.gonioRows=['Axis0','Axis1','Axis2']
+        self.endResetModel()
+
 
 class InstrumentSetupWidget(QtWidgets.QWidget):
     #signal when things change and valid
@@ -212,7 +224,13 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.goniometerMin=[0.,0.,0.]
         self.goniometerMax=[0.,0.,0.]
         self.goniometerStep=[1.,1.,1.]
-        self.updateTable()
+
+        values={'gonioLabels':self.goniometerNames,'gonioDirs':self.goniometerDirections,'gonioSenses':self.goniometerRotationSense,
+                'gonioMinvals':self.goniometerMin,'gonioMaxvals':self.goniometerMax,'gonioSteps':self.goniometerStep}
+        self.goniomodel = GonioTableModel(values,self)
+        self.tableViewGon.setModel(self.goniomodel)
+        self.tableViewGon.update()
+        self.signaldict.update(values)
 
         #goniometer figure
         self.figure=Figure(figsize=(2,3))
@@ -273,11 +291,11 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.gonfig.set_ylim3d(-0.6,0.6)
         self.gonfig.set_zlim3d(-1,5)
         self.gonfig.set_axis_off()
-        self.gonfig.plot([0,1],[-3,-3],[0,0],zdir='y',color='black')
+        self.gonfig.plot([0,-1],[-3,-3],[0,0],zdir='y',color='black')
         self.gonfig.plot([0,0],[-3,-2],[0,0],zdir='y',color='black')
         self.gonfig.plot([0,0],[-3,-3],[0,1],zdir='y',color='black')
         self.gonfig.text(0,1,-2.5,'Z',zdir=None,color='black')
-        self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
+        self.gonfig.text(-1,0,-2.5,'X',zdir=None,color='black')
         self.gonfig.plot([0,0],[-3,-3],[-2,-0.5],zdir='y',color='black',linewidth=3)
         self.gonfig.text(0,-1,-2.5,'Beam',zdir=None,color='black')
         self.gonfig.view_init(10,45)
@@ -336,10 +354,24 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         if self.instrument in ["WAND\u00B2"]:
             self.labelDetZ.show()
             self.editDetZ.show()
+            self.setLabelEi('Wavelength')
+            self.setEiVal(str(1.488))
+            self.goniometerNames=['s1', 'sgl', 'sgu']
+            self.goniometerDirections=['0,1,0', '1,0,0', '0,0,1']
+            self.goniometerRotationSense=[1, -1, -1]
         else:
             self.labelDetZ.hide()
             self.editDetZ.hide()
+            self.setLabelEi('Incident Energy')
+            self.setEiVal(str(10.0))
+            #d['gonioLabels']=['psi','gl','gs']
+            self.goniometerNames=['psi','gl','gs']
+            self.goniometerDirections=['0,1,0','0,0,1','1,0,0']
+            self.goniometerRotationSense=[1,1,1]
+
         self.updateAll(**d)
+        self.updateTable()
+        self.updateFigure()
 
     def updateFast(self,*dummy_args):
         d=dict()
@@ -376,28 +408,10 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
     def getEditEi(self):
         return self.editEi
 
-    def setGoniometerNames(self, names):
-        self.goniometerNames = names.copy()
-        self.updateTable()
-        self.updateFigure()
-
-    def setGoniometerDirections(self, directions):
-        self.goniometerDirections = directions.copy()
-        self.updateTable()
-        self.updateFigure()
-
-    def setGoniometerRotationSense(self, rotationSense):
-        self.goniometerRotationSense = rotationSense.copy()
-        self.updateTable()
-        self.updateFigure()
-
     def updateTable(self):
         values={'gonioLabels':self.goniometerNames,'gonioDirs':self.goniometerDirections,'gonioSenses':self.goniometerRotationSense,
                 'gonioMinvals':self.goniometerMin,'gonioMaxvals':self.goniometerMax,'gonioSteps':self.goniometerStep}
-        self.goniomodel = GonioTableModel(values,self)
-        self.tableViewGon.setModel(self.goniomodel)
-        self.tableViewGon.update()
-        self.signaldict.update(values)
+        self.goniomodel.updateGon(values)
 
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()

@@ -23,7 +23,7 @@ Bugfixes
 
 - The sign of the half-channel width in the :ref:`LoadILLTOF <algm-LoadILLTOF>` algorithm has been changed from negative to positive to ensure the TOF axis is always positive.
 - The :ref:`PyChop <PyChop>` interface has been adjusted to ensure that the command-line version functions as described in the documentation.
-- :ref:`DirectILLCollectData <algm-DirectILLCollectData` will now be able to load data with whitespaces in paths or file names.
+- :ref:`DirectILLCollectData <algm-DirectILLCollectData>` will now be able to load data with whitespaces in paths or file names.
 
 Algorithms
 ----------
@@ -35,7 +35,7 @@ New Features
 
   * This employs the same almost-isotropic analytic powder-averaging incoherent approximation as :ref:`Abins <algm-Abins>`.
   * The ISIS MARI, MAPS, and MERLIN instruments are supported, alongside ILL-PANTHER and a ``TwoDMap`` ideal simulation. Please direct requests/specifications for additional instruments to Sanghamitra Mukhopadhyay and Adam Jackson.
-  * The algorithm produces workspaces in :math:`(Q,\omega)` space, best viewed interactively in :ref:`Sliceviewer <sliceviewer>`, or rendered as :ref:`colorfill plots <Colorfill_Plot>`.
+  * The algorithm produces workspaces in :math:`(Q,\omega)` space, best viewed interactively in :ref:`Sliceviewer <sliceviewer>`, or rendered as :ref:`colorfill plots <Colorfill_Plots>`.
 
 .. image::  ../../images/Abins2D_release_merlin.png
 	        :align: center

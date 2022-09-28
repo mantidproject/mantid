@@ -1,0 +1,1 @@
+* Fixed deprecated syntax in  :ref:`LoadWANDSCD <algm-LoadWANDSCD>` that gives h5py warnings.

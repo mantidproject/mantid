@@ -80,6 +80,8 @@ set(SRC_FILES
     IndirectSimulation.cpp
     IndirectSimulationTab.cpp
     IndirectSqw.cpp
+    IndirectSqwModel.cpp
+    IndirectSqwView.cpp
     IndirectSymmetrise.cpp
     IndirectTab.cpp
     IndirectTools.cpp
@@ -157,6 +159,8 @@ set(MOC_FILES
     IndirectSimulation.h
     IndirectSimulationTab.h
     IndirectSqw.h
+    IndirectSqwModel.h
+    IndirectSqwView.h
     IndirectSymmetrise.h
     IndirectTab.h
     IndirectTools.h

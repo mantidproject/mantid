@@ -73,6 +73,11 @@ void RegionSelector::subscribe(std::shared_ptr<Mantid::API::RegionSelectorObserv
   pyobj().attr("subscribe")(*boost::python::tuple(), **kwargs);
 }
 
+void RegionSelector::clearWorkspace() {
+  GlobalInterpreterLock lock;
+  pyobj().attr("clear_workspace")();
+}
+
 void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   GlobalInterpreterLock lock;
   boost::python::dict kwargs;
@@ -80,14 +85,19 @@ void RegionSelector::updateWorkspace(Workspace_sptr const &workspace) {
   pyobj().attr("update_workspace")(*boost::python::tuple(), **kwargs);
 }
 
-void RegionSelector::addRectangularRegion() {
+void RegionSelector::addRectangularRegion(const std::string &regionType, const std::string &color) {
   GlobalInterpreterLock lock;
-  pyobj().attr("add_rectangular_region")();
+  pyobj().attr("add_rectangular_region")(regionType, color);
 }
 
-auto RegionSelector::getRegion() -> Selection {
+void RegionSelector::cancelDrawingRegion() {
   GlobalInterpreterLock lock;
-  auto pyValues = pyobj().attr("get_region")();
+  pyobj().attr("cancel_drawing_region")();
+}
+
+auto RegionSelector::getRegion(const std::string &regionType) -> Selection {
+  GlobalInterpreterLock lock;
+  auto pyValues = pyobj().attr("get_region")(regionType);
   auto result = Selection();
   for (int i = 0; i < len(pyValues); ++i) {
     result.push_back(boost::python::extract<double>(pyValues[i]));

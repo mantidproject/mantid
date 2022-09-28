@@ -33,7 +33,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_12">
       <item>
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsInput" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>

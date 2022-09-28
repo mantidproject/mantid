@@ -162,8 +162,6 @@ endif()
 # Configure Mantid startup scripts
 # ######################################################################################################################
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
-# build version
-set(MANTIDPYTHON_PREAMBLE "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%PATH%")
 
 configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY)
 # place it in the appropriate directory
@@ -172,8 +170,6 @@ file(
   OUTPUT ${MSVC_BIN_DIR}/mantidpython.bat
   INPUT ${PROJECT_BINARY_DIR}/mantidpython.bat.in
 )
-# install version
-set(MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%PATH%")
 
 configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY)
 
@@ -181,19 +177,20 @@ configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantid
 # Custom targets to fix-up and run Python entry point code
 # ######################################################################################################################
 
-add_custom_target(SystemTests)
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_custom_target(SystemTests)
   add_dependencies(SystemTests Framework)
+  add_dependencies(SystemTests StandardTestData SystemTestData)
+  set_target_properties(
+    SystemTests
+    PROPERTIES
+      VS_DEBUGGER_COMMAND "${Python_EXECUTABLE}"
+      VS_DEBUGGER_COMMAND_ARGUMENTS
+      "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable \"${MSVC_BIN_DIR}/mantidpython.bat\" --exec-args \" --classic\""
+      VS_DEBUGGER_ENVIRONMENT "${MSVC_IDE_ENV}"
+  )
 endif()
-add_dependencies(SystemTests StandardTestData SystemTestData)
-set_target_properties(
-  SystemTests
-  PROPERTIES
-    VS_DEBUGGER_COMMAND "${Python_EXECUTABLE}"
-    VS_DEBUGGER_COMMAND_ARGUMENTS
-    "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable \"${MSVC_BIN_DIR}/mantidpython.bat\" --exec-args \" --classic\""
-    VS_DEBUGGER_ENVIRONMENT "${MSVC_IDE_ENV}"
-)
+
 # ######################################################################################################################
 # (Fake) installation variables to keep windows sweet
 # ######################################################################################################################

@@ -137,7 +137,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
             unit = ('Temperature', 'K')
         else:
             logger.notice('Vertical axis is in run number')
-            unit = ('Run No', '_last 3 digits')
+            unit = ('Run No', ' last 3 digits')
 
         # Create a new vertical axis for the workspaces
         y_ws_axis = NumericAxis.create(len(run_numbers))

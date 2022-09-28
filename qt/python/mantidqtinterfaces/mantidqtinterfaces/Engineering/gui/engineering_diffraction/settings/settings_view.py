@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
+from qtpy.QtGui import QIntValidator, QDoubleValidator
 
 from mantidqt.utils.qt import load_ui
 
@@ -24,6 +25,13 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
         self.finder_fullCalib.setLabelText("Full Calibration")
         self.finder_fullCalib.isForRunFiles(False)
+
+        self.finder_path_to_gsas2.setLabelText("Path to GSASII")
+        self.finder_path_to_gsas2.isForRunFiles(False)
+        self.finder_path_to_gsas2.isForDirectory(True)
+
+        self.timeout_lineedit.setValidator(QIntValidator(0, 200))
+        self.dSpacing_min_lineedit.setValidator(QDoubleValidator(0.0, 200.0, 3))
 
         # set text of labels
         self.log_list_label.setText("Check logs to average when loading focused data")
@@ -77,6 +85,15 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def get_peak_function(self):
         return self.peak_list.currentText()
 
+    def get_path_to_gsas2(self):
+        return self.finder_path_to_gsas2.getFirstFilename()
+
+    def get_timeout(self):
+        return self.timeout_lineedit.text()
+
+    def get_dSpacing_min(self):
+        return self.dSpacing_min_lineedit.text()
+
     # =================
     # Component Setters
     # =================
@@ -126,6 +143,15 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
     def populate_peak_function_list(self, peak_names):
         self.peak_list.addItems(peak_names.split(','))
 
+    def set_path_to_gsas2(self, text):
+        self.finder_path_to_gsas2.setText(text)
+
+    def set_timeout(self, text):
+        self.timeout_lineedit.setText(text)
+
+    def set_dSpacing_min(self, text):
+        self.dSpacing_min_lineedit.setText(text)
+
     # =================
     # Force Actions
     # =================
@@ -135,3 +161,6 @@ class SettingsView(QtWidgets.QDialog, Ui_settings):
 
     def find_save(self):
         self.finder_save.findFiles(True)
+
+    def find_path_to_gsas2(self):
+        self.finder_path_to_gsas2.findFiles(True)

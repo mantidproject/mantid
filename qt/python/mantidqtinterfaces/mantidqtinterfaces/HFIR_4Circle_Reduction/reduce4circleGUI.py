@@ -3847,9 +3847,9 @@ class MainWindow(QMainWindow):
 
         # directories
         try:
-            spice_dir = settings.value('local_spice_dir', '')
+            spice_dir = settings.value('local_spice_dir', '', type=str)
             self.ui.lineEdit_localSpiceDir.setText(str(spice_dir))
-            work_dir = settings.value('work_dir')
+            work_dir = settings.value('work_dir', type=str)
             self.ui.lineEdit_workDir.setText(str(work_dir))
 
             # experiment number
@@ -3857,40 +3857,40 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit_exp.setText(str(exp_num))
 
             # lattice parameters
-            lattice_a = settings.value('a')
+            lattice_a = settings.value('a', type=str)
             self.ui.lineEdit_a.setText(str(lattice_a))
-            lattice_b = settings.value('b')
+            lattice_b = settings.value('b', type=str)
             self.ui.lineEdit_b.setText(str(lattice_b))
-            lattice_c = settings.value('c')
+            lattice_c = settings.value('c', type=str)
             self.ui.lineEdit_c.setText(str(lattice_c))
-            lattice_alpha = settings.value('alpha')
+            lattice_alpha = settings.value('alpha', type=str)
             self.ui.lineEdit_alpha.setText(str(lattice_alpha))
-            lattice_beta = settings.value('beta')
+            lattice_beta = settings.value('beta', type=str)
             self.ui.lineEdit_beta.setText(str(lattice_beta))
-            lattice_gamma = settings.value('gamma')
+            lattice_gamma = settings.value('gamma', type=str)
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
 
             # last project
-            last_1_project_path = str(settings.value('last1path'))
+            last_1_project_path = settings.value('last1path', type=str)
             self.ui.label_last1Path.setText(last_1_project_path)
 
             # calibrated instrument configurations
-            user_wave_length = settings.value('wave_length')
+            user_wave_length = settings.value('wave_length', type=str)
             self.ui.lineEdit_userWaveLength.setText(user_wave_length)
 
-            det_row_center = settings.value('row_center')
+            det_row_center = settings.value('row_center', type=str)
             self.ui.lineEdit_detCenterPixHorizontal.setText(det_row_center)
 
-            det_col_center = settings.value('col_center')
+            det_col_center = settings.value('col_center', type=str)
             self.ui.lineEdit_detCenterPixVertical.setText(det_col_center)
 
-            det_sample_distance = settings.value('det_sample_distance')
+            det_sample_distance = settings.value('det_sample_distance', type=str)
             self.ui.lineEdit_userDetSampleDistance.setText(det_sample_distance)
 
             # survey
-            survey_start = str(settings.value('survey_start_scan'))
+            survey_start = settings.value('survey_start_scan', type=str)
             self.ui.lineEdit_surveyStartPt.setText(survey_start)
-            survey_stop = str(settings.value('survey_stop_scan'))
+            survey_stop = settings.value('survey_stop_scan', type=str)
             self.ui.lineEdit_surveyEndPt.setText(survey_stop)
 
         except TypeError as err:

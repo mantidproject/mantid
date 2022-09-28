@@ -12,17 +12,14 @@ set _SCRIPT_DIR=%~dp0
 set _BIN_DIR=%_SCRIPT_DIR:~,-1%
 
 :: Set paths for dependencies, including Python
-@MANTIDPYTHON_PREAMBLE@
+set PATH=%_BIN_DIR%;%PATH%
+set PYTHONPATH=%_BIN_DIR%;%PYTHONPATH%
 
-if exist "%PYTHONHOME%\Lib\site-packages\PyQt4\sip.pyd" (
-  set _sip_dir=%PYTHONHOME%\Lib\site-packages\PyQt4
-)
-
-set PYTHONPATH=%_BIN_DIR%;%_sip_dir%;%PYTHONPATH%
+set CONDA_BASE=@CONDA_BASE_DIR@
 
 :: Python drivers
-set _PYTHON_EXE=%PYTHONHOME%\python.exe
-set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
+set _PYTHON_EXE=%CONDA_BASE%\python.exe
+set _IPYTHON_EXE=%CONDA_BASE%\Scripts\ipython.exe
 
 :: QtPy should use Qt5 by unless specified
 if "%QT_API%"=="" (
@@ -47,7 +44,7 @@ if "%1"=="--classic" (
 )
 
 :: Start ipython and pass through all arguments to it
-start "Mantid Python" /B /WAIT %_IPYTHON_CMD% %*
+start "Mantid Python" /B /WAIT %_IPYTHON_EXE% %*
 if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 goto TheEnd
 

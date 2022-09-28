@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -73,5 +74,7 @@ void export_Instrument() {
            "instrument")
 
       .def("getBaseInstrument", &Instrument::baseInstrument, arg("self"), return_value_policy<RemoveConstSharedPtr>(),
-           "Return reference to the base instrument");
+           "Return reference to the base instrument")
+
+      .def("findRectDetectors", &Instrument::findRectDetectors, arg("self"), "Return a list of rectangular detectors.");
 }

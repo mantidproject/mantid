@@ -7,6 +7,8 @@
 #pragma once
 
 #include "IndirectDataReductionTab.h"
+#include "IndirectSqwModel.h"
+#include "IndirectSqwView.h"
 
 #include "MantidKernel/System.h"
 #include "ui_IndirectSqw.h"
@@ -23,7 +25,7 @@ class DLLExport IndirectSqw : public IndirectDataReductionTab {
 
 public:
   IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
-  ~IndirectSqw() override;
+  ~IndirectSqw() = default;
 
   void setup() override;
   void run() override;
@@ -36,22 +38,21 @@ private slots:
   void runClicked();
   void saveClicked();
 
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
+  void qLowChanged(double value);
+  void qWidthChanged(double value);
+  void qHighChanged(double value);
+  void eLowChanged(double value);
+  void eWidthChanged(double value);
+  void eHighChanged(double value);
+  void rebinEChanged(int value);
 
 private:
-  void plotRqwContour(std::string const &sampleName);
-  void setDefaultQAndEnergy();
-  void setQRange(std::tuple<double, double> const &axisRange);
-  void setEnergyRange(std::tuple<double, double> const &axisRange);
+  void connectSignals();
+  void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
 
-  std::size_t getOutWsNumberOfSpectra() const;
-
-  void setRunEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-
-  Ui::IndirectSqw m_uiForm;
+  std::unique_ptr<IndirectSqwModel> m_model;
+  std::unique_ptr<IndirectSqwView> m_view;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

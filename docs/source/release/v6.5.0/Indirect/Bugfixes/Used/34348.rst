@@ -1,0 +1,2 @@
+Fixed a bug in Indirect Data Analysis F(Q) fit tab where when loading a file in the workspace selector if the parameter type was changed before the workspace was finished loading it would crash Mantid.
+Fixed a bug in Indirect Data Analysis F(Q) fit tab where when adding data to the interface if the parameter type was changed when no data was selected it would crash Mantid.

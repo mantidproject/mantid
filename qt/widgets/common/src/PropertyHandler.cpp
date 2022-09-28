@@ -28,6 +28,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <QMessageBox>
+#include <algorithm>
 #include <regex>
 #include <utility>
 
@@ -712,21 +713,25 @@ protected:
       vectorSize = newSize;
     }
 
-    // if there is a validator, construct new vector for validator evaluation
-    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-      std::vector<double> newVec(newSize);
-      for (int i = 1; i < vectorSize + 1; ++i) {
+    // populate new vector
+    std::vector<double> newVec(newSize);
+    for (int i = 1; i < newSize + 1; ++i) {
+      double newVal = (m_validator != Mantid::Kernel::IValidator_sptr())
+                          ? m_browser->m_vectorDoubleManager->value(members[vectorSize])
+                          : 0.0;
+      if (i < vectorSize + 1) {
         newVec[i - 1] = m_browser->m_vectorDoubleManager->value(members[i]);
+      } else {
+        newVec[i - 1] = newVal;
       }
+    }
 
+    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
       evaluateValidator(newVec);
     }
 
     v.resize(newSize);
-
-    for (int i = 1; i < vectorSize + 1; ++i) {
-      v[i - 1] = m_browser->m_vectorDoubleManager->value(members[i]);
-    }
+    std::copy(cbegin(newVec), cend(newVec), begin(v));
   }
 
 private:

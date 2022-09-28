@@ -26,7 +26,7 @@ public:
     // The Moments algorithm is a python algorithm and so can not be called in
     m_workspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name_sqw", m_workspace);
-    m_model->setInputWorkspace("Workspace_name");
+    m_model->setInputWorkspace("Workspace_name_sqw");
     m_model->setEMin(-0.4);
     m_model->setEMax(0.4);
     m_model->setScale(false);

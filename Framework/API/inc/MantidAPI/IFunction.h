@@ -554,6 +554,8 @@ public:
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
+  /// Ignore a tie
+  virtual bool ignoreTie(const ParameterTie &) const { return false; }
   /// Put all ties in order in which they will be applied correctly.
   void sortTies();
   /// Write a parameter tie to a string

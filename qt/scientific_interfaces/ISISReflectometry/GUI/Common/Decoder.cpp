@@ -447,6 +447,7 @@ void Decoder::decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &m
   gui->m_ui.filterEdit->setText(map[QString("filterEdit")].toString());
   gui->m_ui.regexCheckBox->setChecked(map[QString("regexCheckBox")].toBool());
   gui->m_ui.saveReductionResultsCheckBox->setChecked(map[QString("saveReductionResultsCheckBox")].toBool());
+  gui->m_ui.saveIndividualRowsCheckBox->setChecked(map[QString("saveIndividualRowsCheckBox")].toBool());
 }
 
 void Decoder::decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map) {

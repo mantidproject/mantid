@@ -9,6 +9,7 @@ import math
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
+from mantid.kernel import MaterialBuilder
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
@@ -79,21 +80,26 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
+def generate_ts_pdf(run_number, focus_file_path, sample_details, placzek_order, sample_temp, merge_banks=False,
+                    q_lims=None, cal_file_name=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
                     freq_params=None, debug=False):
+    if sample_details is None:
+        raise RuntimeError("A SampleDetails object was not set. Please create a SampleDetails object and set the "
+                           "relevant properties it. Then set the new sample by calling set_sample_details()")
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
     raw_ws = mantid.Load(Filename='POLARIS'+str(run_number))
-    sample_geometry = sample_details.generate_sample_geometry()
-    sample_material = sample_details.generate_sample_material()
+    sample_geometry_json = sample_details.generate_sample_geometry()
+    sample_material_json = sample_details.generate_sample_material()
+
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
         InputWorkspace=raw_ws,
         CalFileName=cal_file_name,
-        SampleGeometry=sample_geometry,
-        SampleMaterial=sample_material,
-        CrystalDensity=sample_details.material_object.crystal_density)
+        SampleGeometry=sample_geometry_json,
+        SampleMaterial=sample_material_json,
+        PlaczekOrder=placzek_order,
+        SampleTemp=sample_temp)
 
     ws_group_list = []
     for i in range(self_scattering_correction.getNumberHistograms()):
@@ -104,25 +110,39 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
                                                          WorkspaceToMatch=focused_ws)
-
+    if not compare_ws_compatibility(focused_ws,self_scattering_correction):
+        raise RuntimeError("To use create_total_scattering_pdf you need to run focus with "
+                           "do_van_normalisation=true first.")
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
-    focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
+    if debug:
+        dcs_corrected = mantid.CloneWorkspace(InputWorkspace=focused_ws)
+
+    # convert diff cross section to S(Q) - 1
+    material_builder = MaterialBuilder()
+    sample = material_builder.setFormula(sample_details.material_object.chemical_formula).build()
+    sample_total_scatter_cross_section = sample.totalScatterXSection()
+    sample_coh_scatter_cross_section = sample.cohScatterXSection()
+    focused_ws = focused_ws - sample_total_scatter_cross_section / (4 * math.pi)
+    focused_ws = focused_ws * 4 * math.pi / sample_coh_scatter_cross_section
+    if debug:
+        s_of_q_minus_one = mantid.CloneWorkspace(InputWorkspace=focused_ws)
+
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        fast_fourier_filter(merged_ws, rho0=sample_details.material_object.crystal_density, freq_params=freq_params)
+        fast_fourier_filter(merged_ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
-                                                rho0=sample_details.material_object.crystal_density)
+                                                rho0=sample_details.material_object.number_density)
     else:
         for ws in focused_ws:
-            fast_fourier_filter(ws, rho0=sample_details.material_object.crystal_density, freq_params=freq_params)
+            fast_fourier_filter(ws, rho0=sample_details.material_object.number_density, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
-                                                rho0=sample_details.material_object.crystal_density)
+                                                rho0=sample_details.material_object.number_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     if not debug:
@@ -209,6 +229,8 @@ def _determine_chopper_mode(ws):
 
 
 def fast_fourier_filter(ws, rho0, freq_params=None):
+    # To be improved - input workspace doesn't have regular bins but output from this filter process does (and typically
+    # has a lot more bins since the width is taken from the narrowest bin in the input)
     if freq_params:
         q_data = ws.dataX(0)
         q_max = q_data[-1]
@@ -232,3 +254,14 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
         mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="g(r)",
                                    Filter=True, Qmax=q_max, deltaQ=q_delta, Rmax=r_max,
                                    Direction='Backward', rho0=rho0)
+
+
+def compare_ws_compatibility(ws1, ws2):
+    """
+    Compares the YUnit and the distribution-type of the first workspaces of two groups for compatibility
+    """
+    ws1_YUnit = ws1.getItem(0).YUnit()
+    ws2_YUnit = ws2.getItem(0).YUnit()
+    ws1_Distribution = ws1.getItem(0).isDistribution()
+    ws2_Distribution = ws2.getItem(0).isDistribution()
+    return ws1_YUnit == ws2_YUnit and ws1_Distribution == ws2_Distribution

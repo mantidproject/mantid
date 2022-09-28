@@ -63,7 +63,7 @@ template <typename SequenceType, typename ElementType> std::string toString(cons
 /**
  * A struct to help export std::vector types
  */
-template <typename ElementType> struct std_vector_exporter {
+template <typename ElementType, bool NoIndexingProxy = false> struct std_vector_exporter {
   /// A typedef of a vector of template ElementTypes
   using w_t = std::vector<ElementType>;
 
@@ -80,7 +80,7 @@ template <typename ElementType> struct std_vector_exporter {
   static void wrap(std::string const &python_name) {
     boost::python::class_<w_t, std::shared_ptr<w_t>>(python_name.c_str())
         .def(boost::python::init<w_t const &>())
-        .def(boost::python::vector_indexing_suite<w_t>())
+        .def(boost::python::vector_indexing_suite<w_t, NoIndexingProxy>())
         .def("__str__", &std_vector_exporter::to_string);
   }
 };

@@ -51,7 +51,7 @@ class AboutPresenter(object):
         # set do not show
         qSettings = QSettings()
         qSettings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease = int(qSettings.value(self.DO_NOT_SHOW, "0"))
+        doNotShowUntilNextRelease = qSettings.value(self.DO_NOT_SHOW, 0, type=int)
         qSettings.endGroup()
         about_widget.chk_do_not_show_until_next_release.setChecked(doNotShowUntilNextRelease)
         about_widget.chk_do_not_show_until_next_release.stateChanged.connect(self.action_do_not_show_until_next_release)
@@ -81,8 +81,8 @@ class AboutPresenter(object):
 
         settings = QSettings()
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
-        doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
-        lastVersion = settings.value(AboutPresenter.PREVIOUS_VERSION, "")
+        doNotShowUntilNextRelease = settings.value(AboutPresenter.DO_NOT_SHOW, 0, type=int)
+        lastVersion = settings.value(AboutPresenter.PREVIOUS_VERSION, "", type=str)
         current_version = version().major + "." + version().minor
         settings.endGroup()
 

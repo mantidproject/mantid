@@ -281,7 +281,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             unit = ('Temperature', 'K')
         else:
             logger.information('X axis is in run number')
-            unit = ('Run No', 'last 3 digits')
+            unit = ('Run No', ' last 3 digits')
 
         xdat = list()
         ydat = list()

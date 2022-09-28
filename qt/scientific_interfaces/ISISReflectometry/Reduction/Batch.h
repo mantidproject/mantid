@@ -44,6 +44,7 @@ public:
   bool isInSelection(const Group &item,
                      const std::vector<MantidWidgets::Batch::RowLocation> &selectedRowLocations) override;
   boost::optional<LookupRow> findLookupRow(Row const &row) const override;
+  boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow) const override;
   boost::optional<LookupRow> findWildcardLookupRow() const override;
   void resetState() override;
   void resetSkippedItems() override;

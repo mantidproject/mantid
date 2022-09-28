@@ -26,6 +26,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 class Row;
+class PreviewRow;
 
 /** @class Experiment
 
@@ -56,7 +57,10 @@ public:
   std::vector<LookupRow::ValueArray> lookupTableToArray() const;
 
   boost::optional<LookupRow> findLookupRow(Row const &row, double tolerance) const;
+  boost::optional<LookupRow> findLookupRow(PreviewRow const &previewRow, double tolerance) const;
   boost::optional<LookupRow> findWildcardLookupRow() const;
+
+  void updateLookupRow(LookupRow lookupRow, double tolerance);
 
   boost::optional<size_t> getLookupRowIndexFromRow(Row const &row, double tolerance) const;
 

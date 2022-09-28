@@ -12,8 +12,8 @@
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FortranDefs.h"
-#include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 #include "MantidCurveFitting/RalNlls/Workspaces.h"
 
 namespace Mantid {
@@ -54,7 +54,7 @@ private:
   /// Fitting parameters
   DoubleFortranVector m_x;
   /// The Jacobian
-  mutable JacobianImpl1 m_J;
+  mutable JacobianImpl1<DoubleFortranMatrix> m_J;
   /// Options
   NLLS::nlls_options m_options;
   /// Information about the fitting
