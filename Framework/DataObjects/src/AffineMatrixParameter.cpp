@@ -128,12 +128,6 @@ AffineMatrixParameter &AffineMatrixParameter::operator=(const AffineMatrixParame
   if (this != &other) {
     this->m_affineMatrix = other.m_affineMatrix;
     this->m_isValid = other.m_isValid;
-    size_t nx = m_affineMatrix.numRows();
-    size_t ny = m_affineMatrix.numCols();
-    m_rawMem = new coord_t[nx * ny];
-    m_rawMatrix = new coord_t *[nx];
-    for (size_t i = 0; i < nx; i++)
-      m_rawMatrix[i] = m_rawMem + (i * ny);
     copyRawMatrix();
   }
   return *this;
