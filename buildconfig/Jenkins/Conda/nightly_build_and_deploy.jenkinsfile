@@ -112,9 +112,9 @@ pipeline {
             }
             agent { label "${PLATFORM}" }
             options {
-            timestamps ()
-            retry(3)
-             }
+                timestamps ()
+                retry(3)
+            }
             steps {
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
@@ -151,9 +151,9 @@ pipeline {
             }
             agent { label "${PLATFORM}" }
             options {
-            timestamps()
-             retry(3)
-             }
+                timestamps()
+                retry(3)
+            }
             steps {
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
@@ -184,7 +184,10 @@ pipeline {
         expression { env.PUBLISH_PACKAGES == 'true' }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
-      options { timestamps () }
+      options {
+        timestamps ()
+        retry(3)
+       }
       environment {
         ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
         GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
