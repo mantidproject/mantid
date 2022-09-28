@@ -59,6 +59,8 @@ Bugfixes
 - Fixes a bug in the :ref:`SliceViewer <sliceviewer>` where a workspace is replaced by an algorithm with more than one output workspace.
 - For 3d+ datasets, :ref:`SliceViewer <sliceviewer>` will now automatically open to the zero-slice if present.
 - Ensure that all nan/inf and zero slices work while using log-scaling.
+- Fix a bug where the axes limits of 1D cut viewer plot were not autoscaling on cut update after the user had zoomed or panned.
+- Added a check on toggling non-orthogonal view off that ensures the non-axis cutting tool is not enabled if the workspace does not support non-axis cuts (e.g. is 4D).
 
 
 :ref:`Release 6.5.0 <v6.5.0>`

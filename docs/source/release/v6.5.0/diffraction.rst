@@ -22,6 +22,7 @@ Bugfixes
 - Changed the Fourier Filter applied during ISIS total scattering reduction so that :math:`g(r)=0` instead of :math:`g(r)-1=0`.
 - The error message raised when attempting to use the :ref:`Polaris.create_total_scattering_pdf <create_total_scattering_pdf_polaris-isis-powder-ref>` algorithm, if the focus has been run with ``do_van_normalisation=false``, has been improved.
 - Fixed an issue in the Powder Diffraction Reduction GUI where the GUI would crash when being launched the second time.
+- Fixed deprecated syntax in :ref:`LoadWAND <algm-LoadWAND>` that gives h5py warnings.
 
 
 Engineering Diffraction
