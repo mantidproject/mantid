@@ -42,6 +42,7 @@ New features
 
 .. image:: ../../images/6_5_release/Direct/mslice_quick_options.png
     :align: center
+    :width: 650
 
 Bugfixes
 ############

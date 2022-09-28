@@ -17,6 +17,10 @@ Bugfixes
 - A large number of crashes, caused by opening an Algorithm Dialog and populating it with a :ref:`WorkspaceGroup <WorkspaceGroup>`, have been fixed.
 - It is no longer possible to crash mantid when opening an interface's help documentation for the second time.
 - The ISIS logos have been updated to match the UKRI rebrand.
+
+.. image:: ../../../../images/ISIS_Logo_Transparent_UKRI.png
+    :align: center
+
 - Fixed a change in behaviour after upgrading Qt, where floating point numbers in the matrix data view were not displayed unless the column was wide enough to show all digits.
 
 

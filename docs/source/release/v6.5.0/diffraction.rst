@@ -49,7 +49,7 @@ New features
 
 Bugfixes
 ############
-- Fixed issue with DGSPlanner introduced by diffractometer instrument WAND\ :sup:`2`.
+- Fixed issue with :ref:`DGSPlanner <dgsplanner-ref>` introduced by diffractometer instrument WAND\ :sup:`2`.
 - Fixed logic issues in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` that prevents the integration of satellite peaks.
 - Fixed issue with errorbar in :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDToQ>`.
 - Fixed deprecated syntax in  :ref:`LoadWANDSCD <algm-LoadWANDSCD>` that gives h5py warnings.
