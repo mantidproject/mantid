@@ -40,6 +40,9 @@ New features
 - Updated documentation.
 - Updated quick options for lines to consider new colour mapping and line width changes.
 
+.. image:: ../../images/6_5_release/Direct/mslice_quick_options.png
+    :align: center
+
 Bugfixes
 ############
 - Fixed bug that caused opening of a second slice plot when changing the intensity while an interactive cut plot is open.

@@ -43,6 +43,14 @@ Bugfixes
 ############
 - Fix for the colorbar bug where using log scale causes slice viewer to throw exception with all masked slice.
 - The colorbar now remains autoscaled when switching between the different normalisation options.
+
+.. list-table::
+
+    * - .. figure:: ../../images/6_5_release/Workbench/Normalisation_change.gif
+
+      - .. figure:: ../../images/6_5_release/Workbench/Scale_change.gif
+
+
 - :ref:`SliceViewer <sliceviewer>` will now support ``W_MATRIX`` log for nonorthogonal axes with :ref:`MDHistoWorkspaces <MDHistoWorkspace>`. This prevents a bug related where basis vectors are used to calculate the projection.
 - Fixes a bug in the :ref:`SliceViewer <sliceviewer>` where a workspace is replaced by an algorithm with more than one output workspace.
 - For 3d+ datasets, :ref:`SliceViewer <sliceviewer>` will now automatically open to the zero-slice if present.

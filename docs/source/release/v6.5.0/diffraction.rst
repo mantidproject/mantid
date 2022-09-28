@@ -31,6 +31,9 @@ New features
 ############
 - A new tab has been added to the :ref:`ISIS Engineering Diffraction UI<Engineering_Diffraction-ref>` to support running refinements in GSAS-II.
 
+.. image:: ../../images/6_5_release/Diffraction/GSASII_tab.png
+    :align: center
+
 Bugfixes
 ############
 
