@@ -33,6 +33,16 @@ class StateWavelength(metaclass=JsonSerializable):
             RangeStepType.NOT_SET
         return result
 
+    @property
+    def wavelength_step_type_range(self):
+        # Return the wavelength step type, converting LIN/LOG to
+        # RANGE_LIN/RANGE_LOG.
+        value = self.wavelength_step_type
+        result = RangeStepType.RANGE_LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
+            RangeStepType.RANGE_LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
+            RangeStepType.NOT_SET
+        return result
+
     def validate(self):
         is_invalid = dict()
         if one_is_none([self.wavelength_interval]):
