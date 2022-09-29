@@ -74,7 +74,6 @@ public:
     m_model->setQWidth(0.05);
     m_model->setQMax(1.8);
     m_model->setEFixed("0.4");
-    m_model->setRebinInEnergy(false);
 
     m_model->setupRebinAlgorithm(&batch);
     m_model->setupSofQWAlgorithm(&batch);
