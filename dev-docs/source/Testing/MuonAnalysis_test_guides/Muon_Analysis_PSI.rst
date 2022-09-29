@@ -14,7 +14,8 @@ For continous sources background corrections are very important.
 Fitting a flat background to the data (sometimes along with a exp decay), it is possible to remove the background from the data.
 
 ------------------------------------
-.. _loading_test:
+
+.. _psi_loading_test:
 
 Loading Data Test
 -----------------
@@ -30,7 +31,8 @@ Loading Data Test
 - If you tick the `Plot raw` option the data will change
 
 ------------------------------------
-.. _auto_test:
+
+.. _psi_auto_test:
 
 Auto Background Corrections Test
 --------------------------------
@@ -47,7 +49,8 @@ Auto Background Corrections Test
 - The new values should be similar (within 1) to before
 
 ------------------------------------
-.. _flat_test:
+
+.. _psi_flat_test:
 
 Flat Background Corrections Test
 --------------------------------
@@ -68,7 +71,8 @@ Flat Background Corrections Test
 - The results should be similar to before
 
 ------------------------------------
-.. _manual_test:
+
+.. _psi_manual_test:
 
 Manual Background Corrections Test
 ----------------------------------
