@@ -86,7 +86,7 @@ void ImportMDHistoWorkspace::exec() {
   }
 
   // Fetch out raw pointers to workspace arrays.
-  auto signals = ws->mutableSignalArray();
+  Mantid::signal_t *signals = ws->mutableSignalArray();
   double *errors = ws->mutableErrorSquaredArray();
 
   // Write to the signal and error array from the deque.

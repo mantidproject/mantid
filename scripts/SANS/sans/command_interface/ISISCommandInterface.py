@@ -713,6 +713,34 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0):
     director.add_command(detector_offsets)
 
 
+def _validate_wavrange_types(start, end):
+    def is_set(val):
+        return val is not None
+
+    def is_list(val):
+        return is_set(val) and isinstance(val, list)
+
+    # If one input is a list, they must both be lists of the same length
+    if is_list(start) != is_list(end):
+        raise RuntimeError("WavRangeReduction: The wav_start and wav_end inputs must both be the same type (got"
+                           " a mixture of single value and list)")
+    if is_list(start) and is_list(end) and len(start) != len(end):
+        raise RuntimeError("WavRangeReduction: the wav_start and wav_end inputs must contain the same number of values")
+
+    # Ensure values are stored as floats
+    if is_list(start):
+        start = [float(wav) for wav in start]
+    elif is_set(start):
+        start = float(start)
+
+    if is_list(end):
+        end = [float(wav) for wav in end]
+    elif is_set(end):
+        end = float(end)
+
+    return start, end
+
+
 # --------------------------------------------
 # Commands which actually kick off a reduction
 # --------------------------------------------
@@ -768,11 +796,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         raise RuntimeError("WavRangeReduction: The combineDet input parameter was given a value of {0}. rear, front,"
                            " both, merged and no input are allowed".format(combineDet))
 
-    if wav_start is not None:
-        wav_start = float(wav_start)
-
-    if wav_end is not None:
-        wav_end = float(wav_end)
+    wav_start, wav_end = _validate_wavrange_types(wav_start, wav_end)
 
     wavelength_command = NParameterCommand(command_id=NParameterCommandId.WAV_RANGE_SETTINGS,
                                            values=[wav_start, wav_end, full_trans_wav, reduction_mode])

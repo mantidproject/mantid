@@ -33,7 +33,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(2, widget.editor_count)
 
     def test_open_file_in_new_tab_import_added(self):
-        test_string = "Test file\nLoad()"
+        test_string = "Test file\nConvertUnits()"
         widget = MultiPythonFileInterpreter()
         mock_open_func = mock.mock_open(read_data=test_string)
         with mock.patch(widget.__module__ + '.open', mock_open_func, create=True):

@@ -42,6 +42,7 @@ public:
   ObjCompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   ObjCompAssembly(const ObjCompAssembly &);
+  ObjCompAssembly &operator=(const ObjCompAssembly &);
   ~ObjCompAssembly() override;
   //! Make a clone of the present component
   IComponent *clone() const override;

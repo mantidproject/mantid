@@ -240,7 +240,8 @@ public:
   }
 
   void test_Build_Simple() {
-    std::string result[] = {"TopLevelAlgorithm(InputWorkspace='test_input_"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "TopLevelAlgorithm(InputWorkspace='test_input_"
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
@@ -285,7 +286,8 @@ public:
     const auto &wsHist = outputWS->history();
     ScriptBuilder builder(wsHist.createView());
     const auto generatedText = builder.build();
-    const auto expectedText = "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
+    const auto expectedText = "from mantid.simpleapi import *\n\n"
+                              "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
                               "Dict='{\"Int\":1,\"String\":\"option\"}', "
                               "OutputWorkspace='test_Build_With_PropertyManagerProperty_Out')\n";
 
@@ -296,7 +298,8 @@ public:
 
   void test_newline_chars_removed() {
     // Check that any newline chars are removed
-    std::string result[] = {"FooBar(InputWorkspace='test_input_workspace',"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "FooBar(InputWorkspace='test_input_workspace',"
                             " OutputWorkspace='test_output_workspace')",
                             ""};
 
@@ -339,7 +342,8 @@ public:
 
     std::string algTimestamp{" # " + executionTime};
 
-    std::string result[] = {"TopLevelAlgorithm(InputWorkspace='test_input_"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "TopLevelAlgorithm(InputWorkspace='test_input_"
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')" +
                                 algTimestamp,
@@ -362,6 +366,8 @@ public:
 
   void test_Build_Unrolled() {
     std::string result[] = {
+        "from mantid.simpleapi import *",
+        "",
         "",
         "# Child algorithms of TopLevelAlgorithm",
         "",
@@ -407,6 +413,8 @@ public:
 
   void test_Partially_Unrolled() {
     std::string result[] = {
+        "from mantid.simpleapi import *",
+        "",
         "",
         "# Child algorithms of TopLevelAlgorithm",
         "",
@@ -463,7 +471,8 @@ public:
   void test_Build_Simple_with_backslash() {
     // checks that property values with \ get prefixed with r, eg.
     // filename=r'c:\test\data.txt'
-    std::string result[] = {"TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_"
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
@@ -497,7 +506,8 @@ public:
 
   void test_Build_Dynamic_Property() {
     // importantly the Dynamic Property should not be written into the script
-    std::string result = "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
+    std::string result = "from mantid.simpleapi import *\n\n"
+                         "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
                          "OutputWorkspace='test_output_workspace', PropertyA='A', "
                          "PropertyB='B', DynamicInputProperty='C')\n";
 

@@ -68,8 +68,11 @@ public:
   GeometryHandler(const std::shared_ptr<CSGObject> &obj); ///< Constructor
   GeometryHandler(CSGObject *obj);                        ///< Constructor
   GeometryHandler(const MeshObject &obj);
+  GeometryHandler &operator=(const MeshObject &obj);
   GeometryHandler(const MeshObject2D &obj);
+  GeometryHandler &operator=(const MeshObject2D &obj);
   GeometryHandler(const GeometryHandler &handler);
+  GeometryHandler &operator=(GeometryHandler handler);
   std::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
   void render() const;     ///< Render Object or ObjComponent

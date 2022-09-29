@@ -732,15 +732,17 @@ LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(const std::vector<Spic
     }   // END-IF-ELSE (detector-node or log node)
   }     // END-FOR (xml nodes)
 
-  // Add the property to output workspace
-  for (auto &log_entry : str_log_map) {
-    outws->mutableRun().addProperty(new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
-  }
-  for (auto &log_entry : int_log_map) {
-    outws->mutableRun().addProperty(new PropertyWithValue<int>(log_entry.first, log_entry.second));
-  }
-  for (auto &log_entry : dbl_log_map) {
-    outws->mutableRun().addProperty(new PropertyWithValue<double>(log_entry.first, log_entry.second));
+  if (outws) {
+    // Add the property to output workspace
+    for (auto &log_entry : str_log_map) {
+      outws->mutableRun().addProperty(new PropertyWithValue<std::string>(log_entry.first, log_entry.second));
+    }
+    for (auto &log_entry : int_log_map) {
+      outws->mutableRun().addProperty(new PropertyWithValue<int>(log_entry.first, log_entry.second));
+    }
+    for (auto &log_entry : dbl_log_map) {
+      outws->mutableRun().addProperty(new PropertyWithValue<double>(log_entry.first, log_entry.second));
+    }
   }
 
   // Raise exception if no detector node is found

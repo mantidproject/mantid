@@ -55,7 +55,7 @@ public:
 
   std::set<detid_t> getDetectorIDs(const std::size_t workspaceIndex) const;
 
-  void binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws, const unsigned int operatortype);
+  void binaryOperation(const std::shared_ptr<const SpecialWorkspace2D> &ws, const unsigned int operatortype);
   void binaryOperation(const unsigned int operatortype);
 
   virtual void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews);

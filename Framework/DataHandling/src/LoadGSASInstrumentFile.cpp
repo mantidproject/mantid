@@ -103,11 +103,7 @@ void LoadGSASInstrumentFile::exec() {
   // Check Histogram type - only PNTR is currently supported
   std::string histType = getHistogramType(lines);
   if (histType != "PNTR") {
-    if (histType.size() == 4) {
-      throw std::runtime_error("Histogram type " + histType + " not supported \n");
-    } else {
-      throw std::runtime_error("Error on checking histogram type: " + histType + "\n");
-    }
+    throw std::runtime_error("Error on checking histogram type: " + histType + "\n");
   }
 
   size_t numBanks = getNumberOfBanks(lines);

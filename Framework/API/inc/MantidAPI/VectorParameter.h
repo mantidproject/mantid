@@ -26,6 +26,7 @@ public:
   VectorParameter();
   VectorParameter(size_t size);
   VectorParameter(const VectorParameter<Derived, ElemType> &other);
+  VectorParameter<Derived, ElemType> &operator=(const VectorParameter<Derived, ElemType> &other);
   ~VectorParameter() override;
   void addValue(const size_t index, const ElemType &value);
   std::string toXMLString() const override;
@@ -111,12 +112,20 @@ bool VectorParameter<Derived, ElemType>::operator!=(const Derived &other) const 
 @param other : object to act as source of copy.
 */
 template <typename Derived, typename ElemType>
-VectorParameter<Derived, ElemType>::VectorParameter(const VectorParameter<Derived, ElemType> &other)
-    : m_size(other.m_size), m_isValid(other.m_isValid) {
+VectorParameter<Derived, ElemType>::VectorParameter(const VectorParameter<Derived, ElemType> &other) {
+  *this = other;
+}
+
+template <typename Derived, typename ElemType>
+VectorParameter<Derived, ElemType> &
+VectorParameter<Derived, ElemType>::operator=(const VectorParameter<Derived, ElemType> &other) {
+  m_size = other.m_size;
+  m_isValid = other.m_isValid;
   m_arry = new ElemType[other.getSize()];
   for (size_t i = 0; i < other.getSize(); i++) {
     this->m_arry[i] = other.m_arry[i];
   }
+  return *this;
 }
 
 /// Default constructor

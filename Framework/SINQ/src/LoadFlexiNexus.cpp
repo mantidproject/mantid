@@ -213,7 +213,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
 
   auto ws = std::make_shared<MDHistoWorkspace>(dimensions);
 
-  auto dd = ws->mutableSignalArray();
+  signal_t *dd = ws->mutableSignalArray();
   signal_t *ddE = ws->mutableErrorSquaredArray();
 
   // assign data
