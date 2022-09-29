@@ -23,9 +23,8 @@ API_IMPORT = ("# import mantid algorithms\n"
 
 
 def add_mantid_api_import(editor, content):
-    future_imported_line_no = check_future_import(content)
-    if future_imported_line_no:
-        editor.setCursorPosition(future_imported_line_no, 0)
+    # Always put import at top of file
+    editor.setCursorPosition(0, 0)
     editor.insert(API_IMPORT)
 
 
@@ -37,19 +36,9 @@ def attr_called(attr, content):
     return bool(re.search(r'(^|\s)+' + attr + r'\(.*\)', content))
 
 
-def check_future_import(content):
-    """Return line number of __future__ import in content, if present"""
-    match = re.search(r'(import .*__future__|from __future__  *import)',
-                      content)
-    if match:
-        line_no = len(re.findall(r'(\r\n|\n|\r)', content[:match.end()])) + 1
-        return line_no
-    return False
-
-
 def mantid_algorithm_used_without_import(content):
     for attr in dir(simpleapi):
-        if (not attr.startswith('_') and attr == attr.title()
+        if (not attr.startswith('_') and attr[0].isupper()
                 and attr_called(attr, content)
                 and not attr_imported(attr, content)):
             return True
