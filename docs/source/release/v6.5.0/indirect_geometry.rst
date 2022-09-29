@@ -7,7 +7,7 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`isis-powder-diffraction-osiris-ref`.
+- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:` ISIS Powder Diffraction Scripts - OSIRIS <isis-powder-diffraction-osiris-ref>`.
 - Three new fitting functions: :ref:`FickDiffusionSQE <func-FickDiffusionSQE>`, :ref:`ChudleyElliotSQE <func-Chudley-ElliotSQE>`, and :ref:`HallRossSQE <func-Hall-RossSQE>` have been made and added to ConvFit.
 
 .. image:: ../../images/6_5_release/Indirect/chudley-elliot-fit.png
