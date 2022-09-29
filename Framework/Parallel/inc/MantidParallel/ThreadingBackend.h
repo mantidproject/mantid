@@ -78,7 +78,7 @@ template <class T> size_t loadFromStream(boost::archive::binary_iarchive &ia, st
   return data.size() * sizeof(T);
 }
 template <class T> size_t loadFromStream(boost::archive::binary_iarchive &ia, T *data, const size_t count) {
-  size_t received;
+  size_t received = size_t();
   ia.operator>>(received);
   for (size_t i = 0; i < count; ++i) {
     if (i >= received)

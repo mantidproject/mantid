@@ -44,13 +44,13 @@ public:
 private:
   void init() override;
   void exec() override;
-  void setInstrumentName(NeXus::NXEntry &entry);
+  void setInstrumentName(const NeXus::NXEntry &entry);
   void initWorkSpace(NeXus::NXEntry &);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }
-  void loadExperimentDetails(NeXus::NXEntry &);
-  void loadRunDetails(NeXus::NXEntry &);
+  void loadExperimentDetails(const NeXus::NXEntry &);
+  void loadRunDetails(const NeXus::NXEntry &);
   void runLoadInstrument();
 
   std::vector<std::string> m_supportedInstruments;

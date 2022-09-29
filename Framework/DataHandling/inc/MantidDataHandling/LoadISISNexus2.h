@@ -100,7 +100,7 @@ private:
   /// Load in details about the run
   void loadRunDetails(DataObjects::Workspace2D_sptr &local_workspace, Mantid::NeXus::NXEntry &entry);
   /// Load in details about the sample
-  void loadSampleData(DataObjects::Workspace2D_sptr &, Mantid::NeXus::NXEntry &entry);
+  void loadSampleData(DataObjects::Workspace2D_sptr &, const Mantid::NeXus::NXEntry &entry);
   /// Load log data from the nexus file
   void loadLogs(DataObjects::Workspace2D_sptr &ws);
   // Load a given period into the workspace
@@ -176,7 +176,7 @@ private:
                                  bool excludeMonitors, bool separateMonitors);
 
   /// Check if is the file is a multiple time regime file
-  bool isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const;
+  bool isMultipleTimeRegimeFile(const NeXus::NXEntry &entry) const;
 };
 
 } // namespace DataHandling

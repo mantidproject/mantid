@@ -211,7 +211,6 @@ std::shared_ptr<HistogramData::HistogramX> loadTimeData(const NXEntry &entry) {
     return timeData;
   } else { // Muon V2 file
     auto timeBins = entry.openNXFloat("detector_1/raw_time");
-    timeBins = entry.openNXFloat("detector_1/raw_time");
     auto x_length = timeBins.dim0();
     timeBins.load();
     auto timeData = std::make_shared<HistogramData::HistogramX>(timeBins(), timeBins() + x_length);

@@ -88,7 +88,7 @@ void LoadNexusProcessed2::readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &m
     g_log.information() << "Instrument layout not recognised. Spectra mappings not loaded.";
   }
 }
-void LoadNexusProcessed2::extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry) {
+void LoadNexusProcessed2::extractMappingInfoNew(const Mantid::NeXus::NXEntry &mtd_entry) {
   using namespace Mantid::NeXus;
   auto result = findEntriesOfType(mtd_entry, "NXinstrument");
   if (result.size() != 1) {

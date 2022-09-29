@@ -132,7 +132,7 @@ void EventWorkspaceMRU::insertE(size_t thread_num, EType data, const EventList *
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexE);
   auto eWithMarker = std::make_shared<TypeWithMarker<EType>>(reinterpret_cast<std::uintptr_t>(index));
   eWithMarker->m_data = std::move(data);
-  auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
+  m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
 }
 

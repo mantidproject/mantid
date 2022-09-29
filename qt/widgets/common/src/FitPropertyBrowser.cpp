@@ -856,7 +856,7 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
     action = new QAction("Help", this);
     connect(action, SIGNAL(triggered()), this, SLOT(browserHelp()));
     menu->addAction(action);
-  } else if (isFunctionsGroup || isSettingsGroup || isASetting) {
+  } else if (isSettingsGroup || isASetting) {
     if (isFitEnabled()) {
       action = new QAction("Fit", this);
       connect(action, SIGNAL(triggered()), this, SLOT(fit()));

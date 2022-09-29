@@ -96,8 +96,6 @@ template <class T> void recursiveFill(const Json::Value &jsonArray, std::vector<
 /// path is truncated. If the values are completely emptied, then the path has
 /// been found.
 void recursiveDependencySearch(const Json::Value &parent, std::vector<std::string> &values) {
-  auto name = parent[NAME].asString();
-
   if (!values.empty() && parent[NAME] == values.back())
     values.pop_back();
 

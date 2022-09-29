@@ -262,11 +262,6 @@ void ProfileChiSquared1D::execConcrete() {
   // Value of chi squared for current parameters in m_function
   double chi0 = chiSquaredWeighted;
 
-  // Parameter bounds that define a volume in the parameter
-  // space within which the chi squared is being examined.
-  EigenVector lBounds(nParams);
-  EigenVector rBounds(nParams);
-
   // Number of points in lines for plotting
   size_t n = 100;
   pdfTable->setRowCount(n);
@@ -303,8 +298,6 @@ void ProfileChiSquared1D::execConcrete() {
     //   par0 + rBound is the highest value of the parameter (rBound >= 0)
     double lBound = slice.findBound(-shift);
     double rBound = slice.findBound(shift);
-    lBounds[ip] = lBound;
-    rBounds[ip] = rBound;
 
     // Approximate the slice with a polynomial.
     // P is a vector of values of the polynomial at special points.

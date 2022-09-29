@@ -71,7 +71,7 @@ public:
                                         API::Algorithm *const pAlgo);
   /// creates monitor workspace
   static void createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
-                                     DataObjects::Workspace2D_sptr &normalws_sptr,
+                                     const DataObjects::Workspace2D_sptr &normalws_sptr,
                                      API::WorkspaceGroup_sptr &mongrp_sptr, const int64_t mwsSpecs,
                                      const int64_t nwsSpecs, const int64_t numberOfPeriods, const int64_t lengthIn,
                                      const std::string &title, API::Algorithm *const pAlg);
