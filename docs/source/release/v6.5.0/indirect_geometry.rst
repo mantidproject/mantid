@@ -7,8 +7,13 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`isis-powder-diffraction-osiris-ref`.
+- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`ISIS Powder Diffraction Scripts - OSIRIS <isis-powder-diffraction-osiris-ref>`.
 - Three new fitting functions: :ref:`FickDiffusionSQE <func-FickDiffusionSQE>`, :ref:`ChudleyElliotSQE <func-Chudley-ElliotSQE>`, and :ref:`HallRossSQE <func-Hall-RossSQE>` have been made and added to ConvFit.
+
+.. image:: ../../images/6_5_release/Indirect/chudley-elliot-fit.png
+    :align: center
+    :width: 650
+
 - The :ref:`I(q,t) <iqt>` tab in Indirect Data Analysis can now be ran with direct data.
 - Updated :ref:`SimpleShapeDiscusInelastic <algm-SimpleShapeDiscusInelastic>` workflow algorithm to add support for containers in line with the enhancements made to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>`.
 
