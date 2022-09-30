@@ -409,15 +409,16 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 log = 'Reflected Beam(s): {}\n'.format(refl_beam_names)
                 self._logs.append(log)
                 self.log().accumulate(log)
+                reflected_beam_input = self._compose_run_string(self._rb[angle_index])
                 reflected_beam_name = '{}_reflected'.format(runRB)
                 to_convert_to_q, direct_foreground_name, corrected_theta_ws = \
-                    self.process_reflected_beam(reflected_beam_name, direct_beam_name, angle_index)
+                    self.process_reflected_beam(reflected_beam_input, reflected_beam_name, direct_beam_name, angle_index)
             else:
                 foreground_names = []
                 run_inputs, run_names = self.compose_polarized_runs_list(angle_index)
                 for (run, name) in zip(run_inputs, run_names):
-                    reflected_pol_foreground_ws_name, _, corrected_theta_ws = \
-                        self.process_reflected_beam(name, direct_beam_name, angle_index)
+                    reflected_pol_foreground_ws_name, direct_foreground_name, corrected_theta_ws = \
+                        self.process_reflected_beam(run, name, direct_beam_name, angle_index)
                     foreground_names.append(reflected_pol_foreground_ws_name)
                 to_convert_to_q = '{}_pol_{}'.format(self._out_ws, str(angle_index))
                 self.polarization_correction(','.join(foreground_names), to_convert_to_q)
@@ -425,7 +426,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                     self._auto_cleanup.cleanupLater(workspace.name())
 
             converted_to_q_name = '{}_{}'.format(self._out_ws, str(angle_index))
-            self.convert_to_momentum_transfer(to_convert_to_q, converted_to_q_name, direct_foreground_name, angle_index, corrected_theta_ws)
+            self.convert_to_momentum_transfer(to_convert_to_q, converted_to_q_name, direct_foreground_name, angle_index,
+                                              corrected_theta_ws)
             if scale_factor != 1:
                 Scale(InputWorkspace=converted_to_q_name, OutputWorkspace=converted_to_q_name, Factor=scale_factor)
             to_group.append(converted_to_q_name)
@@ -489,21 +491,23 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         angle_index -- index of the currently processed reflected runs
         theta_correction -- name of the workspace containing twoTheta gravity corrections (FIGARO only, optional)
         """
+        rebinned_direct_foreground = '{}_rebinned'.format(direct_foreground_name)
         RebinToWorkspace(
             WorkspaceToRebin=direct_foreground_name,
             WorkspaceToMatch=input_ws_name,
-            OutputWorkspace=direct_foreground_name)
+            OutputWorkspace=rebinned_direct_foreground)
 
         ReflectometryILLConvertToQ(
             InputWorkspace=input_ws_name,
             OutputWorkspace=output_ws_name,
-            DirectForegroundWorkspace=direct_foreground_name,
+            DirectForegroundWorkspace=rebinned_direct_foreground,
             GroupingQFraction=float(self.get_value(PropertyNames.GROUPING_FRACTION, angle_index)),
             SubalgorithmLogging=self._subalg_logging,
             ThetaCorrection=theta_correction,
             Cleanup=self._cleanup,
         )
         self._auto_cleanup.cleanupLater(direct_foreground_name)
+        self._auto_cleanup.cleanupLater(rebinned_direct_foreground)
 
     def crop_theta_correction(self, reflected_beam_name: str, theta_ws_name: str, angle_index: int) -> str:
         """Prepares the angular gravity correction workspace to have a consistent X axis range with the reflected beam
@@ -691,19 +695,21 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             self._auto_cleanup.cleanupLater(direct_foreground_name)
         if self.is_polarized():
             self.polarization_correction(direct_foreground_name, direct_foreground_name)
+            # the output is a workspace group with one entry, which needs to be flatten to MatrixWorkspace:
             frg_ws_name = mtd[direct_foreground_name][0].name()
             RenameWorkspace(InputWorkspace=frg_ws_name, OutputWorkspace=direct_foreground_name)
 
-    def process_reflected_beam(self, reflected_beam_name: str, direct_beam_name: str, angle_index: int) -> Tuple[str, str, str]:
+    def process_reflected_beam(self, reflected_beam_input, reflected_beam_name: str, direct_beam_name: str,
+                               angle_index: int) -> Tuple[str, str, str]:
         """Processes the reflected beam for the given angle configuration by calling preprocessing, summing foreground,
         correcting gravity (FIGARO only), and in case of polarized processing, polarization correction.
 
         Keyword arguments:
+        reflected_beam_input -- name of the reflected beam run
         reflected_beam_name -- name to be given to the reflected preprocessed workspace
         direct_beam_name -- name of the direct beam workspace at the same angle index
         angle_index -- index of the currently processed reflected runs
         """
-        reflected_beam_input = self._compose_run_string(self._rb[angle_index])
         self.preprocess_reflected_beam(reflected_beam_input, reflected_beam_name, direct_beam_name, angle_index)
         self.log_foreground_centres(reflected_beam_name, direct_beam_name)
         foreground_name = '{}_frg'.format(reflected_beam_name)
