@@ -4,7 +4,7 @@
 Mantid 6.5.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../../../images/ISIS_Logo_Transparent_UKRI.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -17,6 +17,19 @@ Mantid 6.5.0 Release Notes
 We are proud to announce version 6.5.0 of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
+
+In addition to many improvements we are delighted to announce some new features including:
+
+- A new tab has been added to the :ref:`ISIS Engineering Diffraction UI<Engineering_Diffraction-ref>` to support running refinements in GSAS-II.
+- The ISIS powder diffraction scripts support the PaalmanPings correction method.
+- It is now possible to use the algorithms from the :ref:`GOFit optimization package <gofit-fitting>` directly with the :ref:`Crystal Field API <Crystal Field Python Interface>`.
+- The algorithm :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` now simulates scattering in a container (and more generally in any sample environment components) if a user sets up the shapes\materials in the input workspace prior to running the algorithm.
+- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`ISIS Powder Diffraction Scripts - OSIRIS <isis-powder-diffraction-osiris-ref>`.
+- Three new fitting functions: :ref:`FickDiffusionSQE <func-FickDiffusionSQE>`, :ref:`ChudleyElliotSQE <func-Chudley-ElliotSQE>`, and :ref:`HallRossSQE <func-Hall-RossSQE>` have been made and added to ConvFit.
+- Support loading and reducing data for the new detector for D16 at ILL.
+
+.. figure:: ../../images/6_5_release/6_5_collage.png
+   :align: center
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
