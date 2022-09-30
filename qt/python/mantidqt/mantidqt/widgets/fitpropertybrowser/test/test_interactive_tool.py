@@ -46,7 +46,7 @@ class FitInteractiveToolTest(unittest.TestCase):
                     self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
                     self.interactor.motion_notify_callback(event)
 
-                    self.assertEqual(expected_cursor, QApplication.overrideCursor())
+                    self.assertEqual(expected_cursor, QApplication.overrideCursor().shape())
 
     def test_hover_over_marker_sets_override_cursor(self):
         expected_cursor = Qt.SizeHorCursor
