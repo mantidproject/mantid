@@ -680,7 +680,7 @@ class FigureInteraction(object):
         If the cursor is above multiple markers (eg. an intersection) make it into a cross.
         Otherwise set it to the default one.
         :param x_pos: cursor x position
-        :param y_pos: cursor y position(
+        :param y_pos: cursor y position
         """
         if x_pos is None or y_pos is None:
             QApplication.restoreOverrideCursor()
