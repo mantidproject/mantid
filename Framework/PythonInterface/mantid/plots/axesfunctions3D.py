@@ -135,10 +135,10 @@ def plot_surface(axes, workspace, *args, **kwargs):
     :param axes: class:`matplotlib.axes.Axes3D` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or
                       :class:`mantid.api.IMDHistoWorkspace` to extract the data from
-    :param rstride: Array row stride (step size), defaults to 1
-    :param cstride: Array column stride (step size), defaults to 1
-    :param rcount:	Use at most this many rows, defaults to 50
-    :param ccount:	Use at most this many columns, defaults to 50
+    :param rstride: Array row stride (step size)
+    :param cstride: Array column stride (step size)
+    :param rcount:	Use at most this many rows, defaults to 100 (vs matplotlib default of 50)
+    :param ccount:	Use at most this many columns, defaults to 100 (vs matplotlib default of 50)
     :param color:	Color of the surface patches
     :param cmap:	A colormap for the surface patches.
     :param norm:	An instance of Normalize to map values to colors
@@ -158,7 +158,9 @@ def plot_surface(axes, workspace, *args, **kwargs):
     '''
     x, y, z, indices = _extract_3d_data(workspace, **kwargs)
     _set_labels_3d(axes, workspace, indices)
-    return axes.plot_surface(x, y, z, *args, **kwargs)
+    rcount = kwargs.pop('rcount', 100)
+    ccount = kwargs.pop('ccount', 100)
+    return axes.plot_surface(x, y, z, rcount=rcount, ccount=ccount, *args, **kwargs)
 
 
 def contour(axes, workspace, *args, **kwargs):
