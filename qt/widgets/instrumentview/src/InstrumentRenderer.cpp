@@ -409,5 +409,8 @@ size_t InstrumentRenderer::decodePickColor(const QRgb &c) {
                             static_cast<unsigned char>(qBlue(c)));
 }
 
-void InstrumentRenderer::loadColorMap(const QString &fname) { m_colorMap.loadMap(fname); }
+void InstrumentRenderer::loadColorMap(const std::pair<QString, bool> &cmap) {
+  m_colorMap.loadMap(cmap.first);
+  m_HighlightDetsWithZeroCount = cmap.second;
+}
 } // namespace MantidQt::MantidWidgets

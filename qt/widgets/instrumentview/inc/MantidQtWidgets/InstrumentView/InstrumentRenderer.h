@@ -48,7 +48,7 @@ public:
 
   void changeNthPower(double nth_power);
 
-  void loadColorMap(const QString &fname);
+  void loadColorMap(const std::pair<QString, bool> &cmap);
 
   const ColorMap &getColorMap() const { return m_colorMap; }
 

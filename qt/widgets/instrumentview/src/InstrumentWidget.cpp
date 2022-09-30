@@ -806,16 +806,16 @@ void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
     return;
   const auto currentCMap = m_instrumentActor->getCurrentColorMap();
 
-  QString selection;
+  std::pair<QString, bool> selection;
   if (cmapNameOrPath.isEmpty()) {
     // ask user
     selection = ColorMap::chooseColorMap(currentCMap, this);
-    if (selection.isEmpty()) {
+    if (selection.first.isEmpty()) {
       // assume cancelled request
       return;
     }
   } else {
-    selection = ColorMap::exists(cmapNameOrPath);
+    selection = std::make_pair(ColorMap::exists(cmapNameOrPath), false);
   }
 
   if (selection == currentCMap) {

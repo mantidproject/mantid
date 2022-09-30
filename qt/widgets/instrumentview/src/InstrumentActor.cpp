@@ -115,7 +115,7 @@ void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
   m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
-  if (!m_currentCMap.isEmpty()) {
+  if (!m_currentCMap.first.isEmpty()) {
     loadColorMap(m_currentCMap, false);
   }
 
@@ -654,9 +654,9 @@ void InstrumentActor::draw(bool picking) const {
  * @param fname :: A color map file name.
  * @param reset_colors :: An option to reset the detector colors.
  */
-void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
-  m_renderer->loadColorMap(fname);
-  m_currentCMap = fname;
+void InstrumentActor::loadColorMap(const std::pair<QString, bool> &cmap, bool reset_colors) {
+  m_renderer->loadColorMap(cmap);
+  m_currentCMap = cmap;
   if (reset_colors)
     resetColors();
 }
@@ -698,7 +698,8 @@ void InstrumentActor::loadSettings() {
   settings.beginGroup("Mantid/InstrumentWidget");
   m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentCMap = settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
+  m_currentCMap.first = settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
+  m_currentCMap.second = settings.value("ColormapFileHighlightZeros", false).toBool();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
@@ -707,7 +708,8 @@ void InstrumentActor::loadSettings() {
 void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  settings.setValue("ColormapFile", m_currentCMap);
+  settings.setValue("ColormapFile", m_currentCMap.first);
+  settings.setValue("ColormapFileHighlightZeros", m_currentCMap.second);
   settings.setValue("ScaleType", static_cast<int>(m_renderer->getColorMap().getScaleType()));
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
