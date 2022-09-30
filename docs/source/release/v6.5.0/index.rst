@@ -18,6 +18,9 @@ We are proud to announce version 6.5.0 of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
 
+This release includes a wide array of updates, bugfixes, and new features which build on the functionality of Mantid.
+Users are reminded that since the previous release the :ref:`packaging method has changed <v6.4.0>`.
+
 In addition to many improvements we are delighted to announce some new features including:
 
 - A new tab has been added to the :ref:`ISIS Engineering Diffraction UI<Engineering_Diffraction-ref>` to support running refinements in GSAS-II.
@@ -30,6 +33,9 @@ In addition to many improvements we are delighted to announce some new features 
 
 .. figure:: ../../images/6_5_release/6_5_collage.png
    :align: center
+
+Further Information
+-------------------
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
