@@ -128,7 +128,7 @@ For a full release, ``C:\MantidInstall\`` is likely the correct install path. Ta
 .. _Trouble_Linux:
 
 Linux
-======
+=====
 
 For a full release, ``/opt/Mantid/`` is likely the correct install path. Take care to readjust this to ``/opt/mantidnightly/`` if you are diagnosing a nightly version.
 
@@ -205,6 +205,24 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
 11. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
 
+Built-in Help Not Displaying
+----------------------------
+
+It has been observed that the built-in help window can display empty content
+under some circumstances.
+If another package has created a directory in the path ``$HOME/.local/share/mime``
+along with a file ``$HOME/.local/share/mime/packages/user-extension-html.xml``
+then that package has registered that it will handle all ``.html`` files,
+causing Mantid help to display a blank page.
+
+The Mantid help can be restored by renaming the ``mime`` directory:
+
+.. code-block:: shell
+
+   mv ~/.local/share/mime .local/share/mime.orig
+
+It is unclear what might break in other applications but nothing as yet has
+been observed.
 
 .. _Trouble_MacOS:
 
