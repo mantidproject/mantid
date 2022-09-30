@@ -9,11 +9,13 @@
 
 
 import unittest
-from mantidqt.widgets.fitpropertybrowser.interactive_tool import FitInteractiveTool
-from mantidqt.utils.qt.testing import start_qapplication
 from unittest.mock import MagicMock, patch
-from qtpy.QtWidgets import QApplication
+
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QApplication
+
+from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.widgets.fitpropertybrowser.interactive_tool import FitInteractiveTool
 
 
 @start_qapplication
@@ -33,7 +35,8 @@ class FitInteractiveToolTest(unittest.TestCase):
     def cursor_hover_over_marker_test_helper(self, above, expected_cursor):
         with patch('mantidqt.plotting.markers.SingleMarker.is_inside_bounds', return_value=(True, 1)):
             with patch('mantidqt.plotting.markers.RangeMarker.get_range', return_value=[0, 10]):
-                # set is_above to return True, simulating cursor hovering over a marker
+                # is_above = True -> cursor is hovering over a marker
+                # is_above = False -> cursor is not hovering ove a marker
                 with patch('mantidqt.plotting.markers.SingleMarker.is_above', return_value=above):
                     event = MagicMock()
                     event.xdata = 1
