@@ -444,7 +444,7 @@ AllPeaksStrategy::getAllPeaks(const HistogramData::HistogramX &x, const Histogra
     // 2. Not recording + above treshold => start recording
     // 3. Recording + below threshold => stop recording
     // 4. Recording + above threshold => continue recording
-    if (!isRecording && !isAboveThreshold) {
+    if (!isRecording && (!std::isfinite(signal) || !isAboveThreshold)) {
       continue;
     } else if (!isRecording && isAboveThreshold && std::isfinite(signal)) {
       // only start recording if is finite as NaN values will be found to be above threshold
