@@ -9,20 +9,24 @@ from mantid.simpleapi import ReflectometryILLAutoProcess, config, mtd
 
 
 class D17Cycle192IncoherentSanTest(systemtesting.MantidSystemTest):
-    """
-        @brief Tests with VoS11 sample at 2 angles with the data from cycle #192
-        Uses incoherent summation with sample angle option.
-    """
+    """Tests with VoS11 sample at 2 angles with the data from cycle #192. Uses incoherent summation with sample angle
+    option."""
 
-    def __init__(self):
-        super(D17Cycle192IncoherentSanTest, self).__init__()
-        self.setUp()
-
-    def setUp(self):
+    @classmethod
+    def setUp(cls):
+        cls._original_facility = config['default.facility']
+        cls._original_instrument = config['default.instrument']
+        cls._data_search_dirs = config.getDataSearchDirs()
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D17'
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D17/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
 
     def cleanup(self):
         mtd.clear()
@@ -66,20 +70,24 @@ class D17Cycle192IncoherentSanTest(systemtesting.MantidSystemTest):
 
 
 class D17Cycle192CoherentDanTest(systemtesting.MantidSystemTest):
-    """
-        @brief Tests with SiO2 sample at 2 angles with the data from cycle #192
-        Uses coherent summation with detector angle option.
-    """
+    """Tests with SiO2 sample at 2 angles with the data from cycle #192. Uses coherent summation with detector angle
+     option."""
 
-    def __init__(self):
-        super(D17Cycle192CoherentDanTest, self).__init__()
-        self.setUp()
-
-    def setUp(self):
+    @classmethod
+    def setUp(cls):
+        cls._original_facility = config['default.facility']
+        cls._original_instrument = config['default.instrument']
+        cls._data_search_dirs = config.getDataSearchDirs()
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D17'
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D17/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
 
     def cleanup(self):
         mtd.clear()
@@ -123,20 +131,24 @@ class D17Cycle192CoherentDanTest(systemtesting.MantidSystemTest):
 
 
 class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
-    """
-        @brief Tests with RoundRobin sample at 3 angles with the data from cycle #181
-        Uses incoherent summation with sample angle option.
-    """
+    """Tests with RoundRobin sample at 3 angles with the data from cycle #181. Uses incoherent summation with sample
+     angle option."""
 
-    def __init__(self):
-        super(D17Cycle181RoundRobinTest, self).__init__()
-        self.setUp()
-
-    def setUp(self):
+    @classmethod
+    def setUp(cls):
+        cls._original_facility = config['default.facility']
+        cls._original_instrument = config['default.instrument']
+        cls._data_search_dirs = config.getDataSearchDirs()
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D17'
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D17/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
 
     def cleanup(self):
         mtd.clear()
@@ -181,19 +193,24 @@ class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
 
 
 class FigaroCycle212GravityRefUp(systemtesting.MantidSystemTest):
-    """ Tests a reduction of C19H16O4 sample at 2 angles with the data from cycle 212.
-        Uses incoherent summation with detector angle option, and gravity correction with a reflection reference up.
-    """
+    """ Tests a reduction of C19H16O4 sample at 2 angles with the data from cycle 212. Uses incoherent summation
+    with detector angle option, and gravity correction with a reflection reference up."""
 
-    def __init__(self):
-        super(FigaroCycle212GravityRefUp, self).__init__()
-        self.setUp()
-
-    def setUp(self):
+    @classmethod
+    def setUp(cls):
+        cls._original_facility = config['default.facility']
+        cls._original_instrument = config['default.instrument']
+        cls._data_search_dirs = config.getDataSearchDirs()
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'FIGARO'
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/FIGARO/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
 
     def cleanup(self):
         mtd.clear()
