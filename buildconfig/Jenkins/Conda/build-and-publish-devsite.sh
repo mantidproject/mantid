@@ -1,10 +1,8 @@
 #!/bin/bash -ex
 # Build the developer site and push to gh-pages
-#
-# Usage: dev-site mantid_root_dir
 
 if [ $# != 1 ]; then
-  echo "Usage: dev-site.sh mantid_root_dir"
+  echo "Usage: build-and-publish-devsite.sh mantid_root_dir"
   exit 1
 fi
 
