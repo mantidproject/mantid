@@ -163,7 +163,7 @@ class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
         name = 'Thick_HR_5'
         directBeams = '397812,397806,397808'
         reflectedBeams = '397826+397827,397828,397829+397830+397831+397832'
-        foregroundWidth = [4,5,8]
+        foregroundWidth = [4, 5, 8]
         wavelengthLower = [3., 1.6, 2.]
         wavelengthUpper = [27., 25., 25.]
         angleOffset = 2
@@ -189,6 +189,67 @@ class D17Cycle181RoundRobinTest(systemtesting.MantidSystemTest):
             WavelengthLowerBound=wavelengthLower,
             WavelengthUpperBound=wavelengthUpper,
             DeltaQFractionBinning=0.5
+        )
+
+
+class D17Cycle213QuartzUserAngle(systemtesting.MantidSystemTest):
+    """Tests with quartz sample at 4 angles with the data from cycle 213. Uses incoherent summation with user angle
+     option."""
+
+    @classmethod
+    def setUp(cls):
+        cls._original_facility = config['default.facility']
+        cls._original_instrument = config['default.instrument']
+        cls._data_search_dirs = config.getDataSearchDirs()
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D17'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D17/')
+
+    @classmethod
+    def tearDown(cls):
+        config['default.facility'] = cls._original_facility
+        config['default.instrument'] = cls._original_instrument
+        config.setDataSearchDirs(cls._data_search_dirs)
+
+    def cleanup(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-6
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument', 'Sample']
+        return ['D17_Quartz_213', 'D17_Quartz_213.nxs']
+
+    def runTest(self):
+        name = 'D17_Quartz_213'
+        direct_beams = ','.join(['676978'] * 4)
+        reflected_beams = '676979,676980,676981+676982,676983+676985'
+        wavelength_lower = [3.7, 3, 3, 3]
+        wavelength_upper = 24
+        user_angles = [0.406, 0.806, 1.609, 3.207]
+        ReflectometryILLAutoProcess(
+            Run=reflected_beams,
+            DirectRun=direct_beams,
+            OutputWorkspace=name,
+            SummationType='Incoherent',
+            WavelengthLowerBound=wavelength_lower,
+            WavelengthUpperBound=wavelength_upper,
+            DeltaQFractionBinning=0.5,
+            AngleOption='UserAngle',
+            Theta=user_angles,
+            DirectLowAngleFrgHalfWidth=[3, 3, 3, 3],
+            DirectHighAngleFrgHalfWidth=[3, 5, 7, 9],
+            ReflLowAngleFrgHalfWidth=[3, 5, 7, 9],
+            ReflHighAngleFrgHalfWidth=[3, 5, 7, 9],
+            DirectLowAngleBkgOffset=5,
+            DirectLowAngleBkgWidth=10,
+            DirectHighAngleBkgOffset=5,
+            DirectHighAngleBkgWidth=10,
+            ReflLowAngleBkgOffset=5,
+            ReflLowAngleBkgWidth=10,
+            ReflHighAngleBkgOffset=5,
+            ReflHighAngleBkgWidth=10,
         )
 
 
