@@ -76,9 +76,11 @@ void Stitch1DMany::init() {
 
   setPropertySettings("ScaleFactorFromPeriod", std::move(scaleFactorFromPeriodVisible));
 
-  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
-  mustBePositive->setLower(0);
-  declareProperty("IndexOfReference", 0, mustBePositive, "Index of the workspace to be used as reference for scaling.");
+  auto indexValidator = std::make_shared<BoundedValidator<int>>();
+  indexValidator->setLower(-1);
+  declareProperty("IndexOfReference", 0, indexValidator,
+                  "Index of the workspace to be used as reference for scaling, or -1 to choose the last workspace as "
+                  "the reference.");
 }
 
 /// Load and validate the algorithm's properties.
@@ -116,7 +118,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       }
       if (!isDefault("IndexOfReference")) {
         m_indexOfReference = static_cast<int>(this->getProperty("IndexOfReference"));
-        if (m_indexOfReference >= column.size() && m_indexOfReference >= m_inputWSMatrix.size()) {
+        if (m_indexOfReference > -1 && m_indexOfReference >= column.size() &&
+            m_indexOfReference >= m_inputWSMatrix.size()) {
           issues["IndexOfReference"] = "The index of reference workspace is larger than the number of "
                                        "provided workspaces.";
         }
@@ -286,14 +289,16 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
   auto lhsWS = toStitch.front();
   outName += "_" + lhsWS->getName();
   auto scaleRHSWorkspace = m_scaleRHSWorkspace;
+  // Support Python list syntax for selecting the last element in the list
+  auto indexOfReference = m_indexOfReference == -1 ? toStitch.size() - 1 : m_indexOfReference;
 
   for (size_t i = 1; i < toStitch.size(); i++) {
     auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
-    if (i == m_indexOfReference) {
+    if (i == indexOfReference) {
       // don't scale the RHS unless the desired index is the first ws
       scaleRHSWorkspace = false;
-    } else if (i > m_indexOfReference) {
+    } else if (i > indexOfReference) {
       scaleRHSWorkspace = true; // after scaling to the desired ws, keep the scaling
     }
 
