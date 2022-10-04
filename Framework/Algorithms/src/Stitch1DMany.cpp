@@ -15,6 +15,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include <MantidKernel/InvisibleProperty.h>
 #include <memory>
 
 using namespace Mantid::Kernel;
@@ -49,6 +50,8 @@ void Stitch1DMany::init() {
       "Scaling either with respect to first (first hand side, LHS) "
       "or second (right hand side, RHS) workspace. "
       "This property no longer has an effect, please use the IndexOfReference property instead.");
+  // Hide this property from the GUI as it now has no effect and will eventually be removed
+  setPropertySettings("ScaleRHSWorkspace", std::make_unique<InvisibleProperty>());
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("UseManualScaleFactors", false, Direction::Input),
                   "True to use provided values for the scale factor.");
