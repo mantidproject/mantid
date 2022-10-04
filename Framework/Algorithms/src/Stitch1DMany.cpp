@@ -124,8 +124,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       }
       if (!isDefault("IndexOfReference")) {
         m_indexOfReference = static_cast<int>(this->getProperty("IndexOfReference"));
-        if (m_indexOfReference > -1 && m_indexOfReference >= column.size() &&
-            m_indexOfReference >= m_inputWSMatrix.size()) {
+        if (m_indexOfReference > -1 && static_cast<size_t>(m_indexOfReference) >= column.size() &&
+            static_cast<size_t>(m_indexOfReference) >= m_inputWSMatrix.size()) {
           issues["IndexOfReference"] = "The index of reference workspace is larger than the number of "
                                        "provided workspaces.";
         }
@@ -235,7 +235,7 @@ void Stitch1DMany::exec() {
 
         outName = groupName;
         std::vector<double> scaleFactors;
-        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors, static_cast<int>(m_indexOfReference));
+        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors, m_indexOfReference);
 
         // Add the resulting workspace to the list to be grouped together
         toGroup.emplace_back(outName);
@@ -249,8 +249,7 @@ void Stitch1DMany::exec() {
       std::vector<double> periodScaleFactors;
       constexpr bool storeInADS = false;
 
-      doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName, periodScaleFactors,
-                     static_cast<int>(m_indexOfReference), storeInADS);
+      doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName, periodScaleFactors, m_indexOfReference, storeInADS);
 
       // Iterate over each period
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
