@@ -64,11 +64,6 @@ const std::string &Property::name() const { return m_name; }
  */
 const std::string &Property::documentation() const { return m_documentation; }
 
-/** Get the property's short documentation string
- *  @return The documentation string
- */
-const std::string &Property::briefDocumentation() const { return m_shortDoc; }
-
 /** Get the property type_info
  *  @return The type of the property
  */
@@ -136,19 +131,7 @@ std::string Property::valueAsPrettyStr(const size_t maxLength, const bool collap
  *  (or the entire string if no period is found).
  *  @param documentation The string containing the descriptive comment
  */
-void Property::setDocumentation(const std::string &documentation) {
-  m_documentation = documentation;
-
-  if (m_shortDoc.empty()) {
-    auto period = documentation.find_first_of('.');
-    setBriefDocumentation(documentation.substr(0, period));
-  }
-}
-
-/** Sets the
- *
- */
-void Property::setBriefDocumentation(const std::string &documentation) { m_shortDoc = documentation; }
+void Property::setDocumentation(const std::string &documentation) { m_documentation = documentation; }
 
 /** Returns the set of valid values for this property, if such a set exists.
  *  If not, it returns an empty set.

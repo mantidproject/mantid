@@ -500,7 +500,7 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property, QLayout 
 
   Mantid::Kernel::Property *prop = getAlgorithmProperty(property);
   if (prop) { // Set a few things on the widget
-    widget->setToolTip(QString::fromStdString(prop->briefDocumentation()));
+    widget->setToolTip(QString::fromStdString(prop->documentation()));
   }
   widget->setEnabled(isWidgetEnabled(property));
 
