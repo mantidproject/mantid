@@ -9,7 +9,9 @@
 Description
 -----------
 
-This algorithm is the last step in ILL's TOF specular reflectometry reduction workflow. Its main purpose it convert a reflectivity workspace from wavelength to momentum transfer. This is achieved by :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>` which also computes the :math:`Q_{z}` resolution. Further, histogrammed *InputWorkspace* is converted to point data by :ref:`ConvertToPointData <algm-ConvertToPointData>` and, optionally, the points are grouped according to the :math:`Q_{z}` resolution. If the instrument is FIGARO, and *ThetaCorrection* is defined, the second step of the gravity correction is performed, where the gravity-corrected reflection angle is taken into account, and the X-axis transformed to momentum exchange replaces the X-axis of the *OutputWorkspace*.
+This algorithm is the last step in ILL's TOF specular reflectometry reduction workflow. Its main purpose is to convert a reflectivity workspace from wavelength to momentum transfer. This is achieved by :ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>` which also computes the :math:`Q_{z}` resolution. Further, histogrammed *InputWorkspace* is converted to point data by :ref:`ConvertToPointData <algm-ConvertToPointData>` and, optionally, the points are grouped according to the :math:`Q_{z}` resolution.
+
+If the instrument is FIGARO, and *ThetaCorrection* property is defined, the second step of the gravity correction is performed, where the gravity-corrected reflection angle is taken into account, and the X-axis transformed to momentum exchange replaces the X-axis of the *OutputWorkspace*.
 
 The diagram below shows the workflow of this algorithm:
 
