@@ -239,33 +239,45 @@ execute_process(COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPytho
 # Package version
 unset(PYTHON_ARGS)
 
-# used by mantidworkbench
-if(CONDA_BUILD)
-  set(LOCAL_PYPATH "\${CONDA_PREFIX}/bin:\${CONDA_PREFIX}/lib:\${CONDA_PREFIX}/plugins")
-  set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
-  set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
-  set(MANTIDWORKBENCH_EXEC "\${CONDA_PREFIX}/bin/workbench") # what the actual thing is called
-else()
-  set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
-  set(PYTHON_EXEC_LOCAL "${PYTHON_EXECUTABLE}")
-  set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
-  set(MANTIDWORKBENCH_EXEC "\${INSTALLDIR}/bin/workbench")
-endif()
-
 if(ENABLE_WORKBENCH)
-  configure_file(
-    ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
-    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY
-  )
-  install(
-    PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install
-    DESTINATION ${BIN_DIR}
-    RENAME mantidworkbench
-  )
+  foreach(install_type conda;standalone)
+    # used by mantidworkbench
+    if(${install_type} STREQUAL "conda")
+      set(LOCAL_PYPATH "\${CONDA_PREFIX}/bin:\${CONDA_PREFIX}/lib:\${CONDA_PREFIX}/plugins")
+      set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
+      set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
+      set(MANTIDWORKBENCH_EXEC "\${CONDA_PREFIX}/bin/workbench") # what the actual thing is called
+      set(DEST_FILENAME_SUFFIX "")
+    elseif(${install_type} STREQUAL "standalone")
+      set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
+      set(PYTHON_EXEC_LOCAL "\${INSTALLDIR}/bin/python")
+      set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
+      set(MANTIDWORKBENCH_EXEC "\${INSTALLDIR}/bin/workbench")
+      set(DEST_FILENAME_SUFFIX ".standalone")
+    else()
+      message(FATAL_ERROR "Unknown installation type '${install_type}' for workbench startup scripts")
+    endif()
+    # workbench launcher for jemalloc
+    configure_file(
+      ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
+      ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install${DEST_FILENAME_SUFFIX} @ONLY
+    )
+    install(
+      PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install${DEST_FILENAME_SUFFIX}
+      DESTINATION ${BIN_DIR}
+      RENAME mantidworkbench${DEST_FILENAME_SUFFIX}
+    )
+    # mantidpython for jemalloc. Only required for conda as we expect those needing to use Python from the commandline
+    # to install the conda version
+    if(${install_type} EQUAL "conda")
+      configure_file(
+        ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY
+      )
+      install(
+        PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
+        DESTINATION ${BIN_DIR}
+        RENAME mantidpython
+      )
+    endif()
+  endforeach()
 endif()
-configure_file(${CMAKE_MODULE_PATH}/Packaging/mantidpython.in ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY)
-install(
-  PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
-  DESTINATION ${BIN_DIR}
-  RENAME mantidpython
-)
