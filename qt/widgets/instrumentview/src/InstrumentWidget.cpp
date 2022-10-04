@@ -800,8 +800,9 @@ void InstrumentWidget::tabChanged(int /*unused*/) {
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
  * @param cmapNameOrPath Name of a color map or a file path
+ * @param highlightZeroDets Whether to highlight detectors with zero counts
  */
-void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
+void InstrumentWidget::changeColormap(const QString &cmapNameOrPath, const bool highlightZeroDets) {
   if (!m_instrumentActor)
     return;
   const auto currentCMap = m_instrumentActor->getCurrentColorMap();
@@ -815,7 +816,7 @@ void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
       return;
     }
   } else {
-    selection = std::make_pair(ColorMap::exists(cmapNameOrPath), false);
+    selection = std::make_pair(ColorMap::exists(cmapNameOrPath), highlightZeroDets);
   }
 
   if (selection == currentCMap) {
