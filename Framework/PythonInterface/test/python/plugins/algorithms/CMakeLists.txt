@@ -46,13 +46,11 @@ set(TEST_PY_FILES
     EnggVanadiumCorrectionsTest.py
     ExportSampleLogsToHDF5Test.py
     ExportSpectraMaskTest.py
-    FailTest.py
     FilterLogByTimeTest.py
     FitGaussianTest.py
     FindGoniometerFromUBTest.py
     FindGlobalBMatrixTest.py
     FitIncidentSpectrumTest.py
-    FlakyTest.py
     FractionalIndexingTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
