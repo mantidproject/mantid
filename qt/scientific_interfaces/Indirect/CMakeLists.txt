@@ -159,7 +159,6 @@ set(MOC_FILES
     IndirectSimulation.h
     IndirectSimulationTab.h
     IndirectSqw.h
-    IndirectSqwModel.h
     IndirectSqwView.h
     IndirectSymmetrise.h
     IndirectTab.h
@@ -194,6 +193,7 @@ set(INC_FILES
     IndirectMomentsModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
+    IndirectSqwModel.h
     IqtFitModel.h
     MSDFitModel.h
     Notifier.h
