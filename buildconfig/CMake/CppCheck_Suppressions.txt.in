@@ -119,7 +119,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveRKH.c
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:149
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:159
 wrongPrintfScanfArgNum:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:54
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/AffineMatrixParameter.cpp:121
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:145
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1090
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1100
