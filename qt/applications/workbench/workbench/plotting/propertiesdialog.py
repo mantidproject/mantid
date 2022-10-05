@@ -97,6 +97,17 @@ class LabelEditor(PropertiesEditorBase):
         self.ui.errors.show()
 
 
+class TitleLabelEditor(LabelEditor):
+    """Provides a dialog box to edit title of a figure that will change the window title"""
+
+    def __init__(self, canvas, target):
+        super().__init__(canvas, target)
+
+    def changes_accepted(self):
+        super().changes_accepted()
+        self.canvas.manager.set_window_title(self.ui.editor.text())
+
+
 class LegendEditorModel(object):
 
     def __init__(self, label_text):

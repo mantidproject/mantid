@@ -35,7 +35,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
-from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
+from workbench.plotting.propertiesdialog import (LabelEditor, TitleLabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
                                                  ColorbarAxisEditor, ZAxisEditor, LegendEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
@@ -249,7 +249,7 @@ class FigureInteraction(object):
 
         for ax in axes:
             if ax.title.contains(event)[0]:
-                move_and_show(LabelEditor(canvas, ax.title))
+                move_and_show(TitleLabelEditor(canvas, ax.title))
             elif ax.xaxis.label.contains(event)[0]:
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
