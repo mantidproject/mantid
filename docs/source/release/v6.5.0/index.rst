@@ -4,7 +4,7 @@
 Mantid 6.5.0 Release Notes
 ===========================
 
-.. figure:: ../../../../images/ISIS_Logo_Transparent_UKRI.png
+.. figure:: ../../images/6_5_release/6_5_collage.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -16,10 +16,8 @@ Mantid 6.5.0 Release Notes
 
 We are proud to announce version 6.5.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
-
-This release includes a wide array of updates, bugfixes, and new features which build on the functionality of Mantid.
-Users are reminded that since the previous release the :ref:`packaging method has changed <v6.4.0>`.
+This release includes a wide array of updates, bugfixes, and new features, which build on the functionality of Mantid.
+Users are reminded that since the previous release the :ref:`packaging method for Linux has changed <v6.4.0>`.
 
 In addition to many improvements we are delighted to announce some new features including:
 
@@ -32,6 +30,7 @@ In addition to many improvements we are delighted to announce some new features 
 - Support loading and reducing data for the new detector for D16 at ILL.
 
 .. figure:: ../../images/6_5_release/6_5_collage.png
+   :class: screenshot
    :align: center
 
 Further Information
