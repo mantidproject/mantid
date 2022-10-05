@@ -98,7 +98,7 @@ Beta Testing Begins
 .. _quality-assurance-manager-checklist:
 
 Quality Assurance Managers Checklist
------------------------------------
+------------------------------------
 
 **Role**: People responsible for making sure that manual testing has been performed.
 They will ensure Mantid meets quality requirements before delivery in consultation
@@ -145,7 +145,7 @@ Smoke Testing
 .. _release-editor-checklist:
 
 Release Editors Checklist
-------------------------
+-------------------------
 
 **Role**: People responsible for editing the release notes and giving them a common
 language, layout, and collecting images.

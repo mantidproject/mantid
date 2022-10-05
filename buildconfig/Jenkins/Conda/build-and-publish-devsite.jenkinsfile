@@ -1,0 +1,37 @@
+// Build and publish the developer website
+
+pipeline {
+  agent none
+  stages {
+    stage('Build/Publish Developer Docs') {
+      agent { label "linux-64" }
+      environment {
+        GITHUB_ACCESS_TOKEN = credentials("mantid-builder-github-oauth-token")
+      }
+      options {
+        timestamps()
+        retry(2)
+      }
+      steps {
+        build_and_publish()
+      }
+      post {
+        always {
+          record_warnings()
+        }
+      }
+    }
+  }
+}
+
+def build_and_publish() {
+  dir('build') {
+    deleteDir()
+  }
+  sh '${WORKSPACE}/buildconfig/Jenkins/Conda/build-and-publish-devsite.sh \
+    ${WORKSPACE}'
+}
+
+def record_warnings() {
+  recordIssues qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]], tools: [sphinxBuild()]
+}

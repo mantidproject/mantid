@@ -1,14 +1,16 @@
 #!/bin/bash -ex
+# Build the developer site and push to gh-pages
 
-if [ -z "$BUILD_DIR" ]; then
- if [ -z "$WORKSPACE" ]; then
-     echo "WORKSPACE not set. Cannot continue"
-     exit 1
- fi
-
- BUILD_DIR=$WORKSPACE/build
- echo "Setting BUILD_DIR to $BUILD_DIR"
+if [ $# != 1 ]; then
+  echo "Usage: build-and-publish-devsite.sh mantid_root_dir"
+  exit 1
 fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Set working area
+WORKSPACE=$1
+BUILD_DIR=$WORKSPACE/build
+MAMBAFORGE_DIR=$WORKSPACE/mambaforge
 
 ###############################################################################
 # Set up the build directory
@@ -24,25 +26,23 @@ else
 fi
 
 ###############################################################################
-# Setup virtualenv for building the docs
+# Setup environment for building the docs
 ###############################################################################
-VIRTUAL_ENV=$BUILD_DIR/venv
-if [[  -d $VIRTUAL_ENV ]]; then
-  rm -fr $VIRTUAL_ENV
+# false means do not install if it exists already
+"$SCRIPT_DIR/download-and-install-mambaforge" $MAMBAFORGE_DIR $MAMBAFORGE_DIR/bin/mamba false
+condaenv_prefix=$MAMBAFORGE_DIR/envs/dev-site-build
+if [ -d "$condaenv_prefix" ]; then
+  "$MAMBAFORGE_DIR/bin/mamba" update --prefix "$condaenv_prefix" --all
+else
+  "$MAMBAFORGE_DIR/bin/mamba" create --prefix "$condaenv_prefix" --yes sphinx sphinx_bootstrap_theme
 fi
-python3 -m venv $VIRTUAL_ENV
-source $VIRTUAL_ENV/bin/activate
-python3 -m pip install sphinx
-python3 -m pip install sphinx_bootstrap_theme
-which python3
+. $MAMBAFORGE_DIR/etc/profile.d/conda.sh
+conda activate "$condaenv_prefix"
 
 ###############################################################################
 # Build the developer site
-# -----------------------------------------------------------------------------
-# the wacky long line is what is run from inside "sphinx-build" which is not
-# installed by virtualenv for some reason
 ###############################################################################
-python3 -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
+python -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################
 # Push the results
