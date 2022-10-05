@@ -217,7 +217,9 @@ class DMOL3Loader(AbInitioLoader):
         k-point information is set to single Gamma-point as this is all DMOL3
         provides.
 
-        Displacements are scaled by sqrt(mass) and normalised for consistency.
+        Displacements are also normalised here. Note that owing to a different
+        scaling/reporting convention a sqrt(mass) factor is _not_ applied as
+        with e.g. CRYSTAL17 output.
         """
         data = {'frequencies': frequencies[None, :],  # Add first (kpt) index
                 'k_vectors': np.array([[0., 0., 0.]], dtype=FLOAT_TYPE),
@@ -225,7 +227,6 @@ class DMOL3Loader(AbInitioLoader):
                 }
 
         displacements = cls._reshape_displacements(raw_displacements)
-        displacements *= np.sqrt(masses)[None, :, None, None]
         displacements = cls._normalise_displacements(displacements)
         data['atomic_displacements'] = displacements.astype(COMPLEX_TYPE)
 
