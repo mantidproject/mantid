@@ -90,6 +90,7 @@ pipeline {
             }
             post {
               always {
+                archive_ctest_log()
                 publish_test_reports()
               }
             }
@@ -369,4 +370,8 @@ def recipe_update_options() {
     recipe_options += ' --release-version'
   }
   return recipe_options
+}
+
+def archive_ctest_log(){
+  archiveArtifacts artifacts: 'build/ctest_log/*.log', fingerprint: true
 }
