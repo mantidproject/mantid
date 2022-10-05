@@ -42,3 +42,45 @@ foreach(_bundle ${BUNDLES})
     COMPONENT Runtime
   )
 endforeach()
+
+# vesuvio
+set(_vesuvio_external_root ${CMAKE_CURRENT_BINARY_DIR}/vesuvio)
+externalproject_add(
+  vesuvio
+  PREFIX ${_vesuvio_external_root}
+  GIT_REPOSITORY "https://github.com/guijmp/scatt_scripts.git"
+  GIT_TAG cd7c2f1dff36e07be3cfb2570cd95b94d415019b
+  EXCLUDE_FROM_ALL 1
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  TEST_COMMAND ""
+  INSTALL_COMMAND ""
+)
+message(STATUS "Fetching/updating vesuvio")
+execute_process(
+  COMMAND ${CMAKE_COMMAND} ARGS -P ${_vesuvio_external_root}/tmp/vesuvio-gitclone.cmake RESULT_VARIABLE _exit_code
+)
+if(_exit_code EQUAL 0)
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} ARGS -P ${_vesuvio_external_root}/tmp/vesuvio-gitupdate.cmake RESULT_VARIABLE _exit_code
+  )
+  if(NOT _exit_code EQUAL 0)
+    message(FATAL_ERROR "Unable to update vesuvio.")
+  endif()
+else()
+  message(FATAL_ERROR "Unable to clone vesuvio")
+endif()
+# Let the parent lists file know where dev copy of vesuvio is
+set(VESUVIO_DEV
+    ${_vesuvio_external_root}/src/vesuvio
+    PARENT_SCOPE
+)
+
+# Installation VESUVIO_DEV is only set in PARENT_SCOPE! so don't use it here
+foreach(_bundle ${BUNDLES})
+  install(
+    DIRECTORY ${_vesuvio_external_root}/src/vesuvio/vesuvio/
+    DESTINATION ${_bundle}scripts/ExternalInterfaces/vesuvio
+    COMPONENT Runtime
+  )
+endforeach()
