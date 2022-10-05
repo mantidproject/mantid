@@ -98,7 +98,7 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         # G. J. McIntyre and R. F. D. Stansfield, Acta Cryst A 44, 257 (1988).
         lorentz = abs(np.cos(nu)*np.sin(gamma))
         self.assertAlmostEqual(peak0.getIntensity(), 961.6164021216964 * lorentz, delta=1e-5)
-        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567046232615 * lorentz, delta=2e-1)
+        self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567046232615 * lorentz, delta=2e-2)
         q_sample = peak0.getQSampleFrame()
         for i in range(3):
             self.assertNotAlmostEqual(q_sample[i], expected_q_sample[i])
