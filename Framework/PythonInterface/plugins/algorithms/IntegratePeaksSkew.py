@@ -225,7 +225,7 @@ class PeakData:
 
     def __init__(self, xpk, signal, error, irow, icol, det_edges, dets, peak, dTOF):
         # extract peak properties
-        self.hkl = peak.getIntHKL()  # used for plot title
+        self.hkl = np.round(peak.getHKL(), 2)  # used for plot title
         self.wl = peak.getWavelength()
         self.theta = peak.getScattering() / 2
         self.tof = peak.getTOF()
@@ -531,9 +531,9 @@ class PeakData:
                 [np.array([[x, ybot], [x, ytop]]) for x, ybot, ytop in
                  zip(data.get_xdata(), data.get_ydata() - yerr, data.get_ydata() + yerr)])
         # format 2D colorfill
-        title_str = f"{ipk} ({str(self.hkl)[1:-1]}) " \
+        title_str = f"{ipk} ({','.join(str(self.hkl)[1:-1].split())}) " \
                     rf"$\lambda$={np.round(self.wl, 2)} $\AA$ " \
-                    rf"$2\theta={np.round(2 * np.degrees(self.theta), 1)}^\circ$" \
+                    rf"$2\theta={2 * np.degrees(self.theta):.0f}^\circ$" \
                     f"\n{self.status.value}"
         ax[0].set_title(title_str)
         # format 1D
@@ -782,13 +782,15 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                      ncol_max, min_npixels_per_vacancy, max_nvacancies, min_nbins)
             if peak_data.status is PEAK_MASK_STATUS.VALID:
                 if update_peak_pos:
+                    hkl = pk.getHKL()
+                    mnp = pk.getIntMNP()
                     det, tof = peak_data.update_peak_position()
                     # replace last added peak
                     irows_delete.append(pk_ws_int.getNumberPeaks() - 1)
                     self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=tof, DetectorID=int(det))
                     pk_new = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
-                    pk_new.setHKL(*pk.getHKL())
-                    pk_new.setIntMNP(pk.getIntMNP())
+                    pk_new.setHKL(*hkl)
+                    pk_new.setIntMNP(mnp)
                     pk = pk_new
                 # calc Lorz correction
                 if do_lorz_cor:
