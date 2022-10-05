@@ -227,7 +227,7 @@ class PeakData:
         # extract peak properties
         self.hkl = peak.getIntHKL()  # used for plot title
         self.wl = peak.getWavelength()
-        self.theta = peak.getScattering()/2
+        self.theta = peak.getScattering() / 2
         self.tof = peak.getTOF()
         # set data
         self.xpk = xpk
@@ -409,7 +409,7 @@ class PeakData:
         istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ilo
         # expand window to maximise I/sig (good for when peak not entirely in window)
         self.ixlo_opt, self.ixhi_opt = self.optimise_tof_window_intens_over_sig(self.ypk, self.epk_sq,
-                                                                                 istart, iend + 1)
+                                                                                istart, iend + 1)
 
     @staticmethod
     def optimise_tof_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
@@ -418,7 +418,8 @@ class PeakData:
         # increase window to RHS
         nbg_rhs = nbg if signal.size - ihi > nbg + 1 else 0  # don't use bg if not enough points on rhs for one loop below
         nbad = 0
-        bg = max(signal[ihi:ihi + nbg_rhs].mean(), 0) if nbg_rhs > 0 else 0  # default to 0 if not enough elements to rhs
+        bg = max(signal[ihi:ihi + nbg_rhs].mean(),
+                 0) if nbg_rhs > 0 else 0  # default to 0 if not enough elements to rhs
         prev_IoverSig = PeakData._calc_snr(signal[ilo:ihi] - bg, error_sq[ilo:ihi])
         istep_hi = 0
         for istep_hi in range(1, signal.size - ihi - nbg_rhs):
@@ -462,7 +463,7 @@ class PeakData:
         return det, self.tof
 
     def get_dTOF_over_TOF(self):
-        return (self.xpk[self.ixhi_opt] - self.xpk[self.ixlo_opt])/self.tof
+        return (self.xpk[self.ixhi_opt] - self.xpk[self.ixlo_opt]) / self.tof
 
     def plot_integrated_peak(self, fig, ax, ipk, norm_func):
         if self.status is not PEAK_MASK_STATUS.VALID:
@@ -513,7 +514,7 @@ class PeakData:
             ax[0].lines[0].set_ydata(ymask)
             ax[0].lines[1].set_xdata(self.icol)
             ax[0].lines[1].set_ydata(self.irow)
-            img.set_extent([-0.5, image_data.shape[1]-0.5, image_data.shape[0]-0.5, -0.5])
+            img.set_extent([-0.5, image_data.shape[1] - 0.5, image_data.shape[0] - 0.5, -0.5])
             # update 1D focused spectrum
             # vlines
             xlo, xhi, data, xtof, xlo_init, xhi_init, y0 = ax[1].lines
@@ -532,7 +533,7 @@ class PeakData:
         # format 2D colorfill
         title_str = f"{ipk} ({str(self.hkl)[1:-1]}) " \
                     rf"$\lambda$={np.round(self.wl, 2)} $\AA$ " \
-                    rf"$2\theta={np.round(2*np.degrees(self.theta), 1)}^\circ$"\
+                    rf"$2\theta={np.round(2 * np.degrees(self.theta), 1)}^\circ$" \
                     f"\n{self.status.value}"
         ax[0].set_title(title_str)
         # format 1D
@@ -779,7 +780,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
             peak_data.integrate_peak(use_nearest, integrate_on_edge, optimise_mask, npk_min, density_min, nrow_max,
                                      ncol_max, min_npixels_per_vacancy, max_nvacancies, min_nbins)
-
             if peak_data.status is PEAK_MASK_STATUS.VALID:
                 if update_peak_pos:
                     det, tof = peak_data.update_peak_position()
@@ -812,17 +812,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         cot_th_sq = (1 / np.tan(thetas)) ** 2
         wavelengths = np.array([pk_data.wl for pk_data in peak_data_collection])
         frac_tof_widths = np.array([pk_data.get_dTOF_over_TOF() for pk_data in peak_data_collection])
-        did_fit = False
+        estimated_dt0_over_t0, estimated_dth = -1, -1
         if len(thetas) > 1:
             # robust estimation of params for (dT/T)^2 = slope*cot(theta)^2 + intercept
             # if scale_dth cot(th) -> wl*cot(th)
-            xvals = (wavelengths**2)*cot_th_sq if scale_dth else cot_th_sq
+            xvals = (wavelengths ** 2) * cot_th_sq if scale_dth else cot_th_sq
             slope, intercept = self.estimate_linear_params(xvals, frac_tof_widths ** 2)
+            estimated_dt0_over_t0 = np.sqrt(intercept)
+            estimated_dth = np.sqrt(slope)
             if slope > 0 and intercept > 0:
                 logger.notice(f"Estimated resolution parameters:"
-                              f"\nBackscatteringTOFResolution = {np.sqrt(intercept)}"
-                              f"\nThetaWidth = {np.sqrt(slope)}")
-                did_fit = True
+                              f"\nBackscatteringTOFResolution = {estimated_dt0_over_t0}"
+                              f"\nThetaWidth = {estimated_dth}")
             else:
                 logger.warning("Resolution parameters could not be estimated - the provided TOF window parameters are"
                                "likely to be suboptimal (probably the resulting window is too large). Please inspect "
@@ -849,7 +850,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                         subax.clear()
                         subax.set_aspect('auto')
                     self.plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
-                                             did_fit, intercept, slope)
+                                             estimated_dt0_over_t0, estimated_dth)
                     pdf.savefig(fig)
             except OSError:
                 raise RuntimeError(f"OutputFile ({plot_filename}) could not be opened - please check it is not open by "
@@ -878,35 +879,46 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         if frac_tof_window > 0:
             dTOF = tof * frac_tof_window
         else:
-            dth_pk = dth*wl if scale_dth else dth
+            dth_pk = dth * wl if scale_dth else dth
             dTOF = tof * np.sqrt(dt0_over_t0 ** 2 + (dth_pk / np.tan(pk.getScattering() / 2)) ** 2)
         return dTOF
 
     @staticmethod
-    def plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth, did_fit,
-                            intercept, slope):
+    def plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
+                            estimated_dt0_over_t0, estimated_dth):
         # plot dTOF/TOF vs theta
         line = ax[0].scatter(np.degrees(thetas), frac_tof_widths, c=wavelengths)
         ax[0].set_xlabel(r'$\theta (degrees)$')
         ax[0].set_ylabel(r'$dTOF/TOF$')
-        fig.colorbar(line, orientation='horizontal',  label=r'$\lambda (\AA)$')
+        fig.colorbar(line, orientation='horizontal', label=r'$\lambda (\AA)$')
         # plot (dTOF/TOF)^2 vs cot(th)^2 or (wl*cot(th))^2
         if scale_dth:
-            ax[1].scatter((wavelengths**2)*cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
+            ax[1].scatter((wavelengths ** 2) * cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
             ax[1].set_xlabel(r'$(\lambda\cot(\theta))^2$')
         else:
             ax[1].scatter(cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
             ax[1].set_xlabel(r'$\cot(\theta)^2$')
         ax[1].set_ylabel(r'$(dTOF/TOF)^2$')
         # plot the fit if performed
-        if did_fit:
+        if estimated_dth > 0:
+            intercept, slope = estimated_dt0_over_t0 ** 2, estimated_dth ** 2
             xlim = np.array(ax[1].get_xlim())
             ax[1].plot(xlim, slope * xlim + intercept, '-k', label='fit')
             xvals = np.linspace(min(thetas), max(thetas))
             if not scale_dth:
                 ax[0].plot(np.degrees(xvals), np.sqrt(intercept * (1 / np.tan(xvals) ** 2) + slope), '-k', label='fit')
+            else:
+                ylim = ax[0].get_ylim()
+                colors = line.get_cmap().colors
+                nwl = 4
+                wls = np.linspace(wavelengths.min(), wavelengths.max(), nwl)
+                icolors = np.linspace(0, len(colors)-1, nwl, dtype=int)
+                for wl, icolor in zip(wls, icolors):
+                    ax[0].plot(np.degrees(xvals), np.sqrt(intercept * ((wl**2) / np.tan(xvals) ** 2) + slope),
+                               '-', color=colors[icolor])
+                ax[0].set_ylim(*ylim)  # reset limits so suitable for data point coverage not fit lines
             # add resolution parameters to the plot title
-            ax[1].set_title(rf"$d\theta$={np.sqrt(slope):.2E}" + "\n$dT_{bk}/T_{bk}$" + f" = {np.sqrt(intercept):.2E}")
+            ax[1].set_title(rf"$d\theta$={estimated_dth:.2E}" + "\n$dT_{bk}/T_{bk}$" + f"={estimated_dt0_over_t0:.2E}")
 
     def child_CloneWorkspace(self, **kwargs):
         alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
