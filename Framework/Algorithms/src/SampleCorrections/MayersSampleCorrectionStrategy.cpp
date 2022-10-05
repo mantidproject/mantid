@@ -140,8 +140,7 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHis
     msCoeffs = polyfit(xmur, yms, wms);
 
   // corrections to input
-  const double muMin(xmur.front()), muMax(xmur.back()), flightPath(m_pars.l1 + m_pars.l2),
-      vol(M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2));
+  const double muMin(xmur.front()), muMax(xmur.back()), flightPath(m_pars.l1 + m_pars.l2);
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
   auto outputHistogram = m_histogram;
