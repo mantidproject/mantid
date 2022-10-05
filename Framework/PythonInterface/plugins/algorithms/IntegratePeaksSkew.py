@@ -11,7 +11,7 @@ from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.ndimage import label
-from scipy.stats import moment, siegelslopes
+from scipy.stats import moment
 from mantid.geometry import RectangularDetector, GridDetector
 import re
 from enum import Enum
@@ -817,7 +817,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # robust estimation of params for (dT/T)^2 = slope*cot(theta)^2 + intercept
             # if scale_dth cot(th) -> wl*cot(th)
             xvals = (wavelengths**2)*cot_th_sq if scale_dth else cot_th_sq
-            slope, intercept = siegelslopes(frac_tof_widths ** 2, xvals)
+            slope, intercept = self.estimate_linear_params(xvals, frac_tof_widths ** 2)
             if slope > 0 and intercept > 0:
                 logger.notice(f"Estimated resolution parameters:"
                               f"\nBackscatteringTOFResolution = {np.sqrt(intercept)}"
@@ -858,6 +858,17 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
 
         # assign output
         self.setProperty("OutputWorkspace", pk_ws_int)
+
+    @staticmethod
+    def estimate_linear_params(x, y):
+        # adapted from scipy.stats.siegelslopes with added vectorisation
+        dx = x[:, np.newaxis] - x
+        dy = y[:, np.newaxis] - y
+        dx[dx == 0] = np.nan  # ignore these points, but need to keep shape of array so don't apply bool mask
+        grads = dy / dx
+        medslope = np.nanmedian(np.nanmedian(grads, axis=0))
+        medinter = np.median(y - medslope * x)
+        return medslope, medinter
 
     @staticmethod
     def calc_initial_dTOF(pk, frac_tof_window, dt0_over_t0, dth, scale_dth):
