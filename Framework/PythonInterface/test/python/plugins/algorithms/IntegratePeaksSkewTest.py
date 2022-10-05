@@ -29,18 +29,22 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             cls.ws.setY(ispec, cls.ws.readY(ispec) + cls.peak_1D)
             cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
         # make peak table
+        # 0) inside fake peak (bank 1)
+        # 1) outside fake peak (bank 1)
+        # 2) middle bank 2 (no peak)
         cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
-        AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=32)  # inside fake peak (bank 1)
-        AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=27)  # outside fake peak (bank 1)
-        AddPeak(peaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=62)  # middle bank 2 (no peak)
+        for ipk, detid in enumerate([32, 27, 62]):
+            AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=detid)
+            cls.peaks.getPeak(ipk).setHKL(ipk, ipk, ipk)
 
         # Load empty WISH with ComponentArray banks
         cls.ws_comp_arr = LoadEmptyInstrument(InstrumentName='WISH', OutputWorkspace='WISH')
         cls.ws_comp_arr.getAxis(0).setUnit('TOF')
         cls.peaks_comp_arr = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws_comp_arr, NumberOfPeaks=0,
                             OutputWorkspace='peaks_comp_arr')
-        for detid in [10707000, 10707511, 10100255, 9707255, 5104246]:
+        for ipk, detid in enumerate([10707000, 10707511, 10100255, 9707255, 5104246]):
             AddPeak(PeaksWorkspace=cls.peaks_comp_arr, RunWorkspace=cls.ws_comp_arr, TOF=1e4, DetectorID=detid)
+            cls.peaks_comp_arr.getPeak(ipk).setHKL(ipk, ipk, ipk)
 
         # output file dir
         cls._test_dir = tempfile.mkdtemp()
@@ -101,6 +105,10 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             # check peak pos moved to maximum
             self.assertEqual(out.column('DetID')[ipk], 37)
             self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
+            # check that HKL have been stored
+            hkl = pk.getHKL()
+            for miller_index in hkl:
+                self.assertEqual(miller_index, ipk)
         # check other peaks not integrated
         self.assertEqual(out.getPeak(out.getNumberPeaks()-1).getIntensity(), 0)
 

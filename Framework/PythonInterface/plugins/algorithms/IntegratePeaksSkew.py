@@ -787,8 +787,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     irows_delete.append(pk_ws_int.getNumberPeaks() - 1)
                     self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=tof, DetectorID=int(det))
                     pk_new = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
-                    pk_new.setHKL(pk.getHKL())
-                    pk_new.setIntMNP(pk.setIntMNP)
+                    pk_new.setHKL(*pk.getHKL())
+                    pk_new.setIntMNP(pk.getIntMNP())
                     pk = pk_new
                 # calc Lorz correction
                 if do_lorz_cor:
