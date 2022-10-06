@@ -27,10 +27,6 @@ In addition to many improvements we are delighted to announce some new features 
 - Three new fitting functions: :ref:`FickDiffusionSQE <func-FickDiffusionSQE>`, :ref:`ChudleyElliotSQE <func-Chudley-ElliotSQE>`, and :ref:`HallRossSQE <func-Hall-RossSQE>` have been made and added to ConvFit.
 - Support loading and reducing data for the new detector for D16 at ILL.
 
-.. figure:: ../../images/6_5_release/6_5_collage.png
-   :class: screenshot
-   :align: center
-
 Further Information
 -------------------
 
