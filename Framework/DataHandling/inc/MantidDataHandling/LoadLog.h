@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 
@@ -55,7 +56,7 @@ namespace DataHandling {
     @author Anders Markvardsen, ISIS, RAL
     @date 26/09/2007
 */
-class DLLExport LoadLog final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadLog final : public API::Algorithm {
 public:
   /// Default constructor
   LoadLog();

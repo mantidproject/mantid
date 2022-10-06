@@ -7,15 +7,15 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** CreateChunkingFromInstrument : TODO: DESCRIPTION
  */
-class DLLExport CreateChunkingFromInstrument final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL CreateChunkingFromInstrument final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

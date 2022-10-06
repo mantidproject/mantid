@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/DOM/Document.h>
 
@@ -33,7 +33,7 @@ namespace DataHandling {
 
   @date 2011-11-17
 */
-class DLLExport LoadDetectorsGroupingFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadDetectorsGroupingFile final : public API::Algorithm {
 public:
   ///
   const std::string name() const override { return "LoadDetectorsGroupingFile"; };
@@ -94,7 +94,7 @@ private:
   std::map<int, std::vector<int>> m_groupSpectraMap;
 };
 
-class DLLExport LoadGroupXMLFile {
+class MANTID_DATAHANDLING_DLL LoadGroupXMLFile {
 public:
   LoadGroupXMLFile();
 
@@ -158,7 +158,7 @@ private:
  * @author Arturs Bekasovs
  * @date 21/08/2013
  */
-class DLLExport LoadGroupMapFile {
+class MANTID_DATAHANDLING_DLL LoadGroupMapFile {
 public:
   /// Constructor. Opens a file.
   LoadGroupMapFile(const std::string &fileName, Kernel::Logger &log);

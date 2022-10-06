@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace NeXus {
@@ -40,7 +41,7 @@ Required Properties:
 
 @author Martyn Gigg, Tessella plc
 */
-class DLLExport UpdateInstrumentFromFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL UpdateInstrumentFromFile final : public API::Algorithm {
 public:
   /// Default constructor
   UpdateInstrumentFromFile();

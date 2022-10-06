@@ -11,6 +11,7 @@
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/LoadGeometry.h"
 #include "MantidDataObjects/EventList.h"
@@ -72,7 +73,7 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
 
   @date Sep 27, 2010
   */
-class DLLExport LoadEventNexus : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadEventNexus : public API::NexusFileLoader {
 
 public:
   LoadEventNexus();

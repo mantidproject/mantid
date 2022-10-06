@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid {
@@ -65,7 +66,7 @@ for each histogram.
 @author Anders Markvardsen, ISIS, RAL
 @date 15/10/2007
 */
-class DLLExport SaveCSV final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveCSV final : public API::Algorithm {
 public:
   /// Default constructor
   SaveCSV();

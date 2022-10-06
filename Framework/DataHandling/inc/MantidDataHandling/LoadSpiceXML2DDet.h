@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -42,7 +42,7 @@ public:
 
 /** LoadSpiceXML2DDet : Load 2D detector data in XML format form SPICE
  */
-class DLLExport LoadSpiceXML2DDet final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadSpiceXML2DDet final : public API::Algorithm {
 public:
   LoadSpiceXML2DDet();
   ~LoadSpiceXML2DDet() override;

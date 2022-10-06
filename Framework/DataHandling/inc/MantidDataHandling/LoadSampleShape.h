@@ -25,7 +25,7 @@ namespace DataHandling {
 @date 26/02/2018
  */
 
-class DLLExport LoadSampleShape : public Mantid::API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadSampleShape : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadSampleShape"; };

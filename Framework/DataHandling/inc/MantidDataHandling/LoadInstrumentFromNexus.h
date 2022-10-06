@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 
@@ -50,7 +51,7 @@ data to be added.</LI>
 @date 2/5/2008
 @author Ronald Fowler, ISIS, RAL (LoadInstrumentFromNexus)
 */
-class DLLExport LoadInstrumentFromNexus final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadInstrumentFromNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadInstrumentFromNexus();

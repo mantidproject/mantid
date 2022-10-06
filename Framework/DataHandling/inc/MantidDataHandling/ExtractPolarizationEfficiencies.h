@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -15,7 +15,7 @@ namespace DataHandling {
    efficiencies to be used with the polarization correction algorithm
    (PolarizationEfficienciesCor).
 */
-class DLLExport ExtractPolarizationEfficiencies final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL ExtractPolarizationEfficiencies final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

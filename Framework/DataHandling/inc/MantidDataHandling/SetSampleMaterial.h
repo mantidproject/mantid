@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/NeutronAtom.h"
 namespace Mantid {
@@ -20,7 +21,7 @@ namespace DataHandling {
     @author Vickie Lynch, SNS
     @date 2/7/2013
 */
-class DLLExport SetSampleMaterial : public Mantid::API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL SetSampleMaterial : public Mantid::API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override;

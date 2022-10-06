@@ -8,8 +8,8 @@
 
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
 
@@ -20,7 +20,7 @@ namespace DataHandling {
 
   @date 2012-01-30
 */
-class DLLExport LoadPreNexus : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadPreNexus : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

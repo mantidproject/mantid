@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
 
 namespace Mantid {
@@ -22,7 +23,7 @@ namespace DataHandling {
      @author Roman Tolchenov, Tessella plc
      @date 31/10/2011
   */
-class DLLExport LoadQKK : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadQKK : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadQKK"; }

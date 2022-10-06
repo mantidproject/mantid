@@ -17,7 +17,7 @@ namespace DataHandling {
 /**
   Loads an ILL IN16B nexus file into a Mantid workspace.
 */
-class DLLExport LoadILLIndirect2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLIndirect2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLIndirect2();
   /// Returns a confidence value that this algorithm can load a file
