@@ -45,7 +45,6 @@ if __name__ == '__main__':
     args = parse_args()
     args.release = fixReleaseName(args.release)
     main_release_dir = createFileLocation(args.release)
-    # main_release_dir = createFileLocation('v6.5.0')
     release_note_dirs = checkContainsReleaseNote(main_release_dir)
     unused_note_dirs = check_for_unused_files(release_note_dirs)
     print_paths(unused_note_dirs)
