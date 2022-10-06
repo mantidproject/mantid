@@ -30,7 +30,7 @@ This has four detector groups, arranged to form edges of a square.
 
 -------------------------
 
-.. _loading_test:
+.. _loading_test_MUSR:
 
 Loading Data Test
 -----------------
