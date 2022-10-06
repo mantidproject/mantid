@@ -778,6 +778,9 @@ to the gravity correction. The extra length is only taken into account
 when the gravity correction is enabled and the default value is x=0.0.
 See also :ref:`gravity_on-ref`.
 
+Unless there is a reason not too, set the value of *gravity_extra_length* equal
+to 0.5 * collimation_length. See also :ref:`QRESOL/LCOLLIM=z <qresol-lcollim-z>`.
+
 **Replacement**
 
 ..  code-block:: none
@@ -2061,6 +2064,8 @@ the heights and widths of a slit do not have to be the same.
     w1 = 0.016
     h2 = 0.008
     w2 = 0.008
+
+.. _qresol-lcollim-z:
 
 QRESOL/LCOLLIM=z
 ----------------
