@@ -151,7 +151,7 @@ class FitInteractiveTool(QObject):
         selected_peak = None
         for pm in self.peak_markers:
             pm.mouse_move_start(x, y)
-            if pm.is_moving:
+            if pm.is_moving():
                 selected_peak = pm
         if selected_peak is not None:
             self.select_peak(selected_peak)
