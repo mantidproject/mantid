@@ -1,20 +1,11 @@
 #!/bin/sh
 #
-# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour
+# Launch python using any necessary LD_PRELOAD behaviour and mantid libraries
 #
 # Script is configured by CMake
 
-# Find out where we are
-THISFILE=$(readlink -f "$0")
-INSTALLDIR=$(dirname $THISFILE)   # directory of executable
-INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
-
+@PREAMBLE@
 @JEMALLOC_DEFINITIONS@
-
-LOCAL_LDPATH=@EXTRA_LDPATH@
-if [ -n "${LD_LIBRARY_PATH}" ]; then
-  LOCAL_LDPATH=${LOCAL_LDPATH}:${LD_LIBRARY_PATH}
-fi
 
 # Define where python libraries are
 LOCAL_PYTHONPATH=@LOCAL_PYPATH@
@@ -29,23 +20,16 @@ else
     LOCAL_QT_API="pyqt5" # force to use qt5
 fi
 
-# Find private sip module if it exists. Required by qtpy
-if [ -f "${INSTALLDIR}/lib/PyQt4/sip.so" ]; then
-  if [ "$LOCAL_QT_API" = "pyqt" ] || [ "$LOCAL_QT_API" = "pyqt4" ]; then
-    LOCAL_PYTHONPATH=$LOCAL_PYTHONPATH:${INSTALLDIR}/lib/PyQt4
-  fi
-fi
-
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
-    set -- @WRAPPER_PREFIX@@Python_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
+    set -- @WRAPPER_PREFIX@@PYTHON_EXEC_LOCAL@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
 elif [ -n "$1" ] && [ -n "$2" ] && [ "$1" = "-n" ]; then
     ranks=$2
     shift 2
-    set -- mpirun -n $ranks @WRAPPER_PREFIX@@Python_EXECUTABLE@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
+    set -- mpirun -n $ranks @WRAPPER_PREFIX@@PYTHON_EXEC_LOCAL@ @PYTHON_ARGS@ "$@"@WRAPPER_POSTFIX@
 else
     IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
-    set -- @WRAPPER_PREFIX@@Python_EXECUTABLE@ @PYTHON_ARGS@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
+    set -- @WRAPPER_PREFIX@@PYTHON_EXEC_LOCAL@ @PYTHON_ARGS@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
 fi
 
 LD_PRELOAD=${LOCAL_PRELOAD} \
