@@ -12,6 +12,7 @@
 
 #include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses.h"
@@ -27,7 +28,7 @@ to recognise a file as the one containing Bilby data.
 @date 22/01/2016
 */
 
-class DLLExport PatchBBY final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL PatchBBY final : public API::Algorithm {
 public:
   // description
   int version() const override { return 1; }

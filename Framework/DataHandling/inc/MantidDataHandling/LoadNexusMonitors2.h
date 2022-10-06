@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
 // clang-format off
@@ -51,7 +52,7 @@ struct MonitorInfo {
 };
 } // namespace LoadNexusMonitorsAlg
 
-class DLLExport LoadNexusMonitors2 : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadNexusMonitors2 : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNexusMonitors"; }

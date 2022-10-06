@@ -9,7 +9,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -18,7 +17,7 @@ namespace DataHandling {
 /** LoadILLSANS; supports D11, D22 and D33 (TOF/monochromatic)
  */
 
-class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLSANS();
   const std::string name() const override;

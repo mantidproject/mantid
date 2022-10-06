@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -31,7 +32,7 @@ data.</li>
 @author Keith Brown, ISIS, Placement student from the University of Derby
 @date 10/10/13
 */
-class DLLExport LoadAscii2 : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadAscii2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
   LoadAscii2();

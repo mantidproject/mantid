@@ -8,6 +8,7 @@
 
 #include "../../src/LoadRaw/isisraw2.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 #include <nexus/NeXusFile.hpp>
 
@@ -28,7 +29,7 @@ Required Properties:
 @author Roman Tolchenov, Tessella plc
 @date 03/03/2011
 */
-class DLLExport SaveISISNexus final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveISISNexus final : public API::Algorithm {
 public:
   /// Default constructor
   SaveISISNexus();

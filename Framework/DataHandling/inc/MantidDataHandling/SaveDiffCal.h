@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace H5 {
 class Group;
@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /** SaveDiffCal : TODO: DESCRIPTION
  */
-class DLLExport SaveDiffCal final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -7,8 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidKernel/System.h"
+
 namespace Mantid {
 
 namespace DataHandling {
@@ -19,7 +20,7 @@ namespace DataHandling {
   @author Harry Jeffery, ISIS, RAL
   @date 17/7/2014
 */
-class DLLExport SaveParameterFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveParameterFile final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

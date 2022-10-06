@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -21,7 +21,7 @@ Required Properties:
 <LI> Filename - The filename to use for the saved data </LI>
 </UL>
 */
-class DLLExport SavePDFGui final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SavePDFGui final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

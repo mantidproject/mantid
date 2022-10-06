@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -20,7 +21,7 @@ class ChopperConfiguration;
    (.irf) to  GSAS"s instrument
     file (.iparm/.prm).
   */
-class DLLExport SaveGSASInstrumentFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveGSASInstrumentFile final : public API::Algorithm {
 public:
   SaveGSASInstrumentFile();
   /// Algorithm's name

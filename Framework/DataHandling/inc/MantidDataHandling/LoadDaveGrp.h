@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -50,7 +51,7 @@ namespace DataHandling {
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadDaveGrp : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadDaveGrp : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadDaveGrp();

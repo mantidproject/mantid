@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Poco {
 namespace XML {
@@ -22,7 +22,7 @@ namespace DataHandling {
 
 /** LoadGSASInstrumentFile : Load GSAS instrument file to TableWorkspace(s)
  */
-class DLLExport LoadGSASInstrumentFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadGSASInstrumentFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadGSASInstrumentFile"; }

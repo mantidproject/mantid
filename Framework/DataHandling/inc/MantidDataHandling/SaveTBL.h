@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -20,7 +21,7 @@ Saves a table workspace to a reflectometry tbl format ascii file.
 Rows are 17 cells long and this save algorithm will throw if the workspace has
 stitch groups of longer than 3 runs.
 */
-class DLLExport SaveTBL final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveTBL final : public API::Algorithm {
 public:
   /// Default constructor
   SaveTBL();

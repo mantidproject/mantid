@@ -11,6 +11,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,7 +40,7 @@ namespace DataHandling {
  *
  */
 
-class DLLExport SaveNXSPE final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveNXSPE final : public API::Algorithm {
 public:
   /// Constructor
   SaveNXSPE();
