@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidDataObjects/PeakShapeFactory.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -17,7 +16,7 @@ class PeakShape;
 namespace DataObjects {
 /** PeakNoShapeFactory : Factory method for types of NoShape
  */
-class DLLExport PeakNoShapeFactory : public PeakShapeFactory {
+class MANTID_DATAOBJECTS_DLL PeakNoShapeFactory : public PeakShapeFactory {
 public:
   // Factory method
   Mantid::Geometry::PeakShape *create(const std::string &source) const override;

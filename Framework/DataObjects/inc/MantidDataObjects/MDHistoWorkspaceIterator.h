@@ -10,7 +10,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/SkippingPolicy.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 #include <boost/tuple/tuple.hpp>
 #include <map>
 #include <vector>
@@ -34,7 +33,7 @@ using VecMDExtents = std::vector<MDExtentPair>;
   @author Janik Zikovsky
   @date 2011-10-06
 */
-class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
+class MANTID_DATAOBJECTS_DLL MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
 public:
   MDHistoWorkspaceIterator(const MDHistoWorkspace_const_sptr &workspace, SkippingPolicy *skippingPolicy,
                            Mantid::Geometry::MDImplicitFunction *function = nullptr, size_t beginPos = 0,

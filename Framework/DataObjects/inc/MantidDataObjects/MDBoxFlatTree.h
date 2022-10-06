@@ -24,7 +24,7 @@ namespace DataObjects {
  *
  * */
 
-class DLLExport MDBoxFlatTree {
+class MANTID_DATAOBJECTS_DLL MDBoxFlatTree {
 public:
   /**The constructor of the flat box tree    */
   MDBoxFlatTree();
