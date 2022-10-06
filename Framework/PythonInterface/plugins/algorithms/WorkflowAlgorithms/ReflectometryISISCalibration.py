@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from mantid.simpleapi import CreateEmptyTableWorkspace, ApplyCalibration, CloneWorkspace
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, MatrixWorkspaceProperty,
                         FileAction, FileProperty, PropertyMode)
@@ -49,15 +48,36 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def PyExec(self):
         ws = self.getProperty(self._WORKSPACE).value
-        spectra = range(7, 191)  # Spectra of detectors to be moved - these are the workspace indices
+        det_info = ws.detectorInfo()
+        comp_info = ws.componentInfo()
 
-        compInfo = ws.componentInfo()
-        detInfo = ws.detectorInfo()
+        specular_pixel_idx = self._find_specular_pixel_index(ws, det_info)
+        spectra = self._find_detectors_to_calibrate(ws.getDetector(specular_pixel_idx).getID(), det_info, comp_info)
 
-        two_theta = ws.run().getProperty("Theta").timeAverageValue() * 2
+        calib_table = self._create_calibration_table_from_scan(ws, det_info, comp_info, specular_pixel_idx, spectra)
 
-        min_diff = None
-        min_det_idx = None
+        # Apply calibration to workspace
+        output_ws = CloneWorkspace(InputWorkspace=ws)
+        ApplyCalibration(Workspace=output_ws, CalibrationTable=calib_table)
+        self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
+        AnalysisDataService.remove('output_ws')
+
+    def _find_detectors_to_calibrate(self, specular_pixel_id, det_info, comp_info):
+        """Finds the workspace indices of the detectors that should be calibrated"""
+        # detector_idx = det_info.indexOf(specular_pixel_id)
+        # current_component_idx = comp_info.parent(detector_idx)  # How much further up the hierarchy do we need to go?
+        ## Not sure if this conversion from numpy int64 to Python int64 will be necessary
+        ## I think these indexes need to be converted to workspace indexes rather than detector/component info indexes?
+        # return [idx.item() for idx in comp_info.detectorsInSubtree(current_component_idx)]
+        # return range(7, 191)  # These are the workspace indices provided in the example data
+        return range(2, 6)  # range for testing only
+
+    def _find_specular_pixel_index(self, ws, det_info):
+        # Determine position of the specular pixel from the IDF:
+        ws_two_theta = ws.run().getProperty("Theta").timeAverageValue() * 2
+
+        min_theta_diff = None
+        specular_pixel_idx = None
 
         for i in range(0, ws.getNumberHistograms()):
             try:
@@ -65,88 +85,80 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             except RuntimeError:
                 # Exclude point detectors that don't have IDs
                 continue
-            detector_index = detInfo.indexOf(detector.getID())
-            if detInfo.isMonitor(detector_index):
+
+            detector_index = det_info.indexOf(detector.getID())
+
+            if det_info.isMonitor(detector_index):
                 continue
+
             # Get two theta for the detector in radians
-            det_two_theta = detInfo.twoTheta(detector_index) * (180 / math.pi)
-            diff = abs(two_theta - det_two_theta)
-            if min_diff is None or diff < min_diff:
-                min_diff = diff
-                min_det_idx = i
+            det_two_theta = det_info.twoTheta(detector_index) * (180 / math.pi)
 
-        # Determine position of pixel 82 (our specular pixel) from the IDF:
-        det = ws.getDetector(min_det_idx)
-        y82 = det.getPos().Y()
+            # The specular pixel is the one that has a two theta value closest to the workspace two theta value
+            theta_diff = abs(ws_two_theta - det_two_theta)
+            if min_theta_diff is None or theta_diff < min_theta_diff:
+                min_theta_diff = theta_diff
+                specular_pixel_idx = i
 
-        # create dict of spectrum and position from scan
+        if not specular_pixel_idx:
+            raise RuntimeError("Could not find specular pixel index from the IDF")
+
+        return specular_pixel_idx
+
+    def _get_pixel_positions_from_file(self):
+        # Create dictionary of pixel spectrum number and position from scan
+        scanned_pixel_positions = {}
         with open(self.getPropertyValue(self._CALIBRATION_FILE), 'r') as file:
             pixels = csv.reader(file)
-            pixdict = {float(row[0].split()[0]): float(row[0].split()[1]) for row in pixels}
+            for pixel in pixels:
+                pixel_info = pixel[0].split()
+                scanned_pixel_positions[float(pixel_info[0])] = float(pixel_info[1])
+        return scanned_pixel_positions
 
-        # Get the specular pixel position from the calibration scan
-        # This is assuming that there will be an entry in the calibration scan data for the specular pixel found in the workspace
-        specpix_pos = pixdict[min_det_idx]
-        detYCoord = []
-        for i in spectra:
-            try:
-                # Find difference between pixel i and the specular pixel positions in the scan data
-                # Set the pixel i Y co-ordinate by using the position difference from the scan data
-                # added to the specular pixel position from the IDF
-                # Not sure what the multiply 0.001 is for
-                detYCoord.append(y82 + (specpix_pos - pixdict[i]) * 0.001)
-            except KeyError:
-                # Do nothing if there are any spectra/workspace indices in the range that are not in the calibration data
-                pass
+    def _create_calibration_table_from_scan(self, ws, det_info, comp_info, specular_pixel_idx, spectra_to_calibrate):
+        scanned_pixel_positions = self._get_pixel_positions_from_file()
 
-        detIDList = []
-        detPosList = []
-        detWidthList = []
-        detHeightList = []
+        # Get the current specular pixel Y position and the position from the calibration scan
+        specpixel_y = ws.getDetector(specular_pixel_idx).getPos().Y()
 
-        # This seems to be assuming that the spectra range specified matches the indices available in the workspace
-        for i in spectra:
+        scanned_specpixel_y = scanned_pixel_positions.get(specular_pixel_idx)
+        if not scanned_specpixel_y:
+            raise RuntimeError("Could not find calibration data for specular pixel")
+
+        table = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
+        table.addColumn(type="int", name="Detector ID")
+        table.addColumn(type="V3D", name="Detector Position")
+        table.addColumn(type="double", name="Detector Y Coordinate")
+        table.addColumn(type="double", name="Detector Height")
+        table.addColumn(type="double", name="Detector Width")
+
+        # Populate the table with the calibrated data
+        for i in spectra_to_calibrate:
+            scanned_pixel_pos = scanned_pixel_positions.get(i)
+            if not scanned_pixel_pos:
+                # Skip any workspace indices in the range that are not in the calibration data
+                continue
+
             det = ws.getDetector(i)
-            xyz = det.getPos()
-            detIDList.append(det.getID())
-            detPosList.append(xyz)
-            index = detInfo.indexOf(det.getID())  # detectorInfo and componentInfo index
-            box = compInfo.shape(index).getBoundingBox().width()
-            scalings = compInfo.scaleFactor(index)
-            width, height = box[0] * scalings[0], box[1] * scalings[1]
-            detWidthList.append(width)
-            detHeightList.append(height)
+            det_idx = det_info.indexOf(det.getID())  # detectorInfo and componentInfo index
+            box = comp_info.shape(det_idx).getBoundingBox().width()
+            scalings = comp_info.scaleFactor(det_idx)
 
-        # Create CalibrationTable - This would be done by the calibration functions
-        calibTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-        # Add required columns
-        calibTable.addColumn(type="int", name="Detector ID")
-        calibTable.addColumn(type="V3D", name="Detector Position")
-        calibTable.addColumn(type="double", name="Detector Y Coordinate")
-        calibTable.addColumn(type="double", name="Detector Height")
-        calibTable.addColumn(type="double", name="Detector Width")
+            next_row = {'Detector ID': det.getID(),
+                        'Detector Position': det.getPos(),
+                        'Detector Y Coordinate': self._calculate_calibrated_y_pos(specpixel_y, scanned_specpixel_y,
+                                                                                  scanned_pixel_pos),
+                        'Detector Width': box[0] * scalings[0],
+                        'Detector Height': box[1] * scalings[1]}
+            table.addRow(next_row)
+        return table
 
-        # This seems to be assuming that detYCoord was created without any missing entries and
-        # therefore the entries in the separate lists will match up
-        for j in range(len(detYCoord)):
-            nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j],
-                       'Detector Y Coordinate': detYCoord[j],
-                       'Detector Width': detWidthList[j], 'Detector Height': detHeightList[j]}
-            calibTable.addRow(nextRow)
-
-        # Apply calibration to workspace
-        output_ws = CloneWorkspace(InputWorkspace=ws)
-        ApplyCalibration(Workspace=output_ws, CalibrationTable=calibTable)
-        self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
-        AnalysisDataService.remove('output_ws')
-
-    def _find_detectors_to_calibrate(self, specular_pixel_id, det_info, comp_info):
-        """Finds the workspace indices of the detectors that should be calibrated"""
-        spec_detector_idx = det_info.indexOf(specular_pixel_id)
-        current_component_idx = comp_info.parent(spec_detector_idx)  # How much further up the hierarchy do we need to go?
-        # Not sure if this conversion from numpy int64 to Python int64 will be necessary
-        # I think these indexes need to be converted to workspace indexes rather than detector/component info indexes?
-        return [idx.item() for idx in comp_info.detectorsInSubtree(current_component_idx)]
+    def _calculate_calibrated_y_pos(self, specpixel_y, scanned_specpixel_y, scanned_pixel_pos):
+        # First find the difference between the specular pixel position and the pixel position in the scan data.
+        # The calibrated Y co-ordinate is then found by adding this difference to the specular pixel position from
+        # the IDF.
+        # Not sure what the multiply 0.001 is for.
+        return specpixel_y + (scanned_specpixel_y - scanned_pixel_pos) * 0.001
 
 
 AlgorithmFactory.subscribe(ReflectometryISISCalibration)
