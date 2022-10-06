@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -21,7 +21,7 @@ using AffineMatrixType = Mantid::Kernel::Matrix<coord_t>;
  * @author Owen Arnold
  * @date 20/07/2011
  */
-class DLLExport AffineMatrixParameter : public Mantid::API::ImplicitFunctionParameter {
+class MANTID_DATAOBJECTS_DLL AffineMatrixParameter : public Mantid::API::ImplicitFunctionParameter {
 public:
   // ImplcitFunctionParameter Methods.
   std::string getName() const override;

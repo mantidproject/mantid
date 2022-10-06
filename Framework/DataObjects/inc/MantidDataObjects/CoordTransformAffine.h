@@ -12,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 
 namespace Mantid {
@@ -33,7 +32,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-14 10:03:55.944809
  */
-class DLLExport CoordTransformAffine : public Mantid::API::CoordTransform {
+class MANTID_DATAOBJECTS_DLL CoordTransformAffine : public Mantid::API::CoordTransform {
 public:
   CoordTransformAffine(const size_t inD, const size_t outD);
 

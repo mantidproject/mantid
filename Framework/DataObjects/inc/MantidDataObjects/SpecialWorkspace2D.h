@@ -28,7 +28,7 @@ public:
   enum e { AND, OR, XOR, NOT };
 };
 
-class DLLExport SpecialWorkspace2D : public Workspace2D {
+class MANTID_DATAOBJECTS_DLL SpecialWorkspace2D : public Workspace2D {
 public:
   SpecialWorkspace2D() = default;
   SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors = false);
