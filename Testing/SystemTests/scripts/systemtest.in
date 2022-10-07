@@ -29,8 +29,8 @@ function usage() {
   $PYTHON_EXE $RUNNER_SCRIPT -h
 }
 
-# Sets the MANTIDPYTHON variable
-function setup_mantidpython_path() {
+# Sets the LOACL_PYTHONPATH variable
+function setup_python_path() {
   if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
     if [ "$1" == "-C" ]; then
       if [ -n "$2" ]; then
@@ -57,7 +57,7 @@ fi
 
 # For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
 LOCAL_PYTHONPATH=""
-setup_mantidpython_path $1 $2
+setup_python_path $1 $2
 CMAKE_TARGET_ARG=""
 if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
   shift 2

@@ -97,12 +97,6 @@ set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "")
 
 # General package icon
 install(FILES "${PACKAGE_IMAGES_DIR}\\\\${PACKAGE_ICON_BASENAME}.ico" DESTINATION bin)
-# python wrapper
-install(
-  FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install
-  DESTINATION bin
-  RENAME mantidpython.bat
-)
 
 # Extra plugin and include locations
 set(CPACK_NSIS_ADDITIONAL_INCLUDE_DIR "!addincludedir ${THIRD_PARTY_DIR}/share/nsis-plugins/Include")
