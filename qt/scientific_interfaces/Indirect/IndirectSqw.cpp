@@ -71,7 +71,13 @@ void IndirectSqw::connectSignals() {
 void IndirectSqw::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName.toStdString());
-    m_model->setEFixed(getInstrumentDetail("Efixed").toStdString());
+    try {
+      auto const eFixed = getInstrumentDetail("Efixed").toStdString();
+      m_model->setEFixed(eFixed);
+    } catch (std::runtime_error const &ex) {
+      emit showMessageBox(ex.what());
+      return;
+    }
     plotRqwContour();
     m_view->setDefaultQAndEnergy();
   }
