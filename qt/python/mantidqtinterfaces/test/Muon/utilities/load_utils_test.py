@@ -80,9 +80,10 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(run, 22725)
         ConfigService.Instance().setString("default.facility", " ")
 
-    def test_filename_not_caps(self):
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils')
+    def test_filename_not_caps(self, mock_get_name):
         alg = mock.Mock()
-        alg.get_property = mock.Mock()
+
         mock_path = 'C:/users/test/data/'
         wrong_path = 'C:/users/t/data/'
 
@@ -90,7 +91,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         run_number = "125846.nxs"
         for name in instrument_names:
             # this will alway return all caps for the name -> use upper
-            alg.get_property.return_value = [mock_path+name.upper()+run_number]
+            mock_get_name.return_value = mock_path+name.upper()+run_number
             # load will have correct path -> use wrong path for filename
             filename = utils.get_correct_file_path(wrong_path+name+run_number, alg)
 

@@ -192,6 +192,10 @@ def load_dead_time_from_filename(filename):
     return dead_times
 
 
+def get_filename_from_alg(alg):
+    return alg.getProperty("Filename").value[0]
+
+
 def get_correct_file_path(filename_in, alg):
     """
     The filename given to the loading algorithm can be different to the file that was actually loaded.
@@ -203,7 +207,7 @@ def get_correct_file_path(filename_in, alg):
     """
     _, correct_filename = os.path.split(filename_in)
 
-    filename = alg.getProperty("Filename").value[0]
+    filename = get_filename_from_alg(alg)
     _, filename_all_caps = os.path.split(filename)
     return filename.replace(filename_all_caps, correct_filename)
 
