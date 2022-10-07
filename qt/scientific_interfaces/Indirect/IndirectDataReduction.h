@@ -148,6 +148,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
   /// The currently loaded instrument parameter file
   std::string m_ipfFilename;
+  /// The instrument definition file directory
+  std::string m_idfDirectory;
   /// Stores the details of the instrument
   QMap<QString, QString> m_instDetails;
 };
