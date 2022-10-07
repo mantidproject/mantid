@@ -1,0 +1,1 @@
+- The depolarisation columns output by algorithm SaveSESANS are now normalised by the sample thickness. A new parameter, OverrideSampleThickness, allows an alternative value for normalisation to be specified if needed.

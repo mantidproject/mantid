@@ -25,7 +25,7 @@ Usage
 
    import os
 
-   # Create dummy workspace
+   # Create dummy workspace with sample thickness metadata
    dataX = [1,2,3,4,5]
    dataY = [6,1,9,14]
    dataE = [1,1,4,5]
