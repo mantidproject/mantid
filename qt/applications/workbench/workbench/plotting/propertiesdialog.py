@@ -201,11 +201,12 @@ class AxisEditor(PropertiesEditorBase):
             self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
         else:
             self.scale_setter('linear')
-
         self.lim_setter(self.limit_min, self.limit_max)
         self._set_tick_format()
         which = 'both' if hasattr(axes, 'show_minor_gridlines') and axes.show_minor_gridlines else 'major'
-        axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
+
+        if self.ui.gridBox.isChecked():
+            axes.grid(visible=self.ui.gridBox.isChecked(), axis=self.axis_id, which=which)
 
     def error_occurred(self, exc):
         # revert
