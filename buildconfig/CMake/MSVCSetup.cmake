@@ -54,8 +54,7 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}")
 endif()
 
-get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(CONDA_ENV AND _is_multi_config)
+if(CONDA_ENV)
   # Define a new configuration for debugging with Conda. Crucially it must link to the MSVC release runtime but we
   # switch off all optimzations
   set(_conda_debug_cfg_name DebugWithRelRuntime)
@@ -133,7 +132,13 @@ endif()
 
 file(TO_CMAKE_PATH ${MSVC_PATHS} MSVC_PATHS)
 
-set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_is_multi_config)
+  set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+else()
+  set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin)
+endif()
+
 set(MSVC_IDE_ENV
     "\
 PYTHONPATH=${MSVC_BIN_DIR}\n\
