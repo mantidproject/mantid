@@ -178,43 +178,40 @@ void IndirectDataReduction::loadInstrumentIfNotExist(const std::string &instrume
                                                      const std::string &reflection) {
   auto const ipfFilename = m_idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
-  if (ipfFilename != m_ipfFilename) {
-    try {
-      if (!instrumentName.empty()) {
-        auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
-        auto const parameterFilename = m_idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
-        auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-        loadAlg->setChild(true);
-        loadAlg->setLogging(false);
-        loadAlg->initialize();
-        loadAlg->setProperty("Filename", parameterFilename);
-        loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
-        loadAlg->execute();
-        MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
-        m_instWorkspace = instWorkspace;
-      }
+  if (ipfFilename == m_ipfFilename || instrumentName.empty()) {
+    return;
+  }
 
-      // Load the IPF if given an analyser and reflection
-      if (!instrumentName.empty() && !analyser.empty() && !reflection.empty()) {
-        m_ipfFilename = ipfFilename;
-        auto loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
-        loadParamAlg->setChild(true);
-        loadParamAlg->setLogging(false);
-        loadParamAlg->initialize();
-        loadParamAlg->setProperty("Filename", m_ipfFilename);
-        loadParamAlg->setProperty("Workspace", m_instWorkspace);
-        loadParamAlg->execute();
-      }
+  try {
+    auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
+    auto const parameterFilename = m_idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
+    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+    loadAlg->setChild(true);
+    loadAlg->setLogging(false);
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", parameterFilename);
+    loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
+    loadAlg->execute();
+    MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
+    m_instWorkspace = instWorkspace;
 
-      if (m_instWorkspace) {
-        loadInstrumentDetails();
-      }
-    } catch (std::exception const &ex) {
-      g_log.warning() << "Failed to load instrument with error: " << ex.what()
-                      << ". The current facility may not be fully "
-                         "supported.\n";
-      m_instWorkspace = MatrixWorkspace_sptr();
+    // Load the IPF if given an analyser and reflection
+    if (!analyser.empty() && !reflection.empty()) {
+      m_ipfFilename = ipfFilename;
+      auto loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+      loadParamAlg->setChild(true);
+      loadParamAlg->setLogging(false);
+      loadParamAlg->initialize();
+      loadParamAlg->setProperty("Filename", m_ipfFilename);
+      loadParamAlg->setProperty("Workspace", m_instWorkspace);
+      loadParamAlg->execute();
     }
+
+    loadInstrumentDetails();
+  } catch (std::exception const &ex) {
+    g_log.warning() << "Failed to load instrument with error: " << ex.what()
+                    << ". The current facility may not be fully supported.\n";
+    m_instWorkspace = MatrixWorkspace_sptr();
   }
 }
 
