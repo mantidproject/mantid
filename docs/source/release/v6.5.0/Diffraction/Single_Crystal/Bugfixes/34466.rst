@@ -1,0 +1,1 @@
+- Fix bug in :ref:`FindSXPeaks <algm-FindSXPeaks>` which caused a crash for non-finite data (e.g. NaN after dividing intensity in a bin by 0).

@@ -390,7 +390,6 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize, const boo
 void interpolateLinearInplace(const Histogram &input, Histogram &output, const bool calculateErrors,
                               const bool independentErrors) {
   sanityCheck(input, output, minSizeForLinearInterpolation());
-  const auto inputPoints = input.points();
   const auto &interpPoints = output.points();
 
   interpolateYLinearInplace(input, interpPoints, output, calculateErrors, independentErrors);

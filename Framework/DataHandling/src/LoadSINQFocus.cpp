@@ -108,7 +108,7 @@ void LoadSINQFocus::exec() {
  * Note that the instrument in the nexus file is of the form "FOCUS at SINQ"
  *
  */
-void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
+void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
 
   m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
 
@@ -182,7 +182,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   g_log.debug() << "Data loading into WS done....\n";
 }
 
-void LoadSINQFocus::loadRunDetails(NXEntry &entry) {
+void LoadSINQFocus::loadRunDetails(const NXEntry &entry) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
@@ -217,7 +217,7 @@ void LoadSINQFocus::loadRunDetails(NXEntry &entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadSINQFocus::loadExperimentDetails(NXEntry &entry) {
+void LoadSINQFocus::loadExperimentDetails(const NXEntry &entry) {
 
   std::string name = boost::lexical_cast<std::string>(entry.getFloat("sample/name"));
   m_localWorkspace->mutableSample().setName(name);

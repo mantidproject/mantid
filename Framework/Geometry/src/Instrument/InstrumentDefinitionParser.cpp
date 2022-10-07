@@ -663,7 +663,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp, const P
 
     if (firstRound) {
       firstRound = false;
-    } else {
+    } else if (pRecursive != nullptr) {
       tElem = pRecursive->getChildElement("trans");
       rElem = pRecursive->getChildElement("rot");
     }
@@ -919,7 +919,7 @@ void InstrumentDefinitionParser::setValidityRange(const Poco::XML::Element *pRoo
   }
 }
 
-PointingAlong axisNameToAxisType(const std::string &label, std::string &input) {
+PointingAlong axisNameToAxisType(const std::string &label, const std::string &input) {
   PointingAlong direction;
   if (input == "x") {
     direction = X;
@@ -1353,9 +1353,9 @@ void InstrumentDefinitionParser::createGridDetector(Geometry::ICompAssembly *par
   if (pCompElem->hasAttribute("idfillorder"))
     idfillorder = pCompElem->getAttribute("idfillorder");
   // Default ID row step size
-  if (idfillorder[0] == 'x')
+  if (!idfillorder.empty() && idfillorder[0] == 'x')
     idstepbyrow = xpixels;
-  else if (idfillorder[0] == 'y')
+  else if (!idfillorder.empty() && idfillorder[0] == 'y')
     idstepbyrow = ypixels;
   else
     idstepbyrow = zpixels;
@@ -2146,8 +2146,8 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
     if (numberValueEle >= 1) {
       bool hasValue = false;
 
-      for (unsigned long i = 0; i < numberValueEle; ++i) {
-        pValueElem = static_cast<Element *>(pNLvalue->item(i));
+      for (unsigned long j = 0; j < numberValueEle; ++j) {
+        pValueElem = static_cast<Element *>(pNLvalue->item(j));
 
         if (!pValueElem->hasAttribute(("val")))
           continue;

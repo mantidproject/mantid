@@ -88,7 +88,7 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager, const std::st
 // Utility functions for loading values with defaults
 // Single value properties only support int, double, string and bool
 template <typename Type>
-Type GetNeXusValue(NeXus::NXEntry &entry, const std::string &path, const Type &defval, int32_t index) {
+Type GetNeXusValue(const NeXus::NXEntry &entry, const std::string &path, const Type &defval, int32_t index) {
   try {
     NeXus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(path);
     dataSet.load();
@@ -100,7 +100,8 @@ Type GetNeXusValue(NeXus::NXEntry &entry, const std::string &path, const Type &d
 }
 // string and double are special cases
 template <>
-double GetNeXusValue<double>(NeXus::NXEntry &entry, const std::string &path, const double &defval, int32_t index) {
+double GetNeXusValue<double>(const NeXus::NXEntry &entry, const std::string &path, const double &defval,
+                             int32_t index) {
   try {
     NeXus::NXDataSetTyped<float> dataSet = entry.openNXDataSet<float>(path);
     dataSet.load();
@@ -111,7 +112,7 @@ double GetNeXusValue<double>(NeXus::NXEntry &entry, const std::string &path, con
   }
 }
 template <>
-std::string GetNeXusValue<std::string>(NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
+std::string GetNeXusValue<std::string>(const NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
                                        int32_t /*unused*/) {
 
   try {
@@ -227,7 +228,7 @@ class ConvertTOF {
   inline double v1(double t) const { return m_v2 - m_A * m_w * cos(m_w * t + m_phi); }
 
 public:
-  ConvertTOF(double Amp, double freq, double phase, double L1, double v2, std::vector<double> &L2)
+  ConvertTOF(double Amp, double freq, double phase, double L1, double v2, const std::vector<double> &L2)
       : m_w(2 * M_PI * freq), m_phi(M_PI * phase / 180.0), m_L0(L1), m_v2(v2), m_A(Amp), m_L2(L2) {}
 
   TofData directTOF(size_t detID, double tobs) const {
@@ -726,7 +727,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
 }
 
 /// Set up the detector masks to the region of interest \p roi.
-template <typename FD> void LoadEMU<FD>::setupDetectorMasks(std::vector<bool> &roi) {
+template <typename FD> void LoadEMU<FD>::setupDetectorMasks(const std::vector<bool> &roi) {
 
   // count total number of masked bins
   size_t maskedBins = 0;

@@ -56,9 +56,14 @@ Container::Container() : m_shape(std::make_shared<CSGObject>()) {}
 
 Container::Container(IObject_sptr shape) : m_shape(std::move(shape)) {}
 
-Container::Container(const Container &container)
-    : m_shape(IObject_sptr(container.m_shape->clone())), m_sampleShapeXML(container.m_sampleShapeXML),
-      m_sampleShape(container.m_sampleShape) {}
+Container::Container(const Container &container) { *this = container; }
+
+Container &Container::operator=(const Container &container) {
+  m_shape = IObject_sptr(container.m_shape->clone());
+  m_sampleShapeXML = container.m_sampleShapeXML;
+  m_sampleShape = container.m_sampleShape;
+  return *this;
+}
 
 /**
  * Construct a container providing an XML definition shape

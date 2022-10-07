@@ -47,7 +47,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqwModel::IndirectSqwModel() {}
+IndirectSqwModel::IndirectSqwModel() { m_rebinInEnergy = false; }
 
 void IndirectSqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   if (m_rebinInEnergy) {

@@ -48,7 +48,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
        :width: 50%
        :align: center
 
-        * The line plot button should be automatically enabled
+       The line plot button should be automatically enabled
 
     f. Draw, move and resize the rectangle
 
@@ -444,6 +444,7 @@ With ``md_3D`` open in sliceviewer
 2. Run ``ClearUB`` algorithm on ``md_3D``
 
     - Sliceviewer window should close with message
+
     ``Closing Sliceviewer as the underlying workspace was changed: The property supports_nonorthogonal_axes is different on the new workspace.``
 
 

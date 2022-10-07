@@ -358,10 +358,9 @@ void ParameterMap::add(const std::string &type, const IComponent *comp, const st
  */
 void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
-  checkIsNotMaskingParameter(par->name());
-  // can not add null pointer
   if (!par)
     return;
+  checkIsNotMaskingParameter(par->name());
   if (pDescription)
     par->setDescription(*pDescription);
 

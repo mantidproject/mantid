@@ -45,8 +45,8 @@ int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   int confidence(0);
   const auto &entries = descriptor.getAllEntries();
   const static auto target_dataset = "information";
-  for (const auto &[nx_class, grouped_entries] : entries) {
-    UNUSED_ARG(nx_class);
+  for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
+    const auto grouped_entries = iter->second;
     for (const auto &path : grouped_entries) {
       // Mccode writes an information dataset so can be reasonably confident if we find it
       if (boost::ends_with(path, target_dataset)) {

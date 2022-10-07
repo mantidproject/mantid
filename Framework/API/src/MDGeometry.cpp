@@ -66,10 +66,18 @@ MDGeometry::MDGeometry()
 //----------------------------------------------------------------------------------------------
 /** Copy Constructor
  */
-MDGeometry::MDGeometry(const MDGeometry &other)
-    : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin), m_transforms_FromOriginal(),
-      m_transforms_ToOriginal(), m_notificationHelper(std::make_unique<MDGeometryNotificationHelper>(*this)),
-      m_Wtransf(other.m_Wtransf), m_basisVectors(other.m_basisVectors) {
+MDGeometry::MDGeometry(const MDGeometry &other) { *this = other; }
+
+MDGeometry &MDGeometry::operator=(const MDGeometry &other) {
+  m_dimensions = std::vector<std::shared_ptr<IMDDimension>>{};
+  m_originalWorkspaces = std::vector<std::shared_ptr<Workspace>>{};
+  m_origin = other.m_origin;
+  m_transforms_FromOriginal = std::vector<std::shared_ptr<const CoordTransform>>{};
+  m_transforms_ToOriginal = std::vector<std::shared_ptr<const CoordTransform>>{};
+  m_notificationHelper = std::make_unique<MDGeometryNotificationHelper>(*this);
+  m_Wtransf = other.m_Wtransf;
+  m_basisVectors = other.m_basisVectors;
+
   // Perform a deep copy of the dimensions
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
   for (size_t d = 0; d < other.getNumDims(); d++) {
@@ -100,6 +108,8 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   // being deleted.
   for (size_t i = 0; i < other.m_originalWorkspaces.size(); i++)
     this->setOriginalWorkspace(other.m_originalWorkspaces[i], i);
+
+  return *this;
 }
 
 /**

@@ -22,8 +22,6 @@ where :math:`\Delta` is the time between the first and second pulse.
 
 ------------------------------------
 
-.. _single_pulse_test:
-
 Single Pulse Test
 -----------------
 
@@ -45,8 +43,6 @@ Single Pulse Test
 	- **A0:** ``0.07``
 
 ------------------------------------
-
-.. _double_pulse_test:
 
 Double Pulse Test
 -----------------

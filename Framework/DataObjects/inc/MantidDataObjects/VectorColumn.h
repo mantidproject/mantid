@@ -85,13 +85,13 @@ public:
 
   /// Overall memory size taken by the column (bytes)
   long int sizeOfData() const override {
-    long int size(0);
+    long int dataSize(0);
 
     for (auto elemIt = m_data.begin(); elemIt != m_data.end(); ++elemIt) {
-      size += static_cast<long int>(elemIt->size() * sizeof(Type));
+      dataSize += static_cast<long int>(elemIt->size() * sizeof(Type));
     }
 
-    return size;
+    return dataSize;
   }
 
   /// Create another copy of the column

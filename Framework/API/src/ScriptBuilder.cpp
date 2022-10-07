@@ -49,6 +49,7 @@ ScriptBuilder::ScriptBuilder(const std::shared_ptr<HistoryView> &view, std::stri
  */
 const std::string ScriptBuilder::build() {
   std::ostringstream os;
+  os << "from mantid.simpleapi import *\n\n";
   auto iter = m_historyItems.begin();
   for (; iter != m_historyItems.end(); ++iter) {
     writeHistoryToStream(os, iter);
