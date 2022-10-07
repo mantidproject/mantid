@@ -11,7 +11,8 @@ from typing import List, Tuple
 
 from .textparser import TextParser
 from .abinitioloader import AbInitioLoader
-from abins.constants import ATOMIC_LENGTH_2_ANGSTROM, FLOAT_TYPE, COMPLEX_TYPE
+from abins.constants import FLOAT_TYPE, COMPLEX_TYPE
+from abins.constants import ATOMIC_LENGTH_2_ANGSTROM as BOHR_TO_ANGSTROM
 from mantid.kernel import Atom
 
 # This regular expression matches a row of displacement data, formatted
@@ -102,7 +103,7 @@ class DMOL3Loader(AbInitioLoader):
             else:
                 vectors = [file_obj.readline().split() for _ in range(3)]
                 unit_cell = np.asarray(vectors, dtype=FLOAT_TYPE)
-                unit_cell *= ATOMIC_LENGTH_2_ANGSTROM
+                unit_cell *= BOHR_TO_ANGSTROM
 
         return unit_cell
 
@@ -126,7 +127,7 @@ class DMOL3Loader(AbInitioLoader):
 
             # Convert coordinate units from Bohr to Angstrom
             coord = np.asarray(coord,
-                               dtype=FLOAT_TYPE) * ATOMIC_LENGTH_2_ANGSTROM
+                               dtype=FLOAT_TYPE) * BOHR_TO_ANGSTROM
 
             atoms[f"atom_{atom_index}"] = {"symbol": symbol, "mass": atom.mass,
                                            "sort": atom_index, "coord": coord}
@@ -141,7 +142,7 @@ class DMOL3Loader(AbInitioLoader):
         for line in file_obj:
             if line.decode('utf8').strip():
                 file_obj.seek(last_line)
-                break
+                return
             else:
                 last_line = file_obj.tell()
 
@@ -154,10 +155,7 @@ class DMOL3Loader(AbInitioLoader):
         freedom along index 0 (i.e. rows of x y z x y z x y ... for successive
         atoms).
         """
-        frequencies, displacements = cls._read_mode_block(file_obj)
-        frequency_blocks = [frequencies]
-        displacement_blocks = [displacements]
-        cls._get_to_next_nonempty(file_obj)
+        frequency_blocks, displacement_blocks = [], []
 
         while not (TextParser.block_end(file_obj=file_obj, msg=["STANDARD"])
                    or TextParser.file_end(file_obj=file_obj)):
@@ -219,7 +217,7 @@ class DMOL3Loader(AbInitioLoader):
 
         Displacements are also normalised here. Note that owing to a different
         scaling/reporting convention a sqrt(mass) factor is _not_ applied as
-        with e.g. CRYSTAL17 output.
+        with codes that output displacements in length units (e.g. CRYSTAL17).
         """
         data = {'frequencies': frequencies[None, :],  # Add first (kpt) index
                 'k_vectors': np.array([[0., 0., 0.]], dtype=FLOAT_TYPE),
