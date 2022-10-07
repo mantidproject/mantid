@@ -80,7 +80,7 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(run, 22725)
         ConfigService.Instance().setString("default.facility", " ")
 
-    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils.get_filename_from_alg')
     def test_filename_not_caps(self, mock_get_name):
         alg = mock.Mock()
 
