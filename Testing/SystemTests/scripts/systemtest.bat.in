@@ -26,7 +26,7 @@ if [%1]==[-h] (
 if "%MULTI_CONFIG_GENERATOR%" == "true" (
   if [%1] EQU [-C] (
     if [%2] NEQ [] (
-      set LOCAL_PYTHONPATH=%BIN_DIR%\%2\
+      set PYTHONPATH=%PYTHONPATH%;%BIN_DIR%\%2\
     ) else (
       echo -C requires a config argument
       echo.
@@ -46,7 +46,7 @@ if "%MULTI_CONFIG_GENERATOR%" == "true" (
     echo Use -h for full usage
     goto error
   ) else (
-    set LOCAL_PYTHONPATH=%BIN_DIR%\
+    set PYTHONPATH=%PYTHONPATH%;%BIN_DIR%\
   )
 )
 
@@ -68,9 +68,9 @@ if "%MULTI_CONFIG_GENERATOR%" == "true" (
 echo.
 echo Running tests...
 if "%MULTI_CONFIG_GENERATOR%" == "true" (
-  PYTHONPATH=%LOCAL_PYTHONPATH% "python3"  %RUNNER_SCRIPT% --executable="python3" --exec-args= %3 %4 %5 %6 %7 %8 %9
+  %PYTHON_EXE% %RUNNER_SCRIPT% --executable=%PYTHON_EXE% --exec-args= %3 %4 %5 %6 %7 %8 %9
 ) else (
-  PYTHONPATH=%LOCAL_PYTHONPATH% "python3"  %RUNNER_SCRIPT% --executable="python3" --exec-args= %1 %2 %3 %4 %5 %6 %7
+  %PYTHON_EXE% %RUNNER_SCRIPT% --executable=%PYTHON_EXE% --exec-args= %1 %2 %3 %4 %5 %6 %7
 )
 goto end
 

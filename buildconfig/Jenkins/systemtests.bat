@@ -98,13 +98,13 @@ echo "Runing system tests with %NTHREADS% cores."
 set PYTHON_EXE=
 set SYSTEMTEST_ARGS=
 set SYSTEMTEST_SCRIPT=
-set LOCAL_PYTHONPATH=%WORKSPACE%\build\bin\%BUILD_CONFIG%\
+set PYTHONPATH=%PYTHONPATH%;%WORKSPACE%\build\bin\%BUILD_CONFIG%\
 
 :: If no package is built, run the system tests using runSystemTests.py directly.
 :: Otherwise run InstallerTests.py.
 if "%BUILDPKG%" == "no" (
   set PYTHON_EXE=python.exe
-  set SYSTEMTEST_ARGS=--loglevel=information --executable=python3 --quiet --output-on-failure
+  set SYSTEMTEST_ARGS=--loglevel=information --executable=python.exe --quiet --output-on-failure
   set SYSTEMTEST_SCRIPT=%WORKSPACE%\Testing\SystemTests\scripts\runSystemTests.py
 ) else (
   :: A completely clean builder will not have Mantid installed but will need Python to
@@ -114,4 +114,4 @@ if "%BUILDPKG%" == "no" (
   set SYSTEMTEST_SCRIPT=%WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py
 )
 echo Running %SYSTEMTEST_SCRIPT% with %SYSTEMTEST_ARGS% -j %NTHREADS% %EXTRA_ARGS%
-PYTHONPATH=%LOCAL_PYTHONPATH% %PYTHON_EXE% %SYSTEMTEST_SCRIPT% %SYSTEMTEST_ARGS% -j %NTHREADS% %EXTRA_ARGS%
+%PYTHON_EXE% %SYSTEMTEST_SCRIPT% %SYSTEMTEST_ARGS% -j %NTHREADS% %EXTRA_ARGS%
