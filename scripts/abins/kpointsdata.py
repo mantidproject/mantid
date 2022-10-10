@@ -138,8 +138,8 @@ class KpointsData(collections.abc.Sequence):
             if not np.allclose(np.ones(displacements.shape[1]),
                                norm(norm(displacements, axis=0), axis=1)):
                 return False
-        else:
-            return True
+
+        return True
 
     def extract(self):
         extracted = {"unit_cell": self.unit_cell,

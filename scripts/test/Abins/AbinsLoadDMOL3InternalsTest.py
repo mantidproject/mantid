@@ -11,6 +11,7 @@ import unittest
 import numpy as np
 from numpy.testing import assert_allclose
 
+from abins.constants import ATOMIC_LENGTH_2_ANGSTROM as BOHR_TO_ANGSTROM
 from abins.input import DMOL3Loader
 from mantid.kernel import Atom
 
@@ -64,7 +65,7 @@ DUMMY CONTENT
                       [2.42243481736875, 8.68442407988897, 6.67097246055480],
                       [-2.34542583215868, 10.72867081788549, 2.94943237944894],
                       [0.04185270935330, 2.59517848080392, -1.80983568538814]]
-                     ) * 0.52917721067  # Convert Bohr to Angstrom
+                     ) * BOHR_TO_ANGSTROM
         )
 
         self.assertEqual(['F', 'F', 'Na', 'Si'],

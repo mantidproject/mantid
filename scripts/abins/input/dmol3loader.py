@@ -166,6 +166,10 @@ class DMOL3Loader(AbInitioLoader):
 
             cls._get_to_next_nonempty(file_obj)
 
+        # Eigenvector regex includes optional matches for columns 2-9; these
+        # lead to None groups, converted to NaN by numpy. No such cleanup is
+        # needed for frequencies as these were obtained by simple line.split().
+
         for column in range(1, 9):
             # Check if the last displacement block has column(s) of NaN;
             # if so number of modes was not multiple of 9 and extra columns
