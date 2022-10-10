@@ -301,7 +301,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ######################################################################################################################
 # Setup ccache
 # ######################################################################################################################
-include(CCacheSetup)
+get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT _is_multi_config)
+  include(CCacheSetup)
+endif()
 
 # ######################################################################################################################
 # Add compiler options if using gcc
