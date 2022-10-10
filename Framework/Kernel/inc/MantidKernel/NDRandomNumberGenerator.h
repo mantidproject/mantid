@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "DllConfig.h"
+#include "MantidKernel/DllConfig.h"
 #include <vector>
 
 namespace Mantid {
