@@ -8,13 +8,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/DllConfig.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <climits>
 #include <nexus/NeXusFile.hpp>
 
 // class MuonNexusReader - based on ISISRAW this class implements a simple
 // reader for Nexus Muon data files.
-class DLLExport MuonNexusReader {
+class MANTID_NEXUS_DLL MuonNexusReader {
   /** @class MuonNexusReader MuonNexusReader.h
 
   MuunNexusReader opens a Nexus file and reads certain fields expected for a

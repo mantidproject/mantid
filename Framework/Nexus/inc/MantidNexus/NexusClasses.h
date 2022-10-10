@@ -13,6 +13,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/DllConfig.h"
 
 #include <boost/container/vector.hpp>
 #include <nexus/napi.h>
@@ -69,7 +70,7 @@ const int g_processed_blocksize = 8;
 
 /**  Nexus attributes. The type of each attribute is NX_CHAR
  */
-class DLLExport NXAttributes {
+class MANTID_NEXUS_DLL NXAttributes {
 public:
   int n() const { return int(m_values.size()); }         ///< number of attributes
   std::vector<std::string> names() const;                ///< Returns the list of attribute names
@@ -89,7 +90,7 @@ class NXClass;
 /**  The base abstract class for NeXus classes and data sets.
  *    NX classes and data sets are defined at www.nexusformat.org
  */
-class DLLExport NXObject {
+class MANTID_NEXUS_DLL NXObject {
   friend class NXDataSet; ///< a friend class declaration
   friend class NXClass;   ///< a friend class declaration
   friend class NXRoot;    ///< a friend class declaration
@@ -131,7 +132,7 @@ private:
  *  There is no need to free the memory allocated by the NXDataSet as it is done
  * at the destruction.
  */
-class DLLExport NXDataSet : public NXObject {
+class MANTID_NEXUS_DLL NXDataSet : public NXObject {
 public:
   // Constructor
   NXDataSet(const NXClass &parent, const std::string &name);
@@ -483,7 +484,7 @@ using NXUInt = NXDataSetTyped<unsigned int>;
  * (groups) can be created and loaded from
  *   NeXus files.
  */
-class DLLExport NXClass : public NXObject {
+class MANTID_NEXUS_DLL NXClass : public NXObject {
   friend class NXRoot;
 
 public:
@@ -625,7 +626,7 @@ private:
 
 /**  Implements NXlog Nexus class.
  */
-class DLLExport NXLog : public NXClass {
+class MANTID_NEXUS_DLL NXLog : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -721,7 +722,7 @@ private:
 
 /**  Implements NXnote Nexus class.
  */
-class DLLExport NXNote : public NXClass {
+class MANTID_NEXUS_DLL NXNote : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -750,7 +751,7 @@ protected:
 
 /**  Implements NXnote Nexus class with binary data.
  */
-class DLLExport NXBinary : public NXNote {
+class MANTID_NEXUS_DLL NXBinary : public NXNote {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -769,7 +770,7 @@ private:
 
 /**  Main class is the one that can contain auxiliary classes.
  */
-class DLLExport NXMainClass : public NXClass {
+class MANTID_NEXUS_DLL NXMainClass : public NXClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -791,7 +792,7 @@ public:
 
 /**  Implements NXdata Nexus class.
  */
-class DLLExport NXData : public NXMainClass {
+class MANTID_NEXUS_DLL NXData : public NXMainClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -833,7 +834,7 @@ public:
 
 /**  Implements NXdetector Nexus class.
  */
-class DLLExport NXDetector : public NXMainClass {
+class MANTID_NEXUS_DLL NXDetector : public NXMainClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -853,7 +854,7 @@ public:
 
 /**  Implements NXdisk_chopper Nexus class.
  */
-class DLLExport NXDiskChopper : public NXMainClass {
+class MANTID_NEXUS_DLL NXDiskChopper : public NXMainClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -869,7 +870,7 @@ public:
 
 /**  Implements NXinstrument Nexus class.
  */
-class DLLExport NXInstrument : public NXMainClass {
+class MANTID_NEXUS_DLL NXInstrument : public NXMainClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -894,7 +895,7 @@ public:
 
 /**  Implements NXentry Nexus class.
  */
-class DLLExport NXEntry : public NXMainClass {
+class MANTID_NEXUS_DLL NXEntry : public NXMainClass {
 public:
   /**  Constructor.
    *   @param parent :: The parent Nexus class. In terms of HDF it is the group
@@ -918,7 +919,7 @@ public:
 
 /**  Implements NXroot Nexus class.
  */
-class DLLExport NXRoot : public NXClass {
+class MANTID_NEXUS_DLL NXRoot : public NXClass {
 public:
   // Constructor
   NXRoot(std::string fname);
