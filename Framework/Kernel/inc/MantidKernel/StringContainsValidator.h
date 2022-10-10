@@ -19,7 +19,7 @@ namespace Kernel {
   @author Elliot Oram, ISIS, RAL
   @date 05/08/2015
 */
-class DLLExport StringContainsValidator : public TypedValidator<std::string> {
+class MANTID_KERNEL_DLL StringContainsValidator : public TypedValidator<std::string> {
 public:
   StringContainsValidator();
   StringContainsValidator(const std::vector<std::string> &);

@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "MantidKernel/System.h" //DLLExport
+#include "MantidKernel/DllConfig.h"
 
 /** StringTokenizer: A simple tokenizer that splits a string into tokens, which
  are separated by separator characters. An iterator or index can used to iterate
@@ -24,7 +24,7 @@
 namespace Mantid {
 namespace Kernel {
 
-class DLLExport StringTokenizer final {
+class MANTID_KERNEL_DLL StringTokenizer final {
 public:
   /// Specify tokenizer options. These can be combined using + or |.
   enum Options {
