@@ -8,14 +8,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 /** EvaluateMDFunction : TODO: DESCRIPTION
  */
-class DLLExport EvaluateMDFunction final : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_MDALGORITHMS_DLL EvaluateMDFunction final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   EvaluateMDFunction();
 

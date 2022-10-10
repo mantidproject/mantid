@@ -55,7 +55,7 @@ enum TargetFrame {
 };
 } // namespace CnvrtToMD
 
-class DLLExport MDWSTransform {
+class MANTID_MDALGORITHMS_DLL MDWSTransform {
 public:
   MDWSTransform();
 

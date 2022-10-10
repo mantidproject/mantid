@@ -7,11 +7,12 @@
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid::MDAlgorithms {
 
 // Detect and pass to the correct version
-class DLLExport IntegrateEllipsoids final : public API::DataProcessorAlgorithm {
+class MANTID_MDALGORITHMS_DLL IntegrateEllipsoids final : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithm's purpose

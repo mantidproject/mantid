@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -26,7 +26,7 @@ namespace MDAlgorithms {
   Calculates indefinite integral of the spectra in the input workspace sampled
   at a regular grid.
 */
-class DLLExport IntegrateFlux final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegrateFlux final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

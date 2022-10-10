@@ -10,7 +10,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -18,7 +18,7 @@ namespace MDAlgorithms {
 /** Abstract base class for unary operations (e.g. Log or Exp)
  * on MDWorkspaces.
  */
-class DLLExport UnaryOperationMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL UnaryOperationMD : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
