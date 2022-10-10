@@ -59,10 +59,16 @@ if(CONDA_ENV)
   # switch off all optimzations
   set(_conda_debug_cfg_name DebugWithRelRuntime)
   string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
+  # Set language flags for Visual studio and ninja generators
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
+    set(_language_flags "/Zi /Ob0 /Od /RTC1")
+  else()
+    set(_language_flags "/Ob0 /Od /RTC1")
+  endif()
   # C/CXX flags
   foreach(lang C CXX)
     set(CMAKE_${lang}_FLAGS_${_conda_debug_cfg_name_upper}
-        "/Zi /Ob0 /Od /RTC1"
+        ${_language_flags}
         CACHE STRING "" FORCE
     )
   endforeach()
