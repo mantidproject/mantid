@@ -20,7 +20,7 @@ namespace Geometry {
   @author Martyn Gigg
   @date 2011-07-08
 */
-class DLLExport PolygonEdge {
+class MANTID_GEOMETRY_DLL PolygonEdge {
 public:
   /// Defines the orientation with respect to another edge
   enum Orientation {

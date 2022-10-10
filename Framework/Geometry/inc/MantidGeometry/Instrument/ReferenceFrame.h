@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include <string>
 
@@ -23,7 +23,7 @@ enum Handedness { Left, Right };
   @date 2012-01-27
 */
 
-class DLLExport ReferenceFrame {
+class MANTID_GEOMETRY_DLL ReferenceFrame {
 public:
   /// Default constructor
   ReferenceFrame();
