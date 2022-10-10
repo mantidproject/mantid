@@ -110,7 +110,7 @@ class TextParser:
         Checks for msg which terminates block.
 
         :param file_obj: file object from which we read
-        :param msg: list of messages which can end kpoint block.
+        :param msg: list of messages that can end kpoint block.
         :returns: True if end of block otherwise False
         """
         for item in msg:
