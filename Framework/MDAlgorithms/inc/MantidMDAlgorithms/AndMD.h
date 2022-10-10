@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
 
@@ -18,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-08
 */
-class DLLExport AndMD : public BooleanBinaryOperationMD {
+class MANTID_MDALGORITHMS_DLL AndMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;

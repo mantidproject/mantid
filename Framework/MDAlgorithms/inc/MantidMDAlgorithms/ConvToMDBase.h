@@ -31,7 +31,7 @@ namespace MDAlgorithms {
     @date 07-01-2012
 */
 
-class DLLExport ConvToMDBase {
+class MANTID_MDALGORITHMS_DLL ConvToMDBase {
 public:
   // constructor;
   ConvToMDBase();

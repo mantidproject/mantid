@@ -12,7 +12,7 @@
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <boost/optional.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -25,7 +25,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-07-12
 */
-class DLLExport LoadMD : public API::NexusFileLoader {
+class MANTID_MDALGORITHMS_DLL LoadMD : public API::NexusFileLoader {
 public:
   LoadMD();
 

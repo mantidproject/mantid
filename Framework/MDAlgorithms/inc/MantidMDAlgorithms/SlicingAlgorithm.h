@@ -18,6 +18,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/VMD.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -29,7 +30,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-09-27
 */
-class DLLExport SlicingAlgorithm : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL SlicingAlgorithm : public API::Algorithm {
 public:
   SlicingAlgorithm();
 

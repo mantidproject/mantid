@@ -12,7 +12,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -22,7 +22,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-04-13 18:11:53.496539
  */
-class DLLExport IntegratePeaksCWSD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegratePeaksCWSD final : public API::Algorithm {
 public:
   IntegratePeaksCWSD();
 

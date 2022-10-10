@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -21,7 +21,7 @@ std::vector<std::string> DLLExport findOriginalQUnits(const Mantid::API::IMDWork
 
   @date 2015-03-20
 */
-class DLLExport CutMD : public API::DataProcessorAlgorithm {
+class MANTID_MDALGORITHMS_DLL CutMD : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override { return "CutMD"; }
   int version() const override { return 1; }
