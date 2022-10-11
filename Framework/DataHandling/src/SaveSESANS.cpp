@@ -53,7 +53,8 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
   }
 
   m_sampleThickness = static_cast<double>(getProperty("OverrideSampleThickness"));
-  if (m_sampleThickness <= 0) {
+  const double tolerance = 1e-09;
+  if (m_sampleThickness <= tolerance) {
     invalidInputs["OverrideSampleThickness"] = "OverrideSampleThickness value must be greater than 0";
   }
 

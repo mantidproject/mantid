@@ -96,6 +96,18 @@ public:
     TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
   }
 
+  void test_exec_thickness_property_within_tolerance() {
+    auto ws = createTestWorkspace();
+
+    testAlg.setProperty("InputWorkspace", ws);
+    testAlg.setProperty("Sample", "Sample set in SaveSESANSTest");
+    const double tolerance = 1e-09;
+    testAlg.setProperty("OverrideSampleThickness", tolerance);
+
+    // Execute the algorithm
+    TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
+  }
+
 private:
   SaveSESANS testAlg;
   const double root2 = std::sqrt(2.0);
