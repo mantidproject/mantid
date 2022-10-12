@@ -20,7 +20,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -760,17 +759,13 @@ std::string LoadILLSANS::getInstrumentFilePath(const std::string &instName) cons
  * Loads the instrument from the IDF
  */
 void LoadILLSANS::runLoadInstrument() {
-
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  if (m_resMode == "nominal") {
-    loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instrumentName));
-  } else if (m_resMode == "low") {
+  std::string instrumentPath = m_instrumentName;
+  if (m_resMode == "low") {
     // low resolution mode we have only defined for the old D11 and D22
-    loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instrumentName + "lr"));
+    instrumentPath += "lr";
   }
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-  loadInst->execute();
+  instrumentPath += "_Definition.xml";
+  m_loadHelper.loadEmptyInstrument(m_localWorkspace, m_instrumentName, instrumentPath);
 }
 
 /**

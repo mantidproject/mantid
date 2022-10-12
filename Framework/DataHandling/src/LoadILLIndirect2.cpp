@@ -15,7 +15,6 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
@@ -124,7 +123,7 @@ void LoadILLIndirect2::exec() {
   }
   progress.report("Loaded the data");
 
-  runLoadInstrument();
+  m_loader.loadEmptyInstrument(m_localWorkspace, m_instrumentName, getInstrumentFileName());
   progress.report("Loaded the instrument");
 
   if (m_loadOption == "Spectrometer") {
@@ -375,35 +374,20 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
 }
 
 /**
- * Run the Child Algorithm LoadInstrument.
+ * Attaches proper suffixes of the relevant IDF dependent on first tube angle and mode
+ * @return : the file name of the corresponding IDF
  */
-void LoadILLIndirect2::runLoadInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", getInstrumentFilePath());
-  loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-  loadInst->execute();
-}
-
-/**
- * Makes up the full path of the relevant IDF dependent on first tube angle and
- * mode
- * @return : the full path to the corresponding IDF
- */
-std::string LoadILLIndirect2::getInstrumentFilePath() {
-  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
-  std::string idf = m_instrumentName;
+std::string LoadILLIndirect2::getInstrumentFileName() {
+  std::string instrumentFileName = m_instrumentName;
   if (m_loadOption == "Diffractometer") {
-    idf += "D";
+    instrumentFileName += "D";
   } else if (!m_bats && m_firstTubeAngleRounded == 251) {
     // load the instrument with the first tube analyser focused at the midpoint
     // of sample to tube center
-    idf += "F";
+    instrumentFileName += "F";
   }
-  Poco::Path file(idf + "_Definition.xml");
-  Poco::Path fullPath(directory, file);
-  return fullPath.toString();
+  instrumentFileName += "_Definition.xml";
+  return instrumentFileName;
 }
 
 /**

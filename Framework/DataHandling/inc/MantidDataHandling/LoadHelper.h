@@ -41,6 +41,9 @@ public:
   void rotateComponent(const API::MatrixWorkspace_sptr &ws, const std::string &componentName, const Kernel::Quat &rot);
   Kernel::V3D getComponentPosition(const API::MatrixWorkspace_sptr &ws, const std::string &componentName);
 
+  void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
+                           const std::string &instrumentPath = "");
+
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
                                        std::string &parent_class, int level, bool useFullPath);

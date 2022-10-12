@@ -23,7 +23,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
@@ -205,7 +204,7 @@ void LoadILLReflectometry::exec() {
   std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
   loadDataDetails(firstEntry);
   initWorkspace(monitorsData);
-  loadInstrument();
+  m_loader.loadEmptyInstrument(m_localWorkspace, m_instrument == Supported::D17 ? "D17" : "FIGARO");
   loadNexusEntriesIntoProperties();
   loadData(firstEntry, monitorsData, getXValues());
   firstEntry.close();
@@ -217,16 +216,6 @@ void LoadILLReflectometry::exec() {
   placeSlits();
   convertTofToWavelength();
   setProperty("OutputWorkspace", m_localWorkspace);
-}
-
-/// Run the Child Algorithm LoadInstrument.
-void LoadILLReflectometry::loadInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  const std::string instrumentName = m_instrument == Supported::D17 ? "D17" : "FIGARO";
-  loadInst->setPropertyValue("InstrumentName", instrumentName);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  loadInst->executeAsChildAlg();
 }
 
 /**

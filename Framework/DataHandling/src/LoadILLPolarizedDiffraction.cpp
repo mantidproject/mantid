@@ -18,7 +18,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -149,14 +148,17 @@ void LoadILLPolarizedDiffraction::loadData() {
     NXEntry entry = dataRoot.openEntry("entry" + std::to_string(entryNumber));
     m_instName = entry.getString("D7/name");
 
-    std::string start_time = entry.getString("start_time");
-    start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
+    std::string startTime = entry.getString("start_time");
+    startTime = m_loadHelper.dateTimeInIsoFormat(startTime);
 
     // init the workspace with proper number of histograms and number of channels
     auto workspace = initStaticWorkspace(entry);
 
+    // the start time is needed in the workspace when loading the parameter file
+    workspace->mutableRun().addProperty("start_time", startTime);
+
     // load the instrument
-    loadInstrument(workspace, start_time);
+    m_loadHelper.loadEmptyInstrument(workspace, m_instName);
 
     // rotate detectors to their position during measurement
     moveTwoTheta(entry, workspace);
@@ -291,23 +293,6 @@ API::MatrixWorkspace_sptr LoadILLPolarizedDiffraction::initStaticWorkspace(const
   std::string flipperState = entry.getString("D7/POL/actual_stateB1B2");
   workspace->setTitle(polDirection.substr(0, 1) + "_" + flipperState);
   return workspace;
-}
-/**
- * Runs LoadInstrument as child to link the instrument to workspace
- * @param workspace : workspace with data from the first entry
- * @param startTime :: the date the run started, in ISO compliant format
- */
-void LoadILLPolarizedDiffraction::loadInstrument(const API::MatrixWorkspace_sptr &workspace,
-                                                 const std::string &startTime) {
-
-  // the start time is needed in the workspace when loading the parameter file
-  workspace->mutableRun().addProperty("start_time", startTime);
-
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);
-  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  loadInst->execute();
 }
 
 /**

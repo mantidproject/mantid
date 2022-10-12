@@ -75,10 +75,8 @@ private:
   void initMovingWorkspace(const NeXus::NXDouble &scan, const std::string &start_time);
 
   void loadDataScan();
-  API::MatrixWorkspace_sptr loadEmptyInstrument(const std::string &start_time);
   void loadMetaData();
   void loadScanVars();
-  void loadStaticInstrument();
   void moveTwoThetaZero(double);
   void resolveInstrument();
   void resolveScanType();

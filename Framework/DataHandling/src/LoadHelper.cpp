@@ -9,10 +9,12 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
@@ -493,6 +495,24 @@ V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws, const 
   }
   V3D pos = component->getPos();
   return pos;
+}
+
+/**
+ * Loads empty instrument of chosen name into a provided workspace
+ * @param ws A MatrixWorkspace
+ * @param instrumentName Name of the instrument to be loaded
+ */
+void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
+                                     const std::string &instrumentPath) {
+  auto loadInst = AlgorithmManager::Instance().create("LoadInstrument");
+  loadInst->initialize();
+  loadInst->setChild(true);
+  loadInst->setPropertyValue("InstrumentName", instrumentName);
+  if (instrumentPath != "")
+    loadInst->setPropertyValue("Filename", instrumentPath);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
+  loadInst->execute();
 }
 
 } // namespace DataHandling

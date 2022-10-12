@@ -17,7 +17,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -300,7 +299,13 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan, const std::st
   const size_t nBins = 1;
   const bool isPointData = true;
 
-  const auto instrumentWorkspace = loadEmptyInstrument(start_time);
+  const auto instrumentWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  auto &run = instrumentWorkspace->mutableRun();
+  // the start time is needed in the workspace when loading the parameter file
+  run.addProperty("start_time", start_time);
+
+  getInstrumentFilePath(m_instName);
+  m_loadHelper.loadEmptyInstrument(instrumentWorkspace, m_instName);
   const auto &instrument = instrumentWorkspace->getInstrument();
   auto &params = instrumentWorkspace->instrumentParameters();
 
@@ -535,7 +540,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
   }
 
   // Link the instrument
-  loadStaticInstrument();
+  m_loadHelper.loadEmptyInstrument(m_outWorkspace, m_instName);
   if (!m_isSpectrometer) {
     // Move to the starting 2theta
     moveTwoThetaZero(twoTheta0);
@@ -751,38 +756,6 @@ void LoadILLDiffraction::resolveInstrument() {
     g_log.debug() << "Instrument name is " << m_instName << " and has " << m_numberDetectorsActual
                   << " actual detectors.\n";
   }
-}
-
-/**
- * Runs LoadInstrument as child to link the non-moving instrument to workspace
- */
-void LoadILLDiffraction::loadStaticInstrument() {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  loadInst->execute();
-}
-
-/**
- * Runs LoadInstrument and returns a workspace with the instrument, to be
- *used in the ScanningWorkspaceBuilder.
- * @param start_time : start time in ISO formatted string
- * @return A MatrixWorkspace containing the correct instrument
- */
-MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("InstrumentName", m_instName);
-  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-  auto &run = ws->mutableRun();
-
-  // the start time is needed in the workspace when loading the parameter file
-  run.addProperty("start_time", start_time);
-
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
-  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  loadInst->execute();
-  return loadInst->getProperty("Workspace");
 }
 
 /**

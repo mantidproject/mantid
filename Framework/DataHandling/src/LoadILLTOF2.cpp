@@ -12,7 +12,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -92,15 +91,13 @@ void LoadILLTOF2::exec() {
   addAllNexusFieldsAsProperties(filenameData);
   addFacility();
 
-  runLoadInstrument(); // just to get IDF contents
+  // load the instrument from the IDF if it exists
+  m_loader.loadEmptyInstrument(m_localWorkspace, m_instrumentName);
 
   loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
 
   addEnergyToRun();
   addPulseInterval();
-
-  // load the instrument from the IDF if it exists
-  runLoadInstrument();
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -430,18 +427,4 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes, const st
   }
   spec += numberOfTubes * m_numberOfPixelsPerTube;
 }
-
-/**
- * Runs LoadInstrument to attach the instrument to the workspace
- */
-void LoadILLTOF2::runLoadInstrument() {
-
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-
-  loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
-  loadInst->execute();
-}
-
 } // namespace Mantid::DataHandling

@@ -58,7 +58,6 @@ private:
   void loadNexusEntriesIntoProperties();
   std::vector<int> loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data);
   std::vector<std::vector<int>> loadMonitors(const NeXus::NXEntry &entry);
-  void loadInstrument();
   double peakOffsetAngle();
   void addSampleLogs();
   double detectorRotation();
