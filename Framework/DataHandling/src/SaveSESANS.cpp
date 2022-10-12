@@ -53,8 +53,7 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
   }
 
   m_sampleThickness = static_cast<double>(getProperty("OverrideSampleThickness"));
-  const double tolerance = 1e-09;
-  if (m_sampleThickness <= tolerance) {
+  if (m_sampleThickness <= SaveSESANS::TOLERANCE) {
     invalidInputs["OverrideSampleThickness"] = "OverrideSampleThickness value must be greater than 0";
   }
 
@@ -106,7 +105,7 @@ void SaveSESANS::exec() {
 
   if (m_sampleThickness == EMPTY_DBL()) {
     m_sampleThickness = ws->sample().getThickness();
-    if (m_sampleThickness <= 0) {
+    if (m_sampleThickness <= SaveSESANS::TOLERANCE) {
       g_log.error("The workspace passed in does not provide the sample thickness. Please use the "
                   "OverrideSampleThickness property to "
                   "provide this value instead");

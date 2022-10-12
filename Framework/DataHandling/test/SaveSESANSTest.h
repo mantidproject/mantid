@@ -72,6 +72,16 @@ public:
     TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
   }
 
+  void test_exec_with_invalid_sample_thickness() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(withinTolerance);
+
+    setCommonAlgorithmProperties(ws);
+
+    // Execute the algorithm
+    TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
+  }
+
   void test_exec_thickness_property() {
     auto ws = createTestWorkspace();
 
@@ -101,8 +111,7 @@ public:
 
     testAlg.setProperty("InputWorkspace", ws);
     testAlg.setProperty("Sample", "Sample set in SaveSESANSTest");
-    const double tolerance = 1e-09;
-    testAlg.setProperty("OverrideSampleThickness", tolerance);
+    testAlg.setProperty("OverrideSampleThickness", withinTolerance);
 
     // Execute the algorithm
     TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
@@ -115,6 +124,7 @@ private:
   const double echoConstant = 1.5;
   const std::string workspaceTitle = "Sample workspace";
   const std::string sampleName = "Sample set in SaveSESANSTest";
+  const double withinTolerance = 1e-10;
 
   Workspace2D_sptr createTestWorkspace() {
     // Set up workspace
