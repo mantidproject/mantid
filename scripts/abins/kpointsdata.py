@@ -9,6 +9,7 @@ from typing import List, NamedTuple, overload
 from math import isclose
 
 import numpy as np
+from numpy.linalg import norm
 from mantid.kernel import logger as mantid_logger
 
 from abins.constants import (COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
@@ -128,6 +129,17 @@ class KpointsData(collections.abc.Sequence):
                     "unit_cell": self.unit_cell}
 
         return k_points
+
+    def is_normalised(self) -> bool:
+        """
+        Check atomic displacements are normalised correctly
+        """
+        for displacements in self._atomic_displacements:
+            if not np.allclose(np.ones(displacements.shape[1]),
+                               norm(norm(displacements, axis=0), axis=1)):
+                return False
+
+        return True
 
     def extract(self):
         extracted = {"unit_cell": self.unit_cell,
