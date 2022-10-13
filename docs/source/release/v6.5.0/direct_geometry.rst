@@ -48,6 +48,10 @@ Bugfixes
 ############
 - Fixed bug that caused opening of a second slice plot when changing the intensity while an interactive cut plot is open.
 - Fixed error occurring when closing interactive cut plot.
+- The temperature is now cached for access from derived cuts to prevent MSlice from crashing.
+- Improved logic behind intensity type changes to fix a bug impacting both cut and slice plots.
+- Font size changes are now propagated in scripts generated from plots.
+- Fixed a bug that caused the duplication of suffixes when renaming workspaces.
 
 
 :ref:`Release 6.5.0 <v6.5.0>`

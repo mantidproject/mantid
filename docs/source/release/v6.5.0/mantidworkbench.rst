@@ -34,6 +34,7 @@ New features
 Bugfixes
 ############
 - The instrument view startup time has been improved by avoid checking for masking if it is not present.
+- Fix crash when overlaying peaks in side-by-side view of instrument viewer which is not supported.
 
 
 SliceViewer
