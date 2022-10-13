@@ -10,6 +10,8 @@
 # It uses the python launch script to run the tests. All arguments to
 # this script are forwarded to the test runner.
 
+@JEMALLOC_DEFINITIONS@
+
 PYTHON_EXE=@PYTHON_EXECUTABLE@
 RUNNER_SCRIPT=@SYSTEMTESTS_RUNNER_SCRIPT@
 MULTI_CONFIG_GENERATOR=@MULTI_CONFIG_GENERATOR@
@@ -77,5 +79,7 @@ $CMAKE_EXE --build . $CMAKE_TARGET_ARG -- SystemTestData
 # Execute
 echo
 echo "Running tests..."
-PYTHONPATH=$LOCAL_PYTHONPATH python3 $RUNNER_SCRIPT \
+LD_PRELOAD=${LOCAL_PRELOAD} \
+  PYTHONPATH=${LOCAL_PYTHONPATH} \
+  python3 $RUNNER_SCRIPT \
   --executable="python3" --exec-args= "$@"
