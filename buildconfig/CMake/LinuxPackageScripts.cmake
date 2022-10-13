@@ -1,8 +1,7 @@
 # ######################################################################################################################
 # Define scripts for the Linux packages
 #
-# It provides: - launch_mantidworkbench.sh - mantidpython, mantid.sh <- for stable releases - mantid.csh <- for stable
-# releases
+# It provides: - launch_mantidworkbench.sh - mantid.sh <- for stable releases - mantid.csh <- for stable releases
 #
 # ######################################################################################################################
 
@@ -233,17 +232,5 @@ if(ENABLE_WORKBENCH)
       DESTINATION ${BIN_DIR}
       RENAME mantidworkbench${DEST_FILENAME_SUFFIX}
     )
-    # mantidpython for jemalloc. Only required for conda as we expect those needing to use Python from the commandline
-    # to install the conda version
-    if(${install_type} EQUAL "conda")
-      configure_file(
-        ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY
-      )
-      install(
-        PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
-        DESTINATION ${BIN_DIR}
-        RENAME mantidpython
-      )
-    endif()
   endforeach()
 endif()

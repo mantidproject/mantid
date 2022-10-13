@@ -103,7 +103,7 @@ Starting in your build folder:
 
   .. code-block:: sh
 
-     ./bin/mantidpython /path/to/src/Framework/PythonInterface/test/python/plugins/algorithms/MeanTest.py MeanTest.test_mean
+     PYTHONPATH=/path/to/build/bin python3 /path/to/src/Framework/PythonInterface/test/python/plugins/algorithms/MeanTest.py MeanTest.test_mean
 
 Running Unit Tests With Visual Studio and ctest
 ###############################################

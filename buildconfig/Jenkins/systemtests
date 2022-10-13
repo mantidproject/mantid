@@ -120,11 +120,11 @@ if [[ ${RUN_INSTALLER_TESTS} == true ]]; then
   $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
 # Run systems tests without a package
 else
-  # For multi-config generators the pythonpath should be set to a config-dependent subdirectory, otherwise just bin
+  # For multi-config generators the pythonpath should be set to a config-dependent subdirectory of the bin folder
   if [ -f ${WORKSPACE}/build/bin/$BUILD_CONFIG/ ]; then
     LOCAL_PYTHONPATH=${WORKSPACE}/build/bin/$BUILD_CONFIG/
   else
-    LOCAL_PYTHONPATH=${WORKSPACE}/build/bin/mantidpython
+    LOCAL_PYTHONPATH=${WORKSPACE}/build/bin/
   fi
   SYSTEMTEST_ARGS="--loglevel=information --executable=python3 -j ${SYSTEST_NPROCS} --quiet --output-on-failure"
   ${X11_RUNNER} "${X11_RUNNER_ARGS}" LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH} python3

@@ -57,7 +57,7 @@ if [ "$1" == "-h" ]; then
   exit 0
 fi
 
-# For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
+# For multi-config generators the bin folder has a config-dependent subdirectory
 LOCAL_PYTHONPATH=""
 setup_python_path $1 $2
 CMAKE_TARGET_ARG=""
