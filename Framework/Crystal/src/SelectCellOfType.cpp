@@ -105,40 +105,58 @@ void SelectCellOfType::exec() {
   this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
-    std::vector<double> sigabc(6);
-    SelectCellWithForm::DetermineErrors(sigabc, newUB, ws, tolerance);
-    //----------------------------------------------
-    o_lattice->setUB(newUB);
-
-    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
-
+    std::vector<double> sigabc(7);
+    std::vector<double> sigq(3);
     int n_peaks = ws->getNumberPeaks();
 
     int num_indexed = 0;
     double average_error = 0.0;
 
-    if (o_lattice->getMaxOrder() == 0) {
-      std::vector<V3D> miller_indices;
-      std::vector<V3D> q_vectors;
-      for (int i = 0; i < n_peaks; i++) {
-        q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
-      }
-      num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
+    std::vector<V3D> hkl_vectors;
+    std::vector<V3D> mnp_vectors;
+    std::vector<V3D> q_vectors;
 
-      for (int i = 0; i < n_peaks; i++) {
-        IPeak &peak = ws->getPeak(i);
-        peak.setIntHKL(miller_indices[i]);
-        peak.setHKL(miller_indices[i]);
-      }
-    } else {
-      num_indexed = static_cast<int>(num_indexed);
-      for (int i = 0; i < n_peaks; i++) {
-        IPeak &peak = ws->getPeak(i);
-        average_error += (peak.getHKL()).hklError();
-        peak.setIntHKL(T * peak.getIntHKL());
-        peak.setHKL(T * peak.getHKL());
-      }
+    //----------------------------------------------
+    o_lattice->setUB(newUB);
+
+    V3D modVec1 = T * o_lattice->getModVec(0);
+    V3D modVec2 = T * o_lattice->getModVec(1);
+    V3D modVec3 = T * o_lattice->getModVec(2);
+
+    o_lattice->setModVec1(modVec1);
+    o_lattice->setModVec2(modVec2);
+    o_lattice->setModVec3(modVec3);
+
+    DblMatrix modHKL(3, 3);
+    modHKL.setColumn(0, modVec1);
+    modHKL.setColumn(1, modVec2);
+    modHKL.setColumn(2, modVec3);
+    o_lattice->setModHKL(modHKL);
+
+    DblMatrix newModUB = newUB * modHKL;
+    o_lattice->setModUB(newModUB);
+
+    int modDim = IndexingUtils::GetModulationVectors(newUB, newModUB, modVec1, modVec2, modVec3);
+
+    for (int i = 0; i < n_peaks; i++) {
+      IPeak &peak = ws->getPeak(i);
+      // if (IndexingUtils::ValidIndex(hkl_vectors[i], tolerance)) {
+      //   peak.setHKL(hkl_vectors[i]);
+      // }
+      peak.setHKL(T * peak.getHKL());
+      peak.setIntHKL(T * peak.getIntHKL());
+      peak.setIntMNP(T * peak.getIntMNP());
+
+      q_vectors.emplace_back(peak.getQSampleFrame());
+      hkl_vectors.emplace_back(peak.getIntHKL());
+      mnp_vectors.emplace_back(peak.getIntMNP());
     }
+
+    IndexingUtils::Optimize_6dUB(newUB, newModUB, hkl_vectors, mnp_vectors, modDim, q_vectors, sigabc, sigq);
+    num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, hkl_vectors, average_error);
+
+    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     // Tell the user what happened.
