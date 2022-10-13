@@ -117,6 +117,11 @@ def generate_tick_commands(ax):
                                 f"{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
                 commands.append(f"tick_params(axis='y', which='{tick_type}', **"
                                 f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
+                #add the custom show_minor_gridlines attribute so that it can be controlled by qt
+                if tick_type == "minor" and \
+                        getattr(ax.xaxis, f"_{tick_type}_tick_kw")['gridOn'] is True and \
+                        getattr(ax.yaxis, f"_{tick_type}_tick_kw")['gridOn'] is True:
+                    commands.append(f"show_minor_gridlines = True")
 
     return commands
 
