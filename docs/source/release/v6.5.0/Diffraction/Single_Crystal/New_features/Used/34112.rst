@@ -1,1 +1,0 @@
-* New TOPAZ IDF with updated calibration and current number of active banks

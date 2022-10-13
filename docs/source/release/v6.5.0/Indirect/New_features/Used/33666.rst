@@ -1,1 +1,0 @@
-- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`isis-powder-diffraction-osiris-ref`

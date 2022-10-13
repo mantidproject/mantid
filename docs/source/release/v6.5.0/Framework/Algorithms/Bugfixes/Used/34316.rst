@@ -1,1 +1,0 @@
-- Fix a crash that could happen in :ref:`LoadEventNexus <algm-LoadEventNexus>` if there are no pulse times.
