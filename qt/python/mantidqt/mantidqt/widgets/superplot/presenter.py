@@ -379,7 +379,7 @@ class SuperplotPresenter:
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
         the last plot and removes it if is not part of the memorised data. It
-        can also replot all cuves if needed.
+        can also replot all curves if needed.
 
         Args:
             replot (bool): if True, all curves are removed and replotted
