@@ -1,3 +1,0 @@
-- The instrument view startup time has been improved by avoid checking for masking
-  if it is not present.
-

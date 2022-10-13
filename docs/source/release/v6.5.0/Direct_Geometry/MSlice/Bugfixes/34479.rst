@@ -1,4 +1,0 @@
-- The temperature is now cached for access from derived cuts to prevent MSlice from crashing.
-- Improved logic behind intensity type changes to fix a bug impacting both cut and slice plots.
-- Font size changes are now propagated in scripts generated from plots.
-- Fixed a bug that caused the duplication of suffixes when renaming workspaces.

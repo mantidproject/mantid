@@ -1,2 +1,0 @@
-- Fixed bug where :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` the input and output workspace
-names were identical for this algorithm and the child :ref:`Minus <algm-Minus>` algorithm

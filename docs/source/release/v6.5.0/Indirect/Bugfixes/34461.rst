@@ -1,1 +1,0 @@
-- Prevent a crash when loading a file in the S(Q,w) tab without first selecting an instrument.

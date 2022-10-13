@@ -1,2 +1,0 @@
-- Abins/Abins2D DMOL3 parser has been heavily re-written to fix incorrect assignment of eigenvector values. Intensities of any Abins/Abins2D-calculated spectra from DMOL3 data are likely to have changed, and should now agree better with other codes.
-

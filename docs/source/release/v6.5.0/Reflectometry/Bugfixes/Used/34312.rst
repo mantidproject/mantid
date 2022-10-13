@@ -1,1 +1,0 @@
-- Fix a potential crash when performing time slicing if the workspace contains zero counts; you should now get a sensible error message instead.

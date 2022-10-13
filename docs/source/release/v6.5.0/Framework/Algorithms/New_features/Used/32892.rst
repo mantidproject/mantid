@@ -1,1 +1,0 @@
-- Added Sphere to the preset shapes supplied in :ref:`SetSample <algm-SetSample>`.
