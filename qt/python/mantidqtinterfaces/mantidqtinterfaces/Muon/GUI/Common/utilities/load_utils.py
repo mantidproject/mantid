@@ -192,6 +192,26 @@ def load_dead_time_from_filename(filename):
     return dead_times
 
 
+def get_filename_from_alg(alg):
+    return alg.getProperty("Filename").value[0]
+
+
+def get_correct_file_path(filename_in, alg):
+    """
+    The filename given to the loading algorithm can be different to the file that was actually loaded.
+    Pulling the filename back out of the algorithm after loading ensures that the path is accurate.
+
+    The load alg will always change the instrument name to all caps,
+    this behaviour is not wanted as the path is used as a key and may
+    not match the "real" name.
+    """
+    _, correct_filename = os.path.split(filename_in)
+
+    filename = get_filename_from_alg(alg)
+    _, filename_all_caps = os.path.split(filename)
+    return filename.replace(filename_all_caps, correct_filename)
+
+
 def load_workspace_from_filename(filename,
                                  input_properties=DEFAULT_INPUTS,
                                  output_properties=DEFAULT_OUTPUTS):
@@ -202,9 +222,8 @@ def load_workspace_from_filename(filename,
         alg, psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
-    # The filename given to the loading algorithm can be different to the file that was actually loaded.
-    # Pulling the filename back out of the algorithm after loading ensures that the path is accurate.
-    filename = alg.getProperty("Filename").value[0]
+    filename = get_correct_file_path(filename, alg)
+
     workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
     if is_workspace_group(workspace):
         # handle multi-period data
