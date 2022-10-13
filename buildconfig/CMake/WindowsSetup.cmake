@@ -60,10 +60,10 @@ if(CONDA_ENV)
   set(_conda_debug_cfg_name DebugWithRelRuntime)
   string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
   # Set language flags for Visual studio and ninja generators
-  if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    set(_language_flags "/Zi /Ob0 /Od /RTC1")
+  if(CCACHE_FOUND)
+    set(_language_flags "/Z7 /Ob0 /Od /RTC1")
   else()
-    set(_language_flags "/Ob0 /Od /RTC1")
+    set(_language_flags "/Zi /Ob0 /Od /RTC1")
   endif()
   # C/CXX flags
   foreach(lang C CXX)
