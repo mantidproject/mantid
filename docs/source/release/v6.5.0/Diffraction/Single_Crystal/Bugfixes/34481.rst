@@ -1,1 +1,0 @@
-- Fix typo in :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` and :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` Lorentz correction factors.

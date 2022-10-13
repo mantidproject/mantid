@@ -35,10 +35,6 @@ New features
 .. image:: ../../images/6_5_release/Diffraction/GSASII_tab.png
     :align: center
 
-Bugfixes
-############
-
-
 
 Single Crystal Diffraction
 --------------------------
@@ -54,5 +50,8 @@ Bugfixes
 - Fixed logic issues in :ref:`IntegrateEllipsoids <algm-IntegrateEllipsoids>` that prevents the integration of satellite peaks.
 - Fixed issue with errorbar in :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDToQ>`.
 - Fixed deprecated syntax in  :ref:`LoadWANDSCD <algm-LoadWANDSCD>` that gives h5py warnings.
+- Fix bug in :ref:`FindSXPeaks <algm-FindSXPeaks>` which caused a crash for non-finite data (e.g. NaN after dividing intensity in a bin by 0).
+- Fix typo in :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` and :ref:`HB3AIntegrateDetectorPeaks <algm-HB3AIntegrateDetectorPeaks>` Lorentz correction factors.
+
 
 :ref:`Release 6.5.0 <v6.5.0>`

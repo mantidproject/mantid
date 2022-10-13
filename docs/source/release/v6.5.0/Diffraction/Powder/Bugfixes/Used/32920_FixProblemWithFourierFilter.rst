@@ -1,1 +1,0 @@
-- Change Fourier Filter applied during ISIS total scattering reduction so that g(r)=0 instead of g(r)-1=0

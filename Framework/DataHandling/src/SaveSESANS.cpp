@@ -51,6 +51,12 @@ std::map<std::string, std::string> SaveSESANS::validateInputs() {
   if (getPropertyValue("Sample").empty()) {
     invalidInputs["Sample"] = "Sample must be set";
   }
+
+  m_sampleThickness = static_cast<double>(getProperty("OverrideSampleThickness"));
+  if (m_sampleThickness <= SaveSESANS::TOLERANCE) {
+    invalidInputs["OverrideSampleThickness"] = "OverrideSampleThickness value must be greater than 0";
+  }
+
   return invalidInputs;
 }
 
@@ -77,6 +83,11 @@ void SaveSESANS::init() {
   declareProperty<std::string>("Sample", "", "Sample name", Kernel::Direction::Input);
 
   declareProperty<std::string>("Orientation", "Z", validOrientation, "Orientation of the instrument");
+
+  declareProperty("OverrideSampleThickness", EMPTY_DBL(),
+                  "The sample thickness in mm. If set, this value will be used instead of the thickness from the input "
+                  "workspace sample",
+                  Kernel::Direction::Input);
 }
 
 /**
@@ -90,6 +101,17 @@ void SaveSESANS::exec() {
     g_log.error("This algorithm expects a workspace with exactly 1 spectrum");
     throw std::runtime_error("SaveSESANS passed workspace with incorrect "
                              "number of spectra, expected 1");
+  }
+
+  if (m_sampleThickness == EMPTY_DBL()) {
+    m_sampleThickness = ws->sample().getThickness();
+    if (m_sampleThickness <= SaveSESANS::TOLERANCE) {
+      g_log.error("The workspace passed in does not provide the sample thickness. Please use the "
+                  "OverrideSampleThickness property to "
+                  "provide this value instead");
+      throw std::runtime_error("SaveSESANS passed workspace with sample thickness less than "
+                               "or equal to 0 and no value provided for OverrideSampleThickness property");
+    }
   }
 
   auto filename = getPropertyValue("Filename");
@@ -131,12 +153,10 @@ void SaveSESANS::exec() {
  * @param ws The workspace to save
  */
 void SaveSESANS::writeHeaders(std::ofstream &outfile, API::MatrixWorkspace_const_sptr &ws) {
-  const API::Sample &sample = ws->sample();
-
   writeHeader(outfile, "FileFormatVersion", "1.0");
   writeHeader(outfile, "DataFileTitle", ws->getTitle());
   writeHeader(outfile, "Sample", getPropertyValue("Sample"));
-  writeHeader(outfile, "Thickness", std::to_string(sample.getThickness()));
+  writeHeader(outfile, "Thickness", std::to_string(m_sampleThickness));
   writeHeader(outfile, "Thickness_unit", "mm");
   writeHeader(outfile, "Theta_zmax", getPropertyValue("ThetaZMax"));
   writeHeader(outfile, "Theta_zmax_unit", getPropertyValue("ThetaZMaxUnit"));
@@ -178,7 +198,7 @@ std::vector<double> SaveSESANS::calculateSpinEchoLength(const HistogramData::Poi
 /**
  * Calculate the depolarisation column from wavelength and Y values in the
  * workspace
- * (depol = ln(y) / wavelength^2)
+ * (depol = ln(y) / wavelength^2 / sample thickness in cm)
  * @param yValues Y column in the workspace
  * @param wavelength Wavelength column
  * @return The depolarisation column
@@ -186,16 +206,18 @@ std::vector<double> SaveSESANS::calculateSpinEchoLength(const HistogramData::Poi
 std::vector<double> SaveSESANS::calculateDepolarisation(const HistogramData::HistogramY &yValues,
                                                         const HistogramData::Points &wavelength) const {
   Mantid::MantidVec depolarisation;
+  // The sample thickness is provided in mm but we need to use cm here
+  double thickness = m_sampleThickness * 0.1;
 
-  // Depol is calculated as ln(y) / wavelength^2
+  // Depol is calculated as ln(y) / wavelength^2 / sample thickness in cm
   transform(yValues.begin(), yValues.end(), wavelength.begin(), back_inserter(depolarisation),
-            [&](double y, double w) { return log(y) / (w * w); });
+            [&](double y, double w) { return log(y) / (w * w) / thickness; });
   return depolarisation;
 }
 
 /**
  * Calculate the error column from the workspace values
- * (error = e / (y * wavelength^2))
+ * (error = e / (y * wavelength^2)) / sample thickness in cm
  * @param eValues Error values from the workspace
  * @param yValues Y values from the workspace
  * @param wavelength Wavelength values (X values from the workspace)
@@ -206,9 +228,12 @@ Mantid::MantidVec SaveSESANS::calculateError(const HistogramData::HistogramE &eV
                                              const HistogramData::Points &wavelength) const {
   Mantid::MantidVec error;
 
-  // Error is calculated as e / (y * wavelength^2)
+  // The sample thickness is provided in mm but we need to use cm here
+  double thickness = m_sampleThickness * 0.1;
+
+  // Error is calculated as e / (y * wavelength^2) / sample thickness in cm
   for (size_t i = 0; i < eValues.size(); i++) {
-    error.emplace_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]));
+    error.emplace_back(eValues[i] / (yValues[i] * wavelength[i] * wavelength[i]) / thickness);
   }
   return error;
 }

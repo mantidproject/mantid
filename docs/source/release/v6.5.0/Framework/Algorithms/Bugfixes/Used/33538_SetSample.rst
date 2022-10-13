@@ -1,1 +1,0 @@
-- :ref:`SetSample <algm-SetSample>` now accepts numeric inputs of type float, int or string, rather than requiring float.

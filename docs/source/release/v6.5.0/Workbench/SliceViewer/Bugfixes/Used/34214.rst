@@ -1,1 +1,0 @@
-* Fix for colorbar when using log scale that causes slice viewer to throw exception with all masked slice.

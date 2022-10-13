@@ -1,1 +1,0 @@
-- The Save ASCII tab now has a checkbox to allow individual row outputs to be included as well as group outputs when autosave is selected.
