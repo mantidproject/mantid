@@ -50,15 +50,9 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
     auto header = new QTableWidgetItem(info.name(i));
     header->setFlags(header->flags() & ~Qt::ItemIsEditable);
     setItem(0, i, header);
-    if (info.value(i).compare(QString::number(-DBL_MAX))) {
-      auto value = new QTableWidgetItem(info.value(i));
-      value->setFlags(header->flags() & ~Qt::ItemIsEditable);
-      setItem(1, i, value);
-    } else {
-      auto value = new QTableWidgetItem("N/A");
-      value->setFlags(header->flags() & ~Qt::ItemIsEditable);
-      setItem(1, i, value);
-    }
+    auto value = new QTableWidgetItem(info.value(i));
+    value->setFlags(header->flags() & ~Qt::ItemIsEditable);
+    setItem(1, i, value);
   }
   horizontalHeader()->setMinimumSectionSize(50);
   resizeColumnsToContents();
