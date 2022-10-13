@@ -35,10 +35,6 @@ New features
 .. image:: ../../images/6_5_release/Diffraction/GSASII_tab.png
     :align: center
 
-Bugfixes
-############
-
-
 
 Single Crystal Diffraction
 --------------------------

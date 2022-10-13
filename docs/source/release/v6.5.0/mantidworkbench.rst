@@ -5,11 +5,6 @@ Mantid Workbench Changes
 .. contents:: Table of Contents
    :local:
 
-New Features
-------------
-
-
-
 Bugfixes
 --------
 - Log-scaling has been fixed in waterfall plots.
@@ -27,10 +22,6 @@ Bugfixes
 InstrumentViewer
 ----------------
 
-New features
-############
-
-
 Bugfixes
 ############
 - The instrument view startup time has been improved by avoid checking for masking if it is not present.
@@ -39,10 +30,6 @@ Bugfixes
 
 SliceViewer
 -----------
-
-New features
-############
-
 
 Bugfixes
 ############

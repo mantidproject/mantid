@@ -16,4 +16,5 @@ Bugfixes
 - Changed :ref:`LoadEventNexus <algm-LoadEventNexus>` to skip pulsetime lookup on 0 event sections, preventing the crash of legacy files.
 - The depolarisation columns output by algorithm :ref:`SaveSESANS <algm-SaveSESANS>` are now normalised by the sample thickness. A new parameter, ``OverrideSampleThickness``, allows an alternative value for normalisation to be specified if needed.
 
+
 :ref:`Release 6.5.0 <v6.5.0>`

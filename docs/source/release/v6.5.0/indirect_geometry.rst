@@ -27,15 +27,12 @@ Bugfixes
 - Fixed a bug in the Indirect Data Analysis :ref:`F(Q) fit <fqfit>` tab where, when adding data to the interface, if the parameter type was changed when no data was selected it would crash Mantid.
 - Prevent a crash when loading a file in the S(Q,w) tab without first selecting an instrument.
 
+
 Algorithms
 ----------
 
-New features
-############
-
-
 Bugfixes
---------
+########
 - :ref:`Abins<algm-Abins>`/:ref:`Abins2D<algm-Abins2D>` DMOL3 parser has been heavily re-written to fix incorrect assignment of eigenvector values. Intensities of any :ref:`Abins<algm-Abins>`/:ref:`Abins2D<algm-Abins2D>`-calculated spectra from DMOL3 data are likely to have changed, and should now agree better with other codes.
 
 
