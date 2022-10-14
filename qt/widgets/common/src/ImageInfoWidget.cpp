@@ -11,7 +11,6 @@
 #include <QAbstractScrollArea>
 #include <QHeaderView>
 #include <QTableWidget>
-#include <cfloat>
 
 namespace MantidQt::MantidWidgets {
 

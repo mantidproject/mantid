@@ -7,7 +7,6 @@
 
 #include "MantidQtWidgets/Common/ImageInfoModelMD.h"
 #include <climits>
-#include <cmath>
 
 namespace MantidQt::MantidWidgets {
 
