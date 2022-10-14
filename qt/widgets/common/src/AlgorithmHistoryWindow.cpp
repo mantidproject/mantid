@@ -414,6 +414,11 @@ void AlgorithmHistoryWindow::writeToScriptFile() {
   if (filePath.isEmpty())
     return;
 
+  // fix for 34451 in Linux, unlike native filedialog, QFileDialog will not add file extension by type
+  // This only occur in Linux as in Win and Mac QFileDialog calls the native filedialog
+  if (!filePath.endsWith(".py"))
+    filePath += ".py";
+
   ScriptBuilder builder(m_view, getScriptVersionMode());
   std::ofstream file(filePath.toStdString().c_str(), std::ofstream::trunc);
   file << builder.build();
