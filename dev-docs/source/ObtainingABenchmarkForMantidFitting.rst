@@ -20,13 +20,7 @@ Some initial setup is required on your system before we can start setting up an 
 
 1. Download and install the desired version of Mantid from the `downloads <https://download.mantidproject.org/>`_ page (if not already installed). Note its installation path, hereby denoted as ``[INSTALL_PATH]``.
 2. Open a git bash terminal and cd to the desired location.
-<<<<<<< HEAD
-3. Pip install the virtual environment package as described in the 'Installing virtualenv' section found `here <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`__.
-||||||| parent of 5f25edc3fee (fixed duplicate target name warnings)
-3. Pip install the virtual environment package as described in the 'Installing virtualenv' section found `here <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`_.
-=======
 3. Pip install the virtual environment package as described in the `'Installing virtualenv' section <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`_.
->>>>>>> 5f25edc3fee (fixed duplicate target name warnings)
 
 Creating your Benchmarking Environment
 ######################################
