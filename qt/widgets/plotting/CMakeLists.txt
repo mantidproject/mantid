@@ -24,16 +24,11 @@ set(MPL_INC_FILES
     ${MPL_MOC_FILES}
     inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h
     inc/MantidQtWidgets/Plotting/AxisID.h
-    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
-    inc/MantidQtWidgets/Plotting/PeakPicker.h
-    inc/MantidQtWidgets/Plotting/PreviewPlot.h
     inc/MantidQtWidgets/Plotting/PlotWidget/IPlotView.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotModel.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
-
-set(MPL_UI_FILES inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPlotting
@@ -41,7 +36,6 @@ mtd_add_qt_library(
   SRC ${MPL_SRC_FILES}
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
-  UI ${MPL_UI_FILES}
   DEFS IN_MANTIDQT_PLOTTING
   INCLUDE_DIRS inc
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}
