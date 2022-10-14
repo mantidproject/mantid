@@ -12,7 +12,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include <QString>
-#include <cfloat>
 #include <cmath>
 #include <vector>
 
@@ -45,7 +44,7 @@ public:
   static inline const QString MissingValue = QString("-");
 
   static inline const QString defaultFormat(const double x) {
-    if (abs(x) == DBL_MAX)
+    if (abs(x) == UnsetValue)
       return MissingValue;
     return QString::number(x, ImageInfoModel::DecimalFormat, ImageInfoModel::FourDigitPrecision);
   }
