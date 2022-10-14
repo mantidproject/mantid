@@ -153,25 +153,6 @@ language, layout, and collecting images.
 Beta Testing Begins
 ###################
 
-*  Switch to manual handling of release notes by running the release_editor.py script using the
-   `release editor helper tool
-   <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_
-   and open a pull request to put them on ``release-next``. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. framework.rst, and moves
-   the original release notes into a 'Used' folder. This makes it easier for the Release Editor to see which notes have been copied over and which haven't and prevents losing notes or merge conflicts.
-
-.. code-block:: bash
-
-    python release_editor.py --release 6.4.0
-
-*  Neaten up the release notes and add images etc.
-*  Copy over new release notes into main files and move separate release notes into 'Used' folder when done to avoid confusion.
-*  Ensure an image for the release is found to highlight the main changes for this
-   release. This can be a collage of images if there is not a big 'headline' feature
-   or change.
-
-Beta Testing Begins
-###################
-
 * Initial amalgamation of the the release notes:
 
   * ``git pull`` on ``release-next``.
