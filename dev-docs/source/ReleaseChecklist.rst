@@ -176,8 +176,8 @@ Beta Testing Begins
 
   * ``git pull`` on ``release-next``.
   * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`_.
-  * Navigate to tour Mantid 'build' directory and open ``command-prompt.bat``.
-  * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_ and run, parsing the correct version number. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. framework.rst, and moves the original release notes into a 'Used' directory.
+  * Navigate to your Mantid 'build' directory and open ``command-prompt.bat``.
+  * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_ and run, parsing the correct version number. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. ``framework.rst``, and moves the original release notes into a 'Used' directory.
 
     .. code-block:: bash
 
@@ -192,9 +192,9 @@ Beta Testing Begins
 
 * Incoming release notes:
 
-  * As the release sprint goes on, new release note files will be created (existing outside of the 'Used' directories). The text from these will need to be copped into the main release note page and the file itself moved to it's corresponding 'Used' directory.
+  * As the release sprint goes on, new release note files will be created (existing outside of the 'Used' directories). The text from these will need to be copped into the main release note pages (``diffraction.rst``, ``mantidworkbench.rst`` etc.) and the file itself moved to it's corresponding 'Used' directory.
   * It is best to wait until several of these have built up before making a new branch / pr.
-  * To help with finding the new release notes, use the ``unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`_ which will print the location of release notes not within a 'Used' directory.
+  * To help with finding the new release notes, use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`_ which will print the location of release notes not within a 'Used' directory.
 
     .. code-block:: bash
 
@@ -203,7 +203,7 @@ Beta Testing Begins
 * Images:
 
   * Images or GIFs should be added to highlight important and/or visual changes.
-  * An image for the 'headline' feature (or a collage if there is none) should be added to the main page.
+  * An image for the 'headline' feature (or a collage if there is none) should be added to the main page (``index.rst``).
 
 Beta Testing Ends
 #################
@@ -213,7 +213,11 @@ Beta Testing Ends
 Just before release
 ###################
 
-* As one of the final steps in preparing to tag the release, remove all separate release note files and sub-file structure to leave just the upper level release notes e.g. diffraction.rst, index.rst, framework.rst etc.
+* As one of the final steps in preparing to tag the release:
+
+  * Add any final release notes manually to the main release note pages.
+  * Remove unused headings from the main release note pages.
+  * Remove all separate release note files and sub-file structure to leave just the main release note pages.
 
 .. _release-manager-checklist:
 
