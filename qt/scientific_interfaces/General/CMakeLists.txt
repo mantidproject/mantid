@@ -1,20 +1,12 @@
-set(SRC_FILES DataComparison.cpp MantidEV.cpp MantidEVWorker.cpp SampleTransmission.cpp StepScan.cpp)
+set(SRC_FILES MantidEV.cpp MantidEVWorker.cpp SampleTransmission.cpp StepScan.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
-set(INC_FILES
-    DataComparison.h
-    DllConfig.h
-    MantidEV.h
-    MantidEVWorker.h
-    SampleTransmission.h
-    StepScan.h
-    Updateable.h
-)
+set(INC_FILES DllConfig.h MantidEV.h MantidEVWorker.h SampleTransmission.h StepScan.h Updateable.h)
 
-set(MOC_FILES DataComparison.h MantidEV.h SampleTransmission.h StepScan.h)
+set(MOC_FILES MantidEV.h SampleTransmission.h StepScan.h)
 
-set(UI_FILES DataComparison.ui MantidEV.ui SampleTransmission.ui StepScan.ui)
+set(UI_FILES MantidEV.ui SampleTransmission.ui StepScan.ui)
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesGeneral

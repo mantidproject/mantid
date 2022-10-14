@@ -4,15 +4,6 @@
 Building on OS X
 ================
 
-.. toctree::
-   :hidden:
-
-   BuildingOnOSXHistoric
-
-.. contents::
-  :local:
-
-
 The minimum supported version of macOS is High Sierra (10.13).
 
 These instructions are from the assumptions of a blank newly installed version of High Sierra using Homebrew for dependency management.
@@ -78,9 +69,3 @@ In order to be able to 'tap' the ``mantidproject/mantid`` 'tap' we need to have 
 .. code-block:: sh
 
    python3 -m pip install -r /usr/local/Homebrew/Library/Taps/mantidproject/homebrew-mantid/requirements.txt
-
-
-Instructions for Historic Versions
-----------------------------------
-
-See :ref:`BuildingOnOSXHistoric` for instructions for older versions of OSX.
