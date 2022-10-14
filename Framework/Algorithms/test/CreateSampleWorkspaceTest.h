@@ -343,7 +343,8 @@ public:
                          "Sigma=0.5";
     // Retrieve the workspace from data service. TODO: Change to your desired
     // type
-    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Histogram", "User Defined", myFunc);
+    MatrixWorkspace_sptr ws = createSampleWorkspace(outWSName, "Histogram", "User Defined", myFunc, 2, 10, 1000, false,
+                                                    "TOF", -100, 20100, 200);
     if (!ws)
       return;
     TS_ASSERT_DELTA(ws->readY(0)[5], 80.5, 0.0001);
