@@ -56,6 +56,7 @@ class AxesTabWidgetPresenter:
         self.axis_changed()
         ax = self.get_selected_ax()
         self.set_ax_title(ax, self.current_view_props['title'])
+        ax.figure.canvas.manager.set_window_title(self.current_view_props['title'])
         self._apply_properties_to_axes(ax)
         self.update_view()
 
