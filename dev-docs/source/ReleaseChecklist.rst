@@ -164,7 +164,7 @@ Beta Testing Begins
 
       python release_editor.py --release 6.5.0
 
-  * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories.
+  * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories. You could use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`_ for this (explained further bellow).
   * Look over the files to make sure they look roughly correct then submit a PR to be merged into ``release-next``.
 
 * Initial changes:
@@ -196,7 +196,7 @@ Just before release
 
 * As one of the final steps in preparing to tag the release:
 
-  * Add any final release notes manually to the main release note pages.
+  * Add any final release notes manually to the main release note pages. (Make sure to check `main` for any release notes that have merged t the wrong branch)
   * Remove unused headings from the main release note pages.
   * Remove all separate release note files and sub-file structure to leave just the main release note pages.
 
