@@ -471,8 +471,9 @@ class PeakData:
         image_data = self.signal[:, :, self.ixlo_opt:self.ixhi_opt].sum(axis=2)
         # get color axis limits (for LogNorm scale)
         if np.any(image_data > 0):
-            vmin = image_data[image_data > 0].min()
-            vmax = image_data.mean()
+            inonzero = image_data > 0
+            vmin = image_data[inonzero].min()
+            vmax = image_data[inonzero].mean()
             if vmax <= vmin:
                 vmax = image_data.max()
         else:
@@ -810,16 +811,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.child_DeleteTableRows(TableWorkspace=pk_ws_int, Rows=irows_delete)
 
         # estimate TOF resolution params
-        thetas = np.array([pk_data.theta for pk_data in peak_data_collection])
-        cot_th_sq = (1 / np.tan(thetas)) ** 2
-        wavelengths = np.array([pk_data.wl for pk_data in peak_data_collection])
-        frac_tof_widths = np.array([pk_data.get_dTOF_over_TOF() for pk_data in peak_data_collection])
+        thetas = np.array([pk_data.theta for pk_data in peak_data_collection
+                           if pk_data.status == PEAK_MASK_STATUS.VALID])
+        wavelengths = np.array([pk_data.wl for pk_data in peak_data_collection
+                                if pk_data.status == PEAK_MASK_STATUS.VALID])
+        scaled_cot_th_sq = ((wavelengths ** 2) / np.tan(thetas)) ** 2 if scale_dth else (1 / np.tan(thetas))
+        frac_tof_widths = np.array([pk_data.get_dTOF_over_TOF() for pk_data in peak_data_collection
+                                    if pk_data.status == PEAK_MASK_STATUS.VALID])
         estimated_dt0_over_t0, estimated_dth = -1, -1
         if len(thetas) > 1:
             # robust estimation of params for (dT/T)^2 = slope*cot(theta)^2 + intercept
             # if scale_dth cot(th) -> wl*cot(th)
-            xvals = (wavelengths ** 2) * cot_th_sq if scale_dth else cot_th_sq
-            slope, intercept = self.estimate_linear_params(xvals, frac_tof_widths ** 2)
+            slope, intercept = self.estimate_linear_params(scaled_cot_th_sq, frac_tof_widths ** 2)
             estimated_dt0_over_t0 = np.sqrt(intercept)
             estimated_dth = np.sqrt(slope)
             if slope > 0 and intercept > 0:
@@ -851,7 +854,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     for subax in ax:
                         subax.clear()
                         subax.set_aspect('auto')
-                    self.plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
+                    self.plot_TOF_resolution(fig, ax, thetas, scaled_cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
                                              estimated_dt0_over_t0, estimated_dth)
                     pdf.savefig(fig)
             except OSError:
@@ -886,7 +889,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         return dTOF
 
     @staticmethod
-    def plot_TOF_resolution(fig, ax, thetas, cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
+    def plot_TOF_resolution(fig, ax, thetas, scaled_cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
                             estimated_dt0_over_t0, estimated_dth):
         # plot dTOF/TOF vs theta
         line = ax[0].scatter(np.degrees(thetas), frac_tof_widths, c=wavelengths)
@@ -894,12 +897,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ax[0].set_ylabel(r'$dTOF/TOF$')
         fig.colorbar(line, orientation='horizontal', label=r'$\lambda (\AA)$')
         # plot (dTOF/TOF)^2 vs cot(th)^2 or (wl*cot(th))^2
-        if scale_dth:
-            ax[1].scatter((wavelengths ** 2) * cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
-            ax[1].set_xlabel(r'$(\lambda\cot(\theta))^2$')
-        else:
-            ax[1].scatter(cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
-            ax[1].set_xlabel(r'$\cot(\theta)^2$')
+        ax[1].scatter(scaled_cot_th_sq, frac_tof_widths ** 2, c=wavelengths)
+        xlab = r'$(\lambda\cot(\theta))^2$' if scale_dth else r'$\cot(\theta)^2$'
+        ax[1].set_xlabel(xlab)
         ax[1].set_ylabel(r'$(dTOF/TOF)^2$')
         # plot the fit if performed
         if estimated_dth > 0:
