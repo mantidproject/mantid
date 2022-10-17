@@ -12,6 +12,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
@@ -39,7 +40,7 @@ Required Properties:
 <LI> InputWorkspace - The name of the workspace to put the data </LI>
 </UL>
 */
-class DLLExport LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   /// Default constructor

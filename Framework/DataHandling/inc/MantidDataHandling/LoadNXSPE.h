@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,7 +26,7 @@ namespace DataHandling {
   @author Andrei Savici, ORNL
   @date 2011-08-14
 */
-class DLLExport LoadNXSPE : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNXSPE : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNXSPE"; };

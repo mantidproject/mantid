@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 namespace H5 {
 class H5File;
@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /** LoadDiffCal : TODO: DESCRIPTION
  */
-class DLLExport LoadDiffCal final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

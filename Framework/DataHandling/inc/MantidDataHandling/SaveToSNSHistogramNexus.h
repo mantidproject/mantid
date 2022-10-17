@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -31,7 +32,7 @@ time_of_flight fields.
 @date Dec 2, 2010
 */
 
-class DLLExport SaveToSNSHistogramNexus final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveToSNSHistogramNexus final : public API::Algorithm {
 public:
   /// Default constructor
   SaveToSNSHistogramNexus();

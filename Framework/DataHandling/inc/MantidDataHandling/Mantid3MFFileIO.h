@@ -32,7 +32,7 @@ to parse the files
 
 */
 
-class DLLExport Mantid3MFFileIO : public MeshFileIO {
+class MANTID_DATAHANDLING_DLL Mantid3MFFileIO : public MeshFileIO {
 public:
   Mantid3MFFileIO() : MeshFileIO(ScaleUnits::undefined) {
     Lib3MF::PWrapper wrapper = Lib3MF::CWrapper::loadLibrary();

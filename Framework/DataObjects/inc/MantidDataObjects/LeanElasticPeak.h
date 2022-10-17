@@ -12,7 +12,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
 #include <memory>
@@ -28,7 +27,7 @@ namespace DataObjects {
  * other properties can be calculated.
  *
  */
-class DLLExport LeanElasticPeak : public BasePeak {
+class MANTID_DATAOBJECTS_DLL LeanElasticPeak : public BasePeak {
 public:
   LeanElasticPeak();
   LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame);

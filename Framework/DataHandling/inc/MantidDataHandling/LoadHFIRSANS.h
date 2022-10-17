@@ -57,7 +57,7 @@ namespace DataHandling {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport LoadHFIRSANS : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadHFIRSANS : public API::IFileLoader<Kernel::FileDescriptor> {
 
 public:
   /// Algorithm's name for identification overriding a virtual method

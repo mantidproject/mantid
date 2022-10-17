@@ -27,7 +27,7 @@ enum class ScaleUnits;
  * header, and removing the scale applied when loading.
  *
  */
-class DLLExport SaveStl : public MeshFileIO {
+class MANTID_DATAHANDLING_DLL SaveStl : public MeshFileIO {
 public:
   SaveStl(const std::string &filename, const std::vector<uint32_t> &triangle, std::vector<Kernel::V3D> vertices,
           ScaleUnits scaleType)

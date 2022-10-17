@@ -7,15 +7,15 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** LoadMcStasNexus : TODO: DESCRIPTION
  */
-class DLLExport LoadMcStasNexus : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
+class MANTID_DATAHANDLING_DLL LoadMcStasNexus : public API::IFileLoader<Kernel::NexusHDF5Descriptor> {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -18,7 +18,7 @@ namespace DataHandling {
 
 /*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
  */
-class DLLExport LoadILLReflectometry : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLReflectometry : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLReflectometry() = default;
   /// Returns a confidence value that this algorithm can load a file

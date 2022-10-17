@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 #include <boost/optional.hpp>
 #include <memory>
 
@@ -22,7 +22,7 @@ namespace DataHandling {
    - JoinISISPolarizationEfficiencies
    - LoadISISPolarizationEfficiencies
  */
-class DLLExport CreatePolarizationEfficienciesBase : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL CreatePolarizationEfficienciesBase : public API::Algorithm {
 public:
   const std::string category() const override;
 

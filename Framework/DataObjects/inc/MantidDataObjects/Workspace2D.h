@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/HistoWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 
@@ -25,7 +26,7 @@ namespace DataObjects {
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007
 */
-class DLLExport Workspace2D : public API::HistoWorkspace {
+class MANTID_DATAOBJECTS_DLL Workspace2D : public API::HistoWorkspace {
 public:
   /**
   Gets the name of the workspace type

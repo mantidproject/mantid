@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -20,7 +21,7 @@ Deletes a row from a TableWorkspace.
 @author Roman Tolchenov, Tessella plc
 @date 12/05/2011
 */
-class DLLExport DeleteTableRows final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL DeleteTableRows final : public API::Algorithm {
 public:
   /// Default constructor
   DeleteTableRows() {}
