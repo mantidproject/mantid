@@ -105,7 +105,7 @@ void SelectCellOfType::exec() {
   this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
-    std::vector<double> sigabc(7);
+    std::vector<double> sigabc(6);
     std::vector<double> sigq(3);
     int n_peaks = ws->getNumberPeaks();
 
@@ -136,24 +136,19 @@ void SelectCellOfType::exec() {
     DblMatrix newModUB = newUB * modHKL;
     o_lattice->setModUB(newModUB);
 
-    int modDim = IndexingUtils::GetModulationVectors(newUB, newModUB, modVec1, modVec2, modVec3);
-
     for (int i = 0; i < n_peaks; i++) {
       IPeak &peak = ws->getPeak(i);
-      // if (IndexingUtils::ValidIndex(hkl_vectors[i], tolerance)) {
-      //   peak.setHKL(hkl_vectors[i]);
-      // }
       peak.setHKL(T * peak.getHKL());
       peak.setIntHKL(T * peak.getIntHKL());
       peak.setIntMNP(T * peak.getIntMNP());
 
-      q_vectors.emplace_back(peak.getQSampleFrame());
-      hkl_vectors.emplace_back(peak.getIntHKL());
-      mnp_vectors.emplace_back(peak.getIntMNP());
+      q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP());
+      hkl_vectors.emplace_back(peak.getHKL() - modHKL * peak.getIntMNP());
     }
 
-    IndexingUtils::Optimize_6dUB(newUB, newModUB, hkl_vectors, mnp_vectors, modDim, q_vectors, sigabc, sigq);
     num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, hkl_vectors, average_error);
+
+    SelectCellWithForm::DetermineErrors(sigabc, newUB, ws, tolerance);
 
     o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
 
