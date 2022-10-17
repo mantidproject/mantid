@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /** LoadHelper : Auxiliary File for Loading Files
  */
-class DLLExport LoadHelper {
+class MANTID_DATAHANDLING_DLL LoadHelper {
 public:
   virtual ~LoadHelper() = default;
 

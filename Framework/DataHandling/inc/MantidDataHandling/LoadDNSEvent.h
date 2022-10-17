@@ -7,6 +7,7 @@
 #include "BitStream.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
@@ -29,7 +30,7 @@ namespace Mantid::DataHandling {
 
 */
 
-class DLLExport LoadDNSEvent : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadDNSEvent : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   ///
   const std::string name() const override { return "LoadDNSEvent"; }

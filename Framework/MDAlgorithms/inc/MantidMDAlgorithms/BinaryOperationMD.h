@@ -12,6 +12,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -27,7 +28,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-11-04
 */
-class DLLExport BinaryOperationMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL BinaryOperationMD : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

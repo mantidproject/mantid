@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
@@ -30,7 +31,7 @@ data.</li>
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
 */
-class DLLExport LoadSpec final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadSpec final : public API::Algorithm {
 public:
   LoadSpec();
   const std::string name() const override { return "LoadSpec"; }

@@ -174,7 +174,6 @@ set(INC_FILES
     inc/MantidKernel/DeltaEMode.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
-    inc/MantidKernel/DllConfig.h
     inc/MantidKernel/DllOpen.h
     inc/MantidKernel/DocumentationHeader.h
     inc/MantidKernel/DynamicFactory.h
@@ -524,6 +523,12 @@ target_compile_definitions(Kernel PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(
+  Kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Kernel> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(Kernel TRUE)
 
 # This section deals with creating the MantidVersion implementation
 

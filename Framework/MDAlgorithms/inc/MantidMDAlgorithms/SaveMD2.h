@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -16,7 +16,7 @@ namespace MDAlgorithms {
 
 /** Save a MDEventWorkspace to a .nxs file.
  */
-class DLLExport SaveMD2 final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL SaveMD2 final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMD"; };

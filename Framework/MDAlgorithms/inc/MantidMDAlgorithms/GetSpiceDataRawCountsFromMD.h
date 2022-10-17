@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -18,7 +18,7 @@ namespace MDAlgorithms {
   values from
     IMDEventWorkspaces from the output of algorithm ConvertSpiceDataToRealSpace.
 */
-class DLLExport GetSpiceDataRawCountsFromMD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL GetSpiceDataRawCountsFromMD final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "GetSpiceDataRawCountsFromMD"; }

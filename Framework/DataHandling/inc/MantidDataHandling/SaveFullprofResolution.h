@@ -7,15 +7,15 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** SaveFullprofResolution : TODO: DESCRIPTION
  */
-class DLLExport SaveFullprofResolution final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveFullprofResolution final : public API::Algorithm {
 public:
   SaveFullprofResolution();
   /// Algorithm's name

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
@@ -20,7 +21,7 @@ namespace DataHandling {
   @author Janik Zikovsky
   @date 2011-10-03
 */
-class DLLExport SaveIsawDetCal final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveIsawDetCal final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawDetCal"; }

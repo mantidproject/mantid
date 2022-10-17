@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidKernel/System.h"
 #include "boost/optional.hpp"
 namespace Mantid {
 namespace DataObjects {
@@ -17,7 +17,7 @@ namespace DataObjects {
 /** MDFrameFromMDWorkspace: Each dimension of the MDWorkspace contains an
     MDFrame. The acutal frame which is common to all dimensions is extracted.
 */
-class DLLExport MDFramesToSpecialCoordinateSystem {
+class MANTID_DATAOBJECTS_DLL MDFramesToSpecialCoordinateSystem {
 public:
   boost::optional<Mantid::Kernel::SpecialCoordinateSystem> operator()(const Mantid::API::IMDWorkspace *workspace) const;
 

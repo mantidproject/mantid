@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 #include "MantidAPI/IFileLoader.h"
 
@@ -17,7 +17,7 @@ namespace DataHandling {
 
 /** LoadSpiceAscii : TODO: DESCRIPTION
  */
-class DLLExport LoadSpiceAscii final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadSpiceAscii final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

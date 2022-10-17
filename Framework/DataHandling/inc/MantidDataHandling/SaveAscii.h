@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -21,7 +22,7 @@ are saved in columns.
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
 */
-class DLLExport SaveAscii final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveAscii final : public API::Algorithm {
 public:
   /// Default constructor
   SaveAscii();

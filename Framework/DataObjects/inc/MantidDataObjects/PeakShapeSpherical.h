@@ -8,7 +8,6 @@
 
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 #include <string>
 
@@ -17,7 +16,7 @@ namespace DataObjects {
 
 /** PeakShapeSpherical : PeakShape for a spherical peak
  */
-class DLLExport PeakShapeSpherical : public PeakShapeBase {
+class MANTID_DATAOBJECTS_DLL PeakShapeSpherical : public PeakShapeBase {
 public:
   /// Constructor
   PeakShapeSpherical(const double &peakRadius, Kernel::SpecialCoordinateSystem frame,

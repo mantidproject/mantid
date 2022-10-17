@@ -19,7 +19,7 @@ namespace DataHandling {
 /**
     LoadMLZ : Loads MLZ nexus or hdf file into a Mantid workspace.
  */
-class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMLZ();
 

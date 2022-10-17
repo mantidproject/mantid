@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
@@ -20,7 +19,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-09-27
 */
-class DLLExport SliceMD : public SlicingAlgorithm {
+class MANTID_MDALGORITHMS_DLL SliceMD : public SlicingAlgorithm {
 public:
   //// enum describes situations, which could happen for input Box binning
   // enum BoxState

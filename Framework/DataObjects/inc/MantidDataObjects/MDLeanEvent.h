@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/MortonIndex/BitInterleaving.h"
 #include "MantidDataObjects/MortonIndex/CoordinateConversion.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -57,7 +57,7 @@ template <size_t nd> void swap(MDLeanEvent<nd> &first, MDLeanEvent<nd> &second);
  */
 struct EventAccessor {};
 
-template <size_t nd> class DLLExport MDLeanEvent {
+template <size_t nd> class MANTID_DATAOBJECTS_DLL MDLeanEvent {
 public:
   /**
    * Additional index type defenitions

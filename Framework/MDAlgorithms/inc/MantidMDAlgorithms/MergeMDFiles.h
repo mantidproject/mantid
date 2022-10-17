@@ -10,7 +10,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <mutex>
 #include <nexus/NeXusFile.hpp>
 
@@ -23,7 +23,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-08-16
 */
-class DLLExport MergeMDFiles final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL MergeMDFiles final : public API::Algorithm {
 public:
   MergeMDFiles();
   ~MergeMDFiles() override;

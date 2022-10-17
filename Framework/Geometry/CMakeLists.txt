@@ -183,7 +183,6 @@ set(INC_FILES
     inc/MantidGeometry/Crystal/SymmetryOperationSymbolParser.h
     inc/MantidGeometry/Crystal/UnitCell.h
     inc/MantidGeometry/Crystal/V3R.h
-    inc/MantidGeometry/DllConfig.h
     inc/MantidGeometry/ICompAssembly.h
     inc/MantidGeometry/IComponent.h
     inc/MantidGeometry/IDetector.h
@@ -496,10 +495,11 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings Auto-generate exports header
+# Auto-generate exports header
 target_include_directories(
   Geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Geometry> $<INSTALL_INTERFACE:include/Mantid>
 )
+generate_mantid_export_header(Geometry TRUE)
 
 # Installation settings
 if(CONDA_ENV)

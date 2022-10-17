@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/Crystal/ConcretePeakTransformFactory.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -16,7 +15,7 @@ namespace Geometry {
 @class PeakTransformHKL
 Used to remap coordinates into a form consistent with an axis reordering.
 */
-class DLLExport PeakTransformHKL : public PeakTransform {
+class MANTID_GEOMETRY_DLL PeakTransformHKL : public PeakTransform {
 public:
   static std::string name() { return "HKL"; }
   /// Constructor

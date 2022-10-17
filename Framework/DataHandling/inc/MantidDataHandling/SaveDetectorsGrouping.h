@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -17,7 +18,7 @@ namespace DataHandling {
 
   @date 2011-11-16
 */
-class DLLExport SaveDetectorsGrouping final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveDetectorsGrouping final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveDetectorsGrouping"; };

@@ -20,6 +20,7 @@
 #include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/NexusDescriptor.h"
@@ -55,7 +56,7 @@ Optional Properties:
 </UL>
 
 */
-class DLLExport LoadPLN : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadPLN : public API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   int version() const override;

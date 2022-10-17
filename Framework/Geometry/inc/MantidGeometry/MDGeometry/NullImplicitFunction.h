@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <vector>
 
@@ -25,7 +24,7 @@ for Null checks and handles where ImplicitFunctions are used.
 @date 28/01/2011
 */
 
-class DLLExport NullImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
+class MANTID_GEOMETRY_DLL NullImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
 public:
   std::string getName() const override;
   std::string toXMLString() const override;

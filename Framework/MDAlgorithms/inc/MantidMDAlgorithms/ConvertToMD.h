@@ -33,7 +33,7 @@ namespace MDAlgorithms {
 */
 
 /// Convert to MD Events class itself:
-class DLLExport ConvertToMD : public ConvertToMDParent {
+class MANTID_MDALGORITHMS_DLL ConvertToMD : public ConvertToMDParent {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

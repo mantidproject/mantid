@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidKernel/System.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
@@ -22,7 +21,7 @@ pattern to implement common code associated with vector storage.
 @date 01/02/2011
 */
 template <typename Derived, typename ElemType>
-class DLLExport Vector3DParameter : public Mantid::API::ImplicitFunctionParameter {
+class MANTID_MDALGORITHMS_DLL Vector3DParameter : public Mantid::API::ImplicitFunctionParameter {
 public:
   Vector3DParameter(ElemType a, ElemType b, ElemType c);
   Vector3DParameter();

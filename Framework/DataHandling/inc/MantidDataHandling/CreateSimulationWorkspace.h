@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -16,7 +17,7 @@ class BinEdges;
 }
 namespace DataHandling {
 
-class DLLExport CreateSimulationWorkspace final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL CreateSimulationWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

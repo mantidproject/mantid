@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid {
@@ -18,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-07
 */
-class DLLExport MultiplyMD : public BinaryOperationMD {
+class MANTID_MDALGORITHMS_DLL MultiplyMD : public BinaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

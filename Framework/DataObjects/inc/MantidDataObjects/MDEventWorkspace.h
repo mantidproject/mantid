@@ -9,7 +9,6 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/System.h"
 //#include "MantidDataObjects/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
@@ -36,7 +35,7 @@ namespace DataObjects {
  *
  * */
 TMDE_CLASS
-class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
+class MANTID_DATAOBJECTS_DLL MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
