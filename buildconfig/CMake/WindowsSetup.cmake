@@ -59,7 +59,7 @@ if(CONDA_ENV)
   # switch off all optimzations
   set(_conda_debug_cfg_name DebugWithRelRuntime)
   string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
-  if(CCACHE_FOUND)
+  if(USE_CCACHE AND CCACHE_FOUND)
     # For a single-config generator like Ninja, aim to use CCache to speed up builds. The Zi flag is not supported by
     # CCache so we need to use Z7 to allow debugging.
     set(_language_flags "/Z7 /Ob0 /Od /RTC1")
