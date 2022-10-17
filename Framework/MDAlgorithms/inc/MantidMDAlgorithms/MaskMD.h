@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {

@@ -11,14 +11,14 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 /** ConvertCWSDExpToMomentum : TODO: DESCRIPTION
  */
-class DLLExport ConvertCWSDExpToMomentum final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ConvertCWSDExpToMomentum final : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
 

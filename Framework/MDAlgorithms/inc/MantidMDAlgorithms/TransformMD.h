@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2012-01-18
 */
-class DLLExport TransformMD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL TransformMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

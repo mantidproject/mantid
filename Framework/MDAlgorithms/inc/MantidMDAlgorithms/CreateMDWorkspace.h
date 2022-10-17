@@ -27,7 +27,7 @@ std::vector<std::string> MANTID_MDALGORITHMS_DLL parseNames(const std::string &n
  * @author Janik Zikovsky
  * @date 2011-02-25 11:54:52.003137
  */
-class DLLExport CreateMDWorkspace : public API::BoxControllerSettingsAlgorithm {
+class MANTID_MDALGORITHMS_DLL CreateMDWorkspace : public API::BoxControllerSettingsAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateMDWorkspace"; }

@@ -157,7 +157,6 @@ set(INC_FILES
     inc/MantidMDAlgorithms/DgsScatteredTransmissionCorrectionMD.h
     inc/MantidMDAlgorithms/DisplayNormalizationSetter.h
     inc/MantidMDAlgorithms/DivideMD.h
-    inc/MantidMDAlgorithms/DllConfig.h
     inc/MantidMDAlgorithms/EqualToMD.h
     inc/MantidMDAlgorithms/EvaluateMDFunction.h
     inc/MantidMDAlgorithms/ExponentialMD.h
@@ -389,6 +388,12 @@ target_link_libraries(MDAlgorithms PUBLIC Mantid::API Mantid::DataObjects Mantid
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(
+  MDAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/MDAlgorithms> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(MDAlgorithms TRUE)
 
 # Installation settings
 if(CONDA_ENV)

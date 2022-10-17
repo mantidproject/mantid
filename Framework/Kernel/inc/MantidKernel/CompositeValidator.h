@@ -27,7 +27,7 @@ namespace Kernel {
 
 enum class CompositeRelation { AND = 0, OR = 1 };
 
-class DLLExport CompositeValidator : public IValidator {
+class MANTID_KERNEL_DLL CompositeValidator : public IValidator {
 public:
   /// Default constructor
   CompositeValidator(const CompositeRelation &relation = CompositeRelation::AND);

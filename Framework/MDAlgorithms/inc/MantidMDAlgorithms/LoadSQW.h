@@ -11,6 +11,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/FileDescriptor.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <fstream>
 #include <string>
 
@@ -79,7 +80,7 @@ struct dataPositions {
 };
 } // namespace LoadSQWHelper
 
-class DLLExport LoadSQW : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_MDALGORITHMS_DLL LoadSQW : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSQW();
   ~LoadSQW() override;

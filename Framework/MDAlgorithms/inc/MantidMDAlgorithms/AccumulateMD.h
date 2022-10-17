@@ -9,7 +9,6 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 #include <set>
 
@@ -61,7 +60,7 @@ extern void MANTID_MDALGORITHMS_DLL padParameterVector(std::vector<double> &para
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
  */
-class DLLExport AccumulateMD : public API::DataProcessorAlgorithm {
+class MANTID_MDALGORITHMS_DLL AccumulateMD : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

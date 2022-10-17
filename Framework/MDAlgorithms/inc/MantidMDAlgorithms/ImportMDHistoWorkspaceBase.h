@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <vector>
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace MDAlgorithms {
 
   @date 2012-06-21
 */
-class DLLExport ImportMDHistoWorkspaceBase : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ImportMDHistoWorkspaceBase : public API::Algorithm {
 public:
   std::map<std::string, std::string> validateInputs() override;
 

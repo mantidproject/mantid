@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <vector>
 
@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 /** IntegrateMDHistoWorkspace : Algorithm to perform axis aligned integration of
   an MDHistoWorkspace.
 */
-class DLLExport IntegrateMDHistoWorkspace final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegrateMDHistoWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

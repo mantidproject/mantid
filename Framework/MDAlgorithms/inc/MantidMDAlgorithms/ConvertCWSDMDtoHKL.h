@@ -11,7 +11,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
