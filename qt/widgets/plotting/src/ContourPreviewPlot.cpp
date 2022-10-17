@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h"
+#include "MantidQtWidgets/Plotting/ContourPreviewPlot.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"

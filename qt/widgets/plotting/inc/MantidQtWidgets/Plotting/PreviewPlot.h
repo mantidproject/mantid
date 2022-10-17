@@ -12,8 +12,8 @@
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
-#include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
-#include "MantidQtWidgets/Plotting/Mpl/SingleSelector.h"
+#include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/SingleSelector.h"
 
 #include <Poco/NObserver.h>
 
