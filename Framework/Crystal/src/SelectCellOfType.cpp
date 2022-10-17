@@ -112,8 +112,7 @@ void SelectCellOfType::exec() {
     int num_indexed = 0;
     double average_error = 0.0;
 
-    std::vector<V3D> hkl_vectors;
-    std::vector<V3D> mnp_vectors;
+    std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
     //----------------------------------------------
@@ -143,10 +142,10 @@ void SelectCellOfType::exec() {
       peak.setIntMNP(T * peak.getIntMNP());
 
       q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP());
-      hkl_vectors.emplace_back(peak.getHKL() - modHKL * peak.getIntMNP());
+      miller_indices.emplace_back(peak.getHKL() - modHKL * peak.getIntMNP());
     }
 
-    num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, hkl_vectors, average_error);
+    num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
 
     SelectCellWithForm::DetermineErrors(sigabc, newUB, ws, tolerance);
 

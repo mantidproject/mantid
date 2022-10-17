@@ -55,13 +55,18 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &
   std::vector<V3D> miller_ind;
   std::vector<V3D> q_vectors;
   std::vector<V3D> q_vectors0;
+
   int npeaks = ws->getNumberPeaks();
   double fit_error;
+
   miller_ind.reserve(npeaks);
   q_vectors.reserve(npeaks);
   q_vectors0.reserve(npeaks);
+
+  Kernel::Matrix<double> modHKL = ws->sample().getOrientedLattice().getModHKL();
+
   for (int i = 0; i < npeaks; i++)
-    q_vectors0.emplace_back(ws->getPeak(i).getQSampleFrame());
+    q_vectors0.emplace_back(ws->getPeak(i).getQSampleFrame() - UB * modHKL * ws->getPeak(i).getIntMNP());
 
   Kernel::Matrix<double> newUB1(3, 3);
   IndexingUtils::GetIndexedPeaks(UB, q_vectors0, tolerance, miller_ind, q_vectors, fit_error);
