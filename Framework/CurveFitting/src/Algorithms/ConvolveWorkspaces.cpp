@@ -60,7 +60,7 @@ void ConvolveWorkspaces::exec() {
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERRUPT_REGION
     m_progress->report();
-    outputWS->setSharedX(i, ws1->sharedX(i));
+    outputWS->setSharedX(i, ws2->sharedX(i));
     auto &Yout = outputWS->mutableY(i);
     Convolution conv;
 
