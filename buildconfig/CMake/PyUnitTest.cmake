@@ -12,8 +12,6 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     set(_module_dir ${CMAKE_BINARY_DIR}/bin)
   endif()
 
-  set(_test_runner ${Python_EXECUTABLE})
-
   if(NOT PYUNITTEST_RUNNER)
     set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
   else()
@@ -43,16 +41,12 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     string(REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" JEMALLOC_RUNTIME_LIB ${JEMALLOC_RUNTIME_LIB})
   endif()
 
-  # definitions to preload jemalloc but not if we are using address sanitizer as this confuses things
-  if(WITH_ASAN)
-    set(LOCAL_PRELOAD $ENV{LD_PRELOAD})
-  else()
+  # set preload as jemalloc, unless if using address sanitizer as this confuses things
+  if(NOT WITH_ASAN)
     set(LOCAL_PRELOAD ${JEMALLOC_RUNTIME_LIB})
     if(LD_PRELOAD)
       set(LOCAL_PRELOAD ${LOCAL_PRELOAD}:$ENV{LD_PRELOAD})
     endif()
-  endif()
-  if(LOCAL_PRELOAD)
     list(APPEND _test_environment "LD_PRELOAD=${LOCAL_PRELOAD}")
   endif()
 
@@ -62,8 +56,9 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     get_filename_component(_suitename ${part} NAME_WE)
     # We duplicate the suitename so that it matches the junit output name
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
-    add_test(NAME ${_pyunit_separate_name} COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing"
-                                                   ${_test_runner} ${_test_runner_module} ${_test_src_dir}/${_filename}
+    add_test(NAME ${_pyunit_separate_name}
+             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE}
+                     ${_test_runner_module} ${_test_src_dir}/${_filename}
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(
