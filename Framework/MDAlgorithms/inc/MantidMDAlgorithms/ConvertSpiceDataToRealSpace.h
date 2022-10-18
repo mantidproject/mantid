@@ -11,6 +11,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/FileDescriptor.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <deque>
 
@@ -20,7 +21,7 @@ namespace MDAlgorithms {
 /** ConvertSpiceDataToRealSpace : Convert data from SPICE file to singals
   in real space contained in MDEventWrokspaces
 */
-class DLLExport ConvertSpiceDataToRealSpace final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ConvertSpiceDataToRealSpace final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpiceDataToRealSpace"; }

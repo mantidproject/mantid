@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ProxyInfo.h"
 
@@ -19,7 +20,7 @@ namespace DataHandling {
 /** DownloadInstrument : Downloads one or more instrument files to the local
   instrument cache from the instrument repository
 */
-class DLLExport DownloadInstrument : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL DownloadInstrument : public API::Algorithm {
 public:
   DownloadInstrument();
   virtual ~DownloadInstrument() = default;

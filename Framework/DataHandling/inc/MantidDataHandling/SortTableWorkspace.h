@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** SortTableWorkspace : TODO: DESCRIPTION
  */
-class DLLExport SortTableWorkspace : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL SortTableWorkspace : public API::ParallelAlgorithm {
 public:
   const std::string name() const override { return "SortTableWorkspace"; }
   int version() const override;

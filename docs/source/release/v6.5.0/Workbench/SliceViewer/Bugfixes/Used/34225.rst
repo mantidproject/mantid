@@ -1,1 +1,0 @@
-- The colorbar now remains autoscaled when switching between the different normalisation options.

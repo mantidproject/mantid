@@ -13,6 +13,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -22,7 +23,7 @@ namespace MDAlgorithms {
  * Base class for common code shared between different versions of the
  * ConvertToDiffractionMDWorkspace algorithm.
  */
-class DLLExport BaseConvertToDiffractionMDWorkspace : public API::BoxControllerSettingsAlgorithm {
+class MANTID_MDALGORITHMS_DLL BaseConvertToDiffractionMDWorkspace : public API::BoxControllerSettingsAlgorithm {
 
 public:
   /// Algorithm's name for identification

@@ -7,8 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidDataObjects/SkippingPolicy.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/DllConfig.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
@@ -19,14 +18,14 @@ namespace DataObjects {
   @date 2012-03-05
 */
 
-class DLLExport SkippingPolicy {
+class MANTID_DATAOBJECTS_DLL SkippingPolicy {
 public:
   virtual bool keepGoing() const = 0;
   virtual ~SkippingPolicy() = default;
 };
 
 /// Policy that indicates skipping of masked bins.
-class DLLExport SkipMaskedBins : public SkippingPolicy {
+class MANTID_DATAOBJECTS_DLL SkipMaskedBins : public SkippingPolicy {
 private:
   Mantid::API::IMDIterator *m_iterator;
 
@@ -40,7 +39,7 @@ public:
 };
 
 /// Policy that indicates no skipping should be applied.
-class DLLExport SkipNothing : public SkippingPolicy {
+class MANTID_DATAOBJECTS_DLL SkipNothing : public SkippingPolicy {
 public:
   /**
   Always returns false to cancel skipping.

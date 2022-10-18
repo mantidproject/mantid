@@ -52,7 +52,7 @@ at filename.
 @author Gesner Passos, Rutherford Appleton Laboratory
 @date 12/04/2013
 */
-class DLLExport LoadCanSAS1D2 : public LoadCanSAS1D {
+class MANTID_DATAHANDLING_DLL LoadCanSAS1D2 : public LoadCanSAS1D {
 public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }

@@ -9,7 +9,6 @@
 #include "MantidAPI/IJournal.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/AutoPtr.h>
 #include <map>

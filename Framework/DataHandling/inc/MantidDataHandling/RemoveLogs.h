@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 
@@ -55,7 +56,7 @@ namespace DataHandling {
     @author Vickie Lynch, SNS
     @date 26/04/2012
 */
-class DLLExport RemoveLogs final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL RemoveLogs final : public API::Algorithm {
 public:
   /// Default constructor
   RemoveLogs();

@@ -10,6 +10,7 @@
 // Includes
 //--------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,7 +23,7 @@ namespace DataHandling {
     @author Russell Taylor, Tessella
     @date 04/10/2010
 */
-class DLLExport DefineGaugeVolume final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL DefineGaugeVolume final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "DefineGaugeVolume"; }

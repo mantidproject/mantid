@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
@@ -20,7 +21,7 @@ namespace DataHandling {
      @author Michael Whitty, ISIS Facility, Rutherford Appleton Laboratory
      @date 01/09/2010
   */
-class DLLExport LoadGSS : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadGSS : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadGSS"; }

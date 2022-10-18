@@ -6,15 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
 
 /** PeakShapeNone : No peak shape. Null Object. For unintegrated peaks.
  */
-class DLLExport NoShape : public Mantid::Geometry::PeakShape {
+class MANTID_DATAOBJECTS_DLL NoShape : public Mantid::Geometry::PeakShape {
 
 public:
   /// Serialize

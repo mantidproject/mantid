@@ -13,6 +13,7 @@ set(TEST_PY_FILES
     AbinsLoadCASTEPTest.py
     AbinsLoadCRYSTALTest.py
     AbinsLoadDMOL3Test.py
+    AbinsLoadDMOL3InternalsTest.py
     AbinsLoadGAUSSIANTest.py
     AbinsLoadPhonopyTest.py
     AbinsLoadVASPTest.py

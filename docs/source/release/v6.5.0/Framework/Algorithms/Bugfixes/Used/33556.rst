@@ -1,1 +1,0 @@
-- :ref:`ExtractSpectra <algm-ExtractSpectra>` now checks if the bins flagged as masked are still there after processing, and if they are not, the masking flag is unchecked for that spectrum.

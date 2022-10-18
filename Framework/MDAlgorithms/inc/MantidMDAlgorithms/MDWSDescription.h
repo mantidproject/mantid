@@ -21,6 +21,8 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+#include "MantidMDAlgorithms/DllConfig.h"
+
 namespace Mantid {
 namespace MDAlgorithms {
 /***  Class wrapping together all parameters, related to conversion from a
@@ -44,7 +46,7 @@ namespace MDAlgorithms {
 
 /// helper class describes the properties of target MD workspace, which should
 /// be obtained as the result of conversion algorithm.
-class DLLExport MDWSDescription : public API::LogManager {
+class MANTID_MDALGORITHMS_DLL MDWSDescription : public API::LogManager {
 public: // for the time being
   /// the string which describes ChildAlgorithm, used to convert source ws to
   /// target MD ws. At the moment, it coincides with Q-mode

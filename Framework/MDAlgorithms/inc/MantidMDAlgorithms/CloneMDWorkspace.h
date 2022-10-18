@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -19,7 +19,7 @@ namespace MDAlgorithms {
   @author Janik Zikovsky
   @date 2011-08-15
 */
-class DLLExport CloneMDWorkspace final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL CloneMDWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CloneMDWorkspace"; };

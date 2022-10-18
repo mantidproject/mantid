@@ -1,1 +1,0 @@
-* Fixed issue with errorbar in :ref:`IntegrateEllipsoids <algm-ConvertWANDSCDToQ>`.

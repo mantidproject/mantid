@@ -10,7 +10,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -19,7 +19,7 @@ namespace MDAlgorithms {
 
   @date 2012-01-19
 */
-class DLLExport CompareMDWorkspaces final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL CompareMDWorkspaces final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

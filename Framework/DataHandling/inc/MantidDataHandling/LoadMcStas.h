@@ -9,8 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
@@ -19,7 +19,7 @@ namespace DataHandling {
 
 /** LoadMcStas : TODO: DESCRIPTION
  */
-class DLLExport LoadMcStas : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMcStas : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

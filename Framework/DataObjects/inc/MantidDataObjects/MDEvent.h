@@ -10,7 +10,6 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include <cmath>
 #include <numeric>
 
@@ -34,7 +33,7 @@ namespace DataObjects {
  * @date Dec 3, 2010
  *
  * */
-template <size_t nd> class DLLExport MDEvent : public MDLeanEvent<nd> {
+template <size_t nd> class MANTID_DATAOBJECTS_DLL MDEvent : public MDLeanEvent<nd> {
 protected:
   /** 0-based index of which run this event belongs to.
    * This refers to the particular ExperimentInfo that is stored in the

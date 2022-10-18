@@ -1,1 +1,0 @@
-- Fix a bug with starting the live data monitor from the ISIS Reflectometry interface where there was a delay in updating the processed (IvsQ) workspace.

@@ -163,7 +163,11 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   std::map<std::string, double> ranges;
 
   // Get the instrument
-  auto inst = instrumentWorkspace()->getInstrument();
+  auto const instWorkspace = instrumentWorkspace();
+  if (!instWorkspace) {
+    return ranges;
+  }
+  auto inst = instWorkspace->getInstrument();
 
   // Get the analyser component
   auto comp = inst->getComponentByName(analyser.toStdString());

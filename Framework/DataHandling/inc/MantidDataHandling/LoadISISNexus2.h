@@ -56,7 +56,7 @@ multi-period file)
 
 @author Roman Tolchenov, Tessella plc
 */
-class DLLExport LoadISISNexus2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadISISNexus2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default constructor
   LoadISISNexus2();

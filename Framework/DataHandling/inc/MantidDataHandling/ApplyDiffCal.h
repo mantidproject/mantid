@@ -9,15 +9,15 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** ApplyDiffCal :
  */
-class DLLExport ApplyDiffCal final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL ApplyDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <utility>
 
-#include <utility>
-
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
@@ -21,7 +20,7 @@ namespace Mantid {
 namespace DataHandling {
 enum class ScaleUnits { undefined, metres, centimetres, millimetres };
 
-class DLLExport MeshFileIO {
+class MANTID_DATAHANDLING_DLL MeshFileIO {
 public:
   std::shared_ptr<Geometry::MeshObject> rotate(std::shared_ptr<Geometry::MeshObject> environmentMesh, double xRotation,
                                                double yRotation, double zRotation);

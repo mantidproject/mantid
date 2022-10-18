@@ -9,11 +9,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -24,7 +24,7 @@ namespace DataHandling {
  * @author Janik Zikovsky
  * @date 2011-05-09
  */
-class DLLExport LoadCalFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadCalFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadCalFile"; };

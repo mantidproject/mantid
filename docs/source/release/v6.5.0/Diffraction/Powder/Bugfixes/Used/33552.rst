@@ -1,1 +1,0 @@
-- The error message raised when attempting to use ``Polaris.create_total_scattering_pdf`` algorithm if the focus has been run with ``do_van_normalisation=false`` has been improved.

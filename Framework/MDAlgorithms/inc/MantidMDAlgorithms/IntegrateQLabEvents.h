@@ -11,6 +11,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <memory>
 #include <tuple>
@@ -84,7 +85,7 @@ struct OccupiedCell {
  @date   2012-12-19
  */
 
-class DLLExport IntegrateQLabEvents {
+class MANTID_MDALGORITHMS_DLL IntegrateQLabEvents {
 public:
   /**
    * @brief Store events within a certain radius of the specified peak centers,

@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,7 +40,7 @@ namespace DataHandling {
    @author Martyn Gigg, Tessella Support Services plc
    @date 05/11/2008
 */
-class DLLExport SaveVTK final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveVTK final : public API::Algorithm {
 
 public:
   /// Default constructor

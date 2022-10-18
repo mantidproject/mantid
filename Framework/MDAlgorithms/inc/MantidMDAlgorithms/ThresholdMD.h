@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 /** ThresholdMD : TODO: DESCRIPTION
  */
-class DLLExport ThresholdMD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ThresholdMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

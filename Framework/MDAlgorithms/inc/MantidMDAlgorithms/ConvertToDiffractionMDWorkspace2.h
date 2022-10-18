@@ -21,7 +21,8 @@ namespace MDAlgorithms {
  *
  * @date 2013-05-20
  */
-class DLLExport ConvertToDiffractionMDWorkspace2 : public MDAlgorithms::BaseConvertToDiffractionMDWorkspace {
+class MANTID_MDALGORITHMS_DLL ConvertToDiffractionMDWorkspace2
+    : public MDAlgorithms::BaseConvertToDiffractionMDWorkspace {
 public:
   /// Algorithm's version for identification
   int version() const override { return 2; }

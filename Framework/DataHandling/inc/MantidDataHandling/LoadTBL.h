@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -19,7 +20,7 @@ namespace DataHandling {
 Loads a table workspace from an ascii file in reflectometry tbl format. Rows
 must be no longer than 17 cells.
 */
-class DLLExport LoadTBL : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadTBL : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
   LoadTBL();

@@ -65,7 +65,7 @@ class StructureFactorCalculator;
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 05/08/2014
   */
-class DLLExport CrystalStructure {
+class MANTID_GEOMETRY_DLL CrystalStructure {
 public:
   CrystalStructure(const UnitCell &unitCell, const SpaceGroup_const_sptr &spaceGroup,
                    const CompositeBraggScatterer_sptr &scatterers);

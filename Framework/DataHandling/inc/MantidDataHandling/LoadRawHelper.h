@@ -37,7 +37,7 @@ namespace DataHandling {
 /** @class LoadRawHelper DataHandling/LoadRawHelper.h
  * Helper class for LoadRaw algorithms.
  */
-class DLLExport LoadRawHelper : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadRawHelper : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
   LoadRawHelper();

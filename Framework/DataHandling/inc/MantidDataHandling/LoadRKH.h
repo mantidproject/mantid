@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
@@ -31,7 +32,7 @@ namespace DataHandling {
    @author Martyn Gigg, Tessella Support Services plc
    @date 19/01/2009
 */
-class DLLExport LoadRKH : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadRKH : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadRKH"; }

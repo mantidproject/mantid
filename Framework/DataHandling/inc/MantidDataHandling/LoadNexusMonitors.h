@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,7 +27,7 @@ Required Properties:
 @author Michael Reuter, SNS
 @date October 25, 2010
 */
-class DLLExport LoadNexusMonitors final : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadNexusMonitors final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadNexusMonitors() { this->useAlgorithm("LoadNexusMonitors", 2); }

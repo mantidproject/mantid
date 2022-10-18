@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -30,7 +31,7 @@ Creates FunctionDomainMD from an IMDWorkspace. Does not create any properties.
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
  */
-class DLLExport FitMD : public API::IDomainCreator {
+class MANTID_MDALGORITHMS_DLL FitMD : public API::IDomainCreator {
 public:
   /// Default constructor
   FitMD();

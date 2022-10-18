@@ -1,2 +1,0 @@
-- Users can now choose to run :ref:`Polaris.create_total_scattering_pdf <create_total_scattering_pdf_polaris-isis-powder-ref>` with either First order or Second order Placzek Corrections.
-- Users can now choose to use either First order or Second order Placzek Corrections with :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>`.

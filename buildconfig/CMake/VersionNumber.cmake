@@ -35,7 +35,7 @@ if(CONDA_BUILD)
 
 else()
   set(VERSION_MAJOR 6)
-  set(VERSION_MINOR 4)
+  set(VERSION_MINOR 5)
 
   # UNCOMMENT the next 'set' line to 'force' the patch version number to a value (instead of using the count coming out
   # of 'git describe') DO NOT COMMIT THIS TO MASTER UNCOMMENTED, ONLY TO A RELEASE BRANCH

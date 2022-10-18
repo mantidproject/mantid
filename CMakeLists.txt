@@ -118,8 +118,8 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 # Bootstrap any dependencies
 include(Bootstrap)
 
-if(MSVC)
-  include(MSVCSetup)
+if(WIN32)
+  include(WindowsSetup)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include(DarwinSetup)
 endif()

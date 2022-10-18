@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SerialAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/optional.hpp>
 #include <climits>
@@ -33,7 +34,7 @@ Required Properties:
 <LI> Title - the title to describe the saved processed data
 </UL>
 */
-class DLLExport SaveNexusProcessed : public API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveNexusProcessed : public API::SerialAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveNexusProcessed"; }

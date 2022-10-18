@@ -698,6 +698,12 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(
+  DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/DataHandling> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(DataHandling FALSE)
+
 # Installation settings
 if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)

@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include <fstream>
 
 namespace Mantid {
@@ -27,7 +28,7 @@ namespace DataHandling {
     @author Martyn Gigg, Tessella Support Services plc
     @date 26/01/2009
  */
-class DLLExport SaveRKH final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveRKH final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SaveRKH"; }

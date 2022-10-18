@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
@@ -19,7 +19,7 @@ namespace Geometry {
 /** MDFrame : The coordinate frame for a dimension, or set of dimensions in a
   multidimensional workspace.
 */
-class DLLExport MDFrame {
+class MANTID_GEOMETRY_DLL MDFrame {
 public:
   virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
   virtual const Mantid::Kernel::MDUnit &getMDUnit() const = 0;

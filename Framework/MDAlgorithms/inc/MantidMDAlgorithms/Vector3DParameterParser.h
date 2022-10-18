@@ -9,8 +9,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 
 #include <boost/algorithm/string.hpp>
@@ -30,7 +28,7 @@ namespace MDAlgorithms {
  @date 02/11/2011
  */
 template <class VectorValueParameterType>
-class DLLExport Vector3DParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class MANTID_MDALGORITHMS_DLL Vector3DParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   VectorValueParameterType *parseVectorParameter(std::string value);
 

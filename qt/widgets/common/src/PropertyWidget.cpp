@@ -237,7 +237,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
   connect(m_icons[RESTORE], SIGNAL(clicked()), this, SLOT(toggleUseHistory()));
 
   /// Save the documentation tooltip
-  m_doc = QString::fromStdString(prop->briefDocumentation());
+  m_doc = QString::fromStdString(prop->documentation());
 
   if (!isOptionalProperty(prop)) {
     if (!m_doc.isEmpty())
