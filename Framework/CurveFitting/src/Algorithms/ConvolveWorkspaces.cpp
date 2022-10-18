@@ -76,8 +76,9 @@ void ConvolveWorkspaces::exec() {
 
     conv.addFunction(fun);
     size_t N = Yout.size();
+    size_t Nx = outputWS->mutableX(i).size();
     const double *firstX = &outputWS->mutableX(i)[0];
-    FunctionDomain1DView xView(firstX, N);
+    FunctionDomain1DView xView(firstX, Nx);
     FunctionValues out(xView);
     conv.function(xView, out);
 
