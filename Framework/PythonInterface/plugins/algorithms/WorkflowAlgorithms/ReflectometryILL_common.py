@@ -13,6 +13,11 @@ import h5py
 import numpy
 
 
+# constants for summation type options
+SUM_IN_LAMBDA = 'SumInLambda'
+SUM_IN_Q = 'SumInQ'
+
+
 def chopper_opening_angle(sample_logs: Run, instrument: Instrument) -> float:
     """Return the chopper opening angle in degrees.
 

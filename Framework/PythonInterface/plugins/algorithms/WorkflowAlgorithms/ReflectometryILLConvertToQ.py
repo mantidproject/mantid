@@ -111,7 +111,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             theta_ws_in_q.setDx(0, ws.readDx(0))
             theta_ws_in_q = self._to_point_data(theta_ws_in_q)
             theta_ws_in_q = self._group_points(theta_ws_in_q, 'theta_')
-        sum_in_lambda = self._sum_type(ws.run()) == 'SumInLambda'
+        sum_in_lambda = self._sum_type(ws.run()) == common.SUM_IN_LAMBDA
         if sum_in_lambda:
             direct_ws = self._same_q_and_dq(ws, direct_ws, 'direct_')
 
@@ -182,10 +182,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             issues[Prop.INPUT_WS] = "'{}' entry missing in sample logs".format(common.SampleLogs.SUM_TYPE)
         else:
             sum_type = run.getProperty(common.SampleLogs.SUM_TYPE).value
-            if sum_type not in ['SumInLambda', 'SumInQ']:
+            if sum_type not in [common.SUM_IN_LAMBDA, common.SUM_IN_Q]:
                 issues[Prop.INPUT_WS] = "Unknown sum type in sample logs: '{}'. Allowed values: 'SumInLambda' or 'SumInQ'.".format(sum_type)
             else:
-                if sum_type == 'SumInLambda':
+                if sum_type == common.SUM_IN_LAMBDA:
                     if direct_ws.blocksize() != input_ws.blocksize():
                         issues[Prop.DIRECT_FOREGROUND_WS] = 'Number of bins does not match with InputWorkspace.'
                     direct_xs = direct_ws.readX(0)

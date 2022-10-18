@@ -66,7 +66,7 @@ class PropertyNames(object):
 
     # all these array properties must have either single value, or
     # as many, as there are reflected beams (i.e. angle configurations)
-    PROPETIES_TO_SIZE_MATCH = [
+    PROPERTIES_TO_SIZE_MATCH = [
         DB, ANGLE_OPTION, THETA, SUM_TYPE, GROUPING_FRACTION, HIGH_FRG_HALF_WIDTH, HIGH_FRG_HALF_WIDTH_DIRECT, HIGH_BKG_OFFSET,
         HIGH_BKG_OFFSET_DIRECT, HIGH_BKG_WIDTH, HIGH_BKG_WIDTH_DIRECT, LOW_FRG_HALF_WIDTH, LOW_FRG_HALF_WIDTH_DIRECT, LOW_BKG_OFFSET,
         LOW_BKG_OFFSET_DIRECT, LOW_BKG_WIDTH, LOW_BKG_WIDTH_DIRECT, START_WS_INDEX, END_WS_INDEX, START_WS_INDEX_DIRECT,
@@ -166,7 +166,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             rb = self.getProperty(PropertyNames.RB00).value
         dimensionality = len(rb)
         if dimensionality != 0:
-            for property_name in PropertyNames.PROPETIES_TO_SIZE_MATCH:
+            for property_name in PropertyNames.PROPERTIES_TO_SIZE_MATCH:
                 value = self.getProperty(property_name).value
                 if len(value) != dimensionality and len(value) != 1:
                     issues[property_name] = 'Parameter size mismatch: must have a single value or as many as there are reflected beams:' \
@@ -685,7 +685,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         direct_beam_input = self._compose_run_string(db_run)
         self.preprocess_direct_beam(direct_beam_input, direct_beam_name, angle_index)
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
-        sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
+        sum_type = common.SUM_IN_LAMBDA if sum_type == PropertyNames.INCOHERENT else common.SUM_IN_Q
         self.sum_foreground(direct_beam_name, direct_foreground_name, sum_type, angle_index)
         if self.getProperty(PropertyNames.CACHE_DIRECT_BEAM).value:
             self._auto_cleanup.protect(direct_beam_name)
@@ -718,7 +718,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         log = 'Summation method: {}\n'.format(sum_type)
         self._logs.append(log)
         self.log().accumulate(log)
-        sum_type = 'SumInLambda' if sum_type == PropertyNames.INCOHERENT else 'SumInQ'
+        sum_type = common.SUM_IN_LAMBDA if sum_type == PropertyNames.INCOHERENT else common.SUM_IN_Q
         foreground_name, direct_foreground_name = self.sum_foreground(reflected_beam_name, foreground_name, sum_type,
                                                                       angle_index, direct_foreground_name)
         theta_ws_name_cropped = ''
@@ -729,7 +729,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         log = 'Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.format(final_two_theta)
         self._logs.append(log)
         self.log().accumulate(log)
-        if sum_type == 'SumInQ':
+        if sum_type == common.SUM_IN_Q:
             is_Bent = mtd[foreground_name].run().getProperty('beam_stats.bent_sample').value
             log = 'Sample: {0}\n'.format('Bent' if is_Bent == 1 else 'Flat')
             self._logs.append(log)
@@ -799,12 +799,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             float(self.get_value(PropertyNames.WAVELENGTH_LOWER, angle_index)),
             float(self.get_value(PropertyNames.WAVELENGTH_UPPER, angle_index))
         ]
-        if direct_foreground_name == '' and sum_type == 'SumInQ':
+        if direct_foreground_name == '' and sum_type == common.SUM_IN_Q:
             wavelengthRange = [
                 float(self.getProperty(PropertyNames.WAVELENGTH_LOWER).getDefault),
                 float(self.getProperty(PropertyNames.WAVELENGTH_UPPER).getDefault)
             ]
-            sum_type = 'SumInLambda'
+            sum_type = common.SUM_IN_LAMBDA
 
         direct_beam_name = direct_foreground_name[:-4] if direct_foreground_name else ''
         ReflectometryILLSumForeground(
