@@ -463,7 +463,7 @@ protected:
   std::vector<size_t> &m_eventCounts;
 
   void addEventImpl(size_t id, size_t /*x*/, size_t /*y*/, double /*tof*/) override { m_eventCounts[id]++; }
-  void addPseudoBMEventImpl(size_t id, double) {
+  void addPseudoBMEventImpl(size_t id, double) override {
     if (m_includeBM) {
       m_eventCounts[id]++;
     }
