@@ -400,7 +400,7 @@ public:
   }
 
   double duration() const {
-    // length test in seconds
+    // test length in seconds
     return m_framePeriod * static_cast<double>(m_frames) * 1.0e-6;
   }
 
