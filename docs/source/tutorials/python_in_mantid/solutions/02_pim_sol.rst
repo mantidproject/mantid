@@ -52,6 +52,7 @@ B - Plotting ILL Data
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     import numpy as np
+    from mantid.api import AnalysisDataService as ADS
 
     _164198 = ADS.retrieve('164198')
 
