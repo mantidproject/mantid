@@ -106,7 +106,6 @@ void SelectCellOfType::exec() {
 
   if (apply) {
     std::vector<double> sigabc(6);
-    std::vector<double> sigq(3);
     int n_peaks = ws->getNumberPeaks();
 
     int num_indexed = 0;
