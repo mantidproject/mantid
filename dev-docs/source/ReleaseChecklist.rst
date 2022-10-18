@@ -196,7 +196,7 @@ Just before release
 
 * As one of the final steps in preparing to tag the release:
 
-  * Add any final release notes manually to the main release note pages. (Make sure to check `main` for any release notes that have merged t the wrong branch)
+  * Add any final release notes manually to the main release note pages. (Make sure to check `main` for any release notes that have been merged into the wrong branch)
   * Remove unused headings from the main release note pages.
   * Remove all separate release note files and sub-file structure to leave just the main release note pages.
 
