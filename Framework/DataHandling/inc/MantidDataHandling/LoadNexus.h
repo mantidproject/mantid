@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Property.h"
 #include <climits>
 
@@ -39,7 +40,7 @@ data </LI>
 @author Ronald Fowler, based on version by Freddie Akeroyd
 @date 29/08/2008
 */
-class DLLExport LoadNexus final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadNexus();

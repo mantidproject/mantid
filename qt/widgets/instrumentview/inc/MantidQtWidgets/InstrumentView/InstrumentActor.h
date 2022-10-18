@@ -111,13 +111,13 @@ public:
   /// Get the color map.
   const ColorMap &getColorMap() const;
   /// Load a new color map from a file
-  void loadColorMap(const QString & /*fname*/, bool reset_colors = true);
+  void loadColorMap(const std::pair<QString, bool> & /*cmap*/, bool reset_colors = true);
   /// Change the colormap scale type.
   void changeScaleType(int /*type*/);
   /// Change the colormap power scale exponent.
   void changeNthPower(double /*nth_power*/);
   /// Get the file name of the current color map.
-  QString getCurrentColorMap() const { return m_currentCMap; }
+  std::pair<QString, bool> getCurrentColorMap() const { return m_currentCMap; }
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool /*on*/);
   /// extracts a mask workspace from the visualised workspace
@@ -253,7 +253,7 @@ private:
   mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// A helper object that keeps bin masking data.
   mutable MaskBinsData m_maskBinsData;
-  QString m_currentCMap;
+  std::pair<QString, bool> m_currentCMap;
   /// integrated spectra
   std::vector<double> m_integratedSignal;
   /// The workspace data and bin range limits

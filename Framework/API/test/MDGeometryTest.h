@@ -109,31 +109,37 @@ public:
     g.setTransformToOriginal(new NullCoordTransform(7), 0);
     g.setTransformToOriginal(new NullCoordTransform(8), 1);
 
-    // Perform the copy
+    // Perform the copy using copy constructor
     MDGeometry g2(g);
 
-    TS_ASSERT_EQUALS(g2.getNumDims(), 2);
-    TS_ASSERT_EQUALS(g2.getNumNonIntegratedDims(), 2);
-    TS_ASSERT_EQUALS(g2.getBasisVector(0), VMD(1.2, 3.4));
-    TS_ASSERT_EQUALS(g2.getBasisVector(1), VMD(1.2, 3.4));
-    TS_ASSERT_EQUALS(g2.getOrigin(), VMD(4, 5));
-    TS_ASSERT_EQUALS(g2.getDimension(0)->getName(), "Qx");
-    TS_ASSERT_EQUALS(g2.getDimension(1)->getName(), "Qy");
-    // Dimensions are deep copies
-    TS_ASSERT_DIFFERS(g2.getDimension(0), dim0);
-    TS_ASSERT_DIFFERS(g2.getDimension(1), dim1);
-    // Workspaces are not deep-copied, just references
-    TS_ASSERT_EQUALS(g2.getOriginalWorkspace(0), ws0);
-    TS_ASSERT_EQUALS(g2.getOriginalWorkspace(1), ws1);
-    // But transforms are deep-copied
-    TS_ASSERT_DIFFERS(g2.getTransformFromOriginal(0), g.getTransformFromOriginal(0));
-    TS_ASSERT_DIFFERS(g2.getTransformFromOriginal(1), g.getTransformFromOriginal(1));
-    TS_ASSERT_DIFFERS(g2.getTransformToOriginal(0), g.getTransformToOriginal(0));
-    TS_ASSERT_DIFFERS(g2.getTransformToOriginal(1), g.getTransformToOriginal(1));
-    TS_ASSERT(g2.getTransformFromOriginal(0) != nullptr);
-    TS_ASSERT(g2.getTransformFromOriginal(1) != nullptr);
-    TS_ASSERT(g2.getTransformToOriginal(0) != nullptr);
-    TS_ASSERT(g2.getTransformToOriginal(1) != nullptr);
+    assertEqualMDGeometry(g, g2, dim0, dim1, ws0, ws1);
+  }
+
+  void test_copy_assignment_operator() {
+    MDGeometry g;
+    std::vector<IMDDimension_sptr> dims;
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim0(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
+    IMDDimension_sptr dim1(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
+    dims.emplace_back(dim0);
+    dims.emplace_back(dim1);
+    g.initGeometry(dims);
+    g.setBasisVector(0, VMD(1.2, 3.4));
+    g.setBasisVector(1, VMD(1.2, 3.4));
+    g.setOrigin(VMD(4, 5));
+    std::shared_ptr<WorkspaceTester> ws0 = std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
+    g.setOriginalWorkspace(ws0, 0);
+    g.setOriginalWorkspace(ws1, 1);
+    g.setTransformFromOriginal(new NullCoordTransform(5), 0);
+    g.setTransformFromOriginal(new NullCoordTransform(6), 1);
+    g.setTransformToOriginal(new NullCoordTransform(7), 0);
+    g.setTransformToOriginal(new NullCoordTransform(8), 1);
+
+    // Perform the copy using copy assignment operator
+    MDGeometry g2 = g;
+
+    assertEqualMDGeometry(g, g2, dim0, dim1, ws0, ws1);
   }
 
   /** Adding dimension info and searching for it back */
@@ -278,5 +284,33 @@ public:
     // normalized
     geometry.setBasisVector(0, VMD(1.0, 0.0));
     TSM_ASSERT("All basis vectors are normalized", geometry.allBasisNormalized());
+  }
+
+private:
+  void assertEqualMDGeometry(const MDGeometry &geometry1, const MDGeometry &geometry2, IMDDimension_sptr dim0,
+                             IMDDimension_sptr dim1, std::shared_ptr<WorkspaceTester> ws0,
+                             std::shared_ptr<WorkspaceTester> ws1) {
+    TS_ASSERT_EQUALS(geometry2.getNumDims(), 2);
+    TS_ASSERT_EQUALS(geometry2.getNumNonIntegratedDims(), 2);
+    TS_ASSERT_EQUALS(geometry2.getBasisVector(0), VMD(1.2, 3.4));
+    TS_ASSERT_EQUALS(geometry2.getBasisVector(1), VMD(1.2, 3.4));
+    TS_ASSERT_EQUALS(geometry2.getOrigin(), VMD(4, 5));
+    TS_ASSERT_EQUALS(geometry2.getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS(geometry2.getDimension(1)->getName(), "Qy");
+    // Dimensions are deep copies
+    TS_ASSERT_DIFFERS(geometry2.getDimension(0), dim0);
+    TS_ASSERT_DIFFERS(geometry2.getDimension(1), dim1);
+    // Workspaces are not deep-copied, just references
+    TS_ASSERT_EQUALS(geometry2.getOriginalWorkspace(0), ws0);
+    TS_ASSERT_EQUALS(geometry2.getOriginalWorkspace(1), ws1);
+    // But transforms are deep-copied
+    TS_ASSERT_DIFFERS(geometry2.getTransformFromOriginal(0), geometry1.getTransformFromOriginal(0));
+    TS_ASSERT_DIFFERS(geometry2.getTransformFromOriginal(1), geometry1.getTransformFromOriginal(1));
+    TS_ASSERT_DIFFERS(geometry2.getTransformToOriginal(0), geometry1.getTransformToOriginal(0));
+    TS_ASSERT_DIFFERS(geometry2.getTransformToOriginal(1), geometry1.getTransformToOriginal(1));
+    TS_ASSERT(geometry2.getTransformFromOriginal(0) != nullptr);
+    TS_ASSERT(geometry2.getTransformFromOriginal(1) != nullptr);
+    TS_ASSERT(geometry2.getTransformToOriginal(0) != nullptr);
+    TS_ASSERT(geometry2.getTransformToOriginal(1) != nullptr);
   }
 };

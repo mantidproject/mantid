@@ -116,6 +116,8 @@ ONCat::ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, 
 
 ONCat::ONCat(const ONCat &other) = default;
 
+ONCat &ONCat::operator=(const ONCat &other) = default;
+
 ONCat::~ONCat() = default;
 
 /**

@@ -20,7 +20,7 @@ namespace DataHandling {
 ISISJournalGetExperimentRuns obtains a list of runs and related information for
 an investigation and cycle.
  */
-class DLLExport ISISJournalGetExperimentRuns : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL ISISJournalGetExperimentRuns : public API::Algorithm {
 public:
   ISISJournalGetExperimentRuns() : API::Algorithm() {}
   virtual ~ISISJournalGetExperimentRuns() override = default;

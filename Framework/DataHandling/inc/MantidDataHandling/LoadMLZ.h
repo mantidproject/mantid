@@ -19,7 +19,7 @@ namespace DataHandling {
 /**
     LoadMLZ : Loads MLZ nexus or hdf file into a Mantid workspace.
  */
-class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMLZ();
 
@@ -37,15 +37,15 @@ private:
   void init() override;
   void exec() override;
 
-  void loadInstrumentDetails(NeXus::NXEntry &);
-  void loadTimeDetails(NeXus::NXEntry &entry);
+  void loadInstrumentDetails(const NeXus::NXEntry &);
+  void loadTimeDetails(const NeXus::NXEntry &entry);
 
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
 
   void initWorkSpace(NeXus::NXEntry &entry);
   void initInstrumentSpecific();
   void loadRunDetails(NeXus::NXEntry &entry);
-  void loadExperimentDetails(NeXus::NXEntry &entry);
+  void loadExperimentDetails(const NeXus::NXEntry &entry);
 
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void maskDetectors(const NeXus::NXEntry &entry);

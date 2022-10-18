@@ -165,10 +165,10 @@ In the ``Beam centre`` tab:
 
 #. Make a note of the four values representing the front/main detector centre positions.
 #. Check that detector is set to ``main-detector`` and click run.
-#. Check the values in the first row (Centre Position - Rear) have changed on completion.
-#. Change the detector to ``Hab`` and re-run ensuring only the values for the front has changed.
-#. For both a plot should appear, as the centre finder is running  with four lines.
-#. The four lines should gradually get closer together.
+#. A plot should appear - make sure to show it if it is behind another window. It should be updated with four lines, which gradually get closer together. This might take a while to run.
+#. Check the values in the first two text boxes at the top (Centre Position - Rear) have changed when it has finished running.
+#. Change the detector to ``Hab`` and re-run the test.
+#. Four more lines should appear on the same plot. This time, in the values at the top, only the values for the front should have changed.
 
 Sum runs
 ########
@@ -203,7 +203,7 @@ Display
 
 #. In the ``Runs`` tab, check that all table, process, and load buttons have
    clear tooltips by hovering over them.
-#. Check that ``Zero Error Free`, ``Use Optimizations``, and ``Plot Results``
+#. Check that ``Zero Error Free``, ``Use Optimizations``, and ``Plot Results``
    have clear tooltips.
 #. In the settings, hover over a random selection of buttons and text boxes to check tooltips are still there.
    Users rely on the tooltips a lot and really do notice each missing one.

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Column.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/join.hpp>
@@ -25,7 +26,7 @@ namespace DataObjects {
   it will work correctly with complex or user types, but it might.
 */
 
-template <class Type> class DLLExport VectorColumn : public API::Column {
+template <class Type> class MANTID_DATAOBJECTS_DLL VectorColumn : public API::Column {
 public:
   VectorColumn() { m_type = typeName(); }
 
@@ -85,13 +86,13 @@ public:
 
   /// Overall memory size taken by the column (bytes)
   long int sizeOfData() const override {
-    long int size(0);
+    long int dataSize(0);
 
     for (auto elemIt = m_data.begin(); elemIt != m_data.end(); ++elemIt) {
-      size += static_cast<long int>(elemIt->size() * sizeof(Type));
+      dataSize += static_cast<long int>(elemIt->size() * sizeof(Type));
     }
 
-    return size;
+    return dataSize;
   }
 
   /// Create another copy of the column

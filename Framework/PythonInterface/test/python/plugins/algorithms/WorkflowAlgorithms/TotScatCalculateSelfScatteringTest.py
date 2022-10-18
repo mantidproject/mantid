@@ -59,6 +59,30 @@ class TotScatCalculateSelfScatteringTest(unittest.TestCase):
                                                        SampleMaterial=self.material)
         self.assertEqual(correction_ws.getNumberHistograms(), 2)
 
+    def test_TotScatCalculateSelfScattering_placzek_2(self):
+        raw_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(6, 100, True)
+        mtd.addOrReplace("tot_scat_test", raw_ws)
+
+        correction_ws = TotScatCalculateSelfScattering(InputWorkspace="tot_scat_test",
+                                                       CalFileName=self.cal_file_path,
+                                                       SampleGeometry=self.geometry,
+                                                       SampleMaterial=self.material,
+                                                       PlaczekOrder=2,
+                                                       SampleTemp="293")
+        self.assertEqual(correction_ws.getNumberHistograms(), 2)
+
+# fails if no temperature provided
+    def test_TotScatCalculateSelfScattering_placzek_2_fail(self):
+        raw_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(6, 100, True)
+        mtd.addOrReplace("tot_scat_test", raw_ws)
+
+        with self.assertRaises(RuntimeError):
+            correction_ws = TotScatCalculateSelfScattering(InputWorkspace="tot_scat_test",
+                                                           CalFileName=self.cal_file_path,
+                                                           SampleGeometry=self.geometry,
+                                                           SampleMaterial=self.material,
+                                                           PlaczekOrder=2)
+
 
 if __name__ == "__main__":
     unittest.main()

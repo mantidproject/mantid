@@ -23,6 +23,8 @@ Guides
    Standards/index
    Testing/index
    DoxygenSetup
+   NewStarterC++
+   NewStarterPython
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
@@ -202,6 +204,7 @@ GUI Development
    MVPDesign
    MVPTutorial/index
    QtDesignerForPython
+   BalsamiqWireframes
    MantidUsedIconsTable
    ISISReflectometryInterface
 
@@ -258,9 +261,8 @@ Component Overviews
    LoadAlgorithmHook
    Logging
    MatplotlibInCpp
-   MultiThreadingInAlgorithms
+   MultiThreadingInMantid
    PythonVSCppAlgorithms
-   RemoteJobSubmissionAPI
    SampleLogsDev
    Widgets/Plotting
    WritingAnAlgorithm

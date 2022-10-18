@@ -1457,12 +1457,17 @@ void IFunction::init() {
 }
 
 /**
- *  Set a value to a named attribute
+ *  Set a value to a named attribute, retaining validator
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
 void IFunction::storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value) {
   if (hasAttribute(name)) {
+    auto att = m_attrs[name];
+    const Kernel::IValidator_sptr validatorClone = att.getValidator();
+    value.setValidator(validatorClone);
+    value.evaluateValidator();
+
     m_attrs[name] = value;
   } else {
     throw std::invalid_argument("ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" + name + "'");

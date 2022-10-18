@@ -55,6 +55,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         ConvertWANDSCDtoQTest_dummy2 = CreateSingleValuedWorkspace()
         ConvertWANDSCDtoQTest_norm.addExperimentInfo(ConvertWANDSCDtoQTest_dummy2)
         ConvertWANDSCDtoQTest_norm.getExperimentInfo(0).run().addProperty('monitor_count', [100000.], True)
+        ConvertWANDSCDtoQTest_norm.getExperimentInfo(0).run().addProperty('duration', [3600.], True)
 
     @classmethod
     def tearDownClass(cls):
@@ -183,6 +184,32 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         ConvertWANDSCDtoQTest_out.delete()
 
+    def test_errorbar_scale_NormaliseBy(self):
+
+        ConvertWANDSCDtoQTest_None = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data',
+                                                      NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
+                                                      Frame='HKL', KeepTemporaryWorkspaces=True,
+                                                      NormaliseBy='None',
+                                                      BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-8.08,8.08,101', BinningDim2='-8.08,8.08,101',
+                                                      Uproj='1,1,0', Vproj='1,-1,0', Wproj='0,0,1')
+
+        Test_None_intens = ConvertWANDSCDtoQTest_None.getSignalArray().copy()
+        Test_None_sig = np.sqrt(ConvertWANDSCDtoQTest_None.getErrorSquaredArray())
+
+        ConvertWANDSCDtoQTest_Time = ConvertWANDSCDtoQ('ConvertWANDSCDtoQTest_data',
+                                                      NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
+                                                      Frame='HKL', KeepTemporaryWorkspaces=True,
+                                                      NormaliseBy='Time',
+                                                      BinningDim0='-8.08,8.08,101',
+                                                      BinningDim1='-8.08,8.08,101', BinningDim2='-8.08,8.08,101',
+                                                      Uproj='1,1,0', Vproj='1,-1,0', Wproj='0,0,1')
+
+        Test_Time_intens = ConvertWANDSCDtoQTest_Time.getSignalArray().copy()
+        Test_Time_sig = np.sqrt(ConvertWANDSCDtoQTest_Time.getErrorSquaredArray())
+
+        self.assertAlmostEqual(np.nanmax(Test_None_intens/Test_None_sig),
+                               np.nanmax(Test_Time_intens/Test_Time_sig))
 
 if __name__ == '__main__':
     unittest.main()

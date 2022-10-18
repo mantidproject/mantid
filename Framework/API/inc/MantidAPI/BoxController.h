@@ -438,6 +438,7 @@ protected:
   /// box controller is an ws-based singleton so it should not be possible to
   /// copy it, left protected for inheritance;
   BoxController(const BoxController &other);
+  BoxController &operator=(const BoxController &) = delete;
 
 private:
   /// Number of dimensions

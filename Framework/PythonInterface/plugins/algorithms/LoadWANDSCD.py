@@ -216,7 +216,7 @@ class LoadWANDSCD(PythonAlgorithm):
             with h5py.File(run, 'r') as f:
                 bc = np.zeros((512 * 480 * 8), dtype=np.int64)
                 for b in range(8):
-                    bc += np.bincount(f['/entry/bank' + str(b + 1) + '_events/event_id'].value, minlength=512 * 480 * 8)
+                    bc += np.bincount(f['/entry/bank' + str(b + 1) + '_events/event_id'][()], minlength=512 * 480 * 8)
                 bc = bc.reshape((480 * 8, 512))
                 if grouping == 2:
                     bc = bc[::2, ::2] + bc[1::2, ::2] + bc[::2, 1::2] + bc[1::2, 1::2]
@@ -225,10 +225,10 @@ class LoadWANDSCD(PythonAlgorithm):
                          bc[3::4, 1::4] + bc[::4, 2::4] + bc[1::4, 2::4] + bc[2::4, 2::4] + bc[3::4, 2::4] + bc[::4, 3::4] + \
                          bc[1::4, 3::4] + bc[2::4, 3::4] + bc[3::4, 3::4]
                 data_array[n] = bc
-                s1_array.append(f['/entry/DASlogs/HB2C:Mot:s1.RBV/average_value'].value[0])
-                duration_array.append(float(f['/entry/duration'].value[0]))
-                run_number_array.append(float(f['/entry/run_number'].value[0]))
-                monitor_count_array.append(float(f['/entry/monitor1/total_counts'].value[0]))
+                s1_array.append(f['/entry/DASlogs/HB2C:Mot:s1.RBV/average_value'][0])
+                duration_array.append(float(f['/entry/duration'][0]))
+                run_number_array.append(float(f['/entry/run_number'][0]))
+                monitor_count_array.append(float(f['/entry/monitor1/total_counts'][0]))
 
         progress.report('Creating MDHistoWorkspace')
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)

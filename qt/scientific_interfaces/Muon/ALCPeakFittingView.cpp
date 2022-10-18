@@ -111,7 +111,7 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
 }
 
 void ALCPeakFittingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
 void ALCPeakFittingView::displayError(const QString &message) { QMessageBox::critical(m_widget, "Error", message); }

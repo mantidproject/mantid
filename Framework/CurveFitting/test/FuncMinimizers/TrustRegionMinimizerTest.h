@@ -293,4 +293,19 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
   }
+
+  void test_getSvdJ() {
+    DoubleFortranMatrix A(2, 3);
+    A(1, 1) = 3;
+    A(1, 2) = 2;
+    A(1, 3) = 2;
+    A(2, 1) = 2;
+    A(2, 2) = 3;
+    A(2, 3) = -2;
+    double s1 = 0;
+    double sn = 0;
+    getSvdJ(A, s1, sn);
+    TS_ASSERT_EQUALS(s1, 5);
+    TS_ASSERT_EQUALS(sn, 3);
+  }
 };

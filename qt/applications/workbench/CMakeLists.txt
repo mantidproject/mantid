@@ -34,6 +34,13 @@ endif()
 # Resource files
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 if(WIN32)
+  get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if(_is_multi_config)
+    set(WIN_BIN_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>)
+  else()
+    set(WIN_BIN_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+  endif()
+
   function(CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
     # Set path and file content variables
     set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
@@ -49,6 +56,11 @@ if(WIN32)
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if(${BUILD_TYPE} STREQUAL "build")
       file(WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${_qt5_dir}\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
+      file(
+        GENERATE
+        OUTPUT ${WIN_BIN_DIR}/qt.conf
+        INPUT ${_qt_conf_file}
+      )
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
       file(WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
@@ -112,7 +124,7 @@ endif()
 add_dependencies(workbench workbench_resources)
 # if we are building mantidqt we can add a dependency for workbench
 if(MANTID_QT_LIB STREQUAL "BUILD")
-  add_dependencies(workbench mantidqt)
+  add_dependencies(workbench mantidqtinterfaces)
 endif()
 
 # macOS package fixes

@@ -11,7 +11,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -22,7 +22,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaksMD final : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_MDALGORITHMS_DLL CentroidPeaksMD final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   CentroidPeaksMD();

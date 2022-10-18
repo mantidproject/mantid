@@ -28,7 +28,7 @@ namespace MDAlgorithms {
 */
 
 /// Convert to MD Events class itself:
-class DLLExport ConvertToMDParent : public API::BoxControllerSettingsAlgorithm {
+class MANTID_MDALGORITHMS_DLL ConvertToMDParent : public API::BoxControllerSettingsAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override = 0;

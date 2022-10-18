@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/MuonNexusReader.h"
 
 namespace Mantid {
@@ -39,7 +40,7 @@ Required Properties:
 @author Ronald Fowler, based on LoadLog by Anders Markvardsen, ISIS, RAL
 @date 11/08/2008
 */
-class DLLExport LoadMuonLog final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadMuonLog final : public API::Algorithm {
 public:
   /// Default constructor
   LoadMuonLog();

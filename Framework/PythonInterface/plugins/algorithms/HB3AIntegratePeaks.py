@@ -151,7 +151,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             peaks = AnalysisDataService[peaks_ws_name]
             for p in range(peaks.getNumberPeaks()):
                 peak = peaks.getPeak(p)
-                lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                lorentz = abs(np.sin(peak.getScattering()) * np.cos(peak.getAzimuthal()))
                 peak.setIntensity(peak.getIntensity() * lorentz)
                 peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 

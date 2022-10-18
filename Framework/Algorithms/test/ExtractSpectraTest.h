@@ -11,6 +11,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractSpectra.h"
+#include "MantidAlgorithms/MaskBins.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -285,6 +286,38 @@ public:
     // Assert
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDx(*ws);
+  }
+
+  void test_propagate_masked_bins() {
+    auto ws = createInputWorkspace("histo-detector");
+    // first, a masked input needs to be created
+    const auto maskedWsName = "masked_input_ws";
+    Algorithms::MaskBins mask;
+    TS_ASSERT_THROWS_NOTHING(mask.initialize())
+    TS_ASSERT(mask.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(mask.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(mask.setPropertyValue("OutputWorkspace", maskedWsName))
+    TS_ASSERT_THROWS_NOTHING(mask.setPropertyValue("XMin", "0"))
+    TS_ASSERT_THROWS_NOTHING(mask.setPropertyValue("XMax", std::to_string(nBins - 2)))
+    TS_ASSERT_THROWS_NOTHING(mask.execute())
+    MatrixWorkspace_sptr wsMasked;
+    TS_ASSERT_THROWS_NOTHING(wsMasked = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(maskedWsName));
+    TS_ASSERT_EQUALS(wsMasked == nullptr, false)
+
+    const auto extractedWsName = "extracted_ws";
+    Algorithms::ExtractSpectra alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", wsMasked))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", extractedWsName))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XMin", std::to_string(nBins - 2)))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XMax", std::to_string(nBins + 1)))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    MatrixWorkspace_sptr wsExtracted;
+    TS_ASSERT_THROWS_NOTHING(wsExtracted =
+                                 AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(extractedWsName));
+    TS_ASSERT_EQUALS(wsExtracted == nullptr, false)
+    TS_ASSERT_EQUALS(wsExtracted->hasMaskedBins(0), false)
   }
 
   // ---- test event ----

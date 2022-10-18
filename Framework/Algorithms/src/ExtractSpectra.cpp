@@ -245,7 +245,10 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i
       if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
         filteredMask[maskIndex - m_minX] = mask.second;
     }
-    workspace.setMaskedBins(i, filteredMask);
+    if (filteredMask.size() > 0)
+      workspace.setMaskedBins(i, filteredMask);
+    else
+      workspace.setUnmaskedBins(i);
   }
 }
 

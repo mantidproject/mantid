@@ -28,6 +28,10 @@ if(BUILD_MANTIDFRAMEWORK)
   add_dependencies(mantidqtinterfaces PythonInterface)
 endif()
 
+if(BUILD_MANTIDQT)
+  add_dependencies(mantidqtinterfaces mantidqt)
+endif()
+
 add_subdirectory(test)
 add_subdirectory(mantidqtinterfaces/Engineering/gui)
 add_subdirectory(mantidqtinterfaces/drill)

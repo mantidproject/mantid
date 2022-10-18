@@ -418,26 +418,16 @@ void LoadSQW::readDNDDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBu
 
   // TODO: how to use it in our framework? -> it is B^-1 matrix possibly
   // re-scaled
-  std::vector<double> u_to_Rlu(4 * 4); // the matrix transforming from lab to crystal frame with scaling
   i0 += 4 * 4;
   // [data.u_to_rlu, count, ok, mess] = fread_catch(fid,[4,4],'float32'); if
   // ~all(ok); return; end;
   size_t ic = 0;
   for (size_t i = 0; i < 4; i++) {
     for (size_t j = 0; j < 4; j++) {
-      u_to_Rlu[ic] = static_cast<double>(interpretAs<float>(buf, i0 + 4 * (i * 4 + j)));
       ic++;
     }
   }
   i0 += ic * 4;
-  Mantid::Kernel::DblMatrix UEmat(u_to_Rlu);
-  Mantid::Kernel::DblMatrix Rot(3, 3);
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      Rot[i][j] = UEmat[i][j];
-    }
-  }
-  // dscrptn.setRotationMatrix(Rot);
 
   // axis labels size
   i0 += 4 * 4;

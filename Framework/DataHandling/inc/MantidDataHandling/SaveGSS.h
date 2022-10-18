@@ -9,7 +9,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <iosfwd>
@@ -53,7 +53,7 @@ namespace DataHandling {
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
   */
-class DLLExport SaveGSS : public Mantid::API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveGSS : public Mantid::API::SerialAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SaveGSS"; }

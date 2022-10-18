@@ -20,38 +20,18 @@ Also, if you use the `Ninja <https://ninja-build.org/>`_ generator then the exec
 CCache
 ######
 
-Mantid's cmake is configure to use the `ccache <https://ccache.samba.org/>`_ tool if it is available.
-It is highly recommended that this be used on Linux/macOS systems.
-Once ccache is installed, cmake is configured to automatically configure builds to use it.
+Mantid is configured to use the `ccache <https://ccache.samba.org/>`_ tool if it is available.
+It is highly recommended that this be used on Linux/macOS systems, and Windows when using a Ninja generator.
+CCache is installed within your conda environment, and CMake is configured to automatically use it when building.
 
-For Linux either run either
-
-.. code-block:: sh
-
-  sudo yum install ccache
-
-on Red Hat, or
-
-.. code-block:: sh
-
-  sudo apt-get install ccache
-
-on Ubuntu.
-
-For macOS run:
-
-.. code-block:: sh
-
-  brew install ccache
-
-After it is installed run ``ccache --max-size=20G`` to increase the size of the cache.
+With your conda environment activated, run ``ccache --max-size=20G`` to increase the size of the cache.
 
 If you're build with ``ccache`` exhibits warnings that are not usually present then try setting the ``ccache --set-config=run_second_cpp="true"`` config option (or set ``CCACHE_CPP2=yes`` environment variable on older versions).
 
 Network Drives
 --------------
 
-The default location for the cache directory is ``$HOME/.ccache``. If you're home directory is on a network-mounted drive then the location of this cache be moved to provide the best performance. On newer versions of ``ccache`` run ``ccache --set-config=cache_dir=PATH_TO_CACHE``. Older versions (<3.2) do not allow this and must fall back to setting the ``CCACHE_DIR`` environment variable in your shell profile.
+The default location for the cache directory is ``$HOME/.ccache`` on Linux/macOS, and ``$HOME/AppData/Roaming/ccache`` on Windows. If you're home directory is on a network-mounted drive then the location of this cache be moved to provide the best performance. On newer versions of ``ccache`` run ``ccache --set-config=cache_dir=PATH_TO_CACHE``. Older versions (<3.2) do not allow this and must fall back to setting the ``CCACHE_DIR`` environment variable in your shell profile.
 
 Configuring your build
 ######################

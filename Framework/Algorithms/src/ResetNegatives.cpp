@@ -111,12 +111,7 @@ namespace { // anonymous namespace
             /**
              * Convert -0. to 0.
              */
-inline double fixZero(const double value) {
-  if (value == 0. || value == -0.)
-    return 0.;
-  else
-    return value;
-}
+inline double fixZero(const double value) { return value != -0. ? value : 0.; }
 } // namespace
 
 /**

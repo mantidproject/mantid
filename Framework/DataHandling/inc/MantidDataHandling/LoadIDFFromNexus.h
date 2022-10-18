@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -34,7 +35,7 @@ Required Properties:
 data to be added.</LI>
 </UL>
 */
-class DLLExport LoadIDFFromNexus final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadIDFFromNexus final : public API::Algorithm {
 public:
   /// Default constructor
   LoadIDFFromNexus();

@@ -76,7 +76,7 @@ protected:
   std::tuple<double, int> sampleQW(const API::MatrixWorkspace_sptr &CumulativeProb, double x);
   double interpolateSquareRoot(const API::ISpectrum &histToInterpolate, double x);
   double interpolateGaussian(const API::ISpectrum &histToInterpolate, double x);
-  double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w, double q);
+  double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double q, double w);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
   void integrateCumulative(const API::ISpectrum &h, const double xmin, const double xmax, std::vector<double> &resultX,
                            std::vector<double> &resultY, const bool returnCumulative);

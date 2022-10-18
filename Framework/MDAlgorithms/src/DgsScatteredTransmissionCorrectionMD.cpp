@@ -160,7 +160,9 @@ void DgsScatteredTransmissionCorrectionMD::correctForTransmission(typename MDEve
         it->setErrorSquared(it->getErrorSquared() * correction * correction); // no error from `correction`
       }
     }
-    box->releaseEvents();
+    if (box) {
+      box->releaseEvents();
+    }
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION

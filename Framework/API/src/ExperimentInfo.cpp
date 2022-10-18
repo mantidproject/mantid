@@ -74,9 +74,15 @@ ExperimentInfo::ExperimentInfo() : m_parmap(new ParameterMap()), sptr_instrument
  * unlocked.
  * @param source The source object from which to initialize
  */
-ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
+ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) { *this = source; }
+
+/**
+ * Implements the copy assignment operator
+ */
+ExperimentInfo &ExperimentInfo::operator=(const ExperimentInfo &source) {
   this->copyExperimentInfoFrom(&source);
   setSpectrumDefinitions(source.spectrumInfo().sharedSpectrumDefinitions());
+  return *this;
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.

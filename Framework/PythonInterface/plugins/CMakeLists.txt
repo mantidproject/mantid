@@ -115,6 +115,7 @@ set(PYTHON_PLUGINS
     algorithms/LoadNMoldyn4Ascii.py
     algorithms/LoadNMoldyn4Ascii1D.py
     algorithms/LoadPreNexusLive.py
+    algorithms/LoadSANS1MLZ.py
     algorithms/LoadSINQ.py
     algorithms/LoadSINQFile.py
     algorithms/LoadVesuvio.py

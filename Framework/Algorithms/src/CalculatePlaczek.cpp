@@ -163,9 +163,16 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
   // Case1: cannot locate sample temperature
   if (isDefault("SampleTemperature") && (order == 2)) {
     const auto run = inWS->run();
-    const auto sampleTempLogORNL = run.getLogData("SampleTemp");
-    const auto sampleTempLogISIS = run.getLogData("sample_temp");
-    if (sampleTempLogORNL && sampleTempLogISIS) {
+    Mantid::Kernel::Property *sampleTempLog = NULL;
+    // ORNL logs use SampleTemp
+    if (run.hasProperty("SampleTemp")) {
+      sampleTempLog = run.getLogData("SampleTemp");
+    }
+    // ISIS logs use sample_temp
+    if (run.hasProperty("sample_temp")) {
+      sampleTempLog = run.getLogData("sample_temp");
+    }
+    if (!sampleTempLog) {
       issues["SampleTemperature"] = "Cannot locate sample temperature in the run.";
     }
   }
@@ -177,28 +184,30 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
     // we need three spectra here
     if (numHist < 3) {
       issues["IncidentSpectra"] = "Need three spectra here for second order calculation.";
-    }
-    // make sure all are not empty
-    if (incidentWS->readY(0).empty()) {
-      issues["IncidentSpectra"] = "Flux is empty";
-    }
-    if (incidentWS->readY(1).empty()) {
-      issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
-    }
-    if (incidentWS->readY(2).empty()) {
-      issues["IncidentSpectra"] = "Second order derivate of the incident spectrum is empty";
+    } else {
+      // if there are the correct number of spectra make sure all are not empty
+      if (incidentWS->readY(0).empty()) {
+        issues["IncidentSpectra"] = "Flux is empty";
+      }
+      if (incidentWS->readY(1).empty()) {
+        issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+      }
+      if (incidentWS->readY(2).empty()) {
+        issues["IncidentSpectra"] = "Second order derivate of the incident spectrum is empty";
+      }
     }
   } else {
     // we are at first order here
     if (numHist < 2) {
       issues["IncidentSpectra"] = "Need two spectra here for first order calculation.";
-    }
-    // make sure all are not empty
-    if (incidentWS->readY(0).empty()) {
-      issues["IncidentSpectra"] = "Flux is empty";
-    }
-    if (incidentWS->readY(1).empty()) {
-      issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+    } else {
+      // if there are the correct number of spectra make sure all are not empty
+      if (incidentWS->readY(0).empty()) {
+        issues["IncidentSpectra"] = "Flux is empty";
+      }
+      if (incidentWS->readY(1).empty()) {
+        issues["IncidentSpectra"] = "First order derivate of the incident spectrum is empty";
+      }
     }
   }
 
@@ -210,28 +219,30 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
       // we need three spectra here
       if (numHistEff < 3) {
         issues["EfficiencySpectra"] = "Need three spectra here for second order calculation.";
-      }
-      // make sure all are not empty
-      if (efficiencyWS->readY(0).empty()) {
-        issues["EfficiencySpectra"] = "Detector efficiency is empty";
-      }
-      if (efficiencyWS->readY(1).empty()) {
-        issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
-      }
-      if (efficiencyWS->readY(2).empty()) {
-        issues["EfficiencySpectra"] = "Second order derivate of the efficiency spectrum is empty";
+      } else {
+        // if there are the correct number of spectra make sure all are not empty
+        if (efficiencyWS->readY(0).empty()) {
+          issues["EfficiencySpectra"] = "Detector efficiency is empty";
+        }
+        if (efficiencyWS->readY(1).empty()) {
+          issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+        }
+        if (efficiencyWS->readY(2).empty()) {
+          issues["EfficiencySpectra"] = "Second order derivate of the efficiency spectrum is empty";
+        }
       }
     } else {
       // we are at first order here
       if (numHistEff < 2) {
         issues["EfficiencySpectra"] = "Need two spectra here for first order calculation.";
-      }
-      // make sure all are not empty
-      if (efficiencyWS->readY(0).empty()) {
-        issues["EfficiencySpectra"] = "Detector efficiency is empty";
-      }
-      if (efficiencyWS->readY(1).empty()) {
-        issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+      } else {
+        // if there are the correct number of spectra make sure all are not empty
+        if (efficiencyWS->readY(0).empty()) {
+          issues["EfficiencySpectra"] = "Detector efficiency is empty";
+        }
+        if (efficiencyWS->readY(1).empty()) {
+          issues["EfficiencySpectra"] = "First order derivate of the efficiency spectrum is empty";
+        }
       }
     }
   }
@@ -371,9 +382,6 @@ void CalculatePlaczek::exec() {
   }
   PARALLEL_CHECK_INTERRUPT_REGION
 
-  // consolidate output to workspace
-  outputWS->setDistribution(false);
-
   // set output
   setProperty("OutputWorkspace", outputWS);
 }
@@ -419,15 +427,15 @@ double CalculatePlaczek::getSampleTemperature() {
     // get the sample temperature from sample log
     const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
     const auto run = inWS->run();
-    const auto sampleTempLogORNL = run.getLogData("SampleTemp");
-    const auto sampleTempLogISIS = run.getLogData("sample_temp");
-    if (sampleTempLogORNL) {
+    // SampleTemp only valid for ORNL runs
+    if (run.hasProperty("SampleTemp")) {
       sampleTemperature = run.getPropertyAsSingleValue("SampleTemp");
       const std::string sampleTempUnit = run.getProperty("SampleTemp")->units();
       if (sampleTempUnit == "C") {
         sampleTemperature = sampleTemperature + 273.15; // convert to K
       }
-    } else if (sampleTempLogISIS) {
+      // sample_temp only valid for ISIS runs
+    } else if (run.hasProperty("sample_temp")) {
       sampleTemperature = run.getPropertyAsSingleValue("sample_temp");
       const std::string sampleTempUnit = run.getProperty("sample_temp")->units();
       if (sampleTempUnit == "C") {

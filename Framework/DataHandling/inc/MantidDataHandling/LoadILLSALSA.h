@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
 
@@ -21,7 +22,7 @@ namespace DataHandling {
 /**
  Loads an ILL SALSA NeXus file into a Mantid workspace.
  */
-class DLLExport LoadILLSALSA : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLSALSA : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadILLSALSA"; }

@@ -244,6 +244,7 @@ class SliceViewerTest(unittest.TestCase):
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_non_orthogonal_axes_toggled_off(self, mock_sliceinfo_cls):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MDE
+        self.model.can_support_non_axis_cuts.return_value = True
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
                                                       mock_sliceinfo_cls,
@@ -263,7 +264,26 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
         data_view_mock.plot_MDH.assert_called_once()
         data_view_mock.enable_tool_button.assert_has_calls(
-            (mock.call(ToolItemText.LINEPLOTS), mock.call(ToolItemText.REGIONSELECTION)))
+            (mock.call(ToolItemText.LINEPLOTS),
+             mock.call(ToolItemText.REGIONSELECTION),
+             mock.call(ToolItemText.NONAXISALIGNEDCUTS)))
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
+    def test_non_orthogonal_axes_toggled_off_not_enable_non_axis_cuts_if_not_supported(self, mock_sliceinfo_cls):
+        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MDE
+        self.model.can_support_non_axis_cuts.return_value = False
+        presenter, data_view_mock = _create_presenter(self.model,
+                                                      self.view,
+                                                      mock_sliceinfo_cls,
+                                                      enable_nonortho_axes=True,
+                                                      supports_nonortho=True)
+
+        data_view_mock.enable_tool_button.reset_mock()
+
+        presenter.nonorthogonal_axes(False)
+
+        self.assertTrue(mock.call(ToolItemText.NONAXISALIGNEDCUTS) not in
+                        data_view_mock.enable_tool_button.call_args_list)
 
     def test_cut_view_button_disabled_if_model_cannot_support_it(self):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX

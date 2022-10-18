@@ -23,70 +23,6 @@ using namespace MantidQt::CustomInterfaces;
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-std::string checkInstrumentParametersMatch(const Instrument_const_sptr &sampleInstrument,
-                                           const Instrument_const_sptr &resolutionInstrument,
-                                           std::string const &parameter) {
-  if (!sampleInstrument->hasParameter(parameter))
-    return "Could not find the " + parameter + " for the sample workspace.";
-  if (!resolutionInstrument->hasParameter(parameter))
-    return "Could not find the " + parameter + " for the resolution workspaces.";
-  if (sampleInstrument->getStringParameter(parameter)[0] != resolutionInstrument->getStringParameter(parameter)[0])
-    return "The sample and resolution must have matching " + parameter + "s.";
-  return "";
-}
-
-std::string checkParametersMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
-                                 const MatrixWorkspace_const_sptr &resolutionWorkspace, std::string const &parameter) {
-  auto const sampleInstrument = sampleWorkspace->getInstrument();
-  auto const resolutionInstrument = resolutionWorkspace->getInstrument();
-  return checkInstrumentParametersMatch(sampleInstrument, resolutionInstrument, parameter);
-}
-
-std::string checkParametersMatch(std::string const &sampleName, std::string const &resolutionName,
-                                 std::string const &parameter) {
-  auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
-  auto const resolutionWorkspace = getADSMatrixWorkspace(resolutionName);
-  return checkParametersMatch(sampleWorkspace, resolutionWorkspace, parameter);
-}
-
-std::string checkInstrumentsMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
-                                  const MatrixWorkspace_const_sptr &resolutionWorkspace) {
-  auto const sampleInstrument = sampleWorkspace->getInstrument();
-  auto const resolutionInstrument = resolutionWorkspace->getInstrument();
-  if (sampleInstrument->getName() != resolutionInstrument->getName())
-    return "The sample and resolution must have matching instruments.";
-  return "";
-}
-
-std::string validateNumberOfHistograms(const MatrixWorkspace_const_sptr &sampleWorkspace,
-                                       const MatrixWorkspace_const_sptr &resolutionWorkspace) {
-  auto const sampleSize = sampleWorkspace->getNumberHistograms();
-  auto const resolutionSize = resolutionWorkspace->getNumberHistograms();
-  if (resolutionSize > 1 && sampleSize != resolutionSize)
-    return "Resolution must have either one or as many spectra as the sample.";
-  return "";
-}
-
-void addErrorMessage(UserInputValidator &uiv, std::string const &message) {
-  if (!message.empty())
-    uiv.addErrorMessage(QString::fromStdString(message) + "\n");
-}
-
-bool isTechniqueDirect(const MatrixWorkspace_const_sptr &sampleWorkspace,
-                       const MatrixWorkspace_const_sptr &resWorkspace) {
-  try {
-    auto const logValue1 = sampleWorkspace->getLog("deltaE-mode")->value();
-    auto const logValue2 = resWorkspace->getLog("deltaE-mode")->value();
-    return (logValue1 == "Direct") && (logValue2 == "Direct");
-  } catch (std::exception const &) {
-    return false;
-  }
-}
-
 /**
  * Calculate the number of bins in the sample & resolution workspaces
  * @param wsName The sample workspace name
@@ -299,23 +235,6 @@ bool IndirectDataAnalysisIqtTab::validate() {
   if (eLow >= eHigh)
     uiv.addErrorMessage("ELow must be less than EHigh.\n");
 
-  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
-  auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
-
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(sampleName) && ads.doesExist(resolutionName)) {
-    auto const sampleWorkspace = getADSMatrixWorkspace(sampleName);
-    auto const resWorkspace = getADSMatrixWorkspace(resolutionName);
-
-    addErrorMessage(uiv, checkInstrumentsMatch(sampleWorkspace, resWorkspace));
-    addErrorMessage(uiv, validateNumberOfHistograms(sampleWorkspace, resWorkspace));
-
-    if (!isTechniqueDirect(sampleWorkspace, resWorkspace)) {
-      addErrorMessage(uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "analyser"));
-      addErrorMessage(uiv, checkParametersMatch(sampleWorkspace, resWorkspace, "reflection"));
-    }
-  }
-
   auto const message = uiv.generateErrorMessage();
   showMessageBox(message);
 
@@ -331,10 +250,6 @@ void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
 
   auto &ads = AnalysisDataService::Instance();
   if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
-    return;
-
-  if (!checkParametersMatch(sampleName, resolutionName, "analyser").empty() ||
-      !checkParametersMatch(sampleName, resolutionName, "reflection").empty())
     return;
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);

@@ -466,6 +466,9 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
   auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
+  if (pulse_times.empty()) {
+    throw std::invalid_argument("Cannot find run start; event_time_zero contains no pulse times");
+  }
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
   return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
@@ -976,7 +979,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
         m_file->openGroup(entry_name, classType);
 
-        if (takeTimesFromEvents) {
+        // get the number of events
+        const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
+        bool hasTotalCounts = true;
+        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix, *descriptor);
+        bankNames.emplace_back(entry_name);
+        bankNumEvents.emplace_back(num);
+
+        if (takeTimesFromEvents && num > 0) {
           /* If we are here, we are loading logs, but have failed to establish
            * the run_start from the proton_charge log. We are going to get this
            * from our event_time_zero instead
@@ -984,12 +994,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
           auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
           firstPulseT = std::min(firstPulseT, localFirstLast.first);
         }
-        // get the number of events
-        const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
-        bool hasTotalCounts = true;
-        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix, *descriptor);
-        bankNames.emplace_back(entry_name);
-        bankNumEvents.emplace_back(num);
 
         // Look for weights in simulated file
         const std::string absoluteEventWeightName = prefix + "/event_weight";

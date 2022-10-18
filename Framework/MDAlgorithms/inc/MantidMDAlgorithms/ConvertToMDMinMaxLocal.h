@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 
 namespace Mantid {
@@ -15,7 +14,7 @@ namespace MDAlgorithms {
 
 /** ConvertToMDMinMaxLocal : Algorithm to calculate limits for ConvertToMD
  */
-class DLLExport ConvertToMDMinMaxLocal : public ConvertToMDParent {
+class MANTID_MDALGORITHMS_DLL ConvertToMDMinMaxLocal : public ConvertToMDParent {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

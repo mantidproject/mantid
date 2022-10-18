@@ -91,8 +91,13 @@ class HB3ADetectorPeaksTest(unittest.TestCase):
         self.assertEqual(peaks.getNumberPeaks(), 1)
 
         peak0 = peaks.getPeak(0)
-        lorentz = abs(np.cos(peak0.getAzimuthal()) * np.sin(peak0.getScattering()))
-        self.assertAlmostEqual(peak0.getIntensity(), 961.6164021216964 * lorentz, delta=1e-2)
+        two_th = peak0.getScattering()
+        az = peak0.getAzimuthal()
+        nu = np.arcsin(np.sin(two_th)*np.sin(az))
+        gamma = np.arctan(np.tan(two_th)*np.cos(az))
+        # G. J. McIntyre and R. F. D. Stansfield, Acta Cryst A 44, 257 (1988).
+        lorentz = abs(np.cos(nu)*np.sin(gamma))
+        self.assertAlmostEqual(peak0.getIntensity(), 961.6164021216964 * lorentz, delta=1e-5)
         self.assertAlmostEqual(peak0.getSigmaIntensity(), 10.479567046232615 * lorentz, delta=2e-2)
         q_sample = peak0.getQSampleFrame()
         for i in range(3):

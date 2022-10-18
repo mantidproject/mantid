@@ -17,7 +17,7 @@ namespace DataHandling {
 /**
  Loads an ILL IN4/5/6/Panther NeXus file into a Mantid workspace.
  */
-class DLLExport LoadILLTOF2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLTOF2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
   LoadILLTOF2();

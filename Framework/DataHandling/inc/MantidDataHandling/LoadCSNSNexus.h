@@ -8,6 +8,7 @@
 #define MANTID_DATAHANDLING_LOADCSNSNEXUS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <nexus/NeXusFile.hpp>
 /****************************************/
@@ -17,7 +18,7 @@ namespace DataHandling {
 
 /** LoadCSNSNexus : TODO: DESCRIPTION
  */
-class DLLExport LoadCSNSNexus final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadCSNSNexus final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

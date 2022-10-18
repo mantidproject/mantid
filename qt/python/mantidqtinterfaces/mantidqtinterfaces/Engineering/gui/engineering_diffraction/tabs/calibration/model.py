@@ -12,17 +12,23 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 
 class CalibrationModel(object):
     # model shares code with the EnginX auto reduction script - code is kept in EnggUtils.py
-    @staticmethod
-    def create_new_calibration(calibration, rb_num, plot_output, save_dir=None):
+    def __init__(self):
+        self._saved_prm_files = []
+
+    def get_last_prm_files_gsas2(self):
+        return self._saved_prm_files
+
+    def create_new_calibration(self, calibration, rb_num, plot_output, save_dir=None):
         if save_dir is None:
             save_dir = output_settings.get_output_path()
         full_calib = load_full_instrument_calibration()
-        EnggUtils.create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib)
+        prm_filepath = EnggUtils.create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib)
+        self._saved_prm_files.extend(prm_filepath)
 
-    @staticmethod
-    def load_existing_calibration_files(calibration):
+    def load_existing_calibration_files(self, calibration):
         load_full_instrument_calibration()
-        EnggUtils.load_existing_calibration_files(calibration)
+        prm_filepath = EnggUtils.load_existing_calibration_files(calibration)
+        self._saved_prm_files.extend(prm_filepath)
 
 
 def load_full_instrument_calibration():

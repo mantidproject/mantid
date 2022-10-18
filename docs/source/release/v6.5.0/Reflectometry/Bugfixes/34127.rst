@@ -1,1 +1,0 @@
-- The lookup index is now set correctly on the ``Runs`` table when transferring from the search results.

@@ -92,7 +92,7 @@ MDHistoDimension *MDHistoDimensionBuilder::createRaw() {
   if (m_min >= m_max) {
     throw std::invalid_argument("Cannot create MDHistogramDimension with min >= max.");
   }
-  if (m_nbins <= 0) {
+  if (m_nbins == 0) {
     throw std::invalid_argument("Cannot create MDHistogramDimension without setting a n bins.");
   }
 

@@ -23,6 +23,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
@@ -261,6 +262,27 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
       if (SQWS->getAxis(0)->unit()->unitID() == "DeltaE") {
         if (!SQWS->isCommonBins())
           issues["StructureFactorWorkspace"] += "S(Q,w) must have common w values at all Q";
+      }
+
+      auto checkEqualQBins = [&issues](const MantidVec &qValues) {
+        Kernel::EqualBinsChecker checker(qValues, 1.0E-07, -1);
+        if (!checker.validate().empty())
+          issues["StructureFactorWorkspace"] +=
+              "S(Q,w) must have equal size bins in Q in order to support gaussian interpolation";
+        ;
+      };
+
+      if (SQWS->getAxis(0)->unit()->unitID() == "MomentumTransfer") {
+        for (size_t iHist = 0; iHist < SQWS->getNumberHistograms(); iHist++) {
+          auto qValues = SQWS->dataX(iHist);
+          checkEqualQBins(qValues);
+        }
+      } else if (SQWS->getAxis(1)->unit()->unitID() == "MomentumTransfer") {
+        auto qAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));
+        if (qAxis) {
+          auto qValues = qAxis->getValues();
+          checkEqualQBins(qValues);
+        }
       }
     }
   }
@@ -1238,12 +1260,12 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const ISpectrum &
  * w values so the nearest one is taken. Also S(Q,w) is assumed to be zero for w beyond the w limits
  * of the supplied surface. S(Q,w) is assumed to equal the extreme value for q beyond the q limits
  * @param SQWSMapping A set of workspaces related to the structure factor to interpolate
- * @param w The energy transfer (w) value to interpolate at
  * @param q The momentum transfer (q) value to interpolate at
+ * @param w The energy transfer (w) value to interpolate at
  * @return The interpolated S(Q,w) value
  */
-double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double w,
-                                                         double q) {
+double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double q,
+                                                         double w) {
   double SQ = 0.;
   int iW = -1;
   auto wAxis = dynamic_cast<NumericAxis *>(SQWSMapping.SQ->getAxis(1));
@@ -1411,7 +1433,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
       const double finalW = fromWaveVector(k) - finalE;
       auto componentWSIt = findMatchingComponent(componentWorkspaces, shapeObjectWithScatter);
       auto componentWSMapping = *componentWSIt; // to help debugging
-      double SQ = Interpolate2D(componentWSMapping, finalW, q);
+      double SQ = Interpolate2D(componentWSMapping, q, finalW);
       scatteringXSection = m_NormalizeSQ ? scatteringXSection / interpolateFlat(*(componentWSMapping.QSQScaleFactor), k)
                                          : scatteringXSectionFull;
 

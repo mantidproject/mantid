@@ -244,6 +244,20 @@ public:
     delete ws2;
   }
 
+  void test_copy_assignment_operator() {
+    ExperimentInfo ws;
+    ws.mutableRun().setProtonCharge(1.234);
+    ws.mutableSample().setName("test");
+    ws.mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>(1, 2, 3, 90, 90, 90));
+    std::shared_ptr<Instrument> inst1 = std::make_shared<Instrument>();
+    inst1->setName("MyTestInst");
+    ws.setInstrument(inst1);
+
+    ExperimentInfo copiedWs = ws;
+
+    do_compare_ExperimentInfo(ws, copiedWs);
+  }
+
   void test_default_emode_is_elastic() {
     ExperimentInfo exptInfo;
 

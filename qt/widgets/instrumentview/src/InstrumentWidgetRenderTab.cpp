@@ -436,7 +436,9 @@ void InstrumentWidgetRenderTab::initSurface() {
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
  */
-void InstrumentWidgetRenderTab::changeColorMap(const QString &filename) { m_instrWidget->changeColormap(filename); }
+void InstrumentWidgetRenderTab::changeColorMap(const QString &filename, const bool highlightZeroDets) {
+  m_instrWidget->changeColormap(filename, highlightZeroDets);
+}
 
 void InstrumentWidgetRenderTab::loadSettings(const QSettings &settings) {
   int show3daxes = settings.value("3DAxesShown", 1).toInt();
