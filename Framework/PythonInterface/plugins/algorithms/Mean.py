@@ -63,9 +63,9 @@ class Mean(PythonAlgorithm):
         return issues
 
     def _are_workspaces_compatible(self, ws_a, ws_b):
-        sizeA = ws_a.blocksize() * ws_a.getNumberHistograms()
-        sizeB = ws_b.blocksize() * ws_b.getNumberHistograms()
-        return sizeA == sizeB
+        match_bins = ws_a.blocksize() == ws_b.blocksize()
+        match_histograms = ws_a.getNumberHistograms() == ws_b.getNumberHistograms()
+        return match_bins and match_histograms
 
     def PyExec(self):
         workspaces = self.getProperty("Workspaces").value.split(',')
