@@ -40,14 +40,26 @@ class Mean(PythonAlgorithm):
         issues = dict()
         workspaces = self.getProperty("Workspaces").value.split(',')
         name = workspaces[0].strip()
-        ws1 = mtd[name]
+        ws1 = None
+        if name in mtd:
+            ws1 = mtd[name]
+        else:
+            issues["Workspaces"] = f"Workspace '{name}' does not exist"
+            return issues
+
         nSpectra = ws1.getNumberHistograms()
 
         for index in range(1, len(workspaces)):
             name = workspaces[index].strip()
-            ws2 = mtd[name]
+            ws2 = None
+            if name in mtd:
+                ws2 = mtd[name]
+            else:
+                issues["Workspaces"] = f"Workspace '{name}' does not exist"
+                return issues
+
             if not self._are_workspaces_compatible(ws1, ws2):
-                issues["workspaces"]="Input Workspaces are not the same shape."
+                issues["Workspaces"] = "Input Workspaces are not the same shape."
                 # cannot run the next test if this fails
                 return issues
             for spectra in range(0,nSpectra):
