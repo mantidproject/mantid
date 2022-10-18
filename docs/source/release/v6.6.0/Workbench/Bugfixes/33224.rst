@@ -1,0 +1,1 @@
+- Plot window title will now track the title of the plot.
