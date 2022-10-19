@@ -237,7 +237,7 @@ class SuperplotPresenter:
                 pass
             self._canvas.draw_idle()
 
-    def on_normalise_checked(self, checked):
+    def on_normalise_checked(self, checked: bool):
         """
         Transmit the normalisation checkbox state to the model.
 
@@ -374,7 +374,7 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _update_plot(self, replot=False):  # noqa C901
+    def _update_plot(self, replot:bool=False):  # noqa C901
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
@@ -464,7 +464,8 @@ class SuperplotPresenter:
             axes.set_title("")
         self._canvas.draw_idle()
 
-    def _fill_plot_kwargs(self, ws_name, spectrum, normalise, mode, color):
+    def _fill_plot_kwargs(self, ws_name: str, spectrum: int, normalise: bool,
+                          mode: str, color: str) -> dict:
         """
         Fill the keywork arguments dictionnary needed by the mantid plot
         function.

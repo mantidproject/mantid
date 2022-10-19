@@ -136,7 +136,7 @@ class SuperplotModel(QObject):
         """
         return self._workspaces.copy()
 
-    def normalise(self, normalise):
+    def normalise(self, normalise: bool):
         """
         Set the spectra normalisation state.
 
@@ -145,7 +145,7 @@ class SuperplotModel(QObject):
         """
         self._normalised = normalise
 
-    def is_normalised(self):
+    def is_normalised(self) -> bool:
         """
         Get the spectra normalisation state.
 
