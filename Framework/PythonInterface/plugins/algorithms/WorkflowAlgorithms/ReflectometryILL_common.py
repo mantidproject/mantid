@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.geometry import Instrument
-from mantid.simpleapi import DeleteWorkspace, mtd
 from mantid.api import Run, MatrixWorkspace
 from typing import Union
 import h5py
@@ -235,52 +234,3 @@ class SampleLogs:
     SLIT2WIDTH = 'reduction.slit2width'
     SLIT3WIDTH = 'reduction.slit3width'
     SUM_TYPE = 'reduction.foreground.summation_type'
-
-
-class WSCleanup:
-    """A class to manage intermediate workspace cleanup."""
-
-    OFF = 'Cleanup OFF'
-    ON = 'Cleanup ON'
-
-    def __init__(self, cleanup_mode: str, delete_algorithm_logging: bool):
-        """Initialize an instance of the class."""
-        self._delete_algorithm_logging = delete_algorithm_logging
-        self._do_delete = cleanup_mode == self.ON
-        self._protected = set()
-        self._to_be_deleted = set()
-
-    def cleanup(self, *args) -> None:
-        """Delete the workspaces listed in *args."""
-        for ws in args:
-            self._delete(ws)
-
-    def cleanup_later(self, *args) -> None:
-        """Mark the workspaces listed in *args to be cleaned up later."""
-        for arg in args:
-            self._to_be_deleted.add(str(arg))
-
-    def final_cleanup(self) -> None:
-        """Delete all workspaces marked to be cleaned up later."""
-        for ws in self._to_be_deleted:
-            self._delete(ws)
-
-    def protect(self, *args) -> None:
-        """Mark the workspaces listed in *args to be never deleted."""
-        for arg in args:
-            self._protected.add(str(arg))
-
-    def _delete(self, ws: str) -> None:
-        """Delete the given workspace in ws if it is not protected, and deletion is actually turned on.
-
-        Keyword arguments:
-        ws -- name of the workspace to be deleted
-        """
-        if not self._do_delete:
-            return
-        try:
-            ws = str(ws)
-        except RuntimeError:
-            return
-        if ws not in self._protected and mtd.doesExist(ws):
-            DeleteWorkspace(Workspace=ws, EnableLogging=self._delete_algorithm_logging)
