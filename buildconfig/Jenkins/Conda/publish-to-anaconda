@@ -50,6 +50,6 @@ do
     if [[ $package == *"mantid"* ]]
     then
         echo "Uploading $package"
-        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL
+        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL --force
     fi
 done
