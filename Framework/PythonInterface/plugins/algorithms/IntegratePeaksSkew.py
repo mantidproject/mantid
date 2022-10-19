@@ -589,9 +589,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "contribution, dT0/T0, and uncertainty in path length dL/L which is assumed constant "
                                  "for all pixels).")
         self.setPropertySettings("BackscatteringTOFResolution", condition_to_use_resn)
-        self.declareProperty(name="ThetaWidth", defaultValue=0.0015, direction=Direction.Input,
+        self.declareProperty(name="ThetaWidth", defaultValue=0.1, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0),
-                             doc="dTheta resolution (estimated from width at forward scattering minus "
+                             doc="dTheta resolution in degrees (estimated from width at forward scattering minus "
                                  "contribution from moderator, dT0/T0, and path length dL/L).")
         self.setPropertySettings("ThetaWidth", condition_to_use_resn)
         self.declareProperty(name="ScaleThetaWidthByWavelength", defaultValue=False, direction=Direction.Input,
@@ -716,7 +716,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # peak window parameters
         frac_tof_window = self.getProperty('FractionalTOFWindow').value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
-        dth = self.getProperty("ThetaWidth").value
+        dth = np.radians(self.getProperty("ThetaWidth").value)
         scale_dth = self.getProperty("ScaleThetaWidthByWavelength").value
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
@@ -828,7 +828,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 estimated_dth = np.sqrt(slope)
                 logger.notice(f"Estimated resolution parameters:"
                               f"\nBackscatteringTOFResolution = {estimated_dt0_over_t0}"
-                              f"\nThetaWidth = {estimated_dth}")
+                              f"\nThetaWidth = {np.degrees(estimated_dth)}")
             else:
                 logger.warning("Resolution parameters could not be estimated - the provided TOF window parameters are"
                                "likely to be suboptimal (probably the resulting window is too large). Please inspect "
@@ -920,7 +920,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                '-', color=colors[icolor])
                 ax[0].set_ylim(*ylim)  # reset limits so suitable for data point coverage not fit lines
             # add resolution parameters to the plot title
-            ax[1].set_title(rf"$d\theta$={estimated_dth:.2E}" + "\n$dT_{bk}/T_{bk}$" + f"={estimated_dt0_over_t0:.2E}")
+            ax[1].set_title(rf"$d\theta$={np.degrees(estimated_dth):.2f}$^\circ$"
+                            + "\n$dT_{bk}/T_{bk}$" + f"={estimated_dt0_over_t0:.2E}")
 
     def child_CloneWorkspace(self, **kwargs):
         alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)

@@ -80,10 +80,10 @@ class IntegratePeaksSkewTest(unittest.TestCase):
     def test_integrate_use_nearest_peak_false_update_peak_position_false_with_resolution_params(self):
 
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, BackscatteringTOFResolution=0.3,
-                                 ThetaWidth=1e-4, ScaleThetaWidthByWavelength=False, IntegrateIfOnEdge=True,
+                                 ThetaWidth=0.006, ScaleThetaWidthByWavelength=False, IntegrateIfOnEdge=True,
                                  UseNearestPeak=False, UpdatePeakPosition=False, OutputWorkspace='out11')
         out_scaled = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks,
-                                        BackscatteringTOFResolution=0.3, ThetaWidth=1e-2,
+                                        BackscatteringTOFResolution=0.3, ThetaWidth=0.6,
                                         ScaleThetaWidthByWavelength=True, IntegrateIfOnEdge=True,
                                         UseNearestPeak=False, UpdatePeakPosition=False, OutputWorkspace='out12')
         # check intensity of first peak - should be same as TOF window comes out as ~0.3 (as in other tests)
