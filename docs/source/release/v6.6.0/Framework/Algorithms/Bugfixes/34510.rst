@@ -1,0 +1,1 @@
+- Fix problem in :ref:`CreateSampleWorkspace  <algm-CreateSampleWorkspace >` where functions were evaluated at left hand bin edge instead of bin centre
