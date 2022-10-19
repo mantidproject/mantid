@@ -131,7 +131,6 @@ void ConvertMDHistoToMatrixWorkspace::exec() {
 void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  // This code is copied from MantidQwtIMDWorkspaceData
   Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims = inputWorkspace->getNonIntegratedDimensions();
 
   std::string alongDim;

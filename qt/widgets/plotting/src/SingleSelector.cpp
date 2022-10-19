@@ -4,8 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Plotting/Mpl/SingleSelector.h"
-#include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
+#include "MantidQtWidgets/Plotting/SingleSelector.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 using namespace MantidQt::Widgets::MplCpp;
 

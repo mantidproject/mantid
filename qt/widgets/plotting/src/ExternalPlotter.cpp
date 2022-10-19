@@ -9,7 +9,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include <QHash>
 #include <QString>

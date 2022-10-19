@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Plotting/Mpl/PeakPicker.h"
+#include "MantidQtWidgets/Plotting/PeakPicker.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::Widgets::MplCpp;

@@ -15,7 +15,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
