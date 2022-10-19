@@ -65,7 +65,6 @@ HIFI Transverse Field Simultaneous Fitting
 .. figure:: ../../images/MuonAnalysisTests/HIFI-TF-Result.png
 	:alt: HIFI-TF-Result.png
 
-
 -----------------------------------------------
 
 .. _hifi_multi_period:
