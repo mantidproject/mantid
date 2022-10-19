@@ -823,9 +823,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # robust estimation of params for (dT/T)^2 = slope*cot(theta)^2 + intercept
             # if scale_dth cot(th) -> wl*cot(th)
             slope, intercept = self.estimate_linear_params(scaled_cot_th_sq, frac_tof_widths ** 2)
-            estimated_dt0_over_t0 = np.sqrt(intercept)
-            estimated_dth = np.sqrt(slope)
             if slope > 0 and intercept > 0:
+                estimated_dt0_over_t0 = np.sqrt(intercept)
+                estimated_dth = np.sqrt(slope)
                 logger.notice(f"Estimated resolution parameters:"
                               f"\nBackscatteringTOFResolution = {estimated_dt0_over_t0}"
                               f"\nThetaWidth = {estimated_dth}")
