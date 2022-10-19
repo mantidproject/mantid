@@ -380,10 +380,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         to_group = []
         scale_factor = self.getProperty(PropertyNames.SCALE_FACTOR).value
         progress = Progress(self, start=0.0, end=1.0, nreports=self._dimensionality)
-        self.log().purge()
         log = '\nNumber of angles treated: {}\n'.format(self._dimensionality)
-        self.log().accumulate(log)
-        self._logs.append(log)
+        self._accumulate_log(log)
         for angle_index in range(self._dimensionality):
             if len(self._db) == 1:
                 run_db = self.make_name(self._db[0])
@@ -392,11 +390,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 run_db = self.make_name(self._db[angle_index])
                 direct_beam_names = self._get_numor_string(self._db[angle_index])
             log = 'Angle {}:\n'.format(angle_index + 1)
-            self._logs.append(log)
-            self.log().accumulate(log)
+            self._accumulate_log(log)
             log = 'Direct Beam(s): {}\n'.format(direct_beam_names)
-            self._logs.append(log)
-            self.log().accumulate(log)
+            self._accumulate_log(log)
             direct_beam_name = '{}_direct'.format(run_db)
             direct_foreground_name = '{}_frg'.format(direct_beam_name)
             # always process direct beam; even if it can be the same for different angles,
@@ -407,8 +403,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
                 runRB = self.make_name(self._rb[angle_index])
                 refl_beam_names = self._get_numor_string(self._rb[angle_index])
                 log = 'Reflected Beam(s): {}\n'.format(refl_beam_names)
-                self._logs.append(log)
-                self.log().accumulate(log)
+                self._accumulate_log(log)
                 reflected_beam_input = self._compose_run_string(self._rb[angle_index])
                 reflected_beam_name = '{}_reflected'.format(runRB)
                 to_convert_to_q, direct_foreground_name, corrected_theta_ws = \
@@ -449,6 +444,15 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         self.setProperty(Prop.OUTPUT_WS, self._out_ws)
         self._auto_cleanup.finalCleanup()
         self.log().flushNotice()
+
+    def _accumulate_log(self, log: str) -> None:
+        """Wrapper function for simultaneously calling log accumulation and appending for the output configuration file.
+
+        Keyword arguments:
+        log -- reduction progress information to be accumulated
+        """
+        self.log().accumulate(log)
+        self._logs.append(log)
 
     def compose_polarized_runs_list(self, angle_index: int) -> Tuple[List[str], List[str]]:
         """Returns two lists: one of runs, the other of names for different flipper configurations at the given angle_index
@@ -560,11 +564,9 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         db_frg_centre = db.run().getLogData(SampleLogs.LINE_POSITION).value
         rb_frg_centre = mtd[reflected_beam_name].run().getLogData(SampleLogs.LINE_POSITION).value
         log = 'Direct beam foreground centre [pixel]: {:.5f}\n'.format(db_frg_centre)
-        self._logs.append(log)
-        self.log().accumulate(log)
+        self._accumulate_log(log)
         log = 'Reflected beam foreground centre [pixel]: {:.5f}\n'.format(rb_frg_centre)
-        self._logs.append(log)
-        self.log().accumulate(log)
+        self._accumulate_log(log)
 
     def make_name(self, run_name: Union[list, str]) -> str:
         """Returns a name suitable to put in the ADS: the run number.
@@ -669,8 +671,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             preprocess_args['DirectBeamForegroundCentre'] = self._foreground_centre_from_logs(direct_beam_name)
         ReflectometryILLPreprocess(**preprocess_args)
         log = 'Angle method: {}\n'.format(angle_option)
-        self._logs.append(log)
-        self.log().accumulate(log)
+        self._accumulate_log(log)
 
     def process_direct_beam(self, direct_beam_name: str, direct_foreground_name: str, angle_index: int) -> None:
         """Processes the direct beam for the given angle configuration by calling preprocessing, summing foreground,
@@ -716,8 +717,7 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         direct_foreground_name = '{}_frg'.format(direct_beam_name)
         sum_type = self.get_value(PropertyNames.SUM_TYPE, angle_index)
         log = 'Summation method: {}\n'.format(sum_type)
-        self._logs.append(log)
-        self.log().accumulate(log)
+        self._accumulate_log(log)
         sum_type = common.SUM_IN_LAMBDA if sum_type == PropertyNames.INCOHERENT else common.SUM_IN_Q
         foreground_name, direct_foreground_name = self.sum_foreground(reflected_beam_name, foreground_name, sum_type,
                                                                       angle_index, direct_foreground_name)
@@ -727,13 +727,11 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             theta_ws_name_cropped = self.crop_theta_correction(foreground_name, theta_ws_name, angle_index)
         final_two_theta = mtd[foreground_name].spectrumInfo().twoTheta(0) * 180 / math.pi
         log = 'Calibrated 2theta of foreground centre [degree]: {0:.5f}\n'.format(final_two_theta)
-        self._logs.append(log)
-        self.log().accumulate(log)
+        self._accumulate_log(log)
         if sum_type == common.SUM_IN_Q:
             is_Bent = mtd[foreground_name].run().getProperty('beam_stats.bent_sample').value
             log = 'Sample: {0}\n'.format('Bent' if is_Bent == 1 else 'Flat')
-            self._logs.append(log)
-            self.log().accumulate(log)
+            self._accumulate_log(log)
         self._auto_cleanup.cleanupLater(reflected_beam_name)
         self._auto_cleanup.cleanupLater(foreground_name)
         self._auto_cleanup.cleanupLater(theta_ws_name)
@@ -821,15 +819,12 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
             if '{}_rebinned'.format(direct_foreground_name) in mtd:
                 direct_foreground_name = '{}_rebinned'.format(direct_foreground_name)
             log = 'Final source (mid chopper) to sample distance [m]: {:.5f}\n'.format(mtd[output_ws_name].spectrumInfo().l1())
-            self._logs.append(log)
-            self.log().accumulate(log)
+            self._accumulate_log(log)
             log = 'Final reflected foreground centre distance [m]: {:.5f}\n'.format(mtd[output_ws_name].spectrumInfo().l2(0))
-            self._logs.append(log)
-            self.log().accumulate(log)
+            self._accumulate_log(log)
             log = 'Final source (mid chopper) to foreground centre distance [m]: {:.5f}\n'.format(
                 mtd[output_ws_name].spectrumInfo().l1() + mtd[output_ws_name].spectrumInfo().l2(0))
-            self._logs.append(log)
-            self.log().accumulate(log)
+            self._accumulate_log(log)
         return output_ws_name, direct_foreground_name
 
 
