@@ -206,6 +206,7 @@ _translations = {
     'robertapplin': 'Applin, Robert',
     'Rob': 'Applin, Robert',
     'Rob Applin': 'Applin, Robert',
+    'Robert': 'Applin, Robert',
     'SamJenkins1': 'Jenkins, Sam',
     'Sam Jenkins': 'Jenkins, Sam',
     'Samuel Jones': 'Jones, Sam',
@@ -265,7 +266,7 @@ _translations = {
     'Sam Tygier': 'Tygier, Sam',
     'Silke Schomann': 'Schomann, Silke',
     'Jenna Delozier': 'Delozier, Jenna',
-    'Cole Kendrick':  'Kendrick, Cole',
+    'Cole Kendrick': 'Kendrick, Cole',
     'Coleman Kendrick': 'Kendrick, Cole',
     'Zhang, Chen': 'Zhang, Chen',
     'Chen': 'Zhang, Chen',
@@ -281,52 +282,34 @@ _translations = {
     'Jesse McGaha': 'McGaha, Jesse',
     'jrmcgaha-dev': 'McGaha, Jesse',
     'Zachary Morgan': 'Morgan, Zachary',
+    'zjmorgan': 'Morgan, Zachary',
     'MialLewis': 'Lewis, Mial',
     'Jan-Lukas Wynen': 'Wynen, Jan-Lukas',
     'Steve K': 'King, Steve',
     'Oleksandr Koshchii': 'Koshchii, Oleksandr',
-    'walshmm': 'Walsh, Michael'
+    'walshmm': 'Walsh, Michael',
+    'Jens Krüger': 'Krüger, Jens',
+    'Tobias Weber (Institut Laue-Langevin)': 'Weber, Tobias',
+    'Jonathan Haigh': 'Haigh, Jonathan',
+    'rbauststfc': 'Baust, Rachel',
+    'Rachel Baust': 'Baust, Rachel',
+    'Thomas Mueller': 'Mueller, Thomas'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
 # to be used in the case where a Git user has multiple accounts; a translation
 # entry would suffice in such an instance.
 _blacklist = [
-    '',
-    'unknown',
-    'Yao, Marie',
-    'Utkarsh Ayachit',
-    'Chris Kerr',
-    'Thomas Brooks',
-    'mantid-builder',
-    'Erik B Knudsen',
-    'Bartomeu Llopis',
-    'dpaj',
-    'Daniel Pajerowski',
-    'thomueller',
-    'luz.paz',
-    'davidvoneshen',
-    'dependabot[bot]'
+    '', 'unknown', 'Yao, Marie', 'Utkarsh Ayachit', 'Chris Kerr', 'Thomas Brooks', 'mantid-builder', 'Erik B Knudsen', 'Bartomeu Llopis',
+    'dpaj', 'Daniel Pajerowski', 'thomueller', 'luz.paz', 'davidvoneshen', 'dependabot[bot]'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
 # but who are not listed as authors on Git.  These names will be shown in the
 # "main" DOI only.
 whitelist = [
-    'Cottrell, Stephen',
-    'Dillow, David',
-    'Hagen, Mark',
-    'Hillier, Adrian',
-    'Heller, William',
-    'Howells, Spencer',
-    'McGreevy, Robert',
-    'Pascal, Manuel',
-    'Perring, Toby',
-    'Pratt, Francis',
-    'Proffen, Thomas',
-    'Radaelli, Paolo',
-    'Taylor, Jon',
-    'Granroth, Garrett'
+    'Cottrell, Stephen', 'Dillow, David', 'Hagen, Mark', 'Hillier, Adrian', 'Heller, William', 'Howells, Spencer', 'McGreevy, Robert',
+    'Pascal, Manuel', 'Perring, Toby', 'Pratt, Francis', 'Proffen, Thomas', 'Radaelli, Paolo', 'Taylor, Jon', 'Granroth, Garrett'
 ]
 
 
