@@ -10,6 +10,9 @@ import os
 import re
 import subprocess
 
+# The structure of a release tag
+RELEASE_TAG_RE = re.compile(r'^v?\d+.\d+(.\d)?$')
+
 # Authors in Git that do not have a translation listed here or that have not
 # been blacklisted will cause the DOI script to fail.
 #
@@ -345,11 +348,13 @@ def run_from_script_dir(func):
 
 
 @run_from_script_dir
-def _get_all_git_tags():
+def _get_all_release_git_tags():
     '''
     Returns a list of all the tags in the tree.
     '''
-    return subprocess.getoutput(['git', 'tag', '--sort=version:refname']).replace('"', '').split('\n')
+    proc = subprocess.run(['git', 'tag', '--sort=version:refname'], stdout=subprocess.PIPE, encoding='utf-8')
+    all_tags = proc.stdout.replace('"', '').split('\n')
+    return list(filter(lambda tag: RELEASE_TAG_RE.match(tag) is not None, all_tags))
 
 
 def _clean_up_author_list(author_list):
@@ -364,10 +369,9 @@ def _clean_up_author_list(author_list):
     # Make sure there are no names in Git without a corresponding translation.
     untranslated = set(filterfalse(_translations.keys().__contains__, result))
     if untranslated:
-        raise Exception(
-            'No translation exists for the following Git author(s): \n'
-            + '\n'.join(untranslated) + '\n'
-            + 'Please edit the translations table accordingly.')
+        raise RuntimeError('No translation exists for the following Git author(s): \n'
+                           + '\n'.join(untranslated) + '\n'
+                           + 'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]
@@ -385,15 +389,9 @@ def _authors_from_tag_info(tag_info):
     '''Given some tag/commit information, will return the corresponding Git
     authors.
     '''
-    args = [
-        'git', 'log',
-        '--pretty=short',
-        tag_info,
-        '--format="%aN"',
-        '--reverse'
-    ]
-
-    authors = subprocess.getoutput(args).replace('"', '').split('\n')
+    args = ['git', 'log', '--pretty=short', tag_info, '--format="%aN"', '--reverse']
+    proc = subprocess.run(args, stdout=subprocess.PIPE, encoding='utf-8')
+    authors = proc.stdout.replace('"', '').split('\n')
     return _clean_up_author_list(authors)
 
 
@@ -401,7 +399,7 @@ def find_tag(version_str):
     '''Return the Git tag, if it actually exists, for a given version".
     '''
     tag_title = 'v' + version_str
-    if tag_title in _get_all_git_tags():
+    if tag_title in _get_all_release_git_tags():
         return tag_title
     else:
         raise RuntimeError("Cannot find expected git tag '{0}'".format(tag_title))
@@ -410,7 +408,7 @@ def find_tag(version_str):
 def get_previous_tag(tag):
     '''Given an existing git tag, will return the tag that is found before it.
     '''
-    all_tags = _get_all_git_tags()
+    all_tags = _get_all_release_git_tags()
     if tag not in all_tags:
         return None
     return all_tags[all_tags.index(tag) - 1]
@@ -453,8 +451,7 @@ def get_version_from_git_tag(tag):
         match_text = re.match(long_regexp, tag).group(0)
         a, b, c, = [int(x) for x in re.findall(r'\d+', match_text)]
     else:
-        raise RuntimeError(
-            "Unable to parse version information from \"" + tag + "\"")
+        raise RuntimeError("Unable to parse version information from \"" + tag + "\"")
     return '{0}.{1}.{2}'.format(a, b, c)
 
 
@@ -472,7 +469,7 @@ def authors_under_git_tag(tag):
     "2, 6, 1" as inputs, then only commits between the tags "v2.6.0" and
     "v2.6.1" will be included.
     '''
-    all_tags = _get_all_git_tags()
+    all_tags = _get_all_release_git_tags()
 
     previous_tag = all_tags[all_tags.index(tag) - 1]
 
