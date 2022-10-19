@@ -40,6 +40,7 @@ private:
   ValidatorT<std::map<std::string, std::string>> parseOptions(LookupRow::ValueArray const &cellText);
   ValidatorT<boost::optional<std::string>> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
   ValidatorT<boost::optional<std::string>> parseBackgroundProcessingInstructions(LookupRow::ValueArray const &cellText);
+  ValidatorT<boost::optional<std::string>> parseROIDetectorIDs(LookupRow::ValueArray const &cellText);
 
   void validateThetaAndRegex();
 

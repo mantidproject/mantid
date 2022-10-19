@@ -134,6 +134,7 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
   AlgorithmProperties::update("ProcessingInstructions", lookupRow.processingInstructions(), properties);
   AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
+  AlgorithmProperties::update("ROIDetectorIDs", lookupRow.roiDetectorIDs(), properties);
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
