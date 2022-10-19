@@ -429,6 +429,8 @@ class SuperplotPresenter:
             try:
                 ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
             except KeyError:
+                # avoid race condition when many workspaces are remove from the
+                # ADS at the same type
                 continue
             ws_name = ws.name()
             if (ws_name, sp) not in plotted_data:
