@@ -300,15 +300,15 @@ std::vector<double> runningAverage(const std::vector<size_t> &data, size_t halfW
   const size_t TN = 2 * halfWindow + 1;
   size_t sum{0};
   size_t startIndex = N - halfWindow;
-  for (auto i = 0; i < TN; i++) {
-    auto ix = (startIndex + i) % N;
+  for (size_t i = 0; i < TN; i++) {
+    size_t ix = (startIndex + i) % N;
     sum += data[ix];
   }
 
   std::vector<double> filtered(N, 0);
-  for (auto i = 0; i < N; i++) {
+  for (size_t i = 0; i < N; i++) {
     // save previous and then move to next
-    filtered[i] = static_cast<double>(sum) / TN;
+    filtered[i] = static_cast<double>(sum) / static_cast<double>(TN);
 
     sum -= data[startIndex];
     sum += data[(startIndex + TN) % N];
@@ -766,8 +766,9 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   // determine the minimum and maximum beam rate per sec
   auto filteredBM = runningAverage(eventAssigner.beamMonitorCounts(), 5);
   auto res = std::minmax_element(filteredBM.begin(), filteredBM.end());
-  auto minBM = *res.first * eventAssigner.numBins() / eventCounter.duration();
-  auto maxBM = *res.second * eventAssigner.numBins() / eventCounter.duration();
+  auto ratePerSec = static_cast<double>(eventAssigner.numBins()) / eventCounter.duration();
+  auto minBM = *res.first * ratePerSec;
+  auto maxBM = *res.second * ratePerSec;
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "BeamMonitorBkgRate", minBM);
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "BeamMonitorRate", maxBM);
   AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "MonitorCounts",
@@ -794,7 +795,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", static_cast<int>(frame_count));
 
   // add the scan period in secs to the log
-  auto scan_period = (frame_count + 1) / m_dopplerFreq;
+  auto scan_period = static_cast<double>(frame_count + 1) / m_dopplerFreq;
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "ScanPeriod", scan_period);
 
   std::string filename = Base::getPropertyValue(FilenameStr);
