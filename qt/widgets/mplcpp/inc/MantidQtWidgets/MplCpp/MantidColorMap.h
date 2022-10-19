@@ -19,6 +19,11 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
+/**
+ * @brief The MantidColormap exists to provide an matplotlib-based
+ * implementation that satisfies the same colormap interface used by the Qt4
+ * Qwt-based version in the Plotting library.
+ */
 class MANTID_MPLCPP_DLL MantidColorMap {
 public:
   /// Define the possible scale types
