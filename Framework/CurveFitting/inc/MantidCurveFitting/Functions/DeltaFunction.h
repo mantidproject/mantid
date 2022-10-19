@@ -30,10 +30,10 @@ public:
   DeltaFunction();
 
   /// overwrite IPeakFunction base class methods
-  double centre() const override { return 0; }
+  double centre() const override { return getParameter("Centre"); }
   double height() const override { return getParameter("Height"); }
   double fwhm() const override { return 0; }
-  void setCentre(const double c) override { UNUSED_ARG(c); }
+  void setCentre(const double c) override { setParameter("Centre", c); }
   void setHeight(const double h) override { setParameter("Height", h); }
   void setFwhm(const double w) override { UNUSED_ARG(w); }
   virtual double HeightPrefactor() const { return 1.0; } // modulates the Height of the Delta function
