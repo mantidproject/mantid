@@ -24,6 +24,7 @@ class Prop:
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
     SUBALG_LOGGING = 'SubalgorithmLogging'
+    THETA_CORRECTION = "ThetaCorrection"
 
 
 class SubalgLogging:
@@ -161,7 +162,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                              validator=positive_float,
                              doc='If set, group the output by steps of this fraction multiplied by Q resolution')
 
-        self.declareProperty(MatrixWorkspaceProperty("ThetaCorrection",
+        self.declareProperty(MatrixWorkspaceProperty(Prop.THETA_CORRECTION,
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional,
