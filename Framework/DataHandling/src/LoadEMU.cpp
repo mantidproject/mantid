@@ -550,7 +550,7 @@ public:
   const std::vector<size_t> &beamMonitorCounts() const { return m_bmCounts; }
   double binSize() const { return m_binSize; }
   size_t numBins() const { return BEAM_MONITOR_BINS; }
-  size_t bmCounts() const { return std::accumulate(m_bmCounts.begin(), m_bmCounts.end(), 0); }
+  size_t bmCounts() const { return std::accumulate(m_bmCounts.begin(), m_bmCounts.end(), (size_t)0); }
 };
 
 template <typename EP>
