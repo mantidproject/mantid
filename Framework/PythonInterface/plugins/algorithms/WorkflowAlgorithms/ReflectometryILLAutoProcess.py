@@ -11,7 +11,7 @@ from mantid.kernel import (Direction, EnabledWhenProperty, FloatArrayBoundedVali
                            IntArrayBoundedValidator, IntArrayProperty, PropertyCriterion, StringArrayLengthValidator,
                            StringArrayProperty, StringListValidator)
 import ILL_utilities as utils
-from ReflectometryILL_common import SampleLogs
+import ReflectometryILL_common as common
 from ReflectometryILLPreprocess import BkgMethod, Prop, SubalgLogging
 from mantid.simpleapi import (config, CropWorkspace, GroupWorkspaces, mtd, RebinToWorkspace, ReflectometryILLConvertToQ,
                               ReflectometryILLPolarizationCor, ReflectometryILLPreprocess, ReflectometryILLSumForeground,
@@ -122,8 +122,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         ws -- workspace name used as source of metadata
         """
         run = mtd[ws].run() if not isinstance(mtd[ws], WorkspaceGroup) else mtd[ws][0].run()
-        if run.hasProperty(SampleLogs.LINE_POSITION):
-            return run.getLogData(SampleLogs.LINE_POSITION).value
+        if run.hasProperty(common.SampleLogs.LINE_POSITION):
+            return run.getLogData(common.SampleLogs.LINE_POSITION).value
         else:
             raise RuntimeError('Unable to retrieve the direct beam foreground centre needed for DAN option.')
 
@@ -561,8 +561,8 @@ class ReflectometryILLAutoProcess(DataProcessorAlgorithm):
         direct_beam_name -- name of the direct beam workspace
         """
         db = mtd[direct_beam_name] if not isinstance(mtd[direct_beam_name], WorkspaceGroup) else mtd[direct_beam_name][0]
-        db_frg_centre = db.run().getLogData(SampleLogs.LINE_POSITION).value
-        rb_frg_centre = mtd[reflected_beam_name].run().getLogData(SampleLogs.LINE_POSITION).value
+        db_frg_centre = db.run().getLogData(common.SampleLogs.LINE_POSITION).value
+        rb_frg_centre = mtd[reflected_beam_name].run().getLogData(common.SampleLogs.LINE_POSITION).value
         log = 'Direct beam foreground centre [pixel]: {:.5f}\n'.format(db_frg_centre)
         self._accumulate_log(log)
         log = 'Reflected beam foreground centre [pixel]: {:.5f}\n'.format(rb_frg_centre)
