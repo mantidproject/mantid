@@ -25,20 +25,29 @@ To set up your toolchain:
 
 - Navigate to ``File > Settings > Build, Execution, Deployment > Toolchains``
 - Create a new ``System`` toolchain using the ``+`` icon and call it ``Default``
-- Edit the CMake field to point to your conda installed ``cmake``, e.g. ``/path/to/mambaforge/envs/mantid-developer/bin/cmake``
-- Edit the Build Tool field to point to your conda installed ``ninja``, e.g. ``/path/to/mambaforge/envs/mantid-developer/bin/ninja``
-- On Linux, ``Let CMake detect`` the C Compiler and C++ Compiler.
-- On Windows, the C Compiler and C++ Compiler should be directed at the same ``cl.exe`` in your Visual Studio installation, e.g. ``C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe``
+- Edit the CMake field to point to your conda installed ``cmake``, e.g.
+   - On Linux: ``/path/to/mambaforge/envs/mantid-developer/bin/cmake``
+   - On Windows: ``/path/to/mambaforge/envs/mantid-developer/Library/bin/cmake.exe``
+- Edit the Build Tool field to point to your conda installed ``ninja``, e.g.
+   - On Linux: ``/path/to/mambaforge/envs/mantid-developer/bin/ninja``
+   - On Windows: ``/path/to/mambaforge/envs/mantid-developer/Library/bin/ninja.exe``
+- For the C Compiler and C++ Compiler fields,
+   - On Linux: choose ``Let CMake detect``
+   - On Windows: direct them both at the same ``cl.exe`` in your Visual Studio installation, e.g. ``C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe``
 
 To set up CMake:
 
 - Navigate to ``File > Settings > Build, Execution, Deployment > CMake``
-- On Linux, set your Build type to be ``Debug``. On Windows, set your build type to be ``DebugWithRelRuntime``
+- Edit the Build type field by either selecting an option, or typing in a string,
+   - On Linux: ``Debug``
+   - On Windows: ``DebugWithRelRuntime``
 - Set your Toolchain to be the ``Default`` toolchain that you just created
 - Set your generator to be ``Ninja``
-- Set your cmake options to be ``--preset=linux`` or ``--preset=win-ninja``
+- Edit your cmake options to be,
+   - On Linux: ``--preset=linux``
+   - On Windows: ``--preset=win-ninja``
 - Set the build directory to the ``build`` directory if it is not the default (you'll need to use the full path if its outside the source directory)
-- The configurations drop-down at the top should show all of the build targets. If not, the CMake project is probably not loaded. Open the root ``CMakeLists.txt`` file in a tab and there should be a ``Load CMake Project`` option at the top right. Click it and the configurations should be populated
+- The configurations drop-down at the top should show all of the build targets. If not, the CMake project is probably not loaded. Go to ``File > Reload CMake Project``. The configurations should be populated
 
 Building with CLion
 ###################
