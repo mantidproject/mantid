@@ -139,12 +139,11 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
         if normalise_spectrum:
-            min_val = numpy.nanmin(y)
             max_val = numpy.nanmax(y)
-            if (min_val != max_val):
-                y = (y - min_val) / (max_val - min_val)
+            if (max_val != 0):
+                y = y / max_val
                 if dy is not None:
-                    dy = dy / (max_val - min_val)
+                    dy = dy / max_val
     return x, y, dy, dx, indices, axis, kwargs
 
 
