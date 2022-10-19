@@ -16,12 +16,16 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <string>
 #include <utility>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using Mantid::Geometry::Instrument;
@@ -268,6 +272,42 @@ public:
     TS_ASSERT_DELTA(function->getParameter("f1.Height"), 3.0, 0.01);
     TS_ASSERT_DELTA(function->getParameter("f1.PeakCentre"), 0.0, 0.01);
     TS_ASSERT_DELTA(function->getParameter("f1.Sigma"), 1.0, 0.01);
+  }
+
+  void test_xConversionFactor_returns_a_nullopt_if_the_workspace_is_null() {
+    TS_ASSERT_EQUALS(std::nullopt, m_model->xConversionFactor(nullptr));
+  }
+
+  void test_xConversionFactor_returns_1_when_the_axis_unit_is_dspacing() {
+    MatrixWorkspace_const_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01, 0.3);
+
+    // Set the x axis unit to be 'dSpacing'
+    workspace->getAxis(0)->setUnit("dSpacing");
+
+    TS_ASSERT_EQUALS(1.0, *m_model->xConversionFactor(workspace));
+  }
+
+  void test_xConversionFactor_returns_a_degree_conversion_factor_when_the_axis_unit_is_phi() {
+    MatrixWorkspace_const_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01, 0.3);
+
+    // Set the x axis unit to be 'Phi'
+    workspace->getAxis(0)->setUnit("Phi");
+
+    TS_ASSERT_DELTA(180.0 / M_PI, *m_model->xConversionFactor(workspace), 0.000001);
+  }
+
+  void test_xConversionFactor_returns_a_degree_conversion_factor_when_the_axis_label_is_out_of_plane_angle() {
+    MatrixWorkspace_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01, 0.3);
+
+    // Set the x axis unit label to be 'Out of plane angle'
+    auto xUnit = std::dynamic_pointer_cast<Units::Label>(UnitFactory::Instance().create("Label"));
+    xUnit->setLabel("Label", "Out of plane angle");
+    workspace->getAxis(0)->unit() = xUnit;
+
+    TS_ASSERT_DELTA(180.0 / M_PI, *m_model->xConversionFactor(workspace), 0.000001);
   }
 
 private:
