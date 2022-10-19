@@ -47,7 +47,7 @@ generate_mantid_export_header(Nexus TRUE)
 # Installation settings
 if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidNexusTargets")
-  mtd_install_framework_lib(TARGETS Nexus EXPORT_NAME ${TARGET_EXPORT_NAME})
+  mtd_install_framework_lib(TARGETS Nexus INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
   mtd_install_targets(TARGETS Nexus INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()
