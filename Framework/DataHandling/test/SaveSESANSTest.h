@@ -86,7 +86,7 @@ public:
     auto ws = createTestWorkspace();
 
     setCommonAlgorithmProperties(ws);
-    const double thickness = 10;
+    const double thickness = 20;
     testAlg.setProperty("OverrideSampleThickness", thickness);
 
     // Execute the algorithm
@@ -115,6 +115,20 @@ public:
 
     // Execute the algorithm
     TS_ASSERT_THROWS(testAlg.execute(), const std::runtime_error &);
+  }
+
+  void test_exec_thickness_property_plus_sample_thickness_uses_property_value() {
+    auto ws = createTestWorkspace();
+    ws->mutableSample().setThickness(5);
+
+    setCommonAlgorithmProperties(ws);
+    const double thickness = 20;
+    testAlg.setProperty("OverrideSampleThickness", thickness);
+
+    // Execute the algorithm
+    TS_ASSERT_THROWS_NOTHING(testAlg.execute());
+
+    checkOutput(thickness);
   }
 
 private:
