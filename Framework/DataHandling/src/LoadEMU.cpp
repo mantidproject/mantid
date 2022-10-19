@@ -770,7 +770,8 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   auto maxBM = *res.second * eventAssigner.numBins() / eventCounter.duration();
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "BeamMonitorBkgRate", minBM);
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "BeamMonitorRate", maxBM);
-  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "MonitorCounts", eventAssigner.bmCounts());
+  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "MonitorCounts",
+                                        static_cast<int>(eventAssigner.bmCounts()));
 
   // perform a calibration and then TOF conversion if necessary
   // and update the tof limits
@@ -789,8 +790,8 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   setupDetectorMasks(roi);
 
   // set log values
-  auto frame_count = static_cast<size_t>(eventCounter.numFrames());
-  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", frame_count);
+  auto frame_count = eventCounter.numFrames();
+  AddSinglePointTimeSeriesProperty<int>(logManager, m_startRun, "frame_count", static_cast<int>(frame_count));
 
   // add the scan period in secs to the log
   auto scan_period = (frame_count + 1) / m_dopplerFreq;
