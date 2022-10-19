@@ -91,7 +91,7 @@ def chopper_speed(sample_logs: Run, instrument: Instrument) -> float:
     instr_name = instrument.getName()
     if instr_name == 'D17':
         duration = sample_logs.getProperty('duration').value
-        if duration > 30.0:
+        if duration > 30.0:  # for long durations, chopper speed average is reliable, otherwise rotation speed is used
             chopper1_speed_name = instrument.getStringParameter('chopper1_speed')[0]
         else:
             chopper1_speed_name = instrument.getStringParameter('chopper1_speed_alt')[0]
