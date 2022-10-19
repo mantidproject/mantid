@@ -287,7 +287,7 @@ QGroupBox:title {
            </layout>
           </item>
           <item row="0" column="1">
-           <layout class="QGridLayout" name="gridLayout_10" rowstretch="0,0,0,0,0,0" columnstretch="0,0">
+           <layout class="QGridLayout" name="gridLayout_10" rowstretch="0,0,0,0,0,0" columnstretch="0">
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
@@ -672,6 +672,21 @@ QGroupBox:title {
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>project_name_line_edit</tabstop>
+  <tabstop>instrument_group_file_finder</tabstop>
+  <tabstop>phase_file_finder</tabstop>
+  <tabstop>focused_data_file_finder</tabstop>
+  <tabstop>refinement_method_combobox</tabstop>
+  <tabstop>override_unitcell_length</tabstop>
+  <tabstop>refine_microstrain_checkbox</tabstop>
+  <tabstop>refine_sigma_one_checkbox</tabstop>
+  <tabstop>refine_gamma_y_checkbox</tabstop>
+  <tabstop>refine_button</tabstop>
+  <tabstop>number_output_histograms_combobox</tabstop>
+  <tabstop>x_min_line_edit</tabstop>
+  <tabstop>x_max_line_edit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
