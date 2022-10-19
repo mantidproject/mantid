@@ -374,7 +374,7 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _update_plot(self, replot:bool=False):  # noqa C901
+    def _update_plot(self, replot:bool=False):
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
@@ -385,7 +385,38 @@ class SuperplotPresenter:
             replot (bool): if True, all curves are removed and replotted
         """
         selection = self._view.get_selection()
-        current_spectrum_index = self._view.get_spectrum_slider_position()
+        plotted_data = self._model.get_plotted_data()
+
+        figure = self._canvas.figure
+        axes = figure.gca()
+
+        self._remove_unneeded_curves(replot)
+        self._plot_selection()
+
+        if selection or plotted_data:
+            axes.set_axis_on()
+            try:
+                figure.tight_layout()
+            except ValueError:
+                pass
+            legend = axes.legend()
+            if legend:
+                legend_set_draggable(legend, True)
+        else:
+            legend = axes.get_legend()
+            if legend:
+                legend.remove()
+            axes.set_axis_off()
+            axes.set_title("")
+        self._canvas.draw_idle()
+
+    def _remove_unneeded_curves(self, replot: bool):
+        """
+        Removes all unneeded curves from the actual plot.
+
+        Args:
+            replot (bool): if True, all remaining curves are reploted
+        """
         plotted_data = self._model.get_plotted_data()
         mode = self._view.get_mode()
         normalised = self._model.is_normalised()
@@ -394,7 +425,6 @@ class SuperplotPresenter:
         axes = figure.gca()
         artists = axes.get_tracked_artists()
 
-        # remove curves not in plotted_data
         for artist in artists:
             try:
                 ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
@@ -422,6 +452,19 @@ class SuperplotPresenter:
                     else:
                         axes.plot(ws, **kwargs)
 
+    def _plot_selection(self):
+        """
+        Adds selected workspaces/spectra to the plot.
+        """
+        selection = self._view.get_selection()
+        current_spectrum_index = self._view.get_spectrum_slider_position()
+        plotted_data = self._model.get_plotted_data()
+        mode = self._view.get_mode()
+        normalised = self._model.is_normalised()
+
+        figure = self._canvas.figure
+        axes = figure.gca()
+
         # add selection to plot
         for ws_name, spectra in selection.items():
             if (current_spectrum_index not in spectra
@@ -439,30 +482,11 @@ class SuperplotPresenter:
                     ws = mtd[ws_name]
                     if self._error_bars:
                         lines = axes.errorbar(ws, **kwargs)
-                        label = lines.get_label()
                         color = lines.lines[0].get_color()
                     else:
                         lines = axes.plot(ws, **kwargs)
-                        label = lines[0].get_label()
                         color = lines[0].get_color()
                     self._model.set_workspace_color(ws_name, color)
-
-        if selection or plotted_data:
-            axes.set_axis_on()
-            try:
-                figure.tight_layout()
-            except ValueError:
-                pass
-            legend = axes.legend()
-            if legend:
-                legend_set_draggable(legend, True)
-        else:
-            legend = axes.get_legend()
-            if legend:
-                legend.remove()
-            axes.set_axis_off()
-            axes.set_title("")
-        self._canvas.draw_idle()
 
     def _fill_plot_kwargs(self, ws_name: str, spectrum: int, normalise: bool,
                           mode: str, color: str) -> dict:
