@@ -40,7 +40,7 @@ Reduction basics
 
 A very basic data reduction would include a direct and a reflected beam measurement of the sample at one angle position, follow the following steps:
 
-#. Preprocessing of direct and reflected beams in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`
+#. Preprocessing of direct and reflected beams in :ref:`ReflectometryILLPreProcess <algm-ReflectometryILLPreProcess>`
 
 #. Summing of foreground for both direct and reflected beams in :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>`
 
@@ -169,18 +169,13 @@ The default summation type is incoherent (sum along constant :math:`\lambda`), w
 Polarisation correction
 =======================
 
-This algorithm is an ILL specific wrapper around :ref:`PolarizationEffiencyCor <algm-PolarizationEfficiencyCor>`. It is typically run in reflectometry reduction workflow, namely the workflow in the :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>` algorithm, between :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>` and :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
+The polarisation correction is handled by :ref:`ReflectometryILLPolarizationCor <algm-ReflectometryILLPolarizationCor>` algorithm. This algorithm is an ILL-specific wrapper around :ref:`PolarizationEffiencyCor <algm-PolarizationEfficiencyCor>`. It is typically run in reflectometry reduction workflow, namely the workflow in the :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>` algorithm, between :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>` and :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
 
 The algorithm accepts a list of workspace names as *InputWorkspaces*. Thus, the workspaces have to be accessible from the the analysis data service. One to four workspaces can be named. If only a single workspace is given, it is treated as the direct beam. The algorithm loads the polarization efficiencies from *EfficiencyFile*. This file should be in the ILL format readable by :ref:`LoadILLPolarizationFactors <algm-LoadILLPolarizationFactors>`.
 
 The first workspace in *InputWorkspaces* is picked as a reference. The instrument configuration is extracted from the sample logs of this workspace. Further, this workspace is used as *WavelengthReference* for :ref:`LoadILLPolarizationFactors <algm-LoadILLPolarizationFactors>`. To make sure the wavelength axes of all workspaces are consistent comply, they are run through :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, with workspaces being matched to the reference.
 
 Finally, the algorithm extracts the flipper configurations from the input workspaces, reorders the workspaces accordingly and calls :ref:`PolarizationEffiencyCor <algm-PolarizationEfficiencyCor>`. The output is a workspace group returned by :ref:`PolarizationEffiencyCor <algm-PolarizationEfficiencyCor>`, containing workspaces corrected for polarization efficiency and ready for further processing and conversion to momentum exchange.
-
-The following diagram shows the workflow of this algorithm:
-
-.. diagram:: ReflectometryILLPolarizationCor-v1_wkflw.dot
-
 
 Workflow diagram and working example
 ------------------------------------
