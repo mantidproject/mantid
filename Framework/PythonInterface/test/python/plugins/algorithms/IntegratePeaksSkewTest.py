@@ -77,6 +77,19 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         for ipk in range(1, out.getNumberPeaks()):
             self.assertEqual(out.getPeak(ipk).getIntensity(), 0)
 
+    def test_integrate_use_nearest_peak_false_update_peak_position_false_with_resolution_params(self):
+
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, BackscatteringTOFResolution=0.3,
+                                 ThetaWidth=1e-4, ScaleThetaWidthByWavelength=False, IntegrateIfOnEdge=True,
+                                 UseNearestPeak=False, UpdatePeakPosition=False, OutputWorkspace='out11')
+        out_scaled = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks,
+                                        BackscatteringTOFResolution=0.3, ThetaWidth=1e-2,
+                                        ScaleThetaWidthByWavelength=True, IntegrateIfOnEdge=True,
+                                        UseNearestPeak=False, UpdatePeakPosition=False, OutputWorkspace='out12')
+        # check intensity of first peak - should be same as TOF window comes out as ~0.3 (as in other tests)
+        for pk_ws in [out, out_scaled]:
+            self.assertAlmostEqual(pk_ws.getPeak(0).getIntensityOverSigma(), 12.7636, delta=1e-3)
+
     def test_integrate_use_nearest_peak_true_update_peak_position_false(self):
         out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
                                  IntegrateIfOnEdge=True, UseNearestPeak=True, UpdatePeakPosition=False,
