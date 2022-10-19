@@ -31,7 +31,7 @@ Technically this algorithm does not use the seed-skew algorithm to grow an initi
 are found by minimising the skew of the background, subsequently nearest-neighbour connected regions are found in the
 non-background points and a single region is assigned to the peak (by proximity to the expected peak position).
 
-Note this algorithm applies the Lorentz correction to the integrated intensity.
+Note this algorithm can apply the Lorentz correction to the integrated intensity if ``LorentzCorrection=True``.
 
 For each peak the algorithm proceeds as follows:
 
@@ -50,8 +50,6 @@ For each peak the algorithm proceeds as follows:
     :math:`= d\theta` by the wavelength by setting ``ScaleThetaWidthByWavelength = True`` (to account for the wavelength
     dependence of the divergence). After execution the algorithm will print to the log estimates for these parameters
     given the scattering angle dependence of the final TOF window found for the peaks successfully integrated.
-    In addition a graph of the found :math:`dTOF/TOF` vs :math:`\theta` will be saved to the ``OutputFile`` if
-    specified.
 
 2. Integrate the data over the range :math:`TOF_{peak} \pm 0.5*dTOF`
 
@@ -155,6 +153,8 @@ showing the peak mask and the data integrated over the TOF window that maximises
 focused, background subtracted spectra with vertical lines to mark the initial and optimal TOF window and the peak
 centre.
 
+In addition a graph of the found :math:`dTOF/TOF` vs :math:`\theta` will be saved as shown below.
+
 .. figure:: ../images/EstimatedResolutionParametersSkewIntegration.png
     :align: center
     :width: 50%
@@ -174,7 +174,18 @@ Useage
     Load(Filename='SXD23767.raw', OutputWorkspace='SXD23767')
     CreatePeaksWorkspace(InstrumentWorkspace='SXD23767', NumberOfPeaks=0, OutputWorkspace='SingleCrystalPeakTable')
     AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=3271, DetectorID=32615)
-
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=3806, DetectorID=30017)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=5009, DetectorID=42513)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=2486, DetectorID=39170)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=2613, DetectorID=40740)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=2328, DetectorID=40905)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=1703, DetectorID=28764)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=2449, DetectorID=41068)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=2303, DetectorID=40121)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=2038, DetectorID=36910)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=3787, DetectorID=42749)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=886, DetectorID=14284)
+    AddPeak(PeaksWorkspace='SingleCrystalPeakTable', RunWorkspace='SXD23767', TOF=1817, DetectorID=36104)
 
     IntegratePeaksSkew(InputWorkspace='SXD23767', PeaksWorkspace='SingleCrystalPeakTable',
         OutputWorkspace='out', OutputFile="out.pdf",
