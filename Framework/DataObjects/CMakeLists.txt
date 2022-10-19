@@ -254,7 +254,7 @@ generate_mantid_export_header(DataObjects FALSE)
 # Installation settings
 if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
-  mtd_install_framework_lib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME})
+  mtd_install_framework_lib(TARGETS DataObjects INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
   mtd_install_targets(TARGETS DataObjects INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()

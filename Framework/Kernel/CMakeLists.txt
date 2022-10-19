@@ -662,7 +662,7 @@ mtd_install_files(
 # Installation settings
 if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidKernelTargets")
-  mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
+  mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
   mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()
