@@ -112,6 +112,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             theta_ws_in_q.setDx(0, ws.readDx(0))
             theta_ws_in_q = self._to_point_data(theta_ws_in_q)
             theta_ws_in_q = self._group_points(theta_ws_in_q, 'theta_')
+            self._cleanup.cleanupLater(theta_ws_in_q)
         sum_in_lambda = self._sum_type(ws.run()) == common.SUM_IN_LAMBDA
         if sum_in_lambda:
             direct_ws = self._same_q_and_dq(ws, direct_ws, 'direct_')
