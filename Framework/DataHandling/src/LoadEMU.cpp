@@ -529,7 +529,7 @@ protected:
       m_eventVectors[id]->emplace_back(ev);
     }
 
-    // fill the binned counts
+    // add to the binned counts
     auto index = static_cast<size_t>(tobs / m_binSize);
     m_bmCounts[index] += 1;
   }
