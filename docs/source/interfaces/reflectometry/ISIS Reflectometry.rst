@@ -849,6 +849,49 @@ specified, then they will be stitched using the options specified.
 
   *Transmission run options*
 
+.. _refl_preview::
+
+Reduction Preview Tab
+~~~~~~~~~~~~~~~~~~~~~
+
+.. figure:: /images/ISISReflectometryInterface/preview_tab.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The reduction preview tab
+
+  *The reduction preview tab*
+
+The preview tab provides a graphical tool for the selection of various regions of interest, and allows you to
+see the effect of those selections on the reduced reflectivity curve.
+
+Typical usage of the tool is as follows:
+
+- Enter a **run** number and **angle**.
+
+  - The run is loaded, and a plot of the workspace is displayed, with pre-processing (e.g. calibration) applied.
+  - For **2D detectors**, a **detector image** is displayed
+  - For **linear** detectors, a **Spectrum vs TOF** plot is displayed
+
+- 2D Detectors only: select a **region of interest** on the detector image.
+
+  - The selected detectors are **summed** across segments, and a plot of **Spectrum vs TOF** plot is displayed.
+
+- Select one or more **regions of interest** on the TOF plot.
+
+  - A full **reduction** is run using the selected regions, and a plot of the final **reflectivity curve** is displayed.
+
+- **Adjust** the regions of interest until you are happy with the reflectivity curve.
+
+- Click the **Apply** button to save the regions of interest into the batch settings.
+
+  - This will overwrite the settings on the lookup table in the Experiment Settings tab so that they can be applied to
+    a **batch reduction** or saved to a batch file.
+
+All other settings for the preprocessing/reduction are taken from the interface, so the reduction preview will perform
+exactly the **same reduction** as a normal batch reduction, aside from the regions of interest that you have overridden
+using the graphical selection tool.
+
 .. _refl_save_ascii:
 
 Save ASCII Tab
