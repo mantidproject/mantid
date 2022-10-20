@@ -52,7 +52,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         comp_info = ws.componentInfo()
 
         specular_pixel_idx = self._find_specular_pixel_index(ws, det_info)
-        spectra = self._find_detectors_to_calibrate(ws.getDetector(specular_pixel_idx).getID(), det_info, comp_info)
+        spectra = self._find_workspace_indices_to_calibrate(ws.getDetector(specular_pixel_idx).getID(), det_info, comp_info)
 
         calib_table = self._create_calibration_table_from_scan(ws, det_info, comp_info, specular_pixel_idx, spectra)
 
@@ -62,15 +62,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
         AnalysisDataService.remove('output_ws')
 
-    def _find_detectors_to_calibrate(self, specular_pixel_id, det_info, comp_info):
+    def _find_workspace_indices_to_calibrate(self, specular_pixel_id, det_info, comp_info):
         """Finds the workspace indices of the detectors that should be calibrated"""
-        # detector_idx = det_info.indexOf(specular_pixel_id)
-        # current_component_idx = comp_info.parent(detector_idx)  # How much further up the hierarchy do we need to go?
-        ## Not sure if this conversion from numpy int64 to Python int64 will be necessary
-        ## I think these indexes need to be converted to workspace indexes rather than detector/component info indexes?
-        # return [idx.item() for idx in comp_info.detectorsInSubtree(current_component_idx)]
-        # return range(7, 191)  # These are the workspace indices provided in the example data
-        return range(2, 6)  # range for testing only
+        detector_idx = det_info.indexOf(specular_pixel_id)
+        current_component_idx = comp_info.parent(detector_idx)
+        parent_idx = comp_info.parent(current_component_idx)
+        return [idx.item() for idx in comp_info.detectorsInSubtree(parent_idx)]
 
     def _find_specular_pixel_index(self, ws, det_info):
         # Determine position of the specular pixel from the IDF:
