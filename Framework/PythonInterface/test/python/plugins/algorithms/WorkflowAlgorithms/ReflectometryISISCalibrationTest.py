@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import csv
+import math
 import unittest
 
 import numpy as np
@@ -18,15 +20,28 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = 'C:/repos/mantid-data/calibration_test_data.dat'
     _CALIBRATION_WS_NAME = 'CalibTable'
 
+    @classmethod
+    def setUpClass(cls):
+        def _create_calibration_data_dictionary():
+            # Create dictionary of pixel spectrum number and position from test data
+            pixel_positions = {}
+            with open(cls._CALIBRATION_TEST_DATA, 'r') as file:
+                pixels = csv.reader(file)
+                for pixel in pixels:
+                    pixel_info = pixel[0].split()
+                    pixel_positions[float(pixel_info[0])] = float(pixel_info[1])
+            return pixel_positions
+        cls.calibration_data = _create_calibration_data_dictionary()
+
     def tearDown(self):
         AnalysisDataService.clear()
 
     def test_calibration_successful_multiple_component_levels(self):
         input_ws_name = 'test_1234'
-        # This theta value should result in detector ID 13 (or workspace ID 4) being treated as the specular detector
-        ws = self._create_sample_workspace_multiple_component_levels(input_ws_name, 0.0648225)
-        expected_final_xyz = {9: [0,0,5], 10: [0,0.008,5], 11: [0,0.006,5], 12: [0.008,0.007,5], 13: [0.008,0.008,5], 14: [0.008,0.009,5],
-                           15: [0.016,0,5], 16: [0.016,0.008,5], 17: [0.016,0.016,5]}
+        # We use workspace ID 4 (or detector ID 13) as the specular detector
+        spec_det_idx = 4
+        ws = self._create_sample_workspace_multiple_component_levels(input_ws_name, spec_det_idx)
+        expected_final_xyz, expected_final_dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx)
 
         output_ws_name = 'test_calibrated'
         args = {'InputWorkspace': ws,
@@ -35,17 +50,17 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         outputs = [input_ws_name, self._CALIBRATION_WS_NAME, output_ws_name]
         self._assert_run_algorithm_succeeds(args, outputs)
 
-        self._check_calibration_table(4, self._start_xyz, expected_final_xyz, 0.0002, 0.008)
+        self._check_calibration_table(len(self.calibration_data), expected_final_xyz, expected_final_dimensions)
 
         # Check the final output workspace
         retrieved_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_detector_positions(retrieved_ws, expected_final_xyz)
 
     def test_calibration_successful_one_component_level(self):
-        # This theta value should result in detector ID 5 (or workspace ID 4) being treated as the specular detector
-        ws = self._create_sample_workspace_one_component_level(2.286960629950409)
-        expected_final_xyz = {1: [0,0,5], 2: [0,0.1,5], 3: [0,0.398,5], 4: [0,0.399,5], 5: [0,0.4,5], 6: [0,0.401,5],
-                              7: [0,0.6,5], 8: [0,0.7,5], 9: [0,0.8,5]}
+        # We use workspace ID 4 (or detector ID 5) as the specular detector
+        spec_det_idx = 4
+        ws = self._create_sample_workspace_one_component_level(spec_det_idx)
+        expected_final_xyz, expected_final_dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx)
 
         output_ws_name = 'test_calibrated'
         args = {'InputWorkspace': ws,
@@ -54,7 +69,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         outputs = [self._CALIBRATION_WS_NAME, output_ws_name]
         self._assert_run_algorithm_succeeds(args, outputs)
 
-        self._check_calibration_table(4, self._start_xyz, expected_final_xyz, 0.02, 0.1)
+        self._check_calibration_table(len(self.calibration_data), expected_final_xyz, expected_final_dimensions)
 
         # Check the final output workspace
         retrieved_ws = AnalysisDataService.retrieve(output_ws_name)
@@ -71,9 +86,9 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
     def test_missing_entry_in_calibration_file_for_specular_pixel_raises_exception(self):
         input_ws_name = 'test_1234'
-        # This theta value should result in detector ID 10 (or workspace ID 1) being treated as the specular
-        # detector, for which there is no entry in the calibration test data file
-        ws = self._create_sample_workspace_multiple_component_levels(input_ws_name, 0.04583658449656179)
+        # We use workspace ID 1 (or detector ID 10) as the specular detector because there is no entry for this in the
+        # calibration test data file
+        ws = self._create_sample_workspace_multiple_component_levels(input_ws_name, 1)
 
         args = {'InputWorkspace': ws,
                 'CalibrationFile': self._CALIBRATION_TEST_DATA,
@@ -82,31 +97,59 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
     def _check_detector_positions(self, workspace, expected_positions, pos_type='final'):
         for i in range(0, workspace.getNumberHistograms()):
-            detector = workspace.getDetector(i)
-            np.testing.assert_almost_equal(detector.getPos(), expected_positions[detector.getID()],
-                                           err_msg=f"Unexpected {pos_type} position for detector id {detector.getID()}")
+            det = workspace.getDetector(i)
+            np.testing.assert_almost_equal(det.getPos(), expected_positions[det.getID()],
+                                           err_msg=f"Unexpected {pos_type} position for detector id {det.getID()} found at {det.getPos()}")
 
-    def _check_calibration_table(self, expected_num_entries, start_positions, expected_final_positions, expected_height, expected_width):
+    def _calculate_expected_final_detector_values(self, workspace, spec_det_idx):
+        specpixel_y = self._start_xyz[workspace.getDetector(spec_det_idx).getID()][1]
+        scanned_specpixel_y = self.calibration_data[spec_det_idx]
+
+        expected_positions = {}
+        expected_dimensions = {}
+        for i in range(0, workspace.getNumberHistograms()):
+            # Find new expected new position
+            det_id = workspace.getDetector(i).getID()
+            det_start_pos = self._start_xyz[det_id]
+            det_calibration_y = self.calibration_data.get(i)
+            if det_calibration_y:
+                calibrated_y = specpixel_y + (scanned_specpixel_y - det_calibration_y) * 0.001
+            else:
+                calibrated_y = det_start_pos[1]
+            expected_positions[det_id] = [det_start_pos[0], calibrated_y, det_start_pos[2]]
+
+            # Find expected height and width values
+            det_idx = workspace.detectorInfo().indexOf(det_id)
+            comp_info = workspace.componentInfo()
+            box = comp_info.shape(det_idx).getBoundingBox().width()
+            scalings = comp_info.scaleFactor(det_idx)
+            width = box[0] * scalings[0]
+            height = box[1] * scalings[1]
+            expected_dimensions[det_id] = (width, height)
+
+        return expected_positions, expected_dimensions
+
+    def _check_calibration_table(self, expected_num_entries, expected_final_positions, expected_final_dimensions):
         calib_table = AnalysisDataService.retrieve(self._CALIBRATION_WS_NAME).toDict()
         detector_ids = calib_table['Detector ID']
         self.assertEqual(len(detector_ids), expected_num_entries)
 
         for i in range(len(detector_ids)):
             det_id = detector_ids[i]
-            start_pos = start_positions[det_id]
+            start_pos = self._start_xyz[det_id]
             expected_pos = V3D(start_pos[0], start_pos[1], start_pos[2])
 
             self.assertAlmostEqual(calib_table['Detector Position'][i], expected_pos)
             self.assertAlmostEqual(calib_table['Detector Y Coordinate'][i], expected_final_positions[det_id][1])
-            self.assertAlmostEqual(calib_table['Detector Height'][i], expected_height)
-            self.assertAlmostEqual(calib_table['Detector Width'][i], expected_width)
+            self.assertAlmostEqual(calib_table['Detector Height'][i], expected_final_dimensions[det_id][1])
+            self.assertAlmostEqual(calib_table['Detector Width'][i], expected_final_dimensions[det_id][0])
 
-    def _create_sample_workspace_multiple_component_levels(self, name, theta):
+    def _create_sample_workspace_multiple_component_levels(self, name, ref_pixel_idx):
         """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 (i.e. at workspace indices 2 - 5) will have calibration data"""
         ws = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1, NumMonitors=0,
                                    BankPixelWidth=3, XMin=200, OutputWorkspace=name)
 
-        self._set_workspace_theta(ws, theta)
+        self._set_workspace_theta(ws, ref_pixel_idx)
 
         self._start_xyz = {9: [0,0,5], 10: [0,0.008,5], 11: [0,0.016,5], 12: [0.008,0,5], 13: [0.008,0.008,5], 14: [0.008,0.016,5],
                            15: [0.016,0,5], 16: [0.016,0.008,5], 17: [0.016,0.016,5]}
@@ -115,11 +158,11 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         return ws
 
-    def _create_sample_workspace_one_component_level(self, theta):
+    def _create_sample_workspace_one_component_level(self, ref_pixel_idx):
         """Creates a workspace with 9 detectors. Only detector IDs 3 to 6 (i.e. at workspace indices 2 - 5) will have calibration data"""
         ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(9, 20, False)
 
-        self._set_workspace_theta(ws, theta)
+        self._set_workspace_theta(ws, ref_pixel_idx)
 
         self._start_xyz = {1: [0,0,5], 2: [0,0.1,5], 3: [0,0.2,5], 4: [0,0.3,5], 5: [0,0.4,5], 6: [0,0.5,5],
                            7: [0,0.6,5], 8: [0,0.7,5], 9: [0,0.8,5]}
@@ -133,7 +176,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         ws = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=0, NumMonitors=2,
                                    BankPixelWidth=0, XMin=200, OutputWorkspace=name)
 
-        self._set_workspace_theta(ws, 0.04583658449656179)
+        self._create_theta_property_for_workspace(ws, 0.04583658449656179)
 
         self._start_xyz = {0: [0,0,2.5], 1: [0,0,7.5]}
         # Check that the detector positions in the test data have been created where we expect
@@ -141,9 +184,17 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         return ws
 
-    def _set_workspace_theta(self, ws, theta_value):
+    def _set_workspace_theta(self, ws, ref_pixel_idx):
+        """Set workspace theta to the value required so that ref_pixel_idx will be found as the specular pixel"""
+        det_info = ws.detectorInfo()
+        detector_index = det_info.indexOf(ws.getDetector(ref_pixel_idx).getID())
+        det_theta = (det_info.twoTheta(detector_index) * (180 / math.pi)) / 2
+        self._create_theta_property_for_workspace(ws, det_theta)
+
+    def _create_theta_property_for_workspace(self, ws, value):
+        """Set workspace theta to the given value"""
         theta = FloatTimeSeriesProperty('Theta')
-        theta.addValue(np.datetime64('now'), theta_value)
+        theta.addValue(np.datetime64('now'), value)
         ws.run().addProperty(name=theta.name, value=theta, replace=True)
 
     def _assert_run_algorithm_succeeds(self, args, expected=None):
