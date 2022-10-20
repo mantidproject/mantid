@@ -122,7 +122,7 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
   // Validate the E range when it is changed
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(verifyERange(QtProperty *, double)));
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SIGNAL(dataReady(QString const &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
   // Preview symmetrise
   connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
   // X range selectors
@@ -161,6 +161,17 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
 IndirectSymmetriseView::~IndirectSymmetriseView() {}
 
 IndirectPlotOptionsView *IndirectSymmetriseView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ * @param dataName The name of the data that has been loaded
+ */
+void IndirectSymmetriseView::handleDataReady(QString const &dataName) {
+  if (validate()) {
+    plotNewData(dataName);
+  }
+}
 
 /**
  * Verifies that the E Range is valid.

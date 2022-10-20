@@ -84,6 +84,7 @@ set(SRC_FILES
     IndirectSqwView.cpp
     IndirectSymmetrise.cpp
     IndirectSymmetriseView.cpp
+    IndirectSymmetriseModel.cpp
     IndirectTab.cpp
     IndirectTools.cpp
     IndirectToolsTab.cpp
@@ -163,6 +164,7 @@ set(MOC_FILES
     IndirectSqwView.h
     IndirectSymmetrise.h
     IndirectSymmetriseView.h
+    IndirectSymmetriseModel.h
     IndirectTab.h
     IndirectTools.h
     IndirectToolsTab.h

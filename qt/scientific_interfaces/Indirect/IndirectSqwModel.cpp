@@ -150,9 +150,4 @@ UserInputValidator IndirectSqwModel::validate(std::tuple<double, double> const q
   return uiv;
 }
 
-std::pair<double, double> IndirectSqwModel::roundToWidth(std::tuple<double, double> const &axisRange, double width) {
-  return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
-                        roundToPrecision(std::get<1>(axisRange), width) - width);
-}
-
 } // namespace MantidQt::CustomInterfaces

@@ -8,6 +8,7 @@
 
 #include "IndirectDataReductionTab.h"
 
+#include "IndirectSymmetriseModel.h"
 #include "IndirectSymmetriseView.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -51,8 +52,6 @@ public:
 
 private slots:
   void algorithmComplete(bool error);
-  void handleDataReady(QString const &dataName) override;
-  void plotNewData(QString const &workspaceName);
   void preview();
   void previewAlgDone(bool error);
 
@@ -64,6 +63,7 @@ private:
 
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   std::unique_ptr<IndirectSymmetriseView> m_view;
+  std::unique_ptr<IndirectSymmetriseModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

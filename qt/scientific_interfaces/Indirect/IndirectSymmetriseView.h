@@ -55,6 +55,7 @@ private slots:
   void verifyERange(QtProperty *prop, double value);
   void xRangeMaxChanged(double value);
   void xRangeMinChanged(double value);
+  void handleDataReady(QString const &dataName);
 
 private:
   void setRunEnabled(bool enabled);
