@@ -595,13 +595,13 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("h");
   addPeakColumn("k");
   addPeakColumn("l");
+  addPeakColumn("Intens");
+  addPeakColumn("SigInt");
+  addPeakColumn("Intens/SigInt");
   addPeakColumn("Wavelength");
   addPeakColumn("Energy");
   addPeakColumn("TOF");
   addPeakColumn("DSpacing");
-  addPeakColumn("Intens");
-  addPeakColumn("SigInt");
-  addPeakColumn("Intens/SigInt");
   addPeakColumn("BinCount");
   addPeakColumn("BankName");
   addPeakColumn("Row");
