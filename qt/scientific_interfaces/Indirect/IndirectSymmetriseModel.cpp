@@ -27,14 +27,13 @@ namespace MantidQt::CustomInterfaces {
 IndirectSymmetriseModel::IndirectSymmetriseModel() {}
 
 void IndirectSymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                                    QString workspaceName, double eMin, double eMax,
                                                     std::vector<long> spectraRange) {
   // Run the algorithm on the preview spectrum only
-  IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
+  IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
-  symmetriseAlg->setProperty("XMin", eMin);
-  symmetriseAlg->setProperty("XMax", eMax);
+  symmetriseAlg->setProperty("InputWorkspace", m_inputWorkspace);
+  symmetriseAlg->setProperty("XMin", m_eMin);
+  symmetriseAlg->setProperty("XMax", m_eMax);
   symmetriseAlg->setProperty("SpectraRange", spectraRange);
   symmetriseAlg->setProperty("OutputWorkspace", "__Symmetrise_temp");
   symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
@@ -43,20 +42,26 @@ void IndirectSymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorith
   batchAlgoRunner->addAlgorithm(symmetriseAlg);
 }
 
-std::string IndirectSymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                                              QString workspaceName, double eMin, double eMax) {
-  QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
-
-  IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
+std::string IndirectSymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+  IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
-  symmetriseAlg->setProperty("XMin", eMin);
-  symmetriseAlg->setProperty("XMax", eMax);
-  symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
+  symmetriseAlg->setProperty("InputWorkspace", m_inputWorkspace);
+  symmetriseAlg->setProperty("XMin", m_eMin);
+  symmetriseAlg->setProperty("XMax", m_eMax);
+  symmetriseAlg->setProperty("OutputWorkspace", m_outputWorkspace);
   symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
 
   batchAlgoRunner->addAlgorithm(symmetriseAlg);
-  return outputWorkspaceName.toStdString();
+  return m_outputWorkspace;
 }
+
+void IndirectSymmetriseModel::setWorkspaceName(QString workspaceName) {
+  m_inputWorkspace = workspaceName.toStdString();
+  m_outputWorkspace = (workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4)).toStdString();
+}
+
+void IndirectSymmetriseModel::setEMin(double value) { m_eMin = value; }
+
+void IndirectSymmetriseModel::setEMax(double value) { m_eMax = value; }
 
 } // namespace MantidQt::CustomInterfaces

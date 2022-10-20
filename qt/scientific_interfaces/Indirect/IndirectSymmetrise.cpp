@@ -33,10 +33,14 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *pa
 
   // SIGNAL/SLOT CONNECTIONS
   // Preview symmetrise
+  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(handleValueChanged(QtProperty *, double)));
+  connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
   connect(m_view.get(), SIGNAL(previewClicked()), this, SLOT(preview()));
   // Handle running, plotting and saving
   connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
+  m_view->setDefaults();
 }
 
 IndirectSymmetrise::~IndirectSymmetrise() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
@@ -59,8 +63,7 @@ void IndirectSymmetrise::saveClicked() {
 void IndirectSymmetrise::run() {
   m_view->setRawPlotWatchADS(false);
 
-  auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner, m_view->getInputName(),
-                                                                     m_view->getEMin(), m_view->getEMax());
+  auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
 
   // Set the workspace name for Python script export
   m_pythonExportWsName = outputWorkspaceName;
@@ -108,7 +111,7 @@ void IndirectSymmetrise::preview() {
   long spectrumNumber = static_cast<long>(m_view->getPreviewSpec());
   std::vector<long> spectraRange(2, spectrumNumber);
 
-  m_model->setupPreviewAlgorithm(m_batchAlgoRunner, workspaceName, m_view->getEMin(), m_view->getEMax(), spectraRange);
+  m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
 
   // There should never really be unexecuted algorithms in the queue, but it is
   // worth warning in case of possible weirdness
@@ -140,6 +143,27 @@ void IndirectSymmetrise::setFileExtensionsByName(bool filter) {
   auto const tabName("Symmetrise");
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+}
+
+void IndirectSymmetrise::handleValueChanged(QtProperty *prop, double value) {
+  if (prop->propertyName() == "Spectrum No") {
+    m_view->replotNewSpectrum(value);
+  }
+  if (prop->propertyName() == "EMin") {
+    m_view->verifyERange(prop, value);
+    m_model->setEMin(m_view->getEMin());
+  }
+  if (prop->propertyName() == "EMax") {
+    m_view->verifyERange(prop, value);
+    m_model->setEMax(m_view->getEMax());
+  }
+}
+
+void IndirectSymmetrise::handleDataReady(QString const &dataName) {
+  if (m_view->validate()) {
+    m_view->plotNewData(dataName);
+  }
+  m_model->setWorkspaceName(dataName);
 }
 
 } // namespace CustomInterfaces

@@ -21,11 +21,6 @@ using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace {
-double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
-
-std::pair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd, double width) {
-  return std::make_pair(roundToPrecision(rangeStart, width) + width, roundToPrecision(rangeEnd, width) - width);
-}
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   auto const xValues = workspace->x(0);
@@ -120,9 +115,10 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(verifyERange(QtProperty *, double)));
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SIGNAL(valueChanged(QtProperty *, double)));
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SIGNAL(dataReady(QString const &)));
   // Preview symmetrise
   connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
   // X range selectors
@@ -134,7 +130,14 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
 
   connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
           SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
+}
 
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+IndirectSymmetriseView::~IndirectSymmetriseView() {}
+
+void IndirectSymmetriseView::setDefaults() {
   // Set default X range values
   m_dblManager->setValue(m_properties["EMax"], 0.5);
   m_dblManager->setValue(m_properties["EMin"], 0.1);
@@ -155,23 +158,7 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IndirectSymmetriseView::~IndirectSymmetriseView() {}
-
 IndirectPlotOptionsView *IndirectSymmetriseView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
-
-/**
- * Handles the event of data being loaded. Validates the loaded data.
- *
- * @param dataName The name of the data that has been loaded
- */
-void IndirectSymmetriseView::handleDataReady(QString const &dataName) {
-  if (validate()) {
-    plotNewData(dataName);
-  }
-}
 
 /**
  * Verifies that the E Range is valid.
@@ -244,10 +231,6 @@ void IndirectSymmetriseView::updateRangeSelectors(QtProperty *prop, double value
  * @param value New range selector value
  */
 void IndirectSymmetriseView::xRangeMinChanged(double value) {
-  auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
-
-  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
   m_dblManager->setValue(m_properties["EMin"], std::abs(value));
   m_uiForm.pbPreview->setEnabled(true);
 }
@@ -258,10 +241,6 @@ void IndirectSymmetriseView::xRangeMinChanged(double value) {
  * @param value New range selector value
  */
 void IndirectSymmetriseView::xRangeMaxChanged(double value) {
-  auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
-
-  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
   m_dblManager->setValue(m_properties["EMax"], std::abs(value));
   m_uiForm.pbPreview->setEnabled(true);
 }
@@ -348,6 +327,36 @@ void IndirectSymmetriseView::updateMiniPlots() {
   auto const axisRange = getXRangeFromWorkspace(input);
   m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
+}
+
+/**
+ * Redraws mini plots when user changes previw range or spectrum.
+ *
+ * @param prop QtProperty that was changed
+ * @param value Value it was changed to
+ */
+void IndirectSymmetriseView::replotNewSpectrum(double value) {
+  // Validate the preview spectra
+  // Get the range of possible spectra numbers
+  QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
+  MatrixWorkspace_sptr sampleWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+  int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
+  int maxSpectrumRange = sampleWS->getSpectrum(sampleWS->getNumberHistograms() - 1).getSpectrumNo();
+
+  // If entered value is lower then set spectra number to lowest valid value
+  if (value < minSpectrumRange) {
+    m_dblManager->setValue(m_properties["PreviewSpec"], minSpectrumRange);
+    return;
+  }
+
+  // If entered value is higer then set spectra number to highest valid value
+  if (value > maxSpectrumRange) {
+    m_dblManager->setValue(m_properties["PreviewSpec"], maxSpectrumRange);
+    return;
+  }
+  // If we get this far then properties are valid so update mini plots
+  updateMiniPlots();
 }
 
 bool IndirectSymmetriseView::validate() {

@@ -22,7 +22,7 @@ class MANTIDQT_INDIRECT_DLL IndirectSymmetriseView : public QWidget {
 public:
   IndirectSymmetriseView(QWidget *perent = nullptr);
   ~IndirectSymmetriseView();
-
+  void setDefaults();
   IndirectPlotOptionsView *getPlotOptions();
   void setFBSuffixes(QStringList const suffix);
   void setWSSuffixes(QStringList const suffix);
@@ -38,6 +38,8 @@ public:
   void enableSave(bool save);
   void enableRun(bool save);
   void updateRangeSelectors(QtProperty *prop, double value);
+  void replotNewSpectrum(double value);
+  void verifyERange(QtProperty *prop, double value);
 
 public slots:
   void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
@@ -52,10 +54,8 @@ signals:
   void showMessageBox(const QString &message);
 
 private slots:
-  void verifyERange(QtProperty *prop, double value);
   void xRangeMaxChanged(double value);
   void xRangeMinChanged(double value);
-  void handleDataReady(QString const &dataName);
 
 private:
   void setRunEnabled(bool enabled);

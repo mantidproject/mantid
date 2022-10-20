@@ -22,10 +22,19 @@ class MANTIDQT_INDIRECT_DLL IndirectSymmetriseModel {
 public:
   IndirectSymmetriseModel();
   ~IndirectSymmetriseModel() = default;
-  void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceName, double eMin,
-                             double eMax, std::vector<long> spectraRange);
-  std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceName,
-                                       double eMin, double eMax);
+  void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange);
+  std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
+  void setWorkspaceName(QString workspaceName);
+  void setEMin(double value);
+  void setEMax(double value);
+
+private:
+  std::string m_inputWorkspace;
+  std::string m_outputWorkspace;
+  double m_eMin;
+  double m_eMax;
+  std::vector<long> m_spectraRange;
 };
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

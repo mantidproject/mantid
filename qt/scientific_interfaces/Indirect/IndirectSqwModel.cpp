@@ -29,8 +29,6 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &t
   return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
 }
 
-double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
-
 void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
   auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   converter->initialize();
