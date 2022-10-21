@@ -42,7 +42,7 @@ class RectanglePlotTest(unittest.TestCase):
         mtd.clear()
 
     @staticmethod
-    def create_data_array(width=500, height=500, peaks=(), sigma=10):
+    def create_data_array(width: int = 500, height: int = 500, peaks: list = (), sigma: float = 10):
         arr = np.fromfunction(lambda x, y: sum([np.exp(-((x - px)**2 + (y - py)**2) / sigma) for px, py in peaks]),
                               (width, height))
 

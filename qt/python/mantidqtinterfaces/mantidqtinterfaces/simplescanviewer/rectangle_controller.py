@@ -92,7 +92,7 @@ class RectanglesManager(QWidget):
         controller, rectangle = self.rectangles[self.current_rectangle_index]
         controller.update_values(*get_rectangle_corners(rectangle))
 
-    def on_field_changed(self, row, _):
+    def on_field_changed(self, row: int, _):
         """
         Slot triggered when a field of the table is changed. Updates the patch accordingly.
         @param row: the row in which the item changed is

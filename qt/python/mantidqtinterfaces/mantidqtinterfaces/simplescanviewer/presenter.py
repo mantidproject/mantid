@@ -155,7 +155,7 @@ class SimpleScanViewerPresenter:
 
         self.create_slice_viewer(self._ws)
 
-    def set_algorithm_result_name(self, new_algorithm):
+    def set_algorithm_result_name(self, new_algorithm: Algorithm):
         """
         Sets the name of the workspace that will be shown once the algorithm completes.
         @param new_algorithm: the algorithm that has been created

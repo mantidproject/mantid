@@ -11,8 +11,10 @@ from qtpy.QtCore import *
 from qtpy.QtGui import QCloseEvent
 
 import mantid
+from mantid.api import MatrixWorkspace
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot
 
 from .rectangle_plot import MultipleRectangleSelectionLinePlot
@@ -216,7 +218,7 @@ class SimpleScanViewerView(QMainWindow):
         if file_path:
             self.sig_background_selected.emit(file_path)
 
-    def show_slice_viewer(self, workspace):
+    def show_slice_viewer(self, workspace: MatrixWorkspace):
         """
         Set visual options for the slice viewer and display it.
         @param workspace: the workspace to display
@@ -290,17 +292,17 @@ class SimpleScanViewerView(QMainWindow):
         super().closeEvent(event)
 
     @property
-    def data_view(self):
+    def data_view(self) -> SliceViewerDataView:
         return self._data_view
 
     @data_view.setter
-    def data_view(self, new_data_view):
+    def data_view(self, new_data_view: SliceViewerDataView):
         self._data_view = new_data_view
 
     @property
-    def rectangles_manager(self):
+    def rectangles_manager(self) -> RectanglesManager:
         return self._rectangles_manager
 
     @rectangles_manager.setter
-    def rectangles_manager(self, value):
-        self._rectangles_manager = value
+    def rectangles_manager(self, manager: RectanglesManager):
+        self._rectangles_manager = manager

@@ -11,6 +11,7 @@ from enum import Enum
 from bisect import bisect_left
 
 from matplotlib.patches import Rectangle
+from matplotlib.backend_bases import MouseEvent
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QWidget
 import numpy as np
@@ -48,7 +49,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self.signals.sig_current_updated.connect(self._manager.on_current_updated)
         self._manager.sig_controller_updated.connect(self._on_controller_updated)
 
-    def _on_rectangle_selected(self, click_event, release_event):
+    def _on_rectangle_selected(self, click_event: MouseEvent, release_event: MouseEvent):
         """
         Called when a rectangle is selected by RectangleSelector. It draws the rectangle and update the plot.
         @param click_event: the event corresponding to the moment the user clicked and started drawing the rectangle
@@ -80,7 +81,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         self._update_plot_values()
 
-    def _determine_behaviour(self, click_event, release_event) -> UserInteraction:
+    def _determine_behaviour(self, click_event: MouseEvent, release_event: MouseEvent) -> UserInteraction:
         """
         Determine if the user drew another rectangle, moved the currently selected one, changed it, or deselected.
         A bit heuristical since RectangleSelector does not bother telling us what kind of event triggered
@@ -127,8 +128,16 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
         x_axis_values, y_axis_values = self.exporter.get_axes()
 
-        def closest_edge(axis, value, mini, maxi):
-            """Find the closest edge to the given value along given axis"""
+        def closest_edge(axis: np.ndarray, value: float, mini: float, maxi: float) -> float:
+            """
+            Find the closest edge to the given value along given axis
+            @param axis: the array to use to find the edge
+            @param value: we are searching the closest edge of this value
+            @param mini: the minimum value an edge can have. It can change depending on the state of the slice viewer
+            and the axis array does not help finding it so we have to provide it.
+            @param maxi: the maximum value an edge can have.
+            @return the value of the closest edge
+            """
             idx = bisect_left(axis, value)
 
             if idx == 0:
@@ -147,11 +156,19 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
             return edge
 
-        def find_nearest_with_gap(axis, first_value, second_value, mini, maxi):
+        def find_nearest_with_gap(axis: np.ndarray, first_value: float, second_value: float, mini: float, maxi: float)\
+                -> (float, float):
             """
             Find the nearest edges for each values so that they are not the same.
             Most of the times it is just the closest one, but if both are closest to the same one,
             it means finding the second closest for the value that is the most distant from the closest
+            @param axis: the array to use to find the nearest edges
+            @param first_value: one of the limits to snap to the nearest edge
+            @param second_value: the other limit
+            @param mini: the minimum value an edge can have. It can change depending on the state of the slice viewer
+            and the axis array does not help finding it so we have to provide it.
+            @param maxi: the maximum value an edge can have.
+            @return the two new values for the limits, that correspond to edges
             """
 
             closest_1 = closest_edge(axis, first_value, mini, maxi)
@@ -599,7 +616,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         return self._manager.get_rectangles()
 
     @classmethod
-    def is_almost_equal(cls, a, b):
+    def is_almost_equal(cls, a: float, b: float) -> bool:
         """
         Check if 2 numbers are within epsilon of relative distance
         """
