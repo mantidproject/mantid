@@ -542,7 +542,10 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   NXclose(&nxfileID);
   if (m_instrument == Supported::FIGARO) {
     auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
-    m_localWorkspace->mutableRun().addLogData(new Kernel::PropertyWithValue<bool>("refdown", bgs3 > 45));
+    // log data below should be a boolean, but boolean is broken in NeXus so it cannot be saved properly
+    // when exporting data.
+    m_localWorkspace->mutableRun().addLogData(
+        new Kernel::PropertyWithValue<int>("refdown", static_cast<int>(bgs3 > 45)));
   }
 }
 
