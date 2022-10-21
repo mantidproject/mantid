@@ -18,8 +18,8 @@ class RectanglesManager(QWidget):
     A widget holding all the rectangle controllers currently active
     """
 
-    # signal sent when a rectangle is updated, with the object updated and the new x0, y0, x1, y1
-    sig_controller_updated = Signal(patches.Rectangle, float, float, float, float)
+    # signal sent when a rectangle is updated, with the updated patch
+    sig_controller_updated = Signal(patches.Rectangle)
 
     def __init__(self, parent=None):
         super(RectanglesManager, self).__init__(parent=parent)
@@ -104,7 +104,7 @@ class RectanglesManager(QWidget):
         controller, rectangle = self.rectangles[index]
         x0, y0, x1, y1 = controller.get_values()
         rectangle.set_bounds(x0, y0, x1 - x0, y1 - y0)
-        self.sig_controller_updated.emit(rectangle, x0, y0, x1, y1)
+        self.sig_controller_updated.emit(rectangle)
 
     def manage_table_width(self):
         """

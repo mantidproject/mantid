@@ -250,21 +250,18 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self._show_peak(self.current_rectangle, peak)
         self.signals.sig_current_updated.emit()
 
-    def _on_controller_updated(self, rectangle_patch: Rectangle, new_x0: float, new_y0: float,
-                               new_x1: float, new_y1: float):
+    def _on_controller_updated(self, rectangle_patch: Rectangle):
         """
         Slot called when the controller associated to this patch is updated to these new values
-        @param rectangle_patch: the patch to update
-        @param new_x0: the x coordinate of a new corner of the rectangle
-        @param new_y0: the y coordinate of that corner
-        @param new_x1: the x coordinate of the new opposing corner
-        @param new_y1: the y coordinate of that opposing corner
+        @param rectangle_patch: the updated patch
         """
+        new_x0, new_y0 = rectangle_patch.get_xy()
+        new_x1 = new_x0 + rectangle_patch.get_width()
+        new_y1 = new_y0 + rectangle_patch.get_height()
         peak = self._find_peak(rectangle_patch)
         self._show_peak(rectangle_patch, peak)
 
         if self.current_rectangle == rectangle_patch:
-            # TODO reuse values form the patch directly
             self._selector.extents = (new_x0, new_x1, new_y0, new_y1)
 
     def _update_plot_values(self):
