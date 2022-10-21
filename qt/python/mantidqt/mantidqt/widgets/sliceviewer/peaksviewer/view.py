@@ -8,7 +8,7 @@
 
 # 3rd party imports
 from qtpy.QtCore import QSortFilterProxyModel, Qt
-from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget, QCheckBox
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 # local imports
@@ -104,6 +104,7 @@ class PeaksViewerView(QWidget):
         self._group_box: Optional[QGroupBox] = None
         self._presenter: Optional['PeaksViewerPresenter'] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
+        self._concise_check_box: Optional[QCheckBox] = None
         self._setup_ui()
 
     @property
@@ -185,8 +186,11 @@ class PeaksViewerView(QWidget):
         self._table_view.setSelectionMode(_PeaksWorkspaceTableView.SingleSelection)
         self._table_view.clicked.connect(self._on_row_clicked)
         self._table_view.verticalHeader().sectionClicked.connect(self._row_selected)
+        self._concise_check_box = QCheckBox(text="Concise View", parent=self)
+        self._concise_check_box.stateChanged.connect(self._check_box_clicked)
 
         group_box_layout = QVBoxLayout()
+        group_box_layout.addWidget(self._concise_check_box)
         group_box_layout.addWidget(self._table_view)
         self._group_box.setLayout(group_box_layout)
         widget_layout = QVBoxLayout()
@@ -216,6 +220,10 @@ class PeaksViewerView(QWidget):
             return None
 
         return self.table_view.proxy_model.mapToSource(selected[0]).row()
+
+    def _check_box_clicked(self):
+        # do something smart
+        raise NotImplementedError
 
 
 class PeaksViewerCollectionView(QWidget):
