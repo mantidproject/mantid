@@ -35,9 +35,6 @@ class RectangleManagerTest(unittest.TestCase):
         config['default.instrument'] = self.instrument
         mtd.clear()
 
-    def test_additional_peak_info(self):
-        pass
-
     def test_add_rectangle(self):
         rect1 = Rectangle((0, 0), 1, 1)
         rect2 = Rectangle((1, 1), 2, 2)

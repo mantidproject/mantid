@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
-from qtpy.QtCore import *
+from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QCloseEvent
 
-import mantid
 from mantid.api import MatrixWorkspace
+from mantid.kernel import FeatureType
+from mantid import UsageService
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
@@ -113,7 +114,7 @@ class SimpleScanViewerView(QMainWindow):
         self.splitter.addWidget(bar_widget)
 
         # register startup
-        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "SimpleScanViewer", False)
+        UsageService.registerFeatureUsage(FeatureType.Interface, "SimpleScanViewer", False)
 
     def manage_buttons(self):
         """

@@ -59,7 +59,7 @@ class SimpleScanViewerModel:
     def roi_integration(ws: MatrixWorkspace, rectangles: list, bg_ws=None) -> (list, list):
         """
         Sum the workspace values in each provided ROI and returns the sum, and the sum corrected by the background.
-        The correction by the background is just the subtraction of the background value to the sample value for each
+        The correction by the background is just the subtraction of the background value from the sample value for each
         2theta.
 
         @param ws: a workspace from which to integrate the ROIs.
@@ -89,8 +89,6 @@ class SimpleScanViewerModel:
 
             ymin_index = bisect_left(yaxis, y0)
             ymax_index = bisect_left(yaxis, y1)
-
-            # TODO check for off-by-one issues everywhere in the vicinity
 
             ws_integration = np.sum(data[ymin_index:ymax_index, xmin_index:xmax_index])
 

@@ -18,6 +18,7 @@ class RectanglesManager(QWidget):
     A widget holding all the rectangle controllers currently active
     """
 
+    # signal sent when a rectangle is updated, with the object updated and the new x0, y0, x1, y1
     sig_controller_updated = Signal(patches.Rectangle, float, float, float, float)
 
     def __init__(self, parent=None):
@@ -184,9 +185,10 @@ class RectangleController:
         Set the items defining the header of the rectangle controller
         """
         parameter_item = QTableWidgetItem("Parameter")
-        parameter_item.setFlags(parameter_item.flags() & (~Qt.ItemIsEditable))
-
         value_item = QTableWidgetItem("Value")
+
+        # set the flags so that the header are not editable
+        parameter_item.setFlags(parameter_item.flags() & (~Qt.ItemIsEditable))
         value_item.setFlags(value_item.flags() & (~Qt.ItemIsEditable))
 
         self.header = [parameter_item, value_item]
@@ -263,6 +265,7 @@ class DoubleProperty:
 
     def __init__(self, name: str = "", value: float = 0):
         self._name = QTableWidgetItem(name)
+        # set the flags so the name of the parameter is not editable by the user
         self._name.setFlags(self._name.flags() & (~Qt.ItemIsEditable))
 
         self._value = QTableWidgetItem(self.value_as_string(value))

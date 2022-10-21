@@ -50,7 +50,7 @@ class SimpleScanViewerPresenter:
         try:
             presenter = SliceViewer(ws=workspace)
         except ValueError as e:
-            logger.error("Cannot open reduced workspace in Slice Viewer:\n{}".format(e))
+            logger.error("Cannot open the reduced workspace in the simple scan viewer:\n{}".format(e))
             return
 
         self._ws = workspace
