@@ -266,7 +266,7 @@ class SimpleScanViewerView(QMainWindow):
         """
         manager = InterfaceManager()
         preset = dict()
-        enabled = dict()
+        enabled = list()
         if self.file_line_edit.text():
             preset["SampleRuns"] = self.file_line_edit.text()
             enabled = ["SampleRuns"]
