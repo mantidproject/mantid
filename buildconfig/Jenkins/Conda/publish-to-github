@@ -48,7 +48,7 @@ conda activate $CONDA_ENV_NAME
 # The workflow here is attempting ensure there is always something on GitHub. As
 # tags cannot be overwritten we have to delete and recreate the release/tag. If
 # we delete the existing tag/release first and then uploading the new one fails
-# we will be left with nothing on GitHub. For nightly releases we are better atleast
+# we will be left with nothing on GitHub. For nightly releases we are better at least
 # leaving the previous nightly in place. The workflow is:
 #  - create new draft release with the suffix -staged
 #  - upload new assets to staged release
