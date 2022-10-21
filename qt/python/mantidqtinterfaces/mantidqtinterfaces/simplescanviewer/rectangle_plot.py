@@ -313,10 +313,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             x1_ind = min(int(np.floor((x1 - xmin) / x_step)), len(arr[0]))
             y1_ind = min(int(np.floor((y1 - ymin) / y_step)), len(arr))
 
-            # TODO find a more efficient / pythonic way for that
-            for x in range(x0_ind, x1_ind):
-                for y in range(y0_ind, y1_ind):
-                    mask_array[y][x] = 1
+            mask_array[y0_ind:y1_ind, x0_ind:x1_ind] = 1
 
         masked_array = np.ma.masked_where(condition=mask_array == 0, a=arr, copy=True)
 
