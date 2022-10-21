@@ -79,7 +79,7 @@ class SimpleScanViewerView(QMainWindow):
         self.zoom_button.setCheckable(True)
 
         # button to go in rectangle drawing mode
-        self.multiple_button = QPushButton(text="Rectangles")
+        self.multiple_button = QPushButton(text="ROI")
         self.multiple_button.setVisible(False)
         self.multiple_button.setCheckable(True)
 
