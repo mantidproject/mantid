@@ -141,7 +141,7 @@ class PeaksViewerPresenter:
         Respond to a change in the peaks list in the model
         """
         self._peaks_table_presenter.refresh()
-        self.view.table_view.enable_sorting(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
+        self.view.table_view.set_proxy_model(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
 
     # private api
     @staticmethod

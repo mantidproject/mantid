@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
-from qtpy.QtCore import QSortFilterProxyModel
+from qtpy.QtCore import QSortFilterProxyModel, Qt
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
@@ -57,7 +57,7 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         QTableView.keyPressEvent(self, event)
         self._key_handler._row_selected()
 
-    def enable_sorting(self, sort_role: int):
+    def set_proxy_model(self, sort_role: int):
         """
         Turn on column sorting by clicking headers
         :param: Role defined as source of data for sorting
@@ -66,7 +66,21 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         self.proxy_model = _LessThanOperatorSortFilterModel()
         self.proxy_model.setSourceModel(self.source_model)
         self.proxy_model.setSortRole(sort_role)
+        self._filter_columns()
         self.setModel(self.proxy_model)
+
+    def _filter_columns(self):
+        unwanted_columns = ['RunNumber', 'DetID', 'Wavelength', 'Energy', 'TOF', 'DSpacing', 'BinCount', 'Row', 'Col',
+                            'QLab', 'QSample', 'TBar']
+
+        # since we can only look up and delete via index (and removing alters the indexes)
+        # we have to loop over the column names and search for each one
+        for name in unwanted_columns:
+            header_size = self.proxy_model.columnCount()
+            for i in range(header_size):
+                header_name = self.proxy_model.headerData(i, Qt.Horizontal)
+                if header_name == name:
+                    self.proxy_model.removeColumn(i)
 
 
 class PeaksViewerView(QWidget):
