@@ -33,6 +33,12 @@ Single 1D Plots
 |
 |
 
+To create a single 1D plot, right-click on a workspace and select ``Plot > Spectrum...``.
+Check the ``Plot Type`` is set to ``Individual`` before choosing which spectra to plot and selecting ``OK``.
+
+|
+|
+
 Plot Toolbar
 ------------
 
@@ -127,6 +133,12 @@ For more advice: :ref:`02_scripting_plots`
 
 Tiled Plots
 ===========
+
+|
+|
+
+To create a tiled plot, right-click on a workspace and select ``Plot > Spectrum...``.
+Check the ``Plot Type`` is set to ``Tiled`` before choosing which spectra to plot and selecting ``OK``.
 
 |
 |

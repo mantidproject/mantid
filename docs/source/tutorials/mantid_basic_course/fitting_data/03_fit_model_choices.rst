@@ -19,7 +19,7 @@ Multiple peaks + background
 It is possible to fit overlapping peaks on a common
 background. Load the file `GEM38370_Focussed` and plot spectrum number 6.
 Zoom in on the 3 peaks around 2.15 Angstroms. Add a Linear Background, add a Lorentzian peak
-to the large central peak, and add a Gaussian peak to both of the smaller peaks., as below.
+to the large central peak, and add a Gaussian peak to both of the smaller peaks, as below.
 Run the Fit, and inspect the results.
 
 .. figure:: /images/FittingMultiplePeaks.png
