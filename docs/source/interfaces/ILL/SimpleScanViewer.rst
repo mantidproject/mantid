@@ -22,7 +22,7 @@ The user can provide data by:
 * reducing a file through the Advanced button, which opens the dialog for
   :ref:`SANSILLParameterScan <algm-SANSILLParameterScan>` and allows for changing the default parameters.
 
-After the algorithm has run, the output is displayed in a slice viewer like interface. On the right is a table that
+After the algorithm has run, the output is displayed in a slice viewer-like interface. On the right is a table that
 shows the coordinates of all the created ROIs and allows their editing.
 
 Some keyboard inputs allow exporting data to workspaces for further analysis (see below).
@@ -46,9 +46,9 @@ ROI
 Features
 --------
 
-When a ROI is defined, the integrated values are plotted the side plots along each axis. A small red cross is also drawn
-in the ROI, showing the position of the center of mass of this ROI (assumed to be a good enough approximation of the
-peak position).
+When a ROI is defined, the X and Y axis projections are plotted in the side plots attached to their respective axis.
+A small red cross is also drawn in the ROI, showing the position of the center of mass of this ROI (assumed to be a good
+enough approximation of the peak position).
 
 A number of keyboard shortcuts are provided to interact with the data and the ROIs defined.
 
@@ -57,8 +57,8 @@ A number of keyboard shortcuts are provided to interact with the data and the RO
     Deletes the currently selected ROI.
 
 'x', 'y', 'c'
-    Export the cuts - the side plots - to workspaces. "x" exports the one along the x-axis, "y" the one along the y-axis,
-    and "c" along both of them. A different workspace is created for every ROI on each axis, in  addition to a workspace
+    Export the cuts - the side plots - to workspaces. "x" exports the one along the X-axis, "y" the one along the Y-axis,
+    and "c" along both of them. A different workspace is created for every ROI on each axis, in addition to a workspace
     containing the side plot itself (which is just the sum of all the other workspaces based on that axis).
 'p'
     Exports the peaks to a table workspace. For each ROI, the detected peak is the center of mass of the ROI. The values
@@ -72,7 +72,7 @@ A number of keyboard shortcuts are provided to interact with the data and the RO
     * if there is only one ROI, it is assumed to correspond to the first non-zero theta peak and linearly place other
       ROIs at regular intervals assuming :math:`\theta = \Omega`. No ROI is placed at :math:`\theta = 0`, because it is
       the beam and does not contain data.
-    * if there are 2 ROIs, it simply linearly interpolates from these two to place more ROIs. There size is the mean of
+    * if there are 2 ROIs, it simply linearly interpolates from these two to place more ROIs. Their size is the mean of
       the original ROIs.
 
 .. categories:: Interfaces
