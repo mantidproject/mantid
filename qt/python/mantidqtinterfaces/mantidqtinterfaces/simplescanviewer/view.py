@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
 
 from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
 from qtpy.QtCore import *
