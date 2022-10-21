@@ -48,6 +48,7 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         TableWorkspaceDisplayView.__init__(self, *args, **kwargs)
         self.source_model = self.model()
         self.proxy_model = None
+        self.is_concise = False
 
     def keyPressEvent(self, event):
         """
@@ -56,6 +57,9 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         # bypass immediate base class to get standard table arrow key behaviour
         QTableView.keyPressEvent(self, event)
         self._key_handler._row_selected()
+
+    def set_concise(self, bl):
+        self.is_concise = bl
 
     def set_proxy_model(self, sort_role: int):
         """
@@ -66,7 +70,9 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         self.proxy_model = _LessThanOperatorSortFilterModel()
         self.proxy_model.setSourceModel(self.source_model)
         self.proxy_model.setSortRole(sort_role)
-        self._filter_columns()
+        # PROBLEM they get deleted then won't come back (: need reinitialise or something
+        if self.is_concise:
+            self._filter_columns()
         self.setModel(self.proxy_model)
 
     def _filter_columns(self):
@@ -187,6 +193,7 @@ class PeaksViewerView(QWidget):
         self._table_view.clicked.connect(self._on_row_clicked)
         self._table_view.verticalHeader().sectionClicked.connect(self._row_selected)
         self._concise_check_box = QCheckBox(text="Concise View", parent=self)
+        self._concise_check_box.setChecked(False)
         self._concise_check_box.stateChanged.connect(self._check_box_clicked)
 
         group_box_layout = QVBoxLayout()
@@ -223,7 +230,8 @@ class PeaksViewerView(QWidget):
 
     def _check_box_clicked(self):
         # do something smart
-        raise NotImplementedError
+        self._table_view.set_concise(self._concise_check_box.isChecked())
+        self.presenter.concise_checkbox_changes()
 
 
 class PeaksViewerCollectionView(QWidget):

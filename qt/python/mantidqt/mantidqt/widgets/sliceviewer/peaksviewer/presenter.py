@@ -143,6 +143,9 @@ class PeaksViewerPresenter:
         self._peaks_table_presenter.refresh()
         self.view.table_view.set_proxy_model(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
 
+    def concise_checkbox_changes(self):
+        self.view.table_view.set_proxy_model(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
+
     # private api
     @staticmethod
     def _raise_error_if_workspace_incompatible(ws):
