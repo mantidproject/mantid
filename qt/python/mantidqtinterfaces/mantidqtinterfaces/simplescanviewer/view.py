@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, QGroupBox
+from qtpy.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QPushButton, QSplitter, QLineEdit, QFileDialog, \
+    QGroupBox, QToolButton, QStatusBar, QLabel
 from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QCloseEvent
 
@@ -89,8 +90,19 @@ class SimpleScanViewerView(QMainWindow):
         self.background_button.setCheckable(False)
         self.background_button.clicked.connect(self.on_set_background_clicked)
 
+        # status bar with the help
+        self.status_bar = QStatusBar(parent=self.splitter)
+        self.status_bar.setStyleSheet('QStatusBar::item {border: None;}')  # Hide spacers between button and label
+        self.status_bar_label = QLabel()
+        self.help_button = QToolButton()
+        self.help_button.setText("?")
+        self.help_button.clicked.connect(self.presenter.action_open_help_window)
+        self.status_bar.addWidget(self.help_button)
+        self.status_bar.addWidget(self.status_bar_label)
+
         # setting the layout
         upper_layout = QVBoxLayout(self)
+
         layout = QHBoxLayout()
         layout.addWidget(self.file_line_edit)
         layout.addWidget(self.browse_button)
@@ -112,6 +124,7 @@ class SimpleScanViewerView(QMainWindow):
         bar_widget.setLayout(upper_layout)
 
         self.splitter.addWidget(bar_widget)
+        self.splitter.addWidget(self.status_bar)
 
         # register startup
         UsageService.registerFeatureUsage(FeatureType.Interface, "SimpleScanViewer", False)
@@ -223,10 +236,11 @@ class SimpleScanViewerView(QMainWindow):
         Set visual options for the slice viewer and display it.
         @param workspace: the workspace to display
         """
+        self.status_bar.setVisible(False)
         if self.lower_splitter.count() == 0:
             self.lower_splitter.addWidget(self._data_view)
 
-            self.splitter.addWidget(self.lower_splitter)
+            self.splitter.insertWidget(1, self.lower_splitter)
         else:
             self.lower_splitter.replaceWidget(self.SLICE_VIEWER_SPLITTER_INDEX, self._data_view)
 
