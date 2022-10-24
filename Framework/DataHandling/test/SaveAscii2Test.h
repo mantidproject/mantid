@@ -1009,6 +1009,10 @@ public:
   }
 
   void test_Distribution_true_Header_true() {
+    // check the stream saved to file
+    // contains the header flag Distribution=true
+    // when the workspace is a Distribution
+
     MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);
     wsToSave->setDistribution(true);
@@ -1050,6 +1054,10 @@ public:
   }
 
   void test_Distribution_false_Header_true() {
+    // check the stream saved to file
+    // contains the header flag Distribution=false
+    // when the workspace is NOT a Distribution
+
     MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);
 
@@ -1090,6 +1098,11 @@ public:
   }
 
   void test_Distribution_true_Header_false() {
+    // check the stream saved to file
+    // contains the header flag Distribution=true
+    // when the workspace is a Distribution
+    // even when ColumnHeader=false
+
     // ColumnHeader should be written, even when ColumnHeader=false, but Distribution=true
     MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);
@@ -1133,6 +1146,11 @@ public:
   }
 
   void test_Distribution_false_Header_false() {
+    // check the stream saved to file
+    // does NOT contain a header
+    // when the workspace is NOT a Distribution
+    // and ColumnHeader=false
+
     // ColumnHeader not written, when ColumnHeader=false and Distribution=false
     MatrixWorkspace_sptr wsToSave;
     writeInelasticWS(wsToSave);

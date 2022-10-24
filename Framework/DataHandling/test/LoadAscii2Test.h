@@ -154,6 +154,8 @@ public:
   }
 
   void test_Distribution_Header_Flag_true() {
+    // check workspace set to Distribution = True,
+    // when set True in the file header
     m_testno++;
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(4, true, "#", "Space");
@@ -162,6 +164,9 @@ public:
   }
 
   void test_Distribution_Header_Flag_true_Two_Columns() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // when set True in the file header
     m_testno++;
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(2, true);
@@ -170,6 +175,8 @@ public:
   }
 
   void test_Distribution_Header_Flag_false() {
+    // check workspace set to Distribution = False,
+    // when set False in the file header
     m_testno++;
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(4, true, "#", "Space");
@@ -178,6 +185,9 @@ public:
   }
 
   void test_Distribution_Header_Flag_false_Two_Columns() {
+    // for 2 column test file,
+    // check workspace set to Distribution = False,
+    // when set False in the file header
     m_testno++;
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(2, true);
@@ -186,6 +196,8 @@ public:
   }
 
   void test_Distribution_No_Flag_false() {
+    // check workspace set to Distribution = False,
+    // when no flag set in file header
     m_testno++;
     m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", true, false);
     auto loadedWS = runTest(4, true, "#", "Space");
@@ -194,6 +206,9 @@ public:
   }
 
   void test_Distribution_No_Flag_false_Two_Columns() {
+    // for 2 column test file,
+    // check workspace set to Distribution = False,
+    // when no flag set in file header
     m_testno++;
     m_abspath = writeTestFile(2, false, "#", true, 6, "UserDefined", " ", true, false);
     auto loadedWS = runTest(2, true);
@@ -202,6 +217,9 @@ public:
   }
 
   void test_Distribution_Property_true_No_Flag() {
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when no flag set in file header
     m_testno++;
     m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", false, false);
     auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
@@ -210,6 +228,10 @@ public:
   }
 
   void test_Distribution_Property_true_Two_Columns_No_Flag() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when no flag set in file header
     m_testno++;
     m_abspath = writeTestFile(2, false, "#", true, 6, "UserDefined", " ", false, false);
     auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
@@ -218,6 +240,9 @@ public:
   }
 
   void test_Distribution_Property_true_Flag_true() {
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set True in file header
     m_testno++;
     m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
@@ -226,6 +251,10 @@ public:
   }
 
   void test_Distribution_Property_true_Two_Columns_Flag_true() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set True in file header
     m_testno++;
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", true, true);
     auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
@@ -234,6 +263,9 @@ public:
   }
 
   void test_Distribution_Property_true_Flag_false() {
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set False in file header
     m_testno++;
     m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
@@ -242,6 +274,10 @@ public:
   }
 
   void test_Distribution_Property_true_Two_Columns_Flag_false() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set False in file header
     m_testno++;
     m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", false, true);
     auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
