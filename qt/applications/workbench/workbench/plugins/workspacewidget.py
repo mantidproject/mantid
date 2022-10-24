@@ -350,6 +350,17 @@ class WorkspaceWidget(PluginWidget):
         else:
             logger.warning("Sample material can only be viewed for a single workspace.")
 
+    def _show_sample_shape(self, names):
+        """
+        Create a 3D Plot of the SampleShape from the selected workspaces
+
+        :param names: A list of workspace names
+        """
+        try:
+            plot_sample_shape_from_names(names)
+        except RuntimeError as re:
+            logger.error(str(re))
+
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)
         try:
