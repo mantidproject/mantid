@@ -924,7 +924,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
         func.setParameter('X0', pk.getTOF())  # set centre
         func.setMatrixWorkspace(ws, ws.getIndicesFromDetectorIDs([int(detid)])[0], 0.0, 0.0)  # calc A,B,S based on peak cen
-        dTOF = 4*func.fwhm() if func.isExplicitlySet(4) else None
+        is_valid = all(func.isExplicitlySet(ipar) for ipar in [1,2,4])
+        dTOF = 4*func.fwhm() if is_valid else None
         return dTOF
 
     @staticmethod
