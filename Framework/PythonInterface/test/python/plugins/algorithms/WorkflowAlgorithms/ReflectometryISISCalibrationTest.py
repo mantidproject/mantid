@@ -10,6 +10,7 @@ import unittest
 
 import numpy as np
 
+from mantid import FileFinder
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.kernel import FloatTimeSeriesProperty, V3D
@@ -17,7 +18,7 @@ from testhelpers import (assertRaisesNothing, create_algorithm, WorkspaceCreatio
 
 
 class ReflectometryISISCalibrationTest(unittest.TestCase):
-    _CALIBRATION_TEST_DATA = 'C:/repos/mantid-data/calibration_test_data.dat'
+    _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data.dat")
     _CALIBRATION_WS_NAME = 'CalibTable'
 
     @classmethod
