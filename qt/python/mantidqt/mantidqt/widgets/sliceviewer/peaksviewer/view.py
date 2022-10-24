@@ -48,7 +48,6 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         TableWorkspaceDisplayView.__init__(self, *args, **kwargs)
         self.source_model = self.model()
         self.proxy_model = None
-        self.is_concise = False
 
     def keyPressEvent(self, event):
         """
@@ -61,7 +60,7 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     def set_concise(self, bl):
         self.is_concise = bl
 
-    def set_proxy_model(self, sort_role: int):
+    def enable_sorting(self, sort_role: int):
         """
         Turn on column sorting by clicking headers
         :param: Role defined as source of data for sorting
@@ -70,23 +69,19 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         self.proxy_model = _LessThanOperatorSortFilterModel()
         self.proxy_model.setSourceModel(self.source_model)
         self.proxy_model.setSortRole(sort_role)
-        # PROBLEM they get deleted then won't come back (: need reinitialise or something
-        if self.is_concise:
-            self._filter_columns()
         self.setModel(self.proxy_model)
 
-    def _filter_columns(self):
-        unwanted_columns = ['RunNumber', 'DetID', 'Wavelength', 'Energy', 'TOF', 'DSpacing', 'BinCount', 'Row', 'Col',
-                            'QLab', 'QSample', 'TBar']
-
-        # since we can only look up and delete via index (and removing alters the indexes)
-        # we have to loop over the column names and search for each one
-        for name in unwanted_columns:
-            header_size = self.proxy_model.columnCount()
-            for i in range(header_size):
-                header_name = self.proxy_model.headerData(i, Qt.Horizontal)
-                if header_name == name:
-                    self.proxy_model.removeColumn(i)
+    def filter_columns(self, concise, unwanted_columns):
+        """
+        Hide or show columns of the table view
+        :param concise: bool for if the table should be in 'concise mode'
+        :param unwanted_columns: list of columns to hide / show by their header name
+        """
+        header_size = self.source_model.columnCount()
+        for i in range(header_size):
+            header_name = self.source_model.headerData(i, Qt.Horizontal)
+            if header_name in unwanted_columns:
+                self.setColumnHidden(i, concise)
 
 
 class PeaksViewerView(QWidget):
@@ -229,9 +224,10 @@ class PeaksViewerView(QWidget):
         return self.table_view.proxy_model.mapToSource(selected[0]).row()
 
     def _check_box_clicked(self):
-        # do something smart
-        self._table_view.set_concise(self._concise_check_box.isChecked())
-        self.presenter.concise_checkbox_changes()
+        """
+        Call presenter method on concise view checkbox state change
+        """
+        self.presenter.concise_checkbox_changes(self._concise_check_box.isChecked())
 
 
 class PeaksViewerCollectionView(QWidget):
