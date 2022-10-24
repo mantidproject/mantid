@@ -91,3 +91,20 @@ public:
   }
   void exec() override {}
 };
+
+class LowerCaseAliasAlgorithm : public Algorithm {
+public:
+  LowerCaseAliasAlgorithm() : Algorithm() {}
+  ~LowerCaseAliasAlgorithm() override = default;
+  const std::string name() const override { return "Lower"; }
+  int version() const override { return 1; }                          ///< Algorithm's version for identification
+  const std::string category() const override { return "Lowercase"; } ///< Algorithm's category for identification
+  const std::string alias() const override { return "lower"; }
+  const std::string summary() const override { return "Test summary"; }
+
+  void init() override {
+    declareProperty("prop1", "value");
+    declareProperty("prop2", 1);
+  }
+  void exec() override {}
+};
