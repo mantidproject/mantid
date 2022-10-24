@@ -13,6 +13,9 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <QFileInfo>
 
 using namespace IndirectDataValidationHelper;
@@ -28,8 +31,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IndirectSqwModel>()),
+IndirectSqw::IndirectSqw(QWidget *parent)
+    : IndirectDataManipulationTab(parent), m_model(std::make_unique<IndirectSqwModel>()),
       m_view(std::make_unique<IndirectSqwView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraContour));
@@ -54,6 +57,8 @@ void IndirectSqw::connectSignals() {
   connect(m_view.get(), SIGNAL(eWidthChanged(double)), this, SLOT(eWidthChanged(double)));
   connect(m_view.get(), SIGNAL(eHighChanged(double)), this, SLOT(eHighChanged(double)));
   connect(m_view.get(), SIGNAL(rebinEChanged(int)), this, SLOT(rebinEChanged(int)));
+  connect(m_view.get(), SIGNAL(instrumentConfigChanged(const QString &, const QString &, const QString &)), this,
+          SLOT(handleInstrumentConfigChanged(const QString &, const QString &, const QString &)));
 
   connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
@@ -72,7 +77,8 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName.toStdString());
     try {
-      auto const eFixed = getInstrumentDetail("Efixed").toStdString();
+      std::string eFixed = m_model->getEFixedFromInstrument(m_view->getInstrumentName(), m_view->getAnalyserName(),
+                                                            m_view->getReflectionName());
       m_model->setEFixed(eFixed);
     } catch (std::runtime_error const &ex) {
       emit showMessageBox(ex.what());
@@ -81,6 +87,22 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
     plotRqwContour();
     m_view->setDefaultQAndEnergy();
   }
+}
+
+/**
+ * Handles changing the efixed value when the instrument is changed.
+ *
+ */
+void IndirectSqw::handleInstrumentConfigChanged(const QString &instrumentName, const QString &analyser,
+                                                const QString &reflection) {
+
+  std::string instrumentNameString = instrumentName.toStdString();
+  std::string analyserString = analyser.toStdString();
+  std::string reflectionString = reflection.toStdString();
+
+  std::string eFixed = m_model->getEFixedFromInstrument(m_view->getInstrumentName(), m_view->getAnalyserName(),
+                                                        m_view->getReflectionName());
+  m_model->setEFixed(eFixed);
 }
 
 bool IndirectSqw::validate() {

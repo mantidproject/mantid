@@ -1,4 +1,6 @@
-﻿Indirect Bayes
+﻿.. _interface-indirect-bayes:
+
+Indirect Bayes
 ==============
 
 .. contents:: Table of Contents

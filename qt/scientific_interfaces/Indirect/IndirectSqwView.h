@@ -28,6 +28,9 @@ public:
   void setWSSuffixes(QStringList suffix);
   std::tuple<double, double> getQRangeFromPlot();
   std::tuple<double, double> getERangeFromPlot();
+  std::string getInstrumentName();
+  std::string getAnalyserName();
+  std::string getReflectionName();
   std::string getDataName();
   void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace);
   void setDefaultQAndEnergy();
@@ -44,6 +47,7 @@ signals:
   void eWidthChanged(double);
   void eHighChanged(double);
   void rebinEChanged(int);
+  void instrumentConfigChanged(const QString &, const QString &, const QString &);
   void runClicked();
   void saveClicked();
   void showMessageBox(const QString &message);

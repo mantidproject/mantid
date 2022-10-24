@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "IndirectDataManipulationTab.h"
 #include "IndirectSqwModel.h"
 #include "IndirectSqwView.h"
 
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/System.h"
 #include "ui_IndirectSqw.h"
 
@@ -20,11 +21,11 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport IndirectSqw : public IndirectDataReductionTab {
+class DLLExport IndirectSqw : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  IndirectSqw(QWidget *parent = nullptr);
   ~IndirectSqw() = default;
 
   void setup() override;
@@ -45,6 +46,7 @@ private slots:
   void eWidthChanged(double value);
   void eHighChanged(double value);
   void rebinEChanged(int value);
+  void handleInstrumentConfigChanged(const QString &instrumentName, const QString &analyser, const QString &reflection);
 
 private:
   void connectSignals();

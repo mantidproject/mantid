@@ -32,6 +32,8 @@ set(SRC_FILES
     IndirectDataAnalysisIqtFitTab.cpp
     IndirectDataAnalysisMSDFitTab.cpp
     IndirectDataAnalysisTab.cpp
+    IndirectDataManipulation.cpp
+    IndirectDataManipulationTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -129,6 +131,8 @@ set(MOC_FILES
     IndirectDataAnalysisIqtTab.h
     IndirectDataAnalysisMSDFitTab.h
     IndirectDataAnalysisTab.h
+    IndirectDataManipulation.h
+    IndirectDataManipulationTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
@@ -221,6 +225,7 @@ set(UI_FILES
     IndirectCorrections.ui
     IndirectDataAnalysis.ui
     IndirectDataAnalysisElwinTab.ui
+    IndirectDataManipulation.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
     IndirectEditResultsDialog.ui

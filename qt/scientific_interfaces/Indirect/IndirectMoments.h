@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "IndirectDataManipulationTab.h"
 #include "IndirectMomentsModel.h"
 #include "IndirectMomentsView.h"
 
@@ -24,11 +24,11 @@ namespace CustomInterfaces {
   @author Samuel Jackson
   @date 13/08/2013
 */
-class DLLExport IndirectMoments : public IndirectDataReductionTab {
+class DLLExport IndirectMoments : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  IndirectMoments(QWidget *parent = nullptr);
   ~IndirectMoments() = default;
 
   void setup() override;
