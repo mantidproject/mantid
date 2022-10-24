@@ -19,7 +19,7 @@ If you haven't installed CLion yet do that now, CLion can be installed from `her
 Opening CLion
 #############
 
-The first time you build from CLion, you will most likely need to launch it from a terminal or command line to make sure you have access to all the relevent tools.
+The first time you build from CLion, you will most likely need to launch it from a terminal or command line to make sure you have access to all the relevant tools.
 
 * On Linux,
 
@@ -97,7 +97,7 @@ Building with CLion
 ###################
 
 - To build all targets, navigate to ``Build > Build All in 'Debug'``. Check that the build command displayed in the Messages window is running the correct cmake executable from your conda installation.
-- To build a specific target, select it in the configurations drop-down menu and click the hammar icon next to it.
+- To build a specific target, select it in the configurations drop-down menu and click the hammer icon next to it.
 
 If this fails, you may need to open CLion from a terminal with your conda environment activated.
 
