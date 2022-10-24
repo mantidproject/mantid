@@ -125,7 +125,7 @@ void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsre
   EigenJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
   const auto &j = J.getJ();
-  assert(j.cols() == na);
+  assert(static_cast<size_t>(j.cols()) == na);
   covar.resize(na, na);
 
   // calculate the derivatives
