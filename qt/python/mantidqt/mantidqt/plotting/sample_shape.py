@@ -33,7 +33,14 @@ def get_valid_sample_shape_from_workspace(workspace_name):
 
 
 def plot_sample_shape(workspace_name):
+    sample_shape_figure = plot_sample_only(workspace_name)
+    workspace = ADS.retrieve(workspace_name)
+    if workspace.sample().hasEnvironment():
+        plot_container_and_components(workspace_name, sample_shape_figure)
+    return sample_shape_figure
 
+
+def plot_sample_only(workspace_name):
     workspace = ADS.retrieve(workspace_name)
 
     # get shape and mesh vertices
@@ -43,154 +50,41 @@ def plot_sample_shape(workspace_name):
 
     # Create 3D Polygon and set facecolor
     mesh_polygon = Poly3DCollection(mesh, facecolors=['g'], edgecolors=['b'], alpha=0.5, linewidths=0.1)
-
+    mesh_polygon.set_facecolor((0, 1, 0, 0.5))
     fig, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
     axes.add_collection3d(mesh_polygon)
 
     axes.set_mesh_axes_equal(mesh)
+    axes.view_init(elev=10, azim=-150)
     axes.set_title(f'Sample Shape: {workspace_name}')
     axes.set_xlabel('X / m')
     axes.set_ylabel('Y / m')
     axes.set_zlabel('Z / m')
 
-    plt.show()
+    fig.show()
+    return fig
 
-    return axes
 
+def plot_container_and_components(workspace_name, figure):
+    axes = figure.gca()
+    workspace = ADS.retrieve(workspace_name)
+    environment = workspace.sample().getEnvironment()
 
-#
-# '''
-# MeshPlot stl or 3mf
-#
-#
-# from mantid.simpleapi import *
-# import matplotlib.pyplot as plt
-# import numpy as np
-#
-# from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-# from mantid.api import AnalysisDataService as ADS
-#
-# # load sample shape mesh file for a workspace
-# ws = CreateSampleWorkspace()
-# # alternatively: ws = Load('filepath') or ws = ADS.retrieve('ws')
-# ws = LoadSampleShape(ws, "tube.stl")
-#
-# # get shape and mesh vertices
-# sample = ws.sample()
-# shape = sample.getShape()
-# mesh = shape.getMesh()
-#
-# # Create 3D Polygon and set facecolor
-# mesh_polygon = Poly3DCollection(mesh, facecolors = ['g'], edgecolors = ['b'], alpha = 0.5, linewidths=0.1)
-#
-# fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
-# axes.add_collection3d(mesh_polygon)
-#
-# axes.set_mesh_axes_equal(mesh)
-# axes.set_title('Sample Shape: Tube')
-# axes.set_xlabel('X / m')
-# axes.set_ylabel('Y / m')
-# axes.set_zlabel('Z / m')
-#
-# plt.show()
-#
-#
-# CSGObject
-#
-#
-# # import mantid algorithms, numpy and matplotlib
-# from mantid.simpleapi import *
-# import matplotlib.pyplot as plt
-# import numpy as np
-# from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-#
-# ws = CreateSampleWorkspace()
-#
-# merge_xml = ' \
-# <cylinder id="stick"> \
-# <centre-of-bottom-base x="-0.5" y="0.0" z="0.0" /> \
-# <axis x="1.0" y="0.0" z="0.0" />  \
-# <radius val="0.05" /> \
-# <height val="1.0" /> \
-# </cylinder> \
-# \
-# <sphere id="some-sphere"> \
-# <centre x="0.7"  y="0.0" z="0.0" /> \
-# <radius val="0.2" /> \
-# </sphere> \
-# \
-# <rotate-all x="90" y="-45" z="0" /> \
-# <algebra val="some-sphere (: stick)" /> \
-# '
-#
-# SetSample(ws, Geometry={'Shape': 'CSG', 'Value': merge_xml})
-#
-# sample = ws.sample()
-# shape = sample.getShape()
-# mesh = shape.getMesh()
-#
-# mesh_polygon = Poly3DCollection(mesh, edgecolors = 'blue', linewidths=0.1)
-# mesh_polygon.set_facecolor((1,0,0,0.5))
-#
-# fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
-# axes.add_collection3d(mesh_polygon)
-#
-# axes.set_mesh_axes_equal(mesh)
-# axes.view_init(elev=10, azim=-150)
-#
-# axes.set_title('Sample Shape: Microphone')
-# axes.set_xlabel('X / m')
-# axes.set_ylabel('Y / m')
-# axes.set_zlabel('Z / m')
-#
-# plt.show()
-#
-#
-#
-# Containers and Components
-#
-#
-#
-# # import mantid algorithms, numpy and matplotlib
-# from mantid.simpleapi import *
-# import numpy as np
-# import matplotlib.pyplot as plt
-# from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-#
-# # A fake host workspace, replace this with your real one.
-# ws = CreateSampleWorkspace()
-# LoadInstrument(Workspace=ws,RewriteSpectraMap=True,InstrumentName="Pearl")
-# SetSample(ws, Environment={'Name': 'Pearl'})
-#
-# sample = ws.sample()
-# environment = sample.getEnvironment()
-#
-# mesh = sample.getShape().getMesh()
-# container_mesh = environment.getContainer().getShape().getMesh()
-#
-# mesh_polygon_a = Poly3DCollection(mesh, facecolors = 'green', edgecolors='blue',alpha = 0.5, linewidths=0.1, zorder = 0.3)
-# mesh_polygon_b = Poly3DCollection(container_mesh, edgecolors='red', alpha = 0.1, linewidths=0.05, zorder = 0.5)
-# mesh_polygon_b.set_facecolor((1,0,0,0.5))
-#
-# fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
-# axes.add_collection3d(mesh_polygon_a)
-# axes.add_collection3d(mesh_polygon_b)
-#
-# for i in (1,3,5):
-#     print(i)
-#     mesh_polygon_i = Poly3DCollection(environment.getComponent(i).getMesh(), edgecolors='red', alpha = 0.1, linewidths=0.05, zorder = 0.5)
-#     mesh_polygon_i.set_facecolor((1,0,0,0.5))
-#     axes.add_collection3d(mesh_polygon_i)
-#
-# # Auto scale to the mesh size
-# axes_lims = (-0.03,0.03)
-# axes.auto_scale_xyz(axes_lims, axes_lims, axes_lims)
-#
-# axes.set_title('Pearl Sample in Container and Components(1,3,5)')
-# axes.set_xlabel('X / m')
-# axes.set_ylabel('Y / m')
-# axes.set_zlabel('Z / m')
-# axes.view_init(elev=5, azim=40)
+    number_of_components = environment.nelements()
+    for component_index in range(number_of_components):
+        mesh_loop = None
+        if component_index == 0:  # Container
+            mesh_loop = environment.getComponent(component_index).getShape().getMesh()
+        else:
+            mesh_loop = environment.getComponent(component_index).getMesh()
+        mesh_polygon_loop = Poly3DCollection(mesh_loop, edgecolors='red', alpha=0.1, linewidths=0.05, zorder=0.5)
+        mesh_polygon_loop.set_facecolor((0, 1, 0, 0.5))
+        axes.add_collection3d(mesh_polygon_loop)
+
+    axes.set_title('Sample and Components')
+    figure.show()
+    return True
+
 #
 # def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
 #     if origin == None:

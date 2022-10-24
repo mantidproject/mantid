@@ -14,14 +14,13 @@ matplotlib.use('AGG')  # noqa
 # import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, SetSample, LoadSampleShape, DeleteWorkspace
+from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, SetSample, LoadSampleShape, DeleteWorkspace,
+                              LoadInstrument)
 from mantidqt.plotting import sample_shape
 
 
 def setup_workspace_shape_from_CSG_merged(workspace_name: str):
-
     CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
-
     merge_xml = ' \
     <cylinder id="stick"> \
     <centre-of-bottom-base x="-0.5" y="0.0" z="0.0" /> \
@@ -38,14 +37,18 @@ def setup_workspace_shape_from_CSG_merged(workspace_name: str):
     <rotate-all x="90" y="-45" z="0" /> \
     <algebra val="some-sphere (: stick)" /> \
     '
-
     SetSample(workspace_name, Geometry={'Shape': 'CSG', 'Value': merge_xml})
 
 
 def setup_workspace_shape_from_mesh(workspace_name: str):
-
     CreateSampleWorkspace(OutputWorkspace=workspace_name)
     LoadSampleShape(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, Filename="tube.stl")
+
+
+def setup_workspace_sample_container_and_components_from_mesh(workspace_name: str):
+    CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
+    LoadInstrument(Workspace=workspace_name,RewriteSpectraMap=True,InstrumentName="Pearl")
+    SetSample(workspace_name, Environment={'Name': 'Pearl'})
 
 
 class PlotSampleShapeTest(TestCase):
@@ -89,8 +92,17 @@ class PlotSampleShapeTest(TestCase):
 
     def test_plot_created_for_mesh(self):
         setup_workspace_shape_from_mesh("ws_shape")
-        shape_plot = sample_shape.plot_sample_shape("ws_shape")
-        self.assertTrue(shape_plot)
+        shape_plot_axes = sample_shape.plot_sample_shape("ws_shape")
+        self.assertTrue(shape_plot_axes)
+
+    def test_plot_created_for_mesh_container_and_components(self):
+        setup_workspace_sample_container_and_components_from_mesh("ws_shape")
+        shape_plot_figure = sample_shape.plot_sample_shape("ws_shape")
+        self.assertTrue(shape_plot_figure)
+        components_added_to_plot = sample_shape.plot_container_and_components("ws_shape", shape_plot_figure)
+        self.assertTrue(components_added_to_plot)
+
+    # def test_do_not_add_components_if_no_environment(self):
 
 
 if __name__ == '__main__':
