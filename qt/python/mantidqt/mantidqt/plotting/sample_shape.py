@@ -8,6 +8,9 @@
 #
 #
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
 from mantid.api import AnalysisDataService as ADS
 
 
@@ -18,7 +21,8 @@ def get_sample_shape_from_workspace(workspace_name):
 
 
 def is_sample_shape_not_empty(shape):
-    if shape.getShapeXML() != '<type name="userShape">  </type>':
+    mesh = shape.getMesh()
+    if len(mesh) > 3:
         return True
 
 
@@ -26,6 +30,32 @@ def get_valid_sample_shape_from_workspace(workspace_name):
     sample_shape = get_sample_shape_from_workspace(workspace_name)
     if is_sample_shape_not_empty(sample_shape):
         return sample_shape
+
+
+def plot_sample_shape(workspace_name):
+
+    workspace = ADS.retrieve(workspace_name)
+
+    # get shape and mesh vertices
+    sample = workspace.sample()
+    shape = sample.getShape()
+    mesh = shape.getMesh()
+
+    # Create 3D Polygon and set facecolor
+    mesh_polygon = Poly3DCollection(mesh, facecolors=['g'], edgecolors=['b'], alpha=0.5, linewidths=0.1)
+
+    fig, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+    axes.add_collection3d(mesh_polygon)
+
+    axes.set_mesh_axes_equal(mesh)
+    axes.set_title(f'Sample Shape: {workspace_name}')
+    axes.set_xlabel('X / m')
+    axes.set_ylabel('Y / m')
+    axes.set_zlabel('Z / m')
+
+    plt.show()
+
+    return axes
 
 
 #

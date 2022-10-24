@@ -14,11 +14,11 @@ matplotlib.use('AGG')  # noqa
 # import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import CreateWorkspace, SetSample
-from mantidqt.plotting.sample_shape import (get_valid_sample_shape_from_workspace)
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, SetSample, LoadSampleShape, DeleteWorkspace
+from mantidqt.plotting import sample_shape
 
 
-def setup_workspace_with_CSG_merged_shape(workspace_name: str):
+def setup_workspace_shape_from_CSG_merged(workspace_name: str):
 
     CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
 
@@ -42,19 +42,55 @@ def setup_workspace_with_CSG_merged_shape(workspace_name: str):
     SetSample(workspace_name, Geometry={'Shape': 'CSG', 'Value': merge_xml})
 
 
+def setup_workspace_shape_from_mesh(workspace_name: str):
+
+    CreateSampleWorkspace(OutputWorkspace=workspace_name)
+    LoadSampleShape(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, Filename="tube.stl")
+
+
 class PlotSampleShapeTest(TestCase):
 
-    def test_microphone_is_valid(self):
-        setup_workspace_with_CSG_merged_shape("ws_shape")
+    def tearDown(self) -> None:
+        DeleteWorkspace("ws_shape")
+
+    def test_CSG_merged_shape_is_valid(self):
+        setup_workspace_shape_from_CSG_merged("ws_shape")
         ws_shape = ADS.retrieve("ws_shape")
         self.assertTrue(ws_shape.sample().getShape())
-        self.assertTrue(get_valid_sample_shape_from_workspace("ws_shape"))
+        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace("ws_shape"))
 
-    def test_empty_shape_is_not_valid(self):
-        CreateWorkspace(OutputWorkspace="ws_no_shape", DataX=[1, 1], DataY=[2, 2])
-        ws_no_shape = ADS.retrieve("ws_no_shape")
-        self.assertTrue(ws_no_shape.sample().getShape())
-        self.assertFalse(get_valid_sample_shape_from_workspace("ws_no_shape"))
+    def test_CSG_sphere_is_valid(self):
+        CreateSampleWorkspace(OutputWorkspace="ws_shape")
+        ws_shape = ADS.retrieve("ws_shape")
+        self.assertTrue(ws_shape.sample().getShape())
+        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace("ws_shape"))
+
+    def test_CSG_empty_shape_is_not_valid(self):
+        CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
+        ws_shape = ADS.retrieve("ws_shape")
+        self.assertTrue(ws_shape.sample().getShape())
+        self.assertFalse(sample_shape.get_valid_sample_shape_from_workspace("ws_shape"))
+
+    def test_mesh_is_valid(self):
+        setup_workspace_shape_from_mesh("ws_shape")
+        ws_shape = ADS.retrieve("ws_shape")
+        self.assertTrue(ws_shape.sample().getShape())
+        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace("ws_shape"))
+
+    def test_plot_created_for_CSG_sphere(self):
+        CreateSampleWorkspace(OutputWorkspace="ws_shape")
+        shape_plot = sample_shape.plot_sample_shape("ws_shape")
+        self.assertTrue(shape_plot)
+
+    def test_plot_created_for_CSG_merged(self):
+        setup_workspace_shape_from_CSG_merged("ws_shape")
+        shape_plot = sample_shape.plot_sample_shape("ws_shape")
+        self.assertTrue(shape_plot)
+
+    def test_plot_created_for_mesh(self):
+        setup_workspace_shape_from_mesh("ws_shape")
+        shape_plot = sample_shape.plot_sample_shape("ws_shape")
+        self.assertTrue(shape_plot)
 
 
 if __name__ == '__main__':
