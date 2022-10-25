@@ -52,6 +52,7 @@ public:
     auto batch = MockBatch();
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
+    // Set some expected detector IDs in the preview row
     auto detIDsStr = ProcessingInstructions{"2,3"};
     auto row = PreviewRow({});
     row.setLoadedWs(mockWs);
@@ -60,9 +61,13 @@ public:
 
     const std::string inputPropName = "InputWorkspace";
     const std::string roiPropName = "ROIDetectorIDs";
+
+    // Create the algorithm
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+
     auto expectedProps = std::make_unique<AlgorithmRuntimeProps>();
     expectedProps->setProperty(inputPropName, mockWs);
+    // We expect the same detector IDs that were set on the preview row to be set on the algorithm
     expectedProps->setPropertyValue(roiPropName, "2,3");
     const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
 
@@ -70,6 +75,26 @@ public:
     TS_ASSERT_EQUALS(static_cast<decltype(mockWs)>(expectedProps->getProperty(inputPropName)),
                      static_cast<decltype(mockWs)>(setProps.getProperty(inputPropName)))
     TS_ASSERT_EQUALS(expectedProps->getPropertyValue(roiPropName), setProps.getPropertyValue(roiPropName))
+  }
+
+  void test_lookup_table_properties_forwarded() {
+    auto row = PreviewRow({});
+    auto batch = MockBatch();
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+    // Set some expected detector IDs in the lookup row
+    auto const detIDsStr = boost::optional<ProcessingInstructions>{"2,3"};
+    auto lookupRow = makeLookupRow(boost::none);
+    lookupRow.setRoiDetectorIDs(detIDsStr);
+    auto maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+
+    EXPECT_CALL(batch, findLookupPreviewRowProxy(_)).Times(1).WillOnce(Return(maybeLookupRow));
+
+    // Create the algorithm
+    auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+
+    // Expect the original detector IDs to now be set in the algorithm
+    const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
+    TS_ASSERT_EQUALS(setProps.getPropertyValue("ROIDetectorIDs"), *detIDsStr)
   }
 
   void test_row_is_updated_on_algorithm_complete() {

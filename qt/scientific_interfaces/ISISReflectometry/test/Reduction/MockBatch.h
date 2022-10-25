@@ -25,8 +25,8 @@ public:
   MOCK_METHOD(RunsTable const &, runsTable, (), (const, override));
   MOCK_METHOD(Slicing const &, slicing, (), (const, override));
 
-  MOCK_METHOD(boost::optional<LookupRow>, findLookupRow, (Row const &), (const, override));
-  MOCK_METHOD(boost::optional<LookupRow>, findLookupRow, (PreviewRow const &), (const, override));
+  MOCK_METHOD(boost::optional<LookupRow>, findLookupRowProxy, (Row const &), (const));
+  MOCK_METHOD(boost::optional<LookupRow>, findLookupPreviewRowProxy, (PreviewRow const &), (const));
   MOCK_METHOD(boost::optional<LookupRow>, findWildcardLookupRow, (), (const, override));
   MOCK_METHOD(boost::optional<Item &>, getItemWithOutputWorkspaceOrNone, (std::string const &), (override));
   MOCK_METHOD(bool, isInSelection, (const Item &, const std::vector<MantidWidgets::Batch::RowLocation> &), (override));
@@ -38,5 +38,11 @@ public:
   MOCK_METHOD(void, updateLookupIndex, (Row &), (override));
   MOCK_METHOD(void, updateLookupIndexesOfGroup, (Group &), (override));
   MOCK_METHOD(void, updateLookupIndexesOfTable, (), (override));
+
+  // gtest struggles with the combination of overrides and references, so create proxies
+  boost::optional<LookupRow> findLookupRow(Row const &row) const override { return findLookupRowProxy(row); }
+  boost::optional<LookupRow> findLookupRow(PreviewRow const &row) const override {
+    return findLookupPreviewRowProxy(row);
+  }
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

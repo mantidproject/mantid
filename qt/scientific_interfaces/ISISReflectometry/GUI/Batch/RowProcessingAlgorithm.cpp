@@ -310,7 +310,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
                                                                                    PreviewRow const &previewRow) {
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updatePropertiesFromBatchModel(*properties, model);
-  // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)
+  // Look up properties for this run on the lookup table
   auto lookupRow = model.findLookupRow(previewRow);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
