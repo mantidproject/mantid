@@ -113,6 +113,10 @@ void TransformHKL::exec() {
   g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
 
+  o_lattice.setModVec1(hkl_tran * o_lattice.getModVec(0));
+  o_lattice.setModVec2(hkl_tran * o_lattice.getModVec(1));
+  o_lattice.setModVec3(hkl_tran * o_lattice.getModVec(2));
+
   Matrix<double> modUB = o_lattice.getModUB();
   modUB = modUB * hkl_tran_inverse;
   o_lattice.setModUB(modUB);
@@ -143,12 +147,10 @@ void TransformHKL::exec() {
     IPeak &peak = ws->getPeak(i);
     V3D hkl(peak.getHKL());
     V3D ihkl(peak.getIntHKL());
-    V3D imnp(peak.getIntMNP());
     peak.setIntHKL(hkl_tran * ihkl);
-    peak.setIntMNP(hkl_tran * imnp);
     miller_indices.emplace_back(hkl_tran * hkl - modHKL * peak.getIntMNP());
     peak.setHKL(hkl_tran * hkl);
-    q_vectors.emplace_back(peak.getQSampleFrame() - modUB * peak.getIntMNP());
+    q_vectors.emplace_back(peak.getQSampleFrame() - modUB * peak.getIntMNP() * 2 * M_PI);
     num_indexed++;
   }
 
