@@ -27,7 +27,7 @@ using MantidWidgets::SlitCalculator;
 
 namespace CustomInterfaces::ISISReflectometry {
 
-// Do not change the last arguement as you will break backwards compatibility
+// Do not change the last argument as you will break backwards compatibility
 // with project save it should be the same as one of the tags in the decoder.
 DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder, "ISIS Reflectometry")
 
