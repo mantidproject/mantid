@@ -59,7 +59,12 @@ pipeline {
     //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
     stage('Store git commit') {
       script {
-        env.GIT_SHA = GIT_COMMIT
+        agent any
+        steps {
+          script {
+            env.GIT_SHA = GIT_COMMIT
+          }
+        }
       }
     }
     // Verify developer environment build/test while also building conda packages
