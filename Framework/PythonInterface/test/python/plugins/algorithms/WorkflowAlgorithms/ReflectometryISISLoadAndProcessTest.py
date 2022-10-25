@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid import config
+from mantid import config, FileFinder
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace,
                               CropWorkspace, GroupWorkspaces, Rebin)
@@ -551,6 +551,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)
 
+    def test_algorithm_passes_calibration_filepath_to_preprocessing_step(self):
+        args = self._default_options
+        args['InputRunList'] = 'INTER45455'
+        del args['ProcessingInstructions']
+        args['CalibrationFile'] = FileFinder.getFullPath("ISISReflectometry/calibration_test_data_INTER45455.dat")
+        args['AnalysisMode'] = 'MultiDetectorAnalysis'
+        outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'CalibTable']
+        self._assert_run_algorithm_succeeds(args, outputs)
+
     # TODO test if no runNumber is on the WS
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
@@ -649,6 +658,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         except:
             throws = True
         self.assertEqual(throws, True)
+
+    def _assert_run_algorithm_throws_with_error(self, args, error_msg_regex):
+        alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
+        alg.setRethrows(True)
+        self.assertRaisesRegex(RuntimeError, error_msg_regex, alg.execute)
 
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))
