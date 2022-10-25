@@ -28,7 +28,8 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockImageInfoView : public IImageInfoWidget {
 public:
-  MOCK_METHOD3(cursorAt, void(const double x, const double y, const double z));
+  MOCK_METHOD4(cursorAt,
+               void(const double x, const double y, const double signal, const QMap<QString, QString> &extraValues));
   MOCK_METHOD1(showInfo, void(const ImageInfoModel::ImageInfo &info));
   MOCK_METHOD1(setWorkspace, void(const Mantid::API::Workspace_sptr &ws));
 };
@@ -58,7 +59,7 @@ public:
 
     ImageInfoPresenter presenter(mockView.get());
     presenter.setWorkspace(WorkspaceCreationHelper::create2DWorkspace123(10, 10));
-    presenter.cursorAt(1, 2, 1);
+    presenter.cursorAt(1, 2, 1, {});
   }
 
   void test_setWorkspace_creates_matrix_ws_model_with_matrix_ws() {

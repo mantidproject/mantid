@@ -878,6 +878,13 @@ class SliceViewerModelTest(unittest.TestCase):
         for export_type in ('r', 'c', 'x', 'y'):
             assert_error_returned_in_help(self.ws_MDE_3D, export_type, mock_binmd, 'BinMD failed')
 
+    @patch('mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.get_proj_matrix')
+    def test_get_hkl_from_xyz(self, mock_get_proj_matrix):
+        model = SliceViewerModel(self.ws_MDE_3D)
+        mock_get_proj_matrix.return_value = np.array([[0, 1, -1], [0, 1, 1], [1, 0, 0]])
+        hkl = model.get_hkl_from_xyz(0, 1, 2, 1.0, 2.0, 3.0)
+        self.assertTrue((hkl == [-1, 5, 1]).all())
+
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords,
                                              has_oriented_lattice):

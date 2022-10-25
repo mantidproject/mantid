@@ -1,0 +1,1 @@
+- add HKL values to the image info table in the slice viewer when viewing a workspace with HKL coordinates
