@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
+import sys
 
 from MsdTestHelper import (is_registered, check_output, do_a_fit)
 
