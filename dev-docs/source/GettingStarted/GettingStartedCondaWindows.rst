@@ -82,6 +82,10 @@ Compile and Build using Ninja
 * To build Mantid Workbench use: ``ninja``
 * To build the unit tests use: ``ninja AllTests``
 
+Building and debugging with CLion
+---------------------------------
+Please follow the Windows related instructions on :ref:`this page <clion-ref>`.
+
 CMake Conda variables
 ---------------------
 There are two Conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a Conda environment, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
