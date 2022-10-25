@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 
@@ -43,7 +44,7 @@ to use either .raw or .sca</LI>
 
 @author Ronald Fowler
 */
-class DLLExport SetScalingPSD final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SetScalingPSD final : public API::Algorithm {
 public:
   /// Default constructor
   SetScalingPSD();

@@ -59,7 +59,7 @@ enum ePropertyCriterion { IS_DEFAULT, IS_NOT_DEFAULT, IS_EQUAL_TO, IS_NOT_EQUAL_
 /** Enum for use when combining two EnabledWhenPropertyItems */
 enum eLogicOperator { AND, OR, XOR };
 
-class DLLExport EnabledWhenProperty : public IPropertySettings {
+class MANTID_KERNEL_DLL EnabledWhenProperty : public IPropertySettings {
 public:
   /// Constructs a EnabledWhenProperty object which checks the property
   /// with name given and if it matches the criteria enables it

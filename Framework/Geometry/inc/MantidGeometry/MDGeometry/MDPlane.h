@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <vector>
 
@@ -38,7 +38,7 @@ namespace Geometry {
   @author Janik Zikovsky
   @date 2011-07-15
 */
-class DLLExport MDPlane {
+class MANTID_GEOMETRY_DLL MDPlane {
 public:
   MDPlane(const Mantid::Kernel::VMD &normal, const Mantid::Kernel::VMD &point);
   MDPlane(const std::vector<coord_t> &normal, const std::vector<coord_t> &point);

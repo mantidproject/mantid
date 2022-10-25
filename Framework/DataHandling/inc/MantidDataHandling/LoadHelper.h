@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {

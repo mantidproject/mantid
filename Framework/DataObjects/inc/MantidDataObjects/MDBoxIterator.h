@@ -12,7 +12,6 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/SkippingPolicy.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -26,7 +25,7 @@ class SkippingPolicy;
  * @date 2011-06-03
  */
 TMDE_CLASS
-class DLLExport MDBoxIterator : public Mantid::API::IMDIterator {
+class MANTID_DATAOBJECTS_DLL MDBoxIterator : public Mantid::API::IMDIterator {
 public:
   MDBoxIterator(API::IMDNode *topBox, size_t maxDepth, bool leafOnly,
                 Mantid::Geometry::MDImplicitFunction *function = nullptr);

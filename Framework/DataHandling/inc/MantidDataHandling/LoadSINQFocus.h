@@ -26,7 +26,8 @@ namespace DataHandling {
  <LI> Workspace - The name to give to the output workspace </LI>
  </UL>
  */
-class DLLExport LoadSINQFocus : public API::IFileLoader<Kernel::NexusDescriptor>, public API::DeprecatedAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadSINQFocus : public API::IFileLoader<Kernel::NexusDescriptor>,
+                                              public API::DeprecatedAlgorithm {
 public:
   LoadSINQFocus();
   const std::string name() const override;

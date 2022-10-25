@@ -8,7 +8,6 @@
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidDataObjects/AffineMatrixParameter.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -17,7 +16,7 @@ namespace DataObjects {
  * @author Owen Arnold
  * @date 20/07/2011
  */
-class DLLExport AffineMatrixParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class MANTID_DATAOBJECTS_DLL AffineMatrixParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   /// Constructor
   AffineMatrixParameterParser();

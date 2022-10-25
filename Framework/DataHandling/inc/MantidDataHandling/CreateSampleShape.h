@@ -10,6 +10,7 @@
 // Includes
 //--------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace API {
@@ -24,7 +25,7 @@ namespace DataHandling {
     @author Martyn Gigg, Tessella Support Services plc
     @date 13/03/2009
 */
-class DLLExport CreateSampleShape final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL CreateSampleShape final : public API::Algorithm {
 public:
   static void setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML);
 

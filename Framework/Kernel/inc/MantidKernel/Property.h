@@ -101,7 +101,6 @@ public:
   // Getters
   const std::string &name() const;
   const std::string &documentation() const;
-  const std::string &briefDocumentation() const;
   const std::type_info *type_info() const;
   const std::string type() const;
 
@@ -124,7 +123,6 @@ public:
   void setRemember(bool);
 
   void setDocumentation(const std::string &documentation);
-  void setBriefDocumentation(const std::string &documentation);
 
   virtual void saveProperty(::NeXus::File * /*file*/) {
     throw std::invalid_argument("Property::saveProperty - Cannot save '" + this->name() +
@@ -215,8 +213,6 @@ private:
 
   /// Longer, optional description of property
   std::string m_documentation;
-  /// Brief description of property
-  std::string m_shortDoc;
   /// The type of the property
   const std::type_info *m_typeinfo;
   /// Whether the property is used as input, output or both to an algorithm

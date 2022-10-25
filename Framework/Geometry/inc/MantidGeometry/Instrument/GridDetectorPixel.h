@@ -9,7 +9,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -26,7 +25,7 @@ of the pixel and the size of the parent (which is parametrized).
 
 @date 2018-09-28
 */
-class DLLExport GridDetectorPixel : public Detector {
+class MANTID_GEOMETRY_DLL GridDetectorPixel : public Detector {
   friend class GridDetector;
 
 public:

@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlias.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,7 +17,7 @@ namespace DataHandling {
 
   @date 2012-06-01
 */
-class DLLExport SNSAppendGeometryToNexus final : public API::Algorithm, public API::DeprecatedAlias {
+class MANTID_DATAHANDLING_DLL SNSAppendGeometryToNexus final : public API::Algorithm, public API::DeprecatedAlias {
 public:
   SNSAppendGeometryToNexus();
   ~SNSAppendGeometryToNexus() override;

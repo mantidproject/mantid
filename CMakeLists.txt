@@ -118,8 +118,8 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 # Bootstrap any dependencies
 include(Bootstrap)
 
-if(MSVC)
-  include(MSVCSetup)
+if(WIN32)
+  include(WindowsSetup)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include(DarwinSetup)
 endif()
@@ -202,10 +202,6 @@ if(UNIX)
   # Experimental feature. Unix only at this point.
   option(UNITY_BUILD "Switch for utilising unity builds. Faster builds for selected components.")
 endif(UNIX)
-
-if(MSVC)
-  add_definitions(-DQWT_DLL)
-endif()
 
 add_custom_target(AllTests)
 

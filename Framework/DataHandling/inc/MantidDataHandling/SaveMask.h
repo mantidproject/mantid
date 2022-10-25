@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -16,7 +16,7 @@ namespace DataHandling {
 
   @date 2011-11-09
 */
-class DLLExport SaveMask final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveMask final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMask"; };

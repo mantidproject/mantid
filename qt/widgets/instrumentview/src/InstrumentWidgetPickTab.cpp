@@ -1234,7 +1234,6 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
  */
 void DetectorPlotController::updatePlot() {
   if (!m_instrWidget->isTabFolded()) {
-    m_plot->recalcAxisDivs();
     m_plot->replot();
   }
 }

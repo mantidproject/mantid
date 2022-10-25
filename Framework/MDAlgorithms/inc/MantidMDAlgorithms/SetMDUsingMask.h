@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-10
 */
-class DLLExport SetMDUsingMask final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL SetMDUsingMask final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

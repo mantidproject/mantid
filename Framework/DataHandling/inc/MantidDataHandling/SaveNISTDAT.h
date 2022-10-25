@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,7 +27,7 @@ namespace DataHandling {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveNISTDAT final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveNISTDAT final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SaveNISTDAT"; }

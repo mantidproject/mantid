@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -32,7 +33,7 @@ namespace MDAlgorithms {
  @author Roman Tolchenov, Tessella plc
  @date 17/04/2012
  */
-class DLLExport ConvertMDHistoToMatrixWorkspace final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ConvertMDHistoToMatrixWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertMDHistoToMatrixWorkspace"; };

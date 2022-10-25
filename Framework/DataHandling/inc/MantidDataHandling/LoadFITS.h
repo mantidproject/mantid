@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -32,7 +33,7 @@ At the moment this algorithm only supports 2 data axis and the
 following data types: unsigned 8, 16, 32 bits per pixel.
 */
 
-class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadFITS();
 

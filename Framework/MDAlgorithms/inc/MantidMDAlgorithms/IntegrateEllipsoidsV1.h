@@ -22,7 +22,7 @@ class DetectorInfo;
 }
 namespace MDAlgorithms {
 
-class DLLExport IntegrateEllipsoidsV1 final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegrateEllipsoidsV1 final : public API::Algorithm {
 public:
   static void initInstance(API::Algorithm &alg);
   const std::string name() const override;

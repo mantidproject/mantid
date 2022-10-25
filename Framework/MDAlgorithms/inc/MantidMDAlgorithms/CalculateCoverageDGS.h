@@ -9,14 +9,14 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
 /** CalculateCoverageDGS : Calculate coverage for single crystal direct geometry
   scattering
 */
-class DLLExport CalculateCoverageDGS final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL CalculateCoverageDGS final : public API::Algorithm {
 public:
   CalculateCoverageDGS();
   const std::string name() const override;

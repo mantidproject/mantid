@@ -189,7 +189,8 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodePickTab(const InstrumentW
 QMap<QString, QVariant> InstrumentWidgetEncoder::encodeActor(const std::unique_ptr<InstrumentActor> &obj) {
   QMap<QString, QVariant> map;
 
-  map.insert(QString("fileName"), QVariant(obj->getCurrentColorMap()));
+  map.insert(QString("fileName"), QVariant(obj->getCurrentColorMap().first));
+  map.insert(QString("highlightZeroCounts"), QVariant(obj->getCurrentColorMap().second));
   map.insert(QString("binMasks"), QVariant(this->encodeMaskBinsData(obj->m_maskBinsData)));
 
   return map;

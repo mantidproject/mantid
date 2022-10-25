@@ -5,6 +5,7 @@ channels:
 
 dependencies:
   - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
+  - ccache
   - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - conda-wrappers
   - doxygen>=1.9.*
@@ -41,7 +42,7 @@ dependencies:
   - scipy>=1.6.2
   - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
   - sphinx >= 4.5.*
-  - sphinx_bootstrap_theme<=0.7.1
+  - sphinx_bootstrap_theme=>0.8.1
   - tbb-devel=2020.2.*
   - tbb=2020.2.*
   - toml>=0.10.2

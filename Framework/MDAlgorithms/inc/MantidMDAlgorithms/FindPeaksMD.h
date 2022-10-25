@@ -16,8 +16,8 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -30,7 +30,7 @@ namespace MDAlgorithms {
  * @author
  * @date 2011-06-02
  */
-class DLLExport FindPeaksMD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL FindPeaksMD final : public API::Algorithm {
 public:
   FindPeaksMD();
   /// Algorithm's name for identification

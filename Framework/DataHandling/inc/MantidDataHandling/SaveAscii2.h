@@ -13,6 +13,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,7 +41,7 @@ struct BinEdgeAxisProxy : AxisProxy {
 
 } // namespace AxisHelper
 
-class DLLExport SaveAscii2 final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveAscii2 final : public API::Algorithm {
 public:
   /// Default constructor
   SaveAscii2();

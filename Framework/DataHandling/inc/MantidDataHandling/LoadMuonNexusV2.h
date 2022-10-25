@@ -36,7 +36,7 @@ OutputWorkspace_PeriodNo)
 @author Stephen Smith, ISIS
 */
 
-class DLLExport LoadMuonNexusV2 : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadMuonNexusV2 : public API::NexusFileLoader {
 public:
   // Default constructor
   LoadMuonNexusV2();

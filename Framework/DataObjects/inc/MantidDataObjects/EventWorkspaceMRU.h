@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/Exception.h"
@@ -58,7 +59,7 @@ public:
 /** This is a container for the MRU (most-recently-used) list
  * of generated histograms.
  */
-class DLLExport EventWorkspaceMRU {
+class MANTID_DATAOBJECTS_DLL EventWorkspaceMRU {
 public:
   using YType = Kernel::cow_ptr<HistogramData::HistogramY>;
   using EType = Kernel::cow_ptr<HistogramData::HistogramE>;

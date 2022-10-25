@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -82,7 +83,7 @@ union EventUnion {
   DetectorWord splitWord;
 };
 
-class DLLExport LoadNGEM : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNGEM : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification.
   const std::string name() const override { return "LoadNGEM"; }

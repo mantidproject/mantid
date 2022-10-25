@@ -8,10 +8,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,7 +22,7 @@ namespace DataHandling {
  * @author
  * @date 2011-05-10 09:48:31.796980
  */
-class DLLExport SaveCalFile final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveCalFile final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveCalFile"; };

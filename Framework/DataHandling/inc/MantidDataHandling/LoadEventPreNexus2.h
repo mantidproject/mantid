@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/BinaryFile.h"
@@ -73,7 +74,7 @@ struct Pulse {
 };
 #pragma pack(pop)
 
-class DLLExport LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Constructor
   LoadEventPreNexus2();

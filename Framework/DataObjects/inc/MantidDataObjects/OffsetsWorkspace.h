@@ -9,7 +9,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -21,7 +20,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-05-09
  */
-class DLLExport OffsetsWorkspace : public SpecialWorkspace2D {
+class MANTID_DATAOBJECTS_DLL OffsetsWorkspace : public SpecialWorkspace2D {
 public:
   OffsetsWorkspace() = default;
   OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst);

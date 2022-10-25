@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -37,7 +38,7 @@ Required Properties:
 @author Laurent Chapon, ISIS Rutherford Appleton Laboratory
 @date 25/04/2008
 */
-class DLLExport LoadMappingTable final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadMappingTable final : public API::Algorithm {
 public:
   /// Default constructor
   LoadMappingTable();

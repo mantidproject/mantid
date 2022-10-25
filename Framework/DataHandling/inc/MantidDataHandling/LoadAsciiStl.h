@@ -20,7 +20,7 @@ class MeshObject;
 }
 namespace DataHandling {
 
-class DLLExport LoadAsciiStl : public LoadStl {
+class MANTID_DATAHANDLING_DLL LoadAsciiStl : public LoadStl {
 public:
   LoadAsciiStl(std::string filename, ScaleUnits scaleType)
       : LoadStl(std::move(filename), std::ios_base::in, scaleType) {}

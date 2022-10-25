@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 #include <memory>
 
@@ -23,7 +23,7 @@ DLLExport std::vector<double> renormaliseKernel(std::vector<double> kernel, cons
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
  */
-class DLLExport SmoothMD final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL SmoothMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

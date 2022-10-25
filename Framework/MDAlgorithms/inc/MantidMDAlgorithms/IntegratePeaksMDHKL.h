@@ -12,7 +12,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -22,7 +22,7 @@ namespace MDAlgorithms {
  * @author Vickie Lynch
  * @date 2016-06-23
  */
-class DLLExport IntegratePeaksMDHKL final : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL IntegratePeaksMDHKL final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMDHKL"; };

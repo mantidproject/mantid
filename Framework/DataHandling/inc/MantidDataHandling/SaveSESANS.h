@@ -46,8 +46,11 @@ private:
   // Length of the longest attribute name in headers (+4 for readability in the
   // file)
   const int MAX_HDR_LENGTH = 23;
+  // Tolerance to use when comparing two doubles for equality
+  const double TOLERANCE = 1e-09;
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans", ".SESANS"};
   const std::vector<std::string> mandatoryDoubleProperties{"ThetaZMax", "ThetaYMax", "EchoConstant"};
+  double m_sampleThickness = EMPTY_DBL();
 
   void init() override;
   void exec() override;

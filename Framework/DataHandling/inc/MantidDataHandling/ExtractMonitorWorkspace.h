@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -16,7 +16,7 @@ namespace DataHandling {
     hold a reference to the monitor workspace after running this algorithm.
     If no monitor workspace is present the algorithm will fail.
 */
-class DLLExport ExtractMonitorWorkspace final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL ExtractMonitorWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

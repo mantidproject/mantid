@@ -33,7 +33,7 @@ enum ConvertUnits {
   ConvertFromTOF //< Input workspace units are the TOF
 };
 } // namespace CnvrtToMD
-class DLLExport UnitsConversionHelper {
+class MANTID_MDALGORITHMS_DLL UnitsConversionHelper {
   // variables for units conversion:
   // pointer to input workspace units
   Kernel::Unit_sptr m_SourceWSUnit;

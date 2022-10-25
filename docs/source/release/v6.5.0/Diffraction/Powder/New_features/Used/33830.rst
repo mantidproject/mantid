@@ -1,1 +1,0 @@
-- It is now possible to exclude specific banks from the total scattering merge banks for Polaris using -1 in the q_lims. For more details see :ref:`create_total_scattering_pdf<create_total_scattering_pdf_polaris-isis-powder-ref>`.

@@ -5,15 +5,6 @@
 # The settings and definitions here will apply to all projects. Specific project settings should be included in the
 # relevant CMakeLists.txt file for that project.
 
-option(USE_CCACHE "Use ccache to cache object artifacts if available" ON)
-if(USE_CCACHE)
-  find_program(CCACHE_FOUND ccache)
-  if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-  endif()
-endif()
-
 # Set our own compiler version flag from the cmake one and export it globally
 if(CMAKE_COMPILER_IS_GNUCXX)
   if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL CMAKE_C_COMPILER_VERSION)

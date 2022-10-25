@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

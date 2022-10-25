@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
@@ -31,7 +32,7 @@ data.</li>
 @author Jean Bilheux, ORNL
 @date 08/27/10
 */
-class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor>, API::DeprecatedAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor>, API::DeprecatedAlgorithm {
 public:
   LoadSNSspec();
   const std::string name() const override { return "LoadSNSspec"; }

@@ -9,7 +9,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -18,7 +17,7 @@ namespace DataHandling {
 /** LoadLLB : Loads an LLB MIBEMOL TOF NeXus file into a Workspace2D with the
   given name.
 */
-class DLLExport LoadLLB : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadLLB : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadLLB();
 

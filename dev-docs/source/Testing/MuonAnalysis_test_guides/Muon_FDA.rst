@@ -12,7 +12,6 @@ Introduction
 These are unscripted tests for the :program:`Frequency Domain Analysis` interface.
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
-
 ------------------------------------
 
 .. _FFT_test:
@@ -63,7 +62,6 @@ The data can then be summed.
 - Tick the **imaginary Workspace** option
 - You select the real and imaginary parts of ``pq`` to be the **Workspace** and **Imaginary Workspace** respectively
 - Click calculate
-
 
 ------------------------------------
 

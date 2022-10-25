@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidCatalog/ONCat.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 #include <string>
 
@@ -23,7 +23,7 @@ namespace DataHandling {
  * Please see the .cpp file for more information.
  */
 
-class DLLExport ORNLDataArchive : public API::IArchiveSearch {
+class MANTID_DATAHANDLING_DLL ORNLDataArchive : public API::IArchiveSearch {
 public:
   std::string getArchivePath(const std::set<std::string> &basenames,
                              const std::vector<std::string> &suffixes) const override;
