@@ -11,7 +11,6 @@
 //---------------------------------------------------
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -61,8 +60,6 @@ private:
   size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
   size_t m_numberOfChannels;      // time channels - Z
   size_t m_numberOfHistograms;
-
-  LoadHelper m_loader;
 };
 
 } // namespace DataHandling

@@ -10,7 +10,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -92,7 +94,7 @@ void LoadILLTOF2::exec() {
   addFacility();
 
   // load the instrument from the IDF if it exists
-  m_loader.loadEmptyInstrument(m_localWorkspace, m_instrumentName);
+  LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrumentName);
 
   loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
 
@@ -140,13 +142,13 @@ std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &
  */
 void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
 
-  m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+  m_instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
 
   if (m_instrumentPath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
 
-  m_instrumentName = m_loader.getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, m_instrumentPath + "/name");
 
   if (std::find(SUPPORTED_INSTRUMENTS.begin(), SUPPORTED_INSTRUMENTS.end(), m_instrumentName) ==
       SUPPORTED_INSTRUMENTS.end()) {
@@ -268,7 +270,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
-  m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
+  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   NXclose(&nxfileID);
   runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
@@ -281,7 +283,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
 void LoadILLTOF2::addEnergyToRun() {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  const double ei = m_loader.calculateEnergy(m_wavelength);
+  const double ei = LoadHelper::calculateEnergy(m_wavelength);
   runDetails.addProperty<double>("Ei", ei, true); // overwrite
 }
 

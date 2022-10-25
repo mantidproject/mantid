@@ -5,11 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLIndirect2.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -107,7 +110,7 @@ void LoadILLIndirect2::exec() {
   loadDataDetails(firstEntry);
   progress.report("Loaded metadata");
 
-  const std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+  const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
 
   initWorkSpace();
@@ -123,7 +126,7 @@ void LoadILLIndirect2::exec() {
   }
   progress.report("Loaded the data");
 
-  m_loader.loadEmptyInstrument(m_localWorkspace, m_instrumentName, getInstrumentFileName());
+  LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrumentName, getInstrumentFileName());
   progress.report("Loaded the instrument");
 
   if (m_loadOption == "Spectrometer") {
@@ -148,7 +151,7 @@ void LoadILLIndirect2::setInstrumentName(const NeXus::NXEntry &firstEntry, const
     g_log.error(message);
     throw std::runtime_error(message);
   }
-  m_instrumentName = m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
   boost::to_upper(m_instrumentName); // "IN16b" in file, keep it upper case.
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
@@ -368,7 +371,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
     g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);
   }
-  m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
+  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
   runDetails.addProperty("Facility", std::string("ILL"));
   NXclose(&nxfileID);
 }

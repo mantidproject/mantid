@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
@@ -74,8 +73,6 @@ private:
   double m_channelWidth;
   double m_timeOfFlightDelay;
   std::string m_monitorName;
-
-  LoadHelper m_loader;
 };
 
 } // namespace DataHandling

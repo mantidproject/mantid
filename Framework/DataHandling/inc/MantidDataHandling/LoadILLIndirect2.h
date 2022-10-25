@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -64,7 +64,6 @@ private:
   size_t m_firstTubeAngleRounded;   // A flag holding the rounded angle of the first tube
 
   std::vector<std::string> m_supportedInstruments;
-  LoadHelper m_loader;
   std::string m_loadOption;
 };
 

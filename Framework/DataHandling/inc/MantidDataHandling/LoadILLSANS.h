@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
@@ -84,7 +83,6 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loadHelper;                         ///< Load helper for metadata
   std::string m_instrumentName;                    ///< Name of the instrument
   std::vector<std::string> m_supportedInstruments; ///< List of supported instruments
   API::MatrixWorkspace_sptr m_localWorkspace;      ///< to-be output workspace

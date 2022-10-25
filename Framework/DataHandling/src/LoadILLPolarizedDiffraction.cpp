@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLPolarizedDiffraction.h"
+
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -12,6 +14,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -149,7 +152,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     m_instName = entry.getString("D7/name");
 
     std::string startTime = entry.getString("start_time");
-    startTime = m_loadHelper.dateTimeInIsoFormat(startTime);
+    startTime = LoadHelper::dateTimeInIsoFormat(startTime);
 
     // init the workspace with proper number of histograms and number of channels
     auto workspace = initStaticWorkspace(entry);
@@ -158,7 +161,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     workspace->mutableRun().addProperty("start_time", startTime);
 
     // load the instrument
-    m_loadHelper.loadEmptyInstrument(workspace, m_instName);
+    LoadHelper::loadEmptyInstrument(workspace, m_instName);
 
     // rotate detectors to their position during measurement
     moveTwoTheta(entry, workspace);
@@ -238,7 +241,7 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);
       auto const entryName = std::string("entry" + std::to_string(workspaceId));
-      m_loadHelper.addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(), entryName);
+      LoadHelper::addNexusFieldsToWsRun(nxHandle, workspace->mutableRun(), entryName);
       if (m_wavelength != 0) {
         workspace->mutableRun().addProperty("monochromator.wavelength", m_wavelength, true);
       }

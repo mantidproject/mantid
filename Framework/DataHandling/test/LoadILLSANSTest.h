@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"

@@ -5,11 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLDiffraction.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -161,7 +164,7 @@ void LoadILLDiffraction::loadDataScan() {
   if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
     m_isSpectrometer = true;
   }
-  m_startTime = DateAndTime(m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
+  m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
   const bool hasCalibratedData = containsCalibratedData(m_filename);
   if (dataType != "Raw" && hasCalibratedData) {
@@ -224,7 +227,7 @@ void LoadILLDiffraction::loadDataScan() {
   computeThetaOffset();
 
   std::string start_time = firstEntry.getString("start_time");
-  start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
+  start_time = LoadHelper::dateTimeInIsoFormat(start_time);
 
   if (m_scanType == DetectorScan) {
     initMovingWorkspace(scan, start_time);
@@ -254,7 +257,7 @@ void LoadILLDiffraction::loadMetaData() {
   NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
-    m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
+    LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     NXclose(&nxHandle);
   }
   mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
@@ -305,7 +308,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan, const std::st
   run.addProperty("start_time", start_time);
 
   getInstrumentFilePath(m_instName);
-  m_loadHelper.loadEmptyInstrument(instrumentWorkspace, m_instName);
+  LoadHelper::loadEmptyInstrument(instrumentWorkspace, m_instName);
   const auto &instrument = instrumentWorkspace->getInstrument();
   auto &params = instrumentWorkspace->instrumentParameters();
 
@@ -540,7 +543,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
   }
 
   // Link the instrument
-  m_loadHelper.loadEmptyInstrument(m_outWorkspace, m_instName);
+  LoadHelper::loadEmptyInstrument(m_outWorkspace, m_instName);
   if (!m_isSpectrometer) {
     // Move to the starting 2theta
     moveTwoThetaZero(twoTheta0);

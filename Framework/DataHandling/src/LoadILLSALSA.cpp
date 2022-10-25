@@ -117,7 +117,7 @@ void LoadILLSALSA::exec() {
  */
 void LoadILLSALSA::setInstrument(double distance, double angle) {
   // load instrument
-  m_loadHelper.loadEmptyInstrument(m_outputWorkspace, "SALSA");
+  LoadHelper::loadEmptyInstrument(m_outputWorkspace, "SALSA");
 
   // translation
   double angleRad = angle * M_PI / 180.0;
@@ -255,8 +255,7 @@ void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
   NXhandle nxHandle;
   NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-  DataHandling::LoadHelper loadHelper;
-  loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
+  LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
   NXclose(&nxHandle);
 }
 } // namespace Mantid::DataHandling

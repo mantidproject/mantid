@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
 
@@ -55,7 +54,6 @@ private:
   void fillWorkspaceMetadata(const std::string &filename);
   // Output workspace
   std::shared_ptr<DataObjects::Workspace2D> m_outputWorkspace;
-  Mantid::DataHandling::LoadHelper m_loadHelper;
 };
 
 } // namespace DataHandling

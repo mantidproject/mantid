@@ -13,6 +13,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidDataObjects/TableWorkspace.h"

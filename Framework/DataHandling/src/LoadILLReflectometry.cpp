@@ -15,6 +15,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -204,7 +205,7 @@ void LoadILLReflectometry::exec() {
   std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
   loadDataDetails(firstEntry);
   initWorkspace(monitorsData);
-  m_loader.loadEmptyInstrument(m_localWorkspace, m_instrument == Supported::D17 ? "D17" : "FIGARO");
+  LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrument == Supported::D17 ? "D17" : "FIGARO");
   loadNexusEntriesIntoProperties();
   loadData(firstEntry, monitorsData, getXValues());
   firstEntry.close();
@@ -225,7 +226,7 @@ void LoadILLReflectometry::exec() {
  * @param entry :: the NeXus file entry
  */
 void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
-  std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
+  std::string instrumentNamePath = LoadHelper::findInstrumentNexusPath(entry);
   std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
   if (instrumentName.empty())
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
@@ -313,7 +314,7 @@ void LoadILLReflectometry::initWorkspace(const std::vector<std::vector<int>> &mo
 void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data FIGARO 1 x 256 x 1000
-  m_startTime = DateAndTime(m_loader.dateTimeInIsoFormat(entry.getString("start_time")));
+  m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(entry.getString("start_time")));
   if (m_acqMode) {
     NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
     timeOfFlight.load();
@@ -516,7 +517,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
-  m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
+  LoadHelper::addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
 }
 
@@ -682,10 +683,10 @@ void LoadILLReflectometry::placeDetector() {
   const std::string componentName = "detector";
   const RotationPlane rotPlane = m_instrument == Supported::D17 ? RotationPlane::horizontal : RotationPlane::vertical;
   const auto newpos = detectorPosition(rotPlane, m_detectorDistance, detectorRotationAngle);
-  m_loader.moveComponent(m_localWorkspace, componentName, newpos);
+  LoadHelper::moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const auto rotation = detectorFaceRotation(rotPlane, detectorRotationAngle);
-  m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
+  LoadHelper::rotateComponent(m_localWorkspace, componentName, rotation);
 }
 
 /// Update the slit positions.
@@ -725,9 +726,9 @@ void LoadILLReflectometry::placeSlits() {
     }
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
-  m_loader.moveComponent(m_localWorkspace, "slit2", pos);
+  LoadHelper::moveComponent(m_localWorkspace, "slit2", pos);
   pos = {0.0, 0.0, -slit2ToSample};
-  m_loader.moveComponent(m_localWorkspace, "slit3", pos);
+  LoadHelper::moveComponent(m_localWorkspace, "slit3", pos);
 }
 
 /// Update source position.
@@ -735,7 +736,7 @@ void LoadILLReflectometry::placeSource() {
   m_sourceDistance = sourceSampleDistance();
   const std::string source = "chopper1";
   const V3D newPos{0.0, 0.0, -m_sourceDistance};
-  m_loader.moveComponent(m_localWorkspace, source, newPos);
+  LoadHelper::moveComponent(m_localWorkspace, source, newPos);
 }
 
 /// Return the incident neutron deflection angle.
