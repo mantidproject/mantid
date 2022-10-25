@@ -220,6 +220,9 @@ SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDet
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
 
 std::string QtSearchModel::getLogbookCSV(SearchResults const &results) const {
+  if (results.empty()) {
+    return "";
+  }
   std::string csv = getLogbookHeaders();
   for (SearchResult const &result : results) {
     csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "\n";

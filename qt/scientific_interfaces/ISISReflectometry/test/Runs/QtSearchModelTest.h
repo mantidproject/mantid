@@ -38,4 +38,14 @@ public:
     auto csv = model.getLogbookCSV(results);
     TS_ASSERT_EQUALS(expectedCsv, csv)
   }
+
+  void test_csv_string_not_generated_with_no_results() {
+    auto results = SearchResults();
+
+    auto expectedCsv = "";
+
+    auto model = QtSearchModel();
+    auto csv = model.getLogbookCSV(results);
+    TS_ASSERT_EQUALS(expectedCsv, csv);
+  }
 };
