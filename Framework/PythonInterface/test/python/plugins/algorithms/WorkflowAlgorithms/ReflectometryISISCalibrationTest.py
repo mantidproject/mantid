@@ -86,6 +86,13 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
                 'OutputWorkspace': 'test_calibrated'}
         self._assert_run_algorithm_raises_exception(args, "Could not find detector to calibrate at workspace id \d+")
 
+    def test_exception_raised_if_no_calibration_file_supplied(self):
+        input_ws_name = 'test_1234'
+        ws = self._create_sample_workspace(input_ws_name, 4)
+        args = {'InputWorkspace': ws,
+                'OutputWorkspace': 'test_calibrated'}
+        self._assert_run_algorithm_raises_exception(args, "Calibration file path must be provided")
+
     def _check_detector_positions(self, workspace, expected_positions, pos_type='final'):
         for i in range(0, workspace.getNumberHistograms()):
             det = workspace.getDetector(i)

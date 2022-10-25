@@ -38,7 +38,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             MatrixWorkspaceProperty(self._WORKSPACE, '', direction=Direction.Input, optional=PropertyMode.Mandatory),
             doc='An input workspace')
         self.declareProperty(FileProperty(self._CALIBRATION_FILE, "",
-                                          action=FileAction.Load,
+                                          action=FileAction.OptionalLoad,
                                           direction=Direction.Input,
                                           extensions=["dat"]),
                              doc="Calibration data file containing Y locations for detector pixels in mm.")
@@ -59,6 +59,16 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         ApplyCalibration(Workspace=output_ws, CalibrationTable=calib_table)
         self.setProperty(self._OUTPUT_WORKSPACE, output_ws)
         AnalysisDataService.remove('output_ws')
+
+    def validateInputs(self):
+        """Return a dictionary containing issues found in properties."""
+        issues = dict()
+
+        calibration_file = self.getPropertyValue(self._CALIBRATION_FILE)
+        if not calibration_file:
+            issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
+
+        return issues
 
     def _find_specular_pixel_index(self, ws, det_info):
         # Determine position of the specular pixel from the workspace:
