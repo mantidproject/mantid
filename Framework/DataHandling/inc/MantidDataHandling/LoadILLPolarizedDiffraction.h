@@ -9,7 +9,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
@@ -62,7 +61,6 @@ private:
 
   double m_wavelength; // wavelength value is read from the YIG IPF
 
-  LoadHelper m_loadHelper;                                       ///< a helper for metadata
   std::vector<API::MatrixWorkspace_sptr> m_outputWorkspaceGroup; ///< vector with output workspaces
 };
 

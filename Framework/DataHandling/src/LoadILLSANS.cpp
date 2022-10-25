@@ -5,11 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLSANS.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
@@ -101,7 +103,7 @@ void LoadILLSANS::exec() {
   m_isD16Omega = false;
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
-  const std::string instrumentPath = m_loadHelper.findInstrumentNexusPath(firstEntry);
+  const std::string instrumentPath = LoadHelper::findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
   setNumberOfMonitors();
   Progress progress(this, 0.0, 1.0, 4);
@@ -177,13 +179,13 @@ void LoadILLSANS::exec() {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
-    double distance = m_loadHelper.getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/det_calc");
+    double distance = LoadHelper::getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/det_calc");
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
     API::Run &runDetails = m_localWorkspace->mutableRun();
     runDetails.addProperty<double>("L2", distance, true);
     if (m_instrumentName == "D22") {
-      double offset = m_loadHelper.getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/dtr_actual");
+      double offset = LoadHelper::getDoubleFromNexusPath(firstEntry, instrumentPath + "/detector/dtr_actual");
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
     }
   }
@@ -202,7 +204,7 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry, const std:
   if (instrumentNamePath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName = m_loadHelper.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
   const auto inst = std::find(m_supportedInstruments.begin(), m_supportedInstruments.end(), m_instrumentName);
 
   // set alternative version name. Note that D16B is set later, because we need to open the data to distinguish with D16
@@ -227,14 +229,14 @@ LoadILLSANS::DetectorPosition LoadILLSANS::getDetectorPositionD33(const NeXus::N
                                                                   const std::string &instrumentNamePath) {
   std::string detectorPath(instrumentNamePath + "/detector");
   DetectorPosition pos;
-  pos.distanceSampleRear = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/det2_calc");
-  pos.distanceSampleBottomTop = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/det1_calc");
-  pos.distanceSampleRightLeft = pos.distanceSampleBottomTop + m_loadHelper.getDoubleFromNexusPath(
-                                                                  firstEntry, detectorPath + "/det1_panel_separation");
-  pos.shiftLeft = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OxL_actual") * 1e-3;
-  pos.shiftRight = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OxR_actual") * 1e-3;
-  pos.shiftUp = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OyT_actual") * 1e-3;
-  pos.shiftDown = m_loadHelper.getDoubleFromNexusPath(firstEntry, detectorPath + "/OyB_actual") * 1e-3;
+  pos.distanceSampleRear = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/det2_calc");
+  pos.distanceSampleBottomTop = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/det1_calc");
+  pos.distanceSampleRightLeft = pos.distanceSampleBottomTop +
+                                LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/det1_panel_separation");
+  pos.shiftLeft = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OxL_actual") * 1e-3;
+  pos.shiftRight = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OxR_actual") * 1e-3;
+  pos.shiftUp = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OyT_actual") * 1e-3;
+  pos.shiftDown = LoadHelper::getDoubleFromNexusPath(firstEntry, detectorPath + "/OyB_actual") * 1e-3;
   pos >> g_log.debug();
   return pos;
 }
@@ -539,11 +541,11 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
       try {
         // LTOF mode
         std::string binPathPrefix(instrumentPath + "/tof/tof_wavelength_detector");
-        binningRear = m_loadHelper.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "1");
-        binningRight = m_loadHelper.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "2");
-        binningLeft = m_loadHelper.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "3");
-        binningDown = m_loadHelper.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "4");
-        binningUp = m_loadHelper.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
+        binningRear = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "1");
+        binningRight = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "2");
+        binningLeft = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "3");
+        binningDown = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "4");
+        binningUp = LoadHelper::getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
       } catch (std::runtime_error &e) {
         throw std::runtime_error("Unable to load the wavelength axes for TOF data " + std::string(e.what()));
       }
@@ -995,7 +997,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
     // merge runs
     wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
-    double ei = m_loadHelper.calculateEnergy(wavelength);
+    double ei = LoadHelper::calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);
     // wavelength
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
@@ -1004,7 +1006,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 
   // the start time is needed in the workspace when loading the parameter file
   std::string startDate = entry.getString("start_time");
-  runDetails.addProperty<std::string>("start_time", m_loadHelper.dateTimeInIsoFormat(startDate));
+  runDetails.addProperty<std::string>("start_time", LoadHelper::dateTimeInIsoFormat(startDate));
   // set the facility
   runDetails.addProperty<std::string>("Facility", std::string("ILL"));
 }
@@ -1018,7 +1020,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
   if (nxStat != NX_ERROR) {
-    m_loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
+    LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);
   }
 }

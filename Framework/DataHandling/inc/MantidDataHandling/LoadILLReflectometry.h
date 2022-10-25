@@ -8,7 +8,6 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -82,7 +81,6 @@ private:
   double m_sampleZOffset{0.0};
   double m_sourceDistance{0.0};
   double m_sampleAngle{0.0};
-  Mantid::DataHandling::LoadHelper m_loader;
   Mantid::Types::Core::DateAndTime m_startTime;
   API::MatrixWorkspace_sptr m_localWorkspace;
 };
