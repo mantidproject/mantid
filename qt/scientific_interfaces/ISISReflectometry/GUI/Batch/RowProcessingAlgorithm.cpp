@@ -134,7 +134,6 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
   AlgorithmProperties::update("ProcessingInstructions", lookupRow.processingInstructions(), properties);
   AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
-  AlgorithmProperties::update("ROIDetectorIDs", lookupRow.roiDetectorIDs(), properties);
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
@@ -369,6 +368,7 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
   auto lookupRow = row ? findLookupRow(*row, model) : findWildcardLookupRow(model);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
+    AlgorithmProperties::update("ROIDetectorIDs", lookupRow->roiDetectorIDs(), *properties);
   }
   // Update properties the user has specifically set for this run
   if (row) {
