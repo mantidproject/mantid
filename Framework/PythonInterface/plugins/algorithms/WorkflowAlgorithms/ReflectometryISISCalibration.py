@@ -121,7 +121,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
         scanned_specpixel_y = scanned_pixel_positions.get(specular_pixel_idx)
         if not scanned_specpixel_y:
-            raise RuntimeError("Could not find calibration data for specular pixel")
+            raise RuntimeError(f"Missing calibration data for specular pixel with workspace index {specular_pixel_idx}")
 
         table = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
         table.addColumn(type="int", name="Detector ID")

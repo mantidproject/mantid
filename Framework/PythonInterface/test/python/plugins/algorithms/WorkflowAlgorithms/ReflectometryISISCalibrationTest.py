@@ -75,7 +75,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {'InputWorkspace': ws,
                 'CalibrationFile': self._CALIBRATION_TEST_DATA,
                 'OutputWorkspace': 'test_calibrated'}
-        self._assert_run_algorithm_raises_exception(args, "Could not find calibration data for specular pixel")
+        self._assert_run_algorithm_raises_exception(args, "Missing calibration data for specular pixel with workspace index \d+")
 
     def test_detectors_in_calibration_file_but_not_workspace_raises_exception(self):
         # Use workspace ID 2 (or detector ID 3) for the specular detector as this is the only detector in this workspace
