@@ -59,10 +59,10 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID;
     TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -219,11 +219,12 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
-    std::string header1, header2, header3, header4, separator, comment;
+    std::string header1, header2, header3, header4, separator, comment, distributionFlag;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4 >> specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4 >>
+        distributionFlag >> specID;
     TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -280,12 +281,12 @@ public:
     std::ifstream in(filename.c_str());
     int specID;
     double qVal, angle;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID >> separator >> qVal >>
-        separator >> angle;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID >>
+        separator >> qVal >> separator >> angle;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -317,11 +318,11 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     double axisVal;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> axisVal;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> axisVal;
 
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -353,11 +354,11 @@ public:
     std::ifstream in(filename.c_str());
     int specID;
     double firstData;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID >> firstData;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID >> firstData;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -405,11 +406,11 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID;
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
     TS_ASSERT_EQUALS(header1, "X");
@@ -513,11 +514,11 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
 
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID;
     TS_ASSERT_EQUALS(specID, 1);
     TS_ASSERT_EQUALS(comment, "#");
     // the algorithm will use a custom one if supplied even if the type selected
@@ -698,10 +699,10 @@ public:
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str());
     int specID;
-    std::string header1, header2, header3, separator, comment;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
     // Test that the first few column headers, separator and first two bins are
     // as expected
-    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> specID;
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID;
     TS_ASSERT_EQUALS(specID, 2);
     TS_ASSERT_EQUALS(comment, "#");
     TS_ASSERT_EQUALS(separator, ",");
@@ -1004,6 +1005,184 @@ public:
     ss1 << std::string(filename, 0, extPos) << "_1" << std::string(filename, extPos);
     TS_ASSERT(Poco::File(ss0.str()).exists());
     TS_ASSERT(Poco::File(ss1.str()).exists());
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_Distribution_true_Header_true() {
+    // check the stream saved to file
+    // contains the header flag Distribution=true
+    // when the workspace is a Distribution
+
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+    wsToSave->setDistribution(true);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", false));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    double qVal, angle;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID >>
+        separator >> qVal >> separator >> angle;
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(distributionFlag, "Distribution=true");
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
+    TS_ASSERT_EQUALS(angle, 57.295779513082316);
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_Distribution_false_Header_true() {
+    // check the stream saved to file
+    // contains the header flag Distribution=false
+    // when the workspace is NOT a Distribution
+
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", false));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    double qVal, angle;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID >>
+        separator >> qVal >> separator >> angle;
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(distributionFlag, "Distribution=false");
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
+    TS_ASSERT_EQUALS(angle, 57.295779513082316);
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_Distribution_true_Header_false() {
+    // check the stream saved to file
+    // contains the header flag Distribution=true
+    // when the workspace is a Distribution
+    // even when ColumnHeader=false
+
+    // ColumnHeader should be written, even when ColumnHeader=false, but Distribution=true
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+    wsToSave->setDistribution(true);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", false));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("ColumnHeader", false));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    double qVal, angle;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >> distributionFlag >> specID >>
+        separator >> qVal >> separator >> angle;
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(distributionFlag, "Distribution=true");
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
+    TS_ASSERT_EQUALS(angle, 57.295779513082316);
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_Distribution_false_Header_false() {
+    // check the stream saved to file
+    // does NOT contain a header
+    // when the workspace is NOT a Distribution
+    // and ColumnHeader=false
+
+    // ColumnHeader not written, when ColumnHeader=false and Distribution=false
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("SpectrumMetaData", "SpectrumNumber,Q,Angle"));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumID", false));
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("ColumnHeader", false));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    double qVal, angle;
+    std::string header1, header2, header3, separator, comment, distributionFlag;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> specID >> separator >> qVal >> separator >> angle;
+    TS_ASSERT_EQUALS(specID, 1);
+    TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
+    TS_ASSERT_EQUALS(angle, 57.295779513082316);
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
   }
 
   // public as it is used in LoadAsciiTest as well.
