@@ -218,4 +218,33 @@ void QtSearchModel::setSaved() { m_hasUnsavedChanges = false; }
 SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDetails[index]; }
 
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
+
+std::string QtSearchModel::getLogbookCSV(SearchResults const &results) const {
+  std::string csv = getLogbookHeaders();
+  for (SearchResult const &result : results) {
+    csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "\n";
+  }
+  return csv;
+}
+
+std::string QtSearchModel::getLogbookHeaders() const {
+  std::string header;
+  header +=
+      headerData(static_cast<int>(Column::RUN), Qt::Orientation::Horizontal, Qt::DisplayRole).toString().toStdString() +
+      ",";
+  header += headerData(static_cast<int>(Column::TITLE), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            ",";
+  header += headerData(static_cast<int>(Column::EXCLUDE), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            ",";
+  header += headerData(static_cast<int>(Column::COMMENT), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            "\n";
+  return header;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

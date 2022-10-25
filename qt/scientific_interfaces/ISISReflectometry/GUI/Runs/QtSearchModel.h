@@ -35,6 +35,8 @@ public:
   bool hasUnsavedChanges() const override;
   void setUnsaved() override;
   void setSaved() override;
+  // generate csv string for exporting the logbook
+  std::string getLogbookCSV(const SearchResults &results) const;
 
   // QAbstractTableModel overrides
   // row and column counts
@@ -53,6 +55,9 @@ protected:
   SearchResults m_runDetails;
   // Flag to indicate whether there are unsaved changes
   bool m_hasUnsavedChanges;
+
+private:
+  std::string getLogbookHeaders() const;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
