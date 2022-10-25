@@ -42,6 +42,7 @@ public:
   }
 
   static Kernel::Matrix<double> DetermineErrors(std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
+                                                const Kernel::Matrix<double> &modUB,
                                                 const API::IPeaksWorkspace_sptr &ws, double tolerance);
 
 private:

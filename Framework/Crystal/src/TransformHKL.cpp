@@ -112,12 +112,19 @@ void TransformHKL::exec() {
   UB = UB * hkl_tran_inverse;
   g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
+
+  Matrix<double> modUB = o_lattice.getModUB();
+  modUB = modUB * hkl_tran_inverse;
+  o_lattice.setModUB(modUB);
+
+  Matrix<double> modHKL = o_lattice.getModHKL();
+
   std::vector<double> sigabc(6);
 
   bool redetermine_error = this->getProperty("FindError");
 
   if (redetermine_error) {
-    SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
+    SelectCellWithForm::DetermineErrors(sigabc, UB, modUB, ws, tolerance);
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
   } else {
     o_lattice.setError(0, 0, 0, 0, 0, 0);
@@ -136,10 +143,12 @@ void TransformHKL::exec() {
     IPeak &peak = ws->getPeak(i);
     V3D hkl(peak.getHKL());
     V3D ihkl(peak.getIntHKL());
+    V3D imnp(peak.getIntMNP());
     peak.setIntHKL(hkl_tran * ihkl);
-    miller_indices.emplace_back(hkl_tran * ihkl);
+    peak.setIntMNP(hkl_tran * imnp);
+    miller_indices.emplace_back(hkl_tran * hkl - modHKL * peak.getIntMNP());
     peak.setHKL(hkl_tran * hkl);
-    q_vectors.emplace_back(peak.getQSampleFrame());
+    q_vectors.emplace_back(peak.getQSampleFrame() - modUB * peak.getIntMNP());
     num_indexed++;
   }
 

@@ -101,10 +101,19 @@ void SelectCellOfType::exec() {
   g_log.notice(std::string(message));
 
   DblMatrix T = info.GetHKL_Tran();
-  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  g_log.notice() << "Reduced to Conventional Cell Transformation Matrix =  " << T.str() << '\n';
   this->setProperty("TransformationMatrix", T.getVector());
 
+  DblMatrix UBinv = newUB;
+  UBinv.Invert();
+
+  DblMatrix Tref = UBinv * UB;
+
+  g_log.notice() << "Miller HKL Transformation Matrix =  " << Tref.str() << '\n';
+
   if (apply) {
+    // Try to optimize(LSQ) to find lattice errors
+    // UB matrix may NOT have been found by unconstrained least squares optimization
     std::vector<double> sigabc(6);
     int n_peaks = ws->getNumberPeaks();
 
@@ -114,12 +123,11 @@ void SelectCellOfType::exec() {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
-    //----------------------------------------------
-    o_lattice->setUB(newUB);
+    V3D modVec1 = Tref * o_lattice->getModVec(0);
+    V3D modVec2 = Tref * o_lattice->getModVec(1);
+    V3D modVec3 = Tref * o_lattice->getModVec(2);
 
-    V3D modVec1 = T * o_lattice->getModVec(0);
-    V3D modVec2 = T * o_lattice->getModVec(1);
-    V3D modVec3 = T * o_lattice->getModVec(2);
+    o_lattice->setUB(newUB);
 
     o_lattice->setModVec1(modVec1);
     o_lattice->setModVec2(modVec2);
@@ -136,17 +144,16 @@ void SelectCellOfType::exec() {
 
     for (int i = 0; i < n_peaks; i++) {
       IPeak &peak = ws->getPeak(i);
-      peak.setHKL(T * peak.getHKL());
-      peak.setIntHKL(T * peak.getIntHKL());
-      peak.setIntMNP(T * peak.getIntMNP());
+      peak.setHKL(Tref * peak.getHKL());
+      peak.setIntHKL(Tref * peak.getIntHKL());
 
-      q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP());
+      q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP() * 2 * M_PI);
       miller_indices.emplace_back(peak.getHKL() - modHKL * peak.getIntMNP());
     }
 
     num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
 
-    SelectCellWithForm::DetermineErrors(sigabc, newUB, ws, tolerance);
+    SelectCellWithForm::DetermineErrors(sigabc, newUB, newModUB, ws, tolerance);
 
     o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
 

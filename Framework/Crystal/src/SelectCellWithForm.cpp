@@ -50,6 +50,7 @@ void SelectCellWithForm::init() {
 
 Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &sigabc,
                                                            const Kernel::Matrix<double> &UB,
+                                                           const Kernel::Matrix<double> &modUB,
                                                            const IPeaksWorkspace_sptr &ws, double tolerance) {
 
   std::vector<V3D> miller_ind;
@@ -63,10 +64,8 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &
   q_vectors.reserve(npeaks);
   q_vectors0.reserve(npeaks);
 
-  Kernel::Matrix<double> modHKL = ws->sample().getOrientedLattice().getModHKL();
-
   for (int i = 0; i < npeaks; i++)
-    q_vectors0.emplace_back(ws->getPeak(i).getQSampleFrame() - UB * modHKL * ws->getPeak(i).getIntMNP());
+    q_vectors0.emplace_back(ws->getPeak(i).getQSampleFrame() - modUB * ws->getPeak(i).getIntMNP() * 2 * M_PI);
 
   Kernel::Matrix<double> newUB1(3, 3);
   IndexingUtils::GetIndexedPeaks(UB, q_vectors0, tolerance, miller_ind, q_vectors, fit_error);
@@ -133,49 +132,62 @@ void SelectCellWithForm::exec() {
   g_log.notice(std::string(message));
 
   DblMatrix T = info.GetHKL_Tran();
-  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  g_log.notice() << "Reduced to Conventional Cell Transformation Matrix =  " << T.str() << '\n';
   this->setProperty("TransformationMatrix", T.getVector());
 
+  DblMatrix UBinv = newUB;
+  UBinv.Invert();
+
+  DblMatrix Tref = UBinv * UB;
+
+  g_log.notice() << "Miller HKL Transformation Matrix =  " << Tref.str() << '\n';
+
   if (apply) {
-    //----------------------------------- Try to optimize(LSQ) to find lattice
-    // errors ------------------------
-    //                       UB matrix may NOT have been found by unconstrained
-    //                       least squares optimization
-
-    //----------------------------------------------
-    o_lattice->setUB(newUB);
+    // Try to optimize(LSQ) to find lattice errors
+    // UB matrix may NOT have been found by unconstrained least squares optimization
     std::vector<double> sigabc(6);
-    DetermineErrors(sigabc, newUB, ws, tolerance);
-
-    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
-
     int n_peaks = ws->getNumberPeaks();
 
     int num_indexed = 0;
     double average_error = 0.0;
 
-    if (o_lattice->getMaxOrder() == 0) {
-      std::vector<V3D> miller_indices;
-      std::vector<V3D> q_vectors;
-      for (int i = 0; i < n_peaks; i++) {
-        q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
-      }
-      num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
+    std::vector<V3D> miller_indices;
+    std::vector<V3D> q_vectors;
 
-      for (int i = 0; i < n_peaks; i++) {
-        IPeak &peak = ws->getPeak(i);
-        peak.setIntHKL(miller_indices[i]);
-        peak.setHKL(miller_indices[i]);
-      }
-    } else {
-      num_indexed = static_cast<int>(num_indexed);
-      for (int i = 0; i < n_peaks; i++) {
-        IPeak &peak = ws->getPeak(i);
-        average_error += (peak.getHKL()).hklError();
-        peak.setIntHKL(T * peak.getIntHKL());
-        peak.setHKL(T * peak.getHKL());
-      }
+    V3D modVec1 = Tref * o_lattice->getModVec(0);
+    V3D modVec2 = Tref * o_lattice->getModVec(1);
+    V3D modVec3 = Tref * o_lattice->getModVec(2);
+
+    o_lattice->setUB(newUB);
+
+    o_lattice->setModVec1(modVec1);
+    o_lattice->setModVec2(modVec2);
+    o_lattice->setModVec3(modVec3);
+
+    DblMatrix modHKL(3, 3);
+    modHKL.setColumn(0, modVec1);
+    modHKL.setColumn(1, modVec2);
+    modHKL.setColumn(2, modVec3);
+    o_lattice->setModHKL(modHKL);
+
+    DblMatrix newModUB = newUB * modHKL;
+    o_lattice->setModUB(newModUB);
+
+    for (int i = 0; i < n_peaks; i++) {
+      IPeak &peak = ws->getPeak(i);
+      peak.setHKL(Tref * peak.getHKL());
+      peak.setIntHKL(Tref * peak.getIntHKL());
+
+      q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP() * 2 * M_PI);
+      miller_indices.emplace_back(peak.getHKL() - modHKL * peak.getIntMNP());
     }
+
+    num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
+
+    SelectCellWithForm::DetermineErrors(sigabc, newUB, newModUB, ws, tolerance);
+
+    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     // Tell the user what happened.
@@ -183,7 +195,6 @@ void SelectCellWithForm::exec() {
     g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << '\n';
 
     // Save output properties
-
     this->setProperty("NumIndexed", num_indexed);
     this->setProperty("AverageError", average_error);
   }
