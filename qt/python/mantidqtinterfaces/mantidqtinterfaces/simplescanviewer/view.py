@@ -96,7 +96,6 @@ class SimpleScanViewerView(QMainWindow):
         self.status_bar_label = QLabel()
         self.help_button = QToolButton()
         self.help_button.setText("?")
-        self.help_button.clicked.connect(self.presenter.action_open_help_window)
         self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 

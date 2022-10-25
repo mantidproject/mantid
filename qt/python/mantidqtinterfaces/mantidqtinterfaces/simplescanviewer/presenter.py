@@ -30,6 +30,7 @@ class SimpleScanViewerPresenter:
         self.view.sig_file_selected.connect(self.on_file_selected)
         self.view.file_line_edit.returnPressed.connect(self.on_line_edited)
         self.view.sig_background_selected.connect(self.model.process_background)
+        self.view.help_button.clicked.connect(self.action_open_help_window)
 
         self.observer = ScanAlgorithmObserver()
 
