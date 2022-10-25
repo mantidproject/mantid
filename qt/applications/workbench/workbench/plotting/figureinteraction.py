@@ -818,6 +818,7 @@ class FigureInteraction(object):
                     else:
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
+
                 arg_set_copy = copy(arg_set)
                 [
                     arg_set_copy.pop(key)
