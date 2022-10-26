@@ -1,0 +1,1 @@
+- Fixed a bug where waterfall plots were updated unconditionally during ADS updates
