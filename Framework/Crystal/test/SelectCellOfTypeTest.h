@@ -257,9 +257,9 @@ public:
         TS_ASSERT_DELTA(mnp[2], 1, .0001);
 
         V3D diff = peak.getIntHKL() + newModHKL * peak.getIntMNP() - peak.getHKL();
-        TS_ASSERT_DELTA(diff[0], 0, .0001);
-        TS_ASSERT_DELTA(diff[1], 0, .0001);
-        TS_ASSERT_DELTA(diff[2], 0, .0001);
+        TS_ASSERT_DELTA(diff[0], 0, 0.06);
+        TS_ASSERT_DELTA(diff[1], 0, 0.06);
+        TS_ASSERT_DELTA(diff[2], 0, 0.06);
       }
     }
 

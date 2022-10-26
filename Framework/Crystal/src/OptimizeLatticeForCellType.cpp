@@ -136,12 +136,16 @@ void OptimizeLatticeForCellType::exec() {
       throw;
     }
 
+    std::cout << peakWS << "\n";
+
     fit_alg->setProperty("Function", std::static_pointer_cast<IFunction>(latticeFunction));
     fit_alg->setProperty("Ties", "ZeroShift=0.0");
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->executeAsChildAlg();
+
+    std::cout << "fit\n";
 
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
     Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
