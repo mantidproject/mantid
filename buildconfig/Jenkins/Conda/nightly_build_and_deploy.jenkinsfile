@@ -53,6 +53,18 @@ pipeline {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
   }
   stages {
+    // Store the git commit hash in an environment variable so that we can use
+    // the same commit for all stages of the pipeline. This is perfomed by using
+    // the following step at the start of each subsequent stage:
+    //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+    stage('Store git commit') {
+      agent any
+      steps {
+        script {
+          env.GIT_SHA = GIT_COMMIT
+        }
+      }
+    }
     // Verify developer environment build/test while also building conda packages
     // in parallel. Running both steps in parallel reduces the overall pipeline
     // time, however if either part breaks then no publishing occurs.
@@ -86,6 +98,7 @@ pipeline {
             agent { label "${PLATFORM}" }
             options { timestamps () }
             steps {
+              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
               build_and_test("${PLATFORM}")
             }
             post {
@@ -117,6 +130,7 @@ pipeline {
                 retry(3)
             }
             steps {
+              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
                dir('conda-bld') {
@@ -156,6 +170,7 @@ pipeline {
                 retry(3)
             }
             steps {
+              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
               dir('conda-bld') {
@@ -194,6 +209,7 @@ pipeline {
         GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
       }
       steps {
+        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
         // Conda first
         sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
@@ -213,7 +229,7 @@ pipeline {
           target: 'standalone-packages',
           flatten: true
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github\
-          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${GIT_COMMIT} ${WORKSPACE}/standalone-packages/*'
+          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${GIT_SHA} ${WORKSPACE}/standalone-packages/*'
       }
     }
     stage ('Delete old non-main packages from Anaconda') {
@@ -229,6 +245,7 @@ pipeline {
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
+        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
          ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
       }
@@ -245,6 +262,7 @@ pipeline {
         RECIPE_UPDATE_OPTIONS = recipe_update_options()
       }
       steps {
+        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh ${GITHUB_TOKEN} ${GITHUB_USER_NAME} ${GITHUB_USER_EMAIL} ${RECIPE_UPDATE_OPTIONS}'
       }
     }
