@@ -37,6 +37,7 @@ class RectanglesManager(QWidget):
         self.layout().addWidget(self.table)
 
         self.table.cellChanged.connect(self.on_field_changed)
+        self.table.itemSelectionChanged.connect(self.save_current_cell_value)
         self.manage_table_width()
 
     def add_rectangle(self, rectangle: patches.Rectangle):
@@ -92,6 +93,20 @@ class RectanglesManager(QWidget):
         controller, rectangle = self.rectangles[self.current_rectangle_index]
         controller.update_values(*get_rectangle_corners(rectangle))
 
+    def save_current_cell_value(self):
+        """
+        When a field is selected by the user, its current value is stored in case the user provides a bad input
+        (e.g. text)
+        """
+        selected_cell = self.table.selectedIndexes()[0]
+        row, col = selected_cell.row(), selected_cell.column()
+
+        if col != 1:
+            return
+
+        controller, _ = self.rectangles[self.find_rectangle_index_at_row(row)]
+        controller.save_old_values()
+
     def on_field_changed(self, row: int, _):
         """
         Slot triggered when a field of the table is changed. Updates the patch accordingly.
@@ -103,6 +118,7 @@ class RectanglesManager(QWidget):
 
         controller, rectangle = self.rectangles[index]
         x0, y0, x1, y1 = controller.get_values()
+        controller.save_old_values()
         rectangle.set_bounds(x0, y0, x1 - x0, y1 - y0)
         self.sig_controller_updated.emit(rectangle)
 
@@ -242,6 +258,13 @@ class RectangleController:
     def get_values(self):
         return (field.value for field in self.fields)
 
+    def save_old_values(self):
+        """
+        Save values from all the fields
+        """
+        for field in self.fields:
+            field.save_old_value()
+
     def set_peak_plot(self, peak_plot):
         """
         Store the peak plot object and remove the previous one from the figure if it exists
@@ -269,6 +292,7 @@ class DoubleProperty:
         self._name.setFlags(self._name.flags() & (~Qt.ItemIsEditable))
 
         self._value = QTableWidgetItem(self.value_as_string(value))
+        self._old_value: float = value
 
     @property
     def name(self) -> str:
@@ -282,8 +306,8 @@ class DoubleProperty:
         try:
             return float(self._value.text())
         except ValueError:
-            # TODO return previous value ? no changes ?
-            return 0
+            self._value.setText(str(self._old_value))
+            return self._old_value
 
     @value.setter
     def value(self, new_value: float):
@@ -305,6 +329,12 @@ class DoubleProperty:
 
     def __eq__(self, other):
         return self.name == other.name and self.value == other.value
+
+    def save_old_value(self):
+        """
+        Store the current value of the cell in case it needs to be reused later.
+        """
+        self._old_value = self.value
 
 
 def get_rectangle_corners(rectangle: patches.Rectangle):
