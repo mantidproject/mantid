@@ -557,7 +557,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         del args['ProcessingInstructions']
         args['CalibrationFile'] = FileFinder.getFullPath("ISISReflectometry/calibration_test_data_INTER45455.dat")
         args['AnalysisMode'] = 'MultiDetectorAnalysis'
-        outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'CalibTable']
+        outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'Calib_Table_45455']
         self._assert_run_algorithm_succeeds(args, outputs)
 
     # TODO test if no runNumber is on the WS

@@ -115,7 +115,7 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         return output_ws
 
     def _check_calibration(self, ws, det_ws_idx, start_pos_y, expect_calibrated):
-        self.assertEqual(expect_calibrated, AnalysisDataService.doesExist("CalibTable"))
+        self.assertEqual(expect_calibrated, AnalysisDataService.doesExist(f"Calib_Table_{str(ws.getRunNumber())}"))
         final_pos_y = ws.getDetector(det_ws_idx).getPos()[1]
         if expect_calibrated:
             self.assertNotAlmostEqual(start_pos_y, final_pos_y, 10, msg="Calibration not applied as expected")

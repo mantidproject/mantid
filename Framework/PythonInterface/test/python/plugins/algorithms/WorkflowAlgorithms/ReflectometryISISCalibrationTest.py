@@ -19,7 +19,6 @@ from testhelpers import (assertRaisesNothing, create_algorithm, WorkspaceCreatio
 
 class ReflectometryISISCalibrationTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data.dat")
-    _CALIBRATION_WS_NAME = 'CalibTable'
 
     @classmethod
     def setUpClass(cls):
@@ -44,14 +43,15 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         ws = self._create_sample_workspace(input_ws_name, spec_det_idx)
         expected_final_xyz, expected_final_dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx)
 
+        calibration_ws_name = self._calibration_ws_name(ws)
         output_ws_name = 'test_calibrated'
         args = {'InputWorkspace': ws,
                 'CalibrationFile': self._CALIBRATION_TEST_DATA,
                 'OutputWorkspace': output_ws_name}
-        outputs = [input_ws_name, self._CALIBRATION_WS_NAME, output_ws_name]
+        outputs = [input_ws_name, calibration_ws_name, output_ws_name]
         self._assert_run_algorithm_succeeds(args, outputs)
 
-        self._check_calibration_table(len(self.calibration_data), expected_final_xyz, expected_final_dimensions)
+        self._check_calibration_table(calibration_ws_name, len(self.calibration_data), expected_final_xyz, expected_final_dimensions)
 
         # Check the final output workspace
         retrieved_ws = AnalysisDataService.retrieve(output_ws_name)
@@ -127,8 +127,8 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         return expected_positions, expected_dimensions
 
-    def _check_calibration_table(self, expected_num_entries, expected_final_positions, expected_final_dimensions):
-        calib_table = AnalysisDataService.retrieve(self._CALIBRATION_WS_NAME).toDict()
+    def _check_calibration_table(self, calib_ws_name, expected_num_entries, expected_final_positions, expected_final_dimensions):
+        calib_table = AnalysisDataService.retrieve(calib_ws_name).toDict()
         detector_ids = calib_table['Detector ID']
         self.assertEqual(len(detector_ids), expected_num_entries)
 
@@ -213,6 +213,9 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryISISCalibration', **args)
         alg.setRethrows(True)
         return alg
+
+    def _calibration_ws_name(self, input_ws):
+        return f"Calib_Table_{str(input_ws.getRunNumber())}"
 
 
 if __name__ == '__main__':
