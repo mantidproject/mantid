@@ -135,7 +135,16 @@ void RunsPresenter::notifyExportLogbook() const {
   auto csv = m_view->getLogbookCSV();
   if (!csv.empty()) {
     auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
+    std::cerr << filename;
+    if (filename.find_last_of('.') == std::string::npos ||
+        filename.substr(filename.find_last_of('.') + 1) != std::string("csv")) {
+      filename += ".csv";
+    }
     std::ofstream outFile(filename, std::ios::trunc);
+    if (!outFile) {
+      m_messageHandler->giveUserCritical("Saving to " + filename + "failed. Please try again.", "Error");
+      return;
+    }
     outFile << csv;
     outFile.close();
   } else {
