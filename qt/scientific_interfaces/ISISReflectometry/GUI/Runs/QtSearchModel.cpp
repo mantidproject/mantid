@@ -219,18 +219,20 @@ SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDet
 
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
 
-std::string QtSearchModel::getLogbookCSV(SearchResults const &results) const {
+std::string QtSearchModel::getLogbookCSV() const { return makeLogbookCSV(getRows()); }
+
+std::string QtSearchModel::makeLogbookCSV(SearchResults const &results) const {
   if (results.empty()) {
     return "";
   }
-  std::string csv = getLogbookHeaders();
+  std::string csv = makeLogbookHeaders();
   for (SearchResult const &result : results) {
     csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "\n";
   }
   return csv;
 }
 
-std::string QtSearchModel::getLogbookHeaders() const {
+std::string QtSearchModel::makeLogbookHeaders() const {
   std::string header;
   header +=
       headerData(static_cast<int>(Column::RUN), Qt::Orientation::Horizontal, Qt::DisplayRole).toString().toStdString() +

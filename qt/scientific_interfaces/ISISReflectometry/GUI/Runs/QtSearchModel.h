@@ -36,7 +36,8 @@ public:
   void setUnsaved() override;
   void setSaved() override;
   // generate csv string for exporting the logbook
-  std::string getLogbookCSV(const SearchResults &results) const;
+  std::string getLogbookCSV() const;
+  std::string makeLogbookCSV(const SearchResults &results) const;
 
   // QAbstractTableModel overrides
   // row and column counts
@@ -57,7 +58,7 @@ protected:
   bool m_hasUnsavedChanges;
 
 private:
-  std::string getLogbookHeaders() const;
+  std::string makeLogbookHeaders() const;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
