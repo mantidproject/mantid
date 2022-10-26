@@ -213,6 +213,8 @@ ISearchModel const &QtRunsView::searchResults() const { return m_searchModel; }
 
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
+std::string QtRunsView::getLogbookCSV() const { return m_searchModel.getLogbookCSV(); }
+
 /**
 This slot notifies the presenter that the user has modified some values in the
 search results table

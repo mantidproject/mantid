@@ -31,6 +31,7 @@ public:
   MOCK_METHOD2(setSearchResultsColumnWidth, void(int, int));
   MOCK_CONST_METHOD0(searchResults, ISearchModel const &());
   MOCK_METHOD0(mutableSearchResults, ISearchModel &());
+  MOCK_CONST_METHOD0(getLogbookCSV, std::string());
 
   MOCK_METHOD1(setInstrumentList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));

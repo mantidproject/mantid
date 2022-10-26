@@ -49,6 +49,7 @@ public:
   void setSearchResultsColumnWidth(int column, int width) override;
   ISearchModel const &searchResults() const override;
   ISearchModel &mutableSearchResults() override;
+  std::string getLogbookCSV() const override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments) override;
