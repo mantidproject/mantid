@@ -19,6 +19,8 @@ from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, SetSample,
                               LoadInstrument)
 from mantidqt.plotting import sample_shape
 
+workspace_name = "ws_shape"
+
 
 def setup_workspace_shape_from_CSG_merged(workspace_name: str):
     CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
@@ -41,6 +43,34 @@ def setup_workspace_shape_from_CSG_merged(workspace_name: str):
     SetSample(workspace_name, Geometry={'Shape': 'CSG', 'Value': merge_xml})
 
 
+def setup_workspace_sample_and_container_CSG():
+    CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
+
+    SetSample(workspace_name,
+              Geometry={'Shape': 'Cylinder', 'Height': 4.0,
+                        'Radius': 2.0, 'Center': [0., 0., 0.]},
+              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                        'NumberDensity': 0.1},
+              ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0,
+                                 'InnerRadius': 2.0, 'OuterRadius': 2.3,
+                                 'Center': [0., 0., 0.]},
+              ContainerMaterial={'ChemicalFormula': 'Al',
+                                 'NumberDensity': 0.01})
+    return ADS.retrieve(workspace_name)
+
+
+def setup_workspace_container_CSG():
+    CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
+
+    SetSample(workspace_name,
+              ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 4.0,
+                                 'InnerRadius': 2.0, 'OuterRadius': 2.3,
+                                 'Center': [0., 0., 0.]},
+              ContainerMaterial={'ChemicalFormula': 'Al',
+                                 'NumberDensity': 0.01})
+    return ADS.retrieve(workspace_name)
+
+
 def setup_workspace_shape_from_mesh(workspace_name: str):
     CreateSampleWorkspace(OutputWorkspace=workspace_name)
     LoadSampleShape(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, Filename="tube.stl")
@@ -56,7 +86,7 @@ class PlotSampleShapeTest(TestCase):
 
     def tearDown(self) -> None:
         if "ws_shape" in ADS:
-            DeleteWorkspace("ws_shape")
+            DeleteWorkspace(workspace_name)
 
     def test_CSG_merged_shape_is_valid(self):
         setup_workspace_shape_from_CSG_merged("ws_shape")
@@ -84,64 +114,71 @@ class PlotSampleShapeTest(TestCase):
 
     def test_plot_created_for_CSG_sphere_sample_only(self):
         CreateSampleWorkspace(OutputWorkspace="ws_shape")
-        shape_plot = sample_shape.plot_sample_shape("ws_shape")
+        shape_plot = sample_shape.plot_sample_container_and_components("ws_shape")
         self.assertTrue(shape_plot)
 
     def test_plot_created_for_CSG_merged_sample_only(self):
         setup_workspace_shape_from_CSG_merged("ws_shape")
-        shape_plot = sample_shape.plot_sample_shape("ws_shape")
+        shape_plot = sample_shape.plot_sample_container_and_components("ws_shape")
         self.assertTrue(shape_plot)
 
     def test_plot_created_for_mesh_sample_only(self):
         setup_workspace_shape_from_mesh("ws_shape")
-        shape_plot_axes = sample_shape.plot_sample_shape("ws_shape")
+        shape_plot_axes = sample_shape.plot_sample_container_and_components("ws_shape")
         self.assertTrue(shape_plot_axes)
 
     def test_plot_created_for_mesh_container_and_components(self):
         setup_workspace_sample_container_and_components_from_mesh("ws_shape")
         ws_shape = ADS.retrieve("ws_shape")
-        shape_plot_figure = sample_shape.plot_sample_shape("ws_shape")
+        shape_plot_figure = sample_shape.plot_sample_container_and_components("ws_shape")
         self.assertTrue(shape_plot_figure)
-        components_added_to_plot = sample_shape.plot_container_and_components(ws_shape, shape_plot_figure)
+        container_added_to_plot = sample_shape.plot_container(ws_shape, shape_plot_figure)
+        components_added_to_plot = sample_shape.plot_components(ws_shape, shape_plot_figure)
+        self.assertTrue(container_added_to_plot)
         self.assertTrue(components_added_to_plot)
 
-    @patch("mantidqt.plotting.sample_shape.plot_container_and_components")
-    def test_add_components_if_environment(self, mock_plot_container_and_components):
+    @patch("mantidqt.plotting.sample_shape.plot_container")
+    @patch("mantidqt.plotting.sample_shape.plot_components")
+    def test_add_components_if_environment(self, mock_plot_container, mock_plot_components):
         setup_workspace_sample_container_and_components_from_mesh("ws_shape")
-        sample_shape.plot_sample_shape("ws_shape")
-        self.assertEqual(1, mock_plot_container_and_components.call_count)
+        sample_shape.plot_sample_container_and_components("ws_shape")
+        self.assertEqual(1, mock_plot_container.call_count)
+        self.assertEqual(1, mock_plot_components.call_count)
 
-    @patch("mantidqt.plotting.sample_shape.plot_container_and_components")
-    def test_do_not_add_components_if_no_environment(self, mock_plot_container_and_components):
+    @patch("mantidqt.plotting.sample_shape.plot_container")
+    @patch("mantidqt.plotting.sample_shape.plot_components")
+    def test_do_not_add_components_if_no_environment(self, mock_plot_container, mock_plot_components):
         setup_workspace_shape_from_mesh("ws_shape")
-        sample_shape.plot_sample_shape("ws_shape")
-        self.assertEqual(0, mock_plot_container_and_components.call_count)
+        sample_shape.plot_sample_container_and_components("ws_shape")
+        self.assertEqual(0, mock_plot_container.call_count)
+        self.assertEqual(0, mock_plot_components.call_count)
 
     @patch("mantidqt.plotting.sample_shape.call_set_mesh_axes_equal")
     def test_call_axes_equal_once_for_sample_only(self, mock_call_set_mesh_axes_equal):
         setup_workspace_shape_from_mesh("ws_shape")
-        sample_shape.plot_sample_shape("ws_shape")
+        sample_shape.plot_sample_container_and_components("ws_shape")
         self.assertEqual(1, mock_call_set_mesh_axes_equal.call_count)
 
     @patch("mantidqt.plotting.sample_shape.call_set_mesh_axes_equal")
     def test_call_axes_equal_once_for_sample_and_components(self, mock_call_set_mesh_axes_equal):
         setup_workspace_sample_container_and_components_from_mesh("ws_shape")
         ws_shape = ADS.retrieve("ws_shape")
-        shape_plot_figure = sample_shape.plot_sample_shape("ws_shape")
-        sample_shape.plot_container_and_components(ws_shape, shape_plot_figure)
+        shape_plot_figure = sample_shape.plot_sample_container_and_components("ws_shape")
+        sample_shape.plot_container(ws_shape, shape_plot_figure)
+        sample_shape.plot_components(ws_shape, shape_plot_figure)
         self.assertEqual(1, mock_call_set_mesh_axes_equal.call_count)
 
     def test_get_overall_limits_for_sample_only(self):
         setup_workspace_shape_from_mesh("ws_shape")
         ws_shape = ADS.retrieve("ws_shape")
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(ws_shape)
-        self.assertEqual([-0.15, 0.1], [minimum, maximum])
+        self.assertEqual([-0.15, 0.15], [minimum, maximum])
 
     def test_get_overall_limits_for_sample_only_PEARL(self):
         setup_workspace_sample_container_and_components_from_mesh("ws_shape")
         ws_shape = ADS.retrieve("ws_shape")
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(ws_shape, include_components=False)
-        self.assertEqual([-3.289720742031932e-06, 0.0017999805212020874], [minimum, maximum])
+        self.assertEqual([-0.002939387798309326, 0.002939387798309326], [minimum, maximum])
 
     def test_get_overall_limits_for_sample_and_components_PEARL(self):
         setup_workspace_sample_container_and_components_from_mesh("ws_shape")
@@ -153,18 +190,58 @@ class PlotSampleShapeTest(TestCase):
         setup_workspace_shape_from_mesh("ws_shape")
         ws_shape = ADS.retrieve("ws_shape")
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(ws_shape)
-        self.assertEqual([-0.15, 0.1], [minimum, maximum])
+        self.assertEqual([-0.15, 0.15], [minimum, maximum])
 
     def test_overall_limits_for_every_axis(self):
-        self.assertEqual((3, 9), sample_shape.overall_limits_for_every_axis([np.array([3, 5, 7]),
-                                                                             np.array([4, 6, 8]),
-                                                                             np.array([5, 7, 9])]))
+        self.assertEqual((3, 9),
+                         sample_shape.overall_limits_for_every_axis(np.array([np.array([3, 5, 7]),
+                                                                              np.array([4, 6, 8]),
+                                                                              np.array([5, 7, 9]),
+                                                                              np.array([3, 4, 5])])
+                                                                    ))
 
     def test_greater_limits(self):
         self.assertEqual((1, 7), sample_shape.greater_limits(1, 4, 5, 7))
         self.assertEqual((1, 7), sample_shape.greater_limits(4, 5, 1, 7))
         self.assertEqual((1, 7), sample_shape.greater_limits(1, 7, 4, 5))
         self.assertEqual((1, 7), sample_shape.greater_limits(4, 7, 1, 5))
+
+    # Sample and Container
+    def test_sample_container_valid(self):
+        workspace = setup_workspace_sample_and_container_CSG()
+        figure = sample_shape.plot_sample_container_and_components(workspace.name())
+        self.assertTrue(figure)
+        self.assertEqual(f'Sample and Container: {workspace.name()}', figure.gca().get_title())
+
+    # def test_sample_invalid_container_valid(self):
+    #     workspace = setup_workspace_container_CSG()
+    #     figure = sample_shape.plot_sample_container_and_components(workspace.name())
+    #     self.assertTrue(figure)
+    #     self.assertEqual(f'Container: {workspace.name()}', figure.gca().get_title())
+
+    # def test_sample_and_container_invalid(self):
+    #     workspace = setup_workspace_container_CSG()
+    #     figure = sample_shape.plot_sample_container_and_components(workspace.name())
+    #     self.assertFalse(figure)
+    #
+    # def test_sample_valid_and_container_invalid(self):
+    #     workspace = setup_workspace_container_CSG()
+    #     figure = sample_shape.plot_sample_container_and_components(workspace.name())
+    #     self.assertTrue(figure)
+    #     self.assertEqual(f'Sample: {workspace.name()}', figure.gca().get_title())
+
+    # Sample, Container and Components
+    # def test_sample_container_and_components_valid(self):
+    #     workspace = setup_workspace_container_CSG()
+    #     figure = sample_shape.plot_sample_container_and_components(workspace.name())
+    #     self.assertTrue(figure)
+    #     self.assertEqual(f'Sample, Container and Components: {workspace.name()}', figure.gca().get_title())
+    #
+    # def test_sample_invalid_container_and_components_valid(self):
+    #     workspace = setup_workspace_container_CSG()
+    #     figure = sample_shape.plot_sample_container_and_components(workspace.name())
+    #     self.assertTrue(figure)
+    #     self.assertEqual(f'Container and Components: {workspace.name()}', figure.gca().get_title())
 
 
 if __name__ == '__main__':

@@ -21,7 +21,11 @@ def get_sample_shape_from_workspace(workspace_name):
 
 
 def is_sample_shape_not_empty(shape):
-    mesh = shape.getMesh()
+    if is_mesh_not_empty(shape.getMesh()):
+        return True
+
+
+def is_mesh_not_empty(mesh):
     if len(mesh) > 3:
         return True
 
@@ -32,13 +36,19 @@ def get_valid_sample_shape_from_workspace(workspace_name):
         return sample_shape
 
 
-def plot_sample_shape(workspace_name):
+def plot_sample_container_and_components(workspace_name):
+    sample_plotted = container_plotted = components_plotted = None
     workspace = ADS.retrieve(workspace_name)
     figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
-    plot_sample_only(workspace, figure)
+    if workspace.sample():
+        sample_plotted = plot_sample_only(workspace_name, figure)
     if workspace.sample().hasEnvironment():
-        plot_container_and_components(workspace, figure)
+        container_plotted = plot_container(workspace, figure)
+        number_of_components = workspace.sample().getEnvironment().nelements()
+        if number_of_components > 1:
+            components_plotted = plot_components(workspace, figure)
 
+    add_title(sample_plotted, container_plotted, components_plotted, axes, workspace.name())
     set_axes_to_largest_mesh(axes, workspace)
     axes.view_init(elev=10, azim=-150)
     axes.set_xlabel('X / m')
@@ -48,39 +58,60 @@ def plot_sample_shape(workspace_name):
     return figure
 
 
-def plot_sample_only(workspace, figure):
+def plot_sample_only(workspace_name, figure):
     axes = figure.gca()
     # get shape and mesh vertices
-    sample = workspace.sample()
-    shape = sample.getShape()
-    mesh = shape.getMesh()
+    shape = get_valid_sample_shape_from_workspace(workspace_name)
+    if shape:
+        mesh = shape.getMesh()
+        # Create 3D Polygon and set facecolor
+        mesh_polygon = Poly3DCollection(mesh, facecolors=['g'], edgecolors=['b'], alpha=0.5, linewidths=0.1)
+        mesh_polygon.set_facecolor((0, 1, 0, 0.5))
+        axes.add_collection3d(mesh_polygon)
+        axes.set_title(f'Sample: {workspace_name}')
+        return True
 
-    # Create 3D Polygon and set facecolor
-    mesh_polygon = Poly3DCollection(mesh, facecolors=['g'], edgecolors=['b'], alpha=0.5, linewidths=0.1)
+
+def plot_container(workspace, figure):
+    axes = figure.gca()
+    environment = workspace.sample().getEnvironment()
+    container_mesh = environment.getContainer().getShape().getMesh()
+    mesh_polygon = Poly3DCollection(container_mesh, edgecolors='red', alpha=0.1, linewidths=0.05, zorder=0.5)
     mesh_polygon.set_facecolor((0, 1, 0, 0.5))
     axes.add_collection3d(mesh_polygon)
-    axes.set_title(f'Sample: {workspace.name()}')
-
     return True
 
 
-def plot_container_and_components(workspace, figure):
+def plot_components(workspace, figure):
     axes = figure.gca()
     environment = workspace.sample().getEnvironment()
 
     number_of_components = environment.nelements()
-    for component_index in range(number_of_components):
-        mesh_loop = None
-        if component_index == 0:  # Container
-            mesh_loop = environment.getComponent(component_index).getShape().getMesh()
-        else:
-            mesh_loop = environment.getComponent(component_index).getMesh()
+    for component_index in range(1, number_of_components):
+        mesh_loop = environment.getComponent(component_index).getMesh()
         mesh_polygon_loop = Poly3DCollection(mesh_loop, edgecolors='red', alpha=0.1, linewidths=0.05, zorder=0.5)
         mesh_polygon_loop.set_facecolor((0, 1, 0, 0.5))
         axes.add_collection3d(mesh_polygon_loop)
-
-    axes.set_title(f'Sample and Components: {workspace.name()}')
     return True
+
+
+def add_title(sample_plotted, container_plotted, components_plotted, plot_axes, name_of_workspace):
+    title_string = ""
+    if sample_plotted:
+        title_string += "Sample"
+    if container_plotted:
+        if title_string:
+            if components_plotted:
+                title_string += ", "
+            else:
+                title_string += " and "
+        title_string += "Container"
+    if components_plotted:
+        if title_string:
+            title_string += " and "
+        title_string += "Components"
+    title_string += f": {name_of_workspace}"
+    plot_axes.set_title(title_string)
 
 
 def call_set_mesh_axes_equal(axes, mesh):
@@ -94,7 +125,7 @@ def set_axes_to_largest_mesh(axes, workspace):
 
 
 def overall_limits_for_all_meshes(workspace, include_components=True):
-    sample_mesh_limits = workspace.sample().getShape().getMesh().flatten()
+    sample_mesh_limits = workspace.sample().getShape().getMesh()
     overall_minimum, overall_maximum = overall_limits_for_every_axis(sample_mesh_limits)
 
     if include_components and workspace.sample().hasEnvironment():
@@ -111,14 +142,14 @@ def overall_limits_for_all_meshes(workspace, include_components=True):
     return overall_minimum, overall_maximum
 
 
-def overall_limits_for_every_axis(flattened_mesh):
-    minimum_x = flattened_mesh[0].min()
-    maximum_x = flattened_mesh[0].max()
-    minimum_y = flattened_mesh[1].min()
-    maximum_y = flattened_mesh[1].max()
-    minimum_z = flattened_mesh[2].min()
-    maximum_z = flattened_mesh[2].max()
-    return min(minimum_x, minimum_y, minimum_z), max(maximum_x, maximum_y, maximum_z)
+def overall_limits_for_every_axis(mesh):
+    if is_mesh_not_empty(mesh):
+        flattened_mesh = mesh.flatten()
+        minimum = flattened_mesh.min()
+        maximum = flattened_mesh.max()
+        return minimum, maximum
+    else:
+        return None, None
 
 
 def greater_limits(new_minimum, new_maximum, old_minimum, old_maximum):
