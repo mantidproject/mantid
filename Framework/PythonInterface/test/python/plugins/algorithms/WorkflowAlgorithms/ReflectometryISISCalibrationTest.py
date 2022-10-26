@@ -11,8 +11,8 @@ import unittest
 import numpy as np
 
 from mantid import FileFinder
-from mantid.api import AnalysisDataService
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from mantid.kernel import FloatTimeSeriesProperty, V3D
 from testhelpers import (assertRaisesNothing, create_algorithm, WorkspaceCreationHelper)
 
@@ -56,6 +56,44 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         # Check the final output workspace
         retrieved_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_detector_positions(retrieved_ws, expected_final_xyz)
+
+    def test_calibration_successful_for_workspace_group(self):
+        grp_name = 'test'
+        output_grp_name = 'test_calibrated'
+        # Create a group of two workspaces. The first workspace uses workspace index 4 as the specular detector.
+        # The second workspace uses workspace index 2 as the specular detector.
+        spec_det_idx_list = [4, 2]
+        input_ws_grp_size = len(spec_det_idx_list)
+        ws_grp = self._create_workspace_group(grp_name, spec_det_idx_list, input_ws_grp_size)
+
+        expected_final_xyz = []
+        expected_final_dimensions = []
+        calibration_ws_names = []
+        input_ws_names = []
+        output_ws_names = []
+
+        for i in range(ws_grp.getNumberOfEntries()):
+            ws = ws_grp[i]
+            input_ws_names.append(ws.name())
+            output_ws_names.append(f'{output_grp_name}_{i + 1}')
+            pos_xyz, dimensions = self._calculate_expected_final_detector_values(ws, spec_det_idx_list[i])
+            expected_final_xyz.append(pos_xyz)
+            expected_final_dimensions.append(dimensions)
+            calibration_ws_names.append(self._calibration_ws_name(ws))
+
+        args = {'InputWorkspace': ws_grp,
+                'CalibrationFile': self._CALIBRATION_TEST_DATA,
+                'OutputWorkspace': output_grp_name}
+        outputs = input_ws_names + [grp_name, output_grp_name] + calibration_ws_names + output_ws_names
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        # Check the final output workspace and calibration table
+        retrieved_grp = AnalysisDataService.retrieve(output_grp_name)
+        self.assertIsInstance(retrieved_grp, WorkspaceGroup)
+        self.assertEqual(retrieved_grp.getNumberOfEntries(), input_ws_grp_size)
+        for i in range(retrieved_grp.getNumberOfEntries()):
+            self._check_calibration_table(calibration_ws_names[i], len(self.calibration_data), expected_final_xyz[i], expected_final_dimensions[i])
+            self._check_detector_positions(retrieved_grp[i], expected_final_xyz[i])
 
     def test_no_specular_pixel_in_workspace_raises_exception(self):
         input_ws_name = 'test_1234'
@@ -155,6 +193,17 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._check_detector_positions(ws, self._start_xyz, 'start')
 
         return ws
+
+    def _create_workspace_group(self, group_name, ref_pixel_idx_list, number_of_items):
+        """Creates a workspace group with the given number of items. A list of reference pixel workspace IDs must be
+        provided to specify the reference pixel that should be used for each workspace in the group"""
+        child_names = list()
+        for index in range(0, number_of_items):
+            child_name = f"{group_name}_{str(index+1)}"
+            ws = self._create_sample_workspace(child_name, ref_pixel_idx_list[index])
+            ws.run().addProperty('run_number', index, True)
+            child_names.append(child_name)
+        return GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
 
     def _create_sample_workspace_with_missing_detectors(self, ref_pixel_idx):
         """Creates a workspace with 3 detectors. Only detector ID 3 (i.e. at workspace indices 2) will have calibration data.

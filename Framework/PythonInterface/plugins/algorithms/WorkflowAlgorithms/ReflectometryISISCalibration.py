@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateEmptyTableWorkspace, ApplyCalibration, CloneWorkspace
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, MatrixWorkspaceProperty,
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceProperty,
                         FileAction, FileProperty, PropertyMode)
 from mantid.kernel import Direction
 import csv
@@ -35,15 +35,15 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            MatrixWorkspaceProperty(self._WORKSPACE, '', direction=Direction.Input, optional=PropertyMode.Mandatory),
-            doc='An input workspace')
+            WorkspaceProperty(self._WORKSPACE, '', direction=Direction.Input, optional=PropertyMode.Mandatory),
+            doc='An input workspace or workspace group')
         self.declareProperty(FileProperty(self._CALIBRATION_FILE, "",
                                           action=FileAction.OptionalLoad,
                                           direction=Direction.Input,
                                           extensions=["dat"]),
                              doc="Calibration data file containing Y locations for detector pixels in mm.")
         self.declareProperty(
-            MatrixWorkspaceProperty(self._OUTPUT_WORKSPACE, '', direction=Direction.Output),
+            WorkspaceProperty(self._OUTPUT_WORKSPACE, '', direction=Direction.Output),
             doc='The calibrated output workspace.')
 
     def PyExec(self):
