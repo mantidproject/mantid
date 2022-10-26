@@ -214,7 +214,7 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 2, [ep1, 1.98624796464,
-                                                 ep2, 0.00180987932115])
+                                                 ep2, 0.00167306637639])
 
     def test_runs_ok_3peaks(self):
         """
@@ -247,7 +247,7 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 3, [ep1, 2.98294345043,
-                                                 ep2, 0.00212603392105])
+                                                 ep2, 0.00197567235850])
 
     def test_reject_outlying_peaks(self):
         """
