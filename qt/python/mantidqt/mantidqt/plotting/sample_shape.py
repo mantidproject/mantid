@@ -50,12 +50,11 @@ def plot_sample_container_and_components(workspace_name):
 
     add_title(sample_plotted, container_plotted, components_plotted, axes, workspace.name())
     set_axes_to_largest_mesh(axes, workspace)
-    axes.view_init(elev=10, azim=-150)
-    axes.set_xlabel('X / m')
-    axes.set_ylabel('Y / m')
-    axes.set_zlabel('Z / m')
-    figure.show()
-    return figure
+    set_perspective(axes)
+    set_axes_labels(axes)
+    show_the_figure(figure)
+    if sample_plotted or container_plotted or components_plotted:
+        return figure
 
 
 def plot_sample_only(workspace_name, figure):
@@ -96,6 +95,25 @@ def plot_components(workspace, figure):
 
 
 def add_title(sample_plotted, container_plotted, components_plotted, plot_axes, name_of_workspace):
+    title = construct_title(sample_plotted, container_plotted, components_plotted, name_of_workspace)
+    plot_axes.set_title(title)
+
+
+def show_the_figure(plot_figure):
+    plot_figure.show()
+
+
+def set_axes_labels(plot_axes):
+    plot_axes.set_xlabel('X / m')
+    plot_axes.set_ylabel('Y / m')
+    plot_axes.set_zlabel('Z / m')
+
+
+def set_perspective(plot_axes):
+    plot_axes.view_init(elev=10, azim=-150)
+
+
+def construct_title(sample_plotted, container_plotted, components_plotted, name_of_workspace):
     title_string = ""
     if sample_plotted:
         title_string += "Sample"
@@ -111,7 +129,7 @@ def add_title(sample_plotted, container_plotted, components_plotted, plot_axes, 
             title_string += " and "
         title_string += "Components"
     title_string += f": {name_of_workspace}"
-    plot_axes.set_title(title_string)
+    return title_string
 
 
 def call_set_mesh_axes_equal(axes, mesh):
