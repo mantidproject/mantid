@@ -144,17 +144,14 @@ void SelectCellOfType::exec() {
 
     for (int i = 0; i < n_peaks; i++) {
       IPeak &peak = ws->getPeak(i);
+      peak.setHKL(Tref * peak.getHKL());
+      peak.setIntHKL(Tref * peak.getIntHKL());
+
       q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP() * 2 * M_PI);
+      miller_indices.emplace_back(peak.getHKL() - modHKL * peak.getIntMNP());
     }
 
     num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
-
-    for (int i = 0; i < n_peaks; i++) {
-      IPeak &peak = ws->getPeak(i);
-      V3D hkl = miller_indices[i];
-      peak.setHKL(hkl + modHKL * peak.getIntMNP());
-      peak.setIntHKL(hkl);
-    }
 
     SelectCellWithForm::DetermineErrors(sigabc, newUB, newModUB, ws, tolerance);
 
