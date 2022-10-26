@@ -501,6 +501,7 @@ V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws, const 
  * Loads empty instrument of chosen name into a provided workspace
  * @param ws A MatrixWorkspace
  * @param instrumentName Name of the instrument to be loaded
+ * @param instrumentPath Path to the instrument definition file, optional
  */
 void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
                                      const std::string &instrumentPath) {
