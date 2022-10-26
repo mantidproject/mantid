@@ -23,8 +23,9 @@ else:
         scan_viewer = globals()["SimpleScanViewer"]
         try:
             visible = scan_viewer.isVisible()
-        except:
-            # underlying Qt object has been deleted
+        except RuntimeError:
+            # when a scan explorer is closed, the python object can linger while the underlying Qt object has been
+            # deleted. In this case, we create a new one from scratch
             visible = False
         if not visible:
             scan_viewer = SimpleScanViewerPresenter()
