@@ -100,7 +100,7 @@ class SimpleScanViewerView(QMainWindow):
         self.status_bar.addWidget(self.status_bar_label)
 
         # setting the layout
-        upper_layout = QVBoxLayout(self)
+        upper_layout = QVBoxLayout(self.splitter)
 
         layout = QHBoxLayout()
         layout.addWidget(self.file_line_edit)
