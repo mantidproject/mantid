@@ -86,13 +86,6 @@ def setup_workspace_sample_container_and_components_from_mesh():
     return workspace
 
 
-def setup_workspace_container_and_components_from_mesh():
-    workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
-    LoadInstrument(Workspace=workspace, RewriteSpectraMap=True, InstrumentName="Pearl")
-    SetSample(workspace, Environment={'Name': 'Pearl'})
-    return workspace
-
-
 class PlotSampleShapeTest(TestCase):
 
     def tearDown(self) -> None:
@@ -102,24 +95,43 @@ class PlotSampleShapeTest(TestCase):
     def test_CSG_merged_shape_is_valid(self):
         workspace = setup_workspace_shape_from_CSG_merged()
         self.assertTrue(workspace.sample().getShape())
-        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace.name()))
+        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace))
 
     def test_CSG_sphere_is_valid(self):
-        CreateSampleWorkspace(OutputWorkspace="ws_shape")
-        ws_shape = ADS.retrieve("ws_shape")
-        self.assertTrue(ws_shape.sample().getShape())
-        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace("ws_shape"))
+        workspace = CreateSampleWorkspace(OutputWorkspace="ws_shape")
+        self.assertTrue(workspace.sample().getShape())
+        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace))
 
     def test_CSG_empty_shape_is_not_valid(self):
-        CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
-        ws_shape = ADS.retrieve("ws_shape")
-        self.assertTrue(ws_shape.sample().getShape())
-        self.assertFalse(sample_shape.get_valid_sample_shape_from_workspace("ws_shape"))
+        workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
+        self.assertTrue(workspace.sample().getShape())
+        self.assertFalse(sample_shape.get_valid_sample_shape_from_workspace(workspace))
 
     def test_mesh_is_valid(self):
         workspace = setup_workspace_shape_from_mesh()
         self.assertTrue(workspace.sample().getShape())
-        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace.name()))
+        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace))
+
+    def test_container_valid(self):
+        workspace = setup_workspace_container_CSG()
+        self.assertTrue(sample_shape.get_valid_container_shape_from_workspace(workspace))
+
+    # def test_container_invalid(self):
+    #     CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
+    #
+    #     SetSample(workspace_name,
+    #           ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 0.0,
+    #                              'InnerRadius': 2.0, 'OuterRadius': 2.3,
+    #                              'Center': [0., 0., 0.]},
+    #           ContainerMaterial={'ChemicalFormula': 'Al',
+    #                              'NumberDensity': 0.01})
+    #     ADS.retrieve(workspace_name)
+
+    def test_components_valid(self):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        self.assertTrue(sample_shape.get_valid_component_shape_from_workspace(workspace, 1))
+
+    # def test_components_invalid(self):
 
     def test_plot_created_for_CSG_sphere_sample_only(self):
         CreateSampleWorkspace(OutputWorkspace="ws_shape")
