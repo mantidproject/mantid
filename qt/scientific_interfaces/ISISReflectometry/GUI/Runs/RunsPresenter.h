@@ -16,6 +16,7 @@
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
+#include <fstream>
 #include <memory>
 #include <optional>
 
@@ -114,6 +115,7 @@ public:
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
+  void notifyExportLogbook() const override;
 
   // RunNotifierSubscriber overrides
   void notifyCheckForNewRuns() override;

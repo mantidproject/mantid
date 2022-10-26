@@ -131,6 +131,20 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
     m_mainPresenter->notifyChangeInstrumentRequested(newName);
 }
 
+void RunsPresenter::notifyExportLogbook() const {
+  auto csv = m_view->getLogbookCSV();
+  if (!csv.empty()) {
+    auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
+    std::ofstream outFile(filename, std::ios::trunc);
+    outFile << csv;
+    outFile.close();
+  } else {
+    m_messageHandler->giveUserCritical(
+        "No logbook loaded. Enter an Investigation ID (and a cycle when using the archive) to load a logbook.",
+        "Error");
+  }
+}
+
 // Notification from a child presenter that the instrument needs to be changed
 // Returns true and continues to change the instrument if possible; returns
 // false if not
