@@ -113,15 +113,10 @@ void TransformHKL::exec() {
   g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
 
-  o_lattice.setModVec1(hkl_tran * o_lattice.getModVec(0));
-  o_lattice.setModVec2(hkl_tran * o_lattice.getModVec(1));
-  o_lattice.setModVec3(hkl_tran * o_lattice.getModVec(2));
+  Matrix<double> modHKL = o_lattice.getModHKL();
+  o_lattice.setModHKL(hkl_tran * modHKL);
 
   Matrix<double> modUB = o_lattice.getModUB();
-  modUB = modUB * hkl_tran_inverse;
-  o_lattice.setModUB(modUB);
-
-  Matrix<double> modHKL = o_lattice.getModHKL();
 
   std::vector<double> sigabc(6);
 

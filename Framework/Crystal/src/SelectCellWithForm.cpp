@@ -120,20 +120,12 @@ void SelectCellWithForm::ApplyTransform(Kernel::Matrix<double> &newUB, IPeaksWor
 
   DblMatrix Tref = UBinv * UB;
 
-  V3D modVec1 = Tref * o_lattice->getModVec(0);
-  V3D modVec2 = Tref * o_lattice->getModVec(1);
-  V3D modVec3 = Tref * o_lattice->getModVec(2);
-
   o_lattice->setUB(newUB);
 
-  o_lattice->setModVec1(modVec1);
-  o_lattice->setModVec2(modVec2);
-  o_lattice->setModVec3(modVec3);
+  DblMatrix modHKL = o_lattice->getModHKL();
 
-  DblMatrix modHKL(3, 3);
-  modHKL.setColumn(0, modVec1);
-  modHKL.setColumn(1, modVec2);
-  modHKL.setColumn(2, modVec3);
+  modHKL = Tref * modHKL;
+
   o_lattice->setModHKL(modHKL);
 
   DblMatrix modUB = o_lattice->getModUB();
