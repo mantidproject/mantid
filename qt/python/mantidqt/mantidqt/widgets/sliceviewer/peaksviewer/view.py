@@ -57,9 +57,6 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         QTableView.keyPressEvent(self, event)
         self._key_handler._row_selected()
 
-    def set_concise(self, bl):
-        self.is_concise = bl
-
     def enable_sorting(self, sort_role: int):
         """
         Turn on column sorting by clicking headers
