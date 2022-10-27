@@ -360,6 +360,7 @@
                 <xs:complexType>
                   <xs:attribute name="view"/>
                   <xs:attribute name="axis-view"/>
+                  <xs:attribute name="flip-view"/>
                 </xs:complexType>
               </xs:element>
               <xs:element name="location" type="idf:locationType"/>
