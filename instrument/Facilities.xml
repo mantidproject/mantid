@@ -659,21 +659,14 @@
 
   <instrument name="IN4">
     <technique>Spectroscopy</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="IN5">
     <technique>Spectroscopy</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
-    <acquisition>ScanCount</acquisition>
   </instrument>
 
   <instrument name="IN6">
     <technique>Spectroscopy</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="IN10">
@@ -693,10 +686,6 @@
 
   <instrument name="IN16B">
     <technique>Backscattering</technique>
-    <acquisition>DopplerSpectroscopy</acquisition>
-    <acquisition>BatsSpectroscopy</acquisition>
-    <acquisition>DopplerDiffraction</acquisition>
-    <acquisition>BatsDiffraction</acquisition>
   </instrument>
 
   <instrument name="D11">
@@ -745,22 +734,16 @@
 
   <instrument name="PANTHER">
     <technique>Spectroscopy</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
-    <acquisition>ScanCount</acquisition>
   </instrument>
 
   <instrument name="SHARP">
     <technique>Spectroscopy</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
-    <acquisition>ScanCount</acquisition>
   </instrument>
 
   <instrument name="D7">
-    <technique>PolarizedDiffraction</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
+    <technique>Polarized Diffraction</technique>
+    <technique>Polarized spectroscopy</technique>
+    <technique>Diffuse Scattering</technique>
   </instrument>
 
   <instrument name="D19">
