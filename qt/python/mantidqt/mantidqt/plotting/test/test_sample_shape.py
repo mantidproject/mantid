@@ -8,8 +8,9 @@
 #
 #
 
+from numpy.testing import assert_array_equal, assert_allclose
 from unittest import TestCase, main
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 import numpy as np
 import matplotlib
 matplotlib.use('AGG')  # noqa
@@ -17,7 +18,7 @@ matplotlib.use('AGG')  # noqa
 import mantid
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, SetSample, LoadSampleShape, DeleteWorkspace,
-                              LoadInstrument)
+                              LoadInstrument, SetUB)
 from mantidqt.plotting import sample_shape
 
 workspace_name = "ws_shape"
@@ -43,7 +44,8 @@ def setup_workspace_shape_from_CSG_merged():
     <algebra val="some-sphere (: stick)" /> \
     '
     SetSample("ws_shape", Geometry={'Shape': 'CSG', 'Value': merge_xml})
-    return ADS.retrieve(workspace_name)
+    workspace = ADS.retrieve(workspace_name)
+    return workspace
 
 
 def setup_workspace_sample_and_container_CSG():
@@ -88,6 +90,10 @@ def setup_workspace_sample_container_and_components_from_mesh():
 
 class PlotSampleShapeTest(TestCase):
 
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.RELATIVE_TOLERANCE = 0.00001
+
     def tearDown(self) -> None:
         if "ws_shape" in ADS:
             DeleteWorkspace(workspace_name)
@@ -116,22 +122,21 @@ class PlotSampleShapeTest(TestCase):
         workspace = setup_workspace_container_CSG()
         self.assertTrue(sample_shape.get_valid_container_shape_from_workspace(workspace))
 
-    # def test_container_invalid(self):
-    #     CreateWorkspace(OutputWorkspace=workspace_name, DataX=[1, 1], DataY=[2, 2])
-    #
-    #     SetSample(workspace_name,
-    #           ContainerGeometry={'Shape': 'HollowCylinder', 'Height': 0.0,
-    #                              'InnerRadius': 2.0, 'OuterRadius': 2.3,
-    #                              'Center': [0., 0., 0.]},
-    #           ContainerMaterial={'ChemicalFormula': 'Al',
-    #                              'NumberDensity': 0.01})
-    #     ADS.retrieve(workspace_name)
+    @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
+    def test_container_invalid(self, mock_is_mesh_not_empty):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        mock_is_mesh_not_empty.return_value = False
+        self.assertFalse(sample_shape.get_valid_container_shape_from_workspace(workspace))
 
-    def test_components_valid(self):
+    def test_component_valid(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         self.assertTrue(sample_shape.get_valid_component_shape_from_workspace(workspace, 1))
 
-    # def test_components_invalid(self):
+    @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
+    def test_component_invalid(self, mock_is_mesh_not_empty):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        mock_is_mesh_not_empty.return_value = False
+        self.assertFalse(sample_shape.get_valid_container_shape_from_workspace(workspace))
 
     def test_plot_created_for_CSG_sphere_sample_only(self):
         CreateSampleWorkspace(OutputWorkspace="ws_shape")
@@ -222,22 +227,24 @@ class PlotSampleShapeTest(TestCase):
     def test_get_overall_limits_for_sample_only(self):
         workspace = setup_workspace_shape_from_mesh()
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace)
-        self.assertEqual([-0.15, 0.15], [minimum, maximum])
+        assert_array_equal([-0.15, 0.15], [minimum, maximum])
 
     def test_get_overall_limits_for_sample_only_PEARL(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace, include_components=False)
-        self.assertEqual([-0.002939387798309326, 0.002939387798309326], [minimum, maximum])
+        assert_allclose([-0.002939387798309326, 0.002939387798309326],
+                        [minimum, maximum], rtol=self.RELATIVE_TOLERANCE)
 
     def test_get_overall_limits_for_sample_and_components_PEARL(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace)
-        self.assertEqual([-0.035900001525878904, 0.035900001525878904], [minimum, maximum])
+        assert_allclose([-0.035900001525878904, 0.035900001525878904],
+                        [minimum, maximum], rtol=self.RELATIVE_TOLERANCE)
 
     def test_set_axes_to_largest_mesh(self):
         workspace = setup_workspace_shape_from_mesh()
         [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace)
-        self.assertEqual([-0.15, 0.15], [minimum, maximum])
+        assert_array_equal([-0.15, 0.15], [minimum, maximum])
 
     def test_overall_limits_for_every_axis(self):
         self.assertEqual((3, 9),
@@ -291,6 +298,54 @@ class PlotSampleShapeTest(TestCase):
                          sample_shape.construct_title(True, False, True, "workspace_name"))
         self.assertEqual('Components: workspace_name',
                          sample_shape.construct_title(False, False, True, "workspace_name"))
+
+    @patch("mantidqt.plotting.sample_shape.add_beam_arrow")
+    def test_add_beam_arrow_called_once(self, mock_add_beam_arrow):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        figure = sample_shape.plot_sample_container_and_components(workspace.name())
+        self.assertTrue(figure)
+        self.assertEqual(1, mock_add_beam_arrow.call_count)
+
+    @patch("mantidqt.plotting.sample_shape.add_arrow")
+    def test_add_arrow_called_once(self, mock_add_arrow):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        figure = sample_shape.plot_sample_container_and_components(workspace.name())
+        self.assertTrue(figure)
+        self.assertEqual(1, mock_add_arrow.call_count)
+
+    @patch("mantidqt.plotting.sample_shape.call_set_mesh_axes_equal")
+    @patch("mantidqt.plotting.sample_shape.add_beam_arrow")
+    def test_add_beam_arrow_called_after_call_set_mesh_axes_equal(self, mock_add_beam_arrow,
+                                                                  mock_call_set_mesh_axes_equal):
+        manager = Mock()
+        manager.attach_mock(mock_call_set_mesh_axes_equal, "mock_call_set_mesh_axes_equal")
+        manager.attach_mock(mock_add_beam_arrow, "mock_add_beam_arrow")
+
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        figure = sample_shape.plot_sample_container_and_components(workspace.name())
+        self.assertTrue(figure)
+        self.assertEqual([each_call[0] for each_call in manager.mock_calls],
+                         ['mock_call_set_mesh_axes_equal', 'mock_add_beam_arrow'])
+
+    def test_beam_direction(self):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        source = workspace.getInstrument().getSource()
+        sample = workspace.getInstrument().getSample()
+        beam_direction = sample_shape.calculate_beam_direction(source, sample)
+        assert_array_equal([0, 0, 12.75], beam_direction)
+
+    def test_lattice_vectors(self):
+        workspace = CreateSampleWorkspace()
+        SetUB(workspace, a=1, b=1, c=2, alpha=90, beta=90, gamma=60)
+        real_lattice_vectors, reciprocal_lattice_vectors = sample_shape.calculate_lattice_vectors(workspace)
+        expected_real = [[3.14159265e+00,  6.28318531e+00,  0.00000000e+00],
+                         [-1.40822468e-16,  3.84734139e-16,  1.25663706e+01],
+                         [5.44139809e+00,  0.00000000e+00,  0.00000000e+00]]
+        assert_allclose(expected_real, real_lattice_vectors, rtol=self.RELATIVE_TOLERANCE)
+        expected_reciprocal = [[0.000000e+00,  1.000000e+00, -3.061617e-17],
+                               [0.000000e+00,  0.000000e+00,  5.000000e-01],
+                               [1.154701e+00, -5.773503e-01,  3.061617e-17]]
+        assert_allclose(expected_reciprocal, reciprocal_lattice_vectors, rtol=self.RELATIVE_TOLERANCE)
 
 
 if __name__ == '__main__':

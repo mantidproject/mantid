@@ -13,8 +13,6 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from mantid.api import AnalysisDataService as ADS
 
-OVERALL_LIMITS = None
-
 
 def is_shape_valid(shape):
     if is_mesh_not_empty(shape.getMesh()):
@@ -75,6 +73,9 @@ def plot_sample_container_and_components(workspace_name):
     set_axes_to_largest_mesh(axes, workspace)
     set_perspective(axes)
     set_axes_labels(axes)
+    add_beam_arrow(axes, workspace)
+    if workspace.sample().hasOrientedLattice():
+        plot_lattice_vectors(axes, workspace)
     show_the_figure(figure)
     if sample_plotted or container_plotted or components_plotted:
         return figure
@@ -161,7 +162,8 @@ def call_set_mesh_axes_equal(axes, mesh):
 def set_axes_to_largest_mesh(axes, workspace):
     overall_min, overall_max = overall_limits_for_all_meshes(workspace)
     call_set_mesh_axes_equal(axes, np.array(overall_min, overall_max))
-    # OVERALL_LIMITS = overall_min, overall_max
+    global OVERALL_LIMITS
+    OVERALL_LIMITS = overall_min, overall_max
 
 
 def overall_limits_for_all_meshes(workspace, include_components=True):
@@ -202,82 +204,63 @@ def greater_limits(new_minimum, new_maximum, old_minimum, old_maximum):
             maximum = old_maximum
     return minimum, maximum
 
-#
-# def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
-#     if origin == None:
-#         origin = (ax.get_xlim3d()[1],ax.get_ylim3d()[1],ax.get_zlim3d()[1])
-#     if factor == None:
-#         lims = ax.get_xlim3d()
-#         factor = (lims[1]-lims[0]) / 3.0
-#     vector_norm = vector / np.linalg.norm(vector)
-#     ax.quiver(
-#         origin[0], origin[1], origin[2],
-#         vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
-#         color = color,
-#         linestyle = linestyle
-#     )
-# # Add arrow along beam direction
-# source = ws.getInstrument().getSource().getPos()
-# sample = ws.getInstrument().getSample().getPos() - source
-# arrow(axes, sample, origin=(0,0,-0.04))
-#
-# plt.show()
-#
-#
-#
-# Add arrows for Beam or Crystal lattice
-#
-# def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
-#     if origin == None:
-#         origin = (ax.get_xlim3d()[1],ax.get_ylim3d()[1],ax.get_zlim3d()[1])
-#     if factor == None:
-#         lims = ax.get_xlim3d()
-#         factor = (lims[1]-lims[0]) / 3.0
-#     vector_norm = vector / np.linalg.norm(vector)
-#     ax.quiver(
-#         origin[0], origin[1], origin[2],
-#         vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
-#         color = color,
-#         linestyle = linestyle
-#     )
-#
-#     # Create ws and plot sample shape as previously described
-#
-# '''Add arrow along beam direction'''
-# source = ws.getInstrument().getSource().getPos()
-# sample = ws.getInstrument().getSample().getPos() - source
-# arrow(axes, sample, origin=(0,0,-0.04))
-#
-# '''Calculate Lattice Vectors'''
-# SetUB(ws, a=1, b=1, c=2, alpha=90, beta=90, gamma=60)
-# if not sample.hasOrientedLattice():
-#     raise Exception("There is no valid lattice")
-# UB = np.array(ws.sample().getOrientedLattice().getUB())
-# hkl = np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]])
-# QSample = np.matmul(UB,hkl)
-# Goniometer = ws.getRun().getGoniometer().getR()
-# reciprocal_lattice = np.matmul(Goniometer,QSample)#QLab
-# real_lattice = (2.0*np.pi)*np.linalg.inv(np.transpose(reciprocal_lattice))
-#
-# '''Add arrows for real and reciprocal lattice vectors'''
-# colors = ['r','g','b']
-# for i in range(3): # plot real_lattice with '-' solid linestyle
-#     arrow(axes, real_lattice[:,i], color = colors[i])
-# for i in range(3): # plot reciprocal_lattice with '--' dashed linestyle
-#     arrow(axes, reciprocal_lattice[:,i], color = colors[i], linestyle = '--')
-#
-#
-#
-#
-# set mesh axes equal
-#
-#
-# mesh = shape.getMesh()
-# mesh_polygon = Poly3DCollection(mesh, facecolors = facecolors, linewidths=0.1)
-# fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
-# axes.add_collection3d(mesh_polygon)
-#
-# axes.set_mesh_axes_equal(mesh)
-# # then add arrows as desired
-#
-# '''
+
+def calculate_beam_direction(source, sample):
+    source_position = source.getPos()
+    sample_position = sample.getPos()
+    beam_vector = sample_position - source_position
+    return beam_vector
+
+
+def add_beam_arrow(plot_axes, workspace):
+    # Add arrow along beam direction
+    source = workspace.getInstrument().getSource()
+    sample = workspace.getInstrument().getSample()
+    if source and sample:
+        beam_direction = calculate_beam_direction(source, sample)
+        add_arrow(plot_axes, beam_direction)
+
+
+def add_arrow(ax, vector, origin=None, factor=None, color='black', linestyle='-'):
+    # Add arrows for Beam or Crystal lattice
+    if origin is None:
+        origin = (ax.get_xlim3d()[1], ax.get_ylim3d()[1], ax.get_zlim3d()[1])
+    if factor is None:
+        lims = ax.get_xlim3d()
+        factor = (lims[1]-lims[0]) / 3.0
+    vector_norm = vector / np.linalg.norm(vector)
+    ax.quiver(
+        origin[0], origin[1], origin[2],
+        vector_norm[0]*factor, vector_norm[1]*factor, vector_norm[2]*factor,
+        color=color,
+        linestyle=linestyle
+    )
+
+
+def plot_lattice_vectors(plot_axes, workspace):
+    """Add arrows for real and reciprocal lattice vectors"""
+    real_lattice_vectors, reciprocal_lattice_vectors = calculate_lattice_vectors(workspace)
+    colors = ['r', 'g', 'b']
+    plot_real_lattice_vectors(plot_axes, real_lattice_vectors, colors)
+    plot_real_lattice_vectors(plot_axes, reciprocal_lattice_vectors, colors)
+
+
+def plot_real_lattice_vectors(plot_axes, reciprocal_lattice, colors):
+    for i in range(3):  # plot reciprocal_lattice with '--' dashed linestyle
+        add_arrow(plot_axes, reciprocal_lattice[:, i], color=colors[i], linestyle='--')
+
+
+def plot_reciprocal_lattice_vectors(plot_axes, real_lattice, colors):
+    for i in range(3):  # plot real_lattice with '-' solid linestyle
+        add_arrow(plot_axes, real_lattice[:, i], color=colors[i])
+
+
+def calculate_lattice_vectors(workspace):
+    ub_matrix = np.array(workspace.sample().getOrientedLattice().getUB())
+    hkl = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+    q_sample = np.matmul(ub_matrix, hkl)
+    goniometer = workspace.getRun().getGoniometer().getR()
+    reciprocal_lattice_vectors = np.matmul(goniometer, q_sample)  # QLab
+    real_lattice_vectors = (2.0*np.pi)*np.linalg.inv(np.transpose(reciprocal_lattice_vectors))
+
+    return real_lattice_vectors, reciprocal_lattice_vectors
