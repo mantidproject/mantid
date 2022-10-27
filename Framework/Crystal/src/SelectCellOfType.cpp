@@ -77,8 +77,7 @@ void SelectCellOfType::exec() {
   }
 
   // copy current lattice
-  auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
-  Matrix<double> UB = o_lattice->getUB();
+  Matrix<double> UB = ws->sample().getOrientedLattice().getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error("ERROR: The stored UB is not a valid orientation matrix");
@@ -104,63 +103,11 @@ void SelectCellOfType::exec() {
   g_log.notice() << "Reduced to Conventional Cell Transformation Matrix =  " << T.str() << '\n';
   this->setProperty("TransformationMatrix", T.getVector());
 
-  DblMatrix UBinv = newUB;
-  UBinv.Invert();
-
-  DblMatrix Tref = UBinv * UB;
-
-  g_log.notice() << "Miller HKL Transformation Matrix =  " << Tref.str() << '\n';
-
   if (apply) {
-    // Try to optimize(LSQ) to find lattice errors
-    // UB matrix may NOT have been found by unconstrained least squares optimization
-    std::vector<double> sigabc(6);
-    int n_peaks = ws->getNumberPeaks();
-
-    int num_indexed = 0;
+    int num_indexed;
     double average_error = 0.0;
 
-    std::vector<V3D> miller_indices;
-    std::vector<V3D> q_vectors;
-
-    V3D modVec1 = Tref * o_lattice->getModVec(0);
-    V3D modVec2 = Tref * o_lattice->getModVec(1);
-    V3D modVec3 = Tref * o_lattice->getModVec(2);
-
-    o_lattice->setUB(newUB);
-
-    o_lattice->setModVec1(modVec1);
-    o_lattice->setModVec2(modVec2);
-    o_lattice->setModVec3(modVec3);
-
-    DblMatrix modHKL(3, 3);
-    modHKL.setColumn(0, modVec1);
-    modHKL.setColumn(1, modVec2);
-    modHKL.setColumn(2, modVec3);
-    o_lattice->setModHKL(modHKL);
-
-    DblMatrix newModUB = newUB * modHKL;
-    o_lattice->setModUB(newModUB);
-
-    for (int i = 0; i < n_peaks; i++) {
-      IPeak &peak = ws->getPeak(i);
-      q_vectors.emplace_back(peak.getQSampleFrame() - newModUB * peak.getIntMNP() * 2 * M_PI);
-    }
-
-    num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
-
-    for (int i = 0; i < n_peaks; i++) {
-      IPeak &peak = ws->getPeak(i);
-      V3D hkl = miller_indices[i];
-      peak.setHKL(hkl + modHKL * peak.getIntMNP());
-      peak.setIntHKL(hkl);
-    }
-
-    SelectCellWithForm::DetermineErrors(sigabc, newUB, newModUB, ws, tolerance);
-
-    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
-
-    ws->mutableSample().setOrientedLattice(std::move(o_lattice));
+    SelectCellWithForm::ApplyTransform(newUB, ws, tolerance, &num_indexed, &average_error);
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";
