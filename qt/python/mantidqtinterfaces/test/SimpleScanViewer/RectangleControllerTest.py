@@ -126,8 +126,9 @@ class RectangleManagerTest(unittest.TestCase):
 
         self.manager.table.item(1, 1).setText("azerty")
 
-        self.assertEqual(self.manager.get_rectangles()[0].get_xy()[0], 0)
-        trigger_check.assert_called_once()
+        # check the value revert to the previous one when the input is ill-formed
+        self.assertEqual(self.manager.get_rectangles()[0].get_xy()[0], 0.123)
+        self.assertEqual(trigger_check.call_count, 2)
 
     def test_insert_in(self):
         controller = RectangleController(1, 2.1, 3.21, 4.321)
