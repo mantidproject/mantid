@@ -115,15 +115,17 @@ IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(const std::string &wo
 
 IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
                                                            const std::pair<double, double> &range) {
-  workspace = cropWorkspace(workspace, range.first, range.second);
-  workspace = convertToPointData(workspace);
+  if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
+    alteredWorkspace = convertToPointData(alteredWorkspace);
 
-  const auto xData = workspace->readX(0);
-  const auto yData = workspace->readY(0);
+    const auto xData = alteredWorkspace->readX(0);
+    const auto yData = alteredWorkspace->readY(0);
 
-  const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
+    const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
-  return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
+    return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
+  }
+  return nullptr;
 }
 
 bool PlotFitAnalysisPaneModel::hasEstimate() const { return m_estimateFunction != nullptr; }

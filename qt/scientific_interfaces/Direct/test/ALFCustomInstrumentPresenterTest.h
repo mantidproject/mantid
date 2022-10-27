@@ -106,7 +106,7 @@ public:
     // cannot compare std::function directly
     // check behaviour instead
     int run = 6113;
-    auto data = mockALFData("CURVES", "ALF", run, false);
+    auto data = mockALFData("CURVES", "ALF", run, "dSpacing");
     m_model->setCurrentRun(run);
 
     std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};

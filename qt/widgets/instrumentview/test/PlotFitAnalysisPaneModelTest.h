@@ -62,6 +62,15 @@ public:
     TS_ASSERT(m_model->hasEstimate());
   }
 
+  void test_that_calculateEstimate_returns_a_nullptr_if_the_crop_range_is_invalid() {
+    m_workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100, 300.0);
+    AnalysisDataService::Instance().addOrReplace(m_workspaceName, m_workspace);
+
+    const auto function = m_model->calculateEstimate(m_workspaceName, m_range);
+
+    TS_ASSERT_EQUALS(nullptr, function);
+  }
+
 private:
   std::unique_ptr<PlotFitAnalysisPaneModel> m_model;
 
