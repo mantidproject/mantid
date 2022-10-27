@@ -548,7 +548,7 @@ private:
   }
 
   void expectRegionSelectorToolbarEnabled(MockPreviewView &mockView, bool enable) {
-    EXPECT_CALL(mockView, setRegionSelectorToolbarEnabled(Eq(enable))).Times(1);
+    EXPECT_CALL(mockView, setRegionSelectorEnabled(Eq(enable))).Times(1);
   }
 
   void expectInstViewSetToZoomMode(MockPreviewView &mockView) {
@@ -623,7 +623,7 @@ private:
 
   void expectRegionSelectorCleared(MockPreviewView &mockView, MockRegionSelector *mockRegionSelector) {
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
-    EXPECT_CALL(mockView, setRegionSelectorToolbarEnabled(false)).Times(1);
+    EXPECT_CALL(mockView, setRegionSelectorEnabled(false)).Times(1);
   }
 
   void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {

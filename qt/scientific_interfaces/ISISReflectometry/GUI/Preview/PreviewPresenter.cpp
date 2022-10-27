@@ -51,7 +51,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
-  m_view->setRegionSelectorToolbarEnabled(false);
+  m_view->setRegionSelectorEnabled(false);
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
@@ -126,7 +126,7 @@ void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
-  m_view->setRegionSelectorToolbarEnabled(true);
+  m_view->setRegionSelectorEnabled(true);
   // Perform reduction to update the next plot, if possible
   runReduction();
 }
@@ -252,7 +252,7 @@ PreviewRow const &PreviewPresenter::getPreviewRow() const { return m_model->getP
 
 void PreviewPresenter::clearRegionSelector() {
   m_regionSelector->clearWorkspace();
-  m_view->setRegionSelectorToolbarEnabled(false);
+  m_view->setRegionSelectorEnabled(false);
 }
 
 void PreviewPresenter::clearReductionPlot() {
