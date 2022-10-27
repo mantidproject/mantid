@@ -102,6 +102,7 @@ public:
   /// Save settings for the pick tab to a project file
   virtual std::string saveToProject() const override;
   void addToContextMenu(QAction *action, std::function<bool(std::map<std::string, bool>)> &actionCondition);
+  QPushButton *getSelectTubeButton();
 public slots:
   void setTubeXUnits(int units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);

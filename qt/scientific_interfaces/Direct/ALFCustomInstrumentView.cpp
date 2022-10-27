@@ -34,17 +34,27 @@ void ALFCustomInstrumentView::setUpInstrument(const std::string &fileName,
   instrumentWidget->removeTab("Draw");
   instrumentWidget->hideHelp();
 
+  auto pickTab = instrumentWidget->getPickTab();
+
+  connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
+
   // set up extract single tube
   m_extractAction = new QAction("Extract Single Tube", this);
-  connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube())),
-      instrumentWidget->getPickTab()->addToContextMenu(m_extractAction, binders[0]);
+  connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube()));
+  pickTab->addToContextMenu(m_extractAction, binders[0]);
 
   // set up add to average
   m_averageAction = new QAction("Add Tube To Average", this);
-  connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube())),
-      instrumentWidget->getPickTab()->addToContextMenu(m_averageAction, binders[1]);
+  connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube()));
+  pickTab->addToContextMenu(m_averageAction, binders[1]);
 
   setInstrumentWidget(instrumentWidget);
+}
+
+void ALFCustomInstrumentView::selectWholeTube() {
+  auto pickTab = getInstrumentView()->getPickTab();
+  pickTab->setSummationType("Integrate");
+  pickTab->setAxisUnits("Out of plane angle");
 }
 
 void ALFCustomInstrumentView::extractSingleTube() {

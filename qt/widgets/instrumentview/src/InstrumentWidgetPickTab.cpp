@@ -323,6 +323,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   layout->addWidget(panelStack);
 }
 
+QPushButton *InstrumentWidgetPickTab::getSelectTubeButton() { return m_tube; }
+
 /**
  * If the workspace is monochromatic, the plot panel is useless and should be collapsed
  */
