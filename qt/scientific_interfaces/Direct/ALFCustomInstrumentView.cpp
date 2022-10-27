@@ -9,9 +9,6 @@
 
 #include <QMessageBox>
 #include <QSizePolicy>
-#include <QSpacerItem>
-#include <QVBoxLayout>
-#include <utility>
 
 namespace MantidQt::CustomInterfaces {
 
@@ -53,8 +50,8 @@ void ALFCustomInstrumentView::setUpInstrument(const std::string &fileName,
 
 void ALFCustomInstrumentView::selectWholeTube() {
   auto pickTab = getInstrumentView()->getPickTab();
-  pickTab->setSummationType("Integrate");
-  pickTab->setAxisUnits("Out of plane angle");
+  pickTab->setPlotType(MantidQt::MantidWidgets::IWPickPlotType::TUBE_INTEGRAL);
+  pickTab->setTubeXUnits(MantidQt::MantidWidgets::IWPickXUnits::OUT_OF_PLANE_ANGLE);
 }
 
 void ALFCustomInstrumentView::extractSingleTube() {
