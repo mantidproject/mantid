@@ -259,6 +259,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         new_x1 = new_x0 + rectangle_patch.get_width()
         new_y1 = new_y0 + rectangle_patch.get_height()
         peak = self._find_peak(rectangle_patch)
+
         self._show_peak(rectangle_patch, peak)
 
         if self.current_rectangle == rectangle_patch:
@@ -529,22 +530,24 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         x1 = x0 + rect.get_width()
         y1 = y0 + rect.get_height()
 
-        x0, x1 = min(x0, x1), max(x0, x1)
-        y0, y1 = min(y0, y1), max(y0, y1)
+        # we set x0, x1 with xmin <= x0 <= x1 <= xmax
+        x0, x1 = max(min(x0, x1, xmax), xmin), min(max(x0, x1, xmin), xmax)
+        y0, y1 = max(min(y0, y1, ymax), ymin), min(max(y0, y1, ymin), ymax)
 
         # find the indices corresponding to the position in the array
-        x0_ind = max(int(np.floor((x0 - xmin) / x_step)), 0)
-        y0_ind = max(int(np.floor((y0 - ymin) / y_step)), 0)
+        x0_ind = int(np.floor((x0 - xmin) / x_step))
+        y0_ind = int(np.floor((y0 - ymin) / y_step))
 
-        x1_ind = min(int(np.ceil((x1 - xmin) / x_step)), len(arr[0]))
-        y1_ind = min(int(np.ceil((y1 - ymin) / y_step)), len(arr))
+        x1_ind = int(np.ceil((x1 - xmin) / x_step))
+        y1_ind = int(np.ceil((y1 - ymin) / y_step))
 
         slice_cut = arr[y0_ind:y1_ind, x0_ind:x1_ind]
 
-        total_sum = np.sum(slice_cut)
+        total_sum = slice_cut.sum()
 
-        if total_sum == 0:
-            return (x0_ind + x1_ind) * x_step / 2 + xmin, (y0_ind + y1_ind) * y_step / 2 + ymin
+        # if there is no counts or the sum is masked, we return the middle point
+        if total_sum == 0 or np.ma.is_masked(total_sum):
+            return (x0 + x1) / 2, (y0 + y1) / 2
 
         x_mean = np.dot(np.sum(slice_cut, axis=0), np.arange(len(slice_cut[0]))) / total_sum
         y_mean = np.dot(np.sum(slice_cut, axis=1), np.arange(len(slice_cut))) / total_sum

@@ -452,6 +452,13 @@ class RectanglePlotTest(unittest.TestCase):
         self.assertAlmostEqual(peak[0], 205., 5)
         self.assertAlmostEqual(peak[1], 205., 5)
 
+        # rectangle completely off screen
+        rect = Rectangle((-200, -200), 10, 10)
+        peak = self.rectangle_plot._find_peak(rect)
+
+        self.assertAlmostEqual(peak[0], 0., 5)
+        self.assertAlmostEqual(peak[1], 0., 5)
+
     def test_show_peak(self):
         rect = Rectangle((0, 0), 1, 1)
         peak = (0.5, 0.5)
