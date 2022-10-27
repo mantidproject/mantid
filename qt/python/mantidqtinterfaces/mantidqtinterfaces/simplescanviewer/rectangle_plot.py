@@ -563,10 +563,11 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         @param rect: the rectangle whose peak is shown
         @param peak: the position of the peak to show
         """
-        plot = self.plotter.image_axes.plot(*peak, marker='+', color='r')[0]
-        index = self._manager.find_controller(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
-        controller = self._manager.rectangles[index][0]
-        controller.set_peak_plot(plot)
+        indexes = self._manager.find_controllers(*get_opposing_corners(rect.get_xy(), rect.get_width(), rect.get_height()))
+        for index in indexes:
+            plot = self.plotter.image_axes.plot(*peak, marker='+', color='r')[0]
+            controller = self._manager.rectangles[index][0]
+            controller.set_peak_plot(plot)
 
     def _delete_current(self):
         """

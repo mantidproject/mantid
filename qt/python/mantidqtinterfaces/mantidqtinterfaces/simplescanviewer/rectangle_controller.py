@@ -53,7 +53,8 @@ class RectanglesManager(QWidget):
 
     def find_controller(self, x0: float, y0: float, x1: float, y1: float) -> int:
         """
-        Find the controller with given coordinates
+        Find the controller with given coordinates. If there are multiple at the same position,
+        only the first one will be returned.
         @param x0: the x coordinate of a corner of the rectangle
         @param y0: the y coordinate of that corner
         @param x1: the x coordinate of the opposing corner
@@ -65,6 +66,19 @@ class RectanglesManager(QWidget):
             if controller == expected_controller:
                 return index
         return -1
+
+    def find_controllers(self, x0: float, y0: float, x1: float, y1: float) -> list:
+        """
+        Find all the controllers with given coordinates. Useful when wanting to update all ROIs at the exact same
+        position (e.g. not often but can happen).
+        @param x0: the x coordinate of a corner of the rectangle
+        @param y0: the y coordinate of that corner
+        @param x1: the x coordinate of the opposing corner
+        @param y1: the y coordinate of that opposing corner
+        @return a list of the controllers' position in the list of held controllers, or [] if not there
+        """
+        expected_controller = RectangleController(x0, y0, x1, y1)
+        return [index for index, (controller, _) in enumerate(self.rectangles) if controller == expected_controller]
 
     @staticmethod
     def find_rectangle_index_at_row(row: int) -> int:
@@ -98,6 +112,8 @@ class RectanglesManager(QWidget):
         When a field is selected by the user, its current value is stored in case the user provides a bad input
         (e.g. text)
         """
+        if len(self.table.selectedIndexes()) == 0:
+            return
         selected_cell = self.table.selectedIndexes()[0]
         row, col = selected_cell.row(), selected_cell.column()
 
