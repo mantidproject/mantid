@@ -61,6 +61,7 @@ set(PYTHON_TEST_FILES
     mantidqt/plotting/test/test_figuretype.py
     mantidqt/plotting/test/test_functions.py
     mantidqt/plotting/test/test_tiledplots.py
+    mantidqt/plotting/test/test_sample_shape.py
     mantidqt/project/test/test_plotssaver.py
     mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_project.py
