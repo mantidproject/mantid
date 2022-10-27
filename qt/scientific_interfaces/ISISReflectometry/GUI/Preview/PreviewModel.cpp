@@ -95,14 +95,16 @@ std::optional<double> PreviewModel::getDefaultTheta() const {
 
 PreviewRow const &PreviewModel::getPreviewRow() const { return *m_runDetails; }
 
-std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
+boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
+  return m_runDetails->getSelectedBanks();
+}
 
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
 
 void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
 
 void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
-void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
+void PreviewModel::setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 

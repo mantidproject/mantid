@@ -9,6 +9,7 @@
 #include "Common/Detector.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -168,7 +169,8 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   notifyInstViewEditRequested();
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
-  m_model->setSelectedBanks(indices);
+  auto detIDsStr = Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
+  m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
   // Execute summing the selected banks
   runSumBanks();
 }
