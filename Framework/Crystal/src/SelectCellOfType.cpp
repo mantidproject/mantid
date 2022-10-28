@@ -107,7 +107,7 @@ void SelectCellOfType::exec() {
     int num_indexed;
     double average_error = 0.0;
 
-    SelectCellWithForm::ApplyTransform(newUB, ws, tolerance, &num_indexed, &average_error);
+    SelectCellWithForm::ApplyTransform(newUB, ws, tolerance, num_indexed, average_error);
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";

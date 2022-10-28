@@ -48,7 +48,7 @@ public:
                                                 const API::IPeaksWorkspace_sptr &ws, double tolerance);
 
   static void ApplyTransform(Kernel::Matrix<double> &newUB, API::IPeaksWorkspace_sptr &ws, double tolerance,
-                             int *num_indexed, double *average_error);
+                             int &num_indexed, double &average_error);
 
 private:
   /// Initialise the properties

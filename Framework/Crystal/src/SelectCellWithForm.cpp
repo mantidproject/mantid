@@ -102,7 +102,7 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(std::vector<double> &
 }
 
 void SelectCellWithForm::ApplyTransform(Kernel::Matrix<double> &newUB, IPeaksWorkspace_sptr &ws, double tolerance,
-                                        int *num_indexed, double *average_error) {
+                                        int &num_indexed, double &average_error) {
   // Try to optimize(LSQ) to find lattice errors
   // UB matrix may NOT have been found by unconstrained least squares optimization
   std::vector<double> sigabc(6);
@@ -135,7 +135,7 @@ void SelectCellWithForm::ApplyTransform(Kernel::Matrix<double> &newUB, IPeaksWor
     q_vectors.emplace_back(peak.getQSampleFrame() - modUB * peak.getIntMNP() * 2 * M_PI);
   }
 
-  *num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, *average_error);
+  num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
 
   for (int i = 0; i < n_peaks; i++) {
     IPeak &peak = ws->getPeak(i);
@@ -188,7 +188,7 @@ void SelectCellWithForm::exec() {
     int num_indexed;
     double average_error = 0.0;
 
-    SelectCellWithForm::ApplyTransform(newUB, ws, tolerance, &num_indexed, &average_error);
+    SelectCellWithForm::ApplyTransform(newUB, ws, tolerance, num_indexed, average_error);
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";
