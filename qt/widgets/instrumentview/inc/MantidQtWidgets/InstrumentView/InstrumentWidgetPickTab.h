@@ -109,6 +109,7 @@ public:
   void setPlotType(const IWPickPlotType type);
 
 public slots:
+  void setTubeXUnits(int units);
   void setTubeXUnits(const IWPickXUnits units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);
   void savePlotToWorkspace();
