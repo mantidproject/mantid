@@ -8,7 +8,7 @@ User Support
   :local:
 
 Introduction
-############
+------------
 
 As Mantid continues to facilitate cutting-edge scientific research, for an
 increasing number of users, the support side of Mantid is growing more
@@ -26,7 +26,7 @@ The main purpose of user support for the Mantid project, is to aide contact betw
    *Error reporter sends details directly to Mantid support*
 
 Bugs and Error Reports
-######################
+----------------------
 
 1.	Users can report bugs via the `Mantid Help Forum <https://forum.mantidproject.org/>`_ or the `Mantid Help Email <mantid-help@mantidproject.org>`_, or from collected **Error Reports**. Currently this is a quick first contact with the team, but doesn't give much detail about the usage or unexpected error.
 2.	The bug is verified and reproduced by the support team.
@@ -37,17 +37,18 @@ Bugs and Error Reports
 
 
 Troubleshooting
-###############
+---------------
 
 This is a list designed to take a user through how to gain diagnostic information, particularly when Mantid (Workbench) fails to **launch**.
 
 For performance profiling check out our `recommended tools <http://developer.mantidproject.org/ToolsOverview.html#profiling>`_.
 
+|
 
 .. _Trouble_Windows:
 
 Windows
-=======
+#######
 
 For a full release, ``C:\MantidInstall\`` is likely the correct install path. Take care to readjust this to ``C:\MantidNightlyInstall\`` if you are diagnosing a nightly version.
 
@@ -124,11 +125,12 @@ For a full release, ``C:\MantidInstall\`` is likely the correct install path. Ta
 
 11. **Process Monitor**: `Download here <https://docs.microsoft.com/en-us/sysinternals/downloads/procmon>`_. Extract the ProcessMonitor.zip and run Procmon.exe (which requires admin credentials). Set up a configuration filter for ``Process Name contains python``, click ``ADD``, ``APPLY``, ``OK`` and then launch Mantid Workbench, then back in Process Monitor select File>Save and save as a ``LogFile.PML`` file and send to the dev team.
 
+|
 
 .. _Trouble_Linux:
 
 Linux
-=====
+#####
 
 For a full release, ``/opt/Mantid/`` is likely the correct install path. Take care to readjust this to ``/opt/mantidnightly/`` if you are diagnosing a nightly version.
 
@@ -205,8 +207,20 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
 11. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
 
+12. After a hard crash run: ``dmesg | grep -i memory`` and you may get an error log such as ``“Out of memory: Killed process”…``
+
+13. To get a stacktrace from C++ follow these steps:
+
+    - Before opening MantidWorkbench, open a terminal and run ``ulimit -c unlimited``
+    - Then in the same terminal, open MantidWorkbench with ``/opt/mantidworkbench/bin/mantidworkbench`` and use as normal.
+    - If there is a crash, then you will find a ``core.1234`` (some number) file
+      in the current working directory of the terminal, which the user can send to us!
+    - Run ``gdb python3 core.1234`` to get the stacktrace from this coredump file.
+
+|
+
 Built-in Help Not Displaying
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It has been observed that the built-in help window can display empty content
 under some circumstances.
@@ -224,10 +238,12 @@ The Mantid help can be restored by renaming the ``mime`` directory:
 It is unclear what might break in other applications but nothing as yet has
 been observed.
 
+|
+
 .. _Trouble_MacOS:
 
 MacOS
-=====
+#####
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
