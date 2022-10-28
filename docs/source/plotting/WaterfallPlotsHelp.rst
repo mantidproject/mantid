@@ -27,6 +27,15 @@ Waterfall Plots
 .. contents:: Waterfall Plots - Table of contents
     :local:
 
+|
+|
+
+To create a waterfall plot, right-click on a workspace and select ``Plot > Spectrum...``.
+Then set the ``Plot Type`` to ``Waterfall`` before choosing which spectra to plot and selecting ``OK``.
+
+|
+|
+
 Plot Toolbar
 ============
 

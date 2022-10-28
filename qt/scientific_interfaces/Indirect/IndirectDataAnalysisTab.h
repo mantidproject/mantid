@@ -17,8 +17,6 @@
 
 #include <memory>
 
-class QwtPlotCurve;
-class QwtPlot;
 class QSettings;
 class QString;
 

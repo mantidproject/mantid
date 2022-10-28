@@ -104,7 +104,9 @@ std::pair<double, double> PlotFitAnalysisPaneView::getRange() {
 Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() { return m_fitBrowser->getFunction(); }
 
 void PlotFitAnalysisPaneView::updateFunction(const Mantid::API::IFunction_sptr func) {
-  m_fitBrowser->updateMultiDatasetParameters(*func);
+  if (func) {
+    m_fitBrowser->updateMultiDatasetParameters(*func);
+  }
 }
 
 void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {

@@ -9,10 +9,12 @@
 #include "DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -64,6 +66,7 @@ public:
   std::string dataFileName() override { return m_base->dataFileName(); };
   int currentRun() override { return m_base->currentRun(); };
   bool isErrorCode(const int run) override { return m_base->isErrorCode(run); };
+  std::optional<double> xConversionFactor(Mantid::API::MatrixWorkspace_const_sptr workspace) const;
   const std::string getInstrument() override { return m_base->getInstrument(); };
   const std::string getTmpName() override { return m_base->getTmpName(); };
   const std::string getWSName() override { return m_base->getWSName(); };

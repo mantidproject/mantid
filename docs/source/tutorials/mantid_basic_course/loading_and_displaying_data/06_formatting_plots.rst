@@ -29,6 +29,8 @@ Plot Toolbar
 |
 | We will cover use of the Fitting Tab later...
 |
+| For more information on Superplot, see :ref:`WorkbenchSuperplot`
+|
 |
 
 Plots Toolbox

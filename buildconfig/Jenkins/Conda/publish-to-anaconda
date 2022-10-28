@@ -5,7 +5,7 @@
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
-#                 (mantid repo). Windows Caveat: Only use / for this arguement do
+#                 (mantid repo). Windows Caveat: Only use / for this argument do
 #                 not use \\ or \ in the path.
 #   2. TOKEN: Token for uploading to anaconda.org
 #   3. CHANNEL: Channel to upload to
@@ -50,6 +50,6 @@ do
     if [[ $package == *"mantid"* ]]
     then
         echo "Uploading $package"
-        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL
+        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL --force
     fi
 done

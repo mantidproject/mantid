@@ -203,10 +203,6 @@ if(UNIX)
   option(UNITY_BUILD "Switch for utilising unity builds. Faster builds for selected components.")
 endif(UNIX)
 
-if(MSVC)
-  add_definitions(-DQWT_DLL)
-endif()
-
 add_custom_target(AllTests)
 
 if(BUILD_MANTIDFRAMEWORK)

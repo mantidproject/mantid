@@ -52,10 +52,10 @@ public:
     auto batch = MockBatch();
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
-    auto detIDs = std::vector<Mantid::detid_t>{2, 3};
+    auto detIDsStr = ProcessingInstructions{"2,3"};
     auto row = PreviewRow({});
     row.setLoadedWs(mockWs);
-    row.setSelectedBanks(detIDs);
+    row.setSelectedBanks(detIDsStr);
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
     const std::string inputPropName = "InputWorkspace";

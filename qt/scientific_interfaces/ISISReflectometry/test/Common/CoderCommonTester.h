@@ -327,6 +327,7 @@ public:
     declareProperty("I0MonitorIndex", "");
     declareProperty("DetectorCorrectionType", "");
     declareProperty("CorrectDetectors", "");
+    declareProperty("ROIDetectorIDs", "");
   }
   void exec() override {}
 };

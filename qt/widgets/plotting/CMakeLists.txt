@@ -2,38 +2,33 @@
 # Matplotlib-based implementation
 # ######################################################################################################################
 set(MPL_SRC_FILES
-    src/Mpl/ContourPreviewPlot.cpp
-    src/Mpl/ExternalPlotter.cpp
-    src/Mpl/PeakPicker.cpp
-    src/Mpl/PreviewPlot.cpp
-    src/Mpl/RangeSelector.cpp
-    src/Mpl/SingleSelector.cpp
+    src/ContourPreviewPlot.cpp
+    src/ExternalPlotter.cpp
+    src/PeakPicker.cpp
+    src/PreviewPlot.cpp
+    src/RangeSelector.cpp
+    src/SingleSelector.cpp
     src/PlotWidget/PlotModel.cpp
     src/PlotWidget/PlotPresenter.cpp
     src/PlotWidget/QtPlotView.cpp
 )
 
 set(MPL_MOC_FILES
-    inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
-    inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
-    inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
+    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h inc/MantidQtWidgets/Plotting/PeakPicker.h
+    inc/MantidQtWidgets/Plotting/RangeSelector.h inc/MantidQtWidgets/Plotting/SingleSelector.h
+    inc/MantidQtWidgets/Plotting/PreviewPlot.h inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(MPL_INC_FILES
     ${MPL_MOC_FILES}
-    inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h
+    inc/MantidQtWidgets/Plotting/ExternalPlotter.h
     inc/MantidQtWidgets/Plotting/AxisID.h
-    inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
-    inc/MantidQtWidgets/Plotting/PeakPicker.h
-    inc/MantidQtWidgets/Plotting/PreviewPlot.h
     inc/MantidQtWidgets/Plotting/PlotWidget/IPlotView.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotModel.h
     inc/MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h
     inc/MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h
 )
-
-set(MPL_UI_FILES inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
 
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPlotting
@@ -41,7 +36,6 @@ mtd_add_qt_library(
   SRC ${MPL_SRC_FILES}
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
-  UI ${MPL_UI_FILES}
   DEFS IN_MANTIDQT_PLOTTING
   INCLUDE_DIRS inc
   LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES}

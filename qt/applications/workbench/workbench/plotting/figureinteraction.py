@@ -811,12 +811,6 @@ class FigureInteraction(object):
             if arg_set['workspaces'] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
-                arg_set_copy = copy(arg_set)
-                [
-                    arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
-                    if key in arg_set_copy.keys()
-                ]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
                         arg_set['specNum'] = workspace.getSpectrum(
@@ -824,6 +818,13 @@ class FigureInteraction(object):
                     else:
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
+
+                arg_set_copy = copy(arg_set)
+                for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']:
+                    try:
+                        del arg_set_copy[key]
+                    except KeyError:
+                        continue
                 # 2D plots have no spec number so remove it
                 if figure_type(self.canvas.figure) in [FigureType.Image, FigureType.Contour]:
                     arg_set_copy.pop('specNum')

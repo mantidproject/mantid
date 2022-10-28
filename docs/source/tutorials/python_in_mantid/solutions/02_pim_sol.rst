@@ -4,6 +4,8 @@
 Python in Mantid: Solution 2
 ============================
 
+All the data for these solutions can be found in the TrainingCourseData on the Downloads page.
+
 A - Processing ISIS Data
 ========================
 
@@ -52,6 +54,7 @@ B - Plotting ILL Data
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     import numpy as np
+    from mantid.api import AnalysisDataService as ADS
 
     _164198 = ADS.retrieve('164198')
 

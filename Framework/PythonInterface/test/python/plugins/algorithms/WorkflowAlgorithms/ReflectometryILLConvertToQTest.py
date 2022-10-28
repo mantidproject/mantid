@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import MatrixWorkspace
-from mantid.simpleapi import (ReflectometryILLPreprocess, ReflectometryILLSumForeground, ReflectometryILLConvertToQ, mtd)
+from mantid.simpleapi import (CloneWorkspace, ReflectometryILLPreprocess, ReflectometryILLSumForeground,
+                              ReflectometryILLConvertToQ, mtd)
 import unittest
 
 
@@ -25,6 +26,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         # first the direct beam
         ReflectometryILLSumForeground(InputWorkspace='db',
                                       OutputWorkspace='db_frg')
+        CloneWorkspace(InputWorkspace='db_frg', OutputWorkspace='db_frg_for_q')
 
         # then the reflected beam in lambda
         ReflectometryILLSumForeground(InputWorkspace='rb',
@@ -38,7 +40,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
                                       OutputWorkspace='rb_inq_frg',
                                       SummationType='SumInQ',
                                       DirectLineWorkspace='db',
-                                      DirectForegroundWorkspace='db_frg')
+                                      DirectForegroundWorkspace='db_frg_for_q')
 
     @classmethod
     def tearDownClass(cls):
@@ -48,7 +50,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         ReflectometryILLConvertToQ(
             InputWorkspace='rb_frg',
             OutputWorkspace='in_lambda',
-            DirectForegroundWorkspace='db_frg'
+            DirectForegroundWorkspace='db_frg_rebinned'
         )
         self.checkOutput(mtd['in_lambda'], 991)
 
@@ -56,9 +58,9 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         ReflectometryILLConvertToQ(
             InputWorkspace='rb_inq_frg',
             OutputWorkspace='in_q',
-            DirectForegroundWorkspace='db_frg'
+            DirectForegroundWorkspace='db_frg_for_q_rebinned'
         )
-        self.checkOutput(mtd['in_q'], 1045)
+        self.checkOutput(mtd['in_q'], 1046)
 
     def checkOutput(self, ws, blocksize):
         self.assertTrue(ws)

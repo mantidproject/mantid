@@ -15,8 +15,6 @@
 #include <QObject>
 #include <boost/optional.hpp>
 
-class QwtData;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 

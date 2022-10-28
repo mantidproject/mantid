@@ -267,6 +267,26 @@ public:
     algFactory.unsubscribe("ToyAlgorithm", 1);
   }
 
+  void testLowerCaseAlliasesAreNotAddedToDescriptions() {
+    auto &algFactory = AlgorithmFactory::Instance();
+    algFactory.subscribe<LowerCaseAliasAlgorithm>();
+    std::vector<AlgorithmDescriptor> descriptors;
+    descriptors = algFactory.getDescriptors(false, true);
+
+    auto resAlg = std::find_if(descriptors.cbegin(), descriptors.cend(), [](const AlgorithmDescriptor &d) {
+      return (("Lower" == d.name) && ("lower" == d.alias) && (1 == d.version));
+    });
+
+    auto resAlias = std::find_if(descriptors.cbegin(), descriptors.cend(), [](const AlgorithmDescriptor &d) {
+      return (("lower" == d.name) && ("" == d.alias) && (1 == d.version));
+    });
+
+    TS_ASSERT(resAlg != descriptors.cend());
+    TS_ASSERT(resAlias == descriptors.cend());
+
+    algFactory.unsubscribe("LowerCaseAliasAlgorithm", 1);
+  }
+
   void testGetCategories() {
     auto &algFactory = AlgorithmFactory::Instance();
     algFactory.subscribe<CategoryAlgorithm>();

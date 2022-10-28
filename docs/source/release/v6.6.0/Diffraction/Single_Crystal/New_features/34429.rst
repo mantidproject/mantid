@@ -1,0 +1,1 @@
+* Added two options to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: to scale angular resolution parameter (``ThetaWidth``) by wavelength, and to specify minimum number of TOF bins in a valid peak (``NTOFBinsMin``).

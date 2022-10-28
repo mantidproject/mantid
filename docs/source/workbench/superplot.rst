@@ -31,6 +31,9 @@ The list will contain the names of the selected workspaces and below each of
 them, the plotted bins/spectra. One can then add a workspace in the list by
 dragging and dropping it in the list or by using the combobox.
 
+By using the dedicated checkbox above this list, one can toggle the activation
+of the normalisation (by the maximum value) of the curves.
+
 When one or many workspace(s) is(are) clicked in the list, the navigation bar
 can be used to slide over the bins/spectra and update the plot accordingly. The
 current curve indicated by the slider for the workspace(s) that is(are) selected
