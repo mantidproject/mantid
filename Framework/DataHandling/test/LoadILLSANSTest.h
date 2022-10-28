@@ -457,7 +457,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
-    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
@@ -465,6 +465,26 @@ public:
     checkTimeFormat(outputWS);
     checkDuration(outputWS, 5.);
     checkWavelength(outputWS, 4.8);
+  }
+
+  void test_D16_OMEGA_NEW() {
+    // test d16 old scan data in a scan file, i.e. with multiple points in a single file
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "025786.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 261)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 15.);
+    checkWavelength(outputWS, 4.45);
   }
 
   void test_D16B() {
