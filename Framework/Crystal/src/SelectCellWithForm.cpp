@@ -124,11 +124,11 @@ void SelectCellWithForm::ApplyTransform(Kernel::Matrix<double> &newUB, IPeaksWor
 
   DblMatrix modHKL = o_lattice->getModHKL();
 
+  DblMatrix modUB = UB * modHKL;
+
   modHKL = Tref * modHKL;
 
   o_lattice->setModHKL(modHKL);
-
-  DblMatrix modUB = o_lattice->getModUB();
 
   for (int i = 0; i < n_peaks; i++) {
     IPeak &peak = ws->getPeak(i);

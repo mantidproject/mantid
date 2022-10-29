@@ -245,7 +245,6 @@ public:
     TS_ASSERT_DELTA(average_error, 0.00972862, .0001);
 
     Matrix<double> newUB = lpw->sample().getOrientedLattice().getUB();
-    Matrix<double> newModUB = lpw->sample().getOrientedLattice().getModUB();
     Matrix<double> newModHKL = lpw->sample().getOrientedLattice().getModHKL();
 
     for (int i = 0; i < n_peaks; i++) {
