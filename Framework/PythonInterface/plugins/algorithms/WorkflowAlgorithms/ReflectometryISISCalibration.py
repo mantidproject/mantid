@@ -41,7 +41,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                                           action=FileAction.Load,
                                           direction=Direction.Input,
                                           extensions=["dat"]),
-                             doc="Calibration data file containing Y locations for detector pixels.")
+                             doc="Calibration data file containing Y locations for detector pixels in mm.")
         self.declareProperty(
             MatrixWorkspaceProperty(self._OUTPUT_WORKSPACE, '', direction=Direction.Output),
             doc='The calibrated output workspace.')
@@ -141,10 +141,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return table
 
     def _calculate_calibrated_y_pos(self, specpixel_y, scanned_specpixel_y, scanned_pixel_pos):
-        # First find the difference between the specular pixel position and the pixel position in the scan data.
+        # First find the difference between the specular pixel position and the pixel position in the scan data,
+        # and convert to metres.
         # The calibrated Y co-ordinate is then found by adding this difference to the specular pixel position from
         # the IDF.
-        # Need to confirm what the multiply 0.001 is for.
         return specpixel_y + (scanned_specpixel_y - scanned_pixel_pos) * 0.001
 
 
