@@ -103,7 +103,14 @@ public:
     std::string outputSpace = "LoadEMUauTest";
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
-    // load with only beam monitor counts
+    // The test is peculiar to the physical configuration and requirements from
+    // the scientist. The pseudo beam monitor is located after the chopper and
+    // maximum and minimum beam monitor rates are required. As the BM also
+    // captures individual events this spectrum is available by setting the
+    // "IncludeBeamMonitor" flag. The test confirms that the BM rates and
+    // total counts are the same regardless of the BM spectrum and that the
+    // spectrum data is available when the flag is set.
+
     std::string inputFile = "EMU0020493.tar";
     algToBeTested.setPropertyValue("Filename", inputFile);
     algToBeTested.setPropertyValue("SelectDetectorTubes", "16-50");

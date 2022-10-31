@@ -56,6 +56,8 @@ constexpr size_t BM_HISTOGRAMS = HISTO_BINS_X * PIXELS_PER_TUBE;
 constexpr size_t HISTOGRAMS = BM_HISTOGRAMS + PIXELS_PER_TUBE;
 constexpr size_t BEAM_MONITOR_BINS = 100;
 constexpr size_t PSEUDO_BM_TUBE = 55;
+// the half window for the running average matches the plateau width for the peak
+constexpr size_t BM_HALF_WINDOW = 5;
 
 // File loading progress boundaries
 constexpr size_t Progress_LoadBinFile = 48;
@@ -294,24 +296,37 @@ double maskedStdev(const std::vector<double> &vec, const std::vector<bool> &mask
   return std::sqrt(sum / static_cast<double>(count));
 }
 
-// calculate a running average for a given half window size assuming the data is wrapped
+// Calculates a running average for a given half window size assuming the data is wrapped.
+// As the data are integer values, it is possible to maintain an exact sum without any
+// loss of accuracy where the next filtered value is calculated by adding the leading
+// point and subtracting the trailing point from the sum. As the data is wrapped the edge
+// points are handled by the modulus of the array index.
+//
+//    |...........[.....x.....].............|
+//    0           |totalWindow|             |N
+//
 std::vector<double> runningAverage(const std::vector<size_t> &data, size_t halfWindow) {
   const auto N = data.size();
-  const size_t TN = 2 * halfWindow + 1;
+  const size_t totalWindow = 2 * halfWindow + 1;
+
+  // Step 1 is to calculate the sum for the first point where startIndex is the
+  // first point in the total window.
   size_t sum{0};
   size_t startIndex = N - halfWindow;
-  for (size_t i = 0; i < TN; i++) {
+  for (size_t i = 0; i < totalWindow; i++) {
     size_t ix = (startIndex + i) % N;
     sum += data[ix];
   }
 
+  // Save the average for the current point, drop the first point from the total window
+  // sum, add the next point to the sum and shift the start index for the window.
   std::vector<double> filtered(N, 0);
   for (size_t i = 0; i < N; i++) {
     // save previous and then move to next
-    filtered[i] = static_cast<double>(sum) / static_cast<double>(TN);
+    filtered[i] = static_cast<double>(sum) / static_cast<double>(totalWindow);
 
     sum -= data[startIndex];
-    sum += data[(startIndex + TN) % N];
+    sum += data[(startIndex + totalWindow) % N];
     startIndex = (startIndex + 1) % N;
   }
   return filtered;
@@ -764,7 +779,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   EMU::loadEvents(prog, "loading neutron events (TOF)", eventFile, eventAssigner);
 
   // determine the minimum and maximum beam rate per sec
-  auto filteredBM = runningAverage(eventAssigner.beamMonitorCounts(), 5);
+  auto filteredBM = runningAverage(eventAssigner.beamMonitorCounts(), BM_HALF_WINDOW);
   auto res = std::minmax_element(filteredBM.begin(), filteredBM.end());
   auto ratePerSec = static_cast<double>(eventAssigner.numBins()) / eventCounter.duration();
   auto minBM = *res.first * ratePerSec;
