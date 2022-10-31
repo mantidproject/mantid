@@ -200,7 +200,8 @@ class SPowderSemiEmpiricalCalculator:
 
         else:
             atoms_s = {key: value for key, value in data["datasets"]["data"].items() if key not in ("frequencies", "q_bins")}
-            q_bins = data["datasets"]["data"].get("q_bins", None)
+
+        q_bins = data["datasets"]["data"].get("q_bins", None)
 
         s_data = abins.SData(
             temperature=self._temperature, sample_form=self._sample_form, data=atoms_s, frequencies=frequencies, q_bins=q_bins
