@@ -101,6 +101,7 @@ public:
   void saveSettings(QSettings &settings) const override;
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
+  void expandPlotPanel();
   void selectTool(const ToolType tool);
   SelectionType getSelectionType() const { return m_selectionType; }
   std::shared_ptr<ProjectionSurface> getSurface() const;
