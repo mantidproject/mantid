@@ -363,7 +363,7 @@ class WorkspaceWidget(PluginWidget):
             try:
                 sample_shape.plot_sample_container_and_components(workspace_names[0])
             except Exception as exception:
-                logger.warning("Could not show sample material for workspace "
+                logger.warning("Could not show sample shape for workspace "
                                "'{}':\n{}\n".format(workspace_names[0], exception))
         else:
             logger.warning("Plot Sample Shape can only be viewed for a single workspace.")
