@@ -38,7 +38,13 @@ class ComponentInfoController;
 class DetectorPlotController;
 
 enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickPlotType { SINGLE = 0, DETECTOR_SUM, TUBE_SUM, TUBE_INTEGRAL };
-enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickXUnits { DETECTOR_ID = 0, LENGTH, PHI, OUT_OF_PLANE_ANGLE };
+enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickXUnits {
+  DETECTOR_ID = 0,
+  LENGTH,
+  PHI,
+  OUT_OF_PLANE_ANGLE,
+  _NUMBER_OF_UNITS
+};
 
 /**
  * Implements the Pick tab in InstrumentWidget.

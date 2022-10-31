@@ -604,7 +604,11 @@ void InstrumentWidgetPickTab::setTubeXUnits(const IWPickXUnits units) {
   m_plotController->updatePlot();
 }
 
-void InstrumentWidgetPickTab::setTubeXUnits(int units) { setTubeXUnits(static_cast<IWPickXUnits>(units)); }
+void InstrumentWidgetPickTab::setTubeXUnits(int units) {
+  if (0 <= units && units < IWPickXUnits::_NUMBER_OF_UNITS) {
+    setTubeXUnits(static_cast<IWPickXUnits>(units));
+  }
+}
 
 /**
  * Get the color of the overlay shapes in this tab.
