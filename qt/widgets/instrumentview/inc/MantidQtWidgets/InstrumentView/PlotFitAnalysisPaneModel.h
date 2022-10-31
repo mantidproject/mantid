@@ -22,16 +22,19 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneModel {
 public:
   PlotFitAnalysisPaneModel();
   virtual ~PlotFitAnalysisPaneModel(){};
-  virtual IFunction_sptr doFit(const std::string &wsName, const std::pair<double, double> &range,
-                               const IFunction_sptr func);
-  virtual IFunction_sptr calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range);
+  virtual void doFit(const std::string &wsName, const std::pair<double, double> &range);
+  virtual void calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range);
 
-  virtual bool hasEstimate() const;
+  void setPeakCentre(const double centre);
+  double peakCentre() const;
+
+  std::string fitStatus() const;
 
 private:
   IFunction_sptr calculateEstimate(MatrixWorkspace_sptr &workspace, const std::pair<double, double> &range);
 
-  IFunction_sptr m_estimateFunction;
+  IFunction_sptr m_function;
+  std::string m_fitStatus;
 };
 
 } // namespace MantidWidgets

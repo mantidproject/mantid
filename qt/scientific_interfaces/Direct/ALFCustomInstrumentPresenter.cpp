@@ -29,8 +29,6 @@ void ALFCustomInstrumentPresenter::addInstrument() {
 }
 
 void ALFCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  CompositeFunction_sptr composite = m_model->getDefaultFunction();
-  m_analysisPane->addFunction(composite);
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
 

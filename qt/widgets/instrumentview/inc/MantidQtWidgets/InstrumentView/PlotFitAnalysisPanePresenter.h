@@ -24,11 +24,11 @@ public:
   virtual IPlotFitAnalysisPaneView *getView() = 0;
   virtual std::string getCurrentWS() = 0;
   virtual void clearCurrentWS() = 0;
-  virtual void doFit() = 0;
+  virtual void peakCentreEditingFinished() = 0;
+  virtual void fitClicked() = 0;
   virtual void updateEstimateAfterExtraction() = 0;
-  virtual void updateEstimate() = 0;
+  virtual void updateEstimateClicked() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
-  virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter : public QObject,
@@ -45,13 +45,16 @@ public:
   IPlotFitAnalysisPaneView *getView() override { return m_view; };
   std::string getCurrentWS() override { return m_currentName; };
   void clearCurrentWS() override { m_currentName = ""; };
-  void doFit() override;
+  void peakCentreEditingFinished() override;
+  void fitClicked() override;
   void updateEstimateAfterExtraction() override;
-  void updateEstimate() override;
+  void updateEstimateClicked() override;
   void addSpectrum(const std::string &wsName) override;
-  void addFunction(Mantid::API::IFunction_sptr func) override;
 
 private:
+  void updatePeakCentreInViewFromModel();
+
+  VoidObserver *m_peakCentreObserver;
   VoidObserver *m_fitObserver;
   VoidObserver *m_updateEstimateObserver;
   IPlotFitAnalysisPaneView *m_view;

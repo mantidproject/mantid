@@ -8,8 +8,6 @@
 
 #include <exception>
 #include <functional>
-#include <tuple>
-#include <utility>
 
 namespace MantidQt::MantidWidgets {
 
@@ -17,54 +15,61 @@ PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneV
                                                            PlotFitAnalysisPaneModel *model)
     : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
 
+  m_peakCentreObserver = new VoidObserver();
   m_fitObserver = new VoidObserver();
   m_updateEstimateObserver = new VoidObserver();
 
+  m_view->observePeakCentreLineEdit(m_peakCentreObserver);
   m_view->observeFitButton(m_fitObserver);
   m_view->observeUpdateEstimateButton(m_updateEstimateObserver);
 
-  std::function<void()> fitBinder = std::bind(&PlotFitAnalysisPanePresenter::doFit, this);
-  std::function<void()> updateEstimateBinder = std::bind(&PlotFitAnalysisPanePresenter::updateEstimate, this);
+  std::function<void()> peakCentreBinder = std::bind(&PlotFitAnalysisPanePresenter::peakCentreEditingFinished, this);
+  std::function<void()> fitBinder = std::bind(&PlotFitAnalysisPanePresenter::fitClicked, this);
+  std::function<void()> updateEstimateBinder = std::bind(&PlotFitAnalysisPanePresenter::updateEstimateClicked, this);
 
+  m_peakCentreObserver->setSlot(peakCentreBinder);
   m_fitObserver->setSlot(fitBinder);
   m_updateEstimateObserver->setSlot(updateEstimateBinder);
 }
 
-void PlotFitAnalysisPanePresenter::doFit() {
-  auto func = m_view->getFunction();
-  if (m_currentName != "" && func->nParams() != 0) {
+void PlotFitAnalysisPanePresenter::peakCentreEditingFinished() {
+  m_model->setPeakCentre(m_view->peakCentre());
+  m_view->setPeakCentreStatus(m_model->fitStatus());
+}
+
+void PlotFitAnalysisPanePresenter::fitClicked() {
+  if (m_currentName != "") {
     try {
-      func = m_model->doFit(m_currentName, m_view->getRange(), func);
-      m_view->updateFunction(func);
+      m_model->doFit(m_currentName, m_view->getRange());
+      updatePeakCentreInViewFromModel();
     } catch (...) {
       m_view->displayWarning("Fit failed");
     }
     m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
   } else {
-    m_view->displayWarning("Need to have extracted a data and selected a function to fit");
+    m_view->displayWarning("Need to have extracted data to do a fit");
   }
 }
 
-void PlotFitAnalysisPanePresenter::updateEstimateAfterExtraction() {
-  if (!m_model->hasEstimate())
-    updateEstimate();
-}
+void PlotFitAnalysisPanePresenter::updateEstimateAfterExtraction() { updateEstimateClicked(); }
 
-void PlotFitAnalysisPanePresenter::updateEstimate() {
+void PlotFitAnalysisPanePresenter::updateEstimateClicked() {
   if (!m_currentName.empty()) {
-    m_view->updateFunction(m_model->calculateEstimate(m_currentName, m_view->getRange()));
+    m_model->calculateEstimate(m_currentName, m_view->getRange());
+    updatePeakCentreInViewFromModel();
   } else {
     m_view->displayWarning("Could not update estimate: data has not been extracted.");
   }
 }
 
-void PlotFitAnalysisPanePresenter::addFunction(Mantid::API::IFunction_sptr func) {
-  m_view->addFunction(std::move(func));
-}
-
 void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
   m_currentName = wsName;
   m_view->addSpectrum(wsName);
+}
+
+void PlotFitAnalysisPanePresenter::updatePeakCentreInViewFromModel() {
+  m_view->setPeakCentre(m_model->peakCentre());
+  m_view->setPeakCentreStatus(m_model->fitStatus());
 }
 
 } // namespace MantidQt::MantidWidgets
