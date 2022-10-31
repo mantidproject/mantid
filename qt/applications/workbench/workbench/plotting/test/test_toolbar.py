@@ -162,6 +162,7 @@ class ToolBarTest(unittest.TestCase):
         fig_manager = FigureManagerWorkbench(canvas, 1)
         # This is only called when show() is called on the figure manager, so we have to manually call it here.
         fig_manager.toolbar.set_buttons_visibility(fig)
+        fig_manager.window.show()
         fig_manager.toolbar.hide_plot()
 
         self.assertTrue(fig_manager.window.isHidden())
