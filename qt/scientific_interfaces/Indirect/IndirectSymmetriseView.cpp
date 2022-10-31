@@ -37,7 +37,6 @@ namespace MantidQt::CustomInterfaces {
 IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
   m_uiForm.setupUi(parent);
   m_dblManager = new QtDoublePropertyManager();
-  m_dblEdFac = new DoubleEditorFactory(this);
   m_grpManager = new QtGroupPropertyManager();
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
@@ -111,7 +110,7 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
   // i.e. RS min is X max
 
   auto positiveERaw = m_uiForm.ppRawPlot->addRangeSelector("PositiveE");
-  positiveERaw->setColour(Qt::darkGreen);
+  positiveERaw->setColour(Qt::darkMagenta);
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
@@ -179,9 +178,8 @@ void IndirectSymmetriseView::verifyERange(QtProperty *prop, double value) {
       m_dblManager->setValue(m_properties["EMin"], eMin);
       return;
     }
-
     // If range is still invalid reset EMin to half EMax
-    if (eMin > eMax) {
+    else if (eMin > eMax) {
       m_dblManager->setValue(m_properties["EMin"], eMax / 2);
       return;
     }
@@ -192,9 +190,8 @@ void IndirectSymmetriseView::verifyERange(QtProperty *prop, double value) {
       m_dblManager->setValue(m_properties["EMax"], eMax);
       return;
     }
-
     // If range is invalid reset EMax to double EMin
-    if (eMin > eMax) {
+    else if (eMin > eMax) {
       m_dblManager->setValue(m_properties["EMax"], eMin * 2);
       return;
     }
@@ -218,9 +215,7 @@ void IndirectSymmetriseView::updateRangeSelectors(QtProperty *prop, double value
 
   if (prop == m_properties["EMin"]) {
     positiveERaw->setMinimum(value);
-  }
-
-  if (prop == m_properties["EMax"]) {
+  } else if (prop == m_properties["EMax"]) {
     positiveERaw->setMaximum(value);
   }
 }

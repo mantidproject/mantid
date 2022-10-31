@@ -66,7 +66,6 @@ private:
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
-  DoubleEditorFactory *m_dblEdFac;
   QtDoublePropertyManager *m_dblManager;
   QtGroupPropertyManager *m_grpManager;
 };

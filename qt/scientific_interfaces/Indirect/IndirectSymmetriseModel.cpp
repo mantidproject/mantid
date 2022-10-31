@@ -28,7 +28,8 @@ IndirectSymmetriseModel::IndirectSymmetriseModel() {}
 
 void IndirectSymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                                                     std::vector<long> spectraRange) {
-  // Run the algorithm on the preview spectrum only
+  // Run the algorithm on the preview spectrum only, these outputs are only for plotting in the preview window and are
+  // not accessed by users directly.
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
   symmetriseAlg->setProperty("InputWorkspace", m_inputWorkspace);
@@ -57,6 +58,8 @@ std::string IndirectSymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::Bat
 
 void IndirectSymmetriseModel::setWorkspaceName(QString workspaceName) {
   m_inputWorkspace = workspaceName.toStdString();
+  // the last 4 characters in the workspace name are '_red' the ouput weorkspace name is inserting '_sym' before that
+  // '_red'
   m_outputWorkspace = (workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4)).toStdString();
 }
 

@@ -148,12 +148,10 @@ void IndirectSymmetrise::setFileExtensionsByName(bool filter) {
 void IndirectSymmetrise::handleValueChanged(QtProperty *prop, double value) {
   if (prop->propertyName() == "Spectrum No") {
     m_view->replotNewSpectrum(value);
-  }
-  if (prop->propertyName() == "EMin") {
+  } else if (prop->propertyName() == "EMin") {
     m_view->verifyERange(prop, value);
     m_model->setEMin(m_view->getEMin());
-  }
-  if (prop->propertyName() == "EMax") {
+  } else if (prop->propertyName() == "EMax") {
     m_view->verifyERange(prop, value);
     m_model->setEMax(m_view->getEMax());
   }
