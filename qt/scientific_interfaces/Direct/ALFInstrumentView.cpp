@@ -46,6 +46,7 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget->hideHelp();
 
   auto pickTab = m_instrumentWidget->getPickTab();
+  pickTab->expandPlotPanel();
 
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
 
