@@ -87,9 +87,13 @@ def plot_sample_only(workspace, figure):
     shape = get_valid_sample_shape_from_workspace(workspace)
     if shape:
         mesh = shape.getMesh()
-        # Create 3D Polygon and set facecolor
-        mesh_polygon = Poly3DCollection(mesh, edgecolors=['b'], alpha=0.5, linewidths=0.1)
-        mesh_polygon.set_facecolor((0, 1, 0, 0.5))
+        if len(mesh) < 13:
+            face_colors = ['purple', 'mediumorchid', 'royalblue', 'b', 'red', 'firebrick',
+                           'green', 'darkgreen', 'grey', 'black', 'gold', 'orange']
+            mesh_polygon = Poly3DCollection(mesh, facecolors=face_colors, edgecolors='black', alpha=1.0, linewidths=0.1)
+        else:
+            mesh_polygon = Poly3DCollection(mesh, facecolors='red', edgecolors='black', alpha=1.0, linewidths=0.1)
+            mesh_polygon.set_facecolor((1, 0, 0, 0.5))
         axes.add_collection3d(mesh_polygon)
         return True
 
@@ -98,7 +102,7 @@ def plot_container(workspace, figure):
     axes = figure.gca()
     container_shape = get_valid_container_shape_from_workspace(workspace)
     container_mesh = container_shape.getMesh()
-    mesh_polygon = Poly3DCollection(container_mesh, edgecolors='red', alpha=0.1, linewidths=0.05, zorder=0.5)
+    mesh_polygon = Poly3DCollection(container_mesh, edgecolors='black', alpha=0.1, linewidths=0.05, zorder=0.5)
     mesh_polygon.set_facecolor((0, 1, 0, 0.5))
     axes.add_collection3d(mesh_polygon)
     return True
@@ -110,8 +114,8 @@ def plot_components(workspace, figure):
     for component_index in range(1, number_of_components):
         component_shape = get_valid_component_shape_from_workspace(workspace, component_index)
         component_mesh = component_shape.getMesh()
-        mesh_polygon_loop = Poly3DCollection(component_mesh, edgecolors='red', alpha=0.1, linewidths=0.05, zorder=0.5)
-        mesh_polygon_loop.set_facecolor((0, 1, 0, 0.5))
+        mesh_polygon_loop = Poly3DCollection(component_mesh, edgecolors='black', alpha=0.1, linewidths=0.05, zorder=0.5)
+        mesh_polygon_loop.set_facecolor((0, 0, 1, 0.5))
         axes.add_collection3d(mesh_polygon_loop)
     return True
 
@@ -165,6 +169,7 @@ def set_axes_to_largest_mesh(axes, workspace):
 
 
 def overall_limits_for_all_meshes(workspace, include_components=True):
+    overall_limits = None
     sample_shape = get_valid_sample_shape_from_workspace(workspace)
     if sample_shape:
         overall_limits = overall_limits_for_every_axis(sample_shape.getMesh())
