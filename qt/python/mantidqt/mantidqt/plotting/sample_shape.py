@@ -151,7 +151,7 @@ def set_axes_labels(plot_axes):
 
 
 def set_perspective(plot_axes):
-    plot_axes.view_init(elev=10, azim=-150)
+    plot_axes.view_init(elev=15, azim=-135)
 
 
 def call_set_mesh_axes_equal(axes, mesh):
@@ -160,49 +160,68 @@ def call_set_mesh_axes_equal(axes, mesh):
 
 
 def set_axes_to_largest_mesh(axes, workspace):
-    overall_min, overall_max = overall_limits_for_all_meshes(workspace)
-    call_set_mesh_axes_equal(axes, np.array(overall_min, overall_max))
-    global OVERALL_LIMITS
-    OVERALL_LIMITS = overall_min, overall_max
+    overall_limits = overall_limits_for_all_meshes(workspace)
+    call_set_mesh_axes_equal(axes, np.array(overall_limits))
 
 
 def overall_limits_for_all_meshes(workspace, include_components=True):
-    sample_mesh_limits = workspace.sample().getShape().getMesh()
-    overall_minimum, overall_maximum = overall_limits_for_every_axis(sample_mesh_limits)
-
-    if include_components and workspace.sample().hasEnvironment():
-        environment = workspace.sample().getEnvironment()
-        number_of_components = environment.nelements()
-        for component_index in range(number_of_components):
-            if component_index == 0:  # Container
-                loop_component_mesh = environment.getComponent(component_index).getShape().getMesh()
-            else:
-                loop_component_mesh = environment.getComponent(component_index).getMesh()
-            current_mesh_minimum, current_mesh_maximum = overall_limits_for_every_axis(loop_component_mesh)
-            overall_minimum, overall_maximum = greater_limits(current_mesh_minimum, current_mesh_maximum,
-                                                              overall_minimum, overall_maximum)
-    return overall_minimum, overall_maximum
+    sample_shape = get_valid_sample_shape_from_workspace(workspace)
+    if sample_shape:
+        overall_limits = overall_limits_for_every_axis(sample_shape.getMesh())
+    if workspace.sample():
+        if include_components and workspace.sample().hasEnvironment():
+            environment = workspace.sample().getEnvironment()
+            number_of_components = environment.nelements()
+            for component_index in range(number_of_components):
+                if component_index == 0:  # Container
+                    loop_component_mesh = get_valid_container_shape_from_workspace(workspace).getMesh()
+                else:
+                    loop_component_mesh = get_valid_component_shape_from_workspace(workspace, component_index).getMesh()
+                current_mesh_limits = overall_limits_for_every_axis(loop_component_mesh)
+                overall_limits = greater_limits(current_mesh_limits, overall_limits)
+        return overall_limits
 
 
 def overall_limits_for_every_axis(mesh):
     if is_mesh_not_empty(mesh):
         flattened_mesh = mesh.flatten()
-        minimum = flattened_mesh.min()
-        maximum = flattened_mesh.max()
-        return minimum, maximum
+        minimum_x = flattened_mesh[0::3].min()
+        maximum_x = flattened_mesh[0::3].max()
+        minimum_y = flattened_mesh[1::3].min()
+        maximum_y = flattened_mesh[1::3].max()
+        minimum_z = flattened_mesh[2::3].min()
+        maximum_z = flattened_mesh[2::3].max()
+        return [minimum_x, minimum_y, minimum_z, maximum_x, maximum_y, maximum_z]
     else:
-        return None, None
+        return None
 
 
-def greater_limits(new_minimum, new_maximum, old_minimum, old_maximum):
-    minimum, maximum = new_minimum, new_maximum
-    if old_minimum:
-        if old_minimum < minimum:
-            minimum = old_minimum
-    if old_maximum:
-        if old_maximum > maximum:
-            maximum = old_maximum
-    return minimum, maximum
+def compare_and_replace_minimum(new_limit, old_limit):
+    output_limit = new_limit
+    if old_limit < new_limit:
+        output_limit = old_limit
+    return output_limit
+
+
+def compare_and_replace_maximum(new_limit, old_limit):
+    output_limit = new_limit
+    if old_limit > new_limit:
+        output_limit = old_limit
+    return output_limit
+
+
+def greater_limits(new_limits, old_limits):
+    # Set limits to new limits, and replace with old limits that are wider
+    if old_limits:
+        min_x = compare_and_replace_minimum(new_limits[0], old_limits[0])
+        min_y = compare_and_replace_minimum(new_limits[1], old_limits[1])
+        min_z = compare_and_replace_minimum(new_limits[2], old_limits[2])
+        max_x = compare_and_replace_maximum(new_limits[3], old_limits[3])
+        max_y = compare_and_replace_maximum(new_limits[4], old_limits[4])
+        max_z = compare_and_replace_maximum(new_limits[5], old_limits[5])
+    else:
+        [min_x, min_y, min_z, max_x, max_y, max_z] = new_limits
+    return [min_x, min_y, min_z, max_x, max_y, max_z]
 
 
 def calculate_beam_direction(source, sample):
@@ -217,8 +236,9 @@ def add_beam_arrow(plot_axes, workspace):
     source = workspace.getInstrument().getSource()
     sample = workspace.getInstrument().getSample()
     if source and sample:
+        beam_origin = plot_axes.get_xlim3d()[0], plot_axes.get_ylim3d()[0], plot_axes.get_zlim3d()[0]
         beam_direction = calculate_beam_direction(source, sample)
-        add_arrow(plot_axes, beam_direction)
+        add_arrow(plot_axes, beam_direction, origin=beam_origin)
 
 
 def add_arrow(ax, vector, origin=None, factor=None, color='black', linestyle='-'):
@@ -242,15 +262,15 @@ def plot_lattice_vectors(plot_axes, workspace):
     real_lattice_vectors, reciprocal_lattice_vectors = calculate_lattice_vectors(workspace)
     colors = ['r', 'g', 'b']
     plot_real_lattice_vectors(plot_axes, real_lattice_vectors, colors)
-    plot_real_lattice_vectors(plot_axes, reciprocal_lattice_vectors, colors)
+    plot_reciprocal_lattice_vectors(plot_axes, reciprocal_lattice_vectors, colors)
 
 
-def plot_real_lattice_vectors(plot_axes, reciprocal_lattice, colors):
+def plot_reciprocal_lattice_vectors(plot_axes, reciprocal_lattice, colors):
     for i in range(3):  # plot reciprocal_lattice with '--' dashed linestyle
         add_arrow(plot_axes, reciprocal_lattice[:, i], color=colors[i], linestyle='--')
 
 
-def plot_reciprocal_lattice_vectors(plot_axes, real_lattice, colors):
+def plot_real_lattice_vectors(plot_axes, real_lattice, colors):
     for i in range(3):  # plot real_lattice with '-' solid linestyle
         add_arrow(plot_axes, real_lattice[:, i], color=colors[i])
 

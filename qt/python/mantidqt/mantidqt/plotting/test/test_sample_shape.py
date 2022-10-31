@@ -92,7 +92,7 @@ class PlotSampleShapeTest(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.RELATIVE_TOLERANCE = 0.00001
+        cls.RELATIVE_TOLERANCE = 0.001
 
     def tearDown(self) -> None:
         if "ws_shape" in ADS:
@@ -226,39 +226,40 @@ class PlotSampleShapeTest(TestCase):
 
     def test_get_overall_limits_for_sample_only(self):
         workspace = setup_workspace_shape_from_mesh()
-        [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace)
-        assert_array_equal([-0.15, 0.15], [minimum, maximum])
+        minmax_xyz = sample_shape.overall_limits_for_all_meshes(workspace)
+        assert_allclose([-0.1, -0.099993, -0.15, 0.1, 0.099993, 0.15], minmax_xyz, rtol=self.RELATIVE_TOLERANCE)
 
     def test_get_overall_limits_for_sample_only_PEARL(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
-        [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace, include_components=False)
-        assert_allclose([-0.002939387798309326, 0.002939387798309326],
-                        [minimum, maximum], rtol=self.RELATIVE_TOLERANCE)
+        minmax_xyz = sample_shape.overall_limits_for_all_meshes(workspace, include_components=False)
+        assert_allclose([-0.002934, -0.002939, -0.0018, 0.002934, 0.002939, 0.0018],
+                        minmax_xyz, rtol=self.RELATIVE_TOLERANCE)
 
     def test_get_overall_limits_for_sample_and_components_PEARL(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
-        [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace)
-        assert_allclose([-0.035900001525878904, 0.035900001525878904],
-                        [minimum, maximum], rtol=self.RELATIVE_TOLERANCE)
+        minmax_xyz = sample_shape.overall_limits_for_all_meshes(workspace)
+        assert_allclose([-0.0359, -0.0359, -0.01481, 0.0359, 0.0359, 0.01482],
+                        minmax_xyz, rtol=self.RELATIVE_TOLERANCE)
 
     def test_set_axes_to_largest_mesh(self):
         workspace = setup_workspace_shape_from_mesh()
-        [minimum, maximum] = sample_shape.overall_limits_for_all_meshes(workspace)
-        assert_array_equal([-0.15, 0.15], [minimum, maximum])
+        minmax_xyz = sample_shape.overall_limits_for_all_meshes(workspace)
+        assert_allclose([-0.1, -0.099993, -0.15, 0.1, 0.099993, 0.15], minmax_xyz, rtol=self.RELATIVE_TOLERANCE)
 
     def test_overall_limits_for_every_axis(self):
-        self.assertEqual((3, 9),
-                         sample_shape.overall_limits_for_every_axis(np.array([np.array([3, 5, 7]),
-                                                                              np.array([4, 6, 8]),
-                                                                              np.array([5, 7, 9]),
-                                                                              np.array([3, 4, 5])])
-                                                                    ))
+
+        mesh_points = np.array([np.array([3, 5, 1]),
+                                np.array([4, 7, 8]),
+                                np.array([5, 6, 9]),
+                                np.array([3, 4, 5])])
+        self.assertEqual([3, 4, 1, 5, 7, 9], sample_shape.overall_limits_for_every_axis(mesh_points))
 
     def test_greater_limits(self):
-        self.assertEqual((1, 7), sample_shape.greater_limits(1, 4, 5, 7))
-        self.assertEqual((1, 7), sample_shape.greater_limits(4, 5, 1, 7))
-        self.assertEqual((1, 7), sample_shape.greater_limits(1, 7, 4, 5))
-        self.assertEqual((1, 7), sample_shape.greater_limits(4, 7, 1, 5))
+        # [min_x, min_y, min_z, max_x, max_y, max_z]
+        self.assertEqual([1, 2, 3, 10, 11, 12], sample_shape.greater_limits([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12]))
+        self.assertEqual([1, 2, 3, 10, 11, 12], sample_shape.greater_limits([7, 2, 9, 4, 11, 6], [1, 8, 3, 10, 5, 12]))
+        self.assertEqual([1, 2, 3, 10, 11, 12], sample_shape.greater_limits([1, 8, 3, 10, 5, 12], [7, 2, 9, 4, 11, 6]))
+        self.assertEqual([1, 2, 3, 10, 11, 12], sample_shape.greater_limits([7, 8, 9, 10, 11, 12], [1, 2, 3, 4, 5, 6]))
 
     # Sample and Container
     def test_sample_valid_and_container_invalid(self):
@@ -346,6 +347,27 @@ class PlotSampleShapeTest(TestCase):
                                [0.000000e+00,  0.000000e+00,  5.000000e-01],
                                [1.154701e+00, -5.773503e-01,  3.061617e-17]]
         assert_allclose(expected_reciprocal, reciprocal_lattice_vectors, rtol=self.RELATIVE_TOLERANCE)
+
+    @patch("mantidqt.plotting.sample_shape.call_set_mesh_axes_equal")
+    def test_limits_fed_to_call_set_mesh_axes_equal(self, mock_call_set_mesh_axes_equal):
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        _ = sample_shape.plot_sample_container_and_components(workspace.name())
+        write_calls = mock_call_set_mesh_axes_equal.call_args_list
+        assert_allclose(np.array([-0.0359, -0.0359, -0.01481, 0.0359, 0.0359, 0.01482]),
+                        write_calls[0][0][-1], rtol=self.RELATIVE_TOLERANCE)
+
+    @patch("mantidqt.plotting.sample_shape.overall_limits_for_every_axis")
+    @patch("mantidqt.plotting.sample_shape.get_valid_component_shape_from_workspace")
+    @patch("mantidqt.plotting.sample_shape.get_valid_container_shape_from_workspace")
+    @patch("mantidqt.plotting.sample_shape.get_valid_sample_shape_from_workspace")
+    def test_overall_limits_calls_get_valid_shape_methods(self, mock_get_valid_sample, mock_get_valid_container,
+                                                          mock_get_valid_component, mock_overall_limits):
+        mock_overall_limits.return_value = [1, 2, 3, 4, 5, 6]
+        workspace = setup_workspace_sample_container_and_components_from_mesh()
+        sample_shape.overall_limits_for_all_meshes(workspace)
+        self.assertEqual(1, mock_get_valid_sample.call_count)
+        self.assertEqual(1, mock_get_valid_container.call_count)
+        self.assertEqual(8, mock_get_valid_component.call_count)
 
 
 if __name__ == '__main__':
