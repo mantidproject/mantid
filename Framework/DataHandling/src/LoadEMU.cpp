@@ -310,7 +310,7 @@ std::vector<double> runningAverage(const std::vector<size_t> &data, size_t halfW
   const size_t totalWindow = 2 * halfWindow + 1;
 
   // Step 1 is to calculate the sum for the first point where startIndex is the
-  // first point in the total window.
+  // first point in the total window. The start index wraps from the end of the data.
   size_t sum{0};
   size_t startIndex = N - halfWindow;
   for (size_t i = 0; i < totalWindow; i++) {
