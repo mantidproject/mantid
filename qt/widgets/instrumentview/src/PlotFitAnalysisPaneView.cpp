@@ -9,6 +9,7 @@
 #include <tuple>
 #include <utility>
 
+#include <QApplication>
 #include <QLabel>
 #include <QMessageBox>
 #include <QRegExpValidator>
@@ -20,14 +21,15 @@
 namespace {
 
 std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus) {
+  QString color("black"), size(QString::number(0.8 * QApplication::font().pointSize())), status("");
   if (fitStatus.contains("success")) {
-    return {"QLineEdit { background: rgb(179, 240, 153) }", "PeakCentre value is from a successful fit."};
+    color = "green", status = "Fit success";
   } else if (fitStatus.contains("Failed to converge")) {
-    return {"QLineEdit { background: rgb(251, 210, 121) }", "There was a fitting warning: " + fitStatus};
+    color = "darkOrange", status = fitStatus;
   } else if (!fitStatus.isEmpty()) {
-    return {"QLineEdit { background: rgb(251, 139, 131) }", "There was a fitting error: " + fitStatus};
+    color = "red", status = fitStatus;
   }
-  return {"", "PeakCentre value is not from a fit."};
+  return {"QLabel { color: " + color + "; font-size: " + size + "pt; }", status};
 }
 
 } // namespace
@@ -105,15 +107,21 @@ QWidget *PlotFitAnalysisPaneView::setupFitButtonsWidget() {
 
 QWidget *PlotFitAnalysisPaneView::setupPeakCentreWidget(const double centre) {
   auto *peakCentreWidget = new QWidget();
-  auto *peakCentreLayout = new QHBoxLayout(peakCentreWidget);
+  auto *peakCentreLayout = new QGridLayout(peakCentreWidget);
 
   m_peakCentre = new QLineEdit(QString::number(centre));
   m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
 
   connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
 
-  peakCentreLayout->addWidget(new QLabel("Peak Centre:"));
-  peakCentreLayout->addWidget(m_peakCentre);
+  peakCentreLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
+  peakCentreLayout->addWidget(m_peakCentre, 0, 1);
+
+  m_fitStatus = new QLabel("");
+  m_fitStatus->setAlignment(Qt::AlignRight);
+  setPeakCentreStatus("");
+
+  peakCentreLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
 
   return peakCentreWidget;
 }
@@ -141,8 +149,9 @@ double PlotFitAnalysisPaneView::peakCentre() const { return m_peakCentre->text()
 
 void PlotFitAnalysisPaneView::setPeakCentreStatus(const std::string &status) {
   const auto [stylesheet, tooltip] = getPeakCentreUIProperties(QString::fromStdString(status));
-  m_peakCentre->setStyleSheet(stylesheet);
-  m_peakCentre->setToolTip(tooltip);
+  m_fitStatus->setStyleSheet(stylesheet);
+  m_fitStatus->setText(tooltip);
+  m_fitStatus->setToolTip(tooltip);
 }
 
 void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {

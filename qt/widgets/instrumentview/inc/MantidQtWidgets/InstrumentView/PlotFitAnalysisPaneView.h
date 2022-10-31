@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
+#include <QLabel>
 #include <QLineEdit>
 #include <QObject>
 #include <QPushButton>
@@ -76,10 +77,11 @@ private:
 
   MantidWidgets::PreviewPlot *m_plot;
   QLineEdit *m_start, *m_end;
-  QLineEdit *m_peakCentre;
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
   QPushButton *m_updateEstimateButton;
+  QLineEdit *m_peakCentre;
+  QLabel *m_fitStatus;
   Observable *m_peakCentreObservable;
   Observable *m_fitObservable;
   Observable *m_updateEstimateObservable;
