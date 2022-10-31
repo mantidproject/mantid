@@ -31,11 +31,15 @@ class PowderCalculatorTest(unittest.TestCase):
         good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
-        self.assertRaises(ValueError, abins.PowderCalculator, filename=1, abins_data=good_data)
+        self.assertRaises(ValueError, abins.PowderCalculator, filename=1, abins_data=good_data, temperature=300.)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = good_data.extract()["atoms_data"]
-        self.assertRaises(ValueError, abins.PowderCalculator, filename=full_path_filename, abins_data=bad_data)
+        self.assertRaises(ValueError, abins.PowderCalculator, filename=full_path_filename, abins_data=bad_data, temperature=300.)
+
+        # Missing Temperature
+        self.assertRaises(TypeError, abins.PowderCalculator,
+                          filename=full_path_filename, abins_data=good_data)
 
     #       main test
     def test_good_case(self):
@@ -47,8 +51,10 @@ class PowderCalculatorTest(unittest.TestCase):
 
         # calculation of powder data
         good_data = self._get_good_data(filename=name)
-
-        good_tester = abins.PowderCalculator(filename=abins.test_helpers.find_file(filename=name + ".phonon"), abins_data=good_data["DFT"])
+        good_tester = abins.PowderCalculator(
+            filename=abins.test_helpers.find_file(filename=name + ".phonon"),
+            abins_data=good_data["DFT"],
+            temperature=300.)
         calculated_data = good_tester.calculate_data().extract()
 
         # check if evaluated powder data  is correct
@@ -57,7 +63,11 @@ class PowderCalculatorTest(unittest.TestCase):
                 self.assertEqual(True, np.allclose(good_data["powder"][key][i], calculated_data[key][i]))
 
         # check if loading powder data is correct
-        new_tester = abins.PowderCalculator(filename=abins.test_helpers.find_file(name + ".phonon"), abins_data=good_data["DFT"])
+        new_tester = abins.PowderCalculator(
+            filename=abins.test_helpers.find_file(name + ".phonon"),
+            abins_data=good_data["DFT"],
+            temperature=300.)
+
         loaded_data = new_tester.load_formatted_data().extract()
         for key in good_data["powder"]:
             for i in good_data["powder"][key]:

@@ -275,7 +275,9 @@ class SPowderSemiEmpiricalCalculator:
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
 
         # Compute tensors and traces, write to cache for access during atomic s calculations
-        powder_calculator = abins.PowderCalculator(filename=self._input_filename, abins_data=self._abins_data)
+        powder_calculator = abins.PowderCalculator(filename=self._input_filename,
+                                                   abins_data=self._abins_data,
+                                                   temperature=self._temperature)
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine

@@ -16,8 +16,7 @@ class PowderCalculator:
     """
     Class for calculating powder data.
     """
-
-    def __init__(self, *, filename: str, abins_data: abins.AbinsData) -> None:
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData, temperature: float) -> None:
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
@@ -28,6 +27,7 @@ class PowderCalculator:
         k_data: abins.KpointsData = abins_data.get_kpoints_data()
         self._frequencies: Dict[str, np.ndarray] = {}
         self._displacements: Dict[str, np.ndarray] = {}
+        self._temperature = temperature
 
         atoms_data = abins_data.get_atoms_data()
 
@@ -38,8 +38,9 @@ class PowderCalculator:
             self._displacements[k] = k_point_data.atomic_displacements[:, mask]
 
         self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
-
-        self._clerk = abins.IO(input_filename=filename, group_name=abins.parameters.hdf_groups["powder_data"])
+        self._clerk = abins.IO(input_filename=filename,
+                               group_name=abins.parameters.hdf_groups['powder_data'],
+                               temperature=self._temperature)
 
     def _calculate_powder(self) -> abins.PowderData:
         """

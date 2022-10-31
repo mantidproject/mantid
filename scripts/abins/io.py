@@ -23,10 +23,10 @@ class IO(object):
     Class for Abins I/O HDF file operations.
     """
 
-    def __init__(self, input_filename=None, group_name=None, setting="", autoconvolution=False):
-
+    def __init__(self, input_filename=None, group_name=None, setting="", autoconvolution: bool = False, temperature: float = None):
         self._setting = setting
         self._autoconvolution = autoconvolution
+        self._temperature = temperature
 
         if isinstance(input_filename, str):
 
@@ -93,6 +93,47 @@ class IO(object):
         saved_autoconvolution = self.load(list_of_attributes=["autoconvolution"])
         return self._autoconvolution == saved_autoconvolution["attributes"]["autoconvolution"]
 
+    def _valid_temperature(self):
+        """
+        Check if temperature setting matches content of HDF file
+
+        If temperature is not important, set to None in Clerk
+        constructor. (E.g. when loading phonon data from file.)
+
+        :returns: True if consistent or temperature not set for Clerk, otherwise False
+        """
+        if self._temperature is None:
+            return True
+
+        else:
+            from abins.constants import T_THRESHOLD
+            saved_temperature = self.load(list_of_attributes=["temperature"])
+            if saved_temperature["attributes"]["temperature"] == 'None':
+                return False
+
+            else:
+                return np.abs(self._temperature
+                              - saved_temperature["attributes"]["temperature"]
+                              ) < T_THRESHOLD
+
+    @classmethod
+    def _close_enough(cls, previous, new):
+        if isinstance(new, dict):
+            for key, new_value in new.items():
+                if not cls._close_enough(new_value, previous[key]):
+                    logger.warning("Mismatched items from Abins advanced parameters:")
+                    logger.warning(str((key, new_value, previous[key])))
+                    return False
+            return True
+
+        if isinstance(new, (np.ndarray, float)):
+            return np.allclose(previous, new)
+        # Tuples are converted to list in caching
+        elif isinstance(new, tuple):
+            return cls._close_enough(list(new), previous)
+        else:
+            return previous == new
+
     def _valid_advanced_parameters(self):
         """
         Check if advanced parameters haven't changed.
@@ -109,7 +150,7 @@ class IO(object):
         diff = {
             key: (value, previous_advanced_parameters.get(key, None))
             for key, value in current_advanced_parameters.items()
-            if previous_advanced_parameters.get(key, None) != value
+            if not self._close_enough(previous_advanced_parameters.get(key, None), value)
         }
         diff.update({key: (None, value) for key, value in previous_advanced_parameters.items() if key not in current_advanced_parameters})
 
@@ -157,6 +198,9 @@ class IO(object):
         if not self._valid_autoconvolution():
             raise ValueError("Autoconvolution setting is not consistent with the previous calculations")
 
+        if not self._valid_temperature():
+            raise ValueError("Temperature setting is not consistent with the previous calculations.")
+
     def erase_hdf_file(self):
         """
         Erases content of hdf file.
@@ -180,6 +224,7 @@ class IO(object):
         self.add_attribute("hash", self._hash_input_filename)
         self.add_attribute("setting", self._setting)
         self.add_attribute("autoconvolution", self._autoconvolution)
+        self.add_attribute("temperature", self._temperature)
         self.add_attribute("filename", self._input_filename)
         self.add_attribute("advanced_parameters", json.dumps(abins.parameters.non_performance_parameters))
 
@@ -201,6 +246,8 @@ class IO(object):
         for name in self._attributes:
             if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes, bool)):
                 group.attrs[name] = self._attributes[name]
+            elif self._attributes[name] is None:
+                group.attrs[name] = 'None'
             else:
                 raise ValueError(
                     "Invalid value of attribute. String, "
