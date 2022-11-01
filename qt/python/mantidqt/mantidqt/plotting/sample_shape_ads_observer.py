@@ -12,6 +12,7 @@ import sys
 from functools import wraps
 
 from mantid.api import AnalysisDataServiceObserver
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 def _catch_exceptions(func):
@@ -34,10 +35,10 @@ class SampleShapePlotADSObserver(AnalysisDataServiceObserver):
     def __init__(self, on_replace, on_rename, on_clear, on_delete):
         super(SampleShapePlotADSObserver, self).__init__()
 
-        self.on_replace_workspace = on_replace
-        self.on_rename_workspace = on_rename
-        self.on_clear = on_clear
-        self.on_delete_workspace = on_delete
+        self.on_replace_workspace = QAppThreadCall(on_replace, blocking=False)
+        self.on_rename_workspace = QAppThreadCall(on_rename, blocking=False)
+        self.on_clear = QAppThreadCall(on_clear, blocking=False)
+        self.on_delete_workspace = QAppThreadCall(on_delete, blocking=False)
 
         self.observeClear(True)
         self.observeDelete(True)

@@ -23,12 +23,12 @@ class SampleShapePlot:
         self.figure = None
         self.workspace_name = None
         self.plot_visible = None
-        # self.GFM_plot_number = None
+        self.GFM_plot_number = None
 
-        self.GlobalFigureManager = GlobalFigureManager
+        self.Local_GlobalFigureManager = GlobalFigureManager
         # Register with CurrentFigure that we want to know of any
         # changes to the list of plots
-        self.GlobalFigureManager.add_observer(self)
+        self.Local_GlobalFigureManager.add_observer(self)
 
     def notify(self, action, plot_number):
         """
@@ -37,19 +37,13 @@ class SampleShapePlot:
         calls the presenter to update the plot list in the model and
         the view.
 
-        IMPORTANT: Anything called here is not called from the main
-        GUI thread. Changes in the view must be wrapped in a
-        QAppThreadCall!
-
         :param action: A FigureAction corresponding to the event
         :param plot_number: The unique number in GlobalFigureManager
         """
-        # if action == FigureAction.New:
-        #     self.GFM_plot_number = plot_number
-        if action == FigureAction.Closed:
-            self.reset_class()
+        if action == FigureAction.New:
+            self.GFM_plot_number = plot_number
         if action == FigureAction.VisibilityChanged:
-            self.plot_visible = self.is_visible(plot_number)
+            self.plot_visible = is_visible(plot_number)
 
     def create_plot(self, workspace_name, figure=None):
         self.workspace_name = workspace_name
@@ -77,30 +71,19 @@ class SampleShapePlot:
         if workspace.sample().hasOrientedLattice():
             plot_lattice_vectors(axes, workspace)
         if sample_plotted or container_plotted or components_plotted:
-            SampleShapePlot.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace,
-                                                                      self.on_rename_workspace,
-                                                                      self.on_clear, self.on_delete_workspace)
+            self.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace, self.on_rename_workspace,
+                                                           self.on_clear, self.on_delete_workspace)
             if self.plot_visible:
                 show_the_figure(figure)
             figure.canvas.draw()
             self.figure = figure
+            set_figure_window_title(self.GFM_plot_number, f"{workspace_name} Sample Shape")
             return figure
 
     def reset_class(self):
         self.figure = None
         self.workspace_name = None
         self.ads_observer = None
-
-    def is_visible(self, plot_number):
-        """
-        Determines if plot window is visible or hidden
-        :return: True if plot visible (window open), false if hidden
-        """
-        figure_manager = self.GlobalFigureManager.figs.get(plot_number)
-        if figure_manager is None:
-            raise ValueError('Error in is_visible, could not find a plot with the number {}.'.format(plot_number))
-
-        return figure_manager.window.isVisible()
 
     def on_replace_workspace(self, workspace_name):
         self.do_not_replace_plot_if_closed()
@@ -120,12 +103,7 @@ class SampleShapePlot:
             self.reset_class()
 
     def on_rename_workspace(self, old_workspace_name, new_workspace_name):
-        if self.workspace_name == old_workspace_name:
-            self.workspace_name = new_workspace_name
-            plot_axes = self.figure.gca()
-            old_title = plot_axes.get_title()
-            new_title = old_title.replace(old_workspace_name, new_workspace_name)
-            plot_axes.set_title(new_title)
+        pass  # on_replace_workspace is called by rename
 
     def on_delete_workspace(self, workspace_name):
         if self.workspace_name == workspace_name:
@@ -135,6 +113,31 @@ class SampleShapePlot:
     def on_clear(self):
         GlobalFigureManager.destroy_fig(self.figure)
         self.reset_class()
+
+
+def is_visible(plot_number):
+    """
+    Determines if plot window is visible or hidden
+    :return: True if plot visible (window open), false if hidden
+    """
+    figure_manager = GlobalFigureManager.figs.get(plot_number)
+    if figure_manager is None:
+        raise ValueError('Error in is_visible, could not find a plot with the number {}.'.format(plot_number))
+
+    return figure_manager.window.isVisible()
+
+
+def set_figure_window_title(plot_number, new_name):
+    """
+    Renames a figure in the GlobalFigureManager
+    :param plot_number: The unique number in GlobalFigureManager
+    :param new_name: The new figure (plot) name
+    """
+    figure_manager = GlobalFigureManager.figs.get(plot_number)
+    # This can be triggered before the plot is added to the
+    # GlobalFigureManager, so we silently ignore this case
+    if figure_manager is not None:
+        figure_manager.set_window_title(new_name)
 
 
 def plot_sample_container_and_components(workspace_name):
