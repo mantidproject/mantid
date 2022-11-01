@@ -8,7 +8,8 @@ import numpy as np
 from typing import Dict, Tuple
 
 import abins
-from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, NUM_ZERO
+from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, CONSTANT,
+                             CM1_2_HARTREE, K_2_HARTREE, NUM_ZERO)
 
 
 # noinspection PyMethodMayBeStatic
@@ -92,6 +93,13 @@ class PowderCalculator:
         temp = np.fabs(b_tensors)
         indices = temp < NUM_ZERO
         b_tensors[indices] = NUM_ZERO
+
+        if self._temperature < np.finfo(type(self._temperature)).eps:
+            pass
+        else:
+            coth = 1.0 / np.tanh(self._frequencies[k] * CM1_2_HARTREE
+                                 / (2.0 * self._temperature * K_2_HARTREE))
+            b_tensors *= coth[None, :, None, None]
 
         # a_tensors[num_atoms, dim, dim]
         a_tensors = np.sum(a=b_tensors, axis=1)

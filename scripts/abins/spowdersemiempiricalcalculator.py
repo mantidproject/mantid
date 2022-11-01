@@ -12,7 +12,7 @@ import numpy as np
 from scipy.special import factorial
 
 from abins import AbinsData, FrequencyPowderGenerator, SData, SDataByAngle
-from abins.constants import CM1_2_HARTREE, K_2_HARTREE, FLOAT_TYPE, INT_TYPE, MIN_SIZE
+from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
 from mantid.api import Progress
@@ -512,12 +512,7 @@ class SPowderSemiEmpiricalCalculator:
     @staticmethod
     def _isotropic_dw(*, frequencies, q2, a_trace, temperature):
         """Compute Debye-Waller factor in isotropic approximation"""
-        if temperature < np.finfo(type(temperature)).eps:
-            coth = 1.0
-        else:
-            coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * temperature * K_2_HARTREE))
-
-        return np.exp(-q2 * a_trace / 3.0 * coth * coth)
+        return np.exp(-q2 * a_trace / 3.0)
 
     def _get_empty_sdata(self, use_fine_bins: bool = False, max_order: Optional[int] = None, shape=None) -> SData:
         """
@@ -770,12 +765,9 @@ class SPowderSemiEmpiricalCalculator:
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the first quantum order event for the given atom
         """
-        trace_ba = np.einsum("kli, il->k", b_tensor, a_tensor)
-        if self._temperature < np.finfo(type(self._temperature)).eps:
-            coth = 1.0
-        else:
-            coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * self._temperature * K_2_HARTREE))
-        dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
+        trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
+
+        dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0)
 
         return dw
 
