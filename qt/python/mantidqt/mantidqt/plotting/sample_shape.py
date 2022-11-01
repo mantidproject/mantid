@@ -49,14 +49,15 @@ class SampleShapePlot:
         self.workspace_name = workspace_name
         sample_plotted = container_plotted = components_plotted = None
         workspace = ADS.retrieve(workspace_name)
+        if not does_workspace_have_valid_sample_shape(workspace) and not workspace.sample().hasEnvironment():
+            raise Exception("Workspace must have attached Sample Shape or Environment")
         if figure:
             axes = figure.gca()
         else:
             self.plot_visible = True
             figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
 
-        if workspace.sample():
-            sample_plotted = plot_sample_only(workspace, figure)
+        sample_plotted = plot_sample_only(workspace, figure)
         if workspace.sample().hasEnvironment():
             container_plotted = plot_container(workspace, figure)
             number_of_components = workspace.sample().getEnvironment().nelements()
@@ -159,6 +160,14 @@ def get_valid_sample_shape_from_workspace(workspace):
     sample_shape = get_sample_shape_from_workspace(workspace)
     if is_shape_valid(sample_shape):
         return sample_shape
+
+
+def does_workspace_have_valid_sample_shape(workspace):
+    if not workspace.sample().hasShape():
+        return False
+    sample_shape = get_sample_shape_from_workspace(workspace)
+    if is_shape_valid(sample_shape):
+        return True
 
 
 def get_sample_shape_from_workspace(workspace_with_sample):
