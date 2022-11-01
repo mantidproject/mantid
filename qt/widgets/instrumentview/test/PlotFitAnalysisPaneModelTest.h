@@ -45,6 +45,18 @@ public:
     m_model.reset();
   }
 
+  void test_that_the_model_is_instantiated_with_a_function_and_empty_fit_status() {
+    TS_ASSERT_THROWS_NOTHING(m_model->peakCentre());
+    TS_ASSERT_EQUALS("", m_model->fitStatus());
+  }
+
+  void test_that_doFit_sets_a_successful_fit_status_for_a_good_fit() {
+    m_model->doFit(m_workspaceName, m_range);
+
+    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
+    TS_ASSERT_EQUALS("success", m_model->fitStatus());
+  }
+
   void test_that_calculateEstimate_returns_zero_peak_centre_if_the_workspace_does_not_exist_in_the_ADS() {
     AnalysisDataService::Instance().clear();
 

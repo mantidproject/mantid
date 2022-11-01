@@ -10,6 +10,8 @@
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
+
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -50,6 +52,9 @@ public:
   void addSpectrum(const std::string &wsName) override;
 
 private:
+  std::optional<std::string> validateFitValues() const;
+  bool checkDataIsExtracted() const;
+  bool checkPeakCentreIsWithinFitRange() const;
   void updatePeakCentreInViewFromModel();
 
   VoidObserver *m_peakCentreObserver;

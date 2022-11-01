@@ -38,31 +38,49 @@ void PlotFitAnalysisPanePresenter::peakCentreEditingFinished() {
 }
 
 void PlotFitAnalysisPanePresenter::fitClicked() {
-  if (m_currentName != "") {
-    try {
-      m_model->doFit(m_currentName, m_view->getRange());
-      updatePeakCentreInViewFromModel();
-    } catch (...) {
-      m_view->displayWarning("Fit failed");
-    }
-    m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
-  } else {
-    m_view->displayWarning("Need to have extracted data to do a fit");
+  if (const auto validationMessage = validateFitValues()) {
+    m_view->displayWarning(*validationMessage);
+    return;
   }
+
+  try {
+    m_model->doFit(m_currentName, m_view->getRange());
+  } catch (...) {
+    m_view->displayWarning("Fit failed");
+  }
+  updatePeakCentreInViewFromModel();
+  m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
 }
 
 void PlotFitAnalysisPanePresenter::updateEstimateClicked() {
-  if (!m_currentName.empty()) {
+  const auto validationMessage = validateFitValues();
+  if (!validationMessage) {
     m_model->calculateEstimate(m_currentName, m_view->getRange());
     updatePeakCentreInViewFromModel();
   } else {
-    m_view->displayWarning("Could not update estimate: data has not been extracted.");
+    m_view->displayWarning(*validationMessage);
   }
+}
+
+std::optional<std::string> PlotFitAnalysisPanePresenter::validateFitValues() const {
+  if (!checkDataIsExtracted())
+    return "Need to have extracted data to do a fit or estimate.";
+  if (!checkPeakCentreIsWithinFitRange())
+    return "The Peak Centre provided is outside the fit range.";
+  return std::nullopt;
 }
 
 void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
   m_currentName = wsName;
   m_view->addSpectrum(wsName);
+}
+
+bool PlotFitAnalysisPanePresenter::checkDataIsExtracted() const { return !m_currentName.empty(); }
+
+bool PlotFitAnalysisPanePresenter::checkPeakCentreIsWithinFitRange() const {
+  const auto peakCentre = m_view->peakCentre();
+  const auto range = m_view->getRange();
+  return range.first < peakCentre && peakCentre < range.second;
 }
 
 void PlotFitAnalysisPanePresenter::updatePeakCentreInViewFromModel() {
