@@ -172,9 +172,9 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTr
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:191
 deallocuse:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:118
 templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
-#unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:1142
-#unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:1546
-#unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:277
-#unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:114
-#unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:601
-#returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:127
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertybrowser.cpp:114
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qteditorfactory.cpp:154
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtpropertymanager.cpp:27
+unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:11
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp:60
+returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFitData.cpp:17
