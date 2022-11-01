@@ -236,6 +236,7 @@ public:
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setSaved, void());
   MOCK_CONST_METHOD0(searchCriteria, SearchCriteria());
+  MOCK_CONST_METHOD0(getSearchResultsCSV, std::string());
 };
 
 class MockSearcherSubscriber : public SearcherSubscriber {
@@ -266,6 +267,7 @@ public:
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setUnsaved, void());
   MOCK_METHOD0(setSaved, void());
+  MOCK_CONST_METHOD0(getSearchResultsCSV, std::string());
 };
 
 class MockMessageHandler : public IReflMessageHandler {

@@ -132,7 +132,7 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
 }
 
 void RunsPresenter::notifyExportSearchResults() const {
-  auto csv = m_view->getSearchResultsCSV();
+  auto csv = m_searcher->getSearchResultsCSV();
   if (csv.empty()) {
     m_messageHandler->giveUserCritical(
         "No search results loaded. Enter an Investigation ID (and a cycle if using) to load results.", "Error");

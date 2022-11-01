@@ -36,7 +36,7 @@ public:
   void setUnsaved() override;
   void setSaved() override;
   // generate csv string for exporting
-  std::string getSearchResultsCSV() const;
+  std::string getSearchResultsCSV() const override;
   std::string makeSearchResultsCSV(const SearchResults &results) const;
 
   // QAbstractTableModel overrides
