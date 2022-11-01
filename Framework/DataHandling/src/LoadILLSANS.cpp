@@ -647,6 +647,13 @@ size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, si
   }
 
   firstIndex++;
+
+  if (m_instrumentName == "D16") {
+    HistogramData::Points points = HistogramData::Points(binning);
+    m_localWorkspace->setPoints(firstIndex, points);
+    firstIndex++;
+  }
+
   return firstIndex;
 }
 
