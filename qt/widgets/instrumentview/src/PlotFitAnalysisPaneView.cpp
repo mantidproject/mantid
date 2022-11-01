@@ -9,7 +9,6 @@
 #include <tuple>
 #include <utility>
 
-#include <QApplication>
 #include <QLabel>
 #include <QMessageBox>
 #include <QRegExpValidator>
@@ -21,7 +20,7 @@
 namespace {
 
 std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus) {
-  QString color("black"), size(QString::number(0.8 * QApplication::font().pointSize())), status("");
+  QString color("black"), status("");
   if (fitStatus.contains("success")) {
     color = "green", status = "Fit success";
   } else if (fitStatus.contains("Failed to converge")) {
@@ -29,7 +28,7 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
   } else if (!fitStatus.isEmpty()) {
     color = "red", status = fitStatus;
   }
-  return {"QLabel { color: " + color + "; font-size: " + size + "pt; }", status};
+  return {"QLabel { color: " + color + "; }", status};
 }
 
 } // namespace
