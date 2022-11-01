@@ -219,13 +219,13 @@ SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDet
 
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
 
-std::string QtSearchModel::getLogbookCSV() const { return makeLogbookCSV(getRows()); }
+std::string QtSearchModel::getSearchResultsCSV() const { return makeSearchResultsCSV(getRows()); }
 
-std::string QtSearchModel::makeLogbookCSV(SearchResults const &results) const {
+std::string QtSearchModel::makeSearchResultsCSV(SearchResults const &results) const {
   if (results.empty()) {
     return "";
   }
-  std::string csv = makeLogbookHeaders();
+  std::string csv = makeSearchResultsCSVHeaders();
   for (SearchResult const &result : results) {
     // Should be suppressed until C++20. std::accumulate is less efficient as it makes needless copies.
     // cppcheck-suppress useStlAlgorithm
@@ -234,7 +234,7 @@ std::string QtSearchModel::makeLogbookCSV(SearchResults const &results) const {
   return csv;
 }
 
-std::string QtSearchModel::makeLogbookHeaders() const {
+std::string QtSearchModel::makeSearchResultsCSVHeaders() const {
   std::string header;
   header +=
       headerData(static_cast<int>(Column::RUN), Qt::Orientation::Horizontal, Qt::DisplayRole).toString().toStdString() +

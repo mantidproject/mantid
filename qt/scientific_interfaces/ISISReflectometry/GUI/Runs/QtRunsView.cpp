@@ -215,7 +215,7 @@ ISearchModel const &QtRunsView::searchResults() const { return m_searchModel; }
 
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
-std::string QtRunsView::getLogbookCSV() const { return m_searchModel.getLogbookCSV(); }
+std::string QtRunsView::getSearchResultsCSV() const { return m_searchModel.getSearchResultsCSV(); }
 
 /**
 This slot notifies the presenter that the user has modified some values in the
@@ -274,7 +274,7 @@ void QtRunsView::on_actionTransfer_triggered() {
 void QtRunsView::on_actionExport_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
                                                                 {"ISIS Reflectometry", "RunsTab", "Export"}, false);
-  m_notifyee->notifyExportLogbook();
+  m_notifyee->notifyExportSearchResults();
 }
 
 /**

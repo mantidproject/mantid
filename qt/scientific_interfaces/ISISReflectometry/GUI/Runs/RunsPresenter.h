@@ -115,7 +115,7 @@ public:
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
-  void notifyExportLogbook() const override;
+  void notifyExportSearchResults() const override;
 
   // RunNotifierSubscriber overrides
   void notifyCheckForNewRuns() override;

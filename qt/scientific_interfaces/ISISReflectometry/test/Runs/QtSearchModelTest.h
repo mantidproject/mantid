@@ -25,7 +25,7 @@ public:
     auto results = getTestSearchResults();
 
     auto model = QtSearchModel();
-    auto csv = model.makeLogbookCSV(results);
+    auto csv = model.makeSearchResultsCSV(results);
     TS_ASSERT_EQUALS(getTestCSV(), csv)
   }
 
@@ -35,16 +35,16 @@ public:
     auto expectedCsv = "";
 
     auto model = QtSearchModel();
-    auto csv = model.makeLogbookCSV(results);
+    auto csv = model.makeSearchResultsCSV(results);
     TS_ASSERT_EQUALS(expectedCsv, csv)
   }
 
-  void test_get_logbook_csv_uses_member_results() {
+  void test_getSearchResultsCSV_uses_member_results() {
     auto results = getTestSearchResults();
 
     auto model = QtSearchModel();
     model.replaceResults(results);
-    auto csv = model.getLogbookCSV();
+    auto csv = model.getSearchResultsCSV();
     TS_ASSERT_EQUALS(getTestCSV(), csv)
   }
 

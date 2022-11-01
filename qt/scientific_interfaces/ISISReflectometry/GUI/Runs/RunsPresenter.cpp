@@ -131,8 +131,8 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
     m_mainPresenter->notifyChangeInstrumentRequested(newName);
 }
 
-void RunsPresenter::notifyExportLogbook() const {
-  auto csv = m_view->getLogbookCSV();
+void RunsPresenter::notifyExportSearchResults() const {
+  auto csv = m_view->getSearchResultsCSV();
   if (!csv.empty()) {
     auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
     std::cerr << filename;
@@ -149,8 +149,7 @@ void RunsPresenter::notifyExportLogbook() const {
     outFile.close();
   } else {
     m_messageHandler->giveUserCritical(
-        "No logbook loaded. Enter an Investigation ID (and a cycle when using the archive) to load a logbook.",
-        "Error");
+        "No search results loaded. Enter an Investigation ID (and a cycle if using) to load results.", "Error");
   }
 }
 

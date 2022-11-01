@@ -512,7 +512,7 @@
     <string>Export</string>
    </property>
    <property name="toolTip">
-    <string>Export the search results to a logbook .csv file. Note: You must press enter or click out of any edited cells before exporting the logbook.</string>
+    <string>Export the search results to a .csv file. Note: You must press enter or click out of any edited cells before exporting the results.</string>
    </property>
   </action>
  </widget>

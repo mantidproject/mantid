@@ -39,7 +39,7 @@ public:
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;
-  virtual void notifyExportLogbook() const = 0;
+  virtual void notifyExportSearchResults() const = 0;
 };
 
 class RunsViewTimerSubscriber {
@@ -81,7 +81,7 @@ public:
   virtual void setSearchResultsColumnWidth(int column, int width) = 0;
   virtual ISearchModel const &searchResults() const = 0;
   virtual ISearchModel &mutableSearchResults() = 0;
-  virtual std::string getLogbookCSV() const = 0;
+  virtual std::string getSearchResultsCSV() const = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments) = 0;
