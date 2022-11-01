@@ -133,24 +133,27 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
 
 void RunsPresenter::notifyExportSearchResults() const {
   auto csv = m_view->getSearchResultsCSV();
-  if (!csv.empty()) {
-    auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
-    std::cerr << filename;
-    if (filename.find_last_of('.') == std::string::npos ||
-        filename.substr(filename.find_last_of('.') + 1) != std::string("csv")) {
-      filename += ".csv";
-    }
-    std::ofstream outFile(filename, std::ios::trunc);
-    if (!outFile) {
-      m_messageHandler->giveUserCritical("Saving to " + filename + "failed. Please try again.", "Error");
-      return;
-    }
-    outFile << csv;
-    outFile.close();
-  } else {
+  if (csv.empty()) {
     m_messageHandler->giveUserCritical(
         "No search results loaded. Enter an Investigation ID (and a cycle if using) to load results.", "Error");
+    return;
   }
+
+  // Append a .csv extension if the user didn't add one manually.
+  auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
+  std::cerr << filename;
+  if (filename.find_last_of('.') == std::string::npos ||
+      filename.substr(filename.find_last_of('.') + 1) != std::string("csv")) {
+    filename += ".csv";
+  }
+
+  std::ofstream outFile(filename, std::ios::trunc);
+  if (!outFile) {
+    m_messageHandler->giveUserCritical("Saving to " + filename + "failed. Please try again.", "Error");
+    return;
+  }
+  outFile << csv;
+  outFile.close();
 }
 
 // Notification from a child presenter that the instrument needs to be changed
