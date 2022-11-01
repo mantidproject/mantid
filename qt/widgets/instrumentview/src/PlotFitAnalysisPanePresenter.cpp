@@ -12,7 +12,7 @@
 namespace MantidQt::MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
-                                                           PlotFitAnalysisPaneModel *model)
+                                                           IPlotFitAnalysisPaneModel *model)
     : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
 
   m_peakCentreObserver = new VoidObserver();
@@ -50,8 +50,6 @@ void PlotFitAnalysisPanePresenter::fitClicked() {
     m_view->displayWarning("Need to have extracted data to do a fit");
   }
 }
-
-void PlotFitAnalysisPanePresenter::updateEstimateAfterExtraction() { updateEstimateClicked(); }
 
 void PlotFitAnalysisPanePresenter::updateEstimateClicked() {
   if (!m_currentName.empty()) {

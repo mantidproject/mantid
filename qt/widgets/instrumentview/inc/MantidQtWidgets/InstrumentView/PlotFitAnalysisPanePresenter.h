@@ -26,7 +26,6 @@ public:
   virtual void clearCurrentWS() = 0;
   virtual void peakCentreEditingFinished() = 0;
   virtual void fitClicked() = 0;
-  virtual void updateEstimateAfterExtraction() = 0;
   virtual void updateEstimateClicked() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
 };
@@ -36,7 +35,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter : public Q
   Q_OBJECT
 
 public:
-  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view, PlotFitAnalysisPaneModel *m_model);
+  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view, IPlotFitAnalysisPaneModel *m_model);
   ~PlotFitAnalysisPanePresenter() {
     delete m_model;
     delete m_fitObserver;
@@ -47,7 +46,6 @@ public:
   void clearCurrentWS() override { m_currentName = ""; };
   void peakCentreEditingFinished() override;
   void fitClicked() override;
-  void updateEstimateAfterExtraction() override;
   void updateEstimateClicked() override;
   void addSpectrum(const std::string &wsName) override;
 
@@ -58,7 +56,7 @@ private:
   VoidObserver *m_fitObserver;
   VoidObserver *m_updateEstimateObserver;
   IPlotFitAnalysisPaneView *m_view;
-  PlotFitAnalysisPaneModel *m_model;
+  IPlotFitAnalysisPaneModel *m_model;
   std::string m_currentName;
 };
 } // namespace MantidWidgets

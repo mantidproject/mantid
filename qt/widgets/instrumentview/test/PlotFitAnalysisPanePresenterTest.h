@@ -51,27 +51,15 @@ public:
     m_model = nullptr;
   }
 
-  void test_doFit() {
+  void test_fitClicked() {
     // set name via addSpectrum
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
     m_presenter->addSpectrum(m_workspaceName);
-    // set up rest of test
 
-    IFunction_sptr function = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
-
-    EXPECT_CALL(*m_view, getFunction()).Times(1).WillOnce(Return(function));
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+    EXPECT_CALL(*m_model, doFit(m_workspaceName, m_range)).Times(1);
 
-    EXPECT_CALL(*m_view, updateFunction(function));
-
-    m_presenter->doFit();
-    TS_ASSERT_EQUALS(m_model->getFitCount(), 1);
-  }
-
-  void test_addFunction() {
-    auto function = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
-    EXPECT_CALL(*m_view, addFunction(function)).Times(1);
-    m_presenter->addFunction(function);
+    m_presenter->fitClicked();
   }
 
   void test_addSpectrum() {
@@ -82,9 +70,7 @@ public:
   void test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
     EXPECT_CALL(*m_view, displayWarning("Could not update estimate: data has not been extracted.")).Times(1);
 
-    m_presenter->updateEstimate();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 0);
-    TS_ASSERT(!m_model->hasEstimate());
+    m_presenter->updateEstimateClicked();
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
@@ -92,33 +78,9 @@ public:
     m_presenter->addSpectrum(m_workspaceName);
 
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+    EXPECT_CALL(*m_model, calculateEstimate(m_workspaceName, m_range)).Times(1);
 
-    m_presenter->updateEstimate();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
-    TS_ASSERT(m_model->hasEstimate());
-  }
-
-  void test_that_updateEstimateAfterExtraction_calls_calculateEstimate_if_an_estimate_does_not_exist() {
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->addSpectrum(m_workspaceName);
-
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
-
-    m_presenter->updateEstimateAfterExtraction();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
-    TS_ASSERT(m_model->hasEstimate());
-  }
-
-  void test_that_updateEstimateAfterExtraction_does_not_call_calculateEstimate_if_an_estimate_already_exists() {
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->addSpectrum(m_workspaceName);
-
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
-
-    m_presenter->updateEstimate();
-    m_presenter->updateEstimateAfterExtraction();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
-    TS_ASSERT(m_model->hasEstimate());
+    m_presenter->updateEstimateClicked();
   }
 
 private:

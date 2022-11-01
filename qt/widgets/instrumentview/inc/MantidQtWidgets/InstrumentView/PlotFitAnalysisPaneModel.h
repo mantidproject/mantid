@@ -17,18 +17,33 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneModel {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneModel {
+
+public:
+  IPlotFitAnalysisPaneModel(){};
+  virtual ~IPlotFitAnalysisPaneModel(){};
+
+  virtual void doFit(const std::string &wsName, const std::pair<double, double> &range) = 0;
+  virtual void calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) = 0;
+
+  virtual void setPeakCentre(const double centre) = 0;
+  virtual double peakCentre() const = 0;
+
+  virtual std::string fitStatus() const = 0;
+};
+
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneModel : public IPlotFitAnalysisPaneModel {
 
 public:
   PlotFitAnalysisPaneModel();
   virtual ~PlotFitAnalysisPaneModel(){};
-  virtual void doFit(const std::string &wsName, const std::pair<double, double> &range);
-  virtual void calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range);
+  void doFit(const std::string &wsName, const std::pair<double, double> &range) override;
+  void calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) override;
 
-  void setPeakCentre(const double centre);
-  double peakCentre() const;
+  void setPeakCentre(const double centre) override;
+  double peakCentre() const override;
 
-  std::string fitStatus() const;
+  std::string fitStatus() const override;
 
 private:
   IFunction_sptr calculateEstimate(MatrixWorkspace_sptr &workspace, const std::pair<double, double> &range);
