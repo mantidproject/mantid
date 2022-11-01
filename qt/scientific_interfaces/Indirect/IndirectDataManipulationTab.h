@@ -47,6 +47,8 @@ public:
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
+  /// Clear the workspaces held by the output plotting options
+  void clearOutputPlotOptionsWorkspaces();
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
   /// Prevent loading of data with incorrect naming
