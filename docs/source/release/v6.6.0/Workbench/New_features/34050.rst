@@ -1,0 +1,1 @@
+- Added button to figure tool bar which hides the figure (unhidden using the plots tab).
