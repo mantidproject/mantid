@@ -647,15 +647,11 @@ class FigureInteractionTest(unittest.TestCase):
         self.interactor.redraw_annotations.assert_called_once()
 
     def test_marker_annotations_are_removed_on_pan_begin(self):
-        fig_manager = MagicMock()
-        canvas = MagicMock()
-        type(canvas).buttond = PropertyMock(return_value={Qt.MiddleButton: 4})
-        fig_manager.canvas = canvas
+        fig_manager = self._create_mock_fig_manager_to_accept_middle_click()
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
+        mouse_event = self._create_mock_middle_click()
 
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
-        type(mouse_event).button = PropertyMock(return_value=4)
         interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
         interactor.toolbar_manager.is_zoom_active = MagicMock(return_value=False)
 
@@ -664,15 +660,11 @@ class FigureInteractionTest(unittest.TestCase):
         interactor._remove_all_marker_annotations.assert_called_once()
 
     def test_marker_annotations_are_added_on_pan_end(self):
-        fig_manager = MagicMock()
-        canvas = MagicMock()
-        type(canvas).buttond = PropertyMock(return_value={Qt.MiddleButton: 4})
-        fig_manager.canvas = canvas
+        fig_manager = self._create_mock_fig_manager_to_accept_middle_click()
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
+        mouse_event = self._create_mock_middle_click()
 
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
-        type(mouse_event).button = PropertyMock(return_value=4)
         interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
 
         interactor._add_all_marker_annotations = MagicMock()
@@ -687,9 +679,21 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.canvas = canvas
         return fig_manager
 
+    def _create_mock_fig_manager_to_accept_middle_click(self):
+        fig_manager = MagicMock()
+        canvas = MagicMock()
+        type(canvas).buttond = PropertyMock(return_value={Qt.MiddleButton: 4})
+        fig_manager.canvas = canvas
+        return fig_manager
+
     def _create_mock_right_click(self):
         mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
         type(mouse_event).button = PropertyMock(return_value=3)
+        return mouse_event
+
+    def _create_mock_middle_click(self):
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
+        type(mouse_event).button = PropertyMock(return_value=4)
         return mouse_event
 
     def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
