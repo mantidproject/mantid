@@ -56,11 +56,6 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tabElwin">
-       <attribute name="title">
-        <string>Elwin</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabMSD">
        <attribute name="title">
         <string>MSD Fit</string>
@@ -192,8 +187,6 @@
   <tabstop>pbHelp</tabstop>
   <tabstop>pbManageDirs</tabstop>
  </tabstops>
- <resources>
-  <include location="../../../MantidPlot/icons/icons.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

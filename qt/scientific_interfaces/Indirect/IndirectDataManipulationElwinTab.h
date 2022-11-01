@@ -7,23 +7,24 @@
 #pragma once
 
 #include "IAddWorkspaceDialog.h"
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectDataManipulation.h"
+#include "IndirectDataManipulationTab.h"
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
-#include "ui_IndirectDataAnalysisElwinTab.h"
+#include "ui_IndirectDataManipulationElwinTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 using namespace MantidWidgets;
+using namespace IDA;
 
-class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisElwinTab : public IndirectDataAnalysisTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataManipulationElwinTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisElwinTab(QWidget *parent = nullptr);
-  ~IndirectDataAnalysisElwinTab();
+  IndirectDataManipulationElwinTab(QWidget *parent = nullptr);
+  ~IndirectDataManipulationElwinTab();
   void updateTableFromModel();
   QTableWidget *getDataTable() const;
 
@@ -62,9 +63,18 @@ private:
   bool validate() override;
   void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
-  void setBrowserWorkspace() override{};
   void setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws, const QPair<double, double> &range);
   void setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws);
+
+  /// Retrieve the selected spectrum
+  int getSelectedSpectrum() const;
+  /// Sets the selected spectrum
+  virtual void setSelectedSpectrum(int spectrum);
+
+  /// Retrieve input workspace
+  Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
+  /// Set input workspace
+  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
 
   void checkForELTWorkspace();
 
@@ -79,11 +89,13 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  Ui::IndirectDataAnalysisElwinTab m_uiForm;
+  Ui::IndirectDataManipulationElwinTab m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
-  IndirectDataAnalysis *m_parent;
+  IndirectDataManipulation *m_parent;
   QTableWidget *m_dataTable;
   std::unique_ptr<IndirectFitDataModel> m_dataModel;
+  int m_selectedSpectrum;
+  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
 
   bool m_emitCellChanged = true;
 
@@ -96,6 +108,7 @@ private:
   size_t findWorkspaceID();
   void newInputFiles();
   void plotInput();
+  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
   void updateIntegrationRange();
 
 private slots:
@@ -112,6 +125,5 @@ private slots:
   void checkLoadedFiles();
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -26,7 +26,6 @@ set(SRC_FILES
     IndirectCorrections.cpp
     IndirectDataAnalysis.cpp
     IndirectDataAnalysisConvFitTab.cpp
-    IndirectDataAnalysisElwinTab.cpp
     IndirectDataAnalysisFqFitTab.cpp
     IndirectDataAnalysisIqtTab.cpp
     IndirectDataAnalysisIqtFitTab.cpp
@@ -34,6 +33,7 @@ set(SRC_FILES
     IndirectDataAnalysisTab.cpp
     IndirectDataManipulation.cpp
     IndirectDataManipulationTab.cpp
+    IndirectDataManipulationElwinTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -125,7 +125,6 @@ set(MOC_FILES
     IndirectCorrections.h
     IndirectDataAnalysis.h
     IndirectDataAnalysisConvFitTab.h
-    IndirectDataAnalysisElwinTab.h
     IndirectDataAnalysisFqFitTab.h
     IndirectDataAnalysisIqtFitTab.h
     IndirectDataAnalysisIqtTab.h
@@ -133,6 +132,7 @@ set(MOC_FILES
     IndirectDataAnalysisTab.h
     IndirectDataManipulation.h
     IndirectDataManipulationTab.h
+    IndirectDataManipulationElwinTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
@@ -224,7 +224,7 @@ set(UI_FILES
     IndirectBayes.ui
     IndirectCorrections.ui
     IndirectDataAnalysis.ui
-    IndirectDataAnalysisElwinTab.ui
+    IndirectDataManipulationElwinTab.ui
     IndirectDataManipulation.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
