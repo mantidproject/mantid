@@ -646,7 +646,7 @@ class FigureInteractionTest(unittest.TestCase):
         self.interactor.on_scroll(event)
         self.interactor.redraw_annotations.assert_called_once()
 
-    def test_marker_annotations_are_removed_on_pan_begin(self):
+    def test_marker_annotations_are_removed_on_middle_mouse_pan_begin(self):
         fig_manager = self._create_mock_fig_manager_to_accept_middle_click()
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
@@ -659,7 +659,7 @@ class FigureInteractionTest(unittest.TestCase):
         interactor.on_mouse_button_press(mouse_event)
         interactor._remove_all_marker_annotations.assert_called_once()
 
-    def test_marker_annotations_are_added_on_pan_end(self):
+    def test_marker_annotations_are_added_on_middle_mouse_pan_end(self):
         fig_manager = self._create_mock_fig_manager_to_accept_middle_click()
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
