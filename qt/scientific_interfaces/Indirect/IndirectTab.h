@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
@@ -171,6 +172,8 @@ protected:
 
   /// Double editor facotry for the properties browser
   DoubleEditorFactory *m_dblEdFac;
+  /// QtCheckBoxFactory
+  QtCheckBoxFactory *m_blnEdFac;
 
   /// Algorithm runner object to execute chains algorithms on a seperate thread
   /// from the GUI

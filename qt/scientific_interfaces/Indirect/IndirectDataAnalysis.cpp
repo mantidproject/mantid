@@ -7,7 +7,6 @@
 #include "IndirectDataAnalysis.h"
 
 #include "IndirectDataAnalysisConvFitTab.h"
-#include "IndirectDataAnalysisElwinTab.h"
 #include "IndirectDataAnalysisFqFitTab.h"
 #include "IndirectDataAnalysisIqtFitTab.h"
 #include "IndirectDataAnalysisIqtTab.h"
@@ -27,7 +26,6 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   // All tabs MUST appear here to be shown in interface.
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
-  m_tabs.emplace(ELWIN, new IndirectDataAnalysisElwinTab(m_uiForm.twIDATabs->widget(ELWIN)));
   m_tabs.emplace(MSD_FIT, new IndirectDataAnalysisMSDFitTab(m_uiForm.twIDATabs->widget(MSD_FIT)));
   m_tabs.emplace(IQT, new IndirectDataAnalysisIqtTab(m_uiForm.twIDATabs->widget(IQT)));
   m_tabs.emplace(IQT_FIT, new IndirectDataAnalysisIqtFitTab(m_uiForm.twIDATabs->widget(IQT_FIT)));

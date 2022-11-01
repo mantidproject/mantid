@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataAnalysisElwinTab</class>
- <widget class="QWidget" name="IndirectDataAnalysisElwinTab">
+ <class>IndirectDataManipulationElwinTab</class>
+ <widget class="QWidget" name="IndirectDataManipulationElwinTab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -35,14 +35,14 @@
          <x>0</x>
          <y>0</y>
          <width>569</width>
-         <height>232</height>
+         <height>244</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
          <widget class="QTabWidget" name="inputChoice">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="file">
            <attribute name="title">
@@ -196,7 +196,7 @@
          <x>0</x>
          <y>0</y>
          <width>569</width>
-         <height>343</height>
+         <height>331</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -211,10 +211,10 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="properties"/>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="loPlotAndOptions" stretch="0,1">
             <item>
              <layout class="QHBoxLayout" name="loPreviewSelection">
