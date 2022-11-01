@@ -12,6 +12,134 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from mantid.api import AnalysisDataService as ADS
+from mantidqt.plotting.sample_shape_ads_observer import SampleShapePlotADSObserver
+from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
+
+
+class SampleShapePlot:
+
+    def __init__(self, ):
+        self.ads_observer = None
+        self.figure = None
+        self.workspace_name = None
+        self.plot_visible = None
+        # self.GFM_plot_number = None
+
+        self.GlobalFigureManager = GlobalFigureManager
+        # Register with CurrentFigure that we want to know of any
+        # changes to the list of plots
+        self.GlobalFigureManager.add_observer(self)
+
+    def notify(self, action, plot_number):
+        """
+        This is called by GlobalFigureManager when plots are created
+        or destroyed, renamed or the active order is changed. This
+        calls the presenter to update the plot list in the model and
+        the view.
+
+        IMPORTANT: Anything called here is not called from the main
+        GUI thread. Changes in the view must be wrapped in a
+        QAppThreadCall!
+
+        :param action: A FigureAction corresponding to the event
+        :param plot_number: The unique number in GlobalFigureManager
+        """
+        # if action == FigureAction.New:
+        #     self.GFM_plot_number = plot_number
+        if action == FigureAction.Closed:
+            self.reset_class()
+        if action == FigureAction.VisibilityChanged:
+            self.plot_visible = self.is_visible(plot_number)
+
+    def create_plot(self, workspace_name, figure=None):
+        self.workspace_name = workspace_name
+        sample_plotted = container_plotted = components_plotted = None
+        workspace = ADS.retrieve(workspace_name)
+        if figure:
+            axes = figure.gca()
+        else:
+            self.plot_visible = True
+            figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+
+        if workspace.sample():
+            sample_plotted = plot_sample_only(workspace, figure)
+        if workspace.sample().hasEnvironment():
+            container_plotted = plot_container(workspace, figure)
+            number_of_components = workspace.sample().getEnvironment().nelements()
+            if number_of_components > 1:
+                components_plotted = plot_components(workspace, figure)
+
+        add_title(sample_plotted, container_plotted, components_plotted, axes, workspace_name)
+        set_axes_to_largest_mesh(axes, workspace)
+        set_perspective(axes)
+        set_axes_labels(axes)
+        add_beam_arrow(axes, workspace)
+        if workspace.sample().hasOrientedLattice():
+            plot_lattice_vectors(axes, workspace)
+        if sample_plotted or container_plotted or components_plotted:
+            SampleShapePlot.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace,
+                                                                      self.on_rename_workspace,
+                                                                      self.on_clear, self.on_delete_workspace)
+            if self.plot_visible:
+                show_the_figure(figure)
+            figure.canvas.draw()
+            self.figure = figure
+            return figure
+
+    def reset_class(self):
+        self.figure = None
+        self.workspace_name = None
+        self.ads_observer = None
+
+    def is_visible(self, plot_number):
+        """
+        Determines if plot window is visible or hidden
+        :return: True if plot visible (window open), false if hidden
+        """
+        figure_manager = self.GlobalFigureManager.figs.get(plot_number)
+        if figure_manager is None:
+            raise ValueError('Error in is_visible, could not find a plot with the number {}.'.format(plot_number))
+
+        return figure_manager.window.isVisible()
+
+    def on_replace_workspace(self, workspace_name):
+        self.do_not_replace_plot_if_closed()
+
+        if self.workspace_name == workspace_name:
+            self.figure.gca().clear()
+            self.create_plot(workspace_name=self.workspace_name, figure=self.figure)
+
+    def do_not_replace_plot_if_closed(self):
+        plot_is_open = False
+        if self.figure:
+            for manager in GlobalFigureManager.figs.values():
+                if manager.canvas.figure == self.figure:
+                    plot_is_open = True
+
+        if not plot_is_open:
+            self.reset_class()
+
+    def on_rename_workspace(self, old_workspace_name, new_workspace_name):
+        if self.workspace_name == old_workspace_name:
+            self.workspace_name = new_workspace_name
+            plot_axes = self.figure.gca()
+            old_title = plot_axes.get_title()
+            new_title = old_title.replace(old_workspace_name, new_workspace_name)
+            plot_axes.set_title(new_title)
+
+    def on_delete_workspace(self, workspace_name):
+        if self.workspace_name == workspace_name:
+            GlobalFigureManager.destroy_fig(self.figure)
+            self.reset_class()
+
+    def on_clear(self):
+        GlobalFigureManager.destroy_fig(self.figure)
+        self.reset_class()
+
+
+def plot_sample_container_and_components(workspace_name):
+    new_plot = SampleShapePlot()
+    return new_plot.create_plot(workspace_name)
 
 
 def is_shape_valid(shape):
@@ -55,30 +183,6 @@ def get_valid_component_shape_from_workspace(workspace, component_index):
 def get_component_shape_from_workspace(workspace_with_components, component_index):
     if workspace_with_components.sample():
         return workspace_with_components.sample().getEnvironment().getComponent(component_index)
-
-
-def plot_sample_container_and_components(workspace_name):
-    sample_plotted = container_plotted = components_plotted = None
-    workspace = ADS.retrieve(workspace_name)
-    figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
-    if workspace.sample():
-        sample_plotted = plot_sample_only(workspace, figure)
-    if workspace.sample().hasEnvironment():
-        container_plotted = plot_container(workspace, figure)
-        number_of_components = workspace.sample().getEnvironment().nelements()
-        if number_of_components > 1:
-            components_plotted = plot_components(workspace, figure)
-
-    add_title(sample_plotted, container_plotted, components_plotted, axes, workspace_name)
-    set_axes_to_largest_mesh(axes, workspace)
-    set_perspective(axes)
-    set_axes_labels(axes)
-    add_beam_arrow(axes, workspace)
-    if workspace.sample().hasOrientedLattice():
-        plot_lattice_vectors(axes, workspace)
-    show_the_figure(figure)
-    if sample_plotted or container_plotted or components_plotted:
-        return figure
 
 
 def plot_sample_only(workspace, figure):
