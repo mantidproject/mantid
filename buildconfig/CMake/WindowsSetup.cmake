@@ -176,16 +176,6 @@ endif()
 # ######################################################################################################################
 set(PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging)
 
-configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY)
-# place it in the appropriate directory
-file(
-  GENERATE
-  OUTPUT ${MSVC_BIN_DIR}/mantidpython.bat
-  INPUT ${PROJECT_BINARY_DIR}/mantidpython.bat.in
-)
-
-configure_file(${PACKAGING_DIR}/mantidpython.bat.in ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY)
-
 # ######################################################################################################################
 # Custom targets to fix-up and run Python entry point code
 # ######################################################################################################################
@@ -196,11 +186,10 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   add_dependencies(SystemTests StandardTestData SystemTestData)
   set_target_properties(
     SystemTests
-    PROPERTIES
-      VS_DEBUGGER_COMMAND "${Python_EXECUTABLE}"
-      VS_DEBUGGER_COMMAND_ARGUMENTS
-      "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable \"${MSVC_BIN_DIR}/mantidpython.bat\" --exec-args \" --classic\""
-      VS_DEBUGGER_ENVIRONMENT "${MSVC_IDE_ENV}"
+    PROPERTIES VS_DEBUGGER_COMMAND "${Python_EXECUTABLE}"
+               VS_DEBUGGER_COMMAND_ARGUMENTS VS_DEBUGGER_ENVIRONMENT
+               "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable python3"
+               "${MSVC_IDE_ENV}"
   )
 endif()
 

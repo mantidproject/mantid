@@ -1,0 +1,2 @@
+- MantidPython and MantidNotebook have been removed. For help accessing the mantid algorithms and methods
+  in python and jupyter notebooks, check out the instructions in :ref:`PythonNotebook`.

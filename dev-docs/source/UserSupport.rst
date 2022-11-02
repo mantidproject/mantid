@@ -75,14 +75,14 @@ For a full release, ``C:\MantidInstall\`` is likely the correct install path. Ta
 
    .. code-block:: shell
 
-       C:\MantidInstall\bin\mantidpython.bat --classic
+       C:\MantidInstall\bin\python.exe
        import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
    .. code-block:: shell
 
-       C:\MantidInstall\bin\mantidpython.bat --classic
+       C:\MantidInstall\bin\python.exe
        import mantid.simpleapi
 
 6. Turn off **Server Checks**: Open ``C:\MantidInstall\bin\Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
@@ -148,14 +148,14 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
    .. code-block:: shell
 
-      /opt/Mantid/bin/mantidpython --classic
+      /opt/Mantid/bin/python3
       import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
    .. code-block:: shell
 
-      /opt/Mantid/bin/mantidpython --classic
+      /opt/Mantid/bin/python3
       import mantid.simpleapi
 
 6. Try renaming **Config Files**:
@@ -260,20 +260,20 @@ MacOS
    .. code-block:: shell
 
       cd /Applications/MantidWorkbench.app/Contents/MacOS
-      ../Resources/python -m workbench.app.main
+      ../Resources/bin/python -m workbench.app.main
 
 4. Does **Qt** import correctly?
 
    .. code-block:: shell
 
-      /Applications/MantidWorkbench.app/Contents/Resources/python
+      /Applications/MantidWorkbench.app/Contents/Resources/bin/python
       import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
    .. code-block:: shell
 
-       /Applications/MantidWorkbench.app/Contents/Resources/python
+       /Applications/MantidWorkbench.app/Contents/Resources/bin/python
        import mantid.simpleapi
 
 6. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
@@ -306,7 +306,7 @@ MacOS
 
    .. code-block:: shell
 
-      cd /Applications/MantidWorkbench.app/Contents/Resources/
+      cd /Applications/MantidWorkbench.app/Contents/Resources/bin/
       python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
