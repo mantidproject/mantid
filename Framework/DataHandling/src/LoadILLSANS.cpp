@@ -651,7 +651,8 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
   firstIndex++;
 
   if (m_instrumentName == "D16") {
-    HistogramData::Points points = HistogramData::Points(binning);
+    // the old D16 has 2 monitors, the second being empty but still needing a binning
+    points = HistogramData::Points(binning);
     m_localWorkspace->setPoints(firstIndex, points);
     firstIndex++;
   }
