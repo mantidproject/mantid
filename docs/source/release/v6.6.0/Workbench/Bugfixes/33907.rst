@@ -1,0 +1,1 @@
+- Fixed bug where marker labels became unattached when zooming and panning.
