@@ -29,8 +29,6 @@ void ALFCustomInstrumentPresenter::addInstrument() {
 }
 
 void ALFCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  CompositeFunction_sptr composite = m_model->getDefaultFunction();
-  m_analysisPane->addFunction(composite);
   m_view->setupAnalysisPane(m_analysisPane->getView());
 }
 
@@ -87,7 +85,7 @@ void ALFCustomInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
   const std::string WSName = m_model->WSName();
   m_analysisPane->addSpectrum(WSName);
-  m_analysisPane->updateEstimateAfterExtraction();
+  m_analysisPane->updateEstimateClicked();
 }
 
 void ALFCustomInstrumentPresenter::averageTube() {

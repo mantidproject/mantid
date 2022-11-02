@@ -65,18 +65,8 @@ public:
   }
 
   void test_setUpInstrumentAnalysisSplitter() {
-    CompositeFunction_sptr composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(
-        Mantid::API::FunctionFactory::Instance().createFunction("CompositeFunction"));
-
-    auto func = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
-    composite->addFunction(func);
-
-    EXPECT_CALL(*m_model, getDefaultFunction()).Times(1).WillOnce(Return(composite));
     EXPECT_CALL(*m_view, setupAnalysisPane(m_pane->getView())).Times(1);
-    // this function is called at start up -> count is 1
-    TS_ASSERT_EQUALS(m_pane->getAddCount(), 1);
     m_presenter->setUpInstrumentAnalysisSplitter();
-    TS_ASSERT_EQUALS(m_pane->getAddCount(), 2);
   }
 
   void test_loadSideEffects() {
@@ -136,7 +126,7 @@ public:
     EXPECT_CALL(*m_model, extractSingleTube()).Times(1);
     EXPECT_CALL(*m_model, WSName()).Times(1).WillOnce(Return("test"));
     EXPECT_CALL(*m_pane, addSpectrum("test")).Times(1);
-    EXPECT_CALL(*m_pane, updateEstimateAfterExtraction()).Times(1);
+    EXPECT_CALL(*m_pane, updateEstimateClicked()).Times(1);
     m_presenter->extractSingleTube();
   }
 

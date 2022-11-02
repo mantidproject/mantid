@@ -34,29 +34,19 @@ using namespace MantidQt::MantidWidgets;
 
 class MockPlotFitAnalysisPanePresenter : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter {
 public:
-  explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model) {
+  explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view, IPlotFitAnalysisPaneModel *model) {
     (void)model;
     (void)view;
-    m_addFunc = 0;
   };
   ~MockPlotFitAnalysisPanePresenter(){};
   MOCK_METHOD0(destructor, void());
   MOCK_METHOD0(getView, IPlotFitAnalysisPaneView *());
   MOCK_METHOD0(getCurrentWS, std::string());
   MOCK_METHOD0(clearCurrentWS, void());
-  MOCK_METHOD0(doFit, void());
-  MOCK_METHOD0(updateEstimateAfterExtraction, void());
-  MOCK_METHOD0(updateEstimate, void());
+  MOCK_METHOD0(peakCentreEditingFinished, void());
+  MOCK_METHOD0(fitClicked, void());
+  MOCK_METHOD0(updateEstimateClicked, void());
   MOCK_METHOD1(addSpectrum, void(const std::string &name));
-  // at runtime the cast is done, so mock it ourselves
-  void addFunction(IFunction_sptr func) override {
-    (void)func;
-    m_addFunc += 1;
-  };
-  int getAddCount() { return m_addFunc; };
-
-private:
-  int m_addFunc;
 };
 
 class MockPlotFitAnalysisPaneView : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView {
@@ -67,50 +57,30 @@ public:
     (void)parent;
   };
   ~MockPlotFitAnalysisPaneView(){};
+  MOCK_METHOD1(observePeakCentreLineEdit, void(Observer *listener));
   MOCK_METHOD1(observeFitButton, void(Observer *listener));
   MOCK_METHOD1(observeUpdateEstimateButton, void(Observer *listener));
   MOCK_METHOD0(getRange, std::pair<double, double>());
-  MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
   MOCK_METHOD1(addSpectrum, void(const std::string &name));
   MOCK_METHOD1(addFitSpectrum, void(const std::string &name));
-  MOCK_METHOD1(addFunction, void(Mantid::API::IFunction_sptr));
-  MOCK_METHOD1(updateFunction, void(const Mantid::API::IFunction_sptr));
   MOCK_METHOD1(displayWarning, void(const std::string &message));
 
   MOCK_METHOD0(getQWidget, QWidget *());
   MOCK_METHOD2(setupPlotFitSplitter, void(const double &start, const double &end));
   MOCK_METHOD2(createFitPane, QWidget *(const double &start, const double &end));
+
+  MOCK_METHOD1(setPeakCentre, void(const double centre));
+  MOCK_CONST_METHOD0(peakCentre, double());
+  MOCK_METHOD1(setPeakCentreStatus, void(const std::string &status));
 };
 
-class MockPlotFitAnalysisPaneModel : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel {
+class MockPlotFitAnalysisPaneModel : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneModel {
 public:
-  MockPlotFitAnalysisPaneModel() {
-    m_fitCount = 0;
-    m_estimateCount = 0;
-  };
+  MOCK_METHOD2(doFit, void(const std::string &wsName, const std::pair<double, double> &range));
+  MOCK_METHOD2(calculateEstimate, void(const std::string &workspaceName, const std::pair<double, double> &range));
 
-  ~MockPlotFitAnalysisPaneModel(){};
-  IFunction_sptr doFit(const std::string &wsName, const std::pair<double, double> &range,
-                       const IFunction_sptr func) override {
-    m_fitCount += 1;
-    (void)wsName;
-    (void)range;
-    return func;
-  };
+  MOCK_METHOD1(setPeakCentre, void(const double centre));
+  MOCK_CONST_METHOD0(peakCentre, double());
 
-  IFunction_sptr calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) override {
-    (void)workspaceName;
-    (void)range;
-    m_estimateCount += 1;
-    return FunctionFactory::Instance().createFunction("Gaussian");
-  };
-
-  bool hasEstimate() const override { return m_estimateCount > 0; };
-
-  int getFitCount() { return m_fitCount; };
-  int getEstimateCount() { return m_estimateCount; };
-
-private:
-  int m_fitCount;
-  int m_estimateCount;
+  MOCK_CONST_METHOD0(fitStatus, std::string());
 };
