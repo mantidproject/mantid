@@ -451,6 +451,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             while self.rectangle_fit_on_image(seed, new_width, new_height) and current_number <= limit:
                 self._draw_rectangle((seed[0] - new_width / 2, seed[1] - new_height / 2), new_width, new_height)
                 seed += offset
+                current_number += 1
 
         first_center = 2 * center_1 - center_0
         move(first_center, center_1 - center_0)
