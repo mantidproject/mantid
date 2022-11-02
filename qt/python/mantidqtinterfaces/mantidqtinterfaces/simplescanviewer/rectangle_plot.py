@@ -78,8 +78,6 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             point, width, height = self._snap_to_edges(click_event_pos, release_event_pos)
             self._move_selected_rectangle(point, width, height)
 
-        self._update_plot_values()
-
     def _determine_behaviour(self, click_event: MouseEvent, release_event: MouseEvent) -> UserInteraction:
         """
         Determine if the user drew another rectangle, moved the currently selected one, changed it, or deselected.
@@ -237,6 +235,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         self._manager.add_rectangle(rectangle_patch)
         peak = self._find_peak(self.current_rectangle)
         self._show_peak(self.current_rectangle, peak)
+        self._update_plot_values()
 
     def _move_selected_rectangle(self, new_point: tuple, new_width: float, new_height: float):
         """
@@ -249,6 +248,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         peak = self._find_peak(self.current_rectangle)
         self._show_peak(self.current_rectangle, peak)
         self.signals.sig_current_updated.emit()
+        self._update_plot_values()
 
     def _on_controller_updated(self, rectangle_patch: Rectangle):
         """
@@ -258,8 +258,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         new_x0, new_y0 = rectangle_patch.get_xy()
         new_x1 = new_x0 + rectangle_patch.get_width()
         new_y1 = new_y0 + rectangle_patch.get_height()
-        peak = self._find_peak(rectangle_patch)
+        self._update_plot_values()
 
+        peak = self._find_peak(rectangle_patch)
         self._show_peak(rectangle_patch, peak)
 
         if self.current_rectangle == rectangle_patch:
