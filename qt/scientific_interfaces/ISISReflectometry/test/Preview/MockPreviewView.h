@@ -31,7 +31,7 @@ public:
   MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
   MOCK_METHOD(void, setInstViewSelectRectMode, (), (override));
   MOCK_METHOD(void, setInstViewToolbarEnabled, (bool), (override));
-  MOCK_METHOD(void, setRegionSelectorToolbarEnabled, (bool), (override));
+  MOCK_METHOD(void, setRegionSelectorEnabled, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomMode, (), (override));
   MOCK_METHOD(void, setInstViewEditMode, (), (override));
   MOCK_METHOD(void, setRectangularROIState, (bool), (override));

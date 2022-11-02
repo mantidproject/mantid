@@ -163,11 +163,7 @@ void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_rect_select_button->setEnabled(enable);
 }
 
-void QtPreviewView::setRegionSelectorToolbarEnabled(bool enable) {
-  m_ui.rs_ads_export_button->setEnabled(enable);
-  m_ui.rs_edit_button->setEnabled(enable);
-  m_ui.rs_rect_select_button->setEnabled(enable);
-}
+void QtPreviewView::setRegionSelectorEnabled(bool enable) { m_ui.rsPlotLayoutWidget->setEnabled(enable); }
 
 void QtPreviewView::setAngle(double angle) {
   m_ui.angle_spin_box->blockSignals(true);
