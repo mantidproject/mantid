@@ -10,20 +10,12 @@
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
-#include <functional>
-#include <qobject.h>
-#include <tuple>
-
-#include <iostream>
-
 namespace MantidQt::MantidWidgets {
 
 BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view,
-                                                             IBaseCustomInstrumentModel *model,
-                                                             IPlotFitAnalysisPanePresenter *analysisPanePresenter)
-    : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""), m_loadRunObserver(nullptr),
-      m_analysisPanePresenter(analysisPanePresenter) {
-  m_loadRunObserver = new VoidObserver();
+                                                             IBaseCustomInstrumentModel *model)
+    : m_view(view), m_model(model), m_currentRun(0), m_currentFile("") {
+  m_view->subscribePresenter(this);
   m_model->loadEmptyInstrument();
 }
 
@@ -32,19 +24,15 @@ void BaseCustomInstrumentPresenter::addInstrument() {
   initLayout(setUp);
 }
 
-void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
-  // connect to new run
-  m_view->observeLoadRun(m_loadRunObserver);
-  std::function<void()> loadBinder = std::bind(&BaseCustomInstrumentPresenter::loadRunNumber, this);
-  m_loadRunObserver->setSlot(loadBinder);
-  initInstrument(setUp);
-  setUpInstrumentAnalysisSplitter();
-  m_view->setupHelp();
+QWidget *BaseCustomInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
+
+MantidWidgets::InstrumentWidget *BaseCustomInstrumentPresenter::getInstrumentView() {
+  return m_view->getInstrumentView();
 }
 
-void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  auto paneView = m_analysisPanePresenter->getView();
-  m_view->setupInstrumentAnalysisSplitters(paneView->getQWidget());
+void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
+  initInstrument(setUp);
+  m_view->setupHelp();
 }
 
 void BaseCustomInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
@@ -61,7 +49,6 @@ void BaseCustomInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun
     // make displayed run number be in sinc
     m_view->setRunQuietly(std::to_string(m_currentRun));
     m_model->setCurrentRun(m_currentRun);
-    loadSideEffects();
   } catch (...) {
     m_view->setRunQuietly(std::to_string(m_currentRun));
     m_model->setCurrentRun(m_currentRun);

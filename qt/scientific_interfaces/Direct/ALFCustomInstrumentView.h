@@ -27,7 +27,6 @@ public:
   virtual void observeExtractSingleTube(Observer *listner) = 0;
   virtual void observeAverageTube(Observer *listner) = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
-  virtual void setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFCustomInstrumentView : public MantidWidgets::BaseCustomInstrumentView,
@@ -43,7 +42,6 @@ public:
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override final;
   void addSpectrum(const std::string &wsName) override final;
-  void setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) override final;
 
 public slots:
   void selectWholeTube();

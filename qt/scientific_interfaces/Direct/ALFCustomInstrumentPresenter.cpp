@@ -16,23 +16,21 @@
 namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view,
-                                                           IALFCustomInstrumentModel *model,
-                                                           MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane)
-    : BaseCustomInstrumentPresenter(view, model, analysisPane), m_view(view), m_model(model),
-      m_analysisPane(analysisPane), m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
+                                                           IALFCustomInstrumentModel *model)
+    : BaseCustomInstrumentPresenter(view, model), m_view(view), m_model(model), m_extractSingleTubeObserver(nullptr),
+      m_averageTubeObserver(nullptr) {
   addInstrument();
+}
+
+void ALFCustomInstrumentPresenter::subscribeAnalysisPresenter(
+    MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) {
+  m_analysisPresenter = presenter;
 }
 
 void ALFCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupALFInstrument();
   initLayout(&setUp);
 }
-
-void ALFCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  m_view->setupAnalysisPane(m_analysisPane->getView());
-}
-
-void ALFCustomInstrumentPresenter::loadSideEffects() { m_analysisPane->clearCurrentWS(); }
 
 using instrumentSetUp = std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>>;
 using instrumentObserverOptions = std::vector<std::tuple<std::string, Observer *>>;
@@ -84,14 +82,14 @@ std::pair<instrumentSetUp, instrumentObserverOptions> ALFCustomInstrumentPresent
 void ALFCustomInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
   const std::string WSName = m_model->WSName();
-  m_analysisPane->addSpectrum(WSName);
-  m_analysisPane->updateEstimateClicked();
+  m_analysisPresenter->addSpectrum(WSName);
+  m_analysisPresenter->updateEstimateClicked();
 }
 
 void ALFCustomInstrumentPresenter::averageTube() {
   m_model->averageTube();
   const std::string WSName = m_model->WSName();
-  m_analysisPane->addSpectrum(WSName);
+  m_analysisPresenter->addSpectrum(WSName);
 }
 
 } // namespace MantidQt::CustomInterfaces

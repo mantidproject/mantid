@@ -5,9 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-// change to BaseCustomInstrumentView etc.
+
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
@@ -17,10 +19,14 @@
 namespace MantidQt::MantidWidgets {
 
 BaseCustomInstrumentView::BaseCustomInstrumentView(const std::string &instrument, QWidget *parent)
-    : QSplitter(Qt::Vertical, parent), m_helpPage(""), m_loadRunObservable(nullptr), m_files(nullptr),
+    : QSplitter(Qt::Vertical, parent), m_helpPage(""), m_files(nullptr),
       m_instrument(QString::fromStdString(instrument)), m_instrumentWidget(nullptr), m_help(nullptr) {
   auto loadWidget = generateLoadWidget();
   this->addWidget(loadWidget);
+}
+
+void BaseCustomInstrumentView::subscribePresenter(MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *presenter) {
+  m_presenter = presenter;
 }
 
 void BaseCustomInstrumentView::setUpInstrument(
@@ -33,8 +39,6 @@ void BaseCustomInstrumentView::setUpInstrument(
 }
 
 QWidget *BaseCustomInstrumentView::generateLoadWidget() {
-  m_loadRunObservable = new Observable();
-
   m_files = new API::FileFinderWidget(this);
   m_files->setLabelText(m_instrument);
   m_files->allowMultipleFiles(false);
@@ -50,13 +54,6 @@ QWidget *BaseCustomInstrumentView::generateLoadWidget() {
   loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   return loadWidget;
-}
-
-void BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(QWidget *analysisPane) {
-  auto *split = new QSplitter(Qt::Horizontal);
-  split->addWidget(m_instrumentWidget);
-  split->addWidget(analysisPane);
-  this->addWidget(split);
 }
 
 void BaseCustomInstrumentView::setupHelp() {
@@ -97,7 +94,7 @@ void BaseCustomInstrumentView::fileLoaded() {
     warningBox(m_files->getFileProblem());
     return;
   }
-  m_loadRunObservable->notify();
+  m_presenter->loadRunNumber();
 }
 
 void BaseCustomInstrumentView::warningBox(const std::string &message) { warningBox(QString::fromStdString(message)); }

@@ -12,8 +12,9 @@
 namespace MantidQt::MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
-                                                           IPlotFitAnalysisPaneModel *model)
-    : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
+                                                           std::unique_ptr<IPlotFitAnalysisPaneModel> model)
+    : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(std::move(model)),
+      m_currentName("") {
 
   m_peakCentreObserver = new VoidObserver();
   m_fitObserver = new VoidObserver();

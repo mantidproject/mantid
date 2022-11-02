@@ -5,32 +5,38 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
-#include "ALFCustomInstrumentModel.h"
-#include "ALFCustomInstrumentPresenter.h"
 
+#include "ALFCustomInstrumentModel.h"
+#include "ALFCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-
-#include <tuple>
 
 namespace MantidQt::CustomInterfaces {
 
 DECLARE_SUBWINDOW(ALFView)
 
-/// static logger
-Mantid::Kernel::Logger g_log("ALFView");
-
-ALFView::ALFView(QWidget *parent)
-    : UserSubWindow(parent), m_view(nullptr), m_presenter(nullptr), m_analysisPane(nullptr) {
+ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
   this->setWindowTitle("ALF View");
-  m_model = new ALFCustomInstrumentModel();
-  m_view = new ALFCustomInstrumentView(m_model->getInstrument(), this);
-  auto analysisView = new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, m_view);
-  auto analysisModel = new MantidWidgets::PlotFitAnalysisPaneModel();
-  m_analysisPane = new MantidWidgets::PlotFitAnalysisPanePresenter(analysisView, analysisModel);
 
-  m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model, m_analysisPane);
+  m_instrumentModel = std::make_unique<ALFCustomInstrumentModel>();
+  m_instrumentPresenter = std::make_unique<ALFCustomInstrumentPresenter>(
+      new ALFCustomInstrumentView(m_instrumentModel->getInstrument(), this), m_instrumentModel.get());
+
+  m_analysisPresenter = std::make_unique<MantidWidgets::PlotFitAnalysisPanePresenter>(
+      new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, this),
+      std::make_unique<MantidWidgets::PlotFitAnalysisPaneModel>());
+
+  m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
-void ALFView::initLayout() { this->setCentralWidget(m_view); }
+
+void ALFView::initLayout() {
+  auto widg = new QSplitter(Qt::Vertical);
+  auto *split = new QSplitter(Qt::Horizontal);
+  split->addWidget(m_instrumentPresenter->getInstrumentView());
+  split->addWidget(m_analysisPresenter->getView());
+  widg->addWidget(m_instrumentPresenter->getLoadWidget());
+  widg->addWidget(split);
+  this->setCentralWidget(widg);
+}
 
 } // namespace MantidQt::CustomInterfaces

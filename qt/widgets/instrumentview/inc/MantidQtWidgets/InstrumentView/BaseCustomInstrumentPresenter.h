@@ -9,7 +9,6 @@
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <string>
 
@@ -20,32 +19,27 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter : public 
   Q_OBJECT
 
 public:
-  BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
-                                IPlotFitAnalysisPanePresenter *analysisView);
-  ~BaseCustomInstrumentPresenter() { delete m_loadRunObserver; };
+  BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model);
 
   typedef std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>> instrumentSetUp;
   typedef std::vector<std::tuple<std::string, Observer *>> instrumentObserverOptions;
 
+  QWidget *getLoadWidget();
+  MantidWidgets::InstrumentWidget *getInstrumentView();
   virtual void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
   virtual void addInstrument();
 
-protected slots:
   virtual void loadRunNumber();
 
 protected:
-  virtual void loadSideEffects(){};
   virtual void loadAndAnalysis(const std::string &run);
   virtual void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
-  virtual void setUpInstrumentAnalysisSplitter();
   virtual std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() { return nullptr; };
 
   IBaseCustomInstrumentView *m_view;
   IBaseCustomInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
-  VoidObserver *m_loadRunObserver;
-  IPlotFitAnalysisPanePresenter *m_analysisPanePresenter;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

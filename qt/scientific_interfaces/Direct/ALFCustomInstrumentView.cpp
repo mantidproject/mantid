@@ -80,13 +80,6 @@ void ALFCustomInstrumentView::addObserver(std::tuple<std::string, Observer *> &l
   }
 }
 
-void ALFCustomInstrumentView::setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) {
-  // keep a copy here so we can use a custom class
-  m_analysisPane = analysis;
-  // just adds it to the view
-  BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis->getQWidget());
-}
-
 void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(wsName); }
 
 } // namespace MantidQt::CustomInterfaces
