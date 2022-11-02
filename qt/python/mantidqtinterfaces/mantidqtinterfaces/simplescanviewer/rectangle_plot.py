@@ -382,7 +382,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
         elif len(rectangles) == 2:
             self._place_interpolate_linear()
         else:
-            logger.warning("Cannot place more peak regions : current number of regions invalid "
+            logger.warning("Cannot place more regions of interest: current number of regions invalid "
                            "(1 or 2 expected, {} found)".format(len(rectangles)))
             return
 
@@ -391,18 +391,35 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
     def _place_interpolate_linear(self):
         """
         Interpolate linearly the positions and shapes of the 2 provided rectangles to place estimated ROI of peaks.
+        If only one has been drawn, the origin of the plot is used as the other one.
         """
         rectangles = self.get_rectangles()
 
-        if len(rectangles) == 2:
-            rect_0, rect_1 = rectangles
-            new_height = (rect_0.get_height() + rect_1.get_height()) / 2
-            new_width = (rect_0.get_width() + rect_1.get_width()) / 2
-            center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
-            center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
+        # we don't handle cases apart from these two
+        if len(rectangles) != 1 and len(rectangles) != 2:
+            return
 
-        else:
-            # normally, there is only one rectangle in this case
+        def two_same_rectangles(rect: list) -> bool:
+            """
+            Check if two rectangle patches are the (almost) the same
+            @param rect: a pair of rectangle patches
+            @return whether those 2 patches are the same within an epsilon
+            """
+            if len(rect) != 2:
+                return False
+            rect0, rect1 = rect
+
+            return (self.is_almost_equal(rect0.get_x() + rect0.get_width() / 2, rect1.get_x() + rect1.get_width() / 2)
+                    and self.is_almost_equal(rect0.get_y() + rect0.get_height() / 2, rect1.get_y() + rect1.get_height() / 2)
+                    and self.is_almost_equal(abs(rect0.get_width()), abs(rect1.get_width()))
+                    and self.is_almost_equal(abs(rect0.get_height()), abs(rect1.get_height())))
+
+        if len(rectangles) == 1 or two_same_rectangles(rectangles):
+
+            if len(rectangles) != 1:
+                logger.notice("The 2 regions of interest are superposed. Proceeding as if there was only one.")
+
+            # there is only one relevant rectangle in this case
             rect_0 = rectangles[0]
 
             new_height = rect_0.get_height()
@@ -410,7 +427,17 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
 
             peak = self._find_peak(rectangles[0])
             center_0 = np.array(peak)
+
+            # we act as if there was a second rectangle with the same size center around (0, 0)
             center_1 = np.array((0, 0))
+
+        else:
+            # there are two rectangles,a nd we use them both to decide where to place the new ones
+            rect_0, rect_1 = rectangles
+            new_height = (rect_0.get_height() + rect_1.get_height()) / 2
+            new_width = (rect_0.get_width() + rect_1.get_width()) / 2
+            center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
+            center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
 
         def move(seed: np.array, offset: np.array):
             """
