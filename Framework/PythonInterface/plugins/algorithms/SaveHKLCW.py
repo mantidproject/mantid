@@ -70,15 +70,22 @@ class SaveHKLCW(PythonAlgorithm):
 
             if directionCosines:
                 U = peak_ws.sample().getOrientedLattice().getU()
+                B = peak_ws.sample().getOrientedLattice().getU()
                 for p in peak_ws:
-                    ki_n = p.getReferenceFrame().vecPointingAlongBeam()
                     R = p.getGoniometerMatrix()
                     RU = np.dot(R, U)
-                    ki = ki_n * (2 * np.pi / p.getWavelength())
-                    kf_n = ki - p.getQLabFrame()  # direction of scattered wavevector
-                    kf_n = kf_n * (1. / kf_n.norm())
-                    dir_cos_1 = np.dot(RU.T, -ki_n)  # notice ki direction is reversed
-                    dir_cos_2 = np.dot(RU.T, kf_n)
+                    two_theta = p.getScattering()
+                    az_phi = p.getAzimuthal()
+                    t1 = B[:,0].copy()
+                    t2 = B[:,1].copy()
+                    t3 = B[:,2].copy()
+                    t1 /= np.linalg.norm(t1)
+                    t2 /= np.linalg.norm(t2)
+                    t3 /= np.linalg.norm(t3)
+                    up = np.dot(RU.T, [0,0,-1])
+                    us = np.dot(RU.T, [np.sin(two_theta)*np.cos(az_phi),np.sin(two_theta)*np.sin(az_phi),np.cos(two_theta)])
+                    dir_cos_1 = np.dot(up,t1), np.dot(up,t2), np.dot(up,t3)
+                    dir_cos_2 = np.dot(us,t1), np.dot(us,t2), np.dot(us,t3)
                     f.write(
                         "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n"
                         .format(p.getH(), p.getK(), p.getL(), p.getIntensity(),
