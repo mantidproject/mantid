@@ -68,6 +68,26 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   double avgPos = getPhi(pos);
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
+
+void cloneWorkspace(const std::string &inputWorkspace, const std::string &outputWorkspace) {
+  auto cloneAlgorithm = AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneAlgorithm->initialize();
+  cloneAlgorithm->setProperty("InputWorkspace", inputWorkspace);
+  cloneAlgorithm->setProperty("OutputWorkspace", outputWorkspace);
+  cloneAlgorithm->execute();
+}
+
+void rebin(const std::string &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
+           const bool reverseLogarithmic, const std::string &outputWorkspace) {
+  auto rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
+  rebinAlgorithm->setProperty("InputWorkspace", inputWorkspace);
+  rebinAlgorithm->setProperty("Params", rebinString);
+  rebinAlgorithm->setProperty("PreserveEvents", preserveEvents);
+  rebinAlgorithm->setProperty("UseReverseLogarithmic", reverseLogarithmic);
+  rebinAlgorithm->setProperty("OutputWorkspace", outputWorkspace);
+  rebinAlgorithm->execute();
+}
+
 } // namespace
 
 /**
@@ -849,16 +869,18 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
+  auto workspaceName = m_instrWidget->getWorkspaceNameStdString();
+  auto originalWorkspace = "__original_" + workspaceName;
+
+  if (!Mantid::API::AnalysisDataService::Instance().doesExist(originalWorkspace)) {
+    cloneWorkspace(workspaceName, originalWorkspace);
+  }
+
   try {
-    auto alg = AlgorithmManager::Instance().create("Rebin");
-    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("Params", m_rebinParams->text().toStdString());
-    alg->setProperty("PreserveEvents", !m_rebinSaveToHisto->isChecked());
-    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
-    alg->execute();
-  } catch (std::exception &e) {
-    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+    rebin(originalWorkspace, m_rebinParams->text().toStdString(), !m_rebinSaveToHisto->isChecked(),
+          m_rebinUseReverseLog->isChecked(), workspaceName);
+  } catch (const std::exception &ex) {
+    QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
   }
 }
 
