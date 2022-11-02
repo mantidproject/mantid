@@ -55,16 +55,16 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         shutil.rmtree(cls._test_dir)
 
     def test_integrate_on_edge_option(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                           IntegrateIfOnEdge=False, OutputWorkspace='out0')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=False, OutputWorkspace='out0')
         # check peaks in bank 1 were not integrated (mask touches edge)
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_false_update_peak_position_false(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out1')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out1')
         # check intensity of first peak (only valid peak)
         ipk = 0
         pk = out.getPeak(ipk)
@@ -99,9 +99,9 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 12.7636, delta=1e-3)
 
     def test_integrate_use_nearest_peak_true_update_peak_position_false(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=True, UpdatePeakPosition=False,
-                                 OutputWorkspace='out2')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=True,
+                                 UpdatePeakPosition=False, OutputWorkspace='out2')
         # check intensity/sigma of first two peaks equal (same peak integrated)
         # note intensity will be different due to lorz factor as position not updated
         for ipk in range(2):
@@ -114,9 +114,9 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         self.assertEqual(out.getPeak(out.getNumberPeaks()-1).getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_true_update_peak_position_true(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=True, UpdatePeakPosition=True,
-                                 OutputWorkspace='out3')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=True,
+                                 UpdatePeakPosition=True, OutputWorkspace='out3')
         # check intensity/sigma of first two peaks equal (same peak integrated)
         # note intensity will be same now as peak position updated
         for ipk in range(2):
@@ -135,45 +135,46 @@ class IntegratePeaksSkewTest(unittest.TestCase):
 
     def test_print_output_file(self):
         out_file = path.join(self._test_dir, 'out.pdf')
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=False, OutputWorkspace='out4', OutputFile=out_file)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=False, OutputWorkspace='out4',
+                                 OutputFile=out_file)
         # check output file saved
         self.assertTrue(path.exists(out_file))
 
     def test_peak_mask_validation_with_ncol_max(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out5', NColMax=2)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out5', NColMax=2)
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
 
     def test_peak_min_number_tof_bins(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out5', NTOFBinsMin=10)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False,OutputWorkspace='out5', NTOFBinsMin=10)
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
 
     def test_peak_mask_validation_with_ncol_max(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out6', NColMax=3)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out6', NColMax=3)
         self.assertEqual(out.getPeak(0).getIntensityOverSigma(), 0)
         # increase ncol to accept peak mask
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out6', NColMax=4)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out6', NColMax=4)
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
 
     def test_peak_mask_validation_with_nrow_max(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out7', NRowMax=2)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out7', NRowMax=2)
         self.assertEqual(out.getPeak(0).getIntensityOverSigma(), 0)
         # increase nrow to accept peak mask
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out7', NRowMax=3)
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out7', NRowMax=3)
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
 
     def test_peak_mask_validation_with_nvacancies(self):
@@ -187,38 +188,40 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             ws_clone.setE(ispec, ws_clone.readE(0))
 
         # check vacancy with 1 pixel detected (and first peak therefore not integrated)
-        out = IntegratePeaksSkew(InputWorkspace=ws_clone, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out8', NVacanciesMax=0, NPixPerVacancyMin=1)
+        out = IntegratePeaksSkew(InputWorkspace=ws_clone, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out8', NVacanciesMax=0, NPixPerVacancyMin=1)
         self.assertEqual(out.getPeak(0).getIntensityOverSigma(), 0)
 
         # set npix per vacancies > 1 (should now integrate first peak)
-        out = IntegratePeaksSkew(InputWorkspace=ws_clone, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out8', NVacanciesMax=0, NPixPerVacancyMin=2)
+        out = IntegratePeaksSkew(InputWorkspace=ws_clone, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out8', NVacanciesMax=0, NPixPerVacancyMin=2)
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
 
         # set nvacancies > 1 (should now integrate first peak)
-        out = IntegratePeaksSkew(InputWorkspace=ws_clone, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 OutputWorkspace='out8', NVacanciesMax=1, NPixPerVacancyMin=1)
+        out = IntegratePeaksSkew(InputWorkspace=ws_clone, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, OutputWorkspace='out8', NVacanciesMax=1, NPixPerVacancyMin=1)
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
 
     def test_integration_with_non_square_window_nrows_ncols(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 NRows=5, NCols=3, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
-                                 UpdatePeakPosition=False, OutputWorkspace='out8')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, NRows=5, NCols=3, NRowMax=3, NColMax=3,
+                                 IntegrateIfOnEdge=True, UseNearestPeak=True, UpdatePeakPosition=False,
+                                 OutputWorkspace='out8')
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 10.84209, delta=1e-4)
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 NRows=3, NCols=5, NRowMax=3, NColMax=3, IntegrateIfOnEdge=True, UseNearestPeak=True,
-                                 NPixMin=1, UpdatePeakPosition=False, OutputWorkspace='out9')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, NRows=3, NCols=5, NRowMax=3, NColMax=3,
+                                 IntegrateIfOnEdge=True, UseNearestPeak=True, NPixMin=1, UpdatePeakPosition=False,
+                                 OutputWorkspace='out9')
         self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 5.46125, delta=1e-4)  # only one pixel in peak
 
     def test_lorentz_correction_false(self):
-        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, FractionalTOFWindow=0.3,
-                                 IntegrateIfOnEdge=True, UseNearestPeak=False, UpdatePeakPosition=False,
-                                 LorentzCorrection=False, OutputWorkspace='out10')
+        out = IntegratePeaksSkew(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, ThetaWidth=0,
+                                 BackscatteringTOFResolution=0.3, IntegrateIfOnEdge=True, UseNearestPeak=False,
+                                 UpdatePeakPosition=False, LorentzCorrection=False, OutputWorkspace='out10')
         # check intensity of first peak (only valid peak)
         pk = out.getPeak(0)
         self.assertAlmostEqual(pk.getIntensity(), 224, delta=1e-2)

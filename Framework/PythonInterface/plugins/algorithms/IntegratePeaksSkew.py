@@ -8,7 +8,7 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress, Matr
                         IPeaksWorkspaceProperty, FileProperty, FileAction, WorkspaceUnitValidator,
                         FunctionFactory)
 from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty,
-                           PropertyCriterion, logger, LogicOperator)
+                           PropertyCriterion, logger)
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.ndimage import label
@@ -582,9 +582,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=3),
                              doc="Number of column components in the window around a peak on the detector. "
                                  "For WISH column components correspond to tubes.")
-        self.declareProperty(name='FractionalTOFWindow', defaultValue=0.0, direction=Direction.Input,
-                             validator=FloatBoundedValidator(lower=0.0, upper=1.0),
-                             doc="dTOF/TOF window best chosen from forward-scattering bank with worst resolution.")
         self.declareProperty(name="BackscatteringTOFResolution", defaultValue=self.DEFAULT_FRAC_TOF_WINDOW,
                              direction=Direction.Input, validator=FloatBoundedValidator(lower=0, upper=1.0),
                              doc="dTOF/TOF of window for peaks at back-scattering (resolution dominated by moderator "
@@ -593,7 +590,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.declareProperty(name="ThetaWidth", defaultValue=0.1, direction=Direction.Input,
                              validator=FloatBoundedValidator(lower=0),
                              doc="dTheta resolution in degrees (estimated from width at forward scattering minus "
-                                 "contribution from moderator, dT0/T0, and path length dL/L).")
+                                 "contribution from moderator, dT0/T0, and path length dL/L). To use a constant "
+                                 "fractional TOF width for all peaks set ThetaWidth = 0.")
         self.declareProperty(name="ScaleThetaWidthByWavelength", defaultValue=False, direction=Direction.Input,
                              doc="If true the ThetaWidth will be multiplied by the wavelength of a peak. If the "
                                  "ThetaWidth is dominated by the beam divergence, which is proportional to "
@@ -602,14 +600,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                              doc="If true the TOF window will be taken to be 4xFWHM of the BackToBackExponential peak"
                                  "at that position (evaluated using coefficients defined in the instrument "
                                  "Parameters.xml file.")
-        non_const_frac_window = EnabledWhenProperty('FractionalTOFWindow', PropertyCriterion.IsEqualTo, "0")
         not_use_B2B_exp_params = EnabledWhenProperty('GetTOFWindowFromBackToBackParams', PropertyCriterion.IsDefault)
-        condition_to_use_resn = EnabledWhenProperty(non_const_frac_window, not_use_B2B_exp_params, LogicOperator.And)
-        self.setPropertySettings("BackscatteringTOFResolution", condition_to_use_resn)
-        self.setPropertySettings("ThetaWidth", condition_to_use_resn)
-        self.setPropertySettings("ScaleThetaWidthByWavelength", condition_to_use_resn)
-        self.setPropertySettings("GetTOFWindowFromBackToBackParams", non_const_frac_window)
-        self.setPropertySettings("FractionalTOFWindow", not_use_B2B_exp_params)
+        self.setPropertySettings("BackscatteringTOFResolution", not_use_B2B_exp_params)
+        self.setPropertySettings("ThetaWidth", not_use_B2B_exp_params)
+        self.setPropertySettings("ScaleThetaWidthByWavelength", not_use_B2B_exp_params)
         self.declareProperty(name="OptimiseMask", defaultValue=False, direction=Direction.Input,
                              doc="Redo peak mask using optimal TOF window discovered (the original mask is found from "
                                  "the integrated intensity over a TOF window determined from the resolution "
@@ -618,7 +612,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "accurate.")
         self.setPropertyGroup("NRows", "Integration Window Parameters")
         self.setPropertyGroup("NCols", "Integration Window Parameters")
-        self.setPropertyGroup('FractionalTOFWindow', "Integration Window Parameters")
         self.setPropertyGroup("BackscatteringTOFResolution", "Integration Window Parameters")
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
         self.setPropertyGroup("ScaleThetaWidthByWavelength", "Integration Window Parameters")
@@ -698,7 +691,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # check peak size limits are consistent with window size
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
-        # check wondow dimensions are odd
+        # check window dimensions are odd
         if not nrows % 2:
             issues["NRows"] = "NRows must be an odd number."
         if not ncols % 2:
@@ -726,7 +719,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         pk_ws = self.getProperty("PeaksWorkspace").value
         # peak window parameters
-        frac_tof_window = self.getProperty('FractionalTOFWindow').value
         dt0_over_t0 = self.getProperty("BackscatteringTOFResolution").value
         dth = np.radians(self.getProperty("ThetaWidth").value)
         scale_dth = self.getProperty("ScaleThetaWidthByWavelength").value
@@ -794,9 +786,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 if dTOF is None:
                     logger.warning(f'No back to back exponential parameters found for peak {ipk} - a default value of'
                                    f'the fractional TOF width will be used ({self.DEFAULT_FRAC_TOF_WINDOW}).')
-                    dTOF = self.calc_initial_dTOF(pk, self.DEFAULT_FRAC_TOF_WINDOW, 0, 0, False)
+                    dTOF = self.calc_initial_dTOF(pk, self.DEFAULT_FRAC_TOF_WINDOW, dth=0, scale_dth=False)
             else:
-                dTOF = self.calc_initial_dTOF(pk, frac_tof_window, dt0_over_t0, dth, scale_dth)
+                dTOF = self.calc_initial_dTOF(pk, dt0_over_t0, dth, scale_dth)
             peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
             peak_data.integrate_peak(use_nearest, integrate_on_edge, optimise_mask, npk_min, density_min, nrow_max,
                                      ncol_max, min_npixels_per_vacancy, max_nvacancies, min_nbins)
@@ -908,16 +900,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         return medslope, medinter
 
     @staticmethod
-    def calc_initial_dTOF(pk, frac_tof_window, dt0_over_t0, dth, scale_dth):
-        wl = pk.getWavelength()
-        tof = pk.getTOF()
-        # get TOF window using resolution parameters
-        if frac_tof_window > 0:
-            dTOF = tof * frac_tof_window
-        else:
-            dth_pk = dth * wl if scale_dth else dth
-            dTOF = tof * np.sqrt(dt0_over_t0 ** 2 + (dth_pk / np.tan(pk.getScattering() / 2)) ** 2)
-        return dTOF
+    def calc_initial_dTOF(pk, dt0_over_t0, dth, scale_dth):
+        dth_pk = dth * pk.getWavelength() if scale_dth else dth
+        return pk.getTOF() * np.sqrt(dt0_over_t0 ** 2 + (dth_pk / np.tan(pk.getScattering() / 2)) ** 2)
 
     @staticmethod
     def get_initial_dTOF_from_back_to_back_params(pk, ws, detid):
