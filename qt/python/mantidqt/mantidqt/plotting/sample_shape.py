@@ -55,7 +55,7 @@ class SampleShapePlot:
             axes = figure.gca()
         else:
             self.plot_visible = True
-            figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+            figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d', 'proj_type': 'ortho'})
 
         sample_plotted = plot_sample_only(workspace, figure)
         if workspace.sample().hasEnvironment():
