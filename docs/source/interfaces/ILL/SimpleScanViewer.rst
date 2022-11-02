@@ -74,5 +74,6 @@ A number of keyboard shortcuts are provided to interact with the data and the RO
       the beam and does not contain data.
     * if there are 2 ROIs, it simply linearly interpolates from these two to place more ROIs. Their size is the mean of
       the original ROIs.
+    * if there are more than 2 ROIs, no linear interpolation can take place and an error message is thrown.
 
 .. categories:: Interfaces
