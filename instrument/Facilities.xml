@@ -705,8 +705,6 @@
 
   <instrument name="D16">
     <technique>SANS</technique>
-    <acquisition>Count</acquisition>
-    <attribute>2D</attribute>
   </instrument>
 
   <instrument name="D16B">
@@ -715,30 +713,22 @@
 
   <instrument name="D22">
     <technique>SANS</technique>
-    <acquisition>Count</acquisition>
   </instrument>
 
   <instrument name="D33">
     <technique>SANS</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>TOFCount</acquisition>
-    <attribute>2D</attribute>
   </instrument>
 
   <instrument name="D2B">
     <technique>PowderDiffraction</technique>
-    <acquisition>DetectorScan</acquisition>
   </instrument>
 
   <instrument name="D20">
     <technique>PowderDiffraction</technique>
-    <acquisition>Count</acquisition>
-    <acquisition>DetectorScan</acquisition>
   </instrument>
 
   <instrument name="D1B">
     <technique>PowderDiffraction</technique>
-    <acquisition>Count</acquisition>
   </instrument>
 
   <instrument name="D4C">
@@ -747,12 +737,10 @@
 
   <instrument name="D17">
     <technique>Reflectometry</technique>
-    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="FIGARO">
     <technique>Reflectometry</technique>
-    <acquisition>TOFCount</acquisition>
   </instrument>
 
   <instrument name="PANTHER">
