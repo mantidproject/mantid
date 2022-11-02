@@ -190,6 +190,8 @@ class RectanglePlotTest(unittest.TestCase):
     def test_move_selected_rect(self):
         self.rectangle_plot._selector = mock.MagicMock()
         trigger_check = mock.Mock()
+        self.rectangle_plot._update_plot_values = mock.MagicMock()
+
         self.rectangle_plot.signals.sig_current_updated.connect(trigger_check)
         self.rectangle_plot._find_peak = lambda x: x
         self.rectangle_plot._show_peak = lambda x, y: x
@@ -199,6 +201,7 @@ class RectanglePlotTest(unittest.TestCase):
         self.rectangle_plot._move_selected_rectangle((1, 1), 1, 1)
 
         trigger_check.assert_called_once()
+        self.assertEqual(self.rectangle_plot._update_plot_values.call_count, 5)
         self.assertEqual(self.rectangle_plot.current_rectangle.get_x(), 1)
         self.assertEqual(self.rectangle_plot.current_rectangle.get_y(), 1)
         self.assertEqual(self.rectangle_plot.current_rectangle.get_height(), 1)
