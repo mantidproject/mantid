@@ -8,6 +8,8 @@
 
 #include "IndirectDataReductionTab.h"
 
+#include "IndirectSymmetriseModel.h"
+#include "IndirectSymmetriseView.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "ui_IndirectSymmetrise.h"
@@ -49,33 +51,21 @@ public:
   bool validate() override;
 
 private slots:
-  void algorithmComplete(bool error);
+  void handleValueChanged(QtProperty *, double);
   void handleDataReady(QString const &dataName) override;
-  void plotNewData(QString const &workspaceName);
-  void updateMiniPlots();
-  void replotNewSpectrum(QtProperty *prop, double value);
-  void verifyERange(QtProperty *prop, double value);
-  void updateRangeSelectors(QtProperty *prop, double value);
+  void algorithmComplete(bool error);
   void preview();
   void previewAlgDone(bool error);
-  void xRangeMaxChanged(double value);
-  void xRangeMinChanged(double value);
 
   void runClicked();
   void saveClicked();
 
-  void setRunEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
-
 private:
   void setFileExtensionsByName(bool filter) override;
 
-  Ui::IndirectSymmetrise m_uiForm;
-  double m_originalMax;
-  double m_originalMin;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
+  std::unique_ptr<IndirectSymmetriseView> m_view;
+  std::unique_ptr<IndirectSymmetriseModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

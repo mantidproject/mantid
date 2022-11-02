@@ -687,7 +687,7 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 1. In the **Input** box, load the file named ``iris26176_graphite002_red``. This will
    automatically plot the data on the first mini-plot.
 
-2. Move the green slider located at x = -0.5 to be at x = -0.4.
+2. Move the magenta slider located at x = 0.5 to be at x = 0.4.
 
 3. Click **Preview**. This will update the :ref:`Preview properties <preview-properties>` and
    the neighbouring mini-plot.

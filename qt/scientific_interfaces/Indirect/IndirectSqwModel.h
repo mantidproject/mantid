@@ -37,7 +37,6 @@ public:
   std::string getOutputWorkspace();
   MatrixWorkspace_sptr getRqwWorkspace();
   UserInputValidator validate(std::tuple<double, double> const qRange, std::tuple<double, double> const eRange);
-  std::pair<double, double> roundToWidth(std::tuple<double, double> const &axisRange, double width);
 
 private:
   std::string m_inputWorkspace;

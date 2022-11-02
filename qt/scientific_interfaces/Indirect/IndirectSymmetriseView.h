@@ -11,58 +11,63 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-#include "ui_IndirectSqw.h"
+#include "ui_IndirectSymmetrise.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSqwView : public QWidget {
+class MANTIDQT_INDIRECT_DLL IndirectSymmetriseView : public QWidget {
   Q_OBJECT
 
 public:
-  IndirectSqwView(QWidget *perent = nullptr);
-  ~IndirectSqwView();
-
+  IndirectSymmetriseView(QWidget *perent = nullptr);
+  ~IndirectSymmetriseView();
+  void setDefaults();
   IndirectPlotOptionsView *getPlotOptions();
-  void setFBSuffixes(QStringList suffix);
-  void setWSSuffixes(QStringList suffix);
-  std::tuple<double, double> getQRangeFromPlot();
-  std::tuple<double, double> getERangeFromPlot();
-  std::string getDataName();
-  void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace);
-  void setDefaultQAndEnergy();
-  void setSaveEnabled(bool enabled);
+  void setFBSuffixes(QStringList const suffix);
+  void setWSSuffixes(QStringList const suffix);
+  void plotNewData(QString const &workspaceName);
+  void updateMiniPlots();
   bool validate();
+  void setRawPlotWatchADS(bool watchADS);
+  double getEMin();
+  double getEMax();
+  double getPreviewSpec();
+  QString getInputName();
+  void previewAlgDone();
+  void enableSave(bool save);
+  void enableRun(bool save);
+  void updateRangeSelectors(QtProperty *prop, double value);
+  void replotNewSpectrum(double value);
+  void verifyERange(QtProperty *prop, double value);
+
+public slots:
+  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
+                       QString const &message = "Run", QString const &tooltip = "");
 
 signals:
   void valueChanged(QtProperty *, double);
   void dataReady(QString const &);
-  void qLowChanged(double);
-  void qWidthChanged(double);
-  void qHighChanged(double);
-  void eLowChanged(double);
-  void eWidthChanged(double);
-  void eHighChanged(double);
-  void rebinEChanged(int);
+  void previewClicked();
   void runClicked();
   void saveClicked();
   void showMessageBox(const QString &message);
 
-public slots:
-  void updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                       QString const &tooltip);
+private slots:
+  void xRangeMaxChanged(double value);
+  void xRangeMinChanged(double value);
 
 private:
-  void setQRange(std::tuple<double, double> const &axisRange);
-  void setEnergyRange(std::tuple<double, double> const &axisRange);
-
   void setRunEnabled(bool enabled);
-  Ui::IndirectSqw m_uiForm;
+  void setSaveEnabled(bool enabled);
+  Ui::IndirectSymmetrise m_uiForm;
 
   /// Tree of the properties
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
+  QtDoublePropertyManager *m_dblManager;
+  QtGroupPropertyManager *m_grpManager;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
