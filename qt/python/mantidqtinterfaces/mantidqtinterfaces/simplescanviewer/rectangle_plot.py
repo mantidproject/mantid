@@ -439,13 +439,15 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             center_0 = np.array((rect_0.get_x() + rect_0.get_width() / 2, rect_0.get_y() + rect_0.get_height() / 2))
             center_1 = np.array((rect_1.get_x() + rect_1.get_width() / 2, rect_1.get_y() + rect_1.get_height() / 2))
 
-        def move(seed: np.array, offset: np.array):
+        def move(seed: np.array, offset: np.array, limit=10):
             """
             Starting at seed, place a rectangle every offset
             @param seed: the center of the first rectangle to place
             @param offset: the offset between each rectangle, in both x and y.
+            @param limit: the maximum of number of rectangles to place, just as a security against really small offsets
             """
-            while self.rectangle_fit_on_image(seed, new_width, new_height):
+            current_number = 1
+            while self.rectangle_fit_on_image(seed, new_width, new_height) and current_number <= limit:
                 self._draw_rectangle((seed[0] - new_width / 2, seed[1] - new_height / 2), new_width, new_height)
                 seed += offset
 
