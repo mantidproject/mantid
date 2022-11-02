@@ -30,15 +30,23 @@ class SampleShapePlot:
         # changes to the list of plots
         self.Local_GlobalFigureManager.add_observer(self)
 
+    def reset_class(self):
+        self.ads_observer = None
+        self.figure = None
+        self.workspace_name = None
+        self.plot_visible = None
+        self.GFM_plot_number = None
+        self.Local_GlobalFigureManager = None
+
     def notify(self, action, plot_number):
         """
         This is called by GlobalFigureManager when plots are created
-        or destroyed, renamed or the active order is changed. This
-        calls the presenter to update the plot list in the model and
-        the view.
+        or destroyed, renamed or the active order is changed. This is used to
+        track the plot_number and its visibility to correctly update
+        sample shape plots as workspaces are updated.
 
-        :param action: A FigureAction corresponding to the event
-        :param plot_number: The unique number in GlobalFigureManager
+        :param: action: A FigureAction corresponding to the event
+        :param: plot_number: The unique number in GlobalFigureManager
         """
         if action == FigureAction.New:
             self.GFM_plot_number = plot_number
@@ -47,7 +55,6 @@ class SampleShapePlot:
 
     def create_plot(self, workspace_name, figure=None):
         self.workspace_name = workspace_name
-        sample_plotted = container_plotted = components_plotted = None
         workspace = ADS.retrieve(workspace_name)
         if not does_workspace_have_valid_sample_shape(workspace) and not workspace.sample().hasEnvironment():
             raise Exception("Workspace must have attached Sample Shape or Environment")
@@ -57,12 +64,9 @@ class SampleShapePlot:
             self.plot_visible = True
             figure, axes = plt.subplots(subplot_kw={'projection': 'mantid3d', 'proj_type': 'ortho'})
 
-        sample_plotted = plot_sample_only(workspace, figure)
-        if workspace.sample().hasEnvironment():
-            container_plotted = plot_container(workspace, figure)
-            number_of_components = workspace.sample().getEnvironment().nelements()
-            if number_of_components > 1:
-                components_plotted = plot_components(workspace, figure)
+        sample_plotted, container_plotted, components_plotted = try_to_plot_all_sample_shapes(workspace, figure)
+        if int(sample_plotted) + int(container_plotted) + int(components_plotted) == 0:
+            raise Exception("Workspace has no valid Sample, Container or Component Shapes to plot")
 
         add_title(sample_plotted, container_plotted, components_plotted, axes, workspace_name)
         set_axes_to_largest_mesh(axes, workspace)
@@ -71,20 +75,18 @@ class SampleShapePlot:
         add_beam_arrow(axes, workspace)
         if workspace.sample().hasOrientedLattice():
             plot_lattice_vectors(axes, workspace)
-        if sample_plotted or container_plotted or components_plotted:
-            self.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace, self.on_rename_workspace,
-                                                           self.on_clear, self.on_delete_workspace)
-            if self.plot_visible:
-                show_the_figure(figure)
-            figure.canvas.draw()
-            self.figure = figure
-            set_figure_window_title(self.GFM_plot_number, f"{workspace_name} Sample Shape")
-            return figure
 
-    def reset_class(self):
-        self.figure = None
-        self.workspace_name = None
-        self.ads_observer = None
+        self.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace, self.on_rename_workspace,
+                                                       self.on_clear, self.on_delete_workspace)
+        self.set_and_save_figure(workspace_name, figure)
+        return figure
+
+    def set_and_save_figure(self, workspace_name, figure):
+        if self.plot_visible:
+            show_the_figure(figure)
+        figure.canvas.draw()
+        self.figure = figure
+        set_figure_window_title(self.GFM_plot_number, workspace_name)
 
     def on_replace_workspace(self, workspace_name):
         self.do_not_replace_plot_if_closed()
@@ -104,14 +106,16 @@ class SampleShapePlot:
             self.reset_class()
 
     def on_rename_workspace(self, old_workspace_name, new_workspace_name):
-        pass  # on_replace_workspace is called by rename
+        pass  # on_replace_workspace is also triggered by a workspace rename
 
     def on_delete_workspace(self, workspace_name):
         if self.workspace_name == workspace_name:
-            GlobalFigureManager.destroy_fig(self.figure)
-            self.reset_class()
+            self.close_this_plot()
 
     def on_clear(self):
+        self.close_this_plot()
+
+    def close_this_plot(self):
         GlobalFigureManager.destroy_fig(self.figure)
         self.reset_class()
 
@@ -128,22 +132,33 @@ def is_visible(plot_number):
     return figure_manager.window.isVisible()
 
 
-def set_figure_window_title(plot_number, new_name):
+def set_figure_window_title(plot_number, workspace_name):
     """
     Renames a figure in the GlobalFigureManager
     :param plot_number: The unique number in GlobalFigureManager
-    :param new_name: The new figure (plot) name
+    :param workspace_name: The workspace name to include in new title
     """
     figure_manager = GlobalFigureManager.figs.get(plot_number)
     # This can be triggered before the plot is added to the
     # GlobalFigureManager, so we silently ignore this case
     if figure_manager is not None:
-        figure_manager.set_window_title(new_name)
+        figure_manager.set_window_title(f"{workspace_name} Sample Shape")
 
 
 def plot_sample_container_and_components(workspace_name):
     new_plot = SampleShapePlot()
     return new_plot.create_plot(workspace_name)
+
+
+def try_to_plot_all_sample_shapes(workspace, figure):
+    container_plotted = components_plotted = False
+    sample_plotted = plot_sample_only(workspace, figure)
+    if workspace.sample().hasEnvironment():
+        container_plotted = plot_container(workspace, figure)
+        number_of_components = workspace.sample().getEnvironment().nelements()
+        if number_of_components > 1:  # the first component is the container
+            components_plotted = plot_components(workspace, figure)
+    return sample_plotted, container_plotted, components_plotted
 
 
 def is_shape_valid(shape):
@@ -212,6 +227,8 @@ def plot_sample_only(workspace, figure):
             mesh_polygon.set_facecolor((1, 0, 0, 0.5))
         axes.add_collection3d(mesh_polygon)
         return True
+    else:
+        return False
 
 
 def plot_container(workspace, figure):

@@ -18,8 +18,9 @@ matplotlib.use('AGG')  # noqa
 import mantid
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, SetSample, LoadSampleShape, DeleteWorkspace,
-                              LoadInstrument, SetUB)
+                              LoadInstrument, SetUB, RenameWorkspace)
 from mantidqt.plotting import sample_shape
+from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
 
 workspace_name = "ws_shape"
 test_files_path = mantid.config.getString('defaultsave.directory')
@@ -282,8 +283,7 @@ class PlotSampleShapeTest(TestCase):
 
     def test_sample_and_container_invalid(self):
         workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
-        figure = sample_shape.plot_sample_container_and_components(workspace.name())
-        self.assertFalse(figure)
+        self.assertRaises(Exception, sample_shape.plot_sample_container_and_components, workspace.name())
 
     # Sample, Container and Components
     def test_sample_container_and_components_valid(self):
@@ -368,6 +368,67 @@ class PlotSampleShapeTest(TestCase):
         self.assertEqual(1, mock_get_valid_sample.call_count)
         self.assertEqual(1, mock_get_valid_container.call_count)
         self.assertEqual(8, mock_get_valid_component.call_count)
+
+    def side_effect_manager(self, plot_number):
+        if plot_number == 42:
+            return self.figure_manager
+        return None
+
+    def set_up_global_figure_manager(self):
+        self.figure_manager = Mock()
+        self.figure_manager.set_window_title = Mock()
+        self.figure_manager.is_visible = Mock(return_value=True)
+        GlobalFigureManager.figs.get = Mock(side_effect=self.side_effect_manager)
+
+    def test_is_visible_true_for_valid_plot(self):
+        self.set_up_global_figure_manager()
+        self.assertTrue(sample_shape.is_visible(42))
+
+    def test_is_visible_for_invalid_plot_raises_value_error(self):
+        self.set_up_global_figure_manager()
+        self.assertRaises(ValueError, sample_shape.is_visible, 0)
+
+    def test_set_window_title_valid_plot(self):
+        self.set_up_global_figure_manager()
+        sample_shape.set_figure_window_title(42, "workspace_name")
+        self.figure_manager.set_window_title.assert_called_once_with('workspace_name Sample Shape')
+
+    def test_set_window_title_invalid_plot(self):
+        self.set_up_global_figure_manager()
+        sample_shape.set_figure_window_title(0, "workspace_name")
+        self.figure_manager.set_window_title.assert_not_called()
+
+    @patch("mantidqt.plotting.sample_shape.SampleShapePlot.close_this_plot")
+    def test_all_plots_closed_if_ws_deleted(self, mock_close_this_plot):
+        workspace = setup_workspace_sample_and_container_CSG()
+        for loop in range(5):
+            sample_shape.plot_sample_container_and_components(workspace.name())
+        DeleteWorkspace(workspace)
+        self.assertEqual(5, mock_close_this_plot.call_count)
+
+    @patch("mantidqt.plotting.sample_shape.SampleShapePlot.close_this_plot")
+    def test_all_plots_closed_if_ads_cleared(self, mock_close_this_plot):
+        workspace = setup_workspace_sample_and_container_CSG()
+        for loop in range(2):
+            sample_shape.plot_sample_container_and_components(workspace.name())
+        workspace_two = CreateSampleWorkspace()
+        for loop in range(3):
+            sample_shape.plot_sample_container_and_components(workspace_two.name())
+        ADS.clear()
+        self.assertEqual(5, mock_close_this_plot.call_count)
+
+    @patch("mantidqt.plotting.sample_shape.SampleShapePlot.on_replace_workspace")
+    def test_on_replace_workspace_called_when_ws_renamed(self, mock_on_replace_workspace):
+        workspace = setup_workspace_sample_and_container_CSG()
+        for loop in range(5):
+            sample_shape.plot_sample_container_and_components(workspace.name())
+        RenameWorkspace(workspace, "new_name")
+        self.assertEqual(5, mock_on_replace_workspace.call_count)
+
+    def test_GFM_plot_number(self):
+        MySamplePlot = sample_shape.SampleShapePlot()
+        MySamplePlot.notify(FigureAction.New, 200)
+        self.assertEqual(200, MySamplePlot.GFM_plot_number)
 
 
 if __name__ == '__main__':
