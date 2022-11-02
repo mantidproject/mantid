@@ -69,15 +69,7 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
 
-void cloneWorkspace(const std::string &inputWorkspace, const std::string &outputWorkspace) {
-  auto cloneAlgorithm = AlgorithmManager::Instance().create("CloneWorkspace");
-  cloneAlgorithm->initialize();
-  cloneAlgorithm->setProperty("InputWorkspace", inputWorkspace);
-  cloneAlgorithm->setProperty("OutputWorkspace", outputWorkspace);
-  cloneAlgorithm->execute();
-}
-
-void rebin(const std::string &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
+void rebin(const Mantid::API::Workspace_sptr &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
            const bool reverseLogarithmic, const std::string &outputWorkspace) {
   auto rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
   rebinAlgorithm->setProperty("InputWorkspace", inputWorkspace);
@@ -95,7 +87,8 @@ void rebin(const std::string &inputWorkspace, const std::string &rebinString, co
  * @param instrWidget :: Parent InstrumentWidget.
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_tubeXUnitsCache(0), m_plotTypeCache(0),
+    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_originalWorkspace(nullptr), m_tubeXUnitsCache(0),
+      m_plotTypeCache(0),
       m_addedActions(std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
@@ -869,20 +862,19 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
-  auto workspaceName = m_instrWidget->getWorkspaceNameStdString();
-  auto originalWorkspace = "__original_" + workspaceName;
-
-  if (!Mantid::API::AnalysisDataService::Instance().doesExist(originalWorkspace)) {
-    cloneWorkspace(workspaceName, originalWorkspace);
+  if (!m_originalWorkspace) {
+    m_originalWorkspace = m_instrWidget->getWorkspaceClone();
   }
 
   try {
-    rebin(originalWorkspace, m_rebinParams->text().toStdString(), !m_rebinSaveToHisto->isChecked(),
-          m_rebinUseReverseLog->isChecked(), workspaceName);
+    rebin(m_originalWorkspace, m_rebinParams->text().toStdString(), !m_rebinSaveToHisto->isChecked(),
+          m_rebinUseReverseLog->isChecked(), m_instrWidget->getWorkspaceNameStdString());
   } catch (const std::exception &ex) {
     QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
   }
 }
+
+void InstrumentWidgetPickTab::resetOriginalWorkspace() { m_originalWorkspace.reset(); }
 
 /**
  * Clear all the tab's widgets.
