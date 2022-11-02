@@ -597,13 +597,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                  "ThetaWidth is dominated by the beam divergence, which is proportional to "
                                  "wavelength, set this to true.")
         self.declareProperty(name="GetTOFWindowFromBackToBackParams", defaultValue=False, direction=Direction.Input,
-                             doc="If true the TOF window will be taken to be 4xFWHM of the BackToBackExponential peak"
-                                 "at that position (evaluated using coefficients defined in the instrument "
+                             doc="If true the TOF window will be taken to be NFWHM x FWHM of the BackToBackExponential "
+                                 "peak at that position (evaluated using coefficients defined in the instrument "
                                  "Parameters.xml file.")
+        self.declareProperty(name="NFWHM", defaultValue=4, direction=Direction.Input,
+                             doc="Initial TOF window is NFWHM x FWHM of the BackToBackExponential peak at that "
+                                 "position")
         not_use_B2B_exp_params = EnabledWhenProperty('GetTOFWindowFromBackToBackParams', PropertyCriterion.IsDefault)
         self.setPropertySettings("BackscatteringTOFResolution", not_use_B2B_exp_params)
         self.setPropertySettings("ThetaWidth", not_use_B2B_exp_params)
         self.setPropertySettings("ScaleThetaWidthByWavelength", not_use_B2B_exp_params)
+        do_use_B2B_exp_params = EnabledWhenProperty('GetTOFWindowFromBackToBackParams', PropertyCriterion.IsNotDefault)
+        self.setPropertySettings("NFWHM", do_use_B2B_exp_params)
         self.declareProperty(name="OptimiseMask", defaultValue=False, direction=Direction.Input,
                              doc="Redo peak mask using optimal TOF window discovered (the original mask is found from "
                                  "the integrated intensity over a TOF window determined from the resolution "
@@ -616,6 +621,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("ThetaWidth", "Integration Window Parameters")
         self.setPropertyGroup("ScaleThetaWidthByWavelength", "Integration Window Parameters")
         self.setPropertyGroup("GetTOFWindowFromBackToBackParams", "Integration Window Parameters")
+        self.setPropertyGroup("NFWHM", "Integration Window Parameters")
         self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
         # peak validation
         self.declareProperty(name="IntegrateIfOnEdge", defaultValue=False, direction=Direction.Input,
@@ -723,6 +729,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         dth = np.radians(self.getProperty("ThetaWidth").value)
         scale_dth = self.getProperty("ScaleThetaWidthByWavelength").value
         get_dTOF_from_b2bexp_params = self.getProperty("GetTOFWindowFromBackToBackParams").value
+        n_b2b_fwhm = self.getProperty("NFWHM").value
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
         optimise_mask = self.getProperty("OptimiseMask").value
@@ -782,11 +789,13 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                                                                                                     nrows_edge,
                                                                                                     ncols_edge)
             if get_dTOF_from_b2bexp_params:
-                dTOF = self.get_initial_dTOF_from_back_to_back_params(pk, ws, detid)
-                if dTOF is None:
+                fwhm = self.get_fwhm_from_back_to_back_params(pk, ws, detid)
+                if fwhm is None:
                     logger.warning(f'No back to back exponential parameters found for peak {ipk} - a default value of'
                                    f'the fractional TOF width will be used ({self.DEFAULT_FRAC_TOF_WINDOW}).')
                     dTOF = self.calc_initial_dTOF(pk, self.DEFAULT_FRAC_TOF_WINDOW, dth=0, scale_dth=False)
+                else:
+                    dTOF = n_b2b_fwhm * fwhm
             else:
                 dTOF = self.calc_initial_dTOF(pk, dt0_over_t0, dth, scale_dth)
             peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
@@ -905,13 +914,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         return pk.getTOF() * np.sqrt(dt0_over_t0 ** 2 + (dth_pk / np.tan(pk.getScattering() / 2)) ** 2)
 
     @staticmethod
-    def get_initial_dTOF_from_back_to_back_params(pk, ws, detid):
+    def get_fwhm_from_back_to_back_params(pk, ws, detid):
         func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
         func.setParameter('X0', pk.getTOF())  # set centre
         func.setMatrixWorkspace(ws, ws.getIndicesFromDetectorIDs([int(detid)])[0], 0.0, 0.0)  # calc A,B,S based on peak cen
         is_valid = all(func.isExplicitlySet(ipar) for ipar in [1,2,4])
-        dTOF = 4*func.fwhm() if is_valid else None
-        return dTOF
+        return func.fwhm() if is_valid else None
 
     @staticmethod
     def plot_TOF_resolution(fig, ax, thetas, scaled_cot_th_sq, frac_tof_widths, wavelengths, scale_dth,
