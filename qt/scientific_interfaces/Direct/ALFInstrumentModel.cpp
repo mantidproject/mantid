@@ -25,10 +25,26 @@ auto &ADS = AnalysisDataService::Instance();
 
 std::string const CURVES = "Curves";
 std::string const EXTRACTED_PREFIX = "extractedTubes_";
-std::string const D_SPACING_UNIT = "dSpacing";
-std::string const PHI_UNIT = "Phi";
 std::string const OUT_OF_PLANE_ANGLE_LABEL = "Out of plane angle";
 std::string const NOT_IN_ADS = "not_stored_in_ads";
+
+bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
+
+bool isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) {
+  return workspace->getAxis(0)->unit()->unitID() == "dSpacing";
+}
+
+std::optional<double> xConversionFactor(MatrixWorkspace_const_sptr const &workspace) {
+  if (!workspace)
+    return std::nullopt;
+
+  if (const auto axis = workspace->getAxis(0)) {
+    const auto unit = axis->unit()->unitID();
+    const auto label = std::string(axis->unit()->label());
+    return unit == "Phi" || label == "Out of plane angle" ? 180.0 / M_PI : 1.0;
+  }
+  return std::nullopt;
+}
 
 void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
@@ -49,23 +65,29 @@ MatrixWorkspace_sptr load(std::string const &filename) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
-void rebinToWorkspace(std::string const &workspaceToRebin, MatrixWorkspace_sptr &workspaceToMatch,
-                      std::string const &outputName) {
+MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
+                                      MatrixWorkspace_sptr const &workspaceToMatch) {
   auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("WorkspaceToRebin", workspaceToRebin);
   alg->setProperty("WorkspaceToMatch", workspaceToMatch);
-  alg->setProperty("OutputWorkspace", outputName);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
-void plus(std::string const &lhsWorkspace, MatrixWorkspace_sptr &rhsWorkspace, std::string const &outputName) {
+MatrixWorkspace_sptr plus(MatrixWorkspace_sptr const &lhsWorkspace, MatrixWorkspace_sptr const &rhsWorkspace) {
   auto alg = AlgorithmManager::Instance().create("Plus");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("LHSWorkspace", lhsWorkspace);
   alg->setProperty("RHSWorkspace", rhsWorkspace);
-  alg->setProperty("OutputWorkspace", outputName);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
 MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
@@ -91,21 +113,27 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, st
   return outputWorkspace;
 }
 
-void scaleX(std::string const &inputName, double const factor, std::string const &outputName) {
+MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double const factor) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
-  alg->setProperty("InputWorkspace", inputName);
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("Factor", factor);
-  alg->setProperty("OutputWorkspace", outputName);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
-void convertToHistogram(std::string const &inputName, std::string const &outputName) {
+MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspace) {
   auto alg = AlgorithmManager::Instance().create("ConvertToHistogram");
   alg->initialize();
-  alg->setProperty("InputWorkspace", inputName);
-  alg->setProperty("OutputWorkspace", outputName);
+  alg->setAlwaysStoreInADS(false);
+  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
 } // namespace
@@ -113,7 +141,7 @@ void convertToHistogram(std::string const &inputName, std::string const &outputN
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentModel::ALFInstrumentModel()
-    : m_currentRun(0), m_tmpName("ALF_tmp"), m_instrumentName("ALF"), m_wsName("ALFData"), m_numberOfTubesInAverage(0) {
+    : m_currentRun(0), m_instrumentName("ALF"), m_wsName("ALFData"), m_numberOfTubesInAverage(0) {
   loadEmptyInstrument(m_instrumentName, m_wsName);
 }
 
@@ -133,80 +161,54 @@ std::optional<std::string> ALFInstrumentModel::loadData(std::string const &filen
   m_currentRun = loadedWorkspace->getRunNumber();
 
   if (!isAxisDSpacing(loadedWorkspace)) {
-    convertUnits(normaliseByCurrent(loadedWorkspace), D_SPACING_UNIT);
+    loadedWorkspace = convertUnits(normaliseByCurrent(loadedWorkspace), "dSpacing");
   }
 
   ADS.addOrReplace(m_wsName, loadedWorkspace);
   return std::nullopt;
 }
 
-void ALFInstrumentModel::averageTube() {
-  auto name = m_instrumentName + std::to_string(m_currentRun);
-  auto extractedName = extractedWsName();
-  const int oldTotalNumber = m_numberOfTubesInAverage;
-  // multiply up current average
-  auto ws = ADS.retrieveWS<MatrixWorkspace>(extractedName);
-  ws *= double(oldTotalNumber);
-
-  // get the data to add
-  storeSingleTube(name);
-  // rebin to match
-  rebinToWorkspace(extractedName, ws, extractedName);
-  // add together
-  plus(extractedName, ws, extractedName);
-
-  // do division
-  ws = ADS.retrieveWS<MatrixWorkspace>(extractedName);
-  ws->mutableY(0) /= (double(oldTotalNumber) + 1.0);
-  ADS.addOrReplace(extractedName, ws);
-  m_numberOfTubesInAverage++;
-}
-
-void ALFInstrumentModel::extractSingleTube() {
-  storeSingleTube(m_instrumentName + std::to_string(m_currentRun));
-  m_numberOfTubesInAverage = 1;
-}
-
-void ALFInstrumentModel::storeSingleTube(const std::string &name) {
-  if (!ADS.doesExist(CURVES))
-    return;
-
-  const auto scaleFactor = xConversionFactor(ADS.retrieveWS<MatrixWorkspace>(CURVES));
-  if (!scaleFactor)
-    return;
-
-  auto extractedName = extractedWsName();
-  // Convert to degrees if the XAxis is an angle in radians
-  scaleX(CURVES, *scaleFactor, extractedName);
-
-  convertToHistogram(extractedName, extractedName);
-
-  ADS.remove(CURVES);
-}
-
-bool ALFInstrumentModel::isALFData(MatrixWorkspace_const_sptr const &workspace) const {
-  return workspace->getInstrument()->getName() == m_instrumentName;
-}
-
-bool ALFInstrumentModel::isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) const {
-  return workspace->getAxis(0)->unit()->unitID() == D_SPACING_UNIT;
-}
-
 /*
- * Returns a conversion factor to be used for ScaleX when the x axis unit is an angle measured in radians. If
- * the x axis unit is not 'Phi' or 'Out of angle plane', no scaling is required.
- * @param workspace:: the workspace to check if a conversion factor is required.
+ * Extracts a single tube. Increments the average counter.
  */
-std::optional<double> ALFInstrumentModel::xConversionFactor(MatrixWorkspace_const_sptr workspace) const {
-  if (!workspace)
-    return std::nullopt;
-
-  if (const auto axis = workspace->getAxis(0)) {
-    const auto unit = axis->unit()->unitID();
-    const auto label = std::string(axis->unit()->label());
-    return unit == PHI_UNIT || label == OUT_OF_PLANE_ANGLE_LABEL ? 180.0 / M_PI : 1.0;
+void ALFInstrumentModel::extractSingleTube() {
+  if (auto const extractedWorkspace = retrieveSingleTube()) {
+    ADS.addOrReplace(extractedWsName(), extractedWorkspace);
+    m_numberOfTubesInAverage = 1;
   }
-  return std::nullopt;
+}
+
+MatrixWorkspace_sptr ALFInstrumentModel::retrieveSingleTube() {
+  if (!ADS.doesExist(CURVES))
+    return nullptr;
+
+  // Get a handle on the curve workspace and then delete it from the ADS
+  auto const curveWorkspace = ADS.retrieveWS<MatrixWorkspace>(CURVES);
+  ADS.remove(CURVES);
+
+  if (auto const scaleFactor = xConversionFactor(curveWorkspace)) {
+    // Convert to degrees if the XAxis is an angle in radians, and then convert to histograms.
+    return convertToHistogram(scaleX(curveWorkspace, *scaleFactor));
+  }
+  return nullptr;
+}
+
+void ALFInstrumentModel::averageTube() {
+  // Multiply up the current average
+  auto existingAverageTube = ADS.retrieveWS<MatrixWorkspace>(extractedWsName());
+  existingAverageTube *= double(m_numberOfTubesInAverage);
+
+  // Get the recently selected tube, and rebin to match previous extracted workspace
+  auto newExtractedWorkspace = retrieveSingleTube();
+  newExtractedWorkspace = rebinToWorkspace(newExtractedWorkspace, existingAverageTube);
+
+  // Do an average
+  auto averagedWorkspace = plus(newExtractedWorkspace, existingAverageTube);
+  m_numberOfTubesInAverage++;
+  averagedWorkspace->mutableY(0) /= double(m_numberOfTubesInAverage);
+
+  // Add the result back into the ADS
+  ADS.addOrReplace(extractedWsName(), averagedWorkspace);
 }
 
 std::string ALFInstrumentModel::extractedWsName() const {
