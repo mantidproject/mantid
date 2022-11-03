@@ -883,6 +883,21 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyExportSearchResultsDoesNotSaveWhenFileCancelled() {
+    auto csv = "this, is, some, csv\n"
+               "and,some,more,words";
+    auto filename = "";
+
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(*m_searcher, getSearchResultsCSV()).Times(1).WillOnce(Return(csv));
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("CSV (*.csv)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, saveCSVToFile(filename, csv)).Times(0);
+
+    presenter.notifyExportSearchResults();
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;

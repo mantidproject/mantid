@@ -140,8 +140,12 @@ void RunsPresenter::notifyExportSearchResults() const {
     return;
   }
 
-  // Append a .csv extension if the user didn't add one manually.
   auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
+  if (filename.empty()) {
+    return;
+  }
+
+  // Append a .csv extension if the user didn't add one manually.
   if (filename.find_last_of('.') == std::string::npos ||
       filename.substr(filename.find_last_of('.') + 1) != std::string("csv")) {
     filename += ".csv";
