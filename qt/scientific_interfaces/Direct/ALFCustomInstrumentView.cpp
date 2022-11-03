@@ -14,17 +14,13 @@
 namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument, QWidget *parent)
-    : MantidWidgets::BaseCustomInstrumentView(instrument, parent), m_extractSingleTubeObservable(nullptr),
-      m_averageTubeObservable(nullptr), m_extractAction(nullptr), m_averageAction(nullptr), m_analysisPane(nullptr) {
+    : MantidWidgets::BaseCustomInstrumentView(instrument, parent), m_extractAction(nullptr), m_averageAction(nullptr),
+      m_analysisPane(nullptr) {
   m_helpPage = "direct/ALF View";
 }
 
 void ALFCustomInstrumentView::setUpInstrument(const std::string &fileName,
                                               std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
-
-  m_extractSingleTubeObservable = std::make_unique<Observable>();
-  m_averageTubeObservable = std::make_unique<Observable>();
-
   auto instrumentWidget =
       new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
                                           MantidWidgets::InstrumentWidget::Dependencies(), false);
@@ -60,29 +56,13 @@ void ALFCustomInstrumentView::extractSingleTube() {
   instrumentView->getPickTab()->savePlotToWorkspace();
 
   m_presenter->extractSingleTube();
-  m_extractSingleTubeObservable->notify();
 }
 
 void ALFCustomInstrumentView::averageTube() {
   MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
   instrumentView->getPickTab()->savePlotToWorkspace();
 
-  m_presenter->extractSingleTube();
-
-  m_averageTubeObservable->notify();
-}
-
-void ALFCustomInstrumentView::observeExtractSingleTube(Observer *listner) {
-  m_extractSingleTubeObservable->attach(listner);
-}
-void ALFCustomInstrumentView::observeAverageTube(Observer *listner) { m_averageTubeObservable->attach(listner); }
-
-void ALFCustomInstrumentView::addObserver(std::tuple<std::string, Observer *> &listener) {
-  if (std::get<0>(listener) == "singleTube") {
-    observeExtractSingleTube(std::get<1>(listener));
-  } else if (std::get<0>(listener) == "averageTube") {
-    observeAverageTube(std::get<1>(listener));
-  }
+  m_presenter->averageTube();
 }
 
 void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(wsName); }

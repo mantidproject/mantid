@@ -24,8 +24,6 @@ class MANTIDQT_DIRECT_DLL IALFCustomInstrumentView : public virtual MantidWidget
 public:
   IALFCustomInstrumentView(){};
   virtual ~IALFCustomInstrumentView(){};
-  virtual void observeExtractSingleTube(Observer *listner) = 0;
-  virtual void observeAverageTube(Observer *listner) = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
 };
 
@@ -35,12 +33,9 @@ class MANTIDQT_DIRECT_DLL ALFCustomInstrumentView : public MantidWidgets::BaseCu
 
 public:
   explicit ALFCustomInstrumentView(const std::string &instrument, QWidget *parent = nullptr);
-  void observeExtractSingleTube(Observer *listner) override final;
-  void observeAverageTube(Observer *listner) override final;
   void setUpInstrument(const std::string &fileName,
                        std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) override final;
 
-  void addObserver(std::tuple<std::string, Observer *> &listener) override final;
   void addSpectrum(const std::string &wsName) override final;
 
 public slots:
@@ -49,8 +44,6 @@ public slots:
   void averageTube();
 
 private:
-  std::unique_ptr<Observable> m_extractSingleTubeObservable;
-  std::unique_ptr<Observable> m_averageTubeObservable;
   QAction *m_extractAction;
   QAction *m_averageAction;
   MantidWidgets::IPlotFitAnalysisPaneView *m_analysisPane;

@@ -75,6 +75,12 @@ void BaseCustomInstrumentPresenter::extractSingleTube() {
   m_analysisPresenter->updateEstimateClicked();
 }
 
+void BaseCustomInstrumentPresenter::averageTube() {
+  m_model->averageTube();
+  const std::string WSName = m_model->WSName();
+  m_analysisPresenter->addSpectrum(WSName);
+}
+
 void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
   if (!setUp) {
     return;
@@ -83,11 +89,6 @@ void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, in
   auto instrumentSetUp = setUp->first;
 
   m_view->setUpInstrument(instrumentSetUp.first, instrumentSetUp.second);
-
-  auto customContextMenu = setUp->second;
-  for (auto options : customContextMenu) {
-    m_view->addObserver(options);
-  }
 }
 
 } // namespace MantidQt::MantidWidgets

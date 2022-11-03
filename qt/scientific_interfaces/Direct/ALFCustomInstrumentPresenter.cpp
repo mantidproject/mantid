@@ -17,8 +17,7 @@ namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view,
                                                            MantidWidgets::IBaseCustomInstrumentModel *model)
-    : BaseCustomInstrumentPresenter(view, model), m_view(view), m_model(model), m_extractSingleTubeObserver(nullptr),
-      m_averageTubeObserver(nullptr) {
+    : BaseCustomInstrumentPresenter(view, model), m_view(view), m_model(model) {
   addInstrument();
 }
 
@@ -36,10 +35,6 @@ using instrumentObserverOptions = std::vector<std::tuple<std::string, Observer *
     instrumentObserverOptions> : a pair of the conditions and observers
 */
 std::pair<instrumentSetUp, instrumentObserverOptions> ALFCustomInstrumentPresenter::setupALFInstrument() {
-
-  m_extractSingleTubeObserver = new VoidObserver();
-  m_averageTubeObserver = new VoidObserver();
-
   instrumentSetUp setUpContextConditions;
 
   // set up the slots for the custom context menu
@@ -57,27 +52,7 @@ std::pair<instrumentSetUp, instrumentObserverOptions> ALFCustomInstrumentPresent
 
   setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
 
-  // set up single tube extract
-  std::function<void()> extractSingleTubeBinder = std::bind(&ALFCustomInstrumentPresenter::extractSingleTube,
-                                                            this); // binder for slot
-  m_extractSingleTubeObserver->setSlot(extractSingleTubeBinder);   // add slot to observer
-  std::tuple<std::string, Observer *> tmp =
-      std::make_tuple("singleTube", m_extractSingleTubeObserver); // store observer for later
-  customInstrumentOptions.emplace_back(tmp);
-
-  // set up average tube
-  std::function<void()> averageTubeBinder = std::bind(&ALFCustomInstrumentPresenter::averageTube, this);
-  m_averageTubeObserver->setSlot(averageTubeBinder);
-  tmp = std::make_tuple("averageTube", m_averageTubeObserver);
-  customInstrumentOptions.emplace_back(tmp);
-
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
-}
-
-void ALFCustomInstrumentPresenter::averageTube() {
-  m_model->averageTube();
-  const std::string WSName = m_model->WSName();
-  m_analysisPresenter->addSpectrum(WSName);
 }
 
 } // namespace MantidQt::CustomInterfaces

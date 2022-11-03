@@ -34,6 +34,7 @@ public:
   virtual void addInstrument();
 
   void extractSingleTube();
+  void averageTube();
   virtual void loadRunNumber();
 
 protected:

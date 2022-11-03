@@ -24,22 +24,15 @@ class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter : public MantidWidgets::B
 
 public:
   ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view, MantidWidgets::IBaseCustomInstrumentModel *model);
-  ~ALFCustomInstrumentPresenter() {
-    delete m_extractSingleTubeObserver;
-    delete m_averageTubeObserver;
-  };
+  ~ALFCustomInstrumentPresenter(){};
 
   void addInstrument() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
 
-  void averageTube();
-
 private:
   IALFCustomInstrumentView *m_view;
   MantidWidgets::IBaseCustomInstrumentModel *m_model;
-  VoidObserver *m_extractSingleTubeObserver;
-  VoidObserver *m_averageTubeObserver;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
