@@ -659,7 +659,7 @@ class SliceViewerTest(unittest.TestCase):
             self.patched_deps["WorkspaceInfo"].display_indices.return_value = [0, 1]
             mock_get_frame.return_value = SpecialCoordinateSystem.HKL
             self.model.get_hkl_from_xyz.reset_mock()
-            extra_cols = pres.get_extra_image_info_columns(1.0, 2.0, False)
+            extra_cols = pres.get_extra_image_info_columns(1.0, 2.0)
             self.assertEqual(self.model.get_hkl_from_xyz.call_count, callcount)
             self.assertEqual(len(extra_cols), ncols)
 

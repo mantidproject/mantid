@@ -43,19 +43,17 @@ public:
   static ImageInfoPresenterTest *createSuite() { return new ImageInfoPresenterTest(); }
   static void destroySuite(ImageInfoPresenterTest *suite) { delete suite; }
 
-  void test_constructor_calls_view_showInfo() {
+  void test_constructor_calls_view_set_row_count() {
     auto mockView = std::make_unique<StrictMock<MockImageInfoView>>();
 
-    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
-
     ImageInfoPresenter presenter(mockView.get());
-    presenter.setWorkspace(WorkspaceCreationHelper::create2DWorkspace123(10, 10));
+    TS_ASSERT_EQUALS(mockView->rowCount(), 2);
   }
 
   void test_cursorAt_calls_view_showInfo() {
     auto mockView = std::make_unique<StrictMock<MockImageInfoView>>();
 
-    EXPECT_CALL(*mockView, showInfo(_)).Times(2);
+    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
 
     ImageInfoPresenter presenter(mockView.get());
     presenter.setWorkspace(WorkspaceCreationHelper::create2DWorkspace123(10, 10));
@@ -66,7 +64,6 @@ public:
     auto mockView = std::make_unique<MockImageInfoView>();
     ImageInfoPresenter presenter(mockView.get());
     auto matrixWS = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
-    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
 
     presenter.setWorkspace(matrixWS);
 
@@ -79,7 +76,6 @@ public:
     auto mockView = std::make_unique<MockImageInfoView>();
     ImageInfoPresenter presenter(mockView.get());
     const auto mdWS = makeFakeMDEventWorkspace("dummyName", 100);
-    EXPECT_CALL(*mockView, showInfo(_)).Times(1);
 
     presenter.setWorkspace(mdWS);
 
