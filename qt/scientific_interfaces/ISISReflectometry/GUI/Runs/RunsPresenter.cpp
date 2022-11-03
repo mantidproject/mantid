@@ -45,11 +45,12 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
  */
 RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressableView,
                              const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                             std::vector<std::string> instruments, IReflMessageHandler *messageHandler)
+                             std::vector<std::string> instruments, IReflMessageHandler *messageHandler,
+                             IFileHandler *fileHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_instruments(std::move(instruments)),
-      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_fileHandler(fileHandler),
+      m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -141,19 +142,16 @@ void RunsPresenter::notifyExportSearchResults() const {
 
   // Append a .csv extension if the user didn't add one manually.
   auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
-  std::cerr << filename;
   if (filename.find_last_of('.') == std::string::npos ||
       filename.substr(filename.find_last_of('.') + 1) != std::string("csv")) {
     filename += ".csv";
   }
 
-  std::ofstream outFile(filename, std::ios::trunc);
-  if (!outFile) {
-    m_messageHandler->giveUserCritical("Saving to " + filename + "failed. Please try again.", "Error");
-    return;
+  try {
+    m_fileHandler->saveCSVToFile(filename, csv);
+  } catch (std::runtime_error &e) {
+    m_messageHandler->giveUserCritical(e.what(), "Error");
   }
-  outFile << csv;
-  outFile.close();
 }
 
 // Notification from a child presenter that the instrument needs to be changed
