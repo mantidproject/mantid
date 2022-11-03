@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <map>
@@ -14,13 +14,12 @@
 #include <string>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentModel {
+class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
 
 public:
-  IBaseCustomInstrumentModel(){};
-  virtual ~IBaseCustomInstrumentModel(){};
+  IALFInstrumentModel(){};
   virtual void loadEmptyInstrument() = 0;
   virtual std::pair<int, std::string> loadData(const std::string &name) = 0;
   virtual void setCurrentRun(int &run) = 0;
@@ -45,12 +44,12 @@ public:
   virtual bool extractTubeCondition(std::map<std::string, bool> tabBools) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentModel : public virtual IBaseCustomInstrumentModel {
+class MANTIDQT_DIRECT_DLL ALFInstrumentModel : public IALFInstrumentModel {
 
 public:
-  BaseCustomInstrumentModel();
-  BaseCustomInstrumentModel(std::string tmpName, std::string instrumentName, std::string wsName);
-  ~BaseCustomInstrumentModel(){};
+  ALFInstrumentModel();
+  ALFInstrumentModel(std::string tmpName, std::string instrumentName, std::string wsName);
+  ~ALFInstrumentModel(){};
   void loadEmptyInstrument() override;
   std::pair<int, std::string> loadData(const std::string &name) override;
   void setCurrentRun(int &run) override { m_currentRun = run; };
@@ -83,5 +82,5 @@ protected:
   std::string m_wsName;
 };
 
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace MantidQt

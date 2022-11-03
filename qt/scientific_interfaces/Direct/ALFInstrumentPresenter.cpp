@@ -4,44 +4,42 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
+#include "ALFInstrumentPresenter.h"
+
+#include "ALFInstrumentModel.h"
+#include "ALFInstrumentView.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
-namespace MantidQt::MantidWidgets {
+namespace MantidQt::CustomInterfaces {
 
-BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view,
-                                                             IBaseCustomInstrumentModel *model)
+ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, IALFInstrumentModel *model)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile("") {
   m_view->subscribePresenter(this);
   m_model->loadEmptyInstrument();
   addInstrument();
 }
 
-void BaseCustomInstrumentPresenter::subscribeAnalysisPresenter(
+void ALFInstrumentPresenter::subscribeAnalysisPresenter(
     MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) {
   m_analysisPresenter = presenter;
 }
 
-void BaseCustomInstrumentPresenter::addInstrument() {
+void ALFInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
   initLayout(setUp);
 }
 
-QWidget *BaseCustomInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
+QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
 
-MantidWidgets::InstrumentWidget *BaseCustomInstrumentPresenter::getInstrumentView() {
-  return m_view->getInstrumentView();
-}
+MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
-void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp) {
+void ALFInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp) {
   initInstrument(setUp);
   m_view->setupHelp();
 }
 
-void BaseCustomInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
+void ALFInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
   try {
     auto loadedResult = m_model->loadData(pathToRun);
 
@@ -61,7 +59,7 @@ void BaseCustomInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun
   }
 }
 
-void BaseCustomInstrumentPresenter::loadRunNumber() {
+void ALFInstrumentPresenter::loadRunNumber() {
   auto pathToRun = m_view->getFile();
   if (pathToRun == "" || m_currentFile == pathToRun) {
     return;
@@ -69,20 +67,20 @@ void BaseCustomInstrumentPresenter::loadRunNumber() {
   loadAndAnalysis(pathToRun);
 }
 
-void BaseCustomInstrumentPresenter::extractSingleTube() {
+void ALFInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
   const std::string WSName = m_model->WSName();
   m_analysisPresenter->addSpectrum(WSName);
   m_analysisPresenter->updateEstimateClicked();
 }
 
-void BaseCustomInstrumentPresenter::averageTube() {
+void ALFInstrumentPresenter::averageTube() {
   m_model->averageTube();
   const std::string WSName = m_model->WSName();
   m_analysisPresenter->addSpectrum(WSName);
 }
 
-void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp) {
+void ALFInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp) {
   // set up instrument
   auto instrumentSetUp = setUp.first;
 
@@ -97,7 +95,7 @@ using instrumentObserverOptions = std::vector<std::tuple<std::string, Observer *
 * @return <instrumentSetUp,
     instrumentObserverOptions> : a pair of the conditions and observers
 */
-std::pair<instrumentSetUp, instrumentObserverOptions> BaseCustomInstrumentPresenter::setupInstrument() {
+std::pair<instrumentSetUp, instrumentObserverOptions> ALFInstrumentPresenter::setupInstrument() {
   instrumentSetUp setUpContextConditions;
 
   // set up the slots for the custom context menu
@@ -106,9 +104,9 @@ std::pair<instrumentSetUp, instrumentObserverOptions> BaseCustomInstrumentPresen
 
   // set up custom context menu conditions
   std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
-      std::bind(&MantidWidgets::IBaseCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
+      std::bind(&IALFInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
   std::function<bool(std::map<std::string, bool>)> averageTubeConditionBinder =
-      std::bind(&MantidWidgets::IBaseCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
+      std::bind(&IALFInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
 
   binders.emplace_back(extractConditionBinder);
   binders.emplace_back(averageTubeConditionBinder);
@@ -118,4 +116,4 @@ std::pair<instrumentSetUp, instrumentObserverOptions> BaseCustomInstrumentPresen
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
-} // namespace MantidQt::MantidWidgets
+} // namespace MantidQt::CustomInterfaces

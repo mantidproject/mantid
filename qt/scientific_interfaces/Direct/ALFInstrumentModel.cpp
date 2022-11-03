@@ -4,7 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
+#include "ALFInstrumentModel.h"
+
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -23,18 +24,18 @@ const std::string CURVES = "Curves";
 } // namespace
 
 using namespace Mantid::API;
-namespace MantidQt::MantidWidgets {
 
-BaseCustomInstrumentModel::BaseCustomInstrumentModel()
+namespace MantidQt::CustomInterfaces {
+
+ALFInstrumentModel::ALFInstrumentModel()
     : m_currentRun(0), m_tmpName("ALF_tmp"), m_instrumentName("ALF"), m_wsName("ALFData"), m_numberOfTubesInAverage(0) {
 }
 
-BaseCustomInstrumentModel::BaseCustomInstrumentModel(std::string tmpName, std::string instrumentName,
-                                                     std::string wsName)
+ALFInstrumentModel::ALFInstrumentModel(std::string tmpName, std::string instrumentName, std::string wsName)
     : m_currentRun(0), m_tmpName(std::move(tmpName)), m_instrumentName(std::move(instrumentName)),
       m_wsName(std::move(wsName)), m_numberOfTubesInAverage(0) {}
 
-void BaseCustomInstrumentModel::loadEmptyInstrument() {
+void ALFInstrumentModel::loadEmptyInstrument() {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
   alg->setProperty("OutputWorkspace", m_wsName);
@@ -46,7 +47,7 @@ void BaseCustomInstrumentModel::loadEmptyInstrument() {
  * Runs load data alg
  * @param name:: string name for ALF data
  */
-void BaseCustomInstrumentModel::loadAlg(const std::string &name) {
+void ALFInstrumentModel::loadAlg(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
@@ -60,7 +61,7 @@ void BaseCustomInstrumentModel::loadAlg(const std::string &name) {
  * @param name:: string name for ALF data
  * @return std::pair<int,std::string>:: the run number and status
  */
-std::pair<int, std::string> BaseCustomInstrumentModel::loadData(const std::string &name) {
+std::pair<int, std::string> ALFInstrumentModel::loadData(const std::string &name) {
   loadAlg(name);
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   int runNumber = ws->getRunNumber();
@@ -80,7 +81,7 @@ std::pair<int, std::string> BaseCustomInstrumentModel::loadData(const std::strin
   return std::make_pair(runNumber, message);
 }
 
-void BaseCustomInstrumentModel::averageTube() {
+void ALFInstrumentModel::averageTube() {
   const std::string name = getInstrument() + std::to_string(getCurrentRun());
   const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
@@ -115,7 +116,7 @@ void BaseCustomInstrumentModel::averageTube() {
  * Transforms ALF data; normalise to current and then converts to d spacing
  * If already d-space does nothing.
  */
-void BaseCustomInstrumentModel::transformData() {
+void ALFInstrumentModel::transformData() {
   auto normAlg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
   normAlg->setProperty("InputWorkspace", getWSName());
@@ -130,12 +131,12 @@ void BaseCustomInstrumentModel::transformData() {
   dSpacingAlg->execute();
 }
 
-void BaseCustomInstrumentModel::extractSingleTube() {
+void ALFInstrumentModel::extractSingleTube() {
   storeSingleTube(getInstrument() + std::to_string(getCurrentRun()));
   m_numberOfTubesInAverage = 1;
 }
 
-void BaseCustomInstrumentModel::storeSingleTube(const std::string &name) {
+void ALFInstrumentModel::storeSingleTube(const std::string &name) {
   auto &ads = AnalysisDataService::Instance();
   if (!ads.doesExist(CURVES))
     return;
@@ -166,7 +167,7 @@ void BaseCustomInstrumentModel::storeSingleTube(const std::string &name) {
  * Loads data, normalise to current and then converts to d spacing
  * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
  */
-std::map<std::string, bool> BaseCustomInstrumentModel::isDataValid() {
+std::map<std::string, bool> ALFInstrumentModel::isDataValid() {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
   bool isItALF = false;
 
@@ -187,7 +188,7 @@ std::map<std::string, bool> BaseCustomInstrumentModel::isDataValid() {
  * the x axis unit is not 'Phi' or 'Out of angle plane', no scaling is required.
  * @param workspace:: the workspace to check if a conversion factor is required.
  */
-std::optional<double> BaseCustomInstrumentModel::xConversionFactor(MatrixWorkspace_const_sptr workspace) const {
+std::optional<double> ALFInstrumentModel::xConversionFactor(MatrixWorkspace_const_sptr workspace) const {
   if (!workspace)
     return std::nullopt;
 
@@ -199,17 +200,17 @@ std::optional<double> BaseCustomInstrumentModel::xConversionFactor(MatrixWorkspa
   return std::nullopt;
 }
 
-std::string BaseCustomInstrumentModel::WSName() {
+std::string ALFInstrumentModel::WSName() {
   std::string name = getInstrument() + std::to_string(getCurrentRun());
   return EXTRACTEDWS + name;
 }
 
-void BaseCustomInstrumentModel::rename() { AnalysisDataService::Instance().rename(m_tmpName, m_wsName); }
-void BaseCustomInstrumentModel::remove() { AnalysisDataService::Instance().remove(m_tmpName); }
+void ALFInstrumentModel::rename() { AnalysisDataService::Instance().rename(m_tmpName, m_wsName); }
+void ALFInstrumentModel::remove() { AnalysisDataService::Instance().remove(m_tmpName); }
 
-std::string BaseCustomInstrumentModel::dataFileName() { return m_wsName; }
+std::string ALFInstrumentModel::dataFileName() { return m_wsName; }
 
-int BaseCustomInstrumentModel::currentRun() {
+int ALFInstrumentModel::currentRun() {
   try {
 
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
@@ -219,13 +220,13 @@ int BaseCustomInstrumentModel::currentRun() {
   }
 }
 
-bool BaseCustomInstrumentModel::isErrorCode(const int run) { return (run == ERRORCODE); }
+bool ALFInstrumentModel::isErrorCode(const int run) { return (run == ERRORCODE); }
 
-bool BaseCustomInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
+bool ALFInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool BaseCustomInstrumentModel::averageTubeCondition(std::map<std::string, bool> tabBools) {
+bool ALFInstrumentModel::averageTubeCondition(std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStored")->second || tabBools.find("hasCurve")->second);
@@ -236,7 +237,7 @@ bool BaseCustomInstrumentModel::averageTubeCondition(std::map<std::string, bool>
   }
 }
 
-bool BaseCustomInstrumentModel::extractTubeCondition(std::map<std::string, bool> tabBools) {
+bool ALFInstrumentModel::extractTubeCondition(std::map<std::string, bool> tabBools) {
   try {
 
     bool ifCurve = (tabBools.find("plotStored")->second || tabBools.find("hasCurve")->second);
@@ -246,4 +247,4 @@ bool BaseCustomInstrumentModel::extractTubeCondition(std::map<std::string, bool>
   }
 }
 
-} // namespace MantidQt::MantidWidgets
+} // namespace MantidQt::CustomInterfaces

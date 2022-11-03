@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "BaseCustomInstrumentModel.h"
+#include "BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include "DllConfig.h"
@@ -29,8 +30,8 @@ protected:
   void initLayout() override;
 
 private:
-  std::unique_ptr<MantidWidgets::BaseCustomInstrumentModel> m_instrumentModel;
-  std::unique_ptr<MantidWidgets::BaseCustomInstrumentPresenter> m_instrumentPresenter;
+  std::unique_ptr<ALFInstrumentModel> m_instrumentModel;
+  std::unique_ptr<ALFInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<MantidWidgets::PlotFitAnalysisPanePresenter> m_analysisPresenter;
 };
 } // namespace CustomInterfaces

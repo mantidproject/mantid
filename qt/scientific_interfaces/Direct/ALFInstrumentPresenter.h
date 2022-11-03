@@ -5,24 +5,28 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "DllOption.h"
+
+#include "ALFInstrumentModel.h"
+#include "ALFInstrumentView.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
-#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 
 #include <string>
 #include <utility>
 
 namespace MantidQt {
+
 namespace MantidWidgets {
-
 class PlotFitAnalysisPanePresenter;
+}
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter : public QObject {
+namespace CustomInterfaces {
+
+class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter : public QObject {
   Q_OBJECT
 
 public:
-  BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model);
+  ALFInstrumentPresenter(IALFInstrumentView *view, IALFInstrumentModel *model);
 
   void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter);
 
@@ -44,10 +48,10 @@ protected:
   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
   MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
-  IBaseCustomInstrumentView *m_view;
-  IBaseCustomInstrumentModel *m_model;
+  IALFInstrumentView *m_view;
+  IALFInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
 };
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace MantidQt

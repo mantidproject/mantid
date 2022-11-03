@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -18,15 +18,14 @@
 #include <string>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
 
-class BaseCustomInstrumentPresenter;
+class ALFInstrumentPresenter;
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IBaseCustomInstrumentView {
+class MANTIDQT_DIRECT_DLL IALFInstrumentView {
 public:
-  IBaseCustomInstrumentView(){};
-  virtual ~IBaseCustomInstrumentView(){};
-  virtual void subscribePresenter(MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *presenter) = 0;
+  IALFInstrumentView(){};
+  virtual void subscribePresenter(ALFInstrumentPresenter *presenter) = 0;
   virtual QWidget *generateLoadWidget() = 0;
   virtual std::string getFile() = 0;
   virtual void setRunQuietly(const std::string &runNumber) = 0;
@@ -38,12 +37,12 @@ public:
   virtual void setupHelp() = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView : public QWidget, public IBaseCustomInstrumentView {
+class MANTIDQT_DIRECT_DLL ALFInstrumentView : public QWidget, public IALFInstrumentView {
   Q_OBJECT
 
 public:
-  explicit BaseCustomInstrumentView(const std::string &instrument, QWidget *parent = nullptr);
-  void subscribePresenter(MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *presenter) override;
+  explicit ALFInstrumentView(const std::string &instrument, QWidget *parent = nullptr);
+  void subscribePresenter(ALFInstrumentPresenter *presenter) override;
   QWidget *generateLoadWidget() override;
   std::string getFile() override;
   void setRunQuietly(const std::string &runNumber) override;
@@ -63,7 +62,7 @@ public slots:
 
 protected:
   std::string m_helpPage;
-  MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *m_presenter;
+  ALFInstrumentPresenter *m_presenter;
 
 private:
   void warningBox(const QString &message);
@@ -75,5 +74,5 @@ private:
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;
 };
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace MantidQt
