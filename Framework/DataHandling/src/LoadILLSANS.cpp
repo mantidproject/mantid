@@ -314,9 +314,9 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   createEmptyWorkspace(numberOfHistograms, numberOfChannels, type);
   loadMetaData(firstEntry, instrumentPath);
 
-  std::vector<double> binning;
-
-  binning = m_isD16Omega ? getOmegaBinning(firstEntry, "data_scan/scanned_variables/data") : m_defaultBinning;
+  std::vector<double> binning = m_isD16Omega && numberOfChannels > 1
+                                    ? getOmegaBinning(firstEntry, "data_scan/scanned_variables/data")
+                                    : m_defaultBinning;
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, binning, 0);
@@ -634,8 +634,19 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
 
   const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
   m_localWorkspace->setCounts(firstIndex, counts);
-  HistogramData::Points points = HistogramData::Points(binning);
-  m_localWorkspace->setPoints(firstIndex, points);
+
+  if (m_instrumentName == "D16" && scannedVariables.dim1() == 1) {
+    // This is the old D16 data scan format. It is pain.
+    // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
+    // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
+    // handle errors completely differently in this case.
+    // We distinguish it from D16 data in the new format but checking there is only one slice of the omega scan
+    const HistogramData::BinEdges binEdges(binning);
+    m_localWorkspace->setBinEdges(firstIndex, binEdges);
+  } else {
+    HistogramData::Points points = HistogramData::Points(binning);
+    m_localWorkspace->setPoints(firstIndex, points);
+  }
 
   // Add average monitor counts to a property:
   double averageMonitorCounts =
@@ -652,8 +663,14 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
 
   if (m_instrumentName == "D16") {
     // the old D16 has 2 monitors, the second being empty but still needing a binning
-    points = HistogramData::Points(binning);
-    m_localWorkspace->setPoints(firstIndex, points);
+
+    if (scannedVariables.dim1() == 1) {
+      const HistogramData::BinEdges binEdges(binning);
+      m_localWorkspace->setBinEdges(firstIndex, binEdges);
+    } else {
+      HistogramData::Points points = HistogramData::Points(binning);
+      m_localWorkspace->setPoints(firstIndex, points);
+    }
     firstIndex++;
   }
   return firstIndex;
@@ -687,8 +704,14 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
 
         m_localWorkspace->setCounts(index, histoCounts);
         m_localWorkspace->setCountVariances(index, histoVariances);
-        const HistogramData::Points histoPoints(timeBinning);
-        m_localWorkspace->setPoints(index, histoPoints);
+
+        if (m_instrumentName == "D16" && numberOfChannels == 1) {
+          const HistogramData::BinEdges histoPoints(timeBinning);
+          m_localWorkspace->setBinEdges(index, histoPoints);
+        } else {
+          const HistogramData::Points histoPoints(timeBinning);
+          m_localWorkspace->setPoints(index, histoPoints);
+        }
       }
     }
   } else {

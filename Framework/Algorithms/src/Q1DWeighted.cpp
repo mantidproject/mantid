@@ -49,7 +49,7 @@ void Q1DWeighted::init() {
   auto monoValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
   auto tofValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
 
-  monoValidator->add<WorkspaceUnitValidator>("Empty");
+  monoValidator->add<WorkspaceUnitValidator>("Label");
   monoValidator->add<HistogramValidator>(false);
   monoValidator->add<InstrumentValidator>();
 
@@ -133,7 +133,6 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) - 1;
 
   m_isMonochromatic = inputWS->getAxis(0)->unit()->unitID() != "Wavelength";
-
   // number of spectra in the input
   m_nSpec = inputWS->getNumberHistograms();
 
