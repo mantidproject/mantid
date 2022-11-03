@@ -47,8 +47,6 @@ protected:
   MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
   IALFInstrumentView *m_view;
   IALFInstrumentModel *m_model;
-  int m_currentRun;
-  std::string m_currentFile;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

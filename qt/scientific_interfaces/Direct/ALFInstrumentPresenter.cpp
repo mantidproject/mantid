@@ -14,7 +14,7 @@
 namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, IALFInstrumentModel *model)
-    : m_view(view), m_model(model), m_currentRun(0), m_currentFile("") {
+    : m_view(view), m_model(model) {
   m_view->subscribePresenter(this);
   addInstrument();
 }
@@ -25,7 +25,7 @@ void ALFInstrumentPresenter::subscribeAnalysisPresenter(
 }
 
 void ALFInstrumentPresenter::addInstrument() {
-  m_view->setUpInstrument(m_model->dataFileName());
+  m_view->setUpInstrument(m_model->getWSName());
   m_view->setupHelp();
 }
 
@@ -35,27 +35,23 @@ MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { r
 
 void ALFInstrumentPresenter::loadAndAnalysis(const std::string &pathToRun) {
   try {
-    auto loadedResult = m_model->loadData(pathToRun);
-
-    if (loadedResult.second == "success") {
-      m_currentRun = loadedResult.first;
-      m_currentFile = pathToRun;
-    } else {
-      // reset to the previous data
-      m_view->warningBox(loadedResult.second);
+    if (auto const message = m_model->loadData(pathToRun)) {
+      m_view->warningBox(*message);
     }
+    auto runNumber = m_model->runNumber();
     // make displayed run number be in sinc
-    m_view->setRunQuietly(std::to_string(m_currentRun));
-    m_model->setCurrentRun(m_currentRun);
+    m_view->setRunQuietly(std::to_string(runNumber));
+    m_model->setCurrentRun(runNumber);
   } catch (...) {
-    m_view->setRunQuietly(std::to_string(m_currentRun));
-    m_model->setCurrentRun(m_currentRun);
+    auto runNumber = m_model->runNumber();
+    m_view->setRunQuietly(std::to_string(runNumber));
+    m_model->setCurrentRun(runNumber);
   }
 }
 
 void ALFInstrumentPresenter::loadRunNumber() {
   auto pathToRun = m_view->getFile();
-  if (pathToRun == "" || m_currentFile == pathToRun) {
+  if (pathToRun.empty()) {
     return;
   }
   loadAndAnalysis(pathToRun);
@@ -63,13 +59,13 @@ void ALFInstrumentPresenter::loadRunNumber() {
 
 void ALFInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
-  m_analysisPresenter->addSpectrum(m_model->WSName());
+  m_analysisPresenter->addSpectrum(m_model->extractedWsName());
   m_analysisPresenter->updateEstimateClicked();
 }
 
 void ALFInstrumentPresenter::averageTube() {
   m_model->averageTube();
-  m_analysisPresenter->addSpectrum(m_model->WSName());
+  m_analysisPresenter->addSpectrum(m_model->extractedWsName());
 }
 
 bool ALFInstrumentPresenter::hasTubeBeenExtracted() const { return m_model->hasTubeBeenExtracted(); }

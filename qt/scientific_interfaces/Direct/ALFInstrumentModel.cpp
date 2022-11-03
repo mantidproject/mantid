@@ -11,84 +11,100 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
+#include <memory>
 #include <utility>
 
 using namespace Mantid::API;
 
 namespace {
-const int ERRORCODE = -999;
-const std::string EXTRACTEDWS = "extractedTubes_";
-const std::string CURVES = "Curves";
+auto &ADS = AnalysisDataService::Instance();
 
-void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputWorkspace) {
+std::string const CURVES = "Curves";
+std::string const EXTRACTED_PREFIX = "extractedTubes_";
+std::string const D_SPACING_UNIT = "dSpacing";
+std::string const PHI_UNIT = "Phi";
+std::string const OUT_OF_PLANE_ANGLE_LABEL = "Out of plane angle";
+std::string const NOT_IN_ADS = "not_stored_in_ads";
+
+void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
   alg->setProperty("InstrumentName", instrumentName);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
 }
 
-void load(std::string const &filename, std::string const &outputWorkspace) {
+MatrixWorkspace_sptr load(std::string const &filename) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("Filename", filename);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
 void rebinToWorkspace(std::string const &workspaceToRebin, MatrixWorkspace_sptr &workspaceToMatch,
-                      std::string const &outputWorkspace) {
+                      std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
   alg->initialize();
   alg->setProperty("WorkspaceToRebin", workspaceToRebin);
   alg->setProperty("WorkspaceToMatch", workspaceToMatch);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
 }
 
-void plus(std::string const &lhsWorkspace, MatrixWorkspace_sptr &rhsWorkspace, std::string const &outputWorkspace) {
+void plus(std::string const &lhsWorkspace, MatrixWorkspace_sptr &rhsWorkspace, std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("Plus");
   alg->initialize();
   alg->setProperty("LHSWorkspace", lhsWorkspace);
   alg->setProperty("RHSWorkspace", rhsWorkspace);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
 }
 
-void normaliseByCurrent(std::string const &inputWorkspace, std::string const &outputWorkspace) {
+MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
   auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
-void convertUnits(std::string const &inputWorkspace, std::string const &target, std::string const &outputWorkspace) {
+MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, std::string const &target) {
   auto alg = AlgorithmManager::Instance().create("ConvertUnits");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("Target", target);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
-void scaleX(std::string const &inputWorkspace, double const factor, std::string const &outputWorkspace) {
+void scaleX(std::string const &inputName, double const factor, std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
-  alg->setProperty("InputWorkspace", inputWorkspace);
+  alg->setProperty("InputWorkspace", inputName);
   alg->setProperty("Factor", factor);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
 }
 
-void convertToHistogram(std::string const &inputWorkspace, std::string const &outputWorkspace) {
+void convertToHistogram(std::string const &inputName, std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("ConvertToHistogram");
   alg->initialize();
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("OutputWorkspace", outputWorkspace);
+  alg->setProperty("InputWorkspace", inputName);
+  alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
 }
 
@@ -102,102 +118,78 @@ ALFInstrumentModel::ALFInstrumentModel()
 }
 
 /*
- * Loads data for use in ALFView
- * Loads data, normalise to current and then converts to d spacing
- * @param name:: string name for ALF data
- * @return std::pair<int,std::string>:: the run number and status
+ * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
+ * @param filename:: The filepath to the ALFData
+ * @return An optional error message
  */
-std::pair<int, std::string> ALFInstrumentModel::loadData(const std::string &name) {
-  load(name, getTmpName());
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
-  int runNumber = ws->getRunNumber();
-  std::string message = "success";
-  auto bools = isDataValid();
-  if (bools["IsValidInstrument"]) {
-    rename();
-    m_numberOfTubesInAverage = 0;
-  } else {
-    // reset to the previous data
-    message = "Not the correct instrument, expected " + getInstrument();
-    remove();
+std::optional<std::string> ALFInstrumentModel::loadData(std::string const &filename) {
+  auto loadedWorkspace = load(filename);
+
+  if (!isALFData(loadedWorkspace)) {
+    return "Not the correct instrument, expected " + m_instrumentName;
   }
-  if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
-    transformData();
+
+  m_numberOfTubesInAverage = 0;
+  m_currentRun = loadedWorkspace->getRunNumber();
+
+  if (!isAxisDSpacing(loadedWorkspace)) {
+    convertUnits(normaliseByCurrent(loadedWorkspace), D_SPACING_UNIT);
   }
-  return std::make_pair(runNumber, message);
+
+  ADS.addOrReplace(m_wsName, loadedWorkspace);
+  return std::nullopt;
 }
 
 void ALFInstrumentModel::averageTube() {
-  const std::string name = getInstrument() + std::to_string(getCurrentRun());
+  auto name = m_instrumentName + std::to_string(m_currentRun);
+  auto extractedName = extractedWsName();
   const int oldTotalNumber = m_numberOfTubesInAverage;
   // multiply up current average
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(EXTRACTEDWS + name);
+  auto ws = ADS.retrieveWS<MatrixWorkspace>(extractedName);
   ws *= double(oldTotalNumber);
 
   // get the data to add
   storeSingleTube(name);
   // rebin to match
-  rebinToWorkspace(EXTRACTEDWS + name, ws, EXTRACTEDWS + name);
+  rebinToWorkspace(extractedName, ws, extractedName);
   // add together
-  plus(EXTRACTEDWS + name, ws, EXTRACTEDWS + name);
+  plus(extractedName, ws, extractedName);
 
   // do division
-  ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(EXTRACTEDWS + name);
+  ws = ADS.retrieveWS<MatrixWorkspace>(extractedName);
   ws->mutableY(0) /= (double(oldTotalNumber) + 1.0);
-  AnalysisDataService::Instance().addOrReplace(EXTRACTEDWS + name, ws);
+  ADS.addOrReplace(extractedName, ws);
   m_numberOfTubesInAverage++;
 }
 
-/*
- * Transforms ALF data; normalise to current and then converts to d spacing
- * If already d-space does nothing.
- */
-void ALFInstrumentModel::transformData() {
-  normaliseByCurrent(getWSName(), getWSName());
-  convertUnits(getWSName(), "dSpacing", getWSName());
-}
-
 void ALFInstrumentModel::extractSingleTube() {
-  storeSingleTube(getInstrument() + std::to_string(getCurrentRun()));
+  storeSingleTube(m_instrumentName + std::to_string(m_currentRun));
   m_numberOfTubesInAverage = 1;
 }
 
 void ALFInstrumentModel::storeSingleTube(const std::string &name) {
-  auto &ads = AnalysisDataService::Instance();
-  if (!ads.doesExist(CURVES))
+  if (!ADS.doesExist(CURVES))
     return;
 
-  const auto scaleFactor = xConversionFactor(ads.retrieveWS<MatrixWorkspace>(CURVES));
+  const auto scaleFactor = xConversionFactor(ADS.retrieveWS<MatrixWorkspace>(CURVES));
   if (!scaleFactor)
     return;
 
+  auto extractedName = extractedWsName();
   // Convert to degrees if the XAxis is an angle in radians
-  scaleX(CURVES, *scaleFactor, EXTRACTEDWS + name);
+  scaleX(CURVES, *scaleFactor, extractedName);
 
-  convertToHistogram(EXTRACTEDWS + name, EXTRACTEDWS + name);
+  convertToHistogram(extractedName, extractedName);
 
-  ads.remove(CURVES);
+  ADS.remove(CURVES);
 }
 
-/*
- * Checks loaded data is from ALF
- * Loads data, normalise to current and then converts to d spacing
- * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
- */
-std::map<std::string, bool> ALFInstrumentModel::isDataValid() {
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(getTmpName());
-  bool isItALF = false;
+bool ALFInstrumentModel::isALFData(MatrixWorkspace_const_sptr const &workspace) const {
+  return workspace->getInstrument()->getName() == m_instrumentName;
+}
 
-  if (ws->getInstrument()->getName() == getInstrument()) {
-    isItALF = true;
-  }
-  auto axis = ws->getAxis(0);
-  auto unit = axis->unit()->unitID();
-  bool isItDSpace = true;
-  if (unit != "dSpacing") {
-    isItDSpace = false;
-  }
-  return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}};
+bool ALFInstrumentModel::isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) const {
+  return workspace->getAxis(0)->unit()->unitID() == D_SPACING_UNIT;
 }
 
 /*
@@ -212,36 +204,16 @@ std::optional<double> ALFInstrumentModel::xConversionFactor(MatrixWorkspace_cons
   if (const auto axis = workspace->getAxis(0)) {
     const auto unit = axis->unit()->unitID();
     const auto label = std::string(axis->unit()->label());
-    return unit == "Phi" || label == "Out of plane angle" ? 180.0 / M_PI : 1.0;
+    return unit == PHI_UNIT || label == OUT_OF_PLANE_ANGLE_LABEL ? 180.0 / M_PI : 1.0;
   }
   return std::nullopt;
 }
 
-std::string ALFInstrumentModel::WSName() {
-  std::string name = getInstrument() + std::to_string(getCurrentRun());
-  return EXTRACTEDWS + name;
+std::string ALFInstrumentModel::extractedWsName() const {
+  return EXTRACTED_PREFIX + m_instrumentName + std::to_string(m_currentRun);
 }
 
-void ALFInstrumentModel::rename() { AnalysisDataService::Instance().rename(m_tmpName, m_wsName); }
-void ALFInstrumentModel::remove() { AnalysisDataService::Instance().remove(m_tmpName); }
-
-std::string ALFInstrumentModel::dataFileName() { return m_wsName; }
-
-int ALFInstrumentModel::currentRun() {
-  try {
-
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
-    return ws->getRunNumber();
-  } catch (...) {
-    return ERRORCODE;
-  }
-}
-
-bool ALFInstrumentModel::isErrorCode(const int run) const { return (run == ERRORCODE); }
-
-bool ALFInstrumentModel::hasTubeBeenExtracted() const {
-  return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + getInstrument() + std::to_string(getCurrentRun()));
-}
+bool ALFInstrumentModel::hasTubeBeenExtracted() const { return ADS.doesExist(extractedWsName()); }
 
 int ALFInstrumentModel::numberOfTubesInAverage() const { return m_numberOfTubesInAverage; }
 
