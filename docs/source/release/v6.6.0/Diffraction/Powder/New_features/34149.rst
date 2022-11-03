@@ -1,0 +1,1 @@
+- Added support for ILL D4C instrument, a liquid diffractometer. This adds a new algorithm responsible for the reduction stage: :ref:`D4ILLReduction <algm-D4ILLReduction>`, which handles calling the loader, correcting for dead time, bank position offsets, relative efficiency, and normalisation to monitor or time.
