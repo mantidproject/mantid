@@ -447,7 +447,8 @@ public:
     checkWavelength(outputWS, 7.);
   }
 
-  void test_D16_OMEGA() {
+  void test_D16_OMEGA_SCAN_SINGLE_POINT() {
+    // test d16 scan data in the format where every file is a point
     LoadILLSANS alg;
     alg.setChild(true);
     alg.initialize();
@@ -467,8 +468,8 @@ public:
     checkWavelength(outputWS, 4.8);
   }
 
-  void test_D16_OMEGA_NEW() {
-    // test d16 old scan data in a scan file, i.e. with multiple points in a single file
+  void test_D16_OMEGA_CONCATENATED_SCAN() {
+    // test d16 scan data in a scan file, i.e. with multiple points in a single file
     LoadILLSANS alg;
     alg.setChild(true);
     alg.initialize();
