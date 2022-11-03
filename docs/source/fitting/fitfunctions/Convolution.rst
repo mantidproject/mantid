@@ -24,7 +24,7 @@ fitting interval.
 FFT mode
 ========
 
-if :math:`|A|` similar to :math:`|B|`, the function is evaluated
+if :math:`|A|` similar to :math:`|B|` or :math:`AB > 0`, the function is evaluated
 by first transforming :math:`R` and :math:`F` to the Fourier domain,
 multiplying the transforms, then transforming back to the original domain.
 The GSL FFT routines are used to do the actual transformations.
