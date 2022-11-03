@@ -35,7 +35,8 @@ public:
   void setEMax(double eMax);
   void setEFixed(const std::string &eFixed);
   void setRebinInEnergy(bool scale);
-  std::string getEFixedFromInstrument(std::string instrumentName, std::string analyser, std::string reflection);
+  std::string getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
+                                      std::string const &reflection);
   std::string getOutputWorkspace();
   MatrixWorkspace_sptr getRqwWorkspace();
   UserInputValidator validate(std::tuple<double, double> const qRange, std::tuple<double, double> const eRange);

@@ -150,8 +150,8 @@ UserInputValidator IndirectSqwModel::validate(std::tuple<double, double> const q
   return uiv;
 }
 
-std::string IndirectSqwModel::getEFixedFromInstrument(std::string instrumentName, std::string analyser,
-                                                      std::string reflection) {
+std::string IndirectSqwModel::getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
+                                                      std::string const &reflection) {
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")

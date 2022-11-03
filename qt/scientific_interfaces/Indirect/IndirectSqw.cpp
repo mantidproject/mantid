@@ -95,13 +95,8 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
  */
 void IndirectSqw::handleInstrumentConfigChanged(const QString &instrumentName, const QString &analyser,
                                                 const QString &reflection) {
-
-  std::string instrumentNameString = instrumentName.toStdString();
-  std::string analyserString = analyser.toStdString();
-  std::string reflectionString = reflection.toStdString();
-
-  std::string eFixed = m_model->getEFixedFromInstrument(m_view->getInstrumentName(), m_view->getAnalyserName(),
-                                                        m_view->getReflectionName());
+  std::string eFixed =
+      m_model->getEFixedFromInstrument(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
   m_model->setEFixed(eFixed);
 }
 
