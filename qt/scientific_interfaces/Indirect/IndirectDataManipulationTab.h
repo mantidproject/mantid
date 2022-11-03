@@ -36,9 +36,6 @@ class IndirectDataReduction;
 
   This class defines common functionality of tabs used in the Indirect Data
   Manipulation interface.
-
-  @author Samuel Jackson
-  @date 13/08/2013
 */
 class DLLExport IndirectDataManipulationTab : public IndirectTab {
   Q_OBJECT

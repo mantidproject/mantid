@@ -27,9 +27,6 @@ instrument settings
 and sets up the appropriate interface depending on the deltaE mode of the
 instrument. The deltaE
 mode is defined in the instrument definition file using the "deltaE-mode".
-
-@author Martyn Gigg, Tessella Support Services plc
-@author Michael Whitty
 */
 
 class IndirectDataManipulation : public IndirectInterface {

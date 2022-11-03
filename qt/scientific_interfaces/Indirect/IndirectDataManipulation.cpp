@@ -125,7 +125,7 @@ void IndirectDataManipulation::instrumentLoadingDone(bool error) {
   if (error) {
     g_log.warning("Instument loading failed! This instrument (or "
                   "analyser/reflection configuration) may not be supported by "
-                  "the interface.");
+                  "this interface.");
     return;
   }
 }

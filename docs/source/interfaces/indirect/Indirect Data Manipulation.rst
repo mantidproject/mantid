@@ -1,4 +1,4 @@
-.. _interface-indirect-data-manipulation:
+.. _interface-inelastic-data-manipulation:
 
 Indirect Data Manipulation
 ==========================
