@@ -31,9 +31,9 @@ using namespace Functions;
 
 void ConvolveWorkspaces::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace1", "", Direction::Input),
-                  "The name of the first input workspace.");
+                  "The name of the resolution workspace");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace2", "", Direction::Input),
-                  "The name of the second input workspace.");
+                  "The name of the data workspace.");
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
@@ -47,7 +47,7 @@ void ConvolveWorkspaces::exec() {
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  Workspace2D_sptr outputWS = std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws1));
+  Workspace2D_sptr outputWS = std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws2));
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms()) {

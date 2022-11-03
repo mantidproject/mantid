@@ -12,6 +12,8 @@ Description
 Convolution of two workspaces using :ref:`Convolution <func-Convolution>` from
 CurveFitting. Workspaces must have the same number of spectra.
 
+The resolution workspace will be evaluated in the range :math:`-L` to :math:`+L` where :math:`L` is defined in terms of the :math:`x` range of the data workspace as follows :math:`L=(x_{max}-x_{min})/2`. The resolution workspace therefore needs to have values specified in this range.
+
 Usage
 -----
 
