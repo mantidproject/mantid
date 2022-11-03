@@ -34,13 +34,11 @@ public:
   virtual void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) = 0;
   virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
   virtual void setUpInstrument(const std::string &fileName,
-                               std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) = 0;
-  virtual void addObserver(std::tuple<std::string, Observer *> &listener) = 0;
+                               std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) = 0;
   virtual void setupHelp() = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView : public QSplitter,
-                                                                    virtual IBaseCustomInstrumentView {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView : public QWidget, public IBaseCustomInstrumentView {
   Q_OBJECT
 
 public:
@@ -52,15 +50,16 @@ public:
   void warningBox(const std::string &message) override;
   void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) override { m_instrumentWidget = instrument; };
   MantidWidgets::InstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
-  virtual void setUpInstrument(const std::string &fileName,
-                               std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) override;
-  virtual void addObserver(std::tuple<std::string, Observer *> &listener) override { (void)listener; };
+  void setUpInstrument(const std::string &fileName,
+                       std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) override;
   void setupHelp() override;
-  void extractSingleTube();
 
 public slots:
   void fileLoaded();
   void openHelp();
+  void selectWholeTube();
+  void extractSingleTube();
+  void averageTube();
 
 protected:
   std::string m_helpPage;
@@ -69,6 +68,8 @@ protected:
 private:
   void warningBox(const QString &message);
 
+  QAction *m_extractAction;
+  QAction *m_averageAction;
   API::FileFinderWidget *m_files;
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;

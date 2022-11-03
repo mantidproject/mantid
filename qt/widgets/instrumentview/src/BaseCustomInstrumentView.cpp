@@ -13,28 +13,42 @@
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
-#include <QSplitter>
 #include <QVBoxLayout>
 
 namespace MantidQt::MantidWidgets {
 
 BaseCustomInstrumentView::BaseCustomInstrumentView(const std::string &instrument, QWidget *parent)
-    : QSplitter(Qt::Vertical, parent), m_helpPage(""), m_files(nullptr),
-      m_instrument(QString::fromStdString(instrument)), m_instrumentWidget(nullptr), m_help(nullptr) {
-  auto loadWidget = generateLoadWidget();
-  this->addWidget(loadWidget);
+    : QWidget(parent), m_extractAction(nullptr), m_averageAction(nullptr), m_helpPage("direct/ALF View"),
+      m_files(nullptr), m_instrument(QString::fromStdString(instrument)), m_instrumentWidget(nullptr), m_help(nullptr) {
 }
 
 void BaseCustomInstrumentView::subscribePresenter(MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *presenter) {
   m_presenter = presenter;
 }
 
-void BaseCustomInstrumentView::setUpInstrument(
-    const std::string &fileName, std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) {
-
-  (void)instrument;
-  auto instrumentWidget = new InstrumentWidget(QString::fromStdString(fileName));
+void BaseCustomInstrumentView::setUpInstrument(const std::string &fileName,
+                                               std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
+  auto instrumentWidget =
+      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
+                                          MantidWidgets::InstrumentWidget::Dependencies(), false);
+  instrumentWidget->removeTab("Instrument");
+  instrumentWidget->removeTab("Draw");
   instrumentWidget->hideHelp();
+
+  auto pickTab = instrumentWidget->getPickTab();
+
+  connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
+
+  // set up extract single tube
+  m_extractAction = new QAction("Extract Single Tube", this);
+  connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube()));
+  pickTab->addToContextMenu(m_extractAction, binders[0]);
+
+  // set up add to average
+  m_averageAction = new QAction("Add Tube To Average", this);
+  connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube()));
+  pickTab->addToContextMenu(m_averageAction, binders[1]);
+
   setInstrumentWidget(instrumentWidget);
 }
 
@@ -64,7 +78,7 @@ void BaseCustomInstrumentView::setupHelp() {
   helpLayout->addWidget(m_help);
 
   helpLayout->addItem(new QSpacerItem(1000, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
-  this->addWidget(helpWidget);
+  // this->addWidget(helpWidget);
   connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
 }
 
@@ -95,6 +109,26 @@ void BaseCustomInstrumentView::fileLoaded() {
     return;
   }
   m_presenter->loadRunNumber();
+}
+
+void BaseCustomInstrumentView::selectWholeTube() {
+  auto pickTab = getInstrumentView()->getPickTab();
+  pickTab->setPlotType(MantidQt::MantidWidgets::IWPickPlotType::TUBE_INTEGRAL);
+  pickTab->setTubeXUnits(MantidQt::MantidWidgets::IWPickXUnits::OUT_OF_PLANE_ANGLE);
+}
+
+void BaseCustomInstrumentView::extractSingleTube() {
+  MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
+  instrumentView->getPickTab()->savePlotToWorkspace();
+
+  m_presenter->extractSingleTube();
+}
+
+void BaseCustomInstrumentView::averageTube() {
+  MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
+  instrumentView->getPickTab()->savePlotToWorkspace();
+
+  m_presenter->averageTube();
 }
 
 void BaseCustomInstrumentView::warningBox(const std::string &message) { warningBox(QString::fromStdString(message)); }
