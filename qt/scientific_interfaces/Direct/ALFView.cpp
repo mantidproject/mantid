@@ -19,7 +19,7 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   this->setWindowTitle("ALF View");
 
   m_instrumentModel = std::make_unique<MantidWidgets::BaseCustomInstrumentModel>();
-  m_instrumentPresenter = std::make_unique<ALFCustomInstrumentPresenter>(
+  m_instrumentPresenter = std::make_unique<MantidWidgets::BaseCustomInstrumentPresenter>(
       new ALFCustomInstrumentView(m_instrumentModel->getInstrument(), this), m_instrumentModel.get());
 
   m_analysisPresenter = std::make_unique<MantidWidgets::PlotFitAnalysisPanePresenter>(

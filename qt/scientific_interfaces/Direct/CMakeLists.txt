@@ -1,6 +1,6 @@
-set(SRC_FILES ALFView.cpp ALFCustomInstrumentView.cpp ALFCustomInstrumentPresenter.cpp)
+set(SRC_FILES ALFView.cpp ALFCustomInstrumentView.cpp)
 
-set(MOC_FILES ALFView.h ALFCustomInstrumentView.h ALFCustomInstrumentPresenter.h)
+set(MOC_FILES ALFView.h ALFCustomInstrumentView.h)
 
 set(INC_FILES DllConfig.h ALFCustomInstrumentMocks.h)
 

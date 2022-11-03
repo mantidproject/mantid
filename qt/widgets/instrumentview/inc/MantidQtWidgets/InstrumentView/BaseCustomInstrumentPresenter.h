@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
 
 #include <string>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,8 +31,8 @@ public:
 
   QWidget *getLoadWidget();
   MantidWidgets::InstrumentWidget *getInstrumentView();
-  virtual void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
-  virtual void addInstrument();
+  virtual void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp);
+  void addInstrument();
 
   void extractSingleTube();
   void averageTube();
@@ -39,8 +40,8 @@ public:
 
 protected:
   virtual void loadAndAnalysis(const std::string &run);
-  virtual void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
-  virtual std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() { return nullptr; };
+  virtual void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp);
+  std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
   MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
   IBaseCustomInstrumentView *m_view;

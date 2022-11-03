@@ -17,6 +17,7 @@ BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(IBaseCustomInstrume
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile("") {
   m_view->subscribePresenter(this);
   m_model->loadEmptyInstrument();
+  addInstrument();
 }
 
 void BaseCustomInstrumentPresenter::subscribeAnalysisPresenter(
@@ -35,7 +36,7 @@ MantidWidgets::InstrumentWidget *BaseCustomInstrumentPresenter::getInstrumentVie
   return m_view->getInstrumentView();
 }
 
-void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
+void BaseCustomInstrumentPresenter::initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp) {
   initInstrument(setUp);
   m_view->setupHelp();
 }
@@ -81,14 +82,40 @@ void BaseCustomInstrumentPresenter::averageTube() {
   m_analysisPresenter->addSpectrum(WSName);
 }
 
-void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {
-  if (!setUp) {
-    return;
-  }
+void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp) {
   // set up instrument
-  auto instrumentSetUp = setUp->first;
+  auto instrumentSetUp = setUp.first;
 
   m_view->setUpInstrument(instrumentSetUp.first, instrumentSetUp.second);
+}
+
+using instrumentSetUp = std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>>;
+using instrumentObserverOptions = std::vector<std::tuple<std::string, Observer *>>;
+
+/**
+* This creates the custom instrument widget
+* @return <instrumentSetUp,
+    instrumentObserverOptions> : a pair of the conditions and observers
+*/
+std::pair<instrumentSetUp, instrumentObserverOptions> BaseCustomInstrumentPresenter::setupInstrument() {
+  instrumentSetUp setUpContextConditions;
+
+  // set up the slots for the custom context menu
+  std::vector<std::tuple<std::string, Observer *>> customInstrumentOptions;
+  std::vector<std::function<bool(std::map<std::string, bool>)>> binders;
+
+  // set up custom context menu conditions
+  std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
+      std::bind(&MantidWidgets::IBaseCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
+  std::function<bool(std::map<std::string, bool>)> averageTubeConditionBinder =
+      std::bind(&MantidWidgets::IBaseCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
+
+  binders.emplace_back(extractConditionBinder);
+  binders.emplace_back(averageTubeConditionBinder);
+
+  setUpContextConditions = std::make_pair(m_model->dataFileName(), binders);
+
+  return std::make_pair(setUpContextConditions, customInstrumentOptions);
 }
 
 } // namespace MantidQt::MantidWidgets
