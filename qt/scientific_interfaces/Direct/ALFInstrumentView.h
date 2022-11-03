@@ -32,8 +32,7 @@ public:
   virtual void warningBox(const std::string &message) = 0;
   virtual void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) = 0;
   virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
-  virtual void setUpInstrument(const std::string &fileName,
-                               std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) = 0;
+  virtual void setUpInstrument(const std::string &fileName) = 0;
   virtual void setupHelp() = 0;
 };
 
@@ -49,8 +48,7 @@ public:
   void warningBox(const std::string &message) override;
   void setInstrumentWidget(MantidWidgets::InstrumentWidget *instrument) override { m_instrumentWidget = instrument; };
   MantidWidgets::InstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
-  void setUpInstrument(const std::string &fileName,
-                       std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) override;
+  void setUpInstrument(const std::string &fileName) override;
   void setupHelp() override;
 
 public slots:

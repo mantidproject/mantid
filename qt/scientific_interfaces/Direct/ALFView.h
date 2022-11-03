@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "BaseCustomInstrumentModel.h"
-#include "BaseCustomInstrumentPresenter.h"
+#include "ALFInstrumentModel.h"
+#include "ALFInstrumentPresenter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 

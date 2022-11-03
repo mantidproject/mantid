@@ -10,10 +10,27 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
+#include <map>
+#include <string>
+
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
 #include <QVBoxLayout>
+
+namespace {
+
+bool hasCurve(std::map<std::string, bool> properties) {
+  auto const stored = properties.find("plotStored");
+  auto const curve = properties.find("hasCurve");
+  return (stored != properties.cend() && stored->second) || (curve != properties.cend() && curve->second);
+}
+
+std::function<bool(std::map<std::string, bool>)> canExtractTube = [](std::map<std::string, bool> properties) -> bool {
+  return (properties.find("isTube")->second && hasCurve(properties));
+};
+
+} // namespace
 
 namespace MantidQt::CustomInterfaces {
 
@@ -24,8 +41,7 @@ ALFInstrumentView::ALFInstrumentView(const std::string &instrument, QWidget *par
 
 void ALFInstrumentView::subscribePresenter(ALFInstrumentPresenter *presenter) { m_presenter = presenter; }
 
-void ALFInstrumentView::setUpInstrument(const std::string &fileName,
-                                        std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
+void ALFInstrumentView::setUpInstrument(const std::string &fileName) {
   auto instrumentWidget =
       new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
                                           MantidWidgets::InstrumentWidget::Dependencies(), false);
@@ -40,12 +56,18 @@ void ALFInstrumentView::setUpInstrument(const std::string &fileName,
   // set up extract single tube
   m_extractAction = new QAction("Extract Single Tube", this);
   connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube()));
-  pickTab->addToContextMenu(m_extractAction, binders[0]);
+  pickTab->addToContextMenu(m_extractAction, canExtractTube);
+
+  std::function<bool(std::map<std::string, bool>)> canAverageTube =
+      [&](std::map<std::string, bool> properties) -> bool {
+    return (m_presenter->numberOfTubesInAverage() > 0 && properties.find("isTube")->second && hasCurve(properties) &&
+            m_presenter->hasTubeBeenExtracted());
+  };
 
   // set up add to average
   m_averageAction = new QAction("Add Tube To Average", this);
   connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube()));
-  pickTab->addToContextMenu(m_averageAction, binders[1]);
+  pickTab->addToContextMenu(m_averageAction, canAverageTube);
 
   setInstrumentWidget(instrumentWidget);
 }

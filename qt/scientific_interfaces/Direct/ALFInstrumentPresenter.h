@@ -30,13 +30,12 @@ public:
 
   void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter);
 
-  typedef std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>> instrumentSetUp;
-  typedef std::vector<std::tuple<std::string, Observer *>> instrumentObserverOptions;
-
   QWidget *getLoadWidget();
   MantidWidgets::InstrumentWidget *getInstrumentView();
-  virtual void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp);
   void addInstrument();
+
+  bool hasTubeBeenExtracted() const;
+  int numberOfTubesInAverage() const;
 
   void extractSingleTube();
   void averageTube();
@@ -44,8 +43,6 @@ public:
 
 protected:
   virtual void loadAndAnalysis(const std::string &run);
-  virtual void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> &setUp);
-  std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
   MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
   IALFInstrumentView *m_view;

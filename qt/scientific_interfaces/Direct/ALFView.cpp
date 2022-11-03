@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
-#include "BaseCustomInstrumentView.h"
+#include "ALFInstrumentView.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
