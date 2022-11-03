@@ -141,7 +141,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _setup_standard_data(self, paths, file_selector):
         if self._corrections:
-            self._standard_data = DNSDataset(data=file_selector['standard_data'],
+            self._standard_data = DNSDataset(data=file_selector['standard_data_tree_model'],
                                              path=paths['standards_dir'],
                                              is_sample=False,
                                              fields=self._sample_data.fields)
