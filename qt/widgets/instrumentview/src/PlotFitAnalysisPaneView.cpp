@@ -5,8 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionFactory.h"
+
+#include <tuple>
+#include <utility>
 
 #include <QLabel>
 #include <QMessageBox>
@@ -15,13 +16,29 @@
 #include <QSpacerItem>
 #include <QSplitter>
 #include <QVBoxLayout>
-#include <utility>
+
+namespace {
+
+std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus) {
+  QString color("black"), status("");
+  if (fitStatus.contains("success")) {
+    color = "green", status = "Fit success";
+  } else if (fitStatus.contains("Failed to converge")) {
+    color = "darkOrange", status = fitStatus;
+  } else if (!fitStatus.isEmpty()) {
+    color = "red", status = fitStatus;
+  }
+  return {"QLabel { color: " + color + "; }", status};
+}
+
+} // namespace
 
 namespace MantidQt::MantidWidgets {
 
 PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent)
-    : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
-      m_fitObservable(nullptr), m_updateEstimateObservable(nullptr) {
+    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
+      m_peakCentreObservable(new Observable()), m_fitObservable(new Observable()),
+      m_updateEstimateObservable(new Observable()) {
   setupPlotFitSplitter(start, end);
 }
 
@@ -42,51 +59,77 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start, const doubl
   auto fitPane = new QWidget();
   auto fitPaneLayout = new QVBoxLayout(fitPane);
 
-  auto fitButtons = new QWidget();
-  auto layout = new QHBoxLayout(fitButtons);
-  m_fitButton = new QPushButton("Fit");
-  m_updateEstimateButton = new QPushButton("Update Estimate");
-  m_fitObservable = new Observable();
-  m_updateEstimateObservable = new Observable();
-  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(doFit()));
-  connect(m_updateEstimateButton, SIGNAL(clicked()), this, SLOT(updateEstimate()));
+  auto fitRangeWidget = setupFitRangeWidget(start, end);
+  fitPaneLayout->addWidget(fitRangeWidget);
 
-  layout->addWidget(m_fitButton);
-  layout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
-  layout->addWidget(m_updateEstimateButton);
+  auto fitButtonsWidget = setupFitButtonsWidget();
+  fitPaneLayout->addWidget(fitButtonsWidget);
 
-  fitPaneLayout->addWidget(fitButtons);
-
-  m_fitBrowser = new MantidWidgets::FunctionBrowser(this);
-  fitPaneLayout->addWidget(m_fitBrowser);
-
-  auto *startText = new QLabel("Fit from:");
-  m_start = new QLineEdit(QString::number(start));
-  auto startValidator = new QDoubleValidator(m_start);
-  auto endValidator = new QDoubleValidator(m_start);
-  m_start->setValidator(startValidator);
-  auto *endText = new QLabel("to:");
-  m_end = new QLineEdit(QString::number(end));
-  m_end->setValidator(endValidator);
-  auto *range = new QWidget();
-  auto *rangeLayout = new QHBoxLayout(range);
-  rangeLayout->addWidget(startText);
-  rangeLayout->addWidget(m_start);
-  rangeLayout->addWidget(endText);
-  rangeLayout->addWidget(m_end);
-  fitPaneLayout->addWidget(range);
+  auto peakCentreWidget = setupPeakCentreWidget((start + end) / 2.0);
+  fitPaneLayout->addWidget(peakCentreWidget);
 
   return fitPane;
 }
 
-void PlotFitAnalysisPaneView::doFit() {
-  auto function = m_fitBrowser->getFunction();
-  if (function) {
-    m_fitObservable->notify();
-  }
+QWidget *PlotFitAnalysisPaneView::setupFitRangeWidget(const double start, const double end) {
+  auto *rangeWidget = new QWidget();
+  auto *rangeLayout = new QHBoxLayout(rangeWidget);
+
+  m_start = new QLineEdit(QString::number(start));
+  m_start->setValidator(new QDoubleValidator(m_start));
+
+  m_end = new QLineEdit(QString::number(end));
+  m_end->setValidator(new QDoubleValidator(m_end));
+
+  rangeLayout->addWidget(new QLabel("Fit from:"));
+  rangeLayout->addWidget(m_start);
+  rangeLayout->addWidget(new QLabel("to:"));
+  rangeLayout->addWidget(m_end);
+  return rangeWidget;
 }
 
-void PlotFitAnalysisPaneView::updateEstimate() { m_updateEstimateObservable->notify(); }
+QWidget *PlotFitAnalysisPaneView::setupFitButtonsWidget() {
+  auto fitButtonsWidget = new QWidget();
+  auto fitButtonsLayout = new QHBoxLayout(fitButtonsWidget);
+
+  m_fitButton = new QPushButton("Fit");
+  m_updateEstimateButton = new QPushButton("Update Estimate");
+
+  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(notifyFitClicked()));
+  connect(m_updateEstimateButton, SIGNAL(clicked()), this, SLOT(notifyUpdateEstimateClicked()));
+
+  fitButtonsLayout->addWidget(m_fitButton);
+  fitButtonsLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  fitButtonsLayout->addWidget(m_updateEstimateButton);
+  return fitButtonsWidget;
+}
+
+QWidget *PlotFitAnalysisPaneView::setupPeakCentreWidget(const double centre) {
+  auto *peakCentreWidget = new QWidget();
+  auto *peakCentreLayout = new QGridLayout(peakCentreWidget);
+
+  m_peakCentre = new QLineEdit(QString::number(centre));
+  m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
+
+  connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
+
+  peakCentreLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
+  peakCentreLayout->addWidget(m_peakCentre, 0, 1);
+
+  m_fitStatus = new QLabel("");
+  m_fitStatus->setAlignment(Qt::AlignRight);
+  setPeakCentreStatus("");
+
+  peakCentreLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
+
+  return peakCentreWidget;
+}
+
+void PlotFitAnalysisPaneView::notifyPeakCentreEditingFinished() { m_peakCentreObservable->notify(); }
+
+void PlotFitAnalysisPaneView::notifyFitClicked() { m_fitObservable->notify(); }
+
+void PlotFitAnalysisPaneView::notifyUpdateEstimateClicked() { m_updateEstimateObservable->notify(); }
 
 void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
@@ -96,19 +139,18 @@ void PlotFitAnalysisPaneView::addFitSpectrum(const std::string &wsName) {
 }
 
 std::pair<double, double> PlotFitAnalysisPaneView::getRange() {
-  double start = m_start->text().toDouble();
-  double end = m_end->text().toDouble();
-  return std::make_pair(start, end);
+  return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
 }
 
-Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() { return m_fitBrowser->getFunction(); }
+void PlotFitAnalysisPaneView::setPeakCentre(const double centre) { m_peakCentre->setText(QString::number(centre)); }
 
-void PlotFitAnalysisPaneView::updateFunction(const Mantid::API::IFunction_sptr func) {
-  m_fitBrowser->updateMultiDatasetParameters(*func);
-}
+double PlotFitAnalysisPaneView::peakCentre() const { return m_peakCentre->text().toDouble(); }
 
-void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {
-  m_fitBrowser->setFunction(std::move(func));
+void PlotFitAnalysisPaneView::setPeakCentreStatus(const std::string &status) {
+  const auto [stylesheet, tooltip] = getPeakCentreUIProperties(QString::fromStdString(status));
+  m_fitStatus->setStyleSheet(stylesheet);
+  m_fitStatus->setText(tooltip);
+  m_fitStatus->setToolTip(tooltip);
 }
 
 void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {

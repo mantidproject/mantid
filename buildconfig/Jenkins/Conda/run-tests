@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# This script expects a setup environment with all dependencies availiable in
+# This script expects a setup environment with all dependencies available in
 # the environment
 #
 # Expected args:
@@ -92,10 +92,14 @@ else
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest
 fi
 
+
+
 # Run unit tests
 cd $WORKSPACE/build
+# mkdir for ctest log
+mkdir -p ctest_log
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O ctest_log/$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
     terminate_xvfb_sessions
 fi
 

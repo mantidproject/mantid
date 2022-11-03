@@ -18,7 +18,7 @@ namespace DataHandling {
 
 /*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
  */
-class DLLExport LoadILLReflectometry : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLReflectometry : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLReflectometry() = default;
   /// Returns a confidence value that this algorithm can load a file
@@ -45,19 +45,19 @@ private:
   double sampleDetectorDistance() const;
   double sourceSampleDistance() const;
   void sampleHorizontalOffset();
-  void sampleAngle(NeXus::NXEntry &entry);
+  void sampleAngle(const NeXus::NXEntry &entry);
   void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
-  void initNames(NeXus::NXEntry &entry);
+  void initNames(const NeXus::NXEntry &entry);
   void initPixelWidth();
-  void loadDataDetails(NeXus::NXEntry &entry);
+  void loadDataDetails(const NeXus::NXEntry &entry);
   std::vector<double> getXValues();
   void convertTofToWavelength();
   double reflectometryPeak();
-  void loadData(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
+  void loadData(const NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
                 const std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties();
-  std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry, const std::string &monitor_data);
-  std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
+  std::vector<int> loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data);
+  std::vector<std::vector<int>> loadMonitors(const NeXus::NXEntry &entry);
   void loadInstrument();
   double peakOffsetAngle();
   void addSampleLogs();
@@ -66,20 +66,17 @@ private:
   void placeSlits();
   void placeSource();
   double collimationAngle() const;
-  double detectorAngle() const;
   double offsetAngle(const double peakCentre, const double detectorCentre, const double detectorDistance) const;
   Supported m_instrument{Supported::D17};
   size_t m_acqMode{1}; ///(1: TOF (default), 0: monochromatic)
   size_t m_numberOfChannels{0};
   size_t m_numberOfHistograms{0};
-  std::string m_detectorAngleName;
   std::string m_sampleAngleName;
   std::string m_offsetFrom;
   std::string m_chopper1Name;
   std::string m_chopper2Name;
   double m_tofDelay{0.0};
   double m_channelWidth{0.0};
-  double m_detectorAngle{0.0};
   double m_detectorDistance{0.0};
   double m_pixelWidth{0.0};
   double m_sampleZOffset{0.0};

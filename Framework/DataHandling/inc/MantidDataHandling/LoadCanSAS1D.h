@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -35,7 +36,7 @@ Required properties:
 @author Sofia Antony, Rutherford Appleton Laboratory
 @date 26/01/2010
 */
-class DLLExport LoadCanSAS1D : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadCanSAS1D : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadCanSAS1D"; }

@@ -42,8 +42,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
-PreviewJobManager::PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory)
-    : m_jobRunner(jobRunner), m_algFactory(std::move(algFactory)) {
+PreviewJobManager::PreviewJobManager(std::unique_ptr<IJobRunner> jobRunner,
+                                     std::unique_ptr<IReflAlgorithmFactory> algFactory)
+    : m_jobRunner(std::move(jobRunner)), m_algFactory(std::move(algFactory)) {
   m_jobRunner->subscribe(this);
 }
 
@@ -95,9 +96,11 @@ void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algo
     break;
   case AlgorithmType::SUM_BANKS:
     g_log.error(std::string("Error summing banks: ") + message);
+    m_notifyee->notifySumBanksAlgorithmError();
     break;
   case AlgorithmType::REDUCTION:
     g_log.error(std::string("Error performing reduction: ") + message);
+    m_notifyee->notifyReductionAlgorithmError();
     break;
   };
 }

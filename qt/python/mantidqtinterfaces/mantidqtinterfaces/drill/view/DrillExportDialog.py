@@ -25,7 +25,8 @@ class DrillExportDialog(QDialog):
     _presenter = None
 
     """
-    Dictionnary of algorithm names and their corresponding QCheckBox.
+    Dictionnary of algorithm (names, ext) tuples and their corresponding
+    QCheckBox.
     """
     _widgets = None
 
@@ -56,42 +57,39 @@ class DrillExportDialog(QDialog):
         """
         self._presenter = presenter
 
-    def setAlgorithms(self, algorithms, extensions, tooltips):
+    def setAlgorithms(self, algorithms, tooltips):
         """
         Set the algorithms displayed on the dialog.
 
         Args:
-            algorithms (list(str)): list of algorithms
-            extensions (dict(str:str)): extension used by each algorithm
+            algorithms (list((str, ext))): list of algorithms and extensions
             tooltips (dict(str:str)): short doc of each algorithm
         """
-        for i in range(len(algorithms)):
-            algo = algorithms[i]
-            if algo in extensions:
-                text = algo + " (" + extensions[algo] + ")"
-            else:
-                text = algo
+        i = 0
+        for (name, ext) in algorithms:
+            text = name + " (" + ext + ")"
             widget = QCheckBox(text, self)
-            if algo in tooltips:
-                widget.setToolTip(tooltips[algo])
-            self._widgets[algorithms[i]] = widget
+            if name in tooltips:
+                widget.setToolTip(tooltips[name])
+            self._widgets[(name, ext)] = widget
             self.algoList.addWidget(widget, i, 0, Qt.AlignLeft)
             helpButton = QToolButton(self)
             helpButton.setText('...')
             helpButton.setIcon(icons.get_icon("mdi.help"))
             helpButton.clicked.connect(
-                    lambda _, a=algorithms[i]: InterfaceManager().showHelpPage(
+                    lambda _, a=name: InterfaceManager().showHelpPage(
                         "qthelp://org.mantidproject/doc/algorithms/{}.html"
                         .format(a)))
             self.algoList.addWidget(helpButton, i, 1, Qt.AlignRight)
+            i += 1
 
     def setAlgorithmCheckStates(self, states):
         """
         Set the check state of algorithm.
 
         Args:
-            sates (dict(str:bool)): for each algorithm name, a bool to set its
-                                    check state
+            sates (dict((str, str): bool)): activation state for each algorithm
+                                            (name, ext) tuple
         """
         for a,s in states.items():
             if a in self._widgets:
@@ -102,7 +100,7 @@ class DrillExportDialog(QDialog):
         Get the check state of algorithms.
 
         Returns:
-            dict(str:bool): for each algorithm name, a bool to set its check
-                            state
+            dict((str, str): bool): activation state for each algorithm
+                                    (name, ext) tuple
         """
         return {a:w.isChecked() for a,w in self._widgets.items()}

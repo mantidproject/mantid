@@ -38,6 +38,7 @@ class MANTID_API_DLL MDGeometry {
 public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
+  MDGeometry &operator=(const MDGeometry &other);
   virtual ~MDGeometry();
   void initGeometry(const std::vector<std::shared_ptr<Geometry::IMDDimension>> &dimensions);
 

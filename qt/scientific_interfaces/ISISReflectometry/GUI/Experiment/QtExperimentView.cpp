@@ -33,7 +33,8 @@ std::unordered_map<int, std::string> ColumnPropertyNames{
     {LookupRow::QSTEP, "MomentumTransferStep"},
     {LookupRow::SCALE, "ScaleFactor"},
     {LookupRow::RUN_SPECTRA, "ProcessingInstructions"},
-    {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"}};
+    {LookupRow::BACKGROUND_SPECTRA, "BackgroundProcessingInstructions"},
+    {LookupRow::ROI_DETECTOR_IDS, "ROIDetectorIDs"}};
 
 // Changing the palette for spin boxes doesn't work but we can
 // change the background colour with a style sheet. This also changes
@@ -98,7 +99,7 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   initOptionsTable(algorithmForTooltips);
   initFloodControls();
 
-  auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
+  auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace", "ScaleRHSWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   createStitchHints(strategy.createHints());
 
@@ -656,7 +657,7 @@ std::vector<LookupRow::ValueArray> QtExperimentView::getLookupTable() const {
         textFromCell(table.item(row, Col::TRANS_SPECTRA)), textFromCell(table.item(row, Col::QMIN)),
         textFromCell(table.item(row, Col::QMAX)), textFromCell(table.item(row, Col::QSTEP)),
         textFromCell(table.item(row, Col::SCALE)), textFromCell(table.item(row, Col::RUN_SPECTRA)),
-        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA))});
+        textFromCell(table.item(row, Col::BACKGROUND_SPECTRA)), textFromCell(table.item(row, Col::ROI_DETECTOR_IDS))});
   }
   return rows;
 }

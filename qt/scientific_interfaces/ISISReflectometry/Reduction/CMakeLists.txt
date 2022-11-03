@@ -38,6 +38,7 @@ set(REDUCTION_INC_FILES
     ReductionJobs.h
     ReductionWorkspaces.h
     Row.h
+    RowExceptions.h
     RowLocation.h
     Slicing.h
     ValidateRow.h

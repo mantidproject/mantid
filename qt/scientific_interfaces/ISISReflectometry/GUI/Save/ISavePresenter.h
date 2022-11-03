@@ -24,6 +24,7 @@ public:
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
   virtual void saveWorkspaces(std::vector<std::string> const &workspaceNames) = 0;
   virtual bool shouldAutosave() const = 0;
+  virtual bool shouldAutosaveGroupRows() const = 0;
 
   /// Tell the presenter something happened
   virtual void notifyReductionPaused() = 0;

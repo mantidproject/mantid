@@ -169,7 +169,7 @@ void InstrumentWidgetDecoder::decodePickTab(const QMap<QString, QVariant> &map, 
 }
 
 void InstrumentWidgetDecoder::decodeActor(const QMap<QString, QVariant> &map, std::unique_ptr<InstrumentActor> &obj) {
-  obj->loadColorMap(map[QString("fileName")].toString());
+  obj->loadColorMap(std::make_pair(map[QString("fileName")].toString(), map[QString("highlightZeroCounts")].toBool()));
 
   this->decodeBinMasks(map[QString("binMasks")].toList(), obj->m_maskBinsData);
 }

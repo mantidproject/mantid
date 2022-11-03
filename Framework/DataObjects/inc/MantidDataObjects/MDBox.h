@@ -13,7 +13,6 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadScheduler.h"
 
 namespace Mantid {
@@ -43,7 +42,7 @@ namespace DataObjects {
  * */
 
 TMDE_CLASS
-class DLLExport MDBox : public MDBoxBase<MDE, nd> {
+class MANTID_DATAOBJECTS_DLL MDBox : public MDBoxBase<MDE, nd> {
 public:
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth = 0, const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);

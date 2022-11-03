@@ -14,6 +14,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include <sstream>
 
@@ -24,6 +25,7 @@ using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Constraints;
 using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
+using namespace Mantid::CurveFitting::NLLS;
 
 class TrustRegionMinimizerTest : public CxxTest::TestSuite {
 public:
@@ -31,6 +33,87 @@ public:
   // This means the constructor isn't called when running other tests
   static TrustRegionMinimizerTest *createSuite() { return new TrustRegionMinimizerTest(); }
   static void destroySuite(TrustRegionMinimizerTest *suite) { delete suite; }
+
+  void test_mat_mult_j() {
+    DoubleFortranMatrix m(4, 2);
+    m(1, 1) = 1;
+    m(2, 1) = 2;
+    m(3, 1) = 3;
+    m(4, 1) = 4;
+    m(1, 2) = 5;
+    m(2, 2) = 6;
+    m(3, 2) = 7;
+    m(4, 2) = 8;
+
+    DoubleFortranVector v(2);
+    v(1) = 1;
+    v(2) = 2;
+
+    DoubleFortranVector a;
+
+    multJ(m, v, a);
+
+    TS_ASSERT_EQUALS(a(1), 11);
+    TS_ASSERT_EQUALS(a(2), 14);
+    TS_ASSERT_EQUALS(a(3), 17);
+    TS_ASSERT_EQUALS(a(4), 20);
+  }
+
+  void test_mat_mult_j_tr() {
+    DoubleFortranMatrix m(4, 2);
+    m(1, 1) = 1;
+    m(2, 1) = 2;
+    m(3, 1) = 3;
+    m(4, 1) = 4;
+    m(1, 2) = 5;
+    m(2, 2) = 6;
+    m(3, 2) = 7;
+    m(4, 2) = 8;
+
+    DoubleFortranVector v(4);
+    v(1) = 1;
+    v(2) = 2;
+    v(3) = 3;
+    v(4) = 4;
+
+    DoubleFortranVector a;
+
+    multJt(m, v, a);
+
+    TS_ASSERT_EQUALS(a(1), 30);
+    TS_ASSERT_EQUALS(a(2), 70);
+  }
+
+  void test_mat_mult_inner() {
+    DoubleFortranMatrix m(4, 2);
+    m(1, 1) = 1;
+    m(2, 1) = 2;
+    m(3, 1) = 3;
+    m(4, 1) = 4;
+    m(1, 2) = 5;
+    m(2, 2) = 6;
+    m(3, 2) = 7;
+    m(4, 2) = 8;
+
+    DoubleFortranMatrix a;
+
+    matmultInner(m, a);
+
+    TS_ASSERT_EQUALS(a(1, 1), 30);
+    TS_ASSERT_EQUALS(a(2, 1), 70);
+    TS_ASSERT_EQUALS(a(1, 2), 70);
+    TS_ASSERT_EQUALS(a(2, 2), 174);
+  }
+
+  void test_norm_2() {
+    DoubleFortranVector v(4);
+    v(1) = 1;
+    v(2) = 2;
+    v(3) = 3;
+    v(4) = 4;
+
+    TS_ASSERT_DELTA(norm2(v), 5.477, 1e-3);
+  }
 
   void test_Linear() {
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
@@ -175,40 +258,7 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "success"); // Failed to converge
   }
 
-  void xtest_Linear_constrained() {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
-    API::FunctionValues mockData(*domain);
-    UserFunction dataMaker;
-    dataMaker.setAttributeValue("Formula", "a*x+b");
-    dataMaker.setParameter("a", 1.1);
-    dataMaker.setParameter("b", 2.2);
-    dataMaker.function(*domain, mockData);
-
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
-    values->setFitDataFromCalculated(mockData);
-    values->setFitWeights(1.0);
-
-    std::shared_ptr<UserFunction> fun = std::make_shared<UserFunction>();
-    fun->setAttributeValue("Formula", "a*x+b");
-    fun->setParameter("a", 1.);
-    fun->setParameter("b", 2.);
-
-    fun->addConstraint(std::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
-
-    std::shared_ptr<CostFuncLeastSquares> costFun = std::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(fun, domain, values);
-    TS_ASSERT_EQUALS(costFun->nParams(), 2);
-
-    TrustRegionMinimizer s;
-    s.initialize(costFun);
-    TS_ASSERT(s.minimize());
-
-    TS_ASSERT_DELTA(fun->getParameter("a"), 0.5, 0.1); // got 1.1
-    TS_ASSERT_DELTA(fun->getParameter("b"), 5.2, 0.2); // got 2.2
-    TS_ASSERT_EQUALS(s.getError(), "success");
-  }
-
-  void test_Linear_constrained1() {
+  void test_Linear_constrained() {
     API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(0.0, 10.0, 20));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
@@ -242,5 +292,20 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("a"), 1.0, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
+  }
+
+  void test_getSvdJ() {
+    DoubleFortranMatrix A(2, 3);
+    A(1, 1) = 3;
+    A(1, 2) = 2;
+    A(1, 3) = 2;
+    A(2, 1) = 2;
+    A(2, 2) = 3;
+    A(2, 3) = -2;
+    double s1 = 0;
+    double sn = 0;
+    getSvdJ(A, s1, sn);
+    TS_ASSERT_EQUALS(s1, 5);
+    TS_ASSERT_EQUALS(sn, 3);
   }
 };

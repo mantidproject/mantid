@@ -167,11 +167,6 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
  */
 void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
                                                  std::string &parent_class, int level, bool useFullPath) {
-
-  // Link ?
-
-  // Attributes ?
-
   // Classes
   NXstatus getnextentry_status; ///< return status
   int datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see

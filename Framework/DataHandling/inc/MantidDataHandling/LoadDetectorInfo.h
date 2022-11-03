@@ -7,13 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport LoadDetectorInfo final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadDetectorInfo final : public API::Algorithm {
 public:
   LoadDetectorInfo();
 

@@ -800,22 +800,23 @@ void InstrumentWidget::tabChanged(int /*unused*/) {
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
  * @param cmapNameOrPath Name of a color map or a file path
+ * @param highlightZeroDets Whether to highlight detectors with zero counts
  */
-void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
+void InstrumentWidget::changeColormap(const QString &cmapNameOrPath, const bool highlightZeroDets) {
   if (!m_instrumentActor)
     return;
   const auto currentCMap = m_instrumentActor->getCurrentColorMap();
 
-  QString selection;
+  std::pair<QString, bool> selection;
   if (cmapNameOrPath.isEmpty()) {
     // ask user
     selection = ColorMap::chooseColorMap(currentCMap, this);
-    if (selection.isEmpty()) {
+    if (selection.first.isEmpty()) {
       // assume cancelled request
       return;
     }
   } else {
-    selection = ColorMap::exists(cmapNameOrPath);
+    selection = std::make_pair(ColorMap::exists(cmapNameOrPath), highlightZeroDets);
   }
 
   if (selection == currentCMap) {
@@ -1024,7 +1025,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  HelpWindow::showPage(nullptr, std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
+  HelpWindow::showPage(std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
 }
 
 void InstrumentWidget::set3DAxesState(bool on) {

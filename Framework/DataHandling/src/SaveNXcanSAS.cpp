@@ -353,8 +353,7 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
  */
 void createNote(H5::Group &group) {
   auto process = group.openGroup(sasProcessGroupName);
-  auto note =
-      Mantid::DataHandling::H5Util::createGroupCanSAS(process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
+  Mantid::DataHandling::H5Util::createGroupCanSAS(process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
 }
 
 /**
@@ -674,10 +673,8 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
   // Add T with units + uncertainty definition
   const auto transmissionData = workspace->y(0);
   std::map<std::string, std::string> transmissionAttributes;
-  std::string unit;
-  if (unit.empty()) {
-    unit = sasNone;
-  }
+  std::string unit = sasNone;
+
   transmissionAttributes.emplace(sasUnitAttr, unit);
   transmissionAttributes.emplace(sasUncertaintyAttr, sasTransmissionSpectrumTdev);
   transmissionAttributes.emplace(sasUncertaintiesAttr, sasTransmissionSpectrumTdev);

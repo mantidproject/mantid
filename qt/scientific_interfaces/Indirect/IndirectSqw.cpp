@@ -22,178 +22,82 @@ using MantidQt::API::BatchAlgorithmRunner;
 namespace {
 Mantid::Kernel::Logger g_log("S(Q,w)");
 
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
-double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
-
-std::pair<double, double> roundToWidth(std::tuple<double, double> const &axisRange, double width) {
-  return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
-                        roundToPrecision(std::get<1>(axisRange), width) - width);
-}
-
-void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
-  auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
-  converter->initialize();
-  converter->setProperty("InputWorkspace", inputName);
-  converter->setProperty("OutputWorkspace", outputName);
-  converter->setProperty("Target", "ElasticQ");
-  converter->setProperty("EMode", "Indirect");
-  converter->execute();
-}
-
-std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &tuple) {
-  return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent) : IndirectDataReductionTab(idrUI, parent) {
-  m_uiForm.setupUi(parent);
+IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
+    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IndirectSqwModel>()),
+      m_view(std::make_unique<IndirectSqwView>(parent)) {
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraContour));
-
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
-
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
-
-  m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
-
-  // Allows empty workspace selector when initially selected
-  m_uiForm.dsSampleInput->isOptional(true);
-
-  // Disables searching for run files in the data archive
-  m_uiForm.dsSampleInput->isForRunFiles(false);
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraContour));
+  connectSignals();
 }
 
-IndirectSqw::~IndirectSqw() = default;
-
 void IndirectSqw::setup() {}
+
+/**
+ * Connects the signals in the interface.
+ *
+ */
+
+void IndirectSqw::connectSignals() {
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
+
+  connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
+  connect(m_view.get(), SIGNAL(qLowChanged(double)), this, SLOT(qLowChanged(double)));
+  connect(m_view.get(), SIGNAL(qWidthChanged(double)), this, SLOT(qWidthChanged(double)));
+  connect(m_view.get(), SIGNAL(qHighChanged(double)), this, SLOT(qHighChanged(double)));
+  connect(m_view.get(), SIGNAL(eLowChanged(double)), this, SLOT(eLowChanged(double)));
+  connect(m_view.get(), SIGNAL(eWidthChanged(double)), this, SLOT(eWidthChanged(double)));
+  connect(m_view.get(), SIGNAL(eHighChanged(double)), this, SLOT(eHighChanged(double)));
+  connect(m_view.get(), SIGNAL(rebinEChanged(int)), this, SLOT(rebinEChanged(int)));
+
+  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
+  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
+
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
+
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view.get(),
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
+}
 
 /**
  * Handles the event of data being loaded. Validates the loaded data.
  *
  */
 void IndirectSqw::handleDataReady(QString const &dataName) {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsSampleInput, "Sample", DataType::Red);
-
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty()) {
-    showMessageBox(errorMessage);
-  } else {
-    plotRqwContour(dataName.toStdString());
-    setDefaultQAndEnergy();
+  if (m_view->validate()) {
+    m_model->setInputWorkspace(dataName.toStdString());
+    try {
+      auto const eFixed = getInstrumentDetail("Efixed").toStdString();
+      m_model->setEFixed(eFixed);
+    } catch (std::runtime_error const &ex) {
+      emit showMessageBox(ex.what());
+      return;
+    }
+    plotRqwContour();
+    m_view->setDefaultQAndEnergy();
   }
 }
 
 bool IndirectSqw::validate() {
-  double const tolerance = 1e-10;
-  double const qLow = m_uiForm.spQLow->value();
-  double const qWidth = m_uiForm.spQWidth->value();
-  double const qHigh = m_uiForm.spQHigh->value();
-  auto const qRange = m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft);
-
-  UserInputValidator uiv;
-
-  // Validate the sample
-  validateDataIsOfType(uiv, m_uiForm.dsSampleInput, "Sample", DataType::Red);
-
-  // Validate Q binning
-  uiv.checkBins(qLow, qWidth, qHigh, tolerance);
-  uiv.checkRangeIsEnclosed("The contour plots Q axis", convertTupleToPair(qRange), "the Q range provided",
-                           std::make_pair(qLow, qHigh));
-
-  // If selected, validate energy binning
-  if (m_uiForm.ckRebinInEnergy->isChecked()) {
-    double const eLow = m_uiForm.spELow->value();
-    double const eWidth = m_uiForm.spEWidth->value();
-    double const eHigh = m_uiForm.spEHigh->value();
-    auto const eRange = m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
-
-    uiv.checkBins(eLow, eWidth, eHigh, tolerance);
-    uiv.checkRangeIsEnclosed("The contour plots Energy axis", convertTupleToPair(eRange), "the E range provided",
-                             std::make_pair(eLow, eHigh));
-  }
-
+  UserInputValidator uiv = m_model->validate(m_view->getQRangeFromPlot(), m_view->getERangeFromPlot());
   auto const errorMessage = uiv.generateErrorMessage();
-
   // Show an error message if needed
   if (!errorMessage.isEmpty())
     emit showMessageBox(errorMessage);
-
   return errorMessage.isEmpty();
 }
 
 void IndirectSqw::run() {
-  auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  auto const sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
-  auto const eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
-
-  auto const rebinString = m_uiForm.spQLow->text() + "," + m_uiForm.spQWidth->text() + "," + m_uiForm.spQHigh->text();
-
-  // Rebin in energy
-  bool const rebinInEnergy = m_uiForm.ckRebinInEnergy->isChecked();
-  if (rebinInEnergy) {
-    auto const eRebinString =
-        m_uiForm.spELow->text() + "," + m_uiForm.spEWidth->text() + "," + m_uiForm.spEHigh->text();
-
-    auto energyRebinAlg = AlgorithmManager::Instance().create("Rebin");
-    energyRebinAlg->initialize();
-    energyRebinAlg->setProperty("InputWorkspace", sampleWsName.toStdString());
-    energyRebinAlg->setProperty("OutputWorkspace", eRebinWsName.toStdString());
-    energyRebinAlg->setProperty("Params", eRebinString.toStdString());
-
-    m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
-  }
-
-  auto const eFixed = getInstrumentDetail("Efixed").toStdString();
-
-  auto sqwAlg = AlgorithmManager::Instance().create("SofQW");
-  sqwAlg->initialize();
-  sqwAlg->setProperty("OutputWorkspace", sqwWsName.toStdString());
-  sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
-  sqwAlg->setProperty("EMode", "Indirect");
-  sqwAlg->setProperty("EFixed", eFixed);
-  sqwAlg->setProperty("Method", "NormalisedPolygon");
-  sqwAlg->setProperty("ReplaceNaNs", true);
-
-  auto sqwInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  sqwInputProps->setPropertyValue("InputWorkspace",
-                                  rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString());
-
-  m_batchAlgoRunner->addAlgorithm(sqwAlg, std::move(sqwInputProps));
-
-  // Add sample log for S(Q, w) algorithm used
-  auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
-  sampleLogAlg->initialize();
-  sampleLogAlg->setProperty("LogName", "rebin_type");
-  sampleLogAlg->setProperty("LogType", "String");
-  sampleLogAlg->setProperty("LogText", "NormalisedPolygon");
-
-  auto inputToAddSampleLogProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  inputToAddSampleLogProps->setPropertyValue("Workspace", sqwWsName.toStdString());
-
-  m_batchAlgoRunner->addAlgorithm(sampleLogAlg, std::move(inputToAddSampleLogProps));
-
-  // Set the name of the result workspace for Python export
-  m_pythonExportWsName = sqwWsName.toStdString();
+  m_model->setupRebinAlgorithm(m_batchAlgoRunner);
+  m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
+  m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
 
   m_batchAlgoRunner->executeBatch();
-}
-
-std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
-  return getADSMatrixWorkspace(m_pythonExportWsName)->getNumberHistograms();
 }
 
 /**
@@ -203,8 +107,8 @@ std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
  */
 void IndirectSqw::sqwAlgDone(bool error) {
   if (!error) {
-    setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
-    setSaveEnabled(true);
+    setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
+    m_view->setSaveEnabled(true);
   }
 }
 
@@ -213,65 +117,43 @@ void IndirectSqw::sqwAlgDone(bool error) {
  *
  * Creates a colour 2D plot of the data
  */
-void IndirectSqw::plotRqwContour(std::string const &sampleName) {
-  auto const outputName = sampleName.substr(0, sampleName.size() - 4) + "_rqw";
-
+void IndirectSqw::plotRqwContour() {
   try {
-    convertToSpectrumAxis(sampleName, outputName);
-    if (AnalysisDataService::Instance().doesExist(outputName)) {
-      auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-      if (rqwWorkspace)
-        m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
-    }
+    auto const rqwWorkspace = m_model->getRqwWorkspace();
+    if (rqwWorkspace)
+      m_view->plotRqwContour(rqwWorkspace);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
     showMessageBox("Invalid file. Please load a valid reduced workspace.");
   }
 }
 
-void IndirectSqw::setDefaultQAndEnergy() {
-  setQRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft));
-  setEnergyRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
-}
-
-void IndirectSqw::setQRange(std::tuple<double, double> const &axisRange) {
-  auto const qRange = roundToWidth(axisRange, m_uiForm.spQWidth->value());
-  m_uiForm.spQLow->setValue(qRange.first);
-  m_uiForm.spQHigh->setValue(qRange.second);
-}
-
-void IndirectSqw::setEnergyRange(std::tuple<double, double> const &axisRange) {
-  auto const energyRange = roundToWidth(axisRange, m_uiForm.spEWidth->value());
-  m_uiForm.spELow->setValue(energyRange.first);
-  m_uiForm.spEHigh->setValue(energyRange.second);
-}
-
 void IndirectSqw::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Sqw");
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void IndirectSqw::runClicked() { runTab(); }
 
 void IndirectSqw::saveClicked() {
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_model->getOutputWorkspace()));
   m_batchAlgoRunner->executeBatch();
 }
 
-void IndirectSqw::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void IndirectSqw::qLowChanged(double value) { m_model->setQMin(value); }
 
-void IndirectSqw::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void IndirectSqw::qWidthChanged(double value) { m_model->setQWidth(value); }
 
-void IndirectSqw::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                  QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
-}
+void IndirectSqw::qHighChanged(double value) { m_model->setQMax(value); }
 
+void IndirectSqw::eLowChanged(double value) { m_model->setEMin(value); }
+
+void IndirectSqw::eWidthChanged(double value) { m_model->setEWidth(value); }
+
+void IndirectSqw::eHighChanged(double value) { m_model->setEMax(value); }
+
+void IndirectSqw::rebinEChanged(int value) { m_model->setRebinInEnergy(value != 0); }
 } // namespace MantidQt::CustomInterfaces

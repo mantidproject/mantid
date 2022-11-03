@@ -75,6 +75,7 @@ class MoveMarkersState(object):
 
     def motion_notify_callback(self, event):
         """Override base class method"""
+        self.tool.update_hover_cursor(event)
         self.tool.move_markers(event)
 
     def button_release_callback(self, event):

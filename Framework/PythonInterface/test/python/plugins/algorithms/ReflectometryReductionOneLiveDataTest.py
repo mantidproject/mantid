@@ -143,7 +143,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         # Get the properties for the child algorithm, apart from a list of known
         # exclusions
         child_alg = create_algorithm('ReflectometryISISLoadAndProcess')
-        excluded = ['InputRunList', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
+        excluded = ['InputRunList', 'ROIDetectorIDs', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
                     'OutputWorkspaceFirstTransmission', 'OutputWorkspaceSecondTransmission',
                     'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
         child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])

@@ -26,11 +26,11 @@ using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
 void updateInputProperties(MantidQt::API::IAlgorithmRuntimeProps &properties, MatrixWorkspace_sptr const &workspace,
-                           std::vector<Mantid::detid_t> const &detIDs) {
+                           boost::optional<ProcessingInstructions> const &detIDsStr) {
   properties.setProperty("InputWorkspace", workspace);
-
-  auto detIDsStr = Mantid::Kernel::Strings::simpleJoin(detIDs.cbegin(), detIDs.cend(), ",");
-  AlgorithmProperties::update("ROIDetectorIDs", detIDsStr, properties);
+  if (detIDsStr) {
+    AlgorithmProperties::update("ROIDetectorIDs", *detIDsStr, properties);
+  }
 }
 } // namespace
 

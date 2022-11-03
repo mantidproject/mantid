@@ -58,6 +58,7 @@ std::map<std::string, std::string> SaveRMCProfile::validateInputs() {
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   if (!inputWS) {
     result["InputWorkspace"] = "Workspace not found";
+    return result;
   }
 
   const auto nHist = static_cast<int>(inputWS->getNumberHistograms());

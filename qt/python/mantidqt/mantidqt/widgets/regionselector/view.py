@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from qtpy.QtWidgets import (QWidget, QHBoxLayout)
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QCursor
+from qtpy.QtWidgets import QApplication, QHBoxLayout, QWidget
 
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 
@@ -34,3 +35,20 @@ class RegionSelectorView(QWidget):
 
     def create_axes_orthogonal(self, redraw_on_zoom):
         self._data_view.create_axes_orthogonal(redraw_on_zoom=redraw_on_zoom)
+
+    def clear_figure(self):
+        self._data_view.clear_figure()
+        self._data_view.canvas.draw()
+
+    @staticmethod
+    def set_override_cursor(override: bool, override_cursor: Qt.CursorShape = Qt.SizeAllCursor) -> None:
+        """
+        Sets the override cursor if an override cursor doesn't exist. Otherwise, restores the override cursor
+        :param override: A boolean for whether to set the override cursor or not
+        :param override_cursor: The override cursor to use if the override parameter is true
+        """
+        cursor = QApplication.overrideCursor()
+        if override and cursor is None:
+            QApplication.setOverrideCursor(QCursor(override_cursor))
+        elif not override and cursor is not None:
+            QApplication.restoreOverrideCursor()

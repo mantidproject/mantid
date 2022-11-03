@@ -24,7 +24,7 @@ const int roleColumn = 1;
 namespace MantidQt::MantidWidgets {
 
 /**
- * Constructor used inside and outside of MultiDatasetFit interface
+ * Constructor for EditLocalParameterDialog used in FunctionBrowser
  * @param parent :: [input] Parent widget of this dialog
  * @param parName :: [input] Name of parameter to edit in this dialog
  * @param datasetNames :: [input] Names of workspaces being fitted.

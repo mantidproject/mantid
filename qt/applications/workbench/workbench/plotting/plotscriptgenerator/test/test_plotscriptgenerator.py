@@ -294,10 +294,14 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         # This object, mock or not.
         self.assertTrue(hasattr(mock_ax.xaxis, "_major_tick_kw"))
         self.assertTrue(hasattr(mock_ax.xaxis, "_minor_tick_kw"))
-        mock_minor_kw = "{gridOn: False, show: True, width: 6, length: 10}"
-        mock_major_kw = "{gridOn: True, show: True, width: 20, length: 15}"
+        # in the old version it passes a string to a attribute that should be a dict breaking the code
+        mock_minor_kw = {"gridOn": False, "show": True, "width": 6, "length": 10}
+        mock_major_kw = {"gridOn": True, "show": True, "width": 20, "length": 15}
         mock_ax.xaxis._major_tick_kw = mock_major_kw
         mock_ax.xaxis._minor_tick_kw = mock_minor_kw
+        # for assert test
+        mock_minor_kw_str = str(mock_minor_kw)
+        mock_major_kw_str = str(mock_major_kw)
         mock_ax.numRows = 1
         mock_ax.numCols = 1
 
@@ -305,8 +309,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_fig.canvas.manager.fit_browser.fit_result_ws_name = ""
 
         commands = generate_script(mock_fig)
-        self.assertIn(mock_major_kw, commands)
-        self.assertIn(mock_minor_kw, commands)
+        self.assertIn(mock_major_kw_str, commands)
+        self.assertIn(mock_minor_kw_str, commands)
 
     @patch(GET_AUTOSCALE_LIMITS)
     @patch(GEN_AXIS_LIMIT_CMDS)

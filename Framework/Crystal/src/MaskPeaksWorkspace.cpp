@@ -187,15 +187,11 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
 
   if (det) {
-    if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0)
+    if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0) {
+      // throw std::runtime_error("Failed to find workspace index for x=" + std::to_string(x) + " y=" +
+      // std::to_string(y) + "(max x=" + std::to_string(det->xpixels()) +
+      // ", max y=" + std::to_string(det->ypixels()) + ")"); // Useful for debugging
       return EMPTY_INT();
-    if ((x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
-        || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
-    {
-      std::stringstream msg;
-      msg << "Failed to find workspace index for x=" << x << " y=" << y << "(max x=" << det->xpixels()
-          << ", max y=" << det->ypixels() << ")";
-      throw std::runtime_error(msg.str());
     }
 
     int pixelID = det->getAtXY(x, y)->getID();

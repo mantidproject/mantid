@@ -150,13 +150,7 @@ double DetectorGroup::getPhi() const {
 /// Computes the average position and returns the phi value
 double DetectorGroup::getPhiOffset(const double &offset) const {
   double avgPos = getPhi();
-  double phiOut = avgPos;
-  if (avgPos < 0) {
-    phiOut = -(offset + avgPos);
-  } else {
-    phiOut = offset - avgPos;
-  }
-  return phiOut;
+  return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
 
 /** Return IDs for the detectors grouped

@@ -20,7 +20,7 @@ Some initial setup is required on your system before we can start setting up an 
 
 1. Download and install the desired version of Mantid from the `downloads <https://download.mantidproject.org/>`_ page (if not already installed). Note its installation path, hereby denoted as ``[INSTALL_PATH]``.
 2. Open a git bash terminal and cd to the desired location.
-3. Pip install the virtual environment package as described in the 'Installing virtualenv' section found `here <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`_.
+3. Pip install the virtual environment package as described in the `'Installing virtualenv' section <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv>`_.
 
 Creating your Benchmarking Environment
 ######################################
@@ -43,7 +43,7 @@ If using Ubuntu:
 
 In this example, ``benchmark-env`` is the name given to your virtual environment.
 
-2. Activate your environment. This is explained in the 'Activating a virtual environment' section found `here <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#activating-a-virtual-environment>`_.
+2. Activate your environment. This is explained in the `'Activating a virtual environment' section <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#activating-a-virtual-environment>`_.
 
 3. It might be necessary to upgrade and install a few packages before installing FitBenchmarking if working from a Linux system:
 
@@ -53,7 +53,7 @@ In this example, ``benchmark-env`` is the name given to your virtual environment
   python3 -m pip install --upgrade pillow
   sudo apt-get install libglu1-mesa
 
-4. Install the FitBenchmarking package by following the instructions found `here <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_. Note that installing FitBenchmarking from source using the editable flag ``-e`` proved to be the most stable installation prior to the release of FitBenchmarking v0.2.
+4. Install the FitBenchmarking package by following the `FitBenchmarking installation instructions <https://fitbenchmarking.readthedocs.io/en/stable/users/install_instructions/fitbenchmarking.html>`_. Note that installing FitBenchmarking from source using the editable flag ``-e`` proved to be the most stable installation prior to the release of FitBenchmarking v0.2.
 
 5. It is also recommended you pip install the following packages to avoid needless warning messages:
 
@@ -107,5 +107,5 @@ Tips
 
 * Make sure your git bash terminal is open in the correct location and has the virtual environment activated when running your benchmark.
 * Each time your run the benchmark, the old results will be overwritten unless you change the directory you run the ``fitbenchmarking`` command from. In later versions of FitBenchmarking (>v1.5) there will be an option to specify the results directory on the command line or via the ``.ini`` file.
-* To do a benchmark of the changes made in a Pull Request, you can create an unstable build by following the instructions `here <https://developer.mantidproject.org/BuildingWithCMake.html>`_. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
+* To do a benchmark of the changes made in a Pull Request, you can create an unstable build by following the `build instructions <https://developer.mantidproject.org/BuildingWithCMake.html>`_. When creating your benchmark environment, you would then use the python.exe found in the Mantid unstable install directory.
 * Be aware that an 'Unexpected Exception' can sometimes occur when running the fitbenchmarking command after installing it from source without the editable flag ``-e``.

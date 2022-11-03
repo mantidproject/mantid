@@ -31,6 +31,8 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
     # Defines a custom role to be used for sorting with QSortFilterProxy.
     # See https://doc.qt.io/qt-5/qsortfilterproxymodel.html#sortRole-prop
     DATA_SORT_ROLE = 2001
+    HIDDEN_COLUMNS = ['RunNumber', 'DetID', 'Wavelength', 'Energy', 'TOF', 'DSpacing', 'BinCount', 'Row', 'Col',
+                        'QLab', 'QSample', 'TBar']
 
     def create_item(self, data, _):
         """Create a table item to display the data. The data is always readonly
@@ -142,6 +144,13 @@ class PeaksViewerPresenter:
         """
         self._peaks_table_presenter.refresh()
         self.view.table_view.enable_sorting(PeaksWorkspaceDataPresenter.DATA_SORT_ROLE)
+
+    def concise_checkbox_changes(self, concise):
+        """
+        Respond to a change in the concise view check box state
+        :param concise: bool to set concise or expanded view
+        """
+        self.view.table_view.filter_columns(concise, PeaksWorkspaceDataPresenter.HIDDEN_COLUMNS)
 
     # private api
     @staticmethod

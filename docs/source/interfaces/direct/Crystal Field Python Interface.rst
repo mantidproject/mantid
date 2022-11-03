@@ -418,6 +418,46 @@ A complete list of minimizers available for ``scipy.optimize.minimize`` can be f
 
 If the minimizer is not overwritten, 'L-BFGS-B' is set as a default for ``scipy.optimize.minimize`` and 'Levenberg-Marquardt' for Mantid fitting.
 
+.. _gofit-fitting:
+
+GOFit fitting
+~~~~~~~~~~~~~
+The algorithms contained within the `GOFit package <https://github.com/ralna/GOFit>`_ can also be used from the Crystal Field API. This package is designed for the global
+optimization of parameters using a non-linear least squares cost function. For more information about the algorithms used in this implementation, please see the related
+`RAL Technical Report <https://epubs.stfc.ac.uk/work/51662496>`_.
+
+The GOFit package contains `three optimization algorithms <https://github.com/ralna/GOFit/blob/master/docs/algorithms.md>`_ called ``regularisation``, ``multistart`` and
+``alternating``. Please note that the fitting process for ``multistart`` and ``alternating`` can be slow due to the residuals being evaluated in python.
+
+Before you can use the GOFit package in Mantid, you will need to ``pip install gofit`` into your environment because it is an external dependency. Alternatively, run the
+following code in the Mantid workbench script window::
+
+    import subprocess, sys
+    rv = subprocess.run([sys.executable, '-m', 'pip', 'install', '--user', 'gofit'], capture_output=True)
+    print(rv.stdout.decode())
+    print(rv.stderr.decode())
+
+Mantid has to be restarted for the changes to take effect. Please note that the script above requires Python 3.7 or higher.
+
+Once installed, it should be possible to import the package and perform a fit using the ``regularisation`` algorithm by passing a GOFit callable into the Crystal Field API::
+
+    import gofit
+    fit.gofit(algorithm_callable=gofit.regularisation, jacobian=True, maxit=500)
+
+The ``multistart`` algorithm requires you to pass in parameter_bounds and the number of samples::
+
+    parameter_bounds = {'B20': (-0.3013,0.3013), 'B22': (-0.5219,0.5219), 'B40': (-0.004624,0.004624), 'B42': (-0.02068,0.02068), 'B44': (-0.02736,0.02736),
+                        'B60': (-0.0001604,0.0001604), 'B62': (-0.001162,0.001162), 'B64': (-0.001273,0.001273), 'B66': (-0.001724,0.001724),
+                        'IntensityScaling': (0.,10.), 'f0.FWHM': (0.1,5.0), 'f1.FWHM': (0.1,5.0), 'f2.FWHM': (0.1,5.0), 'f3.FWHM': (0.1,5.0), 'f4.FWHM': (0.1,7.0)}
+
+    fit.gofit(algorithm_callable=gofit.multistart, parameter_bounds=parameter_bounds, samples=100, jacobian=True, maxit=500, scaling=True)
+
+The ``alternating`` algorithm also requires you to pass in parameter_bounds and the number of samples::
+
+    fit.gofit(algorithm_callable=gofit.alternating, parameter_bounds=parameter_bounds, samples=100, maxit=500)
+
+A full list of possible arguments for these algorithm can be found `here <https://github.com/ralna/GOFit/blob/master/docs/algorithms.md>`_. The output from these fits
+should be a matrix workspace containing the fitted data, and a table workspace containing the fitted parameters.
 
 Multiple Ions
 -------------

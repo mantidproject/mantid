@@ -4,28 +4,41 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from contextlib import contextmanager
+from io import BufferedReader
 import re
+from typing import Sequence
 
 from abins.constants import EOF, ONE_CHARACTER
 
 
-class TextParser(object):
+class TextParser:
     """
-    Helper class which groups methods used by DFT Loaders for parsing files.
+    File parsing tools: wraps a few methods for buffer navigation
     """
-    def __init__(self):
-        pass
+    @staticmethod
+    @contextmanager
+    def save_excursion(file_obj):
+        """Temporarily save the position in file and return when leaving context"""
+        pos = file_obj.tell()
+        try:
+            yield pos
 
-    def find_first(self, file_obj=None, msg=None, regex=None):
+        finally:
+            file_obj.seek(pos)
+
+    @classmethod
+    def find_first(cls, *,
+                   file_obj: BufferedReader,
+                   msg: str = None,
+                   regex: str = None) -> str:
         """
-        Finds the first line with msg. Moves file current position to the next line.
-        :param file_obj: file object from which we read
-        :type file_obj: BinaryIO
+        Match a string/regex and moves file current position to the next line.
+
+        :param file_obj: file object
         :param msg: keyword to find (exact match)
-        :type msg: str
         :param regex: regular expression to find (use *instead of* msg option).
-            This string will be compiled to a Python re.Pattern .
-        :type regex: str
+             This string will be compiled to a Python re.Pattern.
         """
         if msg is not None:
             msg = bytes(msg, "utf8")
@@ -35,14 +48,14 @@ class TextParser(object):
         if msg and regex:
             raise ValueError("msg or regex should be provided, not both")
         elif msg:
-            while not self.file_end(file_obj=file_obj):
+            while not cls.file_end(file_obj):
                 line = file_obj.readline()
                 if line.strip() and msg in line:
                     return line
             raise EOFError(f'"{msg.decode()}" not found')
         elif regex:
             test = re.compile(regex)
-            while not self.file_end(file_obj=file_obj):
+            while not cls.file_end(file_obj):
                 line = file_obj.readline()
                 if test.match(line):
                     return(line)
@@ -50,9 +63,11 @@ class TextParser(object):
         else:
             raise ValueError("No msg or regex provided: nothing to match")
 
-    def find_last(self, file_obj=None, msg=None):
+    @classmethod
+    def find_last(cls, file_obj=None, msg=None):
         """
         Moves file current position to the last occurrence of msg.
+
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
@@ -61,7 +76,7 @@ class TextParser(object):
         found = False
         last_entry = None
 
-        while not self.file_end(file_obj=file_obj):
+        while not cls.file_end(file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()
             if line.strip() and msg in line:
@@ -73,9 +88,11 @@ class TextParser(object):
         else:
             file_obj.seek(last_entry)
 
-    def file_end(self, file_obj=None):
+    @staticmethod
+    def file_end(file_obj: BufferedReader) -> bool:
         """
         Checks end of the text file.
+
         :param file_obj: file object which was open in "r" mode
         :returns: True if end of file, otherwise False
         """
@@ -87,11 +104,13 @@ class TextParser(object):
             file_obj.seek(pos)
             return False
 
-    def block_end(self, file_obj=None, msg=None):
+    @staticmethod
+    def block_end(file_obj: BufferedReader, *, msg: Sequence[str]) -> bool:
         """
         Checks for msg which terminates block.
+
         :param file_obj: file object from which we read
-        :param msg: list with messages which end kpoint block.
+        :param msg: list of messages that can end kpoint block.
         :returns: True if end of block otherwise False
         """
         for item in msg:
@@ -103,14 +122,15 @@ class TextParser(object):
                 return True
         return False
 
-    def move_to(self, file_obj=None, msg=None):
+    @classmethod
+    def move_to(cls, file_obj=None, msg=None):
         """
         Finds the first line with msg and moves read file pointer to that line.
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
         msg = bytes(msg, "utf8")
-        while not self.file_end(file_obj=file_obj):
+        while not cls.file_end(file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()
             if line.strip() and msg in line:

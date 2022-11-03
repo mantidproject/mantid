@@ -92,14 +92,9 @@ void ProcessBankData::run() { // override {
           outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
         }
         if (alg->getCancel())
-          break; // User cancellation
+          return; // User cancellation
       }
     }
-  }
-
-  // Check for canceled algorithm
-  if (alg->getCancel()) {
-    return;
   }
 
   // Default pulse time (if none are found)
@@ -196,13 +191,8 @@ void ProcessBankData::run() { // override {
     }   // for events in pulse
     // check if cancelled after each pulse
     if (alg->getCancel())
-      break;
+      return;
   } // for pulses
-
-  // Check for canceled algorithm
-  if (alg->getCancel()) {
-    return;
-  }
 
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched

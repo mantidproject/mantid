@@ -82,25 +82,6 @@ execute_process(
 # Tag used by dynamic loader to identify directory of loading library
 set(DL_ORIGIN_TAG @loader_path)
 
-# Generate a target to put a mantidpython wrapper in the appropriate directory
-if(NOT TARGET mantidpython)
-  # TODO path needs to be removed from appropriate script
-  configure_file(
-    ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY
-  )
-
-  add_custom_target(
-    mantidpython ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython
-            ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
-    COMMENT "Generating mantidpython"
-  )
-  # Configure install script at the same time. Doing it later causes a warning from ninja.
-  set(PYTHONHOME "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
-  configure_file(${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY)
-  unset(PYTHONHOME)
-endif()
-
 # directives similar to linux for conda framework-only build
 set(BIN_DIR bin)
 set(WORKBENCH_BIN_DIR bin)
@@ -141,13 +122,6 @@ if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
   set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-  if(NOT CONDA_ENV)
-    install(
-      PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-      DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
-      RENAME mantidpython
-    )
-  endif()
   install(
     FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
     DESTINATION ${WORKBENCH_BUNDLE}Resources/

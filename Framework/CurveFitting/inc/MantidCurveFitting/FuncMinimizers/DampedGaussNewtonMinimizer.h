@@ -10,8 +10,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+#include "MantidCurveFitting/EigenVector.h"
 
 namespace Mantid {
 namespace CurveFitting {

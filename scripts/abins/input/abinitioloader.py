@@ -6,6 +6,7 @@
 
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
+from typing import Sequence
 
 from mantid.kernel import logger
 from mantid.kernel import Atom
@@ -21,8 +22,11 @@ class NamedAbstractClass(ABCMeta):
 
 class AbInitioLoader(metaclass=NamedAbstractClass):
     """
-    A general class which groups all methods which should be inherited or implemented by an ab initio program used
-    in INS analysis.
+    Base class for loaders which import phonon data from ab initio output files
+
+    In addition to a standard interface, this provides some caching functionality.
+    Typically the user calls get_formatted_data() which checks the cache before calling
+    read_formatted_data() if necessary and caching the results.
     """
     def __init__(self, input_ab_initio_filename=None):
         self._sample_form = None
@@ -31,7 +35,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
                                group_name=abins.parameters.hdf_groups['ab_initio_data'])
 
     @abstractmethod
-    def read_vibrational_or_phonon_data(self):
+    def read_vibrational_or_phonon_data(self) -> abins.AbinsData:
         """
         This method is different for different ab initio programs. It has to be overridden by inheriting class.
         This method reads vibrational or phonon data produced by an ab initio program.
@@ -119,7 +123,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         """
         ...
 
-    def load_formatted_data(self):
+    def load_formatted_data(self) -> abins.AbinsData:
         """
         Loads data from hdf file. After data is loaded it is put into AbinsData object.
         :returns: object of type AbinsData
@@ -138,14 +142,14 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         return self._rearrange_data(data=loaded_data)
 
     # Internal method for use by child classes which read ab initio phonon data
-    def _rearrange_data(self, data=None):
+    @staticmethod
+    def _rearrange_data(data: dict) -> abins.AbinsData:
         """
         This method rearranges data read from input ab initio file.
         :param data: dictionary with the data to rearrange
-        :returns: Returns an object of type AbinsData
         """
 
-        k_points = abins.KpointsData(#      1D [k] (one entry corresponds to weight of one k-point)
+        k_points = abins.KpointsData(# 1D [k] (one entry corresponds to weight of one k-point)
                                      weights=data["weights"],
                                      # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
                                      k_vectors=data["k_vectors"],
@@ -159,7 +163,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         atoms = abins.AtomsData(data["atoms"])
         return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
-    def save_ab_initio_data(self, data=None):
+    def save_ab_initio_data(self, data: dict) -> None:
         """
         Saves ab initio data to an HDF5 file.
         :param data: dictionary with data to be saved.
@@ -170,7 +174,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         self._clerk.add_attribute("ab_initio_program", self._ab_initio_program)
         self._clerk.save()
 
-    def get_formatted_data(self):
+    def get_formatted_data(self) -> abins.AbinsData:
         """
         Check for HD5 cache before reading from ab initio outputs if cache unavailable
         """
@@ -192,10 +196,20 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         return ab_initio_data
 
     @staticmethod
-    def check_isotopes_substitution(atoms=None, masses=None, approximate=False):
+    def check_isotopes_substitution(atoms: dict,
+                                    masses: Sequence[float],
+                                    approximate: bool = False
+                                    ) -> None:
         """
-        Updates atomic mass in case of isotopes.
-        :param atoms: dictionary with atoms to check
+        Update atomic masses to Mantid values if isotopic substitution detected
+
+        The masses attached to "atoms", generally derived from atom symbols, are compared
+        to the list of "masses" given in calculation output.
+
+        In "approximate" mode, masses are rounded to the nearest integer for comparison;
+        otherwise the tolerance depends on abins.constants.MASS_EPS
+
+        :param atoms: dictionary of atom data to check and update if appropriate
         :param masses: atomic masses read from an ab initio file
         :param approximate: whether or not look for isotopes in the approximated way
         """

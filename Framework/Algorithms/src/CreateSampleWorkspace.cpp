@@ -308,11 +308,9 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(int numPixe
                                                                      const Geometry::Instrument_sptr &inst,
                                                                      const std::string &functionString, bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
+  Points xValues(x);
 
-  // there is a oddity here that y is evaluated from x=0, and x is from XMin
-  // changing it requires changing unit tests that use this algorithm
-  std::vector<double> xValues(cbegin(x), cend(x) - 1);
-  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+  Counts y(evalFunction(functionString, xValues.rawData(), isRandom ? 1 : 0));
 
   std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
   for (int wi = 0; wi < numMonitors + numPixels; wi++)
@@ -533,22 +531,15 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "monitor-shape");
 
   for (int monitorNumber = monitorsStart; monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
-    // Make a new bank
-    std::ostringstream monitorName;
-    monitorName << "monitor" << monitorNumber - monitorsStart + 1;
+    std::string monitorName = "monitor" + std::to_string(monitorNumber - monitorsStart + 1);
 
-    RectangularDetector *bank = new RectangularDetector(monitorName.str());
-    bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing, monitorNumber, true, 1);
+    Detector *detector = new Detector(monitorName, monitorNumber, monitorShape, testInst.get());
+    // Mark it as a monitor (add to the instrument cache)
+    testInst->markAsMonitor(detector);
 
-    std::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
-    if (detector) {
-      // Mark it as a monitor (add to the instrument cache)
-      testInst->markAsMonitor(detector.get());
-    }
-
-    testInst->add(bank);
+    testInst->add(detector);
     // Set the bank along the z-axis of the instrument, between the detectors.
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
+    detector->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component

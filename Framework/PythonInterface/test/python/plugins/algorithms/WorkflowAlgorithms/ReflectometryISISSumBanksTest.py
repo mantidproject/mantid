@@ -59,6 +59,16 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues['InputWorkspace'], 'The input workspace must contain a rectangular detector')
 
+    def test_validate_inputs_succeeds_if_single_rectangular_detectors(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty('InputWorkspace', test_ws)
+
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 0)
+
     def test_mask_workspace(self):
         roi_detector_id = 200
         test_ws = CreateSampleWorkspace(StoreInADS=False)
@@ -95,18 +105,19 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         self.assertNotEqual(test_ws, summed_ws)
         self.assertTrue(numpy.allclose(num_banks_included * test_ws.readY(0), summed_ws.readY(0)))
 
-    def test_monitors_are_included(self):
+    def test_monitors_are_prepended(self):
         num_banks = 3
         num_monitors = 2
         test_ws = CreateSampleWorkspace(StoreInADS=False, NumBanks=1, BankPixelWidth=num_banks, NumMonitors=num_monitors)
 
         summed_ws = ReflectometryISISSumBanks().sum_banks(test_ws)
+        prepended_ws = ReflectometryISISSumBanks()._prepend_monitors(test_ws, summed_ws)
 
-        self.assertEqual(num_banks + num_monitors, summed_ws.getNumberHistograms())
-        for idx in range(summed_ws.getNumberHistograms()):
-            # The monitors are at the end
-            expected_monitor = idx >= num_banks
-            self.assertEqual(expected_monitor, summed_ws.getDetector(idx).isMonitor())
+        self.assertEqual(num_banks + num_monitors, prepended_ws.getNumberHistograms())
+        for idx in range(prepended_ws.getNumberHistograms()):
+            # The monitors are at the start
+            expected_monitor = idx < num_monitors
+            self.assertEqual(expected_monitor, prepended_ws.getDetector(idx).isMonitor())
 
 
 if __name__ == '__main__':

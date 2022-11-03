@@ -98,7 +98,7 @@ Beta Testing Begins
 .. _quality-assurance-manager-checklist:
 
 Quality Assurance Managers Checklist
------------------------------------
+------------------------------------
 
 **Role**: People responsible for making sure that manual testing has been performed.
 They will ensure Mantid meets quality requirements before delivery in consultation
@@ -145,7 +145,7 @@ Smoke Testing
 .. _release-editor-checklist:
 
 Release Editors Checklist
-------------------------
+-------------------------
 
 **Role**: People responsible for editing the release notes and giving them a common
 language, layout, and collecting images.
@@ -153,21 +153,38 @@ language, layout, and collecting images.
 Beta Testing Begins
 ###################
 
-*  Switch to manual handling of release notes by running the release_editor.py script using the
-   `release editor helper tool
-   <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_
-   and open a pull request to put them on ``release-next``. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. framework.rst, and moves
-   the original release notes into a 'Used' folder. This makes it easier for the Release Editor to see which notes have been copied over and which haven't and prevents losing notes or merge conflicts.
+* Initial amalgamation of the the release notes:
 
-.. code-block:: bash
+  * ``git pull`` on ``release-next``.
+  * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`_.
+  * Navigate to your Mantid 'build' directory and open ``command-prompt.bat``.
+  * In the new command prompt, navigate to the `release_editor.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/release_editor.py>`_ and run, parsing the correct version number. The script copies all of the separate release notes under the correct heading of their upper level file, e.g. ``framework.rst``, and moves the original release notes into a 'Used' directory.
 
-    python release_editor.py --release 6.4.0
+    .. code-block:: bash
 
-*  Neaten up the release notes and add images etc.
-*  Copy over new release notes into main files and move separate release notes into 'Used' folder when done to avoid confusion.
-*  Ensure an image for the release is found to highlight the main changes for this
-   release. This can be a collage of images if there is not a big 'headline' feature
-   or change.
+      python release_editor.py --release 6.5.0
+
+  * Check the script has run correctly by checking all individual rst files have been moved into their respective 'used' directories. You could use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`_ for this (explained further bellow).
+  * Look over the files to make sure they look roughly correct then submit a PR to be merged into ``release-next``.
+
+* Initial changes:
+
+  * For each file which needs changes, create a new branch (example name ``6.5_workbench_release_notes``) and work on changes to then be merged back into ``release-next``.
+
+* Incoming release notes:
+
+  * As the release sprint goes on, new release note files will be created (existing outside of the 'Used' directories). The text from these will need to be copped into the main release note pages (``diffraction.rst``, ``mantidworkbench.rst`` etc.) and the file itself moved to it's corresponding 'Used' directory.
+  * It is best to wait until several of these have built up before making a new branch / pr.
+  * To help with finding the new release notes, use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`_ which will print the location of release notes not within a 'Used' directory.
+
+    .. code-block:: bash
+
+      python unused_release_note_finder.py --release 6.5.0
+
+* Images:
+
+  * Images or GIFs should be added to highlight important and/or visual changes.
+  * An image for the 'headline' feature (or a collage if there is none) should be added to the main page (``index.rst``).
 
 Beta Testing Ends
 #################
@@ -177,7 +194,11 @@ Beta Testing Ends
 Just before release
 ###################
 
-* As one of the final steps in preparing to tag the release, remove all separate release note files and sub-file structure to leave just the upper level release notes e.g. diffraction.rst, index.rst, framework.rst etc.
+* As one of the final steps in preparing to tag the release:
+
+  * Add any final release notes manually to the main release note pages. (Make sure to check `main` for any release notes that have been merged into the wrong branch)
+  * Remove unused headings from the main release note pages.
+  * Remove all separate release note files and sub-file structure to leave just the main release note pages.
 
 .. _release-manager-checklist:
 

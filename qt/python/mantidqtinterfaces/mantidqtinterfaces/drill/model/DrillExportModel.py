@@ -20,14 +20,10 @@ import os
 class DrillExportModel:
 
     """
-    Dictionnary containing algorithms and activation state.
+    Dictionnary containing algorithm (name, extension) tuples and activation
+    state.
     """
     _exportAlgorithms = None
-
-    """
-    Dictionnary of export file extensions.
-    """
-    _exportExtensions = None
 
     """
     Dictionnary of export algorithm short doc.
@@ -57,12 +53,8 @@ class DrillExportModel:
             acquisitionMode (str): acquisition mode
         """
         self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
-        self._exportExtensions = dict()
         self._exportDocs = dict()
-        for a in self._exportAlgorithms.keys():
-            if a in RundexSettings.EXPORT_ALGO_EXTENSION:
-                self._exportExtensions[a] = \
-                    RundexSettings.EXPORT_ALGO_EXTENSION[a]
+        for (a, _) in self._exportAlgorithms.keys():
             try:
                 alg = AlgorithmManager.createUnmanaged(a)
                 self._exportDocs[a] = alg.summary()
@@ -79,16 +71,7 @@ class DrillExportModel:
         Returns:
             list(str): names of algorithms
         """
-        return [algo for algo in self._exportAlgorithms.keys()]
-
-    def getAlgorithmExtentions(self):
-        """
-        Get the extension used for the output file of each export algorithm.
-
-        Returns:
-            dict(str:str): dictionnary algo:extension
-        """
-        return {k:v for k,v in self._exportExtensions.items()}
+        return [(algo, ext) for (algo, ext) in self._exportAlgorithms.keys()]
 
     def getAlgorithmDocs(self):
         """
@@ -104,7 +87,7 @@ class DrillExportModel:
         Get the state of a specific algorithm.
 
         Args:
-            algorithm: name of the algo
+            algorithm (str, str): name of the algo and output file extension
         """
         if algorithm in self._exportAlgorithms:
             return self._exportAlgorithms[algorithm]
@@ -116,7 +99,7 @@ class DrillExportModel:
         Activate a spefific algorithm.
 
         Args:
-            algorithm (str): name of the algo
+            algorithm (str, str)): name of the algo and output file extension
         """
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = True
@@ -126,7 +109,7 @@ class DrillExportModel:
         Inactivate a specific algorithm.
 
         Args:
-            algorithm (str): name of the algo
+            algorithm (str, str): name of the algo and output file extension
         """
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = False
@@ -236,7 +219,7 @@ class DrillExportModel:
             return
 
         tasks = list()
-        for algo,active in self._exportAlgorithms.items():
+        for (algo, ext), active in self._exportAlgorithms.items():
             if not active:
                 continue
             if not self._validCriteria(outputWs, algo):
@@ -248,10 +231,8 @@ class DrillExportModel:
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
-
                 filename = os.path.join(
-                        exportPath,
-                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
+                        exportPath, wsName + ext)
                 name = wsName + ":" + filename
                 if wsName not in self._exports:
                     self._exports[wsName] = set()
@@ -264,7 +245,8 @@ class DrillExportModel:
                         kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
-                        kwargs['FileExtension'] = 'custom'
+                        kwargs['FileExtension'] = ext
+                        kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value')
                     else:
                         kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,

@@ -200,7 +200,7 @@ set<detid_t> SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex
  * @ parameter
  * @ return
  */
-void SpecialWorkspace2D::binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws,
+void SpecialWorkspace2D::binaryOperation(const std::shared_ptr<const SpecialWorkspace2D> &ws,
                                          const unsigned int operatortype) {
 
   // 1. Check compatibility between this and input workspace

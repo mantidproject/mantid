@@ -5,6 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "LookupRow.h"
+#include "GUI/Preview/ROIType.h"
+
+namespace {
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+}
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -13,13 +18,15 @@ LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex
                      boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
                      boost::optional<double> scaleFactor,
                      boost::optional<ProcessingInstructions> processingInstructions,
-                     boost::optional<ProcessingInstructions> backgroundProcessingInstructions)
+                     boost::optional<ProcessingInstructions> backgroundProcessingInstructions,
+                     boost::optional<ProcessingInstructions> roiDetectorIDs)
     : m_theta(std::move(theta)), m_titleMatcher(std::move(titleMatcher)),
       m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
       m_scaleFactor(std::move(scaleFactor)),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
       m_processingInstructions(std::move(processingInstructions)),
-      m_backgroundProcessingInstructions(std::move(backgroundProcessingInstructions)) {}
+      m_backgroundProcessingInstructions(std::move(backgroundProcessingInstructions)),
+      m_roiDetectorIDs(std::move(roiDetectorIDs)) {}
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
@@ -43,13 +50,47 @@ boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructi
   return m_backgroundProcessingInstructions;
 }
 
+boost::optional<ProcessingInstructions> LookupRow::roiDetectorIDs() const { return m_roiDetectorIDs; }
+
+void LookupRow::setRoiDetectorIDs(boost::optional<ProcessingInstructions> selectedBanks) {
+  m_roiDetectorIDs = std::move(selectedBanks);
+}
+
+void LookupRow::setProcessingInstructions(ROIType regionType,
+                                          boost::optional<ProcessingInstructions> processingInstructions) {
+  switch (regionType) {
+  case ROIType::Signal:
+    m_processingInstructions = std::move(processingInstructions);
+    return;
+  case ROIType::Background:
+    m_backgroundProcessingInstructions = std::move(processingInstructions);
+    return;
+  case ROIType::Transmission:
+    m_transmissionProcessingInstructions = std::move(processingInstructions);
+    return;
+  }
+  throw std::invalid_argument("Unexpected ROIType provided");
+}
+
+bool LookupRow::hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const {
+  if (!m_theta.is_initialized() && !lookupRow.m_theta.is_initialized()) {
+    return m_titleMatcher == lookupRow.m_titleMatcher;
+  }
+  if (m_theta.is_initialized() && lookupRow.m_theta.is_initialized()) {
+    return std::abs(*m_theta - *lookupRow.m_theta) <= (tolerance + 2.0 * EPSILON) &&
+           m_titleMatcher == lookupRow.m_titleMatcher;
+  }
+  return false;
+}
+
 bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
   return (lhs.m_theta == rhs.m_theta && lhs.m_titleMatcher == rhs.m_titleMatcher &&
           lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
           lhs.m_scaleFactor == rhs.m_scaleFactor &&
           lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
           lhs.m_processingInstructions == rhs.m_processingInstructions &&
-          lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions);
+          lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions &&
+          lhs.m_roiDetectorIDs == rhs.m_roiDetectorIDs);
 }
 
 bool operator!=(LookupRow const &lhs, LookupRow const &rhs) { return !(lhs == rhs); }
@@ -76,6 +117,8 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
     result[LookupRow::Column::RUN_SPECTRA] = *lookupRow.processingInstructions();
   if (lookupRow.backgroundProcessingInstructions())
     result[LookupRow::Column::BACKGROUND_SPECTRA] = *lookupRow.backgroundProcessingInstructions();
+  if (lookupRow.roiDetectorIDs())
+    result[LookupRow::Column::ROI_DETECTOR_IDS] = *lookupRow.roiDetectorIDs();
   return result;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

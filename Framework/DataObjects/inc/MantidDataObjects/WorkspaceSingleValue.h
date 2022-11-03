@@ -19,7 +19,7 @@ namespace DataObjects {
     @author Nicholas Draper
     @date 19/05/2008
 */
-class DLLExport WorkspaceSingleValue : public API::HistoWorkspace {
+class MANTID_DATAOBJECTS_DLL WorkspaceSingleValue : public API::HistoWorkspace {
 public:
   /**	Gets the name of the workspace type
    * @return Standard string name  */

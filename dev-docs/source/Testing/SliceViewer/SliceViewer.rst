@@ -43,10 +43,10 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     e. Disable line plots and Enable :ref:`ROI tool<mantid:sliceviewer_roi>`
 
-    .. figure:: ../../../../docs/source/images/wb-sliceviewer51-roibutton.png
-       :class: screenshot
-       :width: 50%
-       :align: center
+        .. figure:: ../../../../docs/source/images/wb-sliceviewer51-roibutton.png
+           :class: screenshot
+           :width: 50%
+           :align: center
 
         * The line plot button should be automatically enabled
 
@@ -106,9 +106,9 @@ MDWorkspace (with events)
 
     from mantid.simpleapi import *
 
-    md_4D = CreateMDWorkspace(Dimensions=4, Extents=[-2,2,-1,1,-1.5,1.5,-0.25,0.25], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
+    md_4D = CreateMDWorkspace(Dimensions=4, Extents=[0,2,-1,1,-1.5,1.5,-0.25,0.25], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
     FakeMDEventData(InputWorkspace=md_4D, UniformParams='5e5') # 4D data
-    tmp = CreateMDWorkspace(Dimensions=4, Extents=[-0.5,0.5,-1,-0.5,-1.5,-1, -0.25,0], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
+    tmp = CreateMDWorkspace(Dimensions=4, Extents=[0.25,0.75,-1,-0.5,-1.5,-1, -0.25,0], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
     FakeMDEventData(InputWorkspace=tmp, UniformParams='1e5') # 4D data
     md_4D += tmp
     DeleteWorkspace(tmp)
@@ -119,7 +119,7 @@ MDWorkspace (with events)
     SetUB(Workspace='md_4D', c=2, gamma=120)
 
     # make a 3D MDEvent workspace by integrating over all E
-    md_3D = SliceMD(InputWorkspace='md_4D', AlignedDim0='H,-2,2,100', AlignedDim1='K,-1,1,100', AlignedDim2='L,-1.5,1.5,100')
+    md_3D = SliceMD(InputWorkspace='md_4D', AlignedDim0='H,0,2,100', AlignedDim1='K,-1,1,100', AlignedDim2='L,-1.5,1.5,100')
 
     # Create a peaks workspace and fake data in 3D MD
     CreatePeaksWorkspace(InstrumentWorkspace='md_3D', NumberOfPeaks=0, OutputWorkspace='peaks')
@@ -187,9 +187,11 @@ Test the :ref:`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
     - Note for ``md_4D`` the cross should be plotted at all E (obviously a Bragg peak will only be on the elastic line but the peak object has no elastic/inelastic logic and the sliceviewer only knows that `E` is not a momentum axis, it could be temperature etc.).
 
 4. Click Add Peaks in the Peak Actions section at the top of the peak viewer
+
 5. Click somewhere in the colorfill plot
 
     - Confirm a peak has been added to the table at the position you clicked
+    - Note that peaks need to have H > 0 to be valid due to the assumed beam direction (otherwise you will get an error in the log ``ValueError: Peak::setQLabFrame(): Wavelength found was negative``)
 
 6. Click Remove Peaks
 7. Click on the cross corresponding to the peak you just added
@@ -414,7 +416,9 @@ With ``md_3D`` open in sliceviewer
     - The workspace name in the  title of the sliceviewer window should have updated
     - Zoom to check dynamic rebinning still works
 
-2. Take a note of the colorbar limits and execute this command in the ipython terminal
+2. Ensure colorbar autoscale is checked.
+
+3. Take a note of the colorbar limits and execute this command in the ipython terminal
 
     .. code-block:: python
 
@@ -423,13 +427,13 @@ With ``md_3D`` open in sliceviewer
     - The colorbar max should be doubled.
     - Zoom to check dynamic rebinning still works
 
-3. Clone the workspace for future tests
+4. Clone the workspace for future tests
 
 .. code-block:: python
 
     CloneWorkspace(InputWorkspace='md_3Dim', OutputWorkspace='md_3D')
 
-4. Delete ``md_3Dim`` in the ADS
+5. Delete ``md_3Dim`` in the ADS
 
     - The sliceviewer window should close
 
@@ -439,8 +443,7 @@ With ``md_3D`` open in sliceviewer
 1. Open ``md_3D`` in sliceviewer
 2. Run ``ClearUB`` algorithm on ``md_3D``
 
-    - Sliceviewer window should close with message
-    ``Closing Sliceviewer as the underlying workspace was changed: The property supports_nonorthogonal_axes is different on the new workspace.``
+    - Sliceviewer window should close with message ``Closing Sliceviewer as the underlying workspace was changed: The property supports_nonorthogonal_axes is different on the new workspace.``
 
 
 5. Check BinMD called with NormalizeBasisVectors=False for HKL data
@@ -522,6 +525,6 @@ Check that the non-orthogonal view is disabled for non-Q axes such as energy
     ws_4D.addExperimentInfo(expt_info_4D)
     SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
 
-2. Open `` ws_4D`` in sliceviewer.
+2. Open ``ws_4D`` in sliceviewer.
 3. Confirm that when the Energy axis is viewed (as X or Y) the non-orthogonal view is disabled.
 4. The button should be re-enabled when you view two Q-axes e.g. H and K.

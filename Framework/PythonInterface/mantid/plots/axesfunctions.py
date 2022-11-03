@@ -23,7 +23,8 @@ from mantid.plots.resampling_image import samplingimage
 from mantid.plots.datafunctions import get_axes_labels, get_bins, get_distribution, \
     get_matrix_2d_data, get_md_data1d, get_md_data2d_bin_bounds, \
     get_md_data2d_bin_centers, get_normalization, get_sample_log, get_spectrum, get_uneven_data, \
-    get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_normalize_by_bin_width
+    get_wksp_index_dist_and_label, check_resample_to_regular_grid, get_indices, get_normalize_by_bin_width, \
+    get_spectrum_normalisation
 from mantid.plots.utility import MantidAxType
 from mantid.plots.quad_mesh_wrapper import QuadMeshWrapper
 
@@ -110,6 +111,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         dx = None
         axis = None
     else:
+        normalise_spectrum, kwargs = get_spectrum_normalisation(**kwargs)
         axis = MantidAxType(kwargs.pop("axis", MantidAxType.SPECTRUM))
         normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
@@ -136,6 +138,12 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         else:
             raise ValueError("Axis {} is not a valid axis number.".format(axis))
         indices = None
+        if normalise_spectrum:
+            max_val = numpy.nanmax(y)
+            if (max_val != 0):
+                y = y / max_val
+                if dy is not None:
+                    dy = dy / max_val
     return x, y, dy, dx, indices, axis, kwargs
 
 

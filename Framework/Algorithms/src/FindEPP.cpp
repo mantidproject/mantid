@@ -76,7 +76,7 @@ void FindEPP::fitGaussian(int64_t index) {
   auto spectrum = static_cast<size_t>(index);
   m_outWS->cell<int>(spectrum, 0) = static_cast<int>(spectrum);
 
-  const auto &x = m_inWS->x(spectrum).rawData();
+  const auto x = m_inWS->points(spectrum);
   const auto &y = m_inWS->y(spectrum).rawData();
   const auto &e = m_inWS->e(spectrum).rawData();
 

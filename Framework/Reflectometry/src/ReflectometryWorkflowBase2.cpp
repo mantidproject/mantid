@@ -786,7 +786,8 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(const IAlgorithm
  * @return :: the value of theta found from the logs
  * @throw :: NotFoundError if the log value was not found
  */
-double ReflectometryWorkflowBase2::getThetaFromLogs(const MatrixWorkspace_sptr &inputWs, const std::string &logName) {
+double ReflectometryWorkflowBase2::getThetaFromLogs(const MatrixWorkspace_sptr &inputWs,
+                                                    const std::string &logName) const {
   double theta = -1.;
   const Mantid::API::Run &run = inputWs->run();
   Property *logData = run.getLogData(logName);

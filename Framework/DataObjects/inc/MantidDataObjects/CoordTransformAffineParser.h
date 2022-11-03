@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/DllConfig.h"
 #include <memory>
 
 namespace Poco {
@@ -29,7 +29,7 @@ namespace DataObjects {
  * @author Owen Arnold
  * @date 22/july/2011
  */
-class DLLExport CoordTransformAffineParser {
+class MANTID_DATAOBJECTS_DLL CoordTransformAffineParser {
 public:
   CoordTransformAffineParser();
   virtual Mantid::API::CoordTransform *createTransform(Poco::XML::Element *coordTransElement) const;

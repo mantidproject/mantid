@@ -95,10 +95,6 @@ const double MaxCorrCoeffinXY = .9;       // otherwise all data on one line
 
 IntegratePeakTimeSlices::IntegratePeakTimeSlices()
     : Algorithm(), m_R0(-1), m_ROW(0.), m_COL(0.), m_cellWidth(0.), m_cellHeight(0.), m_NROWS(0), m_NCOLS(0) {
-  m_debug = false;
-
-  if (m_debug)
-    g_log.setLevel(7);
   m_EdgePeak = false;
   m_NeighborIDs = new int[3];
   m_NeighborIDs[0] = 3;

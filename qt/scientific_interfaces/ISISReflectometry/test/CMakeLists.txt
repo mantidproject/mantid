@@ -27,6 +27,7 @@ set(TEST_FILES
     Options/OptionsDialogPresenterTest.h
     Common/ClipboardTest.h
     Common/DecoderTest.h
+    Common/DetectorTest.h
     Common/EncoderTest.h
     Common/PlotterTestQt5.h
     Experiment/ExperimentPresenterTest.h

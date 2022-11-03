@@ -24,7 +24,7 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
+from qtpy.QtCore import (QByteArray, QEventLoop, Qt, QPoint, QSize, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog, QMainWindow,
                             QSplashScreen, QMessageBox)  # noqa
@@ -187,8 +187,8 @@ class MainWindow(QMainWindow):
         from workbench.plugins.workspacewidget import WorkspaceWidget
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
-        prompt = CONF.get('project/prompt_on_deleting_workspace')
-        self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
+        prompt = CONF.get('project/prompt_on_deleting_workspace', type=bool)
+        self.workspacewidget.workspacewidget.enableDeletePrompt(prompt)
         self.widgets.append(self.workspacewidget)
 
         self.set_splash("Loading memory widget")
@@ -473,8 +473,8 @@ class MainWindow(QMainWindow):
     def populate_layout_menu(self):
         self.view_menu_layouts.clear()
         try:
-            layout_dict = CONF.get("MainWindow/user_layouts")
-        except KeyError:
+            layout_dict = CONF.get("MainWindow/user_layouts", type=dict)
+        except (KeyError, TypeError):
             layout_dict = {}
         layout_keys = sorted(layout_dict.keys())
         layout_options = []
@@ -743,14 +743,10 @@ class MainWindow(QMainWindow):
         qapp = QApplication.instance()
 
         # get the saved window geometry
-        window_size = settings.get('MainWindow/size')
-        if not isinstance(window_size, QSize):
-            window_size = QSize(*window_size)
-        window_pos = settings.get('MainWindow/position')
-        if not isinstance(window_pos, QPoint):
-            window_pos = QPoint(*window_pos)
+        window_size = settings.get('MainWindow/size', type=QSize)
+        window_pos = settings.get('MainWindow/position', type=QPoint)
         if settings.has('MainWindow/font'):
-            font_string = settings.get('MainWindow/font').split(',')
+            font_string = settings.get('MainWindow/font', type=str).split(',')
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
 
@@ -784,7 +780,7 @@ class MainWindow(QMainWindow):
 
         # restore window state
         if settings.has('MainWindow/state'):
-            if not self.restoreState(settings.get('MainWindow/state'), SAVE_STATE_VERSION):
+            if not self.restoreState(settings.get('MainWindow/state', type=QByteArray), SAVE_STATE_VERSION):
                 logger.warning(
                     "The previous layout of workbench is not compatible with this version, reverting to default layout."
                 )

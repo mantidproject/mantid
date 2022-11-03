@@ -42,7 +42,9 @@ DECLARE_SUBWINDOW(IndirectDataReduction)
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
-      m_changeObserver(*this, &IndirectDataReduction::handleConfigChange), m_ipfFilename(""), m_instDetails() {
+      m_changeObserver(*this, &IndirectDataReduction::handleConfigChange), m_ipfFilename(""),
+      m_idfDirectory(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")),
+      m_instDetails() {
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(instrumentLoadingDone(bool)));
 
@@ -174,43 +176,42 @@ MatrixWorkspace_sptr IndirectDataReduction::instrumentWorkspace() {
  */
 void IndirectDataReduction::loadInstrumentIfNotExist(const std::string &instrumentName, const std::string &analyser,
                                                      const std::string &reflection) {
-  auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-  auto const ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+  auto const ipfFilename = m_idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 
-  if (ipfFilename != m_ipfFilename) {
-    try {
-      auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
-      auto const parameterFilename = idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
-      auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-      loadAlg->setChild(true);
-      loadAlg->setLogging(false);
-      loadAlg->initialize();
-      loadAlg->setProperty("Filename", parameterFilename);
-      loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
-      loadAlg->execute();
-      MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
+  if (ipfFilename == m_ipfFilename || instrumentName.empty()) {
+    return;
+  }
 
-      // Load the IPF if given an analyser and reflection
-      if (!analyser.empty() && !reflection.empty()) {
-        m_ipfFilename = ipfFilename;
-        auto loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
-        loadParamAlg->setChild(true);
-        loadParamAlg->setLogging(false);
-        loadParamAlg->initialize();
-        loadParamAlg->setProperty("Filename", m_ipfFilename);
-        loadParamAlg->setProperty("Workspace", instWorkspace);
-        loadParamAlg->execute();
-      }
+  try {
+    auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
+    auto const parameterFilename = m_idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
+    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+    loadAlg->setChild(true);
+    loadAlg->setLogging(false);
+    loadAlg->initialize();
+    loadAlg->setProperty("Filename", parameterFilename);
+    loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
+    loadAlg->execute();
+    MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
+    m_instWorkspace = instWorkspace;
 
-      m_instWorkspace = instWorkspace;
-      loadInstrumentDetails();
-
-    } catch (std::exception const &ex) {
-      g_log.warning() << "Failed to load instrument with error: " << ex.what()
-                      << ". The current facility may not be fully "
-                         "supported.\n";
-      m_instWorkspace = MatrixWorkspace_sptr();
+    // Load the IPF if given an analyser and reflection
+    if (!analyser.empty() && !reflection.empty()) {
+      m_ipfFilename = ipfFilename;
+      auto loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+      loadParamAlg->setChild(true);
+      loadParamAlg->setLogging(false);
+      loadParamAlg->initialize();
+      loadParamAlg->setProperty("Filename", m_ipfFilename);
+      loadParamAlg->setProperty("Workspace", m_instWorkspace);
+      loadParamAlg->execute();
     }
+
+    loadInstrumentDetails();
+  } catch (std::exception const &ex) {
+    g_log.warning() << "Failed to load instrument with error: " << ex.what()
+                    << ". The current facility may not be fully supported.\n";
+    m_instWorkspace = MatrixWorkspace_sptr();
   }
 }
 
@@ -251,9 +252,15 @@ void IndirectDataReduction::loadInstrumentDetails() {
     analyser = "mica";
 
   // Get the instrument
-  auto const instrument = instrumentWorkspace()->getInstrument();
-  if (instrument == nullptr)
+  auto const instWorkspace = instrumentWorkspace();
+  if (!instWorkspace) {
+    return;
+  }
+
+  auto const instrument = instWorkspace->getInstrument();
+  if (!instrument) {
     g_log.warning("Instrument workspace has no instrument");
+  }
 
   // Get the analyser component
   auto component = instrument->getComponentByName(analyser);

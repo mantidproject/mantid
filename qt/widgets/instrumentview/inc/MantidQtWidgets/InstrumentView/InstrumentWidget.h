@@ -232,8 +232,8 @@ public slots:
 
   void setupColorMap();
 
-  void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
-  void changeScaleType(int /*type*/);                      // Deprecated
+  void changeColormap(const QString &cmapNameOrPath = "", const bool highlightZeroDets = false); // Deprecated
+  void changeScaleType(int /*type*/);                                                            // Deprecated
   void changeNthPower(double /*nth_power*/);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated

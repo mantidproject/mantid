@@ -60,11 +60,10 @@ VectorValueParameterType *VectorParameterParser<VectorValueParameterType>::parse
 
   auto product = new VectorValueParameterType(strs.size());
   using ValType = typename VectorValueParameterType::ValueType;
-  ValType value = 0;
 
   for (size_t i = 0; i < strs.size(); i++) {
     boost::erase_all(strs[i], " ");
-    value = boost::lexical_cast<ValType>(strs[i]);
+    ValType value = boost::lexical_cast<ValType>(strs[i]);
     product->addValue(i, value);
   }
   return product;

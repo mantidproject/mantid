@@ -30,7 +30,7 @@ This has four detector groups, arranged to form edges of a square.
 
 -------------------------
 
-.. _loading_test:
+.. _loading_test_MUSR:
 
 Loading Data Test
 -----------------
@@ -80,9 +80,7 @@ Loading Data Test
 - In the load bar enter ``62250``
 - Press the ``>`` in the loading area and the next run will be loaded
 
-------------------------------------
-
-.. _transverse_field_asymmetry_test:
+----
 
 Transverse Field Asymmetry Test
 -------------------------------

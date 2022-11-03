@@ -1,4 +1,4 @@
-﻿// Mantid Repository : https://github.com/mantidproject/mantid
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -235,7 +235,7 @@ void LoadILLReflectometry::loadInstrument() {
  *
  * @param entry :: the NeXus file entry
  */
-void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
+void LoadILLReflectometry::initNames(const NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
   std::string instrumentName = entry.getString(instrumentNamePath.append("/name"));
   if (instrumentName.empty())
@@ -252,12 +252,10 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   }
   g_log.debug() << "Instrument name: " << instrumentName << '\n';
   if (m_instrument == Supported::D17) {
-    m_detectorAngleName = "dan.value";
     m_offsetFrom = "VirtualChopper";
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
   } else if (m_instrument == Supported::FIGARO) {
-    m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     // FIGARO: find out which of the four choppers are used
@@ -321,7 +319,7 @@ void LoadILLReflectometry::initWorkspace(const std::vector<std::vector<int>> &mo
  *
  * @param entry First entry of nexus file
  */
-void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
+void LoadILLReflectometry::loadDataDetails(const NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data FIGARO 1 x 256 x 1000
   m_startTime = DateAndTime(m_loader.dateTimeInIsoFormat(entry.getString("start_time")));
@@ -362,7 +360,7 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
  *data
  * @return monitor :: A std::vector containing monitor values
  */
-std::vector<int> LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry, const std::string &monitor_data) {
+std::vector<int> LoadILLReflectometry::loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data) {
   NXData dataGroup = entry.openNXData(monitor_data);
   NXInt data = dataGroup.openIntData();
   data.load();
@@ -375,7 +373,7 @@ std::vector<int> LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry, 
  * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
-std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
+std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(const NeXus::NXEntry &entry) {
   g_log.debug("Read monitor data...");
   // vector of monitors with one entry
   const std::vector<std::vector<int>> monitors{loadSingleMonitor(entry, "monitor1/data"),
@@ -409,10 +407,23 @@ std::vector<double> LoadILLReflectometry::getXValues() {
     std::string chopper{"Chopper"};
     double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
     if (m_instrument == Supported::D17) {
-      chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
-      chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
-      chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
-      chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
+      const auto duration = doubleFromRun("duration");
+      std::string chop1SpeedName, chop1PhaseName, chop2SpeedName, chop2PhaseName;
+      if (duration > 30.0) {
+        chop1SpeedName = instrument->getStringParameter("chopper1_speed")[0];
+        chop1PhaseName = instrument->getStringParameter("chopper1_phase")[0];
+        chop2SpeedName = instrument->getStringParameter("chopper2_speed")[0];
+        chop2PhaseName = instrument->getStringParameter("chopper2_phase")[0];
+      } else {
+        chop1SpeedName = instrument->getStringParameter("chopper1_speed_alt")[0];
+        chop1PhaseName = instrument->getStringParameter("chopper1_phase_alt")[0];
+        chop2SpeedName = instrument->getStringParameter("chopper2_speed_alt")[0];
+        chop2PhaseName = instrument->getStringParameter("chopper2_phase_alt")[0];
+      }
+      chop1Speed = doubleFromRun(chop1SpeedName);
+      chop1Phase = doubleFromRun(chop1PhaseName);
+      chop2Speed = doubleFromRun(chop2SpeedName);
+      chop2Phase = doubleFromRun(chop2PhaseName);
       if (chop1Phase > 360.) {
         // Pre-2018 D17 files which have chopper 1 phase and chopper 2 speed
         // swapped.
@@ -489,7 +500,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * @param monitorsData :: Monitors data already loaded
  * @param xVals :: X values
  */
-void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
+void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
                                     const std::vector<double> &xVals) {
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -529,6 +540,13 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
+  if (m_instrument == Supported::FIGARO) {
+    auto const bgs3 = m_localWorkspace->mutableRun().getLogAsSingleValue("BGS3.value");
+    // log data below should be a boolean, but boolean is broken in NeXus so it cannot be saved properly
+    // when exporting data.
+    m_localWorkspace->mutableRun().addLogData(
+        new Kernel::PropertyWithValue<int>("refdown", static_cast<int>(bgs3 > 45)));
+  }
 }
 
 /**
@@ -628,7 +646,7 @@ double LoadILLReflectometry::detectorRotation() {
   m_localWorkspace->mutableRun().addProperty("reduction.line_position", peakCentre, true);
   const double detectorCentre = getProperty("DetectorCentreFractionalIndex");
   const std::string measurement = getPropertyValue("Measurement");
-  double two_theta = -offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
+  double two_theta = offsetAngle(peakCentre, detectorCentre, m_detectorDistance);
   if (measurement == "ReflectedBeam") {
     if (isDefault("BraggAngle")) {
       if (m_sampleAngle == 0.) {
@@ -649,7 +667,7 @@ double LoadILLReflectometry::detectorRotation() {
  * reflected beams standalone, hence sample angle is the only option if
  * BraggAngle is not manually specified.
  */
-void LoadILLReflectometry::sampleAngle(NeXus::NXEntry &entry) {
+void LoadILLReflectometry::sampleAngle(const NeXus::NXEntry &entry) {
   std::string entryName;
   if (m_instrument == Supported::D17) {
     if (entry.isValid("instrument/SAN/value")) {
@@ -688,7 +706,6 @@ void LoadILLReflectometry::initPixelWidth() {
 void LoadILLReflectometry::placeDetector() {
   m_detectorDistance = sampleDetectorDistance();
   m_localWorkspace->mutableRun().addProperty<double>("L2", m_detectorDistance, true);
-  m_detectorAngle = detectorAngle();
   const auto detectorRotationAngle = detectorRotation();
   const std::string componentName = "detector";
   const RotationPlane rotPlane = m_instrument == Supported::D17 ? RotationPlane::horizontal : RotationPlane::vertical;
@@ -754,19 +771,6 @@ double LoadILLReflectometry::collimationAngle() const {
   return m_instrument == Supported::FIGARO ? doubleFromRun(m_sampleAngleName) : 0.;
 }
 
-/// Return the detector center angle.
-double LoadILLReflectometry::detectorAngle() const {
-  if (m_instrument == Supported::D17) {
-    return doubleFromRun(m_detectorAngleName);
-  } else {
-    const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
-    const double DH2Y = mmToMeter(doubleFromRun("DH2.value"));
-    const double DH1Z = m_localWorkspace->getInstrument()->getNumberParameter("DH1Z")[0];
-    const double DH2Z = m_localWorkspace->getInstrument()->getNumberParameter("DH2Z")[0];
-    return radToDeg(std::atan2(DH2Y - DH1Y, DH2Z - DH1Z));
-  }
-}
-
 /** Calculate the offset angle between detector center and peak.
  *  @param peakCentre peak centre in pixels.
  *  @param detectorCentre detector centre in pixels.
@@ -775,10 +779,10 @@ double LoadILLReflectometry::detectorAngle() const {
  */
 double LoadILLReflectometry::offsetAngle(const double peakCentre, const double detectorCentre,
                                          const double detectorDistance) const {
-  // Sign depends on the definition of detector angle and which way
-  // spectrum numbers increase.
-  const auto sign = m_instrument == Supported::D17 ? 1. : -1.;
   const double offsetWidth = (detectorCentre - peakCentre) * m_pixelWidth;
+  // Sign depends on the definition of detector angle and which way
+  // spectrum numbers increase. Negative convention is used for D17 and positive for FIGARO.
+  auto const sign = m_instrument == Supported::FIGARO ? 1 : -1;
   return sign * radToDeg(std::atan2(offsetWidth, detectorDistance));
 }
 
@@ -786,28 +790,13 @@ double LoadILLReflectometry::offsetAngle(const double peakCentre, const double d
  *  @return the distance in meters
  */
 double LoadILLReflectometry::sampleDetectorDistance() const {
-  double sampleDetectorDistance;
+  std::string distanceEntry;
   if (m_instrument == Supported::D17) {
-    sampleDetectorDistance = mmToMeter(doubleFromRun("det.value"));
+    distanceEntry = "det.value";
   } else {
-    // For FIGARO, the DTR field contains the sample-to-detector distance
-    // when the detector is at the horizontal position (angle = 0).
-    const double restZ = mmToMeter(doubleFromRun("DTR.value"));
-    // Motor DH1 vertical coordinate.
-    const double DH1Y = mmToMeter(doubleFromRun("DH1.value"));
-    const double DH1Z = m_localWorkspace->getInstrument()->getNumberParameter("DH1Z")[0];
-    const double detectorRestY = 0.509;
-    const double detAngle = detectorAngle();
-    const double detectorY = std::sin(degToRad(detAngle)) * (restZ - DH1Z) + DH1Y - detectorRestY;
-    const double detectorZ = std::cos(degToRad(detAngle)) * (restZ - DH1Z) + DH1Z;
-    const double pixelOffset = detectorRestY - 0.5 * m_pixelWidth;
-    const double beamY = detectorY + pixelOffset * std::cos(degToRad(detAngle));
-    const double sht1 = mmToMeter(doubleFromRun("SHT1.value"));
-    const double beamZ = detectorZ - pixelOffset * std::sin(degToRad(detAngle));
-    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-    sampleDetectorDistance = std::hypot(beamY - sht1, beamZ) - m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    distanceEntry = "Distance.Sample_CenterOfDetector_distance";
   }
-  return sampleDetectorDistance;
+  return mmToMeter(doubleFromRun(distanceEntry));
 }
 
 /// Return the horizontal offset along the z axis.
@@ -821,6 +810,8 @@ void LoadILLReflectometry::sampleHorizontalOffset() {
       offsetEntry = "Distance.sampleHorizontalOffset";
     } else if (run.hasProperty("Distance.sample_changer_horizontal_offset")) {
       offsetEntry = "Distance.sample_changer_horizontal_offset";
+    } else if (run.hasProperty("Theta.sample_horizontal_offset")) {
+      offsetEntry = "Theta.sample_horizontal_offset";
     } else {
       throw std::runtime_error("Unable to find sample horizontal offset in the file");
     }
@@ -854,6 +845,12 @@ double LoadILLReflectometry::sourceSampleDistance() const {
       pairSeparation = doubleFromRun("Distance.ChopperGap") * scale;                      // in [m]
       m_localWorkspace->mutableRun().addProperty("VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
                                                  true);
+    } else if (run.hasProperty("Distance.Chopper1_Sample")) {
+      // Valid from cycle 212 onwards
+      pairCentre = mmToMeter(doubleFromRun("Distance.MidChopper_Sample")); // [mm] to [m]
+      pairSeparation = doubleFromRun("Distance.ChopperGap") * scale;       // in [m]
+      m_localWorkspace->mutableRun().addProperty("VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
+                                                 true);
     } else {
       throw std::runtime_error("Unable to extract chopper to sample distance");
     }
@@ -863,8 +860,14 @@ double LoadILLReflectometry::sourceSampleDistance() const {
     return pairCentre;
   } else {
     const double chopperDist = mmToMeter(doubleFromRun("ChopperSetting.chopperpair_sample_distance"));
-    const double deflectionAngle = doubleFromRun(m_sampleAngleName);
-    return chopperDist + m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    std::string entryName = "correct_chopper_sample_distance";
+    bool correctChopperSampleDistance = m_localWorkspace->getInstrument()->getBoolParameter(entryName)[0];
+    auto offset = 0.0;
+    if (correctChopperSampleDistance) {
+      const double deflectionAngle = doubleFromRun(m_sampleAngleName);
+      offset = m_sampleZOffset / std::cos(degToRad(deflectionAngle));
+    }
+    return chopperDist + offset;
   }
 }
 

@@ -346,7 +346,7 @@ LookupRow makeLookupRow(boost::optional<double> angle, boost::optional<boost::re
       std::move(angle), std::move(titleMatcher),
       TransmissionRunPair(std::vector<std::string>{"22348", "22349"}, std::vector<std::string>{"22358", "22359"}),
       ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9, ProcessingInstructions("4-6"),
-      ProcessingInstructions("2-3,7-8"));
+      ProcessingInstructions("2-3,7-8"), ProcessingInstructions("3-22"));
 }
 
 LookupRow makeWildcardLookupRow() { return makeLookupRow(boost::none, boost::none); }
@@ -354,14 +354,16 @@ LookupRow makeWildcardLookupRow() { return makeLookupRow(boost::none, boost::non
 LookupTable makeEmptyLookupTable() { return LookupTable{}; }
 
 LookupTable makeLookupTable() {
-  auto lookupRow = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
-                             RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
+  auto lookupRow =
+      LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+                RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none, boost::none);
   return LookupTable{std::move(lookupRow)};
 }
 
 LookupTable makeLookupTableWithTwoAngles() {
   return LookupTable{LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none,
-                               RangeInQ(0.008, 0.02, 1.2), 0.8, ProcessingInstructions("2-3"), boost::none),
+                               RangeInQ(0.008, 0.02, 1.2), 0.8, ProcessingInstructions("2-3"), boost::none,
+                               boost::none),
                      makeLookupRow(2.3)};
 }
 
@@ -369,10 +371,11 @@ LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
   return LookupTable{
       // wildcard row with no angle
       LookupRow(boost::none, boost::none, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
-                RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7")),
+                RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7"),
+                ProcessingInstructions("3-22")),
       // two angle rows
       LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
-                ProcessingInstructions("2-3"), boost::none),
+                ProcessingInstructions("2-3"), boost::none, boost::none),
       LookupRow(makeLookupRow(2.3))};
 }
 
@@ -433,6 +436,13 @@ Experiment makeExperimentWithValidDuplicateCriteria() {
                     makeLookupTableWithTwoValidDuplicateCriteria());
 }
 
+Experiment makeExperimentWithReductionTypeSetForSumInLambda() {
+  return Experiment(AnalysisMode::PointDetector, ReductionType::NonFlatSample, SummationType::SumInLambda, false, false,
+                    makeEmptyBackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
+                    FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
+                    std::map<std::string, std::string>(), LookupTable());
+}
+
 /* Instrument */
 
 RangeInLambda makeWavelengthRange() { return RangeInLambda(2.3, 14.4); }
@@ -458,4 +468,13 @@ Instrument makeEmptyInstrument() {
                     MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
                     DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
 }
+
+/* Preview */
+
+PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers, double theta) {
+  auto row = PreviewRow(runNumbers);
+  row.setTheta(theta);
+  return row;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper

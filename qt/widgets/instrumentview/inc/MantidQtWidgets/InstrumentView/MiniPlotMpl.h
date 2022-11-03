@@ -48,9 +48,6 @@ public slots:
   void setYLogScale();
   void setYLinearScale();
   void clearAll();
-  // Required to match the interface with MiniPlotQwt but matplotlib
-  // handles this for us so it is a noop
-  void recalcAxisDivs() {}
   void zoomOutOnPlot();
 
 signals:

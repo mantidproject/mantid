@@ -342,7 +342,7 @@ std::vector<std::pair<std::string, std::string>> PeaksWorkspace::peakInfo(const 
   V3D Qsamp;
   Kernel::Matrix<double> Gon(3, 3, true);
 
-  if (seqNum >= 0 && NPeaks == getNumberPeaks())
+  if (seqNum >= 0)
     Gon = getPeak(seqNum).getGoniometerMatrix();
   if (labCoords) {
 

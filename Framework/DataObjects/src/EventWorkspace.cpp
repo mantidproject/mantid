@@ -83,8 +83,8 @@ void EventWorkspace::init(const std::size_t &NVectors, const std::size_t &XLengt
   static_cast<void>(YLength);
 
   // Check validity of arguments
-  if (NVectors <= 0) {
-    throw std::out_of_range("Negative or 0 Number of Pixels specified to EventWorkspace::init");
+  if (NVectors == 0) {
+    throw std::out_of_range("Zero pixels specified to EventWorkspace::init");
   }
 
   // Set each X vector to have one bin of 0 & extremely close to zero

@@ -303,7 +303,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-            data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
+            if self.model.can_support_non_axis_cuts():
+                data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
 
@@ -424,6 +425,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
+
+    def key_pressed(self, event) -> None:
+        pass
+
+    def mouse_moved(self, event) -> None:
+        pass
 
     def deactivate_zoom_pan(self):
         self.view.data_view.deactivate_zoom_pan()

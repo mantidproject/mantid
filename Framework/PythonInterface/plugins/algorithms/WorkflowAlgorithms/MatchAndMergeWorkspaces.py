@@ -77,6 +77,8 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         scale_bool = self.getProperty('CalculateScale').value
         offset_bool = self.getProperty('CalculateOffset').value
         flattened_list = self.unwrap_groups(ws_list)
+        # If some banks are to be excluded this line removes them from flattened_list, x_min and x_max
+        flattened_list, x_min, x_max = self.exclude_banks(flattened_list, x_min, x_max)
         largest_range_spectrum, rebin_param = self.get_common_bin_range_and_largest_spectra(flattened_list)
         CloneWorkspace(InputWorkspace=flattened_list[0], OutputWorkspace='ws_conjoined')
         Rebin(InputWorkspace='ws_conjoined', OutputWorkspace='ws_conjoined', Params=rebin_param)
@@ -144,6 +146,23 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         if x_min.any() == -np.inf or x_min.any() == np.inf:
             raise AttributeError("Limits contains an infinite value.")
         return x_min, x_max, bin_width
+
+    @staticmethod
+    def exclude_banks(flat_list, x_min, x_max):
+        index_to_remove = []
+        for i in range(x_min.size):
+            if x_min[i] == -1 and x_max[i] == -1:
+                index_to_remove.append(i)
+            else:
+                if x_min[i] == -1 or x_max[i] == -1:
+                    raise RuntimeError("The banks to be excluded in q_lims do not match. Please check "
+                                       "that -1 has been added in the correct place on both lists.")
+        revised_wslist = np.delete(flat_list, index_to_remove)
+        x_min = np.delete(x_min, index_to_remove)
+        x_max = np.delete(x_max, index_to_remove)
+        if len(x_min) < 1 or len(x_max) < 1:
+            raise RuntimeError("You have excluded all banks. Merging requires at least one bank.")
+        return revised_wslist, x_min, x_max
 
 
 # Register algorithm with Mantid

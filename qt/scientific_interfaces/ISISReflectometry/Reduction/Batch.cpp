@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Batch.h"
+#include "Reduction/RowExceptions.h"
 
 #include <utility>
 
@@ -29,6 +30,10 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
 
 boost::optional<LookupRow> Batch::findLookupRow(Row const &row) const {
   return experiment().findLookupRow(row, runsTable().thetaTolerance());
+}
+
+boost::optional<LookupRow> Batch::findLookupRow(PreviewRow const &previewRow) const {
+  return experiment().findLookupRow(previewRow, runsTable().thetaTolerance());
 }
 
 boost::optional<LookupRow> Batch::findWildcardLookupRow() const { return experiment().findWildcardLookupRow(); }

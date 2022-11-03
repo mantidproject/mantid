@@ -19,8 +19,6 @@ The second test will use multiple periods, this is when the same data is recorde
 
 -----------------------------------------------
 
-.. _hifi_transverse_field_simultaneous_fitting:
-
 HIFI Transverse Field Simultaneous Fitting
 ------------------------------------------
 
@@ -59,8 +57,7 @@ HIFI Transverse Field Simultaneous Fitting
 	  steps of ``0.1``
 	- Click **Ok**
 	- Click **Fit**
-	- This time the fit should work with a significantly lower value for **Chi
-  squared** (``<10``)
+	- This time the fit should work with a significantly lower value for **Chi-squared** (``<10``)
 - Tick ``Tiled plot by`` in the plotting window
 - Change the combobox to ``Run`` and each subplot will now contain just 2 lines
 - Check that the lines look similar to the results below
@@ -68,7 +65,6 @@ HIFI Transverse Field Simultaneous Fitting
 .. figure:: ../../images/MuonAnalysisTests/HIFI-TF-Result.png
 	:alt: HIFI-TF-Result.png
 
--
 -----------------------------------------------
 
 .. _hifi_multi_period:

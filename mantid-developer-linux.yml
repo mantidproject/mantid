@@ -6,16 +6,17 @@ channels:
 dependencies:
   # Common packages
   - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
+  - ccache
   - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - doxygen>=1.9.*
   - eigen=3.4.*
   - euphonic=0.6.*
   - graphviz>=2.47.0
-  - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
+  - gsl=2.7 # Keep gsl a specific version to reduce changes in our fitting
   - h5py>=2.10.0,<3 # Pinned back due to api differences
   - hdf5=1.10.*
   - ipykernel<6 # Added as hard dependency only to deal with an issue with ipykernel v6 and incompatibility with qtconsole/workbench, was previously a soft dependency that was allowed to update to v6 by qtconsole, at present it stops workbench from loading.
-  - jemalloc>=5.2.1
+  - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0
   - matplotlib=3.5.*
@@ -40,7 +41,7 @@ dependencies:
   - scipy>=1.6.2
   - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
   - sphinx >= 4.5.*
-  - sphinx_bootstrap_theme<=0.7.1
+  - sphinx_bootstrap_theme>=0.8.1
   - tbb-devel=2020.2.*
   - tbb=2020.2.*
   - texlive-core>=20180414

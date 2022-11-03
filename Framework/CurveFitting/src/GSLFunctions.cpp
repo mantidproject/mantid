@@ -80,11 +80,14 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
  * @param J :: Output derivatives
  * @return A GSL status information
  */
+
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   auto *p = reinterpret_cast<struct GSL_FitData *>(params);
-
-  p->J.setJ(J);
+  gsl_matrix *J_tr = gsl_matrix_calloc(J->size2, J->size1);
+  gsl_matrix_transpose_memcpy(J_tr, J);
+  EigenMatrix m(J_tr->size2, J_tr->size1);
+  p->J.setJ(&m);
 
   // update function parameters
   if (x->data) {
@@ -133,6 +136,10 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
   if (!values) {
     throw std::invalid_argument("FunctionValues expected");
   }
+
+  EigenMatrix m_tr = m.tr();
+  std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
+
   for (size_t iY = 0; iY < p->n; iY++)
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= values->getFitWeight(iY);

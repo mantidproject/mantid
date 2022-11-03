@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -48,9 +49,6 @@ void Fit::initConcrete() {
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
   getPointerToProperty("OutputStatus")->setDocumentation("Whether the fit was successful");
   declareProperty("OutputChi2overDoF", 0.0, "Returns the goodness of the fit", Kernel::Direction::Output);
-
-  // Disable default gsl error handler (which is to call abort!)
-  gsl_set_error_handler_off();
 
   std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator = std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
@@ -94,15 +92,37 @@ void Fit::initConcrete() {
                   "Output is an empty string).");
 }
 
+std::map<std::string, std::string> Fit::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  const auto &possibleOperators = Mantid::API::Expression::DEFAULT_OPS_STR;
+  std::string constraints = getPropertyValue("Constraints");
+  if (constraints.size() > 0) {
+    auto operatorPresent = false;
+    for (const auto &op : possibleOperators) {
+      const auto it = constraints.find_first_of(op);
+      if (it <= constraints.size()) {
+        operatorPresent = true;
+        break;
+      }
+    }
+    if (!operatorPresent) {
+      issues["Constraints"] = "No operator is present in the constraint.";
+    }
+  }
+
+  return issues;
+}
+
 /// Read in the properties specific to Fit.
 void Fit::readProperties() {
   std::string ties = getPropertyValue("Ties");
   if (!ties.empty()) {
     m_function->addTies(ties);
   }
-  std::string contstraints = getPropertyValue("Constraints");
-  if (!contstraints.empty()) {
-    m_function->addConstraints(contstraints);
+  std::string constraints = getPropertyValue("Constraints");
+  if (!constraints.empty()) {
+    m_function->addConstraints(constraints);
   }
   m_function->registerFunctionUsage(isChild());
 
@@ -235,7 +255,7 @@ void Fit::createOutput() {
     doCalcErrors = false;
   }
 
-  GSLMatrix covar;
+  EigenMatrix covar;
   if (doCalcErrors) {
     // Calculate the covariance matrix and the errors.
     m_costFunction->calCovarianceMatrix(covar);
@@ -287,8 +307,8 @@ void Fit::createOutput() {
         if (j == i)
           row << 100.0;
         else {
-          if (!covar.gsl()) {
-            throw std::runtime_error("There was an error while allocating the (GSL) covariance "
+          if (!covar.inspector().data()) {
+            throw std::runtime_error("There was an error while allocating the covariance "
                                      "matrix "
                                      "which is needed to produce fitting error results.");
           }

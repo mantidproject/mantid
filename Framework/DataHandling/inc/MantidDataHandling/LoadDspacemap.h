@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/System.h"
@@ -21,7 +22,7 @@ namespace DataHandling {
  * @author Janik Zikovsky (code from Vickie Lynch)
  * @date 2011-05-10
  */
-class DLLExport LoadDspacemap final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadDspacemap final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadDspacemap"; };

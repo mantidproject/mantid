@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
@@ -118,7 +119,7 @@ algorithm,
 // predefine class, used to cashe precalculated detector's parameters
 class DetParameters;
 
-class DLLExport FindDetectorsPar : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL FindDetectorsPar : public API::Algorithm {
 public:
   virtual ~FindDetectorsPar() = default;
   /// Algorithm's name for identification overriding a virtual method

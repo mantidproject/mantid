@@ -50,7 +50,7 @@ DefaultEventLoader::DefaultEventLoader(LoadEventNexus *alg, EventWorkspaceCollec
                                        bool event_id_is_spec, const size_t numBanks, const bool precount,
                                        const int chunk, const int totalChunks)
     : m_haveWeights(haveWeights), event_id_is_spec(event_id_is_spec), precount(precount), chunk(chunk),
-      totalChunks(totalChunks), alg(alg), m_ws(ws) {
+      totalChunks(totalChunks), firstChunkForBank(1), eventsPerChunk(0), alg(alg), m_ws(ws) {
   // This map will be used to find the workspace index
   if (event_id_is_spec)
     pixelID_to_wi_vector = m_ws.getSpectrumToWorkspaceIndexVector(pixelID_to_wi_offset);

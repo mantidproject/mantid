@@ -116,7 +116,6 @@ Poco::XML::Element *vtkGeometryCacheReader::getElementByObjectName(const std::st
  */
 void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle, int noOfPoints, std::vector<double> &points) {
   if (pEle == nullptr) {
-    noOfPoints = 0;
     return;
   }
   // Allocate memory
@@ -141,7 +140,6 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle, int noOfPoints
  */
 void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle, int noOfTriangles, std::vector<uint32_t> &faces) {
   if (pEle == nullptr) {
-    noOfTriangles = 0;
     return;
   }
   // Allocate memory

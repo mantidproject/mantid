@@ -112,6 +112,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/colorbar/test/test_colorbar.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
+    mantidqt/widgets/fitpropertybrowser/test/test_interactive_tool.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_presenter.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
@@ -166,6 +167,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/test/test_data_copier.py
     mantidqt/widgets/workspacedisplay/test/test_workspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
+    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_delegate.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py

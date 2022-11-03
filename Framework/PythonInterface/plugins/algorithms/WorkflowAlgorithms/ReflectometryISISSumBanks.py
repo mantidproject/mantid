@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, PropertyMode)
-from mantid.geometry import RectangularDetector
 from mantid.kernel import Direction
 
 
@@ -87,30 +86,16 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
                                               SumPixelsX=num_banks, SumPixelsY=1)
 
     def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
-        result = None
-        inst = workspace.getInstrument()
-        if not inst:
+        instrument = workspace.getInstrument()
+        if not instrument:
             raise RuntimeError('The input workspace must have an instrument')
 
-        det_info = workspace.detectorInfo()
-
-        for idx in range(inst.nelements()):
-            component = inst[idx]
-            # Skip non-rectangular components
-            if type(component) != RectangularDetector:
-                continue
-            # Skip monitors (assume there's only one detector in a monitor)
-            if det_info.isMonitor(det_info.indexOf(component.minDetectorID())):
-                continue
-            # Error if we find more than one match i.e. if result is already set
-            if result:
-                raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
-            # Match found - set the result
-            result = component
-
-        if not result:
+        rect_detectors = instrument.findRectDetectors()
+        if len(rect_detectors) == 0:
             raise RuntimeError('The input workspace must contain a rectangular detector')
-        return result
+        if len(rect_detectors) > 1:
+            raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
+        return rect_detectors[0]
 
     def _run_child_with_out_props(self, *args, **kwargs) -> MatrixWorkspace:
         alg = self.createChildAlgorithm(*args, **kwargs)

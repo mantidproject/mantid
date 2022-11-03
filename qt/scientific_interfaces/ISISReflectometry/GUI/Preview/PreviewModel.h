@@ -11,10 +11,14 @@
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "ROIType.h"
 #include "Reduction/PreviewRow.h"
+
+#include <boost/optional.hpp>
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -32,14 +36,18 @@ public:
   void reduceAsync(IJobManager &jobManager) override;
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
-  std::vector<Mantid::detid_t> getSelectedBanks() const override;
+  boost::optional<ProcessingInstructions> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
-  ProcessingInstructions getProcessingInstructions() const override;
+  boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
+  std::optional<double> getDefaultTheta() const override;
+  PreviewRow const &getPreviewRow() const override;
 
+  void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
+  void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) override;
   void setTheta(double theta) override;
-  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
-  void setSelectedRegion(Selection const &selection) override;
+  void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) override;
+  void setSelectedRegion(ROIType regionType, Selection const &selection) override;
 
   void exportSummedWsToAds() const override;
   void exportReducedWsToAds() const override;
@@ -51,5 +59,9 @@ private:
   std::unique_ptr<PreviewRow> m_runDetails{nullptr};
 
   void createRunDetails(std::string const &workspaceName);
+
+  std::optional<double> getThetaFromLogs(std::string const &logName) const;
+
+  void setProcessingInstructions(ROIType regionType, ProcessingInstructions processingInstructions);
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

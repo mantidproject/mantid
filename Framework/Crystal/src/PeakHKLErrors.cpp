@@ -384,8 +384,6 @@ void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t 
                    "--------------------\n";
   for (size_t p = 0; p < nParams(); p++) {
     g_log.debug() << parameterName(p) << "(" << getParameter(p) << "),";
-    if ((p + 1) % 6 == 0)
-      g_log.debug() << '\n';
   }
   g_log.debug() << '\n';
   g_log.debug() << "Off constraints=";

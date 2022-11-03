@@ -168,6 +168,19 @@ public:
     runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::BACKGROUND_SPECTRA}));
   }
 
+  void testValidROIDetectorProcessingInstructions() {
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "", "", "1-3"})});
+    auto results = runTestValid(table);
+    TS_ASSERT_EQUALS(results.size(), 1);
+    TS_ASSERT(results[0].roiDetectorIDs().is_initialized());
+    TS_ASSERT_EQUALS(results[0].roiDetectorIDs().get(), "1-3");
+  }
+
+  void testInvalidROIDetectorProcessingInstructions() {
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "", "", "bad"})});
+    runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::ROI_DETECTOR_IDS}));
+  }
+
   void testAnglesThatDifferByTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5011"})});
     auto results = runTestValid(table);

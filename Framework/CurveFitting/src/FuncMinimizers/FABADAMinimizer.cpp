@@ -195,7 +195,7 @@ bool FABADAMinimizer::iterate(size_t /*iteration*/) {
   // Do one iteration of FABADA's algorithm for each parameter.
   for (size_t i = 0; i < m; i++) {
 
-    GSLVector newParameters = m_parameters;
+    EigenVector newParameters = m_parameters;
 
     if (!m_fitFunction->isFixed(i)) {
       // Calculate the step from a Gaussian
@@ -411,7 +411,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex, double &new
  * @param newParameters :: the value of the parameters after applying ties
  * @param newValue :: new value of the current parameter
  */
-void FABADAMinimizer::tieApplication(const size_t &parameterIndex, GSLVector &newParameters, double &newValue) {
+void FABADAMinimizer::tieApplication(const size_t &parameterIndex, EigenVector &newParameters, double &newValue) {
   // Fulfill the ties of the other parameters
   for (size_t j = 0; j < m_nParams; ++j) {
     if (j != parameterIndex) {
@@ -455,7 +455,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex, GSLVector &ne
  * @param newParameters :: new value of the fitting parameters
  */
 void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex, const double &chi2New,
-                                            const GSLVector &newParameters) {
+                                            const EigenVector &newParameters) {
 
   // If new Chi square value is lower, jumping directly to new parameter
   if (chi2New < m_chi2) {

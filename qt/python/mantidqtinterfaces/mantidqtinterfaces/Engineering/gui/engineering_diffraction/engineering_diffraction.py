@@ -55,6 +55,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_on_rb_num_changed(self.presenter.calibration_presenter.set_rb_num)
         self.set_on_instrument_changed(self.presenter.focus_presenter.set_instrument_override)
         self.set_on_rb_num_changed(self.presenter.focus_presenter.set_rb_num)
+        # self.set_on_instrument_changed(self.presenter.gsas2_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.presenter.gsas2_presenter.set_rb_num)
 
         # load most recent calibration, if one saved
         self.presenter.calibration_presenter.load_last_calibration()
@@ -79,6 +81,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         presenter.setup_calibration(self)
         presenter.setup_focus(self)
         presenter.setup_fitting(self)
+        presenter.setup_gsas2(self)
         presenter.setup_calibration_notifier()
         presenter.statusbar_observable.add_subscriber(self.update_statusbar_text_observable)
         presenter.savedir_observable.add_subscriber(self.update_savedir_observable)

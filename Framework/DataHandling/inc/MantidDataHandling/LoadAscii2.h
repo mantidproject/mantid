@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -31,7 +32,7 @@ data.</li>
 @author Keith Brown, ISIS, Placement student from the University of Derby
 @date 10/10/13
 */
-class DLLExport LoadAscii2 : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadAscii2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Default constructor
   LoadAscii2();
@@ -70,17 +71,19 @@ protected:
   void fillInputValues(std::vector<double> &values, const std::list<std::string> &columns) const;
   // write the values in the current line to teh end fo teh current spectra
   void addToCurrentSpectra(const std::list<std::string> &columns);
-  // check that the nubmer of columns in the current line match the number found
+  // check that the number of columns in the current line match the number found
   // previously
   void checkLineColumns(const size_t &cols) const;
   // interpret a line that has been deemed valid enough to look at.
   void parseLine(const std::string &line, std::list<std::string> &columns);
-  // find the number of collums we should expect from now on
+  // find the number of columns we should expect from now on
   void setcolumns(std::ifstream &file, std::string &line, std::list<std::string> &columns);
   // wirte the spectra to the workspace
   void writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, const size_t &numSpectra) const;
   // Process the header information. This implementation just skips it entirely.
   void processHeader(std::ifstream &file);
+  // Set the Distribution on the workspace, either from input property or file header
+  bool setDistribution(std::ifstream &file);
   /// The column separator
   std::string m_columnSep;
 

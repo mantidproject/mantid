@@ -370,6 +370,22 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         red_ws = reduced_workspace.getItem(0)
         self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 1)
 
+    def test_change_spectra_for_individual(self):
+        """Check that the spectra are changed for a custom grouping"""
+
+        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
+                                         Instrument='IRIS',
+                                         Analyser='graphite',
+                                         Reflection='002',
+                                         SpectraRange=[3, 53],
+                                         GroupingMethod='Individual')
+
+        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(wks.getNames()[0], 'iris26176_graphite002_red')
+
+        red_ws = wks.getItem(0)
+        self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

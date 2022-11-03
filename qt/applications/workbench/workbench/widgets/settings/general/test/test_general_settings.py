@@ -369,7 +369,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.save_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict),
+                 call(GeneralProperties.USER_LAYOUT.value, type=dict)]
         mock_CONF.get.assert_has_calls(calls)
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
@@ -390,7 +391,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.load_layout()
 
-        mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value)
+        mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, type=dict)
         mock_parent.restoreState.assert_called_once_with(test_dict['a'], SAVE_STATE_VERSION)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
@@ -409,7 +410,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         presenter.delete_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value), call(GeneralProperties.USER_LAYOUT.value)]
+        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict),
+                 call(GeneralProperties.USER_LAYOUT.value, type=dict)]
         mock_CONF.get.assert_has_calls(calls)
         mock_CONF.set.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, {})
         mock_parent.populate_layout_menu.assert_called_once_with()

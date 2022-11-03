@@ -20,7 +20,7 @@ Experiment::Experiment()
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
       m_lookupTable(LookupTable({LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
-                                           boost::none, ProcessingInstructions(), boost::none)})) {}
+                                           boost::none, ProcessingInstructions(), boost::none, boost::none)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
@@ -63,7 +63,15 @@ boost::optional<LookupRow> Experiment::findLookupRow(Row const &row, double tole
   return m_lookupTable.findLookupRow(row, tolerance);
 }
 
+boost::optional<LookupRow> Experiment::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
+  return m_lookupTable.findLookupRow(previewRow, tolerance);
+}
+
 boost::optional<LookupRow> Experiment::findWildcardLookupRow() const { return m_lookupTable.findWildcardLookupRow(); }
+
+void Experiment::updateLookupRow(LookupRow lookupRow, double tolerance) {
+  m_lookupTable.updateLookupRow(std::move(lookupRow), tolerance);
+}
 
 boost::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
   if (auto const lookupRow = m_lookupTable.findLookupRow(row, tolerance)) {

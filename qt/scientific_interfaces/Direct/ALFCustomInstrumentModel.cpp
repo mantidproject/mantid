@@ -104,12 +104,38 @@ void ALFCustomInstrumentModel::transformData() {
   dSpacingAlg->execute();
 }
 
+/*
+ * Returns a conversion factor to be used for ScaleX when the x axis unit is an angle measured in radians. If
+ * the x axis unit is not 'Phi' or 'Out of angle plane', no scaling is required.
+ * @param workspace:: the workspace to check if a conversion factor is required.
+ */
+std::optional<double> ALFCustomInstrumentModel::xConversionFactor(MatrixWorkspace_const_sptr workspace) const {
+  if (!workspace)
+    return std::nullopt;
+
+  if (const auto axis = workspace->getAxis(0)) {
+    const auto unit = axis->unit()->unitID();
+    const auto label = std::string(axis->unit()->label());
+    return unit == "Phi" || label == "Out of plane angle" ? 180.0 / M_PI : 1.0;
+  }
+  return std::nullopt;
+}
+
 void ALFCustomInstrumentModel::storeSingleTube(const std::string &name) {
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(CURVES))
+    return;
+
+  const auto scaleFactor = xConversionFactor(ads.retrieveWS<MatrixWorkspace>(CURVES));
+  if (!scaleFactor)
+    return;
+
+  // Convert to degrees if the XAxis is an angle in radians
   auto alg = AlgorithmManager::Instance().create("ScaleX");
   alg->initialize();
   alg->setProperty("InputWorkspace", CURVES);
   alg->setProperty("OutputWorkspace", EXTRACTEDWS + name);
-  alg->setProperty("Factor", 180. / M_PI); // convert to degrees
+  alg->setProperty("Factor", *scaleFactor);
   alg->execute();
 
   auto histogramAlg = AlgorithmManager::Instance().create("ConvertToHistogram");
@@ -118,7 +144,7 @@ void ALFCustomInstrumentModel::storeSingleTube(const std::string &name) {
   histogramAlg->setProperty("OutputWorkspace", EXTRACTEDWS + name);
   histogramAlg->execute();
 
-  AnalysisDataService::Instance().remove(CURVES);
+  ads.remove(CURVES);
 }
 
 std::string ALFCustomInstrumentModel::WSName() {

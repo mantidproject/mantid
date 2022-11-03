@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -17,7 +17,7 @@ namespace Kernel {
  * the comma operator can be used to make a call to the factories' subscribe
  * method in the first part.
  */
-class DLLExport RegistrationHelper {
+class MANTID_KERNEL_DLL RegistrationHelper {
 public:
   /** Constructor. Does nothing.
    * @param i :: Takes an int and does nothing with it

@@ -23,6 +23,8 @@ set(TEST_FILES
     IndirectPlotOptionsPresenterTest.h
     IndirectSettingsModelTest.h
     IndirectSettingsPresenterTest.h
+    IndirectSqwModelTest.h
+    IndirectSymmetriseModelTest.h
     IqtFitModelTest.h
 )
 

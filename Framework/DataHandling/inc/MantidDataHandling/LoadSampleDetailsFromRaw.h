@@ -10,6 +10,7 @@
 // Includes
 //-----------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,7 +27,7 @@ namespace DataHandling {
    @author Martyn, Tessella plc
    @date 29/07/2009
 */
-class DLLExport LoadSampleDetailsFromRaw : public Mantid::API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadSampleDetailsFromRaw : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadSampleDetailsFromRaw"; }

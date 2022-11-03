@@ -511,6 +511,7 @@ AlgHistoryProperties::AlgHistoryProperties(QWidget *w, std::vector<PropertyHisto
         << "";
 
   m_histpropTree = new QTreeWidget(w);
+  m_histpropTree->setTextElideMode(Qt::ElideMiddle);
   m_histpropTree->setColumnCount(5);
   m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
   m_histpropTree->setHeaderLabels(hList);
@@ -575,7 +576,7 @@ void AlgHistoryProperties::displayAlgHistoryProperties() {
     sProperty = (*pIter)->name();
     propList.append(sProperty.c_str());
 
-    sProperty = Strings::shorten((*pIter)->value(), 40);
+    sProperty = (*pIter)->value();
     bool bisDefault = (*pIter)->isDefault();
     if (bisDefault == true) {
       if ((*pIter)->isEmptyDefault()) {

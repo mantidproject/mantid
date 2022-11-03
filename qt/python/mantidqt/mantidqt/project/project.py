@@ -55,8 +55,8 @@ class Project(AnalysisDataServiceObserver):
         self.prompt_save_on_close = True
 
     def load_settings_from_config(self, config):
-        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
-        self.save_altered_workspaces_only = config.get('project', 'save_altered_workspaces_only')
+        self.prompt_save_on_close = config.get('project', 'prompt_save_on_close', type=bool)
+        self.save_altered_workspaces_only = config.get('project', 'save_altered_workspaces_only', type=bool)
 
     @property
     def saved(self):

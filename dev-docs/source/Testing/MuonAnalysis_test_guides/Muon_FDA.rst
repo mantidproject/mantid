@@ -12,8 +12,8 @@ Introduction
 These are unscripted tests for the :program:`Frequency Domain Analysis` interface.
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
-
 ------------------------------------
+
 .. _FFT_test:
 
 FFT Test
@@ -33,7 +33,7 @@ FFT Test
     - The "Apodization Function" determines the amount of smoothing of the data
     - Set the "Apodization Function" to ``None`` and press calculate
     - The plot will show a large peak at 0 and then lots of noise
-    - Set the "Apodization Function" to ``Gaussian``and press calculate
+    - Set the "Apodization Function" to ``Gaussian`` and press calculate
     - There will be a clear peak
     - The "padding" adds zeros to the end of the time domain data set, to improve the sampling of the FFT
     - Set the xrange for the plot to be from ``0`` to ``2`` by changing the x min and x max values below the plot
@@ -44,6 +44,7 @@ FFT Test
 - At the top of the plotting window change the unit from "Frequency" to "Field", the data will have different x axis
 
 ------------------------------------
+
 .. _phase_test:
 
 Phasequad Test
@@ -62,8 +63,8 @@ The data can then be summed.
 - You select the real and imaginary parts of ``pq`` to be the **Workspace** and **Imaginary Workspace** respectively
 - Click calculate
 
-
 ------------------------------------
+
 .. _maxent_test:
 
 Maxent Test

@@ -136,7 +136,7 @@
         <number>3</number>
        </property>
        <property name="columnCount">
-        <number>11</number>
+        <number>12</number>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
@@ -221,6 +221,11 @@
        <column>
         <property name="text">
          <string>Background</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>ROI Detector IDs</string>
         </property>
        </column>
       </widget>
@@ -442,7 +447,7 @@
        </property>
        <item>
         <property name="text">
-         <string>Normal</string>
+         <string/>
         </property>
        </item>
        <item>

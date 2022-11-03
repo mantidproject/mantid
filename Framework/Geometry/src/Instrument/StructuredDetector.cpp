@@ -294,9 +294,9 @@ void StructuredDetector::initialize(size_t xPixels, size_t yPixels, std::vector<
   m_idStep = idStep;
 
   // Some safety checks
-  if (m_xPixels <= 0)
+  if (m_xPixels == 0)
     throw std::invalid_argument("StructuredDetector::initialize(): xPixels should be > 0");
-  if (m_yPixels <= 0)
+  if (m_yPixels == 0)
     throw std::invalid_argument("StructuredDetector::initialize(): yPixels should be > 0");
   if (x.size() != y.size())
     throw std::invalid_argument("StructuredDetector::initialize(): x.size() should be = y.size()");

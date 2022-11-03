@@ -240,57 +240,49 @@ class RundexSettings(object):
     # it as activated or not
     EXPORT_ALGORITHMS = {
             SANS_ACQ: {
-                "SaveNexusProcessed": False,
-                "SaveAscii": False,
-                "SaveCanSAS1D": True,
-                "SaveNISTDAT": True
+                ("SaveNexusProcessed", ".nxs"): False,
+                ("SaveAscii", ".txt"): False,
+                ("SaveCanSAS1D", ".xml"): True,
+                ("SaveNISTDAT", ".dat"): True
                 },
             SANS_MULTI: {
-                "SaveNexusProcessed": False,
-                "SaveAscii": False,
-                "SaveCanSAS1D": True,
-                "SaveNISTDAT": True
+                ("SaveNexusProcessed", ".nxs"): False,
+                ("SaveAscii", ".txt"): False,
+                ("SaveCanSAS1D", "xml"): True,
+                ("SaveNISTDAT", ".dat"): True
                 },
             REFL_POL: {
-                "SaveNexusProcessed": False,
-                "SaveAscii": False,
-                "SaveReflectometryAscii": True
+                ("SaveNexusProcessed", ".nxs"): False,
+                ("SaveAscii", ".txt"): False,
+                ("SaveReflectometryAscii", ".mft"): True,
+                ("SaveReflectometryAscii", ".lam"): False
                 },
             REFL_NPOL: {
-                "SaveNexusProcessed": False,
-                "SaveAscii": False,
-                "SaveReflectometryAscii": True
+                ("SaveNexusProcessed", ".nxs"): False,
+                ("SaveAscii", ".txt"): False,
+                ("SaveReflectometryAscii", ".mft"): True,
+                ("SaveReflectometryAscii", ".lam"): False
                 },
             POWDER_DSCAN: {
-                "SaveNexusProcessed": False,
-                "SaveAscii": False,
-                "SaveFocusedXYE": True
+                ("SaveNexusProcessed", ".nxs"): False,
+                ("SaveAscii", ".txt"): False,
+                ("SaveFocusedXYE", ".dat"): True
                 },
             POWDER_PSCAN: {
-                "SaveNexusProcessed": False,
-                "SaveAscii": False,
-                "SaveFocussedXYE": True
+                ("SaveNexusProcessed", ".nxs"): False,
+                ("SaveAscii", ".txt"): False,
+                ("SaveFocussedXYE", ".dat"): True
                 },
             DIRECT_TOF: {
-                "SaveNexusProcessed": True,
-                "SaveAscii": False,
-                "SaveNXSPE": False
+                ("SaveNexusProcessed", ".nxs"): True,
+                ("SaveAscii", ".txt"): False,
+                ("SaveNXSPE", ".nxspe"): False
                 }
             }
 
     EXPORT_ALGO_CRITERIA = {
             "SaveCanSAS1D": "%OutputType% == 'I(Q)'",
             "SaveNISTDAT": "%OutputType% == 'I(Qx,Qy)'",
-            }
-
-    EXPORT_ALGO_EXTENSION = {
-            "SaveNexusProcessed": ".nxs",
-            "SaveAscii": ".txt",
-            "SaveCanSAS1D": ".xml",
-            "SaveNISTDAT": ".dat",
-            "SaveReflectometryAscii": ".mft",
-            "SaveFocussedXYE": ".dat",
-            "SaveNXSPE": ".nxspe"
             }
 
     # ideal number of threads for each acquisition mode (optional)
@@ -420,7 +412,8 @@ class RundexSettings(object):
                 "ReflFitStartWorkspaceIndex",
                 "ReflFitEndWorkspaceIndex",
                 "ReflFitWavelengthLowerBound",
-                "ReflFitWavelengthUpperBound"
+                "ReflFitWavelengthUpperBound",
+                "CorrectGravity"
                 ],
             REFL_NPOL : [
                 "DirectFlatBackground",
@@ -453,7 +446,8 @@ class RundexSettings(object):
                 "ReflFitStartWorkspaceIndex",
                 "ReflFitEndWorkspaceIndex",
                 "ReflFitWavelengthLowerBound",
-                "ReflFitWavelengthUpperBound"
+                "ReflFitWavelengthUpperBound",
+                "CorrectGravity"
                 ],
             POWDER_DSCAN: [
                 "NormaliseTo",

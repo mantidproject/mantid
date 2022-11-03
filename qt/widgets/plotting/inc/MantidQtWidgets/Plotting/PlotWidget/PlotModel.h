@@ -19,6 +19,8 @@ public:
   virtual std::vector<Mantid::API::MatrixWorkspace_sptr> getWorkspaces() const;
   virtual std::vector<int> getWorkspaceIndices() const;
 
+  virtual void clear() noexcept;
+
   virtual void setSpectrum(const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex);
 
   virtual bool getPlotErrorBars() const { return m_plotErrorBars; }

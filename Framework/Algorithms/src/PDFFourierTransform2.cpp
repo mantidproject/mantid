@@ -44,6 +44,8 @@ const string BIG_G_OF_R("G(r)");
 const string LITTLE_G_OF_R("g(r)");
 /// Radial distribution function
 const string RDF_OF_R("RDF(r)");
+/// Total radial distribution function
+const string G_K_OF_R("G_k(r)");
 
 /// Normalized intensity
 const string S_OF_Q("S(Q)");
@@ -110,6 +112,7 @@ void PDFFourierTransform2::init() {
   pdfTypes.emplace_back(BIG_G_OF_R);
   pdfTypes.emplace_back(LITTLE_G_OF_R);
   pdfTypes.emplace_back(RDF_OF_R);
+  pdfTypes.emplace_back(G_K_OF_R);
   declareProperty("PDFType", BIG_G_OF_R, std::make_shared<StringListValidator>(pdfTypes),
                   "Type of output PDF including G(r)");
 
@@ -266,9 +269,9 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vec
 }
 
 void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R,
-                                                   std::vector<double> &DFOfR, const std::vector<double> &DR) {
-  string PDFType = getProperty("PDFType");
-  double rho0 = determineRho0();
+                                                   std::vector<double> &DFOfR, const std::vector<double> &DR,
+                                                   const std::string &PDFType, const double &rho0,
+                                                   const double &cohScatLen) {
   if (PDFType == LITTLE_G_OF_R) {
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // transform the data
@@ -289,6 +292,15 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, co
       DFOfR[i] = (2.0 * R[i] / DR[i] + FOfR[i] / DFOfR[i]) * (FOfR[i] / R[i]);
       // transform the data
       FOfR[i] = FOfR[i] / (factor * R[i] * R[i]) - 1.0;
+    }
+  } else if (PDFType == G_K_OF_R) {
+    const double factor = 0.01 * pow(cohScatLen, 2);
+
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = DFOfR[i] / factor;
+      // transform the data
+      FOfR[i] = FOfR[i] / factor;
     }
   }
   return;
@@ -319,16 +331,15 @@ void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, 
 
 void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR,
                                                      const HistogramData::HistogramX &R,
-                                                     HistogramData::HistogramE &DFOfR) {
+                                                     HistogramData::HistogramE &DFOfR, const std::string &PDFType,
+                                                     const double &rho0, const double &cohScatLen) {
   // convert to the correct form of PDF
-  double rho0 = determineRho0();
-  string outputType = getProperty("PDFType");
-  if (outputType == LITTLE_G_OF_R) {
+  if (PDFType == LITTLE_G_OF_R) {
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // transform the data
       FOfR[i] = FOfR[i] + 1.0;
     }
-  } else if (outputType == BIG_G_OF_R) {
+  } else if (PDFType == BIG_G_OF_R) {
     const double factor = 4. * M_PI * rho0;
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // error propagation - assuming uncertainty in r = 0
@@ -336,13 +347,22 @@ void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &
       // transform the data
       FOfR[i] = FOfR[i] * factor * R[i];
     }
-  } else if (outputType == RDF_OF_R) {
+  } else if (PDFType == RDF_OF_R) {
     const double factor = 4. * M_PI * rho0;
     for (size_t i = 0; i < FOfR.size(); ++i) {
       // error propagation - assuming uncertainty in r = 0
       DFOfR[i] = DFOfR[i] * R[i];
       // transform the data
       FOfR[i] = (FOfR[i] + 1.0) * factor * R[i] * R[i];
+    }
+  } else if (PDFType == G_K_OF_R) {
+    const double factor = 0.01 * pow(cohScatLen, 2);
+
+    for (size_t i = 0; i < FOfR.size(); ++i) {
+      // error propagation - assuming uncertainty in r = 0
+      DFOfR[i] = DFOfR[i] * factor;
+      // transform the data
+      FOfR[i] = FOfR[i] * factor;
     }
   }
   return;
@@ -399,11 +419,23 @@ void PDFFourierTransform2::exec() {
     */
   }
 
+  const std::string PDFType = getProperty("PDFType");
+  double rho0 = determineRho0();
+  const Kernel::Material &material = inputWS->sample().getMaterial();
+  const auto cohScatLen = material.cohScatterLength();
+
+  // A material needs to be provided in order to calculate G_K(r)
+  if (PDFType == "G_k(r)" && cohScatLen == 0.0) {
+    std::stringstream msg;
+    msg << "Coherent Scattering Length is zero. Please check a sample material has been specified";
+    throw std::runtime_error(msg.str());
+  }
+
   // convert to S(Q)-1 or g(R)+1
   if (direction == FORWARD) {
     convertToSQMinus1(inputY, inputX, inputDY, inputDX);
   } else if (direction == BACKWARD) {
-    convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX);
+    convertToLittleGRMinus1(inputY, inputX, inputDY, inputDX, PDFType, rho0, cohScatLen);
   }
 
   double inMin, inMax, outDelta, outMax;
@@ -462,7 +494,6 @@ void PDFFourierTransform2::exec() {
 
   // do the math
 
-  double rho0 = determineRho0();
   double corr = 0.5 / M_PI / M_PI / rho0;
   if (direction == BACKWARD) {
     corr = 4.0 * M_PI * rho0;
@@ -496,7 +527,7 @@ void PDFFourierTransform2::exec() {
   }
 
   if (direction == FORWARD) {
-    convertFromLittleGRMinus1(outputY, outputX, outputE);
+    convertFromLittleGRMinus1(outputY, outputX, outputE, PDFType, rho0, cohScatLen);
   } else if (direction == BACKWARD) {
     convertFromSQMinus1(outputY, outputX, outputE);
   }

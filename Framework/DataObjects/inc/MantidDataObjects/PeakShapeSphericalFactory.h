@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidDataObjects/PeakShapeFactory.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -20,7 +19,7 @@ namespace DataObjects {
  de-serializing from JSON.
  *
 */
-class DLLExport PeakShapeSphericalFactory : public PeakShapeFactory {
+class MANTID_DATAOBJECTS_DLL PeakShapeSphericalFactory : public PeakShapeFactory {
 public:
   /// Make product
   Mantid::Geometry::PeakShape *create(const std::string &source) const override;

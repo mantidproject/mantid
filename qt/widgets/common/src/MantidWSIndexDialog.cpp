@@ -71,7 +71,7 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, const Qt::WindowFlags 
  * @returns Struct containing user options
  */
 MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
-  UserInput options;
+  UserInput options = UserInput();
   options.plots = getPlots();
   options.simple = is1DPlotSelected();
   options.waterfall = isWaterfallPlotSelected();
@@ -88,7 +88,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
 
   // Advanced options
   if (m_advanced && (options.simple || options.waterfall || options.surface || options.contour)) {
-    UserInputAdvanced userInputAdvanced;
+    UserInputAdvanced userInputAdvanced = UserInputAdvanced();
     if (options.surface || options.contour) {
       userInputAdvanced.accepted = true;
       userInputAdvanced.plotIndex = getPlotIndex();
@@ -107,7 +107,7 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
       }
     }
     options.isAdvanced = true;
-    options.advanced = userInputAdvanced;
+    options.advanced = std::move(userInputAdvanced);
   } else {
     options.isAdvanced = false; // We don't want the view to look at options.advanced.
   }
@@ -347,7 +347,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
     QStringList values = m_logValues->lineEdit()->text().split(',');
     bool firstValue = true;
     double previousValue = 0.0;
-    foreach (QString value, values) {
+    for (const auto &value : values) {
       bool ok = false;
       double currentValue = value.toDouble(&ok);
       // Check for non-numeric value
@@ -729,7 +729,7 @@ void MantidWSIndexWidget::generateWsIndexIntervals() {
  */
 void MantidWSIndexWidget::generateSpectraNumIntervals() {
   bool firstWs = true;
-  foreach (const QString wsName, m_wsNames) {
+  for (const auto &wsName : m_wsNames) {
     Mantid::API::MatrixWorkspace_const_sptr ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if (!ws)

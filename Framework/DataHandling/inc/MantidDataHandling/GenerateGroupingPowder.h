@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,7 +17,7 @@ namespace DataHandling {
 
   @date 2012-07-16
 */
-class DLLExport GenerateGroupingPowder final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL GenerateGroupingPowder final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

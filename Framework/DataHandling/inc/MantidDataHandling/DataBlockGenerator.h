@@ -18,7 +18,7 @@ class DataBlock;
     int64_t numbers from a collection of intervals which are being input
     into the generator at construction.
 */
-class DLLExport DataBlockGenerator {
+class MANTID_DATAHANDLING_DLL DataBlockGenerator {
 public:
   DataBlockGenerator(std::vector<SpectrumPair> intervals);
   class DataBlock;

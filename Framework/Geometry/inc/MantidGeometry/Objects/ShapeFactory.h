@@ -114,7 +114,7 @@ private:
   std::string parseInfiniteCone(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
   std::string parseCone(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);
 
-  static std::string parseHexahedronFromStruct(Hexahedron &hex, std::map<int, std::shared_ptr<Surface>> &prim,
+  static std::string parseHexahedronFromStruct(const Hexahedron &hex, std::map<int, std::shared_ptr<Surface>> &prim,
                                                int &l_id);
   Hexahedron parseHexahedron(Poco::XML::Element *pElem);
   std::string parseHexahedron(Poco::XML::Element *pElem, std::map<int, std::shared_ptr<Surface>> &prim, int &l_id);

@@ -12,12 +12,16 @@ if(APPLE OR WIN32)
     INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
   )
   # Allow VS to start workbench for debugging
+  set(_vs_debugger_args "${MSVC_BIN_DIR}/workbench-script.pyw --single-process")
+  # cmake-format: off
   set_target_properties(
     workbench
     PROPERTIES VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${Python_EXECUTABLE}>
-               VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
-               VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
+               VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${_vs_debugger_args}>
+               VS_DEBUGGER_ENVIRONMENT
+               $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
   )
+  # cmake-format: on
 else()
   add_python_package(
     workbench EXECUTABLE
@@ -27,67 +31,16 @@ else()
   )
 endif()
 
-if(APPLE AND Python_W_EXECUTABLE)
-  set(WORKBENCH_PYTHON_EXECUTABLE ${Python_W_EXECUTABLE})
-else()
-  set(WORKBENCH_PYTHON_EXECUTABLE ${Python_EXECUTABLE})
-endif()
-file(TO_CMAKE_PATH ${WORKBENCH_PYTHON_EXECUTABLE} WORKBENCH_PYTHON_EXECUTABLE)
-
-# Wrapper launchers: See mantidworkbench.cpp:main for their function
-if(APPLE OR WIN32)
-  # development version
-  add_executable(MantidWorkbench mantidworkbench.cpp)
-  target_compile_definitions(MantidWorkbench PRIVATE -DPYTHON_EXECUTABLE_PATH="${WORKBENCH_PYTHON_EXECUTABLE}")
-  target_link_libraries(MantidWorkbench PRIVATE Boost::filesystem)
-  set_target_properties(MantidWorkbench PROPERTIES VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>)
-
-  # packaged version - creates a GUI application on Windows without a console
-  add_executable(MantidWorkbenchInstalled WIN32 mantidworkbench.cpp)
-  if(WIN32)
-    set(_py_exe "pythonw.exe")
-    set(_qt_plugins_standalone "..\\\\plugins\\\\qt5")
-    set(PACKAGE_EXECUTABLE MantidWorkbench)
-    target_compile_definitions(MantidWorkbench PRIVATE -D_WIN32_WINNT=0x0A00)
-    target_compile_definitions(MantidWorkbenchInstalled PRIVATE -D_WIN32_WINNT=0x0A00)
-  else()
-    set(_py_exe "python")
-    set(_qt_plugins_standalone "../PlugIns")
-    # appears in the unified menu bar and helps distiguish from other packages
-    set(PACKAGE_EXECUTABLE MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE})
-    target_compile_definitions(MantidWorkbench PRIVATE -DBOOST_ASIO_DISABLE_STD_ALIGNED_ALLOC)
-    target_compile_definitions(MantidWorkbenchInstalled PRIVATE -DBOOST_ASIO_DISABLE_STD_ALIGNED_ALLOC)
-  endif()
-  set_target_properties(
-    MantidWorkbenchInstalled PROPERTIES OUTPUT_NAME ${PACKAGE_EXECUTABLE} RUNTIME_OUTPUT_DIRECTORY
-                                                                          ${CMAKE_CURRENT_BINARY_DIR}
-  )
-  if(CONDA_ENV)
-    target_compile_definitions(MantidWorkbenchInstalled PRIVATE -DPYTHON_EXECUTABLE_PATH="${_py_exe}" -DCONDA_ENV=1)
-  else()
-    target_compile_definitions(
-      MantidWorkbenchInstalled PRIVATE -DPYTHON_EXECUTABLE_PATH="${_py_exe}"
-                                       -DQT_PLUGIN_PATH="${_qt_plugins_standalone}"
-    )
-  endif()
-
-  target_link_libraries(MantidWorkbenchInstalled PRIVATE Boost::filesystem)
-  if(WIN32)
-    target_link_libraries(MantidWorkbenchInstalled PRIVATE Qt5::WinMain)
-  endif()
-  install(
-    TARGETS MantidWorkbenchInstalled
-    DESTINATION ${WORKBENCH_BIN_DIR}
-    COMPONENT Runtime
-  )
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set_target_properties(MantidWorkbenchInstalled PROPERTIES INSTALL_RPATH "@loader_path/../Frameworks")
-  endif()
-endif()
-
-# process resources files
+# Resource files
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 if(WIN32)
+  get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if(_is_multi_config)
+    set(WIN_BIN_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>)
+  else()
+    set(WIN_BIN_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+  endif()
+
   function(CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
     # Set path and file content variables
     set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
@@ -103,6 +56,11 @@ if(WIN32)
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if(${BUILD_TYPE} STREQUAL "build")
       file(WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${_qt5_dir}\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
+      file(
+        GENERATE
+        OUTPUT ${WIN_BIN_DIR}/qt.conf
+        INPUT ${_qt_conf_file}
+      )
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
       file(WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
@@ -166,7 +124,7 @@ endif()
 add_dependencies(workbench workbench_resources)
 # if we are building mantidqt we can add a dependency for workbench
 if(MANTID_QT_LIB STREQUAL "BUILD")
-  add_dependencies(workbench mantidqt)
+  add_dependencies(workbench mantidqtinterfaces)
 endif()
 
 # macOS package fixes
@@ -211,8 +169,6 @@ if(APPLE AND NOT CONDA_BUILD)
   "
     )
 
-  else()
-    include(BundleOSXConda)
   endif()
 
 endif()

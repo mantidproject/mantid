@@ -4,7 +4,7 @@
 Mantid 6.5.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_5_release/6_5_collage.png
    :class: screenshot
    :width: 385px
    :align: right
@@ -12,11 +12,23 @@ Mantid 6.5.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.5.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release includes a wide array of updates, bugfixes, and new features, which build on the functionality of Mantid.
+Users are reminded that this release has now dropped support for ``.rpm`` & ``.deb`` files on Linux in favour of Conda installations or a standalone tarball. Please see the :ref:`6.4.0 release notes <v6.4.0>` for more information.
+
+In addition to many improvements we are delighted to announce some new features including:
+
+- A new tab has been added to the :ref:`ISIS Engineering Diffraction UI<Engineering_Diffraction-ref>` to support running refinements in GSAS-II.
+- The ISIS powder diffraction scripts support the PaalmanPings correction method.
+- It is now possible to use the algorithms from the :ref:`GOFit optimization package <gofit-fitting>` directly with the :ref:`Crystal Field API <Crystal Field Python Interface>`.
+- The algorithm :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` now simulates scattering in a container (and more generally in any sample environment components) if a user sets up the shapes and materials in the input workspace prior to running the algorithm.
+- A new set of scripts has been produced to provide a method for processing OSIRIS data. :ref:`ISIS Powder Diffraction Scripts - OSIRIS <isis-powder-diffraction-osiris-ref>`.
+- Three new fitting functions: :ref:`FickDiffusionSQE <func-FickDiffusionSQE>`, :ref:`ChudleyElliotSQE <func-Chudley-ElliotSQE>`, and :ref:`HallRossSQE <func-Hall-RossSQE>` have been made and added to :ref:`ConvFit <convfit>`.
+- Support loading and reducing data for the new detector for D16 at ILL.
+
+Further Information
+-------------------
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

@@ -387,16 +387,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/CheckboxHeader.h
     inc/MantidQtWidgets/Common/Batch/JobTreeView.h
     inc/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
     inc/MantidQtWidgets/Common/DataSelector.h
     inc/MantidQtWidgets/Common/DiagResults.h
     inc/MantidQtWidgets/Common/DoubleSpinBox.h
@@ -524,52 +514,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmHintStrategy.h
     inc/MantidQtWidgets/Common/CatalogHelper.h
     inc/MantidQtWidgets/Common/ConvolutionFunctionModel.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/Command.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/CommandBase.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/TreeManager.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/VectorString.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h
-    inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
     inc/MantidQtWidgets/Common/ParseNumerics.h
     inc/MantidQtWidgets/Common/FunctionModel.h
@@ -643,8 +587,6 @@ set(INC_FILES
 
 set(UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
-    inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsDialog.ui
-    inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWidget.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/CatalogSearch.ui
     inc/MantidQtWidgets/Common/CatalogSelector.ui
@@ -777,19 +719,6 @@ set(TEST_FILES
     test/Batch/FindSubtreeRootsTest.h
     test/Batch/QtAdaptedModelTest.h
     test/Batch/RowLocationTest.h
-    test/DataProcessorUI/CommandsTest.h
-    test/DataProcessorUI/GenerateNotebookTest.h
-    test/DataProcessorUI/GenericDataProcessorPresenterTest.h
-    test/DataProcessorUI/OneLevelTreeManagerTest.h
-    test/DataProcessorUI/PostprocessingAlgorithmTest.h
-    test/DataProcessorUI/PreprocessingAlgorithmTest.h
-    test/DataProcessorUI/PreprocessMapTest.h
-    test/DataProcessorUI/ProcessingAlgorithmBaseTest.h
-    test/DataProcessorUI/ProcessingAlgorithmTest.h
-    test/DataProcessorUI/QOneLevelTreeModelTest.h
-    test/DataProcessorUI/QTwoLevelTreeModelTest.h
-    test/DataProcessorUI/TwoLevelTreeManagerTest.h
-    test/DataProcessorUI/WhiteListTest.h
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
@@ -817,6 +746,7 @@ set(QT5_TEST_FILES
     test/ImageInfoPresenterTest.h
     test/InterfaceManagerTest.h
     test/ManageUserDirectoriesTest.h
+    # test/MantidHelpWindowTest.h - disabled while the failure is investigated
     test/MuonPeriodInfoTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h

@@ -1,0 +1,1 @@
+- :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>` now properly sums the foreground of the direct beam over the same range as the reflected beam, which fixes observed issues with reflectivity calculation.

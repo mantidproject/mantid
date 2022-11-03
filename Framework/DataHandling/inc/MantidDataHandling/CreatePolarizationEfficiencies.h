@@ -7,14 +7,13 @@
 #pragma once
 
 #include "MantidDataHandling/CreatePolarizationEfficienciesBase.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** CreatePolarizationEfficiencies
  */
-class DLLExport CreatePolarizationEfficiencies : public CreatePolarizationEfficienciesBase {
+class MANTID_DATAHANDLING_DLL CreatePolarizationEfficiencies : public CreatePolarizationEfficienciesBase {
 public:
   const std::string name() const override;
   int version() const override;

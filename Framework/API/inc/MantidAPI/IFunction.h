@@ -554,6 +554,8 @@ public:
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
+  /// Ignore a tie
+  virtual bool ignoreTie(const ParameterTie &) const { return false; }
   /// Put all ties in order in which they will be applied correctly.
   void sortTies();
   /// Write a parameter tie to a string
@@ -742,6 +744,9 @@ class FunctionHandler {
 public:
   /// Constructor
   FunctionHandler(IFunction_sptr fun) : m_fun(std::move(fun)) {}
+  /// Delete copy constructor and copy assignment operator
+  FunctionHandler(const FunctionHandler &) = delete;
+  FunctionHandler &operator=(const FunctionHandler &) = delete;
   /// Virtual destructor
   virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function

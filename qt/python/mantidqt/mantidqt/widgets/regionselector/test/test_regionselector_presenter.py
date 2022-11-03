@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest.mock import Mock, patch, DEFAULT
+from unittest.mock import call, DEFAULT, Mock, patch
 
 from mantidqt.widgets.regionselector.presenter import RegionSelector
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WS_TYPE
@@ -18,13 +18,12 @@ class RegionSelectorTest(unittest.TestCase):
                                                Dimensions=DEFAULT,
                                                WorkspaceInfo=DEFAULT)
         self.patched_deps = self._ws_info_patcher.start()
+        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
 
     def tearDown(self) -> None:
         self._ws_info_patcher.stop()
 
     def test_matrix_workspaces_allowed(self):
-        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
-
         self.assertIsNotNone(RegionSelector(Mock(), view=Mock()))
 
     def test_invalid_workspaces_fail(self):
@@ -44,7 +43,6 @@ class RegionSelectorTest(unittest.TestCase):
     def test_update_workspace_updates_model(self):
         region_selector = RegionSelector(view=Mock())
         mock_ws = Mock()
-        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
 
         region_selector.update_workspace(mock_ws)
 
@@ -64,30 +62,242 @@ class RegionSelectorTest(unittest.TestCase):
         mock_view = Mock()
         region_selector = RegionSelector(view=mock_view)
         mock_ws = Mock()
-        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
 
         region_selector.update_workspace(mock_ws)
 
         mock_view.set_workspace.assert_called_once_with(mock_ws)
 
     def test_add_rectangular_region_creates_selector(self):
-        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
         region_selector = RegionSelector(ws=Mock(), view=Mock())
 
-        region_selector.add_rectangular_region()
+        region_selector.add_rectangular_region("test", "black")
 
-        self.assertIsNotNone(region_selector._selector)
+        self.assertEqual(1, len(region_selector._selectors))
+        self.assertTrue(region_selector._selectors[0].active)
+        self.assertEqual("test", region_selector._selectors[0].region_type())
+
+    def test_add_second_rectangular_region_deactivates_first_selector(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+
+        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black")
+
+        self.assertEqual(2, len(region_selector._selectors))
+
+        self.assertFalse(region_selector._selectors[0].active)
+        self.assertTrue(region_selector._selectors[1].active)
+
+    def test_clear_workspace_will_clear_all_the_selectors_and_model_workspace(self):
+        region_selector = RegionSelector(view=Mock())
+        mock_ws = Mock()
+
+        region_selector.update_workspace(mock_ws)
+        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black")
+
+        region_selector.clear_workspace()
+
+        self.assertEqual(0, len(region_selector._selectors))
+        self.assertEqual(None, region_selector.model.ws)
+
+    def test_clear_workspace_will_clear_the_figure_in_the_view(self):
+        mock_view = Mock()
+        region_selector = RegionSelector(view=mock_view)
+
+        region_selector.clear_workspace()
+
+        mock_view.clear_figure.assert_called_once_with()
+
+    def test_get_region_with_two_signal_regions(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+
+        region = region_selector.get_region("signal")
+        self.assertEqual(4, len(region))
+        self.assertEqual([selector_one.extents[2], selector_one.extents[3], selector_two.extents[2],
+                          selector_two.extents[3]], region)
+
+    def test_get_region_with_different_region_types(self):
+        region_selector, selector_one, selector_two = self._mock_selectors("signal", "background")
+        region = region_selector.get_region("signal")
+        self.assertEqual(2, len(region))
+        self.assertEqual([selector_one.extents[2], selector_one.extents[3]], region)
+
+    def test_canvas_clicked_does_nothing_when_redrawing_region(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+
+        region_selector._drawing_region = True
+
+        region_selector.canvas_clicked(Mock())
+
+        selector_one.set_active.assert_not_called()
+        selector_two.set_active.assert_not_called()
+
+    def test_canvas_clicked_sets_selectors_inactive(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+
+        region_selector._contains_point = Mock(return_value=False)
+
+        region_selector.canvas_clicked(Mock())
+
+        selector_one.set_active.assert_called_once_with(False)
+        selector_two.set_active.assert_called_once_with(False)
+
+    def test_canvas_clicked_sets_selectors_active_if_contains_point(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+
+        event = Mock()
+        event.xdata = 1.5
+        event.ydata = 3.5
+        region_selector.canvas_clicked(event)
+
+        selector_one.set_active.assert_has_calls([call(False), call(True)])
+        selector_two.set_active.assert_called_once_with(False)
+
+    def test_canvas_clicked_sets_only_one_selector_active_if_multiple_contain_point(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_two.extents = selector_one.extents
+
+        event = Mock()
+        event.xdata = 1.5
+        event.ydata = 3.5
+        region_selector.canvas_clicked(event)
+
+        selector_one.set_active.assert_has_calls([call(False), call(True)])
+        selector_two.set_active.assert_called_once_with(False)
+
+    def test_delete_key_pressed_will_do_nothing_if_no_selectors_exist(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(0, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_delete_key_pressed_will_do_nothing_if_no_selectors_are_active(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = False
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(2, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(2, len(region_selector._selectors))
+
+    def test_delete_key_pressed_will_remove_the_active_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+        selector_two.artists = []
+
+        event = Mock()
+        event.key = "delete"
+
+        self.assertEqual(2, len(region_selector._selectors))
+        region_selector.key_pressed(event)
+        self.assertEqual(1, len(region_selector._selectors))
+
+        selector_two.set_active.assert_called_once_with(False)
+        selector_two.update.assert_called_once_with()
+
+    def test_delete_key_pressed_will_notify_region_changed(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active, selector_two.active = False, True
+        selector_two.artists = []
+        mock_observer = Mock()
+        region_selector.subscribe(mock_observer)
+
+        event = Mock()
+        event.key = "delete"
+
+        region_selector.key_pressed(event)
+
+        mock_observer.notifyRegionChanged.assert_called_once()
+
+    def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_exist(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.view.set_override_cursor = Mock()
+
+        event = Mock()
+        event.xdata, event.ydata = 1.0, 2.0
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_not_set_override_cursor_if_no_selectors_are_active(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = False
+
+        event = Mock()
+        event.xdata, event.ydata = 5.5, 7.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_not_set_override_cursor_if_not_hovering_over_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+
+        event = Mock()
+        event.xdata, event.ydata = 1.5, 3.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(False)
+
+    def test_mouse_moved_will_set_override_cursor_if_hovering_over_active_selector(self):
+        region_selector, selector_one, selector_two = self._mock_selectors()
+        selector_one.active = False
+        selector_two.active = True
+
+        event = Mock()
+        event.xdata, event.ydata = 5.5, 7.5
+
+        region_selector.mouse_moved(event)
+
+        region_selector.view.set_override_cursor.assert_called_once_with(True)
 
     def test_on_rectangle_selected_notifies_observer(self):
-        self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
         region_selector = RegionSelector(ws=Mock(), view=Mock())
         mock_observer = Mock()
         region_selector.subscribe(mock_observer)
 
-        region_selector.add_rectangular_region()
+        region_selector.add_rectangular_region("test", "black")
         region_selector._on_rectangle_selected(Mock(), Mock())
 
         mock_observer.notifyRegionChanged.assert_called_once()
+
+    def test_cancel_drawing_region_will_remove_last_selector(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.add_rectangular_region("test", "black")
+        self.assertEqual(1, len(region_selector._selectors))
+        region_selector.cancel_drawing_region()
+        self.assertEqual(0, len(region_selector._selectors))
+
+    def test_cancel_drawing_region_with_no_selectors_does_not_crash(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.cancel_drawing_region()
+
+    def _mock_selectors(self, selector_one_type="signal", selector_two_type="signal"):
+        selector_one, selector_two = Mock(), Mock()
+        selector_one.region_type = Mock(return_value=selector_one_type)
+        selector_two.region_type = Mock(return_value=selector_two_type)
+        selector_one.set_active, selector_two.set_active = Mock(), Mock()
+        selector_one.extents = [1, 2, 3, 4]
+        selector_two.extents = [5, 6, 7, 8]
+
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector._selectors.append(selector_one)
+        region_selector._selectors.append(selector_two)
+
+        return region_selector, selector_one, selector_two
 
 
 if __name__ == '__main__':

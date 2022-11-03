@@ -12,7 +12,7 @@
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
-#                 this arguement do not use \\ or \ in the path.
+#                 this argument do not use \\ or \ in the path.
 #   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
 #
 # Possible flags:
@@ -29,9 +29,9 @@
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 
-# Check arguements passed are 2 or higher, and aren't optional flags.
+# Check arguments passed are 2 or higher, and aren't optional flags.
 if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
-    echo "Pass 2 arguements followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
+    echo "Pass 2 arguments followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
     exit 1
 fi
 

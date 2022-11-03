@@ -41,7 +41,7 @@ and
 A_{eq} x = 0
 \f]
  */
-class DLLExport SLSQPMinimizer {
+class MANTID_KERNEL_DLL SLSQPMinimizer {
 public:
   /**
    * Constructor

@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 
 #include <boost/math/distributions/chi_squared.hpp>
 #include <utility>
@@ -262,11 +262,6 @@ void ProfileChiSquared1D::execConcrete() {
   // Value of chi squared for current parameters in m_function
   double chi0 = chiSquaredWeighted;
 
-  // Parameter bounds that define a volume in the parameter
-  // space within which the chi squared is being examined.
-  GSLVector lBounds(nParams);
-  GSLVector rBounds(nParams);
-
   // Number of points in lines for plotting
   size_t n = 100;
   pdfTable->setRowCount(n);
@@ -303,8 +298,6 @@ void ProfileChiSquared1D::execConcrete() {
     //   par0 + rBound is the highest value of the parameter (rBound >= 0)
     double lBound = slice.findBound(-shift);
     double rBound = slice.findBound(shift);
-    lBounds[ip] = lBound;
-    rBounds[ip] = rBound;
 
     // Approximate the slice with a polynomial.
     // P is a vector of values of the polynomial at special points.
@@ -367,24 +360,24 @@ void ProfileChiSquared1D::execConcrete() {
 
   // Square roots of the diagonals of the covariance matrix give
   // the standard deviations in the quadratic approximation of the chi^2.
-  GSLMatrix V = getCovarianceMatrix();
+  EigenMatrix V = getCovarianceMatrix();
   for (size_t i = 0; i < freeParameters.size(); ++i) {
     int ip = freeParameters[i];
     quadraticErrColumn->fromDouble(i, sqrt(V.get(ip, ip)));
   }
 }
 
-GSLMatrix ProfileChiSquared1D::getCovarianceMatrix() {
+EigenMatrix ProfileChiSquared1D::getCovarianceMatrix() {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   auto nParams = m_function->nParams();
   m_domainCreator->createDomain(domain, values);
   unfixParameters();
-  GSLJacobian J(*m_function, values->size());
+  EigenJacobian J(*m_function, values->size());
   m_function->functionDeriv(*domain, J);
   refixParameters();
   // Calculate the hessian at the current point.
-  GSLMatrix H;
+  EigenMatrix H;
   H.resize(nParams, nParams);
   for (size_t i = 0; i < nParams; ++i) {
     for (size_t j = i; j < nParams; ++j) {
@@ -400,7 +393,7 @@ GSLMatrix ProfileChiSquared1D::getCovarianceMatrix() {
     }
   }
   // Covariance matrix is inverse of hessian
-  GSLMatrix V(H);
+  EigenMatrix V(H);
   V.invert();
   return V;
 }

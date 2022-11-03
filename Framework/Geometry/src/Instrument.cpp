@@ -1052,10 +1052,7 @@ void Instrument::setValidFromDate(const Types::Core::DateAndTime &val) {
 
 Instrument::ContainsState Instrument::containsRectDetectors() const {
   std::queue<IComponent_const_sptr> compQueue; // Search queue
-
-  // Add all the direct children of the intrument
-  for (int i = 0; i < nelements(); i++)
-    compQueue.push(getChild(i));
+  addInstrumentChildrenToQueue(compQueue);
 
   bool foundRect = false;
   bool foundNonRect = false;
@@ -1066,42 +1063,16 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     comp = compQueue.front();
     compQueue.pop();
 
-    // Skip source, is has one
-    if (m_sourceCache && m_sourceCache->getComponentID() == comp->getComponentID())
+    if (!validateComponentProperties(comp))
       continue;
-
-    // Skip sample, if has one
-    if (m_sampleCache && m_sampleCache->getComponentID() == comp->getComponentID())
-      continue;
-
-    // Skip monitors
-    IDetector_const_sptr detector = std::dynamic_pointer_cast<const IDetector>(comp);
-    if (detector && isMonitor(detector->getID()))
-      continue;
-
-    // skip choppers, slits and supermirrors - HACK!
-    const auto &name = comp->getName();
-    if (name == "chopper-position" || name.substr(0, 4) == "slit" || name == "supermirror") {
-      continue;
-    }
 
     if (dynamic_cast<const RectangularDetector *>(comp.get())) {
-      if (!foundRect)
-        foundRect = true;
-    } else {
-      ICompAssembly_const_sptr assembly = std::dynamic_pointer_cast<const ICompAssembly>(comp);
-
-      if (assembly) {
-        for (int i = 0; i < assembly->nelements(); i++)
-          compQueue.push(assembly->getChild(i));
-      } else // Is a non-rectangular component
-      {
-        if (!foundNonRect)
-          foundNonRect = true;
-      }
+      foundRect = true;
+    } // If component isn't a ComponentAssembly, we know it is a non-rectangular detector. Otherwise check its children
+    else if (!addAssemblyChildrenToQueue(compQueue, comp)) {
+      foundNonRect = true;
     }
-
-  } // while
+  }
 
   // Found both
   if (foundRect && foundNonRect)
@@ -1112,8 +1083,73 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
   // Found only non-rectangular
   else
     return Instrument::ContainsState::None;
+}
 
-} // containsRectDetectors
+std::vector<RectangularDetector_const_sptr> Instrument::findRectDetectors() const {
+  std::queue<IComponent_const_sptr> compQueue; // Search queue
+  addInstrumentChildrenToQueue(compQueue);
+
+  std::vector<RectangularDetector_const_sptr> detectors;
+
+  IComponent_const_sptr comp;
+
+  while (!compQueue.empty()) {
+    comp = compQueue.front();
+    compQueue.pop();
+
+    if (!validateComponentProperties(comp))
+      continue;
+
+    if (auto const detector = std::dynamic_pointer_cast<const RectangularDetector>(comp)) {
+      detectors.push_back(detector);
+    } else {
+      // If component is a ComponentAssembly, we add its children to the queue to check if they're Rectangular Detectors
+      addAssemblyChildrenToQueue(compQueue, comp);
+    }
+  }
+  return detectors;
+}
+
+bool Instrument::validateComponentProperties(IComponent_const_sptr component) const {
+  // Skip source, if has one
+  if (m_sourceCache && m_sourceCache->getComponentID() == component->getComponentID())
+    return false;
+
+  // Skip sample, if has one
+  if (m_sampleCache && m_sampleCache->getComponentID() == component->getComponentID())
+    return false;
+
+  // Skip monitors
+  IDetector_const_sptr detector = std::dynamic_pointer_cast<const IDetector>(component);
+  if (detector && isMonitor(detector->getID()))
+    return false;
+
+  // skip choppers, slits and supermirrors - HACK!
+  const auto &name = component->getName();
+  if (name == "chopper-position" || name.substr(0, 4) == "slit" || name == "supermirror") {
+    return false;
+  }
+
+  return true;
+}
+
+void Instrument::addInstrumentChildrenToQueue(std::queue<IComponent_const_sptr> &queue) const {
+  // Add all the direct children of the instrument
+  for (int i = 0; i < nelements(); i++)
+    queue.push(getChild(i));
+}
+
+/// If component is a ComponentAssembly, we add its children to the queue to check if they're Rectangular Detectors and
+/// returns true. Otherwise, it returns false.
+bool Instrument::addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &queue,
+                                            IComponent_const_sptr component) const {
+  if (auto const assembly = std::dynamic_pointer_cast<const ICompAssembly>(component)) {
+    for (int i = 0; i < assembly->nelements(); i++)
+      queue.push(assembly->getChild(i));
+    return true;
+  }
+  return false;
+}
 
 /// Temporary helper for refactoring. Argument is index, *not* ID!
 bool Instrument::isMonitorViaIndex(const size_t index) const {

@@ -12,7 +12,6 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 
@@ -40,7 +39,7 @@ namespace DataObjects {
  *
  * */
 TMDE_CLASS
-class DLLExport MDGridBox : public MDBoxBase<MDE, nd> {
+class MANTID_DATAOBJECTS_DLL MDGridBox : public MDBoxBase<MDE, nd> {
 public:
   MDGridBox(std::shared_ptr<API::BoxController> &bc, const uint32_t depth,
             const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector);

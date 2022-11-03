@@ -1,0 +1,1 @@
+- Fixed a bug where the user couldn't reselect a peak in the fitting tool after adding another

@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <vector>
@@ -51,7 +52,7 @@ namespace DataHandling {
  *
  */
 
-class DLLExport SaveNXTomo final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveNXTomo final : public API::Algorithm {
 public:
   SaveNXTomo();
   /// Algorithm's name for identification overriding a virtual method

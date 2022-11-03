@@ -58,10 +58,16 @@ ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference) : 
 }
 
 /** Copy constructor
- *  @param ass :: assembly to copy
+ *  @param assem :: assembly to copy
  */
-ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
-    : ICompAssembly(ass), IObjComponent(ass), ObjComponent(ass), m_group(ass.m_group) {
+ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &assem)
+    : ICompAssembly(assem), IObjComponent(assem), ObjComponent(assem) {
+  *this = assem;
+}
+
+ObjCompAssembly &ObjCompAssembly::operator=(const ObjCompAssembly &assem) {
+  m_group = assem.m_group;
+
   // Need to do a deep copy
   comp_it it;
   for (it = m_group.begin(); it != m_group.end(); ++it) {
@@ -74,6 +80,8 @@ ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
     // Move copied component object's parent from old to new ObjCompAssembly
     (*it)->setParent(this);
   }
+
+  return *this;
 }
 
 /** Destructor
@@ -331,7 +339,7 @@ void ObjCompAssembly::testIntersectionWithChildren(Track &testRay,
   int nchildren = this->nelements();
   for (int i = 0; i < nchildren; ++i) {
     std::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
-    if (ICompAssembly_sptr childAssembly = std::dynamic_pointer_cast<ICompAssembly>(comp)) {
+    if (std::dynamic_pointer_cast<ICompAssembly>(comp)) {
       searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection

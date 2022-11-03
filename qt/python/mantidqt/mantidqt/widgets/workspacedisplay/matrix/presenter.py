@@ -9,6 +9,7 @@
 #
 from qtpy.QtCore import Qt
 
+from mantid.api import ITableWorkspace
 from mantid.plots.utility import MantidAxType
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
@@ -17,15 +18,25 @@ from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.status_bar_view import StatusBarView
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
-from mantid.simpleapi import CreateEmptyTableWorkspace
+# import of CreateEmptyTableWorkspace is inside method where it is used to avoid
+# starting the mantid framework in unit tests when this module is imported
 
 
 class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plot=None, parent=None, window_flags=Qt.Window, model=None, view=None, ads_observer=None, container=None,
-                 window_width=600, window_height=400):
+    def __init__(self,
+                 ws,
+                 plot=None,
+                 parent=None,
+                 window_flags=Qt.Window,
+                 model=None,
+                 view=None,
+                 ads_observer=None,
+                 container=None,
+                 window_width=600,
+                 window_height=400):
         """
         Creates a display for the provided workspace.
 
@@ -42,7 +53,9 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self, parent, window_flags)
-        self.container = container if container else StatusBarView(parent, self.view, self.model.get_name(),
+        self.container = container if container else StatusBarView(parent,
+                                                                   self.view,
+                                                                   self.model.get_name(),
                                                                    window_width=window_width,
                                                                    window_height=window_height,
                                                                    presenter=self,
@@ -104,9 +117,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.notify_no_selection_to_copy()
             return
         ws = table.model().ws
-        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_spectra")
         row_sizes = [ws.getNumberBins(row) for row in selected_rows]
-        table_ws.setRowCount(max(row_sizes))
+        table_ws = _create_empty_table_workspace(name=ws.name() + "_spectra", num_rows=max(row_sizes))
         num_col = 4 if self.hasDx else 3
         for i, (row, row_size) in enumerate(zip(selected_rows, row_sizes)):
             table_ws.addColumn("double", "XS" + str(row))
@@ -140,17 +152,16 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             self.notify_no_selection_to_copy()
             return
         ws = table.model().ws
-        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_bins")
         num_rows = ws.getNumberHistograms()
-        table_ws.setRowCount(num_rows)
+        table_ws = _create_empty_table_workspace(name=ws.name() + "_bins", num_rows=num_rows)
         table_ws.addColumn("double", "X")
-        num_col = 3 if self.hasDx else 2
+        num_cols = 3 if self.hasDx else 2
         for i, col in enumerate(selected_cols):
             table_ws.addColumn("double", "YB" + str(col))
             table_ws.addColumn("double", "YE" + str(col))
 
-            col_y = num_col * i + 1
-            col_e = num_col * i + 2
+            col_y = num_cols * i + 1
+            col_e = num_cols * i + 2
 
             for j in range(num_rows):
                 data_y = ws.readY(j)
@@ -166,7 +177,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
 
             if self.hasDx:
                 table_ws.addColumn("double", "XE" + str(col))
-                col_dx = num_col * i + 3
+                col_dx = num_cols * i + 3
                 for j in range(num_rows):
                     data_dx = ws.readDx(j)
                     table_ws.setCell(j, col_dx, data_dx[col])
@@ -195,8 +206,11 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         plot_kwargs["axis"] = axis
 
         ws_list = [self.model._ws]
-        self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
-                  overplot=overplot, plot_kwargs=plot_kwargs)
+        self.plot(ws_list,
+                  wksp_indices=[get_index(index) for index in selected],
+                  errors=plot_errors,
+                  overplot=overplot,
+                  plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
@@ -205,12 +219,10 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
     def action_overplot_spectrum(self, table):
-        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
-                             plot_errors=False, overplot=True)
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=False, overplot=True)
 
     def action_overplot_spectrum_with_errors(self, table):
-        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(),
-                             plot_errors=True, overplot=True)
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True, overplot=True)
 
     def action_plot_bin(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column())
@@ -248,3 +260,18 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             return self.model._ws.readDx
         else:
             raise ValueError("Unknown TableViewModel type {}".format(type))
+
+
+# utility functions
+def _create_empty_table_workspace(name: str, num_rows: int) -> ITableWorkspace:
+    """Create and empty table with the given number of rows
+
+    :param name: The name of the workspace in the ADS
+    :param num_rows: Number of rows for the new table
+    :return: A new tableworkspace
+    """
+    # keep import here to avoid framework initialization in tests
+    from mantid.simpleapi import CreateEmptyTableWorkspace
+    table = CreateEmptyTableWorkspace(OutputWorkspace=name)
+    table.setRowCount(num_rows)
+    return table

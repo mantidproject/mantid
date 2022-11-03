@@ -538,6 +538,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
         self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
 
+        cf1.IntensityScaling = 1e2
+        cf2.IntensityScaling = 1e2
+        cf = cf1 + cf2
+        ties = ','.join(re.findall(r'ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in ties
+                        or 'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in ties)  # either possible in python 3
+
     def test_multi_ion_intensity_scaling_multi_spectrum(self):
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
                   'Temperature': [44.0, 50.0], 'FWHM': [1.1, 1.6]}
@@ -584,6 +591,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
         self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
 
+        cf1.IntensityScaling = [1e2,1e2]
+        cf2.IntensityScaling = [1e2,1e2]
+        cf = cf1 + cf2
+        ties = ','.join(re.findall(r'ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in ties
+                        or 'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in ties)  # either possible in python 3
+
     def test_multi_ion_ties_and_fixes(self):
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
                   'Temperature': 44.0, 'FWHM': 1.1}
@@ -598,6 +612,27 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.B41")))
         self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.B66")))
         self.assertTrue(cf.function.isFixed(cf.function.getParameterIndex("ion1.IB62")))
+
+    def test_fit_gaussian_peaks(self):
+        origin = CrystalField.CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                                           Temperature=44.0, FWHM=1.1)
+        x, y = origin.getSpectrum()
+        ws = CrystalField.fitting.makeWorkspace(x, y)
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
+        cf1 = CrystalField.CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField.CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        cf.PeakShape = 'Gaussian'
+
+        chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
+
+        fit = CrystalField.CrystalFieldFit(Model=cf, InputWorkspace=ws,MaxIterations=10)
+        fit.fit()
+
+        self.assertGreater(cf.chi2, 0.0)
+        self.assertLess(cf.chi2, chi2)
 
     def test_two_step_fit_multi_ion_single_spectrum(self):
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,

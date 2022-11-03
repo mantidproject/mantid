@@ -35,7 +35,6 @@ void ALCPeakFittingView::initialize() {
   QStringList plotsWithErrors{"Corrected"};
   m_ui.plot->setLinesWithErrors(plotsWithErrors);
 
-  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
   // TODO: the peak picker is broken, these are being dissabled for release and will be fixed in maintinance.
   // (auto-delete option)
   // m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
@@ -111,7 +110,7 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr &peak) {
 }
 
 void ALCPeakFittingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
 void ALCPeakFittingView::displayError(const QString &message) { QMessageBox::critical(m_widget, "Error", message); }

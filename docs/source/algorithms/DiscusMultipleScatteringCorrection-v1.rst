@@ -34,13 +34,13 @@ The quantity :math:`J_n` is calculated by performing the following integration:
 
 .. math::
 
-   J_n &= (\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i \int_{\omega^{min}}^{\omega_i^{max}} d\omega (e^{-\mu_T l_{i+1}}) \frac{k_{i+1}}{k_i} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \\
-       &=(\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{q_i^{min}}^{q_i^{max}} dQ_i \int_{0}^{2 \pi} d\phi_i \int_{\omega^{min}}^{\omega_i^{max}} d\omega (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k_i^2} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n)
+   J_n &= (\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i \int_{\omega^{min}}^{\omega_i^{max}} d\omega_i (e^{-\mu_T l_{i+1}}) \frac{k_{i+1}}{k_i} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \\
+       &=(\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{2 \pi} d\phi_i \iint \limits_{D(k_i)} dQ_i d\omega_i (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k_i^2} S(Q_i, \omega_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n)
 
 
-The variables :math:`l_i^{max}` represent the maximum path length before the next scatter given a particular phi and theta value (Q). Each :math:`l_i` is actually a function of all of the earlier values for the :math:`l_i`, :math:`\phi` and :math:`Q` variables ie :math:`l_i = l_i(l_1, l_2, ..., l_{i-1}, \phi_1, \phi_2, ..., \phi_i, Q_1, Q_2, ..., Q_i)`.
-The limits on the :math:`\omega` integration are a minimum based on the range of values supplied in the :math:`S(Q, \omega)` profile and a maximum which is a function of i equal to the total energy loss of the pre-scatter neutron.
-The limits on the q integration are also a function of i as follows. These formulae for the limits reduce to 0 and 2k for elastic.
+The variables :math:`l_i^{max}` represent the maximum path length before the next scatter given a particular phi and theta value (Q). Each :math:`l_i` is actually a function of all of the earlier values for the :math:`l_i`, :math:`\phi`, :math:`Q` and :math:`\omega` variables ie :math:`l_i = l_i(l_1, l_2, ..., l_{i-1}, \phi_1, \phi_2, ..., \phi_i, Q_1, Q_2, ..., Q_i, \omega_1, \omega_2, ..., \omega_i)`.
+The integration over the variables :math:`Q` and :math:`\omega` is done over the kinematically accessible region :math:`D(k_i)`. The integral is done over :math:`\omega` first and the range is defined by the minimum value on the :math:`\omega` axis in the :math:`S(Q, \omega)` profile and a maximum which is equal to the total energy loss of the pre-scatter neutron prior to the ith scatter.
+The limits on the q integration are then calculated as follows (and are also a function of i). These formulae for the q limits reduce to 0 and 2k for elastic.
 
 :math:`q_i^{min} = |k_{i+1} - k_i|`
 
@@ -52,15 +52,17 @@ The following substitutions are then performed in order to make it more convenie
 
 :math:`u_i = \frac{\phi_i}{2 \pi}`
 
-:math:`2 k_i^2 = \frac{\sigma_S}{\sigma_s(k_i)} \int_{w_i^{min}}^{w_i^{max}} \int_{q_i^{min}}^{q_i^{max}} Q_i S(Q_i, \omega_i) dQ_i d\omega_i`
+:math:`2 k_i^2 = \frac{\sigma_s}{\sigma_s(k_i)} I(k_i)` where :math:`I(k) = \iint \limits_{D(k)} Q S(Q, \omega) dQ d\omega`
 
 Using the new variables the integral is:
 
 .. math::
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{q_i^{min}}^{q_i^{max}} dQ_i \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{\int_{w_i^{min}}^{w_i^{max}} \int_{q_i^{min}}^{q_i^{max}} Q_i S(Q_i, \omega_i) dQ_i} S(Q_i, \omega_i) \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int\hspace{-3pt}dS\int_{0}^{1}\hspace{-3pt}dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1}\hspace{-3pt}dt_{i+1}\int_{0}^{1} du_i \iint \limits_{D(k_i)}\hspace{-3pt}dQ_i d\omega_i\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i S(Q_i, \omega_i)}{I(k_i)} \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
 
-This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`u_i` between 0 and 1 and values for :math:`Q_i` between :math:`q_i^{min}` and :math:`q_i^{max}`.
+This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`u_i` between 0 and 1. The integral over :math:`Q\omega` space is performed by integrating a slightly modified :math:`S(Q,\omega)` function over a rectangular region. :math:`S_{kin}(Q,\omega)` equals zero if :math:`Q` and :math:`\omega` are outside the kinematically accessible region.
+The rectangular region spans the full length of the :math:`\omega` axis in the :math:`S(Q,\omega)` profile and goes from zero to the maximum possible :math:`Q_i` for a particular :math:`k_i` in the q direction.
+
 A simulated path is traced through the sample to enable the :math:`l_i^{\ max}` values to be calculated. The path is traced by calculating the :math:`l_i`, :math:`\theta` and :math:`\phi` values as follows from the random variables. The code keeps a note of the start coordinates of the current path segment and updates it when moving to the next segment using these randomly selected lengths and directions:
 
 :math:`l_i = -\frac{1}{\mu_T}ln(1-(1-e^{-\mu_T l_i^{\ max}})t_i)`
@@ -73,15 +75,22 @@ The final Monte Carlo integration that is actually performed by the code is as f
 
 .. math::
 
-   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{<Q S(Q, \omega)>} S(Q_i, \omega_i) \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{\Delta Q_i \Delta \omega Q_i S_{kin}(Q_i, \omega_i)}{I(k_i)} \sigma_s(k_i)] e^{-\mu_T l_{out}} S(Q_n, \omega_n) \frac{\sigma_s}{4 \pi}
 
-The purpose of replacing :math:`2 k^2` with :math:`\int Q S(Q) dQ` can now be seen because it avoids the need to multiply by an integration range across :math:`dQ` when converting the integral to a Monte Carlo integration.
-This is useful in the inelastic version of this algorithm where the integration of the structure factor is over two dimensions :math:`Q` and :math:`\omega` and the area of :math:`Q\omega` space that has been integrated over is less obvious.
+where the integration ranges over the rectangular :math:`Q \omega` region are defined as follows:
+
+:math:`\Delta\omega = \omega^{max}-\omega^{min}`
+
+:math:`\Delta Q_i = k_i + \frac{2m}{\hbar}\sqrt{\frac{\hbar^2 k_i^2}{2m} - \omega_{min}}`
 
 This is similar to the formulation described in the Mancinelli paper except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
 
+The integral :math:`I(k)` is evaluated deterministically up front at a set of k values and interpolated as required.
+
+The factor for the final track segment can also be normalised by setting ``NormalizeStructureFactors=true`` which replaces :math:`\sigma_s` with :math:`2k_n^2 \sigma_s(k_n)/I(k_n)`. This feature wasn't in the original Discus implementation.
+
 The results for different :math:`\omega` values can be calculated by simulating tracks separately for each :math:`\omega` value or the same tracks can be reused with the multiple weights for the final track segment being calculated to achieve the required range of overall energy transfers.
-Discus used the latter approach which results in the results for different :math:`\omega` being correlated. This choice is controlled using the "SimulateEnergiesIndependently" parameter
+Discus used the latter approach which results in the results for different :math:`\omega` being correlated. This choice is controlled using the ``SimulateEnergiesIndependently`` parameter
 
 Importance Sampling
 ^^^^^^^^^^^^^^^^^^^
@@ -115,6 +124,40 @@ The importance sampling has also been implemented for inelastic instruments by f
 A 1D coordinate is created which is the actual Q value added onto the maximum Q from the preceding :math:`\omega` row: :math:`Q'(Q,\omega_i) = Q + Q_{max}(\omega_{i-1})`
 With this approach there is no interpolation performed between different :math:`\omega` values. It's not clear whether the importance sampling is useful for inelastic calculations since the area where the multiple scattering correction tends to be largest relative to the signal is away from the peak in :math:`S(Q, \omega)`.
 
+Support for sample environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The calculation can include scattering from the sample environment (e.g. can) in the Monte Carlo simulation. The term "segment" has previously been used to refer to a straight neutron path between two scattering events. For the purpose of this description the term "link" will be used to refer to a subsection of a segment that lies within a single material.
+
+The modified calculation is illustrated here with an example of a sample contained in a can where a track may contain three different links (can, then sample, then can). If the selected scatter point occurs somewhere in the third link, the quantity :math:`t_i` is redefined as:
+
+.. math::
+
+   t_i = \frac{1-e^{-\mu_1 l_1^{max} - \mu_2 l_2^{max} - \mu_3 (l_i - l_1^{max} - l_2^{max})}}{1-e^{-\mu_1 l_1^{max} - \mu_2 l_2^{max} - \mu_3 l_3^{max}}}
+
+This can be generally expressed as follows where n is the number of sample environment components:
+
+.. math::
+
+   t_i = \frac{1-e^{-\sum\limits_{j=1}^{n} \mu_j\ min(max( l_i - \sum\limits_{k=1}^{j-1} l_k^{max},\ 0),\ l_j^{max})}}{1-e^{-\sum\limits_{j=1}^{n} \mu_j l_j^{max}}}
+
+Based on this the length of the ith segment can be derived from a :math:`t_i` that has been randomly selected between 0 and 1 as follows where again the expression is for the specific case of a track containing three different links:
+
+.. math::
+   :label: l_i
+
+   \mu_1 l_1^{max} + \mu_2 l_2^{max} + \mu_3 (l_i - l_1^{max} - l_2^{max}) = - ln(1-(1-e^{-\sum\limits_{j=1}^{n}\mu_j l_j^{max}})t_i)
+
+...and more generally (although perhaps less helpfully in terms of explaining how the code works):
+
+.. math::
+
+   \sum\limits_{j=1}^{n} \mu_j\ min(max( l_i - \sum\limits_{k=1}^{j-1} l_k^{max},\ 0),\ l_j^{max}) = - ln(1-(1-e^{-\sum\limits_{j=1}^{n}\mu_j l_j^{max}})t_i)
+
+It can be seen that the formula :eq:`l_i` can be solved for :math:`l_i` by calculating the quantity on the right hand side and then sequentially subtracting :math:`\mu_i l_i^{max}` from it for increasing i while keeping the running total >=0.
+The value of :math:`i` when you can't subtract any more :math:`\mu_i l_i^{max}` identifies the component containing the scatter. Dividing by :math:`\mu_i` at this point gives you the length into that component that the track reaches.
+
+The other modification to the calculation to support scattering in the sample environment is that a different structure factor :math:`S(Q,\omega)` , :math:`I(k)` and scattering cross section :math:`\sigma_s` is required for each material. The component containing each scatter is derived from the :math:`l_i` calculation and is used to look up the material.
 
 Outputs
 #######
@@ -142,7 +185,7 @@ Note that this differs from the approach taken in other Mantid absorption correc
 :math:`J_{1}^{*}` corrects for attenuation due to absorption before and after the simulated scattering event (which is the same as MonteCarloAbsorption) but it only corrects for attenuation due to scattering after the simulated scattering event.
 For this reason it's not clear this feature from Discus is useful but it has been left in for historical reasons.
 
-The sample shape can be specified by running the algorithms :ref:`SetSample <algm-SetSample>` or :ref:`LoadSampleShape <algm-LoadSampleShape>` on the input workspace prior to running this algorithm.
+The sample shape (and optionally the sample environment shape) can be specified by running the algorithms :ref:`SetSample <algm-SetSample>` or :ref:`LoadSampleShape <algm-LoadSampleShape>` on the input workspace prior to running this algorithm.
 
 The algorithm can take a long time to run on instruments with a lot of spectra and\or a lot of bins in each spectrum. The run time can be reduced by enabling the following interpolation features:
 

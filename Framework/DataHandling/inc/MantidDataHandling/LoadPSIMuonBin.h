@@ -64,7 +64,7 @@ struct temperatureHeaderData {
   bool delimeterOfTitlesIsBackSlash;
 };
 
-class DLLExport LoadPSIMuonBin : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadPSIMuonBin : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;
   const std::string summary() const override;

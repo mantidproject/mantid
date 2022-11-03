@@ -66,6 +66,7 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
@@ -76,6 +77,7 @@ set(TEST_PY_FILES
     LoadLiveDataTest.py
     LoadLampTest.py
     LoadLogPropertyTableTest.py
+    LoadSANS1MLZTest.py
     LoadMultipleGSSTest.py
     LoadNMoldyn3AsciiTest.py
     LoadNMoldyn4Ascii1DTest.py

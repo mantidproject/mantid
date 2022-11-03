@@ -86,7 +86,7 @@ void LoadDialog::createDynamicWidgets() {
 void LoadDialog::helpClicked() {
   const auto loaderName = getAlgorithm()->getPropertyValue("LoaderName");
   QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-  MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(), helpPage);
+  MantidQt::API::HelpWindow::showAlgorithm(helpPage);
 }
 
 /**
@@ -330,7 +330,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop, Q
     propertyLayout->addWidget(inputWidget);
   } else {
     QLabel *nameLbl = new QLabel(propName, parent);
-    nameLbl->setToolTip(QString::fromStdString(prop->briefDocumentation()));
+    nameLbl->setToolTip(QString::fromStdString(prop->documentation()));
     if (dynamic_cast<const PropertyWithValue<bool> *>(prop)) {
       auto *checkBox = new QCheckBox(parent);
       inputWidget = checkBox;

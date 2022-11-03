@@ -1,6 +1,0 @@
-#!/bin/sh
-#
-# RPM pre-uninstall script
-#
-
-# Nothing needs to be done

@@ -1,1 +1,0 @@
-- Single valued workspaces can now be saved by :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and are properly loaded by :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>`.

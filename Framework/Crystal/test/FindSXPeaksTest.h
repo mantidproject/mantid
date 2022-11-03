@@ -190,6 +190,25 @@ public:
     TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
   }
 
+  void testSpectrumWithNaNValuesDoesNotThrow() {
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+    // move instrument component so peak
+    workspace->dataY(0) = std::vector<double>(3, -1.0);
+    workspace->dataY(1) = std::vector<double>{1.0, std::nan(""), 2.0};
+    workspace->dataY(2) = std::vector<double>(3, std::nan(""));
+    auto alg = createFindSXPeaks(workspace);
+    alg->setProperty("PeakFindingStrategy", "AllPeaks");
+    alg->setProperty("AbsoluteBackground", "0");
+    alg->setProperty("ResolutionStrategy", "AbsoluteResolution");
+    alg->setProperty("XResolution", "1000");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+
+    TS_ASSERT_EQUALS(result->getNumberPeaks(), 1);
+    TS_ASSERT_EQUALS(result->getPeak(0).getIntensity(), 2.0);
+  }
+
   void testUseWorkspaceRangeCropping() {
     // creates a workspace where all y-values are 2
     Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);

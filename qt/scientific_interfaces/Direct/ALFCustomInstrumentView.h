@@ -46,6 +46,7 @@ public:
   void setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) override final;
 
 public slots:
+  void selectWholeTube();
   void extractSingleTube();
   void averageTube();
 

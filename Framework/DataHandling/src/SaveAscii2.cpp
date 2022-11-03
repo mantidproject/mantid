@@ -94,7 +94,9 @@ void SaveAscii2::init() {
   setPropertySettings("CustomSeparator",
                       std::make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO, "UserDefined"));
   getPointerToProperty("CustomSeparator")->setAutoTrim(false);
-  declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
+  declareProperty("ColumnHeader", true,
+                  "If true, put column headers into file. Even if false, a header"
+                  "is automatically added if the workspace is Distribution = true.");
 
   declareProperty("SpectrumMetaData", "",
                   "A comma separated list that defines data that describes "
@@ -268,6 +270,7 @@ void SaveAscii2::exec() {
     populateAllMetaData();
   }
 
+  const bool isDistribution = m_ws->isDistribution();
   auto idxIt = idx.begin();
   while (idxIt != idx.end()) {
     std::string currentFilename;
@@ -292,15 +295,16 @@ void SaveAscii2::exec() {
     if (!logList.empty()) {
       writeFileHeader(logList, file);
     }
-    if (writeHeader) {
+    if (writeHeader || isDistribution) {
       file << comment << " X " << m_sep << " Y " << m_sep << " E";
       if (m_writeDX) {
         file << " " << m_sep << " DX";
       }
+      file << " Distribution=" << (isDistribution ? "true" : "false");
       file << '\n';
     }
 
-    // data writting
+    // data writing
     if (oneSpectrumPerFile) {
       writeSpectrum(*idxIt, file);
       progress.report();
