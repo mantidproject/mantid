@@ -132,13 +132,25 @@ def export_reflections(temp_save_directory, name_of_project, project):
                     file.write(f"{str(reflection)}\n")
 
 
+def export_refined_instrument_parameters(temp_save_directory, name_of_project, project):
+    for loop_histogram in project.histograms():
+        loop_histogram_name = loop_histogram.name.replace(".gss", "")
+        instrument_parameter_dict = loop_histogram.getHistEntryList(keyname="Instrument")[0][2][0]
+        sigma_one = instrument_parameter_dict['sig-1']  # [initial value, final value, bool whether refined]
+        gamma_y = instrument_parameter_dict['Y']  # as above
+        inst_parameters = {"Histogram name": loop_histogram_name , "Sigma-1": sigma_one, "Gamma (Y)": gamma_y}
+        inst_parameters_json = json.dumps(inst_parameters, separators=(',', ':'))
+        inst_parameters_file_path = os.path.join(temp_save_directory,
+                                                 name_of_project + f"_inst_parameters_{loop_histogram_name}.txt")
+        with open(inst_parameters_file_path, 'wt', encoding='utf-8') as file:
+            file.write(inst_parameters_json)
+
+
 def export_lattice_parameters(temp_save_directory, name_of_project, project):
     for loop_phase in project.phases():
         cell_parameters = loop_phase.get_cell()
-        # TODO: check if need to add
-        # print(loop_phase.getPhaseEntryList(keyname="Mustrain"))
-        # [(['Histograms', 'PWDR Save_gss_305761_307521_bank_1_bgsub.gsa Bank 1', 'Mustrain'], <class 'list'>,
-        # ['isotropic', [-665.519094881, 1000.0, 1.0], [True, False, False], [0, 0, 1], [0.01, 0.01], [False, False]])]
+        mustrain = loop_phase.getPhaseEntryList(keyname="Mustrain")[0][2][1][0]  # Users happy this has no unit
+        cell_parameters["Microstrain"] = mustrain
         parameters_json = json.dumps(cell_parameters, separators=(',', ':'))
         parameters_file_path = os.path.join(temp_save_directory,
                                             name_of_project + f"_cell_parameters_{loop_phase.name}.txt")
@@ -170,7 +182,7 @@ number_of_regions = inputs_dict['number_of_regions']
 
 
 '''Call GSASIIscriptable'''
-
+import_path = None
 try:
     import_path = os.path.join(path_to_gsas2, 'GSASII')
     sys.path.insert(0, import_path)
@@ -207,5 +219,6 @@ run_parameter_refinement(refine_gamma, 'Y', gsas_project, project_path)
 
 export_refinement_to_csv(temporary_save_directory, project_name, gsas_project)
 export_lattice_parameters(temporary_save_directory, project_name, gsas_project)
+export_refined_instrument_parameters(temporary_save_directory, project_name, gsas_project)
 if refinement_method == "Pawley":
     export_reflections(temporary_save_directory, project_name, gsas_project)

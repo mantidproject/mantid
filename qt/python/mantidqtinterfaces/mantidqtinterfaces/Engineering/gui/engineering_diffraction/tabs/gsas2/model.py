@@ -635,6 +635,7 @@ class GSAS2Model(object):
         logger.notice(save_message)
 
         self.create_lattice_parameter_table()
+        self.create_instrument_parameter_table()
 
     def load_result(self, index_histograms):
         workspace = self.load_gsas_histogram(index_histograms)
@@ -678,6 +679,30 @@ class GSAS2Model(object):
             loaded_reflections.append(np.loadtxt(result_reflections_txt))
         return loaded_reflections
 
+    def create_instrument_parameter_table(self, test=False):
+        INST_TABLE_PARAMS = ["Histogram name", "Sigma-1", "Gamma (Y)"]
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_instrument_parameters")
+        table.addColumn("str", "Histogram name")
+        table.addColumn("double", "Sigma-1 {}".format("(Refined)" if self.refine_sigma_one else ""))
+        table.addColumn("double", "Gamma (Y) {}".format("(Refined)" if self.refine_gamma else ""))
+
+        output_inst_param_files = []
+        for (_, _, filenames) in os.walk(self.user_save_directory):
+            for loop_filename in filenames:
+                if "_inst_parameters_" in loop_filename:
+                    output_inst_param_files.append(os.path.join(self.user_save_directory, loop_filename))
+
+        for inst_parameters_txt in output_inst_param_files:
+            with open(inst_parameters_txt, 'rt', encoding='utf-8') as file:
+                full_file_string = file.read().replace('\n', '')
+            inst_parameter_dict = json.loads(full_file_string)
+            loop_inst_parameters = [inst_parameter_dict["Histogram name"]]
+            for param in INST_TABLE_PARAMS[1:]:
+                loop_inst_parameters.append(float(inst_parameter_dict[param][1]))
+            table.addRow(loop_inst_parameters)
+        if test:
+            return table
+
     def create_lattice_parameter_table(self, test=False):
         LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c",
                                 "angle_alpha", "angle_beta", "angle_gamma", "volume"]
@@ -685,9 +710,13 @@ class GSAS2Model(object):
             os.path.join(self.user_save_directory, self.project_name + ".lst"))
 
         table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters")
-        table.addColumn("str", "Phase")
+        table.addColumn("str", "Phase name")
+        # table.addColumn("str", "Sigma-1 {}".format("(Refined)" if self.refine_sigma_one else ""))
+        # table.addColumn("str", "Gamma (Y) {}".format("(Refined)" if self.refine_gamma else ""))
+
         for param in LATTICE_TABLE_PARAMS:
             table.addColumn("double", param.split("_")[-1])
+        table.addColumn("double", "Microstrain {}".format("(Refined)" if self.refine_microstrain else ""))
         for phase_name in phase_names_list:
             parameters_txt = os.path.join(self.user_save_directory,
                                           self.project_name + f"_cell_parameters_{phase_name}.txt")
@@ -697,6 +726,7 @@ class GSAS2Model(object):
             loop_parameters = [phase_name]
             for param in LATTICE_TABLE_PARAMS:
                 loop_parameters.append(float(parameter_dict[param]))
+            loop_parameters.append(float(parameter_dict["Microstrain"]))
             table.addRow(loop_parameters)
         if test:
             return table
