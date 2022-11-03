@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
-#include "ALFCustomInstrumentModel.h"
 #include "ALFCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
@@ -18,7 +18,7 @@ DECLARE_SUBWINDOW(ALFView)
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
   this->setWindowTitle("ALF View");
 
-  m_instrumentModel = std::make_unique<ALFCustomInstrumentModel>();
+  m_instrumentModel = std::make_unique<MantidWidgets::BaseCustomInstrumentModel>();
   m_instrumentPresenter = std::make_unique<ALFCustomInstrumentPresenter>(
       new ALFCustomInstrumentView(m_instrumentModel->getInstrument(), this), m_instrumentModel.get());
 

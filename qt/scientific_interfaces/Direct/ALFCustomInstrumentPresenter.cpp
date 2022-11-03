@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFCustomInstrumentPresenter.h"
-#include "ALFCustomInstrumentModel.h"
 #include "ALFCustomInstrumentView.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <functional>
@@ -16,15 +16,10 @@
 namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view,
-                                                           IALFCustomInstrumentModel *model)
+                                                           MantidWidgets::IBaseCustomInstrumentModel *model)
     : BaseCustomInstrumentPresenter(view, model), m_view(view), m_model(model), m_extractSingleTubeObserver(nullptr),
       m_averageTubeObserver(nullptr) {
   addInstrument();
-}
-
-void ALFCustomInstrumentPresenter::subscribeAnalysisPresenter(
-    MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) {
-  m_analysisPresenter = presenter;
 }
 
 void ALFCustomInstrumentPresenter::addInstrument() {
@@ -53,9 +48,9 @@ std::pair<instrumentSetUp, instrumentObserverOptions> ALFCustomInstrumentPresent
 
   // set up custom context menu conditions
   std::function<bool(std::map<std::string, bool>)> extractConditionBinder =
-      std::bind(&IALFCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
+      std::bind(&MantidWidgets::IBaseCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
   std::function<bool(std::map<std::string, bool>)> averageTubeConditionBinder =
-      std::bind(&IALFCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
+      std::bind(&MantidWidgets::IBaseCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
 
   binders.emplace_back(extractConditionBinder);
   binders.emplace_back(averageTubeConditionBinder);
@@ -77,13 +72,6 @@ std::pair<instrumentSetUp, instrumentObserverOptions> ALFCustomInstrumentPresent
   customInstrumentOptions.emplace_back(tmp);
 
   return std::make_pair(setUpContextConditions, customInstrumentOptions);
-}
-
-void ALFCustomInstrumentPresenter::extractSingleTube() {
-  m_model->extractSingleTube();
-  const std::string WSName = m_model->WSName();
-  m_analysisPresenter->addSpectrum(WSName);
-  m_analysisPresenter->updateEstimateClicked();
 }
 
 void ALFCustomInstrumentPresenter::averageTube() {

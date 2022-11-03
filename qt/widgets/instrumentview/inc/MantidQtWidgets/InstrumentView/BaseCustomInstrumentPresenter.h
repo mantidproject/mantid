@@ -15,11 +15,15 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class PlotFitAnalysisPanePresenter;
+
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter : public QObject {
   Q_OBJECT
 
 public:
   BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model);
+
+  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter);
 
   typedef std::pair<std::string, std::vector<std::function<bool(std::map<std::string, bool>)>>> instrumentSetUp;
   typedef std::vector<std::tuple<std::string, Observer *>> instrumentObserverOptions;
@@ -29,6 +33,7 @@ public:
   virtual void initLayout(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp = nullptr);
   virtual void addInstrument();
 
+  void extractSingleTube();
   virtual void loadRunNumber();
 
 protected:
@@ -36,6 +41,7 @@ protected:
   virtual void initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp);
   virtual std::pair<instrumentSetUp, instrumentObserverOptions> *setupInstrument() { return nullptr; };
 
+  MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
   IBaseCustomInstrumentView *m_view;
   IBaseCustomInstrumentModel *m_model;
   int m_currentRun;

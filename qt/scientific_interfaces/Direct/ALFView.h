@@ -30,7 +30,7 @@ protected:
   void initLayout() override;
 
 private:
-  std::unique_ptr<ALFCustomInstrumentModel> m_instrumentModel;
+  std::unique_ptr<MantidWidgets::BaseCustomInstrumentModel> m_instrumentModel;
   std::unique_ptr<ALFCustomInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<MantidWidgets::PlotFitAnalysisPanePresenter> m_analysisPresenter;
 };

@@ -56,6 +56,7 @@ public:
                                std::vector<std::function<bool(std::map<std::string, bool>)>> &instrument) override;
   virtual void addObserver(std::tuple<std::string, Observer *> &listener) override { (void)listener; };
   void setupHelp() override;
+  void extractSingleTube();
 
 public slots:
   void fileLoaded();
@@ -63,6 +64,7 @@ public slots:
 
 protected:
   std::string m_helpPage;
+  MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *m_presenter;
 
 private:
   void warningBox(const QString &message);
@@ -71,7 +73,6 @@ private:
   QString m_instrument;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
   QPushButton *m_help;
-  MantidQt::MantidWidgets::BaseCustomInstrumentPresenter *m_presenter;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

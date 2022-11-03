@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
 #include <QMessageBox>
@@ -58,12 +59,16 @@ void ALFCustomInstrumentView::extractSingleTube() {
   MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
   instrumentView->getPickTab()->savePlotToWorkspace();
 
+  m_presenter->extractSingleTube();
   m_extractSingleTubeObservable->notify();
 }
 
 void ALFCustomInstrumentView::averageTube() {
   MantidWidgets::InstrumentWidget *instrumentView = getInstrumentView();
   instrumentView->getPickTab()->savePlotToWorkspace();
+
+  m_presenter->extractSingleTube();
+
   m_averageTubeObservable->notify();
 }
 

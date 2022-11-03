@@ -19,6 +19,11 @@ BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(IBaseCustomInstrume
   m_model->loadEmptyInstrument();
 }
 
+void BaseCustomInstrumentPresenter::subscribeAnalysisPresenter(
+    MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) {
+  m_analysisPresenter = presenter;
+}
+
 void BaseCustomInstrumentPresenter::addInstrument() {
   auto setUp = setupInstrument();
   initLayout(setUp);
@@ -61,6 +66,13 @@ void BaseCustomInstrumentPresenter::loadRunNumber() {
     return;
   }
   loadAndAnalysis(pathToRun);
+}
+
+void BaseCustomInstrumentPresenter::extractSingleTube() {
+  m_model->extractSingleTube();
+  const std::string WSName = m_model->WSName();
+  m_analysisPresenter->addSpectrum(WSName);
+  m_analysisPresenter->updateEstimateClicked();
 }
 
 void BaseCustomInstrumentPresenter::initInstrument(std::pair<instrumentSetUp, instrumentObserverOptions> *setUp) {

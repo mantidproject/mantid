@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h"
 
-#include "ALFCustomInstrumentModel.h"
 #include "ALFCustomInstrumentView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
@@ -17,35 +17,27 @@
 
 namespace MantidQt {
 
-namespace MantidWidgets {
-class PlotFitAnalysisPanePresenter;
-}
-
 namespace CustomInterfaces {
 
 class MANTIDQT_DIRECT_DLL ALFCustomInstrumentPresenter : public MantidWidgets::BaseCustomInstrumentPresenter {
   Q_OBJECT
 
 public:
-  ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view, IALFCustomInstrumentModel *model);
+  ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view, MantidWidgets::IBaseCustomInstrumentModel *model);
   ~ALFCustomInstrumentPresenter() {
     delete m_extractSingleTubeObserver;
     delete m_averageTubeObserver;
   };
 
-  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter);
-
   void addInstrument() override;
 
   std::pair<instrumentSetUp, instrumentObserverOptions> setupALFInstrument();
 
-  void extractSingleTube();
   void averageTube();
 
 private:
-  MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
   IALFCustomInstrumentView *m_view;
-  IALFCustomInstrumentModel *m_model;
+  MantidWidgets::IBaseCustomInstrumentModel *m_model;
   VoidObserver *m_extractSingleTubeObserver;
   VoidObserver *m_averageTubeObserver;
 };
