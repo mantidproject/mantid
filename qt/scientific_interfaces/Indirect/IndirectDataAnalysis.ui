@@ -61,11 +61,6 @@
         <string>MSD Fit</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabIqt">
-       <attribute name="title">
-        <string>I(Q, t)</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabIqtFit">
        <attribute name="title">
         <string>I(Q, t) Fit</string>
@@ -187,6 +182,8 @@
   <tabstop>pbHelp</tabstop>
   <tabstop>pbManageDirs</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../MantidPlot/icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>
