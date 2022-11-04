@@ -99,6 +99,8 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
   return m_runDetails->getSelectedBanks();
 }
 
+boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges() const { return getSelectedBanks(); }
+
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
 
 void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }

@@ -37,6 +37,7 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
   boost::optional<ProcessingInstructions> getSelectedBanks() const override;
+  boost::optional<ProcessingInstructions> getSelectedBanksAsRanges() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
   boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
