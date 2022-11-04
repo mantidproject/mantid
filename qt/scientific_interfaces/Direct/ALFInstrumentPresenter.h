@@ -13,7 +13,6 @@
 #include <string>
 #include <utility>
 
-#include <QObject>
 #include <QWidget>
 
 namespace MantidQt {
@@ -43,8 +42,7 @@ public:
   virtual bool showAverageTubeOption() const = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public QObject, public IALFInstrumentPresenter {
-  Q_OBJECT
+class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
 
 public:
   ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model);
