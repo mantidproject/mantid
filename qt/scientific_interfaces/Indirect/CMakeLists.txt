@@ -34,6 +34,7 @@ set(SRC_FILES
     IndirectDataManipulation.cpp
     IndirectDataManipulationTab.cpp
     IndirectDataManipulationElwinTab.cpp
+    IndirectDataManipulationIqtTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -133,6 +134,7 @@ set(MOC_FILES
     IndirectDataManipulation.h
     IndirectDataManipulationTab.h
     IndirectDataManipulationElwinTab.h
+    IndirectDataManipulationIqtTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
@@ -248,6 +250,7 @@ set(UI_FILES
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
     IndirectDataAnalysisIqtTab.ui
+    IndirectDataManipulationIqtTab.ui
     Quasi.ui
     ResNorm.ui
     Stretch.ui
