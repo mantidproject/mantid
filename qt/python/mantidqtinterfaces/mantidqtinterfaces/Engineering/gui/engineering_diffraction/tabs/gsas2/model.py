@@ -673,11 +673,25 @@ class GSAS2Model(object):
 
     def load_gsas_reflections(self, histogram_index, phase_names):
         loaded_reflections = []
+        result_reflections_dict = {}
         for phase_name in phase_names:
             result_reflections_txt = os.path.join(self.user_save_directory,
                                                   self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt")
             loaded_reflections.append(np.loadtxt(result_reflections_txt))
+            result_reflections_dict[phase_name] = ",    ".join(str(num) for num in np.loadtxt(result_reflections_txt))
+        self.create_reflections_table(phase_names, result_reflections_dict)
         return loaded_reflections
+
+    def create_reflections_table(self, phase_names, reflections_by_phase, test=False):
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections")
+        table.addColumn("str", "Phase name")
+        table.addColumn("str", "Reflections")
+
+        for phase_name in phase_names:
+            row_data = [phase_name, str(reflections_by_phase[phase_name])]
+            table.addRow(row_data)
+        if test:
+            return table
 
     def create_instrument_parameter_table(self, test=False):
         INST_TABLE_PARAMS = ["Histogram name", "Sigma-1", "Gamma (Y)"]
