@@ -34,6 +34,7 @@ using namespace MantidQt::MantidWidgets;
 
 class MockPlotFitAnalysisPanePresenter : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter {
 public:
+  MockPlotFitAnalysisPanePresenter(){};
   explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view, IPlotFitAnalysisPaneModel *model) {
     (void)model;
     (void)view;

@@ -25,7 +25,7 @@ QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWi
 MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
 void ALFInstrumentPresenter::subscribeAnalysisPresenter(
-    MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) {
+    MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) {
   m_analysisPresenter = presenter;
 }
 

@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -10,25 +10,11 @@
 #include <gmock/gmock.h>
 
 #include "ALFInstrumentMocks.h"
-#include "ALFInstrumentModel.h"
 #include "ALFInstrumentPresenter.h"
-#include "ALFInstrumentView.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
 
-#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
@@ -36,7 +22,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
-using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
 class ALFInstrumentPresenterTest : public CxxTest::TestSuite {
@@ -51,90 +36,116 @@ public:
     auto model = std::make_unique<NiceMock<MockALFInstrumentModel>>();
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFInstrumentView>>();
-    // m_pane = new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
     m_presenter = std::make_unique<ALFInstrumentPresenter>(m_view.get(), std::move(model));
+
+    m_analysisPresenter = std::make_unique<NiceMock<MockPlotFitAnalysisPanePresenter>>();
+    m_presenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
   }
 
-  void tearDown() override {}
+  void tearDown() override {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_analysisPresenter));
 
-  void test_test() {}
+    m_presenter.reset();
+    m_view.reset();
+  }
 
-  // void test_setUpInstrumentAnalysisSplitter() {
-  //  EXPECT_CALL(*m_view, setupAnalysisPane(m_pane->getView())).Times(1);
-  //  m_presenter->setUpInstrumentAnalysisSplitter();
-  //}
+  void test_instantiating_the_presenter_will_set_up_the_instrument() {
+    auto model = std::make_unique<NiceMock<MockALFInstrumentModel>>();
+    auto view = std::make_unique<NiceMock<MockALFInstrumentView>>();
 
-  // void test_loadSideEffects() {
-  //  EXPECT_CALL(*m_pane, clearCurrentWS()).Times(1);
-  //  // need to write a wrapper of protected members to get this to work
-  //  m_presenter->loadSideEffects();
-  //}
+    EXPECT_CALL(*model, loadedWsName()).Times(1).WillOnce(Return("ALFData"));
+    EXPECT_CALL(*view, setUpInstrument("ALFData")).Times(1);
 
-  // void test_addInstrument() {
-  //  // this is only called as part of initLayout
-  //  EXPECT_CALL(*m_pane, getView()).Times(1);
-  //  m_presenter->addInstrument();
-  //  // want to check initLayout is called from base class or mock base class
-  //  // funcs?
-  //}
+    auto modelRaw = model.get();
+    auto presenter = std::make_unique<ALFInstrumentPresenter>(view.get(), std::move(model));
 
-  // void test_setupALFInstrument() {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&modelRaw));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&view));
+  }
 
-  //  EXPECT_CALL(*m_model, dataFileName()).Times(1).WillOnce(Return("ALF"));
-  //  auto setup = m_presenter->setupALFInstrument();
-  //  auto tmp = setup.first;
-  //  TS_ASSERT_EQUALS(tmp.first, "ALF");
-  //  std::function<bool(std::map<std::string, bool>)> func1 =
-  //      std::bind(&IALFCustomInstrumentModel::extractTubeCondition, m_model, std::placeholders::_1);
-  //  std::function<bool(std::map<std::string, bool>)> func2 =
-  //      std::bind(&IALFCustomInstrumentModel::averageTubeCondition, m_model, std::placeholders::_1);
-  //  // cannot compare std::function directly
-  //  // check behaviour instead
-  //  int run = 6113;
-  //  auto data = mockALFData("CURVES", "ALF", run, "dSpacing");
-  //  m_model->setCurrentRun(run);
+  void test_getLoadWidget_gets_the_load_widget_from_the_view() {
+    EXPECT_CALL(*m_view, generateLoadWidget()).Times(1);
+    m_presenter->getLoadWidget();
+  }
 
-  //  std::map<std::string, bool> conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", true}};
-  //  TS_ASSERT_EQUALS(tmp.second[0](conditions), func1(conditions));
-  //  TS_ASSERT_EQUALS(tmp.second[1](conditions), func2(conditions));
+  void test_getInstrumentView_gets_the_instrument_view_widget_from_the_view() {
+    EXPECT_CALL(*m_view, getInstrumentView()).Times(1);
+    m_presenter->getInstrumentView();
+  }
 
-  //  conditions = {{"plotStored", true}, {"hasCurve", true}, {"isTube", false}};
-  //  TS_ASSERT_EQUALS(tmp.second[0](conditions), func1(conditions));
-  //  TS_ASSERT_EQUALS(tmp.second[1](conditions), func2(conditions));
+  void test_loadRunNumber_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
+    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(std::nullopt));
 
-  //  conditions = {{"plotStored", false}, {"hasCurve", true}, {"isTube", true}};
-  //  TS_ASSERT_EQUALS(tmp.second[0](conditions), func1(conditions));
-  //  TS_ASSERT_EQUALS(tmp.second[1](conditions), func2(conditions));
+    // Expect no call to loadAndTransform
+    EXPECT_CALL(*m_model, loadAndTransform(_)).Times(0);
 
-  //  conditions = {{"plotStored", true}, {"hasCurve", false}, {"isTube", true}};
-  //  TS_ASSERT_EQUALS(tmp.second[0](conditions), func1(conditions));
-  //  TS_ASSERT_EQUALS(tmp.second[1](conditions), func2(conditions));
+    m_presenter->loadRunNumber();
+  }
 
-  //  conditions = {{"plotStored", false}, {"hasCurve", false}, {"isTube", true}};
-  //  TS_ASSERT_EQUALS(tmp.second[0](conditions), func1(conditions));
-  //  TS_ASSERT_EQUALS(tmp.second[1](conditions), func2(conditions));
+  void test_loadRunNumber_will_show_a_warning_message_when_there_is_a_loading_error() {
+    std::size_t const run(82301u);
+    std::string const filename("ALF82301");
+    std::string const errorMessage("Loading of the data failed");
 
-  //  AnalysisDataService::Instance().remove("extractedTubes_ALF6113");
-  //}
+    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(errorMessage));
+    EXPECT_CALL(*m_view, warningBox(errorMessage)).Times(1);
 
-  // void test_extractSingleTube() {
-  //  EXPECT_CALL(*m_model, extractSingleTube()).Times(1);
-  //  EXPECT_CALL(*m_model, WSName()).Times(1).WillOnce(Return("test"));
-  //  EXPECT_CALL(*m_pane, addSpectrum("test")).Times(1);
-  //  EXPECT_CALL(*m_pane, updateEstimateClicked()).Times(1);
-  //  m_presenter->extractSingleTube();
-  //}
+    EXPECT_CALL(*m_model, runNumber()).Times(1).WillOnce(Return(run));
+    EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run))).Times(1);
 
-  // void test_averageTube() {
-  //  EXPECT_CALL(*m_model, averageTube()).Times(1);
-  //  EXPECT_CALL(*m_model, WSName()).Times(1).WillOnce(Return("test"));
-  //  EXPECT_CALL(*m_pane, addSpectrum("test")).Times(1);
+    m_presenter->loadRunNumber();
+  }
 
-  //  m_presenter->averageTube();
-  //}
+  void test_loadRunNumber_will_not_show_a_warning_when_loading_is_successful() {
+    std::size_t const run(82301u);
+    std::string const filename("ALF82301");
+
+    EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(std::nullopt));
+
+    // Expect no call to warningBox
+    EXPECT_CALL(*m_view, warningBox(_)).Times(0);
+
+    EXPECT_CALL(*m_model, runNumber()).Times(1).WillOnce(Return(run));
+    EXPECT_CALL(*m_view, setRunQuietly(std::to_string(run))).Times(1);
+
+    m_presenter->loadRunNumber();
+  }
+
+  void test_extractSingleTube_calls_the_expected_methods() {
+    std::string const extractedWsName("Extracted_ALF82301");
+
+    EXPECT_CALL(*m_model, extractSingleTube()).Times(1);
+    EXPECT_CALL(*m_model, extractedWsName()).Times(1).WillOnce(Return(extractedWsName));
+
+    EXPECT_CALL(*m_analysisPresenter, addSpectrum(extractedWsName)).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, updateEstimateClicked()).Times(1);
+
+    m_presenter->extractSingleTube();
+  }
+
+  void test_averageTube_calls_the_expected_methods() {
+    std::string const extractedWsName("Extracted_ALF82301");
+
+    EXPECT_CALL(*m_model, averageTube()).Times(1);
+    EXPECT_CALL(*m_model, extractedWsName()).Times(1).WillOnce(Return(extractedWsName));
+
+    EXPECT_CALL(*m_analysisPresenter, addSpectrum(extractedWsName)).Times(1);
+
+    m_presenter->averageTube();
+  }
+
+  void test_showAverageTubeOption_calls_the_showAverageTubeOption_method_in_the_model() {
+    EXPECT_CALL(*m_model, showAverageTubeOption()).Times(1).WillOnce(Return(true));
+    m_presenter->showAverageTubeOption();
+  }
 
 private:
   NiceMock<MockALFInstrumentModel> *m_model;
   std::unique_ptr<NiceMock<MockALFInstrumentView>> m_view;
   std::unique_ptr<ALFInstrumentPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockPlotFitAnalysisPanePresenter>> m_analysisPresenter;
 };

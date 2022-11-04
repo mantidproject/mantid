@@ -19,7 +19,7 @@ namespace MantidQt {
 
 namespace MantidWidgets {
 class InstrumentWidget;
-class PlotFitAnalysisPanePresenter;
+class IPlotFitAnalysisPanePresenter;
 } // namespace MantidWidgets
 
 namespace CustomInterfaces {
@@ -32,7 +32,7 @@ public:
   virtual QWidget *getLoadWidget() = 0;
   virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
 
-  virtual void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) = 0;
+  virtual void subscribeAnalysisPresenter(MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) = 0;
 
   virtual void loadRunNumber() = 0;
 
@@ -50,7 +50,7 @@ public:
   QWidget *getLoadWidget() override;
   MantidWidgets::InstrumentWidget *getInstrumentView() override;
 
-  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) override;
+  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) override;
 
   void loadRunNumber() override;
 
@@ -62,7 +62,7 @@ public:
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);
 
-  MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *m_analysisPresenter;
+  MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *m_analysisPresenter;
 
   IALFInstrumentView *m_view;
   std::unique_ptr<IALFInstrumentModel> m_model;

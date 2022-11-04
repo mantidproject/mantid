@@ -18,6 +18,8 @@ namespace CustomInterfaces {
 class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
 
 public:
+  virtual ~IALFInstrumentModel() = default;
+
   virtual std::optional<std::string> loadAndTransform(std::string const &filename) = 0;
 
   virtual std::string instrumentName() const = 0;

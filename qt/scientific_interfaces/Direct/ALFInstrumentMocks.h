@@ -31,7 +31,6 @@ namespace CustomInterfaces {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALFInstrumentView : public IALFInstrumentView {
-
 public:
   MOCK_METHOD1(setUpInstrument, void(const std::string &fileName));
 
