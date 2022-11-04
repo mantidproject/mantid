@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
@@ -151,7 +152,7 @@ std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string cons
   auto loadedWorkspace = load(filename);
 
   if (!isALFData(loadedWorkspace)) {
-    return "Not the correct instrument, expected " + instrumentName();
+    return "The loaded data is not from the ALF instrument";
   }
 
   m_numberOfTubesInAverage = 0u;
@@ -162,6 +163,25 @@ std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string cons
 
   ADS.addOrReplace(loadedWsName(), loadedWorkspace);
   return std::nullopt;
+}
+
+std::string ALFInstrumentModel::extractedWsName() const {
+  return "extractedTubes_" + instrumentName() + std::to_string(runNumber());
+}
+
+/*
+ * Retrieves the run number from the currently loaded workspace.
+ */
+std::size_t ALFInstrumentModel::runNumber() const {
+  auto const loadedName = loadedWsName();
+  if (!ADS.doesExist(loadedName)) {
+    return 0u;
+  }
+
+  if (auto workspace = ADS.retrieveWS<MatrixWorkspace>(loadedName)) {
+    return static_cast<std::size_t>(workspace->getRunNumber());
+  }
+  return 0u;
 }
 
 /*
@@ -205,25 +225,6 @@ void ALFInstrumentModel::averageTube() {
 
   // Add the result back into the ADS
   ADS.addOrReplace(extractedWsName(), averagedWorkspace);
-}
-
-std::string ALFInstrumentModel::extractedWsName() const {
-  return "extractedTubes_" + instrumentName() + std::to_string(runNumber());
-}
-
-/*
- * Retrieves the run number from the currently loaded workspace.
- */
-std::size_t ALFInstrumentModel::runNumber() const {
-  auto const loadedName = loadedWsName();
-  if (!ADS.doesExist(loadedName)) {
-    return 0u;
-  }
-
-  if (auto workspace = ADS.retrieveWS<MatrixWorkspace>(loadedName)) {
-    return static_cast<std::size_t>(workspace->getRunNumber());
-  }
-  return 0u;
 }
 
 /*

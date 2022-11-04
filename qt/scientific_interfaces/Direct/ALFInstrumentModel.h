@@ -48,6 +48,9 @@ public:
 
   bool showAverageTubeOption() const override;
 
+public: // Methods for testing purposes
+  inline std::size_t numberOfTubesInAverage() const noexcept { return m_numberOfTubesInAverage; }
+
 private:
   Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
 
