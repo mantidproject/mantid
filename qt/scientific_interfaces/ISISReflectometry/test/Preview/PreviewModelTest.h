@@ -83,6 +83,15 @@ public:
     TS_ASSERT_EQUALS(inputRoi, *model.getSelectedBanks())
   }
 
+  void test_get_selected_banks_as_ranges() {
+    PreviewModel model;
+    const ProcessingInstructions inputRoi{"4,5,6,12,13,14,16,23,24,25,26"};
+    const ProcessingInstructions expectedOutput{"4-6,12-16,23-26"};
+
+    model.setSelectedBanks(std::move(inputRoi));
+    TS_ASSERT_EQUALS(expectedOutput, *model.getSelectedBanksAsRanges())
+  }
+
   void test_set_selected_signal_region_converts_to_processing_instructions_string() {
     PreviewModel model;
     const IPreviewModel::Selection inputRoi{3.6, 11.4};
