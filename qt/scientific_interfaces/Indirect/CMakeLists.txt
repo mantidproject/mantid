@@ -27,7 +27,6 @@ set(SRC_FILES
     IndirectDataAnalysis.cpp
     IndirectDataAnalysisConvFitTab.cpp
     IndirectDataAnalysisFqFitTab.cpp
-    IndirectDataAnalysisIqtTab.cpp
     IndirectDataAnalysisIqtFitTab.cpp
     IndirectDataAnalysisMSDFitTab.cpp
     IndirectDataAnalysisTab.cpp
@@ -128,7 +127,6 @@ set(MOC_FILES
     IndirectDataAnalysisConvFitTab.h
     IndirectDataAnalysisFqFitTab.h
     IndirectDataAnalysisIqtFitTab.h
-    IndirectDataAnalysisIqtTab.h
     IndirectDataAnalysisMSDFitTab.h
     IndirectDataAnalysisTab.h
     IndirectDataManipulation.h
@@ -249,7 +247,6 @@ set(UI_FILES
     IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
-    IndirectDataAnalysisIqtTab.ui
     IndirectDataManipulationIqtTab.ui
     Quasi.ui
     ResNorm.ui
