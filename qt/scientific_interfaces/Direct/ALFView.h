@@ -1,17 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ALFInstrumentModel.h"
 #include "ALFInstrumentPresenter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include "DllConfig.h"
+
+#include <QPushButton>
+#include <QWidget>
 
 #include <memory>
 
@@ -29,10 +31,17 @@ public:
 protected:
   void initLayout() override;
 
+private slots:
+  void openHelp();
+
 private:
-  std::unique_ptr<ALFInstrumentModel> m_instrumentModel;
+  QWidget *createHelpWidget();
+
+  QPushButton *m_help;
+
   std::unique_ptr<ALFInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<MantidWidgets::PlotFitAnalysisPanePresenter> m_analysisPresenter;
 };
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

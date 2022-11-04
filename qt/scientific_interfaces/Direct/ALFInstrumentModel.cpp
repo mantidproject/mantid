@@ -24,8 +24,6 @@ namespace {
 auto &ADS = AnalysisDataService::Instance();
 
 std::string const CURVES = "Curves";
-std::string const EXTRACTED_PREFIX = "extractedTubes_";
-std::string const OUT_OF_PLANE_ANGLE_LABEL = "Out of plane angle";
 std::string const NOT_IN_ADS = "not_stored_in_ads";
 
 bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
@@ -140,9 +138,8 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspa
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel()
-    : m_currentRun(0), m_instrumentName("ALF"), m_wsName("ALFData"), m_numberOfTubesInAverage(0) {
-  loadEmptyInstrument(m_instrumentName, m_wsName);
+ALFInstrumentModel::ALFInstrumentModel() : m_numberOfTubesInAverage(0u) {
+  loadEmptyInstrument(instrumentName(), loadedWsName());
 }
 
 /*
@@ -150,21 +147,20 @@ ALFInstrumentModel::ALFInstrumentModel()
  * @param filename:: The filepath to the ALFData
  * @return An optional error message
  */
-std::optional<std::string> ALFInstrumentModel::loadData(std::string const &filename) {
+std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string const &filename) {
   auto loadedWorkspace = load(filename);
 
   if (!isALFData(loadedWorkspace)) {
-    return "Not the correct instrument, expected " + m_instrumentName;
+    return "Not the correct instrument, expected " + instrumentName();
   }
 
-  m_numberOfTubesInAverage = 0;
-  m_currentRun = loadedWorkspace->getRunNumber();
+  m_numberOfTubesInAverage = 0u;
 
   if (!isAxisDSpacing(loadedWorkspace)) {
     loadedWorkspace = convertUnits(normaliseByCurrent(loadedWorkspace), "dSpacing");
   }
 
-  ADS.addOrReplace(m_wsName, loadedWorkspace);
+  ADS.addOrReplace(loadedWsName(), loadedWorkspace);
   return std::nullopt;
 }
 
@@ -174,7 +170,7 @@ std::optional<std::string> ALFInstrumentModel::loadData(std::string const &filen
 void ALFInstrumentModel::extractSingleTube() {
   if (auto const extractedWorkspace = retrieveSingleTube()) {
     ADS.addOrReplace(extractedWsName(), extractedWorkspace);
-    m_numberOfTubesInAverage = 1;
+    m_numberOfTubesInAverage = 1u;
   }
 }
 
@@ -212,11 +208,29 @@ void ALFInstrumentModel::averageTube() {
 }
 
 std::string ALFInstrumentModel::extractedWsName() const {
-  return EXTRACTED_PREFIX + m_instrumentName + std::to_string(m_currentRun);
+  return "extractedTubes_" + instrumentName() + std::to_string(runNumber());
 }
 
-bool ALFInstrumentModel::hasTubeBeenExtracted() const { return ADS.doesExist(extractedWsName()); }
+/*
+ * Retrieves the run number from the currently loaded workspace.
+ */
+std::size_t ALFInstrumentModel::runNumber() const {
+  auto const loadedName = loadedWsName();
+  if (!ADS.doesExist(loadedName)) {
+    return 0u;
+  }
 
-int ALFInstrumentModel::numberOfTubesInAverage() const { return m_numberOfTubesInAverage; }
+  if (auto workspace = ADS.retrieveWS<MatrixWorkspace>(loadedName)) {
+    return static_cast<std::size_t>(workspace->getRunNumber());
+  }
+  return 0u;
+}
+
+/*
+ * Returns true if the option to average a tube should be shown.
+ */
+bool ALFInstrumentModel::showAverageTubeOption() const {
+  return m_numberOfTubesInAverage > 0u && ADS.doesExist(extractedWsName());
+}
 
 } // namespace MantidQt::CustomInterfaces
