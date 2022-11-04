@@ -25,7 +25,7 @@ class DNSFileSelectorView(DNSView):
     def __init__(self, parent):
         super().__init__(parent)
         self._ui = load_ui(__file__,
-                                'file_selector.ui',
+                           'file_selector.ui',
                            baseinstance=self)
 
         self._sample_treeview = self._ui.DNS_sample_view

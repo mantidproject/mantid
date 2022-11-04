@@ -30,10 +30,6 @@ class DNSFileSelectorPresenter(DNSObserver):
         # set standard data view
         self.view.set_standard_data_tree_model(self.model.get_standard_data_model())
 
-        # adjust view to column width
-        self.num_columns = self.model.get_active_model_column_count()
-        self.view.adjust_treeview_columns_width(self.num_columns)
-
         self._old_data_set = set()
 
         # connect signals
@@ -52,13 +48,18 @@ class DNSFileSelectorPresenter(DNSObserver):
                                              watcher)
         self.view.open_progress_dialog(number_of_files)
         self.model.read_all(datafiles, data_path, loaded, watcher)
-        self.view.set_first_column_spanned(self.model.get_scan_range())
         self._filter_scans()
-        if self.model.get_number_of_scans() == 1:
-            self.view.expand_all()
+
+        # switch to the standard mode to fill in the file_selector_presenter's
+        # dictionary with standard data info (default setting). This info will
+        # be written to the 'standard_data_tree_model' key of the dictionary.
+        self._dataset_changed(standard_set=True)
+        self.get_option_dict()
+        # switch back to the sample mode
+        self._dataset_changed(standard_set=False)
 
         # re-adjust view to column width
-        self.view.adjust_treeview_columns_width(self.num_columns)
+        self._format_view()
 
     def _read_standard(self, self_call=False):
         """
@@ -69,14 +70,13 @@ class DNSFileSelectorPresenter(DNSObserver):
         if not standard_path:
             self.raise_error('No path set for standard data')
         standard_found = self.model.read_standard(standard_path)
-        self.view.set_first_column_spanned(self.model.get_scan_range())
         self._filter_standard()
         if not standard_found and not self_call:
             if self.model.try_unzip(data_path, standard_path):
                 self._read_standard(self_call=True)
-        self.view.expand_all()
+
         # re-adjust view to column width
-        self.view.adjust_treeview_columns_width(self.num_columns)
+        self._format_view()
 
     def _cancel_loading(self):
         self.model.set_loading_canceled(True)
@@ -189,6 +189,8 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.view.sig_read_all.connect(self._read_all)
             self.model.set_active_model()
             self._filter_scans()
+        # re-adjust view to column width
+        self._format_view()
 
     # change of modi
     def _is_modus_tof(self):
@@ -258,6 +260,12 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     def _expanded(self):
         self.num_columns = self.model.get_active_model_column_count()
+        self.view.adjust_treeview_columns_width(self.num_columns)
+
+    def _format_view(self):
+        self.num_columns = self.model.get_active_model_column_count()
+        self.view.set_first_column_spanned(self.model.get_scan_range())
+        self.view.expand_all()
         self.view.adjust_treeview_columns_width(self.num_columns)
 
     def _attach_signal_slots(self):
