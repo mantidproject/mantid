@@ -105,6 +105,9 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
+  if (!hasValidSettings()) {
+    throw InvalidTableException("The Experiment Settings table contains invalid settings.");
+  }
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     auto lookupRowCopy = *foundRow;
 
