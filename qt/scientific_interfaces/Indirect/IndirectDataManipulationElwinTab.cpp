@@ -151,7 +151,8 @@ QStringList getSampleFBSuffices() {
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 IndirectDataManipulationElwinTab::IndirectDataManipulationElwinTab(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()) {
+    : IndirectDataManipulationTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()),
+      m_selectedSpectrum(0) {
 
   // Create Editor Factories
   m_dblEdFac = new DoubleEditorFactory(this);
@@ -624,13 +625,12 @@ void IndirectDataManipulationElwinTab::newPreviewWorkspaceSelected(const QString
  * Replots the preview plot.
  */
 void IndirectDataManipulationElwinTab::plotInput() {
-  IndirectDataManipulationElwinTab::plotInput(m_uiForm.ppPlot);
+  plotInput(m_uiForm.ppPlot);
   setDefaultSampleLog(getInputWorkspace());
 }
 
 /**
- * Plots the selected spectrum of the input workspace in this indirect data
- * analysis tab.
+ * Plots the selected spectrum of the input workspace.
  *
  * @param previewPlot The preview plot widget in which to plot the input
  *                    input workspace.
@@ -647,7 +647,7 @@ void IndirectDataManipulationElwinTab::plotInput(MantidQt::MantidWidgets::Previe
 void IndirectDataManipulationElwinTab::handlePreviewSpectrumChanged() {
   if (m_uiForm.elwinPreviewSpec->currentIndex() == 1)
     setSelectedSpectrum(m_uiForm.cbPlotSpectrum->currentText().toInt());
-  IndirectDataManipulationElwinTab::plotInput(m_uiForm.ppPlot);
+  plotInput(m_uiForm.ppPlot);
 }
 
 void IndirectDataManipulationElwinTab::updateIntegrationRange() {
