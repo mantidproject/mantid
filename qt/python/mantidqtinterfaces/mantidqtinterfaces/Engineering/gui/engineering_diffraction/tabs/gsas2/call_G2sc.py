@@ -138,7 +138,7 @@ def export_refined_instrument_parameters(temp_save_directory, name_of_project, p
         instrument_parameter_dict = loop_histogram.getHistEntryList(keyname="Instrument")[0][2][0]
         sigma_one = instrument_parameter_dict['sig-1']  # [initial value, final value, bool whether refined]
         gamma_y = instrument_parameter_dict['Y']  # as above
-        inst_parameters = {"Histogram name": loop_histogram_name , "Sigma-1": sigma_one, "Gamma (Y)": gamma_y}
+        inst_parameters = {"Histogram name": loop_histogram_name, "Sigma-1": sigma_one, "Gamma (Y)": gamma_y}
         inst_parameters_json = json.dumps(inst_parameters, separators=(',', ':'))
         inst_parameters_file_path = os.path.join(temp_save_directory,
                                                  name_of_project + f"_inst_parameters_{loop_histogram_name}.txt")

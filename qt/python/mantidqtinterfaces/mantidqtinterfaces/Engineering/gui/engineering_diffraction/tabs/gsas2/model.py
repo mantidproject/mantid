@@ -685,12 +685,15 @@ class GSAS2Model(object):
         table.addColumn("str", "Histogram name")
         table.addColumn("double", "Sigma-1 {}".format("(Refined)" if self.refine_sigma_one else ""))
         table.addColumn("double", "Gamma (Y) {}".format("(Refined)" if self.refine_gamma else ""))
+        table.addColumn("double", "Fit X Min")
+        table.addColumn("double", "Fit X Max")
 
         output_inst_param_files = []
         for (_, _, filenames) in os.walk(self.user_save_directory):
             for loop_filename in filenames:
                 if "_inst_parameters_" in loop_filename:
                     output_inst_param_files.append(os.path.join(self.user_save_directory, loop_filename))
+        output_inst_param_files.sort()
 
         for inst_parameters_txt in output_inst_param_files:
             with open(inst_parameters_txt, 'rt', encoding='utf-8') as file:
@@ -699,6 +702,11 @@ class GSAS2Model(object):
             loop_inst_parameters = [inst_parameter_dict["Histogram name"]]
             for param in INST_TABLE_PARAMS[1:]:
                 loop_inst_parameters.append(float(inst_parameter_dict[param][1]))
+
+            bank_number_and_extension = str(list(inst_parameters_txt.split(" "))[-1])
+            bank_number_from_gsas2_histogram_name = int(bank_number_and_extension.replace(".txt", ""))
+            loop_inst_parameters.append(float(self.x_min[bank_number_from_gsas2_histogram_name-1]))
+            loop_inst_parameters.append(float(self.x_max[bank_number_from_gsas2_histogram_name-1]))
             table.addRow(loop_inst_parameters)
         if test:
             return table
