@@ -297,7 +297,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         data_view = self.view.data_view
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-            data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             # set transform from sliceinfo but ignore view as non-ortho state not set yet
             data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
@@ -306,8 +305,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-            if self.model.can_support_non_axis_cuts():
-                data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
 
@@ -344,7 +341,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.view.add_widget_to_splitter(self._cutviewer_presenter.get_view())
             self._cutviewer_presenter.show_view()
             data_view.deactivate_tool(ToolItemText.ZOOM)
-            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
                 data_view.deactivate_and_disable_tool(tool)
             # turn off cursor tracking as this causes plot to resize interfering with interactive cutting tool
             data_view.track_cursor.setChecked(False)  # on_track_cursor_state_change(False)
