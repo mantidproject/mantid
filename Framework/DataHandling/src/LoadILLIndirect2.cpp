@@ -21,6 +21,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>
@@ -122,7 +123,7 @@ void LoadILLIndirect2::exec() {
   if (m_loadOption == "Diffractometer") {
     loadDiffractionData(firstEntry);
   } else {
-    loadDataIntoTheWorkSpace(firstEntry);
+    loadDataIntoWorkspace(firstEntry);
   }
   progress.report("Loaded the data");
 
@@ -203,9 +204,9 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
     NXData dataSDGroup = entry.openNXData("dataSD");
     NXInt dataSD = dataSDGroup.openIntData();
 
-    for (int i = 1; i <= dataSD.dim0(); ++i) {
+    for (int i = 0; i < dataSD.dim0(); ++i) {
       try {
-        std::string entryNameFlagSD = boost::str(boost::format("instrument/SingleD/tubes%i_function") % i);
+        std::string entryNameFlagSD = boost::str(boost::format("instrument/SingleD/tubes%i_function") % (i + 1));
         NXFloat flagSD = entry.openNXFloat(entryNameFlagSD);
         flagSD.load();
 
@@ -255,51 +256,33 @@ void LoadILLIndirect2::initWorkSpace() {
  * Load data found in nexus file in general, indirect mode.
  * @param entry :: The Nexus entry
  */
-void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
+void LoadILLIndirect2::loadDataIntoWorkspace(NeXus::NXEntry &entry) {
 
-  NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
-  data.load();
+  // First, let's create common X-axis
+  std::vector<double> xAxis(m_numberOfChannels + 1);
+  std::iota(xAxis.begin(), xAxis.end(), 0.0);
 
-  NXData dataSDGroup = entry.openNXData("dataSD");
-  NXInt dataSD = dataSDGroup.openIntData();
-  dataSD.load();
-
+  // Then load monitor
   NXData dataMonGroup = entry.openNXData("monitor/data");
-  NXInt dataMon = dataMonGroup.openIntData();
+  auto dataMon = dataMonGroup.openIntData();
   dataMon.load();
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, dataMon, xAxis, 0);
 
-  // First, Monitor
-  // Assign Y
-  int *monitor_p = &dataMon(0, 0);
-  m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
-  // Assign Error
-  MantidVec &dataE = m_localWorkspace->dataE(0);
-  std::transform(monitor_p, monitor_p + m_numberOfChannels, dataE.begin(), [](const double v) { return std::sqrt(v); });
   // Then Tubes
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
-    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      const size_t index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
-      // Assign Y
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(index).assign(data_p, data_p + m_numberOfChannels);
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(index);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
-    }
-  }
-  // Then add Simple Detector (SD)
-  size_t offset = m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors;
-  for (auto &index : m_activeSDIndices) {
-    // Assign Y, note that index starts from 1
-    int *dataSD_p = &dataSD(index - 1, 0, 0);
-    m_localWorkspace->dataY(offset).assign(dataSD_p, dataSD_p + m_numberOfChannels);
-    // Assign Error
-    MantidVec &E = m_localWorkspace->dataE(offset);
-    std::transform(dataSD_p, dataSD_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
-    ++offset;
-  }
+  NXData dataGroup = entry.openNXData("data");
+  auto data = dataGroup.openIntData();
+  data.load();
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 1);
+
+  // And finally Simple Detectors (SD)
+  int offset = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors);
+  NXData dataSDGroup = entry.openNXData("dataSD");
+  auto dataSD = dataSDGroup.openIntData();
+  dataSD.load();
+  std::set<int> sdIndices;
+  std::transform(m_activeSDIndices.cbegin(), m_activeSDIndices.cend(), std::inserter(sdIndices, sdIndices.begin()),
+                 [offset](const auto &index) { return index + offset; });
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, dataSD, xAxis, offset, 0, false, std::vector<int>(), sdIndices);
 }
 
 /**
@@ -421,7 +404,7 @@ void LoadILLIndirect2::moveSingleDetectors(const NeXus::NXEntry &entry) {
   std::string prefix("single_tube_");
   int index = 1;
   for (auto i : m_activeSDIndices) {
-    std::string angleEntry = boost::str(boost::format("instrument/SingleD/SD%i angle") % i);
+    std::string angleEntry = boost::str(boost::format("instrument/SingleD/SD%i angle") % (i + 1));
     NXFloat angleSD = entry.openNXFloat(angleEntry);
     angleSD.load();
     g_log.debug("Moving single detector " + std::to_string(i) + " to t=" + std::to_string(angleSD[0]));

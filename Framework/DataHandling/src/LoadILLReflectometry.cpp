@@ -482,26 +482,23 @@ std::vector<double> LoadILLReflectometry::getXValues() {
 void LoadILLReflectometry::loadData(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
                                     const std::vector<double> &xVals) {
   NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
+  auto data = dataGroup.openIntData();
   data.load();
-  const size_t nb_monitors = monitorsData.size();
+  const int nb_monitors = static_cast<int>(monitorsData.size());
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int j = 0; j < static_cast<int>(m_numberOfHistograms); ++j) {
-      const int *data_p = &data(0, static_cast<int>(j), 0);
-      const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram(j, binEdges, counts);
-      m_localWorkspace->getSpectrum(j).setSpectrumNo(j);
-      progress.report();
-    }
-    for (size_t im = 0; im < nb_monitors; ++im) {
-      const int *monitor_p = monitorsData[im].data();
-      const HistogramData::Counts monitorCounts(monitor_p, monitor_p + m_numberOfChannels);
-      const size_t spectrum = im + m_numberOfHistograms;
-      m_localWorkspace->setHistogram(spectrum, binEdges, monitorCounts);
-      m_localWorkspace->getSpectrum(spectrum).setSpectrumNo(static_cast<specnum_t>(spectrum));
+    // first, load data
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xVals, 0);
+    progress.report();
+    // then, the monitor data
+    for (auto im = 0; im < nb_monitors; ++im) {
+      const std::string monitorDataSetName("monitor" + std::to_string(im + 1) + "/data");
+      NXData monitorGroup = entry.openNXData(monitorDataSetName);
+      auto monitorData = monitorGroup.openIntData();
+      monitorData.load();
+      LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xVals,
+                                      static_cast<int>(m_numberOfHistograms) + im);
       progress.report();
     }
   }

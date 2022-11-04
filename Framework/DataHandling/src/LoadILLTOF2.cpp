@@ -96,7 +96,7 @@ void LoadILLTOF2::exec() {
   // load the instrument from the IDF if it exists
   LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrumentName);
 
-  loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
+  loadDataIntoWorkspace(dataFirstEntry, convertToTOF);
 
   addEnergyToRun();
   addPulseInterval();
@@ -130,6 +130,23 @@ std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &
 
       std::vector<int> thisMonitor(data(), data() + data.size());
       monitorList.emplace_back(thisMonitor);
+    }
+  }
+  return monitorList;
+}
+
+/**
+ * Finds monitor data names and stores them in a vector
+ *
+ * @param firstEntry The NeXus entry
+ * @return List of monitor names
+ */
+std::vector<std::string> LoadILLTOF2::getMonitorNames(const NeXus::NXEntry &firstEntry) {
+  std::vector<std::string> monitorList;
+  for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
+       ++it) {
+    if (it->nxclass == "NXmonitor" || boost::starts_with(it->nxname, "monitor")) {
+      monitorList.push_back(it->nxname + "/data");
     }
   }
   return monitorList;
@@ -330,103 +347,68 @@ void LoadILLTOF2::addPulseInterval() {
  * Loads all the spectra into the workspace, including that from the monitor
  *
  * @param entry The Nexus entry
- * @param monitors List of monitor data
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
-void LoadILLTOF2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
-                                           bool convertToTOF) {
+void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
-  NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
+  //  NXData dataGroup = entry.openNXData("data");
   // load the counts from the file into memory
-  data.load();
 
   NXClass moni = entry.openNXGroup(m_monitorName);
 
-  // Put tof in an array
-  auto &X0 = m_localWorkspace->mutableX(0);
+  // Prepare X-axis array
+  std::vector<double> xAxis(m_localWorkspace->readX(0).size());
   if (moni.containsDataSet("time_of_flight")) {
     if (convertToTOF) {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) +
-                m_channelWidth / 2; // to make sure the bin centre is positive
+        xAxis[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) +
+                   m_channelWidth / 2; // to make sure the bin centre is positive
       }
     } else {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-        X0[i] = static_cast<double>(i); // just take the channel index
+        xAxis[i] = static_cast<double>(i); // just take the channel index
       }
     }
   } else {
     // Diffraction PANTHER
-    X0[0] = m_wavelength * 0.9;
-    X0[1] = m_wavelength * 1.1;
+    xAxis[0] = m_wavelength * 0.9;
+    xAxis[1] = m_wavelength * 1.1;
   }
+
   // The binning for monitors is considered the same as for detectors
-  size_t spec = 0;
+  int spec = 0;
+  std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
 
-  auto const &instrument = m_localWorkspace->getInstrument();
+  NXData dataGroup = entry.openNXData("data");
+  auto data = dataGroup.openIntData();
+  data.load();
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, 0, false, detectorIDs);
+  spec = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-
-  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
-
-  loadSpectra(spec, m_numberOfTubes, detectorIDs, data, progress);
-
-  g_log.debug() << "Loading detector data into the workspace: DONE!\n";
-
-  /**
-   * IN4 Rosace detectors are in a different NeXus entry
-   */
+  // IN4 Rosace detectors are in a different NeXus entry
   if (m_instrumentName == "IN4") {
     g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
-    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
-    NXInt dataRosace = dataGroupRosace.openIntData();
-    auto numberOfTubes = static_cast<size_t>(dataRosace.dim0());
     // load the counts from the file into memory
+    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
+    auto dataRosace = dataGroupRosace.openIntData();
     dataRosace.load();
-
-    Progress progressRosace(this, 0.0, 1.0, numberOfTubes * m_numberOfPixelsPerTube);
-
-    loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace, progressRosace);
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, 0, false, detectorIDs);
+    spec += dataRosace.dim0();
   }
 
-  const auto monitorIDs = instrument->getMonitors();
-
-  for (size_t i = 0; i < monitors.size(); ++i) {
-    const auto &monitor = monitors[i];
-    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0), Counts(monitor.begin(), monitor.end()));
-    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[i]);
+  const auto monitorDataGroup = getMonitorNames(entry);
+  for (const auto &monitorName : monitorDataGroup) {
+    detectorIDs[spec] = static_cast<int>(spec) + 1;
+    NXData monitorGroup = entry.openNXData(monitorName);
+    auto monitorData = monitorGroup.openIntData();
+    monitorData.load();
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, 0, false, detectorIDs);
     spec++;
   }
 }
 
-/**
- * Loops over all the pixels and loads the correct spectra. Called for each set
- * of detector types in the workspace.
- *
- * @param spec The current spectrum id
- * @param numberOfTubes The number of detector tubes in the workspace
- * @param detectorIDs A list of all of the detector IDs
- * @param data The NeXus data to load into the workspace
- * @param progress The progress monitor
- */
-void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<detid_t> &detectorIDs,
-                              const NXInt &data, Progress &progress) {
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
-    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      const size_t currentSpectrum = spec + i * m_numberOfPixelsPerTube + j;
-      m_localWorkspace->setHistogram(currentSpectrum, m_localWorkspace->binEdges(0),
-                                     Counts(data_p, data_p + m_numberOfChannels));
-      m_localWorkspace->getSpectrum(currentSpectrum).setDetectorID(detectorIDs[currentSpectrum]);
-      progress.report();
-    }
-  }
-  spec += numberOfTubes * m_numberOfPixelsPerTube;
-}
 } // namespace Mantid::DataHandling

@@ -516,5 +516,83 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
   loadInst->execute();
 }
 
+/**
+ * Fills workspace with histogram data from provided data structure
+ * @param ws A MatrixWorkspace to be filled with data
+ * @param data Data object to extract counts from
+ * @param xAxis X axis values to be assigned to each spectrum
+ * @param initialSpectrum Initial spectrum number, optional and defaults to 0
+ * @param zeroCountsError Value to replace default error of square root of counts, optional and defaults to 0
+ * @param pointData Switch to decide whether the data is going to be a histogram or point data, defaults to false
+ * (histogram)
+ * @param detectorIDs Vector of detector IDs to override the default spectrum number, defaults to empty (IDs equal to
+ * index)
+ * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
+ * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
+ * tube-pixel-channel order
+ */
+void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, Mantid::NeXus::NXInt &data,
+                                     const std::vector<double> &xAxis, int initialSpectrum, double zeroCountsError,
+                                     bool pointData, const std::vector<int> &detectorIDs,
+                                     const std::set<int> &acceptedDetectorIDs,
+                                     const std::tuple<short, short, short> &axisOrder) {
+
+  std::array dims = {data.dim0(), data.dim1(), data.dim2()};
+  const auto nTubes = dims[std::get<0>(axisOrder)];
+  const auto nPixels = dims[std::get<1>(axisOrder)];
+  const auto nChannels = dims[std::get<2>(axisOrder)];
+
+  HistogramData::Points histoPoints;
+  HistogramData::BinEdges binEdges;
+  if (pointData)
+    histoPoints = HistogramData::Points(xAxis);
+  else
+    binEdges = HistogramData::BinEdges(xAxis);
+  int nSkipped = 0;
+  for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
+    for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+      auto currentSpectrum = initialSpectrum + tube_no * nPixels + pixel_no;
+      if (acceptedDetectorIDs.size() != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                                       currentSpectrum) == acceptedDetectorIDs.end()) {
+        nSkipped++;
+        continue;
+      }
+      currentSpectrum -= nSkipped;
+
+      std::vector<int> spectrum(nChannels);
+      for (auto channel_no = 0; channel_no < nChannels; ++channel_no) {
+        if (std::get<0>(axisOrder) == 0) // default data shape with TOF axis as the third dimension
+          spectrum[channel_no] = data(tube_no, pixel_no, channel_no);
+        else // alternative data shape, with TOF/scan axis as the first dimension
+          spectrum[channel_no] = data(channel_no, tube_no, pixel_no);
+      }
+      const HistogramData::Counts counts(spectrum.begin(), spectrum.end());
+      const HistogramData::CountVariances countVariances(spectrum.begin(), spectrum.end());
+      if (pointData) {
+        ws->setCounts(currentSpectrum, counts);
+        ws->setCountVariances(currentSpectrum, countVariances);
+        ws->setPoints(currentSpectrum, histoPoints);
+      } else {
+        ws->setHistogram(currentSpectrum, binEdges, counts);
+      }
+      if (detectorIDs.size() == 0)
+        ws->getSpectrum(currentSpectrum).setSpectrumNo(currentSpectrum);
+      else
+        ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorIDs[currentSpectrum]);
+
+      if (zeroCountsError != 0) {
+        auto &errorAxis = ws->mutableE(currentSpectrum);
+        const auto dataAxis = ws->readY(currentSpectrum);
+        for (auto index = 0; index < static_cast<int>(errorAxis.size()); ++index) {
+          if (dataAxis[index] == 0) {
+            errorAxis[index] = zeroCountsError;
+            auto test = ws->e(currentSpectrum);
+          }
+        }
+      }
+    }
+  }
+}
+
 } // namespace DataHandling
 } // namespace Mantid

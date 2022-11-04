@@ -284,9 +284,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
     path = "data_scan/detector_data/data";
   }
   NXData dataGroup = firstEntry.openNXData(path);
-  NXInt data = dataGroup.openIntData();
+  auto data = dataGroup.openIntData();
   data.load();
-  size_t numberOfHistograms;
 
   m_isD16Omega = (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
 
@@ -309,7 +308,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   // For these monochromatic instruments, one bin is "TOF" mode, and more than that is a scan
   MultichannelType type = (numberOfChannels == 1) ? MultichannelType::TOF : MultichannelType::SCAN;
 
-  numberOfHistograms = numberOfPixelsPerTubes * numberOfTubes + m_numberOfMonitors;
+  size_t numberOfHistograms = numberOfPixelsPerTubes * numberOfTubes + m_numberOfMonitors;
 
   createEmptyWorkspace(numberOfHistograms, numberOfChannels, type);
   loadMetaData(firstEntry, instrumentPath);
@@ -340,13 +339,13 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
   g_log.debug("Fetching data...");
 
   NXData data1 = firstEntry.openNXData("D11/Detector 1/data");
-  NXInt dataCenter = data1.openIntData();
+  auto dataCenter = data1.openIntData();
   dataCenter.load();
   NXData data2 = firstEntry.openNXData("D11/Detector 2/data");
-  NXInt dataLeft = data2.openIntData();
+  auto dataLeft = data2.openIntData();
   dataLeft.load();
   NXData data3 = firstEntry.openNXData("D11/Detector 3/data");
-  NXInt dataRight = data3.openIntData();
+  auto dataRight = data3.openIntData();
   dataRight.load();
 
   size_t numberOfHistograms =
@@ -402,10 +401,10 @@ void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::strin
   g_log.debug("Fetching data...");
 
   NXData data1 = firstEntry.openNXData("data1");
-  NXInt data1_data = data1.openIntData();
+  auto data1_data = data1.openIntData();
   data1_data.load();
   NXData data2 = firstEntry.openNXData("data2");
-  NXInt data2_data = data2.openIntData();
+  auto data2_data = data2.openIntData();
   data2_data.load();
 
   size_t numberOfHistograms =
@@ -464,19 +463,19 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
   g_log.debug("Fetching data...");
 
   NXData dataGroup1 = firstEntry.openNXData("data1");
-  NXInt dataRear = dataGroup1.openIntData();
+  auto dataRear = dataGroup1.openIntData();
   dataRear.load();
   NXData dataGroup2 = firstEntry.openNXData("data2");
-  NXInt dataRight = dataGroup2.openIntData();
+  auto dataRight = dataGroup2.openIntData();
   dataRight.load();
   NXData dataGroup3 = firstEntry.openNXData("data3");
-  NXInt dataLeft = dataGroup3.openIntData();
+  auto dataLeft = dataGroup3.openIntData();
   dataLeft.load();
   NXData dataGroup4 = firstEntry.openNXData("data4");
-  NXInt dataDown = dataGroup4.openIntData();
+  auto dataDown = dataGroup4.openIntData();
   dataDown.load();
   NXData dataGroup5 = firstEntry.openNXData("data5");
-  NXInt dataUp = dataGroup5.openIntData();
+  auto dataUp = dataGroup5.openIntData();
   dataUp.load();
   g_log.debug("Checking channel numbers...");
 
@@ -575,27 +574,21 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
        ++it) {
     if (it->nxclass == "NXmonitor") {
       NXData dataGroup = firstEntry.openNXData(it->nxname);
-      NXInt data = dataGroup.openIntData();
+      auto data = dataGroup.openIntData();
       data.load();
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x" << data.dim1() << "x"
                     << data.dim2() << '\n';
-      const HistogramData::Counts histoCounts(data(), data() + data.dim2());
-      m_localWorkspace->setCounts(firstIndex, histoCounts);
-      const HistogramData::CountVariances histoVariances(data(), data() + data.dim2());
-      m_localWorkspace->setCountVariances(firstIndex, histoVariances);
-
+      std::vector<double> binning(data.dim2());
+      bool pointData;
       if (m_isTOF) {
-        HistogramData::BinEdges histoBinEdges(data.dim2() + 1, HistogramData::LinearGenerator(0.0, 1));
-        m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
+        binning.push_back(0.0); // bin edges require size to include one more value
+        std::iota(binning.begin(), binning.end(), 0.0);
+        pointData = false;
       } else {
-        if (type != MultichannelType::KINETIC) {
-          HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
-          m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
-        } else {
-          HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
-          m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
-        }
+        binning = m_defaultBinning;
+        pointData = type == MultichannelType::KINETIC;
       }
+      LoadHelper::fillStaticWorkspace(m_localWorkspace, data, binning, static_cast<int>(firstIndex), 0, pointData);
       // Add average monitor counts to a property:
       double averageMonitorCounts =
           std::accumulate(data(), data() + data.dim2(), double(0)) / static_cast<double>(data.dim2());
@@ -652,65 +645,29 @@ size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, si
 }
 
 /**
- * @brief Loads data from tubes
+ * @brief Loads data from tubes in scan both mode (channels - tubes - pixels) (D16B)
  * @param data : a reference to already loaded nexus data block
  * @param timeBinning : the x-axis binning
  * @param firstIndex : the workspace index to start loading to
  * @param type : used to discrimante between TOF and Kinetic
  * @return the next ws index after all the tubes in the given detector bank
  */
-size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning, size_t firstIndex = 0,
+size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<double> &timeBinning, size_t firstIndex,
                                       const MultichannelType type) {
 
   int numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTube);
 
+  bool pointData = true;
+  std::tuple<short, short, short> dimOrder;
   if (m_instrumentName == "D16B") {
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int tubeIndex = 0; tubeIndex < numberOfTubes; ++tubeIndex) {
-      for (int pixelIndex = 0; pixelIndex < numberOfPixelsPerTube; ++pixelIndex) {
-        std::vector<int> spectrum(numberOfChannels);
-        for (int channelIndex = 0; channelIndex < numberOfChannels; ++channelIndex) {
-          spectrum[channelIndex] = data(channelIndex, tubeIndex, pixelIndex);
-        }
-        const size_t index = firstIndex + tubeIndex * numberOfPixelsPerTube + pixelIndex;
-        const HistogramData::Counts histoCounts(spectrum.begin(), spectrum.end());
-        const HistogramData::CountVariances histoVariances(spectrum.begin(), spectrum.end());
-
-        m_localWorkspace->setCounts(index, histoCounts);
-        m_localWorkspace->setCountVariances(index, histoVariances);
-        const HistogramData::Points histoPoints(timeBinning);
-        m_localWorkspace->setPoints(index, histoPoints);
-      }
-    }
+    dimOrder = std::tuple<short, short, short>{1, 2, 0};
   } else {
-
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int tubeIndex = 0; tubeIndex < numberOfTubes; ++tubeIndex) {
-      for (int pixelIndex = 0; pixelIndex < numberOfPixelsPerTube; ++pixelIndex) {
-        int *data_p;
-        if (m_isD16Omega) {
-          data_p = &data(0, tubeIndex, pixelIndex);
-        } else {
-          data_p = &data(tubeIndex, pixelIndex, 0);
-        }
-        const size_t index = firstIndex + tubeIndex * numberOfPixelsPerTube + pixelIndex;
-        const HistogramData::Counts histoCounts(data_p, data_p + numberOfChannels);
-        const HistogramData::CountVariances histoVariances(data_p, data_p + numberOfChannels);
-        m_localWorkspace->setCounts(index, histoCounts);
-        m_localWorkspace->setCountVariances(index, histoVariances);
-
-        if (type == MultichannelType::KINETIC) {
-          const HistogramData::Points histoPoints(timeBinning);
-          m_localWorkspace->setPoints(index, histoPoints);
-        } else {
-          const HistogramData::BinEdges binEdges(timeBinning);
-          m_localWorkspace->setBinEdges(index, binEdges);
-        }
-      }
-    }
+    pointData = type == MultichannelType::KINETIC;
+    dimOrder = m_isD16Omega ? std::tuple<short, short, short>{2, 1, 0} : std::tuple<short, short, short>{0, 1, 2};
   }
-
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, timeBinning, static_cast<int>(firstIndex), 0, pointData,
+                                  std::vector<int>(), std::set<int>(), dimOrder);
   return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }
 

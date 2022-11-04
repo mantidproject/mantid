@@ -167,50 +167,21 @@ void LoadILLPolarizedDiffraction::loadData() {
     moveTwoTheta(entry, workspace);
 
     // prepare axes for data
-    std::vector<double> axis = prepareAxes(entry);
+    const std::vector<double> axis = prepareAxes(entry);
 
     // load data from file
-    std::string dataName = "data/Detector_data";
-    NXUInt data = entry.openNXDataSet<unsigned int>(dataName);
+    auto data = entry.openNXDataSet<int>("data/Detector_data");
     data.load();
-
-    // Assign detector counts
-    PARALLEL_FOR_IF(Kernel::threadSafe(*workspace))
-    for (auto pixel_no = 0; pixel_no < static_cast<int>(D7_NUMBER_PIXELS); ++pixel_no) {
-      auto &spectrum = workspace->mutableY(pixel_no);
-      auto &errors = workspace->mutableE(pixel_no);
-      for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
-        unsigned int counts = data(pixel_no, 0, channel_no);
-        spectrum[channel_no] = counts;
-        if (counts == 0) {
-          errors[channel_no] = 1.0;
-        } else {
-          errors[channel_no] = std::sqrt(counts);
-        }
-      }
-      workspace->mutableX(pixel_no) = axis;
-    }
+    LoadHelper::fillStaticWorkspace(workspace, data, axis, 0, 1.0);
 
     // load and assign monitor data
     for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
          monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS); ++monitor_no) {
-      NXUInt monitorData = entry.openNXDataSet<unsigned int>(
+      auto monitorData = entry.openNXDataSet<int>(
           "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) + "/data");
       monitorData.load();
-      auto &spectrum = workspace->mutableY(monitor_no);
-      auto &errors = workspace->mutableE(monitor_no);
-      for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
-        unsigned int counts = monitorData(0, 0, channel_no);
-        spectrum[channel_no] = counts;
-        if (counts == 0) {
-          errors[channel_no] = 1.0;
-        } else {
-          errors[channel_no] = std::sqrt(counts);
-        }
-      }
-      workspace->mutableX(monitor_no) = axis;
+      LoadHelper::fillStaticWorkspace(workspace, monitorData, axis, monitor_no, 1.0);
     }
-
     // convert the spectrum axis to scattering angle
     if (getProperty("ConvertToScatteringAngle")) {
       workspace = convertSpectrumAxis(workspace);
