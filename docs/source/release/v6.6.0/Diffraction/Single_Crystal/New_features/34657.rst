@@ -1,0 +1,2 @@
+* Added new option to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: to get intial TOF window from back-to-back exponential coeficients if sepcified in the insturment parameters.xml
+* Added back-to-back exponential coeficients to SXD parameters.xml file
