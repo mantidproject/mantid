@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "ALFCustomInstrumentMocks.h"
-#include "ALFCustomInstrumentModel.h"
-#include "ALFCustomInstrumentPresenter.h"
-#include "ALFCustomInstrumentView.h"
+#include "ALFInstrumentMocks.h"
+#include "ALFInstrumentModel.h"
+#include "ALFInstrumentPresenter.h"
+#include "ALFInstrumentView.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"

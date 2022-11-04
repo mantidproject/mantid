@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "ALFCustomInstrumentMocks.h"
-#include "ALFCustomInstrumentModel.h"
+#include "ALFInstrumentMocks.h"
+#include "ALFInstrumentModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"

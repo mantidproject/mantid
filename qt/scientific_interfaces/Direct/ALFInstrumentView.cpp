@@ -37,7 +37,7 @@ namespace MantidQt::CustomInterfaces {
 ALFInstrumentView::ALFInstrumentView(QWidget *parent)
     : QWidget(parent), m_files(), m_instrumentWidget(), m_extractAction(), m_averageAction() {}
 
-void ALFInstrumentView::setUpInstrument(const std::string &fileName) {
+void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget =
       new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
                                           MantidWidgets::InstrumentWidget::Dependencies(), false);
@@ -83,7 +83,7 @@ QWidget *ALFInstrumentView::generateLoadWidget() {
   return loadWidget;
 }
 
-void ALFInstrumentView::subscribePresenter(ALFInstrumentPresenter *presenter) { m_presenter = presenter; }
+void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
 
 std::optional<std::string> ALFInstrumentView::getFile() {
   auto name = m_files->getFilenames();
@@ -92,7 +92,7 @@ std::optional<std::string> ALFInstrumentView::getFile() {
   return std::nullopt;
 }
 
-void ALFInstrumentView::setRunQuietly(const std::string &runNumber) {
+void ALFInstrumentView::setRunQuietly(std::string const &runNumber) {
   m_files->setText(QString::fromStdString(runNumber));
 }
 
@@ -123,7 +123,7 @@ void ALFInstrumentView::averageTube() {
   m_presenter->averageTube();
 }
 
-void ALFInstrumentView::warningBox(const std::string &message) {
+void ALFInstrumentView::warningBox(std::string const &message) {
   QMessageBox::warning(this, "ALFView", QString::fromStdString(message));
 }
 

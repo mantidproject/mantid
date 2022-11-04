@@ -27,23 +27,39 @@ namespace CustomInterfaces {
 
 class IALFInstrumentView;
 
-class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter : public QObject {
+class MANTIDQT_DIRECT_DLL IALFInstrumentPresenter {
+
+public:
+  virtual QWidget *getLoadWidget() = 0;
+  virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
+
+  virtual void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) = 0;
+
+  virtual void loadRunNumber() = 0;
+
+  virtual void extractSingleTube() = 0;
+  virtual void averageTube() = 0;
+
+  virtual bool showAverageTubeOption() const = 0;
+};
+
+class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public QObject, public IALFInstrumentPresenter {
   Q_OBJECT
 
 public:
   ALFInstrumentPresenter(IALFInstrumentView *view, std::unique_ptr<IALFInstrumentModel> model);
 
-  QWidget *getLoadWidget();
-  MantidWidgets::InstrumentWidget *getInstrumentView();
+  QWidget *getLoadWidget() override;
+  MantidWidgets::InstrumentWidget *getInstrumentView() override;
 
-  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter);
+  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter *presenter) override;
 
-  void loadRunNumber();
+  void loadRunNumber() override;
 
-  void extractSingleTube();
-  void averageTube();
+  void extractSingleTube() override;
+  void averageTube() override;
 
-  bool showAverageTubeOption() const;
+  bool showAverageTubeOption() const override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);
@@ -53,5 +69,6 @@ private:
   IALFInstrumentView *m_view;
   std::unique_ptr<IALFInstrumentModel> m_model;
 };
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -29,40 +29,41 @@ class InstrumentWidget;
 
 namespace CustomInterfaces {
 
-class ALFInstrumentPresenter;
+class IALFInstrumentPresenter;
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentView {
+
 public:
-  virtual void setUpInstrument(const std::string &fileName) = 0;
+  virtual void setUpInstrument(std::string const &fileName) = 0;
 
   virtual QWidget *generateLoadWidget() = 0;
   virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
 
-  virtual void subscribePresenter(ALFInstrumentPresenter *presenter) = 0;
+  virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
   virtual std::optional<std::string> getFile() = 0;
-  virtual void setRunQuietly(const std::string &runNumber) = 0;
+  virtual void setRunQuietly(std::string const &runNumber) = 0;
 
-  virtual void warningBox(const std::string &message) = 0;
+  virtual void warningBox(std::string const &message) = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFInstrumentView : public QWidget, public IALFInstrumentView {
+class MANTIDQT_DIRECT_DLL ALFInstrumentView final : public QWidget, public IALFInstrumentView {
   Q_OBJECT
 
 public:
   explicit ALFInstrumentView(QWidget *parent = nullptr);
 
-  void setUpInstrument(const std::string &fileName) override final;
+  void setUpInstrument(std::string const &fileName) override;
 
-  QWidget *generateLoadWidget() override final;
-  MantidWidgets::InstrumentWidget *getInstrumentView() override final { return m_instrumentWidget; };
+  QWidget *generateLoadWidget() override;
+  MantidWidgets::InstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
 
-  void subscribePresenter(ALFInstrumentPresenter *presenter) override final;
+  void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
-  std::optional<std::string> getFile() override final;
-  void setRunQuietly(const std::string &runNumber) override final;
+  std::optional<std::string> getFile() override;
+  void setRunQuietly(std::string const &runNumber) override;
 
-  void warningBox(const std::string &message) override final;
+  void warningBox(std::string const &message) override;
 
 private slots:
   void fileLoaded();
@@ -76,7 +77,7 @@ private:
   QAction *m_extractAction;
   QAction *m_averageAction;
 
-  ALFInstrumentPresenter *m_presenter;
+  IALFInstrumentPresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

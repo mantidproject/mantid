@@ -31,22 +31,22 @@ public:
   virtual bool showAverageTubeOption() const = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFInstrumentModel : public IALFInstrumentModel {
+class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
 
 public:
   ALFInstrumentModel();
 
-  std::optional<std::string> loadAndTransform(const std::string &filename) override final;
+  std::optional<std::string> loadAndTransform(const std::string &filename) override;
 
-  inline std::string instrumentName() const override final { return "ALF"; }
-  inline std::string loadedWsName() const override final { return "ALFData"; };
-  std::string extractedWsName() const override final;
-  std::size_t runNumber() const override final;
+  inline std::string instrumentName() const noexcept override { return "ALF"; }
+  inline std::string loadedWsName() const noexcept override { return "ALFData"; };
+  std::string extractedWsName() const override;
+  std::size_t runNumber() const override;
 
-  void extractSingleTube() override final;
-  void averageTube() override final;
+  void extractSingleTube() override;
+  void averageTube() override;
 
-  bool showAverageTubeOption() const override final;
+  bool showAverageTubeOption() const override;
 
 private:
   Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
