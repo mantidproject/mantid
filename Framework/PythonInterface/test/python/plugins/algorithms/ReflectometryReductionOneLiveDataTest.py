@@ -95,6 +95,24 @@ class GetFakeLiveInstrumentValuesInvalidNames(GetFakeLiveInstrumentValue):
 
 AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesInvalidNames)
 
+class GetFakeLiveInstrumentValuesWithZeroTheta(GetFakeLiveInstrumentValue):
+    """Fake algorithm that simulates the special case where the instrument is reporting theta as zero"""
+    def __init__(self):
+        super(GetFakeLiveInstrumentValuesWithZeroTheta, self).__init__()
+
+    def PyInit(self):
+        self._declare_properties()
+
+    def PyExec(self):
+        propertyName = self.getProperty('PropertyName').value
+        if propertyName == self._theta_name:
+            self.setProperty('Value', '0.0')
+        else:
+            self._do_execute()
+
+
+AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesWithZeroTheta)
+
 
 class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def setUp(self):
@@ -210,12 +228,22 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           Instrument='INTER',
                           GetLiveValueAlgorithm='GetFakeLiveInstrumentValueInvalidNames')
 
+    def test_algorithm_fails_if_theta_is_zero(self):
+        self.assertRaises(RuntimeError,
+                          ReflectometryReductionOneLiveData,
+                          InputWorkspace=self.__class__._input_ws,
+                          OutputWorkspace='output',
+                          Instrument='INTER',
+                          GetLiveValueAlgorithm='GetFakeLiveInstrumentValuesWithZeroTheta')
+
+
     def test_slits_gaps_are_set_up_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
         slit1vg = workspace.getInstrument().getComponentByName('slit1').getNumberParameter('vertical gap')
         slit2vg = workspace.getInstrument().getComponentByName('slit2').getNumberParameter('vertical gap')
         self.assertEqual(slit1vg[0], 1.001)
         self.assertEqual(slit2vg[0], 0.5)
+
 
     def _setup_environment(self):
         self._old_facility = config['default.facility']
