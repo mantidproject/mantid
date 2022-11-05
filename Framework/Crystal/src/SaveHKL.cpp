@@ -443,9 +443,18 @@ void SaveHKL::exec() {
           out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
           Kernel::DblMatrix oriented = p.getGoniometerMatrix();
 
-          auto U = ol.getU();
-          auto RU = oriented * U;
+          Kernel::DblMatrix U = ol.getU();
+          Kernel::DblMatrix RU = oriented * U;
           RU.Transpose();
+
+          Kernel::DblMatrix B = ol.getB();
+          Kernel::DblMatrix T(3, 3, false);
+          T[0][0] = ol.astar();
+          T[1][1] = ol.bstar();
+          T[2][2] = ol.cstar();
+          T.Invert();
+          T = B * T;
+          T.Transpose();
 
           // This is the reverse incident beam
           V3D reverse_incident = inst->getSource()->getPos() - inst->getSample()->getPos();
@@ -454,8 +463,8 @@ void SaveHKL::exec() {
           V3D dir = p.getDetPos() - inst->getSample()->getPos();
           dir.normalize();
 
-          V3D dir_cos_1 = RU * reverse_incident;
-          V3D dir_cos_2 = RU * dir;
+          V3D dir_cos_1 = T * RU * reverse_incident;
+          V3D dir_cos_2 = T * RU * dir;
 
           for (int k = 0; k < 3; ++k) {
             out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_1[k];

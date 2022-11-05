@@ -8,7 +8,8 @@
 import unittest
 import tempfile
 import os
-from mantid.simpleapi import SaveHKLCW, CreateSampleWorkspace, CreatePeaksWorkspace, SetUB, DeleteWorkspace, SetGoniometer
+from mantid.simpleapi import (SaveHKLCW, CreateSampleWorkspace, CreatePeaksWorkspace, SetUB, DeleteWorkspace,
+                              SetGoniometer, LoadEmptyInstrument, AddSampleLog, LoadInstrument)
 
 
 class SaveHKLCWTest(unittest.TestCase):
@@ -92,12 +93,18 @@ class SaveHKLCWTest(unittest.TestCase):
         self.assertEqual(lines[0], '   1   1   1    0.00    0.00   1-1.00000 0.33333 0.00000-0.66667 0.00000-0.66667\n')
         self.assertEqual(lines[1], '   1  -1   1    0.00    0.00   1-1.00000 0.33333 0.00000 0.66667 0.00000-0.66667\n')
 
-    def test_DEAMND_direction_consine(self):
+    def test_DEAMND_direction_cosine(self):
         # This will compare the direction cosine calculation to a
         # calculation done by different software, the old DEAMND
         # (FOUR-CIRCLE) software. This same test exist in the test for
         # SaveHKL
-        peaks = CreatePeaksWorkspace(OutputType="LeanElasticPeak", NumberOfPeaks=0)
+        LoadEmptyInstrument(InstrumentName='HB3A', OutputWorkspace='DEMAND')
+        AddSampleLog(Workspace='DEMAND', LogName='2theta', LogText='58.0595',
+                     LogType='Number Series', LogUnit='degree', NumberType='Double')
+        AddSampleLog(Workspace='DEMAND', LogName='det_trans', LogText='399.9955',
+                     LogType='Number Series', LogUnit='millimeter', NumberType='Double')
+        LoadInstrument(Workspace='DEMAND', InstrumentName='HB3A', RewriteSpectraMap=False)
+        peaks = CreatePeaksWorkspace(InstrumentWorkspace='DEMAND', NumberOfPeaks=0)
         SetUB(peaks, UB="-0.009884, -0.016780, 0.115725, 0.112280, 0.002840, 0.011331, -0.005899, 0.081084, 0.023625")
         SetGoniometer(peaks,
                       Axis0='29.0295, 0, 1, 0, -1',
@@ -112,7 +119,7 @@ class SaveHKLCWTest(unittest.TestCase):
             lines = f.readlines()
 
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0], '   1  -2   5    0.00    0.00   1-0.03516-0.13889-0.71004 0.96637-0.70328-0.21644\n')
+        self.assertEqual(lines[0], '   1  -2   5    0.00    0.00   1-0.03516-0.13886-0.71007 0.96633-0.70368-0.21549\n')
 
 
 if __name__ == '__main__':

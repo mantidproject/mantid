@@ -183,22 +183,29 @@ public:
     TS_ASSERT_EQUALS(tbar, 0);
     // compare to direction cosines produced with other software
     TS_ASSERT_DELTA(dir_cos_1_x, -0.03516, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_1_y, -0.71004, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_1_z, -0.70328, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_y, -0.71007, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_z, -0.70368, 1e-4);
     TS_ASSERT_DELTA(dir_cos_2_x, -0.13886, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_y, 0.96643, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_z, -0.21619, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_y, 0.96633, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_z, -0.21549, 1e-4);
     TS_ASSERT_EQUALS(dsp, 1000);
     TS_ASSERT_EQUALS(col, 0);
     TS_ASSERT_EQUALS(row, 0);
 
     // compare direction cosine to direct calculation
-    auto RU = ws->run().getGoniometer().getR() * ws->sample().getOrientedLattice().getU();
+    Kernel::DblMatrix RU = ws->run().getGoniometer().getR() * ws->sample().getOrientedLattice().getU();
     RU.Transpose();
-    V3D dir_cos_1 = RU * V3D(0, 0, -1);
-    auto peaks_pos = ws->getPeak(0).getDetPos();
+    Kernel::DblMatrix T(3, 3, false);
+    T[0][0] = ws->sample().getOrientedLattice().astar();
+    T[1][1] = ws->sample().getOrientedLattice().bstar();
+    T[2][2] = ws->sample().getOrientedLattice().cstar();
+    T.Invert();
+    T = ws->sample().getOrientedLattice().getB() * T;
+    T.Transpose();
+    V3D dir_cos_1 = T * RU * V3D(0, 0, -1);
+    V3D peaks_pos = ws->getPeak(0).getDetPos();
     peaks_pos.normalize();
-    V3D dir_cos_2 = RU * peaks_pos;
+    V3D dir_cos_2 = T * RU * peaks_pos;
     TS_ASSERT_DELTA(dir_cos_1_x, dir_cos_1[0], 1e-4);
     TS_ASSERT_DELTA(dir_cos_1_y, dir_cos_1[1], 1e-4);
     TS_ASSERT_DELTA(dir_cos_1_z, dir_cos_1[2], 1e-4);

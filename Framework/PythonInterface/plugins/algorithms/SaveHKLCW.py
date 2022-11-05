@@ -70,22 +70,22 @@ class SaveHKLCW(PythonAlgorithm):
 
             if directionCosines:
                 U = peak_ws.sample().getOrientedLattice().getU()
-                B = peak_ws.sample().getOrientedLattice().getU()
+                B = peak_ws.sample().getOrientedLattice().getB()
+                astar = peak_ws.sample().getOrientedLattice().astar()
+                bstar = peak_ws.sample().getOrientedLattice().bstar()
+                cstar = peak_ws.sample().getOrientedLattice().cstar()
+                T = np.dot(B, np.diag([1/astar,1/bstar,1/cstar]))
                 for p in peak_ws:
                     R = p.getGoniometerMatrix()
                     RU = np.dot(R, U)
                     two_theta = p.getScattering()
                     az_phi = p.getAzimuthal()
-                    t1 = B[:,0].copy()
-                    t2 = B[:,1].copy()
-                    t3 = B[:,2].copy()
-                    t1 /= np.linalg.norm(t1)
-                    t2 /= np.linalg.norm(t2)
-                    t3 /= np.linalg.norm(t3)
-                    up = np.dot(RU.T, [0,0,-1])
-                    us = np.dot(RU.T, [np.sin(two_theta)*np.cos(az_phi),np.sin(two_theta)*np.sin(az_phi),np.cos(two_theta)])
-                    dir_cos_1 = np.dot(up,t1), np.dot(up,t2), np.dot(up,t3)
-                    dir_cos_2 = np.dot(us,t1), np.dot(us,t2), np.dot(us,t3)
+                    up = np.dot(RU.T, [0,0,-1]) # reverse incident beam
+                    us = np.dot(RU.T, [np.sin(two_theta)*np.cos(az_phi),
+                                       np.sin(two_theta)*np.sin(az_phi),
+                                       np.cos(two_theta)]) # diffracted beam
+                    dir_cos_1 = np.dot(T.T,up).round(6)+0 # avoid writing -0.0
+                    dir_cos_2 = np.dot(T.T,us).round(6)+0
                     f.write(
                         "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n"
                         .format(p.getH(), p.getK(), p.getL(), p.getIntensity(),
