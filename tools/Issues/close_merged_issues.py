@@ -27,7 +27,7 @@ class _HashableGithubIssue:
     def __init__(self, issue: github.Issue.Issue):
         self._issue = issue
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return self._issue.number
 
 
@@ -138,7 +138,7 @@ def close_issues_with_merged_pull_request(repository: github.Repository.Reposito
         open_issues = repository.get_issues(state='open')
         logging.info(f'Repository has {open_issues.totalCount} open issues')
     logging.info('Checking for merged linked pull requests')
-    # Github does not provide an easy between pull requests & issues
+    # Github does not provide an easy link between pull requests & issues
     # We use the timeline on the issue to look for a referenced event and extract the pull_request from the raw_data
 
     issues_to_close = find_issues_fixed_by_pull_requests(open_issues)
