@@ -115,6 +115,13 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self._assert_delta(workspace.dataY(0)[33], 0.000029)
         self._assert_delta(workspace.dataY(0)[53], 0.0)
 
+    def test_basic_reduction_history(self):
+        workspace = self._run_algorithm_with_defaults()
+        expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValue', 'GetFakeLiveInstrumentValue',
+                    'GetFakeLiveInstrumentValue', 'AddSampleLogMultiple', 'SetInstrumentParameter',
+                    'SetInstrumentParameter']
+        self._check_history(workspace, expected)
+
     def test_missing_inputs(self):
         self.assertRaises(RuntimeError,
                           ReflectometryReductionOneLiveData)
@@ -267,6 +274,21 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))
+
+    def _check_history(self, ws, expected, unroll = True):
+        """Return true if algorithm names listed in algorithmNames are found in the
+        workspace's history. If unroll is true, checks the child histories, otherwise
+        checks the top level history (the latter is required for sliced workspaces where
+        the child workspaces have lost their parent's history)
+        """
+        history = ws.getHistory()
+        if unroll:
+            reductionHistory = history.getAlgorithmHistory(history.size() - 1)
+            algHistories = reductionHistory.getChildHistories()
+            algNames = [alg.name() for alg in algHistories]
+        else:
+            algNames = [alg.name() for alg in history]
+        self.assertEqual(algNames, expected)
 
 
 if __name__ == '__main__':
