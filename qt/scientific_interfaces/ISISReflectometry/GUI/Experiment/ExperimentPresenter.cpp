@@ -111,7 +111,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     auto lookupRowCopy = *foundRow;
 
-    lookupRowCopy.setRoiDetectorIDs(previewRow.getSelectedBanks());
+    lookupRowCopy.setRoiDetectorIDs(getRangesFromListOfBanks(previewRow.getSelectedBanks()));
 
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
