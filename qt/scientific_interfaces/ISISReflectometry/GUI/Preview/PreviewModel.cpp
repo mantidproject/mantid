@@ -99,7 +99,46 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
   return m_runDetails->getSelectedBanks();
 }
 
-boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges() const { return getSelectedBanks(); }
+boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges() const {
+  auto all_det_string_maybe = m_runDetails->getSelectedBanks();
+  if (!all_det_string_maybe.has_value()) {
+    return all_det_string_maybe;
+  }
+  auto all_det_string = all_det_string_maybe.get();
+  size_t position = 0;
+  std::string current;
+  std::string prev;
+  std::string prev_output;
+  std::string output;
+  while ((position = all_det_string.find(",")) != std::string::npos) {
+    current = all_det_string.substr(0, position);
+    all_det_string.erase(0, position + 1);
+    if (prev == "") {
+      output += current;
+      prev_output = current;
+      prev = current;
+      continue;
+    }
+    if (std::stoi(current) - 1 == std::stoi(prev)) {
+      prev = current;
+      continue;
+    }
+    if (prev == prev_output) {
+      output += "," + current;
+      prev_output = current;
+      prev = current;
+      continue;
+    }
+    output += "-" + prev + "," + current;
+    prev_output = current;
+    prev = current;
+  }
+  if (all_det_string == prev_output) {
+    return output;
+  }
+  output += "-" + all_det_string;
+  return output;
+}
 
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
 

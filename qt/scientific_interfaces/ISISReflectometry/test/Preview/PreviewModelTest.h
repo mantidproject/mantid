@@ -85,8 +85,8 @@ public:
 
   void test_get_selected_banks_as_ranges() {
     PreviewModel model;
-    const ProcessingInstructions inputRoi{"4,5,6,12,13,14,16,23,24,25,26"};
-    const ProcessingInstructions expectedOutput{"4-6,12-16,23-26"};
+    const ProcessingInstructions inputRoi{"2,4,5,6,12,13,14,16,23,24,25,26,28,30,31"};
+    const ProcessingInstructions expectedOutput{"2,4-6,12-14,16,23-26,28,30-31"};
 
     model.setSelectedBanks(std::move(inputRoi));
     TS_ASSERT_EQUALS(expectedOutput, *model.getSelectedBanksAsRanges())
