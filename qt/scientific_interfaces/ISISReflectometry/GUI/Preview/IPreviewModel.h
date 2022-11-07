@@ -34,7 +34,8 @@ public:
 
   virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
   virtual boost::optional<ProcessingInstructions> getSelectedBanks() const = 0;
-  virtual boost::optional<ProcessingInstructions> getSelectedBanksAsRanges() const = 0;
+  virtual boost::optional<ProcessingInstructions>
+  getRangesFromListOfBanks(boost::optional<ProcessingInstructions> banks) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
   virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;

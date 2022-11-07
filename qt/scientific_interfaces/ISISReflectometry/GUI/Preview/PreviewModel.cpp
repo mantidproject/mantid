@@ -99,12 +99,12 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
   return m_runDetails->getSelectedBanks();
 }
 
-boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges() const {
-  auto all_det_string_maybe = m_runDetails->getSelectedBanks();
-  if (!all_det_string_maybe.has_value() || all_det_string_maybe.get().empty()) {
-    return all_det_string_maybe;
+boost::optional<ProcessingInstructions>
+PreviewModel::getRangesFromListOfBanks(boost::optional<ProcessingInstructions> banks) const {
+  if (!banks.has_value() || banks.get().empty()) {
+    return banks;
   }
-  auto all_det_string = all_det_string_maybe.get();
+  auto all_det_string = banks.get();
   size_t position = 0;
   std::string current;
   std::string prev;
