@@ -30,8 +30,6 @@ public:
   MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getReducedWs, (), (const, override));
   MOCK_METHOD(boost::optional<ProcessingInstructions>, getSelectedBanks, (), (const, override));
-  MOCK_METHOD(boost::optional<ProcessingInstructions>, getRangesFromListOfBanks,
-              (boost::optional<ProcessingInstructions> banks), (const, override));
   MOCK_METHOD(boost::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
   MOCK_METHOD(PreviewRow const &, getPreviewRow, (), (const, override));

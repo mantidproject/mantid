@@ -99,47 +99,6 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
   return m_runDetails->getSelectedBanks();
 }
 
-boost::optional<ProcessingInstructions>
-PreviewModel::getRangesFromListOfBanks(boost::optional<ProcessingInstructions> banks) const {
-  if (!banks.has_value() || banks.get().empty()) {
-    return banks;
-  }
-  auto all_det_string = banks.get();
-  size_t position = 0;
-  std::string current;
-  std::string prev;
-  std::string prev_output;
-  std::string output;
-  while ((position = all_det_string.find(",")) != std::string::npos) {
-    current = all_det_string.substr(0, position);
-    all_det_string.erase(0, position + 1);
-    if (prev.empty()) {
-      output += current;
-      prev_output = current;
-      prev = current;
-      continue;
-    }
-    if (std::stoi(current) - 1 == std::stoi(prev)) {
-      prev = current;
-      continue;
-    }
-    if (prev == prev_output) {
-      output += "," + current;
-      prev_output = current;
-      prev = current;
-      continue;
-    }
-    output += "-" + prev + "," + current;
-    prev_output = current;
-    prev = current;
-  }
-  if (std::stoi(all_det_string) == std::stoi(prev_output) + 1) {
-    return output += "-" + all_det_string;
-  }
-  output += "," + all_det_string;
-  return output;
-}
-
 void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
 
 void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }

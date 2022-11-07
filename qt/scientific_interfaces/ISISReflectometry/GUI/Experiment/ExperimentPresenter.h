@@ -66,6 +66,9 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyPreviewApplyRequested(PreviewRow const &previewRow) override;
+  boost::optional<ProcessingInstructions>
+      getRangesFromListOfBanks(boost::optional<ProcessingInstructions>) const override;
+
   void restoreDefaults() override;
 
   bool hasValidSettings() const noexcept override;

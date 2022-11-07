@@ -83,38 +83,6 @@ public:
     TS_ASSERT_EQUALS(inputRoi, *model.getSelectedBanks())
   }
 
-  void test_get_selected_banks_as_ranges() {
-    PreviewModel model;
-    const ProcessingInstructions inputRoi{"2,4,5,6,12,13,14,16,23,24,25,26,28,30,31"};
-    const ProcessingInstructions expectedOutput{"2,4-6,12-14,16,23-26,28,30-31"};
-
-    TS_ASSERT_EQUALS(expectedOutput, *model.getRangesFromListOfBanks(inputRoi))
-  }
-
-  void test_get_selected_banks_as_ranges_all_incongurous() {
-    PreviewModel model;
-    const ProcessingInstructions inputRoi{"2,4,6,8,10"};
-    const ProcessingInstructions expectedOutput{"2,4,6,8,10"};
-
-    TS_ASSERT_EQUALS(expectedOutput, *model.getRangesFromListOfBanks(inputRoi))
-  }
-
-  void test_get_selected_banks_as_ranges_empty() {
-    PreviewModel model;
-    const ProcessingInstructions inputRoi{""};
-    const ProcessingInstructions expectedOutput{""};
-
-    TS_ASSERT_EQUALS(expectedOutput, *model.getRangesFromListOfBanks(inputRoi))
-  }
-
-  void test_set_selected_signal_region_converts_to_processing_instructions_string() {
-    PreviewModel model;
-    const IPreviewModel::Selection inputRoi{3.6, 11.4};
-    model.setSelectedRegion(ROIType::Signal, inputRoi);
-    // Start and end are rounded to nearest integer and converted to a string
-    TS_ASSERT_EQUALS(ProcessingInstructions{"4-11"}, model.getProcessingInstructions(ROIType::Signal))
-  }
-
   void test_set_selected_background_region_converts_to_processing_instructions_string() {
     PreviewModel model;
     const IPreviewModel::Selection inputRoi{3.6, 11.4};
