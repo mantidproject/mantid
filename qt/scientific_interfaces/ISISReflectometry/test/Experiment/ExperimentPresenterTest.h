@@ -738,7 +738,7 @@ public:
     // THEN an InvalidTableException is thrown.
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), InvalidTableException const &);
 
-  void test_get_selected_banks_as_ranges() {
+  void testGetSelectedBanksAsRanges() {
     auto presenter = makePresenter();
     const ProcessingInstructions inputRoi{"2,4,5,6,12,13,14,16,23,24,25,26,28,30,31"};
     const ProcessingInstructions expectedOutput{"2,4-6,12-14,16,23-26,28,30-31"};
@@ -746,7 +746,7 @@ public:
     TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
   }
 
-  void test_get_selected_banks_as_ranges_all_incongurous() {
+  void testGetSelectedBanksAsRangesAllIncongurous() {
     auto presenter = makePresenter();
     const ProcessingInstructions inputRoi{"2,4,6,8,10"};
     const ProcessingInstructions expectedOutput{"2,4,6,8,10"};
@@ -754,7 +754,7 @@ public:
     TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
   }
 
-  void test_get_selected_banks_as_ranges_empty() {
+  void testGetSelectedBanksAsRangesEmpty() {
     auto presenter = makePresenter();
     const ProcessingInstructions inputRoi{""};
     const ProcessingInstructions expectedOutput{""};
@@ -762,7 +762,7 @@ public:
     TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
   }
 
-  void test_get_selected_banks_as_ranges_single_value() {
+  void testGetSelectedBanksAsRangesSingleValue() {
     auto presenter = makePresenter();
     const ProcessingInstructions inputRoi{"9"};
     const ProcessingInstructions expectedOutput{"9"};
