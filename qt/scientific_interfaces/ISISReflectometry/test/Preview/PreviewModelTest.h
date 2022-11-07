@@ -92,6 +92,24 @@ public:
     TS_ASSERT_EQUALS(expectedOutput, *model.getSelectedBanksAsRanges())
   }
 
+  void test_get_selected_banks_as_ranges_all_incongurous() {
+    PreviewModel model;
+    const ProcessingInstructions inputRoi{"2,4,6,8,10"};
+    const ProcessingInstructions expectedOutput{"2,4,6,8,10"};
+
+    model.setSelectedBanks(std::move(inputRoi));
+    TS_ASSERT_EQUALS(expectedOutput, *model.getSelectedBanksAsRanges())
+  }
+
+  void test_get_selected_banks_as_ranges_empty() {
+    PreviewModel model;
+    const ProcessingInstructions inputRoi{""};
+    const ProcessingInstructions expectedOutput{""};
+
+    model.setSelectedBanks(std::move(inputRoi));
+    TS_ASSERT_EQUALS(expectedOutput, *model.getSelectedBanksAsRanges())
+  }
+
   void test_set_selected_signal_region_converts_to_processing_instructions_string() {
     PreviewModel model;
     const IPreviewModel::Selection inputRoi{3.6, 11.4};

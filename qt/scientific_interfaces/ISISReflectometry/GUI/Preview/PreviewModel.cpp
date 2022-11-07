@@ -101,7 +101,7 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
 
 boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges() const {
   auto all_det_string_maybe = m_runDetails->getSelectedBanks();
-  if (!all_det_string_maybe.has_value()) {
+  if (!all_det_string_maybe.has_value() || all_det_string_maybe.get().empty()) {
     return all_det_string_maybe;
   }
   auto all_det_string = all_det_string_maybe.get();
@@ -113,7 +113,7 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges()
   while ((position = all_det_string.find(",")) != std::string::npos) {
     current = all_det_string.substr(0, position);
     all_det_string.erase(0, position + 1);
-    if (prev == "") {
+    if (prev.empty()) {
       output += current;
       prev_output = current;
       prev = current;
@@ -133,10 +133,10 @@ boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanksAsRanges()
     prev_output = current;
     prev = current;
   }
-  if (all_det_string == prev_output) {
-    return output;
+  if (std::stoi(all_det_string) == std::stoi(prev_output) + 1) {
+    return output += "-" + all_det_string;
   }
-  output += "-" + all_det_string;
+  output += "," + all_det_string;
   return output;
 }
 
