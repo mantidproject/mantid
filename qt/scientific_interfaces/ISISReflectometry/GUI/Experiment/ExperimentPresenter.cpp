@@ -139,29 +139,39 @@ ExperimentPresenter::getRangesFromListOfBanks(boost::optional<ProcessingInstruct
   while ((position = all_det_string.find(",")) != std::string::npos) {
     current = all_det_string.substr(0, position);
     all_det_string.erase(0, position + 1);
+    // Start with the first value in the string.
     if (prev.empty()) {
       output += current;
       prev_output = current;
       prev = current;
       continue;
     }
+    // The previous value was in the middle of a range.
     if (std::stoi(current) - 1 == std::stoi(prev)) {
       prev = current;
       continue;
     }
+    // The previous value stood alone.
     if (prev == prev_output) {
       output += "," + current;
       prev_output = current;
       prev = current;
       continue;
     }
+    // The previous value was at the end of a range.
     output += "-" + prev + "," + current;
     prev_output = current;
     prev = current;
   }
+  // There was only one ID in the whole string.
+  if (prev_output.empty()) {
+    return all_det_string;
+  }
+  // The last ID is at the end of a range.
   if (std::stoi(all_det_string) == std::stoi(prev_output) + 1) {
     return output += "-" + all_det_string;
   }
+  // The last ID stands alone.
   output += "," + all_det_string;
   return output;
 }

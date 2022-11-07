@@ -762,6 +762,14 @@ public:
     TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
   }
 
+  void test_get_selected_banks_as_ranges_single_value() {
+    auto presenter = makePresenter();
+    const ProcessingInstructions inputRoi{"9"};
+    const ProcessingInstructions expectedOutput{"9"};
+
+    TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
