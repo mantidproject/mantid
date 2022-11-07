@@ -14,9 +14,6 @@ import os
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import \
     DNSBinning
-from mantidqtinterfaces.dns_powder_elastic.data_structures. \
-    dns_standard_interpolator import \
-    interpolate_standard
 from mantidqtinterfaces.dns_powder_elastic.data_structures.field_names import \
     field_dict
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
@@ -76,16 +73,6 @@ class DNSDataset(ObjectDict):
                 if workspace != 'path':
                     subtract.append(f"{sample}_{workspace}")
         return subtract
-
-    def interpolate_standard(self, banks, script_name, parent):
-        self.data_dic, n_error = interpolate_standard(self.data_dic, banks,
-                                                      script_name)
-        if n_error:
-            parent.raise_error(
-                'Error: Interpolation of standard data with '
-                'different counting times for the same sample '
-                'type and field is not supported.',
-                critical=True)
 
     def get_nb_banks(self, sample_type=None):
         """

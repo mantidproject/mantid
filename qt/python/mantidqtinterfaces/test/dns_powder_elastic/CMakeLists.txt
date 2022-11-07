@@ -5,7 +5,6 @@ set(TEST_PY_FILES
     data_structures/dns_binning_test.py
     data_structures/dns_dataset_test.py
     data_structures/dns_plot_list_test.py
-    data_structures/dns_standard_interpolator_test.py
     data_structures/field_names_test.py
     options/elastic_powder_options_presenter_test.py
     options/elastic_powder_options_widget_test.py

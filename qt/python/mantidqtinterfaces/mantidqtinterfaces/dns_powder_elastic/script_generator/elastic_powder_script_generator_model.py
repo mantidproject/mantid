@@ -146,12 +146,6 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                                              is_sample=False,
                                              fields=self._sample_data.fields)
 
-    def _interpolate_standard(self):
-        self._standard_data.interpolate_standard(
-            banks=self._sample_data.banks,
-            script_name=self._sample_data.script_name,
-            parent=self)
-
     @staticmethod
     def _get_header_lines():
         lines = [
@@ -309,7 +303,6 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
         self._setup_sample_data(paths, file_selector)
         self._setup_standard_data(paths, file_selector)
-        self._interpolate_standard()
         self._set_loop()
         # validate if input makes sense, otherwise return
         # an empty script and error message
