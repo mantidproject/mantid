@@ -57,7 +57,7 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
 
   std::function<bool(std::map<std::string, bool>)> canAverageTube =
       [&](std::map<std::string, bool> properties) -> bool {
-    return (m_presenter->showAverageTubeOption() && properties.find("isTube")->second && hasCurve(properties));
+    return (m_presenter->checkDataIsExtracted() && properties.find("isTube")->second && hasCurve(properties));
   };
 
   // set up add to average

@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -8,7 +8,6 @@
 
 #include "ALFAnalysisModel.h"
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
 
 #include <QWidget>
 
@@ -20,20 +19,22 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IALFAnalysisView;
+class IALFInstrumentPresenter;
 
 class MANTIDQT_DIRECT_DLL IALFAnalysisPresenter {
 
 public:
   virtual ~IALFAnalysisPresenter() = default;
+
   virtual QWidget *getView() = 0;
-  virtual std::string getCurrentWS() = 0;
-  virtual void clearCurrentWS() = 0;
+
+  virtual void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) = 0;
 
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
   virtual void notifyUpdateEstimateClicked() = 0;
 
-  virtual void addSpectrum(const std::string &wsName) = 0;
+  virtual void notifyTubeExtracted() = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresenter {
@@ -41,20 +42,21 @@ class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresen
 public:
   explicit ALFAnalysisPresenter(IALFAnalysisView *m_view, std::unique_ptr<IALFAnalysisModel> m_model);
   QWidget *getView() override;
-  std::string getCurrentWS() override { return m_currentName; };
-  void clearCurrentWS() override { m_currentName = ""; };
+
+  void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) override;
+
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
   void notifyUpdateEstimateClicked() override;
-  void addSpectrum(const std::string &wsName) override;
+
+  void notifyTubeExtracted() override;
 
 private:
   std::optional<std::string> validateFitValues() const;
-  bool checkDataIsExtracted() const;
   bool checkPeakCentreIsWithinFitRange() const;
   void updatePeakCentreInViewFromModel();
 
-  std::string m_currentName;
+  IALFInstrumentPresenter *m_instrumentPresenter;
 
   IALFAnalysisView *m_view;
   std::unique_ptr<IALFAnalysisModel> m_model;

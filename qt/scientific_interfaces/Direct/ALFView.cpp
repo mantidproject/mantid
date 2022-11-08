@@ -30,6 +30,7 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
                                                                std::make_unique<ALFAnalysisModel>());
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
+  m_analysisPresenter->subscribeInstrumentPresenter(m_instrumentPresenter.get());
 }
 
 void ALFView::initLayout() {

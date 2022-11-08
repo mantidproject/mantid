@@ -39,7 +39,9 @@ public:
   virtual void extractSingleTube() = 0;
   virtual void averageTube() = 0;
 
-  virtual bool showAverageTubeOption() const = 0;
+  virtual bool checkDataIsExtracted() const = 0;
+
+  virtual std::string extractedWsName() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -57,7 +59,9 @@ public:
   void extractSingleTube() override;
   void averageTube() override;
 
-  bool showAverageTubeOption() const override;
+  bool checkDataIsExtracted() const override;
+
+  std::string extractedWsName() const override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);

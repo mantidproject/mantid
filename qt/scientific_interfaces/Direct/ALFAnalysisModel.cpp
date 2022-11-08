@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -11,13 +11,17 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
 #include <numeric>
 
+using namespace Mantid::API;
+
 namespace {
 
-MatrixWorkspace_sptr cropWorkspace(const MatrixWorkspace_sptr &workspace, double startX, double endX) {
+MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
   cropper->setAlwaysStoreInADS(false);
   cropper->setProperty("InputWorkspace", workspace);
@@ -28,7 +32,7 @@ MatrixWorkspace_sptr cropWorkspace(const MatrixWorkspace_sptr &workspace, double
   return cropper->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr convertToPointData(const MatrixWorkspace_sptr &workspace) {
+MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr const &workspace) {
   auto converter = AlgorithmManager::Instance().create("ConvertToPointData");
   converter->setAlwaysStoreInADS(false);
   converter->setProperty("InputWorkspace", workspace);
@@ -37,13 +41,13 @@ MatrixWorkspace_sptr convertToPointData(const MatrixWorkspace_sptr &workspace) {
   return converter->getProperty("OutputWorkspace");
 }
 
-IFunction_sptr createFlatBackground(double height = 0.0) {
+IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
   return flatBackground;
 }
 
-IFunction_sptr createGaussian(double height = 0.0, double peakCentre = 0.0, double sigma = 0.0) {
+IFunction_sptr createGaussian(double const height = 0.0, double const peakCentre = 0.0, double const sigma = 0.0) {
   auto gaussian = FunctionFactory::Instance().createFunction("Gaussian");
   gaussian->setParameter("Height", height);
   gaussian->setParameter("PeakCentre", peakCentre);
@@ -51,7 +55,8 @@ IFunction_sptr createGaussian(double height = 0.0, double peakCentre = 0.0, doub
   return gaussian;
 }
 
-IFunction_sptr createGaussian(const Mantid::MantidVec &xData, const Mantid::MantidVec &yData, double backgroundHeight) {
+IFunction_sptr createGaussian(Mantid::MantidVec const &xData, Mantid::MantidVec const &yData,
+                              double const backgroundHeight) {
   const auto maxValue = *std::max_element(yData.begin(), yData.end());
 
   auto sigma(0.0);
@@ -71,7 +76,7 @@ IFunction_sptr createGaussian(const Mantid::MantidVec &xData, const Mantid::Mant
   return createGaussian(maxValue - backgroundHeight, centre, sigma);
 }
 
-CompositeFunction_sptr createCompositeFunction(const IFunction_sptr &flatBackground, const IFunction_sptr &gaussian) {
+CompositeFunction_sptr createCompositeFunction(IFunction_sptr const &flatBackground, IFunction_sptr const &gaussian) {
   auto composite = std::make_shared<CompositeFunction>();
   composite->addFunction(flatBackground);
   composite->addFunction(gaussian);
@@ -80,14 +85,12 @@ CompositeFunction_sptr createCompositeFunction(const IFunction_sptr &flatBackgro
 
 } // namespace
 
-using namespace Mantid::API;
-
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisModel::ALFAnalysisModel()
     : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus("") {}
 
-void ALFAnalysisModel::doFit(const std::string &wsName, const std::pair<double, double> &range) {
+void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double> const &range) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
@@ -101,7 +104,7 @@ void ALFAnalysisModel::doFit(const std::string &wsName, const std::pair<double, 
   m_fitStatus = alg->getPropertyValue("OutputStatus");
 }
 
-void ALFAnalysisModel::calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) {
+void ALFAnalysisModel::calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -114,21 +117,21 @@ void ALFAnalysisModel::calculateEstimate(const std::string &workspaceName, const
 }
 
 IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
-                                                   const std::pair<double, double> &range) {
+                                                   std::pair<double, double> const &range) {
   if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
     alteredWorkspace = convertToPointData(alteredWorkspace);
 
-    const auto xData = alteredWorkspace->readX(0);
-    const auto yData = alteredWorkspace->readY(0);
+    auto const xData = alteredWorkspace->readX(0);
+    auto const yData = alteredWorkspace->readY(0);
 
-    const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
+    auto const background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
     return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
   }
   return createCompositeFunction(createFlatBackground(), createGaussian());
 }
 
-void ALFAnalysisModel::setPeakCentre(const double centre) {
+void ALFAnalysisModel::setPeakCentre(double const centre) {
   m_function->setParameter("f1.PeakCentre", centre);
   m_fitStatus = "";
 }

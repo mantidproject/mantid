@@ -7,6 +7,8 @@
 #include "ALFAnalysisView.h"
 #include "ALFAnalysisPresenter.h"
 
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
+
 #include <tuple>
 #include <utility>
 
@@ -20,7 +22,7 @@
 
 namespace {
 
-std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus) {
+std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
   QString color("black"), status("");
   if (fitStatus.contains("success")) {
     color = "green", status = "Fit success";
@@ -36,7 +38,7 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
 
 namespace MantidQt::CustomInterfaces {
 
-ALFAnalysisView::ALFAnalysisView(const double &start, const double &end, QWidget *parent)
+ALFAnalysisView::ALFAnalysisView(double const start, double const end, QWidget *parent)
     : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr) {
   setupPlotFitSplitter(start, end);
 }
@@ -45,7 +47,7 @@ QWidget *ALFAnalysisView::getView() { return this; }
 
 void ALFAnalysisView::subscribePresenter(IALFAnalysisPresenter *presenter) { m_presenter = presenter; }
 
-void ALFAnalysisView::setupPlotFitSplitter(const double &start, const double &end) {
+void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end) {
   auto layout = new QHBoxLayout(this);
   auto splitter = new QSplitter(Qt::Vertical);
 
@@ -58,7 +60,7 @@ void ALFAnalysisView::setupPlotFitSplitter(const double &start, const double &en
   layout->addWidget(splitter);
 }
 
-QWidget *ALFAnalysisView::createFitPane(const double &start, const double &end) {
+QWidget *ALFAnalysisView::createFitPane(double const start, double const end) {
   auto fitPane = new QWidget();
   auto fitPaneLayout = new QVBoxLayout(fitPane);
 
@@ -74,7 +76,7 @@ QWidget *ALFAnalysisView::createFitPane(const double &start, const double &end) 
   return fitPane;
 }
 
-QWidget *ALFAnalysisView::setupFitRangeWidget(const double start, const double end) {
+QWidget *ALFAnalysisView::setupFitRangeWidget(double const start, double const end) {
   auto *rangeWidget = new QWidget();
   auto *rangeLayout = new QHBoxLayout(rangeWidget);
 
@@ -107,7 +109,7 @@ QWidget *ALFAnalysisView::setupFitButtonsWidget() {
   return fitButtonsWidget;
 }
 
-QWidget *ALFAnalysisView::setupPeakCentreWidget(const double centre) {
+QWidget *ALFAnalysisView::setupPeakCentreWidget(double const centre) {
   auto *peakCentreWidget = new QWidget();
   auto *peakCentreLayout = new QGridLayout(peakCentreWidget);
 
@@ -134,30 +136,30 @@ void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
 void ALFAnalysisView::notifyUpdateEstimateClicked() { m_presenter->notifyUpdateEstimateClicked(); }
 
-void ALFAnalysisView::addSpectrum(const std::string &wsName) {
+void ALFAnalysisView::addSpectrum(std::string const &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
 }
 
-void ALFAnalysisView::addFitSpectrum(const std::string &wsName) {
+void ALFAnalysisView::addFitSpectrum(std::string const &wsName) {
   m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
 }
 
-std::pair<double, double> ALFAnalysisView::getRange() {
+std::pair<double, double> ALFAnalysisView::getRange() const {
   return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
 }
 
-void ALFAnalysisView::setPeakCentre(const double centre) { m_peakCentre->setText(QString::number(centre)); }
+void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText(QString::number(centre)); }
 
 double ALFAnalysisView::peakCentre() const { return m_peakCentre->text().toDouble(); }
 
-void ALFAnalysisView::setPeakCentreStatus(const std::string &status) {
+void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
   const auto [stylesheet, tooltip] = getPeakCentreUIProperties(QString::fromStdString(status));
   m_fitStatus->setStyleSheet(stylesheet);
   m_fitStatus->setText(tooltip);
   m_fitStatus->setToolTip(tooltip);
 }
 
-void ALFAnalysisView::displayWarning(const std::string &message) {
+void ALFAnalysisView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", message.c_str());
 }
 
