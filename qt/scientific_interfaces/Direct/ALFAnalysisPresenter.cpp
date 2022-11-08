@@ -8,39 +8,22 @@
 #include "ALFAnalysisView.h"
 
 #include <exception>
-#include <functional>
 
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model)
-    : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(std::move(model)),
-      m_currentName("") {
-
-  m_peakCentreObserver = new VoidObserver();
-  m_fitObserver = new VoidObserver();
-  m_updateEstimateObserver = new VoidObserver();
-
-  m_view->observePeakCentreLineEdit(m_peakCentreObserver);
-  m_view->observeFitButton(m_fitObserver);
-  m_view->observeUpdateEstimateButton(m_updateEstimateObserver);
-
-  std::function<void()> peakCentreBinder = std::bind(&ALFAnalysisPresenter::peakCentreEditingFinished, this);
-  std::function<void()> fitBinder = std::bind(&ALFAnalysisPresenter::fitClicked, this);
-  std::function<void()> updateEstimateBinder = std::bind(&ALFAnalysisPresenter::updateEstimateClicked, this);
-
-  m_peakCentreObserver->setSlot(peakCentreBinder);
-  m_fitObserver->setSlot(fitBinder);
-  m_updateEstimateObserver->setSlot(updateEstimateBinder);
+    : m_currentName(""), m_view(view), m_model(std::move(model)) {
+  m_view->subscribePresenter(this);
 }
 
 QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); };
 
-void ALFAnalysisPresenter::peakCentreEditingFinished() {
+void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
   m_model->setPeakCentre(m_view->peakCentre());
   m_view->setPeakCentreStatus(m_model->fitStatus());
 }
 
-void ALFAnalysisPresenter::fitClicked() {
+void ALFAnalysisPresenter::notifyFitClicked() {
   if (const auto validationMessage = validateFitValues()) {
     m_view->displayWarning(*validationMessage);
     return;
@@ -55,7 +38,7 @@ void ALFAnalysisPresenter::fitClicked() {
   m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
 }
 
-void ALFAnalysisPresenter::updateEstimateClicked() {
+void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
   const auto validationMessage = validateFitValues();
   if (!validationMessage) {
     m_model->calculateEstimate(m_currentName, m_view->getRange());

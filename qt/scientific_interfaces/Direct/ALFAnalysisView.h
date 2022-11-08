@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <QLabel>
@@ -22,13 +21,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IALFAnalysisPresenter;
+
 class MANTIDQT_DIRECT_DLL IALFAnalysisView {
 public:
   virtual ~IALFAnalysisView() = default;
   virtual QWidget *getView() = 0;
-  virtual void observePeakCentreLineEdit(Observer *listener) = 0;
-  virtual void observeFitButton(Observer *listener) = 0;
-  virtual void observeUpdateEstimateButton(Observer *listener) = 0;
+  virtual void subscribePresenter(IALFAnalysisPresenter *presenter) = 0;
   virtual std::pair<double, double> getRange() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
   virtual void addFitSpectrum(const std::string &wsName) = 0;
@@ -48,9 +47,7 @@ public:
 
   QWidget *getView() override;
 
-  void observePeakCentreLineEdit(Observer *listener) override { m_peakCentreObservable->attach(listener); };
-  void observeFitButton(Observer *listener) override { m_fitObservable->attach(listener); };
-  void observeUpdateEstimateButton(Observer *listener) override { m_updateEstimateObservable->attach(listener); };
+  void subscribePresenter(IALFAnalysisPresenter *presenter) override;
 
   std::pair<double, double> getRange() override;
   void addSpectrum(const std::string &wsName) override;
@@ -82,9 +79,8 @@ private:
   QPushButton *m_updateEstimateButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
-  Observable *m_peakCentreObservable;
-  Observable *m_fitObservable;
-  Observable *m_updateEstimateObservable;
+
+  IALFAnalysisPresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

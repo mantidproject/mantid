@@ -51,7 +51,7 @@ void ALFInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
 
   m_analysisPresenter->addSpectrum(m_model->extractedWsName());
-  m_analysisPresenter->updateEstimateClicked();
+  m_analysisPresenter->notifyUpdateEstimateClicked();
 }
 
 void ALFInstrumentPresenter::averageTube() {

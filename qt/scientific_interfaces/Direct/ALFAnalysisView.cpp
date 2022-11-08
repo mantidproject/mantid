@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFAnalysisView.h"
+#include "ALFAnalysisPresenter.h"
 
 #include <tuple>
 #include <utility>
@@ -36,13 +37,13 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisView::ALFAnalysisView(const double &start, const double &end, QWidget *parent)
-    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
-      m_peakCentreObservable(new Observable()), m_fitObservable(new Observable()),
-      m_updateEstimateObservable(new Observable()) {
+    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr) {
   setupPlotFitSplitter(start, end);
 }
 
 QWidget *ALFAnalysisView::getView() { return this; }
+
+void ALFAnalysisView::subscribePresenter(IALFAnalysisPresenter *presenter) { m_presenter = presenter; }
 
 void ALFAnalysisView::setupPlotFitSplitter(const double &start, const double &end) {
   auto layout = new QHBoxLayout(this);
@@ -127,11 +128,11 @@ QWidget *ALFAnalysisView::setupPeakCentreWidget(const double centre) {
   return peakCentreWidget;
 }
 
-void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_peakCentreObservable->notify(); }
+void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
 
-void ALFAnalysisView::notifyFitClicked() { m_fitObservable->notify(); }
+void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
-void ALFAnalysisView::notifyUpdateEstimateClicked() { m_updateEstimateObservable->notify(); }
+void ALFAnalysisView::notifyUpdateEstimateClicked() { m_presenter->notifyUpdateEstimateClicked(); }
 
 void ALFAnalysisView::addSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
