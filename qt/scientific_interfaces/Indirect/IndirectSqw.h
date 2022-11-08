@@ -46,7 +46,6 @@ private slots:
   void eWidthChanged(double value);
   void eHighChanged(double value);
   void rebinEChanged(int value);
-  void handleInstrumentConfigChanged(const QString &instrumentName, const QString &analyser, const QString &reflection);
 
 private:
   void connectSignals();

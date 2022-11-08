@@ -45,15 +45,9 @@ IndirectSqwView::IndirectSqwView(QWidget *parent) {
   connect(m_uiForm.spEWidth, SIGNAL(valueChanged(double)), this, SIGNAL(eWidthChanged(double)));
   connect(m_uiForm.spEHigh, SIGNAL(valueChanged(double)), this, SIGNAL(eHighChanged(double)));
   connect(m_uiForm.ckRebinInEnergy, SIGNAL(stateChanged(int)), this, SIGNAL(rebinEChanged(int)));
-  connect(m_uiForm.iicInstrumentConfiguration,
-          SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
-          SIGNAL(instrumentConfigChanged(const QString &, const QString &, const QString &)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
-
-  m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
-      m_uiForm.iicInstrumentConfiguration->getInstrumentName());
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
 
@@ -124,18 +118,6 @@ std::tuple<double, double> IndirectSqwView::getQRangeFromPlot() {
 
 std::tuple<double, double> IndirectSqwView::getERangeFromPlot() {
   return m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
-}
-
-std::string IndirectSqwView::getInstrumentName() {
-  return m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
-}
-
-std::string IndirectSqwView::getAnalyserName() {
-  return m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString();
-}
-
-std::string IndirectSqwView::getReflectionName() {
-  return m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString();
 }
 
 } // namespace MantidQt::CustomInterfaces

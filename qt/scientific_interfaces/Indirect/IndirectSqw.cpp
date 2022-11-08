@@ -7,6 +7,7 @@
 #include "IndirectSqw.h"
 #include "IndirectDataValidationHelper.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -57,8 +58,6 @@ void IndirectSqw::connectSignals() {
   connect(m_view.get(), SIGNAL(eWidthChanged(double)), this, SLOT(eWidthChanged(double)));
   connect(m_view.get(), SIGNAL(eHighChanged(double)), this, SLOT(eHighChanged(double)));
   connect(m_view.get(), SIGNAL(rebinEChanged(int)), this, SLOT(rebinEChanged(int)));
-  connect(m_view.get(), SIGNAL(instrumentConfigChanged(const QString &, const QString &, const QString &)), this,
-          SLOT(handleInstrumentConfigChanged(const QString &, const QString &, const QString &)));
 
   connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
@@ -77,8 +76,7 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName.toStdString());
     try {
-      std::string eFixed = m_model->getEFixedFromInstrument(m_view->getInstrumentName(), m_view->getAnalyserName(),
-                                                            m_view->getReflectionName());
+      double eFixed = getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString()));
       m_model->setEFixed(eFixed);
     } catch (std::runtime_error const &ex) {
       emit showMessageBox(ex.what());
@@ -87,17 +85,6 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
     plotRqwContour();
     m_view->setDefaultQAndEnergy();
   }
-}
-
-/**
- * Handles changing the efixed value when the instrument is changed.
- *
- */
-void IndirectSqw::handleInstrumentConfigChanged(const QString &instrumentName, const QString &analyser,
-                                                const QString &reflection) {
-  std::string eFixed =
-      m_model->getEFixedFromInstrument(instrumentName.toStdString(), analyser.toStdString(), reflection.toStdString());
-  m_model->setEFixed(eFixed);
 }
 
 bool IndirectSqw::validate() {

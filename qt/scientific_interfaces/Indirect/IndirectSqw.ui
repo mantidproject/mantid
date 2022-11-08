@@ -58,28 +58,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="MantidQt::MantidWidgets::IndirectInstrumentConfig" name="iicInstrumentConfiguration">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="techniques" stdset="0">
-         <stringlist>
-          <string>TOF Indirect Geometry Spectroscopy</string>
-          <string>Reactor Indirect Geometry Spectroscopy</string>
-         </stringlist>
-        </property>
-        <property name="enableDiffraction" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="showInstrumentLabel" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -555,11 +533,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
-   <extends>QComboBox</extends>
-   <header>IndirectInstrumentConfig.h</header>
-  </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
