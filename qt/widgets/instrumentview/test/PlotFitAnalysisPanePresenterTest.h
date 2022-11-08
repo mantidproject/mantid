@@ -20,6 +20,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -37,9 +38,10 @@ public:
   static void destroySuite(PlotFitAnalysisPanePresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = new NiceMock<MockPlotFitAnalysisPaneView>();
-    m_model = new MockPlotFitAnalysisPaneModel();
-    m_presenter = new PlotFitAnalysisPanePresenter(m_view, m_model);
+    auto model = std::make_unique<NiceMock<MockPlotFitAnalysisPaneModel>>();
+    m_model = model.get();
+    m_view = std::make_unique<NiceMock<MockPlotFitAnalysisPaneView>>();
+    m_presenter = std::make_unique<PlotFitAnalysisPanePresenter>(m_view.get(), std::move(model));
     m_workspaceName = "test";
     m_range = std::make_pair(0.0, 1.0);
     m_peakCentre = 0.5;
@@ -49,9 +51,11 @@ public:
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
-    delete m_view;
-    delete m_presenter;
-    m_model = nullptr;
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+
+    m_presenter.reset();
+    m_view.reset();
   }
 
   void test_peakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
@@ -130,9 +134,9 @@ public:
   }
 
 private:
-  NiceMock<MockPlotFitAnalysisPaneView> *m_view;
-  MockPlotFitAnalysisPaneModel *m_model;
-  PlotFitAnalysisPanePresenter *m_presenter;
+  NiceMock<MockPlotFitAnalysisPaneModel> *m_model;
+  std::unique_ptr<NiceMock<MockPlotFitAnalysisPaneView>> m_view;
+  std::unique_ptr<PlotFitAnalysisPanePresenter> m_presenter;
 
   std::string m_workspaceName;
   std::pair<double, double> m_range;
