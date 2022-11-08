@@ -37,6 +37,10 @@ using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
 
+namespace {
+ACTION(ThrowFileSavingRuntimeError) { throw std::runtime_error("Could not open file at: test.csv"); }
+} // namespace
+
 //=====================================================================================
 // Functional tests
 //=====================================================================================
@@ -815,6 +819,85 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyExportSearchResultsWhenNoResults() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(*m_searcher, getSearchResultsCSV()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(
+        m_messageHandler,
+        giveUserCritical("No search results loaded. Enter an Investigation ID (and a cycle if using) to load results.",
+                         "Error"))
+        .Times(1);
+
+    presenter.notifyExportSearchResults();
+    verifyAndClear();
+  }
+
+  void testNotifyExportSearchResultsWithResultsAndCSVFileExtension() {
+    auto csv = "this, is, some, csv\n"
+               "and,some,more,words";
+    auto filename = "test.csv";
+
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(*m_searcher, getSearchResultsCSV()).Times(1).WillOnce(Return(csv));
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("CSV (*.csv)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, saveCSVToFile(filename, csv)).Times(1);
+
+    presenter.notifyExportSearchResults();
+    verifyAndClear();
+  }
+
+  void testNotifyExportSearchResultsWithResultsAndNoCSVFileExtension() {
+    auto csv = "this, is, some, csv\n"
+               "and,some,more,words";
+    auto filename_before_asking = "test";
+    auto filename_after_asking = "test.csv";
+
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(*m_searcher, getSearchResultsCSV()).Times(1).WillOnce(Return(csv));
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("CSV (*.csv)"))
+        .Times(1)
+        .WillOnce(Return(filename_before_asking));
+    EXPECT_CALL(m_fileHandler, saveCSVToFile(filename_after_asking, csv)).Times(1);
+
+    presenter.notifyExportSearchResults();
+    verifyAndClear();
+  }
+
+  void testNotifyExportSearchResultsWhenSavingFails() {
+    auto csv = "this, is, some, csv\n"
+               "and,some,more,words";
+    auto filename = "test.csv";
+
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(*m_searcher, getSearchResultsCSV()).Times(1).WillOnce(Return(csv));
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("CSV (*.csv)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, saveCSVToFile(filename, csv)).Times(1).WillRepeatedly(ThrowFileSavingRuntimeError());
+
+    EXPECT_CALL(m_messageHandler, giveUserCritical("Could not open file at: test.csv", "Error")).Times(1);
+
+    presenter.notifyExportSearchResults();
+    verifyAndClear();
+  }
+
+  void testNotifyExportSearchResultsDoesNotSaveWhenFileCancelled() {
+    auto csv = "this, is, some, csv\n"
+               "and,some,more,words";
+    auto filename = "";
+
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(*m_searcher, getSearchResultsCSV()).Times(1).WillOnce(Return(csv));
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("CSV (*.csv)")).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, saveCSVToFile(filename, csv)).Times(0);
+
+    presenter.notifyExportSearchResults();
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;
@@ -822,8 +905,10 @@ private:
   public:
     RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
                         const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                        std::vector<std::string> const &instruments, IReflMessageHandler *messageHandler)
-        : RunsPresenter(mainView, progressView, makeRunsTablePresenter, thetaTolerance, instruments, messageHandler) {}
+                        std::vector<std::string> const &instruments, IReflMessageHandler *messageHandler,
+                        IFileHandler *fileHandler)
+        : RunsPresenter(mainView, progressView, makeRunsTablePresenter, thetaTolerance, instruments, messageHandler,
+                        fileHandler) {}
   };
 
   RunsPresenterFriend makePresenter() {
@@ -831,7 +916,7 @@ private:
 
     auto makeRunsTablePresenter = RunsTablePresenterFactory(m_instruments, m_thetaTolerance, std::move(plotter));
     auto presenter = RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
-                                         m_instruments, &m_messageHandler);
+                                         m_instruments, &m_messageHandler, &m_fileHandler);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
@@ -1202,6 +1287,7 @@ private:
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockProgressableView> m_progressView;
   NiceMock<MockMessageHandler> m_messageHandler;
+  NiceMock<MockFileHandler> m_fileHandler;
   NiceMock<MantidQt::MantidWidgets::Batch::MockJobTreeView> m_jobs;
   NiceMock<MockSearcher> *m_searcher;
   MockPythonRunner *m_pythonRunner;
