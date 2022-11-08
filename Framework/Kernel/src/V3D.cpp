@@ -234,7 +234,7 @@ bool V3D::coLinear(const V3D &Bv, const V3D &Cv) const noexcept {
 }
 
 /**
-  Checks the size of the vector
+  Checks the size of the vector against a tolerance
   @param tolerance :: size of the biggest zero vector allowed.
   @return true if the vector's elements are less in magnitude than tolerance
 */
