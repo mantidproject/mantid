@@ -17,11 +17,10 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL IPlotFitAnalysisPaneModel {
+class MANTIDQT_DIRECT_DLL IALFAnalysisModel {
 
 public:
-  IPlotFitAnalysisPaneModel(){};
-  virtual ~IPlotFitAnalysisPaneModel(){};
+  virtual ~IALFAnalysisModel() = default;
 
   virtual void doFit(const std::string &wsName, const std::pair<double, double> &range) = 0;
   virtual void calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) = 0;
@@ -32,11 +31,10 @@ public:
   virtual std::string fitStatus() const = 0;
 };
 
-class MANTIDQT_DIRECT_DLL PlotFitAnalysisPaneModel : public IPlotFitAnalysisPaneModel {
+class MANTIDQT_DIRECT_DLL ALFAnalysisModel : public IALFAnalysisModel {
 
 public:
-  PlotFitAnalysisPaneModel();
-  virtual ~PlotFitAnalysisPaneModel(){};
+  ALFAnalysisModel();
   void doFit(const std::string &wsName, const std::pair<double, double> &range) override;
   void calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) override;
 

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ALFAnalysisPresenter.h"
 #include "ALFInstrumentPresenter.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "PlotFitAnalysisPanePresenter.h"
 
 #include "DllConfig.h"
 
@@ -40,7 +40,7 @@ private:
   QPushButton *m_help;
 
   std::unique_ptr<ALFInstrumentPresenter> m_instrumentPresenter;
-  std::unique_ptr<PlotFitAnalysisPanePresenter> m_analysisPresenter;
+  std::unique_ptr<ALFAnalysisPresenter> m_analysisPresenter;
 };
 
 } // namespace CustomInterfaces

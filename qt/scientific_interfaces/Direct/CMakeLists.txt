@@ -1,20 +1,16 @@
 set(SRC_FILES
+    ALFAnalysisModel.cpp
+    ALFAnalysisPresenter.cpp
+    ALFAnalysisView.cpp
     ALFInstrumentModel.cpp
     ALFInstrumentPresenter.cpp
     ALFInstrumentView.cpp
     ALFView.cpp
-    PlotFitAnalysisPaneModel.cpp
-    PlotFitAnalysisPanePresenter.cpp
-    PlotFitAnalysisPaneView.cpp
 )
 
-set(MOC_FILES ALFInstrumentView.h ALFView.h PlotFitAnalysisPanePresenter.h
-              PlotFitAnalysisPaneView.h
-)
+set(MOC_FILES ALFAnalysisPresenter.h ALFAnalysisView.h ALFInstrumentView.h ALFView.h)
 
-set(INC_FILES ALFInstrumentMocks.h ALFInstrumentModel.h ALFInstrumentPresenter.h DllConfig.h PlotFitAnalysisPaneMocks.h
-              PlotFitAnalysisPaneModel.h
-)
+set(INC_FILES ALFAnalysisMocks.h ALFAnalysisModel.h ALFInstrumentMocks.h ALFInstrumentModel.h ALFInstrumentPresenter.h DllConfig.h)
 
 # Target
 mtd_add_qt_library(

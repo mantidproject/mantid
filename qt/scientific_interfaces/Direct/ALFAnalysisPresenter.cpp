@@ -4,15 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PlotFitAnalysisPanePresenter.h"
+#include "ALFAnalysisPresenter.h"
 
 #include <exception>
 #include <functional>
 
 namespace MantidQt::CustomInterfaces {
 
-PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
-                                                           std::unique_ptr<IPlotFitAnalysisPaneModel> model)
+ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model)
     : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(std::move(model)),
       m_currentName("") {
 
@@ -24,21 +23,21 @@ PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneV
   m_view->observeFitButton(m_fitObserver);
   m_view->observeUpdateEstimateButton(m_updateEstimateObserver);
 
-  std::function<void()> peakCentreBinder = std::bind(&PlotFitAnalysisPanePresenter::peakCentreEditingFinished, this);
-  std::function<void()> fitBinder = std::bind(&PlotFitAnalysisPanePresenter::fitClicked, this);
-  std::function<void()> updateEstimateBinder = std::bind(&PlotFitAnalysisPanePresenter::updateEstimateClicked, this);
+  std::function<void()> peakCentreBinder = std::bind(&ALFAnalysisPresenter::peakCentreEditingFinished, this);
+  std::function<void()> fitBinder = std::bind(&ALFAnalysisPresenter::fitClicked, this);
+  std::function<void()> updateEstimateBinder = std::bind(&ALFAnalysisPresenter::updateEstimateClicked, this);
 
   m_peakCentreObserver->setSlot(peakCentreBinder);
   m_fitObserver->setSlot(fitBinder);
   m_updateEstimateObserver->setSlot(updateEstimateBinder);
 }
 
-void PlotFitAnalysisPanePresenter::peakCentreEditingFinished() {
+void ALFAnalysisPresenter::peakCentreEditingFinished() {
   m_model->setPeakCentre(m_view->peakCentre());
   m_view->setPeakCentreStatus(m_model->fitStatus());
 }
 
-void PlotFitAnalysisPanePresenter::fitClicked() {
+void ALFAnalysisPresenter::fitClicked() {
   if (const auto validationMessage = validateFitValues()) {
     m_view->displayWarning(*validationMessage);
     return;
@@ -53,7 +52,7 @@ void PlotFitAnalysisPanePresenter::fitClicked() {
   m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
 }
 
-void PlotFitAnalysisPanePresenter::updateEstimateClicked() {
+void ALFAnalysisPresenter::updateEstimateClicked() {
   const auto validationMessage = validateFitValues();
   if (!validationMessage) {
     m_model->calculateEstimate(m_currentName, m_view->getRange());
@@ -63,7 +62,7 @@ void PlotFitAnalysisPanePresenter::updateEstimateClicked() {
   }
 }
 
-std::optional<std::string> PlotFitAnalysisPanePresenter::validateFitValues() const {
+std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
   if (!checkDataIsExtracted())
     return "Need to have extracted data to do a fit or estimate.";
   if (!checkPeakCentreIsWithinFitRange())
@@ -71,20 +70,20 @@ std::optional<std::string> PlotFitAnalysisPanePresenter::validateFitValues() con
   return std::nullopt;
 }
 
-void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
+void ALFAnalysisPresenter::addSpectrum(const std::string &wsName) {
   m_currentName = wsName;
   m_view->addSpectrum(wsName);
 }
 
-bool PlotFitAnalysisPanePresenter::checkDataIsExtracted() const { return !m_currentName.empty(); }
+bool ALFAnalysisPresenter::checkDataIsExtracted() const { return !m_currentName.empty(); }
 
-bool PlotFitAnalysisPanePresenter::checkPeakCentreIsWithinFitRange() const {
+bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   const auto peakCentre = m_view->peakCentre();
   const auto range = m_view->getRange();
   return range.first < peakCentre && peakCentre < range.second;
 }
 
-void PlotFitAnalysisPanePresenter::updatePeakCentreInViewFromModel() {
+void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
   m_view->setPeakCentre(m_model->peakCentre());
   m_view->setPeakCentreStatus(m_model->fitStatus());
 }

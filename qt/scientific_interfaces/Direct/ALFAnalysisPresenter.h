@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ALFAnalysisModel.h"
+#include "ALFAnalysisView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "PlotFitAnalysisPaneModel.h"
-#include "PlotFitAnalysisPaneView.h"
 
 #include <memory>
 #include <optional>
@@ -18,13 +18,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL IPlotFitAnalysisPanePresenter {
+class MANTIDQT_DIRECT_DLL IALFAnalysisPresenter {
 
 public:
-  IPlotFitAnalysisPanePresenter(){};
-  virtual ~IPlotFitAnalysisPanePresenter(){};
+  virtual ~IALFAnalysisPresenter() = default;
   virtual void destructor() = 0;
-  virtual IPlotFitAnalysisPaneView *getView() = 0;
+  virtual IALFAnalysisView *getView() = 0;
   virtual std::string getCurrentWS() = 0;
   virtual void clearCurrentWS() = 0;
   virtual void peakCentreEditingFinished() = 0;
@@ -33,15 +32,14 @@ public:
   virtual void addSpectrum(const std::string &wsName) = 0;
 };
 
-class MANTIDQT_DIRECT_DLL PlotFitAnalysisPanePresenter : public QObject, public IPlotFitAnalysisPanePresenter {
+class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter : public QObject, public IALFAnalysisPresenter {
   Q_OBJECT
 
 public:
-  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view,
-                                        std::unique_ptr<IPlotFitAnalysisPaneModel> m_model);
-  ~PlotFitAnalysisPanePresenter() { delete m_fitObserver; };
-  void destructor() override { this->~PlotFitAnalysisPanePresenter(); };
-  IPlotFitAnalysisPaneView *getView() override { return m_view; };
+  explicit ALFAnalysisPresenter(IALFAnalysisView *m_view, std::unique_ptr<IALFAnalysisModel> m_model);
+  ~ALFAnalysisPresenter() { delete m_fitObserver; };
+  void destructor() override { this->~ALFAnalysisPresenter(); };
+  IALFAnalysisView *getView() override { return m_view; };
   std::string getCurrentWS() override { return m_currentName; };
   void clearCurrentWS() override { m_currentName = ""; };
   void peakCentreEditingFinished() override;
@@ -58,8 +56,9 @@ private:
   VoidObserver *m_peakCentreObserver;
   VoidObserver *m_fitObserver;
   VoidObserver *m_updateEstimateObserver;
-  IPlotFitAnalysisPaneView *m_view;
-  std::unique_ptr<IPlotFitAnalysisPaneModel> m_model;
+
+  IALFAnalysisView *m_view;
+  std::unique_ptr<IALFAnalysisModel> m_model;
   std::string m_currentName;
 };
 } // namespace CustomInterfaces

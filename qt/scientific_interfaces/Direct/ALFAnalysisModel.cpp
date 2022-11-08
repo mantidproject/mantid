@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "PlotFitAnalysisPaneModel.h"
+#include "ALFAnalysisModel.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -84,10 +84,10 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 
-PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel()
+ALFAnalysisModel::ALFAnalysisModel()
     : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus("") {}
 
-void PlotFitAnalysisPaneModel::doFit(const std::string &wsName, const std::pair<double, double> &range) {
+void ALFAnalysisModel::doFit(const std::string &wsName, const std::pair<double, double> &range) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
@@ -101,8 +101,7 @@ void PlotFitAnalysisPaneModel::doFit(const std::string &wsName, const std::pair<
   m_fitStatus = alg->getPropertyValue("OutputStatus");
 }
 
-void PlotFitAnalysisPaneModel::calculateEstimate(const std::string &workspaceName,
-                                                 const std::pair<double, double> &range) {
+void ALFAnalysisModel::calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -114,8 +113,8 @@ void PlotFitAnalysisPaneModel::calculateEstimate(const std::string &workspaceNam
   m_fitStatus = "";
 }
 
-IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
-                                                           const std::pair<double, double> &range) {
+IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
+                                                   const std::pair<double, double> &range) {
   if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
     alteredWorkspace = convertToPointData(alteredWorkspace);
 
@@ -129,13 +128,13 @@ IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(MatrixWorkspace_sptr 
   return createCompositeFunction(createFlatBackground(), createGaussian());
 }
 
-void PlotFitAnalysisPaneModel::setPeakCentre(const double centre) {
+void ALFAnalysisModel::setPeakCentre(const double centre) {
   m_function->setParameter("f1.PeakCentre", centre);
   m_fitStatus = "";
 }
 
-double PlotFitAnalysisPaneModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
+double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
 
-std::string PlotFitAnalysisPaneModel::fitStatus() const { return m_fitStatus; }
+std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
 
 } // namespace MantidQt::CustomInterfaces

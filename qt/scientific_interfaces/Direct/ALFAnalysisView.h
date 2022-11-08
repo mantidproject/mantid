@@ -22,12 +22,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_DIRECT_DLL IPlotFitAnalysisPaneView : public QWidget {
+class MANTIDQT_DIRECT_DLL IALFAnalysisView : public QWidget {
   Q_OBJECT
 
 public:
-  IPlotFitAnalysisPaneView(QWidget *parent = nullptr) : QWidget(parent) {}
-  virtual ~IPlotFitAnalysisPaneView(){};
+  IALFAnalysisView(QWidget *parent = nullptr) : QWidget(parent) {}
+  virtual ~IALFAnalysisView() = default;
   virtual void observePeakCentreLineEdit(Observer *listener) = 0;
   virtual void observeFitButton(Observer *listener) = 0;
   virtual void observeUpdateEstimateButton(Observer *listener) = 0;
@@ -42,11 +42,11 @@ public:
   virtual void setPeakCentreStatus(const std::string &status) = 0;
 };
 
-class MANTIDQT_DIRECT_DLL PlotFitAnalysisPaneView : public IPlotFitAnalysisPaneView {
+class MANTIDQT_DIRECT_DLL ALFAnalysisView : public IALFAnalysisView {
   Q_OBJECT
 
 public:
-  explicit PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent = nullptr);
+  explicit ALFAnalysisView(const double &start, const double &end, QWidget *parent = nullptr);
 
   void observePeakCentreLineEdit(Observer *listener) override { m_peakCentreObservable->attach(listener); };
   void observeFitButton(Observer *listener) override { m_fitObservable->attach(listener); };
