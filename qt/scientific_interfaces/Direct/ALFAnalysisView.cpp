@@ -36,11 +36,13 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisView::ALFAnalysisView(const double &start, const double &end, QWidget *parent)
-    : IALFAnalysisView(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
+    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
       m_peakCentreObservable(new Observable()), m_fitObservable(new Observable()),
       m_updateEstimateObservable(new Observable()) {
   setupPlotFitSplitter(start, end);
 }
+
+QWidget *ALFAnalysisView::getView() { return this; }
 
 void ALFAnalysisView::setupPlotFitSplitter(const double &start, const double &end) {
   auto layout = new QHBoxLayout(this);

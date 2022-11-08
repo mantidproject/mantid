@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFAnalysisPresenter.h"
+#include "ALFAnalysisView.h"
 
 #include <exception>
 #include <functional>
@@ -31,6 +32,8 @@ ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_p
   m_fitObserver->setSlot(fitBinder);
   m_updateEstimateObserver->setSlot(updateEstimateBinder);
 }
+
+QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); };
 
 void ALFAnalysisPresenter::peakCentreEditingFinished() {
   m_model->setPeakCentre(m_view->peakCentre());

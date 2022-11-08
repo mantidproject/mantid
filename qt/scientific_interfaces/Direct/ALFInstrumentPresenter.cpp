@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFInstrumentPresenter.h"
 
+#include "ALFAnalysisPresenter.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt::CustomInterfaces {
 

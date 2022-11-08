@@ -7,9 +7,10 @@
 #pragma once
 
 #include "ALFAnalysisModel.h"
-#include "ALFAnalysisView.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
+
+#include <QWidget>
 
 #include <memory>
 #include <optional>
@@ -18,12 +19,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IALFAnalysisView;
+
 class MANTIDQT_DIRECT_DLL IALFAnalysisPresenter {
 
 public:
   virtual ~IALFAnalysisPresenter() = default;
   virtual void destructor() = 0;
-  virtual IALFAnalysisView *getView() = 0;
+  virtual QWidget *getView() = 0;
   virtual std::string getCurrentWS() = 0;
   virtual void clearCurrentWS() = 0;
   virtual void peakCentreEditingFinished() = 0;
@@ -32,14 +35,13 @@ public:
   virtual void addSpectrum(const std::string &wsName) = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter : public QObject, public IALFAnalysisPresenter {
-  Q_OBJECT
+class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresenter {
 
 public:
   explicit ALFAnalysisPresenter(IALFAnalysisView *m_view, std::unique_ptr<IALFAnalysisModel> m_model);
   ~ALFAnalysisPresenter() { delete m_fitObserver; };
   void destructor() override { this->~ALFAnalysisPresenter(); };
-  IALFAnalysisView *getView() override { return m_view; };
+  QWidget *getView() override;
   std::string getCurrentWS() override { return m_currentName; };
   void clearCurrentWS() override { m_currentName = ""; };
   void peakCentreEditingFinished() override;

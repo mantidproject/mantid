@@ -31,7 +31,7 @@ public:
   virtual std::string fitStatus() const = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFAnalysisModel : public IALFAnalysisModel {
+class MANTIDQT_DIRECT_DLL ALFAnalysisModel final : public IALFAnalysisModel {
 
 public:
   ALFAnalysisModel();
