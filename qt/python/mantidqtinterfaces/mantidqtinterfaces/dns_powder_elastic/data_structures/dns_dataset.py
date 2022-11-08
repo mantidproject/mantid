@@ -32,7 +32,6 @@ class DNSDataset(ObjectDict):
         self.is_sample = is_sample
         if not is_sample and fields is not None:
             data = remove_non_measured_fields(data, fields)
-        self.script_name = create_script_name(data)
         self.banks = get_bank_positions(data)
         self.fields = get_sample_fields(data)
         self.two_theta = automatic_two_theta_binning(data)
@@ -82,15 +81,6 @@ class DNSDataset(ObjectDict):
         if self.data_dic.get(sample_type, 0):
             return len(self.banks)
         return 0
-
-
-# helper functions
-def create_script_name(sample_data):
-    lowest_file_number = min([entry['file_number'] for entry in sample_data])
-    highest_file_number = max([entry['file_number'] for entry in sample_data])
-    sample_name = '_and_'.join(
-        set(entry['sample_type'] for entry in sample_data))
-    return f'{sample_name}_{lowest_file_number}_to_{highest_file_number}.py'
 
 
 def automatic_two_theta_binning(sample_data):

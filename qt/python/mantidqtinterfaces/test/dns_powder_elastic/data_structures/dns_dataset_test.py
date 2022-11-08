@@ -22,7 +22,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
     get_file_selector_fulldat
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import (
-    create_script_name, automatic_two_theta_binning, get_two_theta_step, round_step,
+    automatic_two_theta_binning, get_two_theta_step, round_step,
     get_omega_step, list_to_set, automatic_omega_binning,
     get_proposal_from_filename, get_sample_fields, create_dataset,
     get_datatype_from_sample_name, remove_non_measured_fields,
@@ -85,11 +85,6 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertEqual(testv, 1)
         testv = self.ds.get_nb_banks()
         self.assertEqual(testv, 0)
-
-    # helper function
-    def test_create_script_name(self):
-        testv = create_script_name(self.fulldata)
-        self.assertEqual(testv, '4p1K_map_788058_to_788058.py')
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
            'dns_dataset.DNSBinning')
