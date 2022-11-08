@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+#include "Reduction/IBatch.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
 
@@ -44,7 +45,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::SumBanks {
  * @param alg : this param allows the caller to override the default algorithm type e.g. for injection of a mock;
  * in normal usage this should be left as the default nullptr
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, PreviewRow &row, IAlgorithm_sptr alg) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
     alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISSumBanks");
@@ -53,8 +54,15 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   alg->setAlwaysStoreInADS(false);
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
-  // Set the algorithm properties from the model
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+
+  // Look up properties for this run on the lookup table
+  auto lookupRow = model.findLookupRow(row);
+  if (lookupRow) {
+    AlgorithmProperties::update("ROIDetectorIDs", lookupRow->roiDetectorIDs(), *properties);
+  }
+
+  // Set the algorithm properties from the row
   updateInputProperties(*properties, row.getLoadedWs(), row.getSelectedBanks());
 
   // Return the configured algorithm
