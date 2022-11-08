@@ -137,7 +137,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_defaults()
         expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValue', 'GetFakeLiveInstrumentValue',
                     'GetFakeLiveInstrumentValue', 'AddSampleLogMultiple', 'SetInstrumentParameter',
-                    'SetInstrumentParameter']
+                    'SetInstrumentParameter', 'ReflectometryISISLoadAndProcess']
         self._check_history(workspace, expected)
 
     def test_missing_inputs(self):
@@ -232,7 +232,8 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_zero_theta()
         expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValuesWithZeroTheta',
                     'GetFakeLiveInstrumentValuesWithZeroTheta', 'GetFakeLiveInstrumentValuesWithZeroTheta',
-                    'AddSampleLogMultiple', 'SetInstrumentParameter', 'SetInstrumentParameter']
+                    'AddSampleLogMultiple', 'SetInstrumentParameter', 'SetInstrumentParameter',
+                    'ReflectometryISISLoadAndProcess']
         self._check_history(workspace, expected)
 
     def test_slits_gaps_are_set_up_on_output_workspace(self):

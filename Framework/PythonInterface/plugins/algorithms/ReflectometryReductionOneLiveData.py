@@ -85,9 +85,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _setup_reduction_algorithm(self):
         """Set up the reduction algorithm"""
-        alg = AlgorithmManager.create("ReflectometryISISLoadAndProcess")
-        alg.initialize()
-        alg.setChild(True)
+        alg = self.createChildAlgorithm("ReflectometryISISLoadAndProcess")
         self._copy_property_values_to(alg)
         alg.setProperty("InputRunList", self._out_ws_name)
         alg.setProperty("ThetaLogName", "Theta")
