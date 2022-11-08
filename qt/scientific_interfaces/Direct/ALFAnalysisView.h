@@ -30,17 +30,21 @@ class IALFAnalysisPresenter;
 class MANTIDQT_DIRECT_DLL IALFAnalysisView {
 public:
   virtual ~IALFAnalysisView() = default;
+
   virtual QWidget *getView() = 0;
+
   virtual void subscribePresenter(IALFAnalysisPresenter *presenter) = 0;
+
   virtual std::pair<double, double> getRange() const = 0;
+
   virtual void addSpectrum(std::string const &wsName) = 0;
   virtual void addFitSpectrum(std::string const &wsName) = 0;
-  virtual void displayWarning(std::string const &message) = 0;
-  virtual void setupPlotFitSplitter(double const start, double const end) = 0;
-  virtual QWidget *createFitPane(double const start, double const end) = 0;
+
   virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
   virtual void setPeakCentreStatus(std::string const &status) = 0;
+
+  virtual void displayWarning(std::string const &message) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisView final : public QWidget, public IALFAnalysisView {
@@ -54,24 +58,25 @@ public:
   void subscribePresenter(IALFAnalysisPresenter *presenter) override;
 
   std::pair<double, double> getRange() const override;
+
   void addSpectrum(std::string const &wsName) override;
   void addFitSpectrum(std::string const &wsName) override;
-  void displayWarning(std::string const &message) override;
 
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
 
   void setPeakCentreStatus(std::string const &status) override;
+
+  void displayWarning(std::string const &message) override;
+
 public slots:
   void notifyPeakCentreEditingFinished();
   void notifyUpdateEstimateClicked();
   void notifyFitClicked();
 
-protected:
-  void setupPlotFitSplitter(double const start, double const end) override;
-  QWidget *createFitPane(double const start, double const end) override;
-
 private:
+  void setupPlotFitSplitter(double const start, double const end);
+  QWidget *createFitPane(double const start, double const end);
   QWidget *setupFitRangeWidget(double const start, double const end);
   QWidget *setupFitButtonsWidget();
   QWidget *setupPeakCentreWidget(double const centre);

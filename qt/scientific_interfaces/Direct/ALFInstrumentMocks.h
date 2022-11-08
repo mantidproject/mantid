@@ -57,7 +57,7 @@ public:
   MOCK_METHOD0(extractSingleTube, void());
   MOCK_METHOD0(averageTube, void());
 
-  MOCK_CONST_METHOD0(showAverageTubeOption, bool());
+  MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
 };
 
 class MockALFInstrumentPresenter : public IALFInstrumentPresenter {
@@ -65,7 +65,7 @@ public:
   MOCK_METHOD0(getLoadWidget, QWidget *());
   MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget *());
 
-  MOCK_METHOD1(subscribeAnalysisPresenter, void(MantidWidgets::IPlotFitAnalysisPanePresenter *presenter));
+  MOCK_METHOD1(subscribeAnalysisPresenter, void(IALFAnalysisPresenter *presenter));
 
   MOCK_METHOD0(loadRunNumber, void());
 

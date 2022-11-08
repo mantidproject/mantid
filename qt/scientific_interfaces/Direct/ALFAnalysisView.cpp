@@ -136,16 +136,16 @@ void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
 void ALFAnalysisView::notifyUpdateEstimateClicked() { m_presenter->notifyUpdateEstimateClicked(); }
 
+std::pair<double, double> ALFAnalysisView::getRange() const {
+  return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
+}
+
 void ALFAnalysisView::addSpectrum(std::string const &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
 }
 
 void ALFAnalysisView::addFitSpectrum(std::string const &wsName) {
   m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
-}
-
-std::pair<double, double> ALFAnalysisView::getRange() const {
-  return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
 }
 
 void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText(QString::number(centre)); }

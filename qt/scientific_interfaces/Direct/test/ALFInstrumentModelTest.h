@@ -206,28 +206,28 @@ public:
     TS_ASSERT_DELTA(workspace->readY(0)[2], 0.3, 0.000001);
   }
 
-  void test_showAverageTubeOption_returns_false_if_number_of_tubes_is_zero() {
+  void test_checkDataIsExtracted_returns_false_if_number_of_tubes_is_zero() {
     ADS.addOrReplace(m_model->extractedWsName(), WorkspaceCreationHelper::create2DWorkspace(1, 2));
-    TS_ASSERT(!m_model->showAverageTubeOption());
+    TS_ASSERT(!m_model->checkDataIsExtracted());
   }
 
-  void test_showAverageTubeOption_returns_false_if_extracted_workspace_does_not_exist() {
+  void test_checkDataIsExtracted_returns_false_if_extracted_workspace_does_not_exist() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
 
     m_model->extractSingleTube();
     ADS.remove(m_model->extractedWsName());
 
-    TS_ASSERT(!m_model->showAverageTubeOption());
+    TS_ASSERT(!m_model->checkDataIsExtracted());
   }
 
-  void test_showAverageTubeOption_returns_true_if_a_tube_has_already_been_extracted() {
+  void test_checkDataIsExtracted_returns_true_if_a_tube_has_already_been_extracted() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
 
     m_model->extractSingleTube();
 
-    TS_ASSERT(m_model->showAverageTubeOption());
+    TS_ASSERT(m_model->checkDataIsExtracted());
   }
 
 private:

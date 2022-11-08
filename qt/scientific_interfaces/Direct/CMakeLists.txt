@@ -10,7 +10,15 @@ set(SRC_FILES
 
 set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFView.h)
 
-set(INC_FILES ALFAnalysisMocks.h ALFAnalysisModel.h ALFAnalysisPresenter.h ALFInstrumentMocks.h ALFInstrumentModel.h ALFInstrumentPresenter.h DllConfig.h)
+set(INC_FILES
+    ALFAnalysisMocks.h
+    ALFAnalysisModel.h
+    ALFAnalysisPresenter.h
+    ALFInstrumentMocks.h
+    ALFInstrumentModel.h
+    ALFInstrumentPresenter.h
+    DllConfig.h
+)
 
 # Target
 mtd_add_qt_library(
