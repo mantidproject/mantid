@@ -229,13 +229,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           GetLiveValueAlgorithm='GetFakeLiveInstrumentValueInvalidNames')
 
     def test_algorithm_fails_if_theta_is_zero(self):
-        self.assertRaises(RuntimeError,
-                          ReflectometryReductionOneLiveData,
-                          InputWorkspace=self.__class__._input_ws,
-                          OutputWorkspace='output',
-                          Instrument='INTER',
-                          GetLiveValueAlgorithm='GetFakeLiveInstrumentValuesWithZeroTheta')
-
+        workspace = self._run_algorithm_with_zero_theta()
+        expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValuesWithZeroTheta',
+                    'GetFakeLiveInstrumentValuesWithZeroTheta', 'GetFakeLiveInstrumentValuesWithZeroTheta',
+                    'AddSampleLogMultiple', 'SetInstrumentParameter', 'SetInstrumentParameter']
+        self._check_history(workspace, expected)
 
     def test_slits_gaps_are_set_up_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
@@ -296,6 +294,13 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def _run_algorithm_with_alternative_names(self):
         args = self._default_args
         args['GetLiveValueAlgorithm'] = 'GetFakeLiveInstrumentValueAlternativeNames'
+        alg = create_algorithm('ReflectometryReductionOneLiveData', **args)
+        assertRaisesNothing(self, alg.execute)
+        return mtd['output']
+
+    def _run_algorithm_with_zero_theta(self):
+        args = self._default_args
+        args['GetLiveValueAlgorithm'] = 'GetFakeLiveInstrumentValuesWithZeroTheta'
         alg = create_algorithm('ReflectometryReductionOneLiveData', **args)
         assertRaisesNothing(self, alg.execute)
         return mtd['output']

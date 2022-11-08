@@ -148,6 +148,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                                            + " from the instrument; trying " + liveValue.alternative_name)
                     liveValue.value = \
                         self._get_block_value_from_instrument(liveValue.alternative_name)
+        self._fixup_zero_theta(liveValues)
         # check we have all we need
         self._validate_live_values(liveValues)
         return liveValues
@@ -192,12 +193,20 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("Value").value
 
+    def _fixup_zero_theta(self, liveValues):
+        """If theta is zero the reduction will fail. For a consistent output plot while
+        monitoring live data, users would like to still see an IvsQ plot with similar axes,
+        so instead of failing we give a false angle of 0.7 (it doesn't really matter what this
+        is as long as it is in a typical region for ISIS runs) and run the reduction anyway. This
+        will give a plot that is close to a straight line at zero intensity, so it is obvious that
+        it is not a normal run, but the plot axes do not change much compared to a normal run."""
+        if float(liveValues[self._theta_name()].value) <= 1e-06:
+            liveValues[self._theta_name()].value = 0.7
+
     def _validate_live_values(self, liveValues):
         for key in liveValues:
             if liveValues[key].value is None:
                 raise RuntimeError('Required value ' + key + ' was not found for instrument')
-        if float(liveValues[self._theta_name()].value) <= 1e-06:
-            raise RuntimeError('Theta must be greater than zero')
 
 
 AlgorithmFactory.subscribe(ReflectometryReductionOneLiveData)
