@@ -415,7 +415,7 @@ def plot_real_lattice_vectors(plot_axes, real_lattice, colors):
 
 def calculate_lattice_vectors(workspace):
     ub_matrix = np.array(workspace.sample().getOrientedLattice().getUB())
-    hkl = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+    hkl = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])  # h, k and l are column vectors in this matrix
     q_sample = np.matmul(ub_matrix, hkl)
     goniometer = workspace.getRun().getGoniometer().getR()
     reciprocal_lattice_vectors = np.matmul(goniometer, q_sample)  # QLab

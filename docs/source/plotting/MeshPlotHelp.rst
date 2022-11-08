@@ -18,8 +18,6 @@
 .. contents:: 3D Mesh Plots - Table of contents
     :local:
 
-|
-|
 
 Here the mesh is plotted as a Poly3DCollection `Polygon <https://matplotlib.org/stable/tutorials/toolkits/mplot3d.html#polygon-plots>`_.
 
@@ -32,7 +30,9 @@ Workbench
 
 To quickly plot all Sample, Container and Component shapes attached to a workspace, right-click on it
 in the Workspaces Toolbox and select ``Show Sample Shape``. A black arrow will be added for the beam direction
-and, if there is a UB matrix, colored arrows for the real (solid line) and reciprocal (dashed line) lattice vectors.
+and, if there is a UB matrix, colored arrows for the real (solid line) and reciprocal (dashed line) lattice vectors,
+where h, k and l are represented by red, green and blue arrows, respectively.
+
 A sample shape plot also takes into account any goniometer rotations.
 
 .. image::  ../images/ShowSampleShape.png
@@ -43,7 +43,7 @@ A sample shape plot also takes into account any goniometer rotations.
 Scripting
 #########
 Here are some examples of what you can achieve by plotting the sample shapes with a script. Click on ``Source Code``
-above each plot to download the relevant code snippet.
+above each plot (only available on html page) to download the relevant code snippet.
 
 
 Scripting is useful to show only certain component shapes.
