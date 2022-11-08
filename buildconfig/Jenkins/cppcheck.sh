@@ -26,13 +26,6 @@ cd $WORKSPACE/build
 # remove old results if they exist
 find -name cppcheck.xml -delete
 
-echo $(command -v scl)
-ls /jenkins_workdir/workspace/pull_requests-cppcheck
-ls /usr/bin
-ls /var
-ls /var/jenkins_home
-ls /var/jenkins_home/plugins
-which cmake
 # configure cmake
 if [ $(command -v scl) ]; then
     CMAKE_EXE=cmake3
