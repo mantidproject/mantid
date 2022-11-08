@@ -10,8 +10,9 @@
 import sys
 import unittest
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch, call
 from mantid.api import IMDHistoWorkspace
+from mantid.kernel import SpecialCoordinateSystem
 
 import matplotlib
 
@@ -68,8 +69,8 @@ def create_mdhistoworkspace_mock():
 
 
 class SliceViewerTest(unittest.TestCase):
-    def setUp(self):
-        self.view = mock.Mock(spec=SliceViewerView)
+
+    def createMockDataView(self):
         data_view = mock.Mock(spec=SliceViewerDataView)
         data_view.plot_MDH = mock.Mock()
         data_view.dimensions = mock.Mock()
@@ -80,7 +81,11 @@ class SliceViewerTest(unittest.TestCase):
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
         data_view.get_axes_limits.return_value = None
+        return data_view
 
+    def setUp(self):
+        self.view = mock.Mock(spec=SliceViewerView)
+        data_view = self.createMockDataView()
         dimensions = mock.Mock()
         dimensions.get_slicepoint.return_value = [None, None, 0.5]
         dimensions.transpose = False
@@ -89,11 +94,32 @@ class SliceViewerTest(unittest.TestCase):
         data_view.dimensions = dimensions
         self.view.data_view = data_view
 
+        self.view3D_non_QDim = mock.Mock(spec=SliceViewerView)
+        data_view3D_non_QDim = self.createMockDataView()
+        dimensions3D_non_QDim = mock.Mock()
+        dimensions3D_non_QDim.get_slicepoint.return_value = [None, None, 0.5]
+        dimensions3D_non_QDim.transpose = False
+        dimensions3D_non_QDim.get_slicerange.return_value = [None, None, (-15, 15)]
+        dimensions3D_non_QDim.qflags = [False, True, True]
+        data_view3D_non_QDim.dimensions = dimensions3D_non_QDim
+        self.view3D_non_QDim.data_view = data_view3D_non_QDim
+
+        self.view4D = mock.Mock(spec=SliceViewerView)
+        data_view4D = self.createMockDataView()
+        dimensions4D = mock.Mock()
+        dimensions4D.get_slicepoint.return_value = [None, None, 0.5, 0.5]
+        dimensions4D.transpose = False
+        dimensions4D.get_slicerange.return_value = [None, None, (-15, 15), (-15, 15)]
+        dimensions4D.qflags = [False, True, True, True]
+        data_view4D.dimensions = dimensions4D
+        self.view4D.data_view = data_view4D
+
         self.model = mock.Mock(spec=SliceViewerModel)
         self.model.get_ws = mock.Mock()
         self.model.get_data = mock.Mock()
         self.model.rebin = mock.Mock()
         self.model.workspace_equals = mock.Mock()
+        self.model.get_hkl_from_xyz.return_value = [1.0, 1.0, 1.0]
         self.model.get_properties.return_value = {
             "workspace_type": "WS_TYPE.MATRIX",
             "supports_normalise": True,
@@ -203,21 +229,21 @@ class SliceViewerTest(unittest.TestCase):
         presenter.normalization_changed("By bin width")
         self.view.data_view.plot_matrix.assert_called_with(self.model.ws, distribution=False)
 
-    def peaks_button_disabled_if_model_cannot_support_it(self):
+    def test_peaks_button_disabled_if_model_cannot_support_it(self):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
-        self.model.can_support_peaks_overlay.return_value = False
+        self.model.can_support_peaks_overlays.return_value = False
 
         SliceViewer(None, model=self.model, view=self.view)
 
-        self.view.data_view.disable_tool_button.assert_called_once_with(ToolItemText.OVERLAY_PEAKS)
+        self.view.data_view.disable_tool_button.assert_any_call(ToolItemText.OVERLAY_PEAKS)
 
-    def peaks_button_not_disabled_if_model_can_support_it(self):
+    def test_peaks_button_not_disabled_if_model_can_support_it(self):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
-        self.model.can_support_peaks_overlay.return_value = True
+        self.model.can_support_peaks_overlays.return_value = True
 
         SliceViewer(None, model=self.model, view=self.view)
 
-        self.view.data_view.disable_tool_button.assert_not_called()
+        assert call(ToolItemText.OVERLAY_PEAKS) not in self.view.data_view.disable_tool_button.mock_calls
 
     def test_non_orthogonal_axes_toggled_on(self):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MDE
@@ -626,6 +652,23 @@ class SliceViewerTest(unittest.TestCase):
 
         mock_peaks_presenter.add_delete_peak.assert_called_once_with([3, 2, 1])
         self.view.data_view.canvas.draw_idle.assert_called_once()
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_frame")
+    def test_workspace_requests_hkl_for_image_info(self, mock_get_frame):
+        def run_requests_hkl_test(pres, ncols, callcount):
+            self.patched_deps["WorkspaceInfo"].display_indices.return_value = [0, 1]
+            mock_get_frame.return_value = SpecialCoordinateSystem.HKL
+            self.model.get_hkl_from_xyz.reset_mock()
+            extra_cols = pres.get_extra_image_info_columns(1.0, 2.0)
+            self.assertEqual(self.model.get_hkl_from_xyz.call_count, callcount)
+            self.assertEqual(len(extra_cols), ncols)
+
+        pres3D = SliceViewer(mock.Mock(), model=self.model, view=self.view)
+        run_requests_hkl_test(pres3D, 3, 1)
+        pres3D_no_q_dim = SliceViewer(mock.Mock(), model=self.model, view=self.view3D_non_QDim)
+        run_requests_hkl_test(pres3D_no_q_dim, 0, 0)
+        pres4D = SliceViewer(mock.Mock(), model=self.model, view=self.view4D)
+        run_requests_hkl_test(pres4D, 3, 1)
 
 
 if __name__ == '__main__':
