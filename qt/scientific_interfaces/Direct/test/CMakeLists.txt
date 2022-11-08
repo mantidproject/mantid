@@ -1,5 +1,5 @@
 # Testing
-set(TEST_FILES ALFInstrumentModelTest.h ALFInstrumentPresenterTest.h)
+set(TEST_FILES ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h ALFInstrumentPresenterTest.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
