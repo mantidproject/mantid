@@ -6,19 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
+#include "PlotFitAnalysisPaneModel.h"
+#include "PlotFitAnalysisPaneView.h"
 
 #include <memory>
 #include <optional>
 #include <string>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPanePresenter {
+class MANTIDQT_DIRECT_DLL IPlotFitAnalysisPanePresenter {
 
 public:
   IPlotFitAnalysisPanePresenter(){};
@@ -33,8 +33,7 @@ public:
   virtual void addSpectrum(const std::string &wsName) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter : public QObject,
-                                                                        public IPlotFitAnalysisPanePresenter {
+class MANTIDQT_DIRECT_DLL PlotFitAnalysisPanePresenter : public QObject, public IPlotFitAnalysisPanePresenter {
   Q_OBJECT
 
 public:
@@ -63,5 +62,5 @@ private:
   std::unique_ptr<IPlotFitAnalysisPaneModel> m_model;
   std::string m_currentName;
 };
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace MantidQt

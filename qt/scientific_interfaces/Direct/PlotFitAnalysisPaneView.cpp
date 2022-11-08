@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
+#include "PlotFitAnalysisPaneView.h"
 
 #include <tuple>
 #include <utility>
@@ -33,7 +33,7 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
 
 } // namespace
 
-namespace MantidQt::MantidWidgets {
+namespace MantidQt::CustomInterfaces {
 
 PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent)
     : IPlotFitAnalysisPaneView(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
@@ -157,4 +157,4 @@ void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {
   QMessageBox::warning(this, "Warning!", message.c_str());
 }
 
-} // namespace MantidQt::MantidWidgets
+} // namespace MantidQt::CustomInterfaces

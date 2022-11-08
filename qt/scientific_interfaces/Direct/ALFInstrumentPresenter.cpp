@@ -10,7 +10,7 @@
 #include "ALFInstrumentView.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
+#include "PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt::CustomInterfaces {
 
@@ -24,8 +24,7 @@ QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWi
 
 MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
-void ALFInstrumentPresenter::subscribeAnalysisPresenter(
-    MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) {
+void ALFInstrumentPresenter::subscribeAnalysisPresenter(IPlotFitAnalysisPanePresenter *presenter) {
   m_analysisPresenter = presenter;
 }
 

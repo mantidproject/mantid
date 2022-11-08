@@ -4,12 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
+#include "PlotFitAnalysisPanePresenter.h"
 
 #include <exception>
 #include <functional>
 
-namespace MantidQt::MantidWidgets {
+namespace MantidQt::CustomInterfaces {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
                                                            std::unique_ptr<IPlotFitAnalysisPaneModel> model)
@@ -89,4 +89,4 @@ void PlotFitAnalysisPanePresenter::updatePeakCentreInViewFromModel() {
   m_view->setPeakCentreStatus(m_model->fitStatus());
 }
 
-} // namespace MantidQt::MantidWidgets
+} // namespace MantidQt::CustomInterfaces

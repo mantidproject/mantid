@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllOption.h"
+#include "DllConfig.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
@@ -20,9 +20,9 @@
 #include <string>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView : public QWidget {
+class MANTIDQT_DIRECT_DLL IPlotFitAnalysisPaneView : public QWidget {
   Q_OBJECT
 
 public:
@@ -42,7 +42,7 @@ public:
   virtual void setPeakCentreStatus(const std::string &status) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView : public IPlotFitAnalysisPaneView {
+class MANTIDQT_DIRECT_DLL PlotFitAnalysisPaneView : public IPlotFitAnalysisPaneView {
   Q_OBJECT
 
 public:
@@ -86,5 +86,5 @@ private:
   Observable *m_fitObservable;
   Observable *m_updateEstimateObservable;
 };
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace MantidQt

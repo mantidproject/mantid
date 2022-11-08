@@ -4,7 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
+#include "PlotFitAnalysisPaneModel.h"
+
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -81,7 +82,7 @@ CompositeFunction_sptr createCompositeFunction(const IFunction_sptr &flatBackgro
 
 using namespace Mantid::API;
 
-namespace MantidQt::MantidWidgets {
+namespace MantidQt::CustomInterfaces {
 
 PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel()
     : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus("") {}
@@ -137,4 +138,4 @@ double PlotFitAnalysisPaneModel::peakCentre() const { return m_function->getPara
 
 std::string PlotFitAnalysisPaneModel::fitStatus() const { return m_fitStatus; }
 
-} // namespace MantidQt::MantidWidgets
+} // namespace MantidQt::CustomInterfaces
