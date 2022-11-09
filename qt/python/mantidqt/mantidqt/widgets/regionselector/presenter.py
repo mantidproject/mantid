@@ -207,3 +207,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if x is None or y is None:
             return False
         return extents[0] <= x <= extents[1] and extents[2] <= y <= extents[3]
+
+    def get_extra_image_info_columns(self, xdata, ydata):
+        return {}

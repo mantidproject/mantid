@@ -117,3 +117,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             data_view.enable_tool_button(ToolItemText.ZOOM)
             data_view.enable_tool_button(ToolItemText.PAN)
             data_view.switch_line_plots_tool(PixelLinePlot, self)
+
+    @abc.abstractmethod
+    def get_extra_image_info_columns(self, xdata, ydata):
+        pass
