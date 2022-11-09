@@ -7,17 +7,17 @@
 #pragma once
 
 #include "IndirectDataManipulationTab.h"
-#include "ui_IndirectDataManipulationIqtTab.h"
+#include "ui_InelasticDataManipulationIqtTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataManipulationIqtTab : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationIqtTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectDataManipulationIqtTab(QWidget *parent = nullptr);
-  ~IndirectDataManipulationIqtTab();
+  InelasticDataManipulationIqtTab(QWidget *parent = nullptr);
+  ~InelasticDataManipulationIqtTab();
 
 private:
   void run() override;
@@ -44,7 +44,7 @@ private:
   void setRunIsRunning(bool running);
   void setPreviewSpectrumMaximum(int value);
 
-  Ui::IndirectDataManipulationIqtTab m_uiForm;
+  Ui::InelasticDataManipulationIqtTab m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
   int m_selectedSpectrum;
