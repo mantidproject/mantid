@@ -36,7 +36,7 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
 namespace MantidQt::MantidWidgets {
 
 PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent)
-    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
+    : IPlotFitAnalysisPaneView(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
       m_peakCentreObservable(new Observable()), m_fitObservable(new Observable()),
       m_updateEstimateObservable(new Observable()) {
   setupPlotFitSplitter(start, end);

@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -37,11 +38,9 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter : public Q
   Q_OBJECT
 
 public:
-  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view, IPlotFitAnalysisPaneModel *m_model);
-  ~PlotFitAnalysisPanePresenter() {
-    delete m_model;
-    delete m_fitObserver;
-  };
+  explicit PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view,
+                                        std::unique_ptr<IPlotFitAnalysisPaneModel> m_model);
+  ~PlotFitAnalysisPanePresenter() { delete m_fitObserver; };
   void destructor() override { this->~PlotFitAnalysisPanePresenter(); };
   IPlotFitAnalysisPaneView *getView() override { return m_view; };
   std::string getCurrentWS() override { return m_currentName; };
@@ -61,7 +60,7 @@ private:
   VoidObserver *m_fitObserver;
   VoidObserver *m_updateEstimateObserver;
   IPlotFitAnalysisPaneView *m_view;
-  IPlotFitAnalysisPaneModel *m_model;
+  std::unique_ptr<IPlotFitAnalysisPaneModel> m_model;
   std::string m_currentName;
 };
 } // namespace MantidWidgets

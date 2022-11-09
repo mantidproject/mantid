@@ -22,9 +22,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView : public QWidget {
+  Q_OBJECT
+
 public:
-  IPlotFitAnalysisPaneView(){};
+  IPlotFitAnalysisPaneView(QWidget *parent = nullptr) : QWidget(parent) {}
   virtual ~IPlotFitAnalysisPaneView(){};
   virtual void observePeakCentreLineEdit(Observer *listener) = 0;
   virtual void observeFitButton(Observer *listener) = 0;
@@ -33,7 +35,6 @@ public:
   virtual void addSpectrum(const std::string &wsName) = 0;
   virtual void addFitSpectrum(const std::string &wsName) = 0;
   virtual void displayWarning(const std::string &message) = 0;
-  virtual QWidget *getQWidget() = 0;
   virtual void setupPlotFitSplitter(const double &start, const double &end) = 0;
   virtual QWidget *createFitPane(const double &start, const double &end) = 0;
   virtual void setPeakCentre(const double centre) = 0;
@@ -41,7 +42,7 @@ public:
   virtual void setPeakCentreStatus(const std::string &status) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView : public QWidget, public IPlotFitAnalysisPaneView {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView : public IPlotFitAnalysisPaneView {
   Q_OBJECT
 
 public:
@@ -55,7 +56,6 @@ public:
   void addSpectrum(const std::string &wsName) override;
   void addFitSpectrum(const std::string &wsName) override;
   void displayWarning(const std::string &message) override;
-  QWidget *getQWidget() override { return static_cast<QWidget *>(this); };
 
   void setPeakCentre(const double centre) override;
   double peakCentre() const override;
