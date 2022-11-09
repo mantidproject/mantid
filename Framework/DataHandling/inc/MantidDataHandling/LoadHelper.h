@@ -38,10 +38,12 @@ void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string 
                          const std::string &instrumentPath = "");
 
 void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, Mantid::NeXus::NXInt &, const std::vector<double> &xAxis,
-                         int initialSpectrum = 0, double zeroCountsError = 0, bool pointData = false,
+                         int initialSpectrum = 0, bool pointData = false,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
                          const std::set<int> &detectorID = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
+
+void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
 
 void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
                                      std::string &parent_class, int level, bool useFullPath);

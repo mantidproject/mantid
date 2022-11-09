@@ -282,7 +282,7 @@ void LoadILLIndirect2::loadDataIntoWorkspace(NeXus::NXEntry &entry) {
   std::set<int> sdIndices;
   std::transform(m_activeSDIndices.cbegin(), m_activeSDIndices.cend(), std::inserter(sdIndices, sdIndices.begin()),
                  [offset](const auto &index) { return index + offset; });
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, dataSD, xAxis, offset, 0, false, std::vector<int>(), sdIndices);
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, dataSD, xAxis, offset, false, std::vector<int>(), sdIndices);
 }
 
 /**

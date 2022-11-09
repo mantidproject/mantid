@@ -385,7 +385,7 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF
   NXData dataGroup = entry.openNXData("data");
   auto data = dataGroup.openIntData();
   data.load();
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 0, 0, false, detectorIDs);
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, spec, false, detectorIDs);
   spec = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube);
 
   // IN4 Rosace detectors are in a different NeXus entry
@@ -396,7 +396,7 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF
     NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
     auto dataRosace = dataGroupRosace.openIntData();
     dataRosace.load();
-    LoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, 0, false, detectorIDs);
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, false, detectorIDs);
     spec += dataRosace.dim0();
   }
 
@@ -406,7 +406,7 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF
     NXData monitorGroup = entry.openNXData(monitorName);
     auto monitorData = monitorGroup.openIntData();
     monitorData.load();
-    LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, 0, false, detectorIDs);
+    LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, false, detectorIDs);
     spec++;
   }
 }

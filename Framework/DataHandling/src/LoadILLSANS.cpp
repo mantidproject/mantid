@@ -588,7 +588,7 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
         binning = m_defaultBinning;
         pointData = type == MultichannelType::KINETIC;
       }
-      LoadHelper::fillStaticWorkspace(m_localWorkspace, data, binning, static_cast<int>(firstIndex), 0, pointData);
+      LoadHelper::fillStaticWorkspace(m_localWorkspace, data, binning, static_cast<int>(firstIndex), pointData);
       // Add average monitor counts to a property:
       double averageMonitorCounts =
           std::accumulate(data(), data() + data.dim2(), double(0)) / static_cast<double>(data.dim2());
@@ -666,7 +666,7 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
     pointData = type == MultichannelType::KINETIC;
     dimOrder = m_isD16Omega ? std::tuple<short, short, short>{2, 1, 0} : std::tuple<short, short, short>{0, 1, 2};
   }
-  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, timeBinning, static_cast<int>(firstIndex), 0, pointData,
+  LoadHelper::fillStaticWorkspace(m_localWorkspace, data, timeBinning, static_cast<int>(firstIndex), pointData,
                                   std::vector<int>(), std::set<int>(), dimOrder);
   return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }

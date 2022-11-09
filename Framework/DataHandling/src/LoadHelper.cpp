@@ -522,7 +522,6 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * @param data Data object to extract counts from
  * @param xAxis X axis values to be assigned to each spectrum
  * @param initialSpectrum Initial spectrum number, optional and defaults to 0
- * @param zeroCountsError Value to replace default error of square root of counts, optional and defaults to 0
  * @param pointData Switch to decide whether the data is going to be a histogram or point data, defaults to false
  * (histogram)
  * @param detectorIDs Vector of detector IDs to override the default spectrum number, defaults to empty (IDs equal to
@@ -532,9 +531,8 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * tube-pixel-channel order
  */
 void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, Mantid::NeXus::NXInt &data,
-                                     const std::vector<double> &xAxis, int initialSpectrum, double zeroCountsError,
-                                     bool pointData, const std::vector<int> &detectorIDs,
-                                     const std::set<int> &acceptedDetectorIDs,
+                                     const std::vector<double> &xAxis, int initialSpectrum, bool pointData,
+                                     const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
 
   std::array dims = {data.dim0(), data.dim1(), data.dim2()};
@@ -579,16 +577,22 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, Mantid
         ws->getSpectrum(currentSpectrum).setSpectrumNo(currentSpectrum);
       else
         ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorIDs[currentSpectrum]);
+    }
+  }
+}
 
-      if (zeroCountsError != 0) {
-        auto &errorAxis = ws->mutableE(currentSpectrum);
-        const auto dataAxis = ws->readY(currentSpectrum);
-        for (auto index = 0; index < static_cast<int>(errorAxis.size()); ++index) {
-          if (dataAxis[index] == 0) {
-            errorAxis[index] = zeroCountsError;
-            auto test = ws->e(currentSpectrum);
-          }
-        }
+/**
+ * Replaces errors of bins with zero counts with provided value
+ * @param ws MatrixWorkspace to have its zero errors replaced
+ * @param zeroCountsError Value to replace default error of square root of counts
+ */
+void LoadHelper::replaceZeroErrors(const API::MatrixWorkspace_sptr &ws, double zeroCountsError) {
+  for (size_t spectrum_no = 0; spectrum_no < ws->getNumberHistograms(); ++spectrum_no) {
+    auto &errorAxis = ws->mutableE(spectrum_no);
+    const auto dataAxis = ws->readY(spectrum_no);
+    for (size_t index = 0; index < errorAxis.size(); ++index) {
+      if (dataAxis[index] == 0) {
+        errorAxis[index] = zeroCountsError;
       }
     }
   }

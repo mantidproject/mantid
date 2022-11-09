@@ -172,7 +172,7 @@ void LoadILLPolarizedDiffraction::loadData() {
     // load data from file
     auto data = entry.openNXDataSet<int>("data/Detector_data");
     data.load();
-    LoadHelper::fillStaticWorkspace(workspace, data, axis, 0, 1.0);
+    LoadHelper::fillStaticWorkspace(workspace, data, axis, 0);
 
     // load and assign monitor data
     for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
@@ -180,8 +180,11 @@ void LoadILLPolarizedDiffraction::loadData() {
       auto monitorData = entry.openNXDataSet<int>(
           "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) + "/data");
       monitorData.load();
-      LoadHelper::fillStaticWorkspace(workspace, monitorData, axis, monitor_no, 1.0);
+      LoadHelper::fillStaticWorkspace(workspace, monitorData, axis, monitor_no);
     }
+    // replace errors for bins with zero counts with ones:
+    LoadHelper::replaceZeroErrors(workspace, 1.0);
+
     // convert the spectrum axis to scattering angle
     if (getProperty("ConvertToScatteringAngle")) {
       workspace = convertSpectrumAxis(workspace);
