@@ -320,7 +320,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, binning, 0);
-  if (!m_isD16Omega) {
+  if (!m_isD16Omega ||
+      (m_isD16Omega && data.dim0() == 1)) { // second condition covers legacy D16 omega scans with single scan point
     loadDataFromMonitors(firstEntry, nextIndex);
   } else
     loadDataFromD16ScanMonitors(firstEntry, nextIndex, binning);
