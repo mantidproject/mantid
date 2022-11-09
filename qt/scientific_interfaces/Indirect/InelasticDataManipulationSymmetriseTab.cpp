@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSymmetrise.h"
+#include "InelasticDataManipulationSymmetriseTab.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -16,7 +16,7 @@ using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectSymmetrise");
+Mantid::Kernel::Logger g_log("InelasticDataManipulationSymmetriseTab");
 } // namespace
 
 namespace MantidQt {
@@ -25,9 +25,10 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSymmetrise::IndirectSymmetrise(QWidget *parent)
+InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(QWidget *parent)
     : IndirectDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
-      m_view(std::make_unique<IndirectSymmetriseView>(parent)), m_model(std::make_unique<IndirectSymmetriseModel>()) {
+      m_view(std::make_unique<InelasticDataManipulationSymmetriseTabView>(parent)),
+      m_model(std::make_unique<InelasticDataManipulationSymmetriseTabModel>()) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 
@@ -43,24 +44,26 @@ IndirectSymmetrise::IndirectSymmetrise(QWidget *parent)
   m_view->setDefaults();
 }
 
-IndirectSymmetrise::~IndirectSymmetrise() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
+InelasticDataManipulationSymmetriseTab::~InelasticDataManipulationSymmetriseTab() {
+  m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager);
+}
 
-void IndirectSymmetrise::setup() {}
+void InelasticDataManipulationSymmetriseTab::setup() {}
 
-bool IndirectSymmetrise::validate() { return m_view->validate(); }
+bool InelasticDataManipulationSymmetriseTab::validate() { return m_view->validate(); }
 
-void IndirectSymmetrise::runClicked() { runTab(); }
+void InelasticDataManipulationSymmetriseTab::runClicked() { runTab(); }
 
 /**
  * Handles saving of workspace
  */
-void IndirectSymmetrise::saveClicked() {
+void InelasticDataManipulationSymmetriseTab::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatch();
 }
 
-void IndirectSymmetrise::run() {
+void InelasticDataManipulationSymmetriseTab::run() {
   m_view->setRawPlotWatchADS(false);
 
   auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
@@ -80,7 +83,7 @@ void IndirectSymmetrise::run() {
  *
  * @param error If the algorithm failed
  */
-void IndirectSymmetrise::algorithmComplete(bool error) {
+void InelasticDataManipulationSymmetriseTab::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   m_view->setRawPlotWatchADS(true);
   if (error)
@@ -95,9 +98,9 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
  *
  * Runs Symmetrise on the current spectrum and plots in preview mini plot.
  *
- * @see IndirectSymmetrise::previewAlgDone()
+ * @see InelasticDataManipulationSymmetriseTab::previewAlgDone()
  */
-void IndirectSymmetrise::preview() {
+void InelasticDataManipulationSymmetriseTab::preview() {
   // Handle algorithm completion signal
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
 
@@ -130,7 +133,7 @@ void IndirectSymmetrise::preview() {
  *
  * @param error If the algorithm failed
  */
-void IndirectSymmetrise::previewAlgDone(bool error) {
+void InelasticDataManipulationSymmetriseTab::previewAlgDone(bool error) {
   if (error)
     return;
   m_view->previewAlgDone();
@@ -138,14 +141,14 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
 }
 
-void IndirectSymmetrise::setFileExtensionsByName(bool filter) {
+void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Symmetrise");
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void IndirectSymmetrise::handleValueChanged(QtProperty *prop, double value) {
+void InelasticDataManipulationSymmetriseTab::handleValueChanged(QtProperty *prop, double value) {
   if (prop->propertyName() == "Spectrum No") {
     m_view->replotNewSpectrum(value);
   } else if (prop->propertyName() == "EMin") {
@@ -157,7 +160,7 @@ void IndirectSymmetrise::handleValueChanged(QtProperty *prop, double value) {
   }
 }
 
-void IndirectSymmetrise::handleDataReady(QString const &dataName) {
+void InelasticDataManipulationSymmetriseTab::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_view->plotNewData(dataName);
   }

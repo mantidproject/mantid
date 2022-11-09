@@ -84,9 +84,9 @@ set(SRC_FILES
     InelasticDataManipulationSqwTab.cpp
     InelasticDataManipulationSqwTabModel.cpp
     InelasticDataManipulationSqwTabView.cpp
-    IndirectSymmetrise.cpp
-    IndirectSymmetriseView.cpp
-    IndirectSymmetriseModel.cpp
+    InelasticDataManipulationSymmetriseTab.cpp
+    InelasticDataManipulationSymmetriseTabView.cpp
+    InelasticDataManipulationSymmetriseTabModel.cpp
     IndirectTab.cpp
     IndirectTools.cpp
     IndirectToolsTab.cpp
@@ -166,9 +166,9 @@ set(MOC_FILES
     IndirectSimulationTab.h
     InelasticDataManipulationSqwTab.h
     InelasticDataManipulationSqwTabView.h
-    IndirectSymmetrise.h
-    IndirectSymmetriseView.h
-    IndirectSymmetriseModel.h
+    InelasticDataManipulationSymmetriseTab.h
+    InelasticDataManipulationSymmetriseTabView.h
+    InelasticDataManipulationSymmetriseTabModel.h
     IndirectTab.h
     IndirectTools.h
     IndirectToolsTab.h
@@ -243,7 +243,7 @@ set(UI_FILES
     IndirectSimulation.ui
     IndirectSpectrumSelector.ui
     InelasticDataManipulationSqwTab.ui
-    IndirectSymmetrise.ui
+    InelasticDataManipulationSymmetriseTab.ui
     IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
