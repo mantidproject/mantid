@@ -32,7 +32,7 @@ set(SRC_FILES
     IndirectDataAnalysisTab.cpp
     IndirectDataManipulation.cpp
     IndirectDataManipulationTab.cpp
-    IndirectDataManipulationElwinTab.cpp
+    InelasticDataManipulationElwinTab.cpp
     IndirectDataManipulationIqtTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
@@ -131,7 +131,7 @@ set(MOC_FILES
     IndirectDataAnalysisTab.h
     IndirectDataManipulation.h
     IndirectDataManipulationTab.h
-    IndirectDataManipulationElwinTab.h
+    InelasticDataManipulationElwinTab.h
     IndirectDataManipulationIqtTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
@@ -224,7 +224,7 @@ set(UI_FILES
     IndirectBayes.ui
     IndirectCorrections.ui
     IndirectDataAnalysis.ui
-    IndirectDataManipulationElwinTab.ui
+    InelasticDataManipulationElwinTab.ui
     IndirectDataManipulation.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataManipulationElwinTab</class>
- <widget class="QWidget" name="IndirectDataManipulationElwinTab">
+ <class>InelasticDataManipulationElwinTab</class>
+ <widget class="QWidget" name="InelasticDataManipulationElwinTab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -34,8 +34,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>587</width>
-         <height>221</height>
+         <width>569</width>
+         <height>244</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
@@ -196,7 +196,7 @@
          <x>0</x>
          <y>0</y>
          <width>569</width>
-         <height>333</height>
+         <height>331</height>
         </rect>
        </property>
        <property name="minimumSize">
