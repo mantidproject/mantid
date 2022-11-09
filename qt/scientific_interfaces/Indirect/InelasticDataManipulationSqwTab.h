@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataManipulationTab.h"
 #include "InelasticDataManipulationSqwTabModel.h"
 #include "InelasticDataManipulationSqwTabView.h"
+#include "InelasticDataManipulationTab.h"
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/System.h"
@@ -20,7 +20,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport InelasticDataManipulationSqwTab : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationSqwTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:

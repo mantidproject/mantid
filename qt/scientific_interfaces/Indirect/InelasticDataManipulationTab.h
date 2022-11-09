@@ -32,17 +32,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 class IndirectDataReduction;
 
-/** IndirectDataManipulationTab
+/** InelasticDataManipulationTab
 
   This class defines common functionality of tabs used in the Indirect Data
   Manipulation interface.
 */
-class DLLExport IndirectDataManipulationTab : public IndirectTab {
+class DLLExport InelasticDataManipulationTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataManipulationTab(QObject *parent = nullptr);
-  ~IndirectDataManipulationTab() override;
+  InelasticDataManipulationTab(QObject *parent = nullptr);
+  ~InelasticDataManipulationTab() override;
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);

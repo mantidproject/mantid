@@ -7,7 +7,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "IndirectDataManipulation.h"
+#include "InelasticDataManipulation.h"
 
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationIqtTab.h"
@@ -30,22 +30,22 @@ using namespace Mantid::Geometry;
 using namespace MantidQt;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectDataManipulation");
+Mantid::Kernel::Logger g_log("InelasticDataManipulation");
 }
 
 namespace MantidQt::CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectDataManipulation)
+DECLARE_SUBWINDOW(InelasticDataManipulation)
 
-IndirectDataManipulation::IndirectDataManipulation(QWidget *parent) : IndirectInterface(parent) {}
+InelasticDataManipulation::InelasticDataManipulation(QWidget *parent) : IndirectInterface(parent) {}
 
-IndirectDataManipulation::~IndirectDataManipulation() {}
+InelasticDataManipulation::~InelasticDataManipulation() {}
 
-std::string IndirectDataManipulation::documentationPage() const { return "Indirect Data Manipulation"; }
+std::string InelasticDataManipulation::documentationPage() const { return "Indirect Data Manipulation"; }
 
 /**
  * Called when the user clicks the Python export button.
  */
-void IndirectDataManipulation::exportTabPython() {
+void InelasticDataManipulation::exportTabPython() {
   QString tabName = m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
   m_tabs[tabName].second->exportPythonScript();
 }
@@ -53,7 +53,7 @@ void IndirectDataManipulation::exportTabPython() {
 /**
  * Sets up Qt UI file and connects signals, slots.
  */
-void IndirectDataManipulation::initLayout() {
+void InelasticDataManipulation::initLayout() {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
@@ -79,7 +79,7 @@ void IndirectDataManipulation::initLayout() {
   applySettings(getInterfaceSettings());
 }
 
-void IndirectDataManipulation::applySettings(std::map<std::string, QVariant> const &settings) {
+void InelasticDataManipulation::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
   }
@@ -92,7 +92,7 @@ void IndirectDataManipulation::applySettings(std::map<std::string, QVariant> con
  * functions that require
  * Python scripts are located here.
  */
-void IndirectDataManipulation::initLocalPython() {}
+void InelasticDataManipulation::initLocalPython() {}
 
 /**
  * Gets a parameter from an instrument component as a string.
@@ -101,8 +101,8 @@ void IndirectDataManipulation::initLocalPython() {}
  * @param param Parameter name
  * @return Value as QString
  */
-QString IndirectDataManipulation::getInstrumentParameterFrom(const Mantid::Geometry::IComponent_const_sptr &comp,
-                                                             const std::string &param) {
+QString InelasticDataManipulation::getInstrumentParameterFrom(const Mantid::Geometry::IComponent_const_sptr &comp,
+                                                              const std::string &param) {
   QString value;
 
   if (!comp->hasParameter(param)) {
@@ -125,7 +125,7 @@ QString IndirectDataManipulation::getInstrumentParameterFrom(const Mantid::Geome
 /**
  * Tasks to be carried out after an empty instument has finished loading
  */
-void IndirectDataManipulation::instrumentLoadingDone(bool error) {
+void InelasticDataManipulation::instrumentLoadingDone(bool error) {
   if (error) {
     g_log.warning("Instument loading failed! This instrument (or "
                   "analyser/reflection configuration) may not be supported by "
@@ -139,14 +139,14 @@ void IndirectDataManipulation::instrumentLoadingDone(bool error) {
  *
  * @param close Close event (unused)
  */
-void IndirectDataManipulation::closeEvent(QCloseEvent *close) { UNUSED_ARG(close); }
+void InelasticDataManipulation::closeEvent(QCloseEvent *close) { UNUSED_ARG(close); }
 
 /**
  * Filters the displayed tabs based on the current facility.
  *
  * @param facility Name of facility
  */
-void IndirectDataManipulation::filterUiForFacility(const QString &facility) {
+void InelasticDataManipulation::filterUiForFacility(const QString &facility) {
   g_log.information() << "Facility selected: " << facility.toStdString() << '\n';
   QStringList enabledTabs;
   QStringList disabledInstruments;

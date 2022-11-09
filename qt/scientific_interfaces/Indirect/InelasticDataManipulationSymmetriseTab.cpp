@@ -26,7 +26,7 @@ namespace CustomInterfaces {
 /** Constructor
  */
 InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
+    : InelasticDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
       m_view(std::make_unique<InelasticDataManipulationSymmetriseTabView>(parent)),
       m_model(std::make_unique<InelasticDataManipulationSymmetriseTabModel>()) {
   setOutputPlotOptionsPresenter(

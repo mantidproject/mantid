@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataManipulation</class>
- <widget class="QMainWindow" name="IndirectDataManipulation">
+ <class>InelasticDataManipulation</class>
+ <widget class="QMainWindow" name="InelasticDataManipulation">
   <property name="geometry">
    <rect>
     <x>0</x>

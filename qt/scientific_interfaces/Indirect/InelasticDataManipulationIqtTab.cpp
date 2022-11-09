@@ -71,7 +71,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 
 namespace MantidQt::CustomInterfaces::IDA {
 InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_iqtTree(nullptr), m_iqtResFileType(), m_selectedSpectrum(0) {
+    : InelasticDataManipulationTab(parent), m_iqtTree(nullptr), m_iqtResFileType(), m_selectedSpectrum(0) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraTiled));

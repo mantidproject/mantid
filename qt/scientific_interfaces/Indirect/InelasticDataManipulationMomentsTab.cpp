@@ -23,7 +23,7 @@ namespace MantidQt::CustomInterfaces {
 /** Constructor
  */
 InelasticDataManipulationMomentsTab::InelasticDataManipulationMomentsTab(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationMomentsTabModel>()),
+    : InelasticDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationMomentsTabModel>()),
       m_view(std::make_unique<InelasticDataManipulationMomentsTabView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
