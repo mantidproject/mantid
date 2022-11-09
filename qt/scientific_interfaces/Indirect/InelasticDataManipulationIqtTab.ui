@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataManipulationIqtTab</class>
- <widget class="QWidget" name="IndirectDataManipulationIqtTab">
+ <class>InelasticDataManipulationIqtTab</class>
+ <widget class="QWidget" name="InelasticDataManipulationIqtTab">
   <property name="geometry">
    <rect>
     <x>0</x>

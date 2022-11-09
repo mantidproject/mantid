@@ -9,8 +9,8 @@
 //----------------------
 #include "IndirectDataManipulation.h"
 
-#include "IndirectDataManipulationIqtTab.h"
 #include "InelasticDataManipulationElwinTab.h"
+#include "InelasticDataManipulationIqtTab.h"
 #include "InelasticDataManipulationMomentsTab.h"
 #include "InelasticDataManipulationSqwTab.h"
 #include "InelasticDataManipulationSymmetriseTab.h"
@@ -62,7 +62,7 @@ void IndirectDataManipulation::initLayout() {
   addTab<InelasticDataManipulationSqwTab>("S(Q, w)");
   addTab<InelasticDataManipulationMomentsTab>("Moments");
   addTab<InelasticDataManipulationElwinTab>("Elwin");
-  addTab<IndirectDataManipulationIqtTab>("Iqt");
+  addTab<InelasticDataManipulationIqtTab>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button
