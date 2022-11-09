@@ -12,8 +12,8 @@
 #include "IndirectDataManipulationElwinTab.h"
 #include "IndirectDataManipulationIqtTab.h"
 #include "IndirectMoments.h"
-#include "IndirectSqw.h"
 #include "IndirectSymmetrise.h"
+#include "InelasticDataManipulationSqwTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -59,7 +59,7 @@ void IndirectDataManipulation::initLayout() {
 
   // Create the tabs
   addTab<IndirectSymmetrise>("Symmetrise");
-  addTab<IndirectSqw>("S(Q, w)");
+  addTab<InelasticDataManipulationSqwTab>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
   addTab<IndirectDataManipulationElwinTab>("Elwin");
   addTab<IndirectDataManipulationIqtTab>("Iqt");

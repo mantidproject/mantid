@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSqwModel.h"
+#include "InelasticDataManipulationSqwTabModel.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -47,9 +47,9 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqwModel::IndirectSqwModel() { m_rebinInEnergy = false; }
+InelasticDataManipulationSqwTabModel::InelasticDataManipulationSqwTabModel() { m_rebinInEnergy = false; }
 
-void IndirectSqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+void InelasticDataManipulationSqwTabModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   if (m_rebinInEnergy) {
     std::string eRebinString = std::to_string(m_eLow) + "," + std::to_string(m_eWidth) + "," + std::to_string(m_eHigh);
     auto const eRebinWsName = m_baseName + "_r";
@@ -62,7 +62,7 @@ void IndirectSqwModel::setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *
   }
 }
 
-void IndirectSqwModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+void InelasticDataManipulationSqwTabModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   std::string qRebinString = std::to_string(m_qLow) + "," + std::to_string(m_qWidth) + "," + std::to_string(m_qHigh);
 
   auto const sqwWsName = getOutputWorkspace();
@@ -83,7 +83,8 @@ void IndirectSqwModel::setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *
   batchAlgoRunner->addAlgorithm(sqwAlg, std::move(sqwInputProps));
 }
 
-void IndirectSqwModel::setupAddSampleLogAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+void InelasticDataManipulationSqwTabModel::setupAddSampleLogAlgorithm(
+    MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   auto const sqwWsName = getOutputWorkspace();
   // Add sample log for S(Q, w) algorithm used
   auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
@@ -98,38 +99,38 @@ void IndirectSqwModel::setupAddSampleLogAlgorithm(MantidQt::API::BatchAlgorithmR
   batchAlgoRunner->addAlgorithm(sampleLogAlg, std::move(inputToAddSampleLogProps));
 }
 
-void IndirectSqwModel::setInputWorkspace(const std::string &workspace) {
+void InelasticDataManipulationSqwTabModel::setInputWorkspace(const std::string &workspace) {
   m_inputWorkspace = workspace;
   // remove _red suffix from inpur workspace for outputs
   m_baseName = m_inputWorkspace.substr(0, m_inputWorkspace.find("_red", m_inputWorkspace.length() - 4));
 }
 
-void IndirectSqwModel::setQMin(double qMin) { m_qLow = qMin; }
+void InelasticDataManipulationSqwTabModel::setQMin(double qMin) { m_qLow = qMin; }
 
-void IndirectSqwModel::setQWidth(double qWidth) { m_qWidth = qWidth; }
+void InelasticDataManipulationSqwTabModel::setQWidth(double qWidth) { m_qWidth = qWidth; }
 
-void IndirectSqwModel::setQMax(double qMax) { m_qHigh = qMax; }
+void InelasticDataManipulationSqwTabModel::setQMax(double qMax) { m_qHigh = qMax; }
 
-void IndirectSqwModel::setEMin(double eMin) { m_eLow = eMin; }
+void InelasticDataManipulationSqwTabModel::setEMin(double eMin) { m_eLow = eMin; }
 
-void IndirectSqwModel::setEWidth(double eWidth) { m_eWidth = eWidth; }
+void InelasticDataManipulationSqwTabModel::setEWidth(double eWidth) { m_eWidth = eWidth; }
 
-void IndirectSqwModel::setEMax(double eMax) { m_eHigh = eMax; }
+void InelasticDataManipulationSqwTabModel::setEMax(double eMax) { m_eHigh = eMax; }
 
-void IndirectSqwModel::setEFixed(const double eFixed) { m_eFixed = eFixed; }
+void InelasticDataManipulationSqwTabModel::setEFixed(const double eFixed) { m_eFixed = eFixed; }
 
-void IndirectSqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
+void InelasticDataManipulationSqwTabModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
 
-std::string IndirectSqwModel::getOutputWorkspace() { return m_baseName + "_sqw"; }
+std::string InelasticDataManipulationSqwTabModel::getOutputWorkspace() { return m_baseName + "_sqw"; }
 
-MatrixWorkspace_sptr IndirectSqwModel::getRqwWorkspace() {
+MatrixWorkspace_sptr InelasticDataManipulationSqwTabModel::getRqwWorkspace() {
   auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
   convertToSpectrumAxis(m_inputWorkspace, outputName);
   return getADSMatrixWorkspace(outputName);
 }
 
-UserInputValidator IndirectSqwModel::validate(std::tuple<double, double> const qRange,
-                                              std::tuple<double, double> const eRange) {
+UserInputValidator InelasticDataManipulationSqwTabModel::validate(std::tuple<double, double> const qRange,
+                                                                  std::tuple<double, double> const eRange) {
 
   double const tolerance = 1e-10;
 
@@ -150,8 +151,9 @@ UserInputValidator IndirectSqwModel::validate(std::tuple<double, double> const q
   return uiv;
 }
 
-std::string IndirectSqwModel::getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
-                                                      std::string const &reflection) {
+std::string InelasticDataManipulationSqwTabModel::getEFixedFromInstrument(std::string const &instrumentName,
+                                                                          std::string analyser,
+                                                                          std::string const &reflection) {
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")
@@ -184,9 +186,9 @@ std::string IndirectSqwModel::getEFixedFromInstrument(std::string const &instrum
  * @param analyser Analyser being used (optional)
  * @param reflection Relection being used (optional)
  */
-MatrixWorkspace_sptr IndirectSqwModel::loadInstrumentWorkspace(const std::string &instrumentName,
-                                                               const std::string &analyser,
-                                                               const std::string &reflection) {
+MatrixWorkspace_sptr InelasticDataManipulationSqwTabModel::loadInstrumentWorkspace(const std::string &instrumentName,
+                                                                                   const std::string &analyser,
+                                                                                   const std::string &reflection) {
   std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   auto const ipfFilename = idfdirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
 

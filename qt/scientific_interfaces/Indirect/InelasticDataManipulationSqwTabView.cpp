@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSqwView.h"
+#include "InelasticDataManipulationSqwTabView.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -32,7 +32,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqwView::IndirectSqwView(QWidget *parent) {
+InelasticDataManipulationSqwTabView::InelasticDataManipulationSqwTabView(QWidget *parent) {
   m_uiForm.setupUi(parent);
 
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
@@ -58,17 +58,19 @@ IndirectSqwView::IndirectSqwView(QWidget *parent) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectSqwView::~IndirectSqwView() {}
+InelasticDataManipulationSqwTabView::~InelasticDataManipulationSqwTabView() {}
 
-IndirectPlotOptionsView *IndirectSqwView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+IndirectPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
 
-std::string IndirectSqwView::getDataName() { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
+std::string InelasticDataManipulationSqwTabView::getDataName() {
+  return m_uiForm.dsInput->getCurrentDataName().toStdString();
+}
 
-void IndirectSqwView::setFBSuffixes(QStringList suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
+void InelasticDataManipulationSqwTabView::setFBSuffixes(QStringList suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
 
-void IndirectSqwView::setWSSuffixes(QStringList suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
+void InelasticDataManipulationSqwTabView::setWSSuffixes(QStringList suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
 
-bool IndirectSqwView::validate() {
+bool InelasticDataManipulationSqwTabView::validate() {
   UserInputValidator uiv;
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
 
@@ -78,8 +80,8 @@ bool IndirectSqwView::validate() {
   return errorMessage.isEmpty();
 }
 
-void IndirectSqwView::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                      QString const &tooltip) {
+void InelasticDataManipulationSqwTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
+                                                          QString const &message, QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
@@ -87,36 +89,36 @@ void IndirectSqwView::updateRunButton(bool enabled, std::string const &enableOut
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-void IndirectSqwView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void InelasticDataManipulationSqwTabView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectSqwView::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void InelasticDataManipulationSqwTabView::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectSqwView::plotRqwContour(MatrixWorkspace_sptr rqwWorkspace) {
+void InelasticDataManipulationSqwTabView::plotRqwContour(MatrixWorkspace_sptr rqwWorkspace) {
   m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
 }
 
-void IndirectSqwView::setDefaultQAndEnergy() {
+void InelasticDataManipulationSqwTabView::setDefaultQAndEnergy() {
   setQRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft));
   setEnergyRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
 }
 
-void IndirectSqwView::setQRange(std::tuple<double, double> const &axisRange) {
+void InelasticDataManipulationSqwTabView::setQRange(std::tuple<double, double> const &axisRange) {
   auto const qRange = roundToWidth(axisRange, m_uiForm.spQWidth->value());
   m_uiForm.spQLow->setValue(qRange.first);
   m_uiForm.spQHigh->setValue(qRange.second);
 }
 
-void IndirectSqwView::setEnergyRange(std::tuple<double, double> const &axisRange) {
+void InelasticDataManipulationSqwTabView::setEnergyRange(std::tuple<double, double> const &axisRange) {
   auto const energyRange = roundToWidth(axisRange, m_uiForm.spEWidth->value());
   m_uiForm.spELow->setValue(energyRange.first);
   m_uiForm.spEHigh->setValue(energyRange.second);
 }
 
-std::tuple<double, double> IndirectSqwView::getQRangeFromPlot() {
+std::tuple<double, double> InelasticDataManipulationSqwTabView::getQRangeFromPlot() {
   return m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft);
 }
 
-std::tuple<double, double> IndirectSqwView::getERangeFromPlot() {
+std::tuple<double, double> InelasticDataManipulationSqwTabView::getERangeFromPlot() {
   return m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
 }
 

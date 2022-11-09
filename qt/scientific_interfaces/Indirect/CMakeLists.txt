@@ -81,9 +81,9 @@ set(SRC_FILES
     IndirectSettingsView.cpp
     IndirectSimulation.cpp
     IndirectSimulationTab.cpp
-    IndirectSqw.cpp
-    IndirectSqwModel.cpp
-    IndirectSqwView.cpp
+    InelasticDataManipulationSqwTab.cpp
+    InelasticDataManipulationSqwTabModel.cpp
+    InelasticDataManipulationSqwTabView.cpp
     IndirectSymmetrise.cpp
     IndirectSymmetriseView.cpp
     IndirectSymmetriseModel.cpp
@@ -164,8 +164,8 @@ set(MOC_FILES
     IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
-    IndirectSqw.h
-    IndirectSqwView.h
+    InelasticDataManipulationSqwTab.h
+    InelasticDataManipulationSqwTabView.h
     IndirectSymmetrise.h
     IndirectSymmetriseView.h
     IndirectSymmetriseModel.h
@@ -201,7 +201,7 @@ set(INC_FILES
     IndirectMomentsModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
-    IndirectSqwModel.h
+    InelasticDataManipulationSqwTabModel.h
     IqtFitModel.h
     MSDFitModel.h
     Notifier.h
@@ -242,7 +242,7 @@ set(UI_FILES
     IndirectSettings.ui
     IndirectSimulation.ui
     IndirectSpectrumSelector.ui
-    IndirectSqw.ui
+    InelasticDataManipulationSqwTab.ui
     IndirectSymmetrise.ui
     IndirectTools.ui
     IndirectTransmission.ui

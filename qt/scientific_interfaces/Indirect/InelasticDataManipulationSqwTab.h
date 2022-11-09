@@ -7,26 +7,25 @@
 #pragma once
 
 #include "IndirectDataManipulationTab.h"
-#include "IndirectSqwModel.h"
-#include "IndirectSqwView.h"
+#include "InelasticDataManipulationSqwTabModel.h"
+#include "InelasticDataManipulationSqwTabView.h"
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/System.h"
-#include "ui_IndirectSqw.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** IndirectSqw
+/** InelasticDataManipulationSqwTab
 
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport IndirectSqw : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationSqwTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectSqw(QWidget *parent = nullptr);
-  ~IndirectSqw() = default;
+  InelasticDataManipulationSqwTab(QWidget *parent = nullptr);
+  ~InelasticDataManipulationSqwTab() = default;
 
   void setup() override;
   void run() override;
@@ -52,8 +51,8 @@ private:
   void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
 
-  std::unique_ptr<IndirectSqwModel> m_model;
-  std::unique_ptr<IndirectSqwView> m_view;
+  std::unique_ptr<InelasticDataManipulationSqwTabModel> m_model;
+  std::unique_ptr<InelasticDataManipulationSqwTabView> m_view;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
