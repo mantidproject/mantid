@@ -48,6 +48,7 @@ public:
   void test_that_the_model_is_instantiated_with_a_function_and_empty_fit_status() {
     TS_ASSERT_THROWS_NOTHING(m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
+    TS_ASSERT_EQUALS(std::nullopt, m_model->averageTwoTheta());
   }
 
   void test_that_doFit_sets_a_successful_fit_status_for_a_good_fit() {
@@ -90,6 +91,14 @@ public:
 
     TS_ASSERT_EQUALS(1.1, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
+  }
+
+  void test_that_averagedTwoTheta_returns_the_average_of_the_two_thetas_in_the_model() {
+    m_model->addTwoTheta(29.5);
+    m_model->addTwoTheta(30.4);
+    m_model->addTwoTheta(31.0);
+
+    TS_ASSERT_EQUALS(30.3, *m_model->averageTwoTheta());
   }
 
 private:

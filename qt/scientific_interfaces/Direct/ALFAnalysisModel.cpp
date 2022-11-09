@@ -88,7 +88,7 @@ CompositeFunction_sptr createCompositeFunction(IFunction_sptr const &flatBackgro
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisModel::ALFAnalysisModel()
-    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus("") {}
+    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas() {}
 
 void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double> const &range) {
 
@@ -139,5 +139,15 @@ void ALFAnalysisModel::setPeakCentre(double const centre) {
 double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
 
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
+
+void ALFAnalysisModel::addTwoTheta(double const twoTheta) { m_twoThetas.emplace_back(twoTheta); }
+
+std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
+  if (m_twoThetas.empty()) {
+    return std::nullopt;
+  }
+  auto const count = m_twoThetas.size();
+  return std::reduce(m_twoThetas.cbegin(), m_twoThetas.cend()) / static_cast<double>(count);
+}
 
 } // namespace MantidQt::CustomInterfaces

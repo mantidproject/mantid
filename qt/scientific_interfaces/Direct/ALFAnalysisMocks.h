@@ -15,6 +15,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -64,6 +65,9 @@ public:
   MOCK_CONST_METHOD0(peakCentre, double());
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
+
+  MOCK_METHOD1(addTwoTheta, void(double const twoTheta));
+  MOCK_CONST_METHOD0(averageTwoTheta, std::optional<double>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
