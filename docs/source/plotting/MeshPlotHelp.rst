@@ -30,8 +30,10 @@ Workbench
 
 To quickly plot all Sample, Container and Component shapes attached to a workspace, right-click on it
 in the Workspaces Toolbox and select ``Show Sample Shape``. A black arrow will be added for the beam direction
-and, if there is a UB matrix, colored arrows for the real (solid line) and reciprocal (dashed line) lattice vectors,
-where h, k and l are represented by red, green and blue arrows, respectively.
+and, if there is a UB matrix, colored arrows for lattice vectors.
+The real lattice vectors :math:`a,\ b,\ c` are represented by **solid** line arrows in red, green and blue, respectively.
+Similarly, the reciprocal lattice vectors :math:`a^*,\ b^*,\ c^*`
+are represented by **dashed** line arrows in red, green and blue, respectively.
 
 A sample shape plot also takes into account any goniometer rotations.
 

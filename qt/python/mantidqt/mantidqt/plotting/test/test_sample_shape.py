@@ -89,6 +89,12 @@ def setup_workspace_sample_container_and_components_from_mesh():
     return workspace
 
 
+def setup_workspace_with_instrument_no_shape(instrument_name):
+    workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
+    LoadInstrument(Workspace=workspace, RewriteSpectraMap=True, InstrumentName=instrument_name)
+    return workspace
+
+
 class PlotSampleShapeTest(TestCase):
 
     @classmethod
@@ -283,7 +289,8 @@ class PlotSampleShapeTest(TestCase):
 
     def test_sample_and_container_invalid(self):
         workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
-        self.assertRaises(Exception, sample_shape.plot_sample_container_and_components, workspace.name())
+        self.assertRaisesRegex(Exception, "Workspace must have attached Sample Shape or Environment",
+                               sample_shape.plot_sample_container_and_components, workspace.name())
 
     # Sample, Container and Components
     def test_sample_container_and_components_valid(self):
@@ -386,7 +393,8 @@ class PlotSampleShapeTest(TestCase):
 
     def test_is_visible_for_invalid_plot_raises_value_error(self):
         self.set_up_global_figure_manager()
-        self.assertRaises(ValueError, sample_shape.is_visible, 0)
+        self.assertRaisesRegex(ValueError, "Error in is_visible, could not find a plot with the number",
+                               sample_shape.is_visible, 0)
 
     def test_set_window_title_valid_plot(self):
         self.set_up_global_figure_manager()
@@ -429,6 +437,44 @@ class PlotSampleShapeTest(TestCase):
         MySamplePlot = sample_shape.SampleShapePlot()
         MySamplePlot.notify(FigureAction.New, 200)
         self.assertEqual(200, MySamplePlot.GFM_plot_number)
+
+    def test_set_perspective_with_beam_direction(self):
+        mock_axes = Mock()
+        self.assertEqual("X", sample_shape.set_perspective(mock_axes, workspace=None, beam_direction="X"))
+        self.assertEqual("Z", sample_shape.set_perspective(mock_axes, workspace=None, beam_direction="Z"))
+
+    def test_set_perspective_raises_exception_with_no_workspace_or_valid_beam_direction(self):
+        mock_axes = Mock()
+        self.assertRaisesRegex(Exception, "set_perspective must be called with either beam_direction or a workspace",
+                               sample_shape.set_perspective, mock_axes, workspace=None, beam_direction=None)
+        self.assertRaisesRegex(Exception, "set_perspective must be called with either beam_direction or a workspace",
+                               sample_shape.set_perspective, mock_axes, workspace=None, beam_direction="Y")
+
+    def test_set_perspective_uses_input_beam_direction(self):
+        mock_axes = Mock()
+        workspace = setup_workspace_with_instrument_no_shape("Pearl")
+        self.assertEqual("X", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction="X"))
+        self.assertEqual("Z", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction="Z"))
+        workspace = setup_workspace_with_instrument_no_shape("Polref")
+        self.assertEqual("X", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction="X"))
+        self.assertEqual("Z", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction="Z"))
+
+    def test_set_perspective_with_workspace_and_no_valid_beam_direction(self):
+        mock_axes = Mock()
+        workspace = setup_workspace_with_instrument_no_shape("Pearl")
+        self.assertEqual("Z", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction=None))
+        self.assertEqual("Z", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction="Y"))
+        workspace = setup_workspace_with_instrument_no_shape("Polref")
+        self.assertEqual("X", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction=None))
+        self.assertEqual("X", sample_shape.set_perspective(mock_axes, workspace=workspace, beam_direction="Y"))
+
+    @patch("mantidqt.plotting.sample_shape.set_perspective")
+    def test_home_toolbar_button_calls_set_perspective(self, mock_set_perspective):
+        workspace = setup_workspace_shape_from_mesh()
+        mock_set_perspective.return_value = "X"
+        sample_shape_plot_object = sample_shape.plot_sample_container_and_components(workspace.name(), test=True)
+        sample_shape_plot_object.on_home_clicked()
+        self.assertEqual({'beam_direction': 'X'}, mock_set_perspective.mock_calls[1][-1])
 
 
 if __name__ == '__main__':

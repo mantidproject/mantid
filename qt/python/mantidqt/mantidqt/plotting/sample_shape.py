@@ -14,6 +14,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.plotting.sample_shape_ads_observer import SampleShapePlotADSObserver
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
+from workbench.plotting.toolbar import ToolbarStateManager
 
 
 class SampleShapePlot:
@@ -24,6 +25,9 @@ class SampleShapePlot:
         self.workspace_name = None
         self.plot_visible = None
         self.GFM_plot_number = None
+        self.toolbar_manager = None
+        self.beam_direction = None
+        self.overall_limits = None
 
         self.Local_GlobalFigureManager = GlobalFigureManager
         # Register with CurrentFigure that we want to know of any
@@ -37,6 +41,9 @@ class SampleShapePlot:
         self.plot_visible = None
         self.GFM_plot_number = None
         self.Local_GlobalFigureManager = None
+        self.toolbar_manager = None
+        self.beam_direction = None
+        self.overall_limits = None
 
     def notify(self, action, plot_number):
         """
@@ -53,7 +60,7 @@ class SampleShapePlot:
         if action == FigureAction.VisibilityChanged:
             self.plot_visible = is_visible(plot_number)
 
-    def create_plot(self, workspace_name, figure=None):
+    def create_plot(self, workspace_name, figure=None, test=None):
         self.workspace_name = workspace_name
         workspace = ADS.retrieve(workspace_name)
         if not does_workspace_have_valid_sample_shape(workspace) and not workspace.sample().hasEnvironment():
@@ -70,7 +77,7 @@ class SampleShapePlot:
 
         add_title(sample_plotted, container_plotted, components_plotted, axes, workspace_name)
         set_axes_to_largest_mesh(axes, workspace)
-        set_perspective(axes)
+        self.beam_direction = set_perspective(axes, workspace=workspace)
         set_axes_labels(axes)
         add_beam_arrow(axes, workspace)
         if workspace.sample().hasOrientedLattice():
@@ -79,6 +86,9 @@ class SampleShapePlot:
         self.ads_observer = SampleShapePlotADSObserver(self.on_replace_workspace, self.on_rename_workspace,
                                                        self.on_clear, self.on_delete_workspace)
         self.set_and_save_figure(workspace_name, figure)
+        self.connect_to_home_toolbar_button()
+        if test:
+            return self
         return figure
 
     def set_and_save_figure(self, workspace_name, figure):
@@ -119,6 +129,18 @@ class SampleShapePlot:
         GlobalFigureManager.destroy_fig(self.figure)
         self.reset_class()
 
+    def connect_to_home_toolbar_button(self):
+        if self.figure.canvas.toolbar:
+            self.toolbar_manager = ToolbarStateManager(self.figure.canvas.toolbar)
+            self.toolbar_manager.home_button_connect(self.on_home_clicked)
+
+    def on_home_clicked(self):
+        current_axes = self.figure.gca()
+        if self.beam_direction:
+            set_perspective(current_axes, beam_direction=self.beam_direction)
+        current_axes.set_box_aspect((1, 1, 1))  # when upgraded to matplotlib 3.6 use current_axes.set_aspect('equal')
+        self.figure.canvas.draw()
+
 
 def is_visible(plot_number):
     """
@@ -145,9 +167,9 @@ def set_figure_window_title(plot_number, workspace_name):
         figure_manager.set_window_title(f"{workspace_name} Sample Shape")
 
 
-def plot_sample_container_and_components(workspace_name):
+def plot_sample_container_and_components(workspace_name, test=None):
     new_plot = SampleShapePlot()
-    return new_plot.create_plot(workspace_name)
+    return new_plot.create_plot(workspace_name, test=test)
 
 
 def try_to_plot_all_sample_shapes(workspace, figure):
@@ -287,8 +309,36 @@ def set_axes_labels(plot_axes):
     plot_axes.set_zlabel('Z / m')
 
 
-def set_perspective(plot_axes):
-    plot_axes.view_init(elev=15, azim=-135)
+def direction_not_valid(direction):
+    if not direction:
+        return True
+    if direction != "X" and direction != "Z":
+        return True
+    else:
+        return False
+
+
+def set_perspective(plot_axes, workspace=None, beam_direction=None):
+    # assume beam_direction Z (X) means pointingUp direction Y (Z)
+    if direction_not_valid(beam_direction) and not workspace:
+        # guess the original beam_direction and raise warning
+        plot_axes.view_init(vertical_axis='y', elev=30, azim=-135)
+        raise Exception("set_perspective must be called with either beam_direction or a workspace")
+
+    if direction_not_valid(beam_direction):
+        frame = workspace.getInstrument().getReferenceFrame()
+        if frame.pointingUpAxis() == "Y" and frame.pointingAlongBeamAxis() == "Z":
+            # almost all instruments have this instrument reference frame
+            beam_direction = "Z"
+        else:  # e.g. POLREF has beam along X, pointing up Z
+            beam_direction = "X"
+
+    if beam_direction == "Z":
+        plot_axes.view_init(vertical_axis='y', elev=30, azim=-135)
+    else:
+        plot_axes.view_init(vertical_axis='z', elev=30, azim=-135)
+
+    return beam_direction
 
 
 def call_set_mesh_axes_equal(axes, mesh):
@@ -299,6 +349,7 @@ def call_set_mesh_axes_equal(axes, mesh):
 def set_axes_to_largest_mesh(axes, workspace):
     overall_limits = overall_limits_for_all_meshes(workspace)
     call_set_mesh_axes_equal(axes, np.array(overall_limits))
+    axes.set_box_aspect((1, 1, 1))  # when upgraded to matplotlib 3.6 use axes.set_aspect('equal')
 
 
 def overall_limits_for_all_meshes(workspace, include_components=True):
@@ -382,7 +433,7 @@ def add_beam_arrow(plot_axes, workspace):
 def add_arrow(ax, vector, origin=None, factor=None, color='black', linestyle='-'):
     # Add arrows for Beam or Crystal lattice
     if origin is None:
-        origin = (ax.get_xlim3d()[1], ax.get_ylim3d()[1], ax.get_zlim3d()[1])
+        origin = (ax.get_xlim3d()[1], ax.get_ylim3d()[1], ax.get_zlim3d()[0])
     if factor is None:
         lims = ax.get_xlim3d()
         factor = (lims[1]-lims[0]) / 3.0
