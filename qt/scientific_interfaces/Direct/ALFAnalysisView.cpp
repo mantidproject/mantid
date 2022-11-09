@@ -70,8 +70,8 @@ QWidget *ALFAnalysisView::createFitPane(double const start, double const end) {
   auto fitButtonsWidget = setupFitButtonsWidget();
   fitPaneLayout->addWidget(fitButtonsWidget);
 
-  auto peakCentreWidget = setupPeakCentreWidget((start + end) / 2.0);
-  fitPaneLayout->addWidget(peakCentreWidget);
+  auto resultsWidget = setupResultsWidget((start + end) / 2.0);
+  fitPaneLayout->addWidget(resultsWidget);
 
   return fitPane;
 }
@@ -109,25 +109,31 @@ QWidget *ALFAnalysisView::setupFitButtonsWidget() {
   return fitButtonsWidget;
 }
 
-QWidget *ALFAnalysisView::setupPeakCentreWidget(double const centre) {
-  auto *peakCentreWidget = new QWidget();
-  auto *peakCentreLayout = new QGridLayout(peakCentreWidget);
+QWidget *ALFAnalysisView::setupResultsWidget(double const centre) {
+  auto *resultsWidget = new QWidget();
+  auto *resultsLayout = new QGridLayout(resultsWidget);
 
   m_peakCentre = new QLineEdit(QString::number(centre));
   m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
 
   connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
 
-  peakCentreLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
-  peakCentreLayout->addWidget(m_peakCentre, 0, 1);
+  resultsLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
+  resultsLayout->addWidget(m_peakCentre, 0, 1);
 
   m_fitStatus = new QLabel("");
   m_fitStatus->setAlignment(Qt::AlignRight);
   setPeakCentreStatus("");
 
-  peakCentreLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
+  resultsLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
 
-  return peakCentreWidget;
+  m_averagedTwoTheta = new QLineEdit("-");
+  m_averagedTwoTheta->setReadOnly(true);
+
+  resultsLayout->addWidget(new QLabel("Averaged two theta:"), 2, 0);
+  resultsLayout->addWidget(m_averagedTwoTheta, 2, 1);
+
+  return resultsWidget;
 }
 
 void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }

@@ -79,7 +79,7 @@ private:
   QWidget *createFitPane(double const start, double const end);
   QWidget *setupFitRangeWidget(double const start, double const end);
   QWidget *setupFitButtonsWidget();
-  QWidget *setupPeakCentreWidget(double const centre);
+  QWidget *setupResultsWidget(double const centre);
 
   MantidWidgets::PreviewPlot *m_plot;
   QLineEdit *m_start, *m_end;
@@ -88,6 +88,7 @@ private:
   QPushButton *m_updateEstimateButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
+  QLineEdit *m_averagedTwoTheta;
 
   IALFAnalysisPresenter *m_presenter;
 };
