@@ -99,7 +99,7 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   initOptionsTable(algorithmForTooltips);
   initFloodControls();
 
-  auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
+  auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace", "ScaleRHSWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   createStitchHints(strategy.createHints());
 

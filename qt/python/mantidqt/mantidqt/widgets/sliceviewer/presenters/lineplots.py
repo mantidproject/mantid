@@ -412,7 +412,7 @@ def cursor_info(image: AxesImage, xdata: float, ydata: float, full_bbox: Bbox = 
     data coordinates.
     :param image: An instance of an image type
     :param xdata: X data coordinate of cursor
-    :param xdata: Y data coordinate of cursor
+    :param ydata: Y data coordinate of cursor
     :param full_bbox: Bbox of full workspace dimension to use for transforming mouse position
     :return: None if point is not valid on the image else return CursorInfo type
     """

@@ -37,6 +37,15 @@ class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
 
+enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickPlotType { SINGLE = 0, DETECTOR_SUM, TUBE_SUM, TUBE_INTEGRAL };
+enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickXUnits {
+  DETECTOR_ID = 0,
+  LENGTH,
+  PHI,
+  OUT_OF_PLANE_ANGLE,
+  _NUMBER_OF_UNITS
+};
+
 /**
  * Implements the Pick tab in InstrumentWidget.
  * Contains a set of tools which allow one to:
@@ -102,8 +111,12 @@ public:
   /// Save settings for the pick tab to a project file
   virtual std::string saveToProject() const override;
   void addToContextMenu(QAction *action, std::function<bool(std::map<std::string, bool>)> &actionCondition);
+  QPushButton *getSelectTubeButton();
+  void setPlotType(const IWPickPlotType type);
+
 public slots:
   void setTubeXUnits(int units);
+  void setTubeXUnits(const IWPickXUnits units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);
   void savePlotToWorkspace();
 
@@ -235,9 +248,6 @@ class DetectorPlotController : public QObject {
   Q_OBJECT
 
 public:
-  enum PlotType { Single = 0, DetectorSum, TubeSum, TubeIntegral };
-  enum TubeXUnits { DETECTOR_ID = 0, LENGTH, PHI, OUT_OF_PLANE_ANGLE, NUMBER_OF_UNITS };
-
   DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentWidget *instrWidget, MiniPlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
@@ -246,10 +256,11 @@ public:
   void clear();
   void savePlotToWorkspace();
 
-  void setPlotType(PlotType type) { m_plotType = type; }
-  PlotType getPlotType() const { return m_plotType; }
-  void setTubeXUnits(TubeXUnits units);
-  TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
+  void setPlotType(const IWPickPlotType type) { m_plotType = type; }
+  IWPickPlotType getPlotType() const { return m_plotType; }
+  void setTubeXUnits(const IWPickXUnits units);
+  IWPickXUnits getTubeXUnits() const { return m_tubeXUnits; }
+  QString getTubeXLabel() const;
   QString getTubeXUnitsName() const;
   QString getTubeXUnitsUnits() const;
   QString getPlotCaption() const;
@@ -279,9 +290,9 @@ private:
   InstrumentWidget *m_instrWidget;
   MiniPlot *m_plot;
 
-  PlotType m_plotType;
+  IWPickPlotType m_plotType;
   bool m_enabled;
-  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  IWPickXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   size_t m_currentPickID;
 };
 

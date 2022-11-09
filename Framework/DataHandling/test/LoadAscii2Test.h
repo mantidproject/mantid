@@ -153,6 +153,138 @@ public:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
+  void test_Distribution_Header_Flag_true() {
+    // check workspace set to Distribution = True,
+    // when set True in the file header
+    m_testno++;
+    m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", true, true);
+    auto loadedWS = runTest(4, true, "#", "Space");
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Header_Flag_true_Two_Columns() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // when set True in the file header
+    m_testno++;
+    m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", true, true);
+    auto loadedWS = runTest(2, true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Header_Flag_false() {
+    // check workspace set to Distribution = False,
+    // when set False in the file header
+    m_testno++;
+    m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", false, true);
+    auto loadedWS = runTest(4, true, "#", "Space");
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Header_Flag_false_Two_Columns() {
+    // for 2 column test file,
+    // check workspace set to Distribution = False,
+    // when set False in the file header
+    m_testno++;
+    m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", false, true);
+    auto loadedWS = runTest(2, true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_No_Flag_false() {
+    // check workspace set to Distribution = False,
+    // when no flag set in file header
+    m_testno++;
+    m_abspath = writeTestFile(4, true, "#", true, 6, "UserDefined", " ", true, false);
+    auto loadedWS = runTest(4, true, "#", "Space");
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_No_Flag_false_Two_Columns() {
+    // for 2 column test file,
+    // check workspace set to Distribution = False,
+    // when no flag set in file header
+    m_testno++;
+    m_abspath = writeTestFile(2, false, "#", true, 6, "UserDefined", " ", true, false);
+    auto loadedWS = runTest(2, true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), false);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Property_true_No_Flag() {
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when no flag set in file header
+    m_testno++;
+    m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", false, false);
+    auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Property_true_Two_Columns_No_Flag() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when no flag set in file header
+    m_testno++;
+    m_abspath = writeTestFile(2, false, "#", true, 6, "UserDefined", " ", false, false);
+    auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Property_true_Flag_true() {
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set True in file header
+    m_testno++;
+    m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", true, true);
+    auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Property_true_Two_Columns_Flag_true() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set True in file header
+    m_testno++;
+    m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", true, true);
+    auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Property_true_Flag_false() {
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set False in file header
+    m_testno++;
+    m_abspath = writeTestFile(4, false, "#", true, 6, "UserDefined", " ", false, true);
+    auto loadedWS = runTest(4, true, "#", "Space", false, "", true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
+  void test_Distribution_Property_true_Two_Columns_Flag_false() {
+    // for 2 column test file,
+    // check workspace set to Distribution = True,
+    // using Load input property ForceDistributionTrue = True,
+    // when set False in file header
+    m_testno++;
+    m_abspath = writeTestFile(2, true, "#", true, 6, "UserDefined", " ", false, true);
+    auto loadedWS = runTest(2, true, "#", "CSV", false, "", true);
+    TS_ASSERT_EQUALS(loadedWS->isDistribution(), true);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
   void test_fail_five_columns() {
     m_testno++;
     m_abspath = getAbsPath();
@@ -442,7 +574,8 @@ private:
   // Write the test file
   std::string writeTestFile(const int cols, const bool header = true, const std::string &comment = "#",
                             const bool scientific = true, const int precision = -1, const std::string &sep = "CSV",
-                            const std::string &custsep = "") {
+                            const std::string &custsep = "", const bool distribution = false,
+                            const bool saveDistributionFlag = false) {
     SaveAscii2 save;
     save.initialize();
     save.setPropertyValue("Filename", getTestFileName());
@@ -453,8 +586,12 @@ private:
       if (scientific) {
         file << std::scientific;
       }
-      if (header) {
-        file << comment << "X , Y\n";
+      if (header || saveDistributionFlag) {
+        if (saveDistributionFlag) {
+          file << comment << "X , Y Distribution=" << (distribution ? "true" : "false") << "\n";
+        } else {
+          file << comment << "X , Y\n";
+        }
       }
       for (int i = 0; i < 5; i++) {
         file << i << '\n';
@@ -478,6 +615,9 @@ private:
         }
         if (cols == 4)
           wsToSave->setPointStandardDeviations(i, 4, 1.0);
+      }
+      if (saveDistributionFlag) {
+        wsToSave->setDistribution(distribution);
       }
       const std::string name = "SaveAsciiWS";
       AnalysisDataService::Instance().add(name, wsToSave);
@@ -504,7 +644,8 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr runTest(const int cols, const bool dataCheck = true,
                                             const std::string &comment = "#", const std::string &sep = "CSV",
-                                            const bool execThrows = false, const std::string &custsep = "") {
+                                            const bool execThrows = false, const std::string &custsep = "",
+                                            const bool distributionProperty = false) {
     using Mantid::DataHandling::LoadAscii2;
     using namespace Mantid::API;
 
@@ -517,6 +658,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", sep));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CustomSeparator", custsep));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CommentIndicator", comment));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("ForceDistributionTrue", boost::lexical_cast<std::string>(distributionProperty)));
 
     if (execThrows) {
       TS_ASSERT_THROWS_ANYTHING(loader.execute());

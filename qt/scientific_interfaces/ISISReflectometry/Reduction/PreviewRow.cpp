@@ -42,9 +42,9 @@ void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_
 void PreviewRow::setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
 void PreviewRow::setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_reducedWs = std::move(ws); }
 
-std::vector<Mantid::detid_t> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
+boost::optional<ProcessingInstructions> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
 
-void PreviewRow::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept {
+void PreviewRow::setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) noexcept {
   m_selectedBanks = std::move(selectedBanks);
 }
 

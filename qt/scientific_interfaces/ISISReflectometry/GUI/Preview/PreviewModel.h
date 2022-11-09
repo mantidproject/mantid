@@ -36,7 +36,7 @@ public:
   void reduceAsync(IJobManager &jobManager) override;
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
-  std::vector<Mantid::detid_t> getSelectedBanks() const override;
+  boost::optional<ProcessingInstructions> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
   boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const override;
@@ -46,7 +46,7 @@ public:
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace);
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) override;
   void setTheta(double theta) override;
-  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
+  void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) override;
   void setSelectedRegion(ROIType regionType, Selection const &selection) override;
 
   void exportSummedWsToAds() const override;

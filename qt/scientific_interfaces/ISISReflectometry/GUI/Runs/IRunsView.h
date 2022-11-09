@@ -39,6 +39,7 @@ public:
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;
+  virtual void notifyExportSearchResults() const = 0;
 };
 
 class RunsViewTimerSubscriber {

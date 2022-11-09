@@ -527,10 +527,10 @@ private:
                                                MockInstViewModel &mockInstViewModel, MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
-    auto detIDsStr = std::string{"2, 3, 4"};
+    auto detIDsStr = ProcessingInstructions{"2,3,4"};
     EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
-    EXPECT_CALL(mockModel, setSelectedBanks(detIDs)).Times(1);
+    EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
@@ -548,7 +548,7 @@ private:
   }
 
   void expectRegionSelectorToolbarEnabled(MockPreviewView &mockView, bool enable) {
-    EXPECT_CALL(mockView, setRegionSelectorToolbarEnabled(Eq(enable))).Times(1);
+    EXPECT_CALL(mockView, setRegionSelectorEnabled(Eq(enable))).Times(1);
   }
 
   void expectInstViewSetToZoomMode(MockPreviewView &mockView) {
@@ -623,7 +623,7 @@ private:
 
   void expectRegionSelectorCleared(MockPreviewView &mockView, MockRegionSelector *mockRegionSelector) {
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
-    EXPECT_CALL(mockView, setRegionSelectorToolbarEnabled(false)).Times(1);
+    EXPECT_CALL(mockView, setRegionSelectorEnabled(false)).Times(1);
   }
 
   void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {

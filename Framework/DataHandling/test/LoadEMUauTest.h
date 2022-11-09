@@ -63,7 +63,7 @@ public:
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
 
     // check number of histograms
-    TS_ASSERT_EQUALS(output->getNumberHistograms(), 6528);
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 6592);
     double sum = 0.0;
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
       sum += output->readY(i)[0];
@@ -83,10 +83,73 @@ public:
     TS_ASSERT_DELTA(logpm("DopplerFrequency"), 9.974, 1.0e-3);
     TS_ASSERT_DELTA(logpm("DopplerAmplitude"), 0.075, 1.0e-4);
 
+    TS_ASSERT_DELTA(logpm("ReactorPower"), 19.066, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("ScanPeriod"), 240.733, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("env_T3S1"), 0.0, 1.0e-3);
+
     // test some instrument parameters
     auto instr = output->getInstrument();
     auto iparam = [&instr](const std::string &tag) { return instr->getNumberParameter(tag)[0]; };
     TS_ASSERT_DELTA(iparam("AnalysedV2"), 630.866, 1.0e-3);
     TS_ASSERT_DELTA(iparam("SampleAnalyser"), 1.8, 1.0e-3);
+  }
+
+  void test_load_beam_monitor() {
+    LoadEMUTar algToBeTested;
+
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    std::string outputSpace = "LoadEMUauTest";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+
+    // The test is peculiar to the physical configuration and requirements from
+    // the scientist. The pseudo beam monitor is located after the chopper and
+    // maximum and minimum beam monitor rates are required. As the BM also
+    // captures individual events this spectrum is available by setting the
+    // "IncludeBeamMonitor" flag. The test confirms that the BM rates and
+    // total counts are the same regardless of the BM spectrum and that the
+    // spectrum data is available when the flag is set.
+
+    std::string inputFile = "EMU0020493.tar";
+    algToBeTested.setPropertyValue("Filename", inputFile);
+    algToBeTested.setPropertyValue("SelectDetectorTubes", "16-50");
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+
+    // get workspace generated and run
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    auto run = output->run();
+
+    // useful lambda fns
+    auto logpm = [&run](const std::string &tag) {
+      return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))->firstValue();
+    };
+    auto logpmi = [&run](const std::string &tag) {
+      return dynamic_cast<TimeSeriesProperty<int> *>(run.getProperty(tag))->firstValue();
+    };
+    // check number of histograms and the sum
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 6592);
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 3135);
+
+    // check the beam monitor rates
+    TS_ASSERT_DELTA(logpm("BeamMonitorRate"), 1482.76, 1.0e-2);
+    TS_ASSERT_DELTA(logpm("BeamMonitorBkgRate"), 1.01, 1.0e-2);
+    TS_ASSERT_EQUALS(logpmi("MonitorCounts"), 27510);
+
+    // repeat with the beam spectrum included
+    outputSpace = "LoadEMUauTestA";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+    algToBeTested.setPropertyValue("IncludeBeamMonitor", "1");
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    run = output->run();
+
+    // check total number of events, and counts
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 3135 + 27510);
+    TS_ASSERT_DELTA(logpm("BeamMonitorRate"), 1482.76, 1.0e-2);
+    TS_ASSERT_DELTA(logpm("BeamMonitorBkgRate"), 1.01, 1.0e-2);
+    TS_ASSERT_EQUALS(logpmi("MonitorCounts"), 27510);
   }
 };

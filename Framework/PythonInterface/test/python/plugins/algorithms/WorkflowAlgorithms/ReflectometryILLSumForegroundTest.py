@@ -53,7 +53,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
                                       DirectLineWorkspace='db',
                                       DirectForegroundWorkspace='db_frg')
 
-        self.checkOutput(mtd['rb_inq_frg'], 1045)
+        self.checkOutput(mtd['rb_inq_frg'], 1046)
 
 
     def checkOutput(self, ws, blocksize):

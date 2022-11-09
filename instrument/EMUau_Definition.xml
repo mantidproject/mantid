@@ -286,6 +286,218 @@
   <idlist idname="indirect_vids">
     <id start="1024" end="3263"/>
   </idlist>
+  <!-- MONITOR VERTICAL DETECTORS -->
+  <type name="MonitorPixel" is="Monitor">
+    <cylinder id="cyl">
+      <centre-of-bottom-base x="0.0" y="-0.00195312" z="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.00635"/>
+      <height val="0.00390625"/>
+    </cylinder>
+    <algebra val="cyl"/>
+  </type>
+  <type name="MonitorTube" outline="no">
+    <component type="MonitorPixel">
+      <location y="-0.125000000">
+        <neutronic y="-0.125000000"/>
+      </location>
+      <location y="-0.121093750">
+        <neutronic y="-0.121093750"/>
+      </location>
+      <location y="-0.117187500">
+        <neutronic y="-0.117187500"/>
+      </location>
+      <location y="-0.113281250">
+        <neutronic y="-0.113281250"/>
+      </location>
+      <location y="-0.109375000">
+        <neutronic y="-0.109375000"/>
+      </location>
+      <location y="-0.105468750">
+        <neutronic y="-0.105468750"/>
+      </location>
+      <location y="-0.101562500">
+        <neutronic y="-0.101562500"/>
+      </location>
+      <location y="-0.097656250">
+        <neutronic y="-0.097656250"/>
+      </location>
+      <location y="-0.093750000">
+        <neutronic y="-0.093750000"/>
+      </location>
+      <location y="-0.089843750">
+        <neutronic y="-0.089843750"/>
+      </location>
+      <location y="-0.085937500">
+        <neutronic y="-0.085937500"/>
+      </location>
+      <location y="-0.082031250">
+        <neutronic y="-0.082031250"/>
+      </location>
+      <location y="-0.078125000">
+        <neutronic y="-0.078125000"/>
+      </location>
+      <location y="-0.074218750">
+        <neutronic y="-0.074218750"/>
+      </location>
+      <location y="-0.070312500">
+        <neutronic y="-0.070312500"/>
+      </location>
+      <location y="-0.066406250">
+        <neutronic y="-0.066406250"/>
+      </location>
+      <location y="-0.062500000">
+        <neutronic y="-0.062500000"/>
+      </location>
+      <location y="-0.058593750">
+        <neutronic y="-0.058593750"/>
+      </location>
+      <location y="-0.054687500">
+        <neutronic y="-0.054687500"/>
+      </location>
+      <location y="-0.050781250">
+        <neutronic y="-0.050781250"/>
+      </location>
+      <location y="-0.046875000">
+        <neutronic y="-0.046875000"/>
+      </location>
+      <location y="-0.042968750">
+        <neutronic y="-0.042968750"/>
+      </location>
+      <location y="-0.039062500">
+        <neutronic y="-0.039062500"/>
+      </location>
+      <location y="-0.035156250">
+        <neutronic y="-0.035156250"/>
+      </location>
+      <location y="-0.031250000">
+        <neutronic y="-0.031250000"/>
+      </location>
+      <location y="-0.027343750">
+        <neutronic y="-0.027343750"/>
+      </location>
+      <location y="-0.023437500">
+        <neutronic y="-0.023437500"/>
+      </location>
+      <location y="-0.019531250">
+        <neutronic y="-0.019531250"/>
+      </location>
+      <location y="-0.015625000">
+        <neutronic y="-0.015625000"/>
+      </location>
+      <location y="-0.011718750">
+        <neutronic y="-0.011718750"/>
+      </location>
+      <location y="-0.007812500">
+        <neutronic y="-0.007812500"/>
+      </location>
+      <location y="-0.003906250">
+        <neutronic y="-0.003906250"/>
+      </location>
+      <location y="+0.000000000">
+        <neutronic y="+0.000000000"/>
+      </location>
+      <location y="+0.003906250">
+        <neutronic y="+0.003906250"/>
+      </location>
+      <location y="+0.007812500">
+        <neutronic y="+0.007812500"/>
+      </location>
+      <location y="+0.011718750">
+        <neutronic y="+0.011718750"/>
+      </location>
+      <location y="+0.015625000">
+        <neutronic y="+0.015625000"/>
+      </location>
+      <location y="+0.019531250">
+        <neutronic y="+0.019531250"/>
+      </location>
+      <location y="+0.023437500">
+        <neutronic y="+0.023437500"/>
+      </location>
+      <location y="+0.027343750">
+        <neutronic y="+0.027343750"/>
+      </location>
+      <location y="+0.031250000">
+        <neutronic y="+0.031250000"/>
+      </location>
+      <location y="+0.035156250">
+        <neutronic y="+0.035156250"/>
+      </location>
+      <location y="+0.039062500">
+        <neutronic y="+0.039062500"/>
+      </location>
+      <location y="+0.042968750">
+        <neutronic y="+0.042968750"/>
+      </location>
+      <location y="+0.046875000">
+        <neutronic y="+0.046875000"/>
+      </location>
+      <location y="+0.050781250">
+        <neutronic y="+0.050781250"/>
+      </location>
+      <location y="+0.054687500">
+        <neutronic y="+0.054687500"/>
+      </location>
+      <location y="+0.058593750">
+        <neutronic y="+0.058593750"/>
+      </location>
+      <location y="+0.062500000">
+        <neutronic y="+0.062500000"/>
+      </location>
+      <location y="+0.066406250">
+        <neutronic y="+0.066406250"/>
+      </location>
+      <location y="+0.070312500">
+        <neutronic y="+0.070312500"/>
+      </location>
+      <location y="+0.074218750">
+        <neutronic y="+0.074218750"/>
+      </location>
+      <location y="+0.078125000">
+        <neutronic y="+0.078125000"/>
+      </location>
+      <location y="+0.082031250">
+        <neutronic y="+0.082031250"/>
+      </location>
+      <location y="+0.085937500">
+        <neutronic y="+0.085937500"/>
+      </location>
+      <location y="+0.089843750">
+        <neutronic y="+0.089843750"/>
+      </location>
+      <location y="+0.093750000">
+        <neutronic y="+0.093750000"/>
+      </location>
+      <location y="+0.097656250">
+        <neutronic y="+0.097656250"/>
+      </location>
+      <location y="+0.101562500">
+        <neutronic y="+0.101562500"/>
+      </location>
+      <location y="+0.105468750">
+        <neutronic y="+0.105468750"/>
+      </location>
+      <location y="+0.109375000">
+        <neutronic y="+0.109375000"/>
+      </location>
+      <location y="+0.113281250">
+        <neutronic y="+0.113281250"/>
+      </location>
+      <location y="+0.117187500">
+        <neutronic y="+0.117187500"/>
+      </location>
+      <location y="+0.121093750">
+        <neutronic y="+0.121093750"/>
+      </location>
+    </component>
+  </type>
+  <component type="MonitorTube" name="PseudoBeamMonitor" idlist="monitor-ids">
+    <location x="-0.05" y="0.0195" z="-0.5" name="bm_55"/>
+  </component>
+  <idlist idname="monitor-ids">
+    <id start="6528" end="6591"/>
+  </idlist>
   <!-- DIRECT HORIZONTAL DETECTORS -->
   <type name="HorizontalPixel" is="Detector">
     <cylinder id="cyl-hz">

@@ -14,7 +14,7 @@
 namespace Mantid::API {
 
 /*
-  There are some strict parameters that the function arguements must adhere to.
+  There are some strict parameters that the function arguments must adhere to.
 
   - description is always optional (this isn't needed for citation, but gives
     insight as to why this citation is relevant)

@@ -46,13 +46,13 @@ public:
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
-  std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
+  boost::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
   boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
-  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
+  void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) noexcept;
   void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
@@ -64,7 +64,7 @@ public:
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
-  std::vector<Mantid::detid_t> m_selectedBanks;
+  boost::optional<ProcessingInstructions> m_selectedBanks{boost::none};
   boost::optional<ProcessingInstructions> m_processingInstructions{boost::none};
   boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions{boost::none};
   boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions{boost::none};

@@ -83,49 +83,58 @@ using namespace Mantid::API;
 
 namespace MantidQt::MantidWidgets {
 
-PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel() : m_estimateFunction(nullptr) {}
+PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel()
+    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus("") {}
 
-IFunction_sptr PlotFitAnalysisPaneModel::doFit(const std::string &wsName, const std::pair<double, double> &range,
-                                               const IFunction_sptr func) {
+void PlotFitAnalysisPaneModel::doFit(const std::string &wsName, const std::pair<double, double> &range) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
-  alg->setProperty("Function", func);
+  alg->setProperty("Function", m_function);
   alg->setProperty("InputWorkspace", wsName);
   alg->setProperty("Output", wsName + "_fits");
   alg->setProperty("StartX", range.first);
   alg->setProperty("EndX", range.second);
   alg->execute();
-  return alg->getProperty("Function");
+  m_function = alg->getProperty("Function");
+  m_fitStatus = alg->getPropertyValue("OutputStatus");
 }
 
-IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(const std::string &workspaceName,
-                                                           const std::pair<double, double> &range) {
+void PlotFitAnalysisPaneModel::calculateEstimate(const std::string &workspaceName,
+                                                 const std::pair<double, double> &range) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
 
-    m_estimateFunction = calculateEstimate(workspace, range);
-    return m_estimateFunction;
+    m_function = calculateEstimate(workspace, range);
   } else {
-    m_estimateFunction = nullptr;
-    return createCompositeFunction(createFlatBackground(), createGaussian());
+    m_function = createCompositeFunction(createFlatBackground(), createGaussian());
   }
+  m_fitStatus = "";
 }
 
 IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
                                                            const std::pair<double, double> &range) {
-  workspace = cropWorkspace(workspace, range.first, range.second);
-  workspace = convertToPointData(workspace);
+  if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
+    alteredWorkspace = convertToPointData(alteredWorkspace);
 
-  const auto xData = workspace->readX(0);
-  const auto yData = workspace->readY(0);
+    const auto xData = alteredWorkspace->readX(0);
+    const auto yData = alteredWorkspace->readY(0);
 
-  const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
+    const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
-  return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
+    return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
+  }
+  return createCompositeFunction(createFlatBackground(), createGaussian());
 }
 
-bool PlotFitAnalysisPaneModel::hasEstimate() const { return m_estimateFunction != nullptr; }
+void PlotFitAnalysisPaneModel::setPeakCentre(const double centre) {
+  m_function->setParameter("f1.PeakCentre", centre);
+  m_fitStatus = "";
+}
+
+double PlotFitAnalysisPaneModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
+
+std::string PlotFitAnalysisPaneModel::fitStatus() const { return m_fitStatus; }
 
 } // namespace MantidQt::MantidWidgets

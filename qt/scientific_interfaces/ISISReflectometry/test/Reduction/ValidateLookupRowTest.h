@@ -187,4 +187,20 @@ public:
     TS_ASSERT(result.isError());
     TS_ASSERT_EQUALS(result.assertError(), errorCells);
   }
+
+  void testParseROIDetectorIDs() {
+    LookupRowValidator validator;
+    auto result = validator({"", "", "", "", "", "", "", "", "", "", "", "4-7"});
+    TS_ASSERT(result.isValid());
+    TS_ASSERT(result.assertValid().roiDetectorIDs().is_initialized());
+    TS_ASSERT_EQUALS(result.assertValid().roiDetectorIDs().get(), "4-7");
+  }
+
+  void testParseROIDetectorIDsError() {
+    LookupRowValidator validator;
+    auto result = validator({"", "", "", "", "", "", "", "", "", "", "", "bad"});
+    std::unordered_set<int> errorCells = {LookupRow::Column::ROI_DETECTOR_IDS};
+    TS_ASSERT(result.isError());
+    TS_ASSERT_EQUALS(result.assertError(), errorCells);
+  }
 };

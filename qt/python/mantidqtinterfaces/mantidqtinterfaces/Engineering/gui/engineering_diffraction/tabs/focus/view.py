@@ -93,6 +93,6 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def setup_tabbing_order(self):
         self.finder_focus.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
         self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setTabOrder(self.finder_focus.focusProxy(), self.finder_vanadium.focusProxy())
-        self.setTabOrder(self.finder_vanadium.focusProxy(), self.check_plotOutput)
+        self.setTabOrder(self.finder_focus, self.finder_vanadium)
+        self.setTabOrder(self.finder_vanadium, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_focus)

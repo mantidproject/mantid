@@ -36,7 +36,8 @@ using namespace MantidQt::MantidWidgets;
 
 class mockALFData {
 public:
-  mockALFData(const std::string &name, const std::string &instName, const int &run, const bool TOF) : m_name(name) {
+  mockALFData(const std::string &name, const std::string &instName, const int &run, const std::string &unit)
+      : m_name(name) {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, 0.2, 0.01, 0.3);
     // set instrument
     std::shared_ptr<Instrument> inst = std::make_shared<Instrument>();
@@ -46,11 +47,7 @@ public:
     // set units
     ws->setInstrument(inst);
     auto axis = ws->getAxis(0);
-    if (TOF) {
-      axis->setUnit("TOF");
-    } else {
-      axis->setUnit("dSpacing");
-    }
+    axis->setUnit(unit);
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
   }
   ~mockALFData() { AnalysisDataService::Instance().remove(m_name); }

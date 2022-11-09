@@ -77,8 +77,7 @@ void SelectCellOfType::exec() {
   }
 
   // copy current lattice
-  auto o_lattice = std::make_unique<OrientedLattice>(ws->mutableSample().getOrientedLattice());
-  Matrix<double> UB = o_lattice->getUB();
+  Matrix<double> UB = ws->sample().getOrientedLattice().getUB();
 
   if (!IndexingUtils::CheckUB(UB)) {
     throw std::runtime_error("ERROR: The stored UB is not a valid orientation matrix");
@@ -101,45 +100,14 @@ void SelectCellOfType::exec() {
   g_log.notice(std::string(message));
 
   DblMatrix T = info.GetHKL_Tran();
-  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  g_log.notice() << "Reduced to Conventional Cell Transformation Matrix =  " << T.str() << '\n';
   this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
-    std::vector<double> sigabc(6);
-    SelectCellWithForm::DetermineErrors(sigabc, newUB, ws, tolerance);
-    //----------------------------------------------
-    o_lattice->setUB(newUB);
-
-    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
-
-    int n_peaks = ws->getNumberPeaks();
-
-    int num_indexed = 0;
+    int num_indexed;
     double average_error = 0.0;
 
-    if (o_lattice->getMaxOrder() == 0) {
-      std::vector<V3D> miller_indices;
-      std::vector<V3D> q_vectors;
-      for (int i = 0; i < n_peaks; i++) {
-        q_vectors.emplace_back(ws->getPeak(i).getQSampleFrame());
-      }
-      num_indexed = IndexingUtils::CalculateMillerIndices(newUB, q_vectors, tolerance, miller_indices, average_error);
-
-      for (int i = 0; i < n_peaks; i++) {
-        IPeak &peak = ws->getPeak(i);
-        peak.setIntHKL(miller_indices[i]);
-        peak.setHKL(miller_indices[i]);
-      }
-    } else {
-      num_indexed = static_cast<int>(num_indexed);
-      for (int i = 0; i < n_peaks; i++) {
-        IPeak &peak = ws->getPeak(i);
-        average_error += (peak.getHKL()).hklError();
-        peak.setIntHKL(T * peak.getIntHKL());
-        peak.setHKL(T * peak.getHKL());
-      }
-    }
-    ws->mutableSample().setOrientedLattice(std::move(o_lattice));
+    SelectCellWithForm::ApplyTransform(newUB, ws, tolerance, num_indexed, average_error);
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";

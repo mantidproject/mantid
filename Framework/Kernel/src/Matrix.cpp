@@ -992,11 +992,6 @@ yes invert the matrix using analytic formula. If not then use standard Invert
     *this /= scalefactor;
     long double D = m_rawData[0][0];
     long double k = static_cast<long double>(numRows());
-    if ((std::abs(D) >= 2.0) && ((k * std::acosh(D / 2.0)) > std::acosh(std::numeric_limits<long double>::max()))) {
-      *this *= scalefactor;
-      Invert();
-      return;
-    }
 
     for (size_t i = 0; i < numRows(); i++) {
       for (size_t j = 0; j < numCols(); j++) {
@@ -1014,9 +1009,18 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           lambda = std::acosh(-D / 2.0);
         }
         if (std::abs(D) > 2.0) {
-          long double a = std::cosh((k + 1 - iMinusj) * lambda);
-          long double b = std::cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
-          long double c = 2 * std::sinh(lambda) * std::sinh((k + 1) * lambda);
+          long double a, b, c;
+          if (((k + 1) * std::asinh(D / 2.0)) <= std::asinh(std::numeric_limits<long double>::max())) {
+            a = std::cosh((k + 1 - iMinusj) * lambda);
+            b = std::cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
+            c = 2 * std::sinh(lambda) * std::sinh((k + 1) * lambda);
+          } else {
+            // cosh, sinh overflow for x~>710 so use approximation based on expansion of cosh, sinh into e^x and e^-x
+            a = std::exp(-iMinusj * lambda);
+            b = std::exp(-(iPlusj + 2) * lambda) + std::exp(-(2 * k - iPlusj) * lambda);
+            c = 2 * std::sinh(lambda);
+          }
+
           long double value = m_rawData[i][j];
           value *= (a - b) / c;
           m_rawData[i][j] = static_cast<T>(value);

@@ -15,7 +15,7 @@ accessed from the main menu of MantidWorkbench, in *Interfaces → Direct → MS
 MSlice Standalone
 -----------------
 
-MSlice can be used standalone with the command ``bin/mantidpython --classic scripts/MSlice.py``
+When MSlice is installed as a separate conda package, it can be opened with the command ``mslice``
 
 Documentation
 ---------------
