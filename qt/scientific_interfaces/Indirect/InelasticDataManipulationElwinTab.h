@@ -12,19 +12,19 @@
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
-#include "ui_IndirectDataManipulationElwinTab.h"
+#include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace MantidWidgets;
 using namespace IDA;
 
-class MANTIDQT_INDIRECT_DLL IndirectDataManipulationElwinTab : public IndirectDataManipulationTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationElwinTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectDataManipulationElwinTab(QWidget *parent = nullptr);
-  ~IndirectDataManipulationElwinTab();
+  InelasticDataManipulationElwinTab(QWidget *parent = nullptr);
+  ~InelasticDataManipulationElwinTab();
   void updateTableFromModel();
   QTableWidget *getDataTable() const;
 
@@ -89,7 +89,7 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  Ui::IndirectDataManipulationElwinTab m_uiForm;
+  Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
   IndirectDataManipulation *m_parent;
   QTableWidget *m_dataTable;
