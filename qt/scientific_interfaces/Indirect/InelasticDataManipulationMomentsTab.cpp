@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectMoments.h"
+#include "InelasticDataManipulationMomentsTab.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,9 +22,9 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectMoments::IndirectMoments(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_model(std::make_unique<IndirectMomentsModel>()),
-      m_view(std::make_unique<IndirectMomentsView>(parent)) {
+InelasticDataManipulationMomentsTab::InelasticDataManipulationMomentsTab(QWidget *parent)
+    : IndirectDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationMomentsTabModel>()),
+      m_view(std::make_unique<InelasticDataManipulationMomentsTabView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
 
@@ -46,13 +46,13 @@ IndirectMoments::IndirectMoments(QWidget *parent)
   connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
 }
 
-void IndirectMoments::setup() {}
+void InelasticDataManipulationMomentsTab::setup() {}
 
 /**
  * Handles the event of data being loaded. Validates the loaded data.
  *
  */
-void IndirectMoments::handleDataReady(QString const &dataName) {
+void InelasticDataManipulationMomentsTab::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
@@ -62,21 +62,21 @@ void IndirectMoments::handleDataReady(QString const &dataName) {
 /**
  * Handles the scale checkbox being changed.
  */
-void IndirectMoments::handleScaleChanged(int state) { m_model->setScale(state == Qt::Checked); }
+void InelasticDataManipulationMomentsTab::handleScaleChanged(int state) { m_model->setScale(state == Qt::Checked); }
 
 /**
  * Handles the scale value being changed.
  */
-void IndirectMoments::handleScaleValueChanged(double value) { m_model->setScaleValue(value); }
+void InelasticDataManipulationMomentsTab::handleScaleValueChanged(double value) { m_model->setScaleValue(value); }
 
-void IndirectMoments::run() { runAlgorithm(m_model->setupAlgorithm()); }
+void InelasticDataManipulationMomentsTab::run() { runAlgorithm(m_model->setupAlgorithm()); }
 
-bool IndirectMoments::validate() { return true; }
+bool InelasticDataManipulationMomentsTab::validate() { return true; }
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
  */
-void IndirectMoments::plotNewData(QString const &filename) {
+void InelasticDataManipulationMomentsTab::plotNewData(QString const &filename) {
 
   m_view->plotNewData(filename);
   auto const range = getXRangeFromWorkspace(filename.toStdString());
@@ -93,7 +93,7 @@ void IndirectMoments::plotNewData(QString const &filename) {
  * @param prop :: The property being updated
  * @param val :: The new value for the property
  */
-void IndirectMoments::updateProperties(QtProperty *prop, double val) {
+void InelasticDataManipulationMomentsTab::updateProperties(QtProperty *prop, double val) {
   if (prop->propertyName() == "EMin") {
     m_model->setEMin(val);
   } else if (prop->propertyName() == "EMax") {
@@ -106,7 +106,7 @@ void IndirectMoments::updateProperties(QtProperty *prop, double val) {
  *
  * @param error True if the algorithm exited due to error, false otherwise
  */
-void IndirectMoments::momentsAlgComplete(bool error) {
+void InelasticDataManipulationMomentsTab::momentsAlgComplete(bool error) {
   if (error)
     return;
 
@@ -121,7 +121,7 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_view->plotOutput(QString::fromStdString(m_model->getOutputWorkspace()));
 }
 
-void IndirectMoments::setFileExtensionsByName(bool filter) {
+void InelasticDataManipulationMomentsTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Moments");
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
@@ -131,12 +131,12 @@ void IndirectMoments::setFileExtensionsByName(bool filter) {
 /**
  * Handle when Run is clicked
  */
-void IndirectMoments::runClicked() { runTab(); }
+void InelasticDataManipulationMomentsTab::runClicked() { runTab(); }
 
 /**
  * Handles saving of workspaces
  */
-void IndirectMoments::saveClicked() {
+void InelasticDataManipulationMomentsTab::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
     addSaveWorkspaceToQueue(m_model->getOutputWorkspace());
   m_batchAlgoRunner->executeBatchAsync();

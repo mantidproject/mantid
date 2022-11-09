@@ -16,11 +16,11 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectMomentsModel {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationMomentsTabModel {
 
 public:
-  IndirectMomentsModel();
-  ~IndirectMomentsModel() = default;
+  InelasticDataManipulationMomentsTabModel();
+  ~InelasticDataManipulationMomentsTabModel() = default;
   IAlgorithm_sptr setupAlgorithm();
   void setInputWorkspace(const std::string &workspace);
   void setEMin(double eMin);

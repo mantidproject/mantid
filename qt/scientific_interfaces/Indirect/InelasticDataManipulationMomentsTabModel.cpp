@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectMomentsModel.h"
+#include "InelasticDataManipulationMomentsTabModel.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -23,9 +23,9 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectMomentsModel::IndirectMomentsModel() { m_scale = false; }
+InelasticDataManipulationMomentsTabModel::InelasticDataManipulationMomentsTabModel() { m_scale = false; }
 
-IAlgorithm_sptr IndirectMomentsModel::setupAlgorithm() {
+IAlgorithm_sptr InelasticDataManipulationMomentsTabModel::setupAlgorithm() {
   IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
   momentsAlg->initialize();
   momentsAlg->setProperty("InputWorkspace", m_inputWorkspace);
@@ -42,19 +42,19 @@ IAlgorithm_sptr IndirectMomentsModel::setupAlgorithm() {
   return momentsAlg;
 }
 
-void IndirectMomentsModel::setInputWorkspace(const std::string &workspace) {
+void InelasticDataManipulationMomentsTabModel::setInputWorkspace(const std::string &workspace) {
   m_inputWorkspace = workspace;
   m_outputWorkspaceName = m_inputWorkspace.substr(0, m_inputWorkspace.length() - 4) + "_Moments";
 }
 
-void IndirectMomentsModel::setEMin(double eMin) { m_eMin = eMin; }
+void InelasticDataManipulationMomentsTabModel::setEMin(double eMin) { m_eMin = eMin; }
 
-void IndirectMomentsModel::setEMax(double eMax) { m_eMax = eMax; }
+void InelasticDataManipulationMomentsTabModel::setEMax(double eMax) { m_eMax = eMax; }
 
-void IndirectMomentsModel::setScale(bool scale) { m_scale = scale; }
+void InelasticDataManipulationMomentsTabModel::setScale(bool scale) { m_scale = scale; }
 
-void IndirectMomentsModel::setScaleValue(double scaleValue) { m_scaleValue = scaleValue; }
+void InelasticDataManipulationMomentsTabModel::setScaleValue(double scaleValue) { m_scaleValue = scaleValue; }
 
-std::string IndirectMomentsModel::getOutputWorkspace() { return m_outputWorkspaceName; }
+std::string InelasticDataManipulationMomentsTabModel::getOutputWorkspace() { return m_outputWorkspaceName; }
 
 } // namespace MantidQt::CustomInterfaces

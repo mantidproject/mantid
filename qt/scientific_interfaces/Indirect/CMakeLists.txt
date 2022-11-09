@@ -67,9 +67,9 @@ set(SRC_FILES
     IndirectInstrumentConfig.cpp
     IndirectInterface.cpp
     IndirectMolDyn.cpp
-    IndirectMoments.cpp
-    IndirectMomentsModel.cpp
-    IndirectMomentsView.cpp
+    InelasticDataManipulationMomentsTab.cpp
+    InelasticDataManipulationMomentsTabModel.cpp
+    InelasticDataManipulationMomentsTabView.cpp
     IndirectPlotOptionsModel.cpp
     IndirectPlotOptionsPresenter.cpp
     IndirectPlotOptionsView.cpp
@@ -154,8 +154,8 @@ set(MOC_FILES
     IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectMolDyn.h
-    IndirectMoments.h
-    IndirectMomentsView.h
+    InelasticDataManipulationMomentsTab.h
+    InelasticDataManipulationMomentsTabView.h
     IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h
@@ -198,7 +198,7 @@ set(INC_FILES
     IndirectFittingModel.h
     IndirectFitOutput.h
     IndirectFunctionBrowser/ConvFunctionModel.h
-    IndirectMomentsModel.h
+    InelasticDataManipulationMomentsTabModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
     InelasticDataManipulationSqwTabModel.h
@@ -236,7 +236,7 @@ set(UI_FILES
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
     IndirectMolDyn.ui
-    IndirectMoments.ui
+    InelasticDataManipulationMomentsTab.ui
     IndirectPlotOptions.ui
     IndirectSassena.ui
     IndirectSettings.ui

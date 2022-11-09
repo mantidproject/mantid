@@ -7,29 +7,29 @@
 #pragma once
 
 #include "IndirectDataManipulationTab.h"
-#include "IndirectMomentsModel.h"
-#include "IndirectMomentsView.h"
+#include "InelasticDataManipulationMomentsTabModel.h"
+#include "InelasticDataManipulationMomentsTabView.h"
 
 #include "MantidKernel/System.h"
-#include "ui_IndirectMoments.h"
+#include "ui_InelasticDataManipulationMomentsTab.h"
 
 #include <QFont>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** IndirectMoments : Calculates the S(Q,w) Moments of the provided data with
+/** InelasticDataManipulationMomentsTab : Calculates the S(Q,w) Moments of the provided data with
   the user specified range and scale factor
 
 
   @author Samuel Jackson
   @date 13/08/2013
 */
-class DLLExport IndirectMoments : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationMomentsTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectMoments(QWidget *parent = nullptr);
-  ~IndirectMoments() = default;
+  InelasticDataManipulationMomentsTab(QWidget *parent = nullptr);
+  ~InelasticDataManipulationMomentsTab() = default;
 
   void setup() override;
   void run() override;
@@ -52,8 +52,8 @@ private slots:
 private:
   void plotNewData(QString const &filename);
   void setFileExtensionsByName(bool filter) override;
-  std::unique_ptr<IndirectMomentsModel> m_model;
-  std::unique_ptr<IndirectMomentsView> m_view;
+  std::unique_ptr<InelasticDataManipulationMomentsTabModel> m_model;
+  std::unique_ptr<InelasticDataManipulationMomentsTabView> m_view;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
