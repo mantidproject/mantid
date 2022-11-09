@@ -63,7 +63,20 @@ std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
   return std::nullopt;
 }
 
-void ALFAnalysisPresenter::notifyTubeExtracted() { m_view->addSpectrum(m_instrumentPresenter->extractedWsName()); }
+void ALFAnalysisPresenter::notifyTubeExtracted(double const twoTheta) {
+  m_model->clearTwoThetas();
+  m_model->addTwoTheta(twoTheta);
+  m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
+}
+
+void ALFAnalysisPresenter::notifyTubeAveraged(double const twoTheta) {
+  m_model->addTwoTheta(twoTheta);
+  m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
+}
+
+std::size_t ALFAnalysisPresenter::numberOfTubes() const { return m_model->numberOfTubes(); }
+
+void ALFAnalysisPresenter::clearTwoThetas() { return m_model->clearTwoThetas(); }
 
 bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   auto const peakCentre = m_view->peakCentre();

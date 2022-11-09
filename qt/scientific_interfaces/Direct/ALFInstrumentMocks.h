@@ -54,8 +54,8 @@ public:
   MOCK_CONST_METHOD0(extractedWsName, std::string());
   MOCK_CONST_METHOD0(runNumber, std::size_t());
 
-  MOCK_METHOD0(extractSingleTube, void());
-  MOCK_METHOD0(averageTube, void());
+  MOCK_METHOD0(extractSingleTube, std::optional<double>());
+  MOCK_METHOD1(averageTube, std::optional<double>(std::size_t const numberOfTubes));
 
   MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
 };

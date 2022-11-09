@@ -113,21 +113,14 @@ public:
     TS_ASSERT_EQUALS("extractedTubes_ALF82301", m_model->extractedWsName());
   }
 
-  void test_extractSingleTube_will_not_change_the_number_of_tubes_if_a_single_tube_workspace_cannot_be_found() {
-    m_model->extractSingleTube();
-
-    TS_ASSERT(!ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(0u, m_model->numberOfTubesInAverage());
-  }
-
-  void test_extractSingleTube_will_set_the_number_of_tubes_to_one_if_a_single_tube_workspace_exists() {
+  void test_extractSingleTube_will_create_an_extracted_workspace() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("dSpacing");
 
     m_model->extractSingleTube();
 
+    TS_ASSERT(!ADS.doesExist("Curves"));
     TS_ASSERT(ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(1u, m_model->numberOfTubesInAverage());
   }
 
   void test_extractSingleTube_will_create_a_workspace_with_the_expected_dSpacing_units_and_y_values() {
@@ -175,18 +168,17 @@ public:
     TS_ASSERT_DELTA(workspace->readY(0)[2], 0.2, 0.000001);
   }
 
-  void test_averageTube_increments_the_number_of_averaged_tubes() {
+  void test_averageTube_will_remove_the_curve_workspace_from_the_ads_and_add_an_extracted_ws() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
 
     m_model->extractSingleTube();
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
 
-    m_model->averageTube();
+    m_model->averageTube(1u);
 
     TS_ASSERT(!ADS.doesExist("Curves"));
     TS_ASSERT(ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(2u, m_model->numberOfTubesInAverage());
   }
 
   void test_averageTube_creates_an_average_with_the_existing_extracted_workspace() {
@@ -196,7 +188,7 @@ public:
     m_model->extractSingleTube();
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.4);
 
-    m_model->averageTube();
+    m_model->averageTube(1u);
 
     auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
     TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
@@ -204,11 +196,6 @@ public:
     TS_ASSERT_DELTA(workspace->readX(0)[2], 1.6 * 180.0 / M_PI, 0.000001);
     TS_ASSERT_DELTA(workspace->readY(0)[1], 0.3, 0.000001);
     TS_ASSERT_DELTA(workspace->readY(0)[2], 0.3, 0.000001);
-  }
-
-  void test_checkDataIsExtracted_returns_false_if_number_of_tubes_is_zero() {
-    ADS.addOrReplace(m_model->extractedWsName(), WorkspaceCreationHelper::create2DWorkspace(1, 2));
-    TS_ASSERT(!m_model->checkDataIsExtracted());
   }
 
   void test_checkDataIsExtracted_returns_false_if_extracted_workspace_does_not_exist() {

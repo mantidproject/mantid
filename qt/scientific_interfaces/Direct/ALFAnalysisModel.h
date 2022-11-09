@@ -31,6 +31,9 @@ public:
 
   virtual std::string fitStatus() const = 0;
 
+  virtual std::size_t numberOfTubes() const = 0;
+
+  virtual void clearTwoThetas() = 0;
   virtual void addTwoTheta(double const twoTheta) = 0;
   virtual std::optional<double> averageTwoTheta() const = 0;
 };
@@ -47,6 +50,9 @@ public:
 
   std::string fitStatus() const override;
 
+  std::size_t numberOfTubes() const override;
+
+  void clearTwoThetas() override;
   void addTwoTheta(double const twoTheta) override;
   std::optional<double> averageTwoTheta() const override;
 

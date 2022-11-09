@@ -34,7 +34,12 @@ public:
   MOCK_METHOD0(notifyFitClicked, void());
   MOCK_METHOD0(notifyUpdateEstimateClicked, void());
 
-  MOCK_METHOD0(notifyTubeExtracted, void());
+  MOCK_METHOD1(notifyTubeExtracted, void(double const twoTheta));
+  MOCK_METHOD1(notifyTubeAveraged, void(double const twoTheta));
+
+  MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
+
+  MOCK_METHOD0(clearTwoThetas, void());
 };
 
 class MockALFAnalysisView : public IALFAnalysisView {
@@ -66,6 +71,9 @@ public:
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
 
+  MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
+
+  MOCK_METHOD0(clearTwoThetas, void());
   MOCK_METHOD1(addTwoTheta, void(double const twoTheta));
   MOCK_CONST_METHOD0(averageTwoTheta, std::optional<double>());
 };

@@ -42,6 +42,7 @@ public:
     m_workspaceName = "test";
     m_range = std::make_pair(0.0, 1.0);
     m_peakCentre = 0.5;
+    m_twoTheta = 1.1;
 
     auto model = std::make_unique<NiceMock<MockALFAnalysisModel>>();
     m_model = model.get();
@@ -89,7 +90,7 @@ public:
     // set name via addSpectrum
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_twoTheta);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
@@ -103,7 +104,7 @@ public:
     // set name via addSpectrum
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(2).WillRepeatedly(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_twoTheta);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
@@ -115,9 +116,22 @@ public:
   }
 
   void test_notifyTubeExtracted_will_call_addSpectrum_in_the_view() {
+    EXPECT_CALL(*m_model, clearTwoThetas()).Times(1);
+    EXPECT_CALL(*m_model, addTwoTheta(m_twoTheta)).Times(1);
+
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+
+    m_presenter->notifyTubeExtracted(m_twoTheta);
+  }
+
+  void test_notifyTubeAveraged_will_call_addSpectrum_in_the_view() {
+    EXPECT_CALL(*m_model, addTwoTheta(m_twoTheta)).Times(1);
+
+    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+
+    m_presenter->notifyTubeAveraged(m_twoTheta);
   }
 
   void test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
@@ -131,7 +145,7 @@ public:
     // set name via addSpectrum
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_twoTheta);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
@@ -144,7 +158,7 @@ public:
   void test_that_calculateEstimate_is_called_as_expected() {
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(2).WillRepeatedly(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_twoTheta);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
@@ -159,6 +173,7 @@ private:
   std::string m_workspaceName;
   std::pair<double, double> m_range;
   double m_peakCentre;
+  double m_twoTheta;
 
   NiceMock<MockALFAnalysisModel> *m_model;
   std::unique_ptr<NiceMock<MockALFAnalysisView>> m_view;

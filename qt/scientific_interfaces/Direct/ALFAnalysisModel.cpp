@@ -140,14 +140,17 @@ double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f
 
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
 
+std::size_t ALFAnalysisModel::numberOfTubes() const { return m_twoThetas.size(); }
+
+void ALFAnalysisModel::clearTwoThetas() { m_twoThetas.clear(); }
+
 void ALFAnalysisModel::addTwoTheta(double const twoTheta) { m_twoThetas.emplace_back(twoTheta); }
 
 std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
   if (m_twoThetas.empty()) {
     return std::nullopt;
   }
-  auto const count = m_twoThetas.size();
-  return std::reduce(m_twoThetas.cbegin(), m_twoThetas.cend()) / static_cast<double>(count);
+  return std::reduce(m_twoThetas.cbegin(), m_twoThetas.cend()) / static_cast<double>(numberOfTubes());
 }
 
 } // namespace MantidQt::CustomInterfaces

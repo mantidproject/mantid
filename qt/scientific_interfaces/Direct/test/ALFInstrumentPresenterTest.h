@@ -78,7 +78,8 @@ public:
   void test_loadRunNumber_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
     EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(std::nullopt));
 
-    // Expect no call to loadAndTransform
+    // Expect no calls to these methods
+    EXPECT_CALL(*m_analysisPresenter, clearTwoThetas()).Times(0);
     EXPECT_CALL(*m_model, loadAndTransform(_)).Times(0);
 
     m_presenter->loadRunNumber();
@@ -90,6 +91,7 @@ public:
     std::string const errorMessage("Loading of the data failed");
 
     EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_analysisPresenter, clearTwoThetas()).Times(1);
     EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(errorMessage));
     EXPECT_CALL(*m_view, warningBox(errorMessage)).Times(1);
 
@@ -104,6 +106,7 @@ public:
     std::string const filename("ALF82301");
 
     EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_analysisPresenter, clearTwoThetas()).Times(1);
     EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(std::nullopt));
 
     // Expect no call to warningBox
@@ -117,27 +120,58 @@ public:
 
   void test_extractSingleTube_calls_the_expected_methods() {
     std::string const extractedWsName("Extracted_ALF82301");
+    double const twoTheta(30.1);
 
-    EXPECT_CALL(*m_model, extractSingleTube()).Times(1);
+    EXPECT_CALL(*m_model, extractSingleTube()).Times(1).WillOnce(Return(twoTheta));
 
-    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted(twoTheta)).Times(1);
     EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(1);
+
+    m_presenter->extractSingleTube();
+  }
+
+  void test_extractSingleTube_will_not_notify_analysis_presenter_if_two_theta_is_null() {
+    std::string const extractedWsName("Extracted_ALF82301");
+
+    EXPECT_CALL(*m_model, extractSingleTube()).Times(1).WillOnce(Return(std::nullopt));
+
+    // Expect no calls to analysis presenter
+    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted(_)).Times(0);
+    EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(0);
 
     m_presenter->extractSingleTube();
   }
 
   void test_averageTube_calls_the_expected_methods() {
     std::string const extractedWsName("Extracted_ALF82301");
+    std::size_t const numberOfTubes(2u);
+    double const twoTheta(30.1);
 
-    EXPECT_CALL(*m_model, averageTube()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(numberOfTubes));
+    EXPECT_CALL(*m_model, averageTube(numberOfTubes)).Times(1).WillOnce(Return(twoTheta));
 
-    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, notifyTubeAveraged(twoTheta)).Times(1);
 
     m_presenter->averageTube();
   }
 
-  void test_checkDataIsExtracted_calls_the_showAverageTubeOption_method_in_the_model() {
+  void test_averageTube_will_not_notify_analysis_presenter_if_two_theta_is_null() {
+    std::string const extractedWsName("Extracted_ALF82301");
+    std::size_t const numberOfTubes(2u);
+
+    EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(numberOfTubes));
+    EXPECT_CALL(*m_model, averageTube(numberOfTubes)).Times(1).WillOnce(Return(std::nullopt));
+
+    // Expect no calls to analysis presenter
+    EXPECT_CALL(*m_analysisPresenter, notifyTubeAveraged(_)).Times(0);
+
+    m_presenter->averageTube();
+  }
+
+  void test_checkDataIsExtracted_calls_the_checkDataIsExtracted_method_in_the_model() {
+    EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(1u));
     EXPECT_CALL(*m_model, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
+
     m_presenter->checkDataIsExtracted();
   }
 
