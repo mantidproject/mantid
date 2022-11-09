@@ -10,17 +10,17 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-#include "ui_IndirectMoments.h"
+#include "ui_InelasticDataManipulationMomentsTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectMomentsView : public QWidget {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationMomentsTabView : public QWidget {
   Q_OBJECT
 
 public:
-  IndirectMomentsView(QWidget *perent = nullptr);
-  ~IndirectMomentsView();
+  InelasticDataManipulationMomentsTabView(QWidget *perent = nullptr);
+  ~InelasticDataManipulationMomentsTabView();
 
   void setupProperties();
   IndirectPlotOptionsView *getPlotOptions();
@@ -57,7 +57,7 @@ public slots:
 
 private:
   MantidWidgets::RangeSelector *getRangeSelector();
-  Ui::IndirectMoments m_uiForm;
+  Ui::InelasticDataManipulationMomentsTab m_uiForm;
 
   /// Tree of the properties
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;

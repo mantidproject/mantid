@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectMomentsView.h"
+#include "InelasticDataManipulationMomentsTabView.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -23,7 +23,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectMomentsView::IndirectMomentsView(QWidget *parent) {
+InelasticDataManipulationMomentsTabView::InelasticDataManipulationMomentsTabView(QWidget *parent) {
   m_uiForm.setupUi(parent);
   m_dblManager = new QtDoublePropertyManager();
   m_dblEdFac = new DoubleEditorFactory(this);
@@ -52,7 +52,9 @@ IndirectMomentsView::IndirectMomentsView(QWidget *parent) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectMomentsView::~IndirectMomentsView() { m_propTrees["MomentsPropTree"]->unsetFactoryForManager(m_dblManager); }
+InelasticDataManipulationMomentsTabView::~InelasticDataManipulationMomentsTabView() {
+  m_propTrees["MomentsPropTree"]->unsetFactoryForManager(m_dblManager);
+}
 
 /**
  * Updates the property manager when the range selector is moved.
@@ -60,12 +62,12 @@ IndirectMomentsView::~IndirectMomentsView() { m_propTrees["MomentsPropTree"]->un
  * @param min :: The new value of the lower guide
  * @param max :: The new value of the upper guide
  */
-void IndirectMomentsView::rangeChanged(double min, double max) {
+void InelasticDataManipulationMomentsTabView::rangeChanged(double min, double max) {
   m_dblManager->setValue(m_properties["EMin"], min);
   m_dblManager->setValue(m_properties["EMax"], max);
 }
 
-void IndirectMomentsView::setupProperties() {
+void InelasticDataManipulationMomentsTabView::setupProperties() {
 
   const unsigned int NUM_DECIMALS = 6;
   // PROPERTY TREE
@@ -81,11 +83,13 @@ void IndirectMomentsView::setupProperties() {
   m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 }
 
-IndirectPlotOptionsView *IndirectMomentsView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+IndirectPlotOptionsView *InelasticDataManipulationMomentsTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
 
-std::string IndirectMomentsView::getDataName() { return m_uiForm.dsInput->getCurrentDataName().toStdString(); }
+std::string InelasticDataManipulationMomentsTabView::getDataName() {
+  return m_uiForm.dsInput->getCurrentDataName().toStdString();
+}
 
-bool IndirectMomentsView::validate() {
+bool InelasticDataManipulationMomentsTabView::validate() {
   UserInputValidator uiv;
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
 
@@ -99,7 +103,7 @@ bool IndirectMomentsView::validate() {
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
  */
-void IndirectMomentsView::plotNewData(QString const &filename) {
+void InelasticDataManipulationMomentsTabView::plotNewData(QString const &filename) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   // Clears previous plotted data
@@ -120,7 +124,7 @@ void IndirectMomentsView::plotNewData(QString const &filename) {
  * @param max :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
  */
-void IndirectMomentsView::setPlotPropertyRange(const QPair<double, double> &bounds) {
+void InelasticDataManipulationMomentsTabView::setPlotPropertyRange(const QPair<double, double> &bounds) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setMinimum(m_properties["EMin"], bounds.first);
@@ -140,8 +144,8 @@ void IndirectMomentsView::setPlotPropertyRange(const QPair<double, double> &boun
  * @param bounds :: The upper and lower bounds to be set
  * @param range :: The range to set the range selector to.
  */
-void IndirectMomentsView::setRangeSelector(const QPair<double, double> &bounds,
-                                           const boost::optional<QPair<double, double>> &range) {
+void InelasticDataManipulationMomentsTabView::setRangeSelector(const QPair<double, double> &bounds,
+                                                               const boost::optional<QPair<double, double>> &range) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], bounds.first);
@@ -168,7 +172,7 @@ void IndirectMomentsView::setRangeSelector(const QPair<double, double> &bounds,
  * @param rangeSelector :: The range selector
  * @param newValue :: The new value for the minimum
  */
-void IndirectMomentsView::setRangeSelectorMin(double newValue) {
+void InelasticDataManipulationMomentsTabView::setRangeSelectorMin(double newValue) {
   if (newValue <= m_properties["EMax"]->valueText().toDouble())
     getRangeSelector()->setMinimum(newValue);
   else
@@ -184,20 +188,20 @@ void IndirectMomentsView::setRangeSelectorMin(double newValue) {
  * @param rangeSelector :: The range selector
  * @param newValue :: The new value for the maximum
  */
-void IndirectMomentsView::setRangeSelectorMax(double newValue) {
+void InelasticDataManipulationMomentsTabView::setRangeSelectorMax(double newValue) {
   if (newValue >= m_properties["EMin"]->valueText().toDouble())
     getRangeSelector()->setMaximum(newValue);
   else
     m_dblManager->setValue(m_properties["EMax"], getRangeSelector()->getMaximum());
 }
 
-void IndirectMomentsView::replot() { m_uiForm.ppRawPlot->replot(); }
+void InelasticDataManipulationMomentsTabView::replot() { m_uiForm.ppRawPlot->replot(); }
 
-MantidWidgets::RangeSelector *IndirectMomentsView::getRangeSelector() {
+MantidWidgets::RangeSelector *InelasticDataManipulationMomentsTabView::getRangeSelector() {
   return m_uiForm.ppRawPlot->getRangeSelector("XRange");
 }
 
-void IndirectMomentsView::plotOutput(QString outputWorkspace) {
+void InelasticDataManipulationMomentsTabView::plotOutput(QString outputWorkspace) {
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
   m_uiForm.ppMomentsPreview->addSpectrum("M0", outputWorkspace, 0, Qt::green);
@@ -209,12 +213,16 @@ void IndirectMomentsView::plotOutput(QString outputWorkspace) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void IndirectMomentsView::setFBSuffixes(QStringList const suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
+void InelasticDataManipulationMomentsTabView::setFBSuffixes(QStringList const suffix) {
+  m_uiForm.dsInput->setFBSuffixes(suffix);
+}
 
-void IndirectMomentsView::setWSSuffixes(QStringList const suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
+void InelasticDataManipulationMomentsTabView::setWSSuffixes(QStringList const suffix) {
+  m_uiForm.dsInput->setWSSuffixes(suffix);
+}
 
-void IndirectMomentsView::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                          QString const &tooltip) {
+void InelasticDataManipulationMomentsTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
+                                                              QString const &message, QString const &tooltip) {
   m_uiForm.pbRun->setEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

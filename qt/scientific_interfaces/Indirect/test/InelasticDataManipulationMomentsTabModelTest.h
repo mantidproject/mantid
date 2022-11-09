@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IndirectDataValidationHelper.h"
-#include "IndirectMomentsModel.h"
+#include "InelasticDataManipulationMomentsTabModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -15,12 +15,12 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-class IndirectMomentsModelTest : public CxxTest::TestSuite {
+class InelasticDataManipulationMomentsTabModelTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
-  IndirectMomentsModelTest() = default;
+  InelasticDataManipulationMomentsTabModelTest() = default;
 
-  void setUp() override { m_model = std::make_unique<IndirectMomentsModel>(); }
+  void setUp() override { m_model = std::make_unique<InelasticDataManipulationMomentsTabModel>(); }
 
   void test_algorrithm_set_up() {
     // The Moments algorithm is a python algorithm and so can not be called in c++ tests
@@ -40,5 +40,5 @@ public:
 
 private:
   MatrixWorkspace_sptr m_workspace;
-  std::unique_ptr<IndirectMomentsModel> m_model;
+  std::unique_ptr<InelasticDataManipulationMomentsTabModel> m_model;
 };
