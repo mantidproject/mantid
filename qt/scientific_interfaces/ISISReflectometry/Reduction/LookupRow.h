@@ -64,6 +64,7 @@ public:
   boost::optional<ProcessingInstructions> processingInstructions() const;
   boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
   boost::optional<ProcessingInstructions> roiDetectorIDs() const;
+  void setRoiDetectorIDs(boost::optional<ProcessingInstructions> selectedBanks);
   void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
   bool hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const;
 

@@ -7,10 +7,10 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
+#include <QLabel>
 #include <QLineEdit>
 #include <QObject>
 #include <QPushButton>
@@ -22,58 +22,67 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView : public QWidget {
+  Q_OBJECT
+
 public:
-  IPlotFitAnalysisPaneView(){};
+  IPlotFitAnalysisPaneView(QWidget *parent = nullptr) : QWidget(parent) {}
   virtual ~IPlotFitAnalysisPaneView(){};
+  virtual void observePeakCentreLineEdit(Observer *listener) = 0;
   virtual void observeFitButton(Observer *listener) = 0;
   virtual void observeUpdateEstimateButton(Observer *listener) = 0;
   virtual std::pair<double, double> getRange() = 0;
-  virtual Mantid::API::IFunction_sptr getFunction() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
   virtual void addFitSpectrum(const std::string &wsName) = 0;
-  virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
-  virtual void updateFunction(const Mantid::API::IFunction_sptr func) = 0;
   virtual void displayWarning(const std::string &message) = 0;
-  virtual QWidget *getQWidget() = 0;
   virtual void setupPlotFitSplitter(const double &start, const double &end) = 0;
   virtual QWidget *createFitPane(const double &start, const double &end) = 0;
+  virtual void setPeakCentre(const double centre) = 0;
+  virtual double peakCentre() const = 0;
+  virtual void setPeakCentreStatus(const std::string &status) = 0;
 };
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView : public QWidget, public IPlotFitAnalysisPaneView {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneView : public IPlotFitAnalysisPaneView {
   Q_OBJECT
 
 public:
   explicit PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent = nullptr);
 
+  void observePeakCentreLineEdit(Observer *listener) override { m_peakCentreObservable->attach(listener); };
   void observeFitButton(Observer *listener) override { m_fitObservable->attach(listener); };
-
   void observeUpdateEstimateButton(Observer *listener) override { m_updateEstimateObservable->attach(listener); };
 
   std::pair<double, double> getRange() override;
-  Mantid::API::IFunction_sptr getFunction() override;
   void addSpectrum(const std::string &wsName) override;
   void addFitSpectrum(const std::string &wsName) override;
-  void addFunction(Mantid::API::IFunction_sptr func) override;
-  void updateFunction(const Mantid::API::IFunction_sptr func) override;
   void displayWarning(const std::string &message) override;
-  QWidget *getQWidget() override { return static_cast<QWidget *>(this); };
 
+  void setPeakCentre(const double centre) override;
+  double peakCentre() const override;
+
+  void setPeakCentreStatus(const std::string &status) override;
 public slots:
-  void doFit();
-  void updateEstimate();
+  void notifyPeakCentreEditingFinished();
+  void notifyUpdateEstimateClicked();
+  void notifyFitClicked();
 
 protected:
   void setupPlotFitSplitter(const double &start, const double &end) override;
   QWidget *createFitPane(const double &start, const double &end) override;
 
 private:
+  QWidget *setupFitRangeWidget(const double start, const double end);
+  QWidget *setupFitButtonsWidget();
+  QWidget *setupPeakCentreWidget(const double centre);
+
   MantidWidgets::PreviewPlot *m_plot;
-  MantidWidgets::FunctionBrowser *m_fitBrowser;
   QLineEdit *m_start, *m_end;
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
   QPushButton *m_updateEstimateButton;
+  QLineEdit *m_peakCentre;
+  QLabel *m_fitStatus;
+  Observable *m_peakCentreObservable;
   Observable *m_fitObservable;
   Observable *m_updateEstimateObservable;
 };

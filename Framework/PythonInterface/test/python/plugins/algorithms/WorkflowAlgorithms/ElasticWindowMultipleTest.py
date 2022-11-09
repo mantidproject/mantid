@@ -64,24 +64,24 @@ class ElasticWindowMultipleTest(unittest.TestCase):
         np.testing.assert_allclose(np.array(self.q.readX(0)[:5]),
                                    np.array([0, 0, 0.32031, 0.36003, 0.39825]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.q.readY(0)[:5]),
-                                   np.array([9.88673, 9.88670, 9.88577, 9.88557, 9.88662]), atol=1e-4)
+                                   np.array([9.514471, 9.51444 , 9.513404, 9.513185, 9.514346]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.q.readE(0)[:5]),
-                                   np.array([3.14432, 3.14431, 3.14416, 3.14413, 3.14430]), atol=1e-4)
+                                   np.array([3.084554, 3.084549, 3.084381, 3.084345, 3.084533]), atol=1e-4)
 
     def test_ElasticWindowMultiple_returns_the_expected_q2_data(self):
         np.testing.assert_allclose(np.array(self.q2.readX(0)[:5]),
                                    np.array([0, 0, 0.10260, 0.12963, 0.15860]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.q2.readY(0)[:5]),
-                                   np.array([2.29119, 2.29119, 2.29110, 2.29108, 2.29118]), atol=1e-4)
+                                   np.array([2.252814, 2.252811, 2.252702, 2.252679, 2.252801]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.q2.readE(0)[:5]),
-                                   np.array([0.31803, 0.31804, 0.31805, 0.31805, 0.31804]), atol=1e-4)
+                                   np.array([0.324196, 0.324197, 0.324214, 0.324218, 0.324198]), atol=1e-4)
 
     def test_ElasticWindowMultiple_returns_the_expected_elf_data(self):
         np.testing.assert_allclose(np.array(self.elf.readX(0)[:5]), np.array([3, 3, 3, 3, 3]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.elf.readY(0)[:5]),
-                                   np.array([9.88673, 9.73880, 9.64518, 9.576120, 9.51828]), atol=1e-4)
+                                   np.array([9.514471, 9.559956, 9.553371, 9.522874, 9.481508]), atol=1e-4)
         np.testing.assert_allclose(np.array(self.elf.readE(0)[:5]),
-                                   np.array([3.14432, 3.12071, 3.10567, 3.09453, 3.08517]), atol=1e-4)
+                                   np.array([3.084554, 3.091918, 3.090853, 3.085915, 3.079206]), atol=1e-4)
 
     def test_ElasticWindowMultiple_returns_data_with_the_expected_number_of_histograms(self):
         self.assertEqual(self.q.getNumberHistograms(), 7)

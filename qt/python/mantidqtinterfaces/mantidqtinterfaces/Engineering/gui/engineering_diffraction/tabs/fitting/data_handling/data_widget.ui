@@ -314,6 +314,18 @@ QGroupBox:title {
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>combo_xunit</tabstop>
+  <tabstop>combo_region</tabstop>
+  <tabstop>check_addToPlot</tabstop>
+  <tabstop>button_load</tabstop>
+  <tabstop>button_removeSelected</tabstop>
+  <tabstop>button_removeAll</tabstop>
+  <tabstop>button_plotBG</tabstop>
+  <tabstop>button_SeqFit</tabstop>
+  <tabstop>button_SerialFit</tabstop>
+  <tabstop>table_selection</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

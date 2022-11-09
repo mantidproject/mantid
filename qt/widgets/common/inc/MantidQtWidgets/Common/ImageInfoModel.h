@@ -11,6 +11,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include <QMap>
 #include <QString>
 #include <cmath>
 #include <vector>
@@ -59,9 +60,11 @@ public:
   @param x: x data coordinate
   @param y: y data coordinate
   @param signal: the signal value at x, y
+  @param extraValues: extra values to be displayed in the image info table
   @return An ImageInfo object
   */
-  virtual ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const = 0;
+  virtual ImageInfoModel::ImageInfo info(const double x, const double y, const double signal,
+                                         const QMap<QString, QString> &extraValues) const = 0;
 };
 
 } // namespace MantidWidgets

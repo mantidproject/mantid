@@ -20,6 +20,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -37,95 +38,107 @@ public:
   static void destroySuite(PlotFitAnalysisPanePresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = new NiceMock<MockPlotFitAnalysisPaneView>();
-    m_model = new MockPlotFitAnalysisPaneModel();
-    m_presenter = new PlotFitAnalysisPanePresenter(m_view, m_model);
+    auto model = std::make_unique<NiceMock<MockPlotFitAnalysisPaneModel>>();
+    m_model = model.get();
+    m_view = std::make_unique<NiceMock<MockPlotFitAnalysisPaneView>>();
+    m_presenter = std::make_unique<PlotFitAnalysisPanePresenter>(m_view.get(), std::move(model));
     m_workspaceName = "test";
     m_range = std::make_pair(0.0, 1.0);
+    m_peakCentre = 0.5;
+    m_view->setPeakCentre(m_peakCentre);
+    m_model->setPeakCentre(m_peakCentre);
   }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
-    delete m_view;
-    delete m_presenter;
-    m_model = nullptr;
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+
+    m_presenter.reset();
+    m_view.reset();
   }
 
-  void test_doFit() {
+  void test_peakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
+
+    m_presenter->peakCentreEditingFinished();
+  }
+
+  void test_fitClicked_will_display_a_warning_when_the_workspace_name_is_not_set() {
+    EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
+    m_presenter->fitClicked();
+  }
+
+  void test_fitClicked_will_display_a_warning_when_the_peak_centre_is_outside_the_fit_range() {
     // set name via addSpectrum
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
     m_presenter->addSpectrum(m_workspaceName);
-    // set up rest of test
 
-    IFunction_sptr function = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
-
-    EXPECT_CALL(*m_view, getFunction()).Times(1).WillOnce(Return(function));
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+    EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
 
-    EXPECT_CALL(*m_view, updateFunction(function));
-
-    m_presenter->doFit();
-    TS_ASSERT_EQUALS(m_model->getFitCount(), 1);
+    m_presenter->fitClicked();
   }
 
-  void test_addFunction() {
-    auto function = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
-    EXPECT_CALL(*m_view, addFunction(function)).Times(1);
-    m_presenter->addFunction(function);
+  void test_fitClicked_will_perform_a_fit_when_the_workspace_name_and_peak_centre_is_valid() {
+    // set name via addSpectrum
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
+
+    EXPECT_CALL(*m_model, doFit(m_workspaceName, m_range)).Times(1);
+
+    m_presenter->fitClicked();
   }
 
-  void test_addSpectrum() {
+  void test_addSpectrum_will_call_addSpectrum_in_the_view() {
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
     m_presenter->addSpectrum(m_workspaceName);
   }
 
   void test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
-    EXPECT_CALL(*m_view, displayWarning("Could not update estimate: data has not been extracted.")).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
 
-    m_presenter->updateEstimate();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 0);
-    TS_ASSERT(!m_model->hasEstimate());
+    m_presenter->updateEstimateClicked();
+  }
+
+  void test_that_calculateEstimate_is_not_called_when_the_peak_centre_is_invalid() {
+    // set name via addSpectrum
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+    EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
+
+    m_presenter->updateEstimateClicked();
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
     m_presenter->addSpectrum(m_workspaceName);
 
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
 
-    m_presenter->updateEstimate();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
-    TS_ASSERT(m_model->hasEstimate());
-  }
+    EXPECT_CALL(*m_model, calculateEstimate(m_workspaceName, m_range)).Times(1);
 
-  void test_that_updateEstimateAfterExtraction_calls_calculateEstimate_if_an_estimate_does_not_exist() {
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->addSpectrum(m_workspaceName);
-
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
-
-    m_presenter->updateEstimateAfterExtraction();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
-    TS_ASSERT(m_model->hasEstimate());
-  }
-
-  void test_that_updateEstimateAfterExtraction_does_not_call_calculateEstimate_if_an_estimate_already_exists() {
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->addSpectrum(m_workspaceName);
-
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
-
-    m_presenter->updateEstimate();
-    m_presenter->updateEstimateAfterExtraction();
-    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
-    TS_ASSERT(m_model->hasEstimate());
+    m_presenter->updateEstimateClicked();
   }
 
 private:
-  NiceMock<MockPlotFitAnalysisPaneView> *m_view;
-  MockPlotFitAnalysisPaneModel *m_model;
-  PlotFitAnalysisPanePresenter *m_presenter;
+  NiceMock<MockPlotFitAnalysisPaneModel> *m_model;
+  std::unique_ptr<NiceMock<MockPlotFitAnalysisPaneView>> m_view;
+  std::unique_ptr<PlotFitAnalysisPanePresenter> m_presenter;
 
   std::string m_workspaceName;
   std::pair<double, double> m_range;
+  double m_peakCentre;
 };

@@ -232,6 +232,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.sig_change_line_collection_colour_triggered.connect(
                 self.change_line_collection_colour)
+            self.toolbar.sig_hide_plot_triggered.connect(self.hide_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -354,6 +355,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
+
+    def hide_plot(self):
+        self.window.hide()
 
     def copy_to_clipboard(self):
         """Copy the current figure image to clipboard"""

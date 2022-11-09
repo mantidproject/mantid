@@ -11,7 +11,6 @@ Unicode True
 !define PACKAGE_NAME "mantid${PACKAGE_SUFFIX}"
 !define DISPLAY_NAME "Mantid${PACKAGE_SUFFIX}"
 !define MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${PACKAGE_SUFFIX}.lnk"
-!define MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${PACKAGE_SUFFIX}.lnk"
 !define PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source and Institut Laue - Langevin"
 
 Var StartMenuFolder
@@ -283,16 +282,12 @@ Section "-Core installation"
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
         CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "$INSTDIR\bin\mantid_workbench.ico"
-        SetOutPath "$INSTDIR\bin" # Notebook needs to be run from the bin directory
-        CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe" "-m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
         SetOutPath "$INSTDIR" # needs to revert back to original SetOutPath
         CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$\"$INSTDIR\Uninstall.exe$\""
     !insertmacro MUI_STARTMENU_WRITE_END
 
     # Create desktop shortcuts
     CreateShortCut "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}" "$INSTDIR\bin\MantidWorkbench.exe" "" "$INSTDIR\bin\mantid_workbench.ico"
-    SetOutPath "$INSTDIR\bin" # Notebook needs to be run from the bin directory
-    CreateShortCut "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}" "$INSTDIR\bin\python.exe" "-m jupyter notebook --notebook-dir=%userprofile%" "$INSTDIR\bin\mantid_notebook.ico"
     SetOutPath "$INSTDIR" # needs to revert back to original SetOutPath
 
 SectionEnd
@@ -311,13 +306,11 @@ Section "Uninstall"
     # Remove start menu shortcuts
     !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuFolder
     Delete "$SMPROGRAMS\$StartMenuFolder\${MANTIDWORKBENCH_LINK_NAME}"
-    Delete "$SMPROGRAMS\$StartMenuFolder\${MANTIDNOTEBOOK_LINK_NAME}"
     Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk"
     RMDir "$SMPROGRAMS\$StartMenuFolder"
 
     # Remove desktop shortcuts
     Delete "$DESKTOP\${MANTIDWORKBENCH_LINK_NAME}"
-    Delete "$DESKTOP\${MANTIDNOTEBOOK_LINK_NAME}"
 
     # Remove registry keys
     DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PACKAGE_NAME}"

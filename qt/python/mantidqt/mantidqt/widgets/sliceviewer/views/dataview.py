@@ -325,7 +325,7 @@ class SliceViewerDataView(QWidget):
         if self.image is not None:
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
-            self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
+            self._image_info_tracker.on_cursor_outside_axes()
             if hasattr(self.ax, "remove_artists_if"):
                 self.ax.remove_artists_if(lambda art: art == self.image)
             else:
@@ -388,7 +388,8 @@ class SliceViewerDataView(QWidget):
                                                     transform=self.nonortho_transform,
                                                     do_transform=self.nonorthogonal_mode,
                                                     widget=self.image_info_widget,
-                                                    cursor_transform=self._orig_lims)
+                                                    cursor_transform=self._orig_lims,
+                                                    presenter=self.presenter)
 
         if state:
             self._image_info_tracker.connect()
@@ -398,6 +399,7 @@ class SliceViewerDataView(QWidget):
             self._image_info_tracker.disconnect()
             if self._line_plots and not self._region_selection_on:
                 self._line_plots.disconnect()
+        self._image_info_tracker.on_cursor_outside_axes()
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""

@@ -1,8 +1,8 @@
-set(SRC_FILES ALFView.cpp ALFCustomInstrumentView.cpp ALFCustomInstrumentPresenter.cpp ALFCustomInstrumentModel.cpp)
+set(SRC_FILES ALFInstrumentModel.cpp ALFInstrumentPresenter.cpp ALFInstrumentView.cpp ALFView.cpp)
 
-set(MOC_FILES ALFView.h ALFCustomInstrumentView.h ALFCustomInstrumentPresenter.h)
+set(MOC_FILES ALFInstrumentView.h ALFView.h)
 
-set(INC_FILES DllConfig.h ALFCustomInstrumentModel.h ALFCustomInstrumentMocks.h)
+set(INC_FILES ALFInstrumentMocks.h ALFInstrumentModel.h ALFInstrumentPresenter.h DllConfig.h)
 
 # Target
 mtd_add_qt_library(

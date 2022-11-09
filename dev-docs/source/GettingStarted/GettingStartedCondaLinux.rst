@@ -55,33 +55,7 @@ How to build
 
 Building and debugging with CLion
 ---------------------------------
-CLion will fail to find the build targets if the conda environment is not enabled:
-
-* Navigate to ``File > Settings > Build,Execution,Deployment > Toolchains``
-* Edit the CMake and Build Tool settings to point to your conda installed ``cmake`` and ``ninja`` respectively, e.g. ``/home/<user>/mambaforge/envs/mantid-developer/bin/cmake``
-* Navigate to ``File > Settings > Build,Execution,Deployment > CMake`` and change the generator to ``Ninja`` and the CMake options to ``--preset=linux``. Change the build directory to ``build`` (or your own build directory if not the default; you'll need to use the full path if outside the source directory).
-* The configurations drop-down at the top should show all of the build targets. If not, the CMake project is probably not loaded; open the root ``CMakeLists.txt`` file in a tab and there should be a ``Load CMake Project`` option at the top right. Click it and the configurations should be populated.
-* To test a build, navigate to ``Build > Build All in 'Debug'``. Check that the build command displayed in the Messages window is running the correct cmake executable from your conda installation.
-* Note that you can build a specific target by selecting it in the configurations drop-down menu and clicking the hammer icon next to it.
-* To debug workbench, you'll need to edit the ``workbench`` CMake Application configuration. Set the executable to ``python`` in your conda installation, and program arguments to ``workbench --single-process``. Set the working directory to the full path to your ``build/bin`` directory
-
-If this fails you may need to open CLion from a terminal with conda activated, although I have not found this necessary:
-
-* Open a terminal and run ``conda activate mantid-developer``
-* Launch CLion through that terminal (``<CLION_INSTALL>/bin/clion.sh``)
-
-It is also useful to have your terminals in CLion also run with this environment:
-
-* In your ``home`` directory create a file named ``.clionrc`` and open in your favourite text editor, adding these lines:
-
-.. code-block:: text
-
-    source ~/.bashrc
-    source ~/mambaforge/bin/activate mantid-developer
-
-* Start CLion using the above steps
-* Navigate to ``File > Settings > Tools > Terminal``.
-* To the end of the ``Shell path`` option, add: ``--rcfile ~/.clionrc``.
+Please follow the Linux related instructions on :ref:`this page <clion-ref>`.
 
 CMake Conda variables
 -----------------------

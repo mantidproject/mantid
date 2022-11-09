@@ -18,11 +18,13 @@ digraph ReflectometryILLPreprocess {
     waterNorm             [label="Divide by\nwater reference"]
     slitNorm              [label="Divide by\nslit opening area"]
     subtractBkg           [label="Subtract background"]
-  }
+    gravityCorrection     [label="Gravity correction step 1"]
+}
 
   subgraph decisions {
     $decision_style
     isSlitNorm [label="SlitNormalisation?"]
+    correctGravity [label="Correct for gravity?"]
   }
 
   run                   -> load
@@ -35,5 +37,8 @@ digraph ReflectometryILLPreprocess {
   slitNorm              -> fluxNorm
   fluxNorm              -> subtractBkg
   subtractBkg           -> toWavelength
-  toWavelength          -> output
+  toWavelength          -> correctGravity
+  correctGravity        -> output
+  correctGravity        -> gravityCorrection
+  gravityCorrection     -> output
 }

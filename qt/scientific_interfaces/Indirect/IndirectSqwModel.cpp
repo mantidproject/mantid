@@ -29,8 +29,6 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &t
   return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
 }
 
-double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
-
 void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
   auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   converter->initialize();
@@ -148,11 +146,6 @@ UserInputValidator IndirectSqwModel::validate(std::tuple<double, double> const q
                              std::make_pair(m_eLow, m_eHigh));
   }
   return uiv;
-}
-
-std::pair<double, double> IndirectSqwModel::roundToWidth(std::tuple<double, double> const &axisRange, double width) {
-  return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
-                        roundToPrecision(std::get<1>(axisRange), width) - width);
 }
 
 } // namespace MantidQt::CustomInterfaces

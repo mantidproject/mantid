@@ -9,6 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidGeometry/Crystal/ConventionalCell.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -42,7 +44,11 @@ public:
   }
 
   static Kernel::Matrix<double> DetermineErrors(std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
+                                                const Kernel::Matrix<double> &modUB,
                                                 const API::IPeaksWorkspace_sptr &ws, double tolerance);
+
+  static void ApplyTransform(Kernel::Matrix<double> &newUB, API::IPeaksWorkspace_sptr &ws, double tolerance,
+                             int &num_indexed, double &average_error);
 
 private:
   /// Initialise the properties

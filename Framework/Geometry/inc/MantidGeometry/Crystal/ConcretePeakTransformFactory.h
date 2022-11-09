@@ -14,7 +14,7 @@ namespace Geometry {
 /**
 @class ConcretePeakTransformFactory
 Concrete PeakTransformFactory producing PeakTransforms of type provided by type
-arguement
+argument
 */
 template <typename PeakTransformProduct> class DLLExport ConcretePeakTransformFactory : public PeakTransformFactory {
 public:

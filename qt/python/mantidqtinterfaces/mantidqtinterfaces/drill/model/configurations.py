@@ -254,12 +254,14 @@ class RundexSettings(object):
             REFL_POL: {
                 ("SaveNexusProcessed", ".nxs"): False,
                 ("SaveAscii", ".txt"): False,
-                ("SaveReflectometryAscii", ".mft"): True
+                ("SaveReflectometryAscii", ".mft"): True,
+                ("SaveReflectometryAscii", ".lam"): False
                 },
             REFL_NPOL: {
                 ("SaveNexusProcessed", ".nxs"): False,
                 ("SaveAscii", ".txt"): False,
-                ("SaveReflectometryAscii", ".mft"): True
+                ("SaveReflectometryAscii", ".mft"): True,
+                ("SaveReflectometryAscii", ".lam"): False
                 },
             POWDER_DSCAN: {
                 ("SaveNexusProcessed", ".nxs"): False,
@@ -410,7 +412,8 @@ class RundexSettings(object):
                 "ReflFitStartWorkspaceIndex",
                 "ReflFitEndWorkspaceIndex",
                 "ReflFitWavelengthLowerBound",
-                "ReflFitWavelengthUpperBound"
+                "ReflFitWavelengthUpperBound",
+                "CorrectGravity"
                 ],
             REFL_NPOL : [
                 "DirectFlatBackground",
@@ -443,7 +446,8 @@ class RundexSettings(object):
                 "ReflFitStartWorkspaceIndex",
                 "ReflFitEndWorkspaceIndex",
                 "ReflFitWavelengthLowerBound",
-                "ReflFitWavelengthUpperBound"
+                "ReflFitWavelengthUpperBound",
+                "CorrectGravity"
                 ],
             POWDER_DSCAN: [
                 "NormaliseTo",

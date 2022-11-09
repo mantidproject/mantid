@@ -1,0 +1,1 @@
+- Subsampling of data on surface plots is now only performed if the number of rows or columns is greater than 100 (instead of 50)

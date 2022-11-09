@@ -78,9 +78,9 @@ public:
 
   void test_set_and_get_selected_banks() {
     PreviewModel model;
-    const std::vector<Mantid::detid_t> inputRoi{56, 57, 58, 59};
-    model.setSelectedBanks(inputRoi);
-    TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
+    const ProcessingInstructions inputRoi{"56,57,58,59"};
+    model.setSelectedBanks(std::move(inputRoi));
+    TS_ASSERT_EQUALS(inputRoi, *model.getSelectedBanks())
   }
 
   void test_set_selected_signal_region_converts_to_processing_instructions_string() {

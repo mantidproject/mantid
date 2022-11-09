@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 
 # 3rd party imports
-from qtpy.QtCore import QSortFilterProxyModel
-from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
+from qtpy.QtCore import QSortFilterProxyModel, Qt
+from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget, QCheckBox
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 # local imports
@@ -68,6 +68,18 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         self.proxy_model.setSortRole(sort_role)
         self.setModel(self.proxy_model)
 
+    def filter_columns(self, concise, unwanted_columns):
+        """
+        Hide or show columns of the table view
+        :param concise: bool for if the table should be in 'concise mode'
+        :param unwanted_columns: list of columns to hide / show by their header name
+        """
+        header_size = self.source_model.columnCount()
+        for i in range(header_size):
+            header_name = self.source_model.headerData(i, Qt.Horizontal)
+            if header_name in unwanted_columns:
+                self.setColumnHidden(i, concise)
+
 
 class PeaksViewerView(QWidget):
     """Displays a table view of the PeaksWorkspace along with controls
@@ -90,6 +102,7 @@ class PeaksViewerView(QWidget):
         self._group_box: Optional[QGroupBox] = None
         self._presenter: Optional['PeaksViewerPresenter'] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
+        self._concise_check_box: Optional[QCheckBox] = None
         self._setup_ui()
 
     @property
@@ -171,8 +184,12 @@ class PeaksViewerView(QWidget):
         self._table_view.setSelectionMode(_PeaksWorkspaceTableView.SingleSelection)
         self._table_view.clicked.connect(self._on_row_clicked)
         self._table_view.verticalHeader().sectionClicked.connect(self._row_selected)
+        self._concise_check_box = QCheckBox(text="Concise View", parent=self)
+        self._concise_check_box.setChecked(False)
+        self._concise_check_box.stateChanged.connect(self._check_box_clicked)
 
         group_box_layout = QVBoxLayout()
+        group_box_layout.addWidget(self._concise_check_box)
         group_box_layout.addWidget(self._table_view)
         self._group_box.setLayout(group_box_layout)
         widget_layout = QVBoxLayout()
@@ -202,6 +219,12 @@ class PeaksViewerView(QWidget):
             return None
 
         return self.table_view.proxy_model.mapToSource(selected[0]).row()
+
+    def _check_box_clicked(self):
+        """
+        Call presenter method on concise view checkbox state change
+        """
+        self.presenter.concise_checkbox_changes(self._concise_check_box.isChecked())
 
 
 class PeaksViewerCollectionView(QWidget):

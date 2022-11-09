@@ -308,11 +308,9 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(int numPixe
                                                                      const Geometry::Instrument_sptr &inst,
                                                                      const std::string &functionString, bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
+  Points xValues(x);
 
-  // there is a oddity here that y is evaluated from x=0, and x is from XMin
-  // changing it requires changing unit tests that use this algorithm
-  std::vector<double> xValues(cbegin(x), cend(x) - 1);
-  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+  Counts y(evalFunction(functionString, xValues.rawData(), isRandom ? 1 : 0));
 
   std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
   for (int wi = 0; wi < numMonitors + numPixels; wi++)

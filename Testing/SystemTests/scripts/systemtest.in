@@ -7,14 +7,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # Wrapper script to launch the system tests for a development build.
 #
-# It uses the mantidpython launch script to run the tests. All arguments to
+# It uses the python launch script to run the tests. All arguments to
 # this script are forwarded to the test runner.
+
+@JEMALLOC_DEFINITIONS@
 
 PYTHON_EXE=@PYTHON_EXECUTABLE@
 RUNNER_SCRIPT=@SYSTEMTESTS_RUNNER_SCRIPT@
 MULTI_CONFIG_GENERATOR=@MULTI_CONFIG_GENERATOR@
 BIN_DIR=@CMAKE_RUNTIME_OUTPUT_DIRECTORY@
-MANTIDPYTHON_ARGS="--classic"
 
 function usage() {
   if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
@@ -30,12 +31,12 @@ function usage() {
   $PYTHON_EXE $RUNNER_SCRIPT -h
 }
 
-# Sets the MANTIDPYTHON variable
-function setup_mantidpython_path() {
+# Sets the LOACL_PYTHONPATH variable
+function setup_python_path() {
   if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
     if [ "$1" == "-C" ]; then
       if [ -n "$2" ]; then
-        MANTIDPYTHON=$BIN_DIR/$2/mantidpython
+        LOCAL_PYTHONPATH=$BIN_DIR/$2/
       else
         echo "-C requires a config argument"
         usage
@@ -47,7 +48,7 @@ function setup_mantidpython_path() {
       exit 1
     fi
   else
-    MANTIDPYTHON=$BIN_DIR/mantidpython
+    LOCAL_PYTHONPATH=$BIN_DIR/
   fi
 }
 
@@ -56,9 +57,9 @@ if [ "$1" == "-h" ]; then
   exit 0
 fi
 
-# For multi-config generators mantidpython is in a config-dependent subdirectory, otherwise it's just in bin
-MANTIDPYTHON=""
-setup_mantidpython_path $1 $2
+# For multi-config generators the bin folder has a config-dependent subdirectory
+LOCAL_PYTHONPATH=""
+setup_python_path $1 $2
 CMAKE_TARGET_ARG=""
 if [ "$MULTI_CONFIG_GENERATOR" == "true" ]; then
   shift 2
@@ -78,5 +79,7 @@ $CMAKE_EXE --build . $CMAKE_TARGET_ARG -- SystemTestData
 # Execute
 echo
 echo "Running tests..."
-$MANTIDPYTHON $MANTIDPYTHON_ARGS $RUNNER_SCRIPT \
-  --executable="${MANTIDPYTHON}" --exec-args="${MANTIDPYTHON_ARGS}" "$@"
+LD_PRELOAD=${LOCAL_PRELOAD} \
+  PYTHONPATH=${LOCAL_PYTHONPATH} \
+  python3 $RUNNER_SCRIPT \
+  --executable="python3" --exec-args= "$@"

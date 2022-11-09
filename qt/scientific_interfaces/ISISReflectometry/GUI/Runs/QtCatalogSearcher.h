@@ -41,6 +41,7 @@ public:
   bool hasUnsavedChanges() const override;
   void setSaved() override;
   SearchCriteria searchCriteria() const override;
+  std::string getSearchResultsCSV() const override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;

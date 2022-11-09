@@ -118,6 +118,7 @@ Tools
    FlowchartCreation
    VisualStudioBuildImpact
    PyCharm
+   CLion
    VSCode
    Eclipse
    WindowsSubsystemForLinux
@@ -137,6 +138,9 @@ Tools
 
 :doc:`PyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
+
+:doc:`CLion`
+   Describes how to set up CLion to build and debug using a Ninja generator (Windows/Linux only).
 
 :doc:`VSCode`
    Guide to using VSCode for C++ with Mantid.
