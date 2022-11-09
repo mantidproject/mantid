@@ -233,7 +233,7 @@ class HB2AReduce(PythonAlgorithm):
         col_time = col_time[monitor_mask]
 
         # Get either vcorr file or vanadium data
-        colltrans = data['colltrans'][0] if "colltrans" in data else 0.
+        colltrans = data['colltrans'][0] if "colltrans" in data.dtype.names else 0.
         vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask, data['m1'][0],
                                                                     colltrans, exp,
                                                                     indir, metadata)
