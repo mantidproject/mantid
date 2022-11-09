@@ -713,11 +713,19 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             issues["NPixMin"] = "NPixMin exceeds number of pixels in the window."
         # check valid peak workspace
         ws = self.getProperty("InputWorkspace").value
+        inst = ws.getInstrument()
         pk_ws = self.getProperty("PeaksWorkspace").value
-        if ws.getInstrument().getName() != pk_ws.getInstrument().getName():
+        if inst.getName() != pk_ws.getInstrument().getName():
             issues["PeaksWorkspace"] = "PeaksWorkspace must have same instrument as the InputWorkspace."
         if pk_ws.getNumberPeaks() < 1:
             issues["PeaksWorkspace"] = "PeaksWorkspace must have at least 1 peak."
+        # check that is getting dTOF from back-to-back params then they are present in instrument
+        if self.getProperty("GetTOFWindowFromBackToBackParams").value:
+            # check at least first peak in workspace has back to back params
+            if not inst.getComponentByName(pk_ws.column('BankName')[0]).hasParameter('B'):
+                issues["GetTOFWindowFromBackToBackParams"] = "Workspace doesn't have back to back exponential " \
+                                                             "coefficients defined in the parameters.xml file."
+
         return issues
 
     def PyExec(self):

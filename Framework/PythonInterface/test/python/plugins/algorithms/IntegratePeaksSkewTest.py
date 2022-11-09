@@ -9,7 +9,7 @@ import tempfile
 import shutil
 from os import path
 from mantid.simpleapi import (IntegratePeaksSkew, CreatePeaksWorkspace, AddPeak, AnalysisDataService, CloneWorkspace,
-                              LoadEmptyInstrument)
+                              LoadEmptyInstrument, SetInstrumentParameter)
 from IntegratePeaksSkew import InstrumentArrayConverter
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt, arange, ones, zeros
@@ -20,6 +20,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
     def setUpClass(cls):
         # load empty instrument with RectangularDetector banks and create a peak table
         cls.ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(2, 5, 11)  # nbanks, npix, nbins
+        AnalysisDataService.addOrReplace("ws_rect", cls.ws)
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
         # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=3.5)
@@ -28,6 +29,9 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         for ispec in [7, 11, 12, 13, 17, 22]:
             cls.ws.setY(ispec, cls.ws.readY(ispec) + cls.peak_1D)
             cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
+        # Add back-to-back exponential params
+        for param in ['A','B','S']:
+            SetInstrumentParameter(cls.ws, ParameterName=param, Value="1")
         # make peak table
         # 0) inside fake peak (bank 1)
         # 1) outside fake peak (bank 1)
