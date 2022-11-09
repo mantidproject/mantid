@@ -65,7 +65,7 @@ public:
   MOCK_METHOD0(getLoadWidget, QWidget *());
   MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget *());
 
-  MOCK_METHOD1(subscribeAnalysisPresenter, void(MantidWidgets::PlotFitAnalysisPanePresenter *presenter));
+  MOCK_METHOD1(subscribeAnalysisPresenter, void(MantidWidgets::IPlotFitAnalysisPanePresenter *presenter));
 
   MOCK_METHOD0(loadRunNumber, void());
 
