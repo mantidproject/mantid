@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataManipulationTab.h"
+#include "InelasticDataManipulationTab.h"
 
 #include "InelasticDataManipulationSymmetriseTabModel.h"
 #include "InelasticDataManipulationSymmetriseTabView.h"
@@ -39,7 +39,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport InelasticDataManipulationSymmetriseTab : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationSymmetriseTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:

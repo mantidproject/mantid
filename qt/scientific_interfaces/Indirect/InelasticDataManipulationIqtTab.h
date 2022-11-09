@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataManipulationTab.h"
+#include "InelasticDataManipulationTab.h"
 #include "ui_InelasticDataManipulationIqtTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport InelasticDataManipulationIqtTab : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationIqtTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:

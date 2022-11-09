@@ -151,7 +151,7 @@ QStringList getSampleFBSuffices() {
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()),
+    : InelasticDataManipulationTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()),
       m_selectedSpectrum(0) {
 
   // Create Editor Factories
@@ -165,7 +165,7 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SIGNAL(dataRemoved()));
 
-  m_parent = dynamic_cast<IndirectDataManipulation *>(parent);
+  m_parent = dynamic_cast<InelasticDataManipulation *>(parent);
   m_dataTable = getDataTable();
 
   const QStringList headers = defaultHeaders();

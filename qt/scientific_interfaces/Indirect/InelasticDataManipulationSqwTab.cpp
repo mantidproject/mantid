@@ -33,7 +33,7 @@ namespace MantidQt::CustomInterfaces {
 /** Constructor
  */
 InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent)
-    : IndirectDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationSqwTabModel>()),
+    : InelasticDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationSqwTabModel>()),
       m_view(std::make_unique<InelasticDataManipulationSqwTabView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraContour));

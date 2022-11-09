@@ -7,9 +7,9 @@
 #pragma once
 
 #include "IAddWorkspaceDialog.h"
-#include "IndirectDataManipulation.h"
-#include "IndirectDataManipulationTab.h"
 #include "IndirectFitDataModel.h"
+#include "InelasticDataManipulation.h"
+#include "InelasticDataManipulationTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 using namespace MantidWidgets;
 using namespace IDA;
 
-class MANTIDQT_INDIRECT_DLL InelasticDataManipulationElwinTab : public IndirectDataManipulationTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationElwinTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:
@@ -91,7 +91,7 @@ private:
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
-  IndirectDataManipulation *m_parent;
+  InelasticDataManipulation *m_parent;
   QTableWidget *m_dataTable;
   std::unique_ptr<IndirectFitDataModel> m_dataModel;
   int m_selectedSpectrum;

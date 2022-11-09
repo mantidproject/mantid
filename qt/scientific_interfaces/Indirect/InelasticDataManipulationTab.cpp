@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectDataManipulationTab.h"
+#include "InelasticDataManipulationTab.h"
 
 #include "IndirectDataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -19,29 +19,29 @@ using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
 
 namespace {
-Mantid::Kernel::Logger g_log("IndirectDataManipulationTab");
+Mantid::Kernel::Logger g_log("InelasticDataManipulationTab");
 }
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectDataManipulationTab::IndirectDataManipulationTab(QObject *parent) : IndirectTab(parent), m_tabRunning(false) {
+InelasticDataManipulationTab::InelasticDataManipulationTab(QObject *parent) : IndirectTab(parent), m_tabRunning(false) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 
-IndirectDataManipulationTab::~IndirectDataManipulationTab() = default;
+InelasticDataManipulationTab::~InelasticDataManipulationTab() = default;
 
-void IndirectDataManipulationTab::setOutputPlotOptionsPresenter(
+void InelasticDataManipulationTab::setOutputPlotOptionsPresenter(
     std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
 }
 
-void IndirectDataManipulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
+void InelasticDataManipulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
-void IndirectDataManipulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
+void InelasticDataManipulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
 
-void IndirectDataManipulationTab::runTab() {
+void InelasticDataManipulationTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
@@ -67,7 +67,7 @@ void IndirectDataManipulationTab::runTab() {
  *
  * @param error Unused
  */
-void IndirectDataManipulationTab::tabExecutionComplete(bool error) {
+void InelasticDataManipulationTab::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
@@ -81,6 +81,6 @@ void IndirectDataManipulationTab::tabExecutionComplete(bool error) {
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectDataManipulationTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
+void InelasticDataManipulationTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
 } // namespace MantidQt::CustomInterfaces
