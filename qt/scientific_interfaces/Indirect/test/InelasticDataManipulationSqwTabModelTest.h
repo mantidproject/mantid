@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IndirectDataValidationHelper.h"
-#include "IndirectSqwModel.h"
+#include "InelasticDataManipulationSqwTabModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -15,12 +15,12 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-class IndirectSqwModelTest : public CxxTest::TestSuite {
+class InelasticDataManipulationSqwTabModelTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
-  IndirectSqwModelTest() = default;
+  InelasticDataManipulationSqwTabModelTest() = default;
 
-  void setUp() override { m_model = std::make_unique<IndirectSqwModel>(); }
+  void setUp() override { m_model = std::make_unique<InelasticDataManipulationSqwTabModel>(); }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
@@ -108,5 +108,5 @@ public:
 
 private:
   MatrixWorkspace_sptr m_workspace;
-  std::unique_ptr<IndirectSqwModel> m_model;
+  std::unique_ptr<InelasticDataManipulationSqwTabModel> m_model;
 };

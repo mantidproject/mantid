@@ -18,11 +18,11 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSqwModel {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationSqwTabModel {
 
 public:
-  IndirectSqwModel();
-  ~IndirectSqwModel() = default;
+  InelasticDataManipulationSqwTabModel();
+  ~InelasticDataManipulationSqwTabModel() = default;
   void setupRebinAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
   void setupSofQWAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
   void setupAddSampleLogAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);

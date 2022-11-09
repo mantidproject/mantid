@@ -40,7 +40,7 @@ public:
   /// Interface name
   static std::string name() { return "Data Manipulation"; }
   // This interface's categories.
-  static QString categoryInfo() { return "Indirect"; }
+  static QString categoryInfo() { return "Inelastic"; }
 
   /// Initialize the layout
   void initLayout() override;

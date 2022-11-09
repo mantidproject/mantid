@@ -11,17 +11,17 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-#include "ui_IndirectSqw.h"
+#include "ui_InelasticDataManipulationSqwTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSqwView : public QWidget {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationSqwTabView : public QWidget {
   Q_OBJECT
 
 public:
-  IndirectSqwView(QWidget *perent = nullptr);
-  ~IndirectSqwView();
+  InelasticDataManipulationSqwTabView(QWidget *perent = nullptr);
+  ~InelasticDataManipulationSqwTabView();
 
   IndirectPlotOptionsView *getPlotOptions();
   void setFBSuffixes(QStringList suffix);
@@ -57,7 +57,7 @@ private:
   void setEnergyRange(std::tuple<double, double> const &axisRange);
 
   void setRunEnabled(bool enabled);
-  Ui::IndirectSqw m_uiForm;
+  Ui::InelasticDataManipulationSqwTab m_uiForm;
 
   /// Tree of the properties
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;
