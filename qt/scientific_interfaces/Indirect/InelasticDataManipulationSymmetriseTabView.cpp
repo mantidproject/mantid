@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSymmetriseView.h"
+#include "InelasticDataManipulationSymmetriseTabView.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -34,7 +34,7 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
+InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseTabView(QWidget *parent) {
   m_uiForm.setupUi(parent);
   m_dblManager = new QtDoublePropertyManager();
   m_grpManager = new QtGroupPropertyManager();
@@ -134,9 +134,9 @@ IndirectSymmetriseView::IndirectSymmetriseView(QWidget *parent) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectSymmetriseView::~IndirectSymmetriseView() {}
+InelasticDataManipulationSymmetriseTabView::~InelasticDataManipulationSymmetriseTabView() {}
 
-void IndirectSymmetriseView::setDefaults() {
+void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   // Set default X range values
   m_dblManager->setValue(m_properties["EMax"], 0.5);
   m_dblManager->setValue(m_properties["EMin"], 0.1);
@@ -157,7 +157,9 @@ void IndirectSymmetriseView::setDefaults() {
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-IndirectPlotOptionsView *IndirectSymmetriseView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+IndirectPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() {
+  return m_uiForm.ipoPlotOptions;
+}
 
 /**
  * Verifies that the E Range is valid.
@@ -165,7 +167,7 @@ IndirectPlotOptionsView *IndirectSymmetriseView::getPlotOptions() { return m_uiF
  * @param prop QtProperty changed
  * @param value Value it was changed to (unused)
  */
-void IndirectSymmetriseView::verifyERange(QtProperty *prop, double value) {
+void InelasticDataManipulationSymmetriseTabView::verifyERange(QtProperty *prop, double value) {
   UNUSED_ARG(value);
 
   double eMin = m_dblManager->value(m_properties["EMin"]);
@@ -208,7 +210,7 @@ void IndirectSymmetriseView::verifyERange(QtProperty *prop, double value) {
  * @param prop QtProperty changed
  * @param value Value it was changed to (unused)
  */
-void IndirectSymmetriseView::updateRangeSelectors(QtProperty *prop, double value) {
+void InelasticDataManipulationSymmetriseTabView::updateRangeSelectors(QtProperty *prop, double value) {
   auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
 
   value = fabs(value);
@@ -225,7 +227,7 @@ void IndirectSymmetriseView::updateRangeSelectors(QtProperty *prop, double value
  *
  * @param value New range selector value
  */
-void IndirectSymmetriseView::xRangeMinChanged(double value) {
+void InelasticDataManipulationSymmetriseTabView::xRangeMinChanged(double value) {
   m_dblManager->setValue(m_properties["EMin"], std::abs(value));
   m_uiForm.pbPreview->setEnabled(true);
 }
@@ -235,13 +237,13 @@ void IndirectSymmetriseView::xRangeMinChanged(double value) {
  *
  * @param value New range selector value
  */
-void IndirectSymmetriseView::xRangeMaxChanged(double value) {
+void InelasticDataManipulationSymmetriseTabView::xRangeMaxChanged(double value) {
   m_dblManager->setValue(m_properties["EMax"], std::abs(value));
   m_uiForm.pbPreview->setEnabled(true);
 }
 
-void IndirectSymmetriseView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
-                                             QString const &message, QString const &tooltip) {
+void InelasticDataManipulationSymmetriseTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
+                                                                 QString const &message, QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
@@ -249,13 +251,17 @@ void IndirectSymmetriseView::updateRunButton(bool enabled, std::string const &en
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-void IndirectSymmetriseView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void InelasticDataManipulationSymmetriseTabView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectSymmetriseView::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void InelasticDataManipulationSymmetriseTabView::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectSymmetriseView::setFBSuffixes(QStringList const suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
+void InelasticDataManipulationSymmetriseTabView::setFBSuffixes(QStringList const suffix) {
+  m_uiForm.dsInput->setFBSuffixes(suffix);
+}
 
-void IndirectSymmetriseView::setWSSuffixes(QStringList const suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
+void InelasticDataManipulationSymmetriseTabView::setWSSuffixes(QStringList const suffix) {
+  m_uiForm.dsInput->setWSSuffixes(suffix);
+}
 
 /**
  * Plots a new workspace in the mini plot when it is loaded form the data
@@ -263,7 +269,7 @@ void IndirectSymmetriseView::setWSSuffixes(QStringList const suffix) { m_uiForm.
  *
  * @param workspaceName Name of the workspace that has been loaded
  */
-void IndirectSymmetriseView::plotNewData(QString const &workspaceName) {
+void InelasticDataManipulationSymmetriseTabView::plotNewData(QString const &workspaceName) {
   // Set the preview spectrum number to the first spectrum in the workspace
   auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
   int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
@@ -303,7 +309,7 @@ void IndirectSymmetriseView::plotNewData(QString const &workspaceName) {
 /**
  * Updates the mini plots.
  */
-void IndirectSymmetriseView::updateMiniPlots() {
+void InelasticDataManipulationSymmetriseTabView::updateMiniPlots() {
   if (!m_uiForm.dsInput->isValid())
     return;
 
@@ -330,7 +336,7 @@ void IndirectSymmetriseView::updateMiniPlots() {
  * @param prop QtProperty that was changed
  * @param value Value it was changed to
  */
-void IndirectSymmetriseView::replotNewSpectrum(double value) {
+void InelasticDataManipulationSymmetriseTabView::replotNewSpectrum(double value) {
   // Validate the preview spectra
   // Get the range of possible spectra numbers
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
@@ -354,7 +360,7 @@ void IndirectSymmetriseView::replotNewSpectrum(double value) {
   updateMiniPlots();
 }
 
-bool IndirectSymmetriseView::validate() {
+bool InelasticDataManipulationSymmetriseTabView::validate() {
   UserInputValidator uiv;
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
 
@@ -370,17 +376,21 @@ bool IndirectSymmetriseView::validate() {
   return errorMessage.isEmpty();
 }
 
-void IndirectSymmetriseView::setRawPlotWatchADS(bool watchADS) { m_uiForm.ppRawPlot->watchADS(watchADS); }
+void InelasticDataManipulationSymmetriseTabView::setRawPlotWatchADS(bool watchADS) {
+  m_uiForm.ppRawPlot->watchADS(watchADS);
+}
 
-double IndirectSymmetriseView::getEMin() { return m_dblManager->value(m_properties["EMin"]); }
+double InelasticDataManipulationSymmetriseTabView::getEMin() { return m_dblManager->value(m_properties["EMin"]); }
 
-double IndirectSymmetriseView::getEMax() { return m_dblManager->value(m_properties["EMax"]); }
+double InelasticDataManipulationSymmetriseTabView::getEMax() { return m_dblManager->value(m_properties["EMax"]); }
 
-double IndirectSymmetriseView::getPreviewSpec() { return m_dblManager->value(m_properties["PreviewSpec"]); }
+double InelasticDataManipulationSymmetriseTabView::getPreviewSpec() {
+  return m_dblManager->value(m_properties["PreviewSpec"]);
+}
 
-QString IndirectSymmetriseView::getInputName() { return m_uiForm.dsInput->getCurrentDataName(); }
+QString InelasticDataManipulationSymmetriseTabView::getInputName() { return m_uiForm.dsInput->getCurrentDataName(); }
 
-void IndirectSymmetriseView::previewAlgDone() {
+void InelasticDataManipulationSymmetriseTabView::previewAlgDone() {
   QString workspaceName = getInputName();
   int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
@@ -422,8 +432,8 @@ void IndirectSymmetriseView::previewAlgDone() {
   m_uiForm.ppRawPlot->watchADS(true);
 }
 
-void IndirectSymmetriseView::enableSave(bool save) { m_uiForm.pbSave->setEnabled(save); }
+void InelasticDataManipulationSymmetriseTabView::enableSave(bool save) { m_uiForm.pbSave->setEnabled(save); }
 
-void IndirectSymmetriseView::enableRun(bool run) { m_uiForm.pbRun->setEnabled(run); }
+void InelasticDataManipulationSymmetriseTabView::enableRun(bool run) { m_uiForm.pbRun->setEnabled(run); }
 
 } // namespace MantidQt::CustomInterfaces

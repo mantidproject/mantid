@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectSymmetrise</class>
- <widget class="QWidget" name="IndirectSymmetrise">
+ <class>InelasticDataManipulationSymmetriseTab</class>
+ <widget class="QWidget" name="InelasticDataManipulationSymmetriseTab">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>507</width>
-    <height>606</height>
+    <height>623</height>
    </rect>
   </property>
   <property name="minimumSize">

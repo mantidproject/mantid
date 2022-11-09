@@ -11,17 +11,17 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-#include "ui_IndirectSymmetrise.h"
+#include "ui_InelasticDataManipulationSymmetriseTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSymmetriseView : public QWidget {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationSymmetriseTabView : public QWidget {
   Q_OBJECT
 
 public:
-  IndirectSymmetriseView(QWidget *perent = nullptr);
-  ~IndirectSymmetriseView();
+  InelasticDataManipulationSymmetriseTabView(QWidget *perent = nullptr);
+  ~InelasticDataManipulationSymmetriseTabView();
   void setDefaults();
   IndirectPlotOptionsView *getPlotOptions();
   void setFBSuffixes(QStringList const suffix);
@@ -60,7 +60,7 @@ private slots:
 private:
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  Ui::IndirectSymmetrise m_uiForm;
+  Ui::InelasticDataManipulationSymmetriseTab m_uiForm;
 
   /// Tree of the properties
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;

@@ -17,11 +17,11 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectSymmetriseModel {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationSymmetriseTabModel {
 
 public:
-  IndirectSymmetriseModel();
-  ~IndirectSymmetriseModel() = default;
+  InelasticDataManipulationSymmetriseTabModel();
+  ~InelasticDataManipulationSymmetriseTabModel() = default;
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange);
   std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
   void setWorkspaceName(QString workspaceName);

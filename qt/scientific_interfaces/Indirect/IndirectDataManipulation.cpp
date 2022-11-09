@@ -11,9 +11,9 @@
 
 #include "IndirectDataManipulationElwinTab.h"
 #include "IndirectDataManipulationIqtTab.h"
-#include "IndirectSymmetrise.h"
 #include "InelasticDataManipulationMomentsTab.h"
 #include "InelasticDataManipulationSqwTab.h"
+#include "InelasticDataManipulationSymmetriseTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -58,7 +58,7 @@ void IndirectDataManipulation::initLayout() {
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Create the tabs
-  addTab<IndirectSymmetrise>("Symmetrise");
+  addTab<InelasticDataManipulationSymmetriseTab>("Symmetrise");
   addTab<InelasticDataManipulationSqwTab>("S(Q, w)");
   addTab<InelasticDataManipulationMomentsTab>("Moments");
   addTab<IndirectDataManipulationElwinTab>("Elwin");

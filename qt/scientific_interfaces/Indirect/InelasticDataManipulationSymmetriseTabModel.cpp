@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSymmetriseModel.h"
+#include "InelasticDataManipulationSymmetriseTabModel.h"
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,10 +24,10 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSymmetriseModel::IndirectSymmetriseModel() {}
+InelasticDataManipulationSymmetriseTabModel::InelasticDataManipulationSymmetriseTabModel() {}
 
-void IndirectSymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                                    std::vector<long> spectraRange) {
+void InelasticDataManipulationSymmetriseTabModel::setupPreviewAlgorithm(
+    MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange) {
   // Run the algorithm on the preview spectrum only, these outputs are only for plotting in the preview window and are
   // not accessed by users directly.
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
@@ -43,7 +43,8 @@ void IndirectSymmetriseModel::setupPreviewAlgorithm(MantidQt::API::BatchAlgorith
   batchAlgoRunner->addAlgorithm(symmetriseAlg);
 }
 
-std::string IndirectSymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
+std::string InelasticDataManipulationSymmetriseTabModel::setupSymmetriseAlgorithm(
+    MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) {
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
   symmetriseAlg->setProperty("InputWorkspace", m_inputWorkspace);
@@ -56,15 +57,15 @@ std::string IndirectSymmetriseModel::setupSymmetriseAlgorithm(MantidQt::API::Bat
   return m_outputWorkspace;
 }
 
-void IndirectSymmetriseModel::setWorkspaceName(QString workspaceName) {
+void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(QString workspaceName) {
   m_inputWorkspace = workspaceName.toStdString();
   // the last 4 characters in the workspace name are '_red' the ouput weorkspace name is inserting '_sym' before that
   // '_red'
   m_outputWorkspace = (workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4)).toStdString();
 }
 
-void IndirectSymmetriseModel::setEMin(double value) { m_eMin = value; }
+void InelasticDataManipulationSymmetriseTabModel::setEMin(double value) { m_eMin = value; }
 
-void IndirectSymmetriseModel::setEMax(double value) { m_eMax = value; }
+void InelasticDataManipulationSymmetriseTabModel::setEMax(double value) { m_eMax = value; }
 
 } // namespace MantidQt::CustomInterfaces

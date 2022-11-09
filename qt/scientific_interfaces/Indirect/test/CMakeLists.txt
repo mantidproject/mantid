@@ -24,7 +24,7 @@ set(TEST_FILES
     IndirectSettingsModelTest.h
     IndirectSettingsPresenterTest.h
     InelasticDataManipulationSqwTabModelTest.h
-    IndirectSymmetriseModelTest.h
+    InelasticDataManipulationSymmetriseTabModelTest.h
     IqtFitModelTest.h
 )
 

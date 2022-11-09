@@ -8,11 +8,11 @@
 
 #include "IndirectDataManipulationTab.h"
 
-#include "IndirectSymmetriseModel.h"
-#include "IndirectSymmetriseView.h"
+#include "InelasticDataManipulationSymmetriseTabModel.h"
+#include "InelasticDataManipulationSymmetriseTabView.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
-#include "ui_IndirectSymmetrise.h"
+#include "ui_InelasticDataManipulationSymmetriseTab.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -34,17 +34,17 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** IndirectSymmetrise
+/** InelasticDataManipulationSymmetriseTab
 
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport IndirectSymmetrise : public IndirectDataManipulationTab {
+class DLLExport InelasticDataManipulationSymmetriseTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectSymmetrise(QWidget *parent = nullptr);
-  ~IndirectSymmetrise() override;
+  InelasticDataManipulationSymmetriseTab(QWidget *parent = nullptr);
+  ~InelasticDataManipulationSymmetriseTab() override;
 
   void setup() override;
   void run() override;
@@ -64,8 +64,8 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
-  std::unique_ptr<IndirectSymmetriseView> m_view;
-  std::unique_ptr<IndirectSymmetriseModel> m_model;
+  std::unique_ptr<InelasticDataManipulationSymmetriseTabView> m_view;
+  std::unique_ptr<InelasticDataManipulationSymmetriseTabModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
