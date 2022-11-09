@@ -72,7 +72,9 @@ public:
   MOCK_METHOD0(extractSingleTube, void());
   MOCK_METHOD0(averageTube, void());
 
-  MOCK_CONST_METHOD0(showAverageTubeOption, bool());
+  MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
+
+  MOCK_CONST_METHOD0(extractedWsName, std::string());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
