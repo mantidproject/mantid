@@ -26,32 +26,12 @@ cd $WORKSPACE/build
 # remove old results if they exist
 find -name cppcheck.xml -delete
 
-echo $(command -v scl)
-ls /jenkins_workdir/workspace/pull_requests-cppcheck
-ls /usr/bin
-ls /var
-ls /var/jenkins_home
-ls /var/jenkins_home/plugins
-which cmake
-# configure cmake
-if [ $(command -v scl) ]; then
-    CMAKE_EXE=cmake3
-    SCL_ENABLE="scl enable devtoolset-7"
-else
-    CMAKE_EXE=cmake
-    SCL_ENABLE="eval"
-fi
-$SCL_ENABLE "$CMAKE_EXE --version"
+cmake --version
 
-if [ "$(command -v ninja)" ]; then
-  CMAKE_GENERATOR="-G Ninja"
-elif [ "$(command -v ninja-build)" ]; then
-  CMAKE_GENERATOR="-G Ninja"
-fi
-$SCL_ENABLE "$CMAKE_EXE ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=Debug -DCPPCHECK_GENERATE_XML=TRUE -DCPPCHECK_NUM_THREADS=$BUILD_THREADS .."
+cmake --preset=cppcheck-ci -DCPPCHECK_NUM_THREADS=$BUILD_THREADS ..
 
 # run cppcheck
-$CMAKE_EXE --build . --target cppcheck
+cmake --build . --target cppcheck
 
 # Generate HTML report
 cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report

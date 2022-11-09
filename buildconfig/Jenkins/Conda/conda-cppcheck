@@ -3,32 +3,42 @@
 # This script will set up a conda environment before running the cppcheck shell script.
 #
 # Script usage:
-# conda-cppcheck <path-to-workspace>
+# conda-cppcheck <job-name> <path-to-workspace>
 #
 # Example command to run a PR build on ubuntu:
-# conda-cppcheck /jenkins/workspace_dir/
+# conda-cppcheck pull_requests-cppcheck /jenkins/workspace_dir/
 #
 # Expected args:
-#   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
+#   1. JOB_NAME: The name of the job to be run on must include 'pull_requests'.
+#   2. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
 
-# Check arguments passed are 2 or higher, and aren't optional flags.
-if [[ $# < 1 || $1 == "--"* ]]; then
-    echo "Pass 1 argument: conda-cppcheck <path-to-workspace>"
+# Check arguments passed are 2, and aren't optional flags.
+if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
+    echo "Pass 2 arguments: conda-cppcheck <job-name> <path-to-workspace>"
     exit 1
 fi
 
 # SCRIPT_DIR discovery from https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE=$1
-shift
+JOB_NAME=$1
+WORKSPACE=$2
+shift 2
+
+# Check if C++ files have changed. If not, then skip the check
+if [[ $JOB_NAME == *pull_requests* ]]; then
+    # This relies on the fact pull requests use pull/$PR-NAME
+    # which squashes the branch into a single merge commit
+    cd $WORKSPACE
+
+    if $SCRIPT_DIR/check_for_changes cpp; then
+        echo "No C++ files have changed. Skipping check."
+        exit 0
+    fi
+fi
 
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
+EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
 
 CONDA_ENV_NAME="mantid-developer"
 
@@ -46,4 +56,3 @@ conda activate $CONDA_ENV_NAME
 
 # Run the script that handles the actual building
 $SCRIPT_DIR/cppcheck.sh
-
