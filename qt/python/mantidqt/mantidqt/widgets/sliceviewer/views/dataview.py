@@ -462,8 +462,13 @@ class SliceViewerDataView(QWidget):
             if self.nonorthogonal_mode:
                 inv_tr = self.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
-                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
-                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+                #xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                #xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+
+                # transform top right and bottom left corner
+                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
+                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
+
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             return xlim, ylim
 

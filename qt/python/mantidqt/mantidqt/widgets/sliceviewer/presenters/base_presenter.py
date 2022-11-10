@@ -45,6 +45,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             xmax_p, ymax_p = to_display(xlim[1], ylim[1])
             xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
 
+        # not 100% sure this call to set_axes_limits is required (limits seem to get set in _pcolormesh_nonortho in axesfunctions.py)
         self._data_view.set_axes_limits(xlim, ylim)
         self.data_limits_changed()
 

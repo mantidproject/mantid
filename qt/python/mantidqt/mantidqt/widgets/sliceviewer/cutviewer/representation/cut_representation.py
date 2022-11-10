@@ -9,11 +9,17 @@ from numpy import array, cross, sqrt, sum, mean, zeros, diff, dot
 
 
 class CutRepresentation:
-    def __init__(self, canvas, notify_on_release, xmin, xmax, ymin, ymax, thickness):
+    def __init__(self, canvas, notify_on_release, xmin, xmax, ymin, ymax, thickness, transform):
         self.notify_on_release = notify_on_release
         self.canvas = canvas
         self.ax = canvas.figure.axes[0]
         self.thickness = thickness
+        self.transform = transform
+
+        to_display = self.transform.tr
+        xmin, ymin = to_display(xmin, ymin)
+        xmax, ymax = to_display(xmax, ymax)
+
         self.start = self.ax.plot(xmin, ymin, 'ow', label='start')[0]
         self.end = self.ax.plot(xmax, ymax, 'ow', label='end')[0]
         self.line = None
@@ -49,8 +55,19 @@ class CutRepresentation:
     def get_perp_dir(self):
         # vector perp to line
         xmin, xmax, ymin, ymax = self.get_start_end_points()
+        from_display = self.transform.inv_tr
+        xmin, ymin = from_display(xmin, ymin)
+        xmax, ymax = from_display(xmax, ymax)
+
         u = array([xmax - xmin, ymax - ymin, 0])
         w = cross(u, [0, 0, 1])[0:-1]
+
+        to_display = self.transform.tr
+        perp_xmax, perp_ymax = to_display(xmin + w[0], ymin + w[1])
+        xmin, ymin = to_display(xmin, ymin)
+        w[0] = perp_xmax - xmin
+        w[1] = perp_ymax - ymin
+
         what = w / sqrt(sum(w ** 2))
         return what
 
@@ -121,7 +138,11 @@ class CutRepresentation:
             self.current_artist = None
             if self.end.get_xdata()[0] < self.start.get_xdata()[0]:
                 self.start, self.end = self.end, self.start
-            self.notify_on_release(*self.get_start_end_points(), self.thickness)
+            xmin, xmax, ymin, ymax = self.get_start_end_points()
+            from_display = self.transform.inv_tr
+            xmin, ymin = from_display(xmin, ymin)
+            xmax, ymax = from_display(xmax, ymax)
+            self.notify_on_release(xmin, xmax, ymin, ymax, self.thickness)
 
     def is_valid_event(self, event):
         return event.inaxes == self.ax
