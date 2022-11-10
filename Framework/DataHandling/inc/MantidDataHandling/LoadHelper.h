@@ -37,8 +37,8 @@ Kernel::V3D getComponentPosition(const API::MatrixWorkspace_sptr &ws, const std:
 void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string &instrumentName,
                          const std::string &instrumentPath = "");
 
-void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, Mantid::NeXus::NXInt &, const std::vector<double> &xAxis,
-                         int initialSpectrum = 0, bool pointData = false,
+void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
+                         const std::vector<double> &xAxis, int initialSpectrum = 0, bool pointData = false,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
                          const std::set<int> &acceptedID = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));

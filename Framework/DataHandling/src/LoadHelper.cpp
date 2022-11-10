@@ -530,7 +530,7 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
  * tube-pixel-channel order
  */
-void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, Mantid::NeXus::NXInt &data,
+void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
                                      const std::vector<double> &xAxis, int initialSpectrum, bool pointData,
                                      const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
