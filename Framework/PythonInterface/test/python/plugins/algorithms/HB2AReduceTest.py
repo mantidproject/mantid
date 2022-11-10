@@ -200,6 +200,15 @@ class HB2AReduceTest(unittest.TestCase):
         HB2AReduce_ws.delete()
         norm_time_wsk.delete()
 
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0882_scan0012.dat',
+                                   IndividualDetectors=True,
+                                   SaveData=False)
+        norm_time_wsk = mtd[HB2AReduce_ws.name() + "_norm_time"]
+        self.assertTrue(norm_time_wsk)
+
+        HB2AReduce_ws.delete()
+        norm_time_wsk.delete()
+
 
 if __name__ == '__main__':
     unittest.main()
