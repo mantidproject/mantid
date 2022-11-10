@@ -308,6 +308,11 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
         self.new_plot()
 
+        # replot the cut if one was displayed before
+        if self._cutviewer_presenter is not None and self._cutviewer_presenter.view.cut_rep is not None:
+            self._cutviewer_presenter.show_view()
+            self._cutviewer_presenter.update_cut()
+
     def normalization_changed(self, norm_type):
         """
         Notify the presenter that the type of normalization has changed.
