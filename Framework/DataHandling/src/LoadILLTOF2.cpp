@@ -86,9 +86,9 @@ void LoadILLTOF2::exec() {
   loadInstrumentDetails(dataFirstEntry);
   loadTimeDetails(dataFirstEntry);
 
-  const auto monitors = getMonitorInfo(dataFirstEntry);
+  const auto monitorList = getMonitorInfo(dataFirstEntry);
 
-  initWorkSpace(dataFirstEntry, monitors);
+  initWorkspace(dataFirstEntry);
 
   addAllNexusFieldsAsProperties(filenameData);
   addFacility();
@@ -96,7 +96,7 @@ void LoadILLTOF2::exec() {
   // load the instrument from the IDF if it exists
   LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrumentName);
 
-  loadDataIntoWorkspace(dataFirstEntry, convertToTOF);
+  loadDataIntoWorkspace(dataFirstEntry, monitorList, convertToTOF);
 
   addEnergyToRun();
   addPulseInterval();
@@ -106,42 +106,13 @@ void LoadILLTOF2::exec() {
 }
 
 /**
- * Loads Monitor data into an vector of monitor data
+ * Finds monitor data names and stores them in a vector
  *
  * @param firstEntry The NeXus entry
  *
  * @return List of monitor data
  */
-std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
-
-  std::vector<std::vector<int>> monitorList;
-
-  for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
-       ++it) {
-
-    if (it->nxclass == "NXmonitor" || boost::starts_with(it->nxname, "monitor")) {
-
-      g_log.debug() << "Load monitor data from " + it->nxname;
-
-      NXData dataGroup = firstEntry.openNXData(it->nxname + "/data");
-      NXInt data = dataGroup.openIntData();
-      // load the counts from the file into memory
-      data.load();
-
-      std::vector<int> thisMonitor(data(), data() + data.size());
-      monitorList.emplace_back(thisMonitor);
-    }
-  }
-  return monitorList;
-}
-
-/**
- * Finds monitor data names and stores them in a vector
- *
- * @param firstEntry The NeXus entry
- * @return List of monitor names
- */
-std::vector<std::string> LoadILLTOF2::getMonitorNames(const NeXus::NXEntry &firstEntry) {
+std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
   std::vector<std::string> monitorList;
   for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
        ++it) {
@@ -149,6 +120,7 @@ std::vector<std::string> LoadILLTOF2::getMonitorNames(const NeXus::NXEntry &firs
       monitorList.push_back(it->nxname + "/data");
     }
   }
+  m_numberOfMonitors = monitorList.size();
   return monitorList;
 }
 
@@ -193,7 +165,7 @@ void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  * @param entry The NeXus entry
  * @param monitors List of monitor data
  */
-void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors) {
+void LoadILLTOF2::initWorkspace(NeXus::NXEntry &entry) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -202,7 +174,6 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::ve
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
   m_numberOfChannels = static_cast<size_t>(data.dim2());
-  const size_t numberOfMonitors = monitors.size();
 
   /**
    * IN4 : Rosace detector is in a different field.
@@ -225,7 +196,7 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::ve
   // total number of spectra + number of monitors,
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
-  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms + numberOfMonitors,
+  m_localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", m_numberOfHistograms + m_numberOfMonitors,
                                                          m_numberOfChannels + 1, m_numberOfChannels);
 
   NXClass monitor = entry.openNXGroup(m_monitorName);
@@ -347,10 +318,12 @@ void LoadILLTOF2::addPulseInterval() {
  * Loads all the spectra into the workspace, including that from the monitor
  *
  * @param entry The Nexus entry
+ * @param monitorList Vector containing paths to monitor data
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
-void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF) {
+void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
+                                        bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
@@ -400,8 +373,7 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF
     spec += dataRosace.dim0();
   }
 
-  const auto monitorDataGroup = getMonitorNames(entry);
-  for (const auto &monitorName : monitorDataGroup) {
+  for (const auto &monitorName : monitorList) {
     detectorIDs[spec] = static_cast<int>(spec) + 1;
     NXData monitorGroup = entry.openNXData(monitorName);
     auto monitorData = monitorGroup.openIntData();

@@ -42,9 +42,8 @@ private:
   void exec() override;
 
   void loadInstrumentDetails(const NeXus::NXEntry &);
-  std::vector<std::vector<int>> getMonitorInfo(const NeXus::NXEntry &firstEntry);
-  std::vector<std::string> getMonitorNames(const NeXus::NXEntry &firstEntry);
-  void initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &);
+  std::vector<std::string> getMonitorInfo(const NeXus::NXEntry &firstEntry);
+  void initWorkspace(NeXus::NXEntry &entry);
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(const std::string &filename);
   void addEnergyToRun();
@@ -52,7 +51,7 @@ private:
   void addPulseInterval();
 
   void loadTimeDetails(const NeXus::NXEntry &entry);
-  void loadDataIntoWorkspace(NeXus::NXEntry &entry, bool convertToTOF);
+  void loadDataIntoWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
   void loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<Mantid::detid_t> &detectorIDs,
                    const NeXus::NXInt &data, Mantid::API::Progress &progress);
 
@@ -68,7 +67,8 @@ private:
   size_t m_numberOfTubes;         // number of tubes - X
   size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
   size_t m_numberOfChannels;      // time channels - Z
-  size_t m_numberOfHistograms;
+  size_t m_numberOfHistograms;    // number of histograms (individual detectors)
+  size_t m_numberOfMonitors;      // number of monitors
 
   /* Values parsed from the nexus file */
   double m_wavelength;
