@@ -405,6 +405,19 @@ public:
     presenter.notifyApplyRequested();
   }
 
+  void test_notify_apply_requested_will_catch_InvalidTableException() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested())
+        .Times(1)
+        .WillRepeatedly(Throw(InvalidTableException("Error message")));
+
+    presenter.notifyApplyRequested();
+  }
+
   void test_region_selector_and_reduction_plot_is_cleared_on_a_sum_banks_algorithm_error() {
     auto mockView = makeView();
     auto mockModel = makeModel();
