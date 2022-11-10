@@ -39,6 +39,7 @@ class GSAS2Presenter(object):
             self.plot_result(1)
             self.view.set_number_histograms(number_output_histograms)
             self.save_latest_load_parameters()
+            self.model.load_focused_nxs_for_logs(load_params[2])
 
     def on_plot_index_changed(self, new_plot_index):
         if new_plot_index:

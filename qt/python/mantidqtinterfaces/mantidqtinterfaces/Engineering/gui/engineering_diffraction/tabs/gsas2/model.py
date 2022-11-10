@@ -15,10 +15,14 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
-from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, logger
+from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, Load, logger
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import parse_inputs
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import \
+    SampleLogsGroupWorkspace, _generate_workspace_name
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import \
+    FittingWorkspaceRecordContainer
 
 
 class GSAS2Model(object):
@@ -53,6 +57,8 @@ class GSAS2Model(object):
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
+        self._data_workspaces = FittingWorkspaceRecordContainer()
+        self._sample_logs_workspace_group = SampleLogsGroupWorkspace()
 
     def clear_input_components(self):
         self.user_save_directory = None
@@ -700,6 +706,27 @@ class GSAS2Model(object):
             table.addRow(loop_parameters)
         if test:
             return table
+
+    def load_focused_nxs_for_logs(self, filenames):
+        if len(filenames) == 1 and "all_banks" in filenames[0]:
+            filenames = [filenames[0].replace("all_banks", "bank_1"), filenames[0].replace("all_banks", "bank_2")]
+        for filename in filenames:
+            filename = filename.replace(".gss", ".nxs")
+            ws_name = _generate_workspace_name(filename)
+            if ws_name not in self._data_workspaces.get_loaded_workpace_names():
+                try:
+                    ws = Load(filename, OutputWorkspace=ws_name)
+                    if ws.getNumberHistograms() == 1:
+                        self._data_workspaces.add(ws_name, loaded_ws=ws)
+                    else:
+                        logger.warning(
+                            f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
+                except RuntimeError as e:
+                    logger.error(
+                        f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
+            else:
+                logger.warning(f"File {ws_name} has already been loaded")
+        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
 
     # =========
     # Plotting
