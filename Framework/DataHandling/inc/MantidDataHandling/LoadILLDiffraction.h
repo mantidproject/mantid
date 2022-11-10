@@ -56,8 +56,8 @@ private:
   void calculateRelativeRotations(std::vector<double> &instrumentAngles, const Kernel::V3D &firstTubePosition);
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
-  void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
-  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &, const double &);
+  void fillMovingInstrumentScan(const NeXus::NXInt &, const NeXus::NXDouble &);
+  void fillStaticInstrumentScan(const NeXus::NXInt &, const NeXus::NXDouble &, const double &);
 
   std::vector<Types::Core::DateAndTime> getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;

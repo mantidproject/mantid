@@ -47,7 +47,7 @@ constexpr size_t D20_NUMBER_PIXELS = 1600;
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
-constexpr size_t NUMBER_MONITORS = 1;
+constexpr int NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;
 // The conversion factor from radian to degree
@@ -177,7 +177,7 @@ void LoadILLDiffraction::loadDataScan() {
   else
     dataName = "data_scan/detector_data/data";
   g_log.notice() << "Loading data from " + dataName;
-  NXUInt data = firstEntry.openNXDataSet<unsigned int>(dataName);
+  auto data = firstEntry.openNXDataSet<int>(dataName);
   data.load();
 
   // read the scan data
@@ -465,7 +465,7 @@ void LoadILLDiffraction::calculateRelativeRotations(std::vector<double> &tubeRot
  * @param data : detector data
  * @param scan : scan data
  */
-void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data, const NXDouble &scan) {
+void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDouble &scan) {
 
   std::vector<double> axis = {0.};
   std::vector<double> monitor = getMonitor(scan);
@@ -480,22 +480,16 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data, const NXDo
     }
   }
 
-  // Then load the detector spectra
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
-  for (int i = NUMBER_MONITORS; i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
-    for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-      auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-      if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
-        pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
-      }
-      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber), static_cast<int>(pixelInTubeNumber));
-      const auto wsIndex = j + i * m_numberScanPoints;
-      m_outWorkspace->mutableY(wsIndex) = y;
-      m_outWorkspace->mutableE(wsIndex) = sqrt(y);
-      m_outWorkspace->mutableX(wsIndex) = axis;
-    }
+  // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
+  std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - pixel - tube
+  std::set<int> acceptedIDs;
+  if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
+    for (int i = static_cast<int>(NUMBER_MONITORS); i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS);
+         ++i)
+      acceptedIDs.insert(i);
   }
+  // Assign detector counts
+  LoadHelper::fillMovingWorkspace(m_outWorkspace, data, axis, NUMBER_MONITORS, acceptedIDs, dimOrder);
 }
 
 /**
@@ -506,16 +500,16 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data, const NXDo
  * @param scan : scan data
  * @param twoTheta0 : starting two theta
  */
-void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDouble &scan, const double &twoTheta0) {
+void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDouble &scan, const double &twoTheta0) {
 
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
-  size_t monitorIndex = 0;
-  size_t startIndex = NUMBER_MONITORS;
+  int monitorIndex = 0;
+  int startIndex = static_cast<int>(NUMBER_MONITORS);
   if (m_isSpectrometer) {
     startIndex = 0;
-    monitorIndex = m_numberDetectorsActual;
+    monitorIndex = static_cast<int>(m_numberDetectorsActual);
   }
 
   // Assign monitor counts
@@ -524,23 +518,19 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data, const NXDo
   std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(monitorIndex).begin(),
                  [](double e) { return sqrt(e); });
 
-  // Assign detector counts
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
-  for (int i = static_cast<int>(startIndex); i < static_cast<int>(m_numberDetectorsActual + startIndex); ++i) {
-    auto &spectrum = m_outWorkspace->mutableY(i);
-    auto &errors = m_outWorkspace->mutableE(i);
-    const auto tubeNumber = (i - startIndex) / m_sizeDim2;
-    auto pixelInTubeNumber = (i - startIndex) % m_sizeDim2;
-    if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
-      pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
-    }
-    for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber), static_cast<int>(pixelInTubeNumber));
-      spectrum[j] = y;
-      errors[j] = sqrt(y);
-    }
-    m_outWorkspace->mutableX(i) = axis;
+  // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
+  std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
+  if (m_isSpectrometer) {
+    dimOrder = std::tuple<int, int, int>{1, 2, 0};
   }
+  std::set<int> acceptedIDs;
+  if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
+    for (int i = static_cast<int>(startIndex); i < static_cast<int>(startIndex + m_numberDetectorsActual); ++i)
+      acceptedIDs.insert(i);
+  }
+  // Assign detector counts
+  LoadHelper::fillStaticWorkspace(m_outWorkspace, data, axis, startIndex, true, std::vector<int>(), acceptedIDs,
+                                  dimOrder);
 
   // Link the instrument
   LoadHelper::loadEmptyInstrument(m_outWorkspace, m_instName);
