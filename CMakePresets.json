@@ -199,7 +199,8 @@
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CPPCHECK_GENERATE_XML": "TRUE"
+        "CPPCHECK_GENERATE_XML": "TRUE",
+		"ENABLE_PRECOMMIT": "OFF"
       }
     }
   ]
