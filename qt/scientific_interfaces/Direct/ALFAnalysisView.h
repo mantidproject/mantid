@@ -93,7 +93,7 @@ private:
   QPushButton *m_updateEstimateButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
-  QLineEdit *m_averagedTwoTheta;
+  QLineEdit *m_averageTwoTheta;
 
   IALFAnalysisPresenter *m_presenter;
 };

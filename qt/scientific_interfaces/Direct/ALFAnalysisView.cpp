@@ -22,6 +22,8 @@
 
 namespace {
 
+QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes";
+
 std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
   QString color("black"), status("");
   if (fitStatus.contains("success")) {
@@ -32,6 +34,16 @@ std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus)
     color = "red", status = fitStatus;
   }
   return {"QLabel { color: " + color + "; }", status};
+}
+
+QString constructAverageString(std::vector<double> const &twoThetas) {
+  QString calculationStr("");
+  for (auto i = 0u; i < twoThetas.size(); ++i) {
+    if (i != 0)
+      calculationStr += " + ";
+    calculationStr += QString::number(twoThetas[i]);
+  }
+  return "\n=(" + calculationStr + ")/" + QString::number(twoThetas.size());
 }
 
 } // namespace
@@ -127,11 +139,12 @@ QWidget *ALFAnalysisView::setupResultsWidget(double const centre) {
 
   resultsLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
 
-  m_averagedTwoTheta = new QLineEdit("-");
-  m_averagedTwoTheta->setReadOnly(true);
+  m_averageTwoTheta = new QLineEdit("-");
+  m_averageTwoTheta->setReadOnly(true);
+  m_averageTwoTheta->setToolTip(TWO_THETA_TOOLTIP);
 
-  resultsLayout->addWidget(new QLabel("Averaged two theta:"), 2, 0);
-  resultsLayout->addWidget(m_averagedTwoTheta, 2, 1);
+  resultsLayout->addWidget(new QLabel("Two theta:"), 2, 0);
+  resultsLayout->addWidget(m_averageTwoTheta, 2, 1);
 
   return resultsWidget;
 }
@@ -165,7 +178,10 @@ void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
   m_fitStatus->setToolTip(tooltip);
 }
 
-void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {}
+void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {
+  m_averageTwoTheta->setText(average ? QString::number(*average) : "-");
+  m_averageTwoTheta->setToolTip(all.size() == 0u ? TWO_THETA_TOOLTIP : TWO_THETA_TOOLTIP + constructAverageString(all));
+}
 
 void ALFAnalysisView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", message.c_str());
