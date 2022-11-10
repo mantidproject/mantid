@@ -46,11 +46,15 @@ std::optional<double> xConversionFactor(MatrixWorkspace_const_sptr const &worksp
   return std::nullopt;
 }
 
-double getTwoTheta(MatrixWorkspace_const_sptr const &workspace) {
-  auto &position = workspace->componentInfo().position(0);
-  double radial, theta, phi;
-  position.getSpherical(radial, theta, phi);
-  return theta;
+std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
+                                  Mantid::Geometry::IDetector_const_sptr detector) {
+  if (!instrument || !detector) {
+    return std::nullopt;
+  }
+  auto const sample = instrument->getSample()->getPos();
+  auto const source = instrument->getSource()->getPos();
+
+  return detector->getTwoTheta(sample, sample - source) * 180.0 / M_PI;
 }
 
 void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
@@ -191,10 +195,10 @@ std::size_t ALFInstrumentModel::runNumber() const {
 /*
  * Extracts a single tube. Increments the average counter.
  */
-std::optional<double> ALFInstrumentModel::extractSingleTube() {
+std::optional<double> ALFInstrumentModel::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
   if (auto const extractedWorkspace = retrieveSingleTube()) {
     ADS.addOrReplace(extractedWsName(), extractedWorkspace);
-    return getTwoTheta(extractedWorkspace);
+    return getTwoTheta(extractedWorkspace->getInstrument(), detector);
   }
   return std::nullopt;
 }
@@ -214,7 +218,8 @@ MatrixWorkspace_sptr ALFInstrumentModel::retrieveSingleTube() {
   return nullptr;
 }
 
-std::optional<double> ALFInstrumentModel::averageTube(std::size_t const numberOfTubes) {
+std::optional<double> ALFInstrumentModel::averageTube(Mantid::Geometry::IDetector_const_sptr detector,
+                                                      std::size_t const numberOfTubes) {
   // Multiply up the current average
   auto existingAverageTube = ADS.retrieveWS<MatrixWorkspace>(extractedWsName());
   existingAverageTube *= double(numberOfTubes);
@@ -224,7 +229,7 @@ std::optional<double> ALFInstrumentModel::averageTube(std::size_t const numberOf
   if (!newExtractedWorkspace) {
     return std::nullopt;
   }
-  auto const newTwoTheta = getTwoTheta(newExtractedWorkspace);
+  auto const newTwoTheta = getTwoTheta(newExtractedWorkspace->getInstrument(), detector);
   newExtractedWorkspace = rebinToWorkspace(newExtractedWorkspace, existingAverageTube);
 
   // Do an average

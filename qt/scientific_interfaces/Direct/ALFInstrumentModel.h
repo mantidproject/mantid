@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDetector.h"
 
 #include <optional>
 #include <string>
@@ -27,8 +28,9 @@ public:
   virtual std::string extractedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
-  virtual std::optional<double> extractSingleTube() = 0;
-  virtual std::optional<double> averageTube(std::size_t const numberOfTubes) = 0;
+  virtual std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
+  virtual std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
+                                            std::size_t const numberOfTubes) = 0;
 
   virtual bool checkDataIsExtracted() const = 0;
 };
@@ -45,8 +47,9 @@ public:
   std::string extractedWsName() const override;
   std::size_t runNumber() const override;
 
-  std::optional<double> extractSingleTube() override;
-  std::optional<double> averageTube(std::size_t const numberOfTubes) override;
+  std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
+  std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
+                                    std::size_t const numberOfTubes) override;
 
   bool checkDataIsExtracted() const override;
 

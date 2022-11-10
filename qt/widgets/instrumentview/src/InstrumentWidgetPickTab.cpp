@@ -877,6 +877,13 @@ void InstrumentWidgetPickTab::clearWidgets() {
  */
 void InstrumentWidgetPickTab::savePlotToWorkspace() { m_plotController->savePlotToWorkspace(); }
 
+/**
+ * Returns the detector whos data is currently displayed in the miniplot.
+ */
+Mantid::Geometry::IDetector_const_sptr InstrumentWidgetPickTab::getSelectedDetector() const {
+  return m_plotController->getSelectedDetector();
+}
+
 /** Load pick tab state from a Mantid project file
  * @param lines :: lines from the project file to load state from
  */
@@ -1685,6 +1692,28 @@ void DetectorPlotController::savePlotToWorkspace() {
 
     } // !detids.empty()
   }
+}
+
+/**
+ * Returns the detector whos data is currently displayed in the miniplot.
+ */
+Mantid::Geometry::IDetector_const_sptr DetectorPlotController::getSelectedDetector() const {
+  if (!m_plot->hasCurve()) {
+    // No data is plotted so return a nullptr
+    return nullptr;
+  }
+
+  QStringList labelSplit = m_plot->label().split(QRegExp("[()]"));
+  if (labelSplit.size() != 3) {
+    // Not in the expected format so return a nullptr
+    return nullptr;
+  }
+
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  const auto detindex = actor.getDetectorByDetID(labelSplit[1].toInt());
+  const auto workspaceIndex = actor.getWorkspaceIndex(detindex);
+
+  return actor.getWorkspace()->getDetector(workspaceIndex);
 }
 
 /**

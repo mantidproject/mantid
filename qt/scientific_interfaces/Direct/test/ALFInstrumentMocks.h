@@ -12,6 +12,7 @@
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentPresenter.h"
 #include "ALFInstrumentView.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <QWidget>
@@ -54,8 +55,9 @@ public:
   MOCK_CONST_METHOD0(extractedWsName, std::string());
   MOCK_CONST_METHOD0(runNumber, std::size_t());
 
-  MOCK_METHOD0(extractSingleTube, std::optional<double>());
-  MOCK_METHOD1(averageTube, std::optional<double>(std::size_t const numberOfTubes));
+  MOCK_METHOD1(extractSingleTube, std::optional<double>(Mantid::Geometry::IDetector_const_sptr detector));
+  MOCK_METHOD2(averageTube,
+               std::optional<double>(Mantid::Geometry::IDetector_const_sptr detector, std::size_t const numberOfTubes));
 
   MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
 };
@@ -69,8 +71,8 @@ public:
 
   MOCK_METHOD0(loadRunNumber, void());
 
-  MOCK_METHOD0(extractSingleTube, void());
-  MOCK_METHOD0(averageTube, void());
+  MOCK_METHOD1(extractSingleTube, void(Mantid::Geometry::IDetector_const_sptr detector));
+  MOCK_METHOD1(averageTube, void(Mantid::Geometry::IDetector_const_sptr detector));
 
   MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
 

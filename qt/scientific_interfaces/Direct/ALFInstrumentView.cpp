@@ -115,13 +115,17 @@ void ALFInstrumentView::selectWholeTube() {
 }
 
 void ALFInstrumentView::extractSingleTube() {
-  m_instrumentWidget->getPickTab()->savePlotToWorkspace();
-  m_presenter->extractSingleTube();
+  auto const pickTab = m_instrumentWidget->getPickTab();
+  pickTab->savePlotToWorkspace();
+
+  m_presenter->extractSingleTube(pickTab->getSelectedDetector());
 }
 
 void ALFInstrumentView::averageTube() {
-  m_instrumentWidget->getPickTab()->savePlotToWorkspace();
-  m_presenter->averageTube();
+  auto const pickTab = m_instrumentWidget->getPickTab();
+  pickTab->savePlotToWorkspace();
+
+  m_presenter->averageTube(pickTab->getSelectedDetector());
 }
 
 void ALFInstrumentView::warningBox(std::string const &message) {

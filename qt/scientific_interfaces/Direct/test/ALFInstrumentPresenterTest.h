@@ -12,8 +12,10 @@
 #include "ALFAnalysisMocks.h"
 #include "ALFInstrumentMocks.h"
 #include "ALFInstrumentPresenter.h"
+#include "MockDetector.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <memory>
 #include <string>
@@ -24,6 +26,16 @@ using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using namespace MantidQt::MantidWidgets;
 
+namespace {
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+MATCHER(DetectorNotNull, "Check detector sptr is not null") { return arg != nullptr; }
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+
+} // namespace
+
 class ALFInstrumentPresenterTest : public CxxTest::TestSuite {
 public:
   ALFInstrumentPresenterTest() { FrameworkManager::Instance(); }
@@ -33,6 +45,8 @@ public:
   static void destroySuite(ALFInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
+    m_detector = std::make_shared<NiceMock<MockDetector>>();
+
     auto model = std::make_unique<NiceMock<MockALFInstrumentModel>>();
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFInstrumentView>>();
@@ -122,24 +136,24 @@ public:
     std::string const extractedWsName("Extracted_ALF82301");
     double const twoTheta(30.1);
 
-    EXPECT_CALL(*m_model, extractSingleTube()).Times(1).WillOnce(Return(twoTheta));
+    EXPECT_CALL(*m_model, extractSingleTube(DetectorNotNull())).Times(1).WillOnce(Return(twoTheta));
 
     EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted(twoTheta)).Times(1);
     EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(1);
 
-    m_presenter->extractSingleTube();
+    m_presenter->extractSingleTube(m_detector);
   }
 
   void test_extractSingleTube_will_not_notify_analysis_presenter_if_two_theta_is_null() {
     std::string const extractedWsName("Extracted_ALF82301");
 
-    EXPECT_CALL(*m_model, extractSingleTube()).Times(1).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(*m_model, extractSingleTube(DetectorNotNull())).Times(1).WillOnce(Return(std::nullopt));
 
     // Expect no calls to analysis presenter
     EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted(_)).Times(0);
     EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(0);
 
-    m_presenter->extractSingleTube();
+    m_presenter->extractSingleTube(m_detector);
   }
 
   void test_averageTube_calls_the_expected_methods() {
@@ -148,11 +162,11 @@ public:
     double const twoTheta(30.1);
 
     EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(numberOfTubes));
-    EXPECT_CALL(*m_model, averageTube(numberOfTubes)).Times(1).WillOnce(Return(twoTheta));
+    EXPECT_CALL(*m_model, averageTube(DetectorNotNull(), numberOfTubes)).Times(1).WillOnce(Return(twoTheta));
 
     EXPECT_CALL(*m_analysisPresenter, notifyTubeAveraged(twoTheta)).Times(1);
 
-    m_presenter->averageTube();
+    m_presenter->averageTube(m_detector);
   }
 
   void test_averageTube_will_not_notify_analysis_presenter_if_two_theta_is_null() {
@@ -160,12 +174,12 @@ public:
     std::size_t const numberOfTubes(2u);
 
     EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(numberOfTubes));
-    EXPECT_CALL(*m_model, averageTube(numberOfTubes)).Times(1).WillOnce(Return(std::nullopt));
+    EXPECT_CALL(*m_model, averageTube(DetectorNotNull(), numberOfTubes)).Times(1).WillOnce(Return(std::nullopt));
 
     // Expect no calls to analysis presenter
     EXPECT_CALL(*m_analysisPresenter, notifyTubeAveraged(_)).Times(0);
 
-    m_presenter->averageTube();
+    m_presenter->averageTube(m_detector);
   }
 
   void test_checkDataIsExtracted_calls_the_checkDataIsExtracted_method_in_the_model() {
@@ -176,6 +190,8 @@ public:
   }
 
 private:
+  std::shared_ptr<NiceMock<MockDetector>> m_detector;
+
   NiceMock<MockALFInstrumentModel> *m_model;
   std::unique_ptr<NiceMock<MockALFInstrumentView>> m_view;
   std::unique_ptr<ALFInstrumentPresenter> m_presenter;
