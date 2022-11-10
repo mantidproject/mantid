@@ -39,8 +39,8 @@ ALFInstrumentView::ALFInstrumentView(QWidget *parent)
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
-                                          MantidWidgets::InstrumentWidget::Dependencies(), false);
+      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true, false,
+                                          MantidWidgets::InstrumentWidget::Dependencies());
   m_instrumentWidget->removeTab("Instrument");
   m_instrumentWidget->removeTab("Draw");
   m_instrumentWidget->hideHelp();
