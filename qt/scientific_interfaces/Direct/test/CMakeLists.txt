@@ -5,16 +5,15 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../
-  LINK_LIBS Mantid::DataObjects
-            ${CORE_MANTIDLIBS}
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
+  INCLUDE_DIRS ../
+  LINK_LIBS Mantid::API
+            Mantid::DataObjects
+            Mantid::Geometry
+            Mantid::Kernel
             Mantid::PythonInterfaceCore
             Python::Python
             gmock
   MTD_QT_LINK_LIBS MantidScientificInterfacesDirect MantidQtWidgetsCommon MantidQtWidgetsInstrumentView
-                   MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
 

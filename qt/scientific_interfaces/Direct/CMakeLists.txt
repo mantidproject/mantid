@@ -28,15 +28,7 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   DEFS IN_MANTIDQT_DIRECT
-  LINK_LIBS Mantid::DataObjects
-            ${CORE_MANTIDLIBS}
-            Mantid::PythonInterfaceCore
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${PYTHON_LIBRARIES}
-            ${OPENGL_gl_LIBRARY}
-            ${OPENGL_glu_LIBRARY}
-  QT5_LINK_LIBS Qt5::OpenGL
+  LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
