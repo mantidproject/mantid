@@ -747,7 +747,7 @@ public:
     TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
   }
 
-  void testGetSelectedBanksAsRangesAllIncongurous() {
+  void testGetSelectedBanksAsRangesAllIncongruous() {
     auto presenter = makePresenter();
     const ProcessingInstructions inputRoi{"2,4,6,8,10"};
     const ProcessingInstructions expectedOutput{"2,4,6,8,10"};
