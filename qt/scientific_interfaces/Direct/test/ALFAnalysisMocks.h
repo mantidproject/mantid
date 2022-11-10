@@ -58,6 +58,8 @@ public:
 
   MOCK_METHOD1(setPeakCentreStatus, void(std::string const &status));
 
+  MOCK_METHOD2(setAverageTwoTheta, void(std::optional<double> average, std::vector<double> const &all));
+
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
@@ -76,6 +78,7 @@ public:
   MOCK_METHOD0(clearTwoThetas, void());
   MOCK_METHOD1(addTwoTheta, void(double const twoTheta));
   MOCK_CONST_METHOD0(averageTwoTheta, std::optional<double>());
+  MOCK_CONST_METHOD0(allTwoThetas, std::vector<double>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

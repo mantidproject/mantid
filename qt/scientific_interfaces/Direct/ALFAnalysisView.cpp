@@ -165,6 +165,8 @@ void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
   m_fitStatus->setToolTip(tooltip);
 }
 
+void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {}
+
 void ALFAnalysisView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", message.c_str());
 }

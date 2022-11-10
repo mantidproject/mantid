@@ -15,7 +15,9 @@
 #include <QString>
 #include <QWidget>
 
+#include <optional>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 
@@ -44,6 +46,8 @@ public:
   virtual double peakCentre() const = 0;
   virtual void setPeakCentreStatus(std::string const &status) = 0;
 
+  virtual void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) = 0;
+
   virtual void displayWarning(std::string const &message) = 0;
 };
 
@@ -64,8 +68,9 @@ public:
 
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
-
   void setPeakCentreStatus(std::string const &status) override;
+
+  void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) override;
 
   void displayWarning(std::string const &message) override;
 

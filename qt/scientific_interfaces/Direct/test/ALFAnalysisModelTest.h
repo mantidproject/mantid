@@ -50,6 +50,7 @@ public:
     TS_ASSERT_EQUALS("", m_model->fitStatus());
     TS_ASSERT_EQUALS(0u, m_model->numberOfTubes());
     TS_ASSERT_EQUALS(std::nullopt, m_model->averageTwoTheta());
+    TS_ASSERT(m_model->allTwoThetas().empty());
   }
 
   void test_that_doFit_sets_a_successful_fit_status_for_a_good_fit() {
@@ -100,11 +101,15 @@ public:
     m_model->addTwoTheta(31.0);
 
     TS_ASSERT_EQUALS(30.3, *m_model->averageTwoTheta());
+
+    auto const expectedTwoThetas = std::vector<double>{29.5, 30.4, 31.0};
+    TS_ASSERT_EQUALS(expectedTwoThetas, m_model->allTwoThetas());
   }
 
   void test_that_addTwoTheta_will_add_a_two_theta_to_the_model() {
     m_model->addTwoTheta(29.5);
     TS_ASSERT_EQUALS(29.5, *m_model->averageTwoTheta());
+    TS_ASSERT_EQUALS(std::vector<double>{29.5}, m_model->allTwoThetas());
   }
 
   void test_that_clearTwoThetas_will_clear_the_two_thetas_from_the_model() {
@@ -115,6 +120,7 @@ public:
     m_model->clearTwoThetas();
 
     TS_ASSERT_EQUALS(std::nullopt, m_model->averageTwoTheta());
+    TS_ASSERT(m_model->allTwoThetas().empty());
   }
 
   void test_that_numberOfTubes_returns_the_number_of_two_thetas() {

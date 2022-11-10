@@ -36,6 +36,7 @@ public:
   virtual void clearTwoThetas() = 0;
   virtual void addTwoTheta(double const twoTheta) = 0;
   virtual std::optional<double> averageTwoTheta() const = 0;
+  virtual std::vector<double> allTwoThetas() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisModel final : public IALFAnalysisModel {
@@ -55,6 +56,7 @@ public:
   void clearTwoThetas() override;
   void addTwoTheta(double const twoTheta) override;
   std::optional<double> averageTwoTheta() const override;
+  inline std::vector<double> allTwoThetas() const noexcept override { return m_twoThetas; };
 
 private:
   Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,

@@ -67,16 +67,21 @@ void ALFAnalysisPresenter::notifyTubeExtracted(double const twoTheta) {
   m_model->clearTwoThetas();
   m_model->addTwoTheta(twoTheta);
   m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
 }
 
 void ALFAnalysisPresenter::notifyTubeAveraged(double const twoTheta) {
   m_model->addTwoTheta(twoTheta);
   m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
 }
 
 std::size_t ALFAnalysisPresenter::numberOfTubes() const { return m_model->numberOfTubes(); }
 
-void ALFAnalysisPresenter::clearTwoThetas() { return m_model->clearTwoThetas(); }
+void ALFAnalysisPresenter::clearTwoThetas() {
+  m_model->clearTwoThetas();
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
+}
 
 bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   auto const peakCentre = m_view->peakCentre();
