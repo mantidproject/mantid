@@ -37,6 +37,9 @@ class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     def zoom_pan_clicked(self, active) -> None:
         pass
 
+    def get_extra_image_info_columns(self):
+        return {}
+
 
 class SliceViewerBasePresenterTest(unittest.TestCase):
     def setUp(self):
