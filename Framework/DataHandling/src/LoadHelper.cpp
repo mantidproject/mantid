@@ -582,6 +582,49 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, Mantid
 }
 
 /**
+ * Fills workspace with histogram data from provided data structure
+ * @param ws A MatrixWorkspace to be filled with data
+ * @param data Data object to extract counts from
+ * @param xAxis X axis values to be assigned to each spectrum
+ * @param initialSpectrum Initial spectrum number, optional and defaults to 0
+ * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
+ * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
+ * tube-pixel-channel order
+ */
+void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
+                                     const std::vector<double> &xAxis, int initialSpectrum,
+                                     const std::set<int> &acceptedDetectorIDs,
+                                     const std::tuple<short, short, short> &axisOrder) {
+
+  std::array dims = {data.dim0(), data.dim1(), data.dim2()};
+  const auto nTubes = dims[std::get<0>(axisOrder)];
+  const auto nPixels = dims[std::get<1>(axisOrder)];
+  const auto nScans = dims[std::get<2>(axisOrder)];
+
+  int nSkipped = 0;
+  for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
+    for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
+      auto currentDetector = initialSpectrum + tube_no * nPixels + pixel_no;
+      if (acceptedDetectorIDs.size() != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                                       currentDetector) == acceptedDetectorIDs.end()) {
+        nSkipped++;
+        continue;
+      }
+      currentDetector -= nSkipped;
+      auto currentSpectrum = currentDetector * nScans;
+      for (auto channel_no = 0; channel_no < nScans; ++channel_no) {
+        int spectrumValue;
+        spectrumValue = data(channel_no, tube_no, pixel_no);
+        ws->mutableY(currentSpectrum) = spectrumValue;
+        ws->mutableE(currentSpectrum) = sqrt(spectrumValue);
+        ws->mutableX(currentSpectrum) = xAxis;
+        currentSpectrum++;
+      }
+    }
+  }
+}
+
+/**
  * Replaces errors of bins with zero counts with provided value
  * @param ws MatrixWorkspace to have its zero errors replaced
  * @param zeroCountsError Value to replace default error of square root of counts

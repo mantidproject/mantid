@@ -40,7 +40,12 @@ void loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const std::string 
 void fillStaticWorkspace(const API::MatrixWorkspace_sptr &, Mantid::NeXus::NXInt &, const std::vector<double> &xAxis,
                          int initialSpectrum = 0, bool pointData = false,
                          const std::vector<int> &detectorIDs = std::vector<int>(),
-                         const std::set<int> &detectorID = std::set<int>(),
+                         const std::set<int> &acceptedID = std::set<int>(),
+                         const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
+
+void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus::NXInt &,
+                         const std::vector<double> &xAxis, int initialSpectrum = 0,
+                         const std::set<int> &acceptedID = std::set<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
 void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
