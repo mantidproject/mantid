@@ -81,9 +81,9 @@ class DNSDatasetTest(unittest.TestCase):
         mock_parent.raise_error.assert_called_once()
 
     def test_get_nb_banks(self):
-        testv = self.ds.get_nb_banks(sample_type='4p1K_map')
+        testv = self.ds.get_number_banks(sample_type='4p1K_map')
         self.assertEqual(testv, 1)
-        testv = self.ds.get_nb_banks()
+        testv = self.ds.get_number_banks()
         self.assertEqual(testv, 0)
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'

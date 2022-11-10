@@ -62,7 +62,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
 
     def setUp(self):
         self.error_raised.reset_mock()
-        self.model._spac = "    "
+        self.model._spacing = "    "
         self.model._loop = "123"
 
     def test___init__(self):
@@ -302,22 +302,22 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
 
     def test_set_loop(self):
         self.model._loop = None
-        self.model._spac = None
+        self.model._spacing = None
         self.model._set_loop()
         self.assertEqual(
             self.model._loop,
             "for sample, workspacelist in wss_sample.items(): \n    for work"
             "space in workspacelist:")
-        self.assertEqual(self.model._spac, "\n" + " " * 8)
+        self.assertEqual(self.model._spacing, "\n" + " " * 8)
         self.model._sample_data = {'123': 1}
         self.model._set_loop()
         self.assertEqual(self.model._loop,
                          "for workspace in wss_sample['123']:")
-        self.assertEqual(self.model._spac, "\n" + " " * 4)
+        self.assertEqual(self.model._spacing, "\n" + " " * 4)
         self.model._sample_data = self.sample_data
 
     def test_get_subtract_bg_from_standa_lines(self):
-        self.model._vanac = True
+        self.model._vana_correction = True
         testv = self.model._get_subtract_bg_from_standard_lines()
         self.assertEqual(testv, [
             '', '# subtract background from vanadium and nicr',
@@ -325,29 +325,29 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             'for workspace in workspacelist:\n        background_subtr'
             'action(workspace)'
         ])
-        self.model._vanac = False
-        self.model._nicrc = False
+        self.model._vana_correction = False
+        self.model._nicr_correction = False
         testv = self.model._get_subtract_bg_from_standard_lines()
         self.assertEqual(testv, [])
 
     def test_get_backgroundstring(self):
-        self.model._backfac = '1'
-        self.model._sampb = False
-        testv = self.model._get_background_string()
-        self.assertEqual(testv, "")
-        self.model._sampb = True
-        testv = self.model._get_background_string()
-        self.assertEqual(testv,
+        self.model._background_factor = '1'
+        self.model._sample_background_correction = False
+        test_v = self.model._get_background_string()
+        self.assertEqual(test_v, "")
+        self.model._sample_background_correction = True
+        test_v = self.model._get_background_string()
+        self.assertEqual(test_v,
                          '    background_subtraction(workspace, factor=1)')
 
     def test_get_vanacstring(self):
-        self.model._ign_vana = 'True'
-        self.model._sum_sfnsf = 'True'
-        self.model._vanac = False
-        testv = self.model._get_vana_cstring()
+        self.model._ignore_vana = 'True'
+        self.model._sum_sf_nsf = 'True'
+        self.model._vana_correction = False
+        testv = self.model._get_vana_correction_string()
         self.assertEqual(testv, "")
-        self.model._vanac = True
-        testv = self.model._get_vana_cstring()
+        self.model._vana_correction = True
+        testv = self.model._get_vana_correction_string()
         self.assertEqual(
             testv,
             "    vanadium_correction(workspace, vana_set=sta"
@@ -355,25 +355,25 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             "ue)")
 
     def test_get_samp_corrections_lines(self):
-        self.model._ign_vana = 'True'
-        self.model._sum_sfnsf = 'True'
-        self.model._backfac = '1'
-        self.model._vanac = False
-        self.model._sampb = False
-        testv = self.model._get_sample_corrections_lines()
-        self.assertEqual(testv, [])
-        self.model._sampb = True
-        testv = self.model._get_sample_corrections_lines()
-        self.assertEqual(testv, [
+        self.model._ignore_vana = 'True'
+        self.model._sum_sf_nsf = 'True'
+        self.model._background_factor = '1'
+        self.model._vana_correction = False
+        self.model._sample_background_correction = False
+        test_v = self.model._get_sample_corrections_lines()
+        self.assertEqual(test_v, [])
+        self.model._sample_background_correction = True
+        test_v = self.model._get_sample_corrections_lines()
+        self.assertEqual(test_v, [
             '', '# correct sample data', '123    background_subtraction'
                                          '(workspace, factor=1)'
         ])
 
     def test_get_nicr_cor_lines(self):
-        self.model._nicrc = False
+        self.model._nicr_correction = False
         testv = self.model._get_nicr_cor_lines()
         self.assertEqual(testv, [])
-        self.model._nicrc = True
+        self.model._nicr_correction = True
         testv = self.model._get_nicr_cor_lines()
         self.assertEqual(testv, ["123    flipping_ratio_correction(workspace)"])
 
@@ -448,17 +448,17 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             'export': True
         }
         testv = self.model.script_maker(options, paths, fselector)
-        self.assertTrue(self.model._vanac)
-        self.assertTrue(self.model._nicrc)
-        self.assertTrue(self.model._sampb)
-        self.assertTrue(self.model._backfac)
+        self.assertTrue(self.model._vana_correction)
+        self.assertTrue(self.model._nicr_correction)
+        self.assertTrue(self.model._sample_background_correction)
+        self.assertTrue(self.model._background_factor)
         self.assertTrue(self.model._nonmag)
         self.assertTrue(self.model._xyz)
         self.assertTrue(self.model._corrections)
         self.assertTrue(self.model._ascii)
         self.assertTrue(self.model._nexus)
-        self.assertEqual(self.model._ign_vana, '1')
-        self.assertEqual(self.model._sum_sfnsf, '1')
+        self.assertEqual(self.model._ignore_vana, '1')
+        self.assertEqual(self.model._sum_sf_nsf, '1')
         self.assertEqual(self.model._export_path, '14')
         self.assertEqual(self.model._norm, 'monitor')
         self.assertIsInstance(testv, tuple)
@@ -505,17 +505,17 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             'norm_monitor': 0
         }
         self.model.script_maker(options, paths, fselector)
-        self.assertFalse(self.model._vanac)
-        self.assertFalse(self.model._nicrc)
-        self.assertFalse(self.model._sampb)
-        self.assertFalse(self.model._backfac)
+        self.assertFalse(self.model._vana_correction)
+        self.assertFalse(self.model._nicr_correction)
+        self.assertFalse(self.model._sample_background_correction)
+        self.assertFalse(self.model._background_factor)
         self.assertFalse(self.model._nonmag)
         self.assertFalse(self.model._xyz)
         self.assertFalse(self.model._corrections)
         self.assertFalse(self.model._ascii)
         self.assertFalse(self.model._nexus)
-        self.assertEqual(self.model._ign_vana, '0')
-        self.assertEqual(self.model._sum_sfnsf, '0')
+        self.assertEqual(self.model._ignore_vana, '0')
+        self.assertEqual(self.model._sum_sf_nsf, '0')
         self.assertEqual(self.model._export_path, '')
         self.assertEqual(self.model._norm, 'time')
         options = {
@@ -542,9 +542,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         }
         testv = self.model.script_maker(options, paths, fselector)
         self.assertEqual(len(testv[0]), 13)
-        self.assertFalse(self.model._vanac)
-        self.assertFalse(self.model._nicrc)
-        self.assertFalse(self.model._sampb)
+        self.assertFalse(self.model._vana_correction)
+        self.assertFalse(self.model._nicr_correction)
+        self.assertFalse(self.model._sample_background_correction)
         self.assertFalse(self.model._nonmag)
         self.assertFalse(self.model._xyz)
         self.assertFalse(self.model._corrections)
@@ -573,9 +573,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             'export': False
         }
         self.model.script_maker(options, paths, fselector)
-        self.assertFalse(self.model._vanac)
-        self.assertFalse(self.model._nicrc)
-        self.assertFalse(self.model._sampb)
+        self.assertFalse(self.model._vana_correction)
+        self.assertFalse(self.model._nicr_correction)
+        self.assertFalse(self.model._sample_background_correction)
         self.assertFalse(self.model._nonmag)
         self.assertFalse(self.model._xyz)
         self.assertFalse(self.model._corrections)
