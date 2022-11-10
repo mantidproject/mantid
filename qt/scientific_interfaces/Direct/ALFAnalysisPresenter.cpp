@@ -18,7 +18,7 @@ ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_p
   m_view->subscribePresenter(this);
 }
 
-QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); };
+QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
 
 void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) {
   m_instrumentPresenter = presenter;
