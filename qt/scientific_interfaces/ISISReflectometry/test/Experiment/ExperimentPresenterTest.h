@@ -737,6 +737,7 @@ public:
 
     // THEN an InvalidTableException is thrown.
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), InvalidTableException const &);
+  }
 
   void testGetSelectedBanksAsRanges() {
     auto presenter = makePresenter();
