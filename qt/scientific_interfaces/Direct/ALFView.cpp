@@ -31,6 +31,8 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
       std::make_unique<MantidWidgets::PlotFitAnalysisPaneModel>());
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
+
+  int test = 1;
 }
 
 void ALFView::initLayout() {
