@@ -139,6 +139,9 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         for selector in self._selectors:
             selector.set_active(False)
 
+        if self._drawing_region:
+            self._selectors.pop()
+
         self._selectors.append(Selector(region_type, color, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
