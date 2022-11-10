@@ -116,7 +116,9 @@ class SampleShapePlot:
             self.reset_class()
 
     def on_rename_workspace(self, old_workspace_name, new_workspace_name):
-        pass  # on_replace_workspace is also triggered by a workspace rename
+        if self.workspace_name == old_workspace_name:
+            self.workspace_name = new_workspace_name
+        # on_replace_workspace is also triggered by a workspace rename
 
     def on_delete_workspace(self, workspace_name):
         if self.workspace_name == workspace_name:
@@ -430,13 +432,14 @@ def add_beam_arrow(plot_axes, workspace):
         add_arrow(plot_axes, beam_direction, origin=beam_origin)
 
 
-def add_arrow(ax, vector, origin=None, factor=None, color='black', linestyle='-'):
+def add_arrow(ax, vector, origin=None, relative_factor=None, color='black', linestyle='-'):
     # Add arrows for Beam or Crystal lattice
     if origin is None:
         origin = (ax.get_xlim3d()[1], ax.get_ylim3d()[1], ax.get_zlim3d()[0])
-    if factor is None:
-        lims = ax.get_xlim3d()
-        factor = (lims[1]-lims[0]) / 3.0
+    lims = ax.get_xlim3d()
+    factor = (lims[1]-lims[0]) / 3.0
+    if relative_factor:
+        factor *= relative_factor
     vector_norm = vector / np.linalg.norm(vector)
     ax.quiver(
         origin[0], origin[1], origin[2],
@@ -461,7 +464,7 @@ def plot_reciprocal_lattice_vectors(plot_axes, reciprocal_lattice, colors):
 
 def plot_real_lattice_vectors(plot_axes, real_lattice, colors):
     for i in range(3):  # plot real_lattice with '-' solid linestyle
-        add_arrow(plot_axes, real_lattice[:, i], color=colors[i])
+        add_arrow(plot_axes, real_lattice[:, i], relative_factor=0.8, color=colors[i])
 
 
 def calculate_lattice_vectors(workspace):

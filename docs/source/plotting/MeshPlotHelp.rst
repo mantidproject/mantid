@@ -76,7 +76,7 @@ Note Component index 0 is usually the Container.
    mesh_polygon_b = Poly3DCollection(container_mesh, edgecolors='red', alpha = 0.1, linewidths=0.05, zorder = 0.5)
    mesh_polygon_b.set_facecolor((1,0,0,0.5))
 
-   fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
+   fig, axes = plt.subplots(subplot_kw={'projection': 'mantid3d', 'proj_type': 'ortho'})
    axes.add_collection3d(mesh_polygon_a)
    axes.add_collection3d(mesh_polygon_b)
 
@@ -94,7 +94,7 @@ Note Component index 0 is usually the Container.
    axes.set_xlabel('X / m')
    axes.set_ylabel('Y / m')
    axes.set_zlabel('Z / m')
-   axes.view_init(elev=5, azim=40)
+   axes.set_box_aspect((1, 1, 1))
 
    def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
       if origin == None:
@@ -113,7 +113,7 @@ Note Component index 0 is usually the Container.
    source = ws.getInstrument().getSource().getPos()
    sample = ws.getInstrument().getSample().getPos() - source
    arrow(axes, sample, origin=(0,0,-0.04))
-
+   axes.view_init(vertical_axis='y', elev=30, azim=-135)
    plt.show()
 
 
@@ -160,7 +160,7 @@ Plot a cuboid sample shape, rotate it by the goniometer and add lattice vector a
    facecolors = ['purple','mediumorchid','royalblue','b','red','firebrick','green', 'darkgreen','grey','black', 'gold', 'orange']
    mesh_polygon = Poly3DCollection(mesh, facecolors = facecolors, linewidths=0.1)
 
-   fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
+   fig, axes = plt.subplots(subplot_kw={'projection': 'mantid3d', 'proj_type': 'ortho'})
    axes.add_collection3d(mesh_polygon)
 
    axes.set_title('Cuboid Sample \n with Real and Reciprocal lattice vectors')
@@ -169,7 +169,7 @@ Plot a cuboid sample shape, rotate it by the goniometer and add lattice vector a
    axes.set_zlabel('Z / m')
 
    axes.set_mesh_axes_equal(mesh)
-   axes.view_init(elev=12, azim=44)
+   axes.set_box_aspect((1, 1, 1))
 
    def arrow(ax, vector, origin = None, factor = None, color = 'black',linestyle = '-'):
       if origin == None:
@@ -191,6 +191,7 @@ Plot a cuboid sample shape, rotate it by the goniometer and add lattice vector a
    for i in range(3): # plot reciprocal_lattice with '--' dashed linestyle
       arrow(axes, reciprocal_lattice[:,i], color = colors[i], linestyle = '--')
 
+   axes.view_init(vertical_axis='y', elev=27, azim=50)
    plt.show()
 
 
