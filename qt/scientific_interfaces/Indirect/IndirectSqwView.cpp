@@ -48,7 +48,6 @@ IndirectSqwView::IndirectSqwView(QWidget *parent) {
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
-
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
 

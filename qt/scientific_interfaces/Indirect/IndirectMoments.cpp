@@ -22,8 +22,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IndirectMomentsModel>()),
+IndirectMoments::IndirectMoments(QWidget *parent)
+    : IndirectDataManipulationTab(parent), m_model(std::make_unique<IndirectMomentsModel>()),
       m_view(std::make_unique<IndirectMomentsView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));

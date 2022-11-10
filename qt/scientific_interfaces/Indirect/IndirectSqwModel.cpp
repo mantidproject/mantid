@@ -10,6 +10,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -114,7 +116,7 @@ void IndirectSqwModel::setEWidth(double eWidth) { m_eWidth = eWidth; }
 
 void IndirectSqwModel::setEMax(double eMax) { m_eHigh = eMax; }
 
-void IndirectSqwModel::setEFixed(const std::string &eFixed) { m_eFixed = eFixed; }
+void IndirectSqwModel::setEFixed(const double eFixed) { m_eFixed = eFixed; }
 
 void IndirectSqwModel::setRebinInEnergy(bool scale) { m_rebinInEnergy = scale; }
 
@@ -146,6 +148,70 @@ UserInputValidator IndirectSqwModel::validate(std::tuple<double, double> const q
                              std::make_pair(m_eLow, m_eHigh));
   }
   return uiv;
+}
+
+std::string IndirectSqwModel::getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
+                                                      std::string const &reflection) {
+
+  // In the IRIS IPF there is no fmica component
+  if (instrumentName == "IRIS" && analyser == "fmica")
+    analyser = "mica";
+
+  // Get the instrument
+  auto const instWorkspace = loadInstrumentWorkspace(instrumentName, analyser, reflection);
+
+  auto const instrument = instWorkspace->getInstrument();
+
+  // Get the analyser component
+  auto const component = instrument->getComponentByName(analyser);
+  std::string eFixedValue = "";
+  if (instrument->hasParameter("Efixed")) {
+    eFixedValue = std::to_string(instrument->getNumberParameter("Efixed")[0]);
+  }
+  if (eFixedValue.empty() && component != nullptr)
+    eFixedValue = std::to_string(component->getNumberParameter("Efixed")[0]);
+  return eFixedValue;
+}
+
+/**
+ * Loads an empty instrument into a workspace and returns a pointer to it.
+ *
+ * If an analyser and reflection are supplied then the corresponding IPF is also
+ *loaded.
+ * The workspace is not stored in ADS.
+ *
+ * @param instrumentName Name of the instrument to load
+ * @param analyser Analyser being used (optional)
+ * @param reflection Relection being used (optional)
+ */
+MatrixWorkspace_sptr IndirectSqwModel::loadInstrumentWorkspace(const std::string &instrumentName,
+                                                               const std::string &analyser,
+                                                               const std::string &reflection) {
+  std::string idfdirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+  auto const ipfFilename = idfdirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
+
+  auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
+  auto const parameterFilename = idfdirectory + instrumentName + "_Definition" + dateRange + ".xml";
+  auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->setLogging(false);
+  loadAlg->initialize();
+  loadAlg->setProperty("Filename", parameterFilename);
+  loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
+
+  // Load the IPF if given an analyser and reflection
+  if (!analyser.empty() && !reflection.empty()) {
+    auto loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
+    loadParamAlg->setChild(true);
+    loadParamAlg->setLogging(false);
+    loadParamAlg->initialize();
+    loadParamAlg->setProperty("Filename", ipfFilename);
+    loadParamAlg->setProperty("Workspace", instWorkspace);
+    loadParamAlg->execute();
+  }
+  return instWorkspace;
 }
 
 } // namespace MantidQt::CustomInterfaces

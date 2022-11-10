@@ -25,8 +25,8 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
+IndirectSymmetrise::IndirectSymmetrise(QWidget *parent)
+    : IndirectDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
       m_view(std::make_unique<IndirectSymmetriseView>(parent)), m_model(std::make_unique<IndirectSymmetriseModel>()) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
