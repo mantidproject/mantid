@@ -1339,7 +1339,7 @@ void InstrumentWidget::setBackgroundColor(const QColor &color) {
  * Get the surface info string
  */
 QString InstrumentWidget::getSurfaceInfoText() const {
-  ProjectionSurface *surface = getSurface().get();
+  auto surface = getSurface();
   return surface ? surface->getInfoText() : "";
 }
 

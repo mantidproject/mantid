@@ -326,6 +326,11 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 QPushButton *InstrumentWidgetPickTab::getSelectTubeButton() { return m_tube; }
 
 /**
+ * Expands the plot panel
+ */
+void InstrumentWidgetPickTab::expandPlotPanel() { m_plotPanel->expandCaption(); }
+
+/**
  * If the workspace is monochromatic, the plot panel is useless and should be collapsed
  */
 void InstrumentWidgetPickTab::collapsePlotPanel() {
