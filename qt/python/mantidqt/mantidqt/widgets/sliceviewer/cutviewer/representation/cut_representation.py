@@ -61,7 +61,7 @@ class CutRepresentation:
     def get_perp_dir(self):
         w = self.get_perp_dir_crystal()
 
-        # convert perp vector from crystal basis for display
+        # convert perp vector from crystal basis for display - assumes transformation leave origin unaltered
         to_display = self.transform.tr
         perp_display_x, perp_display_y = to_display(w[0], w[1])
         w_display = array([perp_display_x, perp_display_y])
