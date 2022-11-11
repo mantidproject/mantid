@@ -14,15 +14,12 @@ class NonOrthogonalTransform:
     """
     Defines transformations to move between an orthogonal system and a non-orthogonal system
     defined by the lattice and projection vectors.
-    Includes offset so that the coordinate of the bottom left value is unchanged by the transformation
     """
-    def __init__(self, angle: float, ymin: float):
+    def __init__(self, angle: float):
         """
         :param angle: Angle in radians of skewed. Angle increases anti-clockwise from X
-        :param ymin: Minimum y value in the dataset
         """
         self._angle = angle
-        self._ymin = ymin
 
     @property
     def angle(self):
@@ -35,7 +32,8 @@ class NonOrthogonalTransform:
         :param y: Numpy array of Y coordinates in non-orthogonal frame
         :return: (x, y) of transformed coordinates. lengths of arrays match input
         """
-        return x + np.cos(self._angle) * (y - self._ymin), y
+        angle = self._angle
+        return x + np.cos(angle) * y, np.sin(angle) * y
 
     def inv_tr(self, x, y):
         """Transform coordinate arrays from the orthogonal display frame
@@ -44,7 +42,8 @@ class NonOrthogonalTransform:
         :param y: Numpy array of Y coordinates in orthogonal display frame
         :return: (x, y) of transformed coordinates. lengths of arrays match input
         """
-        return x - (y - self._ymin) * np.cos(self._angle), y
+        angle = self._angle
+        return x - y / np.tan(angle), y / np.sin(angle)
 
 
 class OrthogonalTransform():

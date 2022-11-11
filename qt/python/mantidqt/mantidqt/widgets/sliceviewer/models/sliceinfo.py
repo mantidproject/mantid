@@ -151,7 +151,7 @@ class SliceInfo:
             if abs(angle-(np.pi/2)) < 1e-5:
                 self._transform = OrthogonalTransform()  # use OrthogonalTransform for performance
             else:
-                self._transform = NonOrthogonalTransform(axes_angles[ix, iy], -1.0) # DH hardcode for testing
+                self._transform = NonOrthogonalTransform(axes_angles[ix, iy])
             self._nonorthogonal_axes_supported = True
         else:
             self._transform = OrthogonalTransform()
