@@ -403,7 +403,6 @@ class StateGuiModelTest(unittest.TestCase):
 
         self.assertEqual(state_gui_model.q_xy_max, "")
         self.assertEqual(state_gui_model.q_xy_step, "")
-        self.assertEqual(state_gui_model.q_xy_step_type, None)
         self.assertEqual(state_gui_model.r_cut, 0.0)
         self.assertEqual(state_gui_model.w_cut, 0.0)
 
