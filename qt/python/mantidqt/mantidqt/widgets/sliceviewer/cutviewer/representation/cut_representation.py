@@ -23,9 +23,8 @@ class CutRepresentation:
         self.end = self.ax.plot(xmax, ymax, 'ow', label='end')[0]
 
         perp_vec = self.get_perp_dir_crystal() * thickness
-        thick_max_x, thick_max_y = to_display(perp_vec[0], perp_vec[1])
-        origin_x, origin_y = to_display(0, 0)
-        self.thickness = sqrt(pow(thick_max_x - origin_x, 2) + pow(thick_max_y - origin_y, 2))
+        thick_x, thick_y = to_display(perp_vec[0], perp_vec[1])
+        self.thickness = sqrt(pow(thick_x, 2) + pow(thick_y, 2))
 
         self.line = None
         self.mid = None
@@ -73,9 +72,8 @@ class CutRepresentation:
 
         # convert perp vector from crystal basis for display
         to_display = self.transform.tr
-        perp_end_x, perp_end_y = to_display(w[0], w[1])
-        perp_start_x, perp_start_y = to_display(0, 0)
-        w_display = array([perp_end_x - perp_start_x, perp_end_y - perp_start_y])
+        perp_display_x, perp_display_y = to_display(w[0], w[1])
+        w_display = array([perp_display_x, perp_display_y])
 
         return w_display / sqrt(sum(w_display ** 2))
 
@@ -152,9 +150,8 @@ class CutRepresentation:
 
             # calculate length of thickness vector in crystal basis
             vec = self.get_perp_dir() * self.thickness
-            x_origin_crystal, y_origin_crystal = from_display(0, 0)
             dx_crystal, dy_crystal = from_display(vec[0], vec[1])
-            thickness_crystal = sqrt(pow(dx_crystal - x_origin_crystal, 2) + pow(dy_crystal - y_origin_crystal, 2))
+            thickness_crystal = sqrt(pow(dx_crystal, 2) + pow(dy_crystal, 2))
 
             self.notify_on_release(xmin, xmax, ymin, ymax, thickness_crystal)
 
