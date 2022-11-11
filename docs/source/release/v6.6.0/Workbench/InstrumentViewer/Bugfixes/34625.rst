@@ -1,1 +1,0 @@
-Performing a rebin on the 'Pick' tab of the InstrumentViewer will now rebin the originally loaded data and not the previously rebinned data.
