@@ -7,6 +7,7 @@
 #include "QtInstrumentView.h"
 #include "MantidKernel/UsageService.h"
 
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
@@ -49,6 +50,7 @@ void QtInstrumentView::initLayout() {
   m_ui.lamMinEdit->setSpecialValueText("Unset");
   m_ui.lamMaxEdit->setSpecialValueText("Unset");
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this, SLOT(onRestoreDefaultsRequested()));
+  connect(m_ui.calibrationPathButton, SIGNAL(clicked()), this, SLOT(browseToCalibrationFile()));
 }
 
 void QtInstrumentView::connectSettingsChange(QLineEdit &edit) {
@@ -93,6 +95,13 @@ void QtInstrumentView::disconnectSettingsChange(QCheckBox &edit) {
 
 void QtInstrumentView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
+void QtInstrumentView::browseToCalibrationFile() {
+  auto calibrationFilePath = QFileDialog::getOpenFileName(this, QString(), QString(), tr("Data Files (*.dat)"));
+  if (!calibrationFilePath.isEmpty()) {
+    m_ui.calibrationPathEdit->setText(calibrationFilePath);
+  }
+}
+
 void QtInstrumentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
@@ -122,6 +131,7 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.I0MonitorIndex, "I0MonitorIndex", alg);
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
+  registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
 }
 
 void QtInstrumentView::connectInstrumentSettingsWidgets() {
@@ -135,6 +145,7 @@ void QtInstrumentView::connectInstrumentSettingsWidgets() {
   connectSettingsChange(*m_ui.I0MonitorIndex);
   connectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   connectSettingsChange(*m_ui.correctDetectorsCheckBox);
+  connectSettingsChange(*m_ui.calibrationPathEdit);
 }
 
 void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
@@ -148,6 +159,7 @@ void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.I0MonitorIndex);
   disconnectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   disconnectSettingsChange(*m_ui.correctDetectorsCheckBox);
+  disconnectSettingsChange(*m_ui.calibrationPathEdit);
 }
 
 template <typename Widget>

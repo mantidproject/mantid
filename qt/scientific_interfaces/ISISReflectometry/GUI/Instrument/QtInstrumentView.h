@@ -67,6 +67,7 @@ public:
 public slots:
   void onSettingsChanged();
   void onRestoreDefaultsRequested();
+  void browseToCalibrationFile();
 
 private:
   /// Initialise the interface
