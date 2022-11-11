@@ -9,7 +9,8 @@
 # conda-cppcheck pull_requests-cppcheck /jenkins/workspace_dir/
 #
 # Expected args:
-#   1. JOB_NAME: The name of the job to be run on must include 'pull_requests'.
+#   1. JOB_NAME: If the name of the job contains 'pull_requests', the script checks for any C++ file changes. If
+#                there are none, then it exits early with code 0.
 #   2. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
 
