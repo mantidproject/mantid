@@ -1,0 +1,1 @@
+- Stop using the value of the ScaleRHSWorkspace parameter of Stitch1DMany in favour of the IndexOfReference parameter.

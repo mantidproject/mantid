@@ -1,0 +1,1 @@
+- Mouse cursor now changes to a horizontal double arrow when hovering over peak and range markers in the fitting tool, indicating they can be dragged left and right.
