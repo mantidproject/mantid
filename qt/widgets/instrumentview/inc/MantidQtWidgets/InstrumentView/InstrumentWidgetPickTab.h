@@ -141,6 +141,7 @@ private slots:
   void updatePlotMultipleDetectors();
   void onRunRebin();
   void onRebinParamsWritten(const QString &text);
+  void onKeepOriginalStateChanged(int state);
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
@@ -200,6 +201,8 @@ private:
   QLineEdit *m_rebinParams;
   QCheckBox *m_rebinUseReverseLog;
   QCheckBox *m_rebinSaveToHisto;
+  QCheckBox *m_rebinKeepOriginal;
+  QLabel *m_rebinKeepOriginalWarning;
   QPushButton *m_runRebin;
 
   /// The original workspace to be used for rebinning. Do not add this to the ADS (if you don't want a memory leak)

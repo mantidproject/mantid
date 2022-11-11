@@ -69,7 +69,8 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
 
-void rebin(const Mantid::API::Workspace_sptr &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
+template <typename T>
+void rebin(const T &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
            const bool reverseLogarithmic, const std::string &outputWorkspace) {
   auto rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
   rebinAlgorithm->setProperty("InputWorkspace", inputWorkspace);
@@ -117,6 +118,15 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
                                    "approach the upper limit. See Rebin for details.");
   m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
   m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
+  m_rebinKeepOriginal = new QCheckBox("Keep original workspace", m_rebin);
+  m_rebinKeepOriginal->setChecked(true);
+  m_rebinKeepOriginal->setToolTip("Keeps the original workspace so it can be used for subsequent rebin operations. "
+                                  "WARNING: This option can cause high-memory usage for large datasets.");
+  m_rebinKeepOriginalWarning = new QLabel("*Warning*");
+  m_rebinKeepOriginalWarning->setStyleSheet("QLabel { color: darkorange; }");
+  m_rebinKeepOriginalWarning->setToolTip("WARNING: This option can cause high-memory usage for large datasets.");
+
+  connect(m_rebinKeepOriginal, SIGNAL(stateChanged(int)), this, SLOT(onKeepOriginalStateChanged(int)));
 
   m_runRebin = new QPushButton("Run", m_rebin);
   connect(m_rebinParams, SIGNAL(textChanged(QString)), this, SLOT(onRebinParamsWritten(QString)));
@@ -127,6 +137,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   QGridLayout *rebinCheckBoxesLayout = new QGridLayout();
   rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
   rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginal, 1, 0);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginalWarning, 1, 1);
   rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
 
   rebinLayout->addWidget(m_runRebin, 2, 0);
@@ -862,15 +874,29 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
-  if (!m_originalWorkspace) {
+  if (m_rebinKeepOriginal->isChecked() && !m_originalWorkspace) {
     m_originalWorkspace = m_instrWidget->getWorkspaceClone();
   }
 
   try {
-    rebin(m_originalWorkspace, m_rebinParams->text().toStdString(), !m_rebinSaveToHisto->isChecked(),
-          m_rebinUseReverseLog->isChecked(), m_instrWidget->getWorkspaceNameStdString());
+    if (m_originalWorkspace) {
+      rebin<Mantid::API::Workspace_sptr>(m_originalWorkspace, m_rebinParams->text().toStdString(),
+                                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                                         m_instrWidget->getWorkspaceNameStdString());
+    } else {
+      rebin<std::string>(m_instrWidget->getWorkspaceNameStdString(), m_rebinParams->text().toStdString(),
+                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                         m_instrWidget->getWorkspaceNameStdString());
+    }
   } catch (const std::exception &ex) {
     QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
+  }
+}
+
+void InstrumentWidgetPickTab::onKeepOriginalStateChanged(int state) {
+  m_rebinKeepOriginalWarning->setVisible(state == Qt::Checked);
+  if (state == Qt::Unchecked) {
+    resetOriginalWorkspace();
   }
 }
 
