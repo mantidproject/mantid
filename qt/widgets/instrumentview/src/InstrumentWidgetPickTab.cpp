@@ -119,7 +119,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
   m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
   m_rebinKeepOriginal = new QCheckBox("Keep original workspace", m_rebin);
-  m_rebinKeepOriginal->setChecked(true);
   m_rebinKeepOriginal->setToolTip("Keeps the original workspace so it can be used for subsequent rebin operations. "
                                   "WARNING: This option can cause high-memory usage for large datasets.");
   m_rebinKeepOriginalWarning = new QLabel("*Warning*");
@@ -705,6 +704,7 @@ const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const { r
 void InstrumentWidgetPickTab::saveSettings(QSettings &settings) const {
   settings.setValue("TubeXUnits", m_plotController->getTubeXUnits());
   settings.setValue("PlotType", m_plotController->getPlotType());
+  settings.setValue("RebinKeeporiginal", m_rebinKeepOriginal->isChecked());
 }
 
 /**
@@ -716,6 +716,8 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   // Cache the settings and apply them later
   m_tubeXUnitsCache = settings.value("TubeXUnits", 0).toInt();
   m_plotTypeCache = settings.value("PlotType", IWPickPlotType::SINGLE).toInt();
+
+  m_rebinKeepOriginal->setChecked(settings.value("RebinKeeporiginal", true).toBool());
 }
 void InstrumentWidgetPickTab::addToContextMenu(QAction *action,
                                                std::function<bool(std::map<std::string, bool>)> &actionCondition) {
