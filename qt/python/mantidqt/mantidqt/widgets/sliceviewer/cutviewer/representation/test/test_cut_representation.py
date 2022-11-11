@@ -20,7 +20,12 @@ class LinePlotsTest(unittest.TestCase):
         self.canvas = mock.MagicMock()
         self.notify_on_release = mock.MagicMock()
         xmin, xmax, ymin, ymax, thickness = -1, 1, 0, 2, 0.2
-        self.cut_rep = CutRepresentation(self.canvas, self.notify_on_release, xmin, xmax, ymin, ymax, thickness)
+        transform = mock.MagicMock()
+        transform.tr = mock.MagicMock()
+        transform.tr.side_effect = lambda x, y: (x, y)
+        transform.inv_tr = mock.MagicMock()
+        transform.inv_tr.side_effect = lambda x, y: (x, y)
+        self.cut_rep = CutRepresentation(self.canvas, self.notify_on_release, xmin, xmax, ymin, ymax, thickness, transform)
         self.cut_rep.start = mock.MagicMock()
         self.cut_rep.end = mock.MagicMock()
         self.cut_rep.start.get_xdata.return_value = [xmin]
@@ -63,8 +68,10 @@ class LinePlotsTest(unittest.TestCase):
 
         mock_clear.assert_called_once()
         mock_draw.assert_called_once()
-        self.cut_rep.start.set_data.assert_called_with([3.0], [4.0])
-        self.cut_rep.end.set_data.assert_called_with([5.0], [6.0])
+        self.assertEqual(self.cut_rep.xmin_c, 3.0)
+        self.assertEqual(self.cut_rep.ymin_c, 4.0)
+        self.assertEqual(self.cut_rep.xmax_c, 5.0)
+        self.assertEqual(self.cut_rep.ymax_c, 6.0)
 
     @mock.patch(fpath + ".CutRepresentation.clear_lines", autospec=True)
     @mock.patch(fpath + ".CutRepresentation.draw", autospec=True)
@@ -82,7 +89,7 @@ class LinePlotsTest(unittest.TestCase):
 
         mock_clear.assert_called_once()
         mock_draw.assert_called_once()
-        self.assertAlmostEqual(self.cut_rep.thickness, sqrt(2))
+        self.assertAlmostEqual(self.cut_rep.thickness_c, sqrt(2))
 
     @mock.patch(fpath + ".CutRepresentation.clear_lines", autospec=True)
     @mock.patch(fpath + ".CutRepresentation.draw", autospec=True)
@@ -100,7 +107,8 @@ class LinePlotsTest(unittest.TestCase):
 
         mock_clear.assert_called_once()
         mock_draw.assert_called_once()
-        self.cut_rep.current_artist.set_data.assert_called_once_with([2.0], [3.0])
+        self.assertEqual(self.cut_rep.xmax_c, 2.0)
+        self.assertEqual(self.cut_rep.ymax_c, 3.0)
 
     def test_is_valid_event_if_event_not_in_axes(self):
         mock_event = mock.MagicMock()
@@ -145,7 +153,7 @@ class LinePlotsTest(unittest.TestCase):
         mock_is_valid.return_value = True
         mock_has_artist.return_value = True
         # overwrite end point to have x < start point
-        self.cut_rep.end.get_xdata.return_value = [-2]
+        self.cut_rep.xmax_c= -2
 
         self.cut_rep.on_release("event")
 
