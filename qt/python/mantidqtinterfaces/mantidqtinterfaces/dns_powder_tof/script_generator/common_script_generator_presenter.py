@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Common presenter for DNS acript generators.
+Common presenter for DNS script generators.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
@@ -101,8 +101,7 @@ class DNSScriptGeneratorPresenter(DNSObserver):
             filename, script_path = self.model.save_script(
                 script, filename, script_dir)
             self.view.show_status_message(f'Script Saved to: {script_path}',
-                                          30,
-                                          clear=True)
+                                          30, clear=True)
             self._set_script_filename(filename)
         else:
             self.raise_error('No script filepath set, script will not be '
