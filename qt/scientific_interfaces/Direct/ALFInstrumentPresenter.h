@@ -37,6 +37,8 @@ public:
 
   virtual void loadRunNumber() = 0;
 
+  virtual void notifyShapeChanged() = 0;
+
   virtual void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
   virtual void averageTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
 
@@ -56,6 +58,8 @@ public:
   void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
 
   void loadRunNumber() override;
+
+  void notifyShapeChanged() override;
 
   void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
   void averageTube(Mantid::Geometry::IDetector_const_sptr detector) override;

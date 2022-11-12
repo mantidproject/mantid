@@ -12,8 +12,14 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
+
+namespace MantidWidgets {
+class InstrumentActor;
+}
+
 namespace CustomInterfaces {
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
@@ -27,6 +33,11 @@ public:
   virtual std::string loadedWsName() const = 0;
   virtual std::string extractedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
+
+  virtual void setSelectedDetectors(std::vector<std::size_t> detectorIndices) = 0;
+
+  virtual Mantid::API::MatrixWorkspace_sptr
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor *actor) const = 0;
 
   virtual std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
   virtual std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
@@ -47,6 +58,11 @@ public:
   std::string extractedWsName() const override;
   std::size_t runNumber() const override;
 
+  void setSelectedDetectors(std::vector<std::size_t> detectorIndices) override;
+
+  Mantid::API::MatrixWorkspace_sptr
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor *actor) const override;
+
   std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
   std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
                                     std::size_t const numberOfTubes) override;
@@ -55,6 +71,13 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
+  void prepareDataForIntegralsPlot(MantidQt::MantidWidgets::InstrumentActor *actor,
+                                   std::vector<std::size_t> const &detectorIndices, std::vector<double> &x,
+                                   std::vector<double> &y, std::vector<double> &e) const;
+  double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos, const Mantid::Kernel::V3D &origin,
+                            const Mantid::Kernel::V3D &normal) const;
+
+  std::vector<std::size_t> m_detectorIndices;
 };
 
 } // namespace CustomInterfaces

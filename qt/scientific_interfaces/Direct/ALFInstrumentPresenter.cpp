@@ -49,6 +49,14 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
   }
 }
 
+void ALFInstrumentPresenter::notifyShapeChanged() {
+  m_model->setSelectedDetectors(std::move(m_view->getSelectedDetectors()));
+
+  auto const outOfPlaneAngleWorkspace = m_model->generateOutOfPlaneAngleWorkspace(&m_view->getInstrumentActor());
+
+  // m_analysisPresenter->setExtractedWorkspace(outOfPlaneAngleWorkspace);
+}
+
 void ALFInstrumentPresenter::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
   if (auto const twoTheta = m_model->extractSingleTube(detector)) {
     m_analysisPresenter->notifyTubeExtracted(*twoTheta);

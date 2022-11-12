@@ -7,6 +7,9 @@
 #include "ALFInstrumentView.h"
 
 #include "ALFInstrumentPresenter.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
@@ -44,6 +47,9 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget->removeTab("Instrument");
   m_instrumentWidget->removeTab("Draw");
   m_instrumentWidget->hideHelp();
+
+  connect(m_instrumentWidget->getInstrumentDisplay()->getSurface().get(), SIGNAL(shapeChangeFinished()), this,
+          SLOT(notifyShapeChanged()));
 
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->expandPlotPanel();
@@ -106,6 +112,20 @@ void ALFInstrumentView::fileLoaded() {
     return;
   }
   m_presenter->loadRunNumber();
+}
+
+void ALFInstrumentView::notifyShapeChanged() { m_presenter->notifyShapeChanged(); }
+
+MantidWidgets::InstrumentActor &ALFInstrumentView::getInstrumentActor() const {
+  return m_instrumentWidget->getInstrumentActor();
+}
+
+std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
+  std::vector<size_t> detectorIndices;
+  // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"
+  // (although weather it's treated as a mask or not is up to the caller)
+  m_instrumentWidget->getInstrumentDisplay()->getSurface()->getMaskedDetectors(detectorIndices);
+  return detectorIndices;
 }
 
 void ALFInstrumentView::selectWholeTube() {

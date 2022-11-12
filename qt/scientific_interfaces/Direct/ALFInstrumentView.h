@@ -8,6 +8,8 @@
 
 #include "DllConfig.h"
 
+#include "MantidKernel/V3D.h"
+
 #include <optional>
 #include <string>
 
@@ -24,8 +26,9 @@ class FileFinderWidget;
 }
 
 namespace MantidWidgets {
+class InstrumentActor;
 class InstrumentWidget;
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -43,6 +46,10 @@ public:
 
   virtual std::optional<std::string> getFile() = 0;
   virtual void setRunQuietly(std::string const &runNumber) = 0;
+
+  virtual MantidWidgets::InstrumentActor &getInstrumentActor() const = 0;
+
+  virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -63,10 +70,15 @@ public:
   std::optional<std::string> getFile() override;
   void setRunQuietly(std::string const &runNumber) override;
 
+  MantidWidgets::InstrumentActor &getInstrumentActor() const override;
+
+  std::vector<std::size_t> getSelectedDetectors() const override;
+
   void warningBox(std::string const &message) override;
 
 private slots:
   void fileLoaded();
+  void notifyShapeChanged();
   void selectWholeTube();
   void extractSingleTube();
   void averageTube();
