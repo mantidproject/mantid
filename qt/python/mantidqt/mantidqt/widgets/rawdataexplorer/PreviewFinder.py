@@ -80,12 +80,13 @@ class PreviewFinder:
             D19:     {AcquisitionType.DEFAULT: PreviewType.SVIEW}
             }
 
-    def get_preview(self, instrument_name, acquisition_mode=AcquisitionType.DEFAULT, is_group=False):
+    def get_preview(self, instrument_name: str, acquisition_mode: AcquisitionType = AcquisitionType.DEFAULT,
+                    is_group: bool = False) -> PreviewType:
         """
         Get the preview associated with an instrument with a given acquisition mode.
         @param instrument_name: the name of instrument to look for
         @param acquisition_mode: the acquisition mode used
-        @param is_group: whether the data comes from a group. Used for determining default.
+        @param is_group: whether the data comes from a group. Used to determine default.
         @return the preview to use
         """
         if instrument_name in self.prev:
@@ -100,7 +101,7 @@ class PreviewFinder:
             # default to instrument view and hope for the best
             return PreviewType.IVIEW
 
-    def need_acquisition_mode(self, instrument_name):
+    def need_acquisition_mode(self, instrument_name: str):
         """
         Checks whether an instrument needs an acquisition mode to determine the preview to use
         @param instrument_name: the name of the instrument to look for

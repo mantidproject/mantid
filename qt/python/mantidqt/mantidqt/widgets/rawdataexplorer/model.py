@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import os.path
+from typing import TYPE_CHECKING
 from qtpy.QtCore import *
 from qtpy.QtWidgets import QMessageBox
 
@@ -16,6 +17,9 @@ from mantid.dataobjects import Workspace2D, EventWorkspace
 
 from .PreviewFinder import PreviewFinder, AcquisitionType
 from .memoryManager import MemoryManager
+
+if TYPE_CHECKING:
+    from .presenter import RawDataExplorerPresenter
 
 
 class PreviewModel(QObject):
@@ -40,27 +44,27 @@ class PreviewModel(QObject):
     """
     sig_request_close = Signal()
 
-    def __init__(self, preview_type, workspace_name):
+    def __init__(self, preview_type: PreviewType, workspace_name: str):
         super().__init__()
-        self._type = preview_type
-        self._workspace_name = workspace_name
+        self._type: PreviewType = preview_type
+        self._workspace_name: str = workspace_name
 
-    def get_preview_type(self):
+    def get_preview_type(self) -> PreviewType:
         """
         Get the type of the preview.
         @return (PreviewType): preview type
         """
         return self._type
 
-    def set_workspace_name(self, workspace_name):
+    def set_workspace_name(self, workspace_name: str):
         """
         Set the workspace. This function raises the corresponding signal.
-        @param workspace_name (str): name of the workspace
+        @param workspace_name: name of the workspace
         """
         self._workspace_name = workspace_name
         self.sig_workspace_changed.emit()
 
-    def get_workspace_name(self):
+    def get_workspace_name(self) -> str:
         """
         Get the name of the current workspace.
         @return (str): name
@@ -85,25 +89,25 @@ class RawDataExplorerModel(QObject):
     """
     _previews = None
 
-    def __init__(self, presenter):
+    def __init__(self, presenter: "RawDataExplorerPresenter"):
         """
         Initialise the model
         @param presenter: The presenter controlling this model
         """
         super().__init__()
-        self.presenter = presenter
+        self.presenter: "RawDataExplorerPresenter" = presenter
 
-        self._previews = list()
+        self._previews: list = list()
 
-        self.memory_manager = MemoryManager(self)
+        self.memory_manager: MemoryManager = MemoryManager(self)
 
-    def modify_preview(self, filename):
+    def modify_preview(self, filename: str):
         """
         Modify the last preview of the same type. If none is found, a new preview is opened.
         @param filename: the full path to the file to show
         """
 
-        ws_name = os.path.basename(filename)[:-4]
+        ws_name = os.path.basename(filename)[:-4]  # TODO fix that
 
         # load the file if necessary
         if not mtd.doesExist(ws_name):
@@ -146,7 +150,7 @@ class RawDataExplorerModel(QObject):
         self.sig_new_preview.emit(preview_model)
 
     @staticmethod
-    def load_file(workspace_name, filename):
+    def load_file(workspace_name: str, filename: str) -> bool:
         """
         Load the workspace to the workspace name.
         @param workspace_name: the name of the workspace to create.
@@ -167,15 +171,15 @@ class RawDataExplorerModel(QObject):
             error_reporting("Error, could not load file.")
         return load_alg.isExecuted()
 
-    def del_preview(self, previewModel):
+    def del_preview(self, preview_model: PreviewModel):
         """
         Delete a preview model.
-        @param previewModel(PreviewModel): reference to the model.
+        @param preview_model: a reference to the model.
         """
-        if previewModel in self._previews:
-            self._previews.remove(previewModel)
+        if preview_model in self._previews:
+            self._previews.remove(preview_model)
 
-    def can_delete_workspace(self, ws_name):
+    def can_delete_workspace(self, ws_name: str) -> bool:
         """
         Checks if a workspace is not shown in any preview and thus can be deleted.
         @param ws_name: the name of the workspace
@@ -186,7 +190,7 @@ class RawDataExplorerModel(QObject):
                 return False
         return True
 
-    def choose_preview(self, ws_name):
+    def choose_preview(self, ws_name: str) -> PreviewType:
         """
         Reading the dimensions of the data, this determines the plot to use to show it.
         @param ws_name: the name of the workspace which data are to be shown
@@ -232,11 +236,11 @@ class RawDataExplorerModel(QObject):
         return preview
 
     @staticmethod
-    def determine_acquisition_mode(workspace):
+    def determine_acquisition_mode(workspace: Workspace2D) -> AcquisitionType:
         """
         Reading the workspace run's parameters, attempts to find what kind of acquisition was used to get this data.
         @param workspace: the workspace to check
-        @return (AcquisitionType) the predicted acquisition type
+        @return the predicted acquisition type
         """
         if workspace.blocksize() > 1:
             # TODO FIND A BETTER WAY TO DISSOCIATE THE 2
@@ -251,7 +255,7 @@ class RawDataExplorerModel(QObject):
             return AcquisitionType.MONO
 
     @staticmethod
-    def accumulate(target_ws, ws_to_add):
+    def accumulate(target_ws: str, ws_to_add: str) -> str:
         """
         Accumulate the new workspace on the currently relevant opened workspace
         @param target_ws: the workspace on which to sum
@@ -272,7 +276,7 @@ class RawDataExplorerModel(QObject):
         return final_ws
 
     @staticmethod
-    def accumulate_name(last_ws, ws_to_add):
+    def accumulate_name(last_ws: str, ws_to_add: str) -> str:
         """
         Create the name of a workspace created through accumulation
         @param last_ws: the name of the workspace on which to accumulate
@@ -290,7 +294,7 @@ class RawDataExplorerModel(QObject):
         return ws_name
 
 
-def error_reporting(error_message):
+def error_reporting(error_message: str):
     """
     Log an error and displays a popup for the attention of the user
     @param error_message: the error message to show

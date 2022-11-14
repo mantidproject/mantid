@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -14,7 +14,7 @@ from mantid.simpleapi import config
 from mantid.api import PreviewType
 from mantid.kernel import logger
 
-from .model import RawDataExplorerModel
+from .model import RawDataExplorerModel, PreviewModel
 from .view import RawDataExplorerView, PreviewView
 
 
@@ -49,7 +49,8 @@ class PreviewPresenter:
                         PreviewType.PLOT2D: PreviewView.PLOT2D,
                         PreviewType.PLOTSPECTRUM: PreviewView.PLOTSPECTRUM}
 
-    def __init__(self, main_view, view, main_model, model):
+    def __init__(self, main_view: RawDataExplorerView, view: PreviewView, main_model: RawDataExplorerModel,
+                 model: PreviewModel):
         self._main_view = main_view
         self._view = view
         view.set_presenter(self)
@@ -65,9 +66,10 @@ class PreviewPresenter:
         self._model.sig_workspace_changed.connect(self.on_workspace_changed)
         self._model.sig_request_close.connect(lambda: self._view.sig_request_close.emit())
 
-    def close_preview(self, requested_by_user=True):
+    def close_preview(self, requested_by_user: bool = True):
         """
         Slot triggered when the view is closed.
+        @param requested_by_user: whether closing the preview was requested by the user or by the system
         """
         self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
@@ -96,7 +98,7 @@ class RawDataExplorerPresenter(QObject):
     Presenter for the RawDataExplorer widget
     """
 
-    def __init__(self, parent=None, view=None, model=None):
+    def __init__(self, parent=None, view: RawDataExplorerView = None, model: RawDataExplorerModel = None):
         """
         @param parent: The parent of the object, if there is one
         @param view: Optional - a view to use instead of letting the class create one (intended for testing)
@@ -146,7 +148,7 @@ class RawDataExplorerPresenter(QObject):
 
         self.set_working_directory(path)
 
-    def set_working_directory(self, new_working_directory):
+    def set_working_directory(self, new_working_directory: str):
         """
         Change the current working directory and update the tree view
         @param new_working_directory : the path to the new working directory, which exists
@@ -160,7 +162,7 @@ class RawDataExplorerPresenter(QObject):
         self.view.fileTree.model().setRootPath(new_working_directory)
         self.view.fileTree.setRootIndex(self.view.fileTree.model().index(new_working_directory))
 
-    def on_file_dialog_choice(self, new_directory):
+    def on_file_dialog_choice(self, new_directory: str):
         """
         Slot triggered when the user selects a new working directory from a dialog window
         @param new_directory : the directory selected by the user. None if they cancelled.
@@ -179,14 +181,16 @@ class RawDataExplorerPresenter(QObject):
         else:
             logger.warning("Not a valid path for a directory to set as root for the explorer.")
 
-    def on_accumulate_changed(self, is_now_accumulating):
+    def on_accumulate_changed(self, is_now_accumulating: bool):
         """
         Slot triggered by the user entering or exiting the accumulation mode by pressing Ctrl.
         Manage the file selection mode.
+        @param is_now_accumulating: whether the user is entering or leaving the accumulating mode
         """
         self._is_accumulating = is_now_accumulating
 
         if not is_now_accumulating:
+            # if we are leaving accumulating mode, the selection must be cleared
             self.view.fileTree.selectionModel().clearSelection()
 
         self.set_selection_mode()
@@ -207,21 +211,22 @@ class RawDataExplorerPresenter(QObject):
         QGuiApplication.restoreOverrideCursor()
         self.set_selection_mode(True)
 
-    def on_new_preview(self, previewModel):
+    def on_new_preview(self, preview_model: PreviewModel):
         """
         Triggered when a new preview model has been added to the model. This is
         creating a dedicated MVP for this preview.
+        @param preview_model: the preview model of the new preview
         """
         view = self.view.add_preview()
-        PreviewPresenter(self.view, view, self.model, previewModel)
+        PreviewPresenter(self.view, view, self.model, preview_model)
 
-    def is_accumulating(self):
+    def is_accumulating(self) -> bool:
         """
         @return whether or not the user is currently accumulating workspaces.
         """
         return self._is_accumulating
 
-    def set_selection_mode(self, can_select=True):
+    def set_selection_mode(self, can_select: bool = True):
         """
         Set the current selection mode for the widget.
         @param can_select: True if selection is allowed.

@@ -7,6 +7,7 @@
 
 from qtpy.QtWidgets import QTreeView, QFileSystemModel, QAbstractItemView, QHeaderView
 from qtpy.QtCore import *
+from qtpy.QtGui import QKeyEvent, QFocusEvent
 
 
 class RawDataExplorerFileTree(QTreeView):
@@ -53,17 +54,31 @@ class RawDataExplorerFileTree(QTreeView):
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-    def currentChanged(self, current_index, previous_index):
+    def currentChanged(self, current_index: QModelIndex, previous_index: QModelIndex):
+        """
+        Slot triggered when the current index changed.
+        @param current_index: the new index the user has selected
+        @param previous_index: the previous index the user was at
+        """
+        # for easier future use, the new index is always in the file column,
+        # even if it wasn't the column the user actually selected
         if current_index.column() != self._FILES_COLUMN:
             current_index = current_index.sibling(current_index.row(), self._FILES_COLUMN)
 
+        # if the index changes with the accumulate mode on but without the ctrl key being pressed, the accumulate mode
+        # is stopped
         if not self.is_ctrl_being_pressed:
             self.sig_accumulate_changed.emit(False)
 
         self.sig_new_current.emit(current_index)
         super(RawDataExplorerFileTree, self).currentChanged(current_index, previous_index)
 
-    def selectionChanged(self, selected, deselected):
+    def selectionChanged(self, selected: QItemSelection, deselected: QItemSelection):
+        """
+        Slot triggered when the selection is changed.
+        @param selected: the QItemSelection holding all the selected items
+        @param deselected: the QItemSelection holding all the indices that have deselected
+        """
         super(RawDataExplorerFileTree, self).selectionChanged(selected, deselected)
         if self._clearing_selection:
             self._clearing_selection = False
@@ -93,20 +108,28 @@ class RawDataExplorerFileTree(QTreeView):
         selection_model.clearSelection()
         selection_model.clearCurrentIndex()
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QKeyEvent):
+        """
+        Slot triggered when a key is pressed.
+        @param event: the event triggered by the key press
+        """
         if event.key() == Qt.Key_Control:
             self.is_ctrl_being_pressed = True
             self.sig_accumulate_changed.emit(True)
         else:
             super(RawDataExplorerFileTree, self).keyPressEvent(event)
 
-    def keyReleaseEvent(self, event):
+    def keyReleaseEvent(self, event: QKeyEvent):
+        """
+        Slot triggered when a key is released.
+        @param event: the event triggered by the key release.
+        """
         if event.key() == Qt.Key_Control:
             self.is_ctrl_being_pressed = False
         else:
             super(RawDataExplorerFileTree, self).keyReleaseEvent(event)
 
-    def focusOutEvent(self, event):
+    def focusOutEvent(self, event: QFocusEvent):
         """
         Slot triggered by focusing out of the explorer. Overrode to take care of the case when the widget is updated
         and steals the focus.
@@ -122,9 +145,9 @@ class RawDataExplorerFileTree(QTreeView):
             return
         super(RawDataExplorerFileTree, self).focusOutEvent(event)
 
-    def set_ignore_next_focus_out(self, new_status):
+    def set_ignore_next_focus_out(self, new_status: bool):
         """
         Setter for the bool ignore_next_focus_out
-        @param new_status: a boolean, the new value of the flag
+        @param new_status: the new value of the flag
         """
         self._ignore_next_focus_out = new_status

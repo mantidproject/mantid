@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import *
 
 from mantid.simpleapi import mtd, DeleteWorkspace
@@ -13,6 +15,9 @@ from mantid.kernel import logger
 
 from ...utils.asynchronous import set_interval
 from ..memorywidget.memoryinfo import get_memory_info
+
+if TYPE_CHECKING:
+    from .model import RawDataExplorerModel
 
 
 class MemoryManager(QObject):
@@ -31,12 +36,12 @@ class MemoryManager(QObject):
     """
     Limit at which the memory manager starts to free memory.
     """
-    MEMORY_WORRY_THRESHOLD = 80  # in percentage of the total
+    MEMORY_WORRY_THRESHOLD = 80  # in percentage of the system total
 
     """
     Limit at which the memory manager tries to free memory as fast as possible
     """
-    MEMORY_PANIC_THRESHOLD = 90  # in percentage of total
+    MEMORY_PANIC_THRESHOLD = 90  # in percentage of the system total
 
     """
     Signal sent when freeing memory is needed.
@@ -48,7 +53,7 @@ class MemoryManager(QObject):
     """
     _current_workspaces = None
 
-    def __init__(self, rdexp_model):
+    def __init__(self, rdexp_model: "RawDataExplorerModel"):
         super().__init__()
 
         self.rdexp_model = rdexp_model
@@ -94,7 +99,7 @@ class MemoryManager(QObject):
         self.update_allowed = False
         self.thread_stopper.set()
 
-    def workspace_interacted_with(self, ws_name):
+    def workspace_interacted_with(self, ws_name: str):
         """
         If a workspace is used for a preview, it is considered interacted with and
         thus moved at the end of the queue for deletion
