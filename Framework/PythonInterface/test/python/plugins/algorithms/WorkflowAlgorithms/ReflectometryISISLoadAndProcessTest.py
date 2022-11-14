@@ -661,11 +661,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             throws = True
         self.assertEqual(throws, True)
 
-    def _assert_run_algorithm_throws_with_error(self, args, error_msg_regex):
-        alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
-        alg.setRethrows(True)
-        self.assertRaisesRegex(RuntimeError, error_msg_regex, alg.execute)
-
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))
 

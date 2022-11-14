@@ -92,14 +92,14 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
-        self.assertEqual(True, AnalysisDataService.doesExist(f"Calib_Table_{str(output_ws.getRunNumber())}"))
+        self._check_calibration(output_ws, is_calibrated=True)
 
     def test_calibration_is_skipped_if_file_not_provided(self):
         args = {'InputRunList': 'INTER45455',
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
-        self.assertEqual(False, AnalysisDataService.doesExist(f"Calib_Table_{str(output_ws.getRunNumber())}"))
+        self._check_calibration(output_ws, is_calibrated=False)
 
     def _run_test_with_monitors(self, args):
         alg = create_algorithm('ReflectometryISISPreprocess', **args)
@@ -113,6 +113,9 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
     def _run_test(self, args):
         output_ws, _ = self._run_test_with_monitors(args)
         return output_ws
+
+    def _check_calibration(self, ws, is_calibrated):
+        self.assertEqual(is_calibrated, AnalysisDataService.doesExist(f"Calib_Table_{str(ws.getRunNumber())}"))
 
 
 if __name__ == '__main__':
