@@ -92,14 +92,14 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
-        self._check_calibration(output_ws, 147, -0.004130928370765952, expect_calibrated=True)
+        self.assertEqual(True, AnalysisDataService.doesExist(f"Calib_Table_{str(output_ws.getRunNumber())}"))
 
     def test_calibration_is_skipped_if_file_not_provided(self):
         args = {'InputRunList': 'INTER45455',
                 "OutputWorkspace": "ws"}
         output_ws = self._run_test(args)
         self.assertIsInstance(output_ws, MatrixWorkspace)
-        self._check_calibration(output_ws, 147, -0.004130928370765952, expect_calibrated=False)
+        self.assertEqual(False, AnalysisDataService.doesExist(f"Calib_Table_{str(output_ws.getRunNumber())}"))
 
     def _run_test_with_monitors(self, args):
         alg = create_algorithm('ReflectometryISISPreprocess', **args)
@@ -113,14 +113,6 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
     def _run_test(self, args):
         output_ws, _ = self._run_test_with_monitors(args)
         return output_ws
-
-    def _check_calibration(self, ws, det_ws_idx, start_pos_y, expect_calibrated):
-        self.assertEqual(expect_calibrated, AnalysisDataService.doesExist(f"Calib_Table_{str(ws.getRunNumber())}"))
-        final_pos_y = ws.getDetector(det_ws_idx).getPos()[1]
-        if expect_calibrated:
-            self.assertNotAlmostEqual(start_pos_y, final_pos_y, 10, msg="Calibration not applied as expected")
-        else:
-            self.assertAlmostEqual(start_pos_y, final_pos_y, 10, msg="Calibration applied unexpectedly")
 
 
 if __name__ == '__main__':

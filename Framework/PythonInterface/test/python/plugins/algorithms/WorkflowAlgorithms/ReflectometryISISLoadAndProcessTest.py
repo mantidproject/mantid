@@ -559,16 +559,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         del args['ProcessingInstructions']
         args['CalibrationFile'] = self._CALIBRATION_TEST_DATA
         args['AnalysisMode'] = 'MultiDetectorAnalysis'
-        outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'Calib_Table_45455']
-        self._assert_run_algorithm_succeeds(args, outputs)
-
-    def test_multiple_input_runs_with_calibration_successful(self):
-        args = self._default_options
-        args['InputRunList'] = ['INTER45455', 'INTER45456']
-        del args['ProcessingInstructions']
-        args['CalibrationFile'] = self._CALIBRATION_TEST_DATA
-        args['AnalysisMode'] = 'MultiDetectorAnalysis'
-        outputs = ['IvsQ_45455+45456', 'IvsQ_binned_45455+45456', 'TOF', 'TOF_45455', 'TOF_45456', 'TOF_45455+45456', 'Calib_Table_45455', 'Calib_Table_45456']
+        outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'Calib_Table_45455', 'TOF_45455_summed_segment']
         self._assert_run_algorithm_succeeds(args, outputs)
 
     # TODO test if no runNumber is on the WS
