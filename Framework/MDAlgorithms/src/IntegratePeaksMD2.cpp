@@ -470,7 +470,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *peakWS, *wsProfile2D, *wsFit2D, *wsDiff2D))
   for (int i = 0; i < nPeaks; ++i) {
+    PARALLEL_START_INTERRUPT_REGION
     if (this->getCancel())
       break; // User cancellation
     progress.report();
@@ -891,7 +893,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << " (sig^2 " << errorSquared
                         << "), with background " << bgSignal + ratio * background_total << " (sig^2 "
                         << bgErrorSquared + ratio * ratio * std::fabs(background_total) << ") subtracted.\n";
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
   // This flag is used by the PeaksWorkspace to evaluate whether it has
   // been integrated.
   peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true);
