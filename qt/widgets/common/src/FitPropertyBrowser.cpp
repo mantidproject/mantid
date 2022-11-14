@@ -1431,13 +1431,29 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
     QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
+    const size_t index = compositeFunction()->parameterIndex(parName.toStdString());
+    const auto old_tie = compositeFunction()->getTie(index);
+    const std::string old_tie_str = old_tie->asString();
+    QString old_exp = QString::fromStdString(old_tie_str.substr(old_tie_str.find("=") + 1));
+
     QString str = m_stringManager->value(prop);
+
+    std::string old_exp_str = old_exp.toStdString();
+    std::string str_str = str.toStdString();
+
+    if (old_exp == str)
+      return;
+
     Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(compositeFunction().get(), parName.toStdString());
     try {
       tie->set(str.toStdString());
       h->addTie(parName + "=" + str);
     } catch (...) {
-      g_log.warning() << "Failed to update tie on " << parName.toLatin1().constData() << "\n";
+      g_log.error() << "Failed to update tie on " << parName.toLatin1().constData() << "\n";
+      // throw std::runtime_error("Failed to update tie on " + parName.toStdString() + " Error in expresseion " +
+      // parName.toStdString() + "=" + str.toStdString());
+
+      setStringPropertyValue(prop, old_exp);
     }
     delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
