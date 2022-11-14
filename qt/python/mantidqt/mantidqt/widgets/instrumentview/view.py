@@ -122,7 +122,3 @@ class InstrumentView(QWidget, ObservingView):
     @Slot()
     def _run_close(self):
         self.close()
-
-    def closeEvent(self, event):
-        self.closing.emit()
-        ObservingView.closeEvent(self, event)
