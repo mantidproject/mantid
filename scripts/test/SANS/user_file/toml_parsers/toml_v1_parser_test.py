@@ -177,7 +177,6 @@ class TomlV1ParserTest(unittest.TestCase):
         two_d_convert_to_q = results.get_state_convert_to_q()
         self.assertEqual(5.0, two_d_convert_to_q.q_xy_max)
         self.assertEqual(1.0, two_d_convert_to_q.q_xy_step)
-        self.assertTrue(two_d_convert_to_q.q_xy_step_type is RangeStepType.LIN)
         self.assertTrue(results.get_state_calculate_transmission().rebin_type is RebinType.REBIN)
 
     def test_reduction_commands_parsed(self):
