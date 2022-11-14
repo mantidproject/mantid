@@ -48,7 +48,6 @@ class DNSFileSelectorPresenter(DNSObserver):
                                              watcher)
         self.view.open_progress_dialog(number_of_files)
         self.model.read_all(datafiles, data_path, loaded, watcher)
-        self._filter_scans()
 
         # switch to the standard mode to fill in the file_selector_presenter's
         # dictionary with standard data info (default setting). This info will
@@ -188,7 +187,7 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.view.sig_read_all.disconnect(self._read_standard)
             self.view.sig_read_all.connect(self._read_all)
             self.model.set_active_model()
-            self._filter_scans()
+        self._filter_scans()
         # re-adjust view to column width
         self._format_view()
 
