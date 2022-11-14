@@ -470,11 +470,10 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
-  PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *peakWS, *wsProfile2D, *wsFit2D, *wsDiff2D))
+  bool doParallel = (cylinderBool) ? false : Kernel::threadSafe(*ws, *peakWS);
+  PARALLEL_FOR_IF(doParallel)
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    if (this->getCancel())
-      break; // User cancellation
     progress.report();
 
     // Get a direct ref to that peak.
