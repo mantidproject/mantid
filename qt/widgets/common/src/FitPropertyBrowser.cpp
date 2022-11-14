@@ -1453,7 +1453,7 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
       // throw std::runtime_error("Failed to update tie on " + parName.toStdString() + " Error in expresseion " +
       // parName.toStdString() + "=" + str.toStdString());
 
-      setStringPropertyValue(prop, old_exp);
+      m_stringManager->setValue(prop, old_exp);
     }
     delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may

@@ -1023,8 +1023,8 @@ void QtStringPropertyManager::setValue(QtProperty *property, const QString &val)
 
   it.value() = data;
 
-  emit propertyChanged(property);
   emit valueChanged(property, data.val);
+  emit propertyChanged(property);
 }
 
 /**
