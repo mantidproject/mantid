@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import os.path
+from pathlib import Path
 from typing import TYPE_CHECKING
 from qtpy.QtCore import *
 from qtpy.QtWidgets import QMessageBox
@@ -107,7 +107,7 @@ class RawDataExplorerModel(QObject):
         @param filename: the full path to the file to show
         """
 
-        ws_name = os.path.basename(filename)[:-4]  # TODO fix that
+        ws_name = Path(filename).stem
 
         # load the file if necessary
         if not mtd.doesExist(ws_name):
