@@ -190,6 +190,18 @@
         "TESTING_TIMEOUT": "1200",
         "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
       }
+    },
+    {
+      "name": "cppcheck-ci",
+      "displayName": "cppcheck-ci",
+      "description": "To be used in the cppcheck CI environment only",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CPPCHECK_GENERATE_XML": "TRUE",
+        "ENABLE_PRECOMMIT": "OFF"
+      }
     }
   ]
 }
