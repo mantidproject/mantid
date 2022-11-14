@@ -546,7 +546,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   m_importanceSampling = getProperty("ImportanceSampling");
 
   Progress prog(this, 0.0, 1.0, nhists * nSimulationPoints);
-  prog.setNotifyStep(0.01);
+  prog.setNotifyStep(0.1);
   const std::string reportMsg = "Computing corrections";
 
   bool enableParallelFor = true;
@@ -594,8 +594,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
       for (size_t bin = 0; bin < nbins; bin += xStepSize) {
         const double kinc = std::get<0>(kInW[bin]);
-        if (kinc <= 0) {
-          g_log.warning("Skipping calculation for bin with x<=0, workspace index=" + std::to_string(i) +
+        if ((kinc <= 0) || std::isnan(kinc)) {
+          g_log.warning("Skipping calculation for bin with invalid x, workspace index=" + std::to_string(i) +
                         " bin index=" + std::to_string(std::get<1>(kInW[bin])));
           continue;
         }
