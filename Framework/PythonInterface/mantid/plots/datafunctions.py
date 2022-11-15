@@ -908,7 +908,12 @@ def _get_x_errorbar_segments(err_cont):
 
 def _get_y_errorbar_segments(err_cont):
     if err_cont.has_yerr and not err_cont.has_xerr:
-        return err_cont[2][0].get_segments()
+        y_errorbar_segments = err_cont[2][0].get_segments()
+        # if y axis contains all nan then
+        if not [i for i in y_errorbar_segments if i.size > 0]:
+            return None
+        else:
+            return y_errorbar_segments
     elif err_cont.has_yerr and err_cont.has_xerr:
         return err_cont[2][1].get_segments()
     else:
