@@ -418,7 +418,7 @@ void DiscusMultipleScatteringCorrection::prepareStructureFactors() {
  */
 void DiscusMultipleScatteringCorrection::AddWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape,
                                                                     const std::string_view &matName,
-                                                                    API::MatrixWorkspace_sptr &SQWS) {
+                                                                    API::MatrixWorkspace_sptr SQWS) {
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
   convertWsBothAxesToPoints(SQWS);
   // if S(Q,w) has been supplied ensure Q is along the x axis of each spectrum (so same as S(Q))
@@ -437,7 +437,7 @@ void DiscusMultipleScatteringCorrection::AddWorkspaceToDiscus2DData(const Geomet
   }
   auto specAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));
   std::vector<DiscusData1D> data;
-  for (int i = 0; i < SQWS->getNumberHistograms(); i++) {
+  for (size_t i = 0; i < SQWS->getNumberHistograms(); i++) {
     data.push_back(DiscusData1D{SQWS->histogram(i).dataX(), SQWS->histogram(i).dataY()});
   }
   ComponentWorkspaceMapping SQWSMapping{

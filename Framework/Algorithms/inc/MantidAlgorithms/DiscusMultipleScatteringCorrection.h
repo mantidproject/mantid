@@ -45,7 +45,7 @@ public:
       : m_data(data), m_specAxis(specAxis){};
   std::unique_ptr<DiscusData2D> CreateCopy(bool clearY = false);
   size_t getNumberHistograms() { return m_data.size(); }
-  DiscusData1D &histogram(int i) { return m_data[i]; }
+  DiscusData1D &histogram(const size_t i) { return m_data[i]; }
   std::vector<DiscusData1D> &histograms() { return m_data; }
   const std::vector<double> &getSpecAxisValues();
 
@@ -155,7 +155,7 @@ private:
   const ComponentWorkspaceMapping *findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
                                                          const Geometry::IObject *shapeObjectWithScatter);
   void AddWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape, const std::string_view &matName,
-                                  API::MatrixWorkspace_sptr &ws);
+                                  API::MatrixWorkspace_sptr ws);
   long long m_callsToInterceptSurface{0};
   long long m_IkCalculations{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
