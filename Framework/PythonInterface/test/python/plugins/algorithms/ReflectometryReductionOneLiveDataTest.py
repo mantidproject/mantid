@@ -228,7 +228,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           Instrument='INTER',
                           GetLiveValueAlgorithm='GetFakeLiveInstrumentValueInvalidNames')
 
-    def test_algorithm_fails_if_theta_is_zero(self):
+    def test_reduction_works_if_theta_is_zero(self):
         workspace = self._run_algorithm_with_zero_theta()
         expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValuesWithZeroTheta',
                     'GetFakeLiveInstrumentValuesWithZeroTheta', 'GetFakeLiveInstrumentValuesWithZeroTheta',
