@@ -465,13 +465,13 @@ DetectorCorrections makeDetectorCorrections() {
 }
 
 Instrument makeInstrument() {
-  return Instrument(makeWavelengthRange(), makeMonitorCorrections(), makeDetectorCorrections());
+  return Instrument(makeWavelengthRange(), makeMonitorCorrections(), makeDetectorCorrections(), "");
 }
 
 Instrument makeEmptyInstrument() {
   return Instrument(RangeInLambda(0.0, 0.0),
                     MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
-                    DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
+                    DetectorCorrections(false, DetectorCorrectionType::VerticalShift), "");
 }
 
 /* Preview */

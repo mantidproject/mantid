@@ -59,6 +59,9 @@ public:
   std::string getDetectorCorrectionType() const override;
   void setDetectorCorrectionType(std::string const &value) override;
 
+  std::string getCalibrationFilePath() const override;
+  void setCalibrationFilePath(std::string const &value) override;
+
   void disableAll() override;
   void enableAll() override;
   void enableDetectorCorrectionType() override;

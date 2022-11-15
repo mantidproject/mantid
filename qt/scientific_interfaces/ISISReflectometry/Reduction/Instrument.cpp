@@ -13,15 +13,25 @@ Instrument::Instrument()
       m_detectorCorrections(DetectorCorrections(false, DetectorCorrectionType::VerticalShift)) {}
 
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
-                       DetectorCorrections detectorCorrections)
+                       DetectorCorrections detectorCorrections, std::string calibrationFilePath)
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
-      m_detectorCorrections(detectorCorrections) {}
+      m_detectorCorrections(detectorCorrections), m_calibrationFilePath(calibrationFilePath) {}
+
+Instrument &Instrument::operator=(Instrument const &old_instrument) {
+  m_wavelengthRange = old_instrument.wavelengthRange();
+  m_monitorCorrections = old_instrument.monitorCorrections();
+  m_detectorCorrections = old_instrument.detectorCorrections();
+  m_calibrationFilePath = old_instrument.calibrationFilePath();
+  return *this;
+}
 
 boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const { return m_wavelengthRange; }
 
 MonitorCorrections const &Instrument::monitorCorrections() const { return m_monitorCorrections; }
 
 DetectorCorrections const &Instrument::detectorCorrections() const { return m_detectorCorrections; }
+
+std::string const &Instrument::calibrationFilePath() const { return m_calibrationFilePath; }
 
 size_t Instrument::monitorIndex() const { return m_monitorCorrections.monitorIndex(); }
 
@@ -41,6 +51,7 @@ bool operator!=(Instrument const &lhs, Instrument const &rhs) { return !(lhs == 
 
 bool operator==(Instrument const &lhs, Instrument const &rhs) {
   return lhs.wavelengthRange() == rhs.wavelengthRange() && lhs.monitorCorrections() == rhs.monitorCorrections() &&
-         lhs.detectorCorrections() == rhs.detectorCorrections();
+         lhs.detectorCorrections() == rhs.detectorCorrections() &&
+         lhs.calibrationFilePath() == rhs.calibrationFilePath();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

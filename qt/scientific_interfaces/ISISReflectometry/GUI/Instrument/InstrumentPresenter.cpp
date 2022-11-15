@@ -178,7 +178,8 @@ void InstrumentPresenter::updateModelFromView() {
   auto const wavelengthRange = wavelengthRangeFromView();
   auto const monitorCorrections = monitorCorrectionsFromView();
   auto const detectorCorrections = detectorCorrectionsFromView();
-  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+  auto const calibrationFilePath = m_view->getCalibrationFilePath();
+  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath);
 }
 
 void InstrumentPresenter::updateViewFromModel() {
@@ -202,6 +203,7 @@ void InstrumentPresenter::updateViewFromModel() {
   }
   m_view->setCorrectDetectors(m_model.correctDetectors());
   m_view->setDetectorCorrectionType(detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
+  m_view->setCalibrationFilePath(m_model.calibrationFilePath());
 
   updateWidgetEnabledState();
   updateWidgetValidState();

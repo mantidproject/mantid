@@ -292,4 +292,10 @@ std::string QtInstrumentView::getDetectorCorrectionType() const {
 void QtInstrumentView::setDetectorCorrectionType(std::string const &value) {
   setSelected(*m_ui.detectorCorrectionTypeComboBox, value);
 }
+
+std::string QtInstrumentView::getCalibrationFilePath() const { return m_ui.calibrationPathEdit->text().toStdString(); }
+
+void QtInstrumentView::setCalibrationFilePath(std::string const &value) {
+  m_ui.calibrationPathEdit->setText(QString::fromStdString(value));
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
