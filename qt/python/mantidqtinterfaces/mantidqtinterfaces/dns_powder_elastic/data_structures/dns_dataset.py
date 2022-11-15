@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Class which loads and stores DNS elastic powder datafile information
+Class which loads and stores DNS powder elastic datafile information
 in a dictionary.
 """
 
@@ -24,19 +24,19 @@ from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
 
 class DNSDataset(ObjectDict):
     """
-    Class for storing data of a multiple dns datafiles
-    this is a dictionary but can also be accessed like attributes.
+    Class for storing data of multiple DNS datafiles.
+    This is a dictionary but can also be accessed like attributes.
     """
+
     def __init__(self, data, path, is_sample=True, fields=None):
         super().__init__()
-        self.is_sample = is_sample
-        if not is_sample and fields is not None:
-            data = remove_non_measured_fields(data, fields)
-        self.banks = get_bank_positions(data)
-        self.fields = get_sample_fields(data)
-        self.two_theta = automatic_two_theta_binning(data)
-        self.omega = automatic_omega_binning(data)
-        self.data_dic = create_dataset(data, path)
+        if data:
+            self['is_sample'] = is_sample
+            self['banks'] = get_bank_positions(data)
+            self['fields'] = get_sample_fields(data)
+            self['two_theta'] = automatic_two_theta_binning(data)
+            self['omega'] = automatic_omega_binning(data)
+            self['data_dic'] = create_dataset(data, path)
 
     def format_dataset(self):
         """
@@ -73,7 +73,7 @@ class DNSDataset(ObjectDict):
                     subtract.append(f"{sample}_{workspace}")
         return subtract
 
-    def get_nb_banks(self, sample_type=None):
+    def get_number_banks(self, sample_type=None):
         """
         Returns dict with sample names and number of banks, can be
         0 or the same for all samples.
@@ -168,7 +168,7 @@ def get_sample_fields(sample_data):
 
 def create_dataset(data, path):
     """
-    Converting data from fileselector to a smaller dictionary.
+    Converting data from file selector to a smaller dictionary.
     """
     dataset = {}
     for entry in data:
@@ -204,10 +204,10 @@ def remove_non_measured_fields(standard_data, sample_fields):
     return standard_data
 
 
-def get_bank_positions(sampledata, rounding_limit=0.05):
+def get_bank_positions(sample_data, rounding_limit=0.05):
     new_arr = []
     inside = False
-    banks = set(entry['det_rot'] for entry in sampledata)
+    banks = set(entry['det_rot'] for entry in sample_data)
     for bank in banks:
         for compare in new_arr:
             if abs(compare - bank) < rounding_limit:
