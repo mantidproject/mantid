@@ -348,8 +348,8 @@ class CommandInterfaceStateDirector(object):
                 elif is_old_first_entry_a_list and is_new_entry_a_list:
                     old_values.append(value)
                 else:
-                    raise RuntimeError("CommandInterfaceStateDirector: Trying to insert {0} which is a list into {0} "
-                                       "which is collection of non-list elements".format(value, old_values))
+                    raise RuntimeError(f"CommandInterfaceStateDirector: Trying to insert {value} which is a list into {old_values} "
+                                       "which is collection of non-list elements")
             elif isinstance(value, list) and treat_list_as_element:
                 self._processed_state_settings.update({key: [value]})
             elif isinstance(value, list):

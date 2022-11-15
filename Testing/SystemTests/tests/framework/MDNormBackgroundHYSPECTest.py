@@ -413,4 +413,4 @@ class MDNormBackgroundHYSPECTest(systemtesting.MantidSystemTest):
         except RuntimeError:
             pass
         else:
-            raise AssertionError(f'Expected failure due to Background MD in Q_sample.')
+            raise AssertionError('Expected failure due to Background MD in Q_sample.')

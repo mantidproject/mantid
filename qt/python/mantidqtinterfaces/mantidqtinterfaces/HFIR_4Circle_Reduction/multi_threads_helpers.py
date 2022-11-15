@@ -488,8 +488,8 @@ class MergePeaksThread(QThread):
         self._checkPreprocessedScans = option_to_use
 
         if self._checkPreprocessedScans:
-            assert isinstance(pre_process_dir, str), 'Directory {0} to store preprocessed data must be a string ' \
-                                                     'but not a {1).'.format(pre_process_dir, type(pre_process_dir))
+            assert isinstance(pre_process_dir, str), f'Directory {pre_process_dir} to store preprocessed data must be a string ' \
+                                                     + f'but not a {type(pre_process_dir)}.'
             if os.path.exists(pre_process_dir) is False:
                 raise RuntimeError('Directory {0} does not exist.'.format(pre_process_dir))
             self._preProcessedDir = pre_process_dir
