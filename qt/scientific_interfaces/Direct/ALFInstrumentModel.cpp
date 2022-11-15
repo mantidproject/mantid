@@ -230,7 +230,7 @@ void ALFInstrumentModel::averageTube() {
 /*
  * Returns true if the option to average a tube should be shown.
  */
-bool ALFInstrumentModel::showAverageTubeOption() const {
+bool ALFInstrumentModel::checkDataIsExtracted() const {
   return m_numberOfTubesInAverage > 0u && ADS.doesExist(extractedWsName());
 }
 

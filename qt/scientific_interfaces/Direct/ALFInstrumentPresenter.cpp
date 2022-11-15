@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFInstrumentPresenter.h"
 
+#include "ALFAnalysisPresenter.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt::CustomInterfaces {
 
@@ -24,8 +24,7 @@ QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWi
 
 MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
-void ALFInstrumentPresenter::subscribeAnalysisPresenter(
-    MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) {
+void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) {
   m_analysisPresenter = presenter;
 }
 
@@ -51,15 +50,17 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
 void ALFInstrumentPresenter::extractSingleTube() {
   m_model->extractSingleTube();
 
-  m_analysisPresenter->addSpectrum(m_model->extractedWsName());
-  m_analysisPresenter->updateEstimateClicked();
+  m_analysisPresenter->notifyTubeExtracted();
+  m_analysisPresenter->notifyUpdateEstimateClicked();
 }
 
 void ALFInstrumentPresenter::averageTube() {
   m_model->averageTube();
-  m_analysisPresenter->addSpectrum(m_model->extractedWsName());
+  m_analysisPresenter->notifyTubeExtracted();
 }
 
-bool ALFInstrumentPresenter::showAverageTubeOption() const { return m_model->showAverageTubeOption(); }
+bool ALFInstrumentPresenter::checkDataIsExtracted() const { return m_model->checkDataIsExtracted(); }
+
+std::string ALFInstrumentPresenter::extractedWsName() const { return m_model->extractedWsName(); }
 
 } // namespace MantidQt::CustomInterfaces

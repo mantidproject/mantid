@@ -30,7 +30,7 @@ public:
   virtual void extractSingleTube() = 0;
   virtual void averageTube() = 0;
 
-  virtual bool showAverageTubeOption() const = 0;
+  virtual bool checkDataIsExtracted() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -48,7 +48,7 @@ public:
   void extractSingleTube() override;
   void averageTube() override;
 
-  bool showAverageTubeOption() const override;
+  bool checkDataIsExtracted() const override;
 
 public: // Methods for testing purposes
   inline std::size_t numberOfTubesInAverage() const noexcept { return m_numberOfTubesInAverage; }

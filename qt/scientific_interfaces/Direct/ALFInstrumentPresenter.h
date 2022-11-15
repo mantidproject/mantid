@@ -19,12 +19,12 @@ namespace MantidQt {
 
 namespace MantidWidgets {
 class InstrumentWidget;
-class IPlotFitAnalysisPanePresenter;
 } // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
 class IALFInstrumentView;
+class IALFAnalysisPresenter;
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentPresenter {
 
@@ -32,14 +32,16 @@ public:
   virtual QWidget *getLoadWidget() = 0;
   virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
 
-  virtual void subscribeAnalysisPresenter(MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) = 0;
+  virtual void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) = 0;
 
   virtual void loadRunNumber() = 0;
 
   virtual void extractSingleTube() = 0;
   virtual void averageTube() = 0;
 
-  virtual bool showAverageTubeOption() const = 0;
+  virtual bool checkDataIsExtracted() const = 0;
+
+  virtual std::string extractedWsName() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -50,19 +52,21 @@ public:
   QWidget *getLoadWidget() override;
   MantidWidgets::InstrumentWidget *getInstrumentView() override;
 
-  void subscribeAnalysisPresenter(MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) override;
+  void subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) override;
 
   void loadRunNumber() override;
 
   void extractSingleTube() override;
   void averageTube() override;
 
-  bool showAverageTubeOption() const override;
+  bool checkDataIsExtracted() const override;
+
+  std::string extractedWsName() const override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);
 
-  MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *m_analysisPresenter;
+  IALFAnalysisPresenter *m_analysisPresenter;
 
   IALFInstrumentView *m_view;
   std::unique_ptr<IALFInstrumentModel> m_model;

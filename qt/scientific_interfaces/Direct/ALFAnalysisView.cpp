@@ -4,7 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
+#include "ALFAnalysisView.h"
+#include "ALFAnalysisPresenter.h"
+
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <tuple>
 #include <utility>
@@ -19,7 +22,7 @@
 
 namespace {
 
-std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus) {
+std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
   QString color("black"), status("");
   if (fitStatus.contains("success")) {
     color = "green", status = "Fit success";
@@ -33,16 +36,18 @@ std::tuple<QString, QString> getPeakCentreUIProperties(const QString &fitStatus)
 
 } // namespace
 
-namespace MantidQt::MantidWidgets {
+namespace MantidQt::CustomInterfaces {
 
-PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start, const double &end, QWidget *parent)
-    : IPlotFitAnalysisPaneView(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr),
-      m_peakCentreObservable(new Observable()), m_fitObservable(new Observable()),
-      m_updateEstimateObservable(new Observable()) {
+ALFAnalysisView::ALFAnalysisView(double const start, double const end, QWidget *parent)
+    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr) {
   setupPlotFitSplitter(start, end);
 }
 
-void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start, const double &end) {
+QWidget *ALFAnalysisView::getView() { return this; }
+
+void ALFAnalysisView::subscribePresenter(IALFAnalysisPresenter *presenter) { m_presenter = presenter; }
+
+void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end) {
   auto layout = new QHBoxLayout(this);
   auto splitter = new QSplitter(Qt::Vertical);
 
@@ -55,7 +60,7 @@ void PlotFitAnalysisPaneView::setupPlotFitSplitter(const double &start, const do
   layout->addWidget(splitter);
 }
 
-QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start, const double &end) {
+QWidget *ALFAnalysisView::createFitPane(double const start, double const end) {
   auto fitPane = new QWidget();
   auto fitPaneLayout = new QVBoxLayout(fitPane);
 
@@ -71,7 +76,7 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start, const doubl
   return fitPane;
 }
 
-QWidget *PlotFitAnalysisPaneView::setupFitRangeWidget(const double start, const double end) {
+QWidget *ALFAnalysisView::setupFitRangeWidget(double const start, double const end) {
   auto *rangeWidget = new QWidget();
   auto *rangeLayout = new QHBoxLayout(rangeWidget);
 
@@ -88,7 +93,7 @@ QWidget *PlotFitAnalysisPaneView::setupFitRangeWidget(const double start, const 
   return rangeWidget;
 }
 
-QWidget *PlotFitAnalysisPaneView::setupFitButtonsWidget() {
+QWidget *ALFAnalysisView::setupFitButtonsWidget() {
   auto fitButtonsWidget = new QWidget();
   auto fitButtonsLayout = new QHBoxLayout(fitButtonsWidget);
 
@@ -104,7 +109,7 @@ QWidget *PlotFitAnalysisPaneView::setupFitButtonsWidget() {
   return fitButtonsWidget;
 }
 
-QWidget *PlotFitAnalysisPaneView::setupPeakCentreWidget(const double centre) {
+QWidget *ALFAnalysisView::setupPeakCentreWidget(double const centre) {
   auto *peakCentreWidget = new QWidget();
   auto *peakCentreLayout = new QGridLayout(peakCentreWidget);
 
@@ -125,36 +130,37 @@ QWidget *PlotFitAnalysisPaneView::setupPeakCentreWidget(const double centre) {
   return peakCentreWidget;
 }
 
-void PlotFitAnalysisPaneView::notifyPeakCentreEditingFinished() { m_peakCentreObservable->notify(); }
+void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
 
-void PlotFitAnalysisPaneView::notifyFitClicked() { m_fitObservable->notify(); }
+void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
-void PlotFitAnalysisPaneView::notifyUpdateEstimateClicked() { m_updateEstimateObservable->notify(); }
+void ALFAnalysisView::notifyUpdateEstimateClicked() { m_presenter->notifyUpdateEstimateClicked(); }
 
-void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
-  m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
-}
-void PlotFitAnalysisPaneView::addFitSpectrum(const std::string &wsName) {
-  m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
-}
-
-std::pair<double, double> PlotFitAnalysisPaneView::getRange() {
+std::pair<double, double> ALFAnalysisView::getRange() const {
   return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
 }
 
-void PlotFitAnalysisPaneView::setPeakCentre(const double centre) { m_peakCentre->setText(QString::number(centre)); }
+void ALFAnalysisView::addSpectrum(std::string const &wsName) {
+  m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
+}
 
-double PlotFitAnalysisPaneView::peakCentre() const { return m_peakCentre->text().toDouble(); }
+void ALFAnalysisView::addFitSpectrum(std::string const &wsName) {
+  m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
+}
 
-void PlotFitAnalysisPaneView::setPeakCentreStatus(const std::string &status) {
+void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText(QString::number(centre)); }
+
+double ALFAnalysisView::peakCentre() const { return m_peakCentre->text().toDouble(); }
+
+void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
   const auto [stylesheet, tooltip] = getPeakCentreUIProperties(QString::fromStdString(status));
   m_fitStatus->setStyleSheet(stylesheet);
   m_fitStatus->setText(tooltip);
   m_fitStatus->setToolTip(tooltip);
 }
 
-void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {
+void ALFAnalysisView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", message.c_str());
 }
 
-} // namespace MantidQt::MantidWidgets
+} // namespace MantidQt::CustomInterfaces

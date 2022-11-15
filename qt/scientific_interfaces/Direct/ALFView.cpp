@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
+#include "ALFAnalysisModel.h"
+#include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
 #include <QString>
 #include <QVBoxLayout>
@@ -26,11 +26,11 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   m_instrumentPresenter =
       std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
 
-  m_analysisPresenter = std::make_unique<MantidWidgets::PlotFitAnalysisPanePresenter>(
-      new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, this),
-      std::make_unique<MantidWidgets::PlotFitAnalysisPaneModel>());
+  m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
+                                                               std::make_unique<ALFAnalysisModel>());
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
+  m_analysisPresenter->subscribeInstrumentPresenter(m_instrumentPresenter.get());
 }
 
 void ALFView::initLayout() {

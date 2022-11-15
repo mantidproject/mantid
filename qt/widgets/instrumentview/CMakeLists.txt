@@ -33,9 +33,6 @@ set(SRC_FILES
     src/PanelsSurface.cpp
     src/PeakMarker2D.cpp
     src/PeakOverlay.cpp
-    src/PlotFitAnalysisPaneModel.cpp
-    src/PlotFitAnalysisPanePresenter.cpp
-    src/PlotFitAnalysisPaneView.cpp
     src/Projection3D.cpp
     src/ProjectionSurface.cpp
     src/RectF.cpp
@@ -68,8 +65,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/GLDisplay.h
     inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h
     inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
-    inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h
-    inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h
     inc/MantidQtWidgets/InstrumentView/Projection3D.h
     inc/MantidQtWidgets/InstrumentView/ProjectionSurface.h
     inc/MantidQtWidgets/InstrumentView/Shape2DCollection.h
@@ -113,10 +108,6 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/PanelsSurface.h
     inc/MantidQtWidgets/InstrumentView/PeakMarker2D.h
     inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
-    inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h
-    inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h
-    inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h
-    inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h
     inc/MantidQtWidgets/InstrumentView/Projection3D.h
     inc/MantidQtWidgets/InstrumentView/ProjectionSurface.h
     inc/MantidQtWidgets/InstrumentView/RectF.h

@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
+#include "ALFAnalysisModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -20,24 +20,24 @@
 #include <utility>
 
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::CustomInterfaces;
 
-class PlotFitAnalysisPaneModelTest : public CxxTest::TestSuite {
+class ALFAnalysisModelTest : public CxxTest::TestSuite {
 public:
-  PlotFitAnalysisPaneModelTest() { FrameworkManager::Instance(); }
+  ALFAnalysisModelTest() { FrameworkManager::Instance(); }
 
-  static PlotFitAnalysisPaneModelTest *createSuite() { return new PlotFitAnalysisPaneModelTest(); }
+  static ALFAnalysisModelTest *createSuite() { return new ALFAnalysisModelTest(); }
 
-  static void destroySuite(PlotFitAnalysisPaneModelTest *suite) { delete suite; }
+  static void destroySuite(ALFAnalysisModelTest *suite) { delete suite; }
 
   void setUp() override {
-    m_model = std::make_unique<PlotFitAnalysisPaneModel>();
-
     m_workspace = WorkspaceCreationHelper::create2DWorkspace(1, 100);
     m_workspaceName = "test";
     m_range = std::make_pair<double, double>(0.0, 100.0);
 
     AnalysisDataService::Instance().addOrReplace(m_workspaceName, m_workspace);
+
+    m_model = std::make_unique<ALFAnalysisModel>();
   }
 
   void tearDown() override {
@@ -83,10 +83,19 @@ public:
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
-private:
-  std::unique_ptr<PlotFitAnalysisPaneModel> m_model;
+  void test_that_setPeakCentre_will_remove_the_fit_status_and_set_the_peak_centre() {
+    m_model->doFit(m_workspaceName, m_range);
 
+    m_model->setPeakCentre(1.1);
+
+    TS_ASSERT_EQUALS(1.1, m_model->peakCentre());
+    TS_ASSERT_EQUALS("", m_model->fitStatus());
+  }
+
+private:
   MatrixWorkspace_sptr m_workspace;
   std::string m_workspaceName;
   std::pair<double, double> m_range;
+
+  std::unique_ptr<ALFAnalysisModel> m_model;
 };

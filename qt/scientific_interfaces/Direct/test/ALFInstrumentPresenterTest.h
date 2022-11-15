@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "ALFAnalysisMocks.h"
 #include "ALFInstrumentMocks.h"
 #include "ALFInstrumentPresenter.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneMocks.h"
 
 #include "MantidAPI/FrameworkManager.h"
 
@@ -38,7 +38,7 @@ public:
     m_view = std::make_unique<NiceMock<MockALFInstrumentView>>();
     m_presenter = std::make_unique<ALFInstrumentPresenter>(m_view.get(), std::move(model));
 
-    m_analysisPresenter = std::make_unique<NiceMock<MockPlotFitAnalysisPanePresenter>>();
+    m_analysisPresenter = std::make_unique<NiceMock<MockALFAnalysisPresenter>>();
     m_presenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
   }
 
@@ -119,10 +119,9 @@ public:
     std::string const extractedWsName("Extracted_ALF82301");
 
     EXPECT_CALL(*m_model, extractSingleTube()).Times(1);
-    EXPECT_CALL(*m_model, extractedWsName()).Times(1).WillOnce(Return(extractedWsName));
 
-    EXPECT_CALL(*m_analysisPresenter, addSpectrum(extractedWsName)).Times(1);
-    EXPECT_CALL(*m_analysisPresenter, updateEstimateClicked()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(1);
 
     m_presenter->extractSingleTube();
   }
@@ -131,21 +130,20 @@ public:
     std::string const extractedWsName("Extracted_ALF82301");
 
     EXPECT_CALL(*m_model, averageTube()).Times(1);
-    EXPECT_CALL(*m_model, extractedWsName()).Times(1).WillOnce(Return(extractedWsName));
 
-    EXPECT_CALL(*m_analysisPresenter, addSpectrum(extractedWsName)).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted()).Times(1);
 
     m_presenter->averageTube();
   }
 
-  void test_showAverageTubeOption_calls_the_showAverageTubeOption_method_in_the_model() {
-    EXPECT_CALL(*m_model, showAverageTubeOption()).Times(1).WillOnce(Return(true));
-    m_presenter->showAverageTubeOption();
+  void test_checkDataIsExtracted_calls_the_showAverageTubeOption_method_in_the_model() {
+    EXPECT_CALL(*m_model, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
+    m_presenter->checkDataIsExtracted();
   }
 
 private:
   NiceMock<MockALFInstrumentModel> *m_model;
   std::unique_ptr<NiceMock<MockALFInstrumentView>> m_view;
   std::unique_ptr<ALFInstrumentPresenter> m_presenter;
-  std::unique_ptr<NiceMock<MockPlotFitAnalysisPanePresenter>> m_analysisPresenter;
+  std::unique_ptr<NiceMock<MockALFAnalysisPresenter>> m_analysisPresenter;
 };
