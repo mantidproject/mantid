@@ -68,6 +68,7 @@ void export_Sample() {
       .def("setShape", &Sample::setShape, arg("self"), "Set shape of Sample object.")
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
+      .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
       .def("getEnvironment", &Sample::getEnvironment, return_value_policy<reference_existing_object>(), arg("self"),
            "Returns the sample environment")
       .def("setEnvironment", &Sample::setEnvironment, (arg("self"), arg("env")), "Set the sample environment")
