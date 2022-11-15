@@ -1,0 +1,1 @@
+- Fixed a bug where Mantid would crash when trying to plot errorbars on nan spectra.

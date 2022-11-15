@@ -16,7 +16,7 @@ import numpy as np
 
 import mantid.api
 import mantid.plots.datafunctions as funcs
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from mantid.kernel import config, ConfigService
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,
@@ -864,6 +864,15 @@ class DataFunctionsTest(unittest.TestCase):
             artist = ax.plot([0, 1], [0, 1])[0]
         return artist
 
+    def _create_artist_nan(self, errors=False):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        if errors:
+            artist = ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.1])
+        else:
+            artist = ax.plot([0, 1], [0, 1])[0]
+        return artist
+
     def test_errorbars_hidden_returns_true_for_non_errorbar_container_object(self):
         self.assertTrue(mantid.plots.datafunctions.errorbars_hidden(Mock()))
 
@@ -880,6 +889,14 @@ class DataFunctionsTest(unittest.TestCase):
         [caps.set_visible(False) for caps in container[1] if container[1]]
         [bars.set_visible(False) for bars in container[2]]
         self.assertTrue(mantid.plots.datafunctions.errorbars_hidden(container))
+
+    def test_errorbars_none_for_nan_y_axis(self):
+        err_container = MagicMock()
+        err_container.has_yerr = Mock(return_value=True)
+        err_container.has_xerr = Mock(return_value=False)
+        err_container[2][0] = MagicMock()
+        err_container[2][0].get_segments = MagicMock(return_value=[[], [], []])
+        self.assertTrue(funcs._get_y_errorbar_segments(err_container), None)
 
     def test_get_bin_indices_returns_a_range_with_no_monitors(self):
         ws = self.ws2d_histo
