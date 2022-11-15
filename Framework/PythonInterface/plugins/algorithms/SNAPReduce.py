@@ -286,7 +286,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         # Check binning low < x < high
         low, step, high = self.getProperty('Binning').value
         if low >= high:
-            issues['Binning'] = f'Binning triad must be Low, Step, High with Low < High'
+            issues['Binning'] = 'Binning triad must be Low, Step, High with Low < High'
 
         # cross check normalization
         normalization = self.getProperty("Normalization").value

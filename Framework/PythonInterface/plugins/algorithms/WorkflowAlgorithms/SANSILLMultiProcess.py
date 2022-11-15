@@ -374,7 +374,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         '''Makes sure that the transmission runs are filled in from W1 onwards'''
         issues = dict()
         if not self.getPropertyValue('SampleTrRunsW1') and self.getPropertyValue('SampleTrRunsW2'):
-            issues['SampleTrRunsW1'] = f'If there is one wavelength, transmissions must be filled in W1.'
+            issues['SampleTrRunsW1'] = 'If there is one wavelength, transmissions must be filled in W1.'
         return issues
 
     def _check_optional_files_exist(self):
