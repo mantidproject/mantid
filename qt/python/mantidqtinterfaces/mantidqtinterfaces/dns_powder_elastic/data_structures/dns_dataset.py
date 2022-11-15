@@ -11,6 +11,7 @@ in a dictionary.
 """
 
 import os
+import numpy as np
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import \
     DNSBinning
@@ -85,12 +86,16 @@ class DNSDataset(ObjectDict):
 
 def automatic_two_theta_binning(sample_data):
     det_rot = [-x['det_rot'] for x in sample_data]
-    two_theta_max = (max(det_rot) + 115)
+    two_theta_last_det = 115.0
+    two_theta_max = (max(det_rot) + two_theta_last_det)
     two_theta_min = (min(det_rot))
     two_theta = list(set(det_rot))
+    # default_step below will be used only if only a single value
+    # for two_theta is selected
+    default_step = 5.0
     add_two_theta = []
     for angle in two_theta:
-        add_two_theta.append(angle + 5)
+        add_two_theta.append(angle + default_step)
     two_theta.extend(add_two_theta)
     two_theta_step = get_two_theta_step(two_theta)
     return DNSBinning(two_theta_min, two_theta_max, two_theta_step)
@@ -101,21 +106,18 @@ def get_two_theta_step(angles, rounding_limit=0.05):
     diff_rot = [abs(angles[i] - angles[i + 1]) for i in range(len(angles) - 1)]
     diff_rot = [i for i in diff_rot if i >= rounding_limit]
     diff_rot = list_to_set(diff_rot)
+    # if spacing between detector angles of sample data is not uniform
+    # then the bin size is set to 5 degrees
     if len(diff_rot) > 1:
-        diff_diff_rot = [
-            abs(diff_rot[i] - diff_rot[i + 1])
-            for i in range(len(diff_rot) - 1)
-        ]
-        diff_rot.extend(diff_diff_rot)
-    step = round_step(min(diff_rot))
+        step = 5.0
+    else:
+        step = diff_rot[0]
+    step = round_step(step)
     return step
 
 
 def round_step(step, rounding_limit=0.05):
-    likely_steps = [
-        1, 2, 5 / 2, 5 / 3, 5 / 4, 5 / 6, 5 / 7, 5 / 8, 5 / 9, 5 / 10, 5 / 15,
-        5 / 20
-    ]
+    likely_steps = np.arange(0, 5, 0.1)
     for i in likely_steps:
         if abs(step - i) <= rounding_limit:
             return i
