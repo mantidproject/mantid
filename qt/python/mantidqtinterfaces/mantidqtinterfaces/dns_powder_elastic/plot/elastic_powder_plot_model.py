@@ -19,6 +19,7 @@ from mantid.simpleapi import mtd
 
 
 class DNSElasticPowderPlotModel(DNSObsModel):
+
     def __init__(self, parent):
         super().__init__(parent=parent)
         self._plotted_script_number = 0
@@ -58,16 +59,16 @@ class DNSElasticPowderPlotModel(DNSObsModel):
     @staticmethod
     def get_y_norm_label(norm):
         if norm:
-            return 'normed to monitor'
+            return 'Counts/Monitor Counts'
         return 'Counts/s'
 
     @staticmethod
     def get_x_axis_label(x_axis):
         if x_axis == 'q':
-            return r'$q (\AA^{-1})$'
+            return r'q $(\AA^{-1})$'
         if x_axis == 'd':
-            return r'$d (\AA)$'
-        return '2 theta (degree)'
+            return r'd $(\AA)$'
+        return r'2$\theta$ (deg)'
 
     def _set_script_number(self, script_number):
         self._plotted_script_number = script_number
