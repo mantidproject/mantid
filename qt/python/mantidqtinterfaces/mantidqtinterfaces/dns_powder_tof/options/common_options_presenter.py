@@ -27,13 +27,12 @@ class DNSCommonOptionsPresenter(DNSObserver):
             return None
         warnings = {
             'wavelength_varies': 'Warning, different wavelengths in'
-            'datafiles',
-            'selector_wavelength_missmatch': 'Warning, selector speeds in'
-            ' datafiles '
-            'differ by more than 10 rpm.',
+            ' datafiles. Set the wavelength manually.',
+            'selector_wavelength_missmatch': 'Warning, selector speeds'
+            ' in datafiles differ by more than 10 rpm. Set the'
+            ' wavelength manually.',
             'selector_speed_varies': 'Warning, selector speed differs from'
-            ' wavelength more'
-            ' than 10%, set wavelength manually. ',
+            ' wavelength more than 10%. Set the wavelength manually.',
         }
         wavelength, errors = self.model.determine_wavelength(full_data)
         for key, value in errors.items():
