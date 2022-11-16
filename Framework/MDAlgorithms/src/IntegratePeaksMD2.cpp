@@ -470,7 +470,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
-  bool doParallel = (cylinderBool) ? false : Kernel::threadSafe(*ws, *peakWS);
+  bool doParallel = cylinderBool ? false : Kernel::threadSafe(*ws, *peakWS);
   PARALLEL_FOR_IF(doParallel)
   for (int i = 0; i < nPeaks; ++i) {
     PARALLEL_START_INTERRUPT_REGION
@@ -768,9 +768,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         signal = 0.;
         for (size_t j = 0; j < numSteps; j++) {
           if (j < peakMin || j > peakMax)
-            background_total = background_total + wsProfile2D->mutableY(i)[j];
+            background_total = background_total + wsProfile2D->y(i)[j];
           else
-            signal = signal + wsProfile2D->mutableY(i)[j];
+            signal = signal + wsProfile2D->y(i)[j];
         }
         errorSquared = std::fabs(signal);
       } else {
