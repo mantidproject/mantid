@@ -66,6 +66,11 @@ if [ ! -f $EXPECTED_MAMBA_EXE ]; then
     if [[ $OSTYPE == 'msys'* ]]; then
         # Replace all / with \ for windows batch support before passing in $EXPECTED_MAMBAFORGE_PATH
         cmd.exe /C "START /wait "" $MAMBAFORGE_SCRIPT_NAME /InstallationType=JustMe /RegisterPython=0 /S /D=${EXPECTED_MAMBAFORGE_PATH////\\}"
+        # The paths in the Conda environment shell environments are Windows style. Convert to cygwin style
+        cp $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh{,.orig}
+        cat $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh.orig | \
+          sed -e '/^export\ CONDA_/s/\\/\//g' | \
+          sed -e '/^export\ CONDA_/s/\(\w\)\:/\/\1/g' > $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh
     else
         bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH
     fi
