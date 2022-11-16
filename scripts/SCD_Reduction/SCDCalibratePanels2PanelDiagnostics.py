@@ -384,7 +384,7 @@ def SCDCalibratePanels2PanelDiagnosticsPlot(
             show_plots=showPlots,
         )
     else:
-        raise ValueError(f"Unsupported mode detected, only support boxplot and overlay.")
+        raise ValueError("Unsupported mode detected, only support boxplot and overlay.")
 
     # close backend handle
     if not showPlots:

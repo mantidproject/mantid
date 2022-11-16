@@ -238,7 +238,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         if not files:
             raise RuntimeError('None of the {0} runs satisfied the FWS and Observable criteria.'.format(label))
         else:
-            self.log().information('Filtered {0} runs are: {0} \\n'.format(label, files.replace(',', '\\n')))
+            self.log().information('Filtered {0} runs are: {1} \\n'.format(label, files.replace(',', '\\n')))
 
         return files
 
