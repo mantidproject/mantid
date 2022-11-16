@@ -43,12 +43,6 @@ CMAKE_PRESET=$1
 shift
 
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
-
 CONDA_ENV_NAME="mantid-developer"
 
 if [[ -z "$BUILD_THREADS" ]]; then
@@ -103,7 +97,7 @@ do
 done
 
 # Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CLEAN_BUILD
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $CLEAN_BUILD
 
 # Setup Conda environment
 $SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_CONDA_PATH $CONDA_ENV_NAME

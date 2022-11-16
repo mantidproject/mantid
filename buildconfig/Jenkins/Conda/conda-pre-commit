@@ -32,7 +32,7 @@ CONDA_ENV_NAME="pre-commit"
 CLEAN_BUILD=false
 
 # Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CLEAN_BUILD
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $CLEAN_BUILD
 source $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh
 source $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/mamba.sh
 mamba create -n $CONDA_ENV_NAME pre-commit

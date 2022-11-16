@@ -41,11 +41,6 @@ do
 done
 
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
 CONDA_ENV_NAME=mantid-anaconda-delete
 RECIPES_DIR=$WORKSPACE/conda-recipes
 SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
@@ -78,7 +73,7 @@ function delete_package() {
 ###
 
 # Setup Mambaforge and a conda environment
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH true
 $EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
 $EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME curl jq -y
 . $WORKSPACE/mambaforge/etc/profile.d/conda.sh

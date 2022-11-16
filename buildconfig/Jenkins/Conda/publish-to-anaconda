@@ -22,17 +22,12 @@ shift
 LABEL=$1
 shift
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
 CONDA_ENV_NAME=mantid-anaconda-upload
 RECIPES_DIR=$WORKSPACE/conda-recipes
 SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 
 # Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
+$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH true
 
 # Remove conda env if it exists
 $EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
