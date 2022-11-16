@@ -13,30 +13,21 @@
 #                 this argument do not use \\ or \ in the path.
 #   2. GIT_COMMIT_SHA: SHA of the commit to compare with the base when checking diffs
 #   2. JOB_TYPE: An optional job type. If it contains 'pull_requests', then pre-commit only runs in he diff
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
 
 # Check arguments passed are 2, and aren't optional flags.
 if [[ $# -lt 2 ]]; then
     echo "Usage: conda-pre-commit  <path-to-workspace> <job-name>"
     exit 1
 fi
-
-# SCRIPT_DIR discovery from https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR=$1
 GIT_SHA=$2
 JOB_TYPE=$3
 
-EXPECTED_MAMBAFORGE_PATH=$SOURCE_DIR/mambaforge # Install into the WORKSPACE_DIR
-EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-CONDA_ENV_NAME="pre-commit"
-CLEAN_BUILD=false
+# Mamba
+setup_mamba $SOURCE_DIR/mambaforge "pre-commit"
+mamba install pre-commit
 
-# Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $CLEAN_BUILD
-source $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh
-source $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/mamba.sh
-mamba create -n $CONDA_ENV_NAME pre-commit
-mamba activate $CONDA_ENV_NAME
-
-# Run the script that handles the actual building
+# Run
 $SCRIPT_DIR/pre-commit ${SOURCE_DIR} ${GIT_SHA} ${JOB_TYPE}
