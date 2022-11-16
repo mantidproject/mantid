@@ -47,7 +47,7 @@ and :math:`EMax` are reflected about the Y axis and replaces the negative values
 in the range :math:`-EMax` to :math:`-EMin`, the curve between :math:`-EMin` and
 :math:`EMin` is not modified.
 
-.. interface:: Data Reduction
+.. interface:: Data Manipulation
   :widget: tabSymmetrise
 
 Symmetrise Options
@@ -132,7 +132,7 @@ S(Q, w)
 
 Provides an interface for running the :ref:`SofQW <algm-SofQW>` algorithm.
 
-.. interface:: Data Reduction
+.. interface:: Data Manipulation
   :widget: tabSQw
 
 Instrument Options
@@ -222,7 +222,7 @@ This interface uses the :ref:`SofQWMoments <algm-SofQWMoments>` algorithm to
 calculate the :math:`n^{th}` moment of an :math:`S(Q, \omega)` workspace created
 by the SofQW tab.
 
-.. interface:: Data Reduction
+.. interface:: Data Manipulation
   :widget: tabMoments
 
 Moments Options
@@ -277,9 +277,8 @@ Mantid data search paths that contains the sample environment information the
 ELF workspace can also be normalised to the lowest temperature run in the range
 of input files.
 
-.. image:: ../../images/Inelastic_Data_Analysis_GUI.png
-  :width: 750
-  :align: center
+.. interface:: Data Manipulation
+  :widget: tabElwin
 
 Elwin Options
 ~~~~~~~~~~~~~
@@ -392,8 +391,7 @@ I(Q, t)
 Given sample and resolution inputs, carries out a fit as per the theory detailed
 in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
 
-.. interface:: Data Analysis
-  :width: 450
+.. interface:: Data Manipulation
   :widget: tabIqt
 
 I(Q, t) Options
