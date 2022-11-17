@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import Load, logger, CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace
+from mantid.simpleapi import Load, logger, CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace,\
+    CreateWorkspace, EnggEstimateFocussedBackground, SetUncertainties, Minus
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import \
@@ -48,7 +49,7 @@ class FittingDataModel(object):
             except RuntimeError as e:
                 logger.error(
                     f"Failed to restore workspace: {ws_name}. Error: {e}. \n Continuing loading of other files.")
-        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+        self.update_sample_log_workspace_group()
 
     def load_files(self, filenames_string):
         self._last_added = []
@@ -72,6 +73,9 @@ class FittingDataModel(object):
                         f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
             else:
                 logger.warning(f"File {ws_name} has already been loaded")
+        self.update_sample_log_workspace_group()
+
+    def update_sample_log_workspace_group(self):
         self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
 
     def get_loaded_ws_list(self):
@@ -196,7 +200,7 @@ class FittingDataModel(object):
             # removing record from _data_workspaces to avoid circular call
             if bgsub_ws_name:
                 DeleteWorkspace(bgsub_ws_name)
-            self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+            self.update_sample_log_workspace_group()
             return removed
         else:
             ws_loaded_name = self._data_workspaces.get_loaded_workspace_name_from_bgsub(name)
@@ -218,7 +222,7 @@ class FittingDataModel(object):
                 self._sample_logs_workspace_group.update_log_value(new_key=new_name, old_key=old_name)
         else:
             logger.warning(f"There already exists a workspace with name {new_name}.")
-            self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+            self.update_sample_log_workspace_group()
 
     # handle ADS clear
     def clear_workspaces(self):
@@ -243,7 +247,7 @@ class FittingDataModel(object):
         if removed.bgsub_ws:
             DeleteWorkspace(removed.bgsub_ws)
             removed_ws_list.append(removed.bgsub_ws)
-            self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+            self.update_sample_log_workspace_group()
         return removed_ws_list
 
     def get_loaded_workspaces(self):

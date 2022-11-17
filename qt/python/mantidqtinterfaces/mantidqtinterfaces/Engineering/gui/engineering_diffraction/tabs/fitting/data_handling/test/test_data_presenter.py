@@ -158,11 +158,24 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual({"name1": self.ws1, "name2": self.ws2}, model_dict)
         self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
+        self.model.update_sample_log_workspace_group.assert_not_called()
+
+    def test_remove_workspace_not_tracked_but_is_log_workspaces_group(self):
+        self.model.get_all_workspace_names.return_value = ["name2"]
+        self.model.get_log_workspaces_name.return_value = ["name1", "name2"]
+        self.presenter.row_numbers = {"name1": 0, "name2": 1}
+        self.presenter.plot_removed_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
+
+        self.presenter.remove_workspace("name1")
+
+        self.model.remove_workspace.assert_not_called()
+        self.model.update_sample_log_workspace_group.assert_called_once()
 
     def test_rename_workspace_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
-        self.model.get_all_workspace_names.return_value = ["name1", "name2", "new"] # just return all so has no effect
+        self.model.get_all_workspace_names.return_value = ["name1", "name2", "new"]  # just return all so has no effect
         # lambda function to replace dict with new key and same ordering as before
         self.model.update_workspace_name.side_effect = lambda old, new: model_dict.update(
             {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
@@ -192,7 +205,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual({"name1": self.ws1, "name2": self.ws2}, model_dict)
         self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
         self.assertEqual(0, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
-        self.model.update_log_workspace_group.assert_not_called()
+        self.model.update_sample_log_workspace_group.assert_not_called()
 
     def test_remove_all_tracked_workspaces(self):
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
@@ -252,7 +265,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         test_dict = data_presenter.TwoWayRowDict()
         test_dict["name2"] = 0
         self.assertEqual(self.presenter.row_numbers, test_dict)
-        self.assertEqual(self.model.delete_workspace.call_count,2)
+        self.assertEqual(self.model.delete_workspace.call_count, 2)
         self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
         self.assertEqual(1, self.presenter.plot_added_notifier.notify_subscribers.call_count)
 

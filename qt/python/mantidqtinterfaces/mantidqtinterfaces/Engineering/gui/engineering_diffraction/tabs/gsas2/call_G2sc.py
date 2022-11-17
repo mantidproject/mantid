@@ -122,19 +122,22 @@ def export_refinement_to_csv(temp_save_directory, name_of_project, project):
 
 def export_reflections(temp_save_directory, name_of_project, project):
     for histogram_index, loop_histogram in enumerate(project.histograms()):
+        loop_histogram_name = loop_histogram.name.replace(".gss", "").replace(" ", "_")
         phase_names = [list(loop_histogram.reflections().keys())[0]]
         for phase_name in phase_names:
             reflection_positions = loop_histogram.reflections()[phase_name]['RefList'][:, 5]
             reflection_file_path = os.path.join(temp_save_directory,
                                                 name_of_project + f"_reflections_{histogram_index+1}_{phase_name}.txt")
             with open(reflection_file_path, 'wt', encoding='utf-8') as file:
+                file.write(f"{loop_histogram_name}\n")
+                file.write(f"{phase_name}\n")
                 for reflection in reflection_positions:
                     file.write(f"{str(reflection)}\n")
 
 
 def export_refined_instrument_parameters(temp_save_directory, name_of_project, project):
     for loop_histogram in project.histograms():
-        loop_histogram_name = loop_histogram.name.replace(".gss", "")
+        loop_histogram_name = loop_histogram.name.replace(".gss", "").replace(" ", "_")
         instrument_parameter_dict = loop_histogram.getHistEntryList(keyname="Instrument")[0][2][0]
         sigma_one = instrument_parameter_dict['sig-1']  # [initial value, final value, bool whether refined]
         gamma_y = instrument_parameter_dict['Y']  # as above
