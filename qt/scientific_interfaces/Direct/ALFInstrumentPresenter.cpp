@@ -50,11 +50,10 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
 }
 
 void ALFInstrumentPresenter::notifyShapeChanged() {
-  m_model->setSelectedDetectors(std::move(m_view->getSelectedDetectors()));
+  m_model->setSelectedDetectors(m_view->componentInfo(), m_view->getSelectedDetectors());
 
-  auto const outOfPlaneAngleWorkspace = m_model->generateOutOfPlaneAngleWorkspace(&m_view->getInstrumentActor());
-
-  // m_analysisPresenter->setExtractedWorkspace(outOfPlaneAngleWorkspace);
+  auto const workspace = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
+  m_analysisPresenter->setExtractedWorkspace(std::move(workspace), m_model->runNumber());
 }
 
 void ALFInstrumentPresenter::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {

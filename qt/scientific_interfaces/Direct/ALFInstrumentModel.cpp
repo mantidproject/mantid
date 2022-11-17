@@ -59,6 +59,50 @@ std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instru
   return detector->getTwoTheta(sample, sample - source) * 180.0 / M_PI;
 }
 
+/*
+ * Finds all the detector indices in a tube if at least one detector index from that tube is provided.
+ * @param componentInfo : The component info object which stores info about all detectors in their tubes
+ * @param partTubeDetectorIndices : The detector indices that could come from different parts of multiple tubes
+ * @return A vector of detector indices for representing entire tubes being selected.
+ */
+std::vector<std::size_t> findWholeTubeDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                                std::vector<std::size_t> const &partTubeDetectorIndices) {
+  std::vector<std::size_t> wholeTubeIndices;
+  for (auto const &detectorIndex : partTubeDetectorIndices) {
+    auto const iter = std::find(wholeTubeIndices.cbegin(), wholeTubeIndices.cend(), detectorIndex);
+    // Check that the indices for this tube haven't already been added
+    if (iter == wholeTubeIndices.cend()) {
+      // Find all of the detector indices for the whole tube
+      auto const detectors = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
+      std::transform(detectors.cbegin(), detectors.cend(), std::back_inserter(wholeTubeIndices),
+                     [](auto const &index) { return index; });
+    }
+  }
+  return wholeTubeIndices;
+}
+
+double calculateError(Mantid::HistogramData::HistogramE const &eValues, std::size_t const binIndexMin,
+                      std::size_t const binIndexMax) {
+  // Calculate the squared values
+  std::vector<double> squaredValues;
+  squaredValues.reserve(binIndexMax - binIndexMin);
+  std::transform(eValues.cbegin() + binIndexMin, eValues.cbegin() + binIndexMax, eValues.cbegin() + binIndexMin,
+                 squaredValues.begin(), std::multiplies<double>());
+  // Sum them and then take the sqrt
+  return sqrt(std::accumulate(squaredValues.begin(), squaredValues.end(), 0));
+}
+
+double calculateYCounts(Mantid::HistogramData::HistogramY const &yValues, std::size_t const binIndexMin,
+                        std::size_t const binIndexMax) {
+  return std::accumulate(yValues.cbegin() + binIndexMin, yValues.cbegin() + binIndexMax, 0);
+}
+
+double calculateOutOfPlaneAngle(Mantid::Kernel::V3D const &pos, Mantid::Kernel::V3D const &origin,
+                                Mantid::Kernel::V3D const &normal) {
+  auto const vec = normalize(pos - origin);
+  return asin(vec.scalar_prod(normal));
+}
+
 void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
@@ -80,7 +124,7 @@ MatrixWorkspace_sptr load(std::string const &filename) {
 
 MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<double> const &x,
                                      std::vector<double> const &y, std::vector<double> const &e,
-                                     int const numberOfSpectra, std::string const &unitX) {
+                                     std::size_t const numberOfSpectra, std::string const &unitX) {
   auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
@@ -88,7 +132,7 @@ MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<
   alg->setProperty("DataX", x);
   alg->setProperty("DataY", y);
   alg->setProperty("DataE", e);
-  alg->setProperty("NSpec", numberOfSpectra);
+  alg->setProperty("NSpec", static_cast<int>(numberOfSpectra));
   alg->setProperty("UnitX", unitX);
   alg->setPropertyValue("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
@@ -96,12 +140,12 @@ MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, int const nBunch) {
+MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, std::size_t const nBunch) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("Rebunch");
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("NBunch", nBunch);
+  alg->setProperty("NBunch", static_cast<int>(nBunch));
   alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
@@ -183,7 +227,9 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspa
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() { loadEmptyInstrument(instrumentName(), loadedWsName()); }
+ALFInstrumentModel::ALFInstrumentModel() : m_detectorIndices() {
+  loadEmptyInstrument(instrumentName(), loadedWsName());
+}
 
 /*
  * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
@@ -224,65 +270,41 @@ std::size_t ALFInstrumentModel::runNumber() const {
   return 0u;
 }
 
-void ALFInstrumentModel::setSelectedDetectors(std::vector<std::size_t> detectorIndices) {
-  m_detectorIndices = std::move(detectorIndices);
+void ALFInstrumentModel::setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                              std::vector<std::size_t> const &detectorIndices) {
+  m_detectorIndices = findWholeTubeDetectors(componentInfo, detectorIndices);
 }
 
 MatrixWorkspace_sptr
-ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor *actor) const {
+ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
+  if (m_detectorIndices.empty()) {
+    return nullptr;
+  }
 
   std::vector<double> x, y, e;
-  prepareDataForIntegralsPlot(actor, m_detectorIndices, x, y, e);
+  collectXAndYData(actor, x, y, e);
 
-  MatrixWorkspace_sptr workspace = createWorkspace(actor->getWorkspace()->getName(), x, y, e, 1, "Out of plane angle");
-
+  // Create workspace containing the out of plane angle data in one spectrum
+  auto workspace = createWorkspace(actor.getWorkspace()->getName(), x, y, e, 1u, "Out of plane angle");
+  // Convert x axis from radians to degrees
   workspace = scaleX(workspace, 180.0 / M_PI);
-  workspace = rebunch(workspace, 2);
+  // Rebin and average the workspace based on the number of tubes that are selected
+  workspace = rebunch(workspace, numberOfTubes(actor));
   workspace = convertToHistogram(workspace);
   return workspace;
 }
 
-void ALFInstrumentModel::prepareDataForIntegralsPlot(MantidQt::MantidWidgets::InstrumentActor *actor,
-                                                     std::vector<std::size_t> const &detectorIndices,
-                                                     std::vector<double> &x, std::vector<double> &y,
-                                                     std::vector<double> &e) const {
-  const auto &componentInfo = actor->componentInfo();
-  const auto numberOfDetectorsPerTube =
-      componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndices[0])).size();
-  const auto samplePos = componentInfo.samplePosition();
-  auto normal = normalize(componentInfo.position(detectorIndices[1]) - componentInfo.position(detectorIndices[0]));
-  const auto &detectorInfo = actor->detectorInfo();
-  Mantid::API::MatrixWorkspace_const_sptr ws = actor->getWorkspace();
+void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
+                                          std::vector<double> &y, std::vector<double> &e) const {
+  auto const &componentInfo = actor.componentInfo();
+  auto const &detectorInfo = actor.detectorInfo();
 
-  // collect and sort xy pairs in xymap
+  Mantid::API::MatrixWorkspace_const_sptr workspace = actor.getWorkspace();
+
+  // Collect and sort Y and E values by X
   std::map<double, double> xymap, xemap;
-  std::size_t imin, imax;
+  collectAndSortYByX(xymap, xemap, actor, workspace, componentInfo, detectorInfo);
 
-  for (auto i = 0u; i < detectorIndices.size(); ++i) {
-    auto detIndex = detectorIndices[i];
-    if (i % numberOfDetectorsPerTube == 0) {
-      normal = normalize(componentInfo.position(detectorIndices[i + 1]) - componentInfo.position(detectorIndices[i]));
-    }
-    auto index = actor->getWorkspaceIndex(detIndex);
-    actor->getBinMinMaxIndex(index, imin, imax);
-    if (index != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX && componentInfo.isDetector(detIndex)) {
-
-      // get the x-value for detector idet
-      double xvalue = getOutOfPlaneAngle(detectorInfo.position(detIndex), samplePos, normal);
-
-      // get the y-value for detector idet
-      const auto yValues = ws->readY(index);
-      xymap[xvalue] = std::accumulate(yValues.cbegin() + imin, yValues.cbegin() + imax, 0);
-
-      const auto eValues = ws->readE(index);
-      // take squares of the errors
-      std::vector<double> tmp(imax - imin);
-      std::transform(eValues.cbegin() + imin, eValues.cbegin() + imax, eValues.cbegin() + imin, tmp.begin(),
-                     std::multiplies<double>());
-      // sum them and take sqrt
-      xemap[xvalue] = sqrt(std::accumulate(tmp.begin(), tmp.end(), 0));
-    }
-  }
   x.reserve(xymap.size());
   y.reserve(xymap.size());
   e.reserve(xemap.size());
@@ -291,10 +313,46 @@ void ALFInstrumentModel::prepareDataForIntegralsPlot(MantidQt::MantidWidgets::In
   std::transform(xemap.cbegin(), xemap.cend(), std::back_inserter(e), [](auto const &xe) { return xe.second; });
 }
 
-double ALFInstrumentModel::getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos, const Mantid::Kernel::V3D &origin,
-                                              const Mantid::Kernel::V3D &normal) const {
-  const auto vec = normalize(pos - origin);
-  return asin(vec.scalar_prod(normal));
+void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
+                                            MantidQt::MantidWidgets::InstrumentActor const &actor,
+                                            MatrixWorkspace_const_sptr const &workspace,
+                                            Mantid::Geometry::ComponentInfo const &componentInfo,
+                                            Mantid::Geometry::DetectorInfo const &detectorInfo) const {
+  auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor);
+  auto const samplePosition = componentInfo.samplePosition();
+
+  Mantid::Kernel::V3D normal;
+  std::size_t imin, imax;
+  for (auto i = 0u; i < m_detectorIndices.size(); ++i) {
+    auto const detectorIndex = m_detectorIndices[i];
+    auto const workspaceIndex = actor.getWorkspaceIndex(detectorIndex);
+
+    if (i % nDetectorsPerTube == 0) {
+      normal = normalize(componentInfo.position(m_detectorIndices[i + 1]) - componentInfo.position(detectorIndex));
+      actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
+    }
+
+    if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
+        componentInfo.isDetector(detectorIndex)) {
+
+      auto const xvalue = calculateOutOfPlaneAngle(detectorInfo.position(detectorIndex), samplePosition, normal);
+      xy[xvalue] = calculateYCounts(workspace->y(workspaceIndex), imin, imax);
+      xe[xvalue] = calculateError(workspace->e(workspaceIndex), imin, imax);
+    }
+  }
+}
+
+std::size_t ALFInstrumentModel::numberOfDetectorsPerTube(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
+  auto const &componentInfo = actor.componentInfo();
+  return componentInfo.detectorsInSubtree(componentInfo.parent(m_detectorIndices[0])).size();
+}
+
+std::size_t ALFInstrumentModel::numberOfTubes(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
+  auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor);
+  if (nDetectorsPerTube == 0u) {
+    return 0u;
+  }
+  return static_cast<std::size_t>(m_detectorIndices.size() / nDetectorsPerTube);
 }
 
 /*

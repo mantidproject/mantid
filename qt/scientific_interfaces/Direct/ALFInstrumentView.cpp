@@ -116,8 +116,13 @@ void ALFInstrumentView::fileLoaded() {
 
 void ALFInstrumentView::notifyShapeChanged() { m_presenter->notifyShapeChanged(); }
 
-MantidWidgets::InstrumentActor &ALFInstrumentView::getInstrumentActor() const {
+MantidWidgets::InstrumentActor const &ALFInstrumentView::getInstrumentActor() const {
   return m_instrumentWidget->getInstrumentActor();
+}
+
+Mantid::Geometry::ComponentInfo const &ALFInstrumentView::componentInfo() const {
+  auto &actor = m_instrumentWidget->getInstrumentActor();
+  return actor.componentInfo();
 }
 
 std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {

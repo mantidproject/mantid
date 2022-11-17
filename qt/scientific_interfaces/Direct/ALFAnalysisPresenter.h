@@ -8,6 +8,7 @@
 
 #include "ALFAnalysisModel.h"
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QWidget>
 
@@ -30,6 +31,8 @@ public:
 
   virtual void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) = 0;
 
+  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const runNumber) = 0;
+
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
   virtual void notifyUpdateEstimateClicked() = 0;
@@ -49,6 +52,8 @@ public:
   QWidget *getView() override;
 
   void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) override;
+
+  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const runNumber) override;
 
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;

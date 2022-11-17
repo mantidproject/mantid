@@ -20,6 +20,7 @@
 using namespace Mantid::API;
 
 namespace {
+auto &ADS = AnalysisDataService::Instance();
 
 MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
@@ -88,7 +89,26 @@ CompositeFunction_sptr createCompositeFunction(IFunction_sptr const &flatBackgro
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisModel::ALFAnalysisModel()
-    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas() {}
+    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas(),
+      m_extractedWorkspace() {}
+
+std::optional<std::string> ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                                                                   std::size_t const runNumber) {
+  m_extractedWorkspace = std::move(workspace);
+
+  if (!m_extractedWorkspace) {
+    return std::nullopt;
+  }
+
+  auto const adsName = extractedWsName(m_extractedWorkspace, runNumber);
+  ADS.addOrReplace(adsName, m_extractedWorkspace);
+  return adsName;
+}
+
+std::string ALFAnalysisModel::extractedWsName(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+                                              std::size_t const runNumber) const {
+  return "extractedTubes_ALF" + std::to_string(runNumber);
+}
 
 void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double> const &range) {
 
@@ -105,9 +125,8 @@ void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double
 }
 
 void ALFAnalysisModel::calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) {
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName)) {
-    auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
+  if (ADS.doesExist(workspaceName)) {
+    auto workspace = ADS.retrieveWS<MatrixWorkspace>(workspaceName);
 
     m_function = calculateEstimate(workspace, range);
   } else {

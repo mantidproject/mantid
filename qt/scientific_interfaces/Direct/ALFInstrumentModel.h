@@ -10,9 +10,15 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
 
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
+
+namespace Mantid::Geometry {
+class ComponentInfo;
+class DetectorInfo;
+} // namespace Mantid::Geometry
 
 namespace MantidQt {
 
@@ -34,10 +40,11 @@ public:
   virtual std::string extractedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
-  virtual void setSelectedDetectors(std::vector<std::size_t> detectorIndices) = 0;
+  virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                    std::vector<std::size_t> const &detectorIndices) = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr
-  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor *actor) const = 0;
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const = 0;
 
   virtual std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
   virtual std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
@@ -58,10 +65,11 @@ public:
   std::string extractedWsName() const override;
   std::size_t runNumber() const override;
 
-  void setSelectedDetectors(std::vector<std::size_t> detectorIndices) override;
+  void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
+                            std::vector<std::size_t> const &detectorIndices) override;
 
   Mantid::API::MatrixWorkspace_sptr
-  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor *actor) const override;
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const override;
 
   std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
   std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
@@ -71,11 +79,15 @@ public:
 
 private:
   Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
-  void prepareDataForIntegralsPlot(MantidQt::MantidWidgets::InstrumentActor *actor,
-                                   std::vector<std::size_t> const &detectorIndices, std::vector<double> &x,
-                                   std::vector<double> &y, std::vector<double> &e) const;
-  double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos, const Mantid::Kernel::V3D &origin,
-                            const Mantid::Kernel::V3D &normal) const;
+  void collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
+                        std::vector<double> &y, std::vector<double> &e) const;
+  void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
+                          MantidQt::MantidWidgets::InstrumentActor const &actor,
+                          Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+                          Mantid::Geometry::ComponentInfo const &componentInfo,
+                          Mantid::Geometry::DetectorInfo const &detectorInfo) const;
+  std::size_t numberOfDetectorsPerTube(MantidQt::MantidWidgets::InstrumentActor const &actor) const;
+  std::size_t numberOfTubes(MantidQt::MantidWidgets::InstrumentActor const &actor) const;
 
   std::vector<std::size_t> m_detectorIndices;
 };

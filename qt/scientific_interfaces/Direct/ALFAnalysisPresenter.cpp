@@ -24,6 +24,13 @@ void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter 
   m_instrumentPresenter = presenter;
 }
 
+void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                                                 std::size_t const runNumber) {
+  if (auto const adsName = m_model->setExtractedWorkspace(std::move(workspace), runNumber)) {
+    m_view->addSpectrum(*adsName);
+  }
+}
+
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
   m_model->setPeakCentre(m_view->peakCentre());
   m_view->setPeakCentreStatus(m_model->fitStatus());
