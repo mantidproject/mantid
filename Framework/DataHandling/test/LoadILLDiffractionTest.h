@@ -302,7 +302,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(!outputWS->detectorInfo().isMonitor(nScans + 1))
-    TS_ASSERT(!outputWS->detectorInfo().isMonitor(3073 * nScans))
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(3073))
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
 
