@@ -93,7 +93,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             self.log().information('Loaded workspace ')
         return ws, monitor_ws
 
-    def _applyCalibration(self, ws, calibration_filepath):
+    def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
         alg = self.createChildAlgorithm('ReflectometryISISCalibration')
         alg.setProperty("InputWorkspace", ws)
         alg.setProperty("CalibrationFile", calibration_filepath)
