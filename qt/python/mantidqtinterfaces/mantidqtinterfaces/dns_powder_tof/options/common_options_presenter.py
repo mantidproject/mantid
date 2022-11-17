@@ -14,6 +14,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSOb
 
 
 class DNSCommonOptionsPresenter(DNSObserver):
+
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
 
