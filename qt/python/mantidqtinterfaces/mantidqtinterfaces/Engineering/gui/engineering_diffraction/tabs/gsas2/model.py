@@ -53,6 +53,7 @@ class GSAS2Model(object):
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
+        self.phase_names_list = None
 
     def clear_input_components(self):
         self.user_save_directory = None
@@ -84,6 +85,7 @@ class GSAS2Model(object):
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
+        self.phase_names_list = None
 
     def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_limits):
 
@@ -630,21 +632,21 @@ class GSAS2Model(object):
     def load_basic_outputs(self, gsas_result_filepath):
         logger.notice(f"GSAS-II .lst result file found. Opening {self.project_name}.lst")
         self.read_gsas_lst_and_print_wR(gsas_result_filepath, self.data_files)
+        self.phase_names_list = self.find_phase_names_in_lst(
+            os.path.join(self.user_save_directory, self.project_name + ".lst"))
 
         save_message = self.move_output_files_to_user_save_location()
         logger.notice(save_message)
 
         self.create_lattice_parameter_table()
         self.create_instrument_parameter_table()
+        self.create_reflections_table()
 
-    def load_result(self, index_histograms):
+    def load_result_for_plot(self, index_histograms):
         workspace = self.load_gsas_histogram(index_histograms)
-        phase_names_list = self.find_phase_names_in_lst(
-            os.path.join(self.user_save_directory, self.project_name + ".lst"))
-
         reflections = None
         if self.refinement_method == "Pawley":
-            reflections = self.load_gsas_reflections(index_histograms, phase_names_list)
+            reflections = self.load_gsas_reflections_per_histogram_for_plot(index_histograms)
         return workspace, reflections
 
     def chop_to_limits(self, input_array, x, min_x, max_x):
@@ -671,43 +673,56 @@ class GSAS2Model(object):
                                          DataX=np.tile(my_data[0], 4), DataY=y_data, NSpec=4)
         return gsas_histogram
 
-    def load_gsas_reflections(self, histogram_index, phase_names):
+    def load_gsas_reflections_per_histogram_for_plot(self, histogram_index):
         loaded_reflections = []
-        result_reflections_dict = {}
-        for phase_name in phase_names:
+        for phase_name in self.phase_names_list:
             result_reflections_txt = os.path.join(self.user_save_directory,
                                                   self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt")
-            loaded_reflections.append(np.loadtxt(result_reflections_txt))
-            result_reflections_dict[phase_name] = ",    ".join(str(num) for num in np.loadtxt(result_reflections_txt))
-        self.create_reflections_table(phase_names, result_reflections_dict)
+            loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
+            # first 2 lines iin file are histogram and phase name
         return loaded_reflections
 
-    def create_reflections_table(self, phase_names, reflections_by_phase, test=False):
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections")
-        table.addColumn("str", "Phase name")
-        table.addColumn("str", "Reflections")
+    def load_gsas_reflections_all_histograms_for_table(self):
+        result_reflections_rows = []
+        output_reflections_files = self.get_txt_files_that_include("_reflections_")
+        for file in output_reflections_files:
+            loop_file_text = np.genfromtxt(file, dtype="str")
+            loop_histogram_name = loop_file_text[0]
+            loop_phase_name = loop_file_text[1]
+            loop_reflections_text = ",    ".join(str(num) for num in loop_file_text[2:])
+            result_reflections_rows.append([loop_histogram_name, loop_phase_name, loop_reflections_text])
+        return result_reflections_rows
 
-        for phase_name in phase_names:
-            row_data = [phase_name, str(reflections_by_phase[phase_name])]
-            table.addRow(row_data)
+    def create_reflections_table(self, test=False):
+        table_rows = self.load_gsas_reflections_all_histograms_for_table()
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections")
+        table.addReadOnlyColumn("str", "Histogram name")
+        table.addReadOnlyColumn("str", "Phase name")
+        table.addReadOnlyColumn("str", "Reflections")
+        for row in table_rows:
+            table.addRow(row)
         if test:
             return table
+
+    def get_txt_files_that_include(self, sub_string):
+        output_files = []
+        for (_, _, filenames) in os.walk(self.user_save_directory):
+            for loop_filename in filenames:
+                if sub_string in loop_filename and loop_filename[-4:] == ".txt":
+                    output_files.append(os.path.join(self.user_save_directory, loop_filename))
+        output_files.sort()
+        return output_files
 
     def create_instrument_parameter_table(self, test=False):
         INST_TABLE_PARAMS = ["Histogram name", "Sigma-1", "Gamma (Y)"]
         table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_instrument_parameters")
-        table.addColumn("str", "Histogram name")
-        table.addColumn("double", "Sigma-1 {}".format("(Refined)" if self.refine_sigma_one else ""))
-        table.addColumn("double", "Gamma (Y) {}".format("(Refined)" if self.refine_gamma else ""))
-        table.addColumn("double", "Fit X Min")
-        table.addColumn("double", "Fit X Max")
+        table.addReadOnlyColumn("str", "Histogram name")
+        table.addReadOnlyColumn("double", "Sigma-1{}".format(" (Refined)" if self.refine_sigma_one else ""))
+        table.addReadOnlyColumn("double", "Gamma (Y){}".format(" (Refined)" if self.refine_gamma else ""))
+        table.addReadOnlyColumn("double", "Fit X Min")
+        table.addReadOnlyColumn("double", "Fit X Max")
 
-        output_inst_param_files = []
-        for (_, _, filenames) in os.walk(self.user_save_directory):
-            for loop_filename in filenames:
-                if "_inst_parameters_" in loop_filename:
-                    output_inst_param_files.append(os.path.join(self.user_save_directory, loop_filename))
-        output_inst_param_files.sort()
+        output_inst_param_files = self.get_txt_files_that_include("_inst_parameters_")
 
         for inst_parameters_txt in output_inst_param_files:
             with open(inst_parameters_txt, 'rt', encoding='utf-8') as file:
@@ -717,7 +732,7 @@ class GSAS2Model(object):
             for param in INST_TABLE_PARAMS[1:]:
                 loop_inst_parameters.append(float(inst_parameter_dict[param][1]))
 
-            bank_number_and_extension = str(list(inst_parameters_txt.split(" "))[-1])
+            bank_number_and_extension = str(list(inst_parameters_txt.split("_"))[-1])
             bank_number_from_gsas2_histogram_name = int(bank_number_and_extension.replace(".txt", ""))
             loop_inst_parameters.append(float(self.x_min[bank_number_from_gsas2_histogram_name-1]))
             loop_inst_parameters.append(float(self.x_max[bank_number_from_gsas2_histogram_name-1]))
@@ -728,18 +743,14 @@ class GSAS2Model(object):
     def create_lattice_parameter_table(self, test=False):
         LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c",
                                 "angle_alpha", "angle_beta", "angle_gamma", "volume"]
-        phase_names_list = self.find_phase_names_in_lst(
-            os.path.join(self.user_save_directory, self.project_name + ".lst"))
 
         table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters")
-        table.addColumn("str", "Phase name")
-        # table.addColumn("str", "Sigma-1 {}".format("(Refined)" if self.refine_sigma_one else ""))
-        # table.addColumn("str", "Gamma (Y) {}".format("(Refined)" if self.refine_gamma else ""))
+        table.addReadOnlyColumn("str", "Phase name")
 
         for param in LATTICE_TABLE_PARAMS:
-            table.addColumn("double", param.split("_")[-1])
-        table.addColumn("double", "Microstrain {}".format("(Refined)" if self.refine_microstrain else ""))
-        for phase_name in phase_names_list:
+            table.addReadOnlyColumn("double", param.split("_")[-1])
+        table.addReadOnlyColumn("double", "Microstrain{}".format(" (Refined)" if self.refine_microstrain else ""))
+        for phase_name in self.phase_names_list:
             parameters_txt = os.path.join(self.user_save_directory,
                                           self.project_name + f"_cell_parameters_{phase_name}.txt")
             with open(parameters_txt, 'rt', encoding='utf-8') as file:
@@ -758,7 +769,7 @@ class GSAS2Model(object):
     # =========
 
     def plot_result(self, index_histograms, axis):
-        gsas_histogram_workspace, reflections = self.load_result(index_histograms)
+        gsas_histogram_workspace, reflections = self.load_result_for_plot(index_histograms)
         plot_window_title = self.plot_gsas_histogram(axis, gsas_histogram_workspace, reflections,
                                                      index_histograms, self.data_files)
         return plot_window_title
