@@ -23,7 +23,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
     list_to_multirange
 
 
-class DNSDataset(ObjectDict):
+class DNSElasticDataset(ObjectDict):
     """
     Class for storing data of multiple DNS datafiles.
     This is a dictionary but can also be accessed like attributes.

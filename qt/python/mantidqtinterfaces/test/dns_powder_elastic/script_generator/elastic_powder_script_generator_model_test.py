@@ -9,8 +9,8 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import \
-    DNSDataset
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import \
+    DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
     DNSObsModel
 from mantidqtinterfaces.dns_powder_tof.script_generator.\
@@ -36,7 +36,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.model = DNSElasticPowderScriptGeneratorModel(cls.parent)
         cls.model.raise_error = mock.Mock()
         cls.error_raised = cls.model.raise_error
-        cls.sample_data = mock.create_autospec(DNSDataset)
+        cls.sample_data = mock.create_autospec(DNSElasticDataset)
         cls.model._sample_data = cls.sample_data
         cls.sample_data.data_dic = get_fake_elastic_datadic()
         cls.sample_data.create_subtract.return_value = ['knso_x_sf']
@@ -48,7 +48,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.sample_data.two_theta.nbins = 5
         cls.sample_data.banks = [1, 2, 3]
         cls.sample_data.script_name = '123.txt'
-        cls.standard_data = mock.create_autospec(DNSDataset)
+        cls.standard_data = mock.create_autospec(DNSElasticDataset)
         cls.model._standard_data = cls.standard_data
         cls.standard_data.data_dic = get_elastic_standard_datadic()
         cls.standard_data.format_dataset.return_value = '123456'
@@ -221,22 +221,22 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
 
     @patch('mantidqtinterfaces.dns_powder_elastic.script_generator.'
            'elastic_powder_script_generator_mod'
-           'el.DNSDataset')
-    def test_setup_sample_data(self, mock_dns_dataset):
+           'el.DNSElasticDataset')
+    def test_setup_sample_data(self, mock_dns_elastic_powder_dataset):
         self.model._sample_data = None
-        mock_dns_dataset.return_value = self.sample_data
+        mock_dns_elastic_powder_dataset.return_value = self.sample_data
         self.model._setup_sample_data({'data_dir': '123'}, {'full_data': []})
         self.assertEqual(self.model._sample_data, self.sample_data)
         self.assertEqual(self.model._plot_list, ['mat_knso_x_sf'])
 
     @patch('mantidqtinterfaces.dns_powder_elastic.script_generator.'
            'elastic_powder_script_generator_mod'
-           'el.DNSDataset')
-    def test_setup_standard_data(self, mock_dns_dataset):
+           'el.DNSElasticDataset')
+    def test_setup_standard_data(self, mock_dns_elastic_powder_dataset):
         self.model._standard_data = None
         self.model._corrections = True
 
-        mock_dns_dataset.return_value = self.standard_data
+        mock_dns_elastic_powder_dataset.return_value = self.standard_data
         self.model._setup_standard_data({'standards_dir': '123'},
                                         {'standard_data': []})
         self.assertEqual(self.model._standard_data, self.standard_data)
@@ -422,9 +422,9 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
 
     @patch('mantidqtinterfaces.dns_powder_elastic.script_generator.'
            'elastic_powder_script_generator_mod'
-           'el.DNSDataset')
-    def test_script_maker(self, mock_dns_dataset):
-        mock_dns_dataset.return_value = self.standard_data
+           'el.DNSElasticDataset')
+    def test_script_maker(self, mock_dns_elastic_powder_dataset):
+        mock_dns_elastic_powder_dataset.return_value = self.standard_data
         options = {
             'corrections': 1,
             'det_efficiency': 1,

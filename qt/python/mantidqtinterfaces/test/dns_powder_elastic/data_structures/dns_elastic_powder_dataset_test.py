@@ -16,12 +16,12 @@ from unittest import mock
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
     ObjectDict
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import \
-    DNSDataset
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import \
+    DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
     get_file_selector_fulldat
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import (
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import (
     automatic_two_theta_binning, get_two_theta_step, round_step,
     get_omega_step, list_to_set, automatic_omega_binning,
     get_proposal_from_filename, get_sample_fields, create_dataset,
@@ -34,7 +34,7 @@ class DNSDatasetTest(unittest.TestCase):
     def setUpClass(cls):
         cls.fulldata = get_file_selector_fulldat()['full_data']
         cls.standarddata = get_file_selector_fulldat()['standard_data']
-        cls.ds = DNSDataset(data=cls.fulldata, path='C:/123', is_sample=True)
+        cls.ds = DNSElasticDataset(data=cls.fulldata, path='C:/123', is_sample=True)
         cls.datadic = {'4p1K_map': {'path': 'C:/123\\service',
                                     'z_nsf': [788058]}}
 
@@ -43,7 +43,7 @@ class DNSDatasetTest(unittest.TestCase):
                                          'z_nsf': [788058]}}
 
     def test___init__(self):
-        self.assertIsInstance(self.ds, DNSDataset)
+        self.assertIsInstance(self.ds, DNSElasticDataset)
         self.assertIsInstance(self.ds, ObjectDict)
         self.assertTrue(self.ds.is_sample)
         self.assertTrue(hasattr(self.ds, 'banks'))
@@ -66,7 +66,7 @@ class DNSDatasetTest(unittest.TestCase):
         testv = self.ds.create_subtract()
         self.assertEqual(testv, ['4p1K_map_z_nsf'])
 
-    @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset.'
+    @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset.'
            'interpolate_standard')
     def test_interpolate_standard(self, mock_ip):
         mock_ip.return_value = {}, False
@@ -87,7 +87,7 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertEqual(testv, 0)
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
-           'dns_dataset.DNSBinning')
+           'dns_elastic_powder_dataset.DNSBinning')
     def test_automatic_ttheta_binning(self, mock_binning):
         testv = automatic_two_theta_binning(self.fulldata)
         self.assertEqual(testv, mock_binning.return_value)
@@ -134,7 +134,7 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertEqual(testv, [])
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
-           'dns_dataset.DNSBinning')
+           'dns_elastic_powder_dataset.DNSBinning')
     def test_automatic_omega_binning(self, mock_binning):
         testv = automatic_omega_binning(self.fulldata)
         self.assertEqual(testv, mock_binning.return_value)
