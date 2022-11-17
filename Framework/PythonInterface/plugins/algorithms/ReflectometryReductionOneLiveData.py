@@ -74,10 +74,10 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _setup_workspace_for_reduction(self):
         """Set up the workspace ready for the reduction"""
-        in_ws = self.getProperty("InputWorkspace").value
-        self._out_ws_name = self.getPropertyValue("OutputWorkspace")
+        in_ws_name = self.getPropertyValue("InputWorkspace")
+        self._temp_ws_name = "__" + self.getPropertyValue("OutputWorkspace")
         # Set up a clone for the output because we need to do some in-place manipulations
-        CloneWorkspace(InputWorkspace=in_ws, OutputWorkspace=self._out_ws_name)
+        CloneWorkspace(InputWorkspace=in_ws_name, OutputWorkspace=self._temp_ws_name)
         self._setup_instrument()
         liveValues = self._get_live_values_from_instrument()
         self._setup_sample_logs(liveValues)
@@ -89,11 +89,11 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         alg.initialize()
         alg.setChild(True)
         self._copy_property_values_to(alg)
-        alg.setProperty("InputRunList", self._out_ws_name)
+        alg.setProperty("InputRunList", self._temp_ws_name)
         alg.setProperty("ThetaLogName", "Theta")
         alg.setProperty("GroupTOFWorkspaces", False)
         alg.setProperty("ReloadInvalidWorkspaces", False)
-        alg.setProperty("OutputWorkspaceBinned", self._out_ws_name)
+        alg.setProperty("OutputWorkspaceBinned", self._temp_ws_name)
         return alg
 
     def _run_reduction_algorithm(self, alg):
@@ -101,11 +101,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         alg.execute()
         out_ws = alg.getProperty("OutputWorkspaceBinned").value
         self.setProperty("OutputWorkspace", out_ws)
+        AnalysisDataService.remove(self._temp_ws_name)
 
     def _setup_instrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
         self._instrument = self.getProperty('Instrument').value
-        LoadInstrument(Workspace=self._out_ws_name, RewriteSpectraMap=True,
+        LoadInstrument(Workspace=self._temp_ws_name, RewriteSpectraMap=True,
                        InstrumentName=self._instrument)
 
     def _setup_sample_logs(self, liveValues):
@@ -113,19 +114,19 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         logNames = [key for key in liveValues]
         logValues = [liveValues[key].value for key in liveValues]
         logUnits = [liveValues[key].unit for key in liveValues]
-        AddSampleLogMultiple(Workspace=self._out_ws_name, LogNames=logNames,
+        AddSampleLogMultiple(Workspace=self._temp_ws_name, LogNames=logNames,
                              LogValues=logValues, LogUnits=logUnits)
 
     def _setup_slits(self, liveValues):
         """Set up instrument parameters for the slits"""
         s1 = liveValues[self._s1vg_name()].value
         s2 = liveValues[self._s2vg_name()].value
-        SetInstrumentParameter(Workspace=self._out_ws_name,
+        SetInstrumentParameter(Workspace=self._temp_ws_name,
                                ParameterName='vertical gap',
                                ParameterType='Number',
                                ComponentName='slit1',
                                Value=str(s1))
-        SetInstrumentParameter(Workspace=self._out_ws_name,
+        SetInstrumentParameter(Workspace=self._temp_ws_name,
                                ParameterName='vertical gap',
                                ParameterType='Number',
                                ComponentName='slit2',
