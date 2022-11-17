@@ -163,7 +163,6 @@ void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  * the corresponding values
  *
  * @param entry The NeXus entry
- * @param monitors List of monitor data
  */
 void LoadILLTOF2::initWorkspace(NeXus::NXEntry &entry) {
 
