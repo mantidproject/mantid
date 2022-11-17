@@ -535,6 +535,8 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
                                      const std::vector<int> &detectorIDs, const std::set<int> &acceptedDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
 
+  const bool customDetectorIDs = detectorIDs.size() != 0;
+
   std::array dims = {data.dim0(), data.dim1(), data.dim2()};
   const auto nTubes = dims[std::get<0>(axisOrder)];
   const auto nPixels = dims[std::get<1>(axisOrder)];
@@ -573,10 +575,8 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
       } else {
         ws->setHistogram(currentSpectrum, binEdges, counts);
       }
-      if (detectorIDs.size() == 0)
-        ws->getSpectrum(currentSpectrum).setSpectrumNo(currentSpectrum);
-      else
-        ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorIDs[currentSpectrum]);
+      const auto detectorID = customDetectorIDs ? detectorIDs[currentSpectrum] : currentSpectrum;
+      ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorID);
     }
   }
 }
