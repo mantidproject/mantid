@@ -10,7 +10,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 Instrument::Instrument()
     : m_wavelengthRange(RangeInLambda(0.0, 0.0)),
       m_monitorCorrections(MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0))),
-      m_detectorCorrections(DetectorCorrections(false, DetectorCorrectionType::VerticalShift)) {}
+      m_detectorCorrections(DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
+      m_calibrationFilePath("") {}
 
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections, std::string calibrationFilePath)
