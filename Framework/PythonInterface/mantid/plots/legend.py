@@ -66,7 +66,7 @@ class LegendProperties(dict):
         else:
             props['round_edges'] = False
 
-        props['columns'] = legend._ncol
+        props['columns'] = legend._ncols
         props['column_spacing'] = legend.columnspacing
         props['label_spacing'] = legend.labelspacing
 
@@ -132,7 +132,7 @@ class LegendProperties(dict):
 
         if int(matplotlib.__version__[0]) >= 2:
             legend = ax.legend(handles=get_legend_handles(ax),
-                               ncol=props['columns'],
+                               ncols=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
@@ -151,7 +151,7 @@ class LegendProperties(dict):
                                loc=loc)
         else:
             legend = ax.legend(handles=get_legend_handles(ax),
-                               ncol=props['columns'],
+                               ncols=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
