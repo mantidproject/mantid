@@ -457,16 +457,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius[0], 3) - std::pow(BackgroundOuterRadius[0], 3));
   // volume of PeakRadius sphere
   double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius[0], 3);
-  //
-  // If the following OMP pragma is included, this algorithm seg faults
-  // sporadically when processing multiple TOPAZ runs in a script, on
-  // Scientific Linux 6.2.  Typically, it seg faults after 2 to 6 runs are
-  // processed, though occasionally it will process all 8 requested in the
-  // script without crashing.  Since the lower level codes already use OpenMP,
-  // parallelizing at this level is only marginally useful, giving about a
-  // 5-10% speedup.  Perhaps is should just be removed permanantly, but for
-  // now it is commented out to avoid the seg faults.  Refs #5533
-  // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
+
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
