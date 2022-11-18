@@ -492,12 +492,45 @@ public:
     }
 
     TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
-
+    // check the data is loaded in as expected
+    // first, monitors should be the same regardless of data type
+    TS_ASSERT_DELTA(outputWS->readY(0)[0], 200000.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(0)[0], 447.21359, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readY(detInfo.scanCount() - 1)[0], 200000.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->readE(detInfo.scanCount() - 1)[0], 447.21359, 1E-5)
     if (dataType == "Raw") {
-      TS_ASSERT_DELTA(outputWS->y(25)[0], 0, 1e-12)
+      // second, data, tube 1, isolated counts or high counts
+      TS_ASSERT_DELTA(outputWS->readY(370)[0], 1.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(370)[0], 1.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readY(427)[0], 2.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(427)[0], 1.41421, 1E-5)
+      // tube 2, to ensure proper order of tube filling
+      TS_ASSERT_DELTA(outputWS->readY(3201)[0], 3.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(3201)[0], 1.73205, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readY(3640)[0], 1.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(3640)[0], 1.0, 1E-5)
+      // next tubes, isolated counts or high counts
+      TS_ASSERT_DELTA(outputWS->readY(391031)[0], 4.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(391031)[0], 2.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readY(409405)[0], 2.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(409405)[0], 1.41421, 1E-5)
       TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "none")
     } else {
-      TS_ASSERT_DELTA(outputWS->y(25)[0], 1, 1e-12)
+      // second, data, tube 1, isolated counts or high counts
+      TS_ASSERT_DELTA(outputWS->readY(234)[0], 1.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(234)[0], 1.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readY(457)[0], 2.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(457)[0], 1.41421, 1E-5)
+      // tube 2, to ensure proper order of tube filling
+      TS_ASSERT_DELTA(outputWS->readY(3201)[0], 3.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(3201)[0], 1.73205, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readY(3583)[0], 1.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(3583)[0], 1.0, 1E-5)
+      // next tubes, isolated counts or high counts
+      TS_ASSERT_DELTA(outputWS->readY(314228)[0], 3.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(314228)[0], 1.73205, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readY(409620)[0], 3.0, 1E-5)
+      TS_ASSERT_DELTA(outputWS->readE(409620)[0], 1.73205, 1E-5)
       TS_ASSERT_EQUALS(outputWS->run().getProperty("Detector.calibration_file")->value(), "d2bcal_23Nov16_c.2d")
     }
   }
