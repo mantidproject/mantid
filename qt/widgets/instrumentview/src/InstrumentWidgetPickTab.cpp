@@ -68,6 +68,19 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   double avgPos = getPhi(pos);
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
+
+template <typename T>
+void rebin(const T &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
+           const bool reverseLogarithmic, const std::string &outputWorkspace) {
+  auto rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
+  rebinAlgorithm->setProperty("InputWorkspace", inputWorkspace);
+  rebinAlgorithm->setProperty("Params", rebinString);
+  rebinAlgorithm->setProperty("PreserveEvents", preserveEvents);
+  rebinAlgorithm->setProperty("UseReverseLogarithmic", reverseLogarithmic);
+  rebinAlgorithm->setProperty("OutputWorkspace", outputWorkspace);
+  rebinAlgorithm->execute();
+}
+
 } // namespace
 
 /**
@@ -75,7 +88,8 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
  * @param instrWidget :: Parent InstrumentWidget.
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_tubeXUnitsCache(0), m_plotTypeCache(0),
+    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_originalWorkspace(nullptr), m_tubeXUnitsCache(0),
+      m_plotTypeCache(0),
       m_addedActions(std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
@@ -104,6 +118,14 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
                                    "approach the upper limit. See Rebin for details.");
   m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
   m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
+  m_rebinKeepOriginal = new QCheckBox("Keep original workspace", m_rebin);
+  m_rebinKeepOriginal->setToolTip("Keeps the original workspace so it can be used for subsequent rebin operations. "
+                                  "WARNING: This option can cause high-memory usage for large datasets.");
+  m_rebinKeepOriginalWarning = new QLabel("*Warning*");
+  m_rebinKeepOriginalWarning->setStyleSheet("QLabel { color: darkorange; }");
+  m_rebinKeepOriginalWarning->setToolTip("WARNING: This option can cause high-memory usage for large datasets.");
+
+  connect(m_rebinKeepOriginal, SIGNAL(stateChanged(int)), this, SLOT(onKeepOriginalStateChanged(int)));
 
   m_runRebin = new QPushButton("Run", m_rebin);
   connect(m_rebinParams, SIGNAL(textChanged(QString)), this, SLOT(onRebinParamsWritten(QString)));
@@ -114,6 +136,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   QGridLayout *rebinCheckBoxesLayout = new QGridLayout();
   rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
   rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginal, 1, 0);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginalWarning, 1, 1);
   rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
 
   rebinLayout->addWidget(m_runRebin, 2, 0);
@@ -680,6 +704,7 @@ const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const { r
 void InstrumentWidgetPickTab::saveSettings(QSettings &settings) const {
   settings.setValue("TubeXUnits", m_plotController->getTubeXUnits());
   settings.setValue("PlotType", m_plotController->getPlotType());
+  settings.setValue("RebinKeeporiginal", m_rebinKeepOriginal->isChecked());
 }
 
 /**
@@ -691,6 +716,8 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   // Cache the settings and apply them later
   m_tubeXUnitsCache = settings.value("TubeXUnits", 0).toInt();
   m_plotTypeCache = settings.value("PlotType", IWPickPlotType::SINGLE).toInt();
+
+  m_rebinKeepOriginal->setChecked(settings.value("RebinKeeporiginal", true).toBool());
 }
 void InstrumentWidgetPickTab::addToContextMenu(QAction *action,
                                                std::function<bool(std::map<std::string, bool>)> &actionCondition) {
@@ -849,18 +876,33 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
+  if (m_rebinKeepOriginal->isChecked() && !m_originalWorkspace) {
+    m_originalWorkspace = m_instrWidget->getWorkspaceClone();
+  }
+
   try {
-    auto alg = AlgorithmManager::Instance().create("Rebin");
-    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("Params", m_rebinParams->text().toStdString());
-    alg->setProperty("PreserveEvents", !m_rebinSaveToHisto->isChecked());
-    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
-    alg->execute();
-  } catch (std::exception &e) {
-    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+    if (m_originalWorkspace) {
+      rebin<Mantid::API::Workspace_sptr>(m_originalWorkspace, m_rebinParams->text().toStdString(),
+                                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                                         m_instrWidget->getWorkspaceNameStdString());
+    } else {
+      rebin<std::string>(m_instrWidget->getWorkspaceNameStdString(), m_rebinParams->text().toStdString(),
+                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                         m_instrWidget->getWorkspaceNameStdString());
+    }
+  } catch (const std::exception &ex) {
+    QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
   }
 }
+
+void InstrumentWidgetPickTab::onKeepOriginalStateChanged(int state) {
+  m_rebinKeepOriginalWarning->setVisible(state == Qt::Checked);
+  if (state == Qt::Unchecked) {
+    resetOriginalWorkspace();
+  }
+}
+
+void InstrumentWidgetPickTab::resetOriginalWorkspace() { m_originalWorkspace.reset(); }
 
 /**
  * Clear all the tab's widgets.

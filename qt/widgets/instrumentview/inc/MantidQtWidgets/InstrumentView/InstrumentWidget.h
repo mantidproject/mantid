@@ -121,6 +121,7 @@ public:
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
+  Mantid::API::Workspace_sptr getWorkspaceClone();
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
