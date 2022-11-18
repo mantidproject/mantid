@@ -146,7 +146,7 @@ class PreviewView(QObject):
             self._widget = plotBin(workspace_name, 0, error_bars=True)
         elif self._type == self.PLOT2D:
             self._widget = pcolormesh([workspace_name])
-        elif self._widget == self.PLOTSPECTRUM:
+        elif self._type == self.PLOTSPECTRUM:
             self._widget = plotSpectrum(workspace_name, 0, error_bars=True)
 
     def change_workspace(self, workspace_name: str):
