@@ -22,6 +22,8 @@ using namespace Mantid::API;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
+std::string const FIT_BASE_NAME("__fit");
+
 MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
   cropper->setAlwaysStoreInADS(false);
@@ -92,36 +94,32 @@ ALFAnalysisModel::ALFAnalysisModel()
     : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas(),
       m_extractedWorkspace() {}
 
-std::optional<std::string> ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                                                   std::size_t const runNumber) {
-  m_extractedWorkspace = std::move(workspace);
-
-  if (!m_extractedWorkspace) {
-    return std::nullopt;
-  }
-
-  auto const adsName = extractedWsName(m_extractedWorkspace, runNumber);
-  ADS.addOrReplace(adsName, m_extractedWorkspace);
-  return adsName;
+void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_extractedWorkspace = workspace;
 }
 
-std::string ALFAnalysisModel::extractedWsName(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
-                                              std::size_t const runNumber) const {
-  return "extractedTubes_ALF" + std::to_string(runNumber);
-}
+bool ALFAnalysisModel::isDataExtracted() const { return m_extractedWorkspace != nullptr; }
 
-void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double> const &range) {
+MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &range) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
   alg->setProperty("Function", m_function);
-  alg->setProperty("InputWorkspace", wsName);
-  alg->setProperty("Output", wsName + "_fits");
+  alg->setProperty("InputWorkspace", m_extractedWorkspace);
+  alg->setProperty("Output", FIT_BASE_NAME);
   alg->setProperty("StartX", range.first);
   alg->setProperty("EndX", range.second);
   alg->execute();
+
   m_function = alg->getProperty("Function");
   m_fitStatus = alg->getPropertyValue("OutputStatus");
+  auto const fitWorkspace = ADS.retrieveWS<MatrixWorkspace>(FIT_BASE_NAME + "_Workspace");
+
+  ADS.remove(FIT_BASE_NAME + "_Workspace");
+  ADS.remove(FIT_BASE_NAME + "_Parameters");
+  ADS.remove(FIT_BASE_NAME + "_NormalisedCovarianceWorkspace");
+
+  return fitWorkspace;
 }
 
 void ALFAnalysisModel::calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) {

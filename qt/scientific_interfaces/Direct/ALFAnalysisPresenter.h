@@ -31,7 +31,7 @@ public:
 
   virtual void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) = 0;
 
-  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const runNumber) = 0;
+  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
@@ -53,7 +53,7 @@ public:
 
   void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) override;
 
-  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const runNumber) override;
+  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;

@@ -53,7 +53,7 @@ void ALFInstrumentPresenter::notifyShapeChanged() {
   m_model->setSelectedDetectors(m_view->componentInfo(), m_view->getSelectedDetectors());
 
   auto const workspace = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
-  m_analysisPresenter->setExtractedWorkspace(std::move(workspace), m_model->runNumber());
+  m_analysisPresenter->setExtractedWorkspace(workspace);
 }
 
 void ALFInstrumentPresenter::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
@@ -68,10 +68,6 @@ void ALFInstrumentPresenter::averageTube(Mantid::Geometry::IDetector_const_sptr 
   if (auto const twoTheta = m_model->averageTube(detector, numberOfTubes)) {
     m_analysisPresenter->notifyTubeAveraged(*twoTheta);
   }
-}
-
-bool ALFInstrumentPresenter::checkDataIsExtracted() const {
-  return m_analysisPresenter->numberOfTubes() > 0u && m_model->checkDataIsExtracted();
 }
 
 std::string ALFInstrumentPresenter::extractedWsName() const { return m_model->extractedWsName(); }

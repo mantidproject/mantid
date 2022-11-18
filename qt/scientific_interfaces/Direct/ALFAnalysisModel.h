@@ -23,10 +23,10 @@ class MANTIDQT_DIRECT_DLL IALFAnalysisModel {
 public:
   virtual ~IALFAnalysisModel() = default;
 
-  virtual std::optional<std::string> setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                                           std::size_t const runNumber) = 0;
+  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual bool isDataExtracted() const = 0;
 
-  virtual void doFit(std::string const &wsName, std::pair<double, double> const &range) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
   virtual void calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) = 0;
 
   virtual void setPeakCentre(double const centre) = 0;
@@ -47,10 +47,10 @@ class MANTIDQT_DIRECT_DLL ALFAnalysisModel final : public IALFAnalysisModel {
 public:
   ALFAnalysisModel();
 
-  std::optional<std::string> setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                                   std::size_t const runNumber) override;
+  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  bool isDataExtracted() const override;
 
-  void doFit(std::string const &wsName, std::pair<double, double> const &range) override;
+  Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
   void calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) override;
 
   void setPeakCentre(double const centre) override;
@@ -66,8 +66,7 @@ public:
   inline std::vector<double> allTwoThetas() const noexcept override { return m_twoThetas; };
 
 private:
-  std::string extractedWsName(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
-                              std::size_t const runNumber) const;
+  std::string extractedWsName(std::size_t const runNumber) const;
   Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,
                                                 std::pair<double, double> const &range);
 

@@ -42,8 +42,6 @@ public:
   virtual void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
   virtual void averageTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
 
-  virtual bool checkDataIsExtracted() const = 0;
-
   virtual std::string extractedWsName() const = 0;
 };
 
@@ -63,8 +61,6 @@ public:
 
   void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
   void averageTube(Mantid::Geometry::IDetector_const_sptr detector) override;
-
-  bool checkDataIsExtracted() const override;
 
   std::string extractedWsName() const override;
 

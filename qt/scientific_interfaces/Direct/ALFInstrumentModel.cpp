@@ -405,9 +405,4 @@ std::optional<double> ALFInstrumentModel::averageTube(Mantid::Geometry::IDetecto
   return newTwoTheta;
 }
 
-/*
- * Returns true if the option to average a tube should be shown.
- */
-bool ALFInstrumentModel::checkDataIsExtracted() const { return ADS.doesExist(extractedWsName()); }
-
 } // namespace MantidQt::CustomInterfaces

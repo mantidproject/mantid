@@ -61,15 +61,9 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube()));
   pickTab->addToContextMenu(m_extractAction, canExtractTube);
 
-  std::function<bool(std::map<std::string, bool>)> canAverageTube =
-      [&](std::map<std::string, bool> properties) -> bool {
-    return (m_presenter->checkDataIsExtracted() && properties.find("isTube")->second && hasCurve(properties));
-  };
-
   // set up add to average
   m_averageAction = new QAction("Add Tube To Average", this);
   connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube()));
-  pickTab->addToContextMenu(m_averageAction, canAverageTube);
 }
 
 QWidget *ALFInstrumentView::generateLoadWidget() {

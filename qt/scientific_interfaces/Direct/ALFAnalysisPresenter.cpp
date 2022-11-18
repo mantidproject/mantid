@@ -24,10 +24,10 @@ void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter 
   m_instrumentPresenter = presenter;
 }
 
-void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                                                 std::size_t const runNumber) {
-  if (auto const adsName = m_model->setExtractedWorkspace(std::move(workspace), runNumber)) {
-    m_view->addSpectrum(*adsName);
+void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->setExtractedWorkspace(workspace);
+  if (workspace) {
+    m_view->addSpectrum(workspace);
   }
 }
 
@@ -42,14 +42,13 @@ void ALFAnalysisPresenter::notifyFitClicked() {
     return;
   }
 
-  auto const extractedWsName = m_instrumentPresenter->extractedWsName();
   try {
-    m_model->doFit(extractedWsName, m_view->getRange());
-  } catch (...) {
-    m_view->displayWarning("Fit failed");
+    auto const fitWorkspace = m_model->doFit(m_view->getRange());
+    m_view->addFitSpectrum(fitWorkspace);
+  } catch (std::exception const &ex) {
+    m_view->displayWarning(ex.what());
   }
   updatePeakCentreInViewFromModel();
-  m_view->addFitSpectrum(extractedWsName + "_fits_Workspace");
 }
 
 void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
@@ -63,7 +62,7 @@ void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
 }
 
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
-  if (!m_instrumentPresenter->checkDataIsExtracted())
+  if (!m_model->isDataExtracted())
     return "Need to have extracted data to do a fit or estimate.";
   if (!checkPeakCentreIsWithinFitRange())
     return "The Peak Centre provided is outside the fit range.";
@@ -73,13 +72,13 @@ std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
 void ALFAnalysisPresenter::notifyTubeExtracted(double const twoTheta) {
   m_model->clearTwoThetas();
   m_model->addTwoTheta(twoTheta);
-  m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
+  // m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
   m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
 }
 
 void ALFAnalysisPresenter::notifyTubeAveraged(double const twoTheta) {
   m_model->addTwoTheta(twoTheta);
-  m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
+  // m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
   m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
 }
 

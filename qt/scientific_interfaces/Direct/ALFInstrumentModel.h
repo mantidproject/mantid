@@ -49,8 +49,6 @@ public:
   virtual std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
   virtual std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
                                             std::size_t const numberOfTubes) = 0;
-
-  virtual bool checkDataIsExtracted() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -74,8 +72,6 @@ public:
   std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
   std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
                                     std::size_t const numberOfTubes) override;
-
-  bool checkDataIsExtracted() const override;
 
 private:
   Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
