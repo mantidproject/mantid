@@ -482,12 +482,27 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDou
   std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
   std::set<int> acceptedIDs;
   if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
-    for (int i = static_cast<int>(NUMBER_MONITORS); i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS);
-         ++i)
-      acceptedIDs.insert(i);
+    for (auto index = static_cast<int>(NUMBER_MONITORS);
+         index < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++index)
+      acceptedIDs.insert(index);
+  }
+  std::vector<int> customDetectorIDs;
+  if (m_instName == "D2B" && !m_useCalibratedData) {
+    // this is the "Raw" case of D2B where data in NXS is filled in a 'snake' way: odd tubes are filled with
+    // data from the start, and the even ones from the end.
+    const auto pixelPerTube = data.dim2();
+    for (auto tubeNo = 0; tubeNo < data.dim1(); tubeNo++) {
+      for (auto pixelNo = 0; pixelNo < pixelPerTube; pixelNo++) {
+        int index = NUMBER_MONITORS + tubeNo * pixelPerTube + pixelNo; // direct filling order
+        if (tubeNo % 2 != 0)
+          index += (pixelPerTube - 1) - 2 * pixelNo; // inverted filling order
+        customDetectorIDs.push_back(index);
+      }
+    }
   }
   // Assign detector counts
-  LoadHelper::fillMovingWorkspace(m_outWorkspace, data, axis, NUMBER_MONITORS, acceptedIDs, dimOrder);
+  LoadHelper::fillMovingWorkspace(m_outWorkspace, data, axis, NUMBER_MONITORS, acceptedIDs, customDetectorIDs,
+                                  dimOrder);
 }
 
 /**
