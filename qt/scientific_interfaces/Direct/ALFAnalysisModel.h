@@ -23,11 +23,13 @@ class MANTIDQT_DIRECT_DLL IALFAnalysisModel {
 public:
   virtual ~IALFAnalysisModel() = default;
 
+  virtual void clear() = 0;
+
   virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual bool isDataExtracted() const = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
-  virtual void calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) = 0;
+  virtual void calculateEstimate(std::pair<double, double> const &range) = 0;
 
   virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
@@ -36,7 +38,6 @@ public:
 
   virtual std::size_t numberOfTubes() const = 0;
 
-  virtual void clearTwoThetas() = 0;
   virtual void addTwoTheta(double const twoTheta) = 0;
   virtual std::optional<double> averageTwoTheta() const = 0;
   virtual std::vector<double> allTwoThetas() const = 0;
@@ -47,11 +48,13 @@ class MANTIDQT_DIRECT_DLL ALFAnalysisModel final : public IALFAnalysisModel {
 public:
   ALFAnalysisModel();
 
+  void clear() override;
+
   void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   bool isDataExtracted() const override;
 
   Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
-  void calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) override;
+  void calculateEstimate(std::pair<double, double> const &range) override;
 
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
@@ -60,7 +63,6 @@ public:
 
   std::size_t numberOfTubes() const override;
 
-  void clearTwoThetas() override;
   void addTwoTheta(double const twoTheta) override;
   std::optional<double> averageTwoTheta() const override;
   inline std::vector<double> allTwoThetas() const noexcept override { return m_twoThetas; };

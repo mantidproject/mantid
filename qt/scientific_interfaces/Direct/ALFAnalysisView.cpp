@@ -160,6 +160,7 @@ std::pair<double, double> ALFAnalysisView::getRange() const {
 }
 
 void ALFAnalysisView::addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_plot->clear();
   m_plot->addSpectrum("Extracted Data", workspace, 0, Qt::black);
 }
 

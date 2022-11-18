@@ -116,7 +116,6 @@ public:
   void addToContextMenu(QAction *action, std::function<bool(std::map<std::string, bool>)> &actionCondition);
   QPushButton *getSelectTubeButton();
   void setPlotType(const IWPickPlotType type);
-  Mantid::Geometry::IDetector_const_sptr getSelectedDetector() const;
 
 public slots:
   void setTubeXUnits(int units);
@@ -265,7 +264,6 @@ public:
   void updatePlot();
   void clear();
   void savePlotToWorkspace();
-  Mantid::Geometry::IDetector_const_sptr getSelectedDetector() const;
 
   void setPlotType(const IWPickPlotType type) { m_plotType = type; }
   IWPickPlotType getPlotType() const { return m_plotType; }

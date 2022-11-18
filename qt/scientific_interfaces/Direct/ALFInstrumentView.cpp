@@ -14,31 +14,16 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
-#include <map>
 #include <string>
 
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
-
-namespace {
-
-bool hasCurve(std::map<std::string, bool> properties) {
-  auto const stored = properties.find("plotStored");
-  auto const curve = properties.find("hasCurve");
-  return (stored != properties.cend() && stored->second) || (curve != properties.cend() && curve->second);
-}
-
-std::function<bool(std::map<std::string, bool>)> canExtractTube = [](std::map<std::string, bool> properties) -> bool {
-  return (properties.find("isTube")->second && hasCurve(properties));
-};
-
-} // namespace
+#include <QString>
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentView::ALFInstrumentView(QWidget *parent)
-    : QWidget(parent), m_files(), m_instrumentWidget(), m_extractAction(), m_averageAction() {}
+ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_files(), m_instrumentWidget() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget =
@@ -53,17 +38,7 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
 
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->expandPlotPanel();
-
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
-
-  // set up extract single tube
-  m_extractAction = new QAction("Extract Single Tube", this);
-  connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube()));
-  pickTab->addToContextMenu(m_extractAction, canExtractTube);
-
-  // set up add to average
-  m_averageAction = new QAction("Add Tube To Average", this);
-  connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube()));
 }
 
 QWidget *ALFInstrumentView::generateLoadWidget() {
@@ -131,20 +106,6 @@ void ALFInstrumentView::selectWholeTube() {
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->setPlotType(MantidQt::MantidWidgets::IWPickPlotType::TUBE_INTEGRAL);
   pickTab->setTubeXUnits(MantidQt::MantidWidgets::IWPickXUnits::OUT_OF_PLANE_ANGLE);
-}
-
-void ALFInstrumentView::extractSingleTube() {
-  auto const pickTab = m_instrumentWidget->getPickTab();
-  pickTab->savePlotToWorkspace();
-
-  m_presenter->extractSingleTube(pickTab->getSelectedDetector());
-}
-
-void ALFInstrumentView::averageTube() {
-  auto const pickTab = m_instrumentWidget->getPickTab();
-  pickTab->savePlotToWorkspace();
-
-  m_presenter->averageTube(pickTab->getSelectedDetector());
 }
 
 void ALFInstrumentView::warningBox(std::string const &message) {

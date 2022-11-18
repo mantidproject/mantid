@@ -13,10 +13,6 @@
 #include <optional>
 #include <string>
 
-#include <QAction>
-#include <QPushButton>
-#include <QSplitter>
-#include <QString>
 #include <QWidget>
 
 namespace Mantid::Geometry {
@@ -86,14 +82,10 @@ private slots:
   void fileLoaded();
   void notifyShapeChanged();
   void selectWholeTube();
-  void extractSingleTube();
-  void averageTube();
 
 private:
   API::FileFinderWidget *m_files;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
-  QAction *m_extractAction;
-  QAction *m_averageAction;
 
   IALFInstrumentPresenter *m_presenter;
 };

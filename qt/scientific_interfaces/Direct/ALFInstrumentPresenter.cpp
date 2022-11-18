@@ -34,7 +34,7 @@ void ALFInstrumentPresenter::loadRunNumber() {
     return;
   }
 
-  m_analysisPresenter->clearTwoThetas();
+  m_analysisPresenter->clear();
   if (auto const message = loadAndTransform(*filepath)) {
     m_view->warningBox(*message);
   }
@@ -55,21 +55,5 @@ void ALFInstrumentPresenter::notifyShapeChanged() {
   auto const workspace = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
   m_analysisPresenter->setExtractedWorkspace(workspace);
 }
-
-void ALFInstrumentPresenter::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
-  if (auto const twoTheta = m_model->extractSingleTube(detector)) {
-    m_analysisPresenter->notifyTubeExtracted(*twoTheta);
-    m_analysisPresenter->notifyUpdateEstimateClicked();
-  }
-}
-
-void ALFInstrumentPresenter::averageTube(Mantid::Geometry::IDetector_const_sptr detector) {
-  auto const numberOfTubes = m_analysisPresenter->numberOfTubes();
-  if (auto const twoTheta = m_model->averageTube(detector, numberOfTubes)) {
-    m_analysisPresenter->notifyTubeAveraged(*twoTheta);
-  }
-}
-
-std::string ALFInstrumentPresenter::extractedWsName() const { return m_model->extractedWsName(); }
 
 } // namespace MantidQt::CustomInterfaces

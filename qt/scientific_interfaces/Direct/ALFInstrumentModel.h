@@ -35,9 +35,7 @@ public:
 
   virtual std::optional<std::string> loadAndTransform(std::string const &filename) = 0;
 
-  virtual std::string instrumentName() const = 0;
   virtual std::string loadedWsName() const = 0;
-  virtual std::string extractedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
   virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
@@ -45,10 +43,6 @@ public:
 
   virtual Mantid::API::MatrixWorkspace_sptr
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const = 0;
-
-  virtual std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
-  virtual std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
-                                            std::size_t const numberOfTubes) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -58,9 +52,7 @@ public:
 
   std::optional<std::string> loadAndTransform(const std::string &filename) override;
 
-  inline std::string instrumentName() const noexcept override { return "ALF"; }
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
-  std::string extractedWsName() const override;
   std::size_t runNumber() const override;
 
   void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
@@ -69,12 +61,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const override;
 
-  std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
-  std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
-                                    std::size_t const numberOfTubes) override;
-
 private:
-  Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
   void collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
                         std::vector<double> &y, std::vector<double> &e) const;
   void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,

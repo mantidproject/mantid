@@ -37,12 +37,9 @@ public:
   virtual void notifyFitClicked() = 0;
   virtual void notifyUpdateEstimateClicked() = 0;
 
-  virtual void notifyTubeExtracted(double const twoTheta) = 0;
-  virtual void notifyTubeAveraged(double const twoTheta) = 0;
-
   virtual std::size_t numberOfTubes() const = 0;
 
-  virtual void clearTwoThetas() = 0;
+  virtual void clear() = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresenter {
@@ -59,17 +56,17 @@ public:
   void notifyFitClicked() override;
   void notifyUpdateEstimateClicked() override;
 
-  void notifyTubeExtracted(double const twoTheta) override;
-  void notifyTubeAveraged(double const twoTheta) override;
-
   std::size_t numberOfTubes() const override;
 
-  void clearTwoThetas() override;
+  void clear() override;
 
 private:
   std::optional<std::string> validateFitValues() const;
   bool checkPeakCentreIsWithinFitRange() const;
+
+  void updateViewFromModel();
   void updatePeakCentreInViewFromModel();
+  void updateTwoThetaInViewFromModel();
 
   IALFInstrumentPresenter *m_instrumentPresenter;
 

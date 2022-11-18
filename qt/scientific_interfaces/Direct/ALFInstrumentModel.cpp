@@ -227,9 +227,7 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspa
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_detectorIndices() {
-  loadEmptyInstrument(instrumentName(), loadedWsName());
-}
+ALFInstrumentModel::ALFInstrumentModel() : m_detectorIndices() { loadEmptyInstrument("ALF", loadedWsName()); }
 
 /*
  * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
@@ -249,10 +247,6 @@ std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string cons
 
   ADS.addOrReplace(loadedWsName(), loadedWorkspace);
   return std::nullopt;
-}
-
-std::string ALFInstrumentModel::extractedWsName() const {
-  return "extractedTubes_" + instrumentName() + std::to_string(runNumber());
 }
 
 /*
@@ -353,56 +347,6 @@ std::size_t ALFInstrumentModel::numberOfTubes(MantidQt::MantidWidgets::Instrumen
     return 0u;
   }
   return static_cast<std::size_t>(m_detectorIndices.size() / nDetectorsPerTube);
-}
-
-/*
- * Extracts a single tube. Increments the average counter.
- */
-std::optional<double> ALFInstrumentModel::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
-  if (auto const extractedWorkspace = retrieveSingleTube()) {
-    ADS.addOrReplace(extractedWsName(), extractedWorkspace);
-    return getTwoTheta(extractedWorkspace->getInstrument(), detector);
-  }
-  return std::nullopt;
-}
-
-MatrixWorkspace_sptr ALFInstrumentModel::retrieveSingleTube() {
-  if (!ADS.doesExist(CURVES))
-    return nullptr;
-
-  // Get a handle on the curve workspace and then delete it from the ADS
-  auto const curveWorkspace = ADS.retrieveWS<MatrixWorkspace>(CURVES);
-  ADS.remove(CURVES);
-
-  if (auto const scaleFactor = xConversionFactor(curveWorkspace)) {
-    // Convert to degrees if the XAxis is an angle in radians, and then convert to histograms.
-    return convertToHistogram(scaleX(curveWorkspace, *scaleFactor));
-  }
-  return nullptr;
-}
-
-std::optional<double> ALFInstrumentModel::averageTube(Mantid::Geometry::IDetector_const_sptr detector,
-                                                      std::size_t const numberOfTubes) {
-  // Multiply up the current average
-  auto existingAverageTube = ADS.retrieveWS<MatrixWorkspace>(extractedWsName());
-  existingAverageTube *= double(numberOfTubes);
-
-  // Get the recently selected tube, and rebin to match previous extracted workspace
-  auto newExtractedWorkspace = retrieveSingleTube();
-  if (!newExtractedWorkspace) {
-    return std::nullopt;
-  }
-  auto const newTwoTheta = getTwoTheta(newExtractedWorkspace->getInstrument(), detector);
-  newExtractedWorkspace = rebinToWorkspace(newExtractedWorkspace, existingAverageTube);
-
-  // Do an average
-  auto averagedWorkspace = plus(newExtractedWorkspace, existingAverageTube);
-  averagedWorkspace->mutableY(0) /= double(numberOfTubes + 1u);
-
-  // Add the result back into the ADS
-  ADS.addOrReplace(extractedWsName(), averagedWorkspace);
-
-  return newTwoTheta;
 }
 
 } // namespace MantidQt::CustomInterfaces

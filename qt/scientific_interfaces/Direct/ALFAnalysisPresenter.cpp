@@ -28,7 +28,10 @@ void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sp
   m_model->setExtractedWorkspace(workspace);
   if (workspace) {
     m_view->addSpectrum(workspace);
+    // TODO pass two theta through to the model
+    m_model->addTwoTheta(2.2);
   }
+  updateViewFromModel();
 }
 
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
@@ -54,7 +57,7 @@ void ALFAnalysisPresenter::notifyFitClicked() {
 void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
   auto const validationMessage = validateFitValues();
   if (!validationMessage) {
-    m_model->calculateEstimate(m_instrumentPresenter->extractedWsName(), m_view->getRange());
+    m_model->calculateEstimate(m_view->getRange());
     updatePeakCentreInViewFromModel();
   } else {
     m_view->displayWarning(*validationMessage);
@@ -69,24 +72,11 @@ std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
   return std::nullopt;
 }
 
-void ALFAnalysisPresenter::notifyTubeExtracted(double const twoTheta) {
-  m_model->clearTwoThetas();
-  m_model->addTwoTheta(twoTheta);
-  // m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
-}
-
-void ALFAnalysisPresenter::notifyTubeAveraged(double const twoTheta) {
-  m_model->addTwoTheta(twoTheta);
-  // m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
-}
-
 std::size_t ALFAnalysisPresenter::numberOfTubes() const { return m_model->numberOfTubes(); }
 
-void ALFAnalysisPresenter::clearTwoThetas() {
-  m_model->clearTwoThetas();
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
+void ALFAnalysisPresenter::clear() {
+  m_model->clear();
+  updateViewFromModel();
 }
 
 bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
@@ -95,9 +85,18 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   return range.first < peakCentre && peakCentre < range.second;
 }
 
+void ALFAnalysisPresenter::updateViewFromModel() {
+  updatePeakCentreInViewFromModel();
+  updateTwoThetaInViewFromModel();
+}
+
 void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
   m_view->setPeakCentre(m_model->peakCentre());
   m_view->setPeakCentreStatus(m_model->fitStatus());
+}
+
+void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
 }
 
 } // namespace MantidQt::CustomInterfaces
