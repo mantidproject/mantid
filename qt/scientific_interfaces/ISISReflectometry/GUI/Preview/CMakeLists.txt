@@ -18,7 +18,7 @@ set(PREVIEW_INC_FILES
 
 set(PREVIEW_MOC_FILES QtPreviewView.h)
 
-set(PREVIEW_UI_FILES PreviewWidget.ui)
+set(PREVIEW_UI_FILES PreviewWidget.ui PreviewDockedWidgets.ui)
 
 prepend(PREVIEW_SRC_FILES GUI/Preview ${PREVIEW_SRC_FILES})
 prepend(PREVIEW_INC_FILES GUI/Preview ${PREVIEW_INC_FILES})
