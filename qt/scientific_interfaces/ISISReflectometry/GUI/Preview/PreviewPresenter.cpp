@@ -108,6 +108,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   if (hasLinearDetector(ws)) {
     m_view->resetInstView();
+    m_view->setInstViewToolbarEnabled(false);
     m_model->setSummedWs(ws);
     notifySumBanksCompleted();
   } else {
