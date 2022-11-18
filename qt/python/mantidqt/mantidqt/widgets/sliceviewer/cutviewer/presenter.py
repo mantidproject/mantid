@@ -35,7 +35,7 @@ class CutViewerPresenter:
     def reset_view_table(self):
         self.view.set_bin_params(
             *self.model.get_default_bin_params(self._sliceview_presenter.get_dimensions(),
-                                               self._sliceview_presenter.get_axes_limits(),
+                                               self._sliceview_presenter.get_data_limits_to_fill_current_axes(),
                                                self._sliceview_presenter.get_sliceinfo().z_value))
 
     def validate_bin_params(self, irow, icol):

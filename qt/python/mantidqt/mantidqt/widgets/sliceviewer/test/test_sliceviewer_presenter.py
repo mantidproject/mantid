@@ -80,7 +80,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.help_button = mock.Mock()
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
-        data_view.get_axes_limits.return_value = None
+        data_view.get_data_limits_to_fill_current_axes.return_value = None
         return data_view
 
     def setUp(self):
