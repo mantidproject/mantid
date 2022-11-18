@@ -100,11 +100,14 @@ void ALFAnalysisModel::clear() {
   m_twoThetas.clear();
 }
 
-void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                             std::vector<double> const &twoThetas) {
   m_extractedWorkspace = workspace;
+  m_twoThetas = twoThetas;
   m_fitStatus = "";
-  m_twoThetas.clear();
 }
+
+Mantid::API::MatrixWorkspace_sptr ALFAnalysisModel::extractedWorkspace() const { return m_extractedWorkspace; }
 
 bool ALFAnalysisModel::isDataExtracted() const { return m_extractedWorkspace != nullptr; }
 
@@ -164,8 +167,6 @@ double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
 
 std::size_t ALFAnalysisModel::numberOfTubes() const { return m_twoThetas.size(); }
-
-void ALFAnalysisModel::addTwoTheta(double const twoTheta) { m_twoThetas.emplace_back(twoTheta); }
 
 std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
   if (m_twoThetas.empty()) {

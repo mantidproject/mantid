@@ -31,7 +31,8 @@ public:
 
   virtual void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) = 0;
 
-  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                     std::vector<double> const &twoThetas) = 0;
 
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
@@ -50,7 +51,8 @@ public:
 
   void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) override;
 
-  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                             std::vector<double> const &twoThetas) override;
 
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
@@ -65,6 +67,7 @@ private:
   bool checkPeakCentreIsWithinFitRange() const;
 
   void updateViewFromModel();
+  void updatePlotInViewFromModel();
   void updatePeakCentreInViewFromModel();
   void updateTwoThetaInViewFromModel();
 

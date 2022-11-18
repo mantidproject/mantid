@@ -24,13 +24,9 @@ void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter 
   m_instrumentPresenter = presenter;
 }
 
-void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) {
-  m_model->setExtractedWorkspace(workspace);
-  if (workspace) {
-    m_view->addSpectrum(workspace);
-    // TODO pass two theta through to the model
-    m_model->addTwoTheta(2.2);
-  }
+void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                                 std::vector<double> const &twoThetas) {
+  m_model->setExtractedWorkspace(workspace, twoThetas);
   updateViewFromModel();
 }
 
@@ -86,9 +82,12 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
 }
 
 void ALFAnalysisPresenter::updateViewFromModel() {
+  updatePlotInViewFromModel();
   updatePeakCentreInViewFromModel();
   updateTwoThetaInViewFromModel();
 }
+
+void ALFAnalysisPresenter::updatePlotInViewFromModel() { m_view->addSpectrum(m_model->extractedWorkspace()); }
 
 void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
   m_view->setPeakCentre(m_model->peakCentre());

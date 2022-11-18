@@ -13,6 +13,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace Mantid::Geometry {
@@ -41,7 +42,7 @@ public:
   virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
                                     std::vector<std::size_t> const &detectorIndices) = 0;
 
-  virtual Mantid::API::MatrixWorkspace_sptr
+  virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const = 0;
 };
 
@@ -58,13 +59,13 @@ public:
   void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
                             std::vector<std::size_t> const &detectorIndices) override;
 
-  Mantid::API::MatrixWorkspace_sptr
+  std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const override;
 
 private:
   void collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
-                        std::vector<double> &y, std::vector<double> &e) const;
-  void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
+                        std::vector<double> &y, std::vector<double> &e, std::vector<double> &twoThetas) const;
+  void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe, std::vector<double> &twoThetas,
                           MantidQt::MantidWidgets::InstrumentActor const &actor,
                           Mantid::API::MatrixWorkspace_const_sptr const &workspace,
                           Mantid::Geometry::ComponentInfo const &componentInfo,

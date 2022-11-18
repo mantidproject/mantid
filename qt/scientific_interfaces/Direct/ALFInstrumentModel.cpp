@@ -27,7 +27,6 @@ using namespace Mantid::API;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
-std::string const CURVES = "Curves";
 std::string const NOT_IN_ADS = "not_stored_in_ads";
 
 bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
@@ -45,6 +44,19 @@ std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instru
   auto const source = instrument->getSource()->getPos();
 
   return detector->getTwoTheta(sample, sample - source) * 180.0 / M_PI;
+}
+
+void appendTwoThetaClosestToZero(std::vector<double> &twoThetas,
+                                 std::optional<std::pair<double, std::size_t>> &workspaceIndexClosestToZero,
+                                 MatrixWorkspace_const_sptr const &workspace,
+                                 Mantid::Geometry::Instrument_const_sptr instrument) {
+  if (workspaceIndexClosestToZero) {
+    auto const twoTheta = getTwoTheta(instrument, workspace->getDetector((*workspaceIndexClosestToZero).second));
+    if (twoTheta) {
+      twoThetas.emplace_back(*twoTheta);
+    }
+    workspaceIndexClosestToZero = std::nullopt;
+  }
 }
 
 /*
@@ -221,14 +233,15 @@ void ALFInstrumentModel::setSelectedDetectors(Mantid::Geometry::ComponentInfo co
   m_detectorIndices = findWholeTubeDetectors(componentInfo, detectorIndices);
 }
 
-MatrixWorkspace_sptr
+std::tuple<MatrixWorkspace_sptr, std::vector<double>>
 ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
+  std::vector<double> twoThetas;
   if (m_detectorIndices.empty()) {
-    return nullptr;
+    return {nullptr, twoThetas};
   }
 
   std::vector<double> x, y, e;
-  collectXAndYData(actor, x, y, e);
+  collectXAndYData(actor, x, y, e, twoThetas);
 
   // Create workspace containing the out of plane angle data in one spectrum
   auto workspace = createWorkspace(actor.getWorkspace()->getName(), x, y, e, 1u, "Out of plane angle");
@@ -236,11 +249,12 @@ ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::In
   workspace = scaleX(workspace, 180.0 / M_PI);
   // Rebin and average the workspace based on the number of tubes that are selected
   workspace = rebunch(workspace, numberOfTubes(actor));
-  return workspace;
+  return {workspace, twoThetas};
 }
 
 void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
-                                          std::vector<double> &y, std::vector<double> &e) const {
+                                          std::vector<double> &y, std::vector<double> &e,
+                                          std::vector<double> &twoThetas) const {
   auto const &componentInfo = actor.componentInfo();
   auto const &detectorInfo = actor.detectorInfo();
 
@@ -248,7 +262,7 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::InstrumentAct
 
   // Collect and sort Y and E values by X
   std::map<double, double> xymap, xemap;
-  collectAndSortYByX(xymap, xemap, actor, workspace, componentInfo, detectorInfo);
+  collectAndSortYByX(xymap, xemap, twoThetas, actor, workspace, componentInfo, detectorInfo);
 
   x.reserve(xymap.size());
   y.reserve(xymap.size());
@@ -259,15 +273,18 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::InstrumentAct
 }
 
 void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
+                                            std::vector<double> &twoThetas,
                                             MantidQt::MantidWidgets::InstrumentActor const &actor,
                                             MatrixWorkspace_const_sptr const &workspace,
                                             Mantid::Geometry::ComponentInfo const &componentInfo,
                                             Mantid::Geometry::DetectorInfo const &detectorInfo) const {
   auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor);
   auto const samplePosition = componentInfo.samplePosition();
+  auto const instrument = actor.getInstrument();
 
   Mantid::Kernel::V3D normal;
   std::size_t imin, imax;
+  std::optional<std::pair<double, std::size_t>> workspaceIndexClosestToZeroX = std::nullopt;
   for (auto i = 0u; i < m_detectorIndices.size(); ++i) {
     auto const detectorIndex = m_detectorIndices[i];
     auto const workspaceIndex = actor.getWorkspaceIndex(detectorIndex);
@@ -275,16 +292,24 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
     if (i % nDetectorsPerTube == 0) {
       normal = normalize(componentInfo.position(m_detectorIndices[i + 1]) - componentInfo.position(detectorIndex));
       actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
+      appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
     }
 
     if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
         componentInfo.isDetector(detectorIndex)) {
 
-      auto const xvalue = calculateOutOfPlaneAngle(detectorInfo.position(detectorIndex), samplePosition, normal);
-      xy[xvalue] = calculateYCounts(workspace->y(workspaceIndex), imin, imax);
-      xe[xvalue] = calculateError(workspace->e(workspaceIndex), imin, imax);
+      auto const xValue = calculateOutOfPlaneAngle(detectorInfo.position(detectorIndex), samplePosition, normal);
+      xy[xValue] = calculateYCounts(workspace->y(workspaceIndex), imin, imax);
+      xe[xValue] = calculateError(workspace->e(workspaceIndex), imin, imax);
+
+      auto const absXValue = std::abs(xValue);
+      if (!workspaceIndexClosestToZeroX || absXValue < (*workspaceIndexClosestToZeroX).first) {
+        workspaceIndexClosestToZeroX = std::make_pair(absXValue, workspaceIndex);
+      }
     }
   }
+
+  appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
 }
 
 std::size_t ALFInstrumentModel::numberOfDetectorsPerTube(MantidQt::MantidWidgets::InstrumentActor const &actor) const {

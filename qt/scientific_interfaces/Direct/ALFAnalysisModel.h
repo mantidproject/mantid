@@ -25,7 +25,9 @@ public:
 
   virtual void clear() = 0;
 
-  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                     std::vector<double> const &twoThetas) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr extractedWorkspace() const = 0;
   virtual bool isDataExtracted() const = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
@@ -38,7 +40,6 @@ public:
 
   virtual std::size_t numberOfTubes() const = 0;
 
-  virtual void addTwoTheta(double const twoTheta) = 0;
   virtual std::optional<double> averageTwoTheta() const = 0;
   virtual std::vector<double> allTwoThetas() const = 0;
 };
@@ -50,7 +51,9 @@ public:
 
   void clear() override;
 
-  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                             std::vector<double> const &twoThetas) override;
+  Mantid::API::MatrixWorkspace_sptr extractedWorkspace() const override;
   bool isDataExtracted() const override;
 
   Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
@@ -63,7 +66,6 @@ public:
 
   std::size_t numberOfTubes() const override;
 
-  void addTwoTheta(double const twoTheta) override;
   std::optional<double> averageTwoTheta() const override;
   inline std::vector<double> allTwoThetas() const noexcept override { return m_twoThetas; };
 
