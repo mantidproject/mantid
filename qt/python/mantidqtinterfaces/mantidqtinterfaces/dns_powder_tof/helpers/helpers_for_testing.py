@@ -195,7 +195,7 @@ def get_fake_tof_binning():  # matches data 1,2 above
     }
 
 
-def get_fileselector_param_dict():
+def get_file_selector_param_dict():
     return {
         'paths': {
             'data_dir': 'C:/data',
