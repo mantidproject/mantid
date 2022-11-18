@@ -479,7 +479,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDou
   }
 
   // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
-  std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - pixel - tube
+  std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
   std::set<int> acceptedIDs;
   if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
     for (int i = static_cast<int>(NUMBER_MONITORS); i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS);
