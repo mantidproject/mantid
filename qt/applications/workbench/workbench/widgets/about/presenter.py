@@ -16,7 +16,7 @@ from mantidqt.widgets import manageuserdirectories  # noqa
 
 class AboutPresenter(object):
 
-    USAGE_REPORTING = "usagereports.enabled"
+    USAGE_REPORTING = "usagereports.enabled"z
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"
     PREVIOUS_VERSION = "PreviousVersion"
