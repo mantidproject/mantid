@@ -36,18 +36,6 @@ bool isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) {
   return workspace->getAxis(0)->unit()->unitID() == "dSpacing";
 }
 
-std::optional<double> xConversionFactor(MatrixWorkspace_const_sptr const &workspace) {
-  if (!workspace)
-    return std::nullopt;
-
-  if (const auto axis = workspace->getAxis(0)) {
-    const auto unit = axis->unit()->unitID();
-    const auto label = std::string(axis->unit()->label());
-    return unit == "Phi" || label == "Out of plane angle" ? 180.0 / M_PI : 1.0;
-  }
-  return std::nullopt;
-}
-
 std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
                                   Mantid::Geometry::IDetector_const_sptr detector) {
   if (!instrument || !detector) {
@@ -152,31 +140,6 @@ MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, std::si
   return outputWorkspace;
 }
 
-MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
-                                      MatrixWorkspace_sptr const &workspaceToMatch) {
-  auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("WorkspaceToRebin", workspaceToRebin);
-  alg->setProperty("WorkspaceToMatch", workspaceToMatch);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr plus(MatrixWorkspace_sptr const &lhsWorkspace, MatrixWorkspace_sptr const &rhsWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("Plus");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("LHSWorkspace", lhsWorkspace);
-  alg->setProperty("RHSWorkspace", rhsWorkspace);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
 MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
   auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   alg->initialize();
@@ -206,17 +169,6 @@ MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double c
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("Factor", factor);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("ConvertToHistogram");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
@@ -284,7 +236,6 @@ ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::In
   workspace = scaleX(workspace, 180.0 / M_PI);
   // Rebin and average the workspace based on the number of tubes that are selected
   workspace = rebunch(workspace, numberOfTubes(actor));
-  workspace = convertToHistogram(workspace);
   return workspace;
 }
 
