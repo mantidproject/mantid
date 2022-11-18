@@ -87,6 +87,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
+            "FilteredInput",
+            False,
+            doc="Specifies whether the input workspace was obtained from event filtering.",
+        )
+
+        self.declareProperty(
             MatrixWorkspaceProperty(
                 "BackgroundWorkspace",
                 "",
@@ -172,17 +178,32 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         data = self._expand_groups()
+
         bkg = self.getProperty("BackgroundWorkspace").valueAsStr  # same background for all
         cal = self.getProperty("CalibrationWorkspace").value  # same calibration for all
         numberBins = self.getProperty("NumberBins").value
         outWS = self.getPropertyValue("OutputWorkspace")
         summing = self.getProperty("Sum").value  # [Yes or No]
+        filtered_eve = self.getProperty("FilteredInput").value  # [Yes or No]
 
         # convert all of the input workspaces into spectrum of "target" units (generally angle)
         data, masks = self._convert_data(data)
 
         # determine x-range
         xMin, xMax = self._locate_global_xlimit(data)
+
+        if filtered_eve:
+            ExtractMask(InputWorkspace=cal, OutputWorkspace="mask_shared", EnableLogging=False)
+            if cal is not None:
+                _ws_cal_resampled = self._resample_calibration(data[0], "mask_shared", xMin, xMax)
+            else:
+                _ws_cal_resampled = None
+
+            if bkg:
+                _ws_bkg_resampled = self._resample_background(bkg, data[0], "mask_shared",
+                                                              xMin, xMax, _ws_cal_resampled)
+            else:
+                _ws_bkg_resampled = None
 
         # BEGIN_FOR: prcess_spectra
         for n, (_wsn, _mskn) in enumerate(zip(data, masks)):
@@ -196,17 +217,20 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-            # calibration
-            if cal is not None:
-                _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
+            # TODO Add in if statement for `FilteredInputs`
+            if not filtered_eve:
+                if cal is not None:
+                    _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
+                else:
+                    _ws_cal_resampled = None
+
+            if _ws_cal_resampled is not None:
                 Divide(
                     LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_cal_resampled,
                     OutputWorkspace=_wsn,
                     EnableLogging=False,
                 )
-            else:
-                _ws_cal_resampled = None
 
             Scale(
                 InputWorkspace=_wsn,
@@ -216,9 +240,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             )
 
             # background
-            if bkg:
-                _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled)
+            if not filtered_eve:
+                if bkg:
+                    _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin,
+                                                                  xMax, _ws_cal_resampled)
+                else:
+                    _ws_bkg_resampled = None
 
+            if _ws_bkg_resampled is not None:
                 Minus(
                     LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_bkg_resampled,
@@ -307,17 +336,24 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         target = self.getProperty("Target").value
         wavelength = self.getProperty("Wavelength").value
         e_fixed = UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)
+        filtered_eve = self.getProperty("FilteredInput").value
 
-        ExtractUnmaskedSpectra(
-            InputWorkspace=workspace_in,
-            OutputWorkspace=workspace_out,
-            MaskWorkspace=mask,
-            EnableLogging=False,
-        )
+        if instrument_donor or not filtered_eve:
+            ExtractUnmaskedSpectra(
+                InputWorkspace=workspace_in,
+                OutputWorkspace=workspace_out,
+                MaskWorkspace=mask,
+                EnableLogging=False,
+            )
 
-        if isinstance(mtd[workspace_out], IEventWorkspace):
+        if instrument_donor:
+            wksp_tmp = workspace_out
+        else:
+            wksp_tmp = workspace_in
+
+        if isinstance(mtd[wksp_tmp], IEventWorkspace):
             Integration(
-                InputWorkspace=workspace_out,
+                InputWorkspace=wksp_tmp,
                 OutputWorkspace=workspace_out,
                 EnableLogging=False,
             )
@@ -329,13 +365,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-        ConvertSpectrumAxis(
-            InputWorkspace=workspace_out,
-            OutputWorkspace=workspace_out,
-            Target=target,
-            EFixed=e_fixed,
-            EnableLogging=False,
-        )
+        if not filtered_eve:
+            ConvertSpectrumAxis(
+                InputWorkspace=workspace_out,
+                OutputWorkspace=workspace_out,
+                Target=target,
+                EFixed=e_fixed,
+                EnableLogging=False,
+            )
 
         # this checks for any duplicated values in target axis, if
         # so then group them together
