@@ -54,8 +54,6 @@ constexpr double D20_PIXEL_SIZE = 0.1;
 constexpr double RAD_TO_DEG = 180. / M_PI;
 // A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
 constexpr double WAVE_TO_E = 81.8;
-// Number of pixels in the tubes for D2B
-constexpr size_t D2B_NUMBER_PIXELS_IN_TUBES = 128;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
