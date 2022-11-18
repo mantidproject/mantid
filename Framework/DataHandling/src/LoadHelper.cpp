@@ -588,13 +588,19 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
  * @param xAxis X axis values to be assigned to each spectrum
  * @param initialSpectrum Initial spectrum number, optional and defaults to 0
  * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
+ * @param customDetectorIDs Vector of custom detector IDs to replace the default detectorID calculation, defaults to
+ * empty (default calculation)
  * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
  * tube-pixel-channel order
  */
 void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
                                      const std::vector<double> &xAxis, int initialSpectrum,
                                      const std::set<int> &acceptedDetectorIDs,
+                                     const std::vector<int> &customDetectorIDs,
                                      const std::tuple<short, short, short> &axisOrder) {
+
+  const auto useCustomSpectraMap = customDetectorIDs.size() != 0;
+  const auto useAcceptedDetectorIDs = acceptedDetectorIDs.size() != 0;
 
   std::array dims = {data.dim0(), data.dim1(), data.dim2()};
   const auto nTubes = dims[std::get<0>(axisOrder)];
@@ -605,16 +611,20 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
     for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
       auto currentDetector = initialSpectrum + tube_no * nPixels + pixel_no;
-      if (acceptedDetectorIDs.size() != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
-                                                       currentDetector) == acceptedDetectorIDs.end()) {
+      if (useAcceptedDetectorIDs && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                              currentDetector) == acceptedDetectorIDs.end()) {
         nSkipped++;
         continue;
       }
       currentDetector -= nSkipped;
-      auto currentSpectrum = currentDetector * nScans;
+      int currentSpectrum;
+      if (useCustomSpectraMap)
+        currentSpectrum = customDetectorIDs[currentDetector - initialSpectrum];
+      else
+        currentSpectrum = currentDetector;
+      currentSpectrum *= nScans;
       for (auto channel_no = 0; channel_no < nScans; ++channel_no) {
-        int spectrumValue;
-        spectrumValue = data(channel_no, tube_no, pixel_no);
+        auto spectrumValue = data(channel_no, tube_no, pixel_no);
         ws->mutableY(currentSpectrum) = spectrumValue;
         ws->mutableE(currentSpectrum) = sqrt(spectrumValue);
         ws->mutableX(currentSpectrum) = xAxis;
