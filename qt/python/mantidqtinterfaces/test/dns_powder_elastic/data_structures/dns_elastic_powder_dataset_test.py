@@ -5,21 +5,16 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-"""
-Class which loads and stores a single DNS datafile in a dictionary.
-"""
-
 import unittest
 import os
 from unittest.mock import patch
-from unittest import mock
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
     ObjectDict
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import \
     DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
-    get_file_selector_fulldat
+    get_file_selector_full_data
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import (
     automatic_two_theta_binning, get_two_theta_step, round_step,
@@ -32,11 +27,11 @@ from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_da
 class DNSDatasetTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.fulldata = get_file_selector_fulldat()['full_data']
-        cls.standarddata = get_file_selector_fulldat()['standard_data']
-        cls.ds = DNSElasticDataset(data=cls.fulldata, path='C:/123', is_sample=True)
-        cls.datadic = {'4p1K_map': {'path': 'C:/123\\service',
-                                    'z_nsf': [788058]}}
+        cls.full_data = get_file_selector_full_data()['full_data']
+        cls.standard_data = get_file_selector_full_data()['standard_data_tree_model']
+        cls.ds = DNSElasticDataset(data=cls.full_data, path='C:/123', is_sample=True)
+        cls.data_dic = {'4p1K_map': {'path': 'C:/123\\service',
+                                     'z_nsf': [788058]}}
 
     def setUp(self):
         self.ds.data_dic = {'4p1K_map': {'path': 'C:/123\\service',
@@ -48,135 +43,119 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertTrue(self.ds.is_sample)
         self.assertTrue(hasattr(self.ds, 'banks'))
         self.assertTrue(hasattr(self.ds, 'is_sample'))
-        self.assertTrue(hasattr(self.ds, 'script_name'))
         self.assertTrue(hasattr(self.ds, 'fields'))
-        self.assertTrue(hasattr(self.ds, 'two_theta'))
         self.assertTrue(hasattr(self.ds, 'omega'))
         self.assertTrue(hasattr(self.ds, 'data_dic'))
         self.assertIsInstance(self.ds.data_dic, dict)
 
     #
     def test_format_dataset(self):
-        testv = self.ds.format_dataset()
-        self.assertEqual(testv, "{\n    '4p1K_map' : { 'path' : 'C:/123\\serv"
-                                "ice',\n                  'z_nsf' : [788058]}"
+        test_v = self.ds.format_dataset()
+        self.assertEqual(test_v, "{\n    '4p1K_map': {'path': 'C:/123\\serv"
+                                "ice',\n                 'z_nsf': [788058]}"
                                 ",\n}")
 
     def test_create_subtract(self):
-        testv = self.ds.create_subtract()
-        self.assertEqual(testv, ['4p1K_map_z_nsf'])
+        test_v = self.ds.create_subtract()
+        self.assertEqual(test_v, ['4p1K_map_z_nsf'])
 
-    @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset.'
-           'interpolate_standard')
-    def test_interpolate_standard(self, mock_ip):
-        mock_ip.return_value = {}, False
-        mock_parent = mock.Mock()
-        self.ds.interpolate_standard([-9], '123', mock_parent)
-        self.assertEqual(self.ds.data_dic, {})
-
-        mock_ip.assert_called_once_with(self.datadic, [-9], '123')
-        mock_parent.raise_error.assert_not_called()
-        mock_ip.return_value = {}, True
-        self.ds.interpolate_standard([-9], '123', mock_parent)
-        mock_parent.raise_error.assert_called_once()
-
-    def test_get_nb_banks(self):
-        testv = self.ds.get_number_banks(sample_type='4p1K_map')
-        self.assertEqual(testv, 1)
-        testv = self.ds.get_number_banks()
-        self.assertEqual(testv, 0)
+    def test_get_number_banks(self):
+        test_v = self.ds.get_number_banks(sample_type='4p1K_map')
+        self.assertEqual(test_v, 1)
+        test_v = self.ds.get_number_banks()
+        self.assertEqual(test_v, 0)
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
            'dns_elastic_powder_dataset.DNSBinning')
     def test_automatic_ttheta_binning(self, mock_binning):
-        testv = automatic_two_theta_binning(self.fulldata)
-        self.assertEqual(testv, mock_binning.return_value)
+        test_v = automatic_two_theta_binning(self.full_data)
+        self.assertEqual(test_v, mock_binning.return_value)
         mock_binning.assert_called_once_with(9.0, 124.0, 5.0)
 
-    def test_get_ttheta_step(self):
-        testv = get_two_theta_step([0, 1, 2])
-        self.assertEqual(testv, 1)
-        testv = get_two_theta_step([0, 0.01, 2])
-        self.assertEqual(testv, 2)
-        testv = get_two_theta_step([0, 0.33, 0.66, 1.33, 1.66])
-        self.assertEqual(testv, 1 / 3)
-        testv = get_two_theta_step([0, 0.49, 1.01])
-        self.assertEqual(testv, 1 / 2)
+    def test_get_two_theta_step(self):
+        test_v = get_two_theta_step([0, 1, 2])
+        self.assertEqual(test_v, 1)
+        test_v = get_two_theta_step([0, 0.01, 2])
+        self.assertEqual(test_v, 2)
+        test_v = get_two_theta_step([0, 0.66, 0.99, 1.33, 1.66])
+        self.assertEqual(test_v, 5)
+        test_v = get_two_theta_step([0, 0.49, 1.01])
+        self.assertEqual(test_v, 1 / 2)
 
     def test_round_step(self):
-        testv = round_step(1.99, rounding_limit=0.05)
-        self.assertEqual(testv, 2)
-        testv = round_step(0.38, rounding_limit=0.05)
-        self.assertEqual(testv, 1 / 3)
-        testv = round_step(0.47, rounding_limit=0.05)
-        self.assertEqual(testv, 1 / 2)
-        testv = round_step(0.1, rounding_limit=0.05)
-        self.assertEqual(testv, 0.1)
+        test_v = round_step(1.99, rounding_limit=0.05)
+        self.assertEqual(test_v, 2)
+        test_v = round_step(0.38, rounding_limit=0.05)
+        self.assertEqual(test_v, 0.4)
+        test_v = round_step(0.47, rounding_limit=0.05)
+        self.assertEqual(test_v, 1 / 2)
+        test_v = round_step(0.1, rounding_limit=0.05)
+        self.assertEqual(test_v, 0.1)
 
     def test_get_omega_step(self):
-        testv = get_omega_step([0, 1, 2])
-        self.assertEqual(testv, 1)
-        testv = get_omega_step([0.1, 0.2, 0.3])
-        self.assertAlmostEqual(testv, 0.1)
-        testv = get_omega_step([0.1, 0.2, 2.3])
-        self.assertAlmostEqual(testv, 0.1)
-        testv = get_omega_step([0.1])
-        self.assertEqual(testv, 1)
+        test_v = get_omega_step([0, 1, 2])
+        self.assertEqual(test_v, 1)
+        test_v = get_omega_step([0.1, 0.2, 0.3])
+        self.assertAlmostEqual(test_v, 0.1)
+        test_v = get_omega_step([0.1, 0.2, 2.3])
+        self.assertAlmostEqual(test_v, 0.1)
+        test_v = get_omega_step([0.1])
+        self.assertEqual(test_v, 1)
 
     def test_list_to_set(self):
-        testv = list_to_set([-4, -5, -3])
-        self.assertEqual(testv, [-5, -4, -3])
-        testv = list_to_set([-4, -5, -4.97])
-        self.assertEqual(testv, [-5, -4])
-        testv = list_to_set([-4.1])
-        self.assertEqual(testv, [-4.1])
-        testv = list_to_set([])
-        self.assertEqual(testv, [])
+        test_v = list_to_set([-4, -5, -3])
+        self.assertEqual(test_v, [-5, -4, -3])
+        test_v = list_to_set([-4, -5, -4.97])
+        self.assertEqual(test_v, [-5, -4])
+        test_v = list_to_set([-4.1])
+        self.assertEqual(test_v, [-4.1])
+        test_v = list_to_set([])
+        self.assertEqual(test_v, [])
 
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
            'dns_elastic_powder_dataset.DNSBinning')
     def test_automatic_omega_binning(self, mock_binning):
-        testv = automatic_omega_binning(self.fulldata)
-        self.assertEqual(testv, mock_binning.return_value)
+        test_v = automatic_omega_binning(self.full_data)
+        self.assertEqual(test_v, mock_binning.return_value)
         mock_binning.assert_called_once_with(304.0, 304.0, 1)
 
     def test_get_proposal_from_filename(self):
-        testv = get_proposal_from_filename('p678_000123.d_dat', 123)
-        self.assertEqual(testv, 'p678')
+        test_v = get_proposal_from_filename('p678_000123.d_dat', 123)
+        self.assertEqual(test_v, 'p678')
 
     def test_get_sample_fields(self):
-        testv = get_sample_fields(self.fulldata)
-        self.assertEqual(testv, {'z7_nsf'})
+        test_v = get_sample_fields(self.full_data)
+        self.assertEqual(test_v, {'z_nsf'})
 
     def test_create_dataset(self):
-        testv = create_dataset(self.fulldata, 'C:/123')
-        self.assertEqual(testv, {
+        test_v = create_dataset(self.full_data, 'C:/123')
+        self.assertEqual(test_v, {
             '4p1K_map': {'z_nsf': [788058], 'path': os.path.join('C:/123', 'service')}})
-        testv = create_dataset(self.standarddata, 'C:/123')
-        self.assertEqual(testv, {
+        test_v = create_dataset(self.standard_data, 'C:/123')
+        self.assertEqual(test_v, {
             'empty': {'x_nsf': [788058], 'path': os.path.join('C:/123', 'test_empty.d_dat')},
             'vana': {'z_nsf': [788058, 788059],
                      'path': os.path.join('C:/123', 'test_vana.d_dat')}})
 
     def test_get_datatype_from_sample_name(self):
-        testv = get_datatype_from_sample_name('_12 3')
-        self.assertEqual(testv, '123')
-        testv = get_datatype_from_sample_name('leer')
-        self.assertEqual(testv, 'empty')
+        test_v = get_datatype_from_sample_name('_12 3')
+        self.assertEqual(test_v, '123')
+        test_v = get_datatype_from_sample_name('leer')
+        self.assertEqual(test_v, 'empty')
 
     def test_remove_non_measured_fields(self):
-        testv = remove_non_measured_fields(self.standarddata, ['x_sf'])
-        self.assertEqual(testv, [])
-        testv = remove_non_measured_fields(self.standarddata, ['z7_nsf'])
-        self.assertIsInstance(testv, list)
-        self.assertEqual(len(testv), 2)
-        self.assertEqual(testv[0]['file_number'], 788058)
+        test_v = remove_non_measured_fields(self.standard_data, ['x_sf'])
+        self.assertEqual(test_v, [])
+        test_v = remove_non_measured_fields(self.standard_data, ['z7_nsf'])
+        self.assertIsInstance(test_v, list)
+        self.assertEqual(len(test_v), 2)
+        self.assertEqual(test_v[0]['file_number'], 788058)
 
     def test_get_bank_positions(self):
-        testv = get_bank_positions(self.fulldata)
-        self.assertEqual(testv, [-9])
-        testv = get_bank_positions(self.standarddata)
-        self.assertEqual(testv, [-9.04, -10])
+        test_v = get_bank_positions(self.full_data)
+        self.assertEqual(test_v, [-9])
+        test_v = get_bank_positions(self.standard_data)
+        self.assertEqual(test_v, [-9.04, -10])
 
 
 if __name__ == '__main__':

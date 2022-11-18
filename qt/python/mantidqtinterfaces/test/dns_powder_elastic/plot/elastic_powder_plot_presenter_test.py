@@ -5,6 +5,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 import unittest
 from unittest import mock
 from unittest.mock import patch
@@ -80,9 +81,9 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
             self.presenter._change_line_style)
         self.view.sig_log_change.connect.assert_called_once_with(
             self.presenter._change_log)
-        self.assertEqual(self.presenter._error_bar, 0)
+        self.assertEqual(self.presenter._error_bar, 2)
         self.assertEqual(self.presenter._grid_state, 0)
-        self.assertEqual(self.presenter._line_style, 0)
+        self.assertEqual(self.presenter._line_style, 2)
 
     def test_change_log(self):
         self.presenter._change_log(True)
@@ -96,24 +97,24 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
            'DNSElasticPowderPlotPresenter._plot')
     def test_change_linestyle(self, mock_plot):
         self.presenter._change_line_style()
-        self.assertEqual(self.presenter._line_style, 1)
+        self.assertEqual(self.presenter._line_style, 0)
         mock_plot.assert_called_once()
         self.presenter._change_line_style()
-        self.assertEqual(self.presenter._line_style, 2)
+        self.assertEqual(self.presenter._line_style, 1)
         self.presenter._change_line_style()
-        self.assertEqual(self.presenter._line_style, 0)
+        self.assertEqual(self.presenter._line_style, 2)
 
     @patch('mantidqtinterfaces.dns_powder_elastic.plot.'
            'elastic_powder_plot_presenter.'
            'DNSElasticPowderPlotPresenter._plot')
     def test_change_errorbar(self, mock_plot):
         self.presenter._change_error_bar()
-        self.assertEqual(self.presenter._error_bar, 1)
+        self.assertEqual(self.presenter._error_bar, 0)
         mock_plot.assert_called_once()
         self.presenter._change_error_bar()
-        self.assertEqual(self.presenter._error_bar, 2)
+        self.assertEqual(self.presenter._error_bar, 1)
         self.presenter._change_error_bar()
-        self.assertEqual(self.presenter._error_bar, 0)
+        self.assertEqual(self.presenter._error_bar, 2)
 
     def test_change_gridstate(self):
         self.presenter._change_grid_state(False)
@@ -140,23 +141,23 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.model.get_y_norm_label.assert_called_once()
         self.model.get_max_int_of_workspaces.assert_called_once()
         self.assertEqual(self.model.get_x_y_yerr.call_count, 2)
-        self.assertEqual(self.view.single_plot.call_count, 2)
+        self.assertEqual(self.view.single_error_plot.call_count, 2)
         self.view.finish_plot.assert_called_once()
 
     def test_single_plot(self):
-        self.presenter._single_plot(' 1_', 2, 3, 4)
-        self.view.single_plot.assert_called_once_with(2,
-                                                      3,
-                                                      label='1',
-                                                      linestyle=0)
-        self.presenter._error_bar = 2
         self.presenter._single_plot(' 1_', 2, 3, 4)
         self.view.single_error_plot.assert_called_once_with(2,
                                                             3,
                                                             4,
                                                             label='1',
                                                             capsize=3,
-                                                            linestyle=0)
+                                                            linestyle=2)
+        self.presenter._error_bar = 0
+        self.presenter._single_plot(' 1_', 2, 3, 4)
+        self.view.single_plot.assert_called_once_with(2,
+                                                      3,
+                                                      label='1',
+                                                      linestyle=2)
 
     def test_auto_select_curve(self):
         self.presenter._auto_select_curve()

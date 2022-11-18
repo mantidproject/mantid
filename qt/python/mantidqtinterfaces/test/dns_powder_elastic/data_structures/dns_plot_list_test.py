@@ -32,19 +32,19 @@ class DNSPlotListModelTest(unittest.TestCase):
 
     def test_get_checked_item_names(self):
         self.item.setCheckState(False)
-        testv = self.plm.get_checked_item_names()
-        self.assertEqual(testv, [])
+        test_v = self.plm.get_checked_item_names()
+        self.assertEqual(test_v, [])
         self.item.setCheckState(True)
-        testv = self.plm.get_checked_item_names()
-        self.assertEqual(testv, ['_magnetic'])
+        test_v = self.plm.get_checked_item_names()
+        self.assertEqual(test_v, ['_magnetic'])
 
     def test_get_items(self):
-        testv = self.plm.get_items()
-        self.assertEqual(testv, [self.item, self.item2])
+        test_v = self.plm.get_items()
+        self.assertEqual(test_v, [self.item, self.item2])
 
     def test_get_names(self):
-        testv = self.plm.get_names()
-        self.assertEqual(testv, ['_magnetic', 'def_sf'])
+        test_v = self.plm.get_names()
+        self.assertEqual(test_v, ['_magnetic', 'def_sf'])
 
     def test_uncheck_items(self):
         self.item.setCheckState(True)

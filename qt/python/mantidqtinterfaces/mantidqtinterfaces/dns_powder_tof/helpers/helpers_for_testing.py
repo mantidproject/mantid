@@ -325,12 +325,12 @@ def get_fake_elastic_sc_dataset():
 def get_fake_MD_workspace_unique(name='test', factor=1):
     ws = CreateMDWorkspace(Dimensions='3',
                            EventType='MDEvent',
-                           Extents='4.7,124.8,-10,120,-1,1',
+                           Extents='0,150,-10,110,0,20',
                            Names='Scattering Angle,Omega,TOF',
                            Units='degree,degree,us',
                            OutputWorkspace='test')
-    FakeMDEventData(ws, UniformParams=str(-1000 * factor))
-    bws = BinMD(InputWorkspace=ws, AlignedDim0='Scattering Angle,4.7,124.8,5',
-                AlignedDim1='Omega,-10,120,5', AlignedDim2='TOF,-1,1,1',
+    FakeMDEventData(ws, UniformParams=str(- 15 * 12 * 2 * factor))
+    bws = BinMD(InputWorkspace=ws, AlignedDim0='Scattering Angle,0,150,5',
+                AlignedDim1='Omega,-10,110,4', AlignedDim2='TOF,0,20,1',
                 OutputWorkspace=name)
     return bws
