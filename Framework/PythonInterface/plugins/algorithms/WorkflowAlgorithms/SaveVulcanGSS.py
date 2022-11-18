@@ -13,8 +13,10 @@ from mantid.kernel import Direction
 import mantid.kernel
 import numpy
 import os.path
+from mantid.utils.deprecator import deprecated_alias
 
 
+@deprecated_alias('2022-11-30')
 class SaveVulcanGSS(PythonAlgorithm):
     """ Save GSS file for VULCAN.  This is a workflow algorithm
     """
