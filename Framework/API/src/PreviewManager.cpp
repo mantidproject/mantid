@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidAPI/PreviewManager.h"
 
 namespace Mantid::API {
@@ -61,8 +62,7 @@ bool PreviewManagerImpl::checkAcquisition(const std::string &facility, const std
 }
 
 bool PreviewManagerImpl::checkPreview(const std::string &facility, const std::string &technique,
-                                      const std::string &acquisition,
-                                      const std::string &preview_name) const {
+                                      const std::string &acquisition, const std::string &preview_name) const {
   for (const auto &preview : m_previews) {
     if (preview->facility() == facility && preview->technique() == technique && preview->acquisition() == acquisition &&
         preview->name() == preview_name) {

@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -172,9 +173,7 @@ const std::vector<LiveListenerInfo> &InstrumentInfo::liveListenerInfoList() cons
 /// Return list of techniques
 const std::set<std::string> &InstrumentInfo::techniques() const { return m_technique; }
 
-const std::set<std::string> &InstrumentInfo::acquisitions() const {
-  return m_acquistions;
-}
+const std::set<std::string> &InstrumentInfo::acquisitions() const { return m_acquistions; }
 
 /// Return the facility
 const FacilityInfo &InstrumentInfo::facility() const { return *m_facility; }
@@ -251,16 +250,14 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
 
 /// Called from constructor to fill acquistions
 void InstrumentInfo::fillAcquistions(const Poco::XML::Element *elem) {
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_acquisition =
-      elem->getElementsByTagName("acquisition");
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_acquisition = elem->getElementsByTagName("acquisition");
   if (!pNL_acquisition)
     return;
 
   unsigned long total = pNL_acquisition->length();
 
   for (unsigned long i = 0; i < total; ++i) {
-    Poco::AutoPtr<Poco::XML::NodeList> pNL =
-        pNL_acquisition->item(i)->childNodes();
+    Poco::AutoPtr<Poco::XML::NodeList> pNL = pNL_acquisition->item(i)->childNodes();
     if (pNL->length() > 0) {
       auto *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
       if (txt) {
