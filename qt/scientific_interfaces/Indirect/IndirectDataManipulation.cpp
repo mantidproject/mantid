@@ -9,6 +9,8 @@
 //----------------------
 #include "IndirectDataManipulation.h"
 
+#include "IndirectDataManipulationElwinTab.h"
+#include "IndirectDataManipulationIqtTab.h"
 #include "IndirectMoments.h"
 #include "IndirectSqw.h"
 #include "IndirectSymmetrise.h"
@@ -59,6 +61,8 @@ void IndirectDataManipulation::initLayout() {
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
+  addTab<IndirectDataManipulationElwinTab>("Elwin");
+  addTab<IndirectDataManipulationIqtTab>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button
@@ -150,7 +154,9 @@ void IndirectDataManipulation::filterUiForFacility(const QString &facility) {
   // These tabs work at any facility (always at end of tabs)
   enabledTabs << "Symmetrise"
               << "S(Q, w)"
-              << "Moments";
+              << "Moments"
+              << "Elwin"
+              << "Iqt";
 
   // First remove all tabs
   while (m_uiForm.twIDRTabs->count() > 0) {

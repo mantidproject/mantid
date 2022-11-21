@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectDataAnalysisIqtTab.h"
+#include "IndirectDataManipulationIqtTab.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -70,19 +70,21 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
-IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
+IndirectDataManipulationIqtTab::IndirectDataManipulationIqtTab(QWidget *parent)
+    : IndirectDataManipulationTab(parent), m_iqtTree(nullptr), m_iqtResFileType(), m_selectedSpectrum(0) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraTiled));
 }
 
-IndirectDataAnalysisIqtTab::~IndirectDataAnalysisIqtTab() { m_iqtTree->unsetFactoryForManager(m_dblManager); }
+IndirectDataManipulationIqtTab::~IndirectDataManipulationIqtTab() { m_iqtTree->unsetFactoryForManager(m_dblManager); }
 
-void IndirectDataAnalysisIqtTab::setup() {
+void IndirectDataManipulationIqtTab::setup() {
   m_iqtTree = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_iqtTree);
 
+  // Number of decimal places in property browsers.
+  static const unsigned int NUM_DECIMALS = 6;
   // Create and configure properties
   m_properties["ELow"] = m_dblManager->addProperty("ELow");
   m_dblManager->setDecimals(m_properties["ELow"], NUM_DECIMALS);
@@ -138,8 +140,7 @@ void IndirectDataAnalysisIqtTab::setup() {
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this, SLOT(errorsClicked()));
 
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
 
   connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(updateEnergyRange(int)));
 
@@ -147,7 +148,7 @@ void IndirectDataAnalysisIqtTab::setup() {
   m_uiForm.dsResolution->isOptional(true);
 }
 
-void IndirectDataAnalysisIqtTab::run() {
+void IndirectDataManipulationIqtTab::run() {
   m_uiForm.ppPlot->watchADS(false);
   setRunIsRunning(true);
 
@@ -190,7 +191,7 @@ void IndirectDataAnalysisIqtTab::run() {
  *
  * @param error If the algorithm failed
  */
-void IndirectDataAnalysisIqtTab::algorithmComplete(bool error) {
+void IndirectDataManipulationIqtTab::algorithmComplete(bool error) {
   m_uiForm.ppPlot->watchADS(true);
   setRunIsRunning(false);
   if (error)
@@ -202,20 +203,20 @@ void IndirectDataAnalysisIqtTab::algorithmComplete(bool error) {
 /**
  * Handle saving of workspace
  */
-void IndirectDataAnalysisIqtTab::saveClicked() {
+void IndirectDataManipulationIqtTab::saveClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectDataAnalysisIqtTab::runClicked() {
+void IndirectDataManipulationIqtTab::runClicked() {
   clearOutputPlotOptionsWorkspaces();
   runTab();
 }
 
-void IndirectDataAnalysisIqtTab::errorsClicked() { m_uiForm.spIterations->setEnabled(isErrorsEnabled()); }
+void IndirectDataManipulationIqtTab::errorsClicked() { m_uiForm.spIterations->setEnabled(isErrorsEnabled()); }
 
-bool IndirectDataAnalysisIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
+bool IndirectDataManipulationIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 /**
  * Ensure we have present and valid file/ws inputs.
@@ -223,7 +224,7 @@ bool IndirectDataAnalysisIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculate
  * The underlying Fourier transform of Iqt
  * also means we must enforce several rules on the parameters.
  */
-bool IndirectDataAnalysisIqtTab::validate() {
+bool IndirectDataManipulationIqtTab::validate() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
@@ -244,7 +245,7 @@ bool IndirectDataAnalysisIqtTab::validate() {
 /**
  * Calculates binning parameters.
  */
-void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
+void IndirectDataManipulationIqtTab::updateDisplayedBinParameters() {
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
   auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
@@ -285,14 +286,17 @@ void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   }
 }
 
-void IndirectDataAnalysisIqtTab::loadTabSettings(const QSettings &settings) {
+void IndirectDataManipulationIqtTab::loadTabSettings(const QSettings &settings) {
   m_uiForm.dsInput->readSettings(settings.group());
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
-void IndirectDataAnalysisIqtTab::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+void IndirectDataManipulationIqtTab::handlePreviewSpectrumChanged(int spectra) {
+  setSelectedSpectrum(spectra);
+  plotInput(m_uiForm.ppPlot);
+}
 
-void IndirectDataAnalysisIqtTab::setFileExtensionsByName(bool filter) {
+void IndirectDataManipulationIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Iqt");
   m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
@@ -301,7 +305,7 @@ void IndirectDataAnalysisIqtTab::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
+void IndirectDataManipulationIqtTab::plotInput(const QString &wsname) {
   MatrixWorkspace_sptr workspace;
   try {
     workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
@@ -314,7 +318,7 @@ void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
 
   setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
 
-  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+  plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
@@ -361,7 +365,22 @@ void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
   updateDisplayedBinParameters();
 }
 
-void IndirectDataAnalysisIqtTab::setPreviewSpectrumMaximum(int value) { m_uiForm.spPreviewSpec->setMaximum(value); }
+/**
+ * Plots the selected spectrum of the input workspace.
+ *
+ * @param previewPlot The preview plot widget in which to plot the input
+ *                    input workspace.
+ */
+void IndirectDataManipulationIqtTab::plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
+  previewPlot->clear();
+  auto inputWS = getInputWorkspace();
+  auto spectrum = getSelectedSpectrum();
+
+  if (inputWS && inputWS->x(spectrum).size() > 1)
+    previewPlot->addSpectrum("Sample", getInputWorkspace(), spectrum);
+}
+
+void IndirectDataManipulationIqtTab::setPreviewSpectrumMaximum(int value) { m_uiForm.spPreviewSpec->setMaximum(value); }
 
 /**
  * Updates the range selectors and properties when range selector is moved.
@@ -369,7 +388,7 @@ void IndirectDataAnalysisIqtTab::setPreviewSpectrumMaximum(int value) { m_uiForm
  * @param min Range selector min value
  * @param max Range selector max value
  */
-void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
+void IndirectDataManipulationIqtTab::rangeChanged(double min, double max) {
   double oldMin = m_dblManager->value(m_properties["ELow"]);
   double oldMax = m_dblManager->value(m_properties["EHigh"]);
 
@@ -409,7 +428,7 @@ void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
  * @param prop The property which has been changed
  * @param val The new position for the range selector
  */
-void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop, double val) {
+void IndirectDataManipulationIqtTab::updateRangeSelector(QtProperty *prop, double val) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
@@ -438,25 +457,55 @@ void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop, double va
   updateDisplayedBinParameters();
 }
 
-void IndirectDataAnalysisIqtTab::updateEnergyRange(int state) {
+void IndirectDataManipulationIqtTab::updateEnergyRange(int state) {
   if (state != 0) {
     auto const value = m_dblManager->value(m_properties["ELow"]);
     m_dblManager->setValue(m_properties["EHigh"], -value);
   }
 }
 
-void IndirectDataAnalysisIqtTab::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void IndirectDataManipulationIqtTab::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void IndirectDataAnalysisIqtTab::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void IndirectDataManipulationIqtTab::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-void IndirectDataAnalysisIqtTab::setButtonsEnabled(bool enabled) {
+void IndirectDataManipulationIqtTab::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
-void IndirectDataAnalysisIqtTab::setRunIsRunning(bool running) {
+void IndirectDataManipulationIqtTab::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
+}
+
+/**
+ * Retrieves the selected spectrum.
+ *
+ * @return  The selected spectrum.
+ */
+int IndirectDataManipulationIqtTab::getSelectedSpectrum() const { return m_selectedSpectrum; }
+
+/**
+ * Sets the selected spectrum.
+ *
+ * @param spectrum  The spectrum to set.
+ */
+void IndirectDataManipulationIqtTab::setSelectedSpectrum(int spectrum) { m_selectedSpectrum = spectrum; }
+
+/**
+ * Retrieves the input workspace to be used in data analysis.
+ *
+ * @return  The input workspace to be used in data analysis.
+ */
+MatrixWorkspace_sptr IndirectDataManipulationIqtTab::getInputWorkspace() const { return m_inputWorkspace; }
+
+/**
+ * Sets the input workspace to be used in data analysis.
+ *
+ * @param inputWorkspace  The workspace to set.
+ */
+void IndirectDataManipulationIqtTab::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
+  m_inputWorkspace = std::move(inputWorkspace);
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataAnalysisIqtTab</class>
- <widget class="QWidget" name="IndirectDataAnalysisIqtTab">
+ <class>IndirectDataManipulationIqtTab</class>
+ <widget class="QWidget" name="IndirectDataManipulationIqtTab">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -15,10 +15,6 @@
   </property>
   <layout class="QVBoxLayout" name="layoutFury">
    <item>
-    <widget class="QScrollArea" name="scrollArea">
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
@@ -478,7 +474,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
    </item>
   </layout>
  </widget>

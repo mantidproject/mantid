@@ -6,18 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataAnalysisTab.h"
-#include "ui_IndirectDataAnalysisIqtTab.h"
+#include "IndirectDataManipulationTab.h"
+#include "ui_IndirectDataManipulationIqtTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataAnalysisIqtTab : public IndirectDataAnalysisTab {
+class DLLExport IndirectDataManipulationIqtTab : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisIqtTab(QWidget *parent = nullptr);
-  ~IndirectDataAnalysisIqtTab();
+  IndirectDataManipulationIqtTab(QWidget *parent = nullptr);
+  ~IndirectDataManipulationIqtTab();
 
 private:
   void run() override;
@@ -25,6 +25,16 @@ private:
   bool validate() override;
   void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
+
+  /// Retrieve the selected spectrum
+  int getSelectedSpectrum() const;
+  /// Sets the selected spectrum
+  virtual void setSelectedSpectrum(int spectrum);
+
+  /// Retrieve input workspace
+  Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
+  /// Set input workspace
+  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
 
   bool isErrorsEnabled();
 
@@ -34,14 +44,17 @@ private:
   void setRunIsRunning(bool running);
   void setPreviewSpectrumMaximum(int value);
 
-  Ui::IndirectDataAnalysisIqtTab m_uiForm;
+  Ui::IndirectDataManipulationIqtTab m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
+  int m_selectedSpectrum;
+  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
 
 private slots:
   void algorithmComplete(bool error);
-  void plotInput();
+  void handlePreviewSpectrumChanged(int spectra);
   void plotInput(const QString &wsname);
+  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
   void rangeChanged(double min, double max);
   void updateRangeSelector(QtProperty *prop, double val);
   void updateDisplayedBinParameters();

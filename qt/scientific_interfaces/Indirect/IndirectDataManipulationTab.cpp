@@ -35,6 +35,8 @@ void IndirectDataManipulationTab::setOutputPlotOptionsPresenter(
   m_plotOptionsPresenter = std::move(presenter);
 }
 
+void IndirectDataManipulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
+
 void IndirectDataManipulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }
