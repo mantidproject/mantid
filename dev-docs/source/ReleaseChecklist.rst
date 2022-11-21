@@ -349,7 +349,14 @@ Code Freeze
 * Inform other developers that ``release-next`` has been created by posting to the
   *\#announcements* slack channel. You can use an adapted version of the
   following announcement:
-    The release branch for <version>, called ``release-next``, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
+
+  * The release branch for <version>, called ``release-next``, has now been created:
+    https://github.com/mantidproject/mantid/tree/release-next. If you've not worked with
+    the release/main/-branch workflow before then please take a moment to familiarise
+    yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze.
+    The part about ensuring new branches have the correct parent is the most important part
+    (although this can be corrected afterwards). All branches and PRs that were created
+    before this release branch was created are fine, as their history is the same as ``main``.
 
 **Create Release Notes Skeleton**
 
