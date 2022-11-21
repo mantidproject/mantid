@@ -312,7 +312,8 @@ class TestGSAS2Model(unittest.TestCase):
         self.model.x_max = [21000]
         histogram_workspace = self.model.load_gsas_histogram(1)
         ReplaceSpecialValues(InputWorkspace=histogram_workspace, OutputWorkspace=histogram_workspace, NaNValue=0)
-        expected_workspace = LoadNexus(FileFinder.getFullPath("gsas2_output_workspace_1.nxs"))
+        expected_workspace = LoadNexus(FileFinder.getFullPath(
+            os.path.join('EngDiff_gsas2_tab', "gsas2_output_workspace_1.nxs")))
         ReplaceSpecialValues(InputWorkspace=expected_workspace, OutputWorkspace=expected_workspace, NaNValue=0)
         match_bool, _ = CompareWorkspaces(histogram_workspace, expected_workspace)
         self.assertTrue(match_bool)
