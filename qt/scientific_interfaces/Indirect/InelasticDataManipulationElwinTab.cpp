@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include "IndirectSettingsHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -151,22 +152,17 @@ QStringList getSampleFBSuffices() {
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent)
-    : InelasticDataManipulationTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()),
-      m_selectedSpectrum(0) {
+    : InelasticDataManipulationTab(parent), m_elwTree(nullptr),
+      m_view(std::make_unique<InelasticDataManipulationElwinTabView>(parent)),
+      m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
 
-  // Create Editor Factories
-  m_dblEdFac = new DoubleEditorFactory(this);
-  m_blnEdFac = new QtCheckBoxFactory(this);
-
-  m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
-  connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
-  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
-  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SIGNAL(dataRemoved()));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+  connect(m_view.get(), SIGNAL(addDataClicked()), this, SLOT(showAddWorkspaceDialog()));
+  connect(m_view.get(), SIGNAL(removeDataClicked()), this, SLOT(removeSelectedData()));
 
   m_parent = dynamic_cast<InelasticDataManipulation *>(parent);
-  m_dataTable = getDataTable();
+  m_dataTable = m_view->getDataTable();
 
   const QStringList headers = defaultHeaders();
   setHorizontalHeaders(headers);
@@ -174,90 +170,27 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
   m_dataTable->verticalHeader()->setVisible(false);
 }
 
-InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {
-  m_elwTree->unsetFactoryForManager(m_dblManager);
-  m_elwTree->unsetFactoryForManager(m_blnManager);
-}
+InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {}
 
 void InelasticDataManipulationElwinTab::setup() {
-  // Create QtTreePropertyBrowser object
-  m_elwTree = new QtTreePropertyBrowser();
-  m_uiForm.properties->addWidget(m_elwTree);
-
-  // Editor Factories
-  m_elwTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_elwTree->setFactoryForManager(m_blnManager, m_blnEdFac);
 
   // Number of decimal places in property browsers.
   static const unsigned int NUM_DECIMALS = 6;
-  // Create Properties
-  m_properties["IntegrationStart"] = m_dblManager->addProperty("Start");
-  m_dblManager->setDecimals(m_properties["IntegrationStart"], NUM_DECIMALS);
-  m_properties["IntegrationEnd"] = m_dblManager->addProperty("End");
-  m_dblManager->setDecimals(m_properties["IntegrationEnd"], NUM_DECIMALS);
-  m_properties["BackgroundStart"] = m_dblManager->addProperty("Start");
-  m_dblManager->setDecimals(m_properties["BackgroundStart"], NUM_DECIMALS);
-  m_properties["BackgroundEnd"] = m_dblManager->addProperty("End");
-  m_dblManager->setDecimals(m_properties["BackgroundEnd"], NUM_DECIMALS);
 
-  m_properties["BackgroundSubtraction"] = m_blnManager->addProperty("Background Subtraction");
-  m_properties["Normalise"] = m_blnManager->addProperty("Normalise to Lowest Temp");
-
-  m_properties["IntegrationRange"] = m_grpManager->addProperty("Integration Range");
-  m_properties["IntegrationRange"]->addSubProperty(m_properties["IntegrationStart"]);
-  m_properties["IntegrationRange"]->addSubProperty(m_properties["IntegrationEnd"]);
-  m_properties["BackgroundRange"] = m_grpManager->addProperty("Background Range");
-  m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundStart"]);
-  m_properties["BackgroundRange"]->addSubProperty(m_properties["BackgroundEnd"]);
-
-  m_elwTree->addProperty(m_properties["IntegrationRange"]);
-  m_elwTree->addProperty(m_properties["BackgroundSubtraction"]);
-  m_elwTree->addProperty(m_properties["BackgroundRange"]);
-  m_elwTree->addProperty(m_properties["Normalise"]);
-
-  // We always want one range selector... the second one can be controlled from
-  // within the elwinTwoRanges(bool state) function
-  auto integrationRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinIntegrationRange");
-  integrationRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
-  connect(integrationRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-  connect(integrationRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-  // create the second range
-  auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
-  backgroundRangeSelector->setColour(Qt::darkGreen); // dark green for background
-  backgroundRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
-  connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
-          SLOT(setRange(double, double)));
-  connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-  connect(backgroundRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
-  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(twoRanges(QtProperty *, bool)));
-  twoRanges(m_properties["BackgroundSubtraction"], false);
-
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
-  connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(setSelectedSpectrum(int)));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
+  connect(m_view.get(), SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
+  connect(m_view.get(), SIGNAL(previewIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
+  connect(m_view.get(), SIGNAL(selectedSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
 
   // Handle plot and save
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
-
-  // Set any default values
-  m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
-  m_dblManager->setValue(m_properties["IntegrationEnd"], 0.02);
-
-  m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
-  m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
+  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
+  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
+  connect(m_view.get(), SIGNAL(plotPreviewClicked()), this, SLOT(plotCurrentPreview()));
 
   updateAvailableSpectra();
 }
 
 void InelasticDataManipulationElwinTab::run() {
-  if (m_uiForm.inputChoice->currentIndex() == 0) {
+  if (m_view->getCurrentInputIndex() == 0) {
     runFileInput();
   } else {
     runWorkspaceInput();
@@ -265,9 +198,9 @@ void InelasticDataManipulationElwinTab::run() {
 }
 
 void InelasticDataManipulationElwinTab::runFileInput() {
-  setRunIsRunning(true);
+  m_view->setRunIsRunning(true);
 
-  QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
+  QStringList inputFilenames = m_view->getInputFilenames();
   inputFilenames.sort();
 
   // Get workspace names
@@ -332,18 +265,18 @@ void InelasticDataManipulationElwinTab::runFileInput() {
   elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
   elwinMultAlg->setProperty("OutputELF", elfWorkspace);
 
-  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
-  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_uiForm.leLogValue->currentText().toStdString());
+  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_view->getLogName());
+  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_view->getLogValue());
 
-  elwinMultAlg->setProperty("IntegrationRangeStart", m_dblManager->value(m_properties["IntegrationStart"]));
-  elwinMultAlg->setProperty("IntegrationRangeEnd", m_dblManager->value(m_properties["IntegrationEnd"]));
+  elwinMultAlg->setProperty("IntegrationRangeStart", m_view->getIntegrationStart());
+  elwinMultAlg->setProperty("IntegrationRangeEnd", m_view->getIntegrationEnd());
 
-  if (m_blnManager->value(m_properties["BackgroundSubtraction"])) {
-    elwinMultAlg->setProperty("BackgroundRangeStart", m_dblManager->value(m_properties["BackgroundStart"]));
-    elwinMultAlg->setProperty("BackgroundRangeEnd", m_dblManager->value(m_properties["BackgroundEnd"]));
+  if (m_view->getBackgroundSubtraction()) {
+    elwinMultAlg->setProperty("BackgroundRangeStart", m_view->getBackgroundStart());
+    elwinMultAlg->setProperty("BackgroundRangeEnd", m_view->getBackgroundEnd());
   }
 
-  if (m_blnManager->value(m_properties["Normalise"])) {
+  if (m_view->getNormalise()) {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
@@ -360,12 +293,12 @@ void InelasticDataManipulationElwinTab::runFileInput() {
 }
 
 void InelasticDataManipulationElwinTab::runWorkspaceInput() {
-  setRunIsRunning(true);
+  m_view->setRunIsRunning(true);
 
   // Get workspace names
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
-  auto workspaceBaseName = m_uiForm.cbPreviewFile->currentText();
+  auto workspaceBaseName = m_view->getCurrentPreview();
 
   workspaceBaseName += "_elwin_";
 
@@ -375,7 +308,7 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
 
   // Load input files
-  std::string inputWorkspacesString = m_uiForm.cbPreviewFile->currentText().toStdString();
+  std::string inputWorkspacesString = m_view->getCurrentPreview().toStdString();
 
   // Group input workspaces
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
@@ -394,18 +327,18 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
   elwinMultAlg->setProperty("OutputELF", elfWorkspace);
 
-  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
-  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_uiForm.leLogValue->currentText().toStdString());
+  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_view->getLogName());
+  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_view->getLogValue());
 
-  elwinMultAlg->setProperty("IntegrationRangeStart", m_dblManager->value(m_properties["IntegrationStart"]));
-  elwinMultAlg->setProperty("IntegrationRangeEnd", m_dblManager->value(m_properties["IntegrationEnd"]));
+  elwinMultAlg->setProperty("IntegrationRangeStart", m_view->getIntegrationStart());
+  elwinMultAlg->setProperty("IntegrationRangeEnd", m_view->getIntegrationEnd());
 
-  if (m_blnManager->value(m_properties["BackgroundSubtraction"])) {
-    elwinMultAlg->setProperty("BackgroundRangeStart", m_dblManager->value(m_properties["BackgroundStart"]));
-    elwinMultAlg->setProperty("BackgroundRangeEnd", m_dblManager->value(m_properties["BackgroundEnd"]));
+  if (m_view->getBackgroundSubtraction()) {
+    elwinMultAlg->setProperty("BackgroundRangeStart", m_view->getBackgroundStart());
+    elwinMultAlg->setProperty("BackgroundRangeEnd", m_view->getBackgroundEnd());
   }
 
-  if (m_blnManager->value(m_properties["Normalise"])) {
+  if (m_view->getNormalise()) {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
@@ -426,10 +359,10 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
  */
 void InelasticDataManipulationElwinTab::unGroupInput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
-  setRunIsRunning(false);
+  m_view->setRunIsRunning(false);
 
   if (!error) {
-    if (!m_uiForm.ckGroupInput->isChecked()) {
+    if (!m_view->isGroupInput()) {
       auto ungroupAlg = AlgorithmManager::Instance().create("UnGroupWorkspace");
       ungroupAlg->initialize();
       ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
@@ -438,11 +371,11 @@ void InelasticDataManipulationElwinTab::unGroupInput(bool error) {
 
     setOutputPlotOptionsWorkspaces(getOutputWorkspaceNames());
 
-    if (m_blnManager->value(m_properties["Normalise"]))
+    if (m_view->getNormalise())
       checkForELTWorkspace();
 
   } else {
-    setSaveResultEnabled(false);
+    m_view->setSaveResultEnabled(false);
   }
 }
 
@@ -453,33 +386,7 @@ void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
                    "was not produced - temperatures were not found.");
 }
 
-bool InelasticDataManipulationElwinTab::validate() {
-  UserInputValidator uiv;
-
-  if (m_uiForm.inputChoice->currentIndex() == 0) {
-    uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
-    auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
-    if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
-      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
-  }
-
-  auto rangeOne = std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]),
-                                 m_dblManager->value(m_properties["IntegrationEnd"]));
-  uiv.checkValidRange("Range One", rangeOne);
-
-  bool useTwoRanges = m_blnManager->value(m_properties["BackgroundSubtraction"]);
-  if (useTwoRanges) {
-    auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]),
-                                   m_dblManager->value(m_properties["BackgroundEnd"]));
-    uiv.checkValidRange("Range Two", rangeTwo);
-    uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
-  }
-
-  QString error = uiv.generateErrorMessage();
-  showMessageBox(error);
-
-  return error.isEmpty();
-}
+bool InelasticDataManipulationElwinTab::validate() { return m_view->validate(); }
 
 void InelasticDataManipulationElwinTab::loadTabSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
@@ -487,57 +394,7 @@ void InelasticDataManipulationElwinTab::loadTabSettings(const QSettings &setting
 
 void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
   auto const tabName("Elwin");
-  m_uiForm.dsInputFiles->setFileExtensions(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-}
-
-void InelasticDataManipulationElwinTab::setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws,
-                                                             const QPair<double, double> &range) {
-  auto inst = ws->getInstrument();
-  auto analyser = inst->getStringParameter("analyser");
-
-  if (analyser.size() > 0) {
-    auto comp = inst->getComponentByName(analyser[0]);
-
-    if (comp) {
-      auto params = comp->getNumberParameter("resolution", true);
-
-      // set the default instrument resolution
-      if (!params.empty()) {
-        double res = params[0];
-        m_dblManager->setValue(m_properties["IntegrationStart"], -res);
-        m_dblManager->setValue(m_properties["IntegrationEnd"], res);
-
-        m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
-        m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
-      } else {
-        m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
-        m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
-      }
-    } else {
-      showMessageBox("Warning: The instrument definition file for the input "
-                     "workspace contains an invalid value.");
-    }
-  }
-}
-
-void InelasticDataManipulationElwinTab::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
-  auto inst = ws->getInstrument();
-  // Set sample environment log name
-  auto log = inst->getStringParameter("Workflow.SE-log");
-  QString logName("sample");
-  if (log.size() > 0) {
-    logName = QString::fromStdString(log[0]);
-  }
-  m_uiForm.leLogName->setText(logName);
-  // Set sample environment log value
-  auto logval = inst->getStringParameter("Workflow.SE-log-value");
-  if (logval.size() > 0) {
-    auto logValue = QString::fromStdString(logval[0]);
-    int index = m_uiForm.leLogValue->findText(logValue);
-    if (index >= 0) {
-      m_uiForm.leLogValue->setCurrentIndex(index);
-    }
-  }
+  m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
 }
 
 /**
@@ -546,32 +403,29 @@ void InelasticDataManipulationElwinTab::setDefaultSampleLog(const Mantid::API::M
  * Updates preview selection combo box.
  */
 void InelasticDataManipulationElwinTab::newInputFiles() {
-  // Clear the existing list of files
-  m_uiForm.cbPreviewFile->clear();
+  m_view->clearPreviewFile();
+  m_view->newInputFiles();
 
-  // Populate the combo box with the filenames
-  QStringList filenames = m_uiForm.dsInputFiles->getFilenames();
-  for (auto rawFilename : filenames) {
-    QFileInfo inputFileInfo(rawFilename);
-    QString sampleName = inputFileInfo.baseName();
-
-    // Add the item using the base filename as the display string and the raw
-    // filename as the data value
-    m_uiForm.cbPreviewFile->addItem(sampleName, rawFilename);
-  }
-
-  // Default to the first file
-  m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  QString const wsname = m_uiForm.cbPreviewFile->currentText();
+  QString const wsname = m_view->getPreviewWorkspaceName(0);
   auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
   setInputWorkspace(inputWs);
+}
 
-  const auto range = getXRangeFromWorkspace(inputWs);
+/**
+ * Handles a new set of input files being entered.
+ *
+ * Updates preview selection combo box.
+ */
+void InelasticDataManipulationElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+  // Clear the existing list of files
+  if (m_dataModel->getNumberOfWorkspaces().value < 2)
+    m_view->clearPreviewFile();
 
-  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
-                   m_properties["IntegrationEnd"], range);
-  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
-                   m_properties["BackgroundEnd"], range);
+  m_view->newInputFilesFromDialog(dialog);
+
+  QString const wsname = m_view->getPreviewWorkspaceName(0);
+  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
+  setInputWorkspace(inputWs);
 }
 
 /**
@@ -583,8 +437,8 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
  */
 
 void InelasticDataManipulationElwinTab::checkNewPreviewSelected(int index) {
-  auto const workspaceName = m_uiForm.cbPreviewFile->itemText(index);
-  auto const filename = m_uiForm.cbPreviewFile->itemData(index).toString();
+  auto const workspaceName = m_view->getPreviewWorkspaceName(index);
+  auto const filename = m_view->getPreviewFilename(index);
 
   if (!workspaceName.isEmpty()) {
     if (!filename.isEmpty())
@@ -595,134 +449,35 @@ void InelasticDataManipulationElwinTab::checkNewPreviewSelected(int index) {
 }
 
 void InelasticDataManipulationElwinTab::newPreviewFileSelected(const QString &workspaceName, const QString &filename) {
-  auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
+  auto loadHistory = m_view->isLoadHistory();
   if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
     auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
 
     setInputWorkspace(workspace);
 
-    if (m_uiForm.inputChoice->currentIndex() == 0) {
-      int const numHist = static_cast<int>(workspace->getNumberHistograms()) - 1;
-      m_uiForm.spPlotSpectrum->setMaximum(numHist);
-      m_uiForm.spPlotSpectrum->setValue(0);
-    } else
-      updateAvailableSpectra();
-
-    plotInput();
+    m_view->newPreviewFileSelected(workspace);
+    updateAvailableSpectra();
+    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   }
 }
 
 void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const QString &workspaceName) {
-  if (m_uiForm.inputChoice->currentIndex() == 1) {
+  if (m_view->getCurrentInputIndex() == 1) {
     auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
     setInputWorkspace(workspace);
     updateAvailableSpectra();
-    plotInput();
+    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   }
 }
 
-/**
- * Replots the preview plot.
- */
-void InelasticDataManipulationElwinTab::plotInput() {
-  plotInput(m_uiForm.ppPlot);
-  setDefaultSampleLog(getInputWorkspace());
-}
-
-/**
- * Plots the selected spectrum of the input workspace.
- *
- * @param previewPlot The preview plot widget in which to plot the input
- *                    input workspace.
- */
-void InelasticDataManipulationElwinTab::plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
-  previewPlot->clear();
-  auto inputWS = getInputWorkspace();
-  auto spectrum = getSelectedSpectrum();
-
-  if (inputWS && inputWS->x(spectrum).size() > 1)
-    previewPlot->addSpectrum("Sample", getInputWorkspace(), spectrum);
-}
-
-void InelasticDataManipulationElwinTab::handlePreviewSpectrumChanged() {
-  if (m_uiForm.elwinPreviewSpec->currentIndex() == 1)
-    setSelectedSpectrum(m_uiForm.cbPlotSpectrum->currentText().toInt());
-  plotInput(m_uiForm.ppPlot);
+void InelasticDataManipulationElwinTab::handlePreviewSpectrumChanged(int spectrum) {
+  if (m_view->getPreviewSpec())
+    setSelectedSpectrum(spectrum);
+  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
 void InelasticDataManipulationElwinTab::updateIntegrationRange() {
-  setDefaultResolution(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
-}
-
-void InelasticDataManipulationElwinTab::twoRanges(QtProperty *prop, bool enabled) {
-  if (prop == m_properties["BackgroundSubtraction"]) {
-    auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-    auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-    backgroundRangeSelector->setVisible(enabled);
-    m_properties["BackgroundStart"]->setEnabled(enabled);
-    m_properties["BackgroundEnd"]->setEnabled(enabled);
-
-    disconnect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
-               SLOT(setRange(double, double)));
-    if (!enabled) {
-      backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
-      connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
-              SLOT(setRange(double, double)));
-    }
-  }
-}
-
-void InelasticDataManipulationElwinTab::minChanged(double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
-  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
-  if (from == integrationRangeSelector) {
-    m_dblManager->setValue(m_properties["IntegrationStart"], val);
-  } else if (from == backgroundRangeSelector) {
-    m_dblManager->setValue(m_properties["BackgroundStart"], val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
-}
-
-void InelasticDataManipulationElwinTab::maxChanged(double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
-  MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector *>(sender());
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
-
-  if (from == integrationRangeSelector) {
-    m_dblManager->setValue(m_properties["IntegrationEnd"], val);
-  } else if (from == backgroundRangeSelector) {
-    m_dblManager->setValue(m_properties["BackgroundEnd"], val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
-}
-
-void InelasticDataManipulationElwinTab::updateRS(QtProperty *prop, double val) {
-  auto integrationRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-  auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
-
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
-
-  if (prop == m_properties["IntegrationStart"])
-    setRangeSelectorMin(m_properties["IntegrationStart"], m_properties["IntegrationEnd"], integrationRangeSelector,
-                        val);
-  else if (prop == m_properties["IntegrationEnd"])
-    setRangeSelectorMax(m_properties["IntegrationStart"], m_properties["IntegrationEnd"], integrationRangeSelector,
-                        val);
-  else if (prop == m_properties["BackgroundStart"])
-    setRangeSelectorMin(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
-  else if (prop == m_properties["BackgroundEnd"])
-    setRangeSelectorMax(m_properties["BackgroundStart"], m_properties["BackgroundEnd"], backgroundRangeSelector, val);
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
+  m_view->setDefaultResolution(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
 }
 
 void InelasticDataManipulationElwinTab::runClicked() {
@@ -747,23 +502,6 @@ std::vector<std::string> InelasticDataManipulationElwinTab::getOutputWorkspaceNa
 
 QString InelasticDataManipulationElwinTab::getOutputBasename() {
   return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
-}
-
-void InelasticDataManipulationElwinTab::setRunIsRunning(const bool &running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-  m_uiForm.ppPlot->watchADS(!running);
-}
-
-void InelasticDataManipulationElwinTab::setButtonsEnabled(const bool &enabled) {
-  setRunEnabled(enabled);
-  setSaveResultEnabled(enabled);
-}
-
-void InelasticDataManipulationElwinTab::setRunEnabled(const bool &enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void InelasticDataManipulationElwinTab::setSaveResultEnabled(const bool &enabled) {
-  m_uiForm.pbSave->setEnabled(enabled);
 }
 
 std::unique_ptr<IAddWorkspaceDialog> InelasticDataManipulationElwinTab::getAddWorkspaceDialog(QWidget *parent) const {
@@ -818,7 +556,7 @@ void InelasticDataManipulationElwinTab::addData(IAddWorkspaceDialog const *dialo
     emit dataAdded();
     emit dataChanged();
     newInputFilesFromDialog(dialog);
-    plotInput();
+    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
@@ -833,7 +571,7 @@ void InelasticDataManipulationElwinTab::addDataFromFile(IAddWorkspaceDialog cons
     auto const suffixes = getFilteredSuffixes(allFiles);
     if (suffixes.size() < 1) {
       uiv.addErrorMessage("The input files must be all _red or all _sqw.");
-      m_uiForm.dsInputFiles->clear();
+      m_view->clearInputFiles();
       closeDialog();
     }
     QString error = uiv.generateErrorMessage();
@@ -859,8 +597,6 @@ void InelasticDataManipulationElwinTab::updateTableFromModel() {
     addTableEntry(domainIndex);
   }
 }
-
-QTableWidget *InelasticDataManipulationElwinTab::getDataTable() const { return m_uiForm.tbElwinData; }
 
 void InelasticDataManipulationElwinTab::addTableEntry(FitDomainIndex row) {
   m_dataTable->insertRow(static_cast<int>(row.value));
@@ -906,69 +642,20 @@ void InelasticDataManipulationElwinTab::removeSelectedData() {
   updateAvailableSpectra();
 }
 
-/**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void InelasticDataManipulationElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
-  // Clear the existing list of files
-  if (m_dataModel->getNumberOfWorkspaces().value < 2)
-    m_uiForm.cbPreviewFile->clear();
-
-  // Populate the combo box with the filenames
-  QString workspaceNames;
-  QString filename;
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
-    workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
-    filename = QString::fromStdString(indirectDialog->getFileName());
-  }
-
-  m_uiForm.cbPreviewFile->addItem(workspaceNames, filename);
-
-  // Default to the first file
-  m_uiForm.cbPreviewFile->setCurrentIndex(0);
-  QString const wsname = m_uiForm.cbPreviewFile->currentText();
-  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
-  setInputWorkspace(inputWs);
-
-  const auto range = getXRangeFromWorkspace(inputWs);
-
-  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
-                   m_properties["IntegrationEnd"], range);
-  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
-                   m_properties["BackgroundEnd"], range);
-}
-
-void InelasticDataManipulationElwinTab::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  m_uiForm.elwinPreviewSpec->setCurrentIndex(0);
-  m_uiForm.spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum.value));
-  m_uiForm.spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum.value));
-}
-
-void InelasticDataManipulationElwinTab::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
-                                                            const std::vector<WorkspaceIndex>::const_iterator &to) {
-  m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
-  m_uiForm.cbPlotSpectrum->clear();
-
-  for (auto spectrum = from; spectrum < to; ++spectrum)
-    m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
-}
-
 void InelasticDataManipulationElwinTab::updateAvailableSpectra() {
   auto spectra = m_dataModel->getSpectra(findWorkspaceID());
-  if (m_uiForm.inputChoice->currentIndex() == 1) {
+  if (m_view->getCurrentInputIndex() == 1) {
     if (spectra.isContinuous()) {
       auto const minmax = spectra.getMinMax();
-      setAvailableSpectra(minmax.first, minmax.second);
+      m_view->setAvailableSpectra(minmax.first, minmax.second);
     } else {
-      setAvailableSpectra(spectra.begin(), spectra.end());
+      m_view->setAvailableSpectra(spectra.begin(), spectra.end());
     }
   }
 }
 
 size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
-  auto currentWorkspace = m_uiForm.cbPreviewFile->currentText().toStdString();
+  auto currentWorkspace = m_view->getCurrentPreview().toStdString();
   auto allWorkspaces = m_dataModel->getWorkspaceNames();
   auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
   size_t workspaceID = findWorkspace - allWorkspaces.begin();
@@ -976,19 +663,9 @@ size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
 }
 
 void InelasticDataManipulationElwinTab::checkLoadedFiles() {
-  UserInputValidator uiv;
-  size_t noOfFiles = m_uiForm.dsInputFiles->getFilenames().size();
-  auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
-  if (suffixes.size() != noOfFiles) {
-    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
-    m_uiForm.dsInputFiles->clear();
-  }
-  QString error = uiv.generateErrorMessage();
-  showMessageBox(error);
-
-  if (error.isEmpty()) {
+  if (m_view->validateFileSuffix()) {
     newInputFiles();
-    plotInput();
+    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
     updateIntegrationRange();
   }
 }
@@ -1021,6 +698,51 @@ MatrixWorkspace_sptr InelasticDataManipulationElwinTab::getInputWorkspace() cons
  */
 void InelasticDataManipulationElwinTab::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = std::move(inputWorkspace);
+}
+
+/**
+ * Plots the current preview workspace, if none is set, plots
+ * the selected spectrum of the current input workspace.
+ */
+void InelasticDataManipulationElwinTab::plotCurrentPreview() {
+  auto previewWs = getPreviewPlotWorkspace();
+  auto inputWs = getInputWorkspace();
+  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
+  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+
+  // Check a workspace has been selected
+  if (previewWs) {
+
+    if (inputWs && previewWs->getName() == inputWs->getName()) {
+      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index), errorBars);
+    } else {
+      m_plotter->plotSpectra(previewWs->getName(), "0-2", errorBars);
+    }
+  } else if (inputWs && index < inputWs->getNumberHistograms()) {
+    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
+  } else
+    showMessageBox("Workspace not found - data may not be loaded.");
+}
+
+/**
+ * Retrieves the workspace containing the data to be displayed in
+ * the preview plot.
+ *
+ * @return  The workspace containing the data to be displayed in
+ *          the preview plot.
+ */
+MatrixWorkspace_sptr InelasticDataManipulationElwinTab::getPreviewPlotWorkspace() {
+  return m_previewPlotWorkspace.lock();
+}
+
+/**
+ * Sets the workspace containing the data to be displayed in the
+ * preview plot.
+ *
+ * @param previewPlotWorkspace The workspace to set.
+ */
+void InelasticDataManipulationElwinTab::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
+  m_previewPlotWorkspace = previewPlotWorkspace;
 }
 
 } // namespace MantidQt::CustomInterfaces

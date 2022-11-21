@@ -9,13 +9,16 @@
 #include "IAddWorkspaceDialog.h"
 #include "IndirectFitDataModel.h"
 #include "InelasticDataManipulation.h"
+#include "InelasticDataManipulationElwinTabView.h"
 #include "InelasticDataManipulationTab.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+using namespace Mantid::API;
 using namespace MantidWidgets;
 using namespace IDA;
 
@@ -26,11 +29,6 @@ public:
   InelasticDataManipulationElwinTab(QWidget *parent = nullptr);
   ~InelasticDataManipulationElwinTab();
   void updateTableFromModel();
-  QTableWidget *getDataTable() const;
-
-  void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum);
-  void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
-                           const std::vector<WorkspaceIndex>::const_iterator &to);
 
 public slots:
   void removeSelectedData();
@@ -63,8 +61,7 @@ private:
   bool validate() override;
   void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
-  void setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws, const QPair<double, double> &range);
-  void setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws);
+  void setDefaultResolution(const MatrixWorkspace_const_sptr &ws, const QPair<double, double> &range);
 
   /// Retrieve the selected spectrum
   int getSelectedSpectrum() const;
@@ -72,21 +69,19 @@ private:
   virtual void setSelectedSpectrum(int spectrum);
 
   /// Retrieve input workspace
-  Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
+  MatrixWorkspace_sptr getInputWorkspace() const;
   /// Set input workspace
-  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
+  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
 
   void checkForELTWorkspace();
 
   std::vector<std::string> getOutputWorkspaceNames();
   QString getOutputBasename();
 
-  void setRunIsRunning(const bool &running);
-  void setButtonsEnabled(const bool &enabled);
-  void setRunEnabled(const bool &enabled);
-  void setSaveResultEnabled(const bool &enabled);
-
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
+  MatrixWorkspace_sptr getPreviewPlotWorkspace();
+  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
+  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   Ui::InelasticDataManipulationElwinTab m_uiForm;
@@ -95,9 +90,10 @@ private:
   QTableWidget *m_dataTable;
   std::unique_ptr<IndirectFitDataModel> m_dataModel;
   int m_selectedSpectrum;
-  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
+  MatrixWorkspace_sptr m_inputWorkspace;
 
   bool m_emitCellChanged = true;
+  std::unique_ptr<InelasticDataManipulationElwinTabView> m_view;
 
   virtual int workspaceIndexColumn() const;
 
@@ -107,22 +103,17 @@ private:
   void newPreviewWorkspaceSelected(const QString &workspaceName);
   size_t findWorkspaceID();
   void newInputFiles();
-  void plotInput();
-  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
   void updateIntegrationRange();
 
 private slots:
   void checkNewPreviewSelected(int index);
-  void handlePreviewSpectrumChanged();
-  void twoRanges(QtProperty *prop, bool enabled);
-  void minChanged(double val);
-  void maxChanged(double val);
-  void updateRS(QtProperty *prop, double val);
+  void handlePreviewSpectrumChanged(int spectrum);
   void unGroupInput(bool error);
   void runClicked();
   void saveClicked();
   void addData();
   void checkLoadedFiles();
+  void plotCurrentPreview();
 };
 
 } // namespace CustomInterfaces
