@@ -157,6 +157,7 @@ class PreviewView(QObject):
         if self._type == self.IVIEW:
             self._widget.replace_workspace(workspace_name)
         elif self._type == self.SVIEW:
+            # TODO find how to replace slice viewer's current workspace
             return
         elif self._type == self.PLOT2D:
             pcolormesh([workspace_name], self._widget)
