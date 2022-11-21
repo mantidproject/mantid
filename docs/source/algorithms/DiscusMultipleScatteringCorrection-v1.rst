@@ -18,7 +18,7 @@ The structure function that the algorithm takes as input is a linear combination
 
 If the sample is a perfectly coherent scatterer then :math:`S'(Q, \omega) = S(Q, \omega)`
 
-The algorithm is based on code which was originally written in Fortran as part of the Discus program [#JOH]_. The code was subsequently resurrected and improved by Spencer Howells under the Muscat name and was included in the QENS MODES package [#HOW]_
+The algorithm is based on code which was originally written in Fortran as part of the Discus program [#JOH]_. The code was subsequently resurrected and improved by Spencer Howells under the Muscat name and was included in the QENS MODES package [#HOW]_, [#HOW2]_
 These original programs calculated multiple scattering corrections for inelastic instruments but an elastic diffraction version of the code was also created and results from that program are included in this paper by Mancinelli [#MAN]_.
 
 Theory
@@ -405,6 +405,7 @@ References
 
 .. [#JOH] M W Johnson, 1974 AERE Report R7682, Discus: A computer program for the calculating of multiple scattering effects in inelastic neutron scattering experiments
 .. [#HOW] WS Howells, V Garcia Sakai, F Demmel, MTF Telling, F Fernandez-Alonso, Feb 2010, MODES manual RAL-TR-2010-006, `doi: 10.5286/raltr.2010006 <https://doi.org/10.5286/raltr.2010006>`_
+.. [#HOW2] `FORTRAN source code for MUSCAT <https://github.com/mantidproject/3rdpartysources/tree/master/Fortran/Indirect/AbsCorrection>`_
 .. [#MAN] R Mancinelli 2012 *J. Phys.: Conf. Ser.* **340** 012033, Multiple neutron scattering corrections. Some general equations to do fast evaluations `doi: 10.1088/1742-6596/340/1/012033 <https://doi.org/10.1088/1742-6596/340/1/012033>`_
 .. [#MAY] J Mayers, R Cywinski, 1985 *Nuclear Instruments and Methods in Physics Research* A241, A Monte Carlo Evaluation Of Analytical Multiple Scattering Corrections For Unpolarised Neutron Scattering And Polarisation Analysis Data `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`_
 
