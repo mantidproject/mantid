@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Algorithms {
