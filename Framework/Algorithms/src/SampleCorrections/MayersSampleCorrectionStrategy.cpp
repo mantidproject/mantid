@@ -140,12 +140,7 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHis
     msCoeffs = polyfit(xmur, yms, wms);
 
   // corrections to input
-  const double muMin(xmur.front()), muMax(xmur.back()), flightPath(m_pars.l1 + m_pars.l2),
-      vol(M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2));
-  //  Oct 2003 discussion with Jerry Mayers:
-  //  1E-22 factor in formula for RNS was introduced by Jerry to keep
-  //   multiple scattering correction close to 1
-  const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
+  const double muMin(xmur.front()), muMax(xmur.back()), flightPath(m_pars.l1 + m_pars.l2);
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
   auto outputHistogram = m_histogram;
@@ -168,7 +163,7 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHis
     if (m_pars.mscat) {
       const double msVal = chebyPoly(msCoeffs, xcap);
       const double beta = m_pars.sigmaSc * msVal / sigt;
-      corrfact *= (1.0 - (beta / rns));
+      corrfact *= (1.0 - beta);
     }
     // apply correction
 

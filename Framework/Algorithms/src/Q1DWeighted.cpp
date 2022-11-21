@@ -47,9 +47,13 @@ using namespace DataObjects;
 void Q1DWeighted::init() {
   auto wsValidator = std::make_shared<CompositeValidator>(CompositeRelation::OR);
   auto monoValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
+  auto monoUnitValidator = std::make_shared<CompositeValidator>(CompositeRelation::OR);
   auto tofValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
 
-  monoValidator->add<WorkspaceUnitValidator>("Empty");
+  monoUnitValidator->add<WorkspaceUnitValidator>("Label"); // case for D16 omega scan, which has unit "Omega scan"
+  monoUnitValidator->add<WorkspaceUnitValidator>("Empty"); // case for kinetic data
+
+  monoValidator->add(monoUnitValidator);
   monoValidator->add<HistogramValidator>(false);
   monoValidator->add<InstrumentValidator>();
 
@@ -133,7 +137,6 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) - 1;
 
   m_isMonochromatic = inputWS->getAxis(0)->unit()->unitID() != "Wavelength";
-
   // number of spectra in the input
   m_nSpec = inputWS->getNumberHistograms();
 

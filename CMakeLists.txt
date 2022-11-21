@@ -80,9 +80,9 @@ set(CONDA_BUILD
     CACHE
       BOOL
       "If True then we are using conda-build to build and package mantid.
-          This stops a few things from occuring:
+          This stops a few things from occurring:
           - A bundle is no longer generated on OSX
-          - Linux custom handling on the install is ommitted
+          - Linux custom handling on the install is omitted
           - Prevents site-package manipulation by the installer"
 )
 
@@ -342,99 +342,10 @@ if(ENABLE_CPACK)
     include(WindowsNSIS)
   elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     include(CPackLinuxSetup)
-
-    # rhel requirements - only used if package requested is rpm
-    set(CPACK_RPM_PACKAGE_REQUIRES
-        "boost169-date-time,"
-        "boost169-regex,"
-        "boost169-serialization,"
-        "boost169-filesystem,"
-        "boost169-system,"
-        "nexus >= 4.3.1,gsl,glibc,muParser,tbb,librdkafka,"
-        "OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
-        "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
-        "hdf,hdf5,jsoncpp >= 0.7.0"
-    )
-    if(ENABLE_WORKBENCH)
-      set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
-    endif()
-    # python requirements
-    set(CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES}," "boost169-python3,"
-        "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
-        "python36-six,python36-PyYAML,python36-requests,python36-toml," "python36-ipython,python36-ipython-notebook"
-    )
-    if(ENABLE_WORKBENCH)
-      set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
-                                     "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui"
-      )
-    endif()
-
-    string(REPLACE ";" "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES}) # fix up the fact that it was made
-                                                                                     # as an array
-    string(REPLACE ",," "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES})
-
-    # ubuntu requirements - only used if package requested is deb
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS
-        "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-        "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-        "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-        "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-        "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
-        "libnexus0v5 (>= 4.3),"
-        "libjsoncpp1 (>=0.7.0),"
-        "libmuparser2v5,"
-        "libtbb2,"
-        "librdkafka1,librdkafka++1,"
-        "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}"
-    )
-
-    if("${UNIX_CODENAME}" STREQUAL "bionic")
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS
-          "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23," "liboce-foundation11,liboce-modeling11," "libqscintilla2-qt4-13,"
-          "jupyter-notebook," "libhdf5-cpp-100"
-      )
-      if(ENABLE_WORKBENCH)
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
-      endif()
-    elseif("${UNIX_DIST}" MATCHES "Ubuntu")
-      message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
-    endif()
-    # python requirements
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
-        "python3-numpy,"
-        "python3-requests,"
-        "python3-sip,"
-        "python3-six,"
-        "python3-matplotlib,"
-        "python3-qtpy,"
-        "python3-scipy,"
-        "python3-toml,"
-        "python3-pycifrw (>= 4.2.1),"
-        "python3-yaml,"
-        "ipython3-qtconsole"
-    ) # transitional package for bionic
-
-    if(ENABLE_WORKBENCH)
-      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5,python3-psutil")
-    endif()
-
-    # parse list to string required for deb package
-    string(REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS}) # fix up the fact that it was
-                                                                                         # made as an array
-    string(REPLACE ",," "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS})
-  endif()
-
-  # soft requirement of jemalloc if selected
-  if(USE_JEMALLOC)
-    message(STATUS "Adding jemalloc to the package requirements")
-    set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, jemalloc >= 3.0")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc1 (>= 3.0)")
   endif()
 
   # run cpack configuration
   include(CPack)
-  # let people know what is coming out the other end - must be after cpack generates value for rpm
+  # let people know what is coming out the other end
   message(STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}")
 endif()

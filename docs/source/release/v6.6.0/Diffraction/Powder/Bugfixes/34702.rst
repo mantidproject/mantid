@@ -1,0 +1,1 @@
+- Fixed an issue with :ref:`HB2AReduce <algm-HB2AReduce>` when 'colltrans' column is not available in the data file. This corresponds to the situation when the 'colltrans' motor is not connected.

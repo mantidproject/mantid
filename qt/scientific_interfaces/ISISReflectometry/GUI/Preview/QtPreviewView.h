@@ -52,7 +52,7 @@ public:
   void setInstViewEditMode() override;
   void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
-  void setRegionSelectorToolbarEnabled(bool enable) override;
+  void setRegionSelectorEnabled(bool enable) override;
   void setAngle(double angle) override;
   void setUpdateAngleButtonEnabled(bool enable) override;
   // Region selector toolbar

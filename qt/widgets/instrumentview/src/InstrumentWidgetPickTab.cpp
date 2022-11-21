@@ -68,6 +68,19 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
   double avgPos = getPhi(pos);
   return avgPos < 0 ? -(offset + avgPos) : offset - avgPos;
 }
+
+template <typename T>
+void rebin(const T &inputWorkspace, const std::string &rebinString, const bool preserveEvents,
+           const bool reverseLogarithmic, const std::string &outputWorkspace) {
+  auto rebinAlgorithm = AlgorithmManager::Instance().create("Rebin");
+  rebinAlgorithm->setProperty("InputWorkspace", inputWorkspace);
+  rebinAlgorithm->setProperty("Params", rebinString);
+  rebinAlgorithm->setProperty("PreserveEvents", preserveEvents);
+  rebinAlgorithm->setProperty("UseReverseLogarithmic", reverseLogarithmic);
+  rebinAlgorithm->setProperty("OutputWorkspace", outputWorkspace);
+  rebinAlgorithm->execute();
+}
+
 } // namespace
 
 /**
@@ -75,7 +88,8 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
  * @param instrWidget :: Parent InstrumentWidget.
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_tubeXUnitsCache(0), m_plotTypeCache(0),
+    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_originalWorkspace(nullptr), m_tubeXUnitsCache(0),
+      m_plotTypeCache(0),
       m_addedActions(std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
@@ -104,6 +118,14 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
                                    "approach the upper limit. See Rebin for details.");
   m_rebinSaveToHisto = new QCheckBox("Convert to histogram", m_rebin);
   m_rebinSaveToHisto->setToolTip("Convert the data to histogram, and thus removes the events. CANNOT BE UNDONE.");
+  m_rebinKeepOriginal = new QCheckBox("Keep original workspace", m_rebin);
+  m_rebinKeepOriginal->setToolTip("Keeps the original workspace so it can be used for subsequent rebin operations. "
+                                  "WARNING: This option can cause high-memory usage for large datasets.");
+  m_rebinKeepOriginalWarning = new QLabel("*Warning*");
+  m_rebinKeepOriginalWarning->setStyleSheet("QLabel { color: darkorange; }");
+  m_rebinKeepOriginalWarning->setToolTip("WARNING: This option can cause high-memory usage for large datasets.");
+
+  connect(m_rebinKeepOriginal, SIGNAL(stateChanged(int)), this, SLOT(onKeepOriginalStateChanged(int)));
 
   m_runRebin = new QPushButton("Run", m_rebin);
   connect(m_rebinParams, SIGNAL(textChanged(QString)), this, SLOT(onRebinParamsWritten(QString)));
@@ -114,6 +136,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   QGridLayout *rebinCheckBoxesLayout = new QGridLayout();
   rebinCheckBoxesLayout->addWidget(m_rebinUseReverseLog, 0, 0);
   rebinCheckBoxesLayout->addWidget(m_rebinSaveToHisto, 0, 1);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginal, 1, 0);
+  rebinCheckBoxesLayout->addWidget(m_rebinKeepOriginalWarning, 1, 1);
   rebinLayout->addLayout(rebinCheckBoxesLayout, 1, 0);
 
   rebinLayout->addWidget(m_runRebin, 2, 0);
@@ -146,22 +170,22 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   m_detidUnits = new QAction("Detector ID", this);
   m_detidUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_detidUnits, DetectorPlotController::DETECTOR_ID);
+  m_unitsMapper->setMapping(m_detidUnits, IWPickXUnits::DETECTOR_ID);
   connect(m_detidUnits, SIGNAL(triggered()), m_unitsMapper, SLOT(map()));
 
   m_lengthUnits = new QAction("Tube length", this);
   m_lengthUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_lengthUnits, DetectorPlotController::LENGTH);
+  m_unitsMapper->setMapping(m_lengthUnits, IWPickXUnits::LENGTH);
   connect(m_lengthUnits, SIGNAL(triggered()), m_unitsMapper, SLOT(map()));
 
   m_phiUnits = new QAction("Phi", this);
   m_phiUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_phiUnits, DetectorPlotController::PHI);
+  m_unitsMapper->setMapping(m_phiUnits, IWPickXUnits::PHI);
   connect(m_phiUnits, SIGNAL(triggered()), m_unitsMapper, SLOT(map()));
 
   m_outOfPlaneAngleUnits = new QAction("Out of plane angle", this);
   m_outOfPlaneAngleUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits, DetectorPlotController::OUT_OF_PLANE_ANGLE);
+  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits, IWPickXUnits::OUT_OF_PLANE_ANGLE);
   connect(m_outOfPlaneAngleUnits, SIGNAL(triggered()), m_unitsMapper, SLOT(map()));
 
   m_unitsGroup = new QActionGroup(this);
@@ -323,6 +347,13 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   layout->addWidget(panelStack);
 }
 
+QPushButton *InstrumentWidgetPickTab::getSelectTubeButton() { return m_tube; }
+
+/**
+ * Expands the plot panel
+ */
+void InstrumentWidgetPickTab::expandPlotPanel() { m_plotPanel->expandCaption(); }
+
 /**
  * If the workspace is monochromatic, the plot panel is useless and should be collapsed
  */
@@ -355,6 +386,15 @@ void InstrumentWidgetPickTab::onRebinParamsWritten(const QString &text) {
 bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const { return !m_peakAdd->isChecked(); }
 
 /**
+ * Set the plot type for the tube plot.
+ * @param type :: The type of the plot in terms of PlotType.
+ */
+void InstrumentWidgetPickTab::setPlotType(const IWPickPlotType type) {
+  m_plotController->setPlotType(type);
+  setPlotCaption();
+}
+
+/**
  * Display the miniplot's context menu.
  */
 void InstrumentWidgetPickTab::plotContextMenu() {
@@ -362,11 +402,11 @@ void InstrumentWidgetPickTab::plotContextMenu() {
 
   auto plotType = m_plotController->getPlotType();
 
-  if (plotType == DetectorPlotController::TubeSum || plotType == DetectorPlotController::TubeIntegral) {
+  if (plotType == IWPickPlotType::TUBE_SUM || plotType == IWPickPlotType::TUBE_INTEGRAL) {
     // only for multiple detector selectors
     context.addActions(m_summationType->actions());
-    m_sumDetectors->setChecked(plotType == DetectorPlotController::TubeSum);
-    m_integrateTimeBins->setChecked(plotType != DetectorPlotController::TubeSum);
+    m_sumDetectors->setChecked(plotType == IWPickPlotType::TUBE_SUM);
+    m_integrateTimeBins->setChecked(plotType != IWPickPlotType::TUBE_SUM);
     m_integrateTimeBins->setEnabled(true);
     context.addSeparator();
   }
@@ -399,21 +439,21 @@ void InstrumentWidgetPickTab::plotContextMenu() {
   }
 
   // Tube x units menu options
-  if (plotType == DetectorPlotController::TubeIntegral) {
+  if (plotType == IWPickPlotType::TUBE_INTEGRAL) {
     axes->addSeparator();
     axes->addActions(m_unitsGroup->actions());
     auto tubeXUnits = m_plotController->getTubeXUnits();
     switch (tubeXUnits) {
-    case DetectorPlotController::DETECTOR_ID:
+    case IWPickXUnits::DETECTOR_ID:
       m_detidUnits->setChecked(true);
       break;
-    case DetectorPlotController::LENGTH:
+    case IWPickXUnits::LENGTH:
       m_lengthUnits->setChecked(true);
       break;
-    case DetectorPlotController::PHI:
+    case IWPickXUnits::PHI:
       m_phiUnits->setChecked(true);
       break;
-    case DetectorPlotController::OUT_OF_PLANE_ANGLE:
+    case IWPickXUnits::OUT_OF_PLANE_ANGLE:
       m_outOfPlaneAngleUnits->setChecked(true);
       break;
     default:
@@ -440,7 +480,7 @@ void InstrumentWidgetPickTab::setPlotCaption() { m_plotPanel->setCaption(m_plotC
  * Switch to the detectors summing regime.
  */
 void InstrumentWidgetPickTab::sumDetectors() {
-  m_plotController->setPlotType(DetectorPlotController::TubeSum);
+  m_plotController->setPlotType(IWPickPlotType::TUBE_SUM);
   m_plotController->updatePlot();
   setPlotCaption();
 }
@@ -449,7 +489,7 @@ void InstrumentWidgetPickTab::sumDetectors() {
  * Switch to the time bin integration regime.
  */
 void InstrumentWidgetPickTab::integrateTimeBins() {
-  m_plotController->setPlotType(DetectorPlotController::TubeIntegral);
+  m_plotController->setPlotType(IWPickPlotType::TUBE_INTEGRAL);
   m_plotController->updatePlot();
   setPlotCaption();
 }
@@ -469,7 +509,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Pixel selection");
     surfaceMode = ProjectionSurface::PickSingleMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
   } else if (m_whole->isChecked()) {
     m_selectionType = WholeInstrument;
     m_activeTool->setText("Tool: Whole instrument selection");
@@ -480,14 +520,14 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
     surfaceMode = ProjectionSurface::PickTubeMode;
-    if (plotType < DetectorPlotController::TubeSum) {
-      plotType = DetectorPlotController::TubeSum;
+    if (plotType < IWPickPlotType::TUBE_SUM) {
+      plotType = IWPickPlotType::TUBE_SUM;
     }
   } else if (m_peakAdd->isChecked()) {
     m_selectionType = AddPeak;
     m_activeTool->setText("Tool: Add a single crystal peak");
     surfaceMode = ProjectionSurface::AddPeakMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
   } else if (m_peakErase->isChecked()) {
     m_selectionType = ErasePeak;
     m_activeTool->setText("Tool: Erase crystal peak(s)");
@@ -504,43 +544,43 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
     surfaceMode = ProjectionSurface::EditShapeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
     m_instrWidget->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
     surfaceMode = ProjectionSurface::EditShapeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
     m_instrWidget->getSurface()->startCreatingShape2D("ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
     surfaceMode = ProjectionSurface::EditShapeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
     m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
     surfaceMode = ProjectionSurface::EditShapeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
     m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_sector->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Circular sector");
     surfaceMode = ProjectionSurface::EditShapeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
     m_instrWidget->getSurface()->startCreatingShape2D("sector", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_free_draw->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Arbitrary shape");
     surfaceMode = ProjectionSurface::DrawFreeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
     m_instrWidget->getSurface()->startCreatingFreeShape(Qt::green, QColor(255, 255, 255, 80));
   } else if (m_edit->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
     surfaceMode = ProjectionSurface::EditShapeMode;
-    plotType = DetectorPlotController::Single;
+    plotType = IWPickPlotType::SINGLE;
   }
   m_plotController->setPlotType(plotType);
   if (surface) {
@@ -586,14 +626,17 @@ void InstrumentWidgetPickTab::removeCurve(const QString &label) {
 
 /**
  * Set the x units for the integrated tube plot.
- * @param units :: The x units in terms of TubeXUnits.
+ * @param units :: The x units in terms of IWPickXUnits.
  */
-void InstrumentWidgetPickTab::setTubeXUnits(int units) {
-  if (units < 0 || units >= DetectorPlotController::NUMBER_OF_UNITS)
-    return;
-  auto tubeXUnits = static_cast<DetectorPlotController::TubeXUnits>(units);
-  m_plotController->setTubeXUnits(tubeXUnits);
+void InstrumentWidgetPickTab::setTubeXUnits(const IWPickXUnits units) {
+  m_plotController->setTubeXUnits(units);
   m_plotController->updatePlot();
+}
+
+void InstrumentWidgetPickTab::setTubeXUnits(int units) {
+  if (0 <= units && units < IWPickXUnits::_NUMBER_OF_UNITS) {
+    setTubeXUnits(static_cast<IWPickXUnits>(units));
+  }
 }
 
 /**
@@ -640,8 +683,8 @@ void InstrumentWidgetPickTab::initSurface() {
   }
   m_infoController = new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
   m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
-  m_plotController->setTubeXUnits(static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
-  m_plotController->setPlotType(static_cast<DetectorPlotController::PlotType>(m_plotTypeCache));
+  m_plotController->setTubeXUnits(static_cast<IWPickXUnits>(m_tubeXUnitsCache));
+  m_plotController->setPlotType(static_cast<IWPickPlotType>(m_plotTypeCache));
   // miniplot X unit
   const auto &actor = m_instrWidget->getInstrumentActor();
   // default X axis label
@@ -661,6 +704,7 @@ const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const { r
 void InstrumentWidgetPickTab::saveSettings(QSettings &settings) const {
   settings.setValue("TubeXUnits", m_plotController->getTubeXUnits());
   settings.setValue("PlotType", m_plotController->getPlotType());
+  settings.setValue("RebinKeeporiginal", m_rebinKeepOriginal->isChecked());
 }
 
 /**
@@ -671,7 +715,9 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   // loadSettings is called when m_plotController is not created yet.
   // Cache the settings and apply them later
   m_tubeXUnitsCache = settings.value("TubeXUnits", 0).toInt();
-  m_plotTypeCache = settings.value("PlotType", DetectorPlotController::Single).toInt();
+  m_plotTypeCache = settings.value("PlotType", IWPickPlotType::SINGLE).toInt();
+
+  m_rebinKeepOriginal->setChecked(settings.value("RebinKeeporiginal", true).toBool());
 }
 void InstrumentWidgetPickTab::addToContextMenu(QAction *action,
                                                std::function<bool(std::map<std::string, bool>)> &actionCondition) {
@@ -830,18 +876,33 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
 }
 
 void InstrumentWidgetPickTab::onRunRebin() {
+  if (m_rebinKeepOriginal->isChecked() && !m_originalWorkspace) {
+    m_originalWorkspace = m_instrWidget->getWorkspaceClone();
+  }
+
   try {
-    auto alg = AlgorithmManager::Instance().create("Rebin");
-    alg->setProperty("InputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("OutputWorkspace", m_instrWidget->getWorkspaceNameStdString());
-    alg->setProperty("Params", m_rebinParams->text().toStdString());
-    alg->setProperty("PreserveEvents", !m_rebinSaveToHisto->isChecked());
-    alg->setProperty("UseReverseLogarithmic", m_rebinUseReverseLog->isChecked());
-    alg->execute();
-  } catch (std::exception &e) {
-    QMessageBox::information(this, "Rebin Error", e.what(), "OK");
+    if (m_originalWorkspace) {
+      rebin<Mantid::API::Workspace_sptr>(m_originalWorkspace, m_rebinParams->text().toStdString(),
+                                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                                         m_instrWidget->getWorkspaceNameStdString());
+    } else {
+      rebin<std::string>(m_instrWidget->getWorkspaceNameStdString(), m_rebinParams->text().toStdString(),
+                         !m_rebinSaveToHisto->isChecked(), m_rebinUseReverseLog->isChecked(),
+                         m_instrWidget->getWorkspaceNameStdString());
+    }
+  } catch (const std::exception &ex) {
+    QMessageBox::information(this, "Rebin Error", ex.what(), "OK");
   }
 }
+
+void InstrumentWidgetPickTab::onKeepOriginalStateChanged(int state) {
+  m_rebinKeepOriginalWarning->setVisible(state == Qt::Checked);
+  if (state == Qt::Unchecked) {
+    resetOriginalWorkspace();
+  }
+}
+
+void InstrumentWidgetPickTab::resetOriginalWorkspace() { m_originalWorkspace.reset(); }
 
 /**
  * Clear all the tab's widgets.
@@ -1150,8 +1211,8 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
  */
 DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentWidget *instrWidget,
                                                MiniPlot *plot)
-    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot), m_plotType(Single), m_enabled(true),
-      m_tubeXUnits(DETECTOR_ID), m_currentPickID(std::numeric_limits<size_t>::max()) {
+    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot), m_plotType(IWPickPlotType::SINGLE),
+      m_enabled(true), m_tubeXUnits(DETECTOR_ID), m_currentPickID(std::numeric_limits<size_t>::max()) {
   connect(m_plot, SIGNAL(clickedAt(double, double)), this, SLOT(addPeak(double, double)));
 }
 
@@ -1161,8 +1222,8 @@ DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab, Ins
  * @param pickID :: A pick ID of an instrument component.
  */
 void DetectorPlotController::setPlotData(size_t pickID) {
-  if (m_plotType == DetectorSum) {
-    m_plotType = Single;
+  if (m_plotType == IWPickPlotType::DETECTOR_SUM) {
+    m_plotType = IWPickPlotType::SINGLE;
   }
 
   if (!m_enabled) {
@@ -1174,12 +1235,12 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
   if (componentInfo.isDetector(pickID)) {
-    if (m_plotType == Single) {
+    if (m_plotType == IWPickPlotType::SINGLE) {
       if (m_currentPickID != pickID) {
         m_currentPickID = pickID;
         plotSingle(pickID);
       }
-    } else if (m_plotType == TubeSum || m_plotType == TubeIntegral) {
+    } else if (m_plotType == IWPickPlotType::TUBE_SUM || m_plotType == IWPickPlotType::TUBE_INTEGRAL) {
       m_currentPickID = std::numeric_limits<size_t>::max();
       plotTube(pickID);
     } else {
@@ -1196,7 +1257,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
  * @param detIndices :: A list of detector Indices.
  */
 void DetectorPlotController::setPlotData(const std::vector<size_t> &detIndices) {
-  setPlotType(DetectorSum);
+  setPlotType(IWPickPlotType::DETECTOR_SUM);
   clear();
   std::vector<double> x, y;
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -1297,13 +1358,13 @@ void DetectorPlotController::plotTube(size_t detindex) {
 
   auto parent = componentInfo.parent(detindex);
   if (componentInfo.detectorsInSubtree(parent).size() > 0) {
-    if (m_plotType == TubeSum) // plot sums over detectors vs time bins
+    if (m_plotType == IWPickPlotType::TUBE_SUM) // plot sums over detectors vs time bins
     {
       plotTubeSums(detindex);
     } else // plot detector integrals vs detID or a function of detector
            // position in the tube
     {
-      assert(m_plotType == TubeIntegral);
+      assert(m_plotType == IWPickPlotType::TUBE_INTEGRAL);
       plotTubeIntegrals(detindex);
     }
   }
@@ -1351,11 +1412,7 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
     clear();
     return;
   }
-  auto xAxisCaption = getTubeXUnitsName();
-  auto xAxisUnits = getTubeXUnitsUnits();
-  if (!xAxisUnits.isEmpty()) {
-    xAxisCaption += " (" + xAxisUnits + ")";
-  }
+  auto xAxisCaption = getTubeXLabel();
   auto parent = componentInfo.parent(detindex);
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
@@ -1689,15 +1746,24 @@ double DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos
 }
 
 /**
+ * Return a string to use for the x axis label of the plot.
+ */
+QString DetectorPlotController::getTubeXLabel() const {
+  auto xAxisName = getTubeXUnitsName();
+  auto xAxisUnit = getTubeXUnitsUnits();
+  return xAxisUnit.isEmpty() ? xAxisName : xAxisName + " (" + xAxisUnit + ")";
+}
+
+/**
  * Return symbolic name of current TubeXUnit.
  */
 QString DetectorPlotController::getTubeXUnitsName() const {
   switch (m_tubeXUnits) {
-  case LENGTH:
+  case IWPickXUnits::LENGTH:
     return "Length";
-  case PHI:
+  case IWPickXUnits::PHI:
     return "Phi";
-  case OUT_OF_PLANE_ANGLE:
+  case IWPickXUnits::OUT_OF_PLANE_ANGLE:
     return "Out of plane angle";
   default:
     break;
@@ -1710,31 +1776,38 @@ QString DetectorPlotController::getTubeXUnitsName() const {
  */
 QString DetectorPlotController::getTubeXUnitsUnits() const {
   switch (m_tubeXUnits) {
-  case LENGTH:
+  case IWPickXUnits::LENGTH:
     return "m";
-  case PHI:
+  case IWPickXUnits::PHI:
     return "radians";
-  case OUT_OF_PLANE_ANGLE:
+  case IWPickXUnits::OUT_OF_PLANE_ANGLE:
     return "radians";
   default:
     return "";
   }
 }
 
-void DetectorPlotController::setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
+/**
+ * Set the x units for the tube plot.
+ * @param units :: The x units in terms of TubeXUnits.
+ */
+void DetectorPlotController::setTubeXUnits(const IWPickXUnits units) {
+  m_tubeXUnits = units;
+  m_plot->setXLabel(getTubeXLabel());
+}
 
 /**
  * Get the plot caption for the current plot type.
  */
 QString DetectorPlotController::getPlotCaption() const {
   switch (m_plotType) {
-  case Single:
+  case IWPickPlotType::SINGLE:
     return "Plotting detector spectra";
-  case DetectorSum:
+  case IWPickPlotType::DETECTOR_SUM:
     return "Plotting multiple detector sum";
-  case TubeSum:
+  case IWPickPlotType::TUBE_SUM:
     return "Plotting sum";
-  case TubeIntegral:
+  case IWPickPlotType::TUBE_INTEGRAL:
     return "Plotting integral";
   default:
     throw std::logic_error("getPlotCaption: Unknown plot type.");

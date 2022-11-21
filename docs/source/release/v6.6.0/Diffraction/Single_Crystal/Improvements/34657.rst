@@ -1,0 +1,1 @@
+* Simplified input arguments to :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`: the parameter `FractionalTOFWindow` has been removed, if a user wants to integrate with an initial window dTOF/TOF = constant for all peaks then this can be achieved by setting ThetaWidth = 0 - note this is technically a breaking change.

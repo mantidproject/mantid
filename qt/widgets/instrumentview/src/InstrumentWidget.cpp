@@ -257,6 +257,10 @@ QString InstrumentWidget::getWorkspaceName() const { return m_workspaceName; }
 
 std::string InstrumentWidget::getWorkspaceNameStdString() const { return m_workspaceName.toStdString(); }
 
+Mantid::API::Workspace_sptr InstrumentWidget::getWorkspaceClone() {
+  return getWorkspaceFromADS(getWorkspaceNameStdString())->clone();
+}
+
 void InstrumentWidget::renameWorkspace(const std::string &workspace) {
   m_workspaceName = QString::fromStdString(workspace);
 }
@@ -1339,7 +1343,7 @@ void InstrumentWidget::setBackgroundColor(const QColor &color) {
  * Get the surface info string
  */
 QString InstrumentWidget::getSurfaceInfoText() const {
-  ProjectionSurface *surface = getSurface().get();
+  auto surface = getSurface();
   return surface ? surface->getInfoText() : "";
 }
 
@@ -1576,6 +1580,7 @@ void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::sh
     m_thread.quit();
   }
   if (hasWorkspace(ws_name)) {
+    m_pickTab->resetOriginalWorkspace();
     emit preDeletingHandle();
     close();
     return;
@@ -1600,6 +1605,7 @@ void InstrumentWidget::renameHandle(const std::string &oldName, const std::strin
 
 void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
+  m_pickTab->resetOriginalWorkspace();
   close();
 }
 

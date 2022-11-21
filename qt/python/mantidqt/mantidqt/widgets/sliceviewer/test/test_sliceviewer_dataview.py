@@ -168,6 +168,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
     def test_plot_matrix(self):
         self.view.image = None
         self.view.clear_image = mock.Mock()
+        self.view.on_track_cursor_state_change = mock.Mock()
         self.view.ax = mock.Mock()
         self.view.colorbar = mock.Mock()
 
@@ -183,6 +184,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.image = original_image
         self.view.image.transpose = self.view.dimensions.transpose
         self.view.clear_image = mock.Mock()
+        self.view.on_track_cursor_state_change = mock.Mock()
         self.view.ax = mock.Mock()
         self.view.colorbar = mock.Mock()
 

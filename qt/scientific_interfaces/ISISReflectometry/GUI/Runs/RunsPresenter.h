@@ -8,6 +8,7 @@
 
 #include "CatalogRunNotifier.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/IFileHandler.h"
 #include "GUI/RunsTable/IRunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
 #include "IRunsPresenter.h"
@@ -56,7 +57,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter : public IRunsPresenter,
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
                 const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                std::vector<std::string> instruments, IReflMessageHandler *messageHandler);
+                std::vector<std::string> instruments, IReflMessageHandler *messageHandler, IFileHandler *fileHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -114,6 +115,7 @@ public:
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
+  void notifyExportSearchResults() const override;
 
   // RunNotifierSubscriber overrides
   void notifyCheckForNewRuns() override;
@@ -144,6 +146,8 @@ private:
   IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
   IReflMessageHandler *m_messageHandler;
+  /// The file handler
+  IFileHandler *m_fileHandler;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The tolerance used when looking up settings by theta

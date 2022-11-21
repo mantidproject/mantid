@@ -151,7 +151,17 @@ class SANSILLParameterScan(DataProcessorAlgorithm):
                             startProgress=0.95,
                             endProgress=1)
 
+        # ConvertSpectrumAxis uses a different convention from D16 when it comes to detector orientation, and thus the
+        # 2theta axis is inverted from what is expected, so we flip it back
+        # and since it is a widespread behavior for ILL instruments, this is now the default behaviour
+        ConvertAxisByFormula(InputWorkspace=self.output2D, OutputWorkspace=self.output2D, Axis="Y", Formula="-y")
+
         Transpose(InputWorkspace=self.output2D, OutputWorkspace=self.output2D)
+
+        # flipping the sign of the axis means it is now inverted, which is something matplotlib can't render (and is
+        # really unpleasant to read anyway), so we sort everything again ...
+        # which means cloning the workspace since that's what SortXaAxis does
+        SortXAxis(InputWorkspace=self.output2D, OutputWorkspace=self.output2D, Ordering="Ascending")
 
         self.setProperty('OutputWorkspace', mtd[self.output2D])
 

@@ -164,7 +164,7 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Export
 constParameter:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeaksWorkspace.cpp:141
 constParameter:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/IPeaksWorkspace.cpp:161
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Axis.cpp:44
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:80
+syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Sample.cpp:81
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Run.cpp:244
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/SpectrumDefinition.cpp:40
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37

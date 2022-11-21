@@ -348,6 +348,8 @@ class MantidAxes(Axes):
         :param predicate: A unary predicate used to select artists.
         :return: The output of the inner function.
         """
+        if workspace.name() not in self.tracked_workspaces:
+            return False
         waterfall_x_offset = copy.copy(self.waterfall_x_offset)
         waterfall_y_offset = copy.copy(self.waterfall_y_offset)
         has_fills = self.waterfall_has_fill()

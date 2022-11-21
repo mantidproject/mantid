@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 from typing import Callable, Tuple
+import sys
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
 from qtpy.QtCore import Qt
@@ -22,6 +23,8 @@ from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, Peaks
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
+
+DBLMAX = sys.float_info.max
 
 
 class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
@@ -386,7 +389,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return
 
         self.view.refresh_queued = False
-
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
         ws = self.model.ws
@@ -505,3 +507,21 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def action_open_help_window(self):
         InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')
+
+    def get_extra_image_info_columns(self, xdata, ydata):
+        qdims = [i for i,v in enumerate(self.view.data_view.dimensions.qflags) if v]
+        if len(qdims) == 3 and self.get_frame() == SpecialCoordinateSystem.HKL:
+            slice_point = self.get_slicepoint()
+            xdim, ydim = WorkspaceInfo.display_indices(slice_point, self.view.data_view.dimensions.transpose)
+            zdim = next(i for i, v in enumerate(slice_point) if v is not None and i in qdims)
+            if xdata == DBLMAX and ydata == DBLMAX:
+                hkl_as_strings = ["-", "-", "-"]
+            else:
+                hkl = self.model.get_hkl_from_xyz(xdim, ydim, zdim, xdata, ydata, slice_point[zdim])
+                hkl_as_strings = ["{:.4f}".format(element) for element in hkl]
+            extra_cols = {"H": hkl_as_strings[0],
+                          "K": hkl_as_strings[1],
+                          "L": hkl_as_strings[2]}
+        else:
+            extra_cols = {}
+        return extra_cols

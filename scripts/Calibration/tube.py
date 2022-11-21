@@ -854,9 +854,9 @@ class _CalibrationParameterHelper(object):
                         raise 4
             except:
                 raise RuntimeError(
-                    "Wrong argument {0}. "
+                    f"Wrong argument {self.OVERRIDEPEAKS}. "
                     "It expects a dictionary with key as the tube index and the value as a list of peaks positions. "
-                    "Ex (3 peaks): override_peaks = {1:[2,5.4,500]}".format(self.OVERRIDEPEAKS))
+                    "Ex (3 peaks): override_peaks = {1:[2,5.4,500]}")
             else:
                 return override_peaks
         else:

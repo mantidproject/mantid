@@ -66,8 +66,8 @@ private:
                          int &numberOfPixelsPerTube);
   size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
                               const MultichannelType type = MultichannelType::TOF);
-  size_t loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, size_t firstIndex,
-                                 const std::vector<double> &binning);
+  size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
+                                     const std::vector<double> &binning);
   size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
@@ -91,7 +91,7 @@ private:
   std::string m_resMode;                           ///< Resolution mode for D11 and D22
   bool m_isTOF;                                    ///< TOF or monochromatic flag
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
-  bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
+  bool m_isD16Omega;                               ///< Data comes from a D16 omega scan flag
   size_t m_numberOfMonitors;                       ///< Number of monitors in this instrument
 
   void setFinalProperties(const std::string &filename);
