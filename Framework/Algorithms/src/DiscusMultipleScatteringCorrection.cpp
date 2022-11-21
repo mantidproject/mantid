@@ -1736,7 +1736,7 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
 
 /**
  * Generate an initial track starting at the source and entering
- * the sample\sample environment at a random point on its front surface
+ * the sample/sample environment at a random point on its front surface
  * @param rng Random number generator
  * @return a track
  */

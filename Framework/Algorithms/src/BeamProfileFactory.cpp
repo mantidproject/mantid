@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation BeamProfileFactory,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -32,7 +32,7 @@ std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geomet
       return std::make_unique<CircularBeamProfile>(*frame, source->getPos(), beamRadiusParam[0]);
     }
   }
-  // revert to sample dimensions if no return by this point
+  // revert to rectangular profile enclosing sample dimensions if no return by this point
   if (!sample.getShape().hasValidShape() && !sample.hasEnvironment()) {
     throw std::invalid_argument("Cannot determine beam profile without a sample shape and environment");
   }
@@ -45,6 +45,7 @@ std::unique_ptr<IBeamProfile> BeamProfileFactory::createBeamProfile(const Geomet
     bbox = sample.getEnvironment().boundingBox().width();
     bboxCentre = sample.getEnvironment().boundingBox().centrePoint();
   }
+  // beam profile always centred on zero so set half width = centre + sample half width
   const double beamWidth = 2 * bboxCentre[frame->pointingHorizontal()] + bbox[frame->pointingHorizontal()];
   const double beamHeight = 2 * bboxCentre[frame->pointingUp()] + bbox[frame->pointingUp()];
   return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);

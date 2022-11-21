@@ -720,6 +720,7 @@ set(TEST_FILES
     ApplyInstrumentToPeaksTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
+    BeamProfileFactoryTest.h
     Bin2DPowderDiffractionTest.h
     BinaryOperateMasksTest.h
     BinaryOperationTest.h

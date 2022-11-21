@@ -16,7 +16,6 @@
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -203,6 +202,11 @@ Mantid::API::MatrixWorkspace_sptr setUpWS(const TestWorkspaceDescriptor &wsProps
 
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MonteCarloAbsorptionTest *createSuite() { return new MonteCarloAbsorptionTest(); }
+  static void destroySuite(MonteCarloAbsorptionTest *suite) { delete suite; }
+
   //---------------------------------------------------------------------------
   // Integration tests - Success cases
   //---------------------------------------------------------------------------
@@ -558,31 +562,6 @@ public:
     auto yData = outputWS->getSpectrum(0).dataY();
     bool allZero = std::all_of(yData.begin(), yData.end(), [](double i) { return i == 0; });
     TS_ASSERT_EQUALS(allZero, true);
-  }
-
-  void test_Beam_Height_Calculation_With_Offset_Sample() {
-    using namespace Mantid::Kernel;
-    using namespace Mantid::Algorithms;
-    using namespace Mantid::Geometry;
-    // Define a sample shape
-    constexpr double sampleRadius{0.006};
-    constexpr double sampleHeight{0.04};
-    const V3D sampleBaseCentre{0., sampleHeight / 2., 0.};
-    const V3D yAxis{0., 1., 0.};
-    auto sampleShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
-                                                                     yAxis, "sample-cylinder");
-    auto mcAbsorb = createTestAlgorithm();
-    auto instrument = std::make_shared<Mantid::Geometry::Instrument>("test");
-    instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
-    ObjComponent *source = new ObjComponent("moderator");
-    source->setPos(V3D(0.0, 0.0, -20.0));
-    instrument->add(source);
-    instrument->markAsSource(source);
-    Mantid::DataObjects::Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5, 5);
-    ws->mutableSample().setShape(sampleShape);
-    std::shared_ptr<IBeamProfile> beam;
-    TS_ASSERT_THROWS_NOTHING(beam = mcAbsorb->createBeamProfile(*instrument, ws->sample()));
-    TS_ASSERT(std::dynamic_pointer_cast<RectangularBeamProfile>(beam)->maxPoint()[1] == 0.06);
   }
 
   //---------------------------------------------------------------------------
