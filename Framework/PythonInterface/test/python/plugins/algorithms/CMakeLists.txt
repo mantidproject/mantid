@@ -93,7 +93,6 @@ set(TEST_PY_FILES
     MeanTest.py
     MedianBinWidthTest.py
     MergeCalFilesTest.py
-    MuscatSofQWTest.py
     MuonMaxEntTest.py
     NMoldyn4InterpolationTest.py
     NOMADMedianDetectorTestTest.py
