@@ -10,6 +10,7 @@
 #include "GUI/Batch/IBatchView.h"
 #include "GUI/Common/IJobManager.h"
 #include "IInstViewModel.h"
+#include "IPreviewDockedWidgets.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
@@ -26,6 +27,7 @@ class IBatchPresenter;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter,
                                                         public PreviewViewSubscriber,
+                                                        public PreviewDockedWidgetsSubscriber,
                                                         public JobManagerSubscriber,
                                                         public Mantid::API::RegionSelectorObserver {
 public:
@@ -93,6 +95,7 @@ public:
 
 private:
   IPreviewView *m_view{nullptr};
+  std::unique_ptr<IPreviewDockedWidgets> m_dockedWidgets{nullptr};
   IBatchPresenter *m_mainPresenter{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;

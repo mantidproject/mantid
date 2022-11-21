@@ -35,35 +35,16 @@ public:
   QtPreviewView(QWidget *parent = nullptr);
 
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
+
+  QLayout *getDockedWidgetsLayout() noexcept override;
+
   void enableApplyButton() override;
   void disableApplyButton() override;
 
   std::string getWorkspaceName() const override;
   double getAngle() const override;
-  // Plotting
-  void resetInstView() override;
-  void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
-                    Mantid::Kernel::V3D const &axis) override;
-  // Instrument viewer toolbar
-  void setInstViewZoomState(bool isChecked) override;
-  void setInstViewEditState(bool isChecked) override;
-  void setInstViewSelectRectState(bool isChecked) override;
-  void setInstViewZoomMode() override;
-  void setInstViewEditMode() override;
-  void setInstViewSelectRectMode() override;
-  void setInstViewToolbarEnabled(bool enable) override;
-  void setRegionSelectorEnabled(bool enable) override;
   void setAngle(double angle) override;
   void setUpdateAngleButtonEnabled(bool enable) override;
-  // Region selector toolbar
-  void setEditROIState(bool state) override;
-  void setRectangularROIState(bool state) override;
-
-  std::vector<size_t> getSelectedDetectors() const override;
-  std::string getRegionType() const override;
-
-  QLayout *getRegionSelectorLayout() const override;
-  MantidQt::MantidWidgets::IPlotView *getLinePlotView() const override;
 
 private:
   Ui::PreviewWidget m_ui;
@@ -71,20 +52,10 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
 
   void connectSignals() const;
-  void loadToolbarIcons();
-  void setupSelectRegionTypes();
 
 private slots:
   void onLoadWorkspaceRequested() const;
   void onUpdateClicked() const;
-  void onInstViewSelectRectClicked() const;
-  void onInstViewZoomClicked() const;
-  void onInstViewEditClicked() const;
-  void onInstViewShapeChanged() const;
-  void onRegionSelectorExportToAdsClicked() const;
-  void onLinePlotExportToAdsClicked() const;
-  void onEditROIClicked() const;
-  void onAddRectangularROIClicked(QAction *regionType) const;
   void onAngleEdited();
   void onApplyClicked() const;
 };
