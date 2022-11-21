@@ -84,7 +84,6 @@ class FigureInteractionTest(unittest.TestCase):
             call('motion_notify_event', interactor.motion_event),
             call('resize_event', interactor.mpl_redraw_annotations),
             call('figure_leave_event', interactor.on_leave),
-            call('axis_leave_event', interactor.on_leave),
             call('scroll_event', interactor.on_scroll)
         ]
         fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
