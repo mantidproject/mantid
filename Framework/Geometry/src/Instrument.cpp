@@ -1021,6 +1021,7 @@ std::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const {
  * @param type :: A string with one of the values:
  *    3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,
  * SPHERICAL_Z
+ * @param defaultFlip :: whether the view should be flipped by default. Only relevant in 3D
  *    Caseless. If a wrong value is given logs a warning and sets the view to
  * "3D"
  */
