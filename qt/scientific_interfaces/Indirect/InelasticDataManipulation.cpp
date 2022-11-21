@@ -40,7 +40,7 @@ InelasticDataManipulation::InelasticDataManipulation(QWidget *parent) : Indirect
 
 InelasticDataManipulation::~InelasticDataManipulation() {}
 
-std::string InelasticDataManipulation::documentationPage() const { return "Indirect Data Manipulation"; }
+std::string InelasticDataManipulation::documentationPage() const { return "Inelastic Data Manipulation"; }
 
 /**
  * Called when the user clicks the Python export button.
