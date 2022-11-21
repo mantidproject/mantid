@@ -319,33 +319,37 @@ Code Freeze
 
 **Create the Release Branch (once most PR's are merged)**
 
-*  Ensure the latest `main nightly deployment pipeline
-   https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/`__
-   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
-   the next steps.
-*  Click ``Build Now`` on `open-release-testing
-   <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
-   to create the ``release-next`` branch and to prepare build jobs.
-*  Check the state of all open pull requests for this milestone and decide which
-   should be kept for the release, liaise with the Release Manager on this. Move any
-   pull requests not targeted for release out of the milestone, and then change the base branch
-   of the remaining pull requests to ``release-next``. You can use the following script
-   to update the base branches of these pull requests `update-pr-base-branch.py
-   <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`__
-   A quick example to show how the arguments should be provided to this script is seen below:
+* Ensure the latest `main nightly deployment pipeline
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
+  has passed for all build environments. If it fails, decide if a fix is needed before moving on to
+  the next steps.
+* Click ``Build Now`` on `open-release-testing
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
+  which will perform the following actions:
+
+  * Create or update the ``release-next`` branch.
+  * Enable the job to periodically merge ``release-next`` into ``main``.
+  * Enable the ``release-next_nightly_deployment`` pipeline.
+  * Disable the ``main_nightly_deployment_prototype`` pipeline.
+
+* Check the state of all open pull requests for this milestone and decide which
+  should be kept for the release, liaise with the Release Manager on this. Move any
+  pull requests not targeted for this release out of the milestone, and then change
+  the base branch of the remaining pull requests to ``release-next``. You can either
+  manually change the base branch in GitHub or use the following script to update
+  the base branches of these pull requests `update-pr-base-branch.py
+  <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`__
+  A quick example to show how the arguments should be provided to this script is seen below:
 
 .. code-block:: bash
 
     python update-pr-base-branch.py [milestone] [newbase] --token [generated_token]
     python update-pr-base-branch.py "Release 6.1" "release-next" --token fake123gener8ed456token
 
-*  Inform other developers that ``release-next`` has been created by posting to the
-   *\#announcements* slack channel. You can use an adapted version of the
-   following announcement:
-
-  .. code
-
-  The release branch for <version>, called ``release-next``, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
+* Inform other developers that ``release-next`` has been created by posting to the
+  *\#announcements* slack channel. You can use an adapted version of the
+  following announcement:
+    The release branch for <version>, called ``release-next``, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
 
 **Create Release Notes Skeleton**
 
@@ -366,31 +370,49 @@ Smoke Testing
 Check with the Quality Assurance Manager that the initial Manual testing has been completed, and any issues
 have been fixed. Then:
 
-*  Email ``mantid-builder@mantidproject.org`` and ask that a new token be generated for
-   the instrument updates and placed in the appropriate place in Jenkins.
-*  Check the release notes and verify that the "Under Construction" paragraph on the main
-   index page has been removed. Remove the paragraph if it still exists.
-*  Disable release deploy jobs by building the
-   `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
-   job.
+* Liaise with the release editor to ensure that they have completed all of their tasks.
+* Check the release notes and verify that the "Under Construction" paragraph on the main
+  index page has been removed. Remove the paragraph if it still exists.
+* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
+  job, which will do the following:
+
+  * Disable the job that periodically merges ``release-next`` into ``main``.
+  * Disable the ``release-next_nightly_deployment`` pipeline.
+  * Enable the ``main_nightly_deployment_prototype`` pipeline.
 
 **Create the Release Candidates**
 
-We are now ready to create the release candidates ready for Smoke testing.
+We are now ready to create the release candidates for Smoke testing.
 
-*  On the ``release-next`` branch, check whether the `git SHA
-   <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
-   for MSlice is up to date. If not, create a PR to update it.
-*  On the ``release-next`` branch, create a PR to update the `major & minor
-   <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
-   versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
-*  Ask a gatekeeper to: merge the ``release-next`` branch back to ``main`` locally, and then comment
-   out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
-   directly to the remote ``main`` without making a PR.
-*  Build the `release kit builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
-   and set the ``PACKAGE_SUFFIX`` parameter to an empty string
-*  Liaise with the Quality Assurance Manager and together announce the creation of the
-   Smoke testing issues and Release Candidates in the *\#general* slack channel.
+* On the ``release-next`` branch, check whether the `git SHA
+  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
+  for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
+* On the ``release-next`` branch, create a PR to update the `major & minor
+  <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
+  versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``. Ask a gatekeeper to merge the PR.
+* Ask a gatekeeper to merge the ``release-next`` branch back to ``main`` locally, and then comment
+  out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
+  directly to the remote ``main`` without making a PR.
+* Build the `release-next_nightly_deployment Jenkins pipeline <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
+  with the following parameters (most are already defaulted to the correct values):
+
+  * set ``BUILD_DEVEL`` to ``all``
+  * set ``BUILD_PACKAGE`` to ``all``
+  * set ``CONDA_RECIPES_BRANCH_NAME`` to ``main``
+  * set ``PACKAGE_SUFFIX`` to an **empty string**
+  * tick the ``PUBLISH_PACKAGES`` checkbox
+  * set the ``ANACONDA_CHANNEL`` to ``mantid``
+  * set the ``ANACONDA_CHANNEL_LABEL`` to ``rcN`` where ``N`` is an incremental build number for release
+    candidates, starting at ``1``
+  * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
+  * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.Z-rcN``, where ``X.Y.Z`` is the release number,
+    and ``N`` is an incremental build number for release candidates, starting at ``1``.
+
+* Once the packages have been published to GitHub and Anaconda, ask someone in the ISIS core or DevOps
+  team to manually sign the Windows binary and re-upload it to the github
+  `draft release <https://github.com/mantidproject/mantid/releases>`__.
+* Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
+  issues and Release Candidates in the *\#general* slack channel.
 
 Release Day
 ###########
@@ -398,26 +420,15 @@ Release Day
 Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
 have been fixed.
 
-*  Run the `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
-   job to put the packages, with the exception of Windows, on Sourceforge. Set ``SOURCEFORGE_DIR`` to <major version>.<minor version> (e.g. 6.3)
-
-  *  Have someone at ISIS sign the Windows binary and upload this manually to Sourceforge
-
-  *  Set the default package for each OS to the new version using the information icon
-     next to the file list on Sourceforge
-
-*  Draft a `new release <https://github.com/mantidproject/mantid/releases>`__ on
-   GitHub. The new tag should be created based off the release branch in the form ``vX.Y.Z``. The
-   description of the new release can be copied from the release notes ``index.rst`` file.
-*  Upload the packages to the GitHub release (essentially for a backup), and then publish it. This
-   will create the tag required to generate the DOI.
+*  Edit the `draft release <https://github.com/mantidproject/mantid/releases>`__ on
+   GitHub. A new tag should be created based off the release branch in the form ``vX.Y.Z``. The
+   description of the new release can be copied from the release notes ``index.rst`` file, and
+   edited appropriately. See previous release descriptions for inspiration.
+*  Publish the GitHub release. This will create the tag required to generate the DOI.
 *  Update the `download page <https://download.mantidproject.org>`__ by creating a PR after
    following the instructions in the `Adding a new release section
    <https://github.com/mantidproject/download.mantidproject.org#adding-a-new-release>`__. Once the
    new file in the `releases` directory is merged, Jenkins will publish the new page.
-*  Kick off the build for ``mantidXY`` on RHEL7 for the SNS with ``PACKAGE_SUFFIX`` set to
-   ``XY`` where ``X`` and ``Y`` correspond to the Major and Minor release version numbers:
-   https://builds.mantidproject.org/job/release_clean-rhel7/
 
 **Generate DOI**
 
