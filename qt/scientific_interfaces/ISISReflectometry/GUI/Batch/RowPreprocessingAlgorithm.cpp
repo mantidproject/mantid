@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowPreprocessingAlgorithm.h"
+#include "../../Reduction/IBatch.h"
+#include "../../Reduction/Instrument.h"
 #include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -29,6 +31,11 @@ void updateInputWorkspacesProperties(MantidQt::API::IAlgorithmRuntimeProps &prop
   AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
 
+void updateInstrumentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
+                                        Instrument const &instrument) {
+  AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
+}
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
@@ -39,7 +46,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
  * @param model : the reduction configuration model
  * @param row : the row from the preview tab
  */
-IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, PreviewRow &row, IAlgorithm_sptr alg) {
+IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, PreviewRow &row, IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
     alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISPreprocess");
@@ -51,6 +58,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   // Set the algorithm properties from the model
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updateInputWorkspacesProperties(*properties, row.runNumbers());
+  updateInstrumentSettingsProperties(*properties, model.instrument());
 
   // Return the configured algorithm
   auto jobAlgorithm =

@@ -8,6 +8,7 @@
 
 #include "../../../ISISReflectometry/GUI/Batch/RowPreprocessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
+#include "../../../ISISReflectometry/Reduction/Instrument.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -54,6 +55,9 @@ public:
     auto row = PreviewRow(inputRuns);
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
+    auto instrument = makeEmptyInstrument();
+    EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
+
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
     MantidQt::API::AlgorithmRuntimeProps expectedProps;
@@ -65,6 +69,26 @@ public:
       return setProps.existsProperty(name) &&
              expectedProps.getPropertyValue(name) == expectedProps.getPropertyValue(name);
     }))
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
+  }
+
+  void test_calibration_file_forwarded() {
+    auto batch = MockBatch();
+    auto row = PreviewRow(std::vector<std::string>{"12345"});
+    auto mockAlg = std::make_shared<StubbedPreProcess>();
+
+    auto instrument = makeInstrument();
+    EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
+
+    auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+    TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
+
+    const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
+    TS_ASSERT(setProps.existsProperty("CalibrationFile"));
+    TS_ASSERT_EQUALS(setProps.getPropertyValue("CalibrationFile"), instrument.calibrationFilePath());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
   }
 
   void test_row_is_updated_on_algorithm_complete() {
