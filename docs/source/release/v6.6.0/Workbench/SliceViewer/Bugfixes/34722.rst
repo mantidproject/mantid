@@ -1,0 +1,1 @@
+* Fix bug in sliceviewer where the line plots produced by the ROI tool were not updated if the cursor was released outside the axes.
