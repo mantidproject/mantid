@@ -84,8 +84,8 @@ class SaveHKLCW(PythonAlgorithm):
                     us = np.dot(RU.T, [np.sin(two_theta)*np.cos(az_phi),
                                        np.sin(two_theta)*np.sin(az_phi),
                                        np.cos(two_theta)]) # diffracted beam
-                    dir_cos_1 = np.dot(T.T,up).round(6)+0 # avoid writing -0.0
-                    dir_cos_2 = np.dot(T.T,us).round(6)+0
+                    dir_cos_1 = np.dot(T.T, up).round(6)+0 # avoid writing -0.0
+                    dir_cos_2 = np.dot(T.T, us).round(6)+0
                     f.write(
                         "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n"
                         .format(p.getH(), p.getK(), p.getL(), p.getIntensity(),
