@@ -491,12 +491,14 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXInt &data, const NXDou
     // this is the "Raw" case of D2B where data in NXS is filled in a 'snake' way: odd tubes are filled with
     // data from the start, and the even ones from the end.
     const auto pixelPerTube = data.dim2();
+    customDetectorIDs.resize(data.dim1() * pixelPerTube);
     for (auto tubeNo = 0; tubeNo < data.dim1(); tubeNo++) {
       for (auto pixelNo = 0; pixelNo < pixelPerTube; pixelNo++) {
-        int index = NUMBER_MONITORS + tubeNo * pixelPerTube + pixelNo; // direct filling order
+        const auto defaultSpectrumNo = tubeNo * pixelPerTube + pixelNo; // based-zero count of detectors
+        int index = defaultSpectrumNo + NUMBER_MONITORS; // direct filling order, shift by number of monitors
         if (tubeNo % 2 != 0)
-          index += (pixelPerTube - 1) - 2 * pixelNo; // inverted filling order
-        customDetectorIDs.push_back(index);
+          index += (pixelPerTube - 1) - 2 * pixelNo; // inverted order of pixels in odd numbered tubes
+        customDetectorIDs[defaultSpectrumNo] = index;
       }
     }
   }
