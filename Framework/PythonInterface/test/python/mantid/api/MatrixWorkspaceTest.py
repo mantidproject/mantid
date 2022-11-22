@@ -220,22 +220,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(np.array_equal(x_expected, x_extracted))
         self.assertTrue(np.array_equal(y_expected, y_extracted))
 
-    def test_setxy_accepts_python_list(self):
+    def test_setxye_accepts_python_list(self):
         nbins = 10
         nspec = 2
         xdata = list(range(nbins + 1))
         ydata = list(range(nbins))
+        edata = [0.1] * nbins
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nspec, XLength=nbins + 1, YLength=nbins)
         for i in range(nspec):
             ws.setX(i, xdata)
             ws.setY(i, ydata)
-
+            ws.setE(i, edata)
         # Verify
-        xdata, ydata = np.array(xdata), np.array(ydata)
-        x_expected, y_expected = np.vstack((xdata, xdata)), np.vstack((ydata, ydata))
-        x_extracted, y_extracted = ws.extractX(), ws.extractY()
+        xdata, ydata, edata = np.array(xdata), np.array(ydata), np.array(edata)
+        x_expected, y_expected, e_expected = np.vstack((xdata, xdata)), np.vstack((ydata, ydata)), np.vstack((edata, edata))
+        x_extracted, y_extracted, e_extracted = ws.extractX(), ws.extractY(), ws.extractE()
         self.assertTrue(np.array_equal(x_expected, x_extracted))
         self.assertTrue(np.array_equal(y_expected, y_extracted))
+        self.assertTrue(np.array_equal(e_expected, e_extracted))
 
     def test_data_can_be_extracted_to_numpy_successfully(self):
         x = self._test_ws.extractX()
