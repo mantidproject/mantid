@@ -4,8 +4,8 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="TOPAZ" valid-from   ="2022-05-23 00:00:00"
-              valid-to     ="2022-11-20 23:59:59"
+ name="TOPAZ" valid-from   ="2022-11-21 00:00:00"
+              valid-to     ="2100-01-31 23:59:59"
                      last-modified="2019-06-16 11:00:00">
 
   <!--Created by Vickie Lynch-->
@@ -58,6 +58,16 @@
         </rot>
       </location>
 </component> 
+
+<component type="panel" idstart="917504" idfillbyfirst="y" idstepbyrow="256">
+      <location x="0.226805" y="-0.241113" z="-0.312168" name="bank14">
+        <rot axis-x="0" axis-y="1" axis-z="0" val="-63.920201">
+          <rot axis-x="0" axis-y="0" axis-z="1" val="53.154399">
+            <rot axis-x="0" axis-y="1" axis-z="0" val="41.46696800000001"/>
+          </rot>
+        </rot>
+      </location>
+</component>
 
 <component type="panel" idstart="1048576" idfillbyfirst="y" idstepbyrow="256">
       <location x="-0.224955" y="-0.239862" z="-0.309789" name="bank16">
