@@ -425,6 +425,7 @@ signals:
   void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
   void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
   void sampleMaterialClicked(const QStringList &workspaceNames);
+  void sampleShapeClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
@@ -1060,10 +1061,10 @@ class ImageInfoWidget : public QTableWidget {
 %End
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
-    void cursorAt(const double x, const double y, const double signal);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
     %MethodCode
     try {
-      sipCpp->cursorAt(a0, a1, a2);
+      sipCpp->cursorAt(a0, a1, a2, *a3);
     } catch(const std::exception & exc) {
       SIP_BLOCK_THREADS
       PyErr_SetString(PyExc_RuntimeError, exc.what());

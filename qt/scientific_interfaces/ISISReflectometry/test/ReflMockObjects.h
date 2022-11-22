@@ -236,6 +236,7 @@ public:
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setSaved, void());
   MOCK_CONST_METHOD0(searchCriteria, SearchCriteria());
+  MOCK_CONST_METHOD0(getSearchResultsCSV, std::string());
 };
 
 class MockSearcherSubscriber : public SearcherSubscriber {
@@ -266,6 +267,7 @@ public:
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setUnsaved, void());
   MOCK_METHOD0(setSaved, void());
+  MOCK_CONST_METHOD0(getSearchResultsCSV, std::string());
 };
 
 class MockMessageHandler : public IReflMessageHandler {
@@ -282,6 +284,7 @@ class MockFileHandler : public IFileHandler {
 public:
   MOCK_METHOD2(saveJSONToFile, void(std::string const &, QMap<QString, QVariant> const &));
   MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
+  MOCK_CONST_METHOD2(saveCSVToFile, void(std::string const &, std::string const &));
 };
 
 class MockJobRunner : public IJobRunner {

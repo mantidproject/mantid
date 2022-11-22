@@ -237,7 +237,7 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         if q_min < 0. or q_min >= q_max:
             raise ValueError('qmin must be positive and smaller than qmax. '
-                             'Given qmin={0:.2f}, qmax={0:.2f}.'.format(q_min, q_max))
+                             'Given qmin={0:.2f}, qmax={1:.2f}.'.format(q_min, q_max))
         binning = self.getProperty('OutputBinning').value
         strategy = self.getPropertyValue('DefaultQBinning')
         if len(binning) == 0:

@@ -62,6 +62,7 @@ set(TEST_PY_FILES
     ReflectometryILLPreprocessTest.py
     ReflectometryISISSumBanksTest.py
     ReflectometryILLSumForegroundTest.py
+    ReflectometryISISCalibrationTest.py
     ReflectometryISISLoadAndProcessTest.py
     ReflectometryISISPreprocessTest.py
     ResNorm2Test.py

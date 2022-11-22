@@ -35,7 +35,7 @@ public:
     m_model->setQMin(0.8);
     m_model->setQWidth(0.05);
     m_model->setQMax(1.8);
-    m_model->setEFixed("0.4");
+    m_model->setEFixed(0.4);
     m_model->setRebinInEnergy(true);
   }
 
@@ -73,7 +73,7 @@ public:
     m_model->setQMin(0.8);
     m_model->setQWidth(0.05);
     m_model->setQMax(1.8);
-    m_model->setEFixed("0.4");
+    m_model->setEFixed(0.4);
 
     m_model->setupRebinAlgorithm(&batch);
     m_model->setupSofQWAlgorithm(&batch);
@@ -95,7 +95,7 @@ public:
     m_model->setQMin(0.8);
     m_model->setQWidth(0.05);
     m_model->setQMax(1.8);
-    m_model->setEFixed("0.4");
+    m_model->setEFixed(0.4);
     m_model->setRebinInEnergy(true);
 
     m_model->setupRebinAlgorithm(&batch);

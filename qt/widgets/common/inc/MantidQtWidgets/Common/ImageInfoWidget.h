@@ -10,6 +10,7 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Common/ImageInfoPresenter.h"
+#include <QMap>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,7 +25,10 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoWidget : public IImageInfoWidget {
 public:
   ImageInfoWidget(QWidget *parent = nullptr);
 
-  void cursorAt(const double x, const double y, const double signal) override;
+  // Note: QMap has sip binding via PyQt but only for specific types (both types have to be classes or the first type
+  // has to be int)
+  void cursorAt(const double x, const double y, const double signal,
+                const QMap<QString, QString> &extraValues) override;
   void setWorkspace(const Mantid::API::Workspace_sptr &ws) override;
   void showInfo(const ImageInfoModel::ImageInfo &info) override;
 

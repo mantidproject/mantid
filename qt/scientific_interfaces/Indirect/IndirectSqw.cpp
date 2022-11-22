@@ -7,11 +7,15 @@
 #include "IndirectSqw.h"
 #include "IndirectDataValidationHelper.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
+
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QFileInfo>
 
@@ -28,8 +32,8 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_model(std::make_unique<IndirectSqwModel>()),
+IndirectSqw::IndirectSqw(QWidget *parent)
+    : IndirectDataManipulationTab(parent), m_model(std::make_unique<IndirectSqwModel>()),
       m_view(std::make_unique<IndirectSqwView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraContour));
@@ -72,7 +76,7 @@ void IndirectSqw::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(dataName.toStdString());
     try {
-      auto const eFixed = getInstrumentDetail("Efixed").toStdString();
+      double eFixed = getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString()));
       m_model->setEFixed(eFixed);
     } catch (std::runtime_error const &ex) {
       emit showMessageBox(ex.what());

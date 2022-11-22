@@ -23,7 +23,7 @@ namespace IDA {
 // The assumption is made elsewhere that the ordering of these enums matches the
 // ordering of the
 // tabs as they appear in the interface itself.
-enum IDATabChoice { ELWIN, MSD_FIT, IQT, IQT_FIT, CONV_FIT, FQ_FIT };
+enum IDATabChoice { MSD_FIT, IQT_FIT, CONV_FIT, FQ_FIT };
 
 // Number of decimal places in property browsers.
 static const unsigned int NUM_DECIMALS = 6;

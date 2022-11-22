@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -101,10 +102,12 @@ public:
   void saveSettings(QSettings &settings) const override;
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
+  void expandPlotPanel();
   void selectTool(const ToolType tool);
   SelectionType getSelectionType() const { return m_selectionType; }
   std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
+  void resetOriginalWorkspace();
   void clearWidgets();
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
@@ -138,6 +141,7 @@ private slots:
   void updatePlotMultipleDetectors();
   void onRunRebin();
   void onRebinParamsWritten(const QString &text);
+  void onKeepOriginalStateChanged(int state);
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
@@ -197,7 +201,12 @@ private:
   QLineEdit *m_rebinParams;
   QCheckBox *m_rebinUseReverseLog;
   QCheckBox *m_rebinSaveToHisto;
+  QCheckBox *m_rebinKeepOriginal;
+  QLabel *m_rebinKeepOriginalWarning;
   QPushButton *m_runRebin;
+
+  /// The original workspace to be used for rebinning. Do not add this to the ADS (if you don't want a memory leak)
+  Mantid::API::Workspace_sptr m_originalWorkspace;
 
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;

@@ -23,6 +23,7 @@ set(TEST_FILES
     Runs/RunsPresenterTest.h
     Runs/CatalogRunNotifierTest.h
     Runs/QtCatalogSearcherTest.h
+    Runs/QtSearchModelTest.h
     Runs/SearchResultTest.h
     Options/OptionsDialogPresenterTest.h
     Common/ClipboardTest.h

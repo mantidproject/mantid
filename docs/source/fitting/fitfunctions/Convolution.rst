@@ -24,7 +24,7 @@ fitting interval.
 FFT mode
 ========
 
-if :math:`|A|` similar to :math:`|B|`, the function is evaluated
+if :math:`|A|` similar to :math:`|B|` or :math:`AB > 0`, the function is evaluated
 by first transforming :math:`R` and :math:`F` to the Fourier domain,
 multiplying the transforms, then transforming back to the original domain.
 The GSL FFT routines are used to do the actual transformations.
@@ -34,7 +34,7 @@ evaluated on different intervals. :math:`F` is computed on :math:`[A,B]`
 while :math:`R` is computed on :math:`[-\Delta/2, \Delta/2]`, where
 :math:`\Delta=B-A`.
 
-In the following example a :ref:`func-Convolution` is convolved with a
+In the following example a :ref:`func-Gaussian` is convolved with a
 box function:
 
 .. figure:: /images/Convolution.png

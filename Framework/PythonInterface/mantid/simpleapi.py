@@ -306,8 +306,7 @@ def fitting_algorithm(inout=False):
             # Check for unknown properties and warn they will not be used
             for key in list(kwargs.keys()):
                 if key not in algm:
-                    msg = 'Property {} to {} does not apply to any of the ' + \
-                          ' input workspaces'.format(key, function_name)
+                    msg = 'Property {} to {} does not apply to any of the input workspaces'.format(key, function_name)
                     logger.warning(msg)
                     del kwargs[key]
             set_properties(algm, **kwargs)

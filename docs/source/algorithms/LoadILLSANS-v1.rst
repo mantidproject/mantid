@@ -17,14 +17,16 @@ For D33, it supports both monochromatic and TOF modes.
 
 For D11 and D22 it supports the nominal and low resolution modes (pixel splitting).
 
-For D16, it supports monochromatic and scan mode. The `Wavelength` parameter is intended for old D16 files that may lack
-the wavelength value.
+For D16, it supports both monochromatic and scan mode. The `Wavelength` parameter is intended for old D16 files that may
+lack the wavelength value.
 
 It also supports the newer version for these instruments.
 
-The output is a histogram workspace with unit of wavelength (Angstrom), or the parameter being scanned for D16 scans.
-It has a single bin for monochromatic, many bins (ragged) for TOF mode for D33, and as many bins as there are scan
-points for D16.
+The output is a histogram workspace with unit of wavelength (Angstrom), or in the case of D16 scans,
+a point data workspace using the parameter being scanned as X axis.
+
+It has a single bin for monochromatic, many bins (ragged) for TOF mode for D33, and as many points as there are scan
+steps for D16.
 
 .. include:: ../usagedata-note.txt
 

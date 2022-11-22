@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "IndirectDataValidationHelper.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>
@@ -32,16 +33,20 @@ public:
   void setEMin(double eMin);
   void setEWidth(double eWidth);
   void setEMax(double eMax);
-  void setEFixed(const std::string &eFixed);
+  void setEFixed(const double eFixed);
   void setRebinInEnergy(bool scale);
+  std::string getEFixedFromInstrument(std::string const &instrumentName, std::string analyser,
+                                      std::string const &reflection);
   std::string getOutputWorkspace();
   MatrixWorkspace_sptr getRqwWorkspace();
   UserInputValidator validate(std::tuple<double, double> const qRange, std::tuple<double, double> const eRange);
 
 private:
+  MatrixWorkspace_sptr loadInstrumentWorkspace(const std::string &instrumentName, const std::string &analyser,
+                                               const std::string &reflection);
   std::string m_inputWorkspace;
   std::string m_baseName;
-  std::string m_eFixed;
+  double m_eFixed;
   double m_qLow;
   double m_qWidth = 0.05;
   double m_qHigh;

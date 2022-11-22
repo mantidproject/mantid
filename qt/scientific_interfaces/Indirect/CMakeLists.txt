@@ -26,12 +26,14 @@ set(SRC_FILES
     IndirectCorrections.cpp
     IndirectDataAnalysis.cpp
     IndirectDataAnalysisConvFitTab.cpp
-    IndirectDataAnalysisElwinTab.cpp
     IndirectDataAnalysisFqFitTab.cpp
-    IndirectDataAnalysisIqtTab.cpp
     IndirectDataAnalysisIqtFitTab.cpp
     IndirectDataAnalysisMSDFitTab.cpp
     IndirectDataAnalysisTab.cpp
+    IndirectDataManipulation.cpp
+    IndirectDataManipulationTab.cpp
+    IndirectDataManipulationElwinTab.cpp
+    IndirectDataManipulationIqtTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -123,12 +125,14 @@ set(MOC_FILES
     IndirectCorrections.h
     IndirectDataAnalysis.h
     IndirectDataAnalysisConvFitTab.h
-    IndirectDataAnalysisElwinTab.h
     IndirectDataAnalysisFqFitTab.h
     IndirectDataAnalysisIqtFitTab.h
-    IndirectDataAnalysisIqtTab.h
     IndirectDataAnalysisMSDFitTab.h
     IndirectDataAnalysisTab.h
+    IndirectDataManipulation.h
+    IndirectDataManipulationTab.h
+    IndirectDataManipulationElwinTab.h
+    IndirectDataManipulationIqtTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
@@ -220,7 +224,8 @@ set(UI_FILES
     IndirectBayes.ui
     IndirectCorrections.ui
     IndirectDataAnalysis.ui
-    IndirectDataAnalysisElwinTab.ui
+    IndirectDataManipulationElwinTab.ui
+    IndirectDataManipulation.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
     IndirectEditResultsDialog.ui
@@ -242,7 +247,7 @@ set(UI_FILES
     IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
-    IndirectDataAnalysisIqtTab.ui
+    IndirectDataManipulationIqtTab.ui
     Quasi.ui
     ResNorm.ui
     Stretch.ui

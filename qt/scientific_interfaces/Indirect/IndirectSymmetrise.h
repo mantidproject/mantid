@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "IndirectDataManipulationTab.h"
 
 #include "IndirectSymmetriseModel.h"
 #include "IndirectSymmetriseView.h"
@@ -39,11 +39,11 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport IndirectSymmetrise : public IndirectDataReductionTab {
+class DLLExport IndirectSymmetrise : public IndirectDataManipulationTab {
   Q_OBJECT
 
 public:
-  IndirectSymmetrise(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  IndirectSymmetrise(QWidget *parent = nullptr);
   ~IndirectSymmetrise() override;
 
   void setup() override;

@@ -255,14 +255,14 @@ void LoadILLSANS::setNumberOfMonitors() { m_numberOfMonitors = this->m_instrumen
  */
 void LoadILLSANS::getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
                                     int &numberOfPixelsPerTube) {
-  if (m_instrumentName == "D16B") {
+  if (m_isD16Omega) {
     numberOfChannels = data.dim0();
     numberOfTubes = data.dim1();
     numberOfPixelsPerTube = data.dim2();
   } else {
     numberOfPixelsPerTube = data.dim1();
-    numberOfChannels = m_isD16Omega ? data.dim0() : data.dim2();
-    numberOfTubes = m_isD16Omega ? data.dim2() : data.dim0();
+    numberOfChannels = data.dim2();
+    numberOfTubes = data.dim0();
   }
   g_log.debug() << "Dimensions found:\n- Number of tubes: " << numberOfTubes
                 << "\n- Number of pixels per tube: " << numberOfPixelsPerTube
@@ -287,7 +287,8 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   data.load();
   size_t numberOfHistograms;
 
-  m_isD16Omega = (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
+  // determine if the data comes from a D16 scan
+  m_isD16Omega = (data.dim0() >= 1 && data.dim2() > 1 && m_instrumentName == "D16");
 
   if (m_instrumentName == "D16") {
     const size_t numberOfWiresInD16B = 1152;
@@ -313,17 +314,16 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   createEmptyWorkspace(numberOfHistograms, numberOfChannels, type);
   loadMetaData(firstEntry, instrumentPath);
 
-  std::vector<double> binning;
-
-  binning =
-      m_instrumentName == "D16B" ? getOmegaBinning(firstEntry, "data_scan/scanned_variables/data") : m_defaultBinning;
+  std::vector<double> binning = m_isD16Omega && numberOfChannels > 1
+                                    ? getOmegaBinning(firstEntry, "data_scan/scanned_variables/data")
+                                    : m_defaultBinning;
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, binning, 0);
-  if (m_instrumentName != "D16B") {
+  if (!m_isD16Omega || data.dim0() == 1) { // second condition covers legacy D16 omega scans with single scan point
     loadDataFromMonitors(firstEntry, nextIndex);
   } else
-    loadDataFromD16BMonitor(firstEntry, nextIndex, binning);
+    loadDataFromD16ScanMonitors(firstEntry, nextIndex, binning);
 
   if (data.dim1() == 128) {
     m_resMode = "low";
@@ -617,11 +617,13 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
  * @param binning: the binning to assign the monitor values
  * @return the new workspace index on which to load next
  */
-size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, size_t firstIndex,
-                                            const std::vector<double> &binning) {
+size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
+                                                const std::vector<double> &binning) {
   std::string path = "/data_scan/scanned_variables/data";
 
   // the monitor is the fourth scanned variable
+  // we could verify that by reading the /data_scan/scanned_variables/variable_names/name entry, if only nexus knew how
+  // to read string arrays.
   uint32_t monitorIndex = 3;
 
   NXData scannedVariablesData = firstEntry.openNXData(path);
@@ -632,8 +634,19 @@ size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, si
 
   const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
   m_localWorkspace->setCounts(firstIndex, counts);
-  HistogramData::Points points = HistogramData::Points(binning);
-  m_localWorkspace->setPoints(firstIndex, points);
+
+  if (m_instrumentName == "D16" && scannedVariables.dim1() == 1) {
+    // This is the old D16 data scan format. It is pain.
+    // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
+    // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
+    // handle errors completely differently in this case.
+    // We distinguish it from D16 data in the new format but checking there is only one slice of the omega scan
+    const HistogramData::BinEdges binEdges(binning);
+    m_localWorkspace->setBinEdges(firstIndex, binEdges);
+  } else {
+    HistogramData::Points points = HistogramData::Points(binning);
+    m_localWorkspace->setPoints(firstIndex, points);
+  }
 
   // Add average monitor counts to a property:
   double averageMonitorCounts =
@@ -647,6 +660,19 @@ size_t LoadILLSANS::loadDataFromD16BMonitor(const NeXus::NXEntry &firstEntry, si
   }
 
   firstIndex++;
+
+  if (m_instrumentName == "D16") {
+    // the old D16 has 2 monitors, the second being empty but still needing a binning
+
+    if (scannedVariables.dim1() == 1) {
+      const HistogramData::BinEdges binEdges(binning);
+      m_localWorkspace->setBinEdges(firstIndex, binEdges);
+    } else {
+      HistogramData::Points points = HistogramData::Points(binning);
+      m_localWorkspace->setPoints(firstIndex, points);
+    }
+    firstIndex++;
+  }
   return firstIndex;
 }
 
@@ -664,7 +690,7 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
   int numberOfTubes, numberOfChannels, numberOfPixelsPerTube;
   getDataDimensions(data, numberOfChannels, numberOfTubes, numberOfPixelsPerTube);
 
-  if (m_instrumentName == "D16B") {
+  if (m_isD16Omega) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
     for (int tubeIndex = 0; tubeIndex < numberOfTubes; ++tubeIndex) {
       for (int pixelIndex = 0; pixelIndex < numberOfPixelsPerTube; ++pixelIndex) {
@@ -678,8 +704,14 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
 
         m_localWorkspace->setCounts(index, histoCounts);
         m_localWorkspace->setCountVariances(index, histoVariances);
-        const HistogramData::Points histoPoints(timeBinning);
-        m_localWorkspace->setPoints(index, histoPoints);
+
+        if (m_instrumentName == "D16" && numberOfChannels == 1) {
+          const HistogramData::BinEdges histoPoints(timeBinning);
+          m_localWorkspace->setBinEdges(index, histoPoints);
+        } else {
+          const HistogramData::Points histoPoints(timeBinning);
+          m_localWorkspace->setPoints(index, histoPoints);
+        }
       }
     }
   } else {

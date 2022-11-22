@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid import config
+from mantid import config, FileFinder
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace,
                               CropWorkspace, GroupWorkspaces, Rebin)
@@ -14,6 +14,8 @@ from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
 class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
+    _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data_INTER45455.dat")
+
     def setUp(self):
         self._oldFacility = config['default.facility']
         if self._oldFacility.strip() == '':
@@ -550,6 +552,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['ReflectometryReductionOneAuto', 'GroupWorkspaces']
         self._check_history(AnalysisDataService.retrieve('IvsQ_binned_38415'), history)
+
+    def test_algorithm_passes_calibration_filepath_to_preprocessing_step(self):
+        args = self._default_options
+        args['InputRunList'] = 'INTER45455'
+        del args['ProcessingInstructions']
+        args['CalibrationFile'] = self._CALIBRATION_TEST_DATA
+        args['AnalysisMode'] = 'MultiDetectorAnalysis'
+        outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'Calib_Table_45455', 'TOF_45455_summed_segment']
+        self._assert_run_algorithm_succeeds(args, outputs)
 
     # TODO test if no runNumber is on the WS
 
