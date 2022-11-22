@@ -121,7 +121,6 @@ set(SRC_FILES
     src/ParameterReference.cpp
     src/ParameterTie.cpp
     src/PeakFunctionIntegrator.cpp
-    src/PreviewDeclarations.cpp
     src/PreviewManager.cpp
     src/Progress.cpp
     src/Projection.cpp
