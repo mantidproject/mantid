@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
 
 
 class GSAS2Presenter(object):
@@ -21,6 +22,8 @@ class GSAS2Presenter(object):
             self.view.set_default_gss_files)
         self.prm_filepath_observer_gsas2 = GenericObserverWithArgPassing(
             self.view.set_default_prm_files)
+        self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces,
+                                               self.replace_workspace, self.rename_workspace)
         if not test:
             self.connect_view_signals()
 
@@ -90,3 +93,29 @@ class GSAS2Presenter(object):
         x_minimum = self.model.x_min[int(current_histogram_index)-1]
         x_maximum = self.model.x_max[int(current_histogram_index)-1]
         self.view.set_x_limits(x_minimum, x_maximum)
+
+    # ========================
+    # Sample Logs ADS observer
+    # ========================
+
+    def remove_workspace(self, ws_name):
+        if ws_name in self.model.get_all_workspace_names():
+            self.model.remove_workspace(ws_name)
+        elif ws_name in self.model.get_log_workspaces_name():
+            self.model.update_sample_log_workspace_group()
+
+    def rename_workspace(self, old_name, new_name):
+        # Note - ws.name() not updated yet so need to rely on new_name parameter
+        # Also Note - ADS rename is always associated with a ADS replace so
+        # rely on the replace to _repopulate_table. Prefer not to call twice
+        # to avoid issue with legend entries doubling up
+        if old_name in self.model.get_all_workspace_names():
+            self.model.update_workspace_name(old_name, new_name)
+
+    # handle ADS clear
+    def clear_workspaces(self):
+        self.model.clear_workspaces()
+
+    def replace_workspace(self, name, workspace):
+        if name in self.model.get_all_workspace_names():
+            self.model.replace_workspace(name, workspace)

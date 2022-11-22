@@ -707,6 +707,10 @@ class GSAS2Model(object):
         if test:
             return table
 
+    # ===========
+    # Sample Logs
+    # ===========
+
     def load_focused_nxs_for_logs(self, filenames):
         if len(filenames) == 1 and "all_banks" in filenames[0]:
             filenames = [filenames[0].replace("all_banks", "bank_1"), filenames[0].replace("all_banks", "bank_2")]
@@ -727,6 +731,80 @@ class GSAS2Model(object):
             else:
                 logger.warning(f"File {ws_name} has already been loaded")
         self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+
+    def update_sample_log_workspace_group(self):
+        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+
+    def get_all_workspace_names(self):
+        return self._data_workspaces.get_loaded_workpace_names() + self._data_workspaces.get_bgsub_workpace_names()
+
+    def get_log_workspaces_name(self):
+        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
+        return [ws.name() for ws in current_log_workspaces] if current_log_workspaces else ''
+
+    def set_log_workspaces_none(self):
+        # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
+        self._sample_logs_workspace_group.clear_log_workspaces()
+
+    # handle ADS remove. name workspace has already been deleted
+    def remove_workspace(self, name):
+        ws_loaded = self._data_workspaces.get(name, None)
+        if ws_loaded:
+            bgsub_ws_name = self._data_workspaces[name].bgsub_ws_name
+            removed = self._data_workspaces.pop(name).loaded_ws
+            # deleting bg sub workspace will generate further remove_workspace event so ensure this is done after
+            # removing record from _data_workspaces to avoid circular call
+            if bgsub_ws_name:
+                DeleteWorkspace(bgsub_ws_name)
+            self.update_sample_log_workspace_group()
+            return removed
+        else:
+            ws_loaded_name = self._data_workspaces.get_loaded_workspace_name_from_bgsub(name)
+            if ws_loaded_name:
+                removed = self._data_workspaces[ws_loaded_name].bgsub_ws
+                self._data_workspaces[ws_loaded_name].bgsub_ws = None
+                self._data_workspaces[ws_loaded_name].bgsub_ws_name = None
+                self._data_workspaces[ws_loaded_name].bg_params = []
+                return removed
+
+    def replace_workspace(self, name, workspace):
+        self._data_workspaces.replace_workspace(name, workspace)
+
+    def update_workspace_name(self, old_name, new_name):
+        if new_name not in self.get_all_workspace_names():
+            self._data_workspaces.rename(old_name, new_name)
+            current_log_values = self._sample_logs_workspace_group.get_log_values()
+            if old_name in current_log_values:
+                self._sample_logs_workspace_group.update_log_value(new_key=new_name, old_key=old_name)
+        else:
+            logger.warning(f"There already exists a workspace with name {new_name}.")
+            self.update_sample_log_workspace_group()
+
+    # handle ADS clear
+    def clear_workspaces(self):
+        self._data_workspaces.clear()
+        self.set_log_workspaces_none()
+
+    def delete_workspaces(self):
+        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
+        if current_log_workspaces:
+            ws_name = current_log_workspaces.name()
+            self._sample_logs_workspace_group.clear_log_workspaces()
+            DeleteWorkspace(ws_name)
+        removed_ws_list = []
+        for ws_name in self._data_workspaces.get_loaded_workpace_names():
+            removed_ws_list.extend(self.delete_workspace(ws_name))
+        return removed_ws_list
+
+    def delete_workspace(self, loaded_ws_name):
+        removed = self._data_workspaces.pop(loaded_ws_name)
+        removed_ws_list = [removed.loaded_ws]
+        DeleteWorkspace(removed.loaded_ws)
+        if removed.bgsub_ws:
+            DeleteWorkspace(removed.bgsub_ws)
+            removed_ws_list.append(removed.bgsub_ws)
+            self.update_sample_log_workspace_group()
+        return removed_ws_list
 
     # =========
     # Plotting
