@@ -41,14 +41,27 @@
       }
     },
     {
-      "name": "win",
-      "displayName": "win",
+      "name": "win-msvc",
+      "displayName": "win-msvc",
       "description": "Default build options for a windows conda build",
       "binaryDir": "${sourceDir}/build",
       "generator": "Visual Studio 16 2019",
       "cacheVariables": {
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
         "CONDA_ENV": true
+      }
+    },
+    {
+      "name": "win-ninja",
+      "displayName": "win-ninja",
+      "description": "Default build options for a windows conda Ninja DebugWithRelRuntime build",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
+      "cacheVariables": {
+	"CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
+	"CONDA_ENV": true,
+	"CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
+	"USE_PRECOMPILED_HEADERS": "OFF"
       }
     },
     {
@@ -176,6 +189,18 @@
         "COVERAGE": "OFF",
         "TESTING_TIMEOUT": "1200",
         "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
+      }
+    },
+    {
+      "name": "cppcheck-ci",
+      "displayName": "cppcheck-ci",
+      "description": "To be used in the cppcheck CI environment only",
+      "binaryDir": "${sourceDir}/build",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CPPCHECK_GENERATE_XML": "TRUE",
+        "ENABLE_PRECOMMIT": "OFF"
       }
     }
   ]
