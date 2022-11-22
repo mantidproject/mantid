@@ -431,7 +431,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
-        elif event.dblclick and event.button == data_view.canvas.buttond.get(Qt.LeftButton):
+        elif event.dblclick and event.button == data_view.canvas.buttond.get(Qt.LeftButton)\
+                and not data_view.nonorthogonal_mode:
             if (data_view.ax.xaxis.contains(event)[0]
                  or any(tick.contains(event)[0] for tick in data_view.ax.get_xticklabels())):
                 editor = XAxisEditor(data_view.canvas, data_view.ax)
