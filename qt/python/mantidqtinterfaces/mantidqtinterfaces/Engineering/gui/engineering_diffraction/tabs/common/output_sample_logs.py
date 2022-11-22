@@ -29,7 +29,8 @@ def _generate_workspace_name(filepath):
 
 class SampleLogsGroupWorkspace(object):
 
-    def __init__(self):
+    def __init__(self, called_from_gsas2_tab=False):
+        self.enable_logging = not called_from_gsas2_tab
         self._log_names = []
         self._log_workspaces = None  # GroupWorkspace
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
@@ -37,7 +38,7 @@ class SampleLogsGroupWorkspace(object):
     def create_log_workspace_group(self):
         # run information table
         run_info = self.make_runinfo_table()
-        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs')
+        self._log_workspaces = GroupWorkspaces([run_info], OutputWorkspace='logs', EnableLogging=self.enable_logging)
         # a table per logs
         logs = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "logs")
         if logs:
@@ -47,13 +48,13 @@ class SampleLogsGroupWorkspace(object):
                 self._log_workspaces.add(log)
 
     def make_log_table(self, log):
-        ws_log = CreateEmptyTableWorkspace(OutputWorkspace=log)
+        ws_log = CreateEmptyTableWorkspace(OutputWorkspace=log, EnableLogging=self.enable_logging)
         ws_log.addColumn(type="float", name="avg")
         ws_log.addColumn(type="float", name="stdev")
         return ws_log
 
     def make_runinfo_table(self):
-        run_info = CreateEmptyTableWorkspace()
+        run_info = CreateEmptyTableWorkspace(EnableLogging=self.enable_logging)
         run_info.addColumn(type="str", name="Instrument")
         run_info.addColumn(type="int", name="Run")
         run_info.addColumn(type="str", name="Bank")
@@ -104,7 +105,7 @@ class SampleLogsGroupWorkspace(object):
                 if log in self._log_values[ws_name]:
                     avg, stdev = self._log_values[ws_name][log]  # already averaged
                 elif log in currentRunLogs:
-                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
+                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False, EnableLogging=self.enable_logging)
                 else:
                     avg, stdev = nullLogValue
                 self._log_values[ws_name][log] = [avg, stdev]  # update model dict (even if nan)
@@ -118,7 +119,7 @@ class SampleLogsGroupWorkspace(object):
         self.update_log_group_name()
 
     def remove_log_rows(self, row_numbers):
-        DeleteTableRows(TableWorkspace=self._log_workspaces, Rows=list(row_numbers))
+        DeleteTableRows(TableWorkspace=self._log_workspaces, Rows=list(row_numbers), EnableLogging=self.enable_logging)
         self.update_log_group_name()
 
     def remove_all_log_rows(self):
@@ -129,7 +130,7 @@ class SampleLogsGroupWorkspace(object):
         if self._log_workspaces:
             ws_name = self._log_workspaces.name()
             self._log_workspaces = None
-            DeleteWorkspace(ws_name)
+            DeleteWorkspace(ws_name, EnableLogging=self.enable_logging)
 
     def update_log_group_name(self):
         run_info = ADS.retrieve('run_info')
@@ -137,7 +138,8 @@ class SampleLogsGroupWorkspace(object):
             runs = run_info.column('Run')
             name = f"{run_info.row(0)['Instrument']}_{min(runs)}-{max(runs)}_logs"
             if not name == self._log_workspaces.name():
-                RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
+                RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name,
+                                EnableLogging=self.enable_logging)
         else:
             self.delete_logs()
 

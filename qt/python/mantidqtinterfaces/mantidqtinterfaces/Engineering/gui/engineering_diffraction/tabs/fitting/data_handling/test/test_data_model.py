@@ -227,7 +227,7 @@ class TestFittingDataModel(unittest.TestCase):
         new_name = f"{mock_table.row()['Instrument']}_{min(mock_table.column())}-{max(mock_table.column())}_logs"
         mock_rename.assert_called_with(
             InputWorkspace=self.model._sample_logs_workspace_group.get_log_workspaces().name(),
-            OutputWorkspace=new_name)
+            OutputWorkspace=new_name, EnableLogging=True)
 
     @patch(output_sample_log_path + '.DeleteWorkspace')
     @patch(output_sample_log_path + ".ADS")
@@ -243,7 +243,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._sample_logs_workspace_group.remove_log_rows([0])
 
         mock_delrows.assert_called_once()
-        mock_delws.assert_called_with(name)
+        mock_delws.assert_called_with(name, EnableLogging=True)
         self.assertEqual(None, self.model._sample_logs_workspace_group.get_log_workspaces())
 
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_workspace_group")
@@ -350,7 +350,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertEqual(self.model._sample_logs_workspace_group._log_values["name1"]["LogName"], [1.0, 1.0])
         mock_writerow.assert_any_call(self.model._sample_logs_workspace_group._log_workspaces[1], [1.0, 1.0], 3)
-        mock_avglogs.assert_called_with("name1", LogName="LogName", FixZero=False)
+        mock_avglogs.assert_called_with("name1", LogName="LogName", FixZero=False, EnableLogging=True)
         mock_update_logname.assert_called_once()
 
     @patch(output_sample_log_path + ".write_table_row")

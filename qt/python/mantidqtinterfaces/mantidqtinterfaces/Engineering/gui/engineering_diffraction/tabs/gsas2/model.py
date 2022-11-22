@@ -59,7 +59,7 @@ class GSAS2Model(object):
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
         self._data_workspaces = FittingWorkspaceRecordContainer()
-        self._sample_logs_workspace_group = SampleLogsGroupWorkspace()
+        self._sample_logs_workspace_group = SampleLogsGroupWorkspace(called_from_gsas2_tab=True)
         self.phase_names_list = None
 
     def clear_input_components(self):
@@ -490,7 +490,8 @@ class GSAS2Model(object):
         self.data_x_max = []
         number_of_regions = 0
         for input_file in self.data_files:
-            loop_focused_workspace = LoadGSS(Filename=input_file, OutputWorkspace="GSASII_input_data")
+            loop_focused_workspace = LoadGSS(Filename=input_file, OutputWorkspace="GSASII_input_data",
+                                             EnableLogging=False)
             for workspace_index in range(loop_focused_workspace.getNumberHistograms()):
                 self.data_x_min.append(loop_focused_workspace.readX(workspace_index)[0])
                 self.data_x_max.append(loop_focused_workspace.readX(workspace_index)[-1])
@@ -677,7 +678,8 @@ class GSAS2Model(object):
         y_data = np.concatenate((y_obs, y_calc, y_diff, y_bkg))
 
         gsas_histogram = CreateWorkspace(OutputWorkspace=f"gsas_histogram_{histogram_index}",
-                                         DataX=np.tile(my_data[0], 4), DataY=y_data, NSpec=4)
+                                         DataX=np.tile(my_data[0], 4), DataY=y_data, NSpec=4,
+                                         EnableLogging=False)
         return gsas_histogram
 
     def load_gsas_reflections_per_histogram_for_plot(self, histogram_index):
@@ -706,9 +708,10 @@ class GSAS2Model(object):
             # cannot generate a valid reflections workspace. If one with the same project_name exists, remove it.
             # This is to cover the case where a user runs a Pawley then Rietveld Refinement for the same project_name.
             if ADS.doesExist(f"{self.project_name}_GSASII_reflections"):
-                DeleteWorkspace(f"{self.project_name}_GSASII_reflections")
+                DeleteWorkspace(f"{self.project_name}_GSASII_reflections", EnableLogging=False)
             return None
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections")
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections",
+                                          EnableLogging=False)
         table.addReadOnlyColumn("str", "Histogram name")
         table.addReadOnlyColumn("str", "Phase name")
         table.addReadOnlyColumn("str", "Reflections")
@@ -728,7 +731,8 @@ class GSAS2Model(object):
 
     def create_instrument_parameter_table(self, test=False):
         INST_TABLE_PARAMS = ["Histogram name", "Sigma-1", "Gamma (Y)"]
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_instrument_parameters")
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_instrument_parameters",
+                                          EnableLogging=False)
         table.addReadOnlyColumn("str", "Histogram name")
         table.addReadOnlyColumn("double", "Sigma-1{}".format(" (Refined)" if self.refine_sigma_one else ""))
         table.addReadOnlyColumn("double", "Gamma (Y){}".format(" (Refined)" if self.refine_gamma else ""))
@@ -757,7 +761,8 @@ class GSAS2Model(object):
         LATTICE_TABLE_PARAMS = ["length_a", "length_b", "length_c",
                                 "angle_alpha", "angle_beta", "angle_gamma", "volume"]
 
-        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters")
+        table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_lattice_parameters",
+                                          EnableLogging=False)
         table.addReadOnlyColumn("str", "Phase name")
 
         for param in LATTICE_TABLE_PARAMS:
@@ -789,7 +794,7 @@ class GSAS2Model(object):
             ws_name = _generate_workspace_name(filename)
             if ws_name not in self._data_workspaces.get_loaded_workpace_names():
                 try:
-                    ws = Load(filename, OutputWorkspace=ws_name)
+                    ws = Load(filename, OutputWorkspace=ws_name, EnableLogging=False)
                     if ws.getNumberHistograms() == 1:
                         self._data_workspaces.add(ws_name, loaded_ws=ws)
                     else:
