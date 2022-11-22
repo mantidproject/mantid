@@ -470,8 +470,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         args = {"InputRunList": [run], "EventMode": event_mode}
         calibration_filepath = self.getPropertyValue("CalibrationFile")
         if calibration_filepath:
-            args["CalibrationFile"] = calibration_filepath
-        alg = self.createChildAlgorithm("ReflectometryISISPreprocess", **args)
+            args['CalibrationFile'] = calibration_filepath
+            args[Prop.DEBUG] = self.getPropertyValue(Prop.DEBUG)
+        alg = self.createChildAlgorithm('ReflectometryISISPreprocess', **args)
         alg.setRethrows(True)
         alg.execute()
 

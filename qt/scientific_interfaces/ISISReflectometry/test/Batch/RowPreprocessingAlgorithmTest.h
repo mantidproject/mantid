@@ -56,7 +56,9 @@ public:
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
     auto instrument = makeEmptyInstrument();
+    auto experiment = makeEmptyExperiment();
     EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
+    EXPECT_CALL(batch, experiment()).WillOnce(ReturnRef(experiment));
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
@@ -73,13 +75,15 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
   }
 
-  void test_calibration_file_forwarded() {
+  void test_calibration_properties_forwarded() {
     auto batch = MockBatch();
     auto row = PreviewRow(std::vector<std::string>{"12345"});
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
     auto instrument = makeInstrument();
+    auto experiment = makeExperiment();
     EXPECT_CALL(batch, instrument()).WillOnce(ReturnRef(instrument));
+    EXPECT_CALL(batch, experiment()).WillOnce(ReturnRef(experiment));
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
@@ -87,6 +91,8 @@ public:
     const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
     TS_ASSERT(setProps.existsProperty("CalibrationFile"));
     TS_ASSERT_EQUALS(setProps.getPropertyValue("CalibrationFile"), instrument.calibrationFilePath());
+    TS_ASSERT(setProps.existsProperty("Debug"));
+    TS_ASSERT_EQUALS(setProps.getPropertyValue("Debug"), "1");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&batch));
   }

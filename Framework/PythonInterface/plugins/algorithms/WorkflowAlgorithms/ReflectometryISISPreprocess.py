@@ -23,7 +23,8 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _OUTPUT_WS = "OutputWorkspace"
     _MONITOR_WS = "MonitorWorkspace"
     _EVENT_MODE = "EventMode"
-    _CALIBRATION_FILE = "CalibrationFile"
+    _CALIBRATION_FILE = 'CalibrationFile'
+    _DEBUG = 'Debug'
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -56,11 +57,9 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             doc="The preprocessed output workspace. If multiple input runs are specified "
             "they will be summed into a single output workspace.",
         )
-        self.declareProperty(
-            MatrixWorkspaceProperty(self._MONITOR_WS, "", direction=Direction.Output, optional=PropertyMode.Optional),
-            doc="The loaded monitors workspace. This is only output in event mode.",
-        )
-        self.copyProperties("ReflectometryISISCalibration", [self._CALIBRATION_FILE])
+        self.declareProperty(MatrixWorkspaceProperty(self._MONITOR_WS, '', direction=Direction.Output, optional=PropertyMode.Optional),
+            doc='The loaded monitors workspace. This is only output in event mode.')
+        self.copyProperties('ReflectometryISISCalibration', [self._CALIBRATION_FILE, self._DEBUG])
 
     def PyExec(self):
         workspace, monitor_ws = self._loadRun(self.getPropertyValue(self._RUNS))
@@ -105,6 +104,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         alg = self.createChildAlgorithm("ReflectometryISISCalibration")
         alg.setProperty("InputWorkspace", ws)
         alg.setProperty("CalibrationFile", calibration_filepath)
+        alg.setProperty("Debug", self.getPropertyValue(self._DEBUG))
         alg.execute()
         calibrated_ws = alg.getProperty("OutputWorkspace").value
         self.log().information("Calibrated workspace")

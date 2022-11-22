@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RowPreprocessingAlgorithm.h"
+#include "../../Reduction/Experiment.h"
 #include "../../Reduction/IBatch.h"
 #include "../../Reduction/Instrument.h"
 #include "AlgorithmProperties.h"
@@ -36,6 +37,11 @@ void updateInstrumentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &p
   AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
 }
 
+void updateExperimentSettingsProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
+                                        Experiment const &experiment) {
+  AlgorithmProperties::update("Debug", experiment.debug(), properties);
+}
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
@@ -59,6 +65,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   updateInputWorkspacesProperties(*properties, row.runNumbers());
   updateInstrumentSettingsProperties(*properties, model.instrument());
+  updateExperimentSettingsProperties(*properties, model.experiment());
 
   // Return the configured algorithm
   auto jobAlgorithm =
