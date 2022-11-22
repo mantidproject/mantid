@@ -6,11 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS script generator for elastic powder data.
+DNS script generator model for elastic powder data.
 """
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import \
-    DNSDataset
+import numpy as np
+
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import \
+    DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
     get_normalisation
 from mantidqtinterfaces.dns_powder_tof.script_generator. \
@@ -21,6 +23,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     # pylint: disable=too-many-instance-attributes
     # having the options as instance attributes, is much better readable
     # none of them are public
+
     def __init__(self, parent):
         super().__init__(parent)
         self._script = []
@@ -46,9 +49,6 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _check_all_fields_there(self, fields):
         ts = all(field in fields
                  for field in ['x_sf', 'y_sf', 'z_sf', 'z_nsf'])
-        if not ts:
-            self.raise_error("Not all fields necessary found for XYZ "
-                             "analysis.")
         return ts
 
     @staticmethod
@@ -86,8 +86,6 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         if not self._xyz:
             return lines
         for sample, fields in self._sample_data.data_dic.items():
-            if not self._check_all_fields_there(fields):
-                break
             lines += self._get_xyz_field_string(sample)
             for sample_type in ['nuclear_coh', 'magnetic', 'spin_incoh']:
                 lines += [self._get_to_matrix_string(sample, sample_type)]
@@ -102,9 +100,6 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                 if (field.endswith('_sf')
                         and (f'{field[:-2]}nsf' in fields.keys())):
                     nsf_sf_pairs.append(f"{sample}_{field[:-3]}")
-            if not nsf_sf_pairs:
-                self.raise_error("No pair of SF and NSF measurements"
-                                 f" found for {sample}")
         return nsf_sf_pairs
 
     def _get_non_magnetic_lines(self):
@@ -132,19 +127,19 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return lines
 
     def _setup_sample_data(self, paths, file_selector):
-        self._sample_data = DNSDataset(data=file_selector['full_data'],
-                                       path=paths['data_dir'],
-                                       is_sample=True)
+        self._sample_data = DNSElasticDataset(data=file_selector['full_data'],
+                                              path=paths['data_dir'],
+                                              is_sample=True)
         self._plot_list = [
             'mat_' + x for x in self._sample_data.create_subtract()
         ]
 
     def _setup_standard_data(self, paths, file_selector):
         if self._corrections:
-            self._standard_data = DNSDataset(data=file_selector['standard_data_tree_model'],
-                                             path=paths['standards_dir'],
-                                             is_sample=False,
-                                             fields=self._sample_data.fields)
+            self._standard_data = DNSElasticDataset(data=file_selector['standard_data_tree_model'],
+                                                    path=paths['standards_dir'],
+                                                    is_sample=False,
+                                                    fields=self._sample_data.fields)
 
     @staticmethod
     def _get_header_lines():
@@ -197,15 +192,14 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         if len(self._sample_data.keys()) == 1:
             self._loop = "for workspace in wss_sample['" \
                          f"{list(self._sample_data.keys())[0]}']:"
-            self._spac = "\n" + " " * 4
+            self._spacing = "\n" + " " * 4
         else:
             self._loop = "for sample, workspacelist in wss_sample.items(): " \
                          "\n    for workspace in workspacelist:"
-            self._spac = "\n" + " " * 8
+            self._spacing = "\n" + " " * 8
 
     def _get_subtract_bg_from_standard_lines(self):
-
-        if self._vanac or self._nicrc:
+        if self._vana_correction or self._nicr_correction:
             return [
                 "",
                 "# subtract background from vanadium and nicr",
@@ -216,39 +210,39 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return []
 
     def _get_background_string(self):
-        if self._sampb:
-            return f"{self._spac}background_subtraction(workspace, " \
-                   f"factor={self._backfac})"
+        if self._sample_background_correction:
+            return f"{self._spacing}background_subtraction(workspace, " \
+                   f"factor={self._background_factor})"
         return ""
 
-    def _get_vana_cstring(self):
-        if self._vanac:
-            return f"{self._spac}vanadium_correction(workspace," \
+    def _get_vana_correction_string(self):
+        if self._vana_correction:
+            return f"{self._spacing}vanadium_correction(workspace," \
                    " vana_set=standard_data['vana'], " \
-                   f"ignore_vana_fields={self._ign_vana}, " \
-                   f"sum_vana_sf_nsf={self._sum_sfnsf})"
+                   f"ignore_vana_fields={self._ignore_vana}, " \
+                   f"sum_vana_sf_nsf={self._sum_sf_nsf})"
         return ""
 
     def _get_sample_corrections_lines(self):
         background_string = self._get_background_string()
-        vana_cstring = self._get_vana_cstring()
-        if self._sampb or self._vanac:
+        vana_correction_string = self._get_vana_correction_string()
+        if self._sample_background_correction or self._vana_correction:
             return [
                 "", "# correct sample data",
-                f"{self._loop}{background_string}{vana_cstring}"
+                f"{self._loop}{background_string}{vana_correction_string}"
             ]
         return []
 
     def _get_nicr_cor_lines(self):
-        if self._nicrc:
+        if self._nicr_correction:
             return [
-                f"{self._loop}{self._spac}flipping_ratio_correction(workspace)"
+                f"{self._loop}{self._spacing}flipping_ratio_correction(workspace)"
             ]
         return []
 
     def _get_ascii_save_string(self):
         if self._ascii:
-            return (f"{self._spac}"
+            return (f"{self._spacing}"
                     "SaveAscii('mat_{}'.format(workspace), "
                     f"'{self._export_path}/"
                     "{}.csv'.format(workspace)"
@@ -257,27 +251,27 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_nexus_save_string(self):
         if self._nexus:
-            return (f"{self._spac}SaveNexus"
+            return (f"{self._spacing}SaveNexus"
                     "('mat_{}'.format(workspace), "
                     f"'{self._export_path}/"
                     "{}.nxs'.format("
                     "workspace))")
         return ""
 
-    def _get_convert_to_matrix_lines(self, savestring):
+    def _get_convert_to_matrix_lines(self, save_string):
         lines = [
             "", "# convert the output sample MDHistoWorkspaces to MatrixWorkspaces",
             f"{self._loop}{self._spacing}ConvertMDHistoToMatrixWorkspace"
             "(workspace, Outputworkspace='mat_{}'.format(workspace), "
-            f"Normalization='NoNormalization'){savestring}", ""
+            f"Normalization='NoNormalization'){save_string}", ""
         ]
         return lines
 
     def _get_save_string(self):
         ascii_string = self._get_ascii_save_string()
         nexus_string = self._get_nexus_save_string()
-        savestrings = [x for x in [ascii_string, nexus_string] if x]
-        return "".join(savestrings)
+        save_strings = [x for x in [ascii_string, nexus_string] if x]
+        return "".join(save_strings)
 
     def script_maker(self, options, paths, file_selector=None):
         self._script = []
@@ -297,7 +291,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         self._export_path = paths['export_dir']
         self._ascii = (paths['ascii'] and paths['export']
                        and bool(self._export_path))
-        self._nexus = (paths["nexus"] and paths["export"]
+        self._nexus = (paths['nexus'] and paths['export']
                        and bool(self._export_path))
         self._norm = get_normalisation(options)
 
@@ -327,22 +321,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             self._add_lines_to_script(self._get_xyz_lines())
             self._add_lines_to_script(self._get_non_magnetic_lines())
 
-        # starting writing script
-        self._add_lines_to_script(self._get_header_lines())
-        self._add_lines_to_script(self._get_sample_data_lines())
-        self._add_lines_to_script(self._get_standard_data_lines())
-        self._add_lines_to_script(self._get_binning_lines())
-        self._add_lines_to_script(self._get_load_data_lines())
-        self._add_lines_to_script(self._get_subtract_bg_from_standard_lines())
-        self._add_lines_to_script(self._get_sample_corrections_lines())
-        self._add_lines_to_script(self._get_nicr_cor_lines())
-        save_string = self._get_save_string()
-        self._add_lines_to_script(
-            self._get_convert_to_matrix_lines(save_string))
-        self._add_lines_to_script(self._get_xyz_lines())
-        self._add_lines_to_script(self._get_nonmag_lines())
-
-        return self._script, ''
+        return self._script, error_message
 
     def get_plot_list(self):
         return self._plot_list
