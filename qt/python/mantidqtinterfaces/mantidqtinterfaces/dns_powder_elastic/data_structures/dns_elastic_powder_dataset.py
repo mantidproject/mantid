@@ -43,25 +43,21 @@ class DNSElasticDataset(ObjectDict):
         """
         Formatting the dictionary to a nicely indented string.
         """
-        for fields in self.data_dic.values():
+        dataset = self.data_dic
+        for fields in dataset.values():
             for field, file_numbers in fields.items():
                 if field != 'path':
                     fields[field] = list_to_multirange(file_numbers)
 
-        l_lens = max(len(a) for a in self.data_dic) + 6 + 4
+        tab_indent = 4
+        special_char_indent = 5
         dataset_string = '{\n'
-        for sample_name, fields in self.data_dic.items():
-            lmax = max([len(key) for key in fields] + [0])
-
-            dataset_string += f"'{sample_name:s}' : {{".rjust(l_lens)
-
-            dataset_string += f"{' ' * (lmax - 4)}'path' : " \
-                              f"'{fields.pop('path')}" \
-                              f"',\n"
-            dataset_string += ",\n".join([
-                f"{' ' * (lmax - len(key) + l_lens)}'{key:s}' : {value}"
-                for key, value in sorted(fields.items())
-            ])
+        for sample_name, fields in dataset.items():
+            dataset_string += "".rjust(tab_indent)
+            dataset_string += _get_sample_string(sample_name)
+            dataset_string += _get_path_string(dataset, sample_name)
+            total_indent = tab_indent + special_char_indent + len(sample_name)
+            dataset_string += _get_field_string(fields, total_indent)
             dataset_string += "},\n"
         dataset_string += "}"
         return dataset_string
@@ -165,7 +161,12 @@ def get_proposal_from_filename(filename, file_number):
 
 
 def get_sample_fields(sample_data):
-    return set(entry['field'] for entry in sample_data)
+    field_list = []
+    for entry in sample_data:
+        field = field_dict.get(entry['field'], entry['field'])
+        field_list.append(field)
+    field_set =set(field_list)
+    return field_set
 
 
 def create_dataset(data, path):
@@ -219,3 +220,20 @@ def get_bank_positions(sample_data, rounding_limit=0.05):
         if not inside:
             new_arr.append(bank)
     return new_arr
+
+
+def _get_path_string(dataset, sample_name):
+    path = dataset[sample_name].pop('path')
+    return f"'path': '{path}',\n"
+
+
+def _get_sample_string(sample_name):
+    return f"'{sample_name:s}': {{"
+
+
+def _get_field_string(fields, line_indent):
+    field_items = sorted(fields.items())
+    spacer = "".rjust(line_indent)
+    string_list = [(f"{spacer}'{key:s}': {value}")
+                   for key, value in field_items]
+    return ",\n".join(string_list)
