@@ -45,6 +45,9 @@ void ALFView::initLayout() {
   mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
   mainWidget->addWidget(splitter);
 
+  mainWidget->setCollapsible(0, false);
+  mainWidget->setCollapsible(1, false);
+
   auto centralWidget = new QWidget();
   auto verticalLayout = new QVBoxLayout(centralWidget);
   verticalLayout->addWidget(mainWidget);
