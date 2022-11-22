@@ -435,12 +435,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 and not data_view.nonorthogonal_mode:
             if (data_view.ax.xaxis.contains(event)[0]
                  or any(tick.contains(event)[0] for tick in data_view.ax.get_xticklabels())):
-                editor = XAxisEditor(data_view.canvas, data_view.ax)
+                editor = SliceViewXAxisEditor(data_view.canvas, data_view.ax, self)
                 editor.move(QCursor.pos())
                 editor.exec_()
             elif (data_view.ax.yaxis.contains(event)[0]
                   or any(tick.contains(event)[0] for tick in data_view.ax.get_yticklabels())):
-                editor = YAxisEditor(data_view.canvas, data_view.ax)
+                editor = SliceViewYAxisEditor(data_view.canvas, data_view.ax, self)
                 editor.move(QCursor.pos())
                 editor.exec_()
 
@@ -541,3 +541,25 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             extra_cols = {}
         return extra_cols
+
+
+class SliceViewXAxisEditor(XAxisEditor):
+
+    def __init__(self, canvas, axes, slice_viewer):
+        super(SliceViewXAxisEditor, self).__init__(canvas, axes)
+        self.sv = slice_viewer
+
+    def on_ok(self):
+        super(SliceViewXAxisEditor, self).on_ok()
+        self.sv.dimensions_changed()
+
+
+class SliceViewYAxisEditor(YAxisEditor):
+
+    def __init__(self, canvas, axes, slice_viewer):
+        super(SliceViewYAxisEditor, self).__init__(canvas, axes)
+        self.sv = slice_viewer
+
+    def on_ok(self):
+        super(SliceViewYAxisEditor, self).on_ok()
+        self.sv.dimensions_changed()
