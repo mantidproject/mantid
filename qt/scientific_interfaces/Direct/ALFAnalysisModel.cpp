@@ -128,7 +128,7 @@ MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &ra
 
   ADS.remove(FIT_BASE_NAME + "_Workspace");
   ADS.remove(FIT_BASE_NAME + "_Parameters");
-  ADS.remove(FIT_BASE_NAME + "_NormalisedCovarianceWorkspace");
+  ADS.remove(FIT_BASE_NAME + "_NormalisedCovarianceMatrix");
 
   return fitWorkspace;
 }

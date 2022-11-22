@@ -85,7 +85,7 @@ void ALFInstrumentView::fileLoaded() {
 
 void ALFInstrumentView::notifyShapeChanged() { m_presenter->notifyShapeChanged(); }
 
-MantidWidgets::InstrumentActor const &ALFInstrumentView::getInstrumentActor() const {
+MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() const {
   return m_instrumentWidget->getInstrumentActor();
 }
 

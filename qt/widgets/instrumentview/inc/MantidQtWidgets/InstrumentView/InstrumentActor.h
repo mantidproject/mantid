@@ -45,6 +45,90 @@ namespace MantidWidgets {
 
 class InstrumentRenderer;
 
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IInstrumentActor {
+public:
+  virtual void draw(bool picking = false) const = 0;
+  virtual void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
+                              const bool excludeMonitors) const = 0;
+
+  virtual void setComponentVisible(size_t componentIndex) = 0;
+  virtual void setAllComponentsVisibility(bool /*on*/) = 0;
+  virtual bool hasChildVisible() const = 0;
+
+  virtual std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const = 0;
+  virtual std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const = 0;
+  virtual const Mantid::Geometry::ComponentInfo &componentInfo() const = 0;
+  virtual const Mantid::Geometry::DetectorInfo &detectorInfo() const = 0;
+
+  virtual std::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const = 0;
+  virtual void setMaskMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr wsMask) const = 0;
+  virtual void invertMaskWorkspace() const = 0;
+  virtual std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const = 0;
+  virtual std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const = 0;
+  virtual void applyMaskWorkspace() = 0;
+  virtual void addMaskBinsData(const std::vector<size_t> &indices) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr extractCurrentMask() const = 0;
+  virtual void clearMasks() = 0;
+
+  virtual bool isInitialized() const = 0;
+
+  virtual const ColorMap &getColorMap() const = 0;
+  virtual void loadColorMap(const std::pair<QString, bool> & /*cmap*/, bool reset_colors = true) = 0;
+
+  virtual void changeScaleType(int /*type*/) = 0;
+  virtual void changeNthPower(double /*nth_power*/) = 0;
+  virtual std::pair<QString, bool> getCurrentColorMap() const = 0;
+  virtual void setAutoscaling(bool /*on*/) = 0;
+  virtual bool autoscaling() const = 0;
+
+  virtual void setIntegrationRange(const double &xmin, const double &xmax) = 0;
+  virtual double minValue() const = 0;
+  virtual double maxValue() const = 0;
+  virtual void setMinValue(double value) = 0;
+  virtual void setMaxValue(double value) = 0;
+  virtual void setMinMaxRange(double vmin, double vmax) = 0;
+  virtual double minPositiveValue() const = 0;
+  virtual double minBinValue() const = 0;
+  virtual double maxBinValue() const = 0;
+  virtual double minWkspBinValue() const = 0;
+  virtual double maxWkspBinValue() const = 0;
+  virtual bool wholeRange() const = 0;
+
+  virtual size_t ndetectors() const = 0;
+  virtual size_t getDetectorByDetID(Mantid::detid_t detID) const = 0;
+  virtual Mantid::detid_t getDetID(size_t pickID) const = 0;
+  virtual std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const = 0;
+  virtual Mantid::Geometry::ComponentID getComponentID(size_t pickID) const = 0;
+  virtual const Mantid::Kernel::V3D getDetPos(size_t pickID) const = 0;
+  virtual const std::vector<Mantid::detid_t> &getAllDetIDs() const = 0;
+  virtual size_t getWorkspaceIndex(size_t index) const = 0;
+  virtual std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const = 0;
+  virtual double getIntegratedCounts(size_t index) const = 0;
+  virtual void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const = 0;
+
+  virtual void updateColors() = 0;
+  virtual void showGuides(bool /*on*/) = 0;
+  virtual bool areGuidesShown() const = 0;
+
+  virtual void initMaskHelper() const = 0;
+  virtual bool hasMaskWorkspace() const = 0;
+  virtual bool hasBinMask() const = 0;
+  virtual QString getParameterInfo(size_t index) const = 0;
+  virtual std::string getDefaultAxis() const = 0;
+  virtual std::string getDefaultView() const = 0;
+  virtual std::string getInstrumentName() const = 0;
+  virtual std::vector<std::string> getStringParameter(const std::string &name, bool recursive = true) const = 0;
+
+  virtual void loadFromProject(const std::string &lines) = 0;
+  virtual std::string saveToProject() const = 0;
+  virtual const std::vector<size_t> &components() const = 0;
+
+  virtual bool hasGridBank() const = 0;
+  virtual size_t getNumberOfGridLayers() const = 0;
+  virtual void setGridLayer(bool isUsingLayer, int layer) const = 0;
+  virtual const InstrumentRenderer &getInstrumentRenderer() const = 0;
+};
+
 /**
 \class  InstrumentActor
 \brief  InstrumentActor class is wrapper actor for the instrument.
@@ -57,7 +141,7 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject, public IInstrumentActor {
   Q_OBJECT
 public:
   /// Invalid workspace index in detector index to workspace index lookup
@@ -74,120 +158,121 @@ public:
   ~InstrumentActor();
 
   /// Draw the instrument in 3D
-  void draw(bool picking = false) const;
+  void draw(bool picking = false) const override;
   /// Return the bounding box in 3D
-  void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound, const bool excludeMonitors) const;
+  void getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
+                      const bool excludeMonitors) const override;
   /// Set a component (and all its children) visible.
-  void setComponentVisible(size_t componentIndex);
+  void setComponentVisible(size_t componentIndex) override;
   /// Set visibilit of all components.
-  void setAllComponentsVisibility(bool /*on*/);
+  void setAllComponentsVisibility(bool /*on*/) override;
   /// Check if any child is visible
-  bool hasChildVisible() const;
+  bool hasChildVisible() const override;
   /// Get the underlying instrument
-  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
+  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const override;
   /// Get the associated data workspace
-  std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
-  const Mantid::Geometry::ComponentInfo &componentInfo() const;
-  const Mantid::Geometry::DetectorInfo &detectorInfo() const;
+  std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const override;
+  const Mantid::Geometry::ComponentInfo &componentInfo() const override;
+  const Mantid::Geometry::DetectorInfo &detectorInfo() const override;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
-  std::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const override;
   /// set the mask workspace
-  void setMaskMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr wsMask) const;
+  void setMaskMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr wsMask) const override;
   /// inverts the internal mask workspace
-  void invertMaskWorkspace() const;
+  void invertMaskWorkspace() const override;
   /// Get the mask displayed but not yet applied as a IMaskWorkspace
-  std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
-  std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;
+  std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const override;
+  std::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const override;
   /// Apply the mask in the attached mask workspace to the data.
-  void applyMaskWorkspace();
+  void applyMaskWorkspace() override;
   /// Add a range of bins for masking
-  void addMaskBinsData(const std::vector<size_t> &indices);
+  void addMaskBinsData(const std::vector<size_t> &indices) override;
   /// Remove the attached mask workspace without applying the mask.
   /// Remove the bin masking data.
-  void clearMasks();
+  void clearMasks() override;
 
-  bool isInitialized() const { return m_initialized; }
+  bool isInitialized() const override { return m_initialized; }
 
   /// Get the color map.
-  const ColorMap &getColorMap() const;
+  const ColorMap &getColorMap() const override;
   /// Load a new color map from a file
-  void loadColorMap(const std::pair<QString, bool> & /*cmap*/, bool reset_colors = true);
+  void loadColorMap(const std::pair<QString, bool> & /*cmap*/, bool reset_colors = true) override;
   /// Change the colormap scale type.
-  void changeScaleType(int /*type*/);
+  void changeScaleType(int /*type*/) override;
   /// Change the colormap power scale exponent.
-  void changeNthPower(double /*nth_power*/);
+  void changeNthPower(double /*nth_power*/) override;
   /// Get the file name of the current color map.
-  std::pair<QString, bool> getCurrentColorMap() const { return m_currentCMap; }
+  std::pair<QString, bool> getCurrentColorMap() const override { return m_currentCMap; }
   /// Toggle colormap scale autoscaling.
-  void setAutoscaling(bool /*on*/);
+  void setAutoscaling(bool /*on*/) override;
   /// extracts a mask workspace from the visualised workspace
-  Mantid::API::MatrixWorkspace_sptr extractCurrentMask() const;
+  Mantid::API::MatrixWorkspace_sptr extractCurrentMask() const override;
 
   /// Get colormap scale autoscaling status.
-  bool autoscaling() const { return m_autoscaling; }
+  bool autoscaling() const override { return m_autoscaling; }
 
   /// Set the integration range.
-  void setIntegrationRange(const double &xmin, const double &xmax);
+  void setIntegrationRange(const double &xmin, const double &xmax) override;
   /// Get the minimum data value on the color map scale.
-  double minValue() const { return m_DataMinScaleValue; }
+  double minValue() const override { return m_DataMinScaleValue; }
   /// Get the maximum data value on the color map scale.
-  double maxValue() const { return m_DataMaxScaleValue; }
+  double maxValue() const override { return m_DataMaxScaleValue; }
   /// Set the minimum data value on the color map scale.
-  void setMinValue(double value);
+  void setMinValue(double value) override;
   /// Set the maximum data value on the color map scale.
-  void setMaxValue(double value);
+  void setMaxValue(double value) override;
   /// Set both the minimum and the maximum data values on the color map scale.
-  void setMinMaxRange(double vmin, double vmax);
+  void setMinMaxRange(double vmin, double vmax) override;
   /// Get the smallest positive data value in the data. Used by the log20 scale.
-  double minPositiveValue() const { return m_DataPositiveMinValue; }
+  double minPositiveValue() const override { return m_DataPositiveMinValue; }
   /// Get the lower bound of the integration range.
-  double minBinValue() const { return m_BinMinValue; }
+  double minBinValue() const override { return m_BinMinValue; }
   /// Get the upper bound of the integration range.
-  double maxBinValue() const { return m_BinMaxValue; }
+  double maxBinValue() const override { return m_BinMaxValue; }
   /// Get the workspace min bin
-  double minWkspBinValue() const { return m_WkspBinMinValue; }
+  double minWkspBinValue() const override { return m_WkspBinMinValue; }
   /// Get the workspace max bin
-  double maxWkspBinValue() const { return m_WkspBinMaxValue; }
+  double maxWkspBinValue() const override { return m_WkspBinMaxValue; }
   /// Return true if the integration range covers the whole of the x-axis in the
   /// data workspace.
-  bool wholeRange() const;
+  bool wholeRange() const override;
 
   /// Get the number of detectors in the instrument.
-  size_t ndetectors() const;
+  size_t ndetectors() const override;
   /// Get a detector index by a detector ID.
-  size_t getDetectorByDetID(Mantid::detid_t detID) const;
+  size_t getDetectorByDetID(Mantid::detid_t detID) const override;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
-  Mantid::detid_t getDetID(size_t pickID) const;
-  std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
+  Mantid::detid_t getDetID(size_t pickID) const override;
+  std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const override;
   /// Get a component ID for a non-detector.
-  Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
+  Mantid::Geometry::ComponentID getComponentID(size_t pickID) const override;
   /// Get position of a detector by a pick ID converted form a color in the pick
   /// image.
-  const Mantid::Kernel::V3D getDetPos(size_t pickID) const;
+  const Mantid::Kernel::V3D getDetPos(size_t pickID) const override;
   /// Get a vector of IDs of all detectors in the instrument.
-  const std::vector<Mantid::detid_t> &getAllDetIDs() const;
+  const std::vector<Mantid::detid_t> &getAllDetIDs() const override;
   /// Get displayed color of a detector by its index.
   GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector Index.
-  size_t getWorkspaceIndex(size_t index) const;
+  size_t getWorkspaceIndex(size_t index) const override;
   /// Get the workspace indices of a list of detectors by their detector Index
-  std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const;
+  std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const override;
   /// Get the integrated counts of a detector by its detector Index.
-  double getIntegratedCounts(size_t index) const;
+  double getIntegratedCounts(size_t index) const override;
   /// Sum the counts in detectors
   void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y, size_t size) const;
   /// Sum the counts in detectors.
   void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y) const;
   /// Calc indexes for min and max bin values
-  void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const;
+  void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const override;
 
   /// Update the detector colors to match the integrated counts within the
   /// current integration range.
-  void updateColors();
+  void updateColors() override;
   /// Toggle display of the guide and other non-detector instrument components
-  void showGuides(bool /*on*/);
+  void showGuides(bool /*on*/) override;
   /// Get the guide visibility status
-  bool areGuidesShown() const { return m_showGuides; }
+  bool areGuidesShown() const override { return m_showGuides; }
 
   static void BasisRotation(const Mantid::Kernel::V3D &Xfrom, const Mantid::Kernel::V3D &Yfrom,
                             const Mantid::Kernel::V3D &Zfrom, const Mantid::Kernel::V3D &Xto,
@@ -198,25 +283,25 @@ public:
 
   /* Masking */
 
-  void initMaskHelper() const;
-  bool hasMaskWorkspace() const;
-  bool hasBinMask() const;
-  QString getParameterInfo(size_t index) const;
-  std::string getDefaultAxis() const;
-  std::string getDefaultView() const;
+  void initMaskHelper() const override;
+  bool hasMaskWorkspace() const override;
+  bool hasBinMask() const override;
+  QString getParameterInfo(size_t index) const override;
+  std::string getDefaultAxis() const override;
+  std::string getDefaultView() const override;
   std::string getInstrumentName() const;
-  std::vector<std::string> getStringParameter(const std::string &name, bool recursive = true) const;
+  std::vector<std::string> getStringParameter(const std::string &name, bool recursive = true) const override;
   /// Load the state of the actor from a Mantid project file.
-  void loadFromProject(const std::string &lines);
+  void loadFromProject(const std::string &lines) override;
   /// Save the state of the actor to a Mantid project file.
-  std::string saveToProject() const;
+  std::string saveToProject() const override;
   /// Returns indices of all non-detector components in Instrument.
-  const std::vector<size_t> &components() const { return m_components; }
+  const std::vector<size_t> &components() const override { return m_components; }
 
-  bool hasGridBank() const;
-  size_t getNumberOfGridLayers() const;
-  void setGridLayer(bool isUsingLayer, int layer) const;
-  const InstrumentRenderer &getInstrumentRenderer() const;
+  bool hasGridBank() const override;
+  size_t getNumberOfGridLayers() const override;
+  void setGridLayer(bool isUsingLayer, int layer) const override;
+  const InstrumentRenderer &getInstrumentRenderer() const override;
 
 signals:
   void colorMapChanged() const;

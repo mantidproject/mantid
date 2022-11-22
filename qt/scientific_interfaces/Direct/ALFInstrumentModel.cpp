@@ -234,7 +234,7 @@ void ALFInstrumentModel::setSelectedDetectors(Mantid::Geometry::ComponentInfo co
 }
 
 std::tuple<MatrixWorkspace_sptr, std::vector<double>>
-ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
+ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
   std::vector<double> twoThetas;
   if (m_detectorIndices.empty()) {
     return {nullptr, twoThetas};
@@ -252,8 +252,8 @@ ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::In
   return {workspace, twoThetas};
 }
 
-void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
-                                          std::vector<double> &y, std::vector<double> &e,
+void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor,
+                                          std::vector<double> &x, std::vector<double> &y, std::vector<double> &e,
                                           std::vector<double> &twoThetas) const {
   auto const &componentInfo = actor.componentInfo();
   auto const &detectorInfo = actor.detectorInfo();
@@ -274,11 +274,11 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::InstrumentAct
 
 void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
                                             std::vector<double> &twoThetas,
-                                            MantidQt::MantidWidgets::InstrumentActor const &actor,
+                                            MantidQt::MantidWidgets::IInstrumentActor const &actor,
                                             MatrixWorkspace_const_sptr const &workspace,
                                             Mantid::Geometry::ComponentInfo const &componentInfo,
                                             Mantid::Geometry::DetectorInfo const &detectorInfo) const {
-  auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor);
+  auto const nDetectorsPerTube = numberOfDetectorsPerTube(componentInfo);
   auto const samplePosition = componentInfo.samplePosition();
   auto const instrument = actor.getInstrument();
 
@@ -312,13 +312,12 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
   appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
 }
 
-std::size_t ALFInstrumentModel::numberOfDetectorsPerTube(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
-  auto const &componentInfo = actor.componentInfo();
+std::size_t ALFInstrumentModel::numberOfDetectorsPerTube(Mantid::Geometry::ComponentInfo const &componentInfo) const {
   return componentInfo.detectorsInSubtree(componentInfo.parent(m_detectorIndices[0])).size();
 }
 
-std::size_t ALFInstrumentModel::numberOfTubes(MantidQt::MantidWidgets::InstrumentActor const &actor) const {
-  auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor);
+std::size_t ALFInstrumentModel::numberOfTubes(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
+  auto const nDetectorsPerTube = numberOfDetectorsPerTube(actor.componentInfo());
   if (nDetectorsPerTube == 0u) {
     return 0u;
   }

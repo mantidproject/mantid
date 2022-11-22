@@ -26,7 +26,7 @@ class FileFinderWidget;
 }
 
 namespace MantidWidgets {
-class InstrumentActor;
+class IInstrumentActor;
 class InstrumentWidget;
 } // namespace MantidWidgets
 
@@ -47,7 +47,7 @@ public:
   virtual std::optional<std::string> getFile() = 0;
   virtual void setRunQuietly(std::string const &runNumber) = 0;
 
-  virtual MantidWidgets::InstrumentActor const &getInstrumentActor() const = 0;
+  virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
   virtual Mantid::Geometry::ComponentInfo const &componentInfo() const = 0;
 
   virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
@@ -71,7 +71,7 @@ public:
   std::optional<std::string> getFile() override;
   void setRunQuietly(std::string const &runNumber) override;
 
-  MantidWidgets::InstrumentActor const &getInstrumentActor() const override;
+  MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
   Mantid::Geometry::ComponentInfo const &componentInfo() const override;
 
   std::vector<std::size_t> getSelectedDetectors() const override;

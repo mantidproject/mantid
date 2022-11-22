@@ -24,7 +24,7 @@ class DetectorInfo;
 namespace MantidQt {
 
 namespace MantidWidgets {
-class InstrumentActor;
+class IInstrumentActor;
 }
 
 namespace CustomInterfaces {
@@ -41,9 +41,10 @@ public:
 
   virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
                                     std::vector<std::size_t> const &detectorIndices) = 0;
+  virtual std::vector<std::size_t> selectedDetectors() const = 0;
 
   virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
-  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const = 0;
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -58,20 +59,21 @@ public:
 
   void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
                             std::vector<std::size_t> const &detectorIndices) override;
+  inline std::vector<std::size_t> selectedDetectors() const noexcept override { return m_detectorIndices; };
 
   std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
-  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::InstrumentActor const &actor) const override;
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
 private:
-  void collectXAndYData(MantidQt::MantidWidgets::InstrumentActor const &actor, std::vector<double> &x,
+  void collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor, std::vector<double> &x,
                         std::vector<double> &y, std::vector<double> &e, std::vector<double> &twoThetas) const;
   void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe, std::vector<double> &twoThetas,
-                          MantidQt::MantidWidgets::InstrumentActor const &actor,
+                          MantidQt::MantidWidgets::IInstrumentActor const &actor,
                           Mantid::API::MatrixWorkspace_const_sptr const &workspace,
                           Mantid::Geometry::ComponentInfo const &componentInfo,
                           Mantid::Geometry::DetectorInfo const &detectorInfo) const;
-  std::size_t numberOfDetectorsPerTube(MantidQt::MantidWidgets::InstrumentActor const &actor) const;
-  std::size_t numberOfTubes(MantidQt::MantidWidgets::InstrumentActor const &actor) const;
+  std::size_t numberOfDetectorsPerTube(Mantid::Geometry::ComponentInfo const &componentInfo) const;
+  std::size_t numberOfTubes(MantidQt::MantidWidgets::IInstrumentActor const &actor) const;
 
   std::vector<std::size_t> m_detectorIndices;
 };
