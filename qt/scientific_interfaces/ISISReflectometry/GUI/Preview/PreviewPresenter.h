@@ -49,6 +49,7 @@ public:
     std::unique_ptr<IPreviewModel> model;
     std::unique_ptr<IJobManager> jobManager;
     std::unique_ptr<IInstViewModel> instViewModel;
+    std::unique_ptr<IPreviewDockedWidgets> dockedWidgets{nullptr};
     std::unique_ptr<MantidQt::Widgets::IRegionSelector> regionSelector{nullptr};
     std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> plotPresenter{nullptr};
   };
@@ -95,11 +96,11 @@ public:
 
 private:
   IPreviewView *m_view{nullptr};
-  std::unique_ptr<IPreviewDockedWidgets> m_dockedWidgets{nullptr};
   IBatchPresenter *m_mainPresenter{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
+  std::unique_ptr<IPreviewDockedWidgets> m_dockedWidgets{nullptr};
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;
