@@ -123,7 +123,15 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {"InputWorkspace": ws, "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Calibration file path must be provided")
 
-    def _check_detector_positions(self, workspace, expected_positions, pos_type="final"):
+    def test_exception_raised_if_invalid_calibration_filepath_supplied(self):
+        input_ws_name = 'test_1234'
+        ws = self._create_sample_workspace(input_ws_name, 4)
+        args = {'InputWorkspace': ws,
+                'CalibrationFile': 'invalid/file_path.dat',
+                'OutputWorkspace': 'test_calibrated'}
+        self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
+
+    def _check_detector_positions(self, workspace, expected_positions, pos_type='final'):
         for i in range(0, workspace.getNumberHistograms()):
             det = workspace.getDetector(i)
             np.testing.assert_almost_equal(

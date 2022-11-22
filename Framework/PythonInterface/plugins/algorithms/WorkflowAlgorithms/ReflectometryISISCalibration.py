@@ -74,8 +74,22 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         calibration_file = self.getPropertyValue(self._CALIBRATION_FILE)
         if not calibration_file:
             issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
-
+        else:
+            calib_file_error = self._validate_calibration_filepath(calibration_file)
+            if calib_file_error:
+                issues[self._CALIBRATION_FILE] = calib_file_error
         return issues
+
+    def _validate_calibration_filepath(self, filepath):
+        try:
+            self._scanned_pixel_positions = self._get_pixel_positions_from_file(filepath)
+            if len(self._scanned_pixel_positions) == 0:
+                return "Calibration file provided contains no data"
+        except FileNotFoundError:
+            return "Calibration file path cannot be found"
+        except Exception:
+            return "Could not read contents of calibration file, please see documentation to check the required format"
+        return ""
 
     def _find_specular_pixel_index(self, ws, det_info):
         # Determine position of the specular pixel from the workspace:
@@ -110,10 +124,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
         return specular_pixel_idx
 
-    def _get_pixel_positions_from_file(self):
+    def _get_pixel_positions_from_file(self, filepath):
         # Create dictionary of pixel spectrum number and position from scan
         scanned_pixel_positions = {}
-        with open(self.getPropertyValue(self._CALIBRATION_FILE), "r") as file:
+        with open(filepath, 'r') as file:
             pixels = csv.reader(file)
             for pixel in pixels:
                 pixel_info = pixel[0].split()
@@ -121,12 +135,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return scanned_pixel_positions
 
     def _create_calibration_table_from_scan(self, ws, det_info, comp_info, specular_pixel_idx):
-        scanned_pixel_positions = self._get_pixel_positions_from_file()
-
         # Get the current specular pixel Y position and the position of the specular pixel from the calibration scan
         specpixel_y = ws.getDetector(specular_pixel_idx).getPos().Y()
 
-        scanned_specpixel_y = scanned_pixel_positions.get(specular_pixel_idx)
+        scanned_specpixel_y = self._scanned_pixel_positions.get(specular_pixel_idx)
         if not scanned_specpixel_y:
             raise RuntimeError(f"Missing calibration data for specular pixel with workspace index {specular_pixel_idx}")
 
@@ -138,7 +150,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         table.addColumn(type="double", name="Detector Width")
 
         # Populate the table with the calibrated data
-        for ws_id, scanned_pixel_pos in scanned_pixel_positions.items():
+        for ws_id, scanned_pixel_pos in self._scanned_pixel_positions.items():
             try:
                 det = ws.getDetector(ws_id)
             except RuntimeError:
