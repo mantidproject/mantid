@@ -29,20 +29,18 @@ public:
   PreviewManagerImpl() = default;
   PreviewManagerImpl(const PreviewManagerImpl &) = delete;
   PreviewManagerImpl &operator=(const PreviewManagerImpl &) = delete;
-  std::vector<std::string> getPreviews(const std::string &facility, const std::string &technique = "",
-                                       const std::string &acquisition = "") const;
-  const IPreview &getPreview(const std::string &facility, const std::string &technique, const std::string &acquisition,
+  std::vector<std::string> getPreviews(const std::string &facility, const std::string &technique = "") const;
+  const IPreview &getPreview(const std::string &facility, const std::string &technique,
                              const std::string &preview) const;
   template <class T> void subscribe() {
     static_assert(std::is_base_of<IPreview, T>::value);
     IPreview_uptr preview = std::make_unique<T>();
     const auto facility = preview->facility();
     const auto technique = preview->technique();
-    const auto acquisition = preview->acquisition();
     const auto name = preview->name();
-    if (checkPreview(facility, technique, acquisition, name)) {
+    if (checkPreview(facility, technique, name)) {
       throw std::runtime_error("Preview with the same name is already registered for the same "
-                               "facility, technique and acquisition mode.");
+                               "facility and technique.");
     }
     m_previews.insert(std::move(preview));
   }
@@ -50,10 +48,7 @@ public:
 private:
   bool checkFacility(const std::string &facility) const;
   bool checkTechnique(const std::string &facility, const std::string &technique) const;
-  bool checkAcquisition(const std::string &facility, const std::string &technique,
-                        const std::string &acquisition) const;
-  bool checkPreview(const std::string &facility, const std::string &technique, const std::string &acquisition,
-                    const std::string &preview) const;
+  bool checkPreview(const std::string &facility, const std::string &technique, const std::string &preview) const;
   PreviewRegister m_previews;
 };
 

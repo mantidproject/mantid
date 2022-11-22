@@ -24,7 +24,6 @@ public:
   std::string name() const override { return "BasicPreview"; }
   std::string facility() const override { return "TestFacility"; }
   std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "Mono"; }
 
 private:
   Workspace_sptr preview(Workspace_sptr ws) const override { return ws->clone(); }
@@ -58,29 +57,15 @@ public:
     auto previews = PreviewManager::Instance().getPreviews("TestFacility", "Crystal");
     TS_ASSERT(previews.empty());
   }
-  void test_get_preview_by_facility_and_technique_and_acquisition() {
-    auto previews = PreviewManager::Instance().getPreviews("TestFacility", "SANS", "Mono");
-    TS_ASSERT_EQUALS(previews.size(), 1);
-    TS_ASSERT_EQUALS(previews[0], "BasicPreview");
-  }
-  void test_get_preview_by_facility_and_technique_and_non_existent_acquisition() {
-    auto previews = PreviewManager::Instance().getPreviews("TestFacility", "SANS", "TOF");
-    TS_ASSERT(previews.empty());
-  }
-  void test_get_preview_by_facility_and_acquisition() {
-    auto previews = PreviewManager::Instance().getPreviews("TestFacility", "", "Mono");
-    TS_ASSERT_EQUALS(previews.size(), 1);
-    TS_ASSERT_EQUALS(previews[0], "BasicPreview");
-  }
   void test_get_preview_by_name() {
-    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "BasicPreview");
+    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview");
     TS_ASSERT_EQUALS(preview.name(), "BasicPreview");
     TS_ASSERT_EQUALS(preview.facility(), "TestFacility");
     TS_ASSERT_EQUALS(preview.technique(), "SANS");
     TS_ASSERT_EQUALS(preview.type(), IPreview::PreviewType::SVIEW);
   }
   void test_get_preview_by_non_existent_name() {
-    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "BasicPreview2"),
+    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview2"),
                      const std::runtime_error &)
   }
 };

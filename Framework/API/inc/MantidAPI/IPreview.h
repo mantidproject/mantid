@@ -29,7 +29,6 @@ public:
   virtual std::string technique() const = 0;
   virtual std::string facility() const = 0;
   virtual std::string name() const = 0;
-  virtual std::string acquisition() const = 0;
   Workspace_sptr view(Workspace_sptr ws) const { return preview(ws); }
 
 private:

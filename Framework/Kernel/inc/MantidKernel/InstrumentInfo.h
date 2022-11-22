@@ -55,8 +55,6 @@ public:
   std::string delimiter() const;
   /// Return list of techniques
   const std::set<std::string> &techniques() const;
-  /// Return list of acquisition modes
-  const std::set<std::string> &acquisitions() const;
   /// The facility to which this instrument belongs
   const FacilityInfo &facility() const;
 
@@ -74,7 +72,6 @@ public:
 
 private:
   void fillTechniques(const Poco::XML::Element *elem);
-  void fillAcquistions(const Poco::XML::Element *elem);
   void fillLiveData(const Poco::XML::Element *elem);
   void fillZeroPadding(const Poco::XML::Element *elem);
 
@@ -86,13 +83,12 @@ private:
   /// get the prefix part
   const std::string &getPrefix(ZeroPaddingMap::const_iterator it) const { return it->second.first; }
 
-  const FacilityInfo *m_facility;      ///< Facility
-  std::string m_name;                  ///< Instrument name
-  std::string m_shortName;             ///< Instrument short name
-  ZeroPaddingMap m_zeroPadding;        ///< Run number-dependent zero padding
-  std::string m_delimiter;             ///< Delimiter between instrument name and run number
-  std::set<std::string> m_technique;   ///< List of techniques the instrument can do
-  std::set<std::string> m_acquistions; /// List of acquisition modes this instrument supports
+  const FacilityInfo *m_facility;    ///< Facility
+  std::string m_name;                ///< Instrument name
+  std::string m_shortName;           ///< Instrument short name
+  ZeroPaddingMap m_zeroPadding;      ///< Run number-dependent zero padding
+  std::string m_delimiter;           ///< Delimiter between instrument name and run number
+  std::set<std::string> m_technique; ///< List of techniques the instrument can do
 
   std::vector<LiveListenerInfo> m_listeners; ///< LiveListener connections
   std::vector<TopicInfo> m_kafkaTopics;      ///< Kafka topics

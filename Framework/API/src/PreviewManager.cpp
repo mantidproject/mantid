@@ -9,12 +9,11 @@
 
 namespace Mantid::API {
 
-std::vector<std::string> PreviewManagerImpl::getPreviews(const std::string &facility, const std::string &technique,
-                                                         const std::string &acquisition) const {
+std::vector<std::string> PreviewManagerImpl::getPreviews(const std::string &facility,
+                                                         const std::string &technique) const {
   std::vector<std::string> previews;
   for (const auto &preview : m_previews) {
-    if (preview->facility() == facility && (technique.empty() || preview->technique() == technique) &&
-        (acquisition.empty() || preview->acquisition().empty() || preview->acquisition() == acquisition)) {
+    if (preview->facility() == facility && (technique.empty() || preview->technique() == technique)) {
       previews.emplace_back(preview->name());
     }
   }
@@ -22,19 +21,15 @@ std::vector<std::string> PreviewManagerImpl::getPreviews(const std::string &faci
 }
 
 const IPreview &PreviewManagerImpl::getPreview(const std::string &facility, const std::string &technique,
-                                               const std::string &acquisition, const std::string &preview_name) const {
+                                               const std::string &preview_name) const {
   // cppcheck was unhappy about this for loop, so it got replaced, but is left as a comment so it is actually readable
   //  for (const auto &preview : m_previews) {
-  //    if (preview->facility() == facility && preview->technique() == technique &&
-  //        (preview->acquisition().empty() || preview->acquisition() == acquisition) && preview->name() ==
-  //        preview_name) {
+  //    if (preview->facility() == facility && preview->technique() == technique && preview->name() == preview_name) {
   //      return *preview;
   //    }
   //  }
   auto isPreview = [&](const auto &preview) {
-    return (preview->facility() == facility && preview->technique() == technique &&
-            (preview->acquisition().empty() || preview->acquisition() == acquisition) &&
-            preview->name() == preview_name);
+    return (preview->facility() == facility && preview->technique() == technique && preview->name() == preview_name);
   };
   const auto result = std::find_if(std::begin(m_previews), std::end(m_previews), isPreview);
 
@@ -42,7 +37,7 @@ const IPreview &PreviewManagerImpl::getPreview(const std::string &facility, cons
     return *(*result).get();
   }
   throw std::runtime_error("Preview with the given name is not registered "
-                           "under the facility, technique and acquisition mode.");
+                           "under the facility and technique.");
 }
 
 bool PreviewManagerImpl::checkFacility(const std::string &facility) const {
@@ -57,20 +52,10 @@ bool PreviewManagerImpl::checkTechnique(const std::string &facility, const std::
   return std::any_of(std::begin(m_previews), std::end(m_previews), isTechnique);
 }
 
-bool PreviewManagerImpl::checkAcquisition(const std::string &facility, const std::string &technique,
-                                          const std::string &acquisition) const {
-  auto isAcquisition = [&](const auto &preview) {
-    return (preview->facility() == facility && preview->technique() == technique &&
-            preview->acquisition() == acquisition);
-  };
-  return std::any_of(std::begin(m_previews), std::end(m_previews), isAcquisition);
-}
-
 bool PreviewManagerImpl::checkPreview(const std::string &facility, const std::string &technique,
-                                      const std::string &acquisition, const std::string &preview_name) const {
+                                      const std::string &preview_name) const {
   auto isPreview = [&](const auto &preview) {
-    return (preview->facility() == facility && preview->technique() == technique &&
-            preview->acquisition() == acquisition && preview->name() == preview_name);
+    return (preview->facility() == facility && preview->technique() == technique && preview->name() == preview_name);
   };
   return std::any_of(std::begin(m_previews), std::end(m_previews), isPreview);
 }

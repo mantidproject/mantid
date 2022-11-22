@@ -47,9 +47,6 @@ void export_InstrumentInfo() {
       .def("techniques", &InstrumentInfo::techniques, arg("self"), return_value_policy<copy_const_reference>(),
            "Return list of techniques this instrument supports")
 
-      .def("acquisitions", &InstrumentInfo::acquisitions, arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns list of acquisition modes this instrument supports.")
-
       .def("facility", &InstrumentInfo::facility, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the facility that contains this instrument.")
 

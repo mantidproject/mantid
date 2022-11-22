@@ -28,7 +28,6 @@ public:
   std::string name() const override { return "BasicPreview"; }
   std::string facility() const override { return "TestFacility"; }
   std::string technique() const override { return "SANS"; }
-  std::string acquisition() const override { return "Mono"; }
 
 private:
   Workspace_sptr preview(Workspace_sptr ws) const override { return ws->clone(); }
@@ -51,7 +50,6 @@ public:
     TS_ASSERT_EQUALS(preview->name(), "BasicPreview")
     TS_ASSERT_EQUALS(preview->facility(), "TestFacility")
     TS_ASSERT_EQUALS(preview->technique(), "SANS")
-    TS_ASSERT_EQUALS(preview->acquisition(), "Mono")
     auto inWS = WorkspaceFactory::Instance().create("Workspace2D", 5, 8, 7);
     Workspace_sptr ws = boost::dynamic_pointer_cast<Workspace>(inWS);
     auto outWS = preview->view(ws);
