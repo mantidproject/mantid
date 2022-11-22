@@ -564,7 +564,8 @@ void DiscusMultipleScatteringCorrection::exec() {
   const int seed = getProperty("SeedValue");
 
   InterpolationOption interpolateOpt;
-  interpolateOpt.set(getPropertyValue("Interpolation"), false, true);
+  bool independentErrors = (m_EMode == DeltaEMode::Direct) ? m_simulateEnergiesIndependently : true;
+  interpolateOpt.set(getPropertyValue("Interpolation"), true, independentErrors);
 
   m_importanceSampling = getProperty("ImportanceSampling");
 
@@ -627,21 +628,27 @@ void DiscusMultipleScatteringCorrection::exec() {
         if (m_importanceSampling)
           prepareCumulativeProbForQ(kinc, componentWorkspaces);
 
-        auto weights = simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
+        auto [weights, weightsErrors] =
+            simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
         if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
+          noAbsSimulationWS->getSpectrum(i).mutableE() += weightsErrors;
         } else {
           noAbsSimulationWS->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
+          noAbsSimulationWS->getSpectrum(i).dataE()[std::get<1>(kInW[bin])] = weightsErrors[0];
         }
 
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          weights = simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
+          auto [weights, weightsErrors] =
+              simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
+            simulationWSs[ne]->getSpectrum(i).mutableE() += weightsErrors;
           } else {
             simulationWSs[ne]->getSpectrum(i).dataY()[std::get<1>(kInW[bin])] = weights[0];
+            simulationWSs[ne]->getSpectrum(i).dataE()[std::get<1>(kInW[bin])] = weightsErrors[0];
           }
         }
 
@@ -1327,13 +1334,14 @@ double DiscusMultipleScatteringCorrection::Interpolate2D(const ComponentWorkspac
  * @param specialSingleScatterCalc Boolean indicating whether special single
  * @return An average weight across all of the paths
  */
-std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
+std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
     ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
     const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
-  std::vector<double> sumOfWeights(wValues.size(), 0.);
-  std::vector<int> countZeroWeights(wValues.size(),
-                                    0); // for debugging and analysis of where importance sampling may help
+  // countZeroWeights for debugging and analysis of where importance sampling may help
+  std::vector<double> sumOfWeights(wValues.size(), 0.), countZeroWeights(wValues.size(), 0);
+  std::vector<double> weightsMeans(wValues.size(), 0.), deltas(wValues.size(), 0.), weightsM2(wValues.size(), 0.),
+      weightsErrors(wValues.size(), 0.);
 
   for (int ie = 0; ie < nPaths; ie++) {
     auto [success, weights] =
@@ -1342,14 +1350,26 @@ std::vector<double> DiscusMultipleScatteringCorrection::simulatePaths(
       std::transform(weights.begin(), weights.end(), sumOfWeights.begin(), sumOfWeights.begin(), std::plus<double>());
       std::transform(weights.begin(), weights.end(), countZeroWeights.begin(), countZeroWeights.begin(),
                      [](double d, int count) { return d > 0. ? count : count + 1; });
+
+      // increment standard deviation using Welford algorithm
+      for (size_t i = 0; i < wValues.size(); i++) {
+        deltas[i] = weights[i] - weightsMeans[i];
+        weightsMeans[i] += deltas[i] / static_cast<double>(ie + 1);
+        weightsM2[i] += deltas[i] * (weights[i] - weightsMeans[i]);
+        // calculate sample SD (M2/n-1)
+        // will give NaN for m_events=1, but that's correct
+        weightsErrors[i] = sqrt(weightsM2[i] / static_cast<double>(ie));
+      }
+
     } else
       ie--;
   }
   for (size_t i = 0; i < wValues.size(); i++) {
     sumOfWeights[i] = sumOfWeights[i] / nPaths;
+    weightsErrors[i] = weightsErrors[i] / sqrt(nPaths);
   }
 
-  return sumOfWeights;
+  return {sumOfWeights, weightsErrors};
 }
 
 /**
