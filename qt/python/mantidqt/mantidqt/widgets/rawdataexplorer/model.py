@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from qtpy.QtCore import *
 from qtpy.QtWidgets import QMessageBox
 
-from mantid.simpleapi import mtd, Plus, RenameWorkspace
+from mantid.simpleapi import mtd, Plus
 from mantid.api import AlgorithmManager, PreviewType
 from mantid.kernel import logger
 from mantid.dataobjects import Workspace2D, EventWorkspace
@@ -266,13 +266,12 @@ class RawDataExplorerModel(QObject):
         final_ws = RawDataExplorerModel.accumulate_name(target_ws, ws_to_add)
 
         try:
-            Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=target_ws)
+            Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=final_ws)
         except ValueError as e:
             message = "Unable to accumulate: {0}".format(e)
             error_reporting(message)
             return None
 
-        RenameWorkspace(InputWorkspace=target_ws, OutputWorkspace=final_ws)
         return final_ws
 
     @staticmethod
