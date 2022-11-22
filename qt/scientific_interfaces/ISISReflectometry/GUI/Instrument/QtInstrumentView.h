@@ -62,6 +62,8 @@ public:
   std::string getCalibrationFilePath() const override;
   void setCalibrationFilePath(std::string const &value) override;
 
+  void errorInvalidCalibrationFilePath() override;
+
   void disableAll() override;
   void enableAll() override;
   void enableDetectorCorrectionType() override;
@@ -71,6 +73,7 @@ public slots:
   void onSettingsChanged();
   void onRestoreDefaultsRequested();
   void browseToCalibrationFile();
+  void editingCalibFilePathFinished();
 
 private:
   /// Initialise the interface

@@ -102,6 +102,8 @@ void QtInstrumentView::browseToCalibrationFile() {
   }
 }
 
+void QtInstrumentView::editingCalibFilePathFinished() { m_notifyee->notifyEditingCalibFilePathFinished(); }
+
 void QtInstrumentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
@@ -132,6 +134,7 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
   registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
+  connect(m_ui.calibrationPathEdit, SIGNAL(editingFinished()), this, SLOT(editingCalibFilePathFinished()));
 }
 
 void QtInstrumentView::connectInstrumentSettingsWidgets() {
@@ -297,5 +300,9 @@ std::string QtInstrumentView::getCalibrationFilePath() const { return m_ui.calib
 
 void QtInstrumentView::setCalibrationFilePath(std::string const &value) {
   m_ui.calibrationPathEdit->setText(QString::fromStdString(value));
+}
+
+void QtInstrumentView::errorInvalidCalibrationFilePath() {
+  QMessageBox::critical(this, "Invalid file", "The calibration file specified cannot be found.");
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

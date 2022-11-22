@@ -25,6 +25,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentViewSubscriber {
 public:
   virtual void notifySettingsChanged() = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
+  virtual void notifyEditingCalibFilePathFinished() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IInstrumentView {
@@ -68,6 +69,8 @@ public:
 
   virtual std::string getCalibrationFilePath() const = 0;
   virtual void setCalibrationFilePath(std::string const &value) = 0;
+
+  virtual void errorInvalidCalibrationFilePath() = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;

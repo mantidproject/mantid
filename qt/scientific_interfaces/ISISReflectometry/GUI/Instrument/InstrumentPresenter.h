@@ -43,6 +43,7 @@ public:
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
   void notifyRestoreDefaultsRequested() override;
+  void notifyEditingCalibFilePathFinished() override;
 
 protected:
   std::unique_ptr<IInstrumentOptionDefaults> m_instrumentDefaults;

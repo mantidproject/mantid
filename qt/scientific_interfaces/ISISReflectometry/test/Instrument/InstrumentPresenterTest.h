@@ -341,6 +341,30 @@ public:
     verifyAndClear();
   }
 
+  void testEnteringInvalidCalibrationFilePathTriggersError() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("test"));
+    EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(1);
+    presenter.notifyEditingCalibFilePathFinished();
+    verifyAndClear();
+  }
+
+  void testEnteringEmptyCalibrationFilePathDoesNotTriggerError() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return(""));
+    EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(0);
+    presenter.notifyEditingCalibFilePathFinished();
+    verifyAndClear();
+  }
+
+  void testEnteringSpecialCharactersAsCalibrationFilePathTriggersError() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("?"));
+    EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(1);
+    presenter.notifyEditingCalibFilePathFinished();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
