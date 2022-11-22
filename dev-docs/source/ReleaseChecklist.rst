@@ -110,13 +110,13 @@ Manual Testing
 *  Ensure that Manual testing begins by creating the testing tasks as GitHub issues, assigning them and posting on
    Slack. Most of our Manual testing instructions are :ref:`here <Testing>`. Generate the Manual testing issues by
    following the instructions in the
-   `README file <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate>`__.
+   `README file <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate>`_.
    Please raise the issues from the ISIS and Non-ISIS manual testing spreadsheets.
 *  Over the next week, check the Manual testing GitHub issues. Testers should raise any
    serious problems as separate GitHub issues with a relevant milestone. When testing tasks are complete and all serious
    problems raised as issues, then the testing GitHub issue should be closed.
 *  Manual testing at ISIS as of release 6.3, has taken the form of
-   `Ensemble Manual Testing <https://github.com/mantidproject/documents/blob/main/Project-Management/Tools/RoadmapUpdate/Ensemble%20Manual%20Testing.pptx>`__.
+   `Ensemble Manual Testing <https://github.com/mantidproject/documents/blob/main/Project-Management/Tools/RoadmapUpdate/Ensemble%20Manual%20Testing.pptx>`_.
    In short, testing teams of around 3-5 developers, spread across sub-teams
    are assigned tasks with the code expert in that testing team.
 
@@ -137,7 +137,7 @@ Smoke Testing
 *  It is likely that many changes have been made over the beta test period, therefore
    we must do some more manual testing to ensure everything still works. This stage is
    called Smoke testing. Generate the Smoke testing issues by following the instructions
-   `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
+   `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`_.
 *  Liaise with the Technical Release Manager and together announce the creation of the
    Smoke testing issues and Release Candidates in the *\#general* slack channel.
 
@@ -323,11 +323,11 @@ Code Freeze
 **Create the Release Branch (once most PR's are merged)**
 
 * Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`_
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
 * Click ``Build Now`` on `open-release-testing
-  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`_,
   which will perform the following actions:
 
   * Create or update the ``release-next`` branch.
@@ -340,7 +340,7 @@ Code Freeze
   pull requests not targeted for this release out of the milestone, and then change
   the base branch of the remaining pull requests to ``release-next``. You can either
   manually change the base branch in GitHub or use the `update-pr-base-branch.py
-  <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`__
+  <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`_
   script to update the base branches of these pull requests.
   A quick example to show how the arguments should be provided to this script is seen below:
 
@@ -383,7 +383,7 @@ have been fixed. Then:
 * Liaise with the release editor to ensure that they have completed all of their tasks.
 * Check the release notes and verify that the "Under Construction" paragraph on the main
   index page has been removed. Remove the paragraph if it still exists.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
+* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`_
   job, which will do the following:
 
   * Disable the job that periodically merges ``release-next`` into ``main``.
@@ -395,15 +395,15 @@ have been fixed. Then:
 We are now ready to create the release candidates for Smoke testing.
 
 * On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
+  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`_
   for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
 * On the ``release-next`` branch, create a PR to update the `major & minor
-  <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
+  <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`_
   versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``. Ask a gatekeeper to merge the PR.
 * Ask a gatekeeper to merge the ``release-next`` branch back to ``main`` locally, and then comment
   out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
   directly to the remote ``main`` without making a PR.
-* Build the `release-next_nightly_deployment Jenkins pipeline <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
+* Build the `release-next_nightly_deployment Jenkins pipeline <https://builds.mantidproject.org/view/Release%20Pipeline/>`_
   with the following parameters (most are already defaulted to the correct values):
 
   * set ``BUILD_DEVEL`` to ``all``
@@ -420,7 +420,7 @@ We are now ready to create the release candidates for Smoke testing.
 
 * Once the packages have been published to GitHub and Anaconda, ask someone in the ISIS core or DevOps
   team to manually sign the Windows binary and re-upload it to the GitHub
-  `draft release <https://github.com/mantidproject/mantid/releases>`__.
+  `draft release <https://github.com/mantidproject/mantid/releases>`_.
 * Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
   issues and Release Candidates in the *\#general* slack channel.
 
@@ -430,16 +430,16 @@ Release Day
 Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
 have been fixed.
 
-*  Edit the `draft release <https://github.com/mantidproject/mantid/releases>`__ on
+*  Edit the `draft release <https://github.com/mantidproject/mantid/releases>`_ on
    GitHub. A new tag should be created based off the release branch in the form ``vX.Y.Z``. The
    description of the new release can be copied from the release notes ``index.rst`` file, and
    edited appropriately. See previous release descriptions for inspiration.
 *  Publish the GitHub release. This will create the tag required to generate the DOI.
 *  Change the labels for the release candidates on our `Anaconda site <https://anaconda.org/mantid/mantid/files>`_
    from ``rcN`` to ``main``. You may need to ask a member of the ISIS core or DevOps team to do this.
-*  Update the `download page <https://download.mantidproject.org>`__ by running the `Update latest release links
-   <https://github.com/mantidproject/www/actions/workflows/update-latest-release.yml>`__ workflow in the
-   `mantidproject/www repository <https://github.com/mantidproject/www>`__.
+*  Update the `download page <https://download.mantidproject.org>`_ by running the `Update latest release links
+   <https://github.com/mantidproject/www/actions/workflows/update-latest-release.yml>`_ workflow in the
+   `mantidproject/www repository <https://github.com/mantidproject/www>`_.
 *  Create a PR targeting the ``preprod`` branch in the `daaas-ansible-worksapce repository
    <https://github.com/ral-facilities/daaas-ansible-workspace>`_ to add the new release to IDAaaS. Add the new release
    version to the list of versions installed on IDAaaS `here
@@ -451,7 +451,7 @@ have been fixed.
 **Generate DOI**
 
 This requires that a tag has been created for this release. This tag is created when you draft and
-publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on GitHub.
+publish a new `release <https://github.com/mantidproject/mantid/releases>`_ on GitHub.
 
 *  Make sure that you have updated your local copy of git to grab the new tag.
    ``git fetch -p``
