@@ -52,6 +52,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
 
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
+  m_dockedWidgets->subscribe(this);
 
   m_dockedWidgets->setInstViewToolbarEnabled(false);
   m_dockedWidgets->setRegionSelectorEnabled(false);
