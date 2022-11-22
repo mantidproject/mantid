@@ -548,6 +548,8 @@ class SliceViewXAxisEditor(XAxisEditor):
     def __init__(self, canvas, axes, slice_viewer):
         super(SliceViewXAxisEditor, self).__init__(canvas, axes)
         self.sv = slice_viewer
+        self.ui.logBox.hide()
+        self.ui.gridBox.hide()
 
     def on_ok(self):
         super(SliceViewXAxisEditor, self).on_ok()
@@ -559,6 +561,8 @@ class SliceViewYAxisEditor(YAxisEditor):
     def __init__(self, canvas, axes, slice_viewer):
         super(SliceViewYAxisEditor, self).__init__(canvas, axes)
         self.sv = slice_viewer
+        self.ui.logBox.hide()
+        self.ui.gridBox.hide()
 
     def on_ok(self):
         super(SliceViewYAxisEditor, self).on_ok()
