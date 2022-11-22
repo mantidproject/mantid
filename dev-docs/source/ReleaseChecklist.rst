@@ -107,14 +107,14 @@ with the Release Manager.
 Manual Testing
 ###############
 
-*  Ensure that Manual testing begins by creating the testing tasks as Github issues, assigning them and posting on
+*  Ensure that Manual testing begins by creating the testing tasks as GitHub issues, assigning them and posting on
    Slack. Most of our Manual testing instructions are :ref:`here <Testing>`. Generate the Manual testing issues by
    following the instructions in the
    `README file <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate>`__.
    Please raise the issues from the ISIS and Non-ISIS manual testing spreadsheets.
-*  Over the next week, check the Manual testing Github issues. Testers should raise any
-   serious problems as separate Github issues with a relevant milestone. When testing tasks are complete and all serious
-   problems raised as issues, then the testing Github issue should be closed.
+*  Over the next week, check the Manual testing GitHub issues. Testers should raise any
+   serious problems as separate GitHub issues with a relevant milestone. When testing tasks are complete and all serious
+   problems raised as issues, then the testing GitHub issue should be closed.
 *  Manual testing at ISIS as of release 6.3, has taken the form of
    `Ensemble Manual Testing <https://github.com/mantidproject/documents/blob/main/Project-Management/Tools/RoadmapUpdate/Ensemble%20Manual%20Testing.pptx>`__.
    In short, testing teams of around 3-5 developers, spread across sub-teams
@@ -303,7 +303,10 @@ After the Technical Release Manager has finished their release day tasks:
 *  Also post the contents of the message to the *\#announcements* channel on
    Slack.
 *  Create a new item on the forum news.
-*  Close the release milestone on github.
+*  Add a news item linking to the forum post on the `mantidproject website <https://www.mantidproject.org>`_
+   by manually editing `sidebar-news.html <https://github.com/mantidproject/www/blob/main/source/_templates/sidebar-news.html>`_.
+   Restrict the number of news items to five.
+*  Close the release milestone on GitHub.
 
 .. _technical-release-manager-checklist:
 
@@ -324,7 +327,7 @@ Code Freeze
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
 * Click ``Build Now`` on `open-release-testing
-  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
   which will perform the following actions:
 
   * Create or update the ``release-next`` branch.
@@ -336,9 +339,9 @@ Code Freeze
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change
   the base branch of the remaining pull requests to ``release-next``. You can either
-  manually change the base branch in GitHub or use the following script to update
-  the base branches of these pull requests `update-pr-base-branch.py
+  manually change the base branch in GitHub or use the `update-pr-base-branch.py
   <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`__
+  script to update the base branches of these pull requests.
   A quick example to show how the arguments should be provided to this script is seen below:
 
 .. code-block:: bash
@@ -416,7 +419,7 @@ We are now ready to create the release candidates for Smoke testing.
     and ``N`` is an incremental build number for release candidates, starting at ``1``.
 
 * Once the packages have been published to GitHub and Anaconda, ask someone in the ISIS core or DevOps
-  team to manually sign the Windows binary and re-upload it to the github
+  team to manually sign the Windows binary and re-upload it to the GitHub
   `draft release <https://github.com/mantidproject/mantid/releases>`__.
 * Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
   issues and Release Candidates in the *\#general* slack channel.
@@ -432,10 +435,18 @@ have been fixed.
    description of the new release can be copied from the release notes ``index.rst`` file, and
    edited appropriately. See previous release descriptions for inspiration.
 *  Publish the GitHub release. This will create the tag required to generate the DOI.
-*  Update the `download page <https://download.mantidproject.org>`__ by creating a PR after
-   following the instructions in the `Adding a new release section
-   <https://github.com/mantidproject/download.mantidproject.org#adding-a-new-release>`__. Once the
-   new file in the `releases` directory is merged, Jenkins will publish the new page.
+*  Change the labels for the release candidates on our `Anaconda site <https://anaconda.org/mantid/mantid/files>`_
+   from ``rcN`` to ``main``. You may need to ask a member of the ISIS core or DevOps team to do this.
+*  Update the `download page <https://download.mantidproject.org>`__ by running the `Update latest release links
+   <https://github.com/mantidproject/www/actions/workflows/update-latest-release.yml>`__ workflow in the
+   `mantidproject/www repository <https://github.com/mantidproject/www>`__.
+*  Create a PR targeting the ``preprod`` branch in the `daaas-ansible-worksapce repository
+   <https://github.com/ral-facilities/daaas-ansible-workspace>`_ to add the new release to IDAaaS. Add the new release
+   version to the list of versions installed on IDAaaS `here
+   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/master/roles/software/analysis/mantid/defaults/main.yml>`_
+   making sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
+   The changes need to be verified on an IDAaaS test instance before the PR is created. Ask a member of the
+   ISIS core team for assistance if you don't have access to this repository.
 
 **Generate DOI**
 
