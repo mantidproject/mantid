@@ -11,11 +11,12 @@ import shutil
 import time
 import datetime
 import json
-
 import matplotlib.pyplot as plt
 import numpy as np
+
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, logger
+from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import parse_inputs
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
@@ -695,6 +696,12 @@ class GSAS2Model(object):
 
     def create_reflections_table(self, test=False):
         table_rows = self.load_gsas_reflections_all_histograms_for_table()
+        if not table_rows or self.refinement_method == "Rietveld":
+            # cannot generate a valid reflections workspace. If one with the same project_name exists, remove it.
+            # This is to cover the case where a user runs a Pawley then Rietveld Refinement for the same project_name.
+            if ADS.doesExist(f"{self.project_name}_GSASII_reflections"):
+                DeleteWorkspace(f"{self.project_name}_GSASII_reflections")
+            return None
         table = CreateEmptyTableWorkspace(OutputWorkspace=f"{self.project_name}_GSASII_reflections")
         table.addReadOnlyColumn("str", "Histogram name")
         table.addReadOnlyColumn("str", "Phase name")
