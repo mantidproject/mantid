@@ -11,7 +11,7 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.widgets.rawdataexplorer.view import PreviewView
+from mantidqt.widgets.rawdataexplorer.view import PreviewView, RawDataExplorerView
 
 app = QApplication(sys.argv)
 
@@ -238,6 +238,92 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.on_close("ws", True)
         mocked_presenter.close_preview.assert_has_calls([mock.call(True)])
+
+
+class RawDataExplorerViewTest(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.mocked_presenter = mock.MagicMock()
+        self.view = RawDataExplorerView(self.mocked_presenter)
+
+        self.view.browse.clicked.disconnect()
+        self.view.fileTree.sig_new_current.disconnect()
+
+    def test_constructor(self):
+        pass
+
+    def test_add_preview(self):
+        preview = self.view.add_preview()
+        self.assertEqual(len(self.view._previews), 1)
+        self.assertEqual(self.view._previews[0], preview)
+
+    def test_del_preview_present(self):
+        preview1 = self.view.add_preview()
+        preview2 = self.view.add_preview()
+
+        self.view.del_preview(preview2)
+
+        self.assertEqual(len(self.view._previews), 1)
+        self.assertEqual(self.view._previews[0], preview1)
+
+    def test_del_preview_absent(self):
+        preview1 = self.view.add_preview()
+        preview2 = self.view.add_preview()
+
+        self.view.del_preview(preview2)
+        self.view.del_preview(preview2)
+
+        self.assertEqual(len(self.view._previews), 1)
+        self.assertEqual(self.view._previews[0], preview1)
+
+    def test_clear_selection(self):
+        self.view.fileTree.clear_selection = mock.Mock()
+
+        self.view.clear_selection()
+
+        self.view.fileTree.clear_selection.assert_called_once()  # rather assert on the state of the file tree ?
+        self.assertEqual(self.view._current_selection, set())
+
+    def test_select_last_clicked(self):
+        # TODO there really is no satisfactory way to test that without a fake file system so the file model is sensible
+        pass
+
+    def test_on_item_selected(self):
+
+        # TODO this only checks the code actually runs (and then not by much since we don't enter the for loop)
+        # but without pyfakefs (and possibly even with it, I'm not sure how well it interacts with Qt's C++ backend)
+        # testing this function requires basically mocking all high level calls to the file model which is both a pain
+        # and stupid since we would in the end only be checking that mock works correctly, having replaced every
+        # relevant method
+        index = mock.MagicMock()
+        self.view.on_item_selected(index)
+
+    def test_set_up_connections(self):
+        self.view.show_directory_manager = mock.Mock()
+        self.view.on_item_selected = mock.Mock()
+
+        self.view.setup_connections()
+
+        self.view.browse.clicked.emit()
+        self.view.show_directory_manager.assert_called_once()
+
+        # TODO qt is not happy being passed a mock. Too smart for its own good. No idea how to bypass that for now
+        # self.view.fileTree.sig_new_current.emit(mock.MagicMock())
+        # self.view.on_item_selected.assert_called_once()
+
+    @mock.patch("mantidqt.widgets.rawdataexplorer.view.QFileDialog")
+    def test_show_directory_manager(self, dialog):
+        trigger_check = mock.Mock()
+        self.view.file_tree_path_changed.connect(trigger_check)
+        path = "/"
+        dialog().getExistingDirectory.return_value = path  # so qt accepts to send a signal
+
+        self.view.show_directory_manager()
+
+        # check that the options are the correct ones. Because QFileDialog has been overwritten, it is a bit strange
+        dialog().getExistingDirectory.assert_called_with(parent=self.view, caption="Select a directory", directory=path,
+                                                         options=dialog.DontUseNativeDialog | dialog.ShowDirsOnly)
+        trigger_check.assert_called_with(path)
 
 
 if __name__ == "__main__":
