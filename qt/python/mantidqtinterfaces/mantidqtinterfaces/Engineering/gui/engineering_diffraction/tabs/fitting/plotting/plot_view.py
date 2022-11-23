@@ -34,7 +34,6 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.has_first_undock_occurred = 0
 
         self.setup_figure()
-        self.setup_toolbar()
 
     def setup_figure(self):
         self.figure = Figure()
@@ -73,7 +72,8 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.fit_browser.toggleWsListVisible()
         self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
         self.vLayout_fitprop.addWidget(self.fit_browser)
-        self.fit_browser.hide()
+        self.hide_fit_browser()
+        self.hide_fit_progress_bar()
 
     def mouse_click(self, event):
         if event.button == event.canvas.buttond.get(Qt.RightButton):
@@ -103,20 +103,34 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         if self.plot_dock.isFloating():
             self.plot_dock.close()
 
-    def setup_toolbar(self):
-        self.toolbar.sig_home_clicked.connect(self.display_all)
-        self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
-
     # =================
     # Component Setters
     # =================
 
-    def fit_toggle(self):
-        """Toggle fit browser and tool on/off"""
-        if self.fit_browser.isVisible():
-            self.fit_browser.hide()
-        else:
-            self.fit_browser.show()
+    def set_slot_for_fit_toggled(self, presenter_func):
+        self.toolbar.sig_toggle_fit_triggered.connect(presenter_func)
+
+    def set_slot_for_display_all(self):
+        self.toolbar.sig_home_clicked.connect(self.display_all)
+
+    def hide_fit_browser(self):
+        self.fit_browser.hide()
+
+    def show_fit_browser(self):
+        self.fit_browser.show()
+
+    def hide_fit_progress_bar(self):
+        self.fit_progress_bar.hide()
+
+    def show_fit_progress_bar(self):
+        self.fit_progress_bar.show()
+
+    def set_progress_bar(self, status, minimum, maximum, value, style_sheet):
+        self.fit_progress_bar.setToolTip(str(status))
+        self.fit_progress_bar.setMinimum(minimum)
+        self.fit_progress_bar.setMaximum(maximum)
+        self.fit_progress_bar.setValue(value)
+        self.fit_progress_bar.setStyleSheet(style_sheet)
 
     def clear_figure(self):
         self.figure.clf()
@@ -150,16 +164,18 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         is_visible = self.fit_browser.isVisible()
         self.toolbar.set_fit_checkstate(False)
         self.fit_browser.hide()
+        self.fit_progress_bar.hide()
         if self.fit_browser.getWorkspaceNames() and is_visible:
             self.toolbar.set_fit_checkstate(True)
             self.fit_browser.show()
+            self.fit_progress_bar.show()
 
     def remove_ws_from_fitbrowser(self, ws):
-        # only one spectra per workspace
+        # only one spectrum per workspace
         try:
             self.fit_browser.removeWorkspaceAndSpectra(ws.name())
         except:
-            pass # name may not be available if ws has just been deleted
+            pass  # name may not be available if ws has just been deleted
 
     def update_legend(self, ax):
         if ax.get_lines():
@@ -196,3 +212,6 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def get_figure(self):
         return self.figure
+
+    def is_fit_browser_visible(self):
+        return self.fit_browser.isVisible()

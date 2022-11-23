@@ -27,11 +27,13 @@ class FittingPresenter(object):
         self.data_widget.presenter.fit_all_started_notifier.add_subscriber(self.fit_all_started_observer)
         self.data_widget.presenter.fit_all_started_notifier.add_subscriber(self.plot_widget.fit_all_started_observer)
         self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.data_widget.presenter.fit_observer)
-        #
+        self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.plot_widget.fit_complete_observer)
         self.plot_widget.view.fit_browser.fit_enabled_notifier.add_subscriber(
             self.data_widget.presenter.fit_enabled_observer)
         self.plot_widget.fit_all_done_notifier.add_subscriber(self.data_widget.presenter.fit_all_done_observer)
         self.plot_widget.fit_all_done_notifier.add_subscriber(self.fit_all_done_observer)
+        self.plot_widget.view.fit_browser.fit_started_notifier.add_subscriber(
+            self.plot_widget.fit_started_observer)
 
     def disable_view(self, _):
         self.view.setEnabled(False)

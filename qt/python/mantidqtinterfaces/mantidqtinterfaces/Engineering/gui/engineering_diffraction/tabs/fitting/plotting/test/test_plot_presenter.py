@@ -18,6 +18,14 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.model = mock.create_autospec(plot_model.FittingPlotModel)
         self.view = mock.create_autospec(plot_view.FittingPlotView)
         self.presenter = plot_presenter.FittingPlotPresenter(None, self.model, self.view)
+        self.call_in_progress = mock.call(status='fitting...', minimum=0, maximum=0, value=0,
+                                          style_sheet=plot_presenter.IN_PROGRESS_STYLE_SHEET)
+        self.call_fail = mock.call(status='fail', minimum=0, maximum=100, value=0,
+                                   style_sheet=plot_presenter.FAILED_STYLE_SHEET)
+        self.call_success = mock.call(status='success', minimum=0, maximum=100, value=100,
+                                      style_sheet=plot_presenter.SUCCESS_STYLE_SHEET)
+        self.call_empty = mock.call(status="", minimum=0, maximum=100, value=0,
+                                    style_sheet=plot_presenter.EMPTY_STYLE_SHEET)
 
     def test_add_workspace_to_plot(self):
         self.view.get_axes.return_value = ["axis1", "axis2"]
@@ -112,6 +120,65 @@ class FittingPlotPresenterTest(unittest.TestCase):
             fitprop_list.append({'properties': {'Function': fun_str_list[iws + 1], 'InputWorkspace': ws, 'Output': ws},
                                  'status': mock_fit_output[iws].OutputStatus})
         mock_notifier.notify_subscribers.assert_called_once_with(fitprop_list)
+
+    def test_add_workspace_sets_progress_to_zero(self):
+        self.presenter.add_workspace_to_plot("workspace")
+        self.view.set_progress_bar.assert_has_calls([self.call_empty])
+
+    def test_remove_workspace_sets_progress_to_zero(self):
+        self.presenter.remove_workspace_from_plot("workspace")
+        self.view.set_progress_bar.assert_has_calls([self.call_empty])
+
+    def test_clear_plot_sets_progress_to_zero(self):
+        self.presenter.clear_plot()
+        self.view.set_progress_bar.assert_has_calls([self.call_empty])
+
+    @mock.patch(dir_path + '.Fit')
+    def test_do_all_fit_sets_progress_bar_to_in_progress_then_final(self, mock_fit):
+        self.fit_all_helper(mock_fit, do_sequential=False)
+        self.assertEqual(2, self.view.set_progress_bar.call_count)
+        self.view.set_progress_bar.assert_has_calls([self.call_in_progress, self.call_fail], any_order=False)
+
+    def test_final_state_fail_output_list(self):
+        self.presenter.set_final_state_progress_bar([{'status': "fail"}])
+        self.view.set_progress_bar.assert_has_calls([self.call_fail])
+
+    def test_final_state_fail_status(self):
+        self.presenter.set_final_state_progress_bar(output_list=None, status="fail")
+        self.view.set_progress_bar.assert_has_calls([self.call_fail])
+
+    def test_final_state_success_output_list(self):
+        self.presenter.set_final_state_progress_bar([{'status': "success"}])
+        self.view.set_progress_bar.assert_has_calls([self.call_success])
+
+    def test_final_state_success_status(self):
+        self.presenter.set_final_state_progress_bar(output_list=None, status="success")
+        self.view.set_progress_bar.assert_has_calls([self.call_success])
+
+    def test_hide_toolbar_fit_toggle(self):
+        self.view.is_fit_browser_visible.return_value = True
+        self.presenter.fit_toggle()
+        self.view.hide_fit_browser.assert_called_once()
+        self.view.hide_fit_progress_bar.assert_called_once()
+        self.view.set_progress_bar.assert_called_once()
+
+    def test_show_fail_toolbar_fit_toggle(self):
+        self.view.is_fit_browser_visible.return_value = False
+        self.presenter.fit_toggle()
+        self.view.show_fit_browser.assert_called_once()
+        self.view.show_fit_progress_bar.assert_not_called()
+        self.view.set_progress_bar.assert_called_once()
+
+    def test_show_success_toolbar_fit_toggle(self):
+        self.view.is_fit_browser_visible.return_value = False
+        self.view.show_fit_browser.side_effect = self.set_browser_visible
+        self.presenter.fit_toggle()
+        self.view.show_fit_browser.assert_called_once()
+        self.view.show_fit_progress_bar.assert_called_once()
+        self.view.set_progress_bar.assert_called_once()
+
+    def set_browser_visible(self):
+        self.view.is_fit_browser_visible.return_value = True
 
 
 if __name__ == '__main__':
