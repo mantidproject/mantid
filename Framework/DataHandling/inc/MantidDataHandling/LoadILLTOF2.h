@@ -55,9 +55,6 @@ private:
   void loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<Mantid::detid_t> &detectorIDs,
                    const NeXus::NXInt &data, Mantid::API::Progress &progress);
 
-  /// Calculate error for y
-  static double calculateError(double in) { return sqrt(in); }
-
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   std::string m_instrumentName; ///< Name of the instrument
