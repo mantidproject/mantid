@@ -651,5 +651,27 @@ void LoadHelper::replaceZeroErrors(const API::MatrixWorkspace_sptr &ws, double z
   }
 }
 
+/**
+ * Fetches NXInt data from the requested group name in the entry provided.
+ * @param entry NXEntry where desired data can be found
+ * @param groupName Full name of the data group
+ * @return NXInt data object
+ */
+NeXus::NXInt LoadHelper::getIntDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+  auto dataGroup = entry.openNXData(groupName);
+  return dataGroup.openIntData();
+}
+
+/**
+ * Fetches NXDouble data from the requested group name in the entry provided.
+ * @param entry NXEntry where desired data can be found
+ * @param groupName Full name of the data group
+ * @return NXDouble data object
+ */
+NeXus::NXDouble LoadHelper::getDoubleDataset(const NeXus::NXEntry &entry, const std::string &groupName) {
+  auto dataGroup = entry.openNXData(groupName);
+  return dataGroup.openDoubleData();
+}
+
 } // namespace DataHandling
 } // namespace Mantid
