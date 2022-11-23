@@ -4,7 +4,7 @@
 #
 # Expected args:
 #   1. EXPECTED_MAMBAFORGE_PATH: path to where mambaforge should be installed
-#   3. CLEAN_BUILD: whether or not to force mambaforge to be removed before attempting to install it again
+#   2. CLEAN_BUILD: whether or not to force mambaforge to be removed before attempting to install it again
 
 EXPECTED_MAMBAFORGE_PATH=$1
 CLEAN_BUILD=$2

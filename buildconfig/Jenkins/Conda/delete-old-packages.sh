@@ -73,7 +73,7 @@ function delete_package() {
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "deletion-anaconda"
-mamba install curl jq
+mamba install --yes curl jq
 
 for name in "$@"; do
   delete_package $CHANNEL $name $LABEL

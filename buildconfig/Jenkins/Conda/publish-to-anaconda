@@ -27,7 +27,7 @@ SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "publish-anaconda"
-mamba install anaconda-client
+mamba install --yes anaconda-client
 
 for package in "$@"
 do

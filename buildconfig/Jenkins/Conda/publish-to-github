@@ -33,7 +33,7 @@ github_release_cmd() {
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge publish-gh
-mamba install gh
+mamba install --yes gh
 
 # Create a release and attach the given assets.
 # The workflow here is attempting ensure there is always something on GitHub. As

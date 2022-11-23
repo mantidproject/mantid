@@ -29,7 +29,7 @@ fi
 # Mamba
 ###############################################################################
 setup_mamba $WORKSPACE/mambaforge "devsite"
-mamba install sphinx sphinx_bootstrap_theme
+mamba install --yes sphinx sphinx_bootstrap_theme
 
 ###############################################################################
 # Build the developer site
