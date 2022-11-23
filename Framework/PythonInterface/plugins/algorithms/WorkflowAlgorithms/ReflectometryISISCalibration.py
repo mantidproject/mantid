@@ -39,7 +39,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ["ReflectometryISISLoadAndProcess"]
+        return ['ReflectometryISISLoadAndProcess']
 
     def PyInit(self):
         self.declareProperty(
