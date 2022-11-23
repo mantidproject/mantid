@@ -494,13 +494,10 @@ class SPowderSemiEmpiricalCalculator:
 
         Returns an N_atoms x N_frequencies array.
         """
-        average_a_traces = np.sum(
-            [self._powder_data.get_a_traces(k_index) * kpoint.weight for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
-            axis=0,
-        )
-        iso_dw = self._isotropic_dw(
-            frequencies=self._bin_centres, q2=q2, a_trace=average_a_traces[:, np.newaxis], temperature=self._temperature
-        )
+        average_a_traces = np.sum([self._powder_data.get_a_traces(k_index) * kpoint.weight
+                                   for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
+                                  axis=0)
+        iso_dw = self._isotropic_dw(q2=q2, a_trace=average_a_traces[:, None])
 
         # For 2-D case we need to reshuffle axes after numpy broadcasting
         if len(iso_dw.shape) == 3:
@@ -510,9 +507,9 @@ class SPowderSemiEmpiricalCalculator:
         return iso_dw
 
     @staticmethod
-    def _isotropic_dw(*, frequencies, q2, a_trace, temperature):
+    def _isotropic_dw(*, q2, a_trace):
         """Compute Debye-Waller factor in isotropic approximation"""
-        return np.exp(-q2 * a_trace / 3.0)
+        return np.exp(-q2 * a_trace / 3)
 
     def _get_empty_sdata(self, use_fine_bins: bool = False, max_order: Optional[int] = None, shape=None) -> SData:
         """
@@ -722,8 +719,7 @@ class SPowderSemiEmpiricalCalculator:
                 a_tensor=a_tensor,
                 a_trace=a_trace,
                 b_tensor=b_tensor,
-                b_trace=b_trace,
-            )
+                b_trace=b_trace)
             rebinned_spectrum, _ = np.histogram(frequencies, bins=bins, weights=(scattering_intensities * kpoint_weight), density=False)
             sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
 
@@ -754,7 +750,11 @@ class SPowderSemiEmpiricalCalculator:
 
         return freq, coeff
 
-    def _calculate_order_one_dw(self, *, q2: np.ndarray, frequencies: np.ndarray, a_tensor=None, a_trace=None, b_tensor=None, b_trace=None):
+    def _calculate_order_one_dw(self, *, q2: np.ndarray,
+                                frequencies: np.ndarray,
+                                a_tensor=None, a_trace=None,
+                                b_tensor=None, b_trace=None,
+                                ):
         """
         Calculate mode-dependent Debye-Waller factor for the first order quantum event for one atom.
         :param q2: squared values of momentum transfer vectors
@@ -786,6 +786,7 @@ class SPowderSemiEmpiricalCalculator:
         :param include_dw: Include (mode-dependent) Debye-Waller temperature effect
         :returns: s for the first quantum order event for the given atom
         """
+
         return q2 * b_trace / 3.0
 
     def _calculate_order_two(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None, b_tensor=None, b_trace=None):
@@ -825,17 +826,14 @@ class SPowderSemiEmpiricalCalculator:
         # np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
         # np.take(b_tensor, indices=indices[:, 0], axis=0)))
 
-        s = (
-            q4
-            * (
-                np.prod(np.take(b_trace, indices=indices), axis=1)
-                + np.einsum(
-                    "kli, kil->k", np.take(b_tensor, indices=indices[:, 0], axis=0), np.take(b_tensor, indices=indices[:, 1], axis=0)
-                )
-                + np.einsum(
-                    "kli, kil->k", np.take(b_tensor, indices=indices[:, 1], axis=0), np.take(b_tensor, indices=indices[:, 0], axis=0)
-                )
-            )
-            / (30.0 * factor)
-        )
+        # fmt: off
+        s = q4 * (np.prod(np.take(b_trace, indices=indices), axis=1)
+                  + np.einsum('kli, kil->k',
+                              np.take(b_tensor, indices=indices[:, 0], axis=0),
+                              np.take(b_tensor, indices=indices[:, 1], axis=0))
+                  + np.einsum('kli, kil->k',
+                              np.take(b_tensor, indices=indices[:, 1], axis=0),
+                              np.take(b_tensor, indices=indices[:, 0], axis=0))
+            ) / (30.0 * factor)
+        # fmt: on
         return s

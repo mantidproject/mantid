@@ -141,10 +141,9 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             center=frequencies,
             weights=s_dft,
             is_hist=True,
-            limit=3,
+            limit=6,
             function="gaussian",
-            spacing="sqrt2",
-        )
+            spacing="sqrt2")
 
     elif scheme == "interpolate_coarse":
         return interpolated_broadening(
@@ -554,7 +553,7 @@ def interpolated_broadening(
         hist = weights
     else:
         hist, _ = np.histogram(center, bins=bins, weights=weights, density=False)
-    freq_range = 3 * max(sigma)
+    freq_range = limit * max(sigma)
     kernel_npts_oneside = np.ceil(freq_range / bin_width)
 
     if function == "gaussian":

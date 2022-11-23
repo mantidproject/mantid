@@ -51,14 +51,20 @@ class PowderCalculator:
         k_indices = sorted(self._frequencies.keys())  # make sure dictionary keys are in the same order on each machine
         b_tensors = {}
         a_tensors = {}
+        n_plus_1 = {}
 
         tensors = [self._calculate_powder_k(k=k) for k in k_indices]
 
         for i, k_index in enumerate(k_indices):
             a_tensors[k_index] = tensors[i][0]
             b_tensors[k_index] = tensors[i][1]
+            n_plus_1[k_index] = tensors[i][2]
 
-        powder = abins.PowderData(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=self._frequencies, num_atoms=len(self._masses))
+        powder = abins.PowderData(a_tensors=a_tensors,
+                                  b_tensors=b_tensors,
+                                  frequencies=self._frequencies,
+                                  n_plus_1=n_plus_1,
+                                  num_atoms=len(self._masses))
         return powder
 
     def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -95,16 +101,21 @@ class PowderCalculator:
         b_tensors[indices] = NUM_ZERO
 
         if self._temperature < np.finfo(type(self._temperature)).eps:
-            pass
+            two_n_plus_1 = 1.
+            n_plus_1 = 1.
+            b_tensors_2n_plus_1 = b_tensors_n_plus_1 = b_tensors
+
         else:
-            coth = 1.0 / np.tanh(self._frequencies[k] * CM1_2_HARTREE
-                                 / (2.0 * self._temperature * K_2_HARTREE))
-            b_tensors *= coth[None, :, None, None]
+            two_n_plus_1= 1.0 / np.tanh(self._frequencies[k] * CM1_2_HARTREE
+                                        / (2.0 * self._temperature * K_2_HARTREE))
+            n_plus_1 = two_n_plus_1 * 0.5 + 0.5
+            b_tensors_2n_plus_1 = b_tensors * two_n_plus_1[None, :, None, None]
+            b_tensors_n_plus_1 = b_tensors * n_plus_1[None, :, None, None]
 
         # a_tensors[num_atoms, dim, dim]
-        a_tensors = np.sum(a=b_tensors, axis=1)
+        a_tensors = np.sum(a=b_tensors_2n_plus_1, axis=1)
 
-        return a_tensors, b_tensors
+        return a_tensors, b_tensors_n_plus_1, n_plus_1
 
     def get_formatted_data(self) -> abins.PowderData:
         """
