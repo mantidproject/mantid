@@ -23,7 +23,7 @@ using MantidQt::MantidWidgets::ProjectionSurface;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout)
-    : QMainWindow(parent), m_layout(std::move(layout)) {
+    : QMainWindow(parent), m_layout(layout) {
   QMainWindow::setWindowFlags(Qt::Widget);
   setDockOptions(QMainWindow::AnimatedDocks);
   m_ui.setupUi(this);

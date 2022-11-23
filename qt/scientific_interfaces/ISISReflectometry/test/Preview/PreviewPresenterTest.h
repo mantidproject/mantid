@@ -86,8 +86,8 @@ public:
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
 
-    auto presenter = PreviewPresenter(
-        packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
     presenter.notifyLoadWorkspaceRequested();
   }
 
@@ -130,11 +130,13 @@ public:
     expectLoadWorkspaceCompletedForLinearDetector(*mockView, *mockModel, *mockJobManager, *mockDockedWidgets,
                                                   *mockRegionSelector);
 
+    auto rawMockDockedWidgets = mockDockedWidgets.get();
+
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
                          std::move(mockDockedWidgets), std::move(mockRegionSelector));
     auto presenter = PreviewPresenter(std::move(deps));
 
-    expectRegionSelectorToolbarEnabled(*mockDockedWidgets, true);
+    expectRegionSelectorToolbarEnabled(*rawMockDockedWidgets, true);
 
     EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
     presenter.notifyLoadWorkspaceCompleted();
@@ -149,7 +151,8 @@ public:
 
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
 
-    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel));
+    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel),
+                         std::move(mockDockedWidgets));
     auto presenter = PreviewPresenter(std::move(deps));
     presenter.notifyLoadWorkspaceCompleted();
   }
@@ -237,11 +240,13 @@ public:
 
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
 
+    auto rawMockDockedWidgets = mockDockedWidgets.get();
+
     auto presenter =
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
                                   std::move(mockDockedWidgets), std::move(mockRegionSelector)));
 
-    expectRegionSelectorToolbarEnabled(*mockDockedWidgets, true);
+    expectRegionSelectorToolbarEnabled(*rawMockDockedWidgets, true);
 
     presenter.notifySumBanksCompleted();
   }
@@ -447,12 +452,13 @@ public:
     // expectations later
     auto rawMockRegionSelector = mockRegionSelector.get();
     auto rawMockPlotPresenter = mockPlotPresenter.get();
+    auto rawMockDockableWidgets = mockDockableWidgets.get();
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(),
                                                makeInstViewModel(), std::move(mockDockableWidgets),
                                                std::move(mockRegionSelector), std::move(mockPlotPresenter)));
 
-    expectRegionSelectorCleared(*mockDockableWidgets, rawMockRegionSelector);
+    expectRegionSelectorCleared(rawMockDockableWidgets, rawMockRegionSelector);
     expectReductionPlotCleared(rawMockPlotPresenter);
 
     presenter.notifySumBanksAlgorithmError();
@@ -496,6 +502,7 @@ private:
   MockPreviewDockedWidgetsT makePreviewDockedWidgets() {
     auto mockDockedWidgets = std::make_unique<MockPreviewDockedWidgets>();
     EXPECT_CALL(*mockDockedWidgets, setInstViewToolbarEnabled(Eq(false))).Times(1);
+    EXPECT_CALL(*mockDockedWidgets, subscribe(NotNull())).Times(1);
     return mockDockedWidgets;
   }
 
@@ -663,10 +670,10 @@ private:
     EXPECT_CALL(mainPresenter, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
-  void expectRegionSelectorCleared(MockPreviewDockedWidgets &mockDockedWidgets,
+  void expectRegionSelectorCleared(MockPreviewDockedWidgets *mockDockedWidgets,
                                    MockRegionSelector *mockRegionSelector) {
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
-    EXPECT_CALL(mockDockedWidgets, setRegionSelectorEnabled(false)).Times(1);
+    EXPECT_CALL(*mockDockedWidgets, setRegionSelectorEnabled(false)).Times(1);
   }
 
   void expectReductionPlotCleared(MockPlotPresenter *mockPlotPresenter) {
