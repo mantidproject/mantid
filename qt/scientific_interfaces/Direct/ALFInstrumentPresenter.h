@@ -8,7 +8,6 @@
 
 #include "ALFInstrumentModel.h"
 #include "DllConfig.h"
-#include "MantidGeometry/IDetector.h"
 
 #include <optional>
 #include <string>
