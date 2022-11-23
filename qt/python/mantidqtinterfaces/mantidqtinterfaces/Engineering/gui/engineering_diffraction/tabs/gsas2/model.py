@@ -640,12 +640,11 @@ class GSAS2Model(object):
     def load_basic_outputs(self, gsas_result_filepath):
         logger.notice(f"GSAS-II .lst result file found. Opening {self.project_name}.lst")
         self.read_gsas_lst_and_print_wR(gsas_result_filepath, self.data_files)
-        self.phase_names_list = self.find_phase_names_in_lst(
-            os.path.join(self.user_save_directory, self.project_name + ".lst"))
-
         save_message = self.move_output_files_to_user_save_location()
         logger.notice(save_message)
 
+        self.phase_names_list = self.find_phase_names_in_lst(
+            os.path.join(self.user_save_directory, self.project_name + ".lst"))
         self.create_lattice_parameter_table()
         self.create_instrument_parameter_table()
         self.create_reflections_table()
