@@ -20,10 +20,6 @@ ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_p
 
 QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
 
-void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) {
-  m_instrumentPresenter = presenter;
-}
-
 void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                                  std::vector<double> const &twoThetas) {
   m_model->setExtractedWorkspace(workspace, twoThetas);

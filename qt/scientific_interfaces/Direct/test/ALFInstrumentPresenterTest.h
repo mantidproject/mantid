@@ -12,7 +12,7 @@
 #include "ALFAnalysisMocks.h"
 #include "ALFInstrumentMocks.h"
 #include "ALFInstrumentPresenter.h"
-#include "MockDetector.h"
+#include "MockInstrumentActor.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"

@@ -30,8 +30,6 @@ class MockALFAnalysisPresenter : public IALFAnalysisPresenter {
 public:
   MOCK_METHOD0(getView, QWidget *());
 
-  MOCK_METHOD1(subscribeInstrumentPresenter, void(IALFInstrumentPresenter *presenter));
-
   MOCK_METHOD2(setExtractedWorkspace,
                void(Mantid::API::MatrixWorkspace_sptr const &workspace, std::vector<double> const &twoThetas));
 

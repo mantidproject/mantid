@@ -19,7 +19,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MockDetector.h"
+#include "MockInstrumentActor.h"
 
 #include <memory>
 #include <string>

@@ -29,8 +29,6 @@ public:
 
   virtual QWidget *getView() = 0;
 
-  virtual void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) = 0;
-
   virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                      std::vector<double> const &twoThetas) = 0;
 
@@ -48,8 +46,6 @@ class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresen
 public:
   explicit ALFAnalysisPresenter(IALFAnalysisView *m_view, std::unique_ptr<IALFAnalysisModel> m_model);
   QWidget *getView() override;
-
-  void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) override;
 
   void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                              std::vector<double> const &twoThetas) override;
@@ -70,8 +66,6 @@ private:
   void updatePlotInViewFromModel();
   void updatePeakCentreInViewFromModel();
   void updateTwoThetaInViewFromModel();
-
-  IALFInstrumentPresenter *m_instrumentPresenter;
 
   IALFAnalysisView *m_view;
   std::unique_ptr<IALFAnalysisModel> m_model;
