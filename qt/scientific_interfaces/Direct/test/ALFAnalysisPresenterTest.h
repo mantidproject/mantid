@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace testing;
@@ -42,6 +43,8 @@ public:
     m_workspaceName = "test";
     m_range = std::make_pair(0.0, 1.0);
     m_peakCentre = 0.5;
+    m_allTwoTheta = std::vector<double>{1.0, 2.3, 3.3};
+    m_averageTwoTheta = 2.2;
 
     auto model = std::make_unique<NiceMock<MockALFAnalysisModel>>();
     m_model = model.get();
@@ -89,7 +92,7 @@ public:
     // set name via addSpectrum
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
@@ -103,7 +106,7 @@ public:
     // set name via addSpectrum
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(2).WillRepeatedly(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
@@ -115,9 +118,28 @@ public:
   }
 
   void test_notifyTubeExtracted_will_call_addSpectrum_in_the_view() {
+    EXPECT_CALL(*m_model, clearTwoThetas()).Times(1);
+    EXPECT_CALL(*m_model, addTwoTheta(m_allTwoTheta[0])).Times(1);
+
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
+    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
+    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+
+    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
+  }
+
+  void test_notifyTubeAveraged_will_call_addSpectrum_in_the_view() {
+    EXPECT_CALL(*m_model, addTwoTheta(m_allTwoTheta[0])).Times(1);
+
+    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
+    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
+    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+
+    m_presenter->notifyTubeAveraged(m_allTwoTheta[0]);
   }
 
   void test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
@@ -131,7 +153,7 @@ public:
     // set name via addSpectrum
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
@@ -144,7 +166,7 @@ public:
   void test_that_calculateEstimate_is_called_as_expected() {
     EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(2).WillRepeatedly(Return(m_workspaceName));
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted();
+    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
 
     EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
@@ -155,10 +177,22 @@ public:
     m_presenter->notifyUpdateEstimateClicked();
   }
 
+  void test_clearTwoThetas_will_clear_the_model_and_update_the_view() {
+    EXPECT_CALL(*m_model, clearTwoThetas()).Times(1);
+
+    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
+    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
+    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+
+    m_presenter->clearTwoThetas();
+  }
+
 private:
   std::string m_workspaceName;
   std::pair<double, double> m_range;
   double m_peakCentre;
+  std::vector<double> m_allTwoTheta;
+  std::optional<double> m_averageTwoTheta;
 
   NiceMock<MockALFAnalysisModel> *m_model;
   std::unique_ptr<NiceMock<MockALFAnalysisView>> m_view;

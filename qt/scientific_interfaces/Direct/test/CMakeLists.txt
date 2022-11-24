@@ -1,10 +1,13 @@
 # Testing
 set(TEST_FILES ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h ALFInstrumentPresenterTest.h)
 
+set(TEST_HELPERS ALFAnalysisMocks.h ALFInstrumentMocks.h MockDetector.h)
+
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
   QT_VERSION 5
   SRC ${TEST_FILES}
+  TEST_HELPER_SRCS ${TEST_HELPERS}
   INCLUDE_DIRS ../
   LINK_LIBS Mantid::API
             Mantid::DataObjects

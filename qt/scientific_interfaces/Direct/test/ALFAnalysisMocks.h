@@ -15,6 +15,7 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -33,7 +34,12 @@ public:
   MOCK_METHOD0(notifyFitClicked, void());
   MOCK_METHOD0(notifyUpdateEstimateClicked, void());
 
-  MOCK_METHOD0(notifyTubeExtracted, void());
+  MOCK_METHOD1(notifyTubeExtracted, void(double const twoTheta));
+  MOCK_METHOD1(notifyTubeAveraged, void(double const twoTheta));
+
+  MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
+
+  MOCK_METHOD0(clearTwoThetas, void());
 };
 
 class MockALFAnalysisView : public IALFAnalysisView {
@@ -52,6 +58,8 @@ public:
 
   MOCK_METHOD1(setPeakCentreStatus, void(std::string const &status));
 
+  MOCK_METHOD2(setAverageTwoTheta, void(std::optional<double> average, std::vector<double> const &all));
+
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
@@ -64,6 +72,13 @@ public:
   MOCK_CONST_METHOD0(peakCentre, double());
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
+
+  MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
+
+  MOCK_METHOD0(clearTwoThetas, void());
+  MOCK_METHOD1(addTwoTheta, void(double const twoTheta));
+  MOCK_CONST_METHOD0(averageTwoTheta, std::optional<double>());
+  MOCK_CONST_METHOD0(allTwoThetas, std::vector<double>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

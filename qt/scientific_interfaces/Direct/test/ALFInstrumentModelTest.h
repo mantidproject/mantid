@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MockDetector.h"
 
 #include <memory>
 #include <string>
@@ -32,11 +33,27 @@ using namespace testing;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
+V3D const SAMPLE_POSITION = V3D(0.0, 0.0, 0.0);
+V3D const SOURCE_POSITION = V3D(0.0, 0.0, -25.0);
+
 void addCurvesWorkspaceToADS(std::string const &unit, std::string const &label = "", double const yValue = 0.2) {
   auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, yValue, 0.01, 0.3);
 
   std::shared_ptr<Instrument> instrument = std::make_shared<Instrument>();
   instrument->setName("ALF");
+
+  // Set source position
+  auto *source = new ObjComponent("source");
+  source->setPos(SOURCE_POSITION);
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // Set sample position
+  auto *sampleHolder = new Component("samplePos");
+  sampleHolder->setPos(SAMPLE_POSITION);
+  instrument->add(sampleHolder);
+  instrument->markAsSamplePos(sampleHolder);
+
   workspace->setInstrument(instrument);
 
   workspace->getAxis(0)->setUnit(unit);
@@ -64,6 +81,7 @@ public:
     m_nonALFData = "IRIS00072464.raw";
     m_ALFData = "ALF82301.raw";
 
+    m_detector = std::make_shared<NiceMock<MockDetector>>();
     m_model = std::make_unique<ALFInstrumentModel>();
   }
 
@@ -113,28 +131,21 @@ public:
     TS_ASSERT_EQUALS("extractedTubes_ALF82301", m_model->extractedWsName());
   }
 
-  void test_extractSingleTube_will_not_change_the_number_of_tubes_if_a_single_tube_workspace_cannot_be_found() {
-    m_model->extractSingleTube();
-
-    TS_ASSERT(!ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(0u, m_model->numberOfTubesInAverage());
-  }
-
-  void test_extractSingleTube_will_set_the_number_of_tubes_to_one_if_a_single_tube_workspace_exists() {
+  void test_extractSingleTube_will_create_an_extracted_workspace() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("dSpacing");
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
 
+    TS_ASSERT(!ADS.doesExist("Curves"));
     TS_ASSERT(ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(1u, m_model->numberOfTubesInAverage());
   }
 
   void test_extractSingleTube_will_create_a_workspace_with_the_expected_dSpacing_units_and_y_values() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("dSpacing");
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
 
     auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
 
@@ -149,7 +160,7 @@ public:
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Phi");
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
 
     auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
 
@@ -164,7 +175,7 @@ public:
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
 
     auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
 
@@ -175,28 +186,50 @@ public:
     TS_ASSERT_DELTA(workspace->readY(0)[2], 0.2, 0.000001);
   }
 
-  void test_averageTube_increments_the_number_of_averaged_tubes() {
+  void test_extractSingleTube_returns_nullopt_when_the_detector_is_null() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
 
-    m_model->extractSingleTube();
+    // Expect no call
+    EXPECT_CALL(*m_detector, getTwoTheta(SAMPLE_POSITION, SAMPLE_POSITION - SOURCE_POSITION)).Times(0);
+
+    TS_ASSERT_EQUALS(std::nullopt, m_model->extractSingleTube(nullptr));
+  }
+
+  void test_averageTube_will_remove_the_curve_workspace_from_the_ads_and_add_an_extracted_ws() {
+    m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
 
-    m_model->averageTube();
+    extractSingleTubeWithValidDetector();
+    addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
+
+    averageTubeWithValidDetector(1u);
 
     TS_ASSERT(!ADS.doesExist("Curves"));
     TS_ASSERT(ADS.doesExist(m_model->extractedWsName()));
-    TS_ASSERT_EQUALS(2u, m_model->numberOfTubesInAverage());
+  }
+
+  void test_averageTube_returns_nullopt_when_the_detector_is_null() {
+    m_model->loadAndTransform(m_ALFData);
+    addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
+
+    extractSingleTubeWithValidDetector();
+    addCurvesWorkspaceToADS("Degrees", "Out of plane angle");
+
+    // Expect no call
+    EXPECT_CALL(*m_detector, getTwoTheta(SAMPLE_POSITION, SAMPLE_POSITION - SOURCE_POSITION)).Times(0);
+
+    TS_ASSERT_EQUALS(std::nullopt, m_model->averageTube(nullptr, 1u));
   }
 
   void test_averageTube_creates_an_average_with_the_existing_extracted_workspace() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.4);
 
-    m_model->averageTube();
+    averageTubeWithValidDetector(1u);
 
     auto workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->extractedWsName());
     TS_ASSERT_EQUALS("Label", workspace->getAxis(0)->unit()->unitID());
@@ -206,16 +239,11 @@ public:
     TS_ASSERT_DELTA(workspace->readY(0)[2], 0.3, 0.000001);
   }
 
-  void test_checkDataIsExtracted_returns_false_if_number_of_tubes_is_zero() {
-    ADS.addOrReplace(m_model->extractedWsName(), WorkspaceCreationHelper::create2DWorkspace(1, 2));
-    TS_ASSERT(!m_model->checkDataIsExtracted());
-  }
-
   void test_checkDataIsExtracted_returns_false_if_extracted_workspace_does_not_exist() {
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
     ADS.remove(m_model->extractedWsName());
 
     TS_ASSERT(!m_model->checkDataIsExtracted());
@@ -225,14 +253,31 @@ public:
     m_model->loadAndTransform(m_ALFData);
     addCurvesWorkspaceToADS("Degrees", "Out of plane angle", 0.2);
 
-    m_model->extractSingleTube();
+    extractSingleTubeWithValidDetector();
 
     TS_ASSERT(m_model->checkDataIsExtracted());
   }
 
 private:
+  void extractSingleTubeWithValidDetector() {
+    EXPECT_CALL(*m_detector, getTwoTheta(SAMPLE_POSITION, SAMPLE_POSITION - SOURCE_POSITION))
+        .Times(1)
+        .WillOnce(Return(M_PI));
+    auto const twoTheta = m_model->extractSingleTube(m_detector);
+    TS_ASSERT_EQUALS(180.0, *twoTheta);
+  }
+
+  void averageTubeWithValidDetector(std::size_t const numberOfTubes) {
+    EXPECT_CALL(*m_detector, getTwoTheta(SAMPLE_POSITION, SAMPLE_POSITION - SOURCE_POSITION))
+        .Times(1)
+        .WillOnce(Return(M_PI));
+    auto const twoTheta = m_model->averageTube(m_detector, numberOfTubes);
+    TS_ASSERT_EQUALS(180.0, *twoTheta);
+  }
+
   std::string m_nonALFData;
   std::string m_ALFData;
 
+  std::shared_ptr<NiceMock<MockDetector>> m_detector;
   std::unique_ptr<ALFInstrumentModel> m_model;
 };

@@ -22,6 +22,8 @@
 
 namespace {
 
+QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes";
+
 std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
   QString color("black"), status("");
   if (fitStatus.contains("success")) {
@@ -32,6 +34,16 @@ std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus)
     color = "red", status = fitStatus;
   }
   return {"QLabel { color: " + color + "; }", status};
+}
+
+QString constructAverageString(std::vector<double> const &twoThetas) {
+  QString calculationStr("");
+  for (auto i = 0u; i < twoThetas.size(); ++i) {
+    if (i != 0)
+      calculationStr += " + ";
+    calculationStr += QString::number(twoThetas[i]);
+  }
+  return "\n=(" + calculationStr + ")/" + QString::number(twoThetas.size());
 }
 
 } // namespace
@@ -70,8 +82,8 @@ QWidget *ALFAnalysisView::createFitPane(double const start, double const end) {
   auto fitButtonsWidget = setupFitButtonsWidget();
   fitPaneLayout->addWidget(fitButtonsWidget);
 
-  auto peakCentreWidget = setupPeakCentreWidget((start + end) / 2.0);
-  fitPaneLayout->addWidget(peakCentreWidget);
+  auto resultsWidget = setupResultsWidget((start + end) / 2.0);
+  fitPaneLayout->addWidget(resultsWidget);
 
   return fitPane;
 }
@@ -109,25 +121,32 @@ QWidget *ALFAnalysisView::setupFitButtonsWidget() {
   return fitButtonsWidget;
 }
 
-QWidget *ALFAnalysisView::setupPeakCentreWidget(double const centre) {
-  auto *peakCentreWidget = new QWidget();
-  auto *peakCentreLayout = new QGridLayout(peakCentreWidget);
+QWidget *ALFAnalysisView::setupResultsWidget(double const centre) {
+  auto *resultsWidget = new QWidget();
+  auto *resultsLayout = new QGridLayout(resultsWidget);
 
   m_peakCentre = new QLineEdit(QString::number(centre));
   m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
 
   connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
 
-  peakCentreLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
-  peakCentreLayout->addWidget(m_peakCentre, 0, 1);
+  resultsLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
+  resultsLayout->addWidget(m_peakCentre, 0, 1);
 
   m_fitStatus = new QLabel("");
   m_fitStatus->setAlignment(Qt::AlignRight);
   setPeakCentreStatus("");
 
-  peakCentreLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
+  resultsLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
 
-  return peakCentreWidget;
+  m_averageTwoTheta = new QLineEdit("-");
+  m_averageTwoTheta->setReadOnly(true);
+  m_averageTwoTheta->setToolTip(TWO_THETA_TOOLTIP);
+
+  resultsLayout->addWidget(new QLabel("Two theta:"), 2, 0);
+  resultsLayout->addWidget(m_averageTwoTheta, 2, 1);
+
+  return resultsWidget;
 }
 
 void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
@@ -157,6 +176,11 @@ void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
   m_fitStatus->setStyleSheet(stylesheet);
   m_fitStatus->setText(tooltip);
   m_fitStatus->setToolTip(tooltip);
+}
+
+void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {
+  m_averageTwoTheta->setText(average ? QString::number(*average) : "-");
+  m_averageTwoTheta->setToolTip(all.size() == 0u ? TWO_THETA_TOOLTIP : TWO_THETA_TOOLTIP + constructAverageString(all));
 }
 
 void ALFAnalysisView::displayWarning(std::string const &message) {

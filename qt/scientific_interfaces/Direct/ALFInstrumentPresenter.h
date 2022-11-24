@@ -8,6 +8,7 @@
 
 #include "ALFInstrumentModel.h"
 #include "DllConfig.h"
+#include "MantidGeometry/IDetector.h"
 
 #include <optional>
 #include <string>
@@ -36,8 +37,8 @@ public:
 
   virtual void loadRunNumber() = 0;
 
-  virtual void extractSingleTube() = 0;
-  virtual void averageTube() = 0;
+  virtual void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
+  virtual void averageTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
 
   virtual bool checkDataIsExtracted() const = 0;
 
@@ -56,8 +57,8 @@ public:
 
   void loadRunNumber() override;
 
-  void extractSingleTube() override;
-  void averageTube() override;
+  void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
+  void averageTube(Mantid::Geometry::IDetector_const_sptr detector) override;
 
   bool checkDataIsExtracted() const override;
 

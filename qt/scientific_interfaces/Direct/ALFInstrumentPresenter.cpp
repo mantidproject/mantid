@@ -33,6 +33,8 @@ void ALFInstrumentPresenter::loadRunNumber() {
   if (!filepath) {
     return;
   }
+
+  m_analysisPresenter->clearTwoThetas();
   if (auto const message = loadAndTransform(*filepath)) {
     m_view->warningBox(*message);
   }
@@ -47,19 +49,23 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
   }
 }
 
-void ALFInstrumentPresenter::extractSingleTube() {
-  m_model->extractSingleTube();
-
-  m_analysisPresenter->notifyTubeExtracted();
-  m_analysisPresenter->notifyUpdateEstimateClicked();
+void ALFInstrumentPresenter::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
+  if (auto const twoTheta = m_model->extractSingleTube(detector)) {
+    m_analysisPresenter->notifyTubeExtracted(*twoTheta);
+    m_analysisPresenter->notifyUpdateEstimateClicked();
+  }
 }
 
-void ALFInstrumentPresenter::averageTube() {
-  m_model->averageTube();
-  m_analysisPresenter->notifyTubeExtracted();
+void ALFInstrumentPresenter::averageTube(Mantid::Geometry::IDetector_const_sptr detector) {
+  auto const numberOfTubes = m_analysisPresenter->numberOfTubes();
+  if (auto const twoTheta = m_model->averageTube(detector, numberOfTubes)) {
+    m_analysisPresenter->notifyTubeAveraged(*twoTheta);
+  }
 }
 
-bool ALFInstrumentPresenter::checkDataIsExtracted() const { return m_model->checkDataIsExtracted(); }
+bool ALFInstrumentPresenter::checkDataIsExtracted() const {
+  return m_analysisPresenter->numberOfTubes() > 0u && m_model->checkDataIsExtracted();
+}
 
 std::string ALFInstrumentPresenter::extractedWsName() const { return m_model->extractedWsName(); }
 

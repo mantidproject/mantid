@@ -10,8 +10,10 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,6 +30,13 @@ public:
   virtual double peakCentre() const = 0;
 
   virtual std::string fitStatus() const = 0;
+
+  virtual std::size_t numberOfTubes() const = 0;
+
+  virtual void clearTwoThetas() = 0;
+  virtual void addTwoTheta(double const twoTheta) = 0;
+  virtual std::optional<double> averageTwoTheta() const = 0;
+  virtual std::vector<double> allTwoThetas() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisModel final : public IALFAnalysisModel {
@@ -42,12 +51,20 @@ public:
 
   std::string fitStatus() const override;
 
+  std::size_t numberOfTubes() const override;
+
+  void clearTwoThetas() override;
+  void addTwoTheta(double const twoTheta) override;
+  std::optional<double> averageTwoTheta() const override;
+  inline std::vector<double> allTwoThetas() const noexcept override { return m_twoThetas; };
+
 private:
   Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,
                                                 std::pair<double, double> const &range);
 
   Mantid::API::IFunction_sptr m_function;
   std::string m_fitStatus;
+  std::vector<double> m_twoThetas;
 };
 
 } // namespace CustomInterfaces

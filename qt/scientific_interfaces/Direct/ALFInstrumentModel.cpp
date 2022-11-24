@@ -14,6 +14,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Unit.h"
 
 #include <memory>
@@ -43,6 +44,17 @@ std::optional<double> xConversionFactor(MatrixWorkspace_const_sptr const &worksp
     return unit == "Phi" || label == "Out of plane angle" ? 180.0 / M_PI : 1.0;
   }
   return std::nullopt;
+}
+
+std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
+                                  Mantid::Geometry::IDetector_const_sptr detector) {
+  if (!instrument || !detector) {
+    return std::nullopt;
+  }
+  auto const sample = instrument->getSample()->getPos();
+  auto const source = instrument->getSource()->getPos();
+
+  return detector->getTwoTheta(sample, sample - source) * 180.0 / M_PI;
 }
 
 void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
@@ -139,9 +151,7 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr const &inputWorkspa
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_numberOfTubesInAverage(0u) {
-  loadEmptyInstrument(instrumentName(), loadedWsName());
-}
+ALFInstrumentModel::ALFInstrumentModel() { loadEmptyInstrument(instrumentName(), loadedWsName()); }
 
 /*
  * Loads data into the ALFView. Normalises and converts to DSpacing if necessary.
@@ -154,8 +164,6 @@ std::optional<std::string> ALFInstrumentModel::loadAndTransform(std::string cons
   if (!isALFData(loadedWorkspace)) {
     return "The loaded data is not from the ALF instrument";
   }
-
-  m_numberOfTubesInAverage = 0u;
 
   if (!isAxisDSpacing(loadedWorkspace)) {
     loadedWorkspace = convertUnits(normaliseByCurrent(loadedWorkspace), "dSpacing");
@@ -187,11 +195,12 @@ std::size_t ALFInstrumentModel::runNumber() const {
 /*
  * Extracts a single tube. Increments the average counter.
  */
-void ALFInstrumentModel::extractSingleTube() {
+std::optional<double> ALFInstrumentModel::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
   if (auto const extractedWorkspace = retrieveSingleTube()) {
     ADS.addOrReplace(extractedWsName(), extractedWorkspace);
-    m_numberOfTubesInAverage = 1u;
+    return getTwoTheta(extractedWorkspace->getInstrument(), detector);
   }
+  return std::nullopt;
 }
 
 MatrixWorkspace_sptr ALFInstrumentModel::retrieveSingleTube() {
@@ -209,29 +218,33 @@ MatrixWorkspace_sptr ALFInstrumentModel::retrieveSingleTube() {
   return nullptr;
 }
 
-void ALFInstrumentModel::averageTube() {
+std::optional<double> ALFInstrumentModel::averageTube(Mantid::Geometry::IDetector_const_sptr detector,
+                                                      std::size_t const numberOfTubes) {
   // Multiply up the current average
   auto existingAverageTube = ADS.retrieveWS<MatrixWorkspace>(extractedWsName());
-  existingAverageTube *= double(m_numberOfTubesInAverage);
+  existingAverageTube *= double(numberOfTubes);
 
   // Get the recently selected tube, and rebin to match previous extracted workspace
   auto newExtractedWorkspace = retrieveSingleTube();
+  if (!newExtractedWorkspace) {
+    return std::nullopt;
+  }
+  auto const newTwoTheta = getTwoTheta(newExtractedWorkspace->getInstrument(), detector);
   newExtractedWorkspace = rebinToWorkspace(newExtractedWorkspace, existingAverageTube);
 
   // Do an average
   auto averagedWorkspace = plus(newExtractedWorkspace, existingAverageTube);
-  m_numberOfTubesInAverage++;
-  averagedWorkspace->mutableY(0) /= double(m_numberOfTubesInAverage);
+  averagedWorkspace->mutableY(0) /= double(numberOfTubes + 1u);
 
   // Add the result back into the ADS
   ADS.addOrReplace(extractedWsName(), averagedWorkspace);
+
+  return newTwoTheta;
 }
 
 /*
  * Returns true if the option to average a tube should be shown.
  */
-bool ALFInstrumentModel::checkDataIsExtracted() const {
-  return m_numberOfTubesInAverage > 0u && ADS.doesExist(extractedWsName());
-}
+bool ALFInstrumentModel::checkDataIsExtracted() const { return ADS.doesExist(extractedWsName()); }
 
 } // namespace MantidQt::CustomInterfaces
