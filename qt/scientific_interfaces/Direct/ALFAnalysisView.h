@@ -49,6 +49,9 @@ public:
   virtual void removeFitSpectrum() = 0;
 
   virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
+  virtual Mantid::API::IPeakFunction_const_sptr getPeak() const = 0;
+
+  virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
   virtual void setPeakCentreStatus(std::string const &status) = 0;
 
@@ -76,7 +79,9 @@ public:
   void removeFitSpectrum();
 
   void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
+  Mantid::API::IPeakFunction_const_sptr getPeak() const override;
 
+  void setPeakCentre(double const centre) override;
   double peakCentre() const override;
   void setPeakCentreStatus(std::string const &status) override;
 
@@ -85,6 +90,7 @@ public:
   void displayWarning(std::string const &message) override;
 
 public slots:
+  void notifyPeakPickerChanged();
   void notifyPeakCentreEditingFinished();
   void notifyUpdateEstimateClicked();
   void notifyFitClicked();

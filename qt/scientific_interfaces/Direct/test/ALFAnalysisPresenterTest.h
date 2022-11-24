@@ -78,6 +78,37 @@ public:
     m_presenter->setExtractedWorkspace(nullptr, twoThetas);
   }
 
+  void test_notifyPeakPickerChanged_will_removeFitSpectrum_if_fit_status_is_empty() {
+    EXPECT_CALL(*m_view, getPeak()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_model, setPeakParameters(_)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
+
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
+
+    // Assert is not called as is unnecessary
+    EXPECT_CALL(*m_view, replot()).Times(0);
+
+    m_presenter->notifyPeakPickerChanged();
+  }
+
+  void test_notifyPeakPickerChanged_will_not_removeFitSpectrum_if_fit_status_is_not_empty() {
+    EXPECT_CALL(*m_view, getPeak()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_model, setPeakParameters(_)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return("Success"));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("Success")).Times(1);
+
+    // Assert is not called
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
+
+    // Assert is not called as is unnecessary
+    EXPECT_CALL(*m_view, replot()).Times(0);
+
+    m_presenter->notifyPeakPickerChanged();
+  }
+
   void test_notifyPeakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);

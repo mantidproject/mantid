@@ -32,6 +32,7 @@ public:
   virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                      std::vector<double> const &twoThetas) = 0;
 
+  virtual void notifyPeakPickerChanged() = 0;
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
   virtual void notifyUpdateEstimateClicked() = 0;
@@ -50,6 +51,7 @@ public:
   void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                              std::vector<double> const &twoThetas) override;
 
+  void notifyPeakPickerChanged() override;
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
   void notifyUpdateEstimateClicked() override;

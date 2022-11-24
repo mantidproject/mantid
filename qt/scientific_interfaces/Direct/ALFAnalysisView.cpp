@@ -70,6 +70,7 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
   m_plot->setCanvasColour(Qt::white);
 
   m_peakPicker = new MantidWidgets::PeakPicker(m_plot, Qt::red);
+  connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
 
   splitter->addWidget(m_plot);
 
@@ -155,6 +156,8 @@ QWidget *ALFAnalysisView::setupResultsWidget(double const centre) {
   return resultsWidget;
 }
 
+void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }
+
 void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
 
 void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
@@ -183,11 +186,15 @@ void ALFAnalysisView::addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &wo
 void ALFAnalysisView::removeFitSpectrum() { m_plot->removeSpectrum("Fitted Data"); }
 
 void ALFAnalysisView::setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) {
-  m_peakCentre->setText(QString::number(peak->getParameter("PeakCentre")));
+  setPeakCentre(peak->getParameter("PeakCentre"));
 
   m_peakPicker->setPeak(peak);
   m_peakPicker->select(false);
 }
+
+Mantid::API::IPeakFunction_const_sptr ALFAnalysisView::getPeak() const { return m_peakPicker->peak(); }
+
+void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText(QString::number(centre)); }
 
 double ALFAnalysisView::peakCentre() const { return m_peakCentre->text().toDouble(); }
 

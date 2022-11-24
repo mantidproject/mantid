@@ -150,10 +150,22 @@ IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspa
   return createCompositeFunction(createFlatBackground(), createGaussian());
 }
 
+void ALFAnalysisModel::setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) {
+  auto const centre = peak->getParameter("PeakCentre");
+  auto const height = peak->getParameter("Height");
+  auto const sigma = peak->getParameter("Sigma");
+
+  setPeakCentre(centre);
+  m_function->setParameter("f1.Height", height);
+  m_function->setParameter("f1.Sigma", sigma);
+}
+
 void ALFAnalysisModel::setPeakCentre(double const centre) {
   m_function->setParameter("f1.PeakCentre", centre);
   m_fitStatus = "";
 }
+
+double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f1.PeakCentre"); }
 
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
   auto const gaussian = m_function->getFunction(1)->clone();

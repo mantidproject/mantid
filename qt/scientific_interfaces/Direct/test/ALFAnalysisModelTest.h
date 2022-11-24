@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
@@ -44,7 +45,7 @@ public:
   void test_that_the_model_is_instantiated_with_a_function_and_empty_fit_status() {
     TS_ASSERT_EQUALS(nullptr, m_model->extractedWorkspace());
     TS_ASSERT_THROWS_NOTHING(m_model->getPeakCopy());
-    TS_ASSERT_THROWS_NOTHING(m_model->getPeakCopy()->getParameter("PeakCentre"));
+    TS_ASSERT_THROWS_NOTHING(m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
     TS_ASSERT_EQUALS(0u, m_model->numberOfTubes());
     TS_ASSERT_EQUALS(std::nullopt, m_model->averageTwoTheta());
@@ -68,7 +69,7 @@ public:
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
+    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -77,7 +78,7 @@ public:
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.5, m_model->getPeakCopy()->getParameter("PeakCentre"));
+    TS_ASSERT_EQUALS(0.5, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -87,7 +88,7 @@ public:
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
+    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -98,7 +99,7 @@ public:
 
     m_model->setPeakCentre(1.1);
 
-    TS_ASSERT_EQUALS(1.1, m_model->getPeakCopy()->getParameter("PeakCentre"));
+    TS_ASSERT_EQUALS(1.1, m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -116,6 +117,24 @@ public:
 
     TS_ASSERT_EQUALS(29.5, *m_model->averageTwoTheta());
     TS_ASSERT_EQUALS(std::vector<double>{29.5}, m_model->allTwoThetas());
+  }
+
+  void test_setPeakParameters_will_update_the_parameters_in_the_gaussian() {
+    double height = 1.2;
+    double centre = 1.5;
+    double sigma = 1.8;
+
+    auto gaussian = FunctionFactory::Instance().createFunction("Gaussian");
+    gaussian->setParameter("Height", height);
+    gaussian->setParameter("PeakCentre", centre);
+    gaussian->setParameter("Sigma", sigma);
+
+    m_model->setPeakParameters(std::dynamic_pointer_cast<IPeakFunction>(gaussian));
+
+    auto const modelPeak = m_model->getPeakCopy();
+    TS_ASSERT_EQUALS(height, modelPeak->getParameter("Height"));
+    TS_ASSERT_EQUALS(centre, modelPeak->getParameter("PeakCentre"));
+    TS_ASSERT_EQUALS(sigma, modelPeak->getParameter("Sigma"));
   }
 
   void test_that_clear_will_clear_the_two_thetas_and_extracted_workspace_from_the_model() {

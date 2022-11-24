@@ -26,6 +26,18 @@ void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sp
   updateViewFromModel();
 }
 
+void ALFAnalysisPresenter::notifyPeakPickerChanged() {
+  m_model->setPeakParameters(m_view->getPeak());
+
+  auto const fitStatus = m_model->fitStatus();
+
+  m_view->setPeakCentre(m_model->peakCentre());
+  m_view->setPeakCentreStatus(fitStatus);
+  if (fitStatus.empty()) {
+    m_view->removeFitSpectrum();
+  }
+}
+
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
   m_model->setPeakCentre(m_view->peakCentre());
   updatePeakCentreInViewFromModel();

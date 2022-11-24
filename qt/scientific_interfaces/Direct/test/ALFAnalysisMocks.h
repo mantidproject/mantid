@@ -34,6 +34,7 @@ public:
   MOCK_METHOD2(setExtractedWorkspace,
                void(Mantid::API::MatrixWorkspace_sptr const &workspace, std::vector<double> const &twoThetas));
 
+  MOCK_METHOD0(notifyPeakPickerChanged, void());
   MOCK_METHOD0(notifyPeakCentreEditingFinished, void());
   MOCK_METHOD0(notifyFitClicked, void());
   MOCK_METHOD0(notifyUpdateEstimateClicked, void());
@@ -58,8 +59,10 @@ public:
   MOCK_METHOD0(removeFitSpectrum, void());
 
   MOCK_METHOD1(setPeak, void(Mantid::API::IPeakFunction_const_sptr const &peak));
-  MOCK_CONST_METHOD0(peakCentre, double());
+  MOCK_CONST_METHOD0(getPeak, Mantid::API::IPeakFunction_const_sptr());
 
+  MOCK_METHOD1(setPeakCentre, void(double const centre));
+  MOCK_CONST_METHOD0(peakCentre, double());
   MOCK_METHOD1(setPeakCentreStatus, void(std::string const &status));
 
   MOCK_METHOD2(setAverageTwoTheta, void(std::optional<double> average, std::vector<double> const &all));
@@ -79,7 +82,9 @@ public:
   MOCK_METHOD1(doFit, Mantid::API::MatrixWorkspace_sptr(std::pair<double, double> const &range));
   MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
 
+  MOCK_METHOD1(setPeakParameters, void(Mantid::API::IPeakFunction_const_sptr const &peak));
   MOCK_METHOD1(setPeakCentre, void(double const centre));
+  MOCK_CONST_METHOD0(peakCentre, double());
   MOCK_CONST_METHOD0(getPeakCopy, Mantid::API::IPeakFunction_const_sptr());
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
