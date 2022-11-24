@@ -67,12 +67,6 @@ public:
     checkLoader("ILL/D20/967087", "LoadILLDiffraction");
   }
 
-  void test_loadDiffraction_IN5() { checkLoader("ILL/IN5/199857", "LoadILLDiffraction"); }
-
-  void test_loadDiffraction_PANTHER() { checkLoader("ILL/PANTHER/010578", "LoadILLDiffraction"); }
-
-  void test_loadDiffraction_SHARP() { checkLoader("ILL/SHARP/000104.nxs", "LoadILLDiffraction"); }
-
   void test_LoadPolarizedDiffraction_D7() { checkLoader("ILL/D7/394458", "LoadILLPolarizedDiffraction"); }
 
   void test_loadIndirect_IN16B() {
@@ -90,6 +84,7 @@ public:
   void test_loadTOF_IN5() {
     checkLoader("ILL/IN5/104007", "LoadILLTOF");
     checkLoader("ILL/IN5/189171", "LoadILLTOF");
+    checkLoader("ILL/IN5/199857", "LoadILLTOF"); // scan IN5
   }
 
   void test_loadTOF_IN6() {
@@ -100,11 +95,13 @@ public:
   void test_loadTOF_PANTHER() {
     checkLoader("ILL/PANTHER/001036", "LoadILLTOF"); // monochromatic PANTHER
     checkLoader("ILL/PANTHER/001723", "LoadILLTOF");
+    checkLoader("ILL/PANTHER/010578", "LoadILLTOF"); // scan PANTHER
   }
 
   void test_loadTOF_SHARP() {
     checkLoader("ILL/SHARP/000102", "LoadILLTOF"); // single-channel
     checkLoader("ILL/SHARP/000103", "LoadILLTOF");
+    checkLoader("ILL/SHARP/000104.nxs", "LoadILLTOF"); // scan SHARP
   }
 
   void test_loadReflectometry_D17() { checkLoader("ILL/D17/317370", "LoadILLReflectometry"); }

@@ -105,7 +105,6 @@ private:
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
   bool m_useCalibratedData{false};          ///< whether to use the calibrated data in
                                             ///< the nexus (D2B only)
-  bool m_isSpectrometer{false};
 };
 
 } // namespace DataHandling

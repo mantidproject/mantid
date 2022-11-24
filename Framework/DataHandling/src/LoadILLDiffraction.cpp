@@ -66,9 +66,7 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
   // the second one is to recognize D1B, Tx field eliminates SALSA
   // the third one is to recognize IN5/PANTHER/SHARP scan mode
   if ((descriptor.pathExists("/entry0/instrument/2theta") && !descriptor.pathExists("/entry0/instrument/Tx")) ||
-      descriptor.pathExists("/entry0/instrument/Canne") ||
-      (descriptor.pathExists("/entry0/data_scan") && descriptor.pathExists("/entry0/experiment_identifier") &&
-       descriptor.pathExists("/entry0/instrument/Detector"))) {
+      descriptor.pathExists("/entry0/instrument/Canne")) {
     return 80;
   } else {
     return 0;
@@ -159,9 +157,6 @@ void LoadILLDiffraction::loadDataScan() {
   NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
   m_instName = firstEntry.getString("instrument/name");
-  if (m_instName == "IN5" || m_instName == "PANTHER" || m_instName == "SHARP") {
-    m_isSpectrometer = true;
-  }
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
   const bool hasCalibratedData = containsCalibratedData(m_filename);
@@ -199,7 +194,7 @@ void LoadILLDiffraction::loadDataScan() {
     } else {
       twoThetaValue = getProperty("TwoThetaOffset");
     }
-  } else if (!m_isSpectrometer) {
+  } else {
     std::string twoThetaPath = "instrument/2theta/value";
     NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
     twoTheta0.load();
@@ -518,24 +513,15 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
-  int monitorIndex = 0;
   int startIndex = static_cast<int>(NUMBER_MONITORS);
-  if (m_isSpectrometer) {
-    startIndex = 0;
-    monitorIndex = static_cast<int>(m_numberDetectorsActual);
-  }
 
   // Assign monitor counts
-  m_outWorkspace->mutableX(monitorIndex) = axis;
-  m_outWorkspace->mutableY(monitorIndex) = monitor;
-  std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(monitorIndex).begin(),
-                 [](double e) { return sqrt(e); });
+  m_outWorkspace->mutableX(0) = axis;
+  m_outWorkspace->mutableY(0) = monitor;
+  std::transform(monitor.begin(), monitor.end(), m_outWorkspace->mutableE(0).begin(), [](double e) { return sqrt(e); });
 
   // prepare inputs, dimension orders and list of accepted IDs for exclusion of inactive detectors (D20)
   std::tuple<int, int, int> dimOrder{2, 1, 0}; // scan - tube - pixel
-  if (m_isSpectrometer) {
-    dimOrder = std::tuple<int, int, int>{1, 2, 0};
-  }
   std::set<int> acceptedIDs;
   if (static_cast<int>(m_numberDetectorsActual) != data.dim1() * data.dim2()) {
     for (int i = static_cast<int>(startIndex); i < static_cast<int>(startIndex + m_numberDetectorsActual); ++i)
@@ -547,10 +533,8 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXInt &data, const NXDou
 
   // Link the instrument
   LoadHelper::loadEmptyInstrument(m_outWorkspace, m_instName);
-  if (!m_isSpectrometer) {
-    // Move to the starting 2theta
-    moveTwoThetaZero(twoTheta0);
-  }
+  // Move to the starting 2theta
+  moveTwoThetaZero(twoTheta0);
 }
 
 /**
