@@ -7,6 +7,8 @@
 #include "ALFAnalysisView.h"
 #include "ALFAnalysisPresenter.h"
 
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidQtWidgets/Plotting/PeakPicker.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <tuple>
@@ -52,7 +54,7 @@ QString constructAverageString(std::vector<double> const &twoThetas) {
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisView::ALFAnalysisView(double const start, double const end, QWidget *parent)
-    : QWidget(parent), m_plot(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr) {
+    : QWidget(parent), m_plot(nullptr), m_peakPicker(nullptr), m_start(nullptr), m_end(nullptr), m_fitButton(nullptr) {
   setupPlotFitSplitter(start, end);
 }
 
@@ -66,6 +68,9 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
 
   m_plot = new MantidWidgets::PreviewPlot();
   m_plot->setCanvasColour(Qt::white);
+
+  m_peakPicker = new MantidWidgets::PeakPicker(m_plot, Qt::red);
+
   splitter->addWidget(m_plot);
 
   splitter->addWidget(createFitPane(start, end));
@@ -156,6 +161,8 @@ void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
 void ALFAnalysisView::notifyUpdateEstimateClicked() { m_presenter->notifyUpdateEstimateClicked(); }
 
+void ALFAnalysisView::replot() { m_plot->replot(); }
+
 std::pair<double, double> ALFAnalysisView::getRange() const {
   return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
 }
@@ -173,7 +180,14 @@ void ALFAnalysisView::addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &wo
   }
 }
 
-void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText(QString::number(centre)); }
+void ALFAnalysisView::removeFitSpectrum() { m_plot->removeSpectrum("Fitted Data"); }
+
+void ALFAnalysisView::setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) {
+  m_peakCentre->setText(QString::number(peak->getParameter("PeakCentre")));
+
+  m_peakPicker->setPeak(peak);
+  m_peakPicker->select(false);
+}
 
 double ALFAnalysisView::peakCentre() const { return m_peakCentre->text().toDouble(); }
 

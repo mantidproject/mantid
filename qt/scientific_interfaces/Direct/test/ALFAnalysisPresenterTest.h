@@ -49,9 +49,6 @@ public:
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFAnalysisView>>();
     m_presenter = std::make_unique<ALFAnalysisPresenter>(m_view.get(), std::move(model));
-
-    m_view->setPeakCentre(m_peakCentre);
-    m_model->setPeakCentre(m_peakCentre);
   }
 
   void tearDown() override {
@@ -85,8 +82,32 @@ public:
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
 
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_)).Times(1);
+
     EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
+
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
+    EXPECT_CALL(*m_view, replot()).Times(1);
+
+    m_presenter->notifyPeakCentreEditingFinished();
+  }
+
+  void test_notifyPeakCentreEditingFinished_does_not_remove_fit_spectrum_when_fit_status_is_not_empty() {
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
+
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return("Success"));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("Success")).Times(1);
+
+    // Assert is not called
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
+
+    EXPECT_CALL(*m_view, replot()).Times(1);
 
     m_presenter->notifyPeakCentreEditingFinished();
   }

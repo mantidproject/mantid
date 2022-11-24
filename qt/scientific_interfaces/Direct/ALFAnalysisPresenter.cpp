@@ -28,7 +28,7 @@ void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sp
 
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
   m_model->setPeakCentre(m_view->peakCentre());
-  m_view->setPeakCentreStatus(m_model->fitStatus());
+  updatePeakCentreInViewFromModel();
 }
 
 void ALFAnalysisPresenter::notifyFitClicked() {
@@ -86,8 +86,14 @@ void ALFAnalysisPresenter::updateViewFromModel() {
 void ALFAnalysisPresenter::updatePlotInViewFromModel() { m_view->addSpectrum(m_model->extractedWorkspace()); }
 
 void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
-  m_view->setPeakCentre(m_model->peakCentre());
-  m_view->setPeakCentreStatus(m_model->fitStatus());
+  m_view->setPeak(m_model->getPeakCopy());
+
+  auto const fitStatus = m_model->fitStatus();
+  m_view->setPeakCentreStatus(fitStatus);
+  if (fitStatus.empty()) {
+    m_view->removeFitSpectrum();
+  }
+  m_view->replot();
 }
 
 void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {

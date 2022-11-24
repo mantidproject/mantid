@@ -43,7 +43,8 @@ public:
 
   void test_that_the_model_is_instantiated_with_a_function_and_empty_fit_status() {
     TS_ASSERT_EQUALS(nullptr, m_model->extractedWorkspace());
-    TS_ASSERT_THROWS_NOTHING(m_model->peakCentre());
+    TS_ASSERT_THROWS_NOTHING(m_model->getPeakCopy());
+    TS_ASSERT_THROWS_NOTHING(m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("", m_model->fitStatus());
     TS_ASSERT_EQUALS(0u, m_model->numberOfTubes());
     TS_ASSERT_EQUALS(std::nullopt, m_model->averageTwoTheta());
@@ -58,7 +59,7 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_Parameters"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_NormalisedCovarianceWorkspace"));
 
-    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
+    TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("success", m_model->fitStatus());
   }
 
@@ -67,7 +68,7 @@ public:
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
+    TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -76,7 +77,7 @@ public:
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.5, m_model->peakCentre());
+    TS_ASSERT_EQUALS(0.5, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -86,7 +87,7 @@ public:
 
     m_model->calculateEstimate(m_range);
 
-    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
+    TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 
@@ -97,7 +98,7 @@ public:
 
     m_model->setPeakCentre(1.1);
 
-    TS_ASSERT_EQUALS(1.1, m_model->peakCentre());
+    TS_ASSERT_EQUALS(1.1, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("", m_model->fitStatus());
   }
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QLabel>
@@ -23,8 +24,9 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
+class PeakPicker;
 class PreviewPlot;
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -38,12 +40,15 @@ public:
 
   virtual void subscribePresenter(IALFAnalysisPresenter *presenter) = 0;
 
+  virtual void replot() = 0;
+
   virtual std::pair<double, double> getRange() const = 0;
 
   virtual void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void removeFitSpectrum() = 0;
 
-  virtual void setPeakCentre(double const centre) = 0;
+  virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
   virtual double peakCentre() const = 0;
   virtual void setPeakCentreStatus(std::string const &status) = 0;
 
@@ -62,12 +67,16 @@ public:
 
   void subscribePresenter(IALFAnalysisPresenter *presenter) override;
 
+  void replot() override;
+
   std::pair<double, double> getRange() const override;
 
   void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void removeFitSpectrum();
 
-  void setPeakCentre(double const centre) override;
+  void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
+
   double peakCentre() const override;
   void setPeakCentreStatus(std::string const &status) override;
 
@@ -88,6 +97,7 @@ private:
   QWidget *setupResultsWidget(double const centre);
 
   MantidWidgets::PreviewPlot *m_plot;
+  MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;

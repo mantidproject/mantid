@@ -12,6 +12,7 @@
 #include "ALFAnalysisModel.h"
 #include "ALFAnalysisPresenter.h"
 #include "ALFAnalysisView.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidKernel/WarningSuppressions.h"
@@ -48,12 +49,15 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IALFAnalysisPresenter *presenter));
 
+  MOCK_METHOD0(replot, void());
+
   MOCK_CONST_METHOD0(getRange, std::pair<double, double>());
 
   MOCK_METHOD1(addSpectrum, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
   MOCK_METHOD1(addFitSpectrum, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
+  MOCK_METHOD0(removeFitSpectrum, void());
 
-  MOCK_METHOD1(setPeakCentre, void(double const centre));
+  MOCK_METHOD1(setPeak, void(Mantid::API::IPeakFunction_const_sptr const &peak));
   MOCK_CONST_METHOD0(peakCentre, double());
 
   MOCK_METHOD1(setPeakCentreStatus, void(std::string const &status));
@@ -76,7 +80,7 @@ public:
   MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
 
   MOCK_METHOD1(setPeakCentre, void(double const centre));
-  MOCK_CONST_METHOD0(peakCentre, double());
+  MOCK_CONST_METHOD0(getPeakCopy, Mantid::API::IPeakFunction_const_sptr());
 
   MOCK_CONST_METHOD0(fitStatus, std::string());
 
