@@ -136,7 +136,6 @@ set(PYTHON_PLUGINS
     algorithms/MedianBinWidth.py
     algorithms/MergeCalFiles.py
     algorithms/MuonMaxent.py
-    algorithms/MuscatSofQW.py
     algorithms/NMoldyn4Interpolation.py
     algorithms/NOMADMedianDetectorTest.py
     algorithms/NormaliseSpectra.py
@@ -258,8 +257,6 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/MatchAndMergeWorkspaces.py
     algorithms/WorkflowAlgorithms/MildnerCarpenter.py
     algorithms/WorkflowAlgorithms/MolDyn.py
-    algorithms/WorkflowAlgorithms/MuscatData.py
-    algorithms/WorkflowAlgorithms/MuscatFunc.py
     algorithms/WorkflowAlgorithms/NormaliseByThickness.py
     algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py
     algorithms/WorkflowAlgorithms/PaalmanPingsMonteCarloAbsorption.py
