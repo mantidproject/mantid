@@ -39,11 +39,6 @@ if [[ $OSTYPE == "msys"* ]]; then
     fi
 fi
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
 
 # Parse options
 STANDALONE_PACKAGE_SUFFIX=
@@ -61,14 +56,9 @@ do
   shift
 done
 
-# Setup Mambaforge & environment if it is not already there
-$WORKSPACE/buildconfig/Jenkins/Conda/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
-CONDA_ENV_NAME=standalone-package-env
-$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
-# Create env with conda-build so we can build a local channel
-$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME conda-build mamba -y
-. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
-conda activate $CONDA_ENV_NAME
+# Mamba
+setup_mamba $WORKSPACE/mambaforge "package-standalone"
+mamba install --yes conda-build mamba
 
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
