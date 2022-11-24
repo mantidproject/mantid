@@ -67,7 +67,11 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
   auto splitter = new QSplitter(Qt::Vertical);
 
   m_plot = new MantidWidgets::PreviewPlot();
-  m_plot->setCanvasColour(Qt::white);
+
+  // Set the preview plot background as transparent. Also seems to stop the figure resizing each time replotting
+  // happens.
+  m_plot->canvas()->gcf().setFaceColor("None");
+  m_plot->canvas()->setStyleSheet("background-color:transparent;");
 
   m_peakPicker = new MantidWidgets::PeakPicker(m_plot, Qt::red);
   connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
