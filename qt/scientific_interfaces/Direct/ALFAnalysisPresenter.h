@@ -64,6 +64,8 @@ private:
   std::optional<std::string> validateFitValues() const;
   bool checkPeakCentreIsWithinFitRange() const;
 
+  void calculateEstimate(bool const silent = false);
+
   void updateViewFromModel();
   void updatePlotInViewFromModel();
   void updatePeakCentreInViewFromModel();

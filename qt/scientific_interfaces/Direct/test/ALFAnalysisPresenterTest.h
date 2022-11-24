@@ -68,6 +68,8 @@ public:
 
     EXPECT_CALL(*m_model, setExtractedWorkspace(_, twoThetas)).Times(1);
 
+    expectCalculateEstimate();
+
     EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
 
@@ -186,12 +188,7 @@ public:
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
-    EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
-
-    EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
-
+    expectCalculateEstimate();
     m_presenter->notifyUpdateEstimateClicked();
   }
 
@@ -216,6 +213,14 @@ public:
   }
 
 private:
+  void expectCalculateEstimate() {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
+
+    EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
+  }
+
   std::string m_workspaceName;
   std::pair<double, double> m_range;
   double m_peakCentre;

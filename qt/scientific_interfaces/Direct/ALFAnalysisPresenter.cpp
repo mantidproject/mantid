@@ -23,6 +23,7 @@ QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
 void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                                  std::vector<double> const &twoThetas) {
   m_model->setExtractedWorkspace(workspace, twoThetas);
+  calculateEstimate(true);
   updateViewFromModel();
 }
 
@@ -59,13 +60,8 @@ void ALFAnalysisPresenter::notifyFitClicked() {
 }
 
 void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
-  auto const validationMessage = validateFitValues();
-  if (!validationMessage) {
-    m_model->calculateEstimate(m_view->getRange());
-    updatePeakCentreInViewFromModel();
-  } else {
-    m_view->displayWarning(*validationMessage);
-  }
+  calculateEstimate();
+  updatePeakCentreInViewFromModel();
 }
 
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
@@ -87,6 +83,15 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   auto const peakCentre = m_view->peakCentre();
   auto const range = m_view->getRange();
   return range.first < peakCentre && peakCentre < range.second;
+}
+
+void ALFAnalysisPresenter::calculateEstimate(bool const silent) {
+  auto const validationMessage = validateFitValues();
+  if (!validationMessage) {
+    m_model->calculateEstimate(m_view->getRange());
+  } else if (!silent) {
+    m_view->displayWarning(*validationMessage);
+  }
 }
 
 void ALFAnalysisPresenter::updateViewFromModel() {
