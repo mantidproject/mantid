@@ -440,13 +440,13 @@ have been fixed.
 *  Update the `download page <https://download.mantidproject.org>`_ by running the `Update latest release links
    <https://github.com/mantidproject/www/actions/workflows/update-latest-release.yml>`_ workflow in the
    `mantidproject/www repository <https://github.com/mantidproject/www>`_.
-*  Create a PR targeting the ``preprod`` branch in the `daaas-ansible-worksapce repository
-   <https://github.com/ral-facilities/daaas-ansible-workspace>`_ to add the new release to IDAaaS. Add the new release
-   version to the list of versions installed on IDAaaS `here
-   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/master/roles/software/analysis/mantid/defaults/main.yml>`_
-   making sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
-   The changes need to be verified on an IDAaaS test instance before the PR is created. Ask a member of the
-   ISIS core team for assistance if you don't have access to this repository.
+*  Ask someone with access to the `daaas-ansible-workspace repository
+   <https://github.com/ral-facilities/daaas-ansible-workspace>`_ (a member of the ISIS core team or IDAaaS support)
+   to add the new release to IDAaaS. They can do this by creating a PR targeting the ``preprod`` branch, adding
+   the new release version to the list of versions installed on IDAaaS `here
+   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/master/roles/software/analysis/mantid/defaults/main.yml>`_.
+   Make sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
+   The changes need to be verified on an IDAaaS test instance before the PR can be accepted.
 
 **Generate DOI**
 
