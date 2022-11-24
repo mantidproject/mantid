@@ -111,7 +111,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     auto lookupRowCopy = *foundRow;
 
-    lookupRowCopy.setRoiDetectorIDs(getRangesFromListOfBanks(previewRow.getSelectedBanks()));
+    lookupRowCopy.setRoiDetectorIDs(previewRow.getSelectedBanks());
 
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
@@ -123,57 +123,6 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
     throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
                                "' in the Lookup Table.");
   }
-}
-
-boost::optional<ProcessingInstructions>
-ExperimentPresenter::getRangesFromListOfBanks(boost::optional<ProcessingInstructions> banks) const {
-  if (!banks.has_value() || banks.get().empty()) {
-    return banks;
-  }
-  auto all_det_string = banks.get();
-  size_t position = 0;
-  std::string current;
-  std::string prev;
-  std::string prev_output;
-  std::string output;
-  while ((position = all_det_string.find(",")) != std::string::npos) {
-    current = all_det_string.substr(0, position);
-    all_det_string.erase(0, position + 1);
-    // Start with the first value in the string.
-    if (prev.empty()) {
-      output += current;
-      prev_output = current;
-      prev = current;
-      continue;
-    }
-    // The previous value was in the middle of a range.
-    if (std::stoi(current) - 1 == std::stoi(prev)) {
-      prev = current;
-      continue;
-    }
-    // The previous value stood alone.
-    if (prev == prev_output) {
-      output += "," + current;
-      prev_output = current;
-      prev = current;
-      continue;
-    }
-    // The previous value was at the end of a range.
-    output += "-" + prev + "," + current;
-    prev_output = current;
-    prev = current;
-  }
-  // There was only one ID in the whole string.
-  if (prev_output.empty()) {
-    return all_det_string;
-  }
-  // The last ID is at the end of a range.
-  if (std::stoi(all_det_string) == std::stoi(prev_output) + 1) {
-    return output += "-" + all_det_string;
-  }
-  // The last ID stands alone.
-  output += "," + all_det_string;
-  return output;
 }
 
 void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,

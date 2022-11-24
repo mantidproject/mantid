@@ -739,38 +739,6 @@ public:
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), InvalidTableException const &);
   }
 
-  void testGetSelectedBanksAsRanges() {
-    auto presenter = makePresenter();
-    const ProcessingInstructions inputRoi{"2,4,5,6,12,13,14,16,23,24,25,26,28,30,31"};
-    const ProcessingInstructions expectedOutput{"2,4-6,12-14,16,23-26,28,30-31"};
-
-    TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
-  }
-
-  void testGetSelectedBanksAsRangesAllIncongruous() {
-    auto presenter = makePresenter();
-    const ProcessingInstructions inputRoi{"2,4,6,8,10"};
-    const ProcessingInstructions expectedOutput{"2,4,6,8,10"};
-
-    TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
-  }
-
-  void testGetSelectedBanksAsRangesEmpty() {
-    auto presenter = makePresenter();
-    const ProcessingInstructions inputRoi{""};
-    const ProcessingInstructions expectedOutput{""};
-
-    TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
-  }
-
-  void testGetSelectedBanksAsRangesSingleValue() {
-    auto presenter = makePresenter();
-    const ProcessingInstructions inputRoi{"9"};
-    const ProcessingInstructions expectedOutput{"9"};
-
-    TS_ASSERT_EQUALS(expectedOutput, presenter.getRangesFromListOfBanks(inputRoi))
-  }
-
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
