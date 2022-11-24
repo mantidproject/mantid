@@ -354,9 +354,9 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, const std::vector
   int spec = 0;
   std::vector<int> detectorIDs = m_localWorkspace->getInstrument()->getDetectorIDs(false);
 
-  NXData dataGroup = entry.openNXData("data");
-  auto data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
+
   LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, spec, false, detectorIDs);
   spec = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube);
 
@@ -365,8 +365,7 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, const std::vector
     g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
     // load the counts from the file into memory
-    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
-    auto dataRosace = dataGroupRosace.openIntData();
+    auto dataRosace = LoadHelper::getIntDataset(entry, "instrument/Detector_Rosace/data");
     dataRosace.load();
     LoadHelper::fillStaticWorkspace(m_localWorkspace, dataRosace, xAxis, spec, false, detectorIDs);
     spec += dataRosace.dim0();
@@ -374,8 +373,7 @@ void LoadILLTOF2::loadDataIntoWorkspace(NeXus::NXEntry &entry, const std::vector
 
   for (const auto &monitorName : monitorList) {
     detectorIDs[spec] = static_cast<int>(spec) + 1;
-    NXData monitorGroup = entry.openNXData(monitorName);
-    auto monitorData = monitorGroup.openIntData();
+    auto monitorData = LoadHelper::getIntDataset(entry, monitorName);
     monitorData.load();
     LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xAxis, spec, false, detectorIDs);
     spec++;

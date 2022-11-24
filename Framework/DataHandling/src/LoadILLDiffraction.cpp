@@ -179,8 +179,7 @@ void LoadILLDiffraction::loadDataScan() {
   data.load();
 
   // read the scan data
-  NXData scanGroup = firstEntry.openNXData("data_scan/scanned_variables");
-  NXDouble scan = scanGroup.openDoubleData();
+  auto scan = LoadHelper::getDoubleDataset(firstEntry, "data_scan/scanned_variables");
   scan.load();
 
   // read which variables are scanned
@@ -237,7 +236,6 @@ void LoadILLDiffraction::loadDataScan() {
 
   fillDataScanMetaData(scan);
 
-  scanGroup.close();
   firstEntry.close();
   dataRoot.close();
 }

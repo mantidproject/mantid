@@ -180,12 +180,8 @@ std::string LoadILLIndirect2::getDataPath(const NeXus::NXEntry &entry) {
  */
 void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
 
-  // find the data
-  std::string dataPath = getDataPath(entry);
-
   // read in the data
-  NXData dataGroup = entry.openNXData(dataPath);
-  NXInt data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, getDataPath(entry));
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
@@ -201,8 +197,7 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
 
   // check which single detectors are enabled, and store their indices
   if (m_loadOption == "Spectrometer") {
-    NXData dataSDGroup = entry.openNXData("dataSD");
-    NXInt dataSD = dataSDGroup.openIntData();
+    auto dataSD = LoadHelper::getIntDataset(entry, "dataSD");
 
     for (int i = 0; i < dataSD.dim0(); ++i) {
       try {
@@ -263,21 +258,18 @@ void LoadILLIndirect2::loadDataIntoWorkspace(NeXus::NXEntry &entry) {
   std::iota(xAxis.begin(), xAxis.end(), 0.0);
 
   // Then load monitor
-  NXData dataMonGroup = entry.openNXData("monitor/data");
-  auto dataMon = dataMonGroup.openIntData();
+  auto dataMon = LoadHelper::getIntDataset(entry, "monitor/data");
   dataMon.load();
   LoadHelper::fillStaticWorkspace(m_localWorkspace, dataMon, xAxis, 0);
 
   // Then Tubes
-  NXData dataGroup = entry.openNXData("data");
-  auto data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
   LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xAxis, 1);
 
   // And finally Simple Detectors (SD)
   int offset = static_cast<int>(m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors);
-  NXData dataSDGroup = entry.openNXData("dataSD");
-  auto dataSD = dataSDGroup.openIntData();
+  auto dataSD = LoadHelper::getIntDataset(entry, "dataSD");
   dataSD.load();
   std::set<int> sdIndices;
   std::transform(m_activeSDIndices.cbegin(), m_activeSDIndices.cend(), std::inserter(sdIndices, sdIndices.begin()),
@@ -296,16 +288,10 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
   // first, determine version
   bool newVersion = instrument.containsDataSet("version");
 
-  // find the path to the data
-  std::string dataPath = getDataPath(entry);
-
-  NXData dataGroup = entry.openNXData(dataPath);
-
-  NXInt data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, getDataPath(entry));
   data.load();
 
-  NXData dataMonGroup = entry.openNXData("monitor/data");
-  NXInt dataMon = dataMonGroup.openIntData();
+  auto dataMon = LoadHelper::getIntDataset(entry, "monitor/data");
   dataMon.load();
 
   // First, Monitor

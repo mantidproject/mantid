@@ -351,8 +351,7 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
  * @return monitor :: A std::vector containing monitor values
  */
 std::vector<int> LoadILLReflectometry::loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data) {
-  NXData dataGroup = entry.openNXData(monitor_data);
-  NXInt data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, monitor_data);
   data.load();
   return std::vector<int>(data(), data() + data.size());
 }
@@ -492,8 +491,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  */
 void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
                                     const std::vector<double> &xVals) {
-  NXData dataGroup = entry.openNXData("data");
-  auto data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
   const int nb_monitors = static_cast<int>(monitorsData.size());
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
@@ -505,8 +503,7 @@ void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vect
     // then, the monitor data
     for (auto im = 0; im < nb_monitors; ++im) {
       const std::string monitorDataSetName("monitor" + std::to_string(im + 1) + "/data");
-      NXData monitorGroup = entry.openNXData(monitorDataSetName);
-      auto monitorData = monitorGroup.openIntData();
+      auto monitorData = LoadHelper::getIntDataset(entry, monitorDataSetName);
       monitorData.load();
       LoadHelper::fillStaticWorkspace(m_localWorkspace, monitorData, xVals,
                                       static_cast<int>(m_numberOfHistograms) + im);

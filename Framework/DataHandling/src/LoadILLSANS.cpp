@@ -283,8 +283,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
   } else {
     path = "data_scan/detector_data/data";
   }
-  NXData dataGroup = firstEntry.openNXData(path);
-  auto data = dataGroup.openIntData();
+  auto data = LoadHelper::getIntDataset(firstEntry, path);
   data.load();
 
   // determine if the data comes from a D16 scan
@@ -338,14 +337,11 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("D11/Detector 1/data");
-  auto dataCenter = data1.openIntData();
+  auto dataCenter = LoadHelper::getIntDataset(firstEntry, "D11/Detector 1/data");
   dataCenter.load();
-  NXData data2 = firstEntry.openNXData("D11/Detector 2/data");
-  auto dataLeft = data2.openIntData();
+  auto dataLeft = LoadHelper::getIntDataset(firstEntry, "D11/Detector 2/data");
   dataLeft.load();
-  NXData data3 = firstEntry.openNXData("D11/Detector 3/data");
-  auto dataRight = data3.openIntData();
+  auto dataRight = LoadHelper::getIntDataset(firstEntry, "D11/Detector 3/data");
   dataRight.load();
 
   size_t numberOfHistograms =
@@ -400,11 +396,9 @@ void LoadILLSANS::initWorkSpaceD11B(NeXus::NXEntry &firstEntry, const std::strin
 void LoadILLSANS::initWorkSpaceD22B(NeXus::NXEntry &firstEntry, const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
 
-  NXData data1 = firstEntry.openNXData("data1");
-  auto data1_data = data1.openIntData();
+  auto data1_data = LoadHelper::getIntDataset(firstEntry, "data1");
   data1_data.load();
-  NXData data2 = firstEntry.openNXData("data2");
-  auto data2_data = data2.openIntData();
+  auto data2_data = LoadHelper::getIntDataset(firstEntry, "data2");
   data2_data.load();
 
   size_t numberOfHistograms =
@@ -462,20 +456,15 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
 
   g_log.debug("Fetching data...");
 
-  NXData dataGroup1 = firstEntry.openNXData("data1");
-  auto dataRear = dataGroup1.openIntData();
+  auto dataRear = LoadHelper::getIntDataset(firstEntry, "data1");
   dataRear.load();
-  NXData dataGroup2 = firstEntry.openNXData("data2");
-  auto dataRight = dataGroup2.openIntData();
+  auto dataRight = LoadHelper::getIntDataset(firstEntry, "data2");
   dataRight.load();
-  NXData dataGroup3 = firstEntry.openNXData("data3");
-  auto dataLeft = dataGroup3.openIntData();
+  auto dataLeft = LoadHelper::getIntDataset(firstEntry, "data3");
   dataLeft.load();
-  NXData dataGroup4 = firstEntry.openNXData("data4");
-  auto dataDown = dataGroup4.openIntData();
+  auto dataDown = LoadHelper::getIntDataset(firstEntry, "data4");
   dataDown.load();
-  NXData dataGroup5 = firstEntry.openNXData("data5");
-  auto dataUp = dataGroup5.openIntData();
+  auto dataUp = LoadHelper::getIntDataset(firstEntry, "data5");
   dataUp.load();
   g_log.debug("Checking channel numbers...");
 
@@ -573,8 +562,7 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
   for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
        ++it) {
     if (it->nxclass == "NXmonitor") {
-      NXData dataGroup = firstEntry.openNXData(it->nxname);
-      auto data = dataGroup.openIntData();
+      auto data = LoadHelper::getIntDataset(firstEntry, it->nxname);
       data.load();
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0() << "x" << data.dim1() << "x"
                     << data.dim2() << '\n';
@@ -620,8 +608,7 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
   // to read string arrays.
   uint32_t monitorIndex = 3;
 
-  NXData scannedVariablesData = firstEntry.openNXData(path);
-  NXDouble scannedVariables = scannedVariablesData.openDoubleData();
+  auto scannedVariables = LoadHelper::getDoubleDataset(firstEntry, path);
   scannedVariables.load();
 
   auto firstMonitorValuePos = scannedVariables() + monitorIndex * scannedVariables.dim1();
@@ -1033,16 +1020,16 @@ void LoadILLSANS::moveSource() {
  * @return the omega binning vector
  */
 std::vector<double> LoadILLSANS::getOmegaBinning(const NXEntry &entry, const std::string &path) const {
-  NXData scanning_data = entry.openNXData(path);
-  NXDouble scanning_values = scanning_data.openDoubleData();
-  scanning_values.load();
 
-  const int nBins = scanning_values.dim1();
+  auto scannedValues = LoadHelper::getDoubleDataset(entry, path);
+  scannedValues.load();
+
+  const int nBins = scannedValues.dim1();
   std::vector<double> binning(nBins, 0);
 
   for (int i = 0; i < nBins; ++i) {
     // for D16, we are only interested in the first line, which contains the omega values
-    binning[i] = scanning_values(0, i);
+    binning[i] = scannedValues(0, i);
   }
   return binning;
 }

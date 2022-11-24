@@ -170,15 +170,16 @@ void LoadILLPolarizedDiffraction::loadData() {
     const std::vector<double> axis = prepareAxes(entry);
 
     // load data from file
-    auto data = entry.openNXDataSet<int>("data/Detector_data");
+    auto data = LoadHelper::getIntDataset(entry, "data");
     data.load();
+
     LoadHelper::fillStaticWorkspace(workspace, data, axis, 0);
 
     // load and assign monitor data
     for (auto monitor_no = static_cast<int>(D7_NUMBER_PIXELS);
          monitor_no < static_cast<int>(D7_NUMBER_PIXELS + NUMBER_MONITORS); ++monitor_no) {
-      auto monitorData = entry.openNXDataSet<int>(
-          "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)) + "/data");
+      auto monitorData = LoadHelper::getIntDataset(
+          entry, "monitor" + std::to_string(monitor_no + 1 - static_cast<int>(D7_NUMBER_PIXELS)));
       monitorData.load();
       LoadHelper::fillStaticWorkspace(workspace, monitorData, axis, monitor_no);
     }
