@@ -10,6 +10,8 @@
 """
 Functionality for dealing with legends on plots
 """
+from distutils.version import LooseVersion
+
 import matplotlib
 from matplotlib.patches import BoxStyle
 
@@ -66,7 +68,10 @@ class LegendProperties(dict):
         else:
             props['round_edges'] = False
 
-        props['columns'] = legend._ncols
+        if LooseVersion(matplotlib._version__) >= LooseVersion('3.6.0'):
+            props['columns'] = legend._ncols
+        else:
+            props['columns'] = legend._ncol
         props['column_spacing'] = legend.columnspacing
         props['label_spacing'] = legend.labelspacing
 
@@ -130,7 +135,7 @@ class LegendProperties(dict):
         if 'loc' in props.keys():
             loc = props['loc']
 
-        if int(matplotlib.__version__[0]) >= 2:
+        if LooseVersion(matplotlib._version__) >= LooseVersion('3.6.0'):
             legend = ax.legend(handles=get_legend_handles(ax),
                                ncols=props['columns'],
                                prop={'size': props['entries_size']},
@@ -151,7 +156,7 @@ class LegendProperties(dict):
                                loc=loc)
         else:
             legend = ax.legend(handles=get_legend_handles(ax),
-                               ncols=props['columns'],
+                               ncol=props['columns'],
                                prop={'size': props['entries_size']},
                                numpoints=props['markers'],
                                markerfirst=props['marker_position'] == "Left of Entries",
@@ -159,6 +164,8 @@ class LegendProperties(dict):
                                fancybox=props['round_edges'],
                                shadow=props['shadow'],
                                framealpha=props['transparency'],
+                               facecolor=props['background_color'],
+                               edgecolor=props['edge_color'],
                                title=props['title'],
                                borderpad=props['border_padding'],
                                labelspacing=props['label_spacing'],
