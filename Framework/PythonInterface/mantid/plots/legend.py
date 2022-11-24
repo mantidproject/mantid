@@ -68,7 +68,7 @@ class LegendProperties(dict):
         else:
             props['round_edges'] = False
 
-        if LooseVersion(matplotlib._version__) >= LooseVersion('3.6.0'):
+        if LooseVersion(matplotlib.__version__) >= LooseVersion('3.6.0'):
             props['columns'] = legend._ncols
         else:
             props['columns'] = legend._ncol
@@ -135,7 +135,7 @@ class LegendProperties(dict):
         if 'loc' in props.keys():
             loc = props['loc']
 
-        if LooseVersion(matplotlib._version__) >= LooseVersion('3.6.0'):
+        if LooseVersion(matplotlib.__version__) >= LooseVersion('3.6.0'):
             legend = ax.legend(handles=get_legend_handles(ax),
                                ncols=props['columns'],
                                prop={'size': props['entries_size']},
