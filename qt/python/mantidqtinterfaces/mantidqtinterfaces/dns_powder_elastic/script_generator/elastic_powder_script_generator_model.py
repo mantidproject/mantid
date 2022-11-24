@@ -170,12 +170,11 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             ]
         return ['']
 
-    def _get_binning_lines(self):
-        binning = [
-            self._sample_data.two_theta.bin_edge_min,
-            self._sample_data.two_theta.bin_edge_max,
-            self._sample_data.two_theta.nbins
-        ]
+    def _get_binning_lines(self, options):
+        bin_edge_min = options['two_theta_min'] - options['two_theta_bin_size'] / 2
+        bin_edge_max = options['two_theta_max'] + options['two_theta_bin_size'] / 2
+        num_bins = int(round((bin_edge_max - bin_edge_min) / options['two_theta_bin_size']))
+        binning = [bin_edge_min, bin_edge_max, num_bins]
         return ["", f"binning = {binning}"]
 
     def _get_load_data_lines(self):

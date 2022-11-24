@@ -47,14 +47,15 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
             sample_data = self.param_dict['file_selector']['full_data']
             binning_dict = automatic_two_theta_binning(sample_data)
 
-            two_theta_min = binning_dict['bin_edge_min']
-            two_theta_max = binning_dict['bin_edge_max']
-            number_bins = binning_dict['nbins']
-            two_theta_bin_size = (two_theta_max - two_theta_min) / number_bins
+            two_theta_min = binning_dict['min']
+            two_theta_max = binning_dict['max']
+            two_theta_bin_size = 0.5
+            number_bins = (two_theta_max - two_theta_min) / two_theta_bin_size + 1
 
             own_options = self.get_option_dict()
             own_options['two_theta_min'] = two_theta_min
             own_options['two_theta_max'] = two_theta_max
+            own_options['nbins'] = number_bins
             own_options['two_theta_bin_size'] = two_theta_bin_size
             self.set_view_from_param()
 
