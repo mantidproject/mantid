@@ -169,9 +169,9 @@ class DNSFileSelectorPresenterTest(unittest.TestCase):
            'presenter.DNSFileSelectorPresenter._get_non_hidden_rows')
     def test_check_last_scans(self, mock_hidden_row):
         mock_hidden_row.return_value = [1, 2]
-        self.view.get_nb_scans_to_check.return_value = 0
+        self.view.get_number_scans_to_check.return_value = 0
         self.presenter._check_last_scans('test')
-        self.view.get_nb_scans_to_check.assert_called_once()
+        self.view.get_number_scans_to_check.assert_called_once()
         self.model.check_last_scans.assert_called_once_with(0, False, [1, 2])
         mock_hidden_row.assert_called_once()
         self.model.reset_mock()

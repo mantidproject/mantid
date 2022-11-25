@@ -25,12 +25,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.watcher = watcher
         self.view = view
-        # set sample data view
-        self.view.set_sample_data_tree_model(self.model.get_sample_data_model())
-        # set standard data view
-        self.view.set_standard_data_tree_model(self.model.get_standard_data_model())
-
         self._old_data_set = set()
+        self._standard_data_counter = 0
 
         # connect signals
         self._attach_signal_slots()
@@ -42,23 +38,13 @@ class DNSFileSelectorPresenter(DNSObserver):
         range specified by start and end.
         """
         file_number_range = [start, end]
-        data_path = self.param_dict['paths']['data_dir']
-        number_of_files, loaded, datafiles, file_number_range_filtered = \
-            self.model.set_datafiles_to_load(data_path, file_number_range, filtered,
-                                             watcher)
-        self.view.open_progress_dialog(number_of_files)
-        self.model.read_all(datafiles, data_path, loaded, watcher)
-
-        # switch to the standard mode to fill in the file_selector_presenter's
-        # dictionary with standard data info (default setting). This info will
-        # be written to the 'standard_data_tree_model' key of the dictionary.
-        self._dataset_changed(standard_set=True)
-        self.get_option_dict()
-        # switch back to the sample mode
-        self._dataset_changed(standard_set=False)
-
-        # re-adjust view to column width
-        self._format_view()
+        if self.param_dict:
+            data_path = self.param_dict['paths']['data_dir']
+            number_of_files, loaded, datafiles, file_number_range_filtered = \
+                self.model.set_datafiles_to_load(data_path, file_number_range,
+                                                 filtered, watcher)
+            self.view.open_progress_dialog(number_of_files)
+            self.model.read_all(datafiles, data_path, loaded, watcher)
 
     def _read_standard(self, self_call=False):
         """
@@ -66,16 +52,26 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         data_path = self.param_dict['paths']['data_dir']
         standard_path = self.param_dict['paths']['standards_dir']
-        if not standard_path:
-            self.raise_error('No path set for standard data')
-        standard_found = self.model.read_standard(standard_path)
-        self._filter_standard()
-        if not standard_found and not self_call:
-            if self.model.try_unzip(data_path, standard_path):
-                self._read_standard(self_call=True)
+        if standard_path:
+            standard_found = self.model.read_standard(standard_path)
+            self._filter_standard()
+            if not standard_found and not self_call:
+                if self.model.try_unzip(data_path, standard_path):
+                    self._read_standard(self_call=True)
 
-        # re-adjust view to column width
-        self._format_view()
+    def tab_got_focus(self):
+        standard_path = self.param_dict['paths']['standards_dir']
+        # The first time that the standard data path is provided
+        # and the user clicks on the file selector tab, then the
+        # file selector presenter's dictionary needs to be filled
+        # with standard data info under the 'standard_data_tree_model'
+        # key (default setting). To implement this, standard data
+        # click is realized. After that, a sample data view is
+        # provided to the user.
+        if standard_path and self._standard_data_counter==0:
+            self._standard_data_clicked()
+            self._sample_data_clicked()
+            self._standard_data_counter += 1
 
     def _cancel_loading(self):
         self.model.set_loading_canceled(True)
@@ -103,6 +99,8 @@ class DNSFileSelectorPresenter(DNSObserver):
                 self._read_all()
         else:
             self.watcher.stop_watcher()
+        # re-adjust view to column width
+        self._format_view()
 
     def _auto_select_standard(self, state):
         if state == 2:
@@ -113,14 +111,13 @@ class DNSFileSelectorPresenter(DNSObserver):
         self._read_standard()
         self._check_all_visible_scans()
         self.view.show_status_message(
-            'automatically loaded all standard files',
-            30)
+            'automatically loaded all standard files', 30)
 
     def _check_all_visible_scans(self):
         self.model.check_scans_by_rows(self._get_non_hidden_rows())
 
     def _check_last_scans(self, sender_name):
-        number_of_scans_to_check = self.view.get_nb_scans_to_check()
+        number_of_scans_to_check = self.view.get_number_scans_to_check()
         complete = 'complete' in sender_name
         not_hidden_rows = self._get_non_hidden_rows()
         self.model.check_last_scans(number_of_scans_to_check, complete,
@@ -151,8 +148,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         self._show_all_scans()
         filters = self.view.get_filters().items()
-        hide_scans = self.model.filter_scans_for_boxes(filters,
-                                                       self._is_modus_tof())
+        hide_scans = self.model.filter_scans_for_boxes(
+            filters, self._is_modus_tof())
         for row in hide_scans:
             self.view.hide_scan(row)
 
@@ -173,23 +170,6 @@ class DNSFileSelectorPresenter(DNSObserver):
         if not self.model.get_number_of_scans():
             self._read_standard()
         self._filter_standard()
-
-    def _dataset_changed(self, standard_set):
-        if standard_set:
-            self.view.sig_read_all.disconnect(self._read_all)
-            self.view.sig_read_all.connect(self._read_standard)
-            self.model.set_active_model(standard=True)
-            self._changed_to_standard()
-            own_options = self.get_option_dict()
-            if own_options['auto_select_standard']:
-                self._check_all_visible_scans()
-        else:
-            self.view.sig_read_all.disconnect(self._read_standard)
-            self.view.sig_read_all.connect(self._read_all)
-            self.model.set_active_model()
-        self._filter_scans()
-        # re-adjust view to column width
-        self._format_view()
 
     # change of modi
     def _is_modus_tof(self):
@@ -219,7 +199,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
         self.own_dict['full_data'] = self.model.get_data()
-        self.own_dict['standard_data_tree_model'] = self.model.get_data(standard=True)
+        self.own_dict['standard_data_tree_model'] = self.model.get_data(
+            standard=True)
         self.own_dict['selected_file_numbers'] = self.model.get_data(
             full_info=False)
         return self.own_dict
@@ -235,21 +216,15 @@ class DNSFileSelectorPresenter(DNSObserver):
         Setting of the fields defined in mapping from the parameter dictionary
         and checks scans checked in the dict.
         """
-        file_numbers = self.param_dict[self.name].pop('selected_file_numbers',
-                                                      [])
-        self.view.set_state(self.param_dict.get(self.name, {}))
-        not_found = self.model.check_by_file_numbers(file_numbers)
-        if not_found:
-            print(f'Of {len(file_numbers)} loaded checked '
-                  f'file numbers {not_found} were not found '
-                  'in list of datafiles')
-
-    def tab_got_focus(self):
-        if self.model.model_is_standard():
-            self._filter_standard()
-        else:
-            self._filter_scans()
-        self.view.hide_tof(hidden='_tof' not in self.modus)
+        if self.param_dict:
+            file_numbers = self.param_dict[self.name].pop('selected_file_numbers',
+                                                          [])
+            self.view.set_state(self.param_dict.get(self.name, {}))
+            not_found = self.model.check_by_file_numbers(file_numbers)
+            if not_found:
+                print(f'Of {len(file_numbers)} loaded checked '
+                      f'file numbers {not_found} were not found '
+                      'in list of datafiles')
 
     def process_commandline_request(self, command_dict):
         start = int(command_dict['files'][0]['start'])
@@ -267,10 +242,27 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.expand_all()
         self.view.adjust_treeview_columns_width(self.num_columns)
 
+    def _sample_data_clicked(self):
+        self.view.set_sample_data_tree_model(self.model.get_sample_data_model())
+        self.model.set_active_model(standard=False)
+        if not self.model.get_number_of_scans():
+            self._read_all()
+        self._filter_scans()
+        # re-adjust view to column width
+        self._format_view()
+
+    def _standard_data_clicked(self):
+        self.view.set_standard_data_tree_model(self.model.get_standard_data_model())
+        self.model.set_active_model(standard=True)
+        self._changed_to_standard()
+        own_options = self.get_option_dict()
+        if own_options['auto_select_standard']:
+            self._check_all_visible_scans()
+        # re-adjust view to column width
+        self._format_view()
+
     def _attach_signal_slots(self):
         self.view.sig_expanded.connect(self._expanded)
-
-        self.view.sig_read_all.connect(self._read_all)
         self.view.sig_filters_clicked.connect(self._filter_scans)
         self.view.sig_standard_filters_clicked.connect(self._filter_standard)
         self.view.sig_check_all.connect(self._check_all_visible_scans)
@@ -280,6 +272,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_right_click.connect(self._right_click)
         self.view.sig_progress_canceled.connect(self._cancel_loading)
         self.view.sig_autoload_new_clicked.connect(self._autoload_new)
-        self.view.sig_auto_select_standard_clicked.connect(self._auto_select_standard)
-        self.view.sig_dataset_changed.connect(self._dataset_changed)
+        self.view.sig_auto_select_standard_clicked.connect(
+            self._auto_select_standard)
+        self.view.sig_standard_data_clicked.connect(
+            self._standard_data_clicked)
+        self.view.sig_sample_data_clicked.connect(self._sample_data_clicked)
+
         self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)

@@ -12,8 +12,10 @@ DNS file selector tab view of DNS reduction GUI.
 from mantidqt.utils.qt import load_ui
 from qtpy.QtCore import QModelIndex, Qt, Signal
 from qtpy.QtWidgets import QProgressDialog
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItemEnum
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view \
+    import DNSView
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem \
+    import TreeItemEnum
 
 
 class DNSFileSelectorView(DNSView):
@@ -47,6 +49,8 @@ class DNSFileSelectorView(DNSView):
             'last_scans': self._ui.sB_last_scans,
             'filter_det_rot': self._ui.cB_filter_det_rot,
             'auto_select_standard': self._ui.cB_auto_select_standard,
+            'standard_data_selector': self._ui.pB_standard_data,
+            'sample_data_selector': self._ui.pB_sample_data,
         }
 
         self._sample_treeview.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -64,18 +68,12 @@ class DNSFileSelectorView(DNSView):
         # check boxes
         self._attach_checkbox_signal_slots()
 
-        # combo box
-        self._ui.combB_directory.currentIndexChanged.connect(
-            self.combo_changed)
-
         # hide standard files view
         self._standard_treeview.setHidden(True)
 
         self.progress = None
-        self.combo_changed(0)
 
     # signals
-    sig_read_all = Signal()
     sig_filters_clicked = Signal()
 
     sig_check_all = Signal()
@@ -86,9 +84,10 @@ class DNSFileSelectorView(DNSView):
     sig_progress_canceled = Signal()
     sig_autoload_new_clicked = Signal(int)
     sig_auto_select_standard_clicked = Signal(int)
-    sig_dataset_changed = Signal(int)
     sig_standard_filters_clicked = Signal()
     sig_right_click = Signal(QModelIndex)
+    sig_sample_data_clicked = Signal()
+    sig_standard_data_clicked = Signal()
 
     # signal reactions
     def _expanded(self, _dummy):
@@ -116,23 +115,6 @@ class DNSFileSelectorView(DNSView):
         sender_name = self.sender().objectName()
         self.sig_check_last.emit(sender_name)
 
-    def combo_changed(self, index):
-        # index: 0 - Sample Data, 1 - Standard Data
-        self._ui.groupBox_filter_by_scan.setHidden(index)
-        self._ui.pB_check_last_scan.setHidden(index)
-        self._ui.pB_check_last_complete_scan.setHidden(index)
-        self._ui.sB_last_scans.setHidden(index)
-        self._ui.cB_autoload_new.setHidden(index)
-        self._ui.groupBox_filter_standard.setHidden(1 - index)
-        self._standard_treeview.setHidden(1 - index)
-        self._sample_treeview.setHidden(index)
-        self.cB_auto_select_standard.setHidden(1 - index)
-        if index:
-            self._treeview = self._standard_treeview
-        else:
-            self._treeview = self._sample_treeview
-        self.sig_dataset_changed.emit(index)
-
     def _un_expand_all(self):
         self._treeview.collapseAll()
 
@@ -146,8 +128,11 @@ class DNSFileSelectorView(DNSView):
     def _filter_standard_checked(self):
         self.sig_standard_filters_clicked.emit()
 
-    def _read_all_clicked(self):
-        self.sig_read_all.emit()
+    def _sample_data_clicked(self):
+        self.sig_sample_data_clicked.emit()
+
+    def _standard_data_clicked(self):
+        self.sig_standard_data_clicked.emit()
 
     # get states
     def get_filters(self):
@@ -170,7 +155,7 @@ class DNSFileSelectorView(DNSView):
             filters.pop('cscan')
         return filters
 
-    def get_nb_scans_to_check(self):
+    def get_number_scans_to_check(self):
         return self._ui.sB_last_scans.value()
 
     def get_selected_indexes(self):
@@ -192,10 +177,14 @@ class DNSFileSelectorView(DNSView):
         self._treeview.setRowHidden(row, self._treeview.rootIndex(), False)
 
     def hide_tof(self, hidden=True):
-        self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
-        self._standard_treeview.setColumnHidden(TreeItemEnum.tof_channel_width.value, hidden)
-        self._sample_treeview.setColumnHidden(TreeItemEnum.tof_channels.value, hidden)
-        self._sample_treeview.setColumnHidden(TreeItemEnum.tof_channel_width.value, hidden)
+        self._standard_treeview.setColumnHidden(
+            TreeItemEnum.tof_channels.value, hidden)
+        self._standard_treeview.setColumnHidden(
+            TreeItemEnum.tof_channel_width.value, hidden)
+        self._sample_treeview.setColumnHidden(
+            TreeItemEnum.tof_channels.value, hidden)
+        self._sample_treeview.setColumnHidden(
+            TreeItemEnum.tof_channel_width.value, hidden)
 
     def is_scan_hidden(self, row):
         return self._treeview.isRowHidden(row, self._treeview.rootIndex())
@@ -219,21 +208,44 @@ class DNSFileSelectorView(DNSView):
     # manipulating view
     def set_first_column_spanned(self, scan_range):
         for i in scan_range:
-            self._treeview.setFirstColumnSpanned(i, self._treeview.rootIndex(),
-                                                 True)
+            self._treeview.setFirstColumnSpanned(
+                i, self._treeview.rootIndex(), True)
 
     def set_standard_data_tree_model(self, model):
         self._standard_treeview.setModel(model)
+        self._ui.groupBox_filter_by_scan.setHidden(True)
+        self._ui.pB_check_last_scan.setHidden(True)
+        self._ui.pB_check_last_complete_scan.setHidden(True)
+        self._ui.sB_last_scans.setHidden(True)
+        self._ui.cB_autoload_new.setHidden(True)
+        self._ui.groupBox_filter_standard.setHidden(False)
+        self._standard_treeview.setHidden(False)
+        self._sample_treeview.setHidden(True)
+        self.cB_auto_select_standard.setHidden(False)
+        self._treeview = self._standard_treeview
+        self._ui.pB_standard_data.setDefault(True)
+        self._ui.pB_sample_data.setDefault(False)
 
     def set_sample_data_tree_model(self, model):
         self._sample_treeview.setModel(model)
+        self._ui.groupBox_filter_by_scan.setHidden(False)
+        self._ui.pB_check_last_scan.setHidden(False)
+        self._ui.pB_check_last_complete_scan.setHidden(False)
+        self._ui.sB_last_scans.setHidden(False)
+        self._ui.cB_autoload_new.setHidden(False)
+        self._ui.groupBox_filter_standard.setHidden(True)
+        self._standard_treeview.setHidden(True)
+        self._sample_treeview.setHidden(False)
+        self.cB_auto_select_standard.setHidden(True)
+        self._treeview = self._sample_treeview
+        self._ui.pB_sample_data.setDefault(True)
+        self._ui.pB_standard_data.setDefault(False)
 
     def adjust_treeview_columns_width(self, num_columns):
         for i in range(num_columns):
             self._treeview.resizeColumnToContents(i)
 
     def _attach_button_signal_slots(self):
-        self._ui.pB_td_read_all.clicked.connect(self._read_all_clicked)
         self._ui.cB_filter_det_rot.stateChanged.connect(
             self._filter_scans_checked)
         self._ui.cB_filter_sample_rot.stateChanged.connect(
@@ -253,7 +265,11 @@ class DNSFileSelectorView(DNSView):
         self._ui.pB_check_last_scan.clicked.connect(self._check_last)
         self._ui.pB_check_last_complete_scan.clicked.connect(
             self._check_last)
-        self._ui.pB_check_selected.clicked.connect(self._check_selected)
+        self._ui.pB_check_selected.clicked.connect(
+            self._check_selected)
+        self._ui.pB_standard_data.clicked.connect(
+            self._standard_data_clicked)
+        self._ui.pB_sample_data.clicked.connect(self._sample_data_clicked)
 
     def _attach_checkbox_signal_slots(self):
         self._map['filter_vanadium'].stateChanged.connect(
