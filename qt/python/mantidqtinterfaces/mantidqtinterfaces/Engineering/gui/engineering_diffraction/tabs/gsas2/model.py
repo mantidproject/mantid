@@ -219,7 +219,7 @@ class GSAS2Model(object):
         )
         gsas2_python_path = os.path.join(self.path_to_gsas2, "bin", "python")
         if platform.system() == "Windows":
-            gsas2_python_path = os.path.join(self.path_to_gsas2, "python")
+            gsas2_python_path = os.path.join(self.path_to_gsas2, "python.exe")
         call = [gsas2_python_path,
                 os.path.abspath(os.path.join(os.path.dirname(__file__), "call_G2sc.py")),
                 parse_inputs.Gsas2Inputs_to_json(gsas2_inputs)]
@@ -229,7 +229,16 @@ class GSAS2Model(object):
         try:
             env = os.environ.copy()
             env['PYTHONHOME'] = self.path_to_gsas2
-            shell_process = subprocess.Popen(command_string_list,
+            # The PyCharm debugger attempts to debug into any python subprocesses spawned by Workbench
+            # On Windows (see pydev_monkey.py) this results in the command line arguments being manipulated and
+            # the GSASII json parameter string gets corrupted
+            # Avoid this by passing the GSASII python exe in via the executable parameter instead of argv[0] and also
+            # set argv[0] to something not containing the string 'python'
+            # Note - the PyCharm behaviour can also be disabled by unchecking this property in File, Settings:
+            # "Attach to subprocess automatically while debugging"
+            empty_argv0 = '_'
+            shell_process = subprocess.Popen([empty_argv0] + command_string_list[1:],
+                                             executable=command_string_list[0],
                                              shell=False,
                                              stdin=None,
                                              stdout=subprocess.PIPE,
