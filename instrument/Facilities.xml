@@ -721,7 +721,7 @@
   </instrument>
 
   <instrument name="D4C">
-    <technique>Liquid diffraction</technique>
+    <technique>LiquidDiffraction</technique>
   </instrument>
 
   <instrument name="D17">
@@ -741,7 +741,7 @@
   </instrument>
 
   <instrument name="D7">
-    <technique>Polarized Diffraction</technique>
+    <technique>PolarizedDiffraction</technique>
     <technique>Polarized spectroscopy</technique>
     <technique>Diffuse Scattering</technique>
   </instrument>
