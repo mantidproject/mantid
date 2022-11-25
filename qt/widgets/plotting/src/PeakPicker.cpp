@@ -53,6 +53,8 @@ void PeakPicker::select(bool select) {
     m_peakMarker->deselect();
 }
 
+void PeakPicker::setVisible(bool visible) { m_peakMarker->setVisible(visible); }
+
 void PeakPicker::handleMouseDown(const QPoint &point) {
   const auto dataCoords = m_plot->toDataCoords(point);
   m_peakMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());

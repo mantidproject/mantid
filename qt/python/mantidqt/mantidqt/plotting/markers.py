@@ -54,7 +54,7 @@ class HorizontalMarker(QObject):
                                linewidth=line_width,
                                linestyle=line_style,
                                animated=True)
-        self.axis.add_patch(self.patch)
+        self.axis.add_artist_correctly(self.patch)
         self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
         self.move_cursor = move_cursor
@@ -76,7 +76,10 @@ class HorizontalMarker(QObject):
         """
         Remove this marker from the canvas.
         """
-        self.patch.remove()
+        try:
+            self.patch.remove()
+        except ValueError:
+            pass
 
     def redraw(self):
         """
@@ -237,7 +240,7 @@ class VerticalMarker(QObject):
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
         self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
                                linewidth=line_width, linestyle=line_style, animated=True)
-        self.axis.add_patch(self.patch)
+        self.axis.add_artist_correctly(self.patch)
         self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
         self.move_cursor = move_cursor

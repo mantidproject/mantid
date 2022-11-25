@@ -36,6 +36,8 @@ public:
   void select();
   void deselect();
 
+  void setVisible(bool visible);
+
   void mouseMoveStart(double x, double y);
   void mouseMoveStop();
   bool mouseMove(double x, double y);

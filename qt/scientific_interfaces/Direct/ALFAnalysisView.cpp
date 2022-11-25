@@ -68,12 +68,12 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
 
   m_plot = new MantidWidgets::PreviewPlot();
 
-  // Set the preview plot background as transparent. Also seems to stop the figure resizing each time replotting
-  // happens.
+  // Set the preview plot background as transparent.
   m_plot->canvas()->gcf().setFaceColor("None");
   m_plot->canvas()->setStyleSheet("background-color:transparent;");
 
   m_peakPicker = new MantidWidgets::PeakPicker(m_plot, Qt::red);
+  m_peakPicker->setVisible(false);
   connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
 
   splitter->addWidget(m_plot);
@@ -175,8 +175,10 @@ std::pair<double, double> ALFAnalysisView::getRange() const {
 }
 
 void ALFAnalysisView::addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_peakPicker->setVisible(false);
   m_plot->clear();
   if (workspace) {
+    m_peakPicker->setVisible(true);
     m_plot->addSpectrum("Extracted Data", workspace, 0, Qt::black);
   }
 }

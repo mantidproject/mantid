@@ -98,6 +98,12 @@ void PeakMarker::select() { callMethodNoCheck<void>(pyobj(), "select"); }
 void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
 
 /**
+ * @brief Sets the marker as visible or invisible.
+ * @param visible If true the marker is set as visible.
+ */
+void PeakMarker::setVisible(bool visible) { callMethodNoCheck<void>(pyobj(), "set_visible", visible); }
+
+/**
  * @brief Notifies the relevant marker to start moving.
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.

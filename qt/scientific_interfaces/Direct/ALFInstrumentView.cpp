@@ -33,8 +33,10 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget->removeTab("Draw");
   m_instrumentWidget->hideHelp();
 
-  connect(m_instrumentWidget->getInstrumentDisplay()->getSurface().get(), SIGNAL(shapeChangeFinished()), this,
-          SLOT(notifyShapeChanged()));
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
 
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->expandPlotPanel();

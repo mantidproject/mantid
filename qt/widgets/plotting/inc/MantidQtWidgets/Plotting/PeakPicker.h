@@ -32,6 +32,7 @@ public:
   Mantid::API::IPeakFunction_sptr peak() const;
 
   void select(bool select);
+  void setVisible(bool visible);
 
 signals:
   void changed();
