@@ -327,6 +327,12 @@ void LoadILLTOF2::addPulseInterval() {
   runDetails.addProperty<double>("pulse_interval", pulseInterval);
 }
 
+/**
+ * Prepares X axis for the workspace being loaded
+ * @param entry NeXus entry used to get scanned parameter values in the scan case
+ * @param convertToTOF Should the bin edges be converted to time of flight or keep the channel indices
+ * @return Vector of doubles containing bin edges or point centres positions
+ */
 std::vector<double> LoadILLTOF2::prepareAxis(NeXus::NXEntry &entry, bool convertToTOF) {
 
   std::vector<double> xAxis(m_localWorkspace->readX(0).size());
@@ -334,7 +340,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(NeXus::NXEntry &entry, bool convert
     // read which variable is going to be the axis
     NXInt scannedAxis = entry.openNXInt("data_scan/scanned_variables/variables_names/axis");
     scannedAxis.load();
-    int scannedVarId;
+    int scannedVarId = 0;
     for (int index = 0; index < scannedAxis.dim0(); index++) {
       if (scannedAxis[index] == 1) {
         scannedVarId = index;
@@ -417,6 +423,7 @@ void LoadILLTOF2::fillStaticWorkspace(NeXus::NXEntry &entry, const std::vector<s
 /**
  * Fills scan workspace with data and monitor data counts
  * @param entry The Nexus entry to load the data from
+ * @param monitorList Vector containing paths to monitor data
  */
 void LoadILLTOF2::fillScanWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
   // Prepare X-axis array
