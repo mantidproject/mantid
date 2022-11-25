@@ -377,6 +377,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
+  emit instrumentActorReset();
+
   if (m_useThread) {
     m_instrumentActor->moveToThread(&m_thread);
     m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));

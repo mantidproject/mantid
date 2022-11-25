@@ -79,6 +79,7 @@ public:
   void warningBox(std::string const &message) override;
 
 private slots:
+  void reconnectInstrumentActor();
   void fileLoaded();
   void notifyShapeChanged();
   void selectWholeTube();
