@@ -8,6 +8,7 @@
 import unittest
 from unittest import mock
 import sys
+from pathlib import Path
 
 from qtpy.QtWidgets import QApplication
 
@@ -313,6 +314,7 @@ class RawDataExplorerViewTest(unittest.TestCase):
 
     @mock.patch("mantidqt.widgets.rawdataexplorer.view.QFileDialog")
     def test_show_directory_manager(self, dialog):
+        self.view.fileTree.model().setRootPath(str(Path.home()))
         trigger_check = mock.Mock()
         self.view.file_tree_path_changed.connect(trigger_check)
         path = "/"
@@ -321,7 +323,9 @@ class RawDataExplorerViewTest(unittest.TestCase):
         self.view.show_directory_manager()
 
         # check that the options are the correct ones. Because QFileDialog has been overwritten, it is a bit strange
-        dialog().getExistingDirectory.assert_called_with(parent=self.view, caption="Select a directory", directory=path,
+        dialog().getExistingDirectory.assert_called_with(parent=self.view,
+                                                         caption="Select a directory",
+                                                         directory=str(Path.home()),
                                                          options=dialog.DontUseNativeDialog | dialog.ShowDirsOnly)
         trigger_check.assert_called_with(path)
 

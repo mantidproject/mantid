@@ -43,7 +43,6 @@ class RawDataExplorerFileTree(QTreeView):
         file_model = QFileSystemModel()
         file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
         file_model.setNameFilterDisables(0)
-        file_model.setRootPath("/")
         self.setModel(file_model)
         self.header().hideSection(2)
         self.header().setSectionResizeMode(0, QHeaderView.Stretch)
