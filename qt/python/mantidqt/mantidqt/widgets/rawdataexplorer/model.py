@@ -209,10 +209,14 @@ class RawDataExplorerModel(QObject):
             # we are judging from the first workspace and hoping it is representative
             workspace = workspace.getItem(0)
 
+        # we only support 2 types of data, so we check it is one of these case
         if not isinstance(workspace, Workspace2D) and not isinstance(workspace, EventWorkspace):
             ws_type = str(type(workspace))
+
+            # hack to get a more user-friendly name for the workspace type
             if "dataobject" in ws_type:
                 ws_type = ws_type[21:-2]
+
             error_reporting("Cannot open this data: invalid workspace type {0}.".format(ws_type))
             return None
 
@@ -243,14 +247,15 @@ class RawDataExplorerModel(QObject):
         @return the predicted acquisition type
         """
         if workspace.blocksize() > 1:
-            # TODO FIND A BETTER WAY TO DISSOCIATE THE 2
-            # particularly, TOF can also be only channels -> what then ?
-            if str(workspace.getAxis(0).getUnit().symbol()) == "microsecond":
+            if workspace.getAxis(0).getUnit().unitID() == 'Empty':
+                # SCAN case
+                return AcquisitionType.SCAN
+            elif workspace.getAxis(0).getUnit().unitID() in ['TOF', 'Label']:
                 # TOF case
                 return AcquisitionType.TOF
             else:
-                # SCAN case
-                return AcquisitionType.SCAN
+                error_reporting("Could not find acquisition type for this data. Defaulting to TOF.")
+                return AcquisitionType.TOF
         else:
             return AcquisitionType.MONO
 
