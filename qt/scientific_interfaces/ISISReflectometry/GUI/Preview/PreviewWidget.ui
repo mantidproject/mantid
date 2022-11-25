@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>873</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -97,20 +97,27 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="dockable_widgets_layout"/>
-   </item>
-   <item>
-    <widget class="QSplitter" name="inst_view_2d_plot_splitter">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
-     <widget class="QSplitter" name="subplot_splitter">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>980</width>
+        <height>546</height>
+       </rect>
       </property>
-      <property name="handleWidth">
-       <number>2</number>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QVBoxLayout" name="dockable_widgets_layout"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
@@ -120,7 +127,17 @@
       <enum>QLayout::SetMinimumSize</enum>
      </property>
      <item>
-      <widget class="QTableWidget" name="tableWidget_2"/>
+      <spacer name="output_tool_spacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QPushButton" name="apply_button">
@@ -135,7 +152,6 @@
  </widget>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>tableWidget_2</tabstop>
   <tabstop>apply_button</tabstop>
  </tabstops>
  <resources>
