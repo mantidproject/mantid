@@ -44,6 +44,7 @@ MatrixWorkspace_sptr convertToPointData(MatrixWorkspace_sptr const &workspace) {
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
+  flatBackground->addConstraints("A0 > 0");
   return flatBackground;
 }
 
@@ -52,6 +53,7 @@ IFunction_sptr createGaussian(double const height = 0.0, double const peakCentre
   gaussian->setParameter("Height", height);
   gaussian->setParameter("PeakCentre", peakCentre);
   gaussian->setParameter("Sigma", sigma);
+  gaussian->addConstraints("Height > 0");
   return gaussian;
 }
 

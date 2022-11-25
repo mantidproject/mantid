@@ -86,11 +86,10 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
 }
 
 void ALFAnalysisPresenter::calculateEstimate(bool const silent) {
-  auto const validationMessage = validateFitValues();
-  if (!validationMessage) {
+  if (m_model->isDataExtracted()) {
     m_model->calculateEstimate(m_view->getRange());
   } else if (!silent) {
-    m_view->displayWarning(*validationMessage);
+    m_view->displayWarning("Need to have extracted data to do a fit or estimate.");
   }
 }
 
