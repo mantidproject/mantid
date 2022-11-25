@@ -469,6 +469,8 @@ bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseMove(position);
+  } else {
+    emit mouseHovering(evt->pos());
   }
   return stopEvent;
 }

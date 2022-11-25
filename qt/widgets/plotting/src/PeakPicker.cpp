@@ -8,6 +8,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
+#include <QApplication>
+
 using namespace Mantid::API;
 using namespace MantidQt::Widgets::MplCpp;
 
@@ -16,7 +18,8 @@ namespace MantidQt::MantidWidgets {
 PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
     : QObject(), m_plot(plot), m_peak(nullptr),
       m_peakMarker(std::make_unique<PeakMarker>(m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
-                                                std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
+                                                std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)),
+      m_centreHover(false) {
   UNUSED_ARG(colour);
 
   m_plot->canvas()->draw();
@@ -24,6 +27,7 @@ PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
   connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
   connect(m_plot, SIGNAL(mouseMove(QPoint)), this, SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
+  connect(m_plot, SIGNAL(mouseHovering(QPoint)), this, SLOT(handleMouseHovering(QPoint)));
 
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
@@ -74,6 +78,11 @@ void PeakPicker::handleMouseMove(const QPoint &point) {
 void PeakPicker::handleMouseUp(const QPoint &point) {
   UNUSED_ARG(point);
   m_peakMarker->mouseMoveStop();
+}
+
+void PeakPicker::handleMouseHovering(const QPoint &point) {
+  const auto dataCoords = m_plot->toDataCoords(point);
+  m_peakMarker->mouseMoveHover(dataCoords.x(), dataCoords.y());
 }
 
 void PeakPicker::redrawMarker() { m_peakMarker->redraw(); }

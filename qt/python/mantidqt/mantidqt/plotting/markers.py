@@ -516,6 +516,8 @@ class PeakMarker(QObject):
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = False
+        # True if the mouse is currently hovering over the centre marker
+        self._centre_hover = False
 
     def redraw(self):
         """
@@ -598,6 +600,17 @@ class PeakMarker(QObject):
             if moved:
                 self.fwhm_changed.emit(self.peak_id, self.fwhm())
         return moved
+
+    def mouse_move_hover(self, x: float, y: float) -> None:
+        """
+        Check if the provided coordinate is above the centre marker.
+        """
+        is_above_centre = self.centre_marker.is_above(x, y)
+        if not self._centre_hover and is_above_centre:
+            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+        elif self._centre_hover and not is_above_centre:
+            QApplication.restoreOverrideCursor()
+        self._centre_hover = is_above_centre
 
     def is_moving(self):
         """
