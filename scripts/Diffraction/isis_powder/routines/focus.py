@@ -46,14 +46,14 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
             logger.warning('Pre-summed empty instrument workspace found at ' + run_details.summed_empty_inst_file_path)
             summed_empty = mantid.LoadNexus(Filename=run_details.summed_empty_inst_file_path)
         else:
-            summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_inst_runs,
+            summed_empty = common.generate_summed_runs(empty_ws_string=run_details.empty_inst_runs,
                                                        instrument=instrument)
     elif run_details.sample_empty:
         scale_factor = 1.0
         if empty_can_subtraction_method != 'PaalmanPings':
             scale_factor = instrument._inst_settings.sample_empty_scale
         # Subtract a sample empty if specified ie empty can
-        summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.sample_empty,
+        summed_empty = common.generate_summed_runs(empty_ws_string=run_details.sample_empty,
                                                    instrument=instrument,
                                                    scale_factor=scale_factor)
 
@@ -70,7 +70,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
             raise TypeError("The PaalmanPings absorption method requires 'sample_empty' to be supplied.")
     else:
         if summed_empty:
-            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_ws=summed_empty)
         # Crop to largest acceptable TOF range
         input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 

@@ -499,45 +499,44 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def generate_summed_runs(empty_sample_ws_string, instrument, scale_factor=None):
+def generate_summed_runs(empty_ws_string, instrument, scale_factor=None):
     """
-    Loads the list of empty runs specified by the empty_sample_ws_string and sums
+    Loads the list of empty runs specified by the empty_ws_string and sums
     them (and optionally scales). Returns the summed workspace.
-    :param empty_sample_ws_string: The empty run numbers to sum
+    :param empty_ws_string: The empty run numbers to sum
     :param instrument: The instrument object these runs belong to
     :param scale_factor: The percentage to scale the loaded runs by
     :return: The summed and normalised empty runs
     """
 
-    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                   input_batching=INPUT_BATCHING.Summed)
-    empty_sample = empty_sample[0]
+    empty_ws_list = load_current_normalised_ws_list(run_number_string=empty_ws_string, instrument=instrument,
+                                                    input_batching=INPUT_BATCHING.Summed)
+    empty_ws = empty_ws_list[0]
     if scale_factor:
-        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
+        empty_ws = mantid.Scale(InputWorkspace=empty_ws, OutputWorkspace=empty_ws, Factor=scale_factor,
                                     Operation="Multiply")
-    return empty_sample
+    return empty_ws
 
 
-def subtract_summed_runs(ws_to_correct, empty_sample):
+def subtract_summed_runs(ws_to_correct, empty_ws):
     """
-    Subtracts the list of empty runs specified by the empty_sample_ws_string
-    from the workspace specified. Returns the subtracted workspace.
+    Subtracts empty_ws from ws_to_correct. Returns the subtracted workspace.
     :param ws_to_correct: The workspace to correct
-    :param empty_sample: The empty workspace to subtract
+    :param empty_ws: The empty workspace to subtract
     :return: The workspace with the empty runs subtracted
     """
     # Skip this step if the workspace has no current, as subtracting empty
     # would give us negative counts
     if workspace_has_current(ws_to_correct):
         try:
-            mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+            mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_ws, OutputWorkspace=ws_to_correct)
         except ValueError:
             raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
                              " the empty and sample match?")
     else:
         ws_to_correct = copy.deepcopy(ws_to_correct)
 
-    remove_intermediate_workspace(empty_sample)
+    remove_intermediate_workspace(empty_ws)
 
     return ws_to_correct
 
@@ -659,6 +658,7 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
 
     for run_number in run_numbers_list:
         file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
+        # include file extension in ws name to allow users to distinguish different partial files (eg .s1 or .s2)
         if not AnalysisDataService.doesExist(file_name):
             read_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
         else:
