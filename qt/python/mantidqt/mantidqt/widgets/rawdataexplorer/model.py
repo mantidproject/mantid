@@ -290,11 +290,8 @@ class RawDataExplorerModel(QObject):
         split = last_ws.split("_")
         if len(split) >= 2:
             ws_name = split[0] + "_..._" + ws_to_add
-        elif len(split) == 1:
-            ws_name = last_ws + "_" + ws_to_add
         else:
-            # shouldn't reach this case with the naming convention, but if it happens, default to the new name
-            ws_name = ws_to_add
+            ws_name = last_ws + "_" + ws_to_add
         return ws_name
 
 
