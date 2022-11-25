@@ -38,7 +38,7 @@ class InstrumentView(QWidget, ObservingView):
 
     closing = Signal(str)
 
-    def __init__(self, parent, presenter, name, window_flags=Qt.Window, use_thread=True):
+    def __init__(self, parent, presenter, name, window_flags=Qt.Window, use_thread=False):
         super(InstrumentView, self).__init__(parent)
 
         scale_min = 0

@@ -27,7 +27,7 @@ class InstrumentViewPresenter(ObservingPresenter):
     """
     @param ws : The workspace object OR workspace name.
     """
-    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None, use_thread=True):
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None, use_thread=False):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
 
