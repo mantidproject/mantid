@@ -560,7 +560,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         original_y = original_ws.readY(0)
         scale_factor = 0.75
 
-        scaled_ws = common.generate_summed_runs(empty_sample_ws_string=sample_empty_number, instrument=ISISPowderMockInst(),
+        scaled_ws = common.generate_summed_runs(empty_ws_string=sample_empty_number, instrument=ISISPowderMockInst(),
                                                 scale_factor=scale_factor)
         scaled_y_values = scaled_ws.readY(0)
         self.assertAlmostEqual(scaled_y_values[2], original_y[2]*scale_factor)
@@ -582,7 +582,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         empty_ws = empty_ws * 0.3
 
         returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws,
-                                                  empty_sample=empty_ws)
+                                                  empty_ws=empty_ws)
         y_values = returned_ws.readY(0)
         original_y_values = original_ws.readY(0)
         for i in range(returned_ws.blocksize()):
@@ -603,7 +603,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         empty_ws = empty_ws * 0.3
 
         returned_ws = common.subtract_summed_runs(ws_to_correct=ws_to_correct,
-                                                  empty_sample=empty_ws)
+                                                  empty_ws=empty_ws)
         y_values = returned_ws.readY(0)
         original_y_values = original_ws.readY(0)
         # subtraction should be skipped leaving original values
@@ -624,7 +624,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         # This should throw as the TOF ranges do not match
         with self.assertRaisesRegex(ValueError, "specified for this file do not have matching binning. Do the "):
             common.subtract_summed_runs(ws_to_correct=sample_ws,
-                                        empty_sample=empty_ws)
+                                        empty_ws=empty_ws)
 
         mantid.DeleteWorkspace(sample_ws)
 

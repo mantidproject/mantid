@@ -585,7 +585,8 @@ def load_raw_files(run_number_string, instrument, file_ext=None):
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     file_ext = "" if file_ext is None else file_ext
-    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
+    file_name_list = [instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext) for run_number in run_number_list]
+    load_raw_ws = _load_list_of_files(file_name_list)
     return load_raw_ws
 
 
@@ -644,25 +645,30 @@ def _check_load_range(list_of_runs_to_load):
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
-def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
+def _load_list_of_files(file_name_list, keep_original=True):
     """
     Loads files based on the list passed to it. If the list is
     greater than the maximum range it will raise an exception
     see _check_load_range for more details
-    :param run_numbers_list: The list of runs to load
-    :param instrument: The instrument to generate the prefix for
+    :param file_name_list: The list of file names to load
+    :param keep_original: Whether to retain the original loaded file in unaltered state
     :return: The loaded workspaces as a list
     """
     read_ws_list = []
-    _check_load_range(list_of_runs_to_load=run_numbers_list)
+    _check_load_range(list_of_runs_to_load=file_name_list)
 
-    for run_number in run_numbers_list:
-        file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
+    for file_name in file_name_list:
         # include file extension in ws name to allow users to distinguish different partial files (eg .s1 or .s2)
         if not AnalysisDataService.doesExist(file_name):
-            read_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
+            loaded_ws = mantid.Load(Filename=file_name, OutputWorkspace=file_name)
         else:
-            read_ws = AnalysisDataService.retrieve(file_name)
+            loaded_ws = AnalysisDataService.retrieve(file_name)
+        if keep_original:
+            # preserve original ws in case reduction applies any corrections in situ and user wants to rerun
+            new_name = file_name + '_red'
+            read_ws = mantid.CloneWorkspace(InputWorkspace=loaded_ws, OutputWorkspace=new_name)
+        else:
+            read_ws = loaded_ws
         read_ws_list.append(read_ws)
 
     return read_ws_list
