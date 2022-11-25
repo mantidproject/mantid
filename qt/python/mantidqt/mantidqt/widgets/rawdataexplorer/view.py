@@ -115,17 +115,7 @@ class PreviewView(QObject):
             self.sig_request_close.connect(self._widget.view.emit_close)
             self.sig_request_close.connect(lambda: self.on_close(None, False))
 
-        if self._type == self.PLOT2D:
-            self._widget.canvas.mpl_connect("close_event", self.on_close)
-            self.sig_request_close.connect(lambda: plt.close(self._widget))
-            self.sig_request_close.connect(lambda: self.on_close(None, False))
-
-        if self._type == self.PLOT1D:
-            self._widget.canvas.mpl_connect("close_event", self.on_close)
-            self.sig_request_close.connect(lambda: plt.close(self._widget))
-            self.sig_request_close.connect(lambda: self.on_close(None, False))
-
-        if self._type == self.PLOTSPECTRUM:
+        if self._type in [self.PLOT2D, self.PLOT1D, self.PLOTSPECTRUM]:
             self._widget.canvas.mpl_connect("close_event", self.on_close)
             self.sig_request_close.connect(lambda: plt.close(self._widget))
             self.sig_request_close.connect(lambda: self.on_close(None, False))
