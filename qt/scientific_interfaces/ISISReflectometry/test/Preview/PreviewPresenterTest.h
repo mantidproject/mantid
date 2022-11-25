@@ -138,7 +138,7 @@ public:
 
     expectRegionSelectorToolbarEnabled(*rawMockDockedWidgets, true);
 
-    EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
+    EXPECT_CALL(*rawMockDockedWidgets, setInstViewToolbarEnabled(Eq(false))).Times(1);
     presenter.notifyLoadWorkspaceCompleted();
   }
 
