@@ -41,10 +41,10 @@ public:
   static InstrumentWidgetTest *createSuite() { return new InstrumentWidgetTest(); }
   static void destroySuite(InstrumentWidgetTest *suite) { delete suite; }
 
-  using QtMock = StrictMock<MockQtDisplay>;
-  using GLMock = StrictMock<MockGLDisplay>;
-  using ConnectMock = StrictMock<MockQtConnect>;
-  using MetaObjectMock = StrictMock<MockQtMetaObject>;
+  using QtMock = NiceMock<MockQtDisplay>;
+  using GLMock = NiceMock<MockGLDisplay>;
+  using ConnectMock = NiceMock<MockQtConnect>;
+  using MetaObjectMock = NiceMock<MockQtMetaObject>;
   using DisplayMock = NiceMock<MockInstrumentDisplay>;
   using MessageMock = NiceMock<MockMessageHandler>;
 
