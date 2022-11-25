@@ -100,17 +100,19 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
 
     # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
     if previous_units != ws_units.tof:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof)
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=ws_units.tof, OutputWorkspace=ws_to_correct)
 
     if is_vanadium:
         ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
-                                                      MultipleScattering=multiple_scattering)
+                                                      MultipleScattering=multiple_scattering,
+                                                      OutputWorkspace=ws_to_correct)
     else:
         # Ensure we never do multiple scattering if the sample is not isotropic (e.g. not a Vanadium)
         ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct,
-                                                      MultipleScattering=False)
+                                                      MultipleScattering=False,
+                                                      OutputWorkspace=ws_to_correct)
     if previous_units != ws_units.tof:
-        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units)
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target=previous_units, OutputWorkspace=ws_to_correct)
     return ws_to_correct
 
 
