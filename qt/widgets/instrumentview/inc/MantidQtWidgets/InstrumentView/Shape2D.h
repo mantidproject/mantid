@@ -12,6 +12,7 @@
 #include <QColor>
 #include <QPainterPath>
 #include <QPointF>
+
 class QPainter;
 class QMouseEvent;
 class QWheelEvent;
@@ -76,6 +77,8 @@ public:
   virtual void moveBy(const QPointF &pos);
   /// Get total number of control points.
   virtual size_t getNControlPoints() const;
+  /// Get the radius to use for the control points.
+  virtual int controlPointSize() const;
   /// Get a control point.
   virtual QPointF getControlPoint(size_t i) const;
   /// Set a control point.
@@ -177,7 +180,6 @@ protected:
   // --- Protected data --- //
 
   static const size_t NCommonCP;
-  static const qreal sizeCP;
   RectF m_boundingRect;
   double m_boundingRotation = 0.0;
   QColor m_color;
