@@ -641,7 +641,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         for (int ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          auto [weights, weightsErrors] =
+          std::tie(weights, weightsErrors) =
               simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
