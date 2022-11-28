@@ -360,6 +360,8 @@ private:
                           const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void renameHandle(const std::string &oldName, const std::string &newName) override;
   void clearADSHandle() override;
+  /// close the widget after an ADS event removes the workspace
+  virtual void handleActiveWorkspaceDeleted();
   /// overlay a peaks workspace on the projection surface
   void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
   /// overlay a masked workspace on the projection surface

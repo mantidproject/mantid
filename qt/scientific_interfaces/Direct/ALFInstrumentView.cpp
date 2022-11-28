@@ -7,9 +7,8 @@
 #include "ALFInstrumentView.h"
 
 #include "ALFInstrumentPresenter.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
@@ -26,18 +25,12 @@ namespace MantidQt::CustomInterfaces {
 ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_files(), m_instrumentWidget() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
-  m_instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
-                                          MantidWidgets::InstrumentWidget::Dependencies(), false);
-  m_instrumentWidget->removeTab("Instrument");
-  m_instrumentWidget->removeTab("Draw");
-  m_instrumentWidget->hideHelp();
+  m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
 
   connect(m_instrumentWidget->getInstrumentDisplay()->getSurface().get(), SIGNAL(shapeChangeFinished()), this,
           SLOT(notifyShapeChanged()));
 
   auto pickTab = m_instrumentWidget->getPickTab();
-  pickTab->expandPlotPanel();
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
 }
 

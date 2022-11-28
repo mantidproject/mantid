@@ -10,8 +10,8 @@
 #include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
+#include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <QString>
 #include <QVBoxLayout>
