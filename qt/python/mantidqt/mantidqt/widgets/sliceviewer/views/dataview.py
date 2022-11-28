@@ -99,6 +99,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        # fix colour bar to stop plot and color bar making small size readjustments when the image info table updates
         self.colorbar.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         self.colorbar.cmap.setToolTip("Colormap options")
         self.colorbar.crev.setToolTip("Reverse colormap")
