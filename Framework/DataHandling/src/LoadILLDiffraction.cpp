@@ -218,14 +218,11 @@ void LoadILLDiffraction::loadDataScan() {
   resolveScanType();
   computeThetaOffset();
 
-  std::string start_time = firstEntry.getString("start_time");
-  start_time = LoadHelper::dateTimeInIsoFormat(start_time);
-
   if (m_scanType == DetectorScan) {
-    initMovingWorkspace(scan, start_time);
+    initMovingWorkspace(scan);
     fillMovingInstrumentScan(data, scan);
   } else {
-    initStaticWorkspace(start_time);
+    initStaticWorkspace();
     fillStaticInstrumentScan(data, scan, twoThetaValue);
   }
 
@@ -263,10 +260,8 @@ void LoadILLDiffraction::loadMetaData() {
 /**
  * Initializes the output workspace based on the resolved instrument, scan
  * points, and scan type
- *
- * @param start_time :: the date the run started, in ISO compliant format
  */
-void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
+void LoadILLDiffraction::initStaticWorkspace() {
   size_t nSpectra = m_numberDetectorsActual + NUMBER_MONITORS;
   size_t nBins = 1;
 
@@ -279,16 +274,15 @@ void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, nBins, nBins);
 
   // the start time is needed in the workspace when loading the parameter file
-  m_outWorkspace->mutableRun().addProperty("start_time", start_time);
+  m_outWorkspace->mutableRun().addProperty("start_time", m_startTime.toISO8601String());
 }
 
 /**
  * Use the ScanningWorkspaceBuilder to create a time indexed workspace.
  *
  * @param scan : scan data
- * @param start_time : start time in ISO format string
  */
-void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan, const std::string &start_time) {
+void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   const size_t nTimeIndexes = m_numberScanPoints;
   const size_t nBins = 1;
   const bool isPointData = true;
@@ -296,7 +290,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan, const std::st
   const auto instrumentWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   auto &run = instrumentWorkspace->mutableRun();
   // the start time is needed in the workspace when loading the parameter file
-  run.addProperty("start_time", start_time);
+  run.addProperty("start_time", m_startTime.toISO8601String());
 
   getInstrumentFilePath(m_instName);
   LoadHelper::loadEmptyInstrument(instrumentWorkspace, m_instName);

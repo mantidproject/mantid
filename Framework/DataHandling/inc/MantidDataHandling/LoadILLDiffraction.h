@@ -70,8 +70,8 @@ private:
   std::vector<double> getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                                       const std::string &propertyName) const;
 
-  void initStaticWorkspace(const std::string &start_time);
-  void initMovingWorkspace(const NeXus::NXDouble &scan, const std::string &start_time);
+  void initStaticWorkspace();
+  void initMovingWorkspace(const NeXus::NXDouble &scan);
 
   void loadDataScan();
   void loadMetaData();
