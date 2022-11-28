@@ -8,7 +8,7 @@
 from math import sqrt
 
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (ReductionDimensionality, RangeStepType)
+from sans.common.enums import (ReductionDimensionality)
 from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag)
 
 
@@ -109,7 +109,6 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
 
     # Extract relevant settings
     max_q_xy = state_convert_to_q.q_xy_max
-    log_binning = True if state_convert_to_q.q_xy_step_type is RangeStepType.LOG else False
     delta_q = state_convert_to_q.q_xy_step
     radius_cutoff = state_convert_to_q.radius_cutoff / 1000.  # Qxy expects the radius cutoff to be in mm
     wavelength_cutoff = state_convert_to_q.wavelength_cutoff
@@ -121,7 +120,7 @@ def _run_q_2d(workspace, output_summed_parts, state_convert_to_q,
                    "OutputWorkspace": EMPTY_NAME,
                    "MaxQxy": max_q_xy,
                    "DeltaQ": delta_q,
-                   "IQxQyLogBinning": log_binning,
+                   "IQxQyLogBinning": False,  # Log binning disabled for 2D reductions.
                    "AccountForGravity": use_gravity,
                    "RadiusCut": radius_cutoff,
                    "WaveCut": wavelength_cutoff,

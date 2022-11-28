@@ -238,8 +238,9 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         self.convert_to_q.q_xy_max = self.get_val(["2d_reduction", "stop"], binning_dict)
         self.convert_to_q.q_xy_step = self.get_val(["2d_reduction", "step"], binning_dict)
         two_d_step_type = self.get_val(["2d_reduction", "type"], binning_dict)
-        if two_d_step_type:
-            self.convert_to_q.q_xy_step_type = RangeStepType(two_d_step_type)
+        if two_d_step_type and two_d_step_type != RangeStepType.LIN.value:
+            raise ValueError(
+                f"{two_d_step_type} binning is not supported for 2D reductions. The type must be set to \"Lin\".")
 
         # We could previous interpolate. This is now obsolete, see the docs for details
         self.calculate_transmission.rebin_type = RebinType.REBIN
