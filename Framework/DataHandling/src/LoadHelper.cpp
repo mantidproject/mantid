@@ -453,7 +453,7 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
   loadInst->initialize();
   loadInst->setChild(true);
   loadInst->setPropertyValue("InstrumentName", instrumentName);
-  if (instrumentPath != "")
+  if (!instrumentPath.empty())
     loadInst->setPropertyValue("Filename", instrumentPath);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
