@@ -642,12 +642,8 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
 void LoadHelper::replaceZeroErrors(const API::MatrixWorkspace_sptr &ws, double zeroCountsError) {
   for (size_t spectrum_no = 0; spectrum_no < ws->getNumberHistograms(); ++spectrum_no) {
     auto &errorAxis = ws->mutableE(spectrum_no);
-    const auto dataAxis = ws->readY(spectrum_no);
-    for (size_t index = 0; index < errorAxis.size(); ++index) {
-      if (dataAxis[index] == 0) {
-        errorAxis[index] = zeroCountsError;
-      }
-    }
+    std::transform(errorAxis.begin(), errorAxis.end(), errorAxis.begin(),
+                   [zeroCountsError](const auto &error) { return error == 0 ? zeroCountsError : error; });
   }
 }
 
