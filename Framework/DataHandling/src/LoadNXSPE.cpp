@@ -139,6 +139,8 @@ void LoadNXSPE::exec() {
     file.openData("psi");
     file.getData(temporary);
     psi = temporary.at(0);
+    if (std::isnan(psi))
+      psi = 0.;
     file.closeData();
   }
 
