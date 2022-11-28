@@ -356,62 +356,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 } // recurseAndAddNexusFieldsToWsRun
 
 /**
- * Show attributes attached to the current Nexus entry
- *
- * @param nxfileID The Nexus entry
- *
- */
-void LoadHelper::dumpNexusAttributes(NXhandle nxfileID) {
-  // Attributes
-  NXname pName;
-  int iLength, iType;
-#ifndef NEXUS43
-  int rank;
-  int dims[4];
-#endif
-  std::vector<char> buff(128);
-
-#ifdef NEXUS43
-  while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
-#else
-  while (NXgetnextattra(nxfileID, pName, &rank, dims, &iType) != NX_EOD) {
-    if (rank > 1) { // mantid only supports single value attributes
-      throw std::runtime_error("Encountered attribute with multi-dimensional array value");
-    }
-    iLength = dims[0]; // to clarify things
-    if (iType != NX_CHAR && iLength != 1) {
-      throw std::runtime_error("Encountered attribute with array value");
-    }
-#endif
-
-    switch (iType) {
-    case NX_CHAR: {
-      if (iLength > static_cast<int>(buff.size())) {
-        buff.resize(iLength);
-      }
-      int nz = iLength + 1;
-      NXgetattr(nxfileID, pName, buff.data(), &nz, &iType);
-      break;
-    }
-    case NX_INT16: {
-      short int value;
-      NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      break;
-    }
-    case NX_INT32: {
-      int value;
-      NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      break;
-    }
-    case NX_UINT16: {
-      short unsigned int value;
-      NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      break;
-    }
-    } // switch
-  }   // while
-}
-/**
  * Parses the date as formatted at the ILL:
  * 29-Jun-12 11:27:26
  * and converts it to the ISO format used in Mantid:
