@@ -141,7 +141,7 @@ void LoadILLSANS::exec() {
     // we move the parent "detector" component, but since it is at (0,0,0), we
     // need to find the distance it has to move and move it to this position
     double finalDistance = firstEntry.getFloat(instrumentPath + "/Detector 1/det_calc");
-    V3D pos = getComponentPosition("detector_center");
+    V3D pos = LoadHelper::getComponentPosition(m_localWorkspace, "detector_center");
     double currentDistance = pos.Z();
 
     moveDetectorDistance(finalDistance - currentDistance, "detector");
@@ -776,7 +776,7 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
 void LoadILLSANS::moveDetectorDistance(double distance, const std::string &componentName) {
 
   auto mover = createChildAlgorithm("MoveInstrumentComponent");
-  V3D pos = getComponentPosition(componentName);
+  V3D pos = LoadHelper::getComponentPosition(m_localWorkspace, componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
 
@@ -839,7 +839,7 @@ void LoadILLSANS::placeD16(double angle, double distance, const std::string &com
  */
 void LoadILLSANS::moveDetectorHorizontal(double shift, const std::string &componentName) {
   auto mover = createChildAlgorithm("MoveInstrumentComponent");
-  V3D pos = getComponentPosition(componentName);
+  V3D pos = LoadHelper::getComponentPosition(m_localWorkspace, componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
   mover->setProperty("X", shift);
@@ -857,7 +857,7 @@ void LoadILLSANS::moveDetectorHorizontal(double shift, const std::string &compon
  */
 void LoadILLSANS::moveDetectorVertical(double shift, const std::string &componentName) {
   auto mover = createChildAlgorithm("MoveInstrumentComponent");
-  V3D pos = getComponentPosition(componentName);
+  V3D pos = LoadHelper::getComponentPosition(m_localWorkspace, componentName);
   mover->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
   mover->setProperty("ComponentName", componentName);
   mover->setProperty("X", pos.X());
@@ -866,17 +866,6 @@ void LoadILLSANS::moveDetectorVertical(double shift, const std::string &componen
   mover->setProperty("RelativePosition", false);
   mover->executeAsChildAlg();
   g_log.debug() << "Moving component '" << componentName << "' to Y = " << shift << '\n';
-}
-
-/**
- * Get position of a component
- * @param componentName : the name of the component
- * @return : V3D of the component position
- */
-V3D LoadILLSANS::getComponentPosition(const std::string &componentName) {
-  Geometry::Instrument_const_sptr instrument = m_localWorkspace->getInstrument();
-  Geometry::IComponent_const_sptr component = instrument->getComponentByName(componentName);
-  return component->getPos();
 }
 
 /**
