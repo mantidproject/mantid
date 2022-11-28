@@ -285,7 +285,7 @@ class ColorbarWidget(QWidget):
         Redraws the colobar and emits signal to cause the parent to redraw
         """
         self.colorbar.update_ticks()
-        self.colorbar.draw_all()
+        self.canvas.figure.draw_without_rendering()
         self.canvas.draw_idle()
         self.colorbarChanged.emit()
 
