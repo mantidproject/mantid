@@ -106,7 +106,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
                                 const Mantid::HistogramData::Points &points, Mantid::HistogramData::Histogram &output,
                                 const bool calculateErrors = false, const bool independentErrors = true) {
   auto xs = input.dataX();
-  // Error propagation follows method described in Gardner paper
+  // Interpolation and Error propagation follows method described in Gardner paper
   // "Uncertainties in Interpolated Spectral Data", Journal of Research of the
   // National Institute of Standards and Technology, 2003
   // create tridiagonal "h" matrix
@@ -171,8 +171,11 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
     }
   }
 
-  // plug the calculated second derivatives into the formula for each cubic
-  // polynomial y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
+  // Plug the calculated second derivatives into the formula for each cubic polynomial:
+  // y = A*y_i + B*y_i+1 + C*ypp_i + D*ypp_i+1
+  // Formula is from Gardner paper which references it from Numerical Recipes in C
+  // It is derived from Taylor expansion about x_i with term in yp_i expressed in terms of
+  // y_i, y_i+1, ypp_i, ypp_i+1
   auto &ynew = output.mutableY();
   for (size_t i = 0; i < points.size(); i++) {
     auto it = std::upper_bound(xs.begin(), xs.end(), points[i]);
