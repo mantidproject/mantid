@@ -960,7 +960,7 @@ using LU decomposition
 }
 
 template <typename T>
-void Matrix<T>::invertTridiagonal()
+void Matrix<T>::invertTridiagonal(double tolerance)
 /**
 Check it's a square tridiagonal matrix with all diagonal elements equal and if
 yes invert the matrix using analytic formula. If not then use standard Invert
@@ -974,7 +974,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
         for (size_t j = 1; i < numCols() && regular; i++) {
           size_t diff = std::abs(static_cast<int>(i - j));
           if (diff < 2) {
-            if (std::abs(diagonal[diff] - m_rawData[i][j]) > std::numeric_limits<double>::epsilon()) {
+            if (std::abs(diagonal[diff] - m_rawData[i][j]) > tolerance) {
               regular = false;
             }
           } else if (m_rawData[i][j] != 0) {

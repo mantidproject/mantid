@@ -124,6 +124,10 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
       }
     }
   }
+  double xsMaxEpsilon = *(std::max_element(xs.begin(), xs.end())) * std::numeric_limits<double>::epsilon();
+  // elements with i=j will have the largest value
+  double hMaxEpsilon = xsMaxEpsilon * 2 / 3;
+
   std::vector<double> d(xs.size() - 2);
   auto ys = input.dataY();
   for (size_t i = 0; i < xs.size() - 2; i++) {
@@ -134,7 +138,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
   std::vector<double> ypp(xs.size() - 2);
   // would be quicker to solve linear equation rather than invert h but also
   // need h-1 elements later on
-  h.invertTridiagonal();
+  h.invertTridiagonal(2 * hMaxEpsilon);
   ypp = h * d;
 
   // add in the zero second derivatives at extreme pts to give natural splines
