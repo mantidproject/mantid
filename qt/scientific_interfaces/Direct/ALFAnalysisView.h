@@ -76,7 +76,7 @@ public:
 
   void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
-  void removeFitSpectrum();
+  void removeFitSpectrum() override;
 
   void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
   Mantid::API::IPeakFunction_const_sptr getPeak() const override;
