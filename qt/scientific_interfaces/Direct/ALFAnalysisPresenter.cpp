@@ -11,6 +11,16 @@
 
 #include <exception>
 
+namespace {
+
+double constexpr EPSILON = std::numeric_limits<double>::epsilon();
+
+bool equalWithinTolerance(double const val1, double const val2, double const tolerance = 0.000001) {
+  return std::abs(val1 - val2) <= (tolerance + 2.0 * EPSILON);
+}
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model)
@@ -40,8 +50,11 @@ void ALFAnalysisPresenter::notifyPeakPickerChanged() {
 }
 
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
-  m_model->setPeakCentre(m_view->peakCentre());
-  updatePeakCentreInViewFromModel();
+  auto const newPeakCentre = m_view->peakCentre();
+  if (!equalWithinTolerance(m_model->peakCentre(), newPeakCentre)) {
+    m_model->setPeakCentre(newPeakCentre);
+    updatePeakCentreInViewFromModel();
+  }
 }
 
 void ALFAnalysisPresenter::notifyFitClicked() {

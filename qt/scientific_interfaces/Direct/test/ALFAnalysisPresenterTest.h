@@ -113,6 +113,7 @@ public:
 
   void test_notifyPeakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, peakCentre()).Times(1).WillOnce(Return(0.0));
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
 
     EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
@@ -123,6 +124,22 @@ public:
 
     EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
     EXPECT_CALL(*m_view, replot()).Times(1);
+
+    m_presenter->notifyPeakCentreEditingFinished();
+  }
+
+  void test_notifyPeakCentreEditingFinished_does_not_update_anything_if_the_peak_centre_remains_the_same() {
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, peakCentre()).Times(1).WillOnce(Return(m_peakCentre + 0.000000001));
+
+    // Assert not called as the peak centre remains the same
+    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(0);
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(0).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_)).Times(0);
+    EXPECT_CALL(*m_model, fitStatus()).Times(0).WillOnce(Return(""));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(0);
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
+    EXPECT_CALL(*m_view, replot()).Times(0);
 
     m_presenter->notifyPeakCentreEditingFinished();
   }
@@ -178,15 +195,6 @@ public:
     m_presenter->notifyUpdateEstimateClicked();
   }
 
-  void test_that_calculateEstimate_is_not_called_when_the_peak_centre_is_invalid() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
-    EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
-
-    m_presenter->notifyUpdateEstimateClicked();
-  }
-
   void test_that_calculateEstimate_is_called_as_expected() {
     expectCalculateEstimate();
     m_presenter->notifyUpdateEstimateClicked();
@@ -215,8 +223,7 @@ public:
 private:
   void expectCalculateEstimate() {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
-    EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
 
     EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
   }
