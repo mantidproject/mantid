@@ -8,10 +8,9 @@
 import unittest
 from unittest import mock
 import sys
-import os
-import pathlib
 
 from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import QDir
 
 from mantidqt.widgets.rawdataexplorer.view import PreviewView, RawDataExplorerView
 
@@ -315,10 +314,10 @@ class RawDataExplorerViewTest(unittest.TestCase):
 
     @mock.patch("mantidqt.widgets.rawdataexplorer.view.QFileDialog")
     def test_show_directory_manager(self, dialog):
-        self.view.fileTree.model().setRootPath(os.path.abspath(os.sep))
+        self.view.fileTree.model().setRootPath(QDir.rootPath())
         trigger_check = mock.Mock()
         self.view.file_tree_path_changed.connect(trigger_check)
-        path = os.path.abspath(os.sep)
+        path = str(QDir.rootPath())
         dialog().getExistingDirectory.return_value = path  # so qt accepts to send a signal
 
         self.view.show_directory_manager()
@@ -327,8 +326,9 @@ class RawDataExplorerViewTest(unittest.TestCase):
         # for some reason Qt returns the root path in posix format even on windows
         dialog().getExistingDirectory.assert_called_with(parent=self.view,
                                                          caption="Select a directory",
-                                                         directory=pathlib.PurePosixPath(os.path.abspath(os.sep)),
+                                                         directory=str(QDir.rootPath()),
                                                          options=dialog.DontUseNativeDialog | dialog.ShowDirsOnly)
+
         trigger_check.assert_called_with(path)
 
 
