@@ -471,8 +471,8 @@ void LoadHelper::loadEmptyInstrument(const API::MatrixWorkspace_sptr &ws, const 
  * @param detectorIDs Vector of detector IDs to override the default spectrum number, defaults to empty (IDs equal to
  * index)
  * @param acceptedDetectorIDs Set of accepted detector IDs, defaults to empty (all accepted)
- * @param axisOrder Tuple containing description of axis order of 3D Nexus data, defaults to 0,1,2 meaning
- * tube-pixel-channel order
+ * @param axisOrder Tuple containing information at which position in data one can find tubes, pixels, and channels
+ * (scans), defaults to 0,1,2 meaning default order of tube-pixel-channel
  */
 void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const Mantid::NeXus::NXInt &data,
                                      const std::vector<double> &xAxis, int initialSpectrum, bool pointData,
@@ -486,6 +486,9 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   const auto nPixels = dims[std::get<1>(axisOrder)];
   const auto nChannels = dims[std::get<2>(axisOrder)];
 
+  int loadOrder[3] = {0, 1, 2};
+  loadingOrder(axisOrder, loadOrder);
+
   HistogramData::Points histoPoints;
   HistogramData::BinEdges binEdges;
   if (pointData)
@@ -493,6 +496,7 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   else
     binEdges = HistogramData::BinEdges(xAxis);
   int nSkipped = 0;
+
   for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
     for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
       auto currentSpectrum = initialSpectrum + tube_no * nPixels + pixel_no;
@@ -505,10 +509,8 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
 
       std::vector<int> spectrum(nChannels);
       for (auto channel_no = 0; channel_no < nChannels; ++channel_no) {
-        if (std::get<0>(axisOrder) == 0) // default data shape with TOF axis as the third dimension
-          spectrum[channel_no] = data(tube_no, pixel_no, channel_no);
-        else // alternative data shape, with TOF/scan axis as the first dimension
-          spectrum[channel_no] = data(channel_no, tube_no, pixel_no);
+        const int dataIndices[3] = {tube_no, pixel_no, channel_no};
+        spectrum[channel_no] = data(dataIndices[loadOrder[0]], dataIndices[loadOrder[1]], dataIndices[loadOrder[2]]);
       }
       const HistogramData::Counts counts(spectrum.begin(), spectrum.end());
       const HistogramData::CountVariances countVariances(spectrum.begin(), spectrum.end());
@@ -523,6 +525,20 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
       ws->getSpectrum(currentSpectrum).setSpectrumNo(detectorID);
     }
   }
+}
+
+/**
+ * Handles non-standard loading order of the provided data, based on the provided data dimension order.
+ * @param dataOrder tuple containing where tubes, pixels, and channels (scans) can be found in data
+ * @param dataIndices pointer to the array containing data indices to be set
+ */
+void LoadHelper::loadingOrder(const std::tuple<short, short, short> &dataOrder, int *dataIndices) {
+  if (std::get<0>(dataOrder) != 0)
+    dataIndices[0] = std::get<1>(dataOrder) == 0 ? 1 : 2;
+  if (std::get<1>(dataOrder) != 1)
+    dataIndices[1] = std::get<0>(dataOrder) == 1 ? 0 : 2;
+  if (std::get<2>(dataOrder) != 2)
+    dataIndices[2] = std::get<1>(dataOrder) == 2 ? 1 : 0;
 }
 
 /**

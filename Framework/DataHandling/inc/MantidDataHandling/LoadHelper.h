@@ -48,6 +48,8 @@ void fillMovingWorkspace(const API::MatrixWorkspace_sptr &, const Mantid::NeXus:
                          const std::vector<int> &customID = std::vector<int>(),
                          const std::tuple<short, short, short> &axisOrder = std::tuple<short, short, short>(0, 1, 2));
 
+void loadingOrder(const std::tuple<short, short, short> &axisOrder, int *dataIndices);
+
 NeXus::NXInt getIntDataset(const NeXus::NXEntry &, const std::string &);
 NeXus::NXDouble getDoubleDataset(const NeXus::NXEntry &, const std::string &);
 
