@@ -177,7 +177,7 @@ class RawDataExplorerPresenter(QObject):
         """
         new_dir = self.view.repositoryPath.text()
         if os.path.isdir(new_dir):
-            self.set_working_directory(self.view.repositoryPath.text())
+            self.set_working_directory(new_dir)
         else:
             logger.warning("Not a valid path for a directory to set as root for the explorer.")
 
