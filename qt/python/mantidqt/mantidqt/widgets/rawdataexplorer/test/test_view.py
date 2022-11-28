@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 import sys
 import os
+import pathlib
 
 from qtpy.QtWidgets import QApplication
 
@@ -323,9 +324,10 @@ class RawDataExplorerViewTest(unittest.TestCase):
         self.view.show_directory_manager()
 
         # check that the options are the correct ones. Because QFileDialog has been overwritten, it is a bit strange
+        # for some reason Qt returns the root path in posix format even on windows
         dialog().getExistingDirectory.assert_called_with(parent=self.view,
                                                          caption="Select a directory",
-                                                         directory=os.path.abspath(os.sep),
+                                                         directory=pathlib.PurePosixPath(os.path.abspath(os.sep)),
                                                          options=dialog.DontUseNativeDialog | dialog.ShowDirsOnly)
         trigger_check.assert_called_with(path)
 
