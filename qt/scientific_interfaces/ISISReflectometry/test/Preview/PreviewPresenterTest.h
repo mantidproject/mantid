@@ -541,7 +541,7 @@ private:
                                                MockInstViewModel &mockInstViewModel, MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
-    auto detIDsStr = ProcessingInstructions{"2,3,4"};
+    auto detIDsStr = ProcessingInstructions{"2-4"};
     EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
