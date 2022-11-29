@@ -95,6 +95,24 @@ class GetFakeLiveInstrumentValuesInvalidNames(GetFakeLiveInstrumentValue):
 
 AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesInvalidNames)
 
+class GetFakeLiveInstrumentValuesWithZeroTheta(GetFakeLiveInstrumentValue):
+    """Fake algorithm that simulates the special case where the instrument is reporting theta as zero"""
+    def __init__(self):
+        super(GetFakeLiveInstrumentValuesWithZeroTheta, self).__init__()
+
+    def PyInit(self):
+        self._declare_properties()
+
+    def PyExec(self):
+        propertyName = self.getProperty('PropertyName').value
+        if propertyName == self._theta_name:
+            self.setProperty('Value', '0.0')
+        else:
+            self._do_execute()
+
+
+AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesWithZeroTheta)
+
 
 class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def setUp(self):
@@ -114,6 +132,13 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self._assert_delta(workspace.dataY(0)[4],  0.043630)
         self._assert_delta(workspace.dataY(0)[33], 0.000029)
         self._assert_delta(workspace.dataY(0)[53], 0.0)
+
+    def test_basic_reduction_history(self):
+        workspace = self._run_algorithm_with_defaults()
+        expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValue', 'GetFakeLiveInstrumentValue',
+                    'GetFakeLiveInstrumentValue', 'AddSampleLogMultiple', 'SetInstrumentParameter',
+                    'SetInstrumentParameter', 'ReflectometryISISLoadAndProcess']
+        self._check_history(workspace, expected)
 
     def test_missing_inputs(self):
         self.assertRaises(RuntimeError,
@@ -203,12 +228,21 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           Instrument='INTER',
                           GetLiveValueAlgorithm='GetFakeLiveInstrumentValueInvalidNames')
 
+    def test_reduction_works_if_theta_is_zero(self):
+        workspace = self._run_algorithm_with_zero_theta()
+        expected = ['CloneWorkspace', 'LoadInstrument', 'GetFakeLiveInstrumentValuesWithZeroTheta',
+                    'GetFakeLiveInstrumentValuesWithZeroTheta', 'GetFakeLiveInstrumentValuesWithZeroTheta',
+                    'AddSampleLogMultiple', 'SetInstrumentParameter', 'SetInstrumentParameter',
+                    'ReflectometryISISLoadAndProcess']
+        self._check_history(workspace, expected)
+
     def test_slits_gaps_are_set_up_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
         slit1vg = workspace.getInstrument().getComponentByName('slit1').getNumberParameter('vertical gap')
         slit2vg = workspace.getInstrument().getComponentByName('slit2').getNumberParameter('vertical gap')
         self.assertEqual(slit1vg[0], 1.001)
         self.assertEqual(slit2vg[0], 0.5)
+
 
     def _setup_environment(self):
         self._old_facility = config['default.facility']
@@ -265,8 +299,30 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         return mtd['output']
 
+    def _run_algorithm_with_zero_theta(self):
+        args = self._default_args
+        args['GetLiveValueAlgorithm'] = 'GetFakeLiveInstrumentValuesWithZeroTheta'
+        alg = create_algorithm('ReflectometryReductionOneLiveData', **args)
+        assertRaisesNothing(self, alg.execute)
+        return mtd['output']
+
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))
+
+    def _check_history(self, ws, expected, unroll = True):
+        """Return true if algorithm names listed in algorithmNames are found in the
+        workspace's history. If unroll is true, checks the child histories, otherwise
+        checks the top level history (the latter is required for sliced workspaces where
+        the child workspaces have lost their parent's history)
+        """
+        history = ws.getHistory()
+        if unroll:
+            reductionHistory = history.getAlgorithmHistory(history.size() - 1)
+            algHistories = reductionHistory.getChildHistories()
+            algNames = [alg.name() for alg in algHistories]
+        else:
+            algNames = [alg.name() for alg in history]
+        self.assertEqual(algNames, expected)
 
 
 if __name__ == '__main__':

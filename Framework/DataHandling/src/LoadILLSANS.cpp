@@ -319,10 +319,11 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, binning, 0);
-  if (!m_isD16Omega || data.dim0() == 1) { // second condition covers legacy D16 omega scans with single scan point
-    loadDataFromMonitors(firstEntry, nextIndex);
-  } else
+  if (m_instrumentName == "D16B" ||
+      (m_isD16Omega && data.dim0() > 1)) // second condition excludes legacy D16 omega scans with single scan point
     loadDataFromD16ScanMonitors(firstEntry, nextIndex, binning);
+  else
+    loadDataFromMonitors(firstEntry, nextIndex);
 
   if (data.dim1() == 128) {
     m_resMode = "low";
@@ -616,8 +617,8 @@ size_t LoadILLSANS::loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry
   const HistogramData::Counts counts(firstMonitorValuePos, firstMonitorValuePos + scannedVariables.dim1());
   m_localWorkspace->setCounts(firstIndex, counts);
 
-  if (m_instrumentName == "D16" && scannedVariables.dim1() == 1) {
-    // This is the old D16 data scan format. It is pain.
+  if ((m_instrumentName == "D16" || m_instrumentName == "D16B") && scannedVariables.dim1() == 1) {
+    // This is the old D16 data scan format, which also covers single-scan D16B data. It is pain.
     // Due to the fact it was verified with a data structure using binedges rather than points for the wavelength,
     // we have to keep that and not make it an histogram, because some algorithms later in the reduction process
     // handle errors completely differently in this case.
@@ -674,8 +675,8 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
   bool pointData = true;
   std::tuple<short, short, short> dimOrder;
   if (m_isD16Omega) {
-    dimOrder = std::tuple<short, short, short>{1, 2, 0};      // channels (scans) - tubes - pixels
-    if (m_instrumentName == "D16" && numberOfChannels == 1) { // D16 omega scan data
+    dimOrder = std::tuple<short, short, short>{1, 2, 0}; // channels (scans) - tubes - pixels
+    if ((m_instrumentName == "D16" || m_instrumentName == "D16B") && numberOfChannels == 1) { // D16 omega scan data
       pointData = false;
     } else { // D16B data
       pointData = true;

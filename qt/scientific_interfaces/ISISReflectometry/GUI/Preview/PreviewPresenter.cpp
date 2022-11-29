@@ -108,6 +108,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   if (hasLinearDetector(ws)) {
     m_view->resetInstView();
+    m_view->setInstViewToolbarEnabled(false);
     m_model->setSummedWs(ws);
     notifySumBanksCompleted();
   } else {
@@ -169,7 +170,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   notifyInstViewEditRequested();
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
-  auto detIDsStr = Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
+  auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
   m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
   // Execute summing the selected banks
   runSumBanks();
@@ -203,6 +204,12 @@ void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReduc
 void PreviewPresenter::notifyApplyRequested() {
   try {
     m_mainPresenter->notifyPreviewApplyRequested();
+  } catch (InvalidTableException const &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Please fix any errors in the Experiment Settings table and try again.";
+    g_log.error(msg.str());
   } catch (RowNotFoundException const &ex) {
     std::ostringstream msg;
     msg << "Could not update Experiment Settings: ";

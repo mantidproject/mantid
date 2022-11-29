@@ -58,7 +58,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
       m_overplotMDHisto1D(new QAction("Overplot 1D MDHistogram...", this)),
       m_plotMDHisto1DWithErrs(new QAction("Plot 1D MDHistogram with errors...", this)),
       m_overplotMDHisto1DWithErrs(new QAction("Overplot 1D MDHistogram with errors...", this)),
-      m_sampleMaterial(new QAction("Show Sample Material", this)), m_superplot(new QAction("Superplot...", this)),
+      m_sampleMaterial(new QAction("Show Sample Material", this)),
+      m_sampleShape(new QAction("Show Sample Shape", this)), m_superplot(new QAction("Superplot...", this)),
       m_superplotWithErrs(new QAction("Superplot with errors...", this)),
       m_superplotBins(new QAction("Superplot bins...", this)),
       m_superplotBinsWithErrs(new QAction("Superplot bins with errors...", this)) {
@@ -90,6 +91,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *par
   connect(m_plotWireframe, SIGNAL(triggered()), this, SLOT(onPlotWireframeClicked()));
   connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onPlotContourClicked()));
   connect(m_sampleMaterial, SIGNAL(triggered()), this, SLOT(onSampleMaterialClicked()));
+  connect(m_sampleShape, SIGNAL(triggered()), this, SLOT(onSampleShapeClicked()));
   connect(m_superplot, SIGNAL(triggered()), this, SLOT(onSuperplotClicked()));
   connect(m_superplotWithErrs, SIGNAL(triggered()), this, SLOT(onSuperplotWithErrsClicked()));
   connect(m_superplotBins, SIGNAL(triggered()), this, SLOT(onSuperplotBinsClicked()));
@@ -204,6 +206,8 @@ void WorkspaceTreeWidgetSimple::onSampleMaterialClicked() {
   emit sampleMaterialClicked(getSelectedWorkspaceNamesAsQList());
 }
 
+void WorkspaceTreeWidgetSimple::onSampleShapeClicked() { emit sampleShapeClicked(getSelectedWorkspaceNamesAsQList()); }
+
 void WorkspaceTreeWidgetSimple::onSuperplotClicked() { emit superplotClicked(getSelectedWorkspaceNamesAsQList()); }
 
 void WorkspaceTreeWidgetSimple::onSuperplotWithErrsClicked() {
@@ -261,6 +265,7 @@ void WorkspaceTreeWidgetSimple::addMatrixWorkspaceActions(QMenu *menu, const Man
   menu->addAction(m_showDetectors);
   if (m_tree->selectedItems().size() == 1) {
     menu->addAction(m_sampleMaterial);
+    menu->addAction(m_sampleShape);
   }
 }
 

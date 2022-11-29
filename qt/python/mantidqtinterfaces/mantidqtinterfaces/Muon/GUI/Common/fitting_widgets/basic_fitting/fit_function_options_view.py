@@ -160,7 +160,7 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Clears the fit status and chi squared label."""
         self.fit_status_success_failure.setText("No Fit")
         self.fit_status_success_failure.setStyleSheet("color: black")
-        self.fit_status_chi_squared.setText(f"Chi squared: 0.0")
+        self.fit_status_chi_squared.setText("Chi squared: 0.0")
 
     def set_datasets_in_function_browser(self, dataset_names: list) -> None:
         """Sets the datasets stored in the FunctionBrowser."""

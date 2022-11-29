@@ -1,0 +1,1 @@
+- remove the MuscatData, MuscatFunc and MuscatSofQW algorithms. The functionality provided by these algorithms is now provided by the :ref:`DiscusMultipleScatteringCorrection` algorithm

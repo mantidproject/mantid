@@ -69,6 +69,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Initialize the input and output properties of the algorithm."""
         self._reduction_properties = [] # cached list of properties copied from child alg
         self._declareRunProperties()
+        self._declarePreprocessProperties()
         self._declareSumBanksProperties()
         self._declareSlicingProperties()
         self._declareReductionProperties()
@@ -148,6 +149,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.RELOAD, True,
                              doc='If true, reload input workspaces if they are of the incorrect type')
         self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the TOF workspaces')
+
+    def _declarePreprocessProperties(self):
+        """Copy properties from the child preprocess algorithm"""
+        properties = ['CalibrationFile']
+        self.copyProperties('ReflectometryISISPreprocess', properties)
 
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
@@ -405,6 +411,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
         event_mode = not isTrans and self._slicingEnabled()
         args = {'InputRunList': [run], 'EventMode': event_mode}
+        calibration_filepath = self.getPropertyValue('CalibrationFile')
+        if calibration_filepath:
+            args['CalibrationFile'] = calibration_filepath
         alg = self.createChildAlgorithm('ReflectometryISISPreprocess', **args)
         alg.setRethrows(True)
         alg.execute()

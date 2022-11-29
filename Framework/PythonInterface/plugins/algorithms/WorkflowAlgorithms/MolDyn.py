@@ -208,8 +208,8 @@ class MolDyn(PythonAlgorithm):
 
         # Convolve the symmetrised sample with the resolution
         ConvolveWorkspaces(OutputWorkspace=function_ws_name,
-                           Workspace1=function_ws_name,
-                           Workspace2=resolution_ws)
+                           Workspace1=resolution_ws,
+                           Workspace2=function_ws_name)
 
     def _plot_spectra(self, ws_name):
         """

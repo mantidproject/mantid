@@ -62,6 +62,7 @@ def _pcolormesh_nonortho(axes, workspace, nonortho_tr, *args, **kwargs):
     X, Y = numpy.meshgrid(x, y)
     xx, yy = nonortho_tr(X, Y)
     _setLabels2D(axes, workspace, indices, transpose)
+    axes.grid(False)
     mesh = axes.pcolormesh(xx, yy, z, *args, **kwargs)
     return QuadMeshWrapper(mesh)
 

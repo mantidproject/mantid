@@ -133,6 +133,7 @@ public:
 
     expectRegionSelectorToolbarEnabled(*mockView, true);
 
+    EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
     presenter.notifyLoadWorkspaceCompleted();
   }
 
@@ -405,6 +406,19 @@ public:
     presenter.notifyApplyRequested();
   }
 
+  void test_notify_apply_requested_will_catch_InvalidTableException() {
+    auto mockView = makeView();
+    auto mainPresenter = MockBatchPresenter();
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.acceptMainPresenter(&mainPresenter);
+
+    EXPECT_CALL(mainPresenter, notifyPreviewApplyRequested())
+        .Times(1)
+        .WillRepeatedly(Throw(InvalidTableException("Error message")));
+
+    presenter.notifyApplyRequested();
+  }
+
   void test_region_selector_and_reduction_plot_is_cleared_on_a_sum_banks_algorithm_error() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -527,7 +541,7 @@ private:
                                                MockInstViewModel &mockInstViewModel, MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
-    auto detIDsStr = ProcessingInstructions{"2,3,4"};
+    auto detIDsStr = ProcessingInstructions{"2-4"};
     EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);

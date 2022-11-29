@@ -97,7 +97,7 @@ class ElementalAnalysisContext(object):
     def handle_calculation_error(self, error):
         self.calculation_finished_notifier.notify_subscribers()
         if self.error_notifier:
-            error_message = f"Unexpected error occurred during Rebin: " + str(error)
+            error_message = "Unexpected error occurred during Rebin: " + str(error)
             self.error_notifier.notify_subscribers(error_message)
 
     def _run_rebin(self, name, rebin_type, params):

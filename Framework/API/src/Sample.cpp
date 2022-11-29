@@ -91,6 +91,8 @@ const std::string &Sample::getName() const { return m_name; }
  */
 void Sample::setName(const std::string &name) { m_name = name; }
 
+bool Sample::hasShape() const { return (m_shape != nullptr); }
+
 /**
  * Get a reference to the sample shape object. It is assumed that this is defined
  * within

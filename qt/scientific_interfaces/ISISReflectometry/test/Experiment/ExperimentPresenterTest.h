@@ -725,6 +725,20 @@ public:
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), RowNotFoundException const &);
   }
 
+  void testNotifyPreviewApplyRequestedInvalidTable() {
+    // GIVEN an invalid table
+    OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
+    presenter.notifyLookupRowChanged(1, 1);
+
+    // WHEN we look for any row in the table
+    auto previewRow = PreviewRow({""});
+
+    // THEN an InvalidTableException is thrown.
+    TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), InvalidTableException const &);
+  }
+
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;

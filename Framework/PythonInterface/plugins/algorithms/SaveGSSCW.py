@@ -169,7 +169,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
         # check whether the workspace's 2theta has constant step
         delta_2theta_std = np.std(workspace.readX(0)[1:] - workspace.readX(0)[:-1])
         if delta_2theta_std > 1E-5:
-            raise RuntimeError(f'2theta steps are not constant')
+            raise RuntimeError('2theta steps are not constant')
 
         min_2theta_str = '%9s' % f'{min_2theta:6.3f}'
         delta_2theta_str = '%9s' % f'{delta_2theta:6.3f}'

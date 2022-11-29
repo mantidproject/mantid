@@ -291,7 +291,7 @@ class SANSdata:
         if len(tmp) != 0:
             self.comment.process_data(list(itertools.chain(*tmp)))
         else:
-            self.logs['warning'].append(f"Failed to find 'Comment *' sections.")
+            self.logs['warning'].append("Failed to find 'Comment *' sections.")
 
     def _check_data_size(self):
         for param in ('DataSizeY', 'DataSizeX'):
@@ -311,23 +311,23 @@ class SANSdata:
         """
         self._check_data_size()
         if (type(self.setup.collimation) is str) or (self.setup.collimation == 0.0):
-            self.logs['warning'].append(f"Collimation is not specified in the datafile.")
+            self.logs['warning'].append("Collimation is not specified in the datafile.")
 
         if (type(self.setup.l2) is str) or (self.setup.l2 == 0.0):
-            self.logs['warning'].append(f"SD - sample detector distance ('l2') is not specified in the datafile.")
+            self.logs['warning'].append("SD - sample detector distance ('l2') is not specified in the datafile.")
 
         if (type(self.setup.wavelength) is str) or (self.setup.wavelength == 0.0):
-            self.logs['warning'].append(f"Lambda (wavelength) is not specified in the datafile."
-                                        f" Wavelength is set to user's input.")
+            self.logs['warning'].append("Lambda (wavelength) is not specified in the datafile."
+                                        " Wavelength is set to user's input.")
 
         if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
-            self.logs['warning'].append(f"Sum of all counts is not specified in the datafile.")
+            self.logs['warning'].append("Sum of all counts is not specified in the datafile.")
 
         if (type(self.counter.duration) is str) or (self.counter.duration == 0.0):
-            self.logs['warning'].append(f"Duration of the measurement is not specified in the datafile.")
+            self.logs['warning'].append("Duration of the measurement is not specified in the datafile.")
 
         if (self.counter.monitor2 is None) or (self.counter.monitor2 == 0.0):
-            self.logs['warning'].append(f"Monitor2 is not specified in the datafile. Monitor2 is set to 'None'.")
+            self.logs['warning'].append("Monitor2 is not specified in the datafile. Monitor2 is set to 'None'.")
 
         if (self.counter.monitor1 is None) or (self.counter.monitor1 == 0.0):
-            self.logs['notice'].append(f"Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")
+            self.logs['notice'].append("Monitor1 is not specified in the datafile. Monitor1 is set to 'None'.")

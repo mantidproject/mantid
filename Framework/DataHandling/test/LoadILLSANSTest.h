@@ -595,6 +595,35 @@ public:
     checkWavelength(outputWS, 4.45);
   }
 
+  void test_D16B_single_scan() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "066350.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    // check loaded data contains expected values
+    TS_ASSERT_DELTA(outputWS->x(2 + 2 * 192)[0], 4.45 * 0.95, 1E-3) // +/- 5 % wavelength resolution
+    TS_ASSERT_DELTA(outputWS->x(2 + 2 * 192)[1], 4.45 * 1.05, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(2 + 4 * 192)[0], 3, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(2 + 4 * 192)[0], 1.732, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(104 + 12 * 192)[0], 4.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(104 + 12 * 192)[0], 2.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(184 + 1148 * 192)[0], 8.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(184 + 1148 * 192)[0], 2.828, 1E-3)
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 72.0);
+    checkWavelength(outputWS, 4.45);
+  }
+
   void test_D33_MONO() {
     LoadILLSANS alg;
     alg.setChild(true);
