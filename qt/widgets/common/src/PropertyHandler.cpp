@@ -471,10 +471,15 @@ void PropertyHandler::renameChildren() const {
   // update tie properties, as the parameter names may change
   QMap<QString, QtProperty *>::const_iterator it = m_ties.begin();
   for (; it != m_ties.end(); ++it) {
+    QString parName = it.key();
     QtProperty *prop = it.value();
-    Mantid::API::ParameterTie *tie = m_fun->getTie(m_fun->parameterIndex(it.key().toStdString()));
-    if (!tie)
+    Mantid::API::ParameterTie *tie = m_fun->getTie(m_fun->parameterIndex(parName.toStdString()));
+    if (!tie) {
+      // remove gui tie
+      QtProperty *parProp = getParameterProperty(parName);
+      parProp->removeSubProperty(prop);
       continue;
+    }
     QStringList qtie = QString::fromStdString(tie->asString()).split("=");
     if (qtie.size() < 2)
       continue;
