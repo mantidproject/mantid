@@ -89,17 +89,18 @@ class RawDataExplorerModel(QObject):
     """
     _previews = None
 
-    def __init__(self, presenter: "RawDataExplorerPresenter"):
+    def __init__(self, presenter: "RawDataExplorerPresenter", memory_manager: MemoryManager = None):
         """
-        Initialise the model
+        Initialise the model.
         @param presenter: The presenter controlling this model
+        @param memory_manager: Optional - only used for test purposes
         """
         super().__init__()
         self.presenter: "RawDataExplorerPresenter" = presenter
 
         self._previews: list = list()
 
-        self.memory_manager: MemoryManager = MemoryManager(self)
+        self.memory_manager = MemoryManager(self) if memory_manager is None else memory_manager
 
     def modify_preview(self, filename: str):
         """
@@ -247,10 +248,11 @@ class RawDataExplorerModel(QObject):
         @return the predicted acquisition type
         """
         if workspace.blocksize() > 1:
-            if workspace.getAxis(0).getUnit().unitID() == 'Empty':
+            unit = workspace.getAxis(0).getUnit().unitID()
+            if unit == 'Empty':
                 # SCAN case
                 return AcquisitionType.SCAN
-            elif workspace.getAxis(0).getUnit().unitID() in ['TOF', 'Label']:
+            elif unit in ['TOF', 'Label']:
                 # TOF case
                 return AcquisitionType.TOF
             else:

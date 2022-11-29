@@ -98,7 +98,7 @@ class PreviewFinder:
             # default to 1D plot
             return PreviewType.PLOT1D
         else:
-            # default to instrument view and hope for the best
+            # default to instrument view and hope for the best. It is the most likely to be able to handle unknown data
             return PreviewType.IVIEW
 
     def need_acquisition_mode(self, instrument_name: str):
