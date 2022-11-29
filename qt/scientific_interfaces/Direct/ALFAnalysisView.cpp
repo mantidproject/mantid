@@ -22,7 +22,8 @@
 
 namespace {
 
-QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes";
+QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes. The two theta of a tube is taken to "
+                                  "be the two theta at which the Out of Plane angle is closest to zero.";
 
 std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
   QString color("black"), status("");
@@ -159,12 +160,17 @@ std::pair<double, double> ALFAnalysisView::getRange() const {
   return std::make_pair(m_start->text().toDouble(), m_end->text().toDouble());
 }
 
-void ALFAnalysisView::addSpectrum(std::string const &wsName) {
-  m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
+void ALFAnalysisView::addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_plot->clear();
+  if (workspace) {
+    m_plot->addSpectrum("Extracted Data", workspace, 0, Qt::black);
+  }
 }
 
-void ALFAnalysisView::addFitSpectrum(std::string const &wsName) {
-  m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
+void ALFAnalysisView::addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  if (workspace) {
+    m_plot->addSpectrum("Fitted Data", workspace, 1, Qt::red);
+  }
 }
 
 void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText(QString::number(centre)); }

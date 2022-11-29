@@ -8,7 +8,6 @@
 
 #include "ALFInstrumentModel.h"
 #include "DllConfig.h"
-#include "MantidGeometry/IDetector.h"
 
 #include <optional>
 #include <string>
@@ -37,12 +36,7 @@ public:
 
   virtual void loadRunNumber() = 0;
 
-  virtual void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
-  virtual void averageTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
-
-  virtual bool checkDataIsExtracted() const = 0;
-
-  virtual std::string extractedWsName() const = 0;
+  virtual void notifyShapeChanged() = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -57,12 +51,7 @@ public:
 
   void loadRunNumber() override;
 
-  void extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
-  void averageTube(Mantid::Geometry::IDetector_const_sptr detector) override;
-
-  bool checkDataIsExtracted() const override;
-
-  std::string extractedWsName() const override;
+  void notifyShapeChanged() override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);

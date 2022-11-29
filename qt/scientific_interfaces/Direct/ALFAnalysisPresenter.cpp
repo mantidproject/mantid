@@ -20,8 +20,10 @@ ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_p
 
 QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
 
-void ALFAnalysisPresenter::subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) {
-  m_instrumentPresenter = presenter;
+void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                                 std::vector<double> const &twoThetas) {
+  m_model->setExtractedWorkspace(workspace, twoThetas);
+  updateViewFromModel();
 }
 
 void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
@@ -35,20 +37,19 @@ void ALFAnalysisPresenter::notifyFitClicked() {
     return;
   }
 
-  auto const extractedWsName = m_instrumentPresenter->extractedWsName();
   try {
-    m_model->doFit(extractedWsName, m_view->getRange());
-  } catch (...) {
-    m_view->displayWarning("Fit failed");
+    auto const fitWorkspace = m_model->doFit(m_view->getRange());
+    m_view->addFitSpectrum(fitWorkspace);
+  } catch (std::exception const &ex) {
+    m_view->displayWarning(ex.what());
   }
   updatePeakCentreInViewFromModel();
-  m_view->addFitSpectrum(extractedWsName + "_fits_Workspace");
 }
 
 void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
   auto const validationMessage = validateFitValues();
   if (!validationMessage) {
-    m_model->calculateEstimate(m_instrumentPresenter->extractedWsName(), m_view->getRange());
+    m_model->calculateEstimate(m_view->getRange());
     updatePeakCentreInViewFromModel();
   } else {
     m_view->displayWarning(*validationMessage);
@@ -56,31 +57,18 @@ void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
 }
 
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
-  if (!m_instrumentPresenter->checkDataIsExtracted())
+  if (!m_model->isDataExtracted())
     return "Need to have extracted data to do a fit or estimate.";
   if (!checkPeakCentreIsWithinFitRange())
     return "The Peak Centre provided is outside the fit range.";
   return std::nullopt;
 }
 
-void ALFAnalysisPresenter::notifyTubeExtracted(double const twoTheta) {
-  m_model->clearTwoThetas();
-  m_model->addTwoTheta(twoTheta);
-  m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
-}
-
-void ALFAnalysisPresenter::notifyTubeAveraged(double const twoTheta) {
-  m_model->addTwoTheta(twoTheta);
-  m_view->addSpectrum(m_instrumentPresenter->extractedWsName());
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
-}
-
 std::size_t ALFAnalysisPresenter::numberOfTubes() const { return m_model->numberOfTubes(); }
 
-void ALFAnalysisPresenter::clearTwoThetas() {
-  m_model->clearTwoThetas();
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
+void ALFAnalysisPresenter::clear() {
+  m_model->clear();
+  updateViewFromModel();
 }
 
 bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
@@ -89,9 +77,21 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   return range.first < peakCentre && peakCentre < range.second;
 }
 
+void ALFAnalysisPresenter::updateViewFromModel() {
+  updatePlotInViewFromModel();
+  updatePeakCentreInViewFromModel();
+  updateTwoThetaInViewFromModel();
+}
+
+void ALFAnalysisPresenter::updatePlotInViewFromModel() { m_view->addSpectrum(m_model->extractedWorkspace()); }
+
 void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
   m_view->setPeakCentre(m_model->peakCentre());
   m_view->setPeakCentreStatus(m_model->fitStatus());
+}
+
+void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
 }
 
 } // namespace MantidQt::CustomInterfaces

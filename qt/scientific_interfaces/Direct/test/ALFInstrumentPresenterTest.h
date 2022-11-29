@@ -12,9 +12,11 @@
 #include "ALFAnalysisMocks.h"
 #include "ALFInstrumentMocks.h"
 #include "ALFInstrumentPresenter.h"
-#include "MockDetector.h"
+#include "MockInstrumentActor.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <memory>
@@ -25,12 +27,13 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using namespace MantidQt::MantidWidgets;
+using namespace Mantid::Geometry;
 
 namespace {
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-MATCHER(DetectorNotNull, "Check detector sptr is not null") { return arg != nullptr; }
+MATCHER(ComponentNotNull, "Check component is not null") { return bool(arg); }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
@@ -45,12 +48,12 @@ public:
   static void destroySuite(ALFInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_detector = std::make_shared<NiceMock<MockDetector>>();
-
     auto model = std::make_unique<NiceMock<MockALFInstrumentModel>>();
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFInstrumentView>>();
     m_presenter = std::make_unique<ALFInstrumentPresenter>(m_view.get(), std::move(model));
+
+    m_instrumentActor = std::make_unique<NiceMock<MockInstrumentActor>>();
 
     m_analysisPresenter = std::make_unique<NiceMock<MockALFAnalysisPresenter>>();
     m_presenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
@@ -93,7 +96,7 @@ public:
     EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(std::nullopt));
 
     // Expect no calls to these methods
-    EXPECT_CALL(*m_analysisPresenter, clearTwoThetas()).Times(0);
+    EXPECT_CALL(*m_analysisPresenter, clear()).Times(0);
     EXPECT_CALL(*m_model, loadAndTransform(_)).Times(0);
 
     m_presenter->loadRunNumber();
@@ -105,7 +108,7 @@ public:
     std::string const errorMessage("Loading of the data failed");
 
     EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
-    EXPECT_CALL(*m_analysisPresenter, clearTwoThetas()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
     EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(errorMessage));
     EXPECT_CALL(*m_view, warningBox(errorMessage)).Times(1);
 
@@ -120,7 +123,7 @@ public:
     std::string const filename("ALF82301");
 
     EXPECT_CALL(*m_view, getFile()).Times(1).WillOnce(Return(filename));
-    EXPECT_CALL(*m_analysisPresenter, clearTwoThetas()).Times(1);
+    EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
     EXPECT_CALL(*m_model, loadAndTransform(filename)).Times(1).WillOnce(Return(std::nullopt));
 
     // Expect no call to warningBox
@@ -132,68 +135,41 @@ public:
     m_presenter->loadRunNumber();
   }
 
-  void test_extractSingleTube_calls_the_expected_methods() {
-    std::string const extractedWsName("Extracted_ALF82301");
-    double const twoTheta(30.1);
+  void test_notifyShapeChanged_generates_an_angle_workspace_and_notifies_the_analysis_presenter() {
+    auto const componentInfo = createComponentInfoObject();
+    auto const detectors = std::vector<std::size_t>{2500u, 2501u, 2502u};
 
-    EXPECT_CALL(*m_model, extractSingleTube(DetectorNotNull())).Times(1).WillOnce(Return(twoTheta));
+    EXPECT_CALL(*m_view, componentInfo()).Times(1).WillOnce(ReturnRef(*componentInfo));
+    EXPECT_CALL(*m_view, getSelectedDetectors()).Times(1).WillOnce(Return(detectors));
+    EXPECT_CALL(*m_model, setSelectedDetectors(_, detectors)).Times(1);
 
-    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted(twoTheta)).Times(1);
-    EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(1);
+    MatrixWorkspace_sptr const expectedExtractedWorkspace = nullptr;
+    auto const expectedTwoTheta = std::vector<double>{1.1, 2.2};
+    std::tuple<MatrixWorkspace_sptr, std::vector<double>> const expectedReturn = {expectedExtractedWorkspace,
+                                                                                  expectedTwoTheta};
 
-    m_presenter->extractSingleTube(m_detector);
-  }
+    EXPECT_CALL(*m_view, getInstrumentActor()).Times(1).WillOnce(ReturnRef(*m_instrumentActor));
+    EXPECT_CALL(*m_model, generateOutOfPlaneAngleWorkspace(_)).Times(1).WillOnce(Return(expectedReturn));
 
-  void test_extractSingleTube_will_not_notify_analysis_presenter_if_two_theta_is_null() {
-    std::string const extractedWsName("Extracted_ALF82301");
+    EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(expectedExtractedWorkspace, expectedTwoTheta)).Times(1);
 
-    EXPECT_CALL(*m_model, extractSingleTube(DetectorNotNull())).Times(1).WillOnce(Return(std::nullopt));
-
-    // Expect no calls to analysis presenter
-    EXPECT_CALL(*m_analysisPresenter, notifyTubeExtracted(_)).Times(0);
-    EXPECT_CALL(*m_analysisPresenter, notifyUpdateEstimateClicked()).Times(0);
-
-    m_presenter->extractSingleTube(m_detector);
-  }
-
-  void test_averageTube_calls_the_expected_methods() {
-    std::string const extractedWsName("Extracted_ALF82301");
-    std::size_t const numberOfTubes(2u);
-    double const twoTheta(30.1);
-
-    EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(numberOfTubes));
-    EXPECT_CALL(*m_model, averageTube(DetectorNotNull(), numberOfTubes)).Times(1).WillOnce(Return(twoTheta));
-
-    EXPECT_CALL(*m_analysisPresenter, notifyTubeAveraged(twoTheta)).Times(1);
-
-    m_presenter->averageTube(m_detector);
-  }
-
-  void test_averageTube_will_not_notify_analysis_presenter_if_two_theta_is_null() {
-    std::string const extractedWsName("Extracted_ALF82301");
-    std::size_t const numberOfTubes(2u);
-
-    EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(numberOfTubes));
-    EXPECT_CALL(*m_model, averageTube(DetectorNotNull(), numberOfTubes)).Times(1).WillOnce(Return(std::nullopt));
-
-    // Expect no calls to analysis presenter
-    EXPECT_CALL(*m_analysisPresenter, notifyTubeAveraged(_)).Times(0);
-
-    m_presenter->averageTube(m_detector);
-  }
-
-  void test_checkDataIsExtracted_calls_the_checkDataIsExtracted_method_in_the_model() {
-    EXPECT_CALL(*m_analysisPresenter, numberOfTubes()).Times(1).WillOnce(Return(1u));
-    EXPECT_CALL(*m_model, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
-
-    m_presenter->checkDataIsExtracted();
+    m_presenter->notifyShapeChanged();
   }
 
 private:
-  std::shared_ptr<NiceMock<MockDetector>> m_detector;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> createComponentInfoObject() {
+    auto visitee = ComponentCreationHelper::createMinimalInstrument(V3D(0, 0, 0),   // Source position
+                                                                    V3D(10, 0, 0),  // Sample position
+                                                                    V3D(11, 0, 0)); // Detector position
+    InstrumentVisitor visitor(visitee);
+
+    // Return the ComponentInfo object
+    return InstrumentVisitor::makeWrappers(*visitee, nullptr).first;
+  }
 
   NiceMock<MockALFInstrumentModel> *m_model;
   std::unique_ptr<NiceMock<MockALFInstrumentView>> m_view;
   std::unique_ptr<ALFInstrumentPresenter> m_presenter;
+  std::unique_ptr<NiceMock<MockInstrumentActor>> m_instrumentActor;
   std::unique_ptr<NiceMock<MockALFAnalysisPresenter>> m_analysisPresenter;
 };

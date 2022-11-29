@@ -34,7 +34,7 @@ void ALFInstrumentPresenter::loadRunNumber() {
     return;
   }
 
-  m_analysisPresenter->clearTwoThetas();
+  m_analysisPresenter->clear();
   if (auto const message = loadAndTransform(*filepath)) {
     m_view->warningBox(*message);
   }
@@ -49,24 +49,11 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
   }
 }
 
-void ALFInstrumentPresenter::extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) {
-  if (auto const twoTheta = m_model->extractSingleTube(detector)) {
-    m_analysisPresenter->notifyTubeExtracted(*twoTheta);
-    m_analysisPresenter->notifyUpdateEstimateClicked();
-  }
-}
+void ALFInstrumentPresenter::notifyShapeChanged() {
+  m_model->setSelectedDetectors(m_view->componentInfo(), m_view->getSelectedDetectors());
 
-void ALFInstrumentPresenter::averageTube(Mantid::Geometry::IDetector_const_sptr detector) {
-  auto const numberOfTubes = m_analysisPresenter->numberOfTubes();
-  if (auto const twoTheta = m_model->averageTube(detector, numberOfTubes)) {
-    m_analysisPresenter->notifyTubeAveraged(*twoTheta);
-  }
+  auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
+  m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
 }
-
-bool ALFInstrumentPresenter::checkDataIsExtracted() const {
-  return m_analysisPresenter->numberOfTubes() > 0u && m_model->checkDataIsExtracted();
-}
-
-std::string ALFInstrumentPresenter::extractedWsName() const { return m_model->extractedWsName(); }
 
 } // namespace MantidQt::CustomInterfaces

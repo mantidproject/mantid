@@ -12,12 +12,14 @@
 #include "ALFAnalysisModel.h"
 #include "ALFAnalysisPresenter.h"
 #include "ALFAnalysisView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -28,18 +30,16 @@ class MockALFAnalysisPresenter : public IALFAnalysisPresenter {
 public:
   MOCK_METHOD0(getView, QWidget *());
 
-  MOCK_METHOD1(subscribeInstrumentPresenter, void(IALFInstrumentPresenter *presenter));
+  MOCK_METHOD2(setExtractedWorkspace,
+               void(Mantid::API::MatrixWorkspace_sptr const &workspace, std::vector<double> const &twoThetas));
 
   MOCK_METHOD0(notifyPeakCentreEditingFinished, void());
   MOCK_METHOD0(notifyFitClicked, void());
   MOCK_METHOD0(notifyUpdateEstimateClicked, void());
 
-  MOCK_METHOD1(notifyTubeExtracted, void(double const twoTheta));
-  MOCK_METHOD1(notifyTubeAveraged, void(double const twoTheta));
-
   MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
 
-  MOCK_METHOD0(clearTwoThetas, void());
+  MOCK_METHOD0(clear, void());
 };
 
 class MockALFAnalysisView : public IALFAnalysisView {
@@ -50,8 +50,8 @@ public:
 
   MOCK_CONST_METHOD0(getRange, std::pair<double, double>());
 
-  MOCK_METHOD1(addSpectrum, void(std::string const &name));
-  MOCK_METHOD1(addFitSpectrum, void(std::string const &name));
+  MOCK_METHOD1(addSpectrum, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
+  MOCK_METHOD1(addFitSpectrum, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
 
   MOCK_METHOD1(setPeakCentre, void(double const centre));
   MOCK_CONST_METHOD0(peakCentre, double());
@@ -65,8 +65,15 @@ public:
 
 class MockALFAnalysisModel : public IALFAnalysisModel {
 public:
-  MOCK_METHOD2(doFit, void(std::string const &wsName, std::pair<double, double> const &range));
-  MOCK_METHOD2(calculateEstimate, void(std::string const &workspaceName, std::pair<double, double> const &range));
+  MOCK_METHOD0(clear, void());
+
+  MOCK_METHOD2(setExtractedWorkspace,
+               void(Mantid::API::MatrixWorkspace_sptr const &workspace, std::vector<double> const &twoThetas));
+  MOCK_CONST_METHOD0(extractedWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD0(isDataExtracted, bool());
+
+  MOCK_METHOD1(doFit, Mantid::API::MatrixWorkspace_sptr(std::pair<double, double> const &range));
+  MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
 
   MOCK_METHOD1(setPeakCentre, void(double const centre));
   MOCK_CONST_METHOD0(peakCentre, double());
@@ -75,8 +82,6 @@ public:
 
   MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
 
-  MOCK_METHOD0(clearTwoThetas, void());
-  MOCK_METHOD1(addTwoTheta, void(double const twoTheta));
   MOCK_CONST_METHOD0(averageTwoTheta, std::optional<double>());
   MOCK_CONST_METHOD0(allTwoThetas, std::vector<double>());
 };

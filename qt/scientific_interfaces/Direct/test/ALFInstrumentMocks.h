@@ -12,19 +12,24 @@
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentPresenter.h"
 #include "ALFInstrumentView.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <QWidget>
 
 #include <optional>
 #include <string>
+#include <tuple>
+
+namespace Mantid::Geometry {
+class ComponentInfo;
+}
 
 namespace MantidQt {
 
 namespace MantidWidgets {
+class IInstrumentActor;
 class InstrumentWidget;
-class PlotFitAnalysisPanePresenter;
 } // namespace MantidWidgets
 
 namespace CustomInterfaces {
@@ -43,6 +48,11 @@ public:
   MOCK_METHOD0(getFile, std::optional<std::string>());
   MOCK_METHOD1(setRunQuietly, void(std::string const &runNumber));
 
+  MOCK_CONST_METHOD0(getInstrumentActor, MantidWidgets::IInstrumentActor const &());
+  MOCK_CONST_METHOD0(componentInfo, Mantid::Geometry::ComponentInfo const &());
+
+  MOCK_CONST_METHOD0(getSelectedDetectors, std::vector<std::size_t>());
+
   MOCK_METHOD1(warningBox, void(std::string const &message));
 };
 
@@ -50,16 +60,16 @@ class MockALFInstrumentModel : public IALFInstrumentModel {
 public:
   MOCK_METHOD1(loadAndTransform, std::optional<std::string>(std::string const &filename));
 
-  MOCK_CONST_METHOD0(instrumentName, std::string());
   MOCK_CONST_METHOD0(loadedWsName, std::string());
-  MOCK_CONST_METHOD0(extractedWsName, std::string());
   MOCK_CONST_METHOD0(runNumber, std::size_t());
 
-  MOCK_METHOD1(extractSingleTube, std::optional<double>(Mantid::Geometry::IDetector_const_sptr detector));
-  MOCK_METHOD2(averageTube,
-               std::optional<double>(Mantid::Geometry::IDetector_const_sptr detector, std::size_t const numberOfTubes));
+  MOCK_METHOD2(setSelectedDetectors, void(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                          std::vector<std::size_t> const &detectorIndices));
+  MOCK_CONST_METHOD0(selectedDetectors, std::vector<std::size_t>());
 
-  MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
+  MOCK_CONST_METHOD1(generateOutOfPlaneAngleWorkspace,
+                     std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>(
+                         MantidQt::MantidWidgets::IInstrumentActor const &actor));
 };
 
 class MockALFInstrumentPresenter : public IALFInstrumentPresenter {
@@ -71,12 +81,7 @@ public:
 
   MOCK_METHOD0(loadRunNumber, void());
 
-  MOCK_METHOD1(extractSingleTube, void(Mantid::Geometry::IDetector_const_sptr detector));
-  MOCK_METHOD1(averageTube, void(Mantid::Geometry::IDetector_const_sptr detector));
-
-  MOCK_CONST_METHOD0(checkDataIsExtracted, bool());
-
-  MOCK_CONST_METHOD0(extractedWsName, std::string());
+  MOCK_METHOD0(notifyShapeChanged, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

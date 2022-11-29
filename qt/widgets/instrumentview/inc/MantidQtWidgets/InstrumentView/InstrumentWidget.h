@@ -198,6 +198,8 @@ public:
   /// Whether the side tab is currently visible or is folded
   bool isTabFolded() const;
 
+  IInstrumentDisplay *getInstrumentDisplay() const { return m_instrumentDisplay.get(); };
+
 signals:
   void enableLighting(bool /*_t1*/);
   void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);

@@ -8,6 +8,7 @@
 
 #include "ALFAnalysisModel.h"
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QWidget>
 
@@ -28,18 +29,16 @@ public:
 
   virtual QWidget *getView() = 0;
 
-  virtual void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) = 0;
+  virtual void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                     std::vector<double> const &twoThetas) = 0;
 
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
   virtual void notifyUpdateEstimateClicked() = 0;
 
-  virtual void notifyTubeExtracted(double const twoTheta) = 0;
-  virtual void notifyTubeAveraged(double const twoTheta) = 0;
-
   virtual std::size_t numberOfTubes() const = 0;
 
-  virtual void clearTwoThetas() = 0;
+  virtual void clear() = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresenter {
@@ -48,25 +47,25 @@ public:
   explicit ALFAnalysisPresenter(IALFAnalysisView *m_view, std::unique_ptr<IALFAnalysisModel> m_model);
   QWidget *getView() override;
 
-  void subscribeInstrumentPresenter(IALFInstrumentPresenter *presenter) override;
+  void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                             std::vector<double> const &twoThetas) override;
 
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
   void notifyUpdateEstimateClicked() override;
 
-  void notifyTubeExtracted(double const twoTheta) override;
-  void notifyTubeAveraged(double const twoTheta) override;
-
   std::size_t numberOfTubes() const override;
 
-  void clearTwoThetas() override;
+  void clear() override;
 
 private:
   std::optional<std::string> validateFitValues() const;
   bool checkPeakCentreIsWithinFitRange() const;
-  void updatePeakCentreInViewFromModel();
 
-  IALFInstrumentPresenter *m_instrumentPresenter;
+  void updateViewFromModel();
+  void updatePlotInViewFromModel();
+  void updatePeakCentreInViewFromModel();
+  void updateTwoThetaInViewFromModel();
 
   IALFAnalysisView *m_view;
   std::unique_ptr<IALFAnalysisModel> m_model;

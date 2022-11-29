@@ -8,14 +8,16 @@
 
 #include "DllConfig.h"
 
+#include "MantidKernel/V3D.h"
+
 #include <optional>
 #include <string>
 
-#include <QAction>
-#include <QPushButton>
-#include <QSplitter>
-#include <QString>
 #include <QWidget>
+
+namespace Mantid::Geometry {
+class ComponentInfo;
+}
 
 namespace MantidQt {
 
@@ -24,8 +26,9 @@ class FileFinderWidget;
 }
 
 namespace MantidWidgets {
+class IInstrumentActor;
 class InstrumentWidget;
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -43,6 +46,11 @@ public:
 
   virtual std::optional<std::string> getFile() = 0;
   virtual void setRunQuietly(std::string const &runNumber) = 0;
+
+  virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
+  virtual Mantid::Geometry::ComponentInfo const &componentInfo() const = 0;
+
+  virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -63,19 +71,21 @@ public:
   std::optional<std::string> getFile() override;
   void setRunQuietly(std::string const &runNumber) override;
 
+  MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
+  Mantid::Geometry::ComponentInfo const &componentInfo() const override;
+
+  std::vector<std::size_t> getSelectedDetectors() const override;
+
   void warningBox(std::string const &message) override;
 
 private slots:
   void fileLoaded();
+  void notifyShapeChanged();
   void selectWholeTube();
-  void extractSingleTube();
-  void averageTube();
 
 private:
   API::FileFinderWidget *m_files;
   MantidWidgets::InstrumentWidget *m_instrumentWidget;
-  QAction *m_extractAction;
-  QAction *m_averageAction;
 
   IALFInstrumentPresenter *m_presenter;
 };

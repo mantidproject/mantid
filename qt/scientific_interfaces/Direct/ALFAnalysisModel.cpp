@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -88,28 +87,47 @@ CompositeFunction_sptr createCompositeFunction(IFunction_sptr const &flatBackgro
 namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisModel::ALFAnalysisModel()
-    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas() {}
+    : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas(),
+      m_extractedWorkspace() {}
 
-void ALFAnalysisModel::doFit(std::string const &wsName, std::pair<double, double> const &range) {
+void ALFAnalysisModel::clear() {
+  m_extractedWorkspace = nullptr;
+  m_fitStatus = "";
+  m_twoThetas.clear();
+}
+
+void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
+                                             std::vector<double> const &twoThetas) {
+  m_extractedWorkspace = workspace;
+  m_twoThetas = twoThetas;
+  m_fitStatus = "";
+}
+
+Mantid::API::MatrixWorkspace_sptr ALFAnalysisModel::extractedWorkspace() const { return m_extractedWorkspace; }
+
+bool ALFAnalysisModel::isDataExtracted() const { return m_extractedWorkspace != nullptr; }
+
+MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &range) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("Function", m_function);
-  alg->setProperty("InputWorkspace", wsName);
-  alg->setProperty("Output", wsName + "_fits");
+  alg->setProperty("InputWorkspace", m_extractedWorkspace);
+  alg->setProperty("CreateOutput", true);
   alg->setProperty("StartX", range.first);
   alg->setProperty("EndX", range.second);
   alg->execute();
+
   m_function = alg->getProperty("Function");
   m_fitStatus = alg->getPropertyValue("OutputStatus");
+
+  return alg->getProperty("OutputWorkspace");
 }
 
-void ALFAnalysisModel::calculateEstimate(std::string const &workspaceName, std::pair<double, double> const &range) {
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName)) {
-    auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
-
-    m_function = calculateEstimate(workspace, range);
+void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range) {
+  if (m_extractedWorkspace) {
+    m_function = calculateEstimate(m_extractedWorkspace, range);
   } else {
     m_function = createCompositeFunction(createFlatBackground(), createGaussian());
   }
@@ -141,10 +159,6 @@ double ALFAnalysisModel::peakCentre() const { return m_function->getParameter("f
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }
 
 std::size_t ALFAnalysisModel::numberOfTubes() const { return m_twoThetas.size(); }
-
-void ALFAnalysisModel::clearTwoThetas() { m_twoThetas.clear(); }
-
-void ALFAnalysisModel::addTwoTheta(double const twoTheta) { m_twoThetas.emplace_back(twoTheta); }
 
 std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
   if (m_twoThetas.empty()) {

@@ -10,10 +10,23 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
 
+#include <map>
 #include <optional>
 #include <string>
+#include <tuple>
+#include <vector>
+
+namespace Mantid::Geometry {
+class ComponentInfo;
+class DetectorInfo;
+} // namespace Mantid::Geometry
 
 namespace MantidQt {
+
+namespace MantidWidgets {
+class IInstrumentActor;
+}
+
 namespace CustomInterfaces {
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentModel {
@@ -23,16 +36,15 @@ public:
 
   virtual std::optional<std::string> loadAndTransform(std::string const &filename) = 0;
 
-  virtual std::string instrumentName() const = 0;
   virtual std::string loadedWsName() const = 0;
-  virtual std::string extractedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
-  virtual std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) = 0;
-  virtual std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
-                                            std::size_t const numberOfTubes) = 0;
+  virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                    std::vector<std::size_t> const &detectorIndices) = 0;
+  virtual std::vector<std::size_t> selectedDetectors() const = 0;
 
-  virtual bool checkDataIsExtracted() const = 0;
+  virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentModel final : public IALFInstrumentModel {
@@ -42,19 +54,28 @@ public:
 
   std::optional<std::string> loadAndTransform(const std::string &filename) override;
 
-  inline std::string instrumentName() const noexcept override { return "ALF"; }
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
-  std::string extractedWsName() const override;
   std::size_t runNumber() const override;
 
-  std::optional<double> extractSingleTube(Mantid::Geometry::IDetector_const_sptr detector) override;
-  std::optional<double> averageTube(Mantid::Geometry::IDetector_const_sptr detector,
-                                    std::size_t const numberOfTubes) override;
+  void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
+                            std::vector<std::size_t> const &detectorIndices) override;
+  inline std::vector<std::size_t> selectedDetectors() const noexcept override { return m_detectorIndices; };
 
-  bool checkDataIsExtracted() const override;
+  std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
+  generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
 private:
-  Mantid::API::MatrixWorkspace_sptr retrieveSingleTube();
+  void collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor, std::vector<double> &x,
+                        std::vector<double> &y, std::vector<double> &e, std::vector<double> &twoThetas) const;
+  void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe, std::vector<double> &twoThetas,
+                          MantidQt::MantidWidgets::IInstrumentActor const &actor,
+                          Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+                          Mantid::Geometry::ComponentInfo const &componentInfo,
+                          Mantid::Geometry::DetectorInfo const &detectorInfo) const;
+  std::size_t numberOfDetectorsPerTube(Mantid::Geometry::ComponentInfo const &componentInfo) const;
+  std::size_t numberOfTubes(MantidQt::MantidWidgets::IInstrumentActor const &actor) const;
+
+  std::vector<std::size_t> m_detectorIndices;
 };
 
 } // namespace CustomInterfaces

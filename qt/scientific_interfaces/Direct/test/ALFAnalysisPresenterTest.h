@@ -11,7 +11,6 @@
 
 #include "ALFAnalysisMocks.h"
 #include "ALFAnalysisPresenter.h"
-#include "ALFInstrumentMocks.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -50,9 +49,6 @@ public:
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFAnalysisView>>();
     m_presenter = std::make_unique<ALFAnalysisPresenter>(m_view.get(), std::move(model));
-    m_instrumentPresenter = std::make_unique<NiceMock<MockALFInstrumentPresenter>>();
-
-    m_presenter->subscribeInstrumentPresenter(m_instrumentPresenter.get());
 
     m_view->setPeakCentre(m_peakCentre);
     m_model->setPeakCentre(m_peakCentre);
@@ -63,12 +59,26 @@ public:
 
     m_presenter.reset();
     m_view.reset();
-    m_instrumentPresenter.reset();
   }
 
   void test_getView_will_get_the_view() {
     EXPECT_CALL(*m_view, getView()).Times(1).WillOnce(Return(nullptr));
     TS_ASSERT_EQUALS(nullptr, m_presenter->getView());
+  }
+
+  void test_setExtractedWorkspace_will_set_the_workspace_and_thetas_in_the_model_and_update_the_view() {
+    auto const twoThetas = std::vector<double>{1.1, 2.2};
+
+    EXPECT_CALL(*m_model, setExtractedWorkspace(_, twoThetas)).Times(1);
+
+    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
+
+    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
+    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
+    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+
+    m_presenter->setExtractedWorkspace(nullptr, twoThetas);
   }
 
   void test_notifyPeakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
@@ -81,20 +91,15 @@ public:
     m_presenter->notifyPeakCentreEditingFinished();
   }
 
-  void test_notifyFitClicked_will_display_a_warning_when_the_workspace_name_is_not_set() {
-    EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(false));
+  void test_notifyFitClicked_will_display_a_warning_when_data_is_not_extracted() {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
 
     m_presenter->notifyFitClicked();
   }
 
   void test_notifyFitClicked_will_display_a_warning_when_the_peak_centre_is_outside_the_fit_range() {
-    // set name via addSpectrum
-    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
-
-    EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
     EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
@@ -102,60 +107,25 @@ public:
     m_presenter->notifyFitClicked();
   }
 
-  void test_notifyFitClicked_will_perform_a_fit_when_the_workspace_name_and_peak_centre_is_valid() {
-    // set name via addSpectrum
-    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(2).WillRepeatedly(Return(m_workspaceName));
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
-
-    EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
+  void test_notifyFitClicked_will_perform_a_fit_when_the_workspace_and_peak_centre_is_valid() {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
 
-    EXPECT_CALL(*m_model, doFit(m_workspaceName, m_range)).Times(1);
+    EXPECT_CALL(*m_model, doFit(m_range)).Times(1);
 
     m_presenter->notifyFitClicked();
   }
 
-  void test_notifyTubeExtracted_will_call_addSpectrum_in_the_view() {
-    EXPECT_CALL(*m_model, clearTwoThetas()).Times(1);
-    EXPECT_CALL(*m_model, addTwoTheta(m_allTwoTheta[0])).Times(1);
-
-    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
-    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
-    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
-
-    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
-  }
-
-  void test_notifyTubeAveraged_will_call_addSpectrum_in_the_view() {
-    EXPECT_CALL(*m_model, addTwoTheta(m_allTwoTheta[0])).Times(1);
-
-    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
-    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
-    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
-
-    m_presenter->notifyTubeAveraged(m_allTwoTheta[0]);
-  }
-
-  void test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
-    EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(false));
+  void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
 
     m_presenter->notifyUpdateEstimateClicked();
   }
 
   void test_that_calculateEstimate_is_not_called_when_the_peak_centre_is_invalid() {
-    // set name via addSpectrum
-    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(1).WillOnce(Return(m_workspaceName));
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
-
-    EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
     EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
@@ -164,27 +134,33 @@ public:
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
-    EXPECT_CALL(*m_instrumentPresenter, extractedWsName()).Times(2).WillRepeatedly(Return(m_workspaceName));
-    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
-    m_presenter->notifyTubeExtracted(m_allTwoTheta[0]);
-
-    EXPECT_CALL(*m_instrumentPresenter, checkDataIsExtracted()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
 
-    EXPECT_CALL(*m_model, calculateEstimate(m_workspaceName, m_range)).Times(1);
+    EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
 
     m_presenter->notifyUpdateEstimateClicked();
   }
 
-  void test_clearTwoThetas_will_clear_the_model_and_update_the_view() {
-    EXPECT_CALL(*m_model, clearTwoThetas()).Times(1);
+  void test_numberOfTubes_will_call_the_model_method() {
+    auto const nTubes(2u);
+    EXPECT_CALL(*m_model, numberOfTubes()).Times(1).WillOnce(Return(nTubes));
+
+    TS_ASSERT_EQUALS(nTubes, m_presenter->numberOfTubes());
+  }
+
+  void test_clear_will_clear_the_two_theta_in_the_model_and_update_the_view() {
+    EXPECT_CALL(*m_model, clear()).Times(1);
+
+    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
 
     EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
     EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
     EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
 
-    m_presenter->clearTwoThetas();
+    m_presenter->clear();
   }
 
 private:
@@ -197,5 +173,4 @@ private:
   NiceMock<MockALFAnalysisModel> *m_model;
   std::unique_ptr<NiceMock<MockALFAnalysisView>> m_view;
   std::unique_ptr<ALFAnalysisPresenter> m_presenter;
-  std::unique_ptr<NiceMock<MockALFInstrumentPresenter>> m_instrumentPresenter;
 };

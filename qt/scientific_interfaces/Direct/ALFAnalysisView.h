@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -39,8 +40,8 @@ public:
 
   virtual std::pair<double, double> getRange() const = 0;
 
-  virtual void addSpectrum(std::string const &wsName) = 0;
-  virtual void addFitSpectrum(std::string const &wsName) = 0;
+  virtual void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 
   virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
@@ -63,8 +64,8 @@ public:
 
   std::pair<double, double> getRange() const override;
 
-  void addSpectrum(std::string const &wsName) override;
-  void addFitSpectrum(std::string const &wsName) override;
+  void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
