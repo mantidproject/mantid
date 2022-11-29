@@ -72,11 +72,6 @@ void ALFAnalysisPresenter::notifyFitClicked() {
   updatePeakCentreInViewFromModel();
 }
 
-void ALFAnalysisPresenter::notifyUpdateEstimateClicked() {
-  calculateEstimate();
-  updatePeakCentreInViewFromModel();
-}
-
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
   if (!m_model->isDataExtracted())
     return "Need to have extracted data to do a fit or estimate.";

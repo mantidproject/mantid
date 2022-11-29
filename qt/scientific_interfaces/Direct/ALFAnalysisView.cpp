@@ -8,6 +8,7 @@
 #include "ALFAnalysisPresenter.h"
 
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Plotting/PeakPicker.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
@@ -66,6 +67,13 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
   auto layout = new QHBoxLayout(this);
   auto splitter = new QSplitter(Qt::Vertical);
 
+  splitter->addWidget(createPlotWidget());
+  splitter->addWidget(createFitWidget(start, end));
+
+  layout->addWidget(splitter);
+}
+
+QWidget *ALFAnalysisView::createPlotWidget() {
   m_plot = new MantidWidgets::PreviewPlot();
 
   // Set the preview plot background as transparent.
@@ -76,88 +84,64 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
   m_peakPicker->setVisible(false);
   connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
 
-  splitter->addWidget(m_plot);
-
-  splitter->addWidget(createFitPane(start, end));
-
-  layout->addWidget(splitter);
+  return m_plot;
 }
 
-QWidget *ALFAnalysisView::createFitPane(double const start, double const end) {
-  auto fitPane = new QWidget();
-  auto fitPaneLayout = new QVBoxLayout(fitPane);
+QWidget *ALFAnalysisView::createFitWidget(double const start, double const end) {
+  auto *analysisPane = new QWidget();
+  auto *analysisLayout = new QGridLayout(analysisPane);
 
-  auto fitRangeWidget = setupFitRangeWidget(start, end);
-  fitPaneLayout->addWidget(fitRangeWidget);
+  setupTwoThetaWidget(analysisLayout);
+  setupFitRangeWidget(analysisLayout, start, end);
+  setupPeakCentreWidget(analysisLayout, (start + end) / 2.0);
 
-  auto fitButtonsWidget = setupFitButtonsWidget();
-  fitPaneLayout->addWidget(fitButtonsWidget);
-
-  auto resultsWidget = setupResultsWidget((start + end) / 2.0);
-  fitPaneLayout->addWidget(resultsWidget);
-
-  return fitPane;
+  return analysisPane;
 }
 
-QWidget *ALFAnalysisView::setupFitRangeWidget(double const start, double const end) {
-  auto *rangeWidget = new QWidget();
-  auto *rangeLayout = new QHBoxLayout(rangeWidget);
+void ALFAnalysisView::setupTwoThetaWidget(QGridLayout *layout) {
+  m_averageTwoTheta = new QLineEdit("-");
+  m_averageTwoTheta->setReadOnly(true);
+  m_averageTwoTheta->setToolTip(TWO_THETA_TOOLTIP);
 
+  layout->addWidget(new QLabel("Two theta:"), 0, 0);
+  layout->addWidget(m_averageTwoTheta, 0, 1, 1, 3);
+  layout->addWidget(new QLabel("*placehold"), 0, 4);
+
+  // Add an empty label to act as empty space
+  layout->addWidget(new QLabel(""), 1, 4);
+}
+
+void ALFAnalysisView::setupFitRangeWidget(QGridLayout *layout, double const start, double const end) {
   m_start = new QLineEdit(QString::number(start));
   m_start->setValidator(new QDoubleValidator(m_start));
 
   m_end = new QLineEdit(QString::number(end));
   m_end->setValidator(new QDoubleValidator(m_end));
 
-  rangeLayout->addWidget(new QLabel("Fit from:"));
-  rangeLayout->addWidget(m_start);
-  rangeLayout->addWidget(new QLabel("to:"));
-  rangeLayout->addWidget(m_end);
-  return rangeWidget;
+  layout->addWidget(new QLabel("Fit from:"), 2, 0);
+  layout->addWidget(m_start, 2, 1);
+  layout->addWidget(new QLabel("to:"), 2, 2);
+  layout->addWidget(m_end, 2, 3);
 }
 
-QWidget *ALFAnalysisView::setupFitButtonsWidget() {
-  auto fitButtonsWidget = new QWidget();
-  auto fitButtonsLayout = new QHBoxLayout(fitButtonsWidget);
-
-  m_fitButton = new QPushButton("Fit");
-  m_updateEstimateButton = new QPushButton("Update Estimate");
-
-  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(notifyFitClicked()));
-  connect(m_updateEstimateButton, SIGNAL(clicked()), this, SLOT(notifyUpdateEstimateClicked()));
-
-  fitButtonsLayout->addWidget(m_fitButton);
-  fitButtonsLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
-  fitButtonsLayout->addWidget(m_updateEstimateButton);
-  return fitButtonsWidget;
-}
-
-QWidget *ALFAnalysisView::setupResultsWidget(double const centre) {
-  auto *resultsWidget = new QWidget();
-  auto *resultsLayout = new QGridLayout(resultsWidget);
-
+void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const centre) {
   m_peakCentre = new QLineEdit(QString::number(centre));
   m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
 
-  connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
+  m_fitButton = new QPushButton("Fit");
 
-  resultsLayout->addWidget(new QLabel("Peak Centre:"), 0, 0);
-  resultsLayout->addWidget(m_peakCentre, 0, 1);
+  connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
+  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(notifyFitClicked()));
+
+  layout->addWidget(new QLabel("Peak Centre:"), 3, 0);
+  layout->addWidget(m_peakCentre, 3, 1, 1, 3);
+  layout->addWidget(m_fitButton, 3, 4);
 
   m_fitStatus = new QLabel("");
   m_fitStatus->setAlignment(Qt::AlignRight);
   setPeakCentreStatus("");
 
-  resultsLayout->addWidget(m_fitStatus, 1, 0, 1, 2);
-
-  m_averageTwoTheta = new QLineEdit("-");
-  m_averageTwoTheta->setReadOnly(true);
-  m_averageTwoTheta->setToolTip(TWO_THETA_TOOLTIP);
-
-  resultsLayout->addWidget(new QLabel("Two theta:"), 2, 0);
-  resultsLayout->addWidget(m_averageTwoTheta, 2, 1);
-
-  return resultsWidget;
+  layout->addWidget(m_fitStatus, 4, 0, 1, 4);
 }
 
 void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }
@@ -165,8 +149,6 @@ void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerC
 void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
 
 void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
-
-void ALFAnalysisView::notifyUpdateEstimateClicked() { m_presenter->notifyUpdateEstimateClicked(); }
 
 void ALFAnalysisView::replot() { m_plot->replot(); }
 

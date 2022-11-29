@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
+#include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
 

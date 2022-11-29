@@ -188,18 +188,6 @@ public:
     m_presenter->notifyFitClicked();
   }
 
-  void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
-
-    m_presenter->notifyUpdateEstimateClicked();
-  }
-
-  void test_that_calculateEstimate_is_called_as_expected() {
-    expectCalculateEstimate();
-    m_presenter->notifyUpdateEstimateClicked();
-  }
-
   void test_numberOfTubes_will_call_the_model_method() {
     auto const nTubes(2u);
     EXPECT_CALL(*m_model, numberOfTubes()).Times(1).WillOnce(Return(nTubes));
