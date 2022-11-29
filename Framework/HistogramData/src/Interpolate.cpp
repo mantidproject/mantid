@@ -7,6 +7,7 @@
 
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 
 #include <memory>
@@ -22,6 +23,9 @@ enum class InterpolationType { LINEAR, CSPLINE };
 
 constexpr const char *LINEAR_NAME = "Linear";
 constexpr const char *CSPLINE_NAME = "CSpline";
+
+/// static logger
+Mantid::Kernel::Logger g_log("Interpolate");
 
 /**
  * Compute the number of pre-calculated points given the ysize and step size
@@ -241,7 +245,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
  */
 void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
                                const Mantid::HistogramData::Points &points, Mantid::HistogramData::Histogram &output,
-                               const bool calculateErrors = false, const bool independentErrors = true) {
+                               bool calculateErrors = false, const bool independentErrors = true) {
   const auto xold = input.points();
   const auto &yold = input.y();
   const auto &eold = input.e();
@@ -254,15 +258,20 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
   for (size_t i = 0; i < input.size() - 1; i++) {
     if (calculateErrors) {
       if (xold.size() < 3) {
-        throw std::runtime_error("Number of x points too small to calculate errors");
-      }
-      auto x0_secondDeriv = i < 1 ? 0 : i - 1;
-      auto x1_secondDeriv = x0_secondDeriv + 1 >= xold.size() ? xold.size() - 1 : x0_secondDeriv + 1;
-      auto x2_secondDeriv = x1_secondDeriv + 1;
+        g_log.warning("Number of x points too small to calculate errors");
+        calculateErrors = false;
+      } else {
 
-      auto firstDeriv01 = (yold[x1_secondDeriv] - yold[x0_secondDeriv]) / (xold[x1_secondDeriv] - xold[x0_secondDeriv]);
-      auto firstDeriv12 = (yold[x2_secondDeriv] - yold[x1_secondDeriv]) / (xold[x2_secondDeriv] - xold[x1_secondDeriv]);
-      secondDeriv[i] = (firstDeriv12 - firstDeriv01) / ((xold[x2_secondDeriv] - xold[x0_secondDeriv]) / 2);
+        auto x0_secondDeriv = i < 1 ? 0 : i - 1;
+        auto x1_secondDeriv = x0_secondDeriv + 1 >= xold.size() ? xold.size() - 1 : x0_secondDeriv + 1;
+        auto x2_secondDeriv = x1_secondDeriv + 1;
+
+        auto firstDeriv01 =
+            (yold[x1_secondDeriv] - yold[x0_secondDeriv]) / (xold[x1_secondDeriv] - xold[x0_secondDeriv]);
+        auto firstDeriv12 =
+            (yold[x2_secondDeriv] - yold[x1_secondDeriv]) / (xold[x2_secondDeriv] - xold[x1_secondDeriv]);
+        secondDeriv[i] = (firstDeriv12 - firstDeriv01) / ((xold[x2_secondDeriv] - xold[x0_secondDeriv]) / 2);
+      }
     }
   }
   for (size_t i = 0; i < nypts; ++i) {
