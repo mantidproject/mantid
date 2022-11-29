@@ -194,16 +194,16 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         if filtered_eve:
             ExtractMask(InputWorkspace=cal, OutputWorkspace="mask_shared", EnableLogging=False)
-            if cal is not None:
-                _ws_cal_resampled = self._resample_calibration(data[0], "mask_shared", xMin, xMax)
-            else:
+            if cal is None:
                 _ws_cal_resampled = None
+            else:
+                _ws_cal_resampled = self._resample_calibration(data[0], "mask_shared", xMin, xMax)
 
-            if bkg:
+            if bkg is None:
+                _ws_bkg_resampled = None
+            else:
                 _ws_bkg_resampled = self._resample_background(bkg, data[0], "mask_shared",
                                                               xMin, xMax, _ws_cal_resampled)
-            else:
-                _ws_bkg_resampled = None
 
         # BEGIN_FOR: prcess_spectra
         for n, (_wsn, _mskn) in enumerate(zip(data, masks)):
@@ -217,12 +217,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 EnableLogging=False,
             )
 
-            # TODO Add in if statement for `FilteredInputs`
             if not filtered_eve:
-                if cal is not None:
-                    _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
-                else:
+                if cal is None:
                     _ws_cal_resampled = None
+                else:
+                    _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
 
             if _ws_cal_resampled is not None:
                 Divide(
@@ -241,11 +240,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # background
             if not filtered_eve:
-                if bkg:
+                if bkg is None or bkg.strip() == "":
+                    _ws_bkg_resampled = None
+                else:
                     _ws_bkg_resampled = self._resample_background(bkg, _wsn, _mskn, xMin,
                                                                   xMax, _ws_cal_resampled)
-                else:
-                    _ws_bkg_resampled = None
 
             if _ws_bkg_resampled is not None:
                 Minus(
@@ -432,31 +431,35 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)
-            _mask_n = f"__mask_{n}"  # mask for n-th
-            self.temp_workspace_list.append(_mask_n)  # cleanup later
+            if mask_angle == Property.EMPTY_DBL:
+                self._to_spectrum_axis(_wksp_in, _wksp_out, mask)
+                mask_workspaces.append(mask)
+            else:
+                _mask_n = f"__mask_{n}"  # mask for n-th
+                self.temp_workspace_list.append(_mask_n)  # cleanup later
 
-            ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
-            if mask_angle != Property.EMPTY_DBL:
-                MaskAngle(
-                    Workspace=_mask_n,
-                    MinAngle=mask_angle,
-                    Angle="Phi",
-                    EnableLogging=False,
-                )
-            if mask is not None:
-                # might be a bug if the mask angle isn't set
-                BinaryOperateMasks(
-                    InputWorkspace1=_mask_n,
-                    InputWorkspace2=mask,
-                    OperationType="OR",
-                    OutputWorkspace=_mask_n,
-                    EnableLogging=False,
-                )
+                ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
+                if mask_angle != Property.EMPTY_DBL:
+                    MaskAngle(
+                        Workspace=_mask_n,
+                        MinAngle=mask_angle,
+                        Angle="Phi",
+                        EnableLogging=False,
+                    )
+                if mask is not None:
+                    # might be a bug if the mask angle isn't set
+                    BinaryOperateMasks(
+                        InputWorkspace1=_mask_n,
+                        InputWorkspace2=mask,
+                        OperationType="OR",
+                        OutputWorkspace=_mask_n,
+                        EnableLogging=False,
+                    )
 
-            self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
+                self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
 
-            # append to the list of processed workspaces
-            mask_workspaces.append(_mask_n)
+                # append to the list of processed workspaces
+                mask_workspaces.append(_mask_n)
 
         return output_workspaces, mask_workspaces
 
