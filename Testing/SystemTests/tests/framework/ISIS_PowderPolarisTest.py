@@ -245,6 +245,34 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
+class FocusTestRunTwice(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_absorption("98533", paalman_pings=False)
+        self.focus_results = run_focus_absorption("98533", paalman_pings=False)
+
+    def validate(self):
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-6
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
+
+
 class TotalScatteringTest(systemtesting.MantidSystemTest):
 
     pdf_output = None
