@@ -1042,9 +1042,9 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
                                                              const double xmax, std::vector<double> &resultX,
                                                              std::vector<double> &resultY,
                                                              const bool returnCumulative) {
+  assert(h.histogram().xMode() == HistogramData::Histogram::XMode::Points);
   const std::vector<double> &xValues = h.X;
   const std::vector<double> &yValues = h.Y;
-  bool isPoints = xValues.size() == yValues.size();
 
   // set the integral to zero at xmin
   if (returnCumulative) {
@@ -1074,11 +1074,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
   // deal with partial initial segments
   if (xmin > xValues[iRight - 1]) {
     if (xmax >= xValues[iRight]) {
-      if (isPoints) {
-        double interpY = linearInterp(xmin, iRight - 1, iRight);
-        yToUse = 0.5 * (interpY + yValues[iRight]);
-      } else
-        yToUse = yValues[iRight - 1];
+      double interpY = linearInterp(xmin, iRight - 1, iRight);
+      yToUse = 0.5 * (interpY + yValues[iRight]);
       sum += yToUse * (xValues[iRight] - xmin);
       if (returnCumulative) {
         resultX.push_back(xValues[iRight]);
@@ -1086,12 +1083,9 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
       }
       iRight++;
     } else {
-      if (isPoints) {
-        double interpY1 = linearInterp(xmin, iRight - 1, iRight);
-        double interpY2 = linearInterp(xmax, iRight - 1, iRight);
-        yToUse = 0.5 * (interpY1 + interpY2);
-      } else
-        yToUse = yValues[iRight - 1];
+      double interpY1 = linearInterp(xmin, iRight - 1, iRight);
+      double interpY2 = linearInterp(xmax, iRight - 1, iRight);
+      yToUse = 0.5 * (interpY1 + interpY2);
       sum += yToUse * (xmax - xmin);
       if (returnCumulative) {
         resultX.push_back(xmax);
@@ -1103,10 +1097,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
 
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
-    if (isPoints)
-      yToUse = 0.5 * (yValues[iRight - 1] + yValues[iRight]);
-    else
-      yToUse = yValues[iRight - 1];
+    yToUse = 0.5 * (yValues[iRight - 1] + yValues[iRight]);
     double xLeft = xValues[iRight - 1];
     double xRight = xValues[iRight];
     sum += yToUse * (xRight - xLeft);
@@ -1120,11 +1111,8 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
 
   // integrate a partial final interval if xmax is between points
   if ((xmax > xValues[iRight - 1]) && (xmin <= xValues[iRight - 1])) {
-    if (isPoints) {
-      double interpY = linearInterp(xmax, iRight - 1, iRight);
-      yToUse = 0.5 * (yValues[iRight - 1] + interpY);
-    } else
-      yToUse = yValues[iRight - 1];
+    double interpY = linearInterp(xmax, iRight - 1, iRight);
+    yToUse = 0.5 * (yValues[iRight - 1] + interpY);
     sum += yToUse * (xmax - xValues[iRight - 1]);
     if (returnCumulative) {
       resultX.emplace_back(xmax);
@@ -1137,14 +1125,21 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
   }
 }
 
+/**
+ * Create new workspace with y equal to integral across the bins
+ * @param ws The workspace whose spectra need integrating
+ * @return A workspace containing the integrals
+ */
 API::MatrixWorkspace_sptr DiscusMultipleScatteringCorrection::integrateWS(const API::MatrixWorkspace_sptr &ws) {
-  auto wsIntegrals = DataObjects::create<Workspace2D>(*ws, HistogramData::Points{0.});
-  for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-    std::vector<double> IOfQX, IOfQY;
-    integrateCumulative(DiscusData1D{ws->histogram(i).dataX(), ws->histogram(i).dataY()}, ws->x(i).front(),
-                        ws->x(i).back(), IOfQX, IOfQY, false);
-    wsIntegrals->mutableY(i) = IOfQY.back();
-  }
+  // don't call integrateCumulative function because want error calculation and support for bin edges
+  auto integrateAlgorithm = this->createChildAlgorithm("Integration");
+  integrateAlgorithm->initialize();
+  integrateAlgorithm->setProperty("InputWorkspace", ws);
+  integrateAlgorithm->setProperty("OutputWorkspace", "_");
+  integrateAlgorithm->execute();
+  MatrixWorkspace_sptr wsIntegrals = integrateAlgorithm->getProperty("OutputWorkspace");
+  for (size_t i = 0; i < wsIntegrals->getNumberHistograms(); i++)
+    wsIntegrals->setPoints(i, std::vector<double>{0.});
   return wsIntegrals;
 }
 

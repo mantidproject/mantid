@@ -436,23 +436,6 @@ public:
     testResultY.clear();
     alg.integrateCumulative(data, 0.5, 0.9, testResultX, testResultY, true);
     TS_ASSERT_EQUALS(testResultY[1], 0.4);
-    // bin edges tests
-    testResultX.clear();
-    testResultY.clear();
-    auto ws_edges = Mantid::DataObjects::create<Workspace2D>(
-        1, Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges({0., 1., 2., 3.}),
-                                            Mantid::HistogramData::Frequencies({1., 1., 2.})));
-    DiscusData1D data_edges{ws_edges->getSpectrum(0).readX(), ws_edges->getSpectrum(0).readY()};
-    alg.integrateCumulative(data_edges, 0., 2.2, testResultX, testResultY, true);
-    TS_ASSERT_DELTA(testResultY[3], 2.4, 1E-10);
-    testResultX.clear();
-    testResultY.clear();
-    alg.integrateCumulative(data_edges, 0., 2.0, testResultX, testResultY, true);
-    TS_ASSERT_EQUALS(testResultY[2], 2.0);
-    testResultX.clear();
-    testResultY.clear();
-    alg.integrateCumulative(data_edges, 0., 2.0, testResultX, testResultY, false);
-    TS_ASSERT_EQUALS(testResultY[0], 2.0);
   }
 
   void test_inelastic_with_importance_sampling() {
@@ -802,11 +785,6 @@ public:
     cylinderShape->setMaterial(mat);
     inputWorkspace->mutableSample().setShape(cylinderShape);
     auto alg = createAlgorithm();
-    auto saveNexus = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
-    saveNexus->initialize();
-    saveNexus->setProperty("InputWorkspace", inputWorkspace);
-    saveNexus->setPropertyValue("Filename", "C:\\Multiple Scattering\\InputWorkspaceWithCylinderSaveNexus.nxs");
-    saveNexus->execute();
 
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
     const int NSCATTERINGS = 3;
@@ -816,9 +794,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
     if (alg->isExecuted()) {
-      std::vector<std::string> wsNamesWithoutErrors = {"MuscatResults_Scatter_1_Integrated",
-                                                       "MuscatResults_Scatter_2_Integrated",
-                                                       "MuscatResults_Scatter_3_Integrated"};
       auto output =
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
 
@@ -826,11 +801,8 @@ public:
       for (size_t i = 0; i < output->size(); i++) {
         TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(i));
         auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
-        if (std::find(wsNamesWithoutErrors.begin(), wsNamesWithoutErrors.end(), wsPtr->getName()) ==
-            wsNamesWithoutErrors.end()) {
-          auto eData = matrixWsPtr->dataE(0);
-          TS_ASSERT(std::all_of(eData.cbegin(), eData.cend(), [](double i) { return i > 0; }));
-        }
+        auto eData = matrixWsPtr->dataE(0);
+        TS_ASSERT(std::all_of(eData.cbegin(), eData.cend(), [](double i) { return i > 0; }));
       }
     }
   }
