@@ -52,8 +52,6 @@ private:
   Mantid::API::IPeakFunction_sptr m_peak;
   /// The minimum marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::PeakMarker> m_peakMarker;
-  /// True if the mouse is hovering over the centre of the peak picker
-  bool m_centreHover;
 };
 
 } // namespace MantidWidgets
