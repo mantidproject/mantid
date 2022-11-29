@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from unittest.mock import call, DEFAULT, Mock, patch
+from unittest.mock import call, DEFAULT, Mock, patch, MagicMock
 
 from mantidqt.widgets.regionselector.presenter import RegionSelector
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WS_TYPE
@@ -19,6 +19,8 @@ class RegionSelectorTest(unittest.TestCase):
                                                WorkspaceInfo=DEFAULT)
         self.patched_deps = self._ws_info_patcher.start()
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
+        self.mock_view = MagicMock()
+        self.mock_view._data_view.ax._get_aspect_ratio.return_value = 1
 
     def tearDown(self) -> None:
         self._ws_info_patcher.stop()
@@ -68,7 +70,7 @@ class RegionSelectorTest(unittest.TestCase):
         mock_view.set_workspace.assert_called_once_with(mock_ws)
 
     def test_add_rectangular_region_creates_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
 
         region_selector.add_rectangular_region("test", "black")
 
@@ -77,7 +79,7 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertEqual("test", region_selector._selectors[0].region_type())
 
     def test_add_second_rectangular_region_deactivates_first_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
 
         region_selector.add_rectangular_region("test", "black")
         region_selector._drawing_region = False
@@ -89,7 +91,7 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertTrue(region_selector._selectors[1].active)
 
     def test_clear_workspace_will_clear_all_the_selectors_and_model_workspace(self):
-        region_selector = RegionSelector(view=Mock())
+        region_selector = RegionSelector(view=self.mock_view)
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
@@ -266,7 +268,7 @@ class RegionSelectorTest(unittest.TestCase):
         region_selector.view.set_override_cursor.assert_called_once_with(True)
 
     def test_on_rectangle_selected_notifies_observer(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
         mock_observer = Mock()
         region_selector.subscribe(mock_observer)
 
@@ -276,7 +278,7 @@ class RegionSelectorTest(unittest.TestCase):
         mock_observer.notifyRegionChanged.assert_called_once()
 
     def test_cancel_drawing_region_will_remove_last_selector(self):
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
         region_selector.add_rectangular_region("test", "black")
         self.assertEqual(1, len(region_selector._selectors))
         region_selector.cancel_drawing_region()
@@ -284,7 +286,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_when_multiple_region_adds_are_requested_only_one_region_is_added(self):
         # Given
-        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
         region_selector.add_rectangular_region("test", "black")
         self.assertEqual(1, len(region_selector._selectors))
 
