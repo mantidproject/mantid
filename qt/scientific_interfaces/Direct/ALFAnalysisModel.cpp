@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -20,9 +19,6 @@
 using namespace Mantid::API;
 
 namespace {
-auto &ADS = AnalysisDataService::Instance();
-
-std::string const FIT_BASE_NAME("__fit");
 
 MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
@@ -115,22 +111,18 @@ MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &ra
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("Function", m_function);
   alg->setProperty("InputWorkspace", m_extractedWorkspace);
-  alg->setProperty("Output", FIT_BASE_NAME);
+  alg->setProperty("CreateOutput", true);
   alg->setProperty("StartX", range.first);
   alg->setProperty("EndX", range.second);
   alg->execute();
 
   m_function = alg->getProperty("Function");
   m_fitStatus = alg->getPropertyValue("OutputStatus");
-  auto const fitWorkspace = ADS.retrieveWS<MatrixWorkspace>(FIT_BASE_NAME + "_Workspace");
 
-  ADS.remove(FIT_BASE_NAME + "_Workspace");
-  ADS.remove(FIT_BASE_NAME + "_Parameters");
-  ADS.remove(FIT_BASE_NAME + "_NormalisedCovarianceMatrix");
-
-  return fitWorkspace;
+  return alg->getProperty("OutputWorkspace");
 }
 
 void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range) {
