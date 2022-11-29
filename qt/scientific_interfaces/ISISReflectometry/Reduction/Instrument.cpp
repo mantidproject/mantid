@@ -16,7 +16,7 @@ Instrument::Instrument()
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections, std::string calibrationFilePath)
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
-      m_detectorCorrections(detectorCorrections), m_calibrationFilePath(calibrationFilePath) {}
+      m_detectorCorrections(detectorCorrections), m_calibrationFilePath(std::move(calibrationFilePath)) {}
 
 Instrument &Instrument::operator=(Instrument const &old_instrument) {
   m_wavelengthRange = old_instrument.wavelengthRange();
