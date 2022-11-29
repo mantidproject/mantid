@@ -127,6 +127,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             issues[Prop.SLICE] = "Cannot perform slicing when summing multiple input runs"
         return issues
 
+    def _copy_properties_from_reduction_algorithm(self, properties):
+        self.copyProperties('ReflectometryReductionOneAuto', properties)
+        self._reduction_properties += properties
+
     def _declareRunProperties(self):
         mandatoryInputRuns = CompositeValidator()
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
@@ -143,8 +147,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         properties = [
             'ThetaIn', 'ThetaLogName',
         ]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        self._copy_properties_from_reduction_algorithm(properties)
         # Add properties for settings to apply to input runs
         self.declareProperty(Prop.RELOAD, True,
                              doc='If true, reload input workspaces if they are of the incorrect type')
@@ -190,12 +193,19 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
             'SubtractBackground', 'BackgroundProcessingInstructions', 'BackgroundCalculationMethod',
             'DegreeOfPolynomial', 'CostFunction',
-            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis',
+            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis'
+        ]
+        self._copy_properties_from_reduction_algorithm(properties)
+
+        self.declareProperty('PolarizationEfficiencies', "",
+                             'A workspace or file name containing the polarization efficiency factors for either '
+                             'the Wildes or Fredrikze correction methods.', Direction.Input)
+
+        properties = [
             'FloodCorrection', 'FloodWorkspace',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1'
         ]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        self._copy_properties_from_reduction_algorithm(properties)
 
     def _declareTransmissionProperties(self):
         # Add input transmission run properties
@@ -214,8 +224,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'Params', 'StartOverlap', 'EndOverlap',
             'ScaleRHSWorkspace', 'TransmissionProcessingInstructions'
         ]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        self._copy_properties_from_reduction_algorithm(properties)
 
     def _declareOutputProperties(self):
         properties = [Prop.DEBUG,
@@ -223,8 +232,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                       'ScaleFactor',
                       Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS, Prop.OUTPUT_WS_LAM,
                       Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS]
-        self.copyProperties('ReflectometryReductionOneAuto', properties)
-        self._reduction_properties += properties
+        self._copy_properties_from_reduction_algorithm(properties)
 
     def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
@@ -238,6 +246,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 raise RuntimeError('Error loading run ' + run)
             workspaces.append(ws)
         return workspaces
+
+    def _loadPolarizationCorrectionWorkspace(self):
+        efficiencies_ws = self.getPropertyValue('PolarizationEfficiencies')
+        if not efficiencies_ws:
+            return None
+
+        if AnalysisDataService.doesExist(efficiencies_ws):
+            self.log().information(f'Loading polarization efficiency information from workspace \"{efficiencies_ws}\"')
+            return AnalysisDataService.retrieve(efficiencies_ws)
+
+        args = {'InputRunList': [efficiencies_ws], 'EventMode': False}
+        alg = self.createChildAlgorithm('ReflectometryISISPreprocess', **args)
+        alg.setRethrows(True)
+
+        try:
+            alg.execute()
+        except:
+            raise RuntimeError(f'Could not load polarization efficiency information from file \"{efficiencies_ws}\"')
+
+        ws = alg.getProperty('OutputWorkspace').value
+        self.log().information(f'Loaded polarization efficiency information from file \"{efficiencies_ws}\"')
+        return ws
 
     def _sumBanks(self, workspace_names, roiDetectorIDs):
         output_workspace_names = workspace_names.copy()
@@ -521,6 +551,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.setProperty("InputWorkspace", input_workspace)
         alg.setProperty("FirstTransmissionRun", first_trans_workspace)
         alg.setProperty("SecondTransmissionRun", second_trans_workspace)
+        efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
+        if efficiencies_ws:
+            alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
         alg.execute()
         return alg
 

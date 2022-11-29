@@ -562,6 +562,35 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ['IvsQ_45455', 'IvsQ_binned_45455', 'TOF', 'TOF_45455', 'Calib_Table_45455', 'TOF_45455_summed_segment']
         self._assert_run_algorithm_succeeds(args, outputs)
 
+    def test_invalid_polarization_efficiency_file_name_raises_error(self):
+        args = self._default_options
+        args['InputRunList'] = 'POLREF14966'
+        args['ProcessingInstructions'] = '4'
+        filename = 'efficiencies'
+        args['PolarizationEfficiencies'] = filename
+        self._assert_run_algorithm_throws_with_correct_msg(args, f'Could not load polarization efficiency information from file \"{filename}\"')
+
+    def test_polarization_efficiency_workspace_from_file_is_passed_to_reduction(self):
+        args = self._default_options
+        args['InputRunList'] = 'POLREF14966'
+        args['ProcessingInstructions'] = '4'
+        # The workspace we're providing for the efficiencies isn't in the correct format so the reduction will throw an
+        # error, but this is sufficient to confirm that the parameter was passed through successfully
+        args['PolarizationEfficiencies'] = 'INTER38415'
+        args['PolarizationAnalysis'] = '1'
+        self._assert_run_algorithm_throws_with_correct_msg(args, f'Efficiencies workspace is not in a supported format')
+
+    def test_polarization_efficiency_workspace_from_ADS_is_passed_to_reduction(self):
+        args = self._default_options
+        args['InputRunList'] = 'POLREF14966'
+        args['ProcessingInstructions'] = '4'
+        # The workspace we're providing for the efficiencies isn't in the correct format so the reduction will throw an
+        # error, but this is sufficient to confirm that the parameter was passed through successfully
+        self._create_workspace('test_corrections')
+        args['PolarizationEfficiencies'] = 'test_corrections'
+        args['PolarizationAnalysis'] = '1'
+        self._assert_run_algorithm_throws_with_correct_msg(args, f'Efficiencies workspace is not in a supported format')
+
     # TODO test if no runNumber is on the WS
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
@@ -660,6 +689,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         except:
             throws = True
         self.assertEqual(throws, True)
+
+    def _assert_run_algorithm_throws_with_correct_msg(self, args, error_msg_regex):
+        alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
+        alg.setRethrows(True)
+        self.assertRaisesRegex(RuntimeError, error_msg_regex, alg.execute)
 
     def _assert_delta(self, value1, value2):
         self.assertEqual(round(value1, 6), round(value2, 6))
