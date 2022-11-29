@@ -674,11 +674,10 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
   bool pointData = true;
   std::tuple<short, short, short> dimOrder;
   if (m_isD16Omega) {
-    if (m_instrumentName == "D16" && numberOfChannels == 1) {
-      dimOrder = std::tuple<short, short, short>{2, 1, 0}; // channels (scans) - tubes - pixels
+    dimOrder = std::tuple<short, short, short>{1, 2, 0};      // channels (scans) - tubes - pixels
+    if (m_instrumentName == "D16" && numberOfChannels == 1) { // D16 omega scan data
       pointData = false;
-    } else {
-      dimOrder = std::tuple<short, short, short>{1, 2, 0}; // channels (scans) - pixels - tubes
+    } else { // D16B data
       pointData = true;
     }
   } else {
