@@ -791,6 +791,50 @@ public:
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
   }
 
+  void test_errors_calculated() {
+    // don't use a flat plate here because weights for the NoAbs workspace are all same for flat plates (so error=0)
+    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(1, 180, 1.0, 1, 0.5, 1.0,
+                                                                                              "testinst", "Momentum");
+
+    auto cylinderShape =
+        ComponentCreationHelper::createCappedCylinder(0.01, 0.04, {0., -0.02, 0.}, {0., 1., 0.}, "test");
+    auto mat = Mantid::Kernel::Material("Ni", Mantid::PhysicalConstants::getNeutronAtom(28, 0), 0.091337537);
+    cylinderShape->setMaterial(mat);
+    inputWorkspace->mutableSample().setShape(cylinderShape);
+    auto alg = createAlgorithm();
+    auto saveNexus = Mantid::API::AlgorithmFactory::Instance().create("SaveNexus", 1);
+    saveNexus->initialize();
+    saveNexus->setProperty("InputWorkspace", inputWorkspace);
+    saveNexus->setPropertyValue("Filename", "C:\\Multiple Scattering\\InputWorkspaceWithCylinderSaveNexus.nxs");
+    saveNexus->execute();
+
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+    if (alg->isExecuted()) {
+      std::vector<std::string> wsNamesWithoutErrors = {"MuscatResults_Scatter_1_Integrated",
+                                                       "MuscatResults_Scatter_2_Integrated",
+                                                       "MuscatResults_Scatter_3_Integrated"};
+      auto output =
+          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+
+      Mantid::API::Workspace_sptr wsPtr;
+      for (size_t i = 0; i < output->size(); i++) {
+        TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(i));
+        auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+        if (std::find(wsNamesWithoutErrors.begin(), wsNamesWithoutErrors.end(), wsPtr->getName()) ==
+            wsNamesWithoutErrors.end()) {
+          auto eData = matrixWsPtr->dataE(0);
+          TS_ASSERT(std::all_of(eData.cbegin(), eData.cend(), [](double i) { return i > 0; }));
+        }
+      }
+    }
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
