@@ -199,7 +199,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             else:
                 _ws_cal_resampled = self._resample_calibration(data[0], "mask_shared", xMin, xMax)
 
-            if bkg is None:
+            if bkg is None or bkg.strip() == "":
                 _ws_bkg_resampled = None
             else:
                 _ws_bkg_resampled = self._resample_background(bkg, data[0], "mask_shared",
