@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -82,6 +83,7 @@ protected:
                            std::vector<double> &resultY, const bool returnCumulative);
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
+  void prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS);
 
 private:
   void init() override;
@@ -143,6 +145,8 @@ private:
   std::shared_ptr<const Geometry::ReferenceFrame> m_refframe;
   const Geometry::SampleEnvironment *m_env{nullptr};
   bool m_NormalizeSQ{};
+  Geometry::BoundingBox m_activeRegion;
+  std::unique_ptr<IBeamProfile> m_beamProfile;
 };
 } // namespace Algorithms
 } // namespace Mantid
