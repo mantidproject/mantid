@@ -77,7 +77,7 @@ class PreviewViewTest(unittest.TestCase):
         self.preview_view.sig_request_close.emit()
 
         self.preview_view.on_close.assert_called_once()
-        plt_close.assert_has_calls([mock.call(self.preview_view._widget)])
+        plt_close.assert_called_once_with(self.preview_view._widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.plt.close')
     def test_show_workspace_plot1d(self, plt_close):
@@ -96,7 +96,7 @@ class PreviewViewTest(unittest.TestCase):
         self.preview_view.sig_request_close.emit()
 
         self.preview_view.on_close.assert_called_once()
-        plt_close.assert_has_calls([mock.call(self.preview_view._widget)])
+        plt_close.assert_called_once_with(self.preview_view._widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.plt.close')
     def test_show_workspace_plotspectrum(self, plt_close):
@@ -115,7 +115,7 @@ class PreviewViewTest(unittest.TestCase):
         self.preview_view.sig_request_close.emit()
 
         self.preview_view.on_close.assert_called_once()
-        plt_close.assert_has_calls([mock.call(self.preview_view._widget)])
+        plt_close.assert_called_once_with(self.preview_view._widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.get_window_config')
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.get_instrumentview')
@@ -128,8 +128,8 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.get_widget("ws")
 
-        get_instrumentview.assert_has_calls([mock.call("ws", True, mocked_window_config[0], mocked_window_config[1],
-                                                       use_thread=False)])
+        get_instrumentview.assert_called_once_with("ws", True, mocked_window_config[0], mocked_window_config[1],
+                                                   use_thread=False)
         self.assertEqual(self.preview_view._widget, mocked_widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.mtd')
@@ -143,7 +143,7 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.get_widget("ws")
 
-        slice_viewer.assert_has_calls([mock.call(ws=mocked_ws)])
+        slice_viewer.assert_called_once_with(ws=mocked_ws)
         self.assertEqual(self.preview_view._widget, mocked_widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.plotBin')
@@ -154,7 +154,7 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.get_widget("ws")
 
-        plot_bin.assert_has_calls([mock.call("ws", 0, error_bars=True)])
+        plot_bin.assert_called_once_with("ws", 0, error_bars=True)
         self.assertEqual(self.preview_view._widget, mocked_widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.pcolormesh')
@@ -165,7 +165,7 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.get_widget("ws")
 
-        pcolormesh.assert_has_calls([mock.call(["ws"])])
+        pcolormesh.assert_called_once_with(["ws"])
         self.assertEqual(self.preview_view._widget, mocked_widget)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.plotSpectrum')
@@ -176,7 +176,7 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.get_widget("ws")
 
-        plot_spectrum.assert_has_calls([mock.call("ws", 0, error_bars=True)])
+        plot_spectrum.assert_called_once_with("ws", 0, error_bars=True)
         self.assertEqual(self.preview_view._widget, mocked_widget)
 
     def test_change_workspace_iview(self):
@@ -186,7 +186,7 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.change_workspace(ws_name)
 
-        self.preview_view._widget.replace_workspace.assert_has_calls([mock.call(ws_name)])
+        self.preview_view._widget.replace_workspace.assert_called_once_with(ws_name)
 
     def test_change_workspace_sview(self):
         # TODO first write the relevant code then test it
@@ -201,10 +201,9 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.change_workspace(ws_name)
 
-        plot_bin.assert_has_calls([mock.call(ws_name, 0, error_bars=True, window=self.preview_view._widget,
-                                             clearWindow=True)])
-        self.preview_view._presenter.get_main_view().fileTree.set_ignore_next_focus_out.\
-            assert_has_calls([mock.call(True)])
+        plot_bin.assert_called_once_with(ws_name, 0, error_bars=True, window=self.preview_view._widget,
+                                         clearWindow=True)
+        self.preview_view._presenter.get_main_view().fileTree.set_ignore_next_focus_out.assert_called_once_with(True)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.pcolormesh')
     def test_change_workspace_plot2d(self, pcolor):
@@ -215,9 +214,8 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.change_workspace(ws_name)
 
-        pcolor.assert_has_calls([mock.call([ws_name], self.preview_view._widget)])
-        self.preview_view._presenter.get_main_view().fileTree.set_ignore_next_focus_out.\
-            assert_has_calls([mock.call(True)])
+        pcolor.assert_called_once_with([ws_name], self.preview_view._widget)
+        self.preview_view._presenter.get_main_view().fileTree.set_ignore_next_focus_out.assert_called_once_with(True)
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.plotSpectrum')
     def test_change_workspace_plotspectrum(self, plot_spec):
@@ -228,17 +226,16 @@ class PreviewViewTest(unittest.TestCase):
 
         self.preview_view.change_workspace(ws_name)
 
-        plot_spec.assert_has_calls([mock.call(ws_name, 0, error_bars=True, window=self.preview_view._widget,
-                                              clearWindow=True)])
-        self.preview_view._presenter.get_main_view().fileTree.set_ignore_next_focus_out.\
-            assert_has_calls([mock.call(True)])
+        plot_spec.assert_called_once_with(ws_name, 0, error_bars=True, window=self.preview_view._widget,
+                                          clearWindow=True)
+        self.preview_view._presenter.get_main_view().fileTree.set_ignore_next_focus_out.assert_called_once_with(True)
 
     def test_on_close(self):
         mocked_presenter = mock.Mock()
         self.preview_view.set_presenter(mocked_presenter)
 
         self.preview_view.on_close("ws", True)
-        mocked_presenter.close_preview.assert_has_calls([mock.call(True)])
+        mocked_presenter.close_preview.assert_called_once_with(True)
 
 
 class RawDataExplorerViewTest(unittest.TestCase):
