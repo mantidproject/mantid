@@ -245,7 +245,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
  */
 void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
                                const Mantid::HistogramData::Points &points, Mantid::HistogramData::Histogram &output,
-                               bool calculateErrors = false, const bool independentErrors = true) {
+                               const bool calculateErrors = false, const bool independentErrors = true) {
   const auto xold = input.points();
   const auto &yold = input.y();
   const auto &eold = input.e();
@@ -254,12 +254,13 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
   auto &ynew = output.mutableY();
   auto &enew = output.mutableE();
 
+  bool calculateInterpolationErrors = true;
   std::vector<double> secondDeriv(input.size() - 1);
   for (size_t i = 0; i < input.size() - 1; i++) {
     if (calculateErrors) {
       if (xold.size() < 3) {
-        g_log.warning("Number of x points too small to calculate errors");
-        calculateErrors = false;
+        g_log.warning("Number of x points too small to calculate interpolation errors");
+        calculateInterpolationErrors = false;
       } else {
 
         auto x0_secondDeriv = i < 1 ? 0 : i - 1;
@@ -306,7 +307,8 @@ void interpolateYLinearInplace(const Mantid::HistogramData::Histogram &input,
         sourcePointsError = (xp - x1) * e2 + (x2 - xp) * e1;
       }
       // calculate interpolation error
-      auto interpError = 0.5 * (xp - x1) * (x2 - xp) * std::abs(secondDeriv[index - 1]);
+      auto interpError =
+          calculateInterpolationErrors ? 0.5 * (xp - x1) * (x2 - xp) * std::abs(secondDeriv[index - 1]) : 0;
       // combine the two errors
       enew[i] = sqrt(pow(sourcePointsError, 2) + pow(interpError, 2));
     } else {
