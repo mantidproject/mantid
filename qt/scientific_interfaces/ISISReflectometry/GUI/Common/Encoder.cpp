@@ -259,6 +259,7 @@ QMap<QString, QVariant> Encoder::encodeInstrument(const QtInstrumentView *gui) {
   instrumentMap.insert(QString("correctDetectorsCheckBox"), QVariant(gui->m_ui.correctDetectorsCheckBox->isChecked()));
   instrumentMap.insert(QString("detectorCorrectionTypeComboBox"),
                        QVariant(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex()));
+  instrumentMap.insert(QString("calibrationPathEdit"), QVariant(gui->m_ui.calibrationPathEdit->text()));
   return instrumentMap;
 }
 
