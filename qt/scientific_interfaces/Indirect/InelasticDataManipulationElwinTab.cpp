@@ -75,14 +75,6 @@ std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
   return suffixes;
 }
 
-IAlgorithm_sptr loadAlgorithm(std::string const &filepath, std::string const &outputName) {
-  auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filepath);
-  loadAlg->setProperty("OutputWorkspace", outputName);
-  return loadAlg;
-}
-
 namespace Regexes {
 const QString EMPTY = "^$";
 const QString SPACE = "(\\s)*";
@@ -154,6 +146,7 @@ using namespace IDA;
 InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent)
     : InelasticDataManipulationTab(parent), m_elwTree(nullptr),
       m_view(std::make_unique<InelasticDataManipulationElwinTabView>(parent)),
+      m_model(std::make_unique<InelasticDataManipulationElwinTabModel>()),
       m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
 
   setOutputPlotOptionsPresenter(
@@ -180,6 +173,9 @@ void InelasticDataManipulationElwinTab::setup() {
   connect(m_view.get(), SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
   connect(m_view.get(), SIGNAL(previewIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
   connect(m_view.get(), SIGNAL(selectedSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
+  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(handleValueChanged(QtProperty *, double)));
+  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(handleValueChanged(QtProperty *, bool)));
 
   // Handle plot and save
   connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
@@ -231,65 +227,25 @@ void InelasticDataManipulationElwinTab::runFileInput() {
     workspaceBaseName = prefix + QString::fromStdString("-" + runNumber) + suffix;
   }
 
-  workspaceBaseName += "_elwin_";
-
-  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
-  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
-  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
-  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
-
   // Load input files
   std::string inputWorkspacesString;
 
   for (auto &inputFilename : inputFilenames) {
     QFileInfo inputFileInfo(inputFilename);
     auto const workspaceName = inputFileInfo.baseName().toStdString();
-    m_batchAlgoRunner->addAlgorithm(loadAlgorithm(inputFilename.toStdString(), workspaceName));
+    m_model->setupLoadAlgorithm(m_batchAlgoRunner, inputFilename.toStdString(), workspaceName);
     inputWorkspacesString += workspaceName + ",";
   }
 
-  // Group input workspaces
-  auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupWsAlg->initialize();
-  auto runTimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  runTimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
-  groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
-
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runTimeProps));
-
-  // Configure ElasticWindowMultiple algorithm
-  auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
-  elwinMultAlg->initialize();
-
-  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
-  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
-  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
-
-  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_view->getLogName());
-  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_view->getLogValue());
-
-  elwinMultAlg->setProperty("IntegrationRangeStart", m_view->getIntegrationStart());
-  elwinMultAlg->setProperty("IntegrationRangeEnd", m_view->getIntegrationEnd());
-
-  if (m_view->getBackgroundSubtraction()) {
-    elwinMultAlg->setProperty("BackgroundRangeStart", m_view->getBackgroundStart());
-    elwinMultAlg->setProperty("BackgroundRangeEnd", m_view->getBackgroundEnd());
-  }
-
-  if (m_view->getNormalise()) {
-    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
-  }
-
-  auto elwinInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  elwinInputProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
-
-  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(elwinInputProps));
+  m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
+  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, workspaceBaseName, inputGroupWsName, m_view->getLogName(),
+                                      m_view->getLogValue());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = qSquaredWorkspace;
+  m_pythonExportWsName = (workspaceBaseName + "_elwin_eq2").toStdString();
 }
 
 void InelasticDataManipulationElwinTab::runWorkspaceInput() {
@@ -298,60 +254,20 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   // Get workspace names
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
-  auto workspaceBaseName = m_view->getCurrentPreview();
-
-  workspaceBaseName += "_elwin_";
-
-  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
-  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
-  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
-  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
-
   // Load input files
   std::string inputWorkspacesString = m_view->getCurrentPreview().toStdString();
 
   // Group input workspaces
-  auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupWsAlg->initialize();
-  auto runTimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  runTimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
-  groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
+  m_model->setupGroupAlgorithm(m_batchAlgoRunner, inputWorkspacesString, inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runTimeProps));
-
-  // Configure ElasticWindowMultiple algorithm
-  auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
-  elwinMultAlg->initialize();
-
-  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
-  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
-  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
-
-  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_view->getLogName());
-  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_view->getLogValue());
-
-  elwinMultAlg->setProperty("IntegrationRangeStart", m_view->getIntegrationStart());
-  elwinMultAlg->setProperty("IntegrationRangeEnd", m_view->getIntegrationEnd());
-
-  if (m_view->getBackgroundSubtraction()) {
-    elwinMultAlg->setProperty("BackgroundRangeStart", m_view->getBackgroundStart());
-    elwinMultAlg->setProperty("BackgroundRangeEnd", m_view->getBackgroundEnd());
-  }
-
-  if (m_view->getNormalise()) {
-    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
-  }
-
-  auto elwinInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
-  elwinInputProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
-
-  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(elwinInputProps));
+  m_model->setupElasticWindowMultiple(m_batchAlgoRunner, m_view->getCurrentPreview(), inputGroupWsName,
+                                      m_view->getLogName(), m_view->getLogValue());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = qSquaredWorkspace;
+  m_pythonExportWsName = (m_view->getCurrentPreview() + "_elwin_eq2").toStdString();
 }
 
 /**
@@ -363,10 +279,7 @@ void InelasticDataManipulationElwinTab::unGroupInput(bool error) {
 
   if (!error) {
     if (!m_view->isGroupInput()) {
-      auto ungroupAlg = AlgorithmManager::Instance().create("UnGroupWorkspace");
-      ungroupAlg->initialize();
-      ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
-      ungroupAlg->execute();
+      m_model->ungroupAlgorithm("IDA_Elwin_Input");
     }
 
     setOutputPlotOptionsWorkspaces(getOutputWorkspaceNames());
@@ -395,6 +308,26 @@ void InelasticDataManipulationElwinTab::loadTabSettings(const QSettings &setting
 void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
   auto const tabName("Elwin");
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+}
+
+void InelasticDataManipulationElwinTab::handleValueChanged(QtProperty *prop, double value) {
+  if (prop->propertyName() == "IntegrationStart") {
+    m_model->setIntegrationStart(value);
+  } else if (prop->propertyName() == "IntegrationEnd") {
+    m_model->setIntegrationEnd(value);
+  } else if (prop->propertyName() == "BackgroundStart") {
+    m_model->setBackgroundStart(value);
+  } else if (prop->propertyName() == "BackgroundEnd") {
+    m_model->setBackgroundEnd(value);
+  }
+}
+
+void InelasticDataManipulationElwinTab::handleValueChanged(QtProperty *prop, bool value) {
+  if (prop->propertyName() == "BackgroundSubtraction") {
+    m_model->setBackgroundSubtraction(value);
+  } else if (prop->propertyName() == "Normalise") {
+    m_model->setNormalise(value);
+  }
 }
 
 /**

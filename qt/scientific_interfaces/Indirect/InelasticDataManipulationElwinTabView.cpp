@@ -28,12 +28,6 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-std::vector<std::string> getOutputWorkspaceSuffices() { return {"_eq", "_eq2", "_elf", "_elt"}; }
-
 std::string extractLastOf(const std::string &str, const std::string &delimiter) {
   auto const cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
@@ -62,87 +56,11 @@ std::vector<std::string> extractSuffixes(QStringList const &files, std::string c
   });
 }
 
-std::vector<std::string> attachPrefix(std::vector<std::string> const &strings, std::string const &prefix) {
-  return transformElements(strings.begin(), strings.end(), [&prefix](std::string const &str) { return prefix + str; });
-}
-
 std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
   auto suffixes = extractSuffixes(files, "_");
 
   removeElementsIf(suffixes, [&](std::string const &suffix) { return suffix != "red" && suffix != "sqw"; });
   return suffixes;
-}
-
-IAlgorithm_sptr loadAlgorithm(std::string const &filepath, std::string const &outputName) {
-  auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filepath);
-  loadAlg->setProperty("OutputWorkspace", outputName);
-  return loadAlg;
-}
-
-namespace Regexes {
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
-const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
-const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
-const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
-} // namespace Regexes
-
-class ExcludeRegionDelegate : public QItemDelegate {
-public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
-                        const QModelIndex & /*index*/) const override {
-    auto lineEdit = std::make_unique<QLineEdit>(parent);
-    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
-    lineEdit->setValidator(validator.release());
-    return lineEdit.release();
-  }
-
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-    const auto value = index.model()->data(index, Qt::EditRole).toString();
-    static_cast<QLineEdit *>(editor)->setText(value);
-  }
-
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
-    auto *lineEdit = static_cast<QLineEdit *>(editor);
-    model->setData(index, lineEdit->text(), Qt::EditRole);
-  }
-
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                            const QModelIndex & /*index*/) const override {
-    editor->setGeometry(option.rect);
-  }
-};
-
-QStringList defaultHeaders() {
-  QStringList headers;
-  headers << "Workspace"
-          << "WS Index";
-  return headers;
-}
-
-class ScopedFalse {
-  bool &m_ref;
-  bool m_oldValue;
-
-public:
-  // this sets the input bool to false whilst this object is in scope and then
-  // resets it to its old value when this object drops out of scope.
-  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
-  ~ScopedFalse() { m_ref = m_oldValue; }
-};
-
-QStringList getSampleWSSuffices() {
-  QStringList const wsSampleSuffixes{"red", "sqw"};
-  return wsSampleSuffixes;
-}
-
-QStringList getSampleFBSuffices() {
-  QStringList const fbSampleSuffixes{"red.*", "sqw.*"};
-  return fbSampleSuffixes;
 }
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
@@ -186,13 +104,13 @@ void InelasticDataManipulationElwinTabView::setup() {
   // Number of decimal places in property browsers.
   static const unsigned int NUM_DECIMALS = 6;
   // Create Properties
-  m_properties["IntegrationStart"] = m_dblManager->addProperty("Start");
+  m_properties["IntegrationStart"] = m_dblManager->addProperty("IntegrationStart");
   m_dblManager->setDecimals(m_properties["IntegrationStart"], NUM_DECIMALS);
-  m_properties["IntegrationEnd"] = m_dblManager->addProperty("End");
+  m_properties["IntegrationEnd"] = m_dblManager->addProperty("IntegrationEnd");
   m_dblManager->setDecimals(m_properties["IntegrationEnd"], NUM_DECIMALS);
-  m_properties["BackgroundStart"] = m_dblManager->addProperty("Start");
+  m_properties["BackgroundStart"] = m_dblManager->addProperty("BackgroundStart");
   m_dblManager->setDecimals(m_properties["BackgroundStart"], NUM_DECIMALS);
-  m_properties["BackgroundEnd"] = m_dblManager->addProperty("End");
+  m_properties["BackgroundEnd"] = m_dblManager->addProperty("BackgroundEnd");
   m_dblManager->setDecimals(m_properties["BackgroundEnd"], NUM_DECIMALS);
 
   m_properties["BackgroundSubtraction"] = m_blnManager->addProperty("Background Subtraction");
@@ -226,7 +144,9 @@ void InelasticDataManipulationElwinTabView::setup() {
   connect(backgroundRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SIGNAL(valueChanged(QtProperty *, double)));
   connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(twoRanges(QtProperty *, bool)));
+  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SIGNAL(valueChanged(QtProperty *, bool)));
   twoRanges(m_properties["BackgroundSubtraction"], false);
 
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SIGNAL(filesFound()));
@@ -248,6 +168,8 @@ void InelasticDataManipulationElwinTabView::setup() {
 }
 
 IndirectPlotOptionsView *InelasticDataManipulationElwinTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+
+QTableWidget *InelasticDataManipulationElwinTabView::getDataTable() const { return m_uiForm.tbElwinData; }
 
 bool InelasticDataManipulationElwinTabView::validate() {
   if (validateFileSuffix()) {
@@ -568,72 +490,6 @@ InelasticDataManipulationElwinTabView::getAddWorkspaceDialog(QWidget *parent) co
 }
 
 void InelasticDataManipulationElwinTabView::clearInputFiles() { m_uiForm.dsInputFiles->clear(); }
-
-void InelasticDataManipulationElwinTabView::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(m_parent);
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-}
-
-void InelasticDataManipulationElwinTabView::closeDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
-}
-
-void InelasticDataManipulationElwinTabView::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
-    m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-}
-
-void InelasticDataManipulationElwinTabView::updateTableFromModel() {
-  ScopedFalse _signalBlock(m_emitCellChanged);
-  m_dataTable->setRowCount(0);
-  for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
-    addTableEntry(domainIndex);
-  }
-}
-
-QTableWidget *InelasticDataManipulationElwinTabView::getDataTable() const { return m_uiForm.tbElwinData; }
-
-void InelasticDataManipulationElwinTabView::addTableEntry(FitDomainIndex row) {
-  m_dataTable->insertRow(static_cast<int>(row.value));
-  const auto &name = m_dataModel->getWorkspace(row)->getName();
-  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
-  auto flags = cell->flags();
-  flags ^= Qt::ItemIsEditable;
-  cell->setFlags(flags);
-  setCell(std::move(cell), row.value, 0);
-
-  cell = std::make_unique<QTableWidgetItem>(QString::number(m_dataModel->getSpectrum(row)));
-  cell->setFlags(flags);
-  setCell(std::move(cell), row.value, workspaceIndexColumn());
-}
-
-void InelasticDataManipulationElwinTabView::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
-                                                    int column) {
-  m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
-}
-
-void InelasticDataManipulationElwinTabView::setCellText(const QString &text, FitDomainIndex row, int column) {
-  m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
-}
-
-int InelasticDataManipulationElwinTabView::workspaceIndexColumn() const { return 1; }
-
-void InelasticDataManipulationElwinTabView::setHorizontalHeaders(const QStringList &headers) {
-  m_dataTable->setColumnCount(headers.size());
-  m_dataTable->setHorizontalHeaderLabels(headers);
-
-  auto header = m_dataTable->horizontalHeader();
-  header->setSectionResizeMode(0, QHeaderView::Stretch);
-}
 
 void InelasticDataManipulationElwinTabView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_uiForm.elwinPreviewSpec->setCurrentIndex(0);

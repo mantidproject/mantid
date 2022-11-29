@@ -27,7 +27,6 @@ class MANTIDQT_INDIRECT_DLL InelasticDataManipulationElwinTabView : public QWidg
 public:
   InelasticDataManipulationElwinTabView(QWidget *parent = nullptr);
   ~InelasticDataManipulationElwinTabView();
-  void updateTableFromModel();
   QTableWidget *getDataTable() const;
   IndirectPlotOptionsView *getPlotOptions();
 
@@ -55,7 +54,7 @@ public:
   void setSaveResultEnabled(const bool &enabled);
   void clearInputFiles();
 
-  // getters for m_propperties
+  // getters for m_properties
   double getIntegrationStart();
   double getIntegrationEnd();
   double getBackgroundStart();
@@ -78,16 +77,8 @@ signals:
   void selectedSpectrumChanged(int);
   void previewIndexChanged(int);
   void filesFound();
-
-protected:
-  virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
-  virtual void addTableEntry(FitDomainIndex row);
-  void setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column);
-  void setCellText(const QString &text, FitDomainIndex row, int column);
-
-protected slots:
-  void showAddWorkspaceDialog();
-  virtual void closeDialog();
+  void valueChanged(QtProperty *, double);
+  void valueChanged(QtProperty *, bool);
 
 private:
   void setup();
@@ -104,31 +95,19 @@ private:
   void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty,
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);
   void setPreviewToDefault();
-
   void setButtonsEnabled(const bool &enabled);
   void setRunEnabled(const bool &enabled);
 
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
 
-  virtual int workspaceIndexColumn() const;
-
-  void setHorizontalHeaders(const QStringList &headers);
-
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
-  InelasticDataManipulation *m_parent;
-  QTableWidget *m_dataTable;
-  std::unique_ptr<IndirectFitDataModel> m_dataModel;
   QtDoublePropertyManager *m_dblManager;
   QtBoolPropertyManager *m_blnManager;
   QtGroupPropertyManager *m_grpManager;
-
   DoubleEditorFactory *m_dblEdFac;
   QtCheckBoxFactory *m_blnEdFac;
-
   QMap<QString, QtProperty *> m_properties;
-  bool m_emitCellChanged = true;
 
 private slots:
   void twoRanges(QtProperty *prop, bool enabled);

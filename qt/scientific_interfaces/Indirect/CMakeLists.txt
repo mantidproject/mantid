@@ -33,6 +33,7 @@ set(SRC_FILES
     InelasticDataManipulation.cpp
     InelasticDataManipulationTab.cpp
     InelasticDataManipulationElwinTab.cpp
+    InelasticDataManipulationElwinTabModel.cpp
     InelasticDataManipulationElwinTabView.cpp
     InelasticDataManipulationIqtTab.cpp
     IndirectDataReduction.cpp
@@ -133,6 +134,7 @@ set(MOC_FILES
     InelasticDataManipulation.h
     InelasticDataManipulationTab.h
     InelasticDataManipulationElwinTab.h
+    InelasticDataManipulationElwinTabModel.h
     InelasticDataManipulationElwinTabView.h
     InelasticDataManipulationIqtTab.h
     IndirectDataReduction.h

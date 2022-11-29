@@ -9,6 +9,7 @@
 #include "IAddWorkspaceDialog.h"
 #include "IndirectFitDataModel.h"
 #include "InelasticDataManipulation.h"
+#include "InelasticDataManipulationElwinTabModel.h"
 #include "InelasticDataManipulationElwinTabView.h"
 #include "InelasticDataManipulationTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -94,6 +95,7 @@ private:
 
   bool m_emitCellChanged = true;
   std::unique_ptr<InelasticDataManipulationElwinTabView> m_view;
+  std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
 
   virtual int workspaceIndexColumn() const;
 
@@ -106,6 +108,8 @@ private:
   void updateIntegrationRange();
 
 private slots:
+  void handleValueChanged(QtProperty *, double);
+  void handleValueChanged(QtProperty *, bool);
   void checkNewPreviewSelected(int index);
   void handlePreviewSpectrumChanged(int spectrum);
   void unGroupInput(bool error);
