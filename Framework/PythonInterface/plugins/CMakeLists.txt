@@ -167,6 +167,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveGEMMAUDParamFile.py
     algorithms/SaveGSSCW.py
     algorithms/SaveHKLCW.py
+    algorithms/SaveINS.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
