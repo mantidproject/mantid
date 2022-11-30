@@ -1,8 +1,7 @@
 # ######################################################################################################################
 # Define scripts for the Linux packages
 #
-# It provides: - launch_mantidworkbench.sh - mantidpython, mantid.sh <- for stable releases - mantid.csh <- for stable
-# releases
+# It provides: - launch_mantidworkbench.sh - mantid.sh <- for stable releases - mantid.csh <- for stable releases
 #
 # ######################################################################################################################
 
@@ -29,12 +28,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       CACHE PATH "Install path" FORCE
   )
 endif()
-
-# Tell rpm to use the appropriate python executable
-set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python ${Python_EXECUTABLE}")
-
-# Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps} Required for Fedora >= 18 and RHEL >= 7
-set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps)
 
 # ######################################################################################################################
 # Environment scripts (profile.d)
@@ -102,30 +95,10 @@ if("${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora"
     set(QT_QPA "")
   endif()
 
-  if(NOT MPI_BUILD)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_install.sh.in ${PRE_INSTALL_FILE} @ONLY)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_post_install.sh.in ${POST_INSTALL_FILE} @ONLY)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_uninstall.sh.in ${PRE_UNINSTALL_FILE} @ONLY)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_post_uninstall.sh.in ${POST_UNINSTALL_FILE} @ONLY)
-    # CPack variables
-    set(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${PRE_INSTALL_FILE})
-    set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${POST_INSTALL_FILE})
-    set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${PRE_UNINSTALL_FILE})
-    set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${POST_UNINSTALL_FILE})
-  endif()
 elseif("${UNIX_DIST}" MATCHES "Ubuntu")
   set(WRAPPER_PREFIX "")
   set(WRAPPER_POSTFIX "")
 
-  if(NOT MPI_BUILD)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_inst.in ${PRE_INSTALL_FILE} @ONLY)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_post_inst.in ${POST_INSTALL_FILE} @ONLY)
-    configure_file(${CMAKE_MODULE_PATH}/Packaging/deb/scripts/deb_pre_rm.in ${PRE_UNINSTALL_FILE} @ONLY)
-    # No postrm script as dpkg removes empty directories if everything else is tidied away.
-
-    # CPack variables
-    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${PRE_INSTALL_FILE};${POST_INSTALL_FILE};${PRE_UNINSTALL_FILE}")
-  endif()
 endif()
 
 # ######################################################################################################################
@@ -227,9 +200,6 @@ if(ENABLE_WORKBENCH)
     COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidworkbench.sh" OUTPUT_QUIET ERROR_QUIET
   )
 endif()
-configure_file(${CMAKE_MODULE_PATH}/Packaging/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY)
-# Needs to be executable
-execute_process(COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython" OUTPUT_QUIET ERROR_QUIET)
 configure_file(
   ${CMAKE_MODULE_PATH}/Packaging/AddPythonPath.py.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/AddPythonPath.py @ONLY
 )
@@ -267,17 +237,5 @@ if(ENABLE_WORKBENCH)
       DESTINATION ${BIN_DIR}
       RENAME mantidworkbench${DEST_FILENAME_SUFFIX}
     )
-    # mantidpython for jemalloc. Only required for conda as we expect those needing to use Python from the commandline
-    # to install the conda version
-    if(${install_type} EQUAL "conda")
-      configure_file(
-        ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY
-      )
-      install(
-        PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
-        DESTINATION ${BIN_DIR}
-        RENAME mantidpython
-      )
-    endif()
   endforeach()
 endif()

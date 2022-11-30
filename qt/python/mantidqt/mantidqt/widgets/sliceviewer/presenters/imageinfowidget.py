@@ -25,7 +25,7 @@ ImageInfoWidget = import_qt('.._common', 'mantidqt.widgets', 'ImageInfoWidget')
 
 
 class ImageInfoTracker(CursorTracker):
-    def __init__(self, image: Union[AxesImage, QuadMesh], transform: NonOrthogonalTransform,
+    def __init__(self, image: Union[AxesImage, QuadMesh], presenter, transform: NonOrthogonalTransform,
                  do_transform: bool, widget: ImageInfoWidget, cursor_transform: tuple = None):
         """
         Update the image that the widget refers too.
@@ -50,10 +50,12 @@ class ImageInfoTracker(CursorTracker):
             self.on_cursor_at = self._on_cursor_at_axesimage
         else:
             self.on_cursor_at = self._on_cursor_at_mesh
+        self._presenter = presenter
 
     def on_cursor_outside_axes(self):
         """Update the image table given the mouse has moved out of the image axes"""
-        self._widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
+        extra_cols = self._presenter.get_extra_image_info_columns(DBLMAX, DBLMAX)
+        self._widget.cursorAt(DBLMAX, DBLMAX, DBLMAX, extra_cols)
 
     # private api
 
@@ -66,15 +68,15 @@ class ImageInfoTracker(CursorTracker):
         """
         if self._image is None:
             return
-
         cinfo = cursor_info(self._image, xdata, ydata, full_bbox=self._cursor_transform)
         if cinfo is not None:
             arr, _, (i, j) = cinfo
             if (0 <= i < arr.shape[0]) and (0 <= j < arr.shape[1]) and not np.ma.is_masked(arr[i, j]):
+                extra_cols = self._presenter.get_extra_image_info_columns(xdata, ydata)
                 if (not self._cursor_transform) and self._image.transpose:
-                    # The cursor transform would have dealt with this
+                    # Only do this for MatrixWorkspace where ImageInfoWidget requires x to be TOF, y to be spectrum #
                     xdata, ydata = ydata, xdata
-                self._widget.cursorAt(xdata, ydata, arr[i, j])
+                self._widget.cursorAt(xdata, ydata, arr[i, j], extra_cols)
 
     def _on_cursor_at_mesh(self, xdata: float, ydata: float):
         """
@@ -89,4 +91,5 @@ class ImageInfoTracker(CursorTracker):
             return
         if self.do_transform:
             xdata, ydata = self.transform.inv_tr(xdata, ydata)
-        self._widget.cursorAt(xdata, ydata, DBLMAX)
+        extra_cols = self._presenter.get_extra_image_info_columns(xdata, ydata)
+        self._widget.cursorAt(xdata, ydata, DBLMAX, extra_cols)

@@ -12,5 +12,4 @@ Useful links
  * Build server: https://builds.mantidproject.org
  * Developer site: https://developer.mantidproject.org
 
-[![Build Status](https://builds.mantidproject.org/job/main_incremental/badge/icon)](https://builds.mantidproject.org/job/main_incremental/)
-[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/335.svg)](https://scan.coverity.com/projects/335)
+[![Build Status](https://builds.mantidproject.org/buildStatus/icon?job=main_nightly_deployment_prototype)](https://builds.mantidproject.org/job/main_nightly_deployment_prototype)

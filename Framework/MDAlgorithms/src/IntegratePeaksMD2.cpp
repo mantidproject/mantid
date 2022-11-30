@@ -457,22 +457,14 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius[0], 3) - std::pow(BackgroundOuterRadius[0], 3));
   // volume of PeakRadius sphere
   double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius[0], 3);
-  //
-  // If the following OMP pragma is included, this algorithm seg faults
-  // sporadically when processing multiple TOPAZ runs in a script, on
-  // Scientific Linux 6.2.  Typically, it seg faults after 2 to 6 runs are
-  // processed, though occasionally it will process all 8 requested in the
-  // script without crashing.  Since the lower level codes already use OpenMP,
-  // parallelizing at this level is only marginally useful, giving about a
-  // 5-10% speedup.  Perhaps is should just be removed permanantly, but for
-  // now it is commented out to avoid the seg faults.  Refs #5533
-  // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
+
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
+  bool doParallel = cylinderBool ? false : Kernel::threadSafe(*ws, *peakWS);
+  PARALLEL_FOR_IF(doParallel)
   for (int i = 0; i < nPeaks; ++i) {
-    if (this->getCancel())
-      break; // User cancellation
+    PARALLEL_START_INTERRUPT_REGION
     progress.report();
 
     // Get a direct ref to that peak.
@@ -767,9 +759,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         signal = 0.;
         for (size_t j = 0; j < numSteps; j++) {
           if (j < peakMin || j > peakMax)
-            background_total = background_total + wsProfile2D->mutableY(i)[j];
+            background_total = background_total + wsProfile2D->y(i)[j];
           else
-            signal = signal + wsProfile2D->mutableY(i)[j];
+            signal = signal + wsProfile2D->y(i)[j];
         }
         errorSquared = std::fabs(signal);
       } else {
@@ -891,7 +883,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << " (sig^2 " << errorSquared
                         << "), with background " << bgSignal + ratio * background_total << " (sig^2 "
                         << bgErrorSquared + ratio * ratio * std::fabs(background_total) << ") subtracted.\n";
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
   // This flag is used by the PeaksWorkspace to evaluate whether it has
   // been integrated.
   peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true);

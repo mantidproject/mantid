@@ -125,6 +125,7 @@ class FigureInteraction(object):
             zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
         elif event.button == 'down':  # zoom out
             zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
+        self.redraw_annotations()
         event.canvas.draw()
 
     def on_mouse_button_press(self, event):
@@ -141,8 +142,7 @@ class FigureInteraction(object):
 
         # If left button clicked, start moving peaks
         if self.toolbar_manager.is_tool_active():
-            for marker in self.markers:
-                marker.remove_all_annotations()
+            self._remove_all_marker_annotations()
         elif event.button == 1 and marker_selected is not None:
             for marker in marker_selected:
                 if len(marker_selected) > 1:
@@ -171,6 +171,7 @@ class FigureInteraction(object):
                 if event.inaxes and event.inaxes.can_pan():
                     event.button = 1
                     try:
+                        self._remove_all_marker_annotations()
                         self.canvas.toolbar.press_pan(event)
                     finally:
                         event.button = 3
@@ -185,6 +186,7 @@ class FigureInteraction(object):
                 event.button = 1
                 try:
                     self.canvas.toolbar.release_pan(event)
+                    self._add_all_marker_annotations()
                 finally:
                     event.button = 3
         elif event.button == self.canvas.buttond.get(Qt.RightButton) and self.toolbar_manager.is_zoom_active():
@@ -192,8 +194,7 @@ class FigureInteraction(object):
             self.toolbar_manager.emit_sig_home_clicked()
 
         if self.toolbar_manager.is_tool_active():
-            for marker in self.markers:
-                marker.add_all_annotations()
+            self._add_all_marker_annotations()
         else:
             x_pos = event.xdata
             y_pos = event.ydata
@@ -722,6 +723,14 @@ class FigureInteraction(object):
             marker.remove_all_annotations()
             marker.add_all_annotations()
 
+    def _remove_all_marker_annotations(self):
+        for marker in self.markers:
+            marker.remove_all_annotations()
+
+    def _add_all_marker_annotations(self):
+        for marker in self.markers:
+            marker.add_all_annotations()
+
     def mpl_redraw_annotations(self, event):
         """Redraws all annotations when a mouse button was clicked"""
         if hasattr(event, 'button') and event.button is not None:
@@ -811,12 +820,6 @@ class FigureInteraction(object):
             if arg_set['workspaces'] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
-                arg_set_copy = copy(arg_set)
-                [
-                    arg_set_copy.pop(key)
-                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
-                    if key in arg_set_copy.keys()
-                ]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
                         arg_set['specNum'] = workspace.getSpectrum(
@@ -824,6 +827,13 @@ class FigureInteraction(object):
                     else:
                         raise RuntimeError("No spectrum number associated with plot of "
                                            "workspace '{}'".format(workspace.name()))
+
+                arg_set_copy = copy(arg_set)
+                for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']:
+                    try:
+                        del arg_set_copy[key]
+                    except KeyError:
+                        continue
                 # 2D plots have no spec number so remove it
                 if figure_type(self.canvas.figure) in [FigureType.Image, FigureType.Contour]:
                     arg_set_copy.pop('specNum')

@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# This script expects a setup environment with all dependencies availiable in
+# This script expects a setup environment with all dependencies available in
 # the environment
 #
 # Expected args:

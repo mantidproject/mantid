@@ -414,6 +414,11 @@ void AlgorithmHistoryWindow::writeToScriptFile() {
   if (filePath.isEmpty())
     return;
 
+  // fix for 34451 in Linux, unlike native filedialog, QFileDialog will not add file extension by type
+  // This only occur in Linux as in Win and Mac QFileDialog calls the native filedialog
+  if (!filePath.endsWith(".py"))
+    filePath += ".py";
+
   ScriptBuilder builder(m_view, getScriptVersionMode());
   std::ofstream file(filePath.toStdString().c_str(), std::ofstream::trunc);
   file << builder.build();
@@ -511,6 +516,7 @@ AlgHistoryProperties::AlgHistoryProperties(QWidget *w, std::vector<PropertyHisto
         << "";
 
   m_histpropTree = new QTreeWidget(w);
+  m_histpropTree->setTextElideMode(Qt::ElideMiddle);
   m_histpropTree->setColumnCount(5);
   m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
   m_histpropTree->setHeaderLabels(hList);
@@ -575,7 +581,7 @@ void AlgHistoryProperties::displayAlgHistoryProperties() {
     sProperty = (*pIter)->name();
     propList.append(sProperty.c_str());
 
-    sProperty = Strings::shorten((*pIter)->value(), 40);
+    sProperty = (*pIter)->value();
     bool bisDefault = (*pIter)->isDefault();
     if (bisDefault == true) {
       if ((*pIter)->isEmptyDefault()) {

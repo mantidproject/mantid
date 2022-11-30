@@ -557,6 +557,11 @@ void FitPeaks::processInputFunctions() {
     bkgdname = bkgdfunctiontype;
   m_bkgdFunction =
       std::dynamic_pointer_cast<IBackgroundFunction>(API::FunctionFactory::Instance().createFunction(bkgdname));
+  if (m_highBackground)
+    m_linearBackgroundFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
+        API::FunctionFactory::Instance().createFunction("LinearBackground"));
+  else
+    m_linearBackgroundFunction = nullptr;
 
   // TODO check that both parameter names and values exist
   // input peak parameters
@@ -1611,9 +1616,7 @@ double FitPeaks::fitFunctionHighBackground(const IAlgorithm_sptr &fit, const std
                                            const size_t &ws_index, const double &expected_peak_center,
                                            bool observe_peak_shape, const API::IPeakFunction_sptr &peakfunction,
                                            const API::IBackgroundFunction_sptr &bkgdfunc) {
-  if (!m_linearBackgroundFunction)
-    m_linearBackgroundFunction = std::dynamic_pointer_cast<IBackgroundFunction>(
-        API::FunctionFactory::Instance().createFunction("LinearBackground"));
+  assert(m_linearBackgroundFunction);
 
   // high background to reduce
   API::IBackgroundFunction_sptr high_bkgd_function =

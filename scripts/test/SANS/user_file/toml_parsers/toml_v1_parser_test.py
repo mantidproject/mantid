@@ -177,8 +177,29 @@ class TomlV1ParserTest(unittest.TestCase):
         two_d_convert_to_q = results.get_state_convert_to_q()
         self.assertEqual(5.0, two_d_convert_to_q.q_xy_max)
         self.assertEqual(1.0, two_d_convert_to_q.q_xy_step)
-        self.assertTrue(two_d_convert_to_q.q_xy_step_type is RangeStepType.LIN)
         self.assertTrue(results.get_state_calculate_transmission().rebin_type is RebinType.REBIN)
+
+    def test_binning_commands_ignores_log(self):
+        # Wavelength
+        for bin_type in ["Lin", "Log"]:
+            wavelength_dict = {"binning": {"wavelength": {"start": 1.1, "step": 0.1, "stop": 2.2, "type": bin_type}}}
+            wavelength = self._setup_parser(wavelength_dict).get_state_wavelength()
+            self.assertEqual((1.1, 2.2), wavelength.wavelength_interval.wavelength_full_range)
+            self.assertEqual(0.1, wavelength.wavelength_interval.wavelength_step)
+            self.assertEqual(RangeStepType(bin_type), wavelength.wavelength_step_type)
+
+        one_d_reduction_q_dict = {"binning": {"1d_reduction": {"binning": "1.0, 0.1, 2.0, -0.2, 3.0",
+                                                               "radius_cut": 12.3,
+                                                               "wavelength_cut": 23.4}}}
+        one_d_convert_to_q = self._setup_parser(one_d_reduction_q_dict).get_state_convert_to_q()
+        self.assertEqual(1.0, one_d_convert_to_q.q_min)
+        self.assertEqual(3.0, one_d_convert_to_q.q_max)
+        self.assertEqual("1.0, 0.1, 2.0, -0.2, 3.0", one_d_convert_to_q.q_1d_rebin_string.strip())
+        self.assertEqual(12.3, one_d_convert_to_q.radius_cutoff)
+        self.assertEqual(23.4, one_d_convert_to_q.wavelength_cutoff)
+
+        two_d_reduction_q_dict = {"binning": {"2d_reduction": {"step": 1.0, "stop": 5.0, "type": "Log"}}}
+        self.assertRaises(ValueError, self._setup_parser, two_d_reduction_q_dict)
 
     def test_reduction_commands_parsed(self):
         top_level_dict = {"reduction": {"merged": {},

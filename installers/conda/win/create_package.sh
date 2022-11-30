@@ -76,7 +76,6 @@ echo "Creating conda env from mantidworkbench and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
   --copy --channel $CONDA_CHANNEL --channel conda-forge -y \
   mantidworkbench \
-  notebook \
   m2w64-jq
 echo "Conda env created"
 
@@ -110,7 +109,6 @@ mv $CONDA_ENV_PATH/Library/bin/mantid-scripts.pth $COPY_DIR/bin/
 
 echo "Copy Mantid icon files from source to package/bin"
 cp $THIS_SCRIPT_DIR/../../../images/mantid_workbench$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_workbench.ico
-cp $THIS_SCRIPT_DIR/../../../images/mantid_notebook$LOWER_CASE_SUFFIX.ico $COPY_DIR/bin/mantid_notebook.ico
 
 echo "Copy Instrument details to the package"
 mv $CONDA_ENV_PATH/Library/instrument $COPY_DIR/

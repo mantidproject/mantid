@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/BeamProfileFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
@@ -463,14 +464,7 @@ void DiscusMultipleScatteringCorrection::exec() {
                              "AlwaysStoreInADS set to true");
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  m_sampleShape = inputWS->sample().getShapePtr();
-  // generate the bounding box before the multithreaded section
-  m_sampleShape->getBoundingBox();
-  try {
-    m_env = &inputWS->sample().getEnvironment();
-  } catch (std::runtime_error &) {
-    // swallow this as no defined environment from getEnvironment
-  }
+  prepareSampleBeamGeometry(inputWS);
   prepareStructureFactors();
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
@@ -530,9 +524,6 @@ void DiscusMultipleScatteringCorrection::exec() {
     outputWSs.emplace_back(outputWS);
   }
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? *sparseWS : *inputWS;
-
-  m_refframe = inputWS->getInstrument()->getReferenceFrame();
-  m_sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const auto nhists = useSparseInstrument ? sparseWS->getNumberHistograms() : inputWS->getNumberHistograms();
 
   const int nSingleScatterEvents = getProperty("NeutronPathsSingle");
@@ -546,7 +537,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   m_importanceSampling = getProperty("ImportanceSampling");
 
   Progress prog(this, 0.0, 1.0, nhists * nSimulationPoints);
-  prog.setNotifyStep(0.01);
+  prog.setNotifyStep(0.1);
   const std::string reportMsg = "Computing corrections";
 
   bool enableParallelFor = true;
@@ -594,8 +585,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
       for (size_t bin = 0; bin < nbins; bin += xStepSize) {
         const double kinc = std::get<0>(kInW[bin]);
-        if (kinc <= 0) {
-          g_log.warning("Skipping calculation for bin with x<=0, workspace index=" + std::to_string(i) +
+        if ((kinc <= 0) || std::isnan(kinc)) {
+          g_log.warning("Skipping calculation for bin with invalid x, workspace index=" + std::to_string(i) +
                         " bin index=" + std::to_string(std::get<1>(kInW[bin])));
           continue;
         }
@@ -1745,22 +1736,18 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
 
 /**
  * Generate an initial track starting at the source and entering
- * the sample at a random point on its front surface
+ * the sample/sample environment at a random point on its front surface
  * @param rng Random number generator
  * @return a track
  */
 Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng) {
-  auto &sampleBox = m_sampleShape->getBoundingBox();
   // generate random point on front surface of sample bounding box
   // The change of variables from length to t1 means this still samples the points fairly in the integration
   // volume even in shapes like cylinders where the depth varies across xy
-  auto sampleBoxWidth = sampleBox.width();
-  auto ptx = sampleBox.minPoint()[m_refframe->pointingHorizontal()] +
-             rng.nextValue() * sampleBoxWidth[m_refframe->pointingHorizontal()];
-  auto pty =
-      sampleBox.minPoint()[m_refframe->pointingUp()] + rng.nextValue() * sampleBoxWidth[m_refframe->pointingUp()];
+  auto neutron = m_beamProfile->generatePoint(rng, m_activeRegion);
+  auto ptx = neutron.startPos.X();
+  auto pty = neutron.startPos.Y();
 
-  // perhaps eventually also generate random point on the beam profile?
   auto ptOnBeamProfile = Kernel::V3D();
   ptOnBeamProfile[m_refframe->pointingHorizontal()] = ptx;
   ptOnBeamProfile[m_refframe->pointingUp()] = pty;
@@ -1916,6 +1903,25 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
   // can't return iterator because boost have moved vec_iterator into a different namespace post v1.65.1 so won't
   // build on all platforms
   return &(*componentWSIt);
+}
+
+void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS) {
+  m_sampleShape = inputWS->sample().getShapePtr();
+  try {
+    m_env = &inputWS->sample().getEnvironment();
+  } catch (std::runtime_error &) {
+    // swallow this as no defined environment from getEnvironment
+  }
+  // generate the bounding box before the multithreaded section
+  m_activeRegion = m_sampleShape->getBoundingBox();
+  if (m_env) {
+    const auto &envBox = m_env->boundingBox();
+    m_activeRegion.grow(envBox);
+  }
+  auto instrument = inputWS->getInstrument();
+  m_beamProfile = BeamProfileFactory::createBeamProfile(*instrument, inputWS->sample());
+  m_refframe = instrument->getReferenceFrame();
+  m_sourcePos = instrument->getSource()->getPos();
 }
 
 } // namespace Mantid::Algorithms

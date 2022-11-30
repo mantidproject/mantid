@@ -9,6 +9,7 @@
 #include "Common/Detector.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
@@ -50,7 +51,7 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
   m_jobManager->subscribe(this);
 
   m_view->setInstViewToolbarEnabled(false);
-  m_view->setRegionSelectorToolbarEnabled(false);
+  m_view->setRegionSelectorEnabled(false);
 
   m_plotPresenter->setScaleLog(AxisID::YLeft);
   m_plotPresenter->setScaleLog(AxisID::XBottom);
@@ -107,6 +108,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   if (hasLinearDetector(ws)) {
     m_view->resetInstView();
+    m_view->setInstViewToolbarEnabled(false);
     m_model->setSummedWs(ws);
     notifySumBanksCompleted();
   } else {
@@ -125,7 +127,7 @@ void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
-  m_view->setRegionSelectorToolbarEnabled(true);
+  m_view->setRegionSelectorEnabled(true);
   // Perform reduction to update the next plot, if possible
   runReduction();
 }
@@ -168,7 +170,8 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   notifyInstViewEditRequested();
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
-  m_model->setSelectedBanks(indices);
+  auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+  m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
   // Execute summing the selected banks
   runSumBanks();
 }
@@ -201,6 +204,12 @@ void PreviewPresenter::notifyLinePlotExportAdsRequested() { m_model->exportReduc
 void PreviewPresenter::notifyApplyRequested() {
   try {
     m_mainPresenter->notifyPreviewApplyRequested();
+  } catch (InvalidTableException const &ex) {
+    std::ostringstream msg;
+    msg << "Could not update Experiment Settings: ";
+    msg << ex.what();
+    msg << " Please fix any errors in the Experiment Settings table and try again.";
+    g_log.error(msg.str());
   } catch (RowNotFoundException const &ex) {
     std::ostringstream msg;
     msg << "Could not update Experiment Settings: ";
@@ -250,7 +259,7 @@ PreviewRow const &PreviewPresenter::getPreviewRow() const { return m_model->getP
 
 void PreviewPresenter::clearRegionSelector() {
   m_regionSelector->clearWorkspace();
-  m_view->setRegionSelectorToolbarEnabled(false);
+  m_view->setRegionSelectorEnabled(false);
 }
 
 void PreviewPresenter::clearReductionPlot() {

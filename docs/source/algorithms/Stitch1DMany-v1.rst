@@ -32,8 +32,7 @@ same number of workspaces. The algorithm will stitch together the workspaces
 in the first group before stitching workspaces from the next group on top
 of the previous ones.
 
-When stitching the workspaces, either the RHS or LHS workspaces can be scaled.
-We can specify manual scale factors to use by setting
+When stitching the workspaces, we can specify manual scale factors to use by setting
 :literal:`UseManualScaleFactors` true and passing values to
 :literal:`ManualScaleFactors`. For group workspaces, we can also use
 :literal:`ScaleFactorFromPeriod` to select a period which will obtain a vector
@@ -43,7 +42,8 @@ to all other periods when stitching.
 The workspace that provides the scale for stitching output can be chosen by
 specifying the desired index through :literal:`IndexOfReference` property.
 The reference workspace will not be scaled, and the other workspaces will be scaled
-to match the reference.
+to match the reference. Note that this property should be used instead of
+:literal:`ScaleRHSWorkspace`, which no longer has any effect and will eventually be removed.
 
 Workflow
 --------
@@ -54,10 +54,10 @@ The algorithm workflow is as follows:
    workspaces or not. The algorithm handles matrix workspaces differently from
    group workspaces.
 #. If matrix workspaces are supplied, the algorithm simply iterates over each
-   workspace and calls the :literal:`Stitch1D` algorithm. This stitches each RHS
-   workspace to the LHS workspace to form a single stitched workspace (LHS to
-   RHS if ScaleRHSWorkspace is set to false). The resultant workspace and its
-   scale factor are outputted.
+   workspace and calls the :literal:`Stitch1D` algorithm. This stitches each pair
+   of workspaces together, with either the RHS or LHS workspace being scaled
+   depending on the chosen reference workspace (given by :literal:`IndexOfReference`).
+   The resultant workspace and its scale factor are outputted.
 #. If group workspaces are supplied, the algorithm checks whether or not to
    scale workspaces using scale factors from a specific period (given by
    :literal:`ScaleFactorFromPeriod`). This is done only if

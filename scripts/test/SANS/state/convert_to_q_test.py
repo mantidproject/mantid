@@ -23,7 +23,7 @@ class StateConvertToQTest(unittest.TestCase):
                            "gravity_extra_length": 12., "radius_cutoff": 1.5, "wavelength_cutoff": 2.7,
                            "q_min": 0.5, "q_max": 1., "q_1d_rebin_string": "0.5,0.2,1.",
                            "q_step2": 1., "q_step_type2": RangeStepType.LIN, "q_mid": 1.,
-                           "q_xy_max": 1.4, "q_xy_step": 24.5, "q_xy_step_type": RangeStepType.LIN,
+                           "q_xy_max": 1.4, "q_xy_step": 24.5,
                            "use_q_resolution": True, "q_resolution_collimation_length": 12.,
                            "q_resolution_delta_r": 12., "moderator_file": "test.txt", "q_resolution_a1": 1.,
                            "q_resolution_a2": 2., "q_resolution_h1": 1., "q_resolution_h2": 2., "q_resolution_w1": 1.,

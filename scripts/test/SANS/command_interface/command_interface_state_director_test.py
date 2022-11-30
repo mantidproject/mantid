@@ -111,7 +111,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
 
         # QXY Limits
         command = NParameterCommand(command_id=NParameterCommandId.QXY_LIMIT,
-                                    values=[1.23, 23., 1.1, RangeStepType.LIN])
+                                    values=[1.23, 23., 1.1])
         self._assert_raises_nothing(command_interface.add_command, command)
 
         # Process all commands
@@ -183,7 +183,6 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
         self.assertEqual(state.adjustment.calculate_transmission.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state.convert_to_q.q_xy_max,  23.)
         self.assertEqual(state.convert_to_q.q_xy_step,  1.1)
-        self.assertEqual(state.convert_to_q.q_xy_step_type, RangeStepType.LIN)
 
     def test_that_can_remove_last_command(self):
         # Arrange

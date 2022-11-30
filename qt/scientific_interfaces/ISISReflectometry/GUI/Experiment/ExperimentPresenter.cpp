@@ -105,8 +105,13 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
+  if (!hasValidSettings()) {
+    throw InvalidTableException("The Experiment Settings table contains invalid settings.");
+  }
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
     auto lookupRowCopy = *foundRow;
+
+    lookupRowCopy.setRoiDetectorIDs(previewRow.getSelectedBanks());
 
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Signal);
     updateLookupRowProcessingInstructions(previewRow, lookupRowCopy, ROIType::Background);
@@ -123,7 +128,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
 void ExperimentPresenter::updateLookupRowProcessingInstructions(PreviewRow const &previewRow, LookupRow &lookupRow,
                                                                 ROIType regionType) {
   auto const instructions = previewRow.getProcessingInstructions(regionType);
-  lookupRow.setProcessingInstructions(regionType, instructions);
+  lookupRow.setProcessingInstructions(regionType, std::move(instructions));
 }
 
 void ExperimentPresenter::restoreDefaults() {

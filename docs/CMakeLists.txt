@@ -38,12 +38,6 @@ endif()
 # Add a sphinx build target to build documentation builder - Name of the sphinx builder: html, qthelp etc target_name -
 # Optional target name. Default=docs-${builder}
 function(add_sphinx_build_target builder math_renderer)
-  if(CONDA_BUILD)
-    set(runner ${Python_EXECUTABLE})
-  else()
-    set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython$<$<BOOL:${WIN32}>:.bat>)
-    set(runner_args "--classic")
-  endif()
 
   if(ARGC GREATER 2)
     set(target_name ${ARGV2})
@@ -77,8 +71,9 @@ function(add_sphinx_build_target builder math_renderer)
     ${target_name}
     COMMAND
       ${CMAKE_COMMAND} -E env SCREENSHOTS_DIR=${SCREENSHOTS_DIR} DIAGRAMS_DIR=${DIAGRAMS_DIR}
-      DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE} ${runner}
-      ${runner_args} -m ${SPHINX_MAIN} ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
+      DOT_EXECUTABLE=${DOT_EXECUTABLE} MATH_EXT=${math_renderer} ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
+      PYTHONPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} ${Python_EXECUTABLE} -m ${SPHINX_MAIN}
+      ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
     DEPENDS ${target_dependencies} ${SPHINX_CONF_DIR}/conf.py ${conf_builder}
     COMMENT "Building ${builder} documentation using ${math_renderer}"
   )

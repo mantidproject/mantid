@@ -20,13 +20,14 @@ namespace ISISReflectometry {
 class RunsPresenterFactory {
 public:
   RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance,
-                       std::vector<std::string> instruments, IReflMessageHandler *messageHandler)
+                       std::vector<std::string> instruments, IReflMessageHandler *messageHandler,
+                       IFileHandler *fileHandler)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)), m_thetaTolerance(std::move(thetaTolerance)),
-        m_instruments(std::move(instruments)), m_messageHandler(messageHandler) {}
+        m_instruments(std::move(instruments)), m_messageHandler(messageHandler), m_fileHandler(fileHandler) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(view, view, m_runsTablePresenterFactory, m_thetaTolerance, m_instruments,
-                                           m_messageHandler);
+                                           m_messageHandler, m_fileHandler);
   }
 
 private:
@@ -34,6 +35,7 @@ private:
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   IReflMessageHandler *m_messageHandler;
+  IFileHandler *m_fileHandler;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

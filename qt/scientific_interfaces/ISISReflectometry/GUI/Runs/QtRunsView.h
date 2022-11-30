@@ -119,6 +119,7 @@ private slots:
   void on_actionAutoreduce_triggered();
   void on_actionAutoreducePause_triggered();
   void on_actionTransfer_triggered();
+  void on_actionExport_triggered();
   void on_buttonMonitor_clicked();
   void on_buttonStopMonitor_clicked();
   void onStartMonitorComplete();

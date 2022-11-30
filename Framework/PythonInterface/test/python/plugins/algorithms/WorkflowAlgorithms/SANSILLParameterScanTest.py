@@ -26,29 +26,34 @@ class SANSILLParameterScanTest(unittest.TestCase):
         mtd.clear()
 
     def test_D16_omega(self):
+        output_name = "output2d"
         SANSILLParameterScan(SampleRun="066321.nxs",
-                             OutputWorkspace="output2d",
+                             OutputWorkspace=output_name,
                              OutputJoinedWorkspace="reduced",
                              Observable="Omega.value",
                              PixelYmin=3,
                              PixelYMax=189)
-        self._check_output(mtd["output2d"], 6)
+
+        ws = mtd[output_name]
+        self._check_output(ws, 6, 1152)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(0), -42.9348, delta=4)
+        self.assertAlmostEqual(ws.getAxis(0).getValue(1151), 43.0836, delta=4)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(0), 5.2, delta=3)
+        self.assertAlmostEqual(ws.getAxis(1).getValue(1), 5.4, delta=3)
         self.assertTrue(mtd["reduced"])
 
-    def _check_output(self, ws, spectra=1):
+    def _check_output(self, ws, spectra, blocksize):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, MatrixWorkspace))
         self.assertEqual(str(ws.getAxis(0).getUnit().symbol()), "degrees")
         self.assertEqual(ws.getAxis(0).getUnit().caption(), "Scattering angle")
         self.assertEqual(str(ws.getAxis(1).getUnit().symbol()), "degrees")
         self.assertEqual(ws.getAxis(1).getUnit().caption(), "Omega.value")
-        self.assertAlmostEqual(ws.getAxis(1).getValue(0), 5.2, delta=3)
-        self.assertAlmostEqual(ws.getAxis(1).getValue(1), 5.4, delta=3)
         self.assertEqual(ws.getNumberHistograms(), spectra)
         self.assertTrue(ws.getInstrument())
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getHistory())
-        self.assertTrue(ws.blocksize(), 1152)
+        self.assertTrue(ws.blocksize(), blocksize)
         self.assertTrue(not ws.isHistogramData())
         self.assertTrue(not ws.isDistribution())
 

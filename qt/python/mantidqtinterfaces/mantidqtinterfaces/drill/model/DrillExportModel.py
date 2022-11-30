@@ -231,7 +231,6 @@ class DrillExportModel:
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
-
                 filename = os.path.join(
                         exportPath, wsName + ext)
                 name = wsName + ":" + filename
@@ -246,7 +245,8 @@ class DrillExportModel:
                         kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
-                        kwargs['FileExtension'] = 'custom'
+                        kwargs['FileExtension'] = ext
+                        kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value')
                     else:
                         kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,

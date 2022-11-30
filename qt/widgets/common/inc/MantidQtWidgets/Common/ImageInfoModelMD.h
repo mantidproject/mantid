@@ -21,9 +21,11 @@ public:
    * @param x: x data coordinate
    * @param y: y data coordinate
    * @param signal: the signal value at x, y
+   * @param extraValues: extra values to be displayed in the image info table
    * @return An ImageInfo object describing the point
    */
-  ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const override;
+  ImageInfoModel::ImageInfo info(const double x, const double y, const double signal,
+                                 const QMap<QString, QString> &extraValues) const override;
 };
 
 } // namespace MantidWidgets

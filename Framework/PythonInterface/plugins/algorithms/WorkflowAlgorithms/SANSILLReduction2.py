@@ -526,12 +526,22 @@ class SANSILLReduction(PythonAlgorithm):
                 check_wavelengths_match(mtd[solvent_ws], mtd[ws])
                 Minus(LHSWorkspace=ws, RHSWorkspace=solvent_ws, OutputWorkspace=ws)
 
-    def apply_solid_angle(self, ws):
-        """Calculates solid angle and divides by it"""
+    def apply_solid_angle(self, ws: str):
+        """
+        Calculates the solid angle and divides by it.
+        @param ws: the name of the workspace on which to apply the solid angle correction
+        """
         sa_ws = ws + '_solidangle'
+        method = 'Rectangle '
+
         # D22B has the front panel tilted, hence the Rectangle approximation is wrong
         # D16 can be rotated around the sample, where again rectangle is wrong unless we rotate back
-        method = 'GenericShape' if self.instrument == 'D22B' or self.instrument == 'D16' else 'Rectangle'
+        if self.instrument == 'D22B' or self.instrument == 'D16':
+            method = 'GenericShape'
+        # new D16 is a banana detector
+        elif self.instrument == 'D16B':
+            method = 'VerticalTube'
+
         SolidAngle(InputWorkspace=ws, OutputWorkspace=sa_ws, Method=method)
         Divide(LHSWorkspace=ws, RHSWorkspace=sa_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
         DeleteWorkspace(Workspace=sa_ws)
@@ -831,29 +841,34 @@ class SANSILLReduction(PythonAlgorithm):
         There it could load the instrument only with the first run to save some time
         The main complexity here is the injection of blanks (for sample) and replicas (for transmission)
         """
-        if not self.getPropertyValue('Runs'):
-            #
-            self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
-            return
-
         ws = self.getPropertyValue('OutputWorkspace')
-        tmp = f'__{ws}'
-        runs = self.getPropertyValue('Runs').split(',')
-        non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
-        blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
+        if not self.getProperty('Runs').isDefault:
+            tmp = f'__{ws}'
+            runs = self.getPropertyValue('Runs').split(',')
+            non_blank_runs = list(filter(lambda x: x != EMPTY_TOKEN, runs))
+            blank_runs = list(filter(lambda x: x == EMPTY_TOKEN, runs))
 
-        nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
-        self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
+            nreports = len(non_blank_runs) + self.processes.index(self.getPropertyValue('ProcessAs')) + 2
+            self.progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
 
-        if self.getPropertyValue('ProcessAs') == 'Transmission':
-            # sometimes the same transmission can be applied to many samples
-            non_blank_runs = self.remove_repeated(non_blank_runs)
+            if self.getPropertyValue('ProcessAs') == 'Transmission':
+                # sometimes the same transmission can be applied to many samples
+                non_blank_runs = self.remove_repeated(non_blank_runs)
 
-        LoadAndMerge(Filename=','.join(non_blank_runs), OutputWorkspace=tmp, startProgress=0., endProgress=len(non_blank_runs)/nreports)
-        self.progress.report(len(non_blank_runs), 'Loaded')
+            LoadAndMerge(Filename=','.join(non_blank_runs),
+                         OutputWorkspace=tmp,
+                         startProgress=0.,
+                         endProgress=len(non_blank_runs)/nreports)
+
+            self.progress.report(len(non_blank_runs), 'Loaded')
+        else:
+            # no runs have been provided, so the user has given an already loaded workspace
+            tmp = self.getPropertyValue('SampleWorkspace')
+            blank_runs = []
+            self.progress = Progress(self, start=0.0, end=1.0, nreports=10)
 
         if isinstance(mtd[tmp], MatrixWorkspace) and blank_runs:
-            # if we loaded a single workspace but there are blanks, need to make a group so that the blanks can be inserted
+            # if we loaded a single workspace but there are blanks, need to make a group so the blanks can be inserted
             RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=tmp+'_0')
             GroupWorkspaces(InputWorkspaces=[tmp+'_0'], OutputWorkspace=tmp)
 
@@ -880,7 +895,9 @@ class SANSILLReduction(PythonAlgorithm):
             self.preprocess(tmp)
             if self.mode == AcqMode.REVENT or self.mode == AcqMode.MONO:
                 self.linearize_axis(tmp)
-            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
+            if tmp != ws:
+                RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
+
         self.set_process_as(ws)
         assert isinstance(mtd[ws], MatrixWorkspace)
         self.progress.report('Combined')
@@ -981,10 +998,7 @@ class SANSILLReduction(PythonAlgorithm):
         If we are processing the empty beam we apply the dark current correction and process as empty beam
         If we are processing transmission, we apply both dark current and empty beam corrections and process as transmission
         """
-        if not self.getPropertyValue('Runs'):
-            ws = self.getPropertyValue('SampleWorkspace')
-        else:
-            ws = self.getPropertyValue('OutputWorkspace')
+        ws = self.getPropertyValue('OutputWorkspace')
 
         self.apply_normalisation(ws)
         self.progress.report()

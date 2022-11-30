@@ -21,4 +21,10 @@ struct MultipleRowsFoundException : public std::length_error {
 public:
   MultipleRowsFoundException(std::string s) : std::length_error(std::move(s)){};
 };
+
+struct InvalidTableException : public std::runtime_error {
+public:
+  InvalidTableException(std::string s) : std::runtime_error(std::move(s)){};
+};
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

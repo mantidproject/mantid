@@ -731,7 +731,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
   */
 
   // Try known shapes or CSG first if supplied
-  if (args) {
+  if (isDictionaryPopulated(args)) {
     const auto refFrame = experiment.getInstrument()->getReferenceFrame();
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
@@ -751,7 +751,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     const auto &can = sampleEnv->getContainer();
     if (sampleEnv->getContainer().hasCustomizableSampleShape()) {
       Container::ShapeArgs shapeArgs;
-      if (args) {
+      if (isDictionaryPopulated(args)) {
         const auto &props = args->getProperties();
         for (const auto &prop : props) {
           // assume in cm
@@ -769,7 +769,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
       }
       experiment.mutableSample().setShape(shapeObject);
     } else if (sampleEnv->getContainer().hasFixedSampleShape()) {
-      if (args) {
+      if (isDictionaryPopulated(args)) {
         throw std::runtime_error("The can has a fixed sample shape that cannot "
                                  "be adjusted using the Geometry parameter.");
       }
@@ -787,7 +787,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
 
       experiment.mutableSample().setShape(shapeObject);
     } else {
-      if (args) {
+      if (isDictionaryPopulated(args)) {
         throw std::runtime_error("Cannot override the sample shape because the "
                                  "environment definition does not define a "
                                  "default sample shape. Please either provide "

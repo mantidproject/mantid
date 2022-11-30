@@ -1,0 +1,4 @@
+- Sample shapes can now be plotted by right-clicking the workspace and selecting ``Show Sample Shape``.
+  This will plot all Sample, Container and Component shapes attached to the workspace,
+  add a black arrow for the beam direction and colored arrows for the lattice vectors.
+  For more details see** :ref:`Mesh_Plots`.

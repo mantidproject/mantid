@@ -17,10 +17,13 @@
 #include "MockExperimentOptionDefaults.h"
 #include "MockExperimentView.h"
 
+#include <string>
+
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace std::string_literals;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using testing::_;
@@ -682,14 +685,16 @@ public:
     // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
     auto presenter = makePresenter(makeDefaults(), makeExperiment());
     auto previewRow = PreviewRow({"1234"});
-    previewRow.setProcessingInstructions(ROIType::Signal, std::string{"10"});
-    previewRow.setProcessingInstructions(ROIType::Background, std::string{"11"});
-    previewRow.setProcessingInstructions(ROIType::Transmission, std::string{"12"});
+    previewRow.setSelectedBanks("9"s);
+    previewRow.setProcessingInstructions(ROIType::Signal, "10"s);
+    previewRow.setProcessingInstructions(ROIType::Background, "11"s);
+    previewRow.setProcessingInstructions(ROIType::Transmission, "12"s);
     previewRow.setTheta(2.3);
 
     presenter.notifyPreviewApplyRequested(previewRow);
     // Row with angle 2.3 is the last row in the look-up table
     auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT_EQUALS(row.roiDetectorIDs().get(), "9");
     TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
     TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
     TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
@@ -704,6 +709,7 @@ public:
     presenter.notifyPreviewApplyRequested(previewRow);
     // Row with angle 2.3 is the last row in the look-up table
     auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT(!row.roiDetectorIDs());
     TS_ASSERT(!row.processingInstructions());
     TS_ASSERT(!row.backgroundProcessingInstructions());
     TS_ASSERT(!row.transmissionProcessingInstructions());
@@ -717,6 +723,20 @@ public:
     previewRow.setTheta(10);
 
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), RowNotFoundException const &);
+  }
+
+  void testNotifyPreviewApplyRequestedInvalidTable() {
+    // GIVEN an invalid table
+    OptionsTable const optionsTable = {optionsRowWithWildcard(), optionsRowWithWildcard()};
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getLookupTable()).WillOnce(Return(optionsTable));
+    presenter.notifyLookupRowChanged(1, 1);
+
+    // WHEN we look for any row in the table
+    auto previewRow = PreviewRow({""});
+
+    // THEN an InvalidTableException is thrown.
+    TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), InvalidTableException const &);
   }
 
 private:

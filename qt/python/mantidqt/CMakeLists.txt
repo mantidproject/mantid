@@ -61,6 +61,7 @@ set(PYTHON_TEST_FILES
     mantidqt/plotting/test/test_figuretype.py
     mantidqt/plotting/test/test_functions.py
     mantidqt/plotting/test/test_tiledplots.py
+    mantidqt/plotting/test/test_sample_shape.py
     mantidqt/project/test/test_plotssaver.py
     mantidqt/project/test/test_plotsloader.py
     mantidqt/project/test/test_project.py
@@ -112,6 +113,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/colorbar/test/test_colorbar.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
+    mantidqt/widgets/fitpropertybrowser/test/test_interactive_tool.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_presenter.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py

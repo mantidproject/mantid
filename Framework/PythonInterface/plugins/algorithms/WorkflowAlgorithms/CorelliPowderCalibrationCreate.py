@@ -104,7 +104,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         issues = dict()
 
         if self.getProperty('FixSource').value == self.getProperty('AdjustSource').value:
-            issues['FixSource'] = f'Either "FixSource" or "AdjustSource" must be set to True, but not both.'
+            issues['FixSource'] = 'Either "FixSource" or "AdjustSource" must be set to True, but not both.'
 
         return issues
 

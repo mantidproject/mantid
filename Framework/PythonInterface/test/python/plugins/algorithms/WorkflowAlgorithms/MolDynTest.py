@@ -91,8 +91,10 @@ class MolDynTest(unittest.TestCase):
 
 
     def test_loadSqwWithRes(self):
-        # Create a sample workspace thet looks like an instrument resolution
-        sample_res = CreateSampleWorkspace(NumBanks=1,
+        # Create a sample workspace that looks like an instrument resolution, area under curve ~1
+        sample_res = CreateSampleWorkspace(Function='User Defined',
+                                           UserDefinedFunction='name=Gaussian, PeakCentre=0, Height=3.99, Sigma=0.1',
+                                           NumBanks=1,
                                            BankPixelWidth=1,
                                            XUnit='Energy',
                                            XMin=-10,
