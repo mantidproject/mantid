@@ -49,6 +49,7 @@ dependencies:
   - zlib>=1.2.11
   # Needed only for development
   - cppcheck==2.5
+  - pygments==2.11.2 # Had to pin back to 2.11 due to cppcheck error which is only fixed in cppcheck>=2.8
   - pre-commit>=2.12.0
 
   # Use conda version of clang to get matching CXXFLAGS.
