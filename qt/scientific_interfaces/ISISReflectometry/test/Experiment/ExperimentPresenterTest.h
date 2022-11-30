@@ -214,9 +214,15 @@ public:
     auto presenter = makePresenter();
     expectPolarizationAnalysisOn();
     presenter.notifySettingsChanged();
-    assertPolarizationAnalysisOn(presenter);
+    assertPolarizationAnalysisParameterFile(presenter);
     verifyAndClear();
   }
+
+  void testTogglePolarizationCorrectionOptionEnablesWorkspaceInput() {
+    runTestThatPolarizationCorrectionsUsesParameterFile();
+  }
+
+  void testSettingPolarizationCorrectionWorkspaceUpdatesModel() { runTestThatPolarizationCorrectionsUsesWorkspace(); }
 
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
@@ -647,7 +653,7 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
     assertBackgroundSubtractionOptionsSet(presenter);
-    assertPolarizationAnalysisOn(presenter);
+    assertPolarizationAnalysisParameterFile(presenter);
     assertFloodCorrectionUsesParameterFile(presenter);
     verifyAndClear();
   }
@@ -838,9 +844,14 @@ private:
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   }
 
-  void assertPolarizationAnalysisOn(ExperimentPresenter const &presenter) {
+  void assertPolarizationAnalysisParameterFile(ExperimentPresenter const &presenter) {
     TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().correctionType(),
                      PolarizationCorrectionType::ParameterFile);
+  }
+
+  void assertPolarizationAnalysisWorkspace(ExperimentPresenter const &presenter) {
+    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().correctionType(),
+                     PolarizationCorrectionType::Workspace);
   }
 
   void assertFloodCorrectionUsesParameterFile(ExperimentPresenter const &presenter) {
@@ -873,6 +884,41 @@ private:
     EXPECT_CALL(m_view, disablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
 
+    verifyAndClear();
+  }
+
+  void runTestThatPolarizationCorrectionsDisabled() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
+
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void runTestThatPolarizationCorrectionsUsesParameterFile() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return(""));
+
+    presenter.notifySettingsChanged();
+
+    assertPolarizationAnalysisParameterFile(presenter);
+
+    verifyAndClear();
+  }
+
+  void runTestThatPolarizationCorrectionsUsesWorkspace() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("test_ws"));
+
+    presenter.notifySettingsChanged();
+
+    assertPolarizationAnalysisWorkspace(presenter);
     verifyAndClear();
   }
 

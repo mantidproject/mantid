@@ -154,9 +154,17 @@ BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const correctionType = m_view->getPolarizationCorrectionOption() ? PolarizationCorrectionType::ParameterFile
-                                                                        : PolarizationCorrectionType::None;
-  return PolarizationCorrections(correctionType);
+  auto const correctionsChecked = m_view->getPolarizationCorrectionOption();
+
+  if (!correctionsChecked) {
+    return PolarizationCorrections(PolarizationCorrectionType::None);
+  }
+  auto const correctionsWorkspace = m_view->getPolarizationEfficienciesWorkspace();
+  if (correctionsWorkspace == "") {
+    return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
+  }
+  return PolarizationCorrections(PolarizationCorrectionType(PolarizationCorrectionType::Workspace),
+                                 correctionsWorkspace);
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
