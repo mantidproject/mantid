@@ -18,14 +18,6 @@ Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCo
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
       m_detectorCorrections(detectorCorrections), m_calibrationFilePath(std::move(calibrationFilePath)) {}
 
-Instrument &Instrument::operator=(Instrument const &old_instrument) {
-  m_wavelengthRange = old_instrument.wavelengthRange();
-  m_monitorCorrections = old_instrument.monitorCorrections();
-  m_detectorCorrections = old_instrument.detectorCorrections();
-  m_calibrationFilePath = old_instrument.calibrationFilePath();
-  return *this;
-}
-
 boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const { return m_wavelengthRange; }
 
 MonitorCorrections const &Instrument::monitorCorrections() const { return m_monitorCorrections; }

@@ -28,8 +28,6 @@ public:
   Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections, std::string calibrationFilePath);
 
-  Instrument &operator=(Instrument const &);
-
   boost::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
   MonitorCorrections const &monitorCorrections() const;
