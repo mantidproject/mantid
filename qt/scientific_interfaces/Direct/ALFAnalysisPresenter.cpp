@@ -33,7 +33,7 @@ QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
 void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                                  std::vector<double> const &twoThetas) {
   m_model->setExtractedWorkspace(workspace, twoThetas);
-  calculateEstimate(true);
+  calculateEstimate();
   updateViewFromModel();
 }
 
@@ -98,11 +98,9 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
   return range.first < peakCentre && peakCentre < range.second;
 }
 
-void ALFAnalysisPresenter::calculateEstimate(bool const silent) {
+void ALFAnalysisPresenter::calculateEstimate() {
   if (m_model->isDataExtracted()) {
     m_model->calculateEstimate(m_view->getRange());
-  } else if (!silent) {
-    m_view->displayWarning("Need to have extracted data to do a fit or estimate.");
   }
 }
 
