@@ -521,12 +521,12 @@ void QtExperimentView::disableCostFunction() { m_ui.costFunctionComboBox->setEna
 
 void QtExperimentView::enablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(true);
-  m_ui.polCorrLabel->setEnabled(true);
+  m_ui.polCorrCheckLabel->setEnabled(true);
 }
 
 void QtExperimentView::disablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(false);
-  m_ui.polCorrLabel->setEnabled(false);
+  m_ui.polCorrCheckLabel->setEnabled(false);
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {
@@ -726,6 +726,14 @@ void QtExperimentView::showTransmissionStitchParamsInvalid() { showAsInvalid(*m_
 void QtExperimentView::setPolarizationCorrectionOption(bool enable) { setChecked(*m_ui.polCorrCheckBox, enable); }
 
 bool QtExperimentView::getPolarizationCorrectionOption() const { return m_ui.polCorrCheckBox->isChecked(); }
+
+std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {
+  return getText(*m_ui.polCorrEfficienciesWsSelector);
+}
+
+void QtExperimentView::setPolarizationEfficienciesWorkspace(std::string const &workspace) {
+  setSelected(*m_ui.polCorrEfficienciesWsSelector, workspace);
+}
 
 std::string QtExperimentView::getStitchOptions() const { return getText(stitchOptionsLineEdit()); }
 

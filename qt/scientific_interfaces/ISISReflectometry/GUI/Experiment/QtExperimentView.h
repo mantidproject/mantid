@@ -72,6 +72,8 @@ public:
 
   bool getPolarizationCorrectionOption() const override;
   void setPolarizationCorrectionOption(bool enable) override;
+  std::string getPolarizationEfficienciesWorkspace() const override;
+  void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
