@@ -112,6 +112,7 @@ private:
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
   QLineEdit *m_averageTwoTheta;
+  QLabel *m_numberOfTubes;
 
   IALFAnalysisPresenter *m_presenter;
 };

@@ -25,29 +25,37 @@
 
 namespace {
 
+QString const DEFAULT_TUBES_TOOLTIP = "No tubes have been selected";
 QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes. The two theta of a tube is taken to "
                                   "be the two theta at which the Out of Plane angle is closest to zero.";
 
-std::tuple<QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
-  QString color("black"), status("");
+QString const INFO_LABEL_STYLE = "QLabel { border-radius: 5px; border: 2px solid black; }";
+QString const ERROR_LABEL_STYLE = "QLabel { color: red; border-radius: 5px; border: 2px solid red; }";
+QString const WARNING_LABEL_STYLE = "QLabel { color: darkOrange; border-radius: 5px; border: 2px solid orange; }";
+QString const SUCCESS_LABEL_STYLE = "QLabel { color: green; border-radius: 5px; border: 2px solid green; }";
+
+std::tuple<QString, QString, QString> getPeakCentreUIProperties(QString const &fitStatus) {
+  QString stylesheet(""), status(""), tooltip("");
   if (fitStatus.contains("success")) {
-    color = "green", status = "Fit success";
+    stylesheet = SUCCESS_LABEL_STYLE, status = "Success", tooltip = "Fit successful";
   } else if (fitStatus.contains("Failed to converge")) {
-    color = "darkOrange", status = fitStatus;
+    stylesheet = WARNING_LABEL_STYLE, status = "Warning", tooltip = fitStatus;
   } else if (!fitStatus.isEmpty()) {
-    color = "red", status = fitStatus;
+    stylesheet = ERROR_LABEL_STYLE, status = "Error", tooltip = fitStatus;
   }
-  return {"QLabel { color: " + color + "; }", status};
+  return {stylesheet, status, tooltip};
 }
 
-QString constructAverageString(std::vector<double> const &twoThetas) {
-  QString calculationStr("");
+QString constructNumberOfTubesTooltip(std::vector<double> const &twoThetas) {
+  if (twoThetas.empty()) {
+    return DEFAULT_TUBES_TOOLTIP;
+  }
+  QString calculationStr("All two thetas:");
   for (auto i = 0u; i < twoThetas.size(); ++i) {
-    if (i != 0)
-      calculationStr += " + ";
+    calculationStr += "\n";
     calculationStr += QString::number(twoThetas[i]);
   }
-  return "\n=(" + calculationStr + ")/" + QString::number(twoThetas.size());
+  return calculationStr;
 }
 
 } // namespace
@@ -97,7 +105,7 @@ QWidget *ALFAnalysisView::createPlotWidget() {
 
 QWidget *ALFAnalysisView::createPlotToolbar() {
   m_resetButton = new QPushButton(MantidQt::Icons::getIcon("mdi.replay"), "");
-  m_resetButton->setToolTip("Reset plot and peak centre");
+  m_resetButton->setToolTip("Reset peak centre");
   connect(m_resetButton, SIGNAL(clicked()), this, SLOT(notifyResetClicked()));
 
   auto toolbarWidget = new QWidget();
@@ -124,10 +132,13 @@ void ALFAnalysisView::setupTwoThetaWidget(QGridLayout *layout) {
   m_averageTwoTheta = new QLineEdit("-");
   m_averageTwoTheta->setReadOnly(true);
   m_averageTwoTheta->setToolTip(TWO_THETA_TOOLTIP);
+  m_numberOfTubes = new QLabel("0 tubes");
+  m_numberOfTubes->setStyleSheet(INFO_LABEL_STYLE);
+  m_numberOfTubes->setToolTip(DEFAULT_TUBES_TOOLTIP);
 
   layout->addWidget(new QLabel("Two theta:"), 0, 0);
   layout->addWidget(m_averageTwoTheta, 0, 1, 1, 3);
-  layout->addWidget(new QLabel("*placehold"), 0, 4);
+  layout->addWidget(m_numberOfTubes, 0, 4, Qt::AlignCenter);
 
   // Add an empty label to act as empty space
   layout->addWidget(new QLabel(""), 1, 4);
@@ -144,26 +155,26 @@ void ALFAnalysisView::setupFitRangeWidget(QGridLayout *layout, double const star
   layout->addWidget(m_start, 2, 1);
   layout->addWidget(new QLabel("to:"), 2, 2);
   layout->addWidget(m_end, 2, 3);
+
+  m_fitButton = new QPushButton("Fit");
+  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(notifyFitClicked()));
+  layout->addWidget(m_fitButton, 2, 4);
 }
 
 void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const centre) {
   m_peakCentre = new QLineEdit(QString::number(centre));
   m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
 
-  m_fitButton = new QPushButton("Fit");
-
   connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
-  connect(m_fitButton, SIGNAL(clicked()), this, SLOT(notifyFitClicked()));
 
   layout->addWidget(new QLabel("Peak Centre:"), 3, 0);
   layout->addWidget(m_peakCentre, 3, 1, 1, 3);
-  layout->addWidget(m_fitButton, 3, 4);
 
   m_fitStatus = new QLabel("");
-  m_fitStatus->setAlignment(Qt::AlignRight);
+  m_fitStatus->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
   setPeakCentreStatus("");
 
-  layout->addWidget(m_fitStatus, 4, 0, 1, 4);
+  layout->addWidget(m_fitStatus, 3, 4, Qt::AlignCenter);
 }
 
 void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }
@@ -211,15 +222,17 @@ void ALFAnalysisView::setPeakCentre(double const centre) { m_peakCentre->setText
 double ALFAnalysisView::peakCentre() const { return m_peakCentre->text().toDouble(); }
 
 void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
-  const auto [stylesheet, tooltip] = getPeakCentreUIProperties(QString::fromStdString(status));
+  const auto [stylesheet, text, tooltip] = getPeakCentreUIProperties(QString::fromStdString(status));
   m_fitStatus->setStyleSheet(stylesheet);
-  m_fitStatus->setText(tooltip);
+  m_fitStatus->setText(text);
   m_fitStatus->setToolTip(tooltip);
 }
 
 void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {
   m_averageTwoTheta->setText(average ? QString::number(*average) : "-");
-  m_averageTwoTheta->setToolTip(all.size() == 0u ? TWO_THETA_TOOLTIP : TWO_THETA_TOOLTIP + constructAverageString(all));
+  m_numberOfTubes->setText(all.size() == 1u ? QString::number(all.size()) + " tube"
+                                            : QString::number(all.size()) + " tubes");
+  m_numberOfTubes->setToolTip(constructNumberOfTubesTooltip(all));
 }
 
 void ALFAnalysisView::displayWarning(std::string const &message) {
