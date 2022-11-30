@@ -41,6 +41,7 @@ class SliceViewerView(QWidget, ObservingView):
         self._splitter = QSplitter(self)
         self._data_view = SliceViewerDataView(presenter, dims_info, can_normalise, self, conf)
         self._splitter.addWidget(self._data_view)
+        self._splitter.setCollapsible(0, False)
         self._splitter.splitterMoved.connect(self._data_view.on_resize)
         #  peaks viewer off by default
         self._peaks_view = None
@@ -83,6 +84,8 @@ class SliceViewerView(QWidget, ObservingView):
 
     def add_widget_to_splitter(self, widget):
         self._splitter.addWidget(widget)
+        widget_index = self._splitter.indexOf(widget)
+        self._splitter.setCollapsible(widget_index, False)
         self._data_view.on_resize()
 
     def peaks_overlay_clicked(self):

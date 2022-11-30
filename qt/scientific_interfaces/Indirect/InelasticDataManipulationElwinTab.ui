@@ -165,6 +165,9 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
       <widget class="QWidget" name="layoutWidget1">
        <layout class="QVBoxLayout" name="properties"/>
       </widget>
@@ -174,6 +177,12 @@
          <layout class="QHBoxLayout" name="loPreviewSelection">
           <item>
            <widget class="QLabel" name="lbPreviewFile">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Preview file:</string>
             </property>
@@ -182,15 +191,40 @@
           <item>
            <widget class="QComboBox" name="cbPreviewFile">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <widget class="QLabel" name="lbPreviewSpec">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Spectrum:</string>
             </property>
@@ -199,26 +233,29 @@
           <item>
            <widget class="QStackedWidget" name="elwinPreviewSpec">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>75</width>
               <height>50</height>
              </size>
             </property>
             <property name="lineWidth">
              <number>-1</number>
             </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
             <widget class="QWidget" name="pgPlotSpinBox">
              <widget class="QSpinBox" name="spPlotSpectrum">
               <property name="geometry">
                <rect>
-                <x>150</x>
-                <y>10</y>
+                <x>0</x>
+                <y>15</y>
                 <width>33</width>
                 <height>22</height>
                </rect>
@@ -238,8 +275,8 @@
              <widget class="QComboBox" name="cbPlotSpectrum">
               <property name="geometry">
                <rect>
-                <x>170</x>
-                <y>10</y>
+                <x>0</x>
+                <y>15</y>
                 <width>73</width>
                 <height>22</height>
                </rect>
