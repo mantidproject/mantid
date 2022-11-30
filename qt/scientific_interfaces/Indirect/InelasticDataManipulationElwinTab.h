@@ -60,9 +60,7 @@ private:
   void runWorkspaceInput();
   void setup() override;
   bool validate() override;
-  void loadTabSettings(const QSettings &settings);
   void setFileExtensionsByName(bool filter) override;
-  void setDefaultResolution(const MatrixWorkspace_const_sptr &ws, const QPair<double, double> &range);
 
   /// Retrieve the selected spectrum
   int getSelectedSpectrum() const;
@@ -82,20 +80,17 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
-  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
 
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  Ui::InelasticDataManipulationElwinTab m_uiForm;
-  QtTreePropertyBrowser *m_elwTree;
+  std::unique_ptr<InelasticDataManipulationElwinTabView> m_view;
+  std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
   InelasticDataManipulation *m_parent;
   QTableWidget *m_dataTable;
   std::unique_ptr<IndirectFitDataModel> m_dataModel;
+  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
+  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
   MatrixWorkspace_sptr m_inputWorkspace;
-
   bool m_emitCellChanged = true;
-  std::unique_ptr<InelasticDataManipulationElwinTabView> m_view;
-  std::unique_ptr<InelasticDataManipulationElwinTabModel> m_model;
 
   virtual int workspaceIndexColumn() const;
 

@@ -144,8 +144,7 @@ QStringList getSampleFBSuffices() {
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
 InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent)
-    : InelasticDataManipulationTab(parent), m_elwTree(nullptr),
-      m_view(std::make_unique<InelasticDataManipulationElwinTabView>(parent)),
+    : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationElwinTabView>(parent)),
       m_model(std::make_unique<InelasticDataManipulationElwinTabModel>()),
       m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
 
@@ -166,10 +165,6 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
 InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {}
 
 void InelasticDataManipulationElwinTab::setup() {
-
-  // Number of decimal places in property browsers.
-  static const unsigned int NUM_DECIMALS = 6;
-
   connect(m_view.get(), SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
   connect(m_view.get(), SIGNAL(previewIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
   connect(m_view.get(), SIGNAL(selectedSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
@@ -300,10 +295,6 @@ void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
 }
 
 bool InelasticDataManipulationElwinTab::validate() { return m_view->validate(); }
-
-void InelasticDataManipulationElwinTab::loadTabSettings(const QSettings &settings) {
-  m_uiForm.dsInputFiles->readSettings(settings.group());
-}
 
 void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
   auto const tabName("Elwin");
