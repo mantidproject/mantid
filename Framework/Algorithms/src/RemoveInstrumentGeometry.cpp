@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/RemoveInstrumentGeometry.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,6 +45,12 @@ void RemoveInstrumentGeometry::init() {
  */
 void RemoveInstrumentGeometry::exec() {
   // TODO Auto-generated execute stub
+  API::Workspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  API::Workspace_sptr outputWS = this->getProperty("OutputWorkspace");
+  // if (outputWS != inputWS) {
+  outputWS = inputWS->clone();
+  //}
+  this->setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms
