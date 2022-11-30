@@ -56,6 +56,8 @@ public:
 
   void renameChildren() const;
 
+  void refreshTies();
+
   /// Creates name for this function to be displayed
   /// in the browser
   QString functionName() const;
