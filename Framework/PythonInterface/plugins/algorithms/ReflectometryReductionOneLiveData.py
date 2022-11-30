@@ -61,7 +61,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-            'ScaleFactor', 'PolarizationAnalysis',
+            'ScaleFactor', 'PolarizationAnalysis', 'PolarizationEfficiencies',
             'FloodCorrection', 'FloodWorkspace', 'Debug',
             'TimeInterval', 'LogValueInterval', 'LogName', 'UseNewFilterAlgorithm',
             'ReloadInvalidWorkspaces', 'GroupTOFWorkspaces', 'CalibrationFile', 'OutputWorkspace']
