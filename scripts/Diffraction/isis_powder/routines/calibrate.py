@@ -184,6 +184,6 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
     mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,
                             EndWorkspaceIndex=ADS.retrieve(out_name).getNumberHistograms()-1,
                             NCoeff=instrument._inst_settings.spline_coeff,
-                            OutputWorkspace=out_name)
+                            OutputWorkspace=out_name, EnableLogging=False)
     out_spline_van_file_path = run_details.splined_vanadium_file_path
     mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=out_name)
