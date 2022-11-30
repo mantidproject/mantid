@@ -12,15 +12,17 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-enum class PolarizationCorrectionType { None, ParameterFile };
+enum class PolarizationCorrectionType { None, ParameterFile, Workspace };
 
 inline PolarizationCorrectionType polarizationCorrectionTypeFromString(std::string const &correctionType) {
   if (correctionType == "None")
     return PolarizationCorrectionType::None;
-  else if (correctionType == "ParameterFile")
+  if (correctionType == "ParameterFile")
     return PolarizationCorrectionType::ParameterFile;
-  else
-    throw std::invalid_argument("Unexpected polarization correction type.");
+  if (correctionType == "Workspace")
+    return PolarizationCorrectionType::Workspace;
+
+  throw std::invalid_argument("Unexpected polarization correction type.");
 }
 
 inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
@@ -29,6 +31,8 @@ inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType
     return "None";
   case PolarizationCorrectionType::ParameterFile:
     return "ParameterFile";
+  case PolarizationCorrectionType::Workspace:
+    return "Workspace";
   }
   throw std::invalid_argument("Unexpected polarization correction type.");
 }
@@ -42,12 +46,15 @@ inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
-  explicit PolarizationCorrections(PolarizationCorrectionType correctionType);
+  explicit PolarizationCorrections(PolarizationCorrectionType correctionType,
+                                   boost::optional<std::string> workspace = boost::none);
 
   PolarizationCorrectionType correctionType() const;
+  boost::optional<std::string> workspace() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
+  boost::optional<std::string> m_workspace;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);
