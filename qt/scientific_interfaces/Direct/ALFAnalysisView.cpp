@@ -70,10 +70,15 @@ void ALFAnalysisView::setupPlotFitSplitter(double const start, double const end)
   splitter->addWidget(createPlotWidget());
   splitter->addWidget(createFitWidget(start, end));
 
+  layout->setContentsMargins(5, 0, 5, 0);
   layout->addWidget(splitter);
 }
 
 QWidget *ALFAnalysisView::createPlotWidget() {
+  auto *plotWidget = new QWidget();
+  auto *plotLayout = new QVBoxLayout(plotWidget);
+  plotLayout->setSpacing(0);
+
   m_plot = new MantidWidgets::PreviewPlot();
 
   // Set the preview plot background as transparent.
@@ -84,7 +89,24 @@ QWidget *ALFAnalysisView::createPlotWidget() {
   m_peakPicker->setVisible(false);
   connect(m_peakPicker, SIGNAL(changed()), this, SLOT(notifyPeakPickerChanged()));
 
-  return m_plot;
+  plotLayout->addWidget(createPlotToolbar());
+  plotLayout->addWidget(m_plot);
+
+  return plotWidget;
+}
+
+QWidget *ALFAnalysisView::createPlotToolbar() {
+  m_resetButton = new QPushButton(MantidQt::Icons::getIcon("mdi.replay"), "");
+  m_resetButton->setToolTip("Reset plot and peak centre");
+  connect(m_resetButton, SIGNAL(clicked()), this, SLOT(notifyResetClicked()));
+
+  auto toolbarWidget = new QWidget();
+  auto *toolbarLayout = new QHBoxLayout(toolbarWidget);
+  toolbarLayout->setMargin(0);
+  toolbarLayout->addWidget(m_resetButton);
+  toolbarLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+
+  return toolbarWidget;
 }
 
 QWidget *ALFAnalysisView::createFitWidget(double const start, double const end) {
@@ -149,6 +171,8 @@ void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerC
 void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
 
 void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
+
+void ALFAnalysisView::notifyResetClicked() { m_presenter->notifyResetClicked(); }
 
 void ALFAnalysisView::replot() { m_plot->replot(); }
 

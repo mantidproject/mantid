@@ -35,6 +35,7 @@ public:
   virtual void notifyPeakPickerChanged() = 0;
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
+  virtual void notifyResetClicked() = 0;
 
   virtual std::size_t numberOfTubes() const = 0;
 
@@ -53,6 +54,7 @@ public:
   void notifyPeakPickerChanged() override;
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
+  void notifyResetClicked() override;
 
   std::size_t numberOfTubes() const override;
 

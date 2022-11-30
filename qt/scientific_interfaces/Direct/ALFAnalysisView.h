@@ -89,10 +89,11 @@ public:
 
   void displayWarning(std::string const &message) override;
 
-public slots:
+private slots:
   void notifyPeakPickerChanged();
   void notifyPeakCentreEditingFinished();
   void notifyFitClicked();
+  void notifyResetClicked();
 
 private:
   void setupPlotFitSplitter(double const start, double const end);
@@ -107,6 +108,7 @@ private:
   MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
   QPushButton *m_fitButton;
+  QPushButton *m_resetButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
   QLineEdit *m_averageTwoTheta;
