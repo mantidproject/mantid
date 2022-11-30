@@ -138,7 +138,8 @@ class NonIDF_Properties(object):
                          containing results of white beam neutrons scattering from vanadium, used to calculate monovanadium
                          integrals for monochromatic vanadium.\n
                          If not explicitly set, white beam for sample run is used.""")
-    empty_bg_run_for_monoWb = RunDescriptorDependent(empty_bg_run_for_wb,"EBG4MonoWB_","""Run number, workspace or symbolic presentation of such run
+    empty_bg_run_for_monoWb = RunDescriptorDependent(empty_bg_run_for_wb,"EBG4MonoWB_",
+                                                     """Run number, workspace or symbolic presentation of such run
                   containing results of the empty instrument background measurements for detector Vanadium for Mono""")
 
     # TODO: do something about it.  Second white is explicitly used in

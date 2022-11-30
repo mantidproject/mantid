@@ -302,6 +302,13 @@ public:
     verifyAndClear();
   }
 
+  void test_search_results_collection_passed_to_results() {
+    auto searcher = makeCatalogSearcher(true);
+    EXPECT_CALL(m_searchResults, getSearchResultsCSV()).Times(1);
+    searcher.getSearchResultsCSV();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockRunsView> m_view;
   NiceMock<MockSearcherSubscriber> m_notifyee;

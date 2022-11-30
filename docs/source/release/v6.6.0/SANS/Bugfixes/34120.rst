@@ -1,0 +1,1 @@
+- There can now only be one instance of the GUI open at any time. Selecting the GUI from the ``Interfaces`` menu when there is already one open will now re-show the currently open GUI.

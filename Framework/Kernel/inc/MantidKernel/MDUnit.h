@@ -17,7 +17,7 @@ namespace Kernel {
 /** MDUnit : Unit type for multidimensional data types. Not convertable to/from
   TOF unlike Unit.
 */
-class DLLExport MDUnit {
+class MANTID_KERNEL_DLL MDUnit {
 public:
   virtual UnitLabel getUnitLabel() const = 0;
   virtual bool canConvertTo(const MDUnit &other) const = 0;
@@ -28,13 +28,13 @@ public:
 };
 
 /// QUnit base
-class DLLExport QUnit : public MDUnit {
+class MANTID_KERNEL_DLL QUnit : public MDUnit {
 public:
   bool isQUnit() const override;
 };
 
 /// Dimensionless RLU
-class DLLExport ReciprocalLatticeUnit : public QUnit {
+class MANTID_KERNEL_DLL ReciprocalLatticeUnit : public QUnit {
 public:
   ReciprocalLatticeUnit();
   ReciprocalLatticeUnit(UnitLabel unitLabel);
@@ -48,14 +48,14 @@ private:
 };
 
 /// Inverse Angstroms unit
-class DLLExport InverseAngstromsUnit : public QUnit {
+class MANTID_KERNEL_DLL InverseAngstromsUnit : public QUnit {
 public:
   UnitLabel getUnitLabel() const override;
   bool canConvertTo(const MDUnit &other) const override;
   InverseAngstromsUnit *clone() const override;
 };
 
-class DLLExport LabelUnit : public MDUnit {
+class MANTID_KERNEL_DLL LabelUnit : public MDUnit {
 private:
   UnitLabel m_unitLabel;
 

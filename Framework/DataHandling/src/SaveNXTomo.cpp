@@ -35,12 +35,8 @@ using namespace DataObjects;
 
 const std::string SaveNXTomo::NXTOMO_VER = "2.0";
 
-SaveNXTomo::SaveNXTomo() : API::Algorithm() {
-  m_filename = "";
-  m_includeError = false;
-  m_overwriteFile = false;
-  m_spectraCount = 0;
-}
+SaveNXTomo::SaveNXTomo()
+    : API::Algorithm(), m_includeError(false), m_overwriteFile(false), m_spectraCount(0), m_filename("") {}
 
 /**
  * Initialise the algorithm

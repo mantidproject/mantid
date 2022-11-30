@@ -60,7 +60,12 @@ class HB3AIntegratePeaksTest(unittest.TestCase):
         for p in range(int_peaks2.getNumberPeaks()):
             peak1 = int_peaks.getPeak(p)
             peak2 = int_peaks2.getPeak(p)
-            lorentz = abs(np.sin(peak2.getScattering() * np.cos(peak2.getAzimuthal())))
+            two_th = peak2.getScattering()
+            az = peak2.getAzimuthal()
+            nu = np.arcsin(np.sin(two_th)*np.sin(az))
+            gamma = np.arctan(np.tan(two_th)*np.cos(az))
+            # G. J. McIntyre and R. F. D. Stansfield, Acta Cryst A 44, 257 (1988).
+            lorentz = abs(np.cos(nu)*np.sin(gamma))
             self.assertAlmostEqual(peak1.getIntensity() * lorentz, peak2.getIntensity())
             self.assertAlmostEqual(peak1.getSigmaIntensity() * lorentz, peak2.getSigmaIntensity())
 

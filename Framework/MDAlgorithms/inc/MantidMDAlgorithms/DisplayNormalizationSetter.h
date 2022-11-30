@@ -8,7 +8,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 energy-transfer-mode
     and if we are dealing with Q3D.
 */
-class DLLExport DisplayNormalizationSetter {
+class MANTID_MDALGORITHMS_DLL DisplayNormalizationSetter {
 public:
   void operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
                   const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ = false,

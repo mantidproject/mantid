@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 #include <memory>
 #include <string>
@@ -17,7 +17,7 @@ namespace Geometry {
 
 /** PeakShape : Abstract type to describes the shape of a peak.
  */
-class DLLExport PeakShape {
+class MANTID_GEOMETRY_DLL PeakShape {
 public:
   /// Coordinte frame used upon creation
   virtual Mantid::Kernel::SpecialCoordinateSystem frame() const = 0;

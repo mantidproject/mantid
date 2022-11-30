@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
 /** MDNormSCD : Generate MD normalization for single crystal diffraction
  */
-class DLLExport MDNormDirectSC : public SlicingAlgorithm {
+class MANTID_MDALGORITHMS_DLL MDNormDirectSC : public SlicingAlgorithm {
 public:
   MDNormDirectSC();
 

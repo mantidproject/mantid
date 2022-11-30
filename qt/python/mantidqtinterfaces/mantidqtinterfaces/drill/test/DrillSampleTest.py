@@ -28,6 +28,11 @@ class DrillSampleTest(unittest.TestCase):
         self.sample.setController(controller)
         self.assertEqual(self.sample._controller, controller)
 
+    def test_setExporter(self):
+        exporter = mock.Mock()
+        self.sample.setExporter(exporter)
+        self.assertEqual(self.sample._exporter, exporter)
+
     def test_setIndex(self):
         index = 120
         self.sample.setIndex(index)
@@ -113,10 +118,12 @@ class DrillSampleTest(unittest.TestCase):
 
     @mock.patch("mantidqtinterfaces.drill.model.DrillSample.logger")
     def test_onProcessSuccess(self, mLogger):
+        self.sample._exporter = mock.Mock()
         self.sample.statusChanged = mock.Mock()
         self.sample.onProcessSuccess()
         mLogger.information.assert_called_once()
         self.sample.statusChanged.emit.assert_called_once_with()
+        self.sample._exporter.run.assert_called_once_with(self.sample)
 
     @mock.patch("mantidqtinterfaces.drill.model.DrillSample.logger")
     def test_onProcessError(self, mLogger):

@@ -9,6 +9,7 @@
 #include "byte_rel_comp.h"
 #include "vms_convert.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <ostream>
 
@@ -147,11 +148,9 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt)
       ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
-  for (auto &value : t_pmap) {
-    value = 1; // period number for each basic period
-  }
-  memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
-  memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
+  std::fill(std::begin(t_pmap), std::end(t_pmap), 1); // period number for each basic period
+  memset(t_tcm1, 0, sizeof(t_tcm1));                  // time channel mode
+  memset(t_tcp1, 0, sizeof(t_tcp1));                  // time channel parameters
   e_nse = 0;
   e_seblock = nullptr;
   u_len = 0;
@@ -171,11 +170,9 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT *crpt, bool doUpdateFromCRPT)
       ver8(0), ddes(nullptr), dat1(nullptr) {
   memset(r_title, ' ', sizeof(r_title));
   memset(i_inst, ' ', sizeof(i_inst));
-  for (auto &value : t_pmap) {
-    value = 1; // period number for each basic period
-  }
-  memset(t_tcm1, 0, sizeof(t_tcm1)); // time channel mode
-  memset(t_tcp1, 0, sizeof(t_tcp1)); // time channel parameters
+  std::fill(std::begin(t_pmap), std::end(t_pmap), 1); // period number for each basic period
+  memset(t_tcm1, 0, sizeof(t_tcm1));                  // time channel mode
+  memset(t_tcp1, 0, sizeof(t_tcp1));                  // time channel parameters
   e_nse = 0;
   e_seblock = nullptr;
   u_len = 0;

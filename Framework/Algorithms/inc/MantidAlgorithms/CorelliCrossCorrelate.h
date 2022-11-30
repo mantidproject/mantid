@@ -15,7 +15,7 @@ namespace Algorithms {
 
 /** CorelliCrossCorrelate : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL CorelliCrossCorrelate : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorelliCrossCorrelate final : public API::Algorithm {
 public:
   const std::string name() const override { return "CorelliCrossCorrelate"; };
   int version() const override { return 1; };

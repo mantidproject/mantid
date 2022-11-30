@@ -23,10 +23,12 @@ ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_vi
  * @param x X position on an image of the workspace
  * @param y Y position on an image of the workspace
  * @param signal The signal value at the given position
+ * @param extraValues A map of extra column names and values to display
  */
-void ImageInfoPresenter::cursorAt(const double x, const double y, const double signal) {
+void ImageInfoPresenter::cursorAt(const double x, const double y, const double signal,
+                                  const QMap<QString, QString> extraValues) {
   assert(m_model);
-  m_view->showInfo(m_model->info(x, y, signal));
+  m_view->showInfo(m_model->info(x, y, signal, extraValues));
 }
 
 /**
@@ -39,8 +41,6 @@ void ImageInfoPresenter::setWorkspace(const Mantid::API::Workspace_sptr &workspa
   else {
     m_model = std::make_unique<ImageInfoModelMD>();
   }
-  // Blank view
-  cursorAt(ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue, ImageInfoModel::UnsetValue);
 }
 
 } // namespace MantidQt::MantidWidgets

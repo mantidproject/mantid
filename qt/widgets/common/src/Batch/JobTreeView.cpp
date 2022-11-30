@@ -431,9 +431,9 @@ void JobTreeView::appendAndEditAtRowBelow() {
   setCurrentIndex(QModelIndex());
   setCurrentIndex(current);
   if (current != m_mainModel.index(-1, -1)) {
-    auto const below = findOrMakeCellBelow(fromFilteredModel(current));
-    auto index = below.first;
-    auto isNew = below.second;
+    auto const cell = findOrMakeCellBelow(fromFilteredModel(current));
+    auto index = cell.first;
+    auto isNew = cell.second;
 
     if (isNew) {
       m_notifyee->notifyRowInserted(rowLocation().atIndex(mapToMainModel(index)));

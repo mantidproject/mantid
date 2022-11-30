@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <vector>
 
 namespace Mantid {
@@ -21,7 +21,7 @@ namespace MDAlgorithms {
 @date 01/10/2010
 */
 
-class DLLExport InvalidParameter : public Mantid::API::ImplicitFunctionParameter {
+class MANTID_MDALGORITHMS_DLL InvalidParameter : public Mantid::API::ImplicitFunctionParameter {
 private:
   std::string m_value;
 

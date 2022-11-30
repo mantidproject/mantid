@@ -34,6 +34,8 @@ set(TEST_PY_FILES
     elemental_analysis/PeriodicTableModel_test.py
     elemental_analysis/PeriodicTablePresenter_test.py
     elemental_analysis_2/elemental_analysis_context_test.py
+    elemental_analysis_2/elemental_analysis_data_context_test.py
+    elemental_analysis_2/elemental_analysis_eagroup_context_test.py
     elemental_analysis_2/elemental_analysis_main_GUI_test.py
     elemental_analysis_2/EA_loading_tab/elemental_analysis_loadutils_test.py
     elemental_analysis_2/EA_loading_tab/elemental_analysis_load_model_test.py

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "PeakShapeFactory.h"
 
 namespace Mantid {
@@ -14,7 +13,7 @@ namespace DataObjects {
 
 /** PeakShapeEllipsoidFactory : Create ellipsoid peak shapes
  */
-class DLLExport PeakShapeEllipsoidFactory : public PeakShapeFactory {
+class MANTID_DATAOBJECTS_DLL PeakShapeEllipsoidFactory : public PeakShapeFactory {
 public:
   // PeakShapeFactory interface
 

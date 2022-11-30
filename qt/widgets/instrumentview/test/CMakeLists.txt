@@ -1,12 +1,6 @@
 # Testing
-set(TEST_FILES
-    InstrumentWidgetDecoderTest.h
-    InstrumentWidgetEncoderTest.h
-    BaseCustomInstrumentPresenterTest.h
-    PlotFitAnalysisPaneModelTest.h
-    PlotFitAnalysisPanePresenterTest.h
-    InstrumentWidget/InstrumentDisplayTest.h
-    InstrumentWidget/InstrumentWidgetTest.h
+set(TEST_FILES InstrumentWidgetDecoderTest.h InstrumentWidgetEncoderTest.h InstrumentWidget/InstrumentDisplayTest.h
+               InstrumentWidget/InstrumentWidgetTest.h
 )
 
 set(MOCK_HEADER_DIRS InstrumentWidget)

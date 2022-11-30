@@ -8,7 +8,9 @@ set(TEST_PY_FILES
     CalculateMonteCarloAbsorptionTest.py
     CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py
+    DirectILL_commonTest.py
     DirectILLApplySelfShieldingTest.py
+    DirectILLAutoProcessTest.py
     DirectILLCollectDataTest.py
     DirectILLDiagnosticsTest.py
     DirectILLIntegrateVanadiumTest.py
@@ -60,19 +62,23 @@ set(TEST_PY_FILES
     ReflectometryILLPreprocessTest.py
     ReflectometryISISSumBanksTest.py
     ReflectometryILLSumForegroundTest.py
+    ReflectometryISISCalibrationTest.py
     ReflectometryISISLoadAndProcessTest.py
     ReflectometryISISPreprocessTest.py
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
     SANSILLAutoProcessTest.py
+    SANSILLMultiProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
+    SANSILLReduction2Test.py
     SANSILLParameterScanTest.py
     SANSMaskTest.py
     SANSStitchTest.py
     SavePlot1DTest.py
     SaveVulcanGSSTest.py
+    SimpleShapeDiscusInelasticTest.py
     SimpleShapeMonteCarloAbsorptionTest.py
     SimulatedDensityOfStatesTest.py
     SofQWMomentsTest.py

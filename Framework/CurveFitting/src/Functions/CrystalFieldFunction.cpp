@@ -576,6 +576,13 @@ ParameterTie *CrystalFieldFunction::getTie(size_t i) const {
   return tie;
 }
 
+/// Checks if whether tie should be ignored
+bool CrystalFieldFunction::ignoreTie(const ParameterTie &tie) const {
+  // Ignore height ties for Gaussian peaks as component of a CrystalFieldFunction to avoid problems during tie sorting
+  return tie.ownerFunction()->name() == "Gaussian" && tie.parameterName() == "Height" &&
+         tie.asString().find("/Sigma") != std::string::npos;
+}
+
 /// Get the i-th constraint
 IConstraint *CrystalFieldFunction::getConstraint(size_t i) const {
   checkSourceFunction();

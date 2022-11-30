@@ -21,7 +21,7 @@ namespace Algorithms {
   tubes into a workspace with counts as a function of height and scattering
   angle. Currently works for the D2B instrument geometry.
 */
-class MANTID_ALGORITHMS_DLL SumOverlappingTubes : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SumOverlappingTubes final : public API::Algorithm {
 public:
   const std::string name() const override { return "SumOverlappingTubes"; }
   const std::string category() const override { return "ILL\\Diffraction"; }

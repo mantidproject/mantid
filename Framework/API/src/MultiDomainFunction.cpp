@@ -12,6 +12,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <set>
 
@@ -298,9 +299,8 @@ void MultiDomainFunction::setLocalAttribute(size_t funIndex, const std::string &
     // value must be either an int or a list of ints: "a,b,c,..."
     list.toList();
     indx.reserve(list.size());
-    for (const auto &k : list) {
-      indx.emplace_back(boost::lexical_cast<size_t>(k.name()));
-    }
+    std::transform(list.begin(), list.end(), std::back_inserter(indx),
+                   [](const Mantid::API::Expression &k) { return boost::lexical_cast<size_t>(k.name()); });
   }
   setDomainIndices(funIndex, indx);
 }

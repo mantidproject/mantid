@@ -20,12 +20,12 @@ namespace Muon {
 @date 2018-06-01
 */
 
-class MANTID_MUON_DLL ApplyMuonDetectorGroupPairing : public API::Algorithm {
+class MANTID_MUON_DLL ApplyMuonDetectorGroupPairing final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ApplyMuonDetectorGroupPairing() : API::Algorithm() {}
   /// Virtual destructor
-  ~ApplyMuonDetectorGroupPairing() {}
+  virtual ~ApplyMuonDetectorGroupPairing() = default;
   /// Algorithm's name
   const std::string name() const override { return "ApplyMuonDetectorGroupPairing"; }
   /// Algorithm's version
@@ -72,7 +72,7 @@ public:
   void setMuonProcessAlgorithmTimeProperties(IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
 
   /// Checks that the detector IDs in grouping are in the workspace
-  void checkDetectorIDsInWorkspace(API::Grouping &grouping, const API::Workspace_sptr &workspace);
+  void checkDetectorIDsInWorkspace(const API::Grouping &grouping, const API::Workspace_sptr &workspace);
 
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;

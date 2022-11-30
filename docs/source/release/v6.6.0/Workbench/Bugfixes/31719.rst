@@ -1,0 +1,1 @@
+- When plotting with exported script, the "Show Minor Gridlines" checkbox in the Axes tab will be ticked and fixed toggle grid lines button affecting minor lines.

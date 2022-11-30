@@ -107,6 +107,17 @@ private:
 };
 
 //===================================================================================================================
+
+class FakeWorkspace : public Mantid::API::Workspace {
+public:
+  const std::string id() const override { return "FakeWorkspace"; }
+  Workspace *doClone() const override { return new FakeWorkspace(*this); }
+  Workspace *doCloneEmpty() const override { return new FakeWorkspace; }
+  const std::string toString() const override { return "FakeWorkspace instance"; }
+  size_t getMemorySize() const override { return 0; }
+};
+
+//===================================================================================================================
 class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
   AxeslessWorkspaceTester(const Mantid::Parallel::StorageMode storageMode = Mantid::Parallel::StorageMode::Cloned)
@@ -294,19 +305,17 @@ public:
 
   void removeRow(size_t) override { throw std::runtime_error("removeRow not implemented"); }
 
-  void find(size_t, size_t &, const size_t &) override { throw std::runtime_error("find not implemented"); }
+  void find(size_t, size_t &, size_t) override { throw std::runtime_error("find not implemented"); }
 
-  void find(double, size_t &, const size_t &) override { throw std::runtime_error("find not implemented"); }
+  void find(double, size_t &, size_t) override { throw std::runtime_error("find not implemented"); }
 
-  void find(float, size_t &, const size_t &) override { throw std::runtime_error("find not implemented"); }
+  void find(float, size_t &, size_t) override { throw std::runtime_error("find not implemented"); }
 
-  void find(Boolean, size_t &, const size_t &) override { throw std::runtime_error("find not implemented"); }
+  void find(Boolean, size_t &, size_t) override { throw std::runtime_error("find not implemented"); }
 
-  void find(const std::string &, size_t &, const size_t &) override {
-    throw std::runtime_error("find not implemented");
-  }
+  void find(const std::string &, size_t &, size_t) override { throw std::runtime_error("find not implemented"); }
 
-  void find(const Mantid::Kernel::V3D &, size_t &, const size_t &) override {
+  void find(const Mantid::Kernel::V3D &, size_t &, size_t) override {
     throw std::runtime_error("find not implemented");
   }
 

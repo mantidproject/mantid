@@ -1,0 +1,1 @@
+Added the 'Keep original workspace' rebin option on the 'Pick' tab. This will ensure the originally loaded data is rebinned when ticked and not the previously rebinned data.

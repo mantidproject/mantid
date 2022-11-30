@@ -170,5 +170,8 @@ void export_Property() {
 
       .add_static_property("EMPTY_DBL", emptyDouble)
       .add_static_property("EMPTY_INT", emptyInt)
-      .add_static_property("EMPTY_LONG", emptyLong);
+      .add_static_property("EMPTY_LONG", emptyLong)
+
+      .def("setAutoTrim", &Property::setAutoTrim, (arg("setting")), "Setting automatic trimming of whitespaces.")
+      .def("getAutoTrim", &Property::autoTrim, "Gets the setting of automatic trimming of whitespaces.");
 }

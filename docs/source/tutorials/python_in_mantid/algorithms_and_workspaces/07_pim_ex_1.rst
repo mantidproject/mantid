@@ -19,7 +19,8 @@ The aim of this exercise is to use Mantid to write a script, which excludes this
 #. :ref:`algm-Load` - Load the given HRPD data set, HRP39182.RAW into a workspace called 'HRP39182'
 #. :ref:`algm-MaskBins` - Mask out the bins corresponding to the pulse with XMin=19990 and XMax=20040
 #. Repeat the previous step for the other 4 pulses, each of which is 20000 microseconds after the previous. *All MaskBins executions should happen on the same InputWorkspace so that all 5 pulses are masked from the same workspace. Hint: A loop might be useful.*
-#. :ref:`algm-AlignDetectors` - Correct the masked workspace for small variations in detector position, using the calibration file `hrpd_new_072_01_corr.cal`. (Note: This performs an explicit conversion to dSpacing)
+#. :ref:`algm-ApplyDiffCal`- Correct the masked workspace for small variations in detector position, using the calibration file `hrpd_new_072_01_corr.cal`.
+#. :ref:`algm-ConvertUnits` - Convert unit to dSpacing
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the masked workspace using the same cal file as the previous step (called a grouping file here)
 
 Bonus: Can you run the Align-Focus process on the original, unmasked data and :ref:`algm-Minus` the final workspace processed without the pulse from the final workspace processed with the pulse? Plot the difference workspace with the final processed data to compare.
@@ -32,7 +33,8 @@ Filter, process and compress event data.
 #. :ref:`algm-LoadEventNexus` - Load the given POWGEN data set, PG3_4871. If you need to reduce the number of events loaded, select only the first 4000 seconds of the run.
 #. Log the number of events in the Messages Box with the command `logger.notice("message")` (The function to get the number of events from a workspace called `ws` is `ws.getNumberEvents()`.
 #. :ref:`algm-FilterBadPulses` - Remove events that occurred while the accelerator was resetting, by setting the LowerCutoff to 99.5 % of the average beam proton charge.
-#. :ref:`algm-AlignDetectors` - Convert to d-spacing using the supplied calibration file called PG3_golden.cal
+#. :ref:`algm-ApplyDiffCal`- Correct the masked workspace for small variations in detector position, using the calibration file `PG3_golden.cal`.
+#. :ref:`algm-ConvertUnits` - Convert unit to dSpacing.
 #. :ref:`algm-Rebin` - Bin the data in d-spacing from 1.4 to 8 angstroms using logarithmic binning of .0004.
 #. :ref:`algm-DiffractionFocussing` - Focus the data in the workspace using the same cal file as the previous step (PG3_golden.cal).
 #. :ref:`algm-CompressEvents` - Saves some memory. Again, extract and log the number of events.

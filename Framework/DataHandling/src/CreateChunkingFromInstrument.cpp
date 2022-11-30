@@ -17,6 +17,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
+#include <algorithm>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -227,18 +228,19 @@ string parentName(const IComponent_const_sptr &comp, const string &prefix) {
  */
 string parentName(const IComponent_const_sptr &comp, const vector<string> &names) {
   // handle the special case of the component has the name
-  for (const auto &name : names)
-    if (name == comp->getName())
-      return name;
+  const auto compName = comp->getName();
+  auto it = std::find(names.cbegin(), names.cend(), compName);
+  if (it != names.cend())
+    return *it;
 
   // find the parent with the correct name
   IComponent_const_sptr parent = comp->getParent();
   if (parent) {
+    const auto parName = parent->getName();
     // see if this is the parent
-    for (const auto &name : names)
-      if (name == parent->getName())
-        return name;
-
+    it = std::find(names.cbegin(), names.cend(), parName);
+    if (it != names.cend())
+      return *it;
     // or recurse
     return parentName(parent, names);
   } else {
@@ -380,7 +382,7 @@ void CreateChunkingFromInstrument::exec() {
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 0; num < maxBankNum; ++num) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       ostringstream mess;
       mess << "bank" << num;
       IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
@@ -396,16 +398,14 @@ void CreateChunkingFromInstrument::exec() {
 
         // add it to the correct chunk
         if (!parent.empty()) {
-          if (grouping.count(parent) == 0)
-            grouping[parent] = vector<string>();
-
+          grouping.try_emplace(parent, vector<string>());
           grouping[parent].emplace_back(comp->getName());
         }
       }
       progress.report();
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // check to see that something happened
     if (grouping.empty())

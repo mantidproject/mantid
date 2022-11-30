@@ -32,8 +32,6 @@ void IndirectBayes::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, IndirectBayesTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-            SIGNAL(runAsPythonScript(const QString &, bool)));
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
@@ -97,6 +95,6 @@ void IndirectBayes::applySettings(std::map<std::string, QVariant> const &setting
 
 std::string IndirectBayes::documentationPage() const { return "Indirect Bayes"; }
 
-IndirectBayes::~IndirectBayes() {}
+IndirectBayes::~IndirectBayes() = default;
 
 } // namespace MantidQt::CustomInterfaces

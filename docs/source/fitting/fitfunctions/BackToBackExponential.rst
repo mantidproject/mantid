@@ -31,7 +31,7 @@ maximum, by an amount that depends on :math:`A`, :math:`B` and :math:`S`).
 
 For information about how to convert Fullprof back-to-back exponential
 parameters into those used for this function see
-`CreateBackToBackParameters <http://www.mantidproject.org/CreateBackToBackParameters>`_.
+:ref:`CreateBackToBackParameters <CreateBackToBackParameters>`.
 For information about how to create parameters from a GSAS parameter file see
 `CreateBackToBackParametersGSAS <http://www.mantidproject.org/CreateBackToBackParametersGSAS>`_.
 

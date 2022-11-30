@@ -18,7 +18,7 @@ namespace Algorithms {
 
   Calculates the resolution function for L1 and Theta.
 */
-class MANTID_ALGORITHMS_DLL VesuvioL1ThetaResolution : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL VesuvioL1ThetaResolution final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -68,6 +68,9 @@ class InstrumentViewPresenter(ObservingPresenter):
     def show_view(self):
         self.container.show()
 
+    def save_image(self, filename):
+        self.container.save_image(filename)
+
     def get_current_tab(self):
         return self.container.get_current_tab()
 

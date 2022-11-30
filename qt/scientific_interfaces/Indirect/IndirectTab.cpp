@@ -350,10 +350,8 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
  */
 void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtProperty *max,
                                        const QPair<double, double> &bounds) {
-  m_dblManager->setMinimum(min, bounds.first);
-  m_dblManager->setMaximum(min, bounds.second);
-  m_dblManager->setMinimum(max, bounds.first);
-  m_dblManager->setMaximum(max, bounds.second);
+  m_dblManager->setRange(min, bounds.first, bounds.second);
+  m_dblManager->setRange(max, bounds.first, bounds.second);
   rs->setBounds(bounds.first, bounds.second);
 }
 
@@ -367,18 +365,14 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtPro
  * @param range :: The range to set the range selector to.
  */
 void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                                   const QPair<double, double> &bounds,
-                                   const boost::optional<QPair<double, double>> &range) {
-  m_dblManager->setValue(lower, bounds.first);
-  m_dblManager->setValue(upper, bounds.second);
-  if (range) {
-    rs->setMinimum(range.get().first);
-    rs->setMaximum(range.get().second);
+                                   const QPair<double, double> &range,
+                                   const boost::optional<QPair<double, double>> &bounds) {
+  m_dblManager->setValue(lower, range.first);
+  m_dblManager->setValue(upper, range.second);
+  rs->setRange(range.first, range.second);
+  if (bounds) {
     // clamp the bounds of the selector
-    rs->setRange(range.get().first, range.get().second);
-  } else {
-    rs->setMinimum(bounds.first);
-    rs->setMaximum(bounds.second);
+    rs->setBounds(bounds.get().first, bounds.get().second);
   }
 }
 

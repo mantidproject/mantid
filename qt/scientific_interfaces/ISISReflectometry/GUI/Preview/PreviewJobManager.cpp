@@ -20,8 +20,9 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Job Manager");
 
 constexpr auto PREPROCESS_ALG_NAME = "ReflectometryISISPreprocess";
 constexpr auto SUM_BANKS_ALG_NAME = "ReflectometryISISSumBanks";
+constexpr auto REDUCTION_ALG_NAME = "ReflectometryReductionOneAuto";
 
-enum class AlgorithmType { PREPROCESS, SUM_BANKS };
+enum class AlgorithmType { PREPROCESS, SUM_BANKS, REDUCTION };
 
 AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configuredAlg) {
   auto const &name = configuredAlg->algorithm()->name();
@@ -29,6 +30,8 @@ AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configured
     return AlgorithmType::PREPROCESS;
   } else if (name == SUM_BANKS_ALG_NAME) {
     return AlgorithmType::SUM_BANKS;
+  } else if (name == REDUCTION_ALG_NAME) {
+    return AlgorithmType::REDUCTION;
   } else {
     throw std::logic_error(std::string("Preview tab error: callback from invalid algorithm ") + name);
   }
@@ -39,8 +42,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
-PreviewJobManager::PreviewJobManager(IJobRunner *jobRunner, std::unique_ptr<IReflAlgorithmFactory> algFactory)
-    : m_jobRunner(jobRunner), m_algFactory(std::move(algFactory)) {
+PreviewJobManager::PreviewJobManager(std::unique_ptr<IJobRunner> jobRunner,
+                                     std::unique_ptr<IReflAlgorithmFactory> algFactory)
+    : m_jobRunner(std::move(jobRunner)), m_algFactory(std::move(algFactory)) {
   m_jobRunner->subscribe(this);
 }
 
@@ -72,6 +76,9 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
   case AlgorithmType::SUM_BANKS:
     m_notifyee->notifySumBanksCompleted();
     break;
+  case AlgorithmType::REDUCTION:
+    m_notifyee->notifyReductionCompleted();
+    break;
   };
 }
 
@@ -89,6 +96,11 @@ void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algo
     break;
   case AlgorithmType::SUM_BANKS:
     g_log.error(std::string("Error summing banks: ") + message);
+    m_notifyee->notifySumBanksAlgorithmError();
+    break;
+  case AlgorithmType::REDUCTION:
+    g_log.error(std::string("Error performing reduction: ") + message);
+    m_notifyee->notifyReductionAlgorithmError();
     break;
   };
 }
@@ -98,6 +110,8 @@ void PreviewJobManager::startPreprocessing(PreviewRow &row) {
 }
 
 void PreviewJobManager::startSumBanks(PreviewRow &row) { executeAlg(m_algFactory->makeSumBanksAlgorithm(row)); }
+
+void PreviewJobManager::startReduction(PreviewRow &row) { executeAlg(m_algFactory->makeReductionAlgorithm(row)); }
 
 void PreviewJobManager::executeAlg(IConfiguredAlgorithm_sptr alg) {
   m_jobRunner->clearAlgorithmQueue();

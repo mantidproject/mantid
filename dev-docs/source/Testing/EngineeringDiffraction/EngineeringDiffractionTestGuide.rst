@@ -17,10 +17,10 @@ will be needed as older runs may be deleted.
 Overview
 ^^^^^^^^
 The Engineering Diffraction interface allows scientists using the EnginX instrument to interactively
-process their data. There are 3 tabs which are ordered according to the main steps performed.
+process their data. There are 4 tabs in total but only the first 3 need testing (the GSAS II tab is being evaluated by the users and is in an extended beta testing phase).
 These are:
 
-- Calibration - This is where a cerium oxide run are entered to calibrate the subsequent data.
+- Calibration - This is where a cerium oxide run is entered to calibrate the subsequent data.
 - Focus - Where are the data across multiple spectra are normalised and summed into a single spectrum for later steps.
 - Fitting - Where peaks can be fitted on focused data
 
@@ -36,25 +36,25 @@ This test follows the simple steps for calibrating and focusing in the Engineeri
 Calibration
 -----------
 
-1. Ensure you are able to access the archive.
+1. Ensure you are able to access the ISIS data archive.
 
-2. Open the Engineering Diffraction gui.
+2. Open the Engineering Diffraction gui: ``Interfaces`` > ``Diffraction`` > ``Engineering Diffraction``
 
-3. On opening the gui the Create New Calibration option should be selected.
+3. On opening the gui the `Create New Calibration` option should be selected.
 
 4. Open the settings dialog from the cog in the bottom left of the gui.
 
-5. Set the Save location to a directory of your choice.
+5. Set the `Save Location` to a directory of your choice.
 
-6. Check that the Full Calibration setting has a default path to a .nxs file (currently ENGINX_full_instrument_calibration_193749.nxs)
+6. Check that the `Full Calibration` setting has a default path to a .nxs file (currently ENGINX_full_instrument_calibration_193749.nxs)
 
 7. Close the settings window
 
-8. For the Calibration Sample number enter `305738`.
+8. For the `Calibration Sample #` enter 305738.
 
-9. Tick the Plot Calibrated Workspace option.
+9. Tick the `Plot Calibrated Workspace` option.
 
-10. Click Calibrate, after completing calibration it should produce the following plot.
+10. Click `Calibrate`, after completing calibration it should produce the following plot.
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExpectedLinear.png
     :width: 900px
@@ -62,24 +62,24 @@ Calibration
 11. Check that in your save location there is a Calibration folder containing three .prm files
     `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
 
-12. Close down the Engineering Diffraction gui and reopen it. The Load Existing Calibration radio
+12. Close down the Engineering Diffraction gui and reopen it. The `Load Existing Calibration` radio
     button should be checked on the Calibration tab and the path should be populated with the
-    `_all_banks`.prm file generated earlier in this test.
+    `_all_banks.prm` file generated earlier in this test.
 
-13. In the Load Existing Calibration box browse to the `_bank_2`.prm file and click the Load button.
+13. In the `Load Existing Calibration` box browse to the `_bank_2.prm` file and click the `Load` button.
 
 Focus
 -----
 
 1. Change to the Focus tab.
 
-2. For the Sample Run number use `305761` and for the Vanadium run number enter `307521`.
+2. For the `Sample Run #` use 305761 and for the `Vanadium #` enter 307521.
 
-3. Tick the Plot Focused Workspace option and click Focus. It should produce a plot of a single spectrum for bank 2.
+3. Tick the `Plot Focused Workspace` option and click `Focus`. It should produce a plot of a single spectrum for bank 2.
 
 4. Go back to the Calibration tab and load in an existing calibration for both banks e.g. `ENGINX_305738_all_banks.prm`
 
-5. Go back to the Focus tab and click Focus, after completing calibration it should produce a plot.
+5. Go back to the Focus tab and click `Focus`, after completing calibration it should produce a plot.
 
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 900px
@@ -93,7 +93,7 @@ Test 2
 
 This test covers the RB number.
 
-1. Enter a string into the RB number box.
+1. Enter a string into the `RB Number` box.
 
 2. Follow the steps of Test 1, any output files (for non-texture ROI) should now be located in both
 [Save location]/user/[RB number] and [Save location] (for texture ROI the files will be saved in the first location
@@ -105,24 +105,24 @@ Test 3
 
 This test covers the Cropping functionality in the Calibration tab.
 
-1. Change the RB Number to "North", this is purely to separate the cropped output files into their own space.
+1. Change the RB Number to `North`, this is purely to separate the cropped output files into their own space.
 
-2. Go to the Calibration tab and tick the Crop Calibration option. In the drop down "Region of Interest" select `1 (North)`.
+2. Go to the Calibration tab, select `Create New Calibration` and tick the Crop Calibration option. In the drop down `Region of Interest` select `1 (North)`.
 
-3. Check the "Plot Calibrated Workspace" checkbox and click calibrate.
+3. Check the `Plot Calibrated Workspace` checkbox and click calibrate.
 
 4. The generated figure should show a plot of TOF vs d-spacing and plot showing residuals of the quadratic fit
 
 5. Check that only one .prm and one .nxs output file was generated.
 
-6. Go to focus tab and click Focus.
+6. Go to focus tab and click `Focus`.
 
-7. Change the RB number to "Custom".
+7. Change the RB number to `Custom`.
 
-8. Repeat steps 2-5 this time using Custom Spectra `1200-1400` (these spectrum number correspond to the South Bank). Please note that some custom spectra values may
+8. Repeat steps 2-5 this time setting `Region Of Interest` to `Crop to Spectra` and using `Custom Spectra` `1200-1400` (these spectrum number correspond to the South Bank). Please note that some custom spectra values may
    cause the algorithms to fail.
 
-9. Repeat steps 2-5 with the Texture grouping - there should be 20 spectra per run.
+9. Repeat steps 2-5 with `Region of Interest` set to `Texture (20 spec)` - there should be 20 spectra per run.
 
 
 Test 4
@@ -149,13 +149,15 @@ Test 5
 
 This tests the removal of focused runs from the fitting tab.
 
-1. Having loaded multiple runs, select a row in the UI table and then click the `Remove Selected` button below the table. The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the log tables with each row corresponding to the run in the same row of the UI table. The workspace of the focussed run that was removed from the UI will still exist in the ADS.
+1. Load multiple runs using the `Browse` button. This should take you to a folder called "Focus" containing .nxs files that have been previously generated from the Focus tab. Select multiple files and click on `Open`
 
-2. Try clicking the `Remove All` button, the UI table should be empty and the log workspaces no longer present.
+2. Having loaded multiple runs, select a row in the UI table and then click the `Remove Selected` button below the table. The row should be removed, if the run was plotted it will disappear from the plot and there should be one less row in each of the table workspaces inside the "_logs" workspace group with each row corresponding to the run in the same row of the UI table. The workspaces called "ENGINX\_...._TOF" and "ENGINX\_...._TOG_bgsub" will be deleted from the ADS
 
-3. Try loading in a run again, the UI should still be able to access the workspace and remember the log values - check there are no calls to ``AverageLogData`` in the log (should be visible at notice level).
+3. Try clicking the `Remove All` button, the UI table should be empty and the workspace group with name ending "_logs" should no longer be present.
 
-4. Try removing a workspace by deleting it in the ADS, the corresponding row in the log tables and the UI table should have been removed.
+4. Try loading in a run again, the UI should still be able to access the workspace and remember the log values - check there are no calls to ``AverageLogData`` in the log (should be visible at notice level).
+
+5. Try removing a workspace by deleting it in the ADS, the corresponding row in the log tables and the UI table should have been removed.
 
 Test 6
 ^^^^^^
@@ -166,7 +168,7 @@ This tests that the background subtraction works.
 
 2. Select the row in the table and check the `Inspect Background` button should now be enabled regardless of whether the `Subtract BG` box is checked.
 
-3. Click  `Inspect Background` to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of Niter, BG, XWindow and SG (input to ``EnggEstimateFocussedBackground``, hover over a cell inn the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
+3. Click  `Inspect Background` to open a new figure which shows the raw data, the background and the subtracted data. Changing the values of Niter, BG, XWindow and SG (input to ``EnggEstimateFocussedBackground``, hover over a cell in the table to see a tool tip for explanation) should produce a change in the background on the external plot and in the UI plot.
 
 Test 7
 ^^^^^^

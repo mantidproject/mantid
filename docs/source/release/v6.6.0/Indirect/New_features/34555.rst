@@ -1,0 +1,1 @@
+- Loads data from the beam monitor and  adds missing environment parameters, reactor power and scan period to the log when loading EMU event files using :ref:`LoadEMU <algm-LoadEMU>`.

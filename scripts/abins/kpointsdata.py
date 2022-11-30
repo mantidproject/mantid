@@ -6,7 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 from typing import List, NamedTuple, overload
+from math import isclose
+
 import numpy as np
+from numpy.linalg import norm
+from mantid.kernel import logger as mantid_logger
 
 from abins.constants import (COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
@@ -22,22 +26,30 @@ class KpointData(NamedTuple):
 class KpointsData(collections.abc.Sequence):
     """Class storing atomic frequencies and displacements at specific k-points
 
-    "weights" - weights of all k-points; weights.shape == (num_k,);
+    Args:
 
-    "k_vectors"  - k_vectors of all k-points;  k_vectors.shape == (num_k, 3)
+        weights: weights of all k-points; weights.shape == (num_k,);
 
-    "frequencies" - frequencies for all k-points; frequencies.shape == (num_k, num_freq)
+        k_vectors: k_vectors of all k-points;  k_vectors.shape == (num_k, 3)
 
-    "atomic_displacements" - atomic displacements for all k-points;
-                             atomic_displacements.shape == (num_k, num_atoms, num_freq, 3)
+        frequencies: frequencies for all k-points; frequencies.shape == (num_k, num_freq)
 
-    "unit_cell" - lattice vectors (use zeros for open boundary conditions);
-                  unit_cell.shape == (3, 3)
+        atomic_displacements: atomic displacements for all k-points;
+        atomic_displacements.shape == (num_k, num_atoms, num_freq, 3)
 
+        unit_cell: lattice vectors (use zeros for open boundary conditions);
+        unit_cell.shape == (3, 3)
+
+        logger: Logging instance. Defaults to Mantid logger. Alternate loggers
+            may be useful for testing.
     """
     def __init__(self, *, frequencies: np.ndarray, atomic_displacements: np.ndarray,
-                 weights: np.ndarray, k_vectors: np.ndarray, unit_cell: np.ndarray) -> None:
+                 weights: np.ndarray, k_vectors: np.ndarray, unit_cell: np.ndarray,
+                 logger = None) -> None:
         super().__init__()
+
+        if logger is None:
+            logger = mantid_logger
 
         self._data = {}
         dim = 3
@@ -57,6 +69,11 @@ class KpointsData(collections.abc.Sequence):
         if not (weights.dtype.num == FLOAT_ID
                 and np.allclose(weights, weights[weights >= 0])):
             raise ValueError("Invalid value of weights.")
+
+        if not isclose(np.sum(weights), 1.0):
+            logger.warning("k-point weights do not sum to 1. Re-normalising...")
+            weights /= np.sum(weights)
+
         self._weights = weights
 
         # k_vectors
@@ -112,6 +129,17 @@ class KpointsData(collections.abc.Sequence):
                     "unit_cell": self.unit_cell}
 
         return k_points
+
+    def is_normalised(self) -> bool:
+        """
+        Check atomic displacements are normalised correctly
+        """
+        for displacements in self._atomic_displacements:
+            if not np.allclose(np.ones(displacements.shape[1]),
+                               norm(norm(displacements, axis=0), axis=1)):
+                return False
+
+        return True
 
     def extract(self):
         extracted = {"unit_cell": self.unit_cell,

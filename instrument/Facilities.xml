@@ -703,6 +703,10 @@
     <technique>SANS</technique>
   </instrument>
 
+  <instrument name="D16B">
+    <technique>SANS</technique>
+  </instrument>
+
   <instrument name="D22">
     <technique>SANS</technique>
   </instrument>

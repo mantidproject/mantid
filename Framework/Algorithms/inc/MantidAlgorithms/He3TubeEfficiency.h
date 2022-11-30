@@ -46,7 +46,7 @@ namespace Algorithms {
     @author Michael Reuter
     @date 30/09/2010
 */
-class MANTID_ALGORITHMS_DLL He3TubeEfficiency : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL He3TubeEfficiency final : public API::Algorithm {
 public:
   /// Default constructor
   He3TubeEfficiency();

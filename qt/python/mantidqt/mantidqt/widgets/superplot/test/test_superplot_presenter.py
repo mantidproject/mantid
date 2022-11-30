@@ -11,6 +11,7 @@ from unittest import mock
 from mantidqt.widgets.superplot.presenter import SuperplotPresenter
 
 from mantid.plots import MantidAxes
+from mantid.plots.utility import MantidAxType
 
 
 class SuperplotPresenterTest(unittest.TestCase):
@@ -223,13 +224,39 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_view.set_spectra_list.assert_has_calls(calls)
 
     def test_update_plot(self):
+        self.m_view.get_selection.return_value = {"ws1": [10]}
+        self.m_model.get_plotted_data.return_value = [("ws1", 10), ("ws2", 1)]
+        self.m_axes.reset_mock()
+        self.m_figure.reset_mock()
+        self.presenter._remove_unneeded_curves = mock.Mock()
+        self.presenter._plot_selection = mock.Mock()
+        self.presenter._update_plot()
+        self.presenter._remove_unneeded_curves.assert_called_once()
+        self.presenter._plot_selection.assert_called_once()
+        self.m_axes.set_axis_on.assert_called_once()
+        self.m_figure.tight_layout.assert_called_once()
+        self.m_axes.legend.assert_called_once()
+        self.m_view.get_selection.return_value = {}
+        self.m_model.get_plotted_data.return_value = []
+        self.m_axes.reset_mock()
+        self.m_figure.reset_mock()
+        self.presenter._remove_unneeded_curves.reset_mock()
+        self.presenter._plot_selection.reset_mock()
+        self.presenter._update_plot()
+        self.presenter._remove_unneeded_curves.assert_called_once()
+        self.presenter._plot_selection.assert_called_once()
+        self.m_axes.get_legend.assert_called_once()
+        self.m_axes.set_axis_off.assert_called_once()
+        self.m_axes.set_title.assert_called_once_with("")
+        self.m_canvas.draw_idle.assert_called()
+
+    def test_remove_unneeded_curves(self):
+        self.m_mtd.__contains__.return_value = True
         self.m_axes.reset_mock()
         self.m_model.get_plotted_data.return_value = [("ws5", 5), ("ws2", 1)]
         self.m_model.is_spectrum_mode.return_value = True
         self.m_model.is_bin_mode.return_value = False
         self.m_view.get_mode.return_value = self.presenter.SPECTRUM_MODE_TEXT
-        self.m_view.get_selection.return_value = {"ws1": [10]}
-        self.m_view.get_spectrum_slider_position.return_value = 10
         self.m_axes.plot.return_value = [mock.Mock()]
         a1 = mock.Mock()
         a1.get_label.return_value = "label"
@@ -249,18 +276,62 @@ class SuperplotPresenterTest(unittest.TestCase):
         ws1.name.return_value = "ws1"
         self.m_axes.get_artists_workspace_and_workspace_index.side_effect = \
             [(ws5, 5), (ws2, 1), (ws1, 1)]
+        self.presenter._fill_plot_kwargs = mock.Mock()
+        self.presenter._fill_plot_kwargs.return_value = dict()
+        self.presenter._remove_unneeded_curves(False)
+        self.m_axes.remove_artists_if.assert_called_once()
+        self.presenter._fill_plot_kwargs.assert_not_called()
+        self.m_axes.remove_artists_if.reset_mock()
+        self.m_axes.get_artists_workspace_and_workspace_index.side_effect = \
+                [(ws5, 5), (ws2, 1), (ws1, 1)]
+        self.presenter._remove_unneeded_curves(True)
+        self.m_axes.remove_artists_if.assert_called()
+        self.presenter._fill_plot_kwargs.assert_called()
+
+    def test_plot_selection(self):
+        self.m_mtd.__contains__.return_value = True
+        self.m_axes.reset_mock()
+        self.m_model.get_plotted_data.return_value = [("ws5", 5), ("ws2", 1)]
+        self.m_view.get_selection.return_value = {"ws1": [10]}
+        self.m_view.get_spectrum_slider_position.return_value = 10
         line = mock.Mock()
         line.get_label.return_value = "label"
         line.get_color.return_value = "color"
         self.m_axes.plot.return_value = [line]
         self.m_model.get_workspace_color.return_value = "memorized_color"
-        self.presenter._update_plot()
-        self.m_axes.remove_artists_if.assert_called_once()
-        calls = [mock.call("ws5", 5, "label", "color"),
-                 mock.call("ws2", 1, "label", "color")]
-        self.m_view.modify_spectrum_label.assert_has_calls(calls)
+        self.presenter._fill_plot_kwargs = mock.Mock()
+        self.presenter._fill_plot_kwargs.return_value = dict()
+        self.presenter._plot_selection()
         self.m_model.set_workspace_color.assert_called_once_with("ws1", "color")
         self.m_axes.plot.assert_called_once()
+
+    def test_fill_plot_kwargs(self):
+        ws_name = "ws_name"
+        spectrum = 0
+        normalise = False
+        mode = self.presenter.SPECTRUM_MODE_TEXT
+        color = "color"
+        ws = mock.Mock()
+        self.m_mtd.__getitem__.return_value = ws
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
+                                                  mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
+                                      "wkspIndex": 0,
+                                      "color": "color"})
+        normalise = True
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
+                                                  mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.SPECTRUM,
+                                      "wkspIndex": 0,
+                                      "color": "color",
+                                      "normalise_spectrum": True})
+        mode = self.presenter.BIN_MODE_TEXT
+        kwargs = self.presenter._fill_plot_kwargs(ws_name, spectrum, normalise,
+                                                  mode, color)
+        self.assertDictEqual(kwargs, {"axis": MantidAxType.BIN,
+                                      "wkspIndex": 0,
+                                      "color": "color",
+                                      "normalise_spectrum": True})
 
     def test_on_workspace_selection_changed(self):
         self.presenter._update_plot = mock.Mock()

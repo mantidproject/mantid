@@ -8,6 +8,8 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -236,6 +238,14 @@ public:
   /*
    * End test radius filter
    */
+
+  void testNoNMatrixWorkspaceInputNotAccepted() {
+    SmoothNeighbours alg;
+    alg.initialize();
+    TSM_ASSERT_THROWS("Input workspace must be a subclass of MatrixWorkspace",
+                      alg.setProperty("InputWorkspace", std::make_shared<FakeWorkspace>()),
+                      const std::invalid_argument &);
+  }
 
   void testWithUnsignedNumberOfNeighbours() {
     SmoothNeighbours alg;

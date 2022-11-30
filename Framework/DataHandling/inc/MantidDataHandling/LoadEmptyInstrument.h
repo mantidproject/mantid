@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -43,7 +44,7 @@ instrument display window</LI>
 @author Anders Markvardsen, ISIS, RAL
 @date 31/10/2008
 */
-class DLLExport LoadEmptyInstrument : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadEmptyInstrument : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadEmptyInstrument"; }

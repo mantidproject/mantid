@@ -30,9 +30,11 @@ def deprecated_alias(deprecation_date):  # decorator factory
 
     def decorator_instance(cls):
         cls_aliasDeprecated = cls.aliasDeprecated
+
         @functools.wraps(cls_aliasDeprecated)
         def new_aliasDeprecated(self):
             return deprecation_date
+
         cls.aliasDeprecated = new_aliasDeprecated
         return cls
 
@@ -56,9 +58,10 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
         depr_msg = f'Algorithm "{cls.__name__}" is deprecated since {deprecation_date}.'
         if new_name:
             depr_msg += ' Use "{new_name}" instead'
-        raise_msg = f'Configuration "algorithms.deprecated" set to raise upon use of any deprecated algorithm'
+        raise_msg = 'Configuration "algorithms.deprecated" set to raise upon use of any deprecated algorithm'
 
         cls_category = cls.category
+
         @functools.wraps(cls_category)
         def new_category(self):
             r"""Add the Deprecated category"""
@@ -66,6 +69,7 @@ def deprecated_algorithm(new_name, deprecation_date):  # decorator factory
         cls.category = new_category
 
         cls_PyExec = cls.PyExec
+
         @functools.wraps(cls_PyExec)
         def new_PyExec(self):
             r"""decorate PyExec to raise or log an error message"""

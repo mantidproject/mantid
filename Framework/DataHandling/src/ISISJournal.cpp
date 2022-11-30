@@ -291,7 +291,7 @@ std::vector<ISISJournal::RunData> ISISJournal::getRuns(std::vector<std::string> 
  */
 std::string ISISJournal::getURLContents(std::string const &url) {
   std::ostringstream serverReply;
-  int statusCode;
+  InternetHelper::HTTPStatus statusCode{InternetHelper::HTTPStatus::BAD_REQUEST};
   try {
     statusCode = m_internetHelper->sendRequest(url, serverReply);
   } catch (Kernel::Exception::InternetError const &) {
@@ -300,9 +300,10 @@ std::string ISISJournal::getURLContents(std::string const &url) {
     throw Kernel::Exception::InternetError(msg.str());
   }
 
-  if (statusCode != Poco::Net::HTTPResponse::HTTP_OK) {
+  if (statusCode != InternetHelper::HTTPStatus::OK) {
     std::ostringstream msg;
-    msg << "Failed to access file " << url << "\nHTTP Code: " << statusCode << "\nCheck that the cycle name is valid.";
+    msg << "Failed to access file " << url << "\nHTTP Code: " << static_cast<int>(statusCode)
+        << "\nCheck that the cycle name is valid.";
     throw Kernel::Exception::InternetError(msg.str());
   }
   return serverReply.str();

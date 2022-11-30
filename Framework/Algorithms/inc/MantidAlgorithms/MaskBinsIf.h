@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** MaskBinsIf : Masks bins based on muparser expression
  */
-class MANTID_ALGORITHMS_DLL MaskBinsIf : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsIf final : public API::Algorithm {
 public:
   const std::string name() const override { return "MaskBinsIf"; }
   int version() const override { return 1; }

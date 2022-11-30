@@ -8,6 +8,13 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "ROIType.h"
+#include "Reduction/PreviewRow.h"
+#include "Reduction/ProcessingInstructions.h"
+
+#include <boost/optional.hpp>
+
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,19 +23,31 @@ class IJobManager;
 
 class IPreviewModel {
 public:
+  using Selection = std::vector<double>;
+
   IPreviewModel() = default;
   virtual ~IPreviewModel() = default;
   virtual bool loadWorkspaceFromAds(std::string const &workspaceName) = 0;
   virtual void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) = 0;
   virtual void sumBanksAsync(IJobManager &jobManager) = 0;
+  virtual void reduceAsync(IJobManager &jobManager) = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
-  virtual std::vector<Mantid::detid_t> getSelectedBanks() const = 0;
+  virtual boost::optional<ProcessingInstructions> getSelectedBanks() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getReducedWs() const = 0;
+  virtual boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
+  virtual std::optional<double> getDefaultTheta() const = 0;
+  virtual PreviewRow const &getPreviewRow() const = 0;
 
-  virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
+  virtual void setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) = 0;
 
-  virtual std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const = 0;
+  virtual void setTheta(double theta) = 0;
+
+  virtual void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) = 0;
+  virtual void setSelectedRegion(ROIType regionType, Selection const &selection) = 0;
+
   virtual void exportSummedWsToAds() const = 0;
+  virtual void exportReducedWsToAds() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

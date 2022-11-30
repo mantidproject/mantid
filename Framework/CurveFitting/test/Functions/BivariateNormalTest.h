@@ -46,7 +46,7 @@ private:
 public:
   Jacob(const int nparams, const int npoints) { M = Matrix<double>(nparams, npoints); }
 
-  ~Jacob() override {}
+  ~Jacob() override = default;
   void set(const size_t iY, const size_t iP, const double value) override { M[iP][iY] = value; }
 
   double get(const size_t iY, const size_t iP) override { return M[iP][iY]; }

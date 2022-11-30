@@ -214,8 +214,4 @@ The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` provides a graphic
 
 See the :ref:`full documentation <interface-isis-refl>` for more information.
 
-Note that the main table on the ``Runs`` tab is designed to be a :ref:`generic batch-processing table <DataProcessorWidget_DevelopersGuide-ref>` which can be customised and re-used for other technique areas in their own interfaces. The table and interface are both tested in unit tests using gmock. The interface uses the MVP pattern at different levels and communication happens between presenters.
-
-Note that the current interface replaces the ``ISIS Reflectometry (Old)`` interface, which was written in Python and had several limitations, including lack of automated testing. The old interface will shortly be removed.
-
 .. categories:: Techniques

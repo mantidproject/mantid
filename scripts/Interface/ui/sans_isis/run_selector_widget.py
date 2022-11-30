@@ -46,7 +46,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         return previous_directories
 
     def _previous_or_default_directory(self, settings, default):
-        return settings.value("InPath", default)
+        return settings.value("InPath", default, type=type(default))
 
     def _store_previous_directory(self, settings, path):
         previous_file = QFileInfo(path)

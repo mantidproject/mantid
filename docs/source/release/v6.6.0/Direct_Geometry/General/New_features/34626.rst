@@ -1,0 +1,1 @@
+By default on ALFView, the mini plot on the pick tab will now select the 'Out of plane angle' axis and 'Integrate' when the ``Select whole tube`` button is pressed.

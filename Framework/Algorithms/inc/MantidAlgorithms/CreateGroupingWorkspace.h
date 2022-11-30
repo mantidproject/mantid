@@ -20,7 +20,7 @@ namespace Algorithms {
  *
  *  Optionally uses bank names to create the groups.
  */
-class MANTID_ALGORITHMS_DLL CreateGroupingWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateGroupingWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

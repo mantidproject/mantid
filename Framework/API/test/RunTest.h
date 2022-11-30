@@ -14,6 +14,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <cxxtest/TestSuite.h>
 #include <json/value.h>
@@ -133,7 +134,9 @@ public:
     TS_ASSERT_EQUALS(runInfo_2.getGoniometer(), Goniometer());
 
     // Check self assignment
+    GNU_DIAG_OFF("self-assign-overloaded")
     runInfo = runInfo;
+    GNU_DIAG_ON("self-assign-overloaded")
     TS_ASSERT_EQUALS(runInfo.getProperties().size(), 1);
     TS_ASSERT_DELTA(runInfo.getProtonCharge(), 15.0, 1e-8);
     TS_ASSERT_EQUALS(runInfo.getNumGoniometers(), 1);

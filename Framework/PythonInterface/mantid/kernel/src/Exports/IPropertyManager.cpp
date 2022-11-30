@@ -53,12 +53,8 @@ void setProperty(IPropertyManager &self, const std::string &name, const boost::p
 }
 
 void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
-#if PY_MAJOR_VERSION >= 3
   const object view = kwargs.attr("items")();
   const object objectItems(handle<>(PyObject_GetIter(view.ptr())));
-#else
-  const object objectItems = kwargs.iteritems();
-#endif
   auto begin = stl_input_iterator<object>(objectItems);
   auto end = stl_input_iterator<object>();
   for (auto it = begin; it != end; ++it) {

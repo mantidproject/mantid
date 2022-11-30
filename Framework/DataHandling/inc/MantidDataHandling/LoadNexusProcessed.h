@@ -12,6 +12,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
@@ -39,7 +40,7 @@ Required Properties:
 <LI> InputWorkspace - The name of the workspace to put the data </LI>
 </UL>
 */
-class DLLExport LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   /// Default constructor
@@ -100,7 +101,7 @@ private:
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root, const std::string &entry_name, const double &progressStart,
                                 const double &progressRange);
 
-  API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry &entry);
+  API::Workspace_sptr loadTableEntry(const Mantid::NeXus::NXEntry &entry);
 
   /// Load a numeric column to the TableWorkspace.
   template <typename ColumnType, typename NexusType>
@@ -137,7 +138,7 @@ private:
   void getWordsInString(const std::string &words4, std::string &w1, std::string &w2, std::string &w3, std::string &w4);
 
   /// Read the bin masking information
-  void readBinMasking(Mantid::NeXus::NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace);
+  void readBinMasking(const Mantid::NeXus::NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
   /// bins have already been cached

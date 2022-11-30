@@ -131,13 +131,17 @@ class GenerateLogbook(PythonAlgorithm):
         try:
             logbook_optional_parameters = parameters.getStringParameter('logbook_optional_parameters')[0]
         except IndexError:
-            raise RuntimeError("Optional headers are requested but are not defined for {}.".format(self._instrument))
+            self.log().warning("Optional headers are requested but are not defined for {}.".format(self._instrument))
+            return
         else:
             logbook_optional_parameters = logbook_optional_parameters.split(',')
             # create tmp dictionary with headers and paths read from IPF with whitespaces removed from the header
             optional_entries = dict()
             for entry in logbook_optional_parameters:
                 optional_entry = entry.split(':')
+                if len(optional_entry) == 1:
+                    self.log().warning("Optional header {} is requested but is not properly defined.".format(optional_entry[0]))
+                    continue
                 if len(optional_entry) < 3:
                     optional_entry.append('s')
                 optional_entries[(optional_entry[2], str(optional_entry[0]).strip())] = optional_entry[1]
@@ -155,7 +159,7 @@ class GenerateLogbook(PythonAlgorithm):
                             break
                     if (('s', header) not in optional_entries and ('d', header) not in optional_entries
                             and ('f', header) not in optional_entries):
-                        raise RuntimeError("Header {} requested, but not defined for {}.".format(header, self._instrument))
+                        self.log().warning("Header {} requested, but not defined for {}.".format(header, self._instrument))
 
     def _get_custom_entries(self):
         logbook_custom_entries = self.getPropertyValue('CustomEntries')
@@ -267,11 +271,11 @@ class GenerateLogbook(PythonAlgorithm):
             elif op == "*":
                 new_val = values[ind1] * values[ind2]
             elif op == "//":
-                if values[ind2] == 0:
-                    self.log().warning("Divisor is equal to 0.")
-                    new_val = 'N/A'
-                else:
+                try:
                     new_val = values[ind1] / values[ind2]
+                except (RuntimeWarning, TypeError) as e:
+                    self.log().warning("Division error: {}".format(str(e)))
+                    new_val = "N/A"
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
             if type(new_val) == str():

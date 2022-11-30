@@ -25,7 +25,7 @@ namespace ICat {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 17/03/2014
 */
-class MANTID_ICAT_DLL CatalogKeepAlive : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogKeepAlive final : public API::Algorithm {
 public:
   /// constructor
   CatalogKeepAlive() : API::Algorithm() {}

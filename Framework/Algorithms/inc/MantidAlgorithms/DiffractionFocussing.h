@@ -47,7 +47,7 @@ The structure of the grouping file is as follows:
 @author Nick Draper, Tessella
 @date 11/07/2008
 */
-class MANTID_ALGORITHMS_DLL DiffractionFocussing : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL DiffractionFocussing final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   DiffractionFocussing();

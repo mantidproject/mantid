@@ -21,7 +21,7 @@ namespace Algorithms {
  * @copyright GNU General Public License
  */
 
-class MANTID_ALGORITHMS_DLL SortXAxis : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SortXAxis final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

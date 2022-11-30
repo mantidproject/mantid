@@ -15,7 +15,6 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <iosfwd>
 #include <mutex>
@@ -48,7 +47,7 @@ namespace DataObjects {
  *
  * */
 TMDE_CLASS
-class DLLExport MDBoxBase : public Mantid::API::IMDNode {
+class MANTID_DATAOBJECTS_DLL MDBoxBase : public Mantid::API::IMDNode {
 public:
   //-----------------------------------------------------------------------------------------------
   MDBoxBase(Mantid::API::BoxController *const boxController = nullptr, const uint32_t depth = 0,

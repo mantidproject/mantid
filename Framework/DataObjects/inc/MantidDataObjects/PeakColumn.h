@@ -25,7 +25,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-25 18:06:32.952258
  */
-template <class T> class DLLExport PeakColumn : public Mantid::API::Column {
+template <class T> class MANTID_DATAOBJECTS_DLL PeakColumn : public Mantid::API::Column {
 
 public:
   /// Construct a column with a reference to the peaks list, a name & type

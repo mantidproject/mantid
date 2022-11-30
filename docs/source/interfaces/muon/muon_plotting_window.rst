@@ -71,6 +71,14 @@ Only tiled plots can be shown and to improve the visibility of the plots the axi
 .. image::  ../../images/muon_plotting_raw.png
    :width: 500px
 
+Model Data Plots
+^^^^^^^^^^^^^^^^
+
+This shows the data that has been selected on the :ref:`Model Fitting Tab <muon_model_fitting_tab-ref>` tab. This must
+first be enabled via the :ref:`feature flags <Muon_Feature_Flags-ref>`.
+If a fit is calculated for the data, this is also displayed on the plot.
+
+
 :ref:`Muon Analysis <Muon_Analysis-ref>`,
 :ref:`Muon Analysis Plotting <Muon_Analysis_plotting-ref>`,
 :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`,

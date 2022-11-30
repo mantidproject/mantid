@@ -339,18 +339,15 @@ public:
     double lon = (grid.longitudeAt(3) + grid.longitudeAt(2)) / 2.0;
     size_t nearestLatIndex, nearestLonIndex;
     std::tie(nearestLatIndex, nearestLonIndex) = sparseWS->grid().getNearestVertex(lat, lon);
-    double val = static_cast<double>(sparseWS->grid().getDetectorIndex(nearestLatIndex, nearestLonIndex) +
-                                     sparseWS->grid().getDetectorIndex(nearestLatIndex + 1, nearestLonIndex) +
-                                     sparseWS->grid().getDetectorIndex(nearestLatIndex, nearestLonIndex + 1) +
-                                     sparseWS->grid().getDetectorIndex(nearestLatIndex + 1, nearestLonIndex + 1)) /
-                 4.0;
+    double indexSum = static_cast<double>(sparseWS->grid().getDetectorIndex(nearestLatIndex, nearestLonIndex) +
+                                          sparseWS->grid().getDetectorIndex(nearestLatIndex + 1, nearestLonIndex) +
+                                          sparseWS->grid().getDetectorIndex(nearestLatIndex, nearestLonIndex + 1) +
+                                          sparseWS->grid().getDetectorIndex(nearestLatIndex + 1, nearestLonIndex + 1));
+    double val = indexSum / 4.0;
     // second derivative is zero here so error will be from propagating
     // the original errors on points only
-    double err = sqrt(sparseWS->grid().getDetectorIndex(nearestLatIndex, nearestLonIndex) +
-                      sparseWS->grid().getDetectorIndex(nearestLatIndex + 1, nearestLonIndex) +
-                      sparseWS->grid().getDetectorIndex(nearestLatIndex, nearestLonIndex + 1) +
-                      sparseWS->grid().getDetectorIndex(nearestLatIndex + 1, nearestLonIndex + 1)) /
-                 4.0;
+    double err = sqrt(indexSum) / 4.0;
+
     auto h = sparseWS->bilinearInterpolateFromDetectorGrid(lat, lon);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {
@@ -371,7 +368,7 @@ public:
       for (size_t col = 0; col < sparseCols; col++) {
         auto &ys = sparseWS->mutableY(row + col * sparseRows);
         for (size_t j = 0; j < ys.size(); ++j) {
-          ys[j] = pow(col, 2);
+          ys[j] = std::pow(col, 2);
         }
       }
     }
@@ -398,7 +395,7 @@ public:
       for (size_t col = 0; col < sparseCols; col++) {
         auto &ys = sparseWS->mutableY(row + col * sparseRows);
         for (size_t j = 0; j < ys.size(); ++j) {
-          ys[j] = pow(col, 2);
+          ys[j] = std::pow(col, 2);
         }
       }
     }
@@ -422,7 +419,7 @@ public:
       for (size_t col = 0; col < sparseCols; col++) {
         auto &ys = sparseWS->mutableY(row + col * sparseRows);
         for (size_t j = 0; j < ys.size(); ++j) {
-          ys[j] = pow(sparseCols - 1, 2) - pow(sparseCols - col - 1, 2);
+          ys[j] = std::pow(sparseCols - 1, 2) - std::pow(sparseCols - col - 1, 2);
         }
       }
     }

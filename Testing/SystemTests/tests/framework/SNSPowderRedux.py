@@ -61,11 +61,8 @@ class PG3Analysis(systemtesting.MantidSystemTest):
     char_file = "PG3_characterization_2011_08_31-HR.txt"
 
     def skipTests(self):
-        # don't run in conda, temporary solution
-        if "CONDA_PREFIX" in os.environ:
-            return True
-
-        return _skip_test()
+        # disabled
+        return True
 
     def cleanup(self):
         return do_cleanup()
@@ -188,14 +185,11 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
 
 class PG3StripPeaks(systemtesting.MantidSystemTest):
     ref_file = 'PG3_4866_reference.gsa'
-    cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
 
     def skipTests(self):
-        # don't run in conda, temporary solution
-        if "CONDA_PREFIX" in os.environ:
-            return True
-
-        return _skip_test()
+        # disabled
+        return True
 
     def cleanup(self):
         return do_cleanup()

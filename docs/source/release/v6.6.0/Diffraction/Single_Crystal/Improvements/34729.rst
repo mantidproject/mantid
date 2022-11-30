@@ -1,0 +1,1 @@
+* Parallelize loop over peaks in IntegratePEaksMD which provides significant speed-up for ellipsoid integration.

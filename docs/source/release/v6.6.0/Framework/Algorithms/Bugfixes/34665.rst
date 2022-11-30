@@ -1,0 +1,1 @@
+- fix problem with the :ref:`ConvolveWorkspaces  <algm-ConvolveWorkspaces>` algorithm when run on input workspaces with different x ranges. The x range of the output workspace was being taken from the resolution workspace instead of the data workspace

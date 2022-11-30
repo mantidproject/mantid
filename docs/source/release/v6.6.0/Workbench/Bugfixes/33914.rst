@@ -1,0 +1,1 @@
+- Fixed a bug where spectra plots with error bars could not have normalisation turned off.

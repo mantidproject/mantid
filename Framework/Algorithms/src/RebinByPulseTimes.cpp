@@ -50,7 +50,7 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspa
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outputWS))
   for (int i = 0; i < histnumber; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     const auto &el = inWS->getSpectrum(i);
     MantidVec y_data, e_data;
@@ -66,9 +66,9 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspa
 
     // Report progress
     prog.report(name());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**

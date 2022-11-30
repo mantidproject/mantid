@@ -10,9 +10,6 @@
 #include "MantidQtWidgets/Common/WidgetScrollbarDecorator.h"
 
 #include <QMainWindow>
-#include <QScrollArea>
-#include <QVBoxLayout>
-#include <QWidget>
 
 using namespace MantidQt::API;
 

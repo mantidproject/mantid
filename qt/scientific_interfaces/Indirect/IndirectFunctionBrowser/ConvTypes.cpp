@@ -14,6 +14,9 @@ using namespace Mantid::API;
 
 std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::None, false},
                                                                    {FitType::TeixeiraWater, true},
+                                                                   {FitType::FickDiffusion, true},
+                                                                   {FitType::ChudleyElliot, true},
+                                                                   {FitType::HallRoss, true},
                                                                    {FitType::StretchedExpFT, false},
                                                                    {FitType::DiffSphere, true},
                                                                    {FitType::ElasticDiffSphere, true},
@@ -27,6 +30,9 @@ std::map<FitType, bool> FitTypeQDepends = std::map<FitType, bool>({{FitType::Non
 
 std::unordered_map<FitType, std::string>
     FitTypeEnumToString({{FitType::TeixeiraWater, "TeixeiraWaterSQE"},
+                         {FitType::FickDiffusion, "FickDiffusionSQE"},
+                         {FitType::ChudleyElliot, "ChudleyElliotSQE"},
+                         {FitType::HallRoss, "HallRossSQE"},
                          {FitType::StretchedExpFT, "StretchedExpFT"},
                          {FitType::DiffSphere, "DiffSphere"},
                          {FitType::ElasticDiffSphere, "ElasticDiffSphere"},
@@ -40,6 +46,9 @@ std::unordered_map<FitType, std::string>
 
 std::unordered_map<std::string, FitType>
     FitTypeStringToEnum({{"TeixeiraWaterSQE", FitType::TeixeiraWater},
+                         {"FickDiffusionSQE", FitType::FickDiffusion},
+                         {"ChudleyElliotSQE", FitType::ChudleyElliot},
+                         {"HallRossSQE", FitType::HallRoss},
                          {"StretchedExpFT", FitType::StretchedExpFT},
                          {"DiffSphere", FitType::DiffSphere},
                          {"ElasticDiffSphere", FitType::ElasticDiffSphere},
@@ -65,6 +74,17 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_DIFFCOEFF, "DiffCoeff"},
     {ParamID::TW_TAU, "Tau"},
     {ParamID::TW_CENTRE, "Centre"},
+    {ParamID::FD_HEIGHT, "Height"},
+    {ParamID::FD_DIFFCOEFF, "DiffCoeff"},
+    {ParamID::FD_CENTRE, "Centre"},
+    {ParamID::CE_HEIGHT, "Height"},
+    {ParamID::CE_TAU, "Tau"},
+    {ParamID::CE_L, "L"},
+    {ParamID::CE_CENTRE, "Centre"},
+    {ParamID::HR_HEIGHT, "Height"},
+    {ParamID::HR_TAU, "Tau"},
+    {ParamID::HR_L, "L"},
+    {ParamID::HR_CENTRE, "Centre"},
     {ParamID::DELTA_HEIGHT, "Height"},
     {ParamID::DELTA_CENTER, "Centre"},
     {ParamID::TEMPERATURE, "Temperature"},
@@ -113,6 +133,9 @@ template <>
 std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typeMap{
     {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
     {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {FitType::FickDiffusion, {"Fick Diffusion", "FickDiffusionSQE", {ParamID::FD_HEIGHT, ParamID::FD_CENTRE}}},
+    {FitType::ChudleyElliot, {"Chudley-Elliot", "ChudleyElliotSQE", {ParamID::CE_HEIGHT, ParamID::CE_CENTRE}}},
+    {FitType::HallRoss, {"Hall-Ross", "HallRossSQE", {ParamID::HR_HEIGHT, ParamID::HR_CENTRE}}},
     {FitType::StretchedExpFT, {"StretchedExpFT", "StretchedExpFT", {ParamID::SE_HEIGHT, ParamID::SE_CENTRE}}},
     {FitType::DiffSphere, {"DiffSphere", "DiffSphere", {ParamID::DP_INTENSITY, ParamID::DP_SHIFT}}},
     {FitType::ElasticDiffSphere,

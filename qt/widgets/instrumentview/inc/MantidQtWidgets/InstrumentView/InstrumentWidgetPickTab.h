@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -36,6 +37,15 @@ class CollapsibleStack;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
+
+enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickPlotType { SINGLE = 0, DETECTOR_SUM, TUBE_SUM, TUBE_INTEGRAL };
+enum EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IWPickXUnits {
+  DETECTOR_ID = 0,
+  LENGTH,
+  PHI,
+  OUT_OF_PLANE_ANGLE,
+  _NUMBER_OF_UNITS
+};
 
 /**
  * Implements the Pick tab in InstrumentWidget.
@@ -92,18 +102,24 @@ public:
   void saveSettings(QSettings &settings) const override;
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
+  void expandPlotPanel();
   void selectTool(const ToolType tool);
   SelectionType getSelectionType() const { return m_selectionType; }
   std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
+  void resetOriginalWorkspace();
   void clearWidgets();
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
   virtual std::string saveToProject() const override;
   void addToContextMenu(QAction *action, std::function<bool(std::map<std::string, bool>)> &actionCondition);
+  QPushButton *getSelectTubeButton();
+  void setPlotType(const IWPickPlotType type);
+
 public slots:
   void setTubeXUnits(int units);
+  void setTubeXUnits(const IWPickXUnits units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);
   void savePlotToWorkspace();
 
@@ -125,6 +141,7 @@ private slots:
   void updatePlotMultipleDetectors();
   void onRunRebin();
   void onRebinParamsWritten(const QString &text);
+  void onKeepOriginalStateChanged(int state);
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
@@ -184,7 +201,12 @@ private:
   QLineEdit *m_rebinParams;
   QCheckBox *m_rebinUseReverseLog;
   QCheckBox *m_rebinSaveToHisto;
+  QCheckBox *m_rebinKeepOriginal;
+  QLabel *m_rebinKeepOriginalWarning;
   QPushButton *m_runRebin;
+
+  /// The original workspace to be used for rebinning. Do not add this to the ADS (if you don't want a memory leak)
+  Mantid::API::Workspace_sptr m_originalWorkspace;
 
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;
@@ -235,9 +257,6 @@ class DetectorPlotController : public QObject {
   Q_OBJECT
 
 public:
-  enum PlotType { Single = 0, DetectorSum, TubeSum, TubeIntegral };
-  enum TubeXUnits { DETECTOR_ID = 0, LENGTH, PHI, OUT_OF_PLANE_ANGLE, NUMBER_OF_UNITS };
-
   DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentWidget *instrWidget, MiniPlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
@@ -246,10 +265,11 @@ public:
   void clear();
   void savePlotToWorkspace();
 
-  void setPlotType(PlotType type) { m_plotType = type; }
-  PlotType getPlotType() const { return m_plotType; }
-  void setTubeXUnits(TubeXUnits units);
-  TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
+  void setPlotType(const IWPickPlotType type) { m_plotType = type; }
+  IWPickPlotType getPlotType() const { return m_plotType; }
+  void setTubeXUnits(const IWPickXUnits units);
+  IWPickXUnits getTubeXUnits() const { return m_tubeXUnits; }
+  QString getTubeXLabel() const;
   QString getTubeXUnitsName() const;
   QString getTubeXUnitsUnits() const;
   QString getPlotCaption() const;
@@ -279,9 +299,9 @@ private:
   InstrumentWidget *m_instrWidget;
   MiniPlot *m_plot;
 
-  PlotType m_plotType;
+  IWPickPlotType m_plotType;
   bool m_enabled;
-  TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
+  IWPickXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   size_t m_currentPickID;
 };
 

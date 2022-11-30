@@ -33,9 +33,9 @@
 // clang-format on
 
 #include <algorithm>
-#include <cmath>
 #include <cctype>
 #include <climits>
+#include <cmath>
 #include <functional>
 #include <sstream>
 #include <vector>
@@ -875,7 +875,7 @@ void LoadISISNexus2::loadRunDetails(DataObjects::Workspace2D_sptr &local_workspa
  *   @param local_workspace :: The workspace to load the logs to.
  *   @param entry :: The Nexus entry
  */
-void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr &local_workspace, NXEntry &entry) {
+void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr &local_workspace, const NXEntry &entry) {
 
   // load sample geometry - Id and dimensions
   LoadISISNexusHelper::loadSampleGeometry(local_workspace->mutableSample(), entry, m_hasVMSBlock);
@@ -1050,7 +1050,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry, std::vector<specn
  * @param entry a handle to the Nexus file
  * @return if the file has multiple time regimes or not
  */
-bool LoadISISNexus2::isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const {
+bool LoadISISNexus2::isMultipleTimeRegimeFile(const NeXus::NXEntry &entry) const {
   auto hasMultipleTimeRegimes(false);
   try {
     NXClass instrument = entry.openNXGroup("instrument");

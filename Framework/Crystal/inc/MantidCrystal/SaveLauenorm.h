@@ -21,7 +21,7 @@ namespace Crystal {
  * @date 2014-07-24
  */
 
-class MANTID_CRYSTAL_DLL SaveLauenorm : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveLauenorm final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveLauenorm"; };

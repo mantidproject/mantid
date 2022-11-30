@@ -25,6 +25,8 @@ OptionalBool::OptionalBool(Value arg) : m_arg(arg) {}
 
 bool OptionalBool::operator==(const OptionalBool &other) const { return m_arg == other.getValue(); }
 
+bool OptionalBool::operator!=(const OptionalBool &other) const { return m_arg != other.getValue(); }
+
 OptionalBool::Value OptionalBool::getValue() const { return m_arg; }
 
 std::ostream &operator<<(std::ostream &os, OptionalBool const &object) {

@@ -51,7 +51,7 @@ class CalculateQToscaTest(unittest.TestCase):
 
         q2 = self._tosca_instrument.calculate_q_powder(
             input_data=freq,
-            angle=tosca_params['settings']['Forward (TOSCA)']['angles'][0])
+            angle=tosca_params['settings']['Backward (TOSCA)']['angles'][0])
 
         # noinspection PyTypeChecker
         self.assertEqual(True, np.allclose(correct_q_data, q2))

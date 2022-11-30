@@ -72,7 +72,7 @@ public:
     auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10, 15000.0, 100.);
     ImageInfoModelMatrixWS model(workspace);
 
-    const auto info = model.info(15200, 4, 7);
+    const auto info = model.info(15200, 4, 7, {});
 
     const InfoItems expectedInfo = {{"x", "15200.0000"},
                                     {"Spectrum", "4"},
@@ -122,9 +122,9 @@ public:
     };
 
     constexpr auto dblmax = std::numeric_limits<double>::max();
-    assertBlankInfo(model.info(dblmax, 4, 7));
-    assertBlankInfo(model.info(15200, dblmax, 7));
-    assertBlankInfo(model.info(15200, 4, dblmax));
+    assertBlankInfo(model.info(dblmax, 4, 7, {}));
+    assertBlankInfo(model.info(15200, dblmax, 7, {}));
+    assertBlankInfo(model.info(15200, 4, dblmax, {}));
   }
 
   void test_info_for_monitor() {
@@ -185,7 +185,7 @@ public:
 
       ImageInfoModelMatrixWS model(DirectEFixed(logName)(workspace));
 
-      TS_ASSERT_THROWS_NOTHING(model.info(x, y, signal));
+      TS_ASSERT_THROWS_NOTHING(model.info(x, y, signal, {}));
     }
   }
 
@@ -203,7 +203,7 @@ private:
     }
     ImageInfoModelMatrixWS model(addEfixed(workspace));
 
-    const auto info = model.info(x, y, signal);
+    const auto info = model.info(x, y, signal, {});
 
     TS_ASSERT_EQUALS(expectedInfo.size(), info.size());
     int index(0);

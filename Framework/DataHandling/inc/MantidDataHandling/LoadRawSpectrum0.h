@@ -40,7 +40,7 @@ OutputWorkspace_PeriodNo)</LI>
 @author Sofia Antony,ISIS,RAL
 @date 12/04/2010
 */
-class DLLExport LoadRawSpectrum0 : public LoadRawHelper {
+class MANTID_DATAHANDLING_DLL LoadRawSpectrum0 : public LoadRawHelper {
 public:
   /// Default constructor
   LoadRawSpectrum0();

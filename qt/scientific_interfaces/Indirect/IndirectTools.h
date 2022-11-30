@@ -29,7 +29,7 @@ class DLLExport IndirectTools : public IndirectInterface {
 
 public: // public constants and enums
   /// Enumeration for the index of each tab
-  enum TabChoice { TRANSMISSION, LOAD_ILL };
+  enum TabChoice { TRANSMISSION };
 
 public: // public constructor, destructor and functions
   /// Default Constructor

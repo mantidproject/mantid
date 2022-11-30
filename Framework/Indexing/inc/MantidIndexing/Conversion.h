@@ -10,6 +10,9 @@
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
+#include <algorithm>
+#include <iterator>
+
 namespace Mantid {
 namespace Indexing {
 
@@ -31,8 +34,8 @@ template <class Out, class In, typename std::enable_if<std::is_integral<In>::val
 std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
-  for (const auto index : indices)
-    converted.emplace_back(static_cast<typename Out::underlying_type>(index));
+  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(converted),
+                 [](const auto index) { return static_cast<typename Out::underlying_type>(index); });
   return converted;
 }
 
@@ -47,8 +50,8 @@ template <class Out, class In, typename std::enable_if<!std::is_integral<In>::va
 std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
-  for (const auto &index : indices)
-    converted.emplace_back(static_cast<Out>(static_cast<typename In::underlying_type>(index)));
+  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(converted),
+                 [](const auto &index) { return static_cast<Out>(static_cast<typename In::underlying_type>(index)); });
   return converted;
 }
 

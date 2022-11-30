@@ -20,7 +20,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 04/03/2009
 */
-class MANTID_ALGORITHMS_DLL PointByPointVCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PointByPointVCorrection final : public API::Algorithm {
 public:
   PointByPointVCorrection();
   ~PointByPointVCorrection() override;

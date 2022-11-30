@@ -32,7 +32,7 @@ LoadDAEDialog::LoadDAEDialog(QWidget *parent)
     : MantidQt::API::AlgorithmDialog(parent), lineHost(nullptr), lineName(nullptr), minSpLineEdit(nullptr),
       maxSpLineEdit(nullptr), listSpLineEdit(nullptr), updateLineEdit(nullptr) {}
 
-LoadDAEDialog::~LoadDAEDialog() {}
+LoadDAEDialog::~LoadDAEDialog() = default;
 
 void LoadDAEDialog::initLayout() {
   auto *paramsLayout = new QGridLayout;

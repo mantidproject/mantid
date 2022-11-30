@@ -220,9 +220,9 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
                                              OutputWorkspace='wsfapicorr')
         self.assertTrue(out_ws)
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
-        self.assertEquals(out_ws.blocksize(), mtd['fapi'][0].blocksize())
-        self.assertEquals(out_ws.getNumberHistograms(), mtd['fapi'][0].getNumberHistograms())
-        self.assertEquals(out_ws.getAxis(0).getUnit().unitID(), mtd['fapi'][0].getAxis(0).getUnit().unitID())
+        self.assertEqual(out_ws.blocksize(), mtd['fapi'][0].blocksize())
+        self.assertEqual(out_ws.getNumberHistograms(), mtd['fapi'][0].getNumberHistograms())
+        self.assertEqual(out_ws.getAxis(0).getUnit().unitID(), mtd['fapi'][0].getAxis(0).getUnit().unitID())
 
     def test_group_raise(self):
         kwargs = {

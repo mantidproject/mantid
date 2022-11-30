@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "SXD" valid-from = "2013-03-13T00:00:00">
+    
+    <component-link name="SXD" >
+        <parameter name="BackToBackExponential:S" type="fitting">
+            <formula eq="sqrt(22.441*centre^4+6.397*centre^2)" unit="dSpacing" result-unit="TOF" />
+        </parameter>
+        <parameter name="BackToBackExponential:A" type="fitting">
+            <formula eq="2.0" unit="dSpacing" result-unit="1/TOF" /> <fixed />
+        </parameter>
+        <parameter name="BackToBackExponential:B" type="fitting">
+            <formula eq="(0.075+0.025/(centre^4))" unit="Wavelength" result-unit="1/TOF" /> <fixed />
+        </parameter>
+    </component-link>
+
+</parameter-file>

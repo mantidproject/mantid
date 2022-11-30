@@ -53,18 +53,16 @@ const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &SpectrumInfo::sharedSpec
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    if (!m_detectorInfo.isMonitor(detIndex))
-      return false;
-  return true;
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  return std::all_of(spectrumDefinition.cbegin(), spectrumDefinition.cend(),
+                     [this](const std::pair<size_t, size_t> &detIndex) { return m_detectorInfo.isMonitor(detIndex); });
 }
 
 /// Returns true if the detector(s) associated with the spectrum are masked.
 bool SpectrumInfo::isMasked(const size_t index) const {
-  bool masked = true;
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    masked &= m_detectorInfo.isMasked(detIndex);
-  return masked;
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  return std::all_of(spectrumDefinition.cbegin(), spectrumDefinition.cend(),
+                     [this](const std::pair<size_t, size_t> &detIndex) { return m_detectorInfo.isMasked(detIndex); });
 }
 
 /** Returns L2 (distance from sample to spectrum).
@@ -73,10 +71,11 @@ bool SpectrumInfo::isMasked(const size_t index) const {
  * i.e., for a monitor in the beamline between source and sample L2 is negative.
  */
 double SpectrumInfo::l2(const size_t index) const {
-  double l2{0.0};
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    l2 += m_detectorInfo.l2(detIndex);
-  return l2 / static_cast<double>(spectrumDefinition(index).size());
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  auto l2 = std::accumulate(
+      spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
+      [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.l2(detIndex); });
+  return l2 / static_cast<double>(spectrumDefinition.size());
 }
 
 /** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -85,10 +84,11 @@ double SpectrumInfo::l2(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::twoTheta(const size_t index) const {
-  double twoTheta{0.0};
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    twoTheta += m_detectorInfo.twoTheta(detIndex);
-  return twoTheta / static_cast<double>(spectrumDefinition(index).size());
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  auto twoTheta = std::accumulate(
+      spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
+      [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.twoTheta(detIndex); });
+  return twoTheta / static_cast<double>(spectrumDefinition.size());
 }
 
 /** Returns the signed scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -97,10 +97,12 @@ double SpectrumInfo::twoTheta(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
-  double signedTwoTheta{0.0};
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    signedTwoTheta += m_detectorInfo.signedTwoTheta(detIndex);
-  return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  auto signedTwoTheta = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
+                                        [this](double x, const std::pair<size_t, size_t> &detIndex) {
+                                          return x + m_detectorInfo.signedTwoTheta(detIndex);
+                                        });
+  return signedTwoTheta / static_cast<double>(spectrumDefinition.size());
 }
 
 /** Returns the out-of-plane angle in radians (angle w.r.t. to
@@ -109,10 +111,11 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::azimuthal(const size_t index) const {
-  double phi{0.0};
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    phi += m_detectorInfo.azimuthal(detIndex);
-  return phi / static_cast<double>(spectrumDefinition(index).size());
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  auto phi = std::accumulate(
+      spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.0,
+      [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.azimuthal(detIndex); });
+  return phi / static_cast<double>(spectrumDefinition.size());
 }
 
 /** Calculate latitude and longitude for given spectrum index.
@@ -132,10 +135,12 @@ std::pair<double, double> SpectrumInfo::geographicalAngles(const size_t index) c
 
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
-  Kernel::V3D newPos;
-  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
-    newPos += m_detectorInfo.position(detIndex);
-  return newPos / static_cast<double>(spectrumDefinition(index).size());
+  const auto spectrumDefinition = checkAndGetSpectrumDefinition(index);
+  auto newPos = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), Kernel::V3D(),
+                                [this](const auto &x, const std::pair<size_t, size_t> &detIndex) {
+                                  return x + m_detectorInfo.position(detIndex);
+                                });
+  return newPos / static_cast<double>(spectrumDefinition.size());
 }
 
 /** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of detectors

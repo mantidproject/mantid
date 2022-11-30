@@ -43,7 +43,7 @@ namespace Algorithms {
 
   @date 2012-04-09
 */
-class MANTID_ALGORITHMS_DLL GenerateEventsFilter : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GenerateEventsFilter final : public API::Algorithm {
 public:
   explicit GenerateEventsFilter();
 

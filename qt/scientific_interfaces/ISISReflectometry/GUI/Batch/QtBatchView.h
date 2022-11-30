@@ -15,7 +15,6 @@
 #include "GUI/Save/QtSaveView.h"
 #include "IBatchView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "ui_BatchWidget.h"
 
 #include <QCloseEvent>
@@ -39,38 +38,21 @@ public:
   IInstrumentView *instrument() const override;
   IPreviewView *preview() const override;
 
-  // IJobRunner overrides
-  void subscribe(JobRunnerSubscriber *notifyee) override;
-  void clearAlgorithmQueue() override;
-  void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
-  void executeAlgorithmQueue() override;
-  void cancelAlgorithmQueue() override;
-
-private slots:
-  void onBatchComplete(bool error);
-  void onBatchCancelled();
-  void onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
-  void onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
-  void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, const std::string &errorMessage);
-
 private:
   void initLayout();
   Mantid::API::IAlgorithm_sptr createReductionAlg();
-  void connectBatchAlgoRunnerSlots();
 
   std::unique_ptr<QtRunsView> createRunsTab();
   std::unique_ptr<QtEventView> createEventTab();
   std::unique_ptr<QtSaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
-  std::vector<JobRunnerSubscriber *> m_notifyees;
   std::unique_ptr<QtRunsView> m_runs;
   std::unique_ptr<QtEventView> m_eventHandling;
   std::unique_ptr<QtSaveView> m_save;
   std::unique_ptr<QtExperimentView> m_experiment;
   std::unique_ptr<QtInstrumentView> m_instrument;
   std::unique_ptr<QtPreviewView> m_preview;
-  API::BatchAlgorithmRunner m_batchAlgoRunner;
 
   friend class Encoder;
   friend class Decoder;

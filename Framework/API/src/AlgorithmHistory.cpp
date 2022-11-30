@@ -20,6 +20,9 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+
+#include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <utility>
 
@@ -56,10 +59,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg, const Types::Core
 }
 
 /// Default constructor
-AlgorithmHistory::AlgorithmHistory() { m_uuid = boost::uuids::to_string(uuidGen()); }
-
-/// Destructor
-AlgorithmHistory::~AlgorithmHistory() = default;
+AlgorithmHistory::AlgorithmHistory() : m_uuid(boost::uuids::to_string(uuidGen())) {}
 
 /**
     Construct AlgorithmHistory by name. Can be used for rstoring the history
@@ -89,9 +89,8 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
-  for (const auto &property : properties) {
-    m_properties.emplace_back(std::make_shared<PropertyHistory>(property->createHistory()));
-  }
+  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(m_properties),
+                 [](const auto &property) { return std::make_shared<PropertyHistory>(property->createHistory()); });
 }
 
 /**
@@ -111,17 +110,6 @@ void AlgorithmHistory::fillAlgorithmHistory(const Algorithm *const alg, const Ty
   m_executionDuration = duration;
   m_execCount = uexeccount;
   setProperties(alg);
-}
-
-/**
-    Standard Copy Constructor
-    @param A :: AlgorithmHistory Item to copy
- */
-AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
-    : m_name(A.m_name), m_version(A.m_version), m_executionDate(A.m_executionDate),
-      m_executionDuration(A.m_executionDuration), m_properties(A.m_properties), m_execCount(A.m_execCount),
-      m_uuid(A.m_uuid) {
-  m_childHistories = A.m_childHistories;
 }
 
 /** Add details of an algorithm's execution to an existing history object

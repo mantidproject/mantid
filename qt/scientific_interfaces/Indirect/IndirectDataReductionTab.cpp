@@ -29,7 +29,7 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
 }
 
-IndirectDataReductionTab::~IndirectDataReductionTab() {}
+IndirectDataReductionTab::~IndirectDataReductionTab() = default;
 
 void IndirectDataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
@@ -163,7 +163,11 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   std::map<std::string, double> ranges;
 
   // Get the instrument
-  auto inst = instrumentWorkspace()->getInstrument();
+  auto const instWorkspace = instrumentWorkspace();
+  if (!instWorkspace) {
+    return ranges;
+  }
+  auto inst = instWorkspace->getInstrument();
 
   // Get the analyser component
   auto comp = inst->getComponentByName(analyser.toStdString());

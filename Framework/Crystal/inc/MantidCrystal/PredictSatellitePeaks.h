@@ -25,7 +25,7 @@ namespace Crystal {
     @date   2019-03-2019
 
 */
-class MANTID_CRYSTAL_DLL PredictSatellitePeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictSatellitePeaks final : public API::Algorithm {
 public:
   PredictSatellitePeaks();
   /// Algorithm's name for identification

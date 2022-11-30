@@ -15,12 +15,5 @@ namespace MantidWidgets {
  */
 enum class AxisID : int { YLeft = 0, XBottom = 2 };
 
-/**
- * Return an integer from an AxisID that represents the same axis in Qwt
- * @param id An AxisID type
- * @return An integer defining the same axis
- */
-inline constexpr int toQwtAxis(const AxisID id) { return static_cast<int>(id); }
-
 } // namespace MantidWidgets
 } // namespace MantidQt

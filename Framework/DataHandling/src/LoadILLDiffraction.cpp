@@ -63,9 +63,10 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  // the second one is to recognize D1B
+  // the second one is to recognize D1B, Tx field eliminates SALSA
   // the third one is to recognize IN5/PANTHER/SHARP scan mode
-  if (descriptor.pathExists("/entry0/instrument/2theta") || descriptor.pathExists("/entry0/instrument/Canne") ||
+  if ((descriptor.pathExists("/entry0/instrument/2theta") && !descriptor.pathExists("/entry0/instrument/Tx")) ||
+      descriptor.pathExists("/entry0/instrument/Canne") ||
       (descriptor.pathExists("/entry0/data_scan") && descriptor.pathExists("/entry0/experiment_identifier") &&
        descriptor.pathExists("/entry0/instrument/Detector"))) {
     return 80;

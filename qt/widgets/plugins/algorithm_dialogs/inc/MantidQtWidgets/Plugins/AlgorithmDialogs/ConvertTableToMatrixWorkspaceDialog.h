@@ -34,7 +34,7 @@ namespace CustomDialogs {
   @author Roman Tolchenov, Tessella plc
   @date 26/01/2012
 */
-class ConvertTableToMatrixWorkspaceDialog : public API::AlgorithmDialog {
+class ConvertTableToMatrixWorkspaceDialog final : public API::AlgorithmDialog {
   Q_OBJECT
 
 public:

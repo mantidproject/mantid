@@ -10,11 +10,13 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DateAndTime.h"
 
 #include <map>
+#include <queue>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -204,6 +206,8 @@ public:
   /// @return Full if all detectors are rect., Partial if some, None if none
   ContainsState containsRectDetectors() const;
 
+  std::vector<RectangularDetector_const_sptr> findRectDetectors() const;
+
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
   std::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
@@ -220,6 +224,11 @@ public:
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file, const std::vector<detid_t> &detIDs) const;
+
+  bool validateComponentProperties(IComponent_const_sptr component) const;
+
+  void addInstrumentChildrenToQueue(std::queue<IComponent_const_sptr> &queue) const;
+  bool addAssemblyChildrenToQueue(std::queue<IComponent_const_sptr> &queue, IComponent_const_sptr component) const;
 
   /// Private copy assignment operator
   Instrument &operator=(const Instrument &);

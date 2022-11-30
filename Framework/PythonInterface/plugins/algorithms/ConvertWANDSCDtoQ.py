@@ -355,7 +355,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         progress.report('Creating MDHistoWorkspace')
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", output[1:-1,1:-1,1:-1].ravel('F'))
-        createWS_alg.setProperty("ErrorInput", np.sqrt(output[1:-1,1:-1,1:-1].ravel('F')))
+        createWS_alg.setProperty("ErrorInput", (np.sqrt(output/output_norm))[1:-1,1:-1,1:-1].ravel('F'))
         createWS_alg.setProperty("Dimensionality", 3)
         createWS_alg.setProperty("Extents", '{},{},{},{},{},{}'.format(dim0_min,dim0_max,dim1_min,dim1_max,dim2_min,dim2_max))
         createWS_alg.setProperty("NumberOfBins", '{},{},{}'.format(dim0_bins,dim1_bins,dim2_bins))

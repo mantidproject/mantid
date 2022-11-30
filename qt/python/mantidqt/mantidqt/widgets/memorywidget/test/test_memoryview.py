@@ -18,3 +18,4 @@ class MemoryViewTest(unittest.TestCase, QtAssertionsHelper):
 
     def test_invoke_set_value_connects_slot_set_value(self):
         self.assert_connected_once(self.view, self.view.set_value)
+        self.assert_connected_once(self.view, self.view.set_mantid_value)

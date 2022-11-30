@@ -55,10 +55,10 @@ Triple<T> &Triple<T>::operator=(const Triple<T> &A)
 
 template <typename T>
 Triple<T>::~Triple()
-/**
-  Standard Destructor
-*/
-{}
+    /**
+      Standard Destructor
+    */
+    = default;
 
 template <typename T>
 bool Triple<T>::operator==(const Triple<T> &A) const
@@ -206,10 +206,10 @@ DTriple<F, S, T> &DTriple<F, S, T>::operator=(const DTriple<F, S, T> &A)
 
 template <typename F, typename S, typename T>
 DTriple<F, S, T>::~DTriple()
-/**
-  Standard Destructor
-*/
-{}
+    /**
+      Standard Destructor
+    */
+    = default;
 
 template <typename F, typename S, typename T>
 bool DTriple<F, S, T>::operator==(const DTriple<F, S, T> &A) const

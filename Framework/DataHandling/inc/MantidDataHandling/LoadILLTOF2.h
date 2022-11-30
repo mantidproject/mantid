@@ -17,7 +17,7 @@ namespace DataHandling {
 /**
  Loads an ILL IN4/5/6/Panther NeXus file into a Mantid workspace.
  */
-class DLLExport LoadILLTOF2 : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLTOF2 : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
   LoadILLTOF2();
@@ -41,8 +41,8 @@ private:
   // Execution code
   void exec() override;
 
-  void loadInstrumentDetails(NeXus::NXEntry &);
-  std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
+  void loadInstrumentDetails(const NeXus::NXEntry &);
+  std::vector<std::vector<int>> getMonitorInfo(const NeXus::NXEntry &firstEntry);
   void initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &);
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(const std::string &filename);
@@ -50,7 +50,7 @@ private:
   void addFacility();
   void addPulseInterval();
 
-  void loadTimeDetails(NeXus::NXEntry &entry);
+  void loadTimeDetails(const NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vector<std::vector<int>> &, bool convertToTOF);
   void loadSpectra(size_t &spec, const size_t numberOfTubes, const std::vector<Mantid::detid_t> &detectorIDs,
                    const NeXus::NXInt &data, Mantid::API::Progress &progress);

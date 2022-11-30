@@ -114,16 +114,13 @@ public:
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;
 
-  virtual void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-                                    std::vector<MissingInstrumentParameterValue> const &missingValues) = 0;
-
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
 
   virtual void addLookupRow() = 0;
   virtual void removeLookupRow(int rowIndex) = 0;
 
-  virtual void showLookupRowsNotUnique(double tolerance) = 0;
+  virtual void setTooltip(int row, int column, std::string const &text) = 0;
 
   virtual ~IExperimentView() = default;
 };

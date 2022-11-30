@@ -512,8 +512,6 @@ class RunDescriptor(PropDescriptor):
                     if fext is not None: # Change only if real new extension is provided
                         self._fext = fext
 
-
-#--------------------------------------------------------------------------------------------------------------------
     def _set_run_list(self,instance,run_list,file_path=None,fext=None):
 
         if self._run_list and self._run_list.check_runs_equal(run_list,file_path,fext):
@@ -1232,8 +1230,6 @@ class RunDescriptor(PropDescriptor):
             other_workspace/=TargFactor
         AddSampleLog(other_workspace,LogName='NormalizationFactor',LogText=str(TargFactor),LogType='Number')
 
-
-#--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def copy_spectrum2monitors(data_ws,mon_ws,spectraID):
         """
@@ -1573,7 +1569,7 @@ class RunDescriptor(PropDescriptor):
         AddSampleLog(Workspace=ws,LogName="empty_bg_removed",LogText=str(ebg_local_name))
         RunDescriptor._logger('**** Empty instrument background {0} has been removed from workspace {1}'.
                               format(bg_name,ws.name()),'information')
-    #
+
     @staticmethod
     def _check_normalised_and_normalise(input_ws,do_normalise = False):
         "Check if input workspace is normalised and normalise it if do_normalise==True"
@@ -1595,7 +1591,7 @@ class RunDescriptor(PropDescriptor):
         else:
             mod_ws = input_ws
         return (mod_ws,is_normalised)
-    #
+
     @staticmethod
     def _add_empty_spectra(expand_ws,n_spectra,add_from_start=False):
         """Add zeroed spectra to a matrix workspace

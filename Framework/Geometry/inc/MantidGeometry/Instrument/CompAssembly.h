@@ -44,6 +44,7 @@ public:
   CompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   CompAssembly(const CompAssembly &);
+  CompAssembly &operator=(const CompAssembly &other);
   ~CompAssembly() override;
   //! Make a clone of the present component
   IComponent *clone() const override;

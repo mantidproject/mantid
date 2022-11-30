@@ -86,7 +86,7 @@ class RecentlyClosedScriptsMenu(QMenu):
     def _get_scripts_from_settings():
         scripts = []
         try:
-            scripts = CONF.get(RECENT_SCRIPTS_KEY)
+            scripts = CONF.get(RECENT_SCRIPTS_KEY, type=list)
         except KeyError:
             # Happens quite often and should fail silently.
             pass

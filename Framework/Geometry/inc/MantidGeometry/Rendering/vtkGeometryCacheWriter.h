@@ -31,9 +31,9 @@ namespace Geometry {
 class CSGObject;
 class MANTID_GEOMETRY_DLL vtkGeometryCacheWriter {
 private:
-  Poco::XML::Document *mDoc; ///< The XML document
-  Poco::XML::Element *mRoot; ///< The root XML element
-  std::string mFileName;     ///< The file name
+  Poco::XML::Document *m_doc; ///< The XML document
+  Poco::XML::Element *m_root; ///< The root XML element
+  std::string m_filename;     ///< The file name
   // Private Methods
   void Init();
   void createVTKFileHeader();

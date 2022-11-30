@@ -12,6 +12,7 @@
 
 #include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/FileDescriptor.h"
@@ -28,7 +29,7 @@ to recognise a file as the one containing Bilby data.
 @date 11/07/2014
 */
 
-class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
 
   struct InstrumentInfo {
     // core values or non standard conversion

@@ -27,7 +27,7 @@ Loads an file in ISIS RAW format and stores it in a 2D workspace
 overrides the init() & exec() methods.
 LoadRaw3 uses less memory by only loading up the datablocks as required.
  */
-class DLLExport LoadRaw3 : public LoadRawHelper {
+class MANTID_DATAHANDLING_DLL LoadRaw3 : public LoadRawHelper {
 
 public:
   /// Default constructor

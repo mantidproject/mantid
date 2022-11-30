@@ -58,7 +58,7 @@ public:
 
 protected slots:
   /// Slot to update the guides when the range properties change
-  virtual void updateProperties(QtProperty *prop, double val) = 0;
+  virtual void updateProperties(QtProperty *prop, double val);
 
 protected:
   /// Formats the tree widget to make it easier to read
@@ -67,7 +67,7 @@ protected:
   QtTreePropertyBrowser *m_propTree;
 
 private:
-  virtual void setFileExtensionsByName(bool filter) = 0;
+  virtual void setFileExtensionsByName(bool filter);
 };
 
 } // namespace CustomInterfaces

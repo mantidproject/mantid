@@ -23,6 +23,7 @@ public:
   virtual ~IFileHandler(){};
   virtual void saveJSONToFile(std::string const &filename, QMap<QString, QVariant> const &map) = 0;
   virtual QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) = 0;
+  virtual void saveCSVToFile(std::string const &filename, std::string const &content) const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -44,7 +44,7 @@ class MultiFileEditor(PluginWidget):
 
         completion_enabled = True
         if CONF.has(ENABLE_COMPLETION_KEY):
-            completion_enabled = CONF.get(ENABLE_COMPLETION_KEY)
+            completion_enabled = CONF.get(ENABLE_COMPLETION_KEY, type=bool)
 
         # layout
         self.editors = MultiPythonFileInterpreter(font=font,
@@ -118,12 +118,12 @@ class MultiFileEditor(PluginWidget):
 
     def readSettings(self, settings):
         try:
-            prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
-            zoom_level = settings.get(ZOOM_LEVEL_KEY)
-        except KeyError:
+            prev_session_tabs = settings.get(TAB_SETTINGS_KEY, type=list)
+            zoom_level = settings.get(ZOOM_LEVEL_KEY, type=int)
+        except (KeyError, TypeError):
             return
         self.restore_session_tabs(prev_session_tabs)
-        self.editors.current_editor().editor.zoomTo(int(zoom_level))
+        self.editors.current_editor().editor.zoomTo(zoom_level)
 
     def writeSettings(self, settings):
         settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)

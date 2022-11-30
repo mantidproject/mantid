@@ -28,6 +28,7 @@ public:
   Container();
   Container(IObject_sptr shape);
   Container(const Container &container);
+  Container &operator=(const Container &container);
   Container(const std::string &xml);
 
   bool hasCustomizableSampleShape() const;
@@ -39,6 +40,7 @@ public:
   void setSampleShape(IObject_sptr sampleShape) { m_sampleShape = std::move(sampleShape); };
 
   const IObject &getShape() const { return *m_shape; }
+  const IObject_sptr getShapePtr() const { return m_shape; }
 
   bool isValid(const Kernel::V3D &p) const override { return m_shape->isValid(p); }
   bool isOnSide(const Kernel::V3D &p) const override { return m_shape->isOnSide(p); }

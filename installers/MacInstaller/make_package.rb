@@ -55,7 +55,6 @@ REQUIREMENTS=[
   "qtconsole",
   "qtpy",
   "mock",
-  "notebook",
   "numpy",
   "psutil",
   "requests",

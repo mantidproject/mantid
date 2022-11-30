@@ -17,7 +17,7 @@ namespace WorkflowAlgorithms {
 
 @date 2012-07-11
  */
-class DLLExport DgsConvertToEnergyTransfer : public API::Algorithm {
+class DLLExport DgsConvertToEnergyTransfer final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

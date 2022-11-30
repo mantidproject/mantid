@@ -29,7 +29,7 @@ using namespace API;
 using Geometry::Instrument;
 
 /// Empty default constructor
-LoadInstrumentFromRaw::LoadInstrumentFromRaw() {}
+LoadInstrumentFromRaw::LoadInstrumentFromRaw() = default;
 
 /// Initialisation method.
 void LoadInstrumentFromRaw::init() {

@@ -39,6 +39,7 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiFitPeaks2D : public API::Algorithm {
 public:
+  virtual ~PoldiFitPeaks2D() = default;
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"PoldiFitPeaks1D"}; }
@@ -84,6 +85,8 @@ protected:
                                      const PoldiPeakCollection_sptr &peakCollection);
 
   std::string getUserSpecifiedTies(const API::IFunction_sptr &poldiFn);
+
+  std::string getUserSpecifiedBounds(const API::IFunction_sptr &poldiFn);
 
   PoldiPeakCollection_sptr getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
 

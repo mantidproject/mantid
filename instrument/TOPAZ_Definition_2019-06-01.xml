@@ -5,7 +5,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="TOPAZ" valid-from   ="2019-06-01 00:00:00"
-              valid-to     ="2100-01-31 23:59:59"
+              valid-to     ="2022-05-22 11:59:59"
                      last-modified="2019-06-06 16:00:00">
 
   <!--Created by Vickie Lynch-->

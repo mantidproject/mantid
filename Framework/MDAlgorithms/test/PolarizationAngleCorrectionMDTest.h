@@ -24,7 +24,6 @@
 #include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidMDAlgorithms/PolarizationAngleCorrectionMD.h"
 
-using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using Mantid::DataObjects::MDHistoWorkspace_sptr;
@@ -394,10 +393,10 @@ private:
    */
   bool compareMDEvents(const std::string &ws1, const std::string &ws2, const bool &compare_events = true) {
     // Compare number of MDEvents
-    API::IMDEventWorkspace_sptr md1 =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(ws1));
-    API::IMDEventWorkspace_sptr md2 =
-        std::dynamic_pointer_cast<IMDEventWorkspace>(API::AnalysisDataService::Instance().retrieve(ws2));
+    IMDEventWorkspace_sptr md1 =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws1));
+    IMDEventWorkspace_sptr md2 =
+        std::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(ws2));
 
     // compare number of events
     if (md1->getNEvents() != md2->getNEvents()) {

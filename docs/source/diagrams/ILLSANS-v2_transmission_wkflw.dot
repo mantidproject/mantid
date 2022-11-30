@@ -1,0 +1,49 @@
+digraph Transmission {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+    BeamCenter
+    TransmissionBeamRadius
+    DarkCurrentWorkspace
+    EmptyBeamWorkspace
+    FluxWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    ConjoinXRuns
+    Divide
+    Minus
+    MoveInstrumentComponent
+    CalculateFlux
+    Divide2 [label=Divide]
+  }
+
+  Runs -> LoadAndMerge
+  LoadAndMerge -> ConjoinXRuns
+  ConjoinXRuns -> Divide
+  NormaliseBy -> Divide
+  Divide -> Minus
+  DarkCurrentWorkspace -> Minus
+  Minus -> MoveInstrumentComponent
+  EmptyBeamWorkspace -> BeamCenter
+  BeamCenter -> MoveInstrumentComponent
+  MoveInstrumentComponent -> CalculateFlux
+  TransmissionBeamRadius -> CalculateFlux
+  CalculateFlux -> Divide2
+  FluxWorkspace -> Divide2
+  Divide2 -> OutputWorkspace
+}

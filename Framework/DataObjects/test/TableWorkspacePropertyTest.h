@@ -28,7 +28,7 @@ public:
   /// no arg constructor
   TableWorkspaceAlgorithm() : Algorithm() {}
   /// virtual destructor
-  ~TableWorkspaceAlgorithm() override {}
+  ~TableWorkspaceAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "TableWorkspaceAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

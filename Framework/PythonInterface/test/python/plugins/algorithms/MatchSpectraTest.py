@@ -15,16 +15,16 @@ class MatchSpectraTest(unittest.TestCase):
 
     def __createWorkspace(self, name, histogram, uncertainties):
         if histogram:
-            x = np.arange(self.numpoints + 1, dtype=np.float)
+            x = np.arange(self.numpoints + 1, dtype=float)
         else:
-            x = np.arange(self.numpoints, dtype=np.float)
+            x = np.arange(self.numpoints, dtype=float)
         x = np.tile(x, self.numhist)
-        y = np.arange(self.numpoints, dtype=np.float)
+        y = np.arange(self.numpoints, dtype=float)
         y = np.tile(y, self.numhist)
         y[self.numpoints:2 * self.numpoints] += 10  # for offset test
         y[2 * self.numpoints:3 * self.numpoints] *= 10  # for scale test
         y[3 * self.numpoints:] = y[3 * self.numpoints:] * 10 + 10  # for scale and offset test
-        dy = np.zeros(y.size, dtype=np.float) + 1
+        dy = np.zeros(y.size, dtype=float) + 1
 
         if uncertainties:
             CreateWorkspace(OutputWorkspace=name,
@@ -42,17 +42,17 @@ class MatchSpectraTest(unittest.TestCase):
         xlen = self.numpoints
         if histogram:
             xlen += 1
-        x = np.arange(xlen, dtype=np.float)
+        x = np.arange(xlen, dtype=float)
         x = np.tile(x, self.numhist)
         shifts = (0., 10., 20., 30.)
         # shift x-values so they are not common
         for i, shift in enumerate(shifts):
             x[i*xlen:(i+1)*xlen] += shift
 
-        y = np.zeros(self.numhist * self.numpoints, dtype=np.float)
+        y = np.zeros(self.numhist * self.numpoints, dtype=float)
         for i, shift in enumerate(shifts):
             # follow shift from above
-            newY = np.arange(self.numpoints, dtype=np.float)+shift
+            newY = np.arange(self.numpoints, dtype=float)+shift
             if i == 1:
                 newY += 10.
             elif i == 2:
@@ -62,7 +62,7 @@ class MatchSpectraTest(unittest.TestCase):
             # otherwise do nothing
             y[i * self.numpoints:(i + 1) * self.numpoints] = newY
 
-        dy = np.zeros(y.size, dtype=np.float) + 1
+        dy = np.zeros(y.size, dtype=float) + 1
 
         CreateWorkspace(OutputWorkspace=name,
                         DataX=x,

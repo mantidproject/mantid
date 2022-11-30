@@ -43,6 +43,16 @@ public:
     TSM_ASSERT_DIFFERS("ExperimentInfo's were deep-copied", copy.getExperimentInfo(0), mei.getExperimentInfo(0));
   }
 
+  void test_copy_assignment_operator() {
+    MultipleExperimentInfos multiExperimentInfos;
+    ExperimentInfo_sptr experimentInfo(new ExperimentInfo);
+    TS_ASSERT_EQUALS(multiExperimentInfos.addExperimentInfo(experimentInfo), 0);
+    MultipleExperimentInfos copyMultiExperimentInfos = multiExperimentInfos;
+    TS_ASSERT_EQUALS(copyMultiExperimentInfos.getNumExperimentInfo(), 1);
+    TSM_ASSERT_DIFFERS("ExperimentInfo's were deep-copied", copyMultiExperimentInfos.getExperimentInfo(0),
+                       multiExperimentInfos.getExperimentInfo(0));
+  }
+
   void testHasOrientedLattice() {
     constexpr uint16_t nExperimentInfosToAdd = 3;
 

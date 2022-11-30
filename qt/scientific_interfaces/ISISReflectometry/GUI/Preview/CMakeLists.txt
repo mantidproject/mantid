@@ -12,6 +12,7 @@ set(PREVIEW_INC_FILES
     PreviewPresenterFactory.h
     PreviewPresenter.h
     IPreviewView.h
+    ROIType.h
     QtPreviewView.h
 )
 

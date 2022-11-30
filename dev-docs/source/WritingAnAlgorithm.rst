@@ -49,7 +49,7 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
       /// (Empty) Constructor
       MyAlg() : Mantid::API::Algorithm() {}
       /// Virtual destructor
-      virtual ~MyAlg() {}
+      virtual ~MyAlg() = default;
       /// Algorithm's name
       const std::string name() const override { return "MyAlg"; }
       /// Algorithm's purpose/summary

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/DiskBuffer.h"
 #include <nexus/NeXusFile.hpp>
 
@@ -23,7 +24,7 @@ namespace DataObjects {
 
     @date March 15, 2013
 */
-class DLLExport BoxControllerNeXusIO : public API::IBoxControllerIO {
+class MANTID_DATAOBJECTS_DLL BoxControllerNeXusIO : public API::IBoxControllerIO {
 public:
   BoxControllerNeXusIO(API::BoxController *const bc);
 

@@ -97,12 +97,6 @@ set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "")
 
 # General package icon
 install(FILES "${PACKAGE_IMAGES_DIR}\\\\${PACKAGE_ICON_BASENAME}.ico" DESTINATION bin)
-# python wrapper
-install(
-  FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install
-  DESTINATION bin
-  RENAME mantidpython.bat
-)
 
 # Extra plugin and include locations
 set(CPACK_NSIS_ADDITIONAL_INCLUDE_DIR "!addincludedir ${THIRD_PARTY_DIR}/share/nsis-plugins/Include")
@@ -111,31 +105,6 @@ set(CPACK_NSIS_ADDITIONAL_PLUGIN_ANSI_DIR
 )
 set(CPACK_NSIS_ADDITIONAL_PLUGIN_UNICODE_DIR
     "!addplugindir /x86-unicode ${THIRD_PARTY_DIR}/share/nsis-plugins/Plugins/x86-unicode"
-)
-
-# Notebook
-set(WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook${CPACK_PACKAGE_SUFFIX}")
-set(MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${CPACK_PACKAGE_SUFFIX_CAMELCASE}.lnk")
-install(FILES "${PACKAGE_IMAGES_DIR}\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico" DESTINATION bin)
-set(CPACK_NSIS_CREATE_ICONS_EXTRA
-    "
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico'
-"
-)
-set(CPACK_NSIS_DELETE_ICONS_EXTRA
-    "
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
-"
-)
-set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-    "
-  CreateShortCut '$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico'
-"
-)
-set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
-    "
-  Delete \\\"$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
-"
 )
 
 # Workbench

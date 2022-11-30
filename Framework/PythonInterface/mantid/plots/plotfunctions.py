@@ -202,10 +202,10 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     if waterfall:
         ax.set_waterfall(True)
 
-    if not overplot:
-        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    if not overplot and fig.canvas.manager is not None:
+        fig.canvas.manager.set_window_title(figure_title(workspaces, fig.number))
     elif ax.is_waterfall():
-        _overplot_waterfall(ax,len(nums)*len(workspaces))
+        _overplot_waterfall(ax, len(nums)*len(workspaces))
 
     if ax.is_waterfall():
         #If axes is waterfall, update axes limits following line offset.
@@ -237,7 +237,8 @@ def _overplot_waterfall(ax, no_of_lines):
         if ax.waterfall_has_fill():
             datafunctions.waterfall_update_fill(ax)
 
-        ax.lines += errorbar_cap_lines
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
 
 
 def _update_show_figure(fig):
@@ -363,8 +364,8 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if ax_properties:
         for axis in fig.axes:
             axis.set(**ax_properties)
-    if window_title:
-        fig.canvas.set_window_title(window_title)
+    if window_title and fig.canvas.manager is not None:
+        fig.canvas.manager.set_window_title(window_title)
 
     if not overplot:
         for ax in fig.axes:

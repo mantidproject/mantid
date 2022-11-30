@@ -14,6 +14,7 @@
 #include <json/json.h>
 
 using Mantid::Kernel::ErrorReporter;
+using Mantid::Kernel::InternetHelper;
 
 class TestableErrorReporter : public ErrorReporter {
 public:
@@ -24,11 +25,11 @@ public:
 
 protected:
   /// sends a report over the internet
-  int sendReport(const std::string &message, const std::string &url) override {
+  InternetHelper::HTTPStatus sendReport(const std::string &message, const std::string &url) override {
     UNUSED_ARG(message);
     UNUSED_ARG(url);
     // do nothing
-    return 200;
+    return InternetHelper::HTTPStatus::OK;
   }
 };
 

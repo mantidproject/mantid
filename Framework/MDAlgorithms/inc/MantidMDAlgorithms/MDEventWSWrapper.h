@@ -8,6 +8,7 @@
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
 namespace Mantid {
@@ -39,7 +40,7 @@ using fpAddData = void (MDEventWSWrapper::*)(const float *, const uint16_t *, co
 /// signature for the internal templated function pointer to create workspace
 using fpCreateWS = void (MDEventWSWrapper::*)(const MDWSDescription &);
 
-class DLLExport MDEventWSWrapper {
+class MANTID_MDALGORITHMS_DLL MDEventWSWrapper {
 public:
   MDEventWSWrapper();
   virtual ~MDEventWSWrapper() = default;

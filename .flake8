@@ -27,7 +27,6 @@ exclude =
 # Ignore UI files
     scripts/ErrorReporter/ui_errorreport.py,
     scripts/Interface/ui,
-    scripts/Interface/ui/dataprocessorinterface,
 
 
 max-complexity = 20

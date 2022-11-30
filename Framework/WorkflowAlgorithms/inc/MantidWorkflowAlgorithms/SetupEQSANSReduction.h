@@ -20,7 +20,7 @@ namespace WorkflowAlgorithms {
     Set up the reduction options for EQSANS reduction.
 */
 
-class DLLExport SetupEQSANSReduction : public API::Algorithm {
+class DLLExport SetupEQSANSReduction final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SetupEQSANSReduction"; }

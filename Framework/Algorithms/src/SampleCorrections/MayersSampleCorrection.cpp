@@ -114,7 +114,7 @@ void MayersSampleCorrection::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i) ||
         spectrumInfo.l2(i) == 0) {
@@ -134,7 +134,7 @@ void MayersSampleCorrection::exec() {
     double _(0.0), theta(0.0), phi(0.0);
     pos.getSpherical(_, theta, phi);
     params.azimuth = asin(sin(theta) * sin(phi));
-    params.rho = sampleMaterial.numberDensity();
+    params.rho = sampleMaterial.numberDensityEffective();
     params.sigmaAbs = sampleMaterial.absorbXSection();
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
@@ -146,9 +146,9 @@ void MayersSampleCorrection::exec() {
     outputWS->setHistogram(i, correction.getCorrectedHisto());
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", outputWS);
 }

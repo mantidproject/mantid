@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 #ifndef Q_MOC_RUN
 #include <memory>
 #endif
@@ -28,7 +28,7 @@ to facilite testing.
 /**
  * Abstract IDF Object
  */
-class DLLExport AbstractIDFObject {
+class MANTID_GEOMETRY_DLL AbstractIDFObject {
 public:
   AbstractIDFObject() = default;
   static const std::string expectedExtension();
@@ -49,7 +49,7 @@ private:
 /**
  * Concrete IDF Object.
  */
-class DLLExport IDFObject : public AbstractIDFObject {
+class MANTID_GEOMETRY_DLL IDFObject : public AbstractIDFObject {
 public:
   IDFObject(const std::string &fileName);
   const Poco::Path getParentDirectory() const override;
@@ -73,7 +73,7 @@ private:
 /*
  * NULL IDFObject
  */
-class DLLExport NullIDFObject : public AbstractIDFObject {
+class MANTID_GEOMETRY_DLL NullIDFObject : public AbstractIDFObject {
 private:
   std::string m_emptyResponse;
 

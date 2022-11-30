@@ -43,7 +43,7 @@ namespace Algorithms {
     @author Matt Clarke
     @date 08/12/2008
  */
-class MANTID_ALGORITHMS_DLL RemoveBins : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveBins final : public API::Algorithm {
 public:
   /// Default constructor
   RemoveBins();

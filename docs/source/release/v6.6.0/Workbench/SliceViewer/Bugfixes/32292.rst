@@ -1,0 +1,1 @@
+- Slice viewer now displays '-' instead of ``-DBL_MAX`` in some energy transfer readings.

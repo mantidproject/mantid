@@ -154,8 +154,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(result["NumberDensity"], "The number density or effective number density must "
-                                              " be specified with a user-defined material")
+    TS_ASSERT_EQUALS(result["NumberDensity"],
+                     "The number density or effective number density or Z Parameter\\Unit Cell Volume must "
+                     " be specified with a user-defined material")
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
@@ -291,7 +292,7 @@ public:
     TS_ASSERT_EQUALS(result["PackingFraction"], "Cannot have a packing fraction less than 0")
   }
 
-  void testFailureValidateInputsPackingFracOnly() {
+  void testSuccessfulValidateInputsPackingFracElementMaterial() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -302,9 +303,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["PackingFraction"], "Cannot determine number density from only "
-                                                " the packing fraction. The number density "
-                                                " or effective number density is also needed.")
+    TS_ASSERT(result.empty())
   }
 
   void testFailureValidateInputsPackingWithAll() {
@@ -329,10 +328,13 @@ public:
   void testSuccessfulValidateInputsPackingFracOnly() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
-      setMaterial.atomicNumber = 1;
       setMaterial.packingFraction = 1;
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
+      setMaterial.coherentXSection = 1.;
+      setMaterial.incoherentXSection = 1.;
+      setMaterial.attenuationXSection = 1.;
+      setMaterial.scatteringXSection = 1.;
       return setMaterial;
     }
     ();

@@ -15,7 +15,8 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
@@ -107,8 +108,8 @@ protected:
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
   void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &bounds,
-                        const boost::optional<QPair<double, double>> &range = boost::none);
+                        const QPair<double, double> &range,
+                        const boost::optional<QPair<double, double>> &bounds = boost::none);
   /// Sets the min of the range selector if it is less than the max
   void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);
@@ -171,6 +172,8 @@ protected:
 
   /// Double editor facotry for the properties browser
   DoubleEditorFactory *m_dblEdFac;
+  /// QtCheckBoxFactory
+  QtCheckBoxFactory *m_blnEdFac;
 
   /// Algorithm runner object to execute chains algorithms on a seperate thread
   /// from the GUI

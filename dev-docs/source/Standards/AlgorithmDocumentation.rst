@@ -188,4 +188,4 @@ Assuming you are in the build directory and want to update the documentation for
 
 ::
 
-   bin/mantidpython --classic -m sphinx <sourcedir>/docs/source docs <sourcedir>/docs/source/algorithms/Rebin-v1.rst
+   PYTHONPATH=/path/to/build/bin python3 -m sphinx <sourcedir>/docs/source docs <sourcedir>/docs/source/algorithms/Rebin-v1.rst

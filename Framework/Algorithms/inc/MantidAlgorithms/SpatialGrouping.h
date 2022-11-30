@@ -31,7 +31,7 @@ namespace Algorithms {
     @author Michael Whitty, STFC ISIS
     @date 13/12/2010
 */
-class MANTID_ALGORITHMS_DLL SpatialGrouping : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SpatialGrouping final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SpatialGrouping"; }

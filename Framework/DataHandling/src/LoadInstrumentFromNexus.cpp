@@ -27,7 +27,7 @@ using namespace API;
 using Geometry::Instrument;
 
 /// Empty default constructor
-LoadInstrumentFromNexus::LoadInstrumentFromNexus() {}
+LoadInstrumentFromNexus::LoadInstrumentFromNexus() = default;
 
 /// Initialisation method.
 void LoadInstrumentFromNexus::init() {

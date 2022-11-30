@@ -41,6 +41,23 @@
 #include <sstream>
 #include <utility>
 
+namespace {
+
+constexpr double EPSILON = std::numeric_limits<double>::epsilon();
+constexpr double MIN_DOUBLE = std::numeric_limits<double>::min();
+constexpr double STEP_PERCENTAGE = 0.001;
+
+const auto defaultStepSize = [](const double parameterValue) -> double {
+  return fabs(parameterValue) < 100.0 * MIN_DOUBLE / STEP_PERCENTAGE ? 100.0 * EPSILON
+                                                                     : parameterValue * STEP_PERCENTAGE;
+};
+
+const auto sqrtEpsilonStepSize = [](const double parameterValue) -> double {
+  return fabs(parameterValue) < 1 ? sqrt(EPSILON) : parameterValue * sqrt(EPSILON);
+};
+
+} // namespace
+
 namespace Mantid::API {
 using namespace Geometry;
 
@@ -62,10 +79,12 @@ struct TieNode {
 };
 const std::vector<std::string> EXCLUDEUSAGE = {"CompositeFunction"};
 } // namespace
+
 /**
  * Constructor
  */
-IFunction ::IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
+IFunction ::IFunction()
+    : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0), m_stepSizeFunction(defaultStepSize) {}
 
 /**
  * Destructor
@@ -261,18 +280,13 @@ std::string IFunction::writeTies() const {
  * @param tie :: A pointer to a new tie
  */
 void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
-
   auto iPar = getParameterIndex(*tie);
-  bool found = false;
-  for (auto &m_tie : m_ties) {
-    auto mPar = getParameterIndex(*m_tie);
-    if (mPar == iPar) {
-      found = true;
-      m_tie = std::move(tie);
-      break;
-    }
-  }
-  if (!found) {
+  auto it =
+      std::find_if(m_ties.begin(), m_ties.end(), [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
+
+  if (it != m_ties.end()) {
+    *it = std::move(tie);
+  } else {
     m_ties.emplace_back(std::move(tie));
     setParameterStatus(iPar, Tied);
   }
@@ -361,15 +375,12 @@ void IFunction::clearTies() {
  */
 void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t iPar = ic->parameterIndex();
-  bool found = false;
-  for (auto &constraint : m_constraints) {
-    if (constraint->parameterIndex() == iPar) {
-      found = true;
-      constraint = std::move(ic);
-      break;
-    }
-  }
-  if (!found) {
+  auto it = std::find_if(m_constraints.begin(), m_constraints.end(),
+                         [&iPar](const auto &constraint) { return constraint->parameterIndex() == iPar; });
+
+  if (it != m_constraints.end()) {
+    *it = std::move(ic);
+  } else {
     m_constraints.emplace_back(std::move(ic));
   }
 }
@@ -405,14 +416,15 @@ void IFunction::removeConstraint(const std::string &parName) {
  */
 void IFunction::setConstraintPenaltyFactor(const std::string &parName, const double &c) {
   size_t iPar = parameterIndex(parName);
-  for (auto &constraint : m_constraints) {
-    if (iPar == constraint->getLocalIndex()) {
-      constraint->setPenaltyFactor(c);
-      return;
-    }
+  const auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                               [&iPar](const auto &constraint) { return iPar == constraint->getLocalIndex(); });
+
+  if (it != m_constraints.cend()) {
+    (*it)->setPenaltyFactor(c);
+  } else {
+    g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
+                    << "\n";
   }
-  g_log.warning() << parName << " does not have constraint so setConstraintPenaltyFactor failed"
-                  << "\n";
 }
 
 /// Remove all constraints.
@@ -765,6 +777,8 @@ std::vector<double> IFunction::Attribute::asVector() const {
  * @param str :: The new value
  */
 void IFunction::Attribute::setString(const std::string &str) {
+  evaluateValidator(str);
+
   try {
     boost::get<std::string>(m_data) = str;
   } catch (...) {
@@ -779,6 +793,8 @@ void IFunction::Attribute::setString(const std::string &str) {
  * @param d :: The new value
  */
 void IFunction::Attribute::setDouble(const double &d) {
+  evaluateValidator(d);
+
   try {
     boost::get<double>(m_data) = d;
   } catch (...) {
@@ -793,6 +809,8 @@ void IFunction::Attribute::setDouble(const double &d) {
  * @param i :: The new value
  */
 void IFunction::Attribute::setInt(const int &i) {
+  evaluateValidator(i);
+
   try {
     boost::get<int>(m_data) = i;
   } catch (...) {
@@ -807,6 +825,8 @@ void IFunction::Attribute::setInt(const int &i) {
  * @param b :: The new value
  */
 void IFunction::Attribute::setBool(const bool &b) {
+  evaluateValidator(b);
+
   try {
     boost::get<bool>(m_data) = b;
   } catch (...) {
@@ -822,6 +842,8 @@ void IFunction::Attribute::setBool(const bool &b) {
  * @param v :: The new value
  */
 void IFunction::Attribute::setVector(const std::vector<double> &v) {
+  evaluateValidator(v);
+
   try {
     auto &value = boost::get<std::vector<double>>(m_data);
     value.assign(v.begin(), v.end());
@@ -850,32 +872,54 @@ public:
   /**
    * Constructor
    * @param value :: The value to set
+   * @param validator :: Associated validator
    */
-  explicit SetValue(std::string value) : m_value(std::move(value)) {}
+  explicit SetValue(std::string value, Mantid::Kernel::IValidator_sptr validator = Mantid::Kernel::IValidator_sptr())
+      : m_value(std::move(value)), m_validator(validator) {}
 
 protected:
   /// Apply if string
-  void apply(std::string &str) const override { str = m_value; }
+  void apply(std::string &str) const override {
+    evaluateValidator(m_value);
+    str = m_value;
+  }
   /// Apply if int
   void apply(int &i) const override {
+    int tempi = 0;
+
     std::istringstream istr(m_value + " ");
-    istr >> i;
+    istr >> tempi;
     if (!istr.good())
       throw std::invalid_argument("Failed to set int attribute "
                                   "from string " +
                                   m_value);
+
+    evaluateValidator(tempi);
+    i = tempi;
   }
   /// Apply if double
   void apply(double &d) const override {
+    double tempd = 0;
+
     std::istringstream istr(m_value + " ");
-    istr >> d;
+    istr >> tempd;
     if (!istr.good())
       throw std::invalid_argument("Failed to set double attribute "
                                   "from string " +
                                   m_value);
+
+    evaluateValidator(tempd);
+    d = tempd;
   }
   /// Apply if bool
-  void apply(bool &b) const override { b = (m_value == "true" || m_value == "TRUE" || m_value == "1"); }
+  void apply(bool &b) const override {
+    bool tempb = false;
+
+    tempb = (m_value == "true" || m_value == "TRUE" || m_value == "1");
+    evaluateValidator(tempb);
+
+    b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
+  }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
     if (m_value.empty() || m_value == "EMPTY") {
@@ -883,21 +927,41 @@ protected:
       return;
     }
     if (m_value.size() > 2) {
-      // check if the value is in barckets (...)
+      // check if the value is in brackets (...)
       if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }
     }
-    Mantid::Kernel::StringTokenizer tokenizer(m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    v.resize(tokenizer.count());
+    Kernel::StringTokenizer tokenizer(m_value, ",", Kernel::StringTokenizer::TOK_TRIM);
+    size_t newSize = tokenizer.count();
+
+    // if visitor has an associated validator, first populate temp vec and evaluate against validator.
+    if (m_validator != nullptr) {
+      std::vector<double> tempVec(newSize);
+
+      for (size_t i = 0; i < tempVec.size(); ++i) {
+        tempVec[i] = boost::lexical_cast<double>(tokenizer[i]);
+      }
+      evaluateValidator(tempVec);
+    }
+
+    v.resize(newSize);
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
     }
   }
 
+  /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
+  template <typename T> void evaluateValidator(T &inputData) const {
+    if (m_validator != nullptr) {
+      IFunction::ValidatorEvaluator::evaluate(inputData, m_validator);
+    }
+  }
+
 private:
   mutable std::string m_value; ///< the value as a string
+  mutable Kernel::IValidator_sptr m_validator;
 };
 } // namespace
 
@@ -905,9 +969,19 @@ private:
  * @param str :: String representation of the new value
  */
 void IFunction::Attribute::fromString(const std::string &str) {
-  SetValue tmp(str);
+  SetValue tmp(str, m_validator);
   apply(tmp);
 }
+
+/** Set validator to enforce limits on attribute value
+ * @param validator :: shared ptr to validator object
+ */
+void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator) const { m_validator = validator; }
+
+/**
+ *  Evaluates the validator associated with this attribute.
+ */
+void IFunction::Attribute::evaluateValidator() const { boost::apply_visitor(AttributeValidatorVisitor(this), m_data); }
 
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared
@@ -962,9 +1036,6 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
    * consider that method when updating this.
    */
 
-  constexpr double epsilon = std::numeric_limits<double>::epsilon() * 100;
-  constexpr double stepPercentage = 0.001;
-  constexpr double cutoff = 100.0 * std::numeric_limits<double>::min() / stepPercentage;
   const size_t nParam = nParams();
   size_t nData = getValuesSize(domain);
 
@@ -982,11 +1053,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
   for (size_t iP = 0; iP < nParam; iP++) {
     if (isActive(iP)) {
       const double val = activeParameter(iP);
-      if (fabs(val) < cutoff) {
-        step = epsilon;
-      } else {
-        step = val * stepPercentage;
-      }
+      step = calculateStepSize(val);
 
       const double paramPstep = val + step;
       setActiveParameter(iP, paramPstep);
@@ -1001,6 +1068,27 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobi
       }
     }
   }
+}
+
+/** Calculates the step size to use when calculating the numerical derivative.
+ * @param parameterValue :: The value of the active parameter.
+ * @returns The step size to use when calculating the numerical derivative.
+ */
+double IFunction::calculateStepSize(const double parameterValue) const { return m_stepSizeFunction(parameterValue); }
+
+/** Sets the function to use when calculating the step size.
+ * @param method :: An enum indicating which method to use when calculating the step size.
+ */
+void IFunction::setStepSizeMethod(const StepSizeMethod method) {
+  switch (method) {
+  case StepSizeMethod::DEFAULT:
+    m_stepSizeFunction = defaultStepSize;
+    return;
+  case StepSizeMethod::SQRT_EPSILON:
+    m_stepSizeFunction = sqrtEpsilonStepSize;
+    return;
+  }
+  throw std::invalid_argument("An invalid method for calculating the step size was provided.");
 }
 
 /** Initialize the function providing it the workspace
@@ -1328,7 +1416,38 @@ void IFunction::setAttribute(const std::string &name, const API::IFunction::Attr
  * @param defaultValue :: A default value
  */
 void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
+  checkAttributeName(name);
+
   m_attrs.emplace(name, defaultValue);
+}
+
+/**
+ * Declares a single attribute with a validator
+ * @param name :: The name of the attribute
+ * @param defaultValue :: A default value
+ * @param validator :: validator to restrict allows input value of defaultValue param
+ */
+void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                                 const Kernel::IValidator &validator) {
+  const Kernel::IValidator_sptr validatorClone = validator.clone();
+  checkAttributeName(name);
+
+  defaultValue.setValidator(validatorClone);
+  defaultValue.evaluateValidator();
+
+  m_attrs.emplace(name, defaultValue);
+}
+
+/**
+ * Checks Attribute of "name" does not exist
+ * @param name :: The name of the attribute
+ */
+void IFunction::checkAttributeName(const std::string &name) {
+  if (m_attrs.find(name) != m_attrs.end()) {
+    std::ostringstream msg;
+    msg << "Attribute (" << name << ") already exists.";
+    throw std::invalid_argument(msg.str());
+  }
 }
 
 /// Initialize the function. Calls declareAttributes & declareParameters
@@ -1338,12 +1457,17 @@ void IFunction::init() {
 }
 
 /**
- *  Set a value to a named attribute
+ *  Set a value to a named attribute, retaining validator
  *  @param name :: The name of the attribute
  *  @param value :: The value of the attribute
  */
 void IFunction::storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value) {
   if (hasAttribute(name)) {
+    auto att = m_attrs[name];
+    const Kernel::IValidator_sptr validatorClone = att.getValidator();
+    value.setValidator(validatorClone);
+    value.evaluateValidator();
+
     m_attrs[name] = value;
   } else {
     throw std::invalid_argument("ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" + name + "'");
@@ -1462,9 +1586,10 @@ void IFunction::sortTies() {
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
     auto const tie = getTie(i);
-    if (!tie) {
+    if (!tie || ignoreTie(*tie)) {
       continue;
     }
+
     TieNode newNode;
     newNode.left = getParameterIndex(*tie);
     auto const rhsParameters = tie->getRHSParameters();

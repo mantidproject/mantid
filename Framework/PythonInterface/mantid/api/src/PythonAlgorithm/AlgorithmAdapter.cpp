@@ -166,13 +166,7 @@ template <typename BaseAlgorithm> bool AlgorithmAdapter<BaseAlgorithm>::isRunnin
     if (PyErr_Occurred())
       throw PythonException();
     if (PyBool_Check(result)) {
-
-#if PY_MAJOR_VERSION >= 3
       return static_cast<bool>(PyLong_AsLong(result));
-#else
-      return static_cast<bool>(PyInt_AsLong(result));
-#endif
-
     } else
       throw std::runtime_error("Algorithm.isRunning - Expected bool return type.");
   }

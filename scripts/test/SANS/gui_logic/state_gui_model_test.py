@@ -403,7 +403,6 @@ class StateGuiModelTest(unittest.TestCase):
 
         self.assertEqual(state_gui_model.q_xy_max, "")
         self.assertEqual(state_gui_model.q_xy_step, "")
-        self.assertEqual(state_gui_model.q_xy_step_type, None)
         self.assertEqual(state_gui_model.r_cut, 0.0)
         self.assertEqual(state_gui_model.w_cut, 0.0)
 
@@ -412,14 +411,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.q_1d_rebin_string = "test"
         state_gui_model.q_xy_max = 1.
         state_gui_model.q_xy_step = 122.
-        state_gui_model.q_xy_step_type = RangeStepType.LOG
         state_gui_model.r_cut = 45.
         state_gui_model.w_cut = 890.
 
         self.assertEqual(state_gui_model.q_1d_rebin_string, "test")
         self.assertEqual(state_gui_model.q_xy_max, 1.)
         self.assertEqual(state_gui_model.q_xy_step, 122.)
-        self.assertEqual(state_gui_model.q_xy_step_type, RangeStepType.LOG)
         self.assertEqual(state_gui_model.r_cut, 45.)
         self.assertEqual(state_gui_model.w_cut, 890.)
 

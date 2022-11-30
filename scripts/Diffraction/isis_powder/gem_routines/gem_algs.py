@@ -32,13 +32,13 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     grouping_file_name = inst_settings.grouping_file_name
     if inst_settings.texture_mode:
         return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                         is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
+                                         is_vanadium_run=is_vanadium_run, empty_inst_run_number=empty_runs,
                                          grouping_file_name=grouping_file_name, vanadium_string=vanadium_runs,
                                          splined_name_list=["texture_mode"])
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
 
-                                     is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
+                                     is_vanadium_run=is_vanadium_run, empty_inst_run_number=empty_runs,
                                      grouping_file_name=grouping_file_name, vanadium_string=vanadium_runs)
 
 

@@ -14,9 +14,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include <memory>
-
 #include <algorithm>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -68,11 +67,8 @@ void CreatePolarizationEfficienciesBase::exec() {
 std::vector<std::string>
 CreatePolarizationEfficienciesBase::getNonDefaultProperties(std::vector<std::string> const &labels) const {
   std::vector<std::string> outputLabels;
-  for (auto const &label : labels) {
-    if (!isDefault(label)) {
-      outputLabels.emplace_back(label);
-    }
-  }
+  std::copy_if(labels.cbegin(), labels.cend(), std::back_inserter(outputLabels),
+               [this](const std::string &label) { return !isDefault(label); });
   return outputLabels;
 }
 

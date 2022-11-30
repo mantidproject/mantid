@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <utility>
 
@@ -172,6 +173,14 @@ void CompositeFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace
   for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {
     m_functions[iFun]->setMatrixWorkspace(workspace, wi, startX, endX);
   }
+}
+
+/** Sets the function to use when calculating the step size.
+ * @param stepSizeMethod :: An enum indicating which method to use when calculating the step size.
+ */
+void CompositeFunction::setStepSizeMethod(const StepSizeMethod stepSizeMethod) {
+  std::for_each(m_functions.begin(), m_functions.end(),
+                [&stepSizeMethod](const auto &function) { function->setStepSizeMethod(stepSizeMethod); });
 }
 
 /** Function you want to fit to.
@@ -337,11 +346,9 @@ size_t CompositeFunction::nParams() const { return m_nParams; }
 
 // Total number of attributes
 size_t CompositeFunction::nAttributes() const {
-  size_t numAttributes = nGlobalAttributes();
-  for (const auto &func : m_functions) {
-    numAttributes += func->nAttributes();
-  }
-  return numAttributes;
+  return std::accumulate(
+      m_functions.cbegin(), m_functions.cend(), nGlobalAttributes(),
+      [](const size_t accumulator, const auto &function) -> size_t { return accumulator + function->nAttributes(); });
 }
 /**
  *
@@ -830,8 +837,20 @@ void CompositeFunction::declareParameter(const std::string &name, double initVal
  * @param defaultValue :: A default value
  */
 void CompositeFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue) {
-  m_globalAttributeNames.emplace_back(name);
   IFunction::declareAttribute(name, defaultValue);
+  m_globalAttributeNames.emplace_back(name);
+}
+
+/**
+ * Declares a single (global) attribute on the composite function, with a validator
+ * @param name :: The name of the attribute
+ * @param defaultValue :: A default value
+ * @param validator :: validator to restrict attribute values
+ */
+void CompositeFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
+                                         const Kernel::IValidator &validator) {
+  IFunction::declareAttribute(name, defaultValue, validator);
+  m_globalAttributeNames.emplace_back(name);
 }
 
 /**

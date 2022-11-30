@@ -79,7 +79,7 @@ public:
 
   static Kernel::Matrix<double> RotationMatrixAboutRegAxis(double theta, char axis);
 
-  std::shared_ptr<Geometry::Instrument> getNewInstrument(const DataObjects::PeaksWorkspace_sptr &Peaks) const;
+  std::shared_ptr<Geometry::Instrument> getNewInstrument(const DataObjects::PeaksWorkspace_sptr &peaksWs) const;
 
   std::vector<std::string> getAttributeNames() const override { return {"OptRuns", "PeakWorkspaceName"}; }
 

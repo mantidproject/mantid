@@ -27,7 +27,7 @@ namespace DataObjects {
 
   @date 2012-04-03
 */
-class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace, public API::ISplittersWorkspace {
+class MANTID_DATAOBJECTS_DLL SplittersWorkspace : public DataObjects::TableWorkspace, public API::ISplittersWorkspace {
 public:
   SplittersWorkspace();
 

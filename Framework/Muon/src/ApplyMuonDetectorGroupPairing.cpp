@@ -391,7 +391,7 @@ Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput() {
 }
 
 // Checks that the detector IDs in grouping are in the workspace
-void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(API::Grouping &grouping,
+void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(const API::Grouping &grouping,
                                                                 const Workspace_sptr &workspace) {
   bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
   if (!check) {

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/HistoWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 
@@ -25,7 +26,7 @@ namespace DataObjects {
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007
 */
-class DLLExport Workspace2D : public API::HistoWorkspace {
+class MANTID_DATAOBJECTS_DLL Workspace2D : public API::HistoWorkspace {
 public:
   /**
   Gets the name of the workspace type
@@ -71,7 +72,7 @@ public:
   /** sets the monitorWorkspace indexlist
     @param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<specnum_t> &mList) { m_monitorList = mList; }
+  void setMonitorList(const std::vector<specnum_t> &mList) { m_monitorList = mList; }
 
   /// Copy the data (Y's) from an image to this workspace.
   void setImageY(const API::MantidImage &image, size_t start = 0, bool parallelExecution = true) override;

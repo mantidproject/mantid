@@ -29,8 +29,7 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MiniPlotMpl : public QWidget {
 public:
   explicit MiniPlotMpl(QWidget *parent = nullptr);
 
-  void setData(std::vector<double> x, std::vector<double> y, QString xunit,
-               QString curveLabel);
+  void setData(std::vector<double> x, std::vector<double> y, QString xunit, QString curveLabel);
   void setXLabel(QString xunit);
   QString label() const { return m_activeCurveLabel; }
   void addPeakLabel(const PeakMarker2D *peakMarker);
@@ -49,9 +48,6 @@ public slots:
   void setYLogScale();
   void setYLinearScale();
   void clearAll();
-  // Required to match the interface with MiniPlotQwt but matplotlib
-  // handles this for us so it is a noop
-  void recalcAxisDivs() {}
   void zoomOutOnPlot();
 
 signals:

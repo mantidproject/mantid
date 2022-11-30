@@ -21,11 +21,15 @@
     </parameter>
     <!-- Logs to sum when merging the runs -->
     <parameter name="sample_logs_sum" type="string" visible="false">
-      <value val="timer" />
+      <value val="duration" />
     </parameter>
     <!-- Tau coefficient for DeadTimeCorrection, to be applied tube by tube -->
     <parameter name="tau" type="number">
       <value val="0.0000015" />
+    </parameter>
+    <!-- Logs to list when conjoining the runs -->
+    <parameter name="conjoin_sample_logs_list" type="string" visible="false">
+      <value val="sample.thickness, sample_description, run_number" />
     </parameter>
     <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
     Note that for the panels, often pixels have transposed shape, but the surface is the same.
@@ -88,7 +92,11 @@
     <parameter name="log_list_to_save" type="string" visible="false">
       <value val="facility,instrument.name,experiment_identifier,
 		  start_time,end_time,numor_list,processedAs,
-		  wavelength,sample_transmission_numors,L2"/>
+		  wavelength,sample_transmission_ws,
+		  sample_transmission_numors,beam_ws,beam_numors,
+		  container_ws,container_numors,absorber_ws,absorber_numors,
+		  flux_ws,flux_numors,reference_ws,reference_numors,
+		  sensitivity_ws,sensitivity_numors,mask_ws,L2"/>
     </parameter>
   </component-link>
 

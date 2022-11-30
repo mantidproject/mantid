@@ -18,7 +18,7 @@ namespace DataHandling {
 
 /** LoadSwans : Test Loader to read data from the LDRD new SWANS detector
  */
-class DLLExport LoadSwans final : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadSwans final : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSwans();
   const std::string name() const override;

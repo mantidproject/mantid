@@ -112,7 +112,10 @@ protected:
   QToolButton *m_backward;
 
 private:
-  Q_DISABLE_COPY(pqHelpWindow)
+  // Delete the copy constructor and assignment operator
+  pqHelpWindow(const pqHelpWindow &) = delete;
+  pqHelpWindow &operator=(const pqHelpWindow &) = delete;
+
   void errorMissingPage(const QUrl &url);
 
   class pqNetworkAccessManager;

@@ -34,7 +34,7 @@ namespace Algorithms {
   National Laboratory
     @date 27/07/2009
 */
-class MANTID_ALGORITHMS_DLL GetEi : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetEi final : public API::Algorithm {
 public:
   GetEi();
 

@@ -121,6 +121,7 @@ public:
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
+  Mantid::API::Workspace_sptr getWorkspaceClone();
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
@@ -197,6 +198,8 @@ public:
   /// Whether the side tab is currently visible or is folded
   bool isTabFolded() const;
 
+  IInstrumentDisplay *getInstrumentDisplay() const { return m_instrumentDisplay.get(); };
+
 signals:
   void enableLighting(bool /*_t1*/);
   void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
@@ -232,8 +235,8 @@ public slots:
 
   void setupColorMap();
 
-  void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
-  void changeScaleType(int /*type*/);                      // Deprecated
+  void changeColormap(const QString &cmapNameOrPath = "", const bool highlightZeroDets = false); // Deprecated
+  void changeScaleType(int /*type*/);                                                            // Deprecated
   void changeNthPower(double /*nth_power*/);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated

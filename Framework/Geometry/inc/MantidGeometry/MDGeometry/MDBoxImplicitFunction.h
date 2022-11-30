@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <boost/tuple/tuple.hpp>
 #include <vector>
@@ -23,7 +22,7 @@ namespace Geometry {
   @author Janik Zikovsky
   @date 2011-07-21
 */
-class DLLExport MDBoxImplicitFunction : public MDImplicitFunction {
+class MANTID_GEOMETRY_DLL MDBoxImplicitFunction : public MDImplicitFunction {
 public:
   MDBoxImplicitFunction(const Mantid::Kernel::VMD &min, const Mantid::Kernel::VMD &max);
 

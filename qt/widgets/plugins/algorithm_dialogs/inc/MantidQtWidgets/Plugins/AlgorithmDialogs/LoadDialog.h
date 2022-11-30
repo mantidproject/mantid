@@ -45,7 +45,7 @@ namespace CustomDialogs {
 */
 class PreventLoadRequests;
 
-class LoadDialog : public API::AlgorithmDialog {
+class LoadDialog final : public API::AlgorithmDialog {
   Q_OBJECT
   friend PreventLoadRequests;
 

@@ -58,7 +58,7 @@ void SmoothData::exec() {
   Progress progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     int npts = nptsGroup[0];
     if (groupWS) {
       const int group = validateSpectrumInGroup(static_cast<size_t>(i));
@@ -86,9 +86,9 @@ void SmoothData::exec() {
     outputWorkspace->setHistogram(i, smooth(inputWorkspace->histogram(i), npts));
 
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // Loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Set the output workspace to its property
   setProperty("OutputWorkspace", outputWorkspace);

@@ -24,10 +24,9 @@ class MantidNavigationTool:
     """
     Mantid navigation tool
     """
-
     def __init__(self, text, tooltip, icon=None, callback=None, checked=None, initialiser=None):
         """
-        Context manager to temporarily change value of autoscale_on_update
+        Context manager
         :param text: Name of the action
         :param tooltip: Tooltip information describing the action
         :param icon: Icon for the action (optional)
@@ -126,9 +125,9 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         pass
 
     def set_message(self, s):
-        self.message.emit(s)
+        self.message.emit(s.replace("\n", ""))
         if self.coordinates:
-            self.locLabel.setText(s)
+            self.locLabel.setText(s.replace("\n", ""))
 
     def set_cursor(self, cursor):
         self.canvas.setCursor(cursord[cursor])

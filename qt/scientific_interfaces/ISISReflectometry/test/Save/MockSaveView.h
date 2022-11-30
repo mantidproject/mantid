@@ -55,6 +55,8 @@ public:
   MOCK_METHOD0(disableQResolutionCheckBox, void());
   MOCK_METHOD0(enableSeparatorButtonGroup, void());
   MOCK_METHOD0(disableSeparatorButtonGroup, void());
+  MOCK_METHOD0(enableSaveIndividualRowsCheckbox, void());
+  MOCK_METHOD0(disableSaveIndividualRowsCheckbox, void());
 
   MOCK_METHOD0(showFilterEditValid, void());
   MOCK_METHOD0(showFilterEditInvalid, void());

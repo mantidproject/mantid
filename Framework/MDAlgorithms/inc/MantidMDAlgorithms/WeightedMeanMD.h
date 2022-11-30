@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2012-06-26
 */
-class DLLExport WeightedMeanMD : public BinaryOperationMD {
+class MANTID_MDALGORITHMS_DLL WeightedMeanMD : public BinaryOperationMD {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "WeightedMeanMD"; };

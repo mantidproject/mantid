@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common import thread_model
 from mantid.simpleapi import CloneWorkspace
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, remove_ws_if_present
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import rebin_ws
-from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_ADS_observer import MuonADSObserver
 
 REBINNED_FIXED_WS_SUFFIX = "_EA_Rebinned_Fixed"
 REBINNED_VARIABLE_WS_SUFFIX = "_EA_Rebinned_Variable"
@@ -26,7 +26,7 @@ class ElementalAnalysisContext(object):
         self._group_context = ea_group_context
         self._plot_panes_context = plot_panes_context
         self.workspace_suffix = workspace_suffix
-        self.ads_observer = MuonContextADSObserver(delete_callback=self.remove_workspace,
+        self.ads_observer = MuonADSObserver(delete_callback=self.remove_workspace,
                                                    clear_callback=self.clear_context,
                                                    replace_callback=self.workspace_replaced,
                                                    delete_group_callback=self.remove_workspace)
@@ -97,7 +97,7 @@ class ElementalAnalysisContext(object):
     def handle_calculation_error(self, error):
         self.calculation_finished_notifier.notify_subscribers()
         if self.error_notifier:
-            error_message = f"Unexpected error occurred during Rebin: " + str(error)
+            error_message = "Unexpected error occurred during Rebin: " + str(error)
             self.error_notifier.notify_subscribers(error_message)
 
     def _run_rebin(self, name, rebin_type, params):

@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 #include <utility>
@@ -422,30 +423,40 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
 bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
-  // Validate the sample workspace
-  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
+  // Check input not empty
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
 
-  // Validate the container workspace
-  if (m_uiForm.ckUseCan->isChecked())
-    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
+  if (uiv.isAllInputValid()) {
+    // Validate the sample workspace
+    validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
 
-  // Validate the corrections workspace
-  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
+    // Validate the container workspace
+    if (m_uiForm.ckUseCan->isChecked())
+      validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
 
-  // Check sample has the same number of Histograms as each of the workspaces in the corrections group
-  m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
-  m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+    // Validate the corrections workspace
+    validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
 
-  for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
-    MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
+    // Check sample has the same number of Histograms as each of the workspaces in the corrections group
+    m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
+    if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {
+      m_ppCorrectionsGp = getADSWorkspace<WorkspaceGroup>(m_correctionsGroupName);
+      for (std::size_t i = 0; i < m_ppCorrectionsGp->size(); i++) {
+        MatrixWorkspace_sptr factorWs = std::dynamic_pointer_cast<MatrixWorkspace>(m_ppCorrectionsGp->getItem(i));
 
-    const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
-    const size_t containerHist = factorWs->getNumberHistograms();
+        const size_t sampleHist = m_ppSampleWS->getNumberHistograms();
+        const size_t containerHist = factorWs->getNumberHistograms();
 
-    if (sampleHist != containerHist) {
-      uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+        if (sampleHist != containerHist) {
+          uiv.addErrorMessage(" Sample and Container do not have a matching number of Histograms.");
+        }
+      }
+    } else {
+      uiv.addErrorMessage("Please check the Corrections Workspace that has been selected.");
     }
   }
+
   // Show errors if there are any
   if (!uiv.isAllInputValid())
     emit showMessageBox(uiv.generateErrorMessage());

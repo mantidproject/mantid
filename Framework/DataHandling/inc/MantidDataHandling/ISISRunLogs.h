@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/System.h"
 
 #include "MantidAPI/Run.h"
 
@@ -25,7 +25,7 @@ namespace DataHandling {
     - current period log: "period x"
     - all periods: "periods"
  */
-class DLLExport ISISRunLogs {
+class MANTID_DATAHANDLING_DLL ISISRunLogs {
 public:
   /// Construct this object using a run that has the required ICP event log
   /// and the number of periods

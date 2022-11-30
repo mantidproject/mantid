@@ -280,6 +280,7 @@ void RunsTablePresenter::resetTablePrecision() { m_jobViewUpdater.resetPrecision
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
   notifyRowStateChanged();
+  notifyRowModelChanged();
 }
 
 void RunsTablePresenter::appendRowsToGroupsInView(std::vector<int> const &groupIndices) {
@@ -452,6 +453,8 @@ void RunsTablePresenter::updateGroupName(MantidWidgets::Batch::RowLocation const
     cell.setContentText(oldValue);
     m_view->jobs().setCellAt(itemIndex, column, cell);
   }
+  m_mainPresenter->notifyGroupNameChanged(m_model.mutableReductionJobs().mutableGroups()[groupIndex]);
+  notifyRowModelChanged();
 }
 
 void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const &itemIndex, int column,
@@ -468,6 +471,9 @@ void RunsTablePresenter::updateRowField(MantidWidgets::Batch::RowLocation const 
   updateRow(m_model.mutableReductionJobs(), groupIndex, rowIndex, rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
+    m_mainPresenter->notifyRowContentChanged(
+        m_model.mutableReductionJobs().mutableGroups()[groupIndex].mutableRows()[rowIndex].get());
+    notifyRowModelChanged(m_model.reductionJobs().groups()[groupIndex].rows()[rowIndex].get());
   } else {
     showCellsAsInvalidInView(itemIndex, rowValidationResult.assertError());
   }
@@ -774,7 +780,7 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
   applyStylingToParent(row);
 }
 
-void RunsTablePresenter::notifyRowOutputsChanged() {
+void RunsTablePresenter::notifyRowModelChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
     auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
@@ -790,7 +796,7 @@ void RunsTablePresenter::notifyRowOutputsChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
+void RunsTablePresenter::notifyRowModelChanged(boost::optional<Item const &> item) {
   if (!item.is_initialized() || item->isGroup())
     return;
 

@@ -27,9 +27,8 @@ using namespace CurveFitting::Algorithms;
 /// Constructor
 LatticeDomainCreator::LatticeDomainCreator(Kernel::IPropertyManager *manager, const std::string &workspacePropertyName,
                                            API::IDomainCreator::DomainType domainType)
-    : IDomainCreator(manager, std::vector<std::string>(1, workspacePropertyName), domainType), m_workspace() {
-  m_workspacePropertyName = m_workspacePropertyNames.front();
-}
+    : IDomainCreator(manager, std::vector<std::string>(1, workspacePropertyName), domainType),
+      m_workspacePropertyName(m_workspacePropertyNames.front()), m_workspace() {}
 
 /**
  * Creates a LatticeDomain from the assigned Workspace

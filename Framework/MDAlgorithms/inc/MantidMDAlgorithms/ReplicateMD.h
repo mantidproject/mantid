@@ -25,7 +25,7 @@ namespace MDAlgorithms {
   higher dimensionality MDWorkspace from a
   lower dimensionality one.
 */
-class MANTID_MDALGORITHMS_DLL ReplicateMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ReplicateMD final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

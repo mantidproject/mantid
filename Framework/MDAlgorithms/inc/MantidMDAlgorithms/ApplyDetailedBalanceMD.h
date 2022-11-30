@@ -18,7 +18,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-08
 */
-class MANTID_MDALGORITHMS_DLL ApplyDetailedBalanceMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ApplyDetailedBalanceMD final : public API::Algorithm {
 public:
   ApplyDetailedBalanceMD() : mDeltaEIndex(999) {}
   const std::string name() const override;

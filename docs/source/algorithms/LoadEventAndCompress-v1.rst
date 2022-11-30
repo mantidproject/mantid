@@ -71,13 +71,15 @@ And run it using the following commands
 
     $ module load mpi/openmpi-x86_64
     $ export LD_PRELOAD=/usr/lib64/openmpi/lib/libmpi.so
-    $ mpirun -np 8 mantidpython test_mpi.py
+    $ mpirun -np 8 python test_mpi.py
 
 to run without mpi is simply
 
 .. code-block:: bash
 
-    $ mantidpython test_mpi.py
+    $ python test_mpi.py
+
+(you may also need to check out :ref:`PythonNotebook`)
 
 .. categories::
 

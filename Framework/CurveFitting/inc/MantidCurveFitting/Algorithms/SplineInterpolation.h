@@ -27,7 +27,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC
   @date 25/07/2013
 */
-class MANTID_CURVEFITTING_DLL SplineInterpolation : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineInterpolation final : public API::Algorithm {
 public:
   SplineInterpolation();
 

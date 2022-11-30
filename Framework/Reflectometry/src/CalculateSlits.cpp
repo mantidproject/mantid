@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(CalculateSlits)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-CalculateSlits::CalculateSlits() {}
+CalculateSlits::CalculateSlits() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

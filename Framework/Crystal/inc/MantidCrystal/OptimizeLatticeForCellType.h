@@ -25,7 +25,7 @@ namespace Crystal {
  @author Vickie Lynch, SNS
  @date 02/06/2012
  */
-class MANTID_CRYSTAL_DLL OptimizeLatticeForCellType : public API::Algorithm {
+class MANTID_CRYSTAL_DLL OptimizeLatticeForCellType final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "OptimizeLatticeForCellType"; }

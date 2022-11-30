@@ -231,23 +231,6 @@ void loadISISMaskFile(const std::string &isisfilename, std::vector<Mantid::specn
   convertToVector(dummy, ranges, spectraMasks);
 }
 
-/** Parse bank IDs (string name)
- * Sample:            bank2
- * @param valuetext:  must be bank name
- * @param tomask:     if true, mask, if not unmask
- * @param toMask:     vector of string containing component names for masking
- * @param toUnmask    vector of strings containing component names for unmasking
- */
-void parseComponent(const std::string &valuetext, bool tomask, std::vector<std::string> &toMask,
-                    std::vector<std::string> &toUnmask) {
-
-  // 1. Parse bank out
-  if (tomask) {
-    toMask.emplace_back(valuetext);
-  } else {
-    toUnmask.emplace_back(valuetext);
-  }
-}
 } // namespace
 
 namespace Mantid::DataHandling {
@@ -593,9 +576,7 @@ void LoadMask::parseXML() {
 
   std::vector<specnum_t> singleSp, pairSp;
   std::vector<detid_t> maskSingleDet, maskPairDet;
-  std::vector<detid_t> umaskSingleDet, umaskPairDet;
 
-  bool tomask = true;
   bool ingroup = false;
   while (pNode) {
     const Poco::XML::XMLString value = pNode->innerText();
@@ -603,12 +584,11 @@ void LoadMask::parseXML() {
     if (pNode->nodeName() == "group") {
       // Node "group"
       ingroup = true;
-      tomask = true;
 
     } else if (pNode->nodeName() == "component") {
       // Node "component"
       if (ingroup) {
-        parseComponent(value, tomask, m_maskCompIdSingle, m_uMaskCompIdSingle);
+        m_maskCompIdSingle.emplace_back(value);
       } else {
         g_log.error() << "XML File hierarchical (component) error!\n";
       }
@@ -625,11 +605,7 @@ void LoadMask::parseXML() {
     } else if (pNode->nodeName() == "detids") {
       // Node "detids"
       if (ingroup) {
-        if (tomask) {
-          parseRangeText(value, maskSingleDet, maskPairDet);
-        } else { // NOTE -- currently never happens.TODO: NOT IMPLEMENTED
-          parseRangeText(value, umaskSingleDet, umaskPairDet);
-        }
+        parseRangeText(value, maskSingleDet, maskPairDet);
       } else {
         g_log.error() << "XML File (detids) hierarchical error!\n";
       }
@@ -667,7 +643,6 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS, cons
   for (auto &it : sourceDetMap) {
     spectr2index_map.insert(std::pair<size_t, Mantid::detid_t>(it.second, it.first));
   }
-  spec2index_map new_map;
   for (int i : maskedSpecID) {
     // find spectra number from spectra ID for the source workspace
     const auto itSpec = s2imap.find(i);

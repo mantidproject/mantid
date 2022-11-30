@@ -4,6 +4,8 @@
 Python in Mantid: Solution 1
 ============================
 
+All the data for these solutions can be found in the TrainingCourseData on the Downloads page.
+
 A - Using ISIS Data
 ===================
 
@@ -17,9 +19,10 @@ A - Using ISIS Data
     Load(Filename=inputData+".RAW",OutputWorkspace=inputData,Cache="If Slow")
 
     # First do the analysis without prompt pulse removal so that we can compare the difference
-    # Align the detectors (incoporates unit conversion to d-Spacing)
+
     cal_file = "hrpd_new_072_01_corr.cal"
-    AlignDetectors(InputWorkspace=inputData,OutputWorkspace="aligned-withpulse",CalibrationFile=cal_file)
+    ApplyDiffCal(InstrumentWorkspace=inputData, CalibrationFile=cal_file)
+    ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withpulse", Target="dSpacing")
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withpulse",OutputWorkspace="focussed-withpulse",GroupingFileName=cal_file)
 
@@ -29,8 +32,8 @@ A - Using ISIS Data
       max = 20040 + (i*20000)
       MaskBins(InputWorkspace=inputData,OutputWorkspace=inputData,XMin=min,XMax=max)
 
-    # Align the detectors (on the data with the pulse removed incoporates unit conversion to d-Spacing)
-    AlignDetectors(InputWorkspace=inputData,OutputWorkspace="aligned-withoutpulse",CalibrationFile=cal_file)
+    ApplyDiffCal(InstrumentWorkspace=inputData, CalibrationFile=cal_file)
+    ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withoutpulse", Target="dSpacing")
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withoutpulse",OutputWorkspace="focussed-withoutpulse",GroupingFileName=cal_file)
     # Subract the processed data with and without pulse from eachother
@@ -53,7 +56,8 @@ A - Using ISIS Data
     # First do the analysis without prompt pulse removal so that we can compare the difference
     # Align the detectors (incoporates unit conversion to d-Spacing)
     cal_file = "hrpd_new_072_01_corr.cal"
-    AlignDetectors(InputWorkspace=inputData,OutputWorkspace="aligned-withpulse",CalibrationFile=cal_file)
+    ApplyDiffCal(InstrumentWorkspace=inputData, CalibrationFile=cal_file)
+    ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withpulse", Target="dSpacing")
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withpulse",OutputWorkspace="focussed-withpulse",GroupingFileName=cal_file)
 
@@ -64,7 +68,8 @@ A - Using ISIS Data
       MaskBins(InputWorkspace=inputData,OutputWorkspace=inputData,XMin=min,XMax=max)
 
     # Align the detectors (on the data with the pulse removed incoporates unit conversion to d-Spacing)
-    AlignDetectors(InputWorkspace=inputData,OutputWorkspace="aligned-withoutpulse",CalibrationFile=cal_file)
+    ApplyDiffCal(InstrumentWorkspace=inputData, CalibrationFile=cal_file)
+    ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withoutpulse", Target="dSpacing")
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withoutpulse",OutputWorkspace="focussed-withoutpulse",GroupingFileName=cal_file)
     # Subract the processed data with and without pulse from eachother
@@ -87,7 +92,9 @@ Right-click in the Messages toolbox and check that the log level is set to "Noti
     nevents = run.getNumberEvents()
     logger.notice('Number of Events Before = {}'.format(str(nevents)))
     filtered = FilterBadPulses(run, LowerCutoff=99.5)
-    aligned = AlignDetectors(InputWorkspace=filtered, CalibrationFile='PG3_golden.cal')
+    ApplyDiffCal(InstrumentWorkspace=filtered, CalibrationFile='PG3_golden.cal')
+    aligned = ConvertUnits(InputWorkspace=filtered, Target="dSpacing")
+
     rebinned = Rebin(InputWorkspace=aligned, Params=[1.4,-0.0004, 8])
     focused = DiffractionFocussing(InputWorkspace=rebinned, GroupingFileName='PG3_golden.cal')
     compressed = CompressEvents(InputWorkspace=focused)

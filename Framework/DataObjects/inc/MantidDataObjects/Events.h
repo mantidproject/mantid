@@ -10,7 +10,7 @@
 #include <time.h>
 #endif
 #include "MantidAPI/MatrixWorkspace_fwd.h" // get MantidVec declaration
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidTypes/Event/TofEvent.h"
@@ -36,7 +36,7 @@ namespace DataObjects {
  *  - weight of the neutron (float, can be
  */
 #pragma pack(push, 4) // Ensure the structure is no larger than it needs to
-class DLLExport WeightedEvent : public Types::Event::TofEvent {
+class MANTID_DATAOBJECTS_DLL WeightedEvent : public Types::Event::TofEvent {
 
   /// EventList has the right to mess with WeightedEvent.
   friend class EventList;
@@ -88,7 +88,7 @@ public:
  *  - weight of the neutron (float, can be
  */
 #pragma pack(push, 4) // Ensure the structure is no larger than it needs to
-class DLLExport WeightedEventNoTime {
+class MANTID_DATAOBJECTS_DLL WeightedEventNoTime {
 
   /// EventList has the right to mess with this
   friend class EventList;

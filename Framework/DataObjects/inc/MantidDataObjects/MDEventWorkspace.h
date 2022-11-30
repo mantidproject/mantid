@@ -9,7 +9,6 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/System.h"
 //#include "MantidDataObjects/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
@@ -36,7 +35,7 @@ namespace DataObjects {
  *
  * */
 TMDE_CLASS
-class DLLExport MDEventWorkspace : public API::IMDEventWorkspace {
+class MANTID_DATAOBJECTS_DLL MDEventWorkspace : public API::IMDEventWorkspace {
 
 public:
   /// Typedef for a shared pointer of this kind of event workspace
@@ -48,7 +47,7 @@ public:
       Mantid::API::MDNormalization preferredNormalization = Mantid::API::MDNormalization::VolumeNormalization,
       Mantid::API::MDNormalization preferredNormalizationHisto = Mantid::API::MDNormalization::VolumeNormalization);
   MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) = delete;
-  ~MDEventWorkspace() override;
+  virtual ~MDEventWorkspace() override = default;
 
   /// Returns a clone of the workspace
   std::unique_ptr<MDEventWorkspace> clone() const { return std::unique_ptr<MDEventWorkspace>(doClone()); }

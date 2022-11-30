@@ -28,19 +28,19 @@ void update(std::string const &property, boost::optional<std::string> const &val
 }
 
 void update(std::string const &property, bool value, AlgorithmRuntimeProps &properties) {
-  update(property, boolToString(value), properties);
+  properties.setProperty(property, value);
 }
 
 void update(std::string const &property, int value, AlgorithmRuntimeProps &properties) {
-  update(property, std::to_string(value), properties);
+  properties.setProperty(property, value);
 }
 
 void update(std::string const &property, size_t value, AlgorithmRuntimeProps &properties) {
-  update(property, std::to_string(value), properties);
+  properties.setProperty(property, value);
 }
 
 void update(std::string const &property, double value, AlgorithmRuntimeProps &properties) {
-  update(property, std::to_string(value), properties);
+  properties.setProperty(property, value);
 }
 
 void update(std::string const &property, boost::optional<double> const &value, AlgorithmRuntimeProps &properties) {

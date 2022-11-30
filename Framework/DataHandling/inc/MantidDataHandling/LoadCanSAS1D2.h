@@ -52,7 +52,7 @@ at filename.
 @author Gesner Passos, Rutherford Appleton Laboratory
 @date 12/04/2013
 */
-class DLLExport LoadCanSAS1D2 : public LoadCanSAS1D {
+class MANTID_DATAHANDLING_DLL LoadCanSAS1D2 : public LoadCanSAS1D {
 public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
@@ -72,7 +72,7 @@ protected:
   std::vector<API::MatrixWorkspace_sptr> trans_gp, trans_can_gp;
 
 private:
-  void processTransmission(std::vector<API::MatrixWorkspace_sptr> &trans_gp, const std::string &trans_name,
+  void processTransmission(const std::vector<API::MatrixWorkspace_sptr> &trans_gp, const std::string &trans_name,
                            const std::string &output_name);
 };
 } // namespace DataHandling

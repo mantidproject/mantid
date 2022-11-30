@@ -1050,7 +1050,7 @@ class CWSCDReductionControl(object):
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
                     if self._debugPrintMode:
-                        print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
+                        print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {3} '
                               'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
                     continue
                 # END-IF

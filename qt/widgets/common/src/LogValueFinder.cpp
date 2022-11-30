@@ -8,6 +8,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+
+#include <algorithm>
 #include <ostream>
 #include <utility>
 
@@ -40,9 +42,8 @@ std::vector<std::string> LogValueFinder::getLogNames() const {
     const auto &workspace = ads.retrieveWS<MatrixWorkspace>(wsName);
     const auto &logs = workspace->run().getLogData();
     logNames.reserve(logs.size());
-    for (const auto &log : logs) {
-      logNames.emplace_back(log->name());
-    }
+    std::transform(logs.cbegin(), logs.cend(), std::back_inserter(logNames),
+                   [](const auto &log) { return log->name(); });
   }
   return logNames;
 }

@@ -23,7 +23,7 @@ IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFi
   setUpPresenter();
 }
 
-IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() {}
+IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() = default;
 
 void IndirectFitOutputOptionsPresenter::setUpPresenter() {
   setMultiWorkspaceOptionsVisible(false);

@@ -76,7 +76,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
         for iws, ws in enumerate(ws_list):
             # check calls to fit use initial guess for both workspaces as first fit was unsuccessful
             _, _, kwargs = mock_fit.mock_calls[iws]
-            self.assertEquals(kwargs, {'Function': fun_str_list[0], 'InputWorkspace': ws, 'Output': ws})
+            self.assertEqual(kwargs, {'Function': fun_str_list[0], 'InputWorkspace': ws, 'Output': ws})
 
     def fit_all_helper(self, mock_fit, do_sequential):
         ws_list = ['ws1', 'ws2']
@@ -101,13 +101,13 @@ class FittingPlotPresenterTest(unittest.TestCase):
             # check calls to fit
             _, _, kwargs = mock_fit.mock_calls[iws]
             if do_sequential:
-                self.assertEquals(kwargs, {'Function': fun_str_list[iws], 'InputWorkspace': ws, 'Output': ws})
+                self.assertEqual(kwargs, {'Function': fun_str_list[iws], 'InputWorkspace': ws, 'Output': ws})
             else:
                 # use same initial params for all workspaces
-                self.assertEquals(kwargs, {'Function': fun_str_list[0], 'InputWorkspace': ws, 'Output': ws})
+                self.assertEqual(kwargs, {'Function': fun_str_list[0], 'InputWorkspace': ws, 'Output': ws})
             # check update browser with fit results
             _, args, _ = self.view.update_browser.mock_calls[iws]
-            self.assertEquals(args, (mock_fit_output[iws].OutputStatus, fun_str_list[iws + 1], ws))
+            self.assertEqual(args, (mock_fit_output[iws].OutputStatus, fun_str_list[iws + 1], ws))
             # collect all fitprop dicts together to test notifier
             fitprop_list.append({'properties': {'Function': fun_str_list[iws + 1], 'InputWorkspace': ws, 'Output': ws},
                                  'status': mock_fit_output[iws].OutputStatus})

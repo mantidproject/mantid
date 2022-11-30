@@ -18,7 +18,7 @@ namespace Algorithms {
 /** ExtractMaskToTable : Extract the mask in a workspace to a table workspace.
   The table workspace must be compatible to algorithm MaskBinsFromTable.
 */
-class MANTID_ALGORITHMS_DLL ExtractMaskToTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExtractMaskToTable final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ExtractMaskToTable"; }

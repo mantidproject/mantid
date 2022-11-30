@@ -29,7 +29,7 @@ InstrumentTreeModel::InstrumentTreeModel(const InstrumentWidget *instrWidget, QO
 /**
  * Destructor for instrument display tree
  */
-InstrumentTreeModel::~InstrumentTreeModel() {}
+InstrumentTreeModel::~InstrumentTreeModel() = default;
 
 /**
  * Column count for the instrument tree.

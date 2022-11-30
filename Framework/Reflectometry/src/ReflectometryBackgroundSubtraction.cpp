@@ -290,7 +290,13 @@ std::map<std::string, std::string> ReflectometryBackgroundSubtraction::validateI
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   auto indexProp = dynamic_cast<IndexProperty *>(getPointerToProperty("ProcessingInstructions"));
-  Indexing::SpectrumIndexSet indexSet = *indexProp;
+  Indexing::SpectrumIndexSet indexSet;
+  try {
+    indexSet = *indexProp;
+  } catch (std::runtime_error const &e) {
+    // This can except unhandled when the input workspace is the wrong type. So just add an error instead.
+    errors["InputWorkspace"] = e.what();
+  }
   const std::string backgroundType = getProperty("BackgroundCalculationMethod");
 
   if (inputWS) {

@@ -113,6 +113,16 @@ std::map<std::string, std::string> CopyDataRange::validateInputs() {
   int const yInsertionIndex = getProperty("InsertionYIndex");
   int const xInsertionIndex = getProperty("InsertionXIndex");
 
+  if (!inputWorkspace) {
+    errors["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+  }
+  if (!destWorkspace) {
+    errors["DestWorkspace"] = "The DestWorkspace must be a MatrixWorkspace.";
+  }
+  if (!errors.empty()) {
+    return errors;
+  }
+
   try {
     auto const xMinIndex = inputWorkspace->yIndexOfX(xMin, 0, 0.000001);
     auto const xMaxIndex = inputWorkspace->yIndexOfX(xMax, 0, 0.000001);

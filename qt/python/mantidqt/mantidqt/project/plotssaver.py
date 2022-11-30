@@ -213,11 +213,11 @@ class PlotsSaver(object):
     def get_dict_for_grid_style(ax):
         grid_style = {}
         gridlines = ax.get_gridlines()
-        if ax._gridOnMajor and len(gridlines) > 0:
+        if ax._major_tick_kw['gridOn'] and len(gridlines) > 0:
             grid_style["color"] = to_hex(gridlines[0].get_color())
             grid_style["alpha"] = gridlines[0].get_alpha()
             grid_style["gridOn"] = True
-            grid_style["minorGridOn"] = ax._gridOnMinor
+            grid_style["minorGridOn"] = ax._minor_tick_kw['gridOn']
         else:
             grid_style["gridOn"] = False
         return grid_style

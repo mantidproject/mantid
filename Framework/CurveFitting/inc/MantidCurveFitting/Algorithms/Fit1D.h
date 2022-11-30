@@ -58,6 +58,7 @@ public:
   virtual void functionDeriv(const double *in, API::Jacobian *out, const double *xValues, const size_t nData);
 
 protected:
+  ~Fit1D() = default;
   // Overridden Algorithm methods
   void init() override;
   void exec() override;

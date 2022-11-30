@@ -39,7 +39,7 @@ GLColor::GLColor(int r, int g, int b, int a) {
 /**
  * (virtual) Destructor
  */
-GLColor::~GLColor() {}
+GLColor::~GLColor() = default;
 
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color

@@ -39,12 +39,7 @@ void CreateTransmissionWorkspaceAuto2::init() {
                   "Second transmission run workspace in TOF.");
 
   // Analysis mode
-  const std::vector<std::string> analysisMode{"PointDetectorAnalysis", "MultiDetectorAnalysis"};
-  auto analysisModeValidator = std::make_shared<StringListValidator>(analysisMode);
-  declareProperty("AnalysisMode", analysisMode[0], analysisModeValidator,
-                  "Analysis mode. This property is only used when "
-                  "ProcessingInstructions is not set.",
-                  Direction::Input);
+  initAnalysisProperties();
 
   // Processing instructions
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("ProcessingInstructions", "", Direction::Input),

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 
 #include <limits>
 

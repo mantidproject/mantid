@@ -325,7 +325,7 @@ void ReplicateMD::exec() {
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto outIt = dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     // Iterate over the output workspace
@@ -347,9 +347,9 @@ void ReplicateMD::exec() {
 
     } while (outIt->next());
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   this->setProperty("OutputWorkspace", outputWS);
 }

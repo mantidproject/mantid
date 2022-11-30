@@ -12,8 +12,10 @@
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include <MantidKernel/InvisibleProperty.h>
 #include <memory>
 
 using namespace Mantid::Kernel;
@@ -43,9 +45,13 @@ void Stitch1DMany::init() {
                   "End overlaps for stitched workspaces "
                   "(number of input workspaces minus one).");
 
-  declareProperty(std::make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true, Direction::Input),
-                  "Scaling either with respect to first (first hand side, LHS) "
-                  "or second (right hand side, RHS) workspace.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<OptionalBool>>("ScaleRHSWorkspace", OptionalBool::Unset, Direction::Input),
+      "Scaling either with respect to first (first hand side, LHS) "
+      "or second (right hand side, RHS) workspace. "
+      "This property no longer has an effect, please use the IndexOfReference property instead.");
+  // Hide this property from the GUI as it now has no effect and will eventually be removed
+  setPropertySettings("ScaleRHSWorkspace", std::make_unique<InvisibleProperty>());
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("UseManualScaleFactors", false, Direction::Input),
                   "True to use provided values for the scale factor.");
@@ -76,9 +82,11 @@ void Stitch1DMany::init() {
 
   setPropertySettings("ScaleFactorFromPeriod", std::move(scaleFactorFromPeriodVisible));
 
-  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
-  mustBePositive->setLower(0);
-  declareProperty("IndexOfReference", 0, mustBePositive, "Index of the workspace to be used as reference for scaling.");
+  auto indexValidator = std::make_shared<BoundedValidator<int>>();
+  indexValidator->setLower(-1);
+  declareProperty("IndexOfReference", 0, indexValidator,
+                  "Index of the workspace to be used as reference for scaling, or -1 to choose the last workspace as "
+                  "the reference.");
 }
 
 /// Load and validate the algorithm's properties.
@@ -116,7 +124,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       }
       if (!isDefault("IndexOfReference")) {
         m_indexOfReference = static_cast<int>(this->getProperty("IndexOfReference"));
-        if (m_indexOfReference >= column.size() && m_indexOfReference >= m_inputWSMatrix.size()) {
+        if (m_indexOfReference > -1 && static_cast<size_t>(m_indexOfReference) >= column.size() &&
+            static_cast<size_t>(m_indexOfReference) >= m_inputWSMatrix.size()) {
           issues["IndexOfReference"] = "The index of reference workspace is larger than the number of "
                                        "provided workspaces.";
         }
@@ -167,7 +176,6 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 
       m_startOverlaps = this->getProperty("StartOverlaps");
       m_endOverlaps = this->getProperty("EndOverlaps");
-      m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
       m_params = this->getProperty("Params");
 
       // Either stitch MatrixWorkspaces or workspaces of the group
@@ -209,6 +217,11 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 
 /// Execute the algorithm.
 void Stitch1DMany::exec() {
+  if (static_cast<OptionalBool>(this->getProperty("ScaleRHSWorkspace")) != OptionalBool::Unset) {
+    g_log.warning("The ScaleRHSWorkspace property no longer has any effect. Please see documentation on the "
+                  "IndexOfReference parameter and use that instead.");
+  }
+
   if (m_inputWSMatrix.size() > 1) {   // groups
     std::vector<std::string> toGroup; // List of workspaces to be grouped
     std::string groupName = this->getProperty("OutputWorkspace");
@@ -222,7 +235,7 @@ void Stitch1DMany::exec() {
 
         outName = groupName;
         std::vector<double> scaleFactors;
-        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors, static_cast<int>(m_indexOfReference));
+        doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors, m_indexOfReference);
 
         // Add the resulting workspace to the list to be grouped together
         toGroup.emplace_back(outName);
@@ -236,8 +249,7 @@ void Stitch1DMany::exec() {
       std::vector<double> periodScaleFactors;
       constexpr bool storeInADS = false;
 
-      doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName, periodScaleFactors,
-                     static_cast<int>(m_indexOfReference), storeInADS);
+      doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName, periodScaleFactors, m_indexOfReference, storeInADS);
 
       // Iterate over each period
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
@@ -285,17 +297,14 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
 
   auto lhsWS = toStitch.front();
   outName += "_" + lhsWS->getName();
-  auto scaleRHSWorkspace = m_scaleRHSWorkspace;
+  // Support Python list syntax for selecting the last element in the list
+  auto indexOfReference = m_indexOfReference == -1 ? toStitch.size() - 1 : m_indexOfReference;
 
   for (size_t i = 1; i < toStitch.size(); i++) {
     auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
-    if (i == m_indexOfReference) {
-      // don't scale the RHS unless the desired index is the first ws
-      scaleRHSWorkspace = false;
-    } else if (i > m_indexOfReference) {
-      scaleRHSWorkspace = true; // after scaling to the desired ws, keep the scaling
-    }
+    // Scale the LHS ws until we have scaled to the reference ws. After that we scale the RHS ws to keep the scaling.
+    auto scaleRHSWorkspace = i > indexOfReference;
 
     auto alg = createChildAlgorithm("Stitch1D");
     alg->initialize();
@@ -359,7 +368,6 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
   alg->setProperty("StartOverlaps", m_startOverlaps);
   alg->setProperty("EndOverlaps", m_endOverlaps);
   alg->setProperty("Params", m_params);
-  alg->setProperty("ScaleRHSWorkspace", m_scaleRHSWorkspace);
   alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
   if (useManualScaleFactors)
     alg->setProperty("ManualScaleFactors", m_manualScaleFactors);

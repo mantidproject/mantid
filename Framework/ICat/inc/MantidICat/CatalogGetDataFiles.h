@@ -27,12 +27,12 @@ Required Properties:
 @date 07/07/2010
 
  */
-class MANTID_ICAT_DLL CatalogGetDataFiles : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogGetDataFiles final : public API::Algorithm {
 public:
   /// Constructor
   CatalogGetDataFiles() : API::Algorithm() {}
   /// Destructor
-  ~CatalogGetDataFiles() override {}
+  ~CatalogGetDataFiles() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogGetDataFiles"; }
   /// Summary of algorithms purpose

@@ -21,7 +21,7 @@ public:
   virtual size_t numberOfTriangles() const = 0;
   virtual std::vector<double> getVertices() const = 0;
   virtual std::vector<uint32_t> getTriangles() const = 0;
-  virtual ~RenderingMesh() {}
+  virtual ~RenderingMesh() = default;
 };
 
 } // namespace Geometry

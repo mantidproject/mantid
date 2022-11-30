@@ -51,7 +51,8 @@ ImageInfoModelMatrixWS::ImageInfoModelMatrixWS(Mantid::API::MatrixWorkspace_sptr
 }
 
 /// @copydoc MantidQt::MantidWidgets::ImageInfoModel::info
-ImageInfoModel::ImageInfo ImageInfoModelMatrixWS::info(const double x, const double y, const double signal) const {
+ImageInfoModel::ImageInfo ImageInfoModelMatrixWS::info(const double x, const double y, const double signal,
+                                                       const QMap<QString, QString> &) const {
   ImageInfo info(m_names);
   if (x == UnsetValue || y == UnsetValue || signal == UnsetValue)
     return info;

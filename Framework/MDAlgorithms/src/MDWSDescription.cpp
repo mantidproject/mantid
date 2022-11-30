@@ -201,7 +201,7 @@ void MDWSDescription::setUpMissingParameters(const MDWSDescription &SourceMatrWS
  *compatible with existing MD workspace
  *
  */
-void MDWSDescription::checkWSCorresponsMDWorkspace(MDWSDescription &NewMDWorkspaceD) {
+void MDWSDescription::checkWSCorresponsMDWorkspace(const MDWSDescription &NewMDWorkspaceD) {
   if (m_NDims != NewMDWorkspaceD.m_NDims) {
     std::string ERR = "Dimension numbers are inconsistent: this workspace has " + std::to_string(m_NDims) +
                       " dimensions and target one: " + std::to_string(NewMDWorkspaceD.m_NDims);

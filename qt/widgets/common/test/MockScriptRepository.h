@@ -12,7 +12,7 @@
 
 using namespace Mantid::API;
 
-typedef std::pair<std::string, std::tuple<SCRIPTSTATUS, bool, bool>> fileType;
+using fileType = std::pair<std::string, std::tuple<SCRIPTSTATUS, bool, bool>>;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 

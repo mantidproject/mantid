@@ -38,8 +38,8 @@ namespace Algorithms {
   1.   CYRSTAL LATTICE IS CORRECT!  AS FOR FITTING INSTRUMENT PARAMETER, IT IS A
   GIVEN VALUE.
 */
-class MANTID_CURVEFITTING_DLL RefinePowderInstrumentParameters : public API::Algorithm,
-                                                                 public API::DeprecatedAlgorithm {
+class MANTID_CURVEFITTING_DLL RefinePowderInstrumentParameters final : public API::Algorithm,
+                                                                       public API::DeprecatedAlgorithm {
 public:
   RefinePowderInstrumentParameters();
 

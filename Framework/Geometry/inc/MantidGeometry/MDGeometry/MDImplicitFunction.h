@@ -9,7 +9,6 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,7 +41,7 @@ namespace Geometry {
   @author Janik Zikovsky
   @date 2011-07-15
 */
-class DLLExport MDImplicitFunction {
+class MANTID_GEOMETRY_DLL MDImplicitFunction {
 public:
   MDImplicitFunction();
   virtual ~MDImplicitFunction() = default;

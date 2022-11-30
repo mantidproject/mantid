@@ -12,7 +12,6 @@
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 // Forward declaration (here, because is not in Mantid namespace)
 class MuonNexusReader;
@@ -53,7 +52,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class DLLExport LoadMuonNexus1 : public LoadMuonNexus {
+class MANTID_DATAHANDLING_DLL LoadMuonNexus1 : public LoadMuonNexus {
 public:
   /// Default constructor
   LoadMuonNexus1();

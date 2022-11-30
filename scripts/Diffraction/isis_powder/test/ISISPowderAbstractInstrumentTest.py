@@ -187,7 +187,7 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
             inst_settings=mock_inst._inst_settings,
             is_vanadium_run=False,
             grouping_file_name=grouping_filename,
-            empty_run_number=empty_runs,
+            empty_inst_run_number=empty_runs,
             vanadium_string=vanadium_runs)
 
         return mock_inst, run_details_obj, out_dir

@@ -4,6 +4,8 @@
 Python in Mantid: Solution 4
 ============================
 
+All the data for these solutions can be found in the TrainingCourseData on the Downloads page.
+
 Manipulating data arrays
 ========================
 

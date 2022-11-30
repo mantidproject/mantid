@@ -9,12 +9,11 @@
 Description
 -----------
 
-This algorithm fits and functionalizes an incident spectrum and finds its first derivative.
+This algorithm fits and functionalizes an incident spectrum and finds its first derivative and optionally its second derivative.
 FitIncidentSpectrum is able to fit an incident spectrum using:
 
-*  GaussConvCubicSpline: A fit with Cubic Spline using a Gaussian Convolution to get weights. In builds running older
-   versions of SciPy the first derivative is can be less accurate.
-*  CubicSpline: A fit using a cubic cline.
+*  GaussConvCubicSpline: A fit with Cubic Spline using a Gaussian Convolution to get weights.
+*  CubicSpline: A fit using a cubic spline.
 *  CubicSplineViaMantid: A fit with cubic spline using the mantid SplineSmoothing algorithm.
 
 Usage

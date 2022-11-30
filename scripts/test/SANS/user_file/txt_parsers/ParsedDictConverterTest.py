@@ -218,7 +218,7 @@ class ParsedDictConverterTest(unittest.TestCase):
                                        txt_user_file_reader=adapter)
         state_move = parser.get_state_move(file_information=None)
 
-        self.assertAlmostEquals(-10.0 / self.MM_TO_M, state_move.monitor_4_offset)
+        self.assertAlmostEqual(-10.0 / self.MM_TO_M, state_move.monitor_4_offset)
 
     def test_move_ignores_m5_for_non_zoom(self):
         mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.SANS2D],
@@ -229,7 +229,7 @@ class ParsedDictConverterTest(unittest.TestCase):
                                        txt_user_file_reader=adapter)
         state_move = parser.get_state_move(file_information=None)
 
-        self.assertAlmostEquals(0.0, state_move.monitor_4_offset)
+        self.assertAlmostEqual(0.0, state_move.monitor_4_offset)
 
     def test_move_m5_works_on_zoom(self):
         mocked_values = {DetectorId.INSTRUMENT: [SANSInstrument.ZOOM],
@@ -241,8 +241,8 @@ class ParsedDictConverterTest(unittest.TestCase):
         state_move = parser.get_state_move(file_information=None)
 
         self.assertIsInstance(state_move, StateMoveZOOM)
-        self.assertAlmostEquals(0.0, state_move.monitor_4_offset)
-        self.assertAlmostEquals(-5.0 / self.MM_TO_M, state_move.monitor_5_offset)
+        self.assertAlmostEqual(0.0, state_move.monitor_4_offset)
+        self.assertAlmostEqual(-5.0 / self.MM_TO_M, state_move.monitor_5_offset)
 
 
 if __name__ == '__main__':

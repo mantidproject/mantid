@@ -9,7 +9,6 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 #include <iosfwd>
 #include <vector>
@@ -54,7 +53,7 @@ enum EventSortType {
     @date 4/02/2010
 */
 
-class DLLExport EventList : public Mantid::API::IEventList {
+class MANTID_DATAOBJECTS_DLL EventList : public Mantid::API::IEventList {
 public:
   EventList();
 

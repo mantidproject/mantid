@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 import numpy as np
+from numpy.testing import assert_allclose
 
 import abins
 from abins.input import AbInitioLoader
@@ -69,9 +70,9 @@ class Tester(object):
                 correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"][k])
             calc_frequencies, calc_displacements = self._cull_imaginary_modes(
                 items["frequencies"][k], items["atomic_displacements"][k])
-            self.assertEqual(True, np.allclose(correct_frequencies, calc_frequencies))
-            self.assertEqual(True, np.allclose(correct_displacements, calc_displacements))
-            self.assertEqual(True, np.allclose(correct_k_points["k_vectors"][k], items["k_vectors"][k]))
+            assert_allclose(correct_frequencies, calc_frequencies)
+            assert_allclose(correct_displacements, calc_displacements)
+            assert_allclose(correct_k_points["k_vectors"][k], items["k_vectors"][k])
             self.assertEqual(correct_k_points["weights"][k], items["weights"][k])
 
         correct_atoms = correct_data["datasets"]["atoms_data"]
@@ -81,8 +82,7 @@ class Tester(object):
             self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
                                    delta=0.00001)  # delta in amu units
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
-                                               atoms["atom_%s" % item]["coord"]))
+            assert_allclose(correct_atoms["atom_%s" % item]["coord"], atoms["atom_%s" % item]["coord"])
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
@@ -95,7 +95,7 @@ class Tester(object):
                              data["attributes"]["filename"])
 
         # check datasets
-        self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
+        assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
 
     def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
 
@@ -106,7 +106,10 @@ class Tester(object):
             read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension.upper())
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)
 
-        loaded_data = ab_initio_loader.load_formatted_data().extract()
+        abins_data = ab_initio_loader.load_formatted_data()
+        self.assertTrue(abins_data.get_kpoints_data().is_normalised())
+
+        loaded_data = abins_data.extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
@@ -118,10 +121,10 @@ class Tester(object):
             calc_frequencies, calc_displacements = self._cull_imaginary_modes(
                 items["frequencies"][k], items["atomic_displacements"][k])
 
-            self.assertEqual(True, np.allclose(correct_frequencies, calc_frequencies))
-            self.assertEqual(True, np.allclose(correct_displacements, calc_displacements))
-            self.assertEqual(True, np.allclose(correct_items["k_vectors"][k], items["k_vectors"][k]))
-            self.assertEqual(correct_items["weights"][k], items["weights"][k])
+            assert_allclose(correct_frequencies, calc_frequencies)
+            assert_allclose(correct_displacements, calc_displacements)
+            assert_allclose(correct_items["k_vectors"][k], items["k_vectors"][k])
+            assert_allclose(correct_items["weights"][k], items["weights"][k])
 
         # atoms
         correct_atoms = correct_data["datasets"]["atoms_data"]
@@ -132,8 +135,8 @@ class Tester(object):
             self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"],
                                    delta=0.00001)
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
-                                               atoms["atom_%s" % item]["coord"]))
+            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
+                            atoms["atom_%s" % item]["coord"])
 
     def check(self, *,
               name: str,
@@ -181,7 +184,7 @@ class Tester(object):
         data = self._get_reader_data(ab_initio_reader)
 
         # test validData method
-        self.assertEqual(True, ab_initio_reader._clerk._valid_hash())
+        self.assertTrue(ab_initio_reader._clerk._valid_hash())
 
         return data
 

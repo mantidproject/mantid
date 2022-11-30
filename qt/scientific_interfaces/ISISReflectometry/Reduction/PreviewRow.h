@@ -6,9 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
+#include "GUI/Preview/ROIType.h"
 #include "Item.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "Reduction/ProcessingInstructions.h"
+
+#include <boost/optional.hpp>
 
 #include <string>
 #include <vector>
@@ -28,6 +32,8 @@ public:
   PreviewRow &operator=(PreviewRow &&) = default;
 
   std::vector<std::string> const &runNumbers() const;
+  double theta() const;
+  void setTheta(double theta);
 
   bool isGroup() const override;
   bool isPreview() const override;
@@ -39,11 +45,15 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
-  std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
+  Mantid::API::MatrixWorkspace_sptr getReducedWs() const noexcept;
+  boost::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
+  boost::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
-  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
+  void setReducedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
+  void setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) noexcept;
+  void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
@@ -53,9 +63,14 @@ public:
 
 private:
   std::vector<std::string> m_runNumbers;
-  std::vector<Mantid::detid_t> m_selectedBanks;
+  double m_theta;
+  boost::optional<ProcessingInstructions> m_selectedBanks{boost::none};
+  boost::optional<ProcessingInstructions> m_processingInstructions{boost::none};
+  boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions{boost::none};
+  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions{boost::none};
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
+  Mantid::API::MatrixWorkspace_sptr m_reducedWs;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

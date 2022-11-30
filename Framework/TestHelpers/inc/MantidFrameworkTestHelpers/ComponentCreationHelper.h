@@ -188,7 +188,8 @@ void addRectangularBank(Mantid::Geometry::Instrument &testInstrument, int idStar
 /// pixels*pixels in size, a source and spherical sample shape.
 Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                                                                   double pixelSpacing = 0.008,
-                                                                  double bankDistanceFromSample = 5.0);
+                                                                  double bankDistanceFromSample = 5.0,
+                                                                  bool addMonitor = false);
 
 Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
                                                                    double pixelSpacing = 0.008);

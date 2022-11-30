@@ -25,28 +25,38 @@ void EventPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mai
 Slicing const &EventPresenter::slicing() const { return m_slicing; }
 
 void EventPresenter::notifyUniformSliceCountChanged(int) {
-  setUniformSlicingByNumberOfSlicesFromView();
-  m_mainPresenter->notifySettingsChanged();
+  if (m_sliceType == SliceType::UniformEven) {
+    setUniformSlicingByNumberOfSlicesFromView();
+    m_mainPresenter->notifySettingsChanged();
+  }
 }
 
 void EventPresenter::notifyUniformSecondsChanged(double) {
-  setUniformSlicingByTimeFromView();
-  m_mainPresenter->notifySettingsChanged();
+  if (m_sliceType == SliceType::Uniform) {
+    setUniformSlicingByTimeFromView();
+    m_mainPresenter->notifySettingsChanged();
+  }
 }
 
 void EventPresenter::notifyCustomSliceValuesChanged(std::string) {
-  setCustomSlicingFromView();
-  m_mainPresenter->notifySettingsChanged();
+  if (m_sliceType == SliceType::Custom) {
+    setCustomSlicingFromView();
+    m_mainPresenter->notifySettingsChanged();
+  }
 }
 
 void EventPresenter::notifyLogSliceBreakpointsChanged(std::string) {
-  setLogValueSlicingFromView();
-  m_mainPresenter->notifySettingsChanged();
+  if (m_sliceType == SliceType::LogValue) {
+    setLogValueSlicingFromView();
+    m_mainPresenter->notifySettingsChanged();
+  }
 }
 
 void EventPresenter::notifyLogBlockNameChanged(std::string) {
-  setLogValueSlicingFromView();
-  m_mainPresenter->notifySettingsChanged();
+  if (m_sliceType == SliceType::LogValue) {
+    setLogValueSlicingFromView();
+    m_mainPresenter->notifySettingsChanged();
+  }
 }
 
 void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {

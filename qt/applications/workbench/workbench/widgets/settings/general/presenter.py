@@ -93,7 +93,7 @@ class GeneralSettings(object):
 
     def setup_general_group(self):
         self.view.window_behaviour.addItems(self.WINDOW_BEHAVIOUR)
-        window_behaviour = CONF.get(GeneralProperties.WINDOW_BEHAVIOUR.value)
+        window_behaviour = CONF.get(GeneralProperties.WINDOW_BEHAVIOUR.value, type=str)
         if window_behaviour in self.WINDOW_BEHAVIOUR:
             self.view.window_behaviour.setCurrentIndex(self.view.window_behaviour.findText(window_behaviour))
 
@@ -104,7 +104,7 @@ class GeneralSettings(object):
     def action_main_font_button_clicked(self):
         font = None
         if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value).split(',')
+            font_string = CONF.get(GeneralProperties.FONT.value, type=str).split(',')
             if len(font_string) > 2:
                 font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
         font_dialog = self.view.create_font_dialog(self.parent, font)
@@ -113,7 +113,7 @@ class GeneralSettings(object):
     def action_font_selected(self, font):
         font_string = ""
         if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value)
+            font_string = CONF.get(GeneralProperties.FONT.value, type=str)
         if font_string != font.toString():
             CONF.set(GeneralProperties.FONT.value, font.toString())
             if self.settings_presenter is not None:
@@ -167,9 +167,11 @@ class GeneralSettings(object):
         ConfigService.setString(GeneralProperties.USE_NOTIFICATIONS.value, "On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value)))
-        self.view.prompt_save_editor_modified.setChecked(bool(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value)))
-        self.view.prompt_deleting_workspaces.setChecked(bool(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value)))
+        self.view.prompt_save_on_close.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool))
+        self.view.prompt_save_editor_modified.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value,
+                                                                  type=bool))
+        self.view.prompt_deleting_workspaces.setChecked(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value,
+                                                                 type=bool))
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
@@ -180,7 +182,7 @@ class GeneralSettings(object):
         crystallography_convention = ("Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value))
         use_open_gl = ("on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower())
         invisible_workspaces = ("true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
-        completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value)
+        completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value, type=bool)
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -229,8 +231,8 @@ class GeneralSettings(object):
 
     def get_layout_dict(self):
         try:
-            layout_list = CONF.get(GeneralProperties.USER_LAYOUT.value)
-        except KeyError:
+            layout_list = CONF.get(GeneralProperties.USER_LAYOUT.value, type=dict)
+        except (KeyError, TypeError):
             layout_list = {}
         return layout_list
 

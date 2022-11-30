@@ -8,6 +8,7 @@ digraph ReflectometryILLConvertToQ {
     output            [label="OutputWorkspace"]
     direct_foreground [label="DirectForegroundWorkspace"]
     q_grouping        [label="GroupingQFraction"]
+    ThetaCorrection
   }
 
   subgraph algorithms {
@@ -18,21 +19,28 @@ digraph ReflectometryILLConvertToQ {
     refl_to_q            [label="ReflectometryMomentumTransfer"]
     refl_to_point_data   [label="ConvertToPointData"]
     refl_group_points    [label="Optionally group points\nto Q resolution"]
+    gravityCorrection    [label="Gravity correction step 1"]
     divide               [label="Divide"]
   }
 
   subgraph decisions {
     $decision_style
     if_direct_foreground [label="Is DirectForegroundWorkspace\navailable?"]
+    correctGravity [label="Correct for gravity?"]
   }
 
   input -> refl_to_q
   refl_to_q -> refl_to_point_data
   refl_to_point_data -> refl_group_points
   refl_group_points -> if_direct_foreground
-  if_direct_foreground -> output              [label="no"]
+  if_direct_foreground -> correctGravity      [label="no"]
   if_direct_foreground -> divide              [label="yes, LHS"]
-  divide -> output
+  divide -> correctGravity
+
+  correctGravity -> gravityCorrection [label="yes, FIGARO"]
+  ThetaCorrection -> gravityCorrection
+  gravityCorrection -> output
+  correctGravity -> output [label="no"]
 
   direct_foreground -> direct_to_q
   refl_to_q -> direct_to_q                    [label="Q and dQ data"]

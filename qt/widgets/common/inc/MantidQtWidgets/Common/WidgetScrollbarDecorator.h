@@ -11,12 +11,9 @@
 //----------------------------------
 #include "MantidKernel/System.h"
 
-//----------------------------------
-// Forward declarations
-//----------------------------------
-class QScrollArea;
-class QVBoxLayout;
-class QWidget;
+#include <QScrollArea>
+#include <QVBoxLayout>
+#include <QWidget>
 
 namespace MantidQt {
 namespace API {

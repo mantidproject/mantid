@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/function.hpp>
 #include <memory>
@@ -28,7 +27,7 @@ backward-forward compatibility
 with some some additional new functionality.
 Original purpose to support LoadEventNexus for the MultiPeriod cases.
 */
-class DLLExport EventWorkspaceCollection {
+class MANTID_DATAHANDLING_DLL EventWorkspaceCollection {
 
 private:
   /// Vector of EventWorkspaces

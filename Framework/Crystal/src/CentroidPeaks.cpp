@@ -90,7 +90,7 @@ void CentroidPeaks::integrate() {
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Get a direct ref to that peak.
     auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
@@ -163,9 +163,9 @@ void CentroidPeaks::integrate() {
       peak.setWavelength(lambda);
       peak.setBinCount(inWS->y(workspaceIndex)[chan]);
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   removeEdgePeaks(*peakWS);
 
   // Save the output
@@ -212,7 +212,7 @@ void CentroidPeaks::integrateEvent() {
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Get a direct ref to that peak.
     auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
@@ -281,9 +281,9 @@ void CentroidPeaks::integrateEvent() {
       peak.setWavelength(lambda);
       peak.setBinCount(intensity);
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   removeEdgePeaks(*peakWS);
 
   // Save the output

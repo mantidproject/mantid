@@ -1,0 +1,1 @@
+- Fix problem in :ref:`CreateSampleWorkspace  <algm-CreateSampleWorkspace >` where functions were evaluated at left hand bin edge instead of bin centre. The algorithm FindEPP <algm-FindEPP >` has also been updated with a similar change

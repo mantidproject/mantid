@@ -66,6 +66,15 @@ std::map<std::string, std::string> XrayAbsorptionCorrection::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr muonProfile = getProperty("MuonImplantationProfile");
   std::map<std::string, std::string> issues;
+  if (!inputWS) {
+    issues["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+  }
+  if (!muonProfile) {
+    issues["MuonImplantationProfile"] = "The MuonImplantationProfile must be a MatrixWorkspace.";
+  }
+  if (!issues.empty()) {
+    return issues;
+  }
   if (!inputWS->sample().getShape().hasValidShape()) {
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
   }

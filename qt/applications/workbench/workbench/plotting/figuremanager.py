@@ -16,7 +16,6 @@ import re
 from functools import wraps
 
 import matplotlib
-from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.collections import LineCollection
@@ -37,6 +36,7 @@ from mantidqt.widgets.superplot import Superplot
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 from workbench.config import get_window_config
+from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.plotting.mantidfigurecanvas import (  # noqa: F401
     MantidFigureCanvas, draw_if_interactive as draw_if_interactive_impl, show as show_impl)
 from workbench.plotting.figureinteraction import FigureInteraction
@@ -154,8 +154,9 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                     ax.wsName = newName
                 ax.make_legend()
             ax.set_title(_replace_workspace_name_in_string(oldName, newName, ax.get_title()))
-        self.canvas.set_window_title(
-            _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
+        if self.canvas.manager is not None:
+            self.canvas.manager.set_window_title(
+                _replace_workspace_name_in_string(oldName, newName, self.canvas.get_window_title()))
         self.canvas.draw()
 
 
@@ -231,6 +232,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.sig_change_line_collection_colour_triggered.connect(
                 self.change_line_collection_colour)
+            self.toolbar.sig_hide_plot_triggered.connect(self.hide_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -282,7 +284,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.showFullScreen()
 
     def _window_activated(self):
-        Gcf.set_active(self)
+        GlobalFigureManager.set_active(self)
 
     def _get_toolbar(self, canvas, parent):
         return WorkbenchNavigationToolbar(canvas, parent, False)
@@ -326,7 +328,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         self._ads_observer.observeAll(False)
         self._ads_observer = None
-        # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
+        # disconnect window events before calling GlobalFigureManager.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
         # would produce an extraneous activated event that would add a new figure to the plots list
         # right after deleted the old one.
@@ -337,11 +339,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.superplot.close()
 
         try:
-            Gcf.destroy(self.num)
+            GlobalFigureManager.destroy(self.num)
         except AttributeError:
             pass
             # It seems that when the python session is killed,
-            # Gcf can get destroyed before the Gcf.destroy
+            # GlobalFigureManager can get destroyed before the GlobalFigureManager.destroy
             # line is run, leading to a useless AttributeError.
 
     def launch_plot_options(self):
@@ -353,6 +355,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def launch_plot_help(self):
         PlotHelpPages.show_help_page_for_figure(self.canvas.figure)
+
+    def hide_plot(self):
+        self.window.hide()
 
     def copy_to_clipboard(self):
         """Copy the current figure image to clipboard"""
@@ -440,7 +445,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # We need to add a call to the figure manager here to call
         # notify methods when a figure is renamed, to update our
         # plot list.
-        Gcf.figure_title_changed(self.num)
+        GlobalFigureManager.figure_title_changed(self.num)
 
         # For the workbench we also keep the label in sync, this is
         # to allow getting a handle as plt.figure('Figure Name')
@@ -452,7 +457,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         plot visibility was changed. This method is added to this
         class so that it can be wrapped in a QAppThreadCall.
         """
-        Gcf.figure_visibility_changed(self.num)
+        GlobalFigureManager.figure_visibility_changed(self.num)
 
     def generate_plot_script_clipboard(self):
         script = generate_script(self.canvas.figure, exclude_headers=True)
@@ -506,9 +511,19 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
-        ax.lines.reverse()
-        ax.lines += errorbar_cap_lines
-        ax.collections += fills
+        self._reverse_axis_lines(ax)
+
+        for cap in errorbar_cap_lines:
+            ax.add_line(cap)
+        if LooseVersion("3.7") > LooseVersion(matplotlib.__version__) >= LooseVersion("3.2"):
+            for line_fill in fills:
+                if line_fill not in ax.collections:
+                    ax.add_collection(line_fill)
+        elif LooseVersion(matplotlib.__version__) < LooseVersion("3.2"):
+            ax.collections += fills
+        else:
+            raise NotImplementedError("ArtistList will become an immutable tuple in matplotlib 3.7 and thus, "
+                                      "this code doesn't work anymore.")
         ax.collections.reverse()
         ax.update_waterfall(x, y)
 
@@ -534,6 +549,18 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                 col.set_color(colour.name())
 
         self.canvas.draw()
+
+    @staticmethod
+    def _reverse_axis_lines(ax):
+        # The built-in reverse method can't be used here as the double assignment doesn't work.
+        lines = []
+        num_lines = len(ax.get_lines())
+        for i in range(num_lines):
+            line = ax.get_lines()[num_lines - i - 1]
+            lines.append(line)
+        for line in lines:
+            line.remove()
+            ax.add_line(line)
 
 
 # -----------------------------------------------------------------------------

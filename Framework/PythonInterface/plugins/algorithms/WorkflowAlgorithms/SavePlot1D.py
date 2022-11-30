@@ -234,7 +234,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         # get the flag to pop out canvas or not
         pop_canvas = self.getProperty('PopCanvas').value
 
-        plt.tight_layout(1.08)
+        plt.tight_layout()
         if pop_canvas:
             plt.show()
         filename = self.getProperty("OutputFilename").value

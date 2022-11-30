@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -41,7 +42,7 @@ namespace DataHandling {
  *         6th  &quot;          DetID (m) \n
  *-----------------------------------------------------------------------
  */
-class DLLExport SavePAR : public Mantid::API::Algorithm {
+class MANTID_DATAHANDLING_DLL SavePAR : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SavePAR"; }

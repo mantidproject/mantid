@@ -16,7 +16,7 @@ namespace Algorithms {
 /** Stitch1DMany : Stitches multiple Matrix Workspaces together into a single
  output.
  */
-class MANTID_ALGORITHMS_DLL Stitch1DMany : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Stitch1DMany final : public API::Algorithm {
 public:
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1DMany"; }
@@ -56,10 +56,9 @@ private:
   std::vector<double> m_manualScaleFactors;
   API::Workspace_sptr m_outputWorkspace;
 
-  bool m_scaleRHSWorkspace = true;
   bool m_useManualScaleFactors = false;
   size_t m_scaleFactorFromPeriod = 1;
-  size_t m_indexOfReference = 0;
+  int m_indexOfReference = 0;
 };
 
 } // namespace Algorithms

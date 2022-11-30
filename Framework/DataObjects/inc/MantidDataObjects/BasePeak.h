@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
 #include <memory>
@@ -30,7 +30,7 @@ namespace DataObjects {
  * to Peak and LeanPeak.
  *
  */
-class DLLExport BasePeak : public Geometry::IPeak {
+class MANTID_DATAOBJECTS_DLL BasePeak : public Geometry::IPeak {
 public:
   BasePeak();
   BasePeak(const Mantid::Kernel::Matrix<double> &goniometer);
@@ -116,7 +116,7 @@ protected:
   double calculateWavelengthFromQLab(const Mantid::Kernel::V3D &qLab);
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
-  std::string convention;
+  std::string m_convention;
 
   /// Cached sample position
   Mantid::Kernel::V3D m_samplePos;

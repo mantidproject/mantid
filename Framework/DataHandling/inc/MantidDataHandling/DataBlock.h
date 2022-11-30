@@ -23,7 +23,7 @@ class DataBlockGenerator;
     periods that are associated with the spectra in the nexus file.
 */
 
-class DLLExport DataBlock {
+class MANTID_DATAHANDLING_DLL DataBlock {
 public:
   DataBlock();
   DataBlock(const Mantid::NeXus::NXInt &data);

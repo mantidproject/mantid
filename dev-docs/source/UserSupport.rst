@@ -8,7 +8,7 @@ User Support
   :local:
 
 Introduction
-############
+------------
 
 As Mantid continues to facilitate cutting-edge scientific research, for an
 increasing number of users, the support side of Mantid is growing more
@@ -26,7 +26,7 @@ The main purpose of user support for the Mantid project, is to aide contact betw
    *Error reporter sends details directly to Mantid support*
 
 Bugs and Error Reports
-######################
+----------------------
 
 1.	Users can report bugs via the `Mantid Help Forum <https://forum.mantidproject.org/>`_ or the `Mantid Help Email <mantid-help@mantidproject.org>`_, or from collected **Error Reports**. Currently this is a quick first contact with the team, but doesn't give much detail about the usage or unexpected error.
 2.	The bug is verified and reproduced by the support team.
@@ -37,256 +37,280 @@ Bugs and Error Reports
 
 
 Troubleshooting
-###############
+---------------
 
 This is a list designed to take a user through how to gain diagnostic information, particularly when Mantid (Workbench) fails to **launch**.
 
 For performance profiling check out our `recommended tools <http://developer.mantidproject.org/ToolsOverview.html#profiling>`_.
 
+|
 
 .. _Trouble_Windows:
 
 Windows
-=======
+#######
 
 For a full release, ``C:\MantidInstall\`` is likely the correct install path. Take care to readjust this to ``C:\MantidNightlyInstall\`` if you are diagnosing a nightly version.
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
-
 2. Does the **error reporter** appear? Is there a useful stacktrace? [If the errorreport won't send, the user can check with "Show Details"]
-
 
 3. Try launching from a command prompt:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	C:\MantidInstall\bin\MantidWorkbench
+      C:\MantidInstall\bin\MantidWorkbench
 
-If this does not work, try launching with:
+   If this does not work, try launching with:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd C:\MantidInstall\bin
-	set QT_PLUGIN_PATH=%CD%\..\plugins\qt5
-	set PYTHONPATH=%CD%;%PYTHONPATH%
-	python -m workbench.app.main
-
+      cd C:\MantidInstall\bin
+      set QT_PLUGIN_PATH=%CD%\..\plugins\qt5
+      set PYTHONPATH=%CD%;%PYTHONPATH%
+      python -m workbench.app.main
 
 4. Does **Qt** import correctly? In a command prompt / terminal window, run the following:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    C:\MantidInstall\bin\mantidpython.bat --classic
-    import qtpy.QtCore
-
+       C:\MantidInstall\bin\python.exe
+       import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    C:\MantidInstall\bin\mantidpython.bat --classic
-    import mantid.simpleapi
-
+       C:\MantidInstall\bin\python.exe
+       import mantid.simpleapi
 
 6. Turn off **Server Checks**: Open ``C:\MantidInstall\bin\Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
-	c. Usage Reporting: ``usagereports.enabled = 0``
-	d. Project Recovery: ``projectRecovery.enabled=false``
 
+   a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+   b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
+   c. Usage Reporting: ``usagereports.enabled = 0``
+   d. Project Recovery: ``projectRecovery.enabled=false``
 
 7. Try renaming **Config Files**:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd %APPDATA%\mantidproject
-	mv mantidproject.ini mantidproject.ini.backup
-	# Try again to start workbench, if that doesn't work ...
+      cd %APPDATA%\mantidproject
+      mv mantidproject.ini mantidproject.ini.backup
+      # Try again to start workbench, if that doesn't work ...
 
-	cd %APPDATA%\mantidproject
-	mv mantid mantidbackup
-	# Try again to start workbench
+      cd %APPDATA%\mantidproject
+      mv mantid mantidbackup
+      # Try again to start workbench
 
-Advanced options:
+**Advanced options:**
 
 8. Check the PATH for conflicts with Mantid:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	echo %PATH%
+      echo %PATH%
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    cd C:\MantidInstall\bin\
-    python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
+       cd C:\MantidInstall\bin\
+       python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything outside of ``C:\MantidInstall`` could be a problem.
 
-If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``set PYTHONNOUSERSITE=1``
+   If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``set PYTHONNOUSERSITE=1``
 
 10.  Try to open workbench. After it fails, open **Event Viewer** (just search in the Windows menu bar) and selected ``Windows Logs->Application``. Double-click on the relevant error line/s and send the crash information to the dev team.
 
 11. **Process Monitor**: `Download here <https://docs.microsoft.com/en-us/sysinternals/downloads/procmon>`_. Extract the ProcessMonitor.zip and run Procmon.exe (which requires admin credentials). Set up a configuration filter for ``Process Name contains python``, click ``ADD``, ``APPLY``, ``OK`` and then launch Mantid Workbench, then back in Process Monitor select File>Save and save as a ``LogFile.PML`` file and send to the dev team.
 
+|
 
 .. _Trouble_Linux:
 
 Linux
-======
+#####
 
 For a full release, ``/opt/Mantid/`` is likely the correct install path. Take care to readjust this to ``/opt/mantidnightly/`` if you are diagnosing a nightly version.
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
-
 2. Does the **error reporter** appear? Is there a useful stacktrace? [If the errorreport won't send, the user can check with "Show Details"]
-
 
 3. Try launching from the terminal:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	/opt/Mantid/bin/mantidworkbench
-
+      /opt/Mantid/bin/mantidworkbench
 
 4. Does **Qt** import correctly? In terminal, run the following:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /opt/Mantid/bin/mantidpython --classic
-    import qtpy.QtCore
-
+      /opt/Mantid/bin/python3
+      import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /opt/Mantid/bin/mantidpython --classic
-    import mantid.simpleapi
-
+      /opt/Mantid/bin/python3
+      import mantid.simpleapi
 
 6. Try renaming **Config Files**:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd $HOME/.config/mantidproject
-	mv mantidproject.ini mantidproject.ini.backup
-	# Try again to start workbench, if that doesn't work ...
+      cd $HOME/.config/mantidproject
+      mv mantidproject.ini mantidproject.ini.backup
+      # Try again to start workbench, if that doesn't work ...
 
-	cd $HOME
-	mv .mantid .mantidbackup
-	# Try again to start workbench
-
+      cd $HOME
+      mv .mantid .mantidbackup
+      # Try again to start workbench
 
 7. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
-	c. Usage Reporting: ``usagereports.enabled = 0``
-	d. Project Recovery: ``projectRecovery.enabled=false``
+
+   a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+   b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
+   c. Usage Reporting: ``usagereports.enabled = 0``
+   d. Project Recovery: ``projectRecovery.enabled=false``
 
 
-Advanced Options:
-
+**Advanced Options:**
 
 8. Check the PATH for conflicts with Mantid: e.g. Anything relating to ``.local`` could be a problem.
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	echo $PATH
+      echo $PATH
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    cd /opt/Mantid/bin/
-    python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
-
+      cd /opt/Mantid/bin/
+      python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
-If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
+   If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
-10. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
+10. Check the terminal output for an error ``Failed to create history session``.
 
+    This can happen if the sqlite database has not been unlocked, e.g. from a previous crashed session. To work around this, replace the original with a new copy. The warning should give the location of the database, e.g. ``~/.ipython/profile_default/history.sqlite``. Ensure there are no Mantid sessions running, then make a copy of the database as follows (replace the path if it is different):
+
+    .. code-block:: shell
+
+       cd ~/.ipython/profile_default/
+       mv history.sqlite history.sqlite.orig
+       cp history.sqlite.orig history.sqlite
+
+11. Further diagnosis for process monitoring: `strace <https://strace.io/>`_.
+
+12. After a hard crash run: ``dmesg | grep -i memory`` and you may get an error log such as ``“Out of memory: Killed process”…``
+
+13. To get a stacktrace from C++ follow these steps:
+
+    - Before opening MantidWorkbench, open a terminal and run ``ulimit -c unlimited``
+    - Then in the same terminal, open MantidWorkbench with ``/opt/mantidworkbench/bin/mantidworkbench`` and use as normal.
+    - If there is a crash, then you will find a ``core.1234`` (some number) file
+      in the current working directory of the terminal, which the user can send to us!
+    - Run ``gdb python3 core.1234`` to get the stacktrace from this coredump file.
+
+|
+
+Built-in Help Not Displaying
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It has been observed that the built-in help window can display empty content
+under some circumstances.
+If another package has created a directory in the path ``$HOME/.local/share/mime``
+along with a file ``$HOME/.local/share/mime/packages/user-extension-html.xml``
+then that package has registered that it will handle all ``.html`` files,
+causing Mantid help to display a blank page.
+
+The Mantid help can be restored by renaming the ``mime`` directory:
+
+.. code-block:: shell
+
+   mv ~/.local/share/mime .local/share/mime.orig
+
+It is unclear what might break in other applications but nothing as yet has
+been observed.
+
+|
 
 .. _Trouble_MacOS:
 
 MacOS
-=====
+#####
 
 1. Does the **splash screen** appear? Can get a rough idea how far through launch it stops.
 
-
 2. Does the **error reporter** appear? Is there a useful stacktrace? [If the errorreport won't send, the user can check with "Show Details"]
-
 
 3. Try launching from terminal, by running the following:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	/Applications/MantidWorkbench.app/Contents/MacOS/MantidWorkbench
+      open --stdout=workbench_bundle.log --stderr=workbench_bundle.log /Applications/MantidWorkbench.app
 
-If this does not work, try launching with:
+   If this does not work, try launching with:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd /Applications/MantidWorkbench.app/Contents/MacOS
-	export QT_PLUGIN_PATH=$PWD/../PlugIns/
-	export PYTHONPATH=$PWD:$PYTHONPATH
-	python3 -m workbench.app.main
-
+      cd /Applications/MantidWorkbench.app/Contents/MacOS
+      ../Resources/bin/python -m workbench.app.main
 
 4. Does **Qt** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
-    import qtpy.QtCore
-
+      /Applications/MantidWorkbench.app/Contents/Resources/bin/python
+      import qtpy.QtCore
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
-    import mantid.simpleapi
-
+       /Applications/MantidWorkbench.app/Contents/Resources/bin/python
+       import mantid.simpleapi
 
 6. Turn off **Server Checks**: Open ``$HOME/.mantid/Mantid.user.properties`` in any texteditor, add each code line to the end of the file and try to open Workbench after each.
-	a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
-	b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
-	c. Usage Reporting: ``usagereports.enabled = 0``
-	d. Project Recovery: ``projectRecovery.enabled=false``
 
+   a. Instrument File : ``UpdateInstrumentDefinitions.OnStartup = 0``
+   b. Mantid Version : ``CheckMantidVersion.OnStartup = 0``
+   c. Usage Reporting: ``usagereports.enabled = 0``
+   d. Project Recovery: ``projectRecovery.enabled=false``
 
 7. Try renaming **Config files**:
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	cd $HOME/.config/mantidproject
-	mv mantidproject.ini mantidproject.ini.backup
-	# Try again to start workbench, if that doesn't work ...
+      cd $HOME/.config/mantidproject
+      mv mantidproject.ini mantidproject.ini.backup
+      # Try again to start workbench, if that doesn't work ...
 
-	cd ~
-	mv .mantid .mantidbackup
-	# Try again to start workbench
+      cd ~
+      mv .mantid .mantidbackup
+      # Try again to start workbench
 
-Advanced Options:
 
+**Advanced Options:**
 
 8. Check the PATH for conflicts with Mantid: e.g. Anything relating to ``.local`` could be a problem.
 
-.. code-block:: shell
+   .. code-block:: shell
 
-	echo $PATH
+      echo $PATH
 
-.. code-block:: shell
+   .. code-block:: shell
 
-    cd /Applications/MantidWorkbench.app/Contents/MacOS/
-    python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
-
+      cd /Applications/MantidWorkbench.app/Contents/Resources/bin/
+      python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
 
 9. Check for conflicts with **numpy**: ``python -c "import numpy; print(numpy.__file__)"`` Anything relating to ``.local`` could be a problem.
 
-If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
+   If there is a local version of Numpy, Matplotlib, Scipy etc., prevent Mantid from looking there, by running: ``export PYTHONNOUSERSITE=1``
 
 10. Further diagnosis for process monitoring: `dtrace <http://dtrace.org/>`_.

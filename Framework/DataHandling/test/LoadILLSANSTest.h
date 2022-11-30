@@ -86,6 +86,10 @@ public:
     IComponent_const_sptr component = instrument->getComponentByName("detector");
     V3D pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), 20.007, 1E-3)
+    // check for the correct unit
+    const auto unit = outputWS->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unit, "Wavelength");
+    // check loaded data contains expected values
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec6 = outputWS->y(6).rawData();
     const auto &err6 = outputWS->e(6).rawData();
@@ -94,9 +98,14 @@ public:
     TS_ASSERT_DELTA(xAxis[1], 6.27, 1E-5)
     TS_ASSERT_EQUALS(spec6[0], 20)
     TS_ASSERT_DELTA(err6[0], sqrt(20), 1E-5)
-    const auto unit = outputWS->getAxis(0)->unit()->unitID();
-    TS_ASSERT_EQUALS(unit, "Wavelength");
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(1)[0], 3.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(16384)[0], 10418891.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(16385)[0], 0.0, 1E-5)
+
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 1200.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D11B() {
@@ -132,14 +141,22 @@ public:
     component = instrument->getComponentByName("detector_right");
     pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), l2 - panelOffset, 1E-5)
+    // check for the correct unit
+    const auto unit = outputWS->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unit, "Wavelength");
+    // check loaded data contains expected values
     const auto &xAxis = outputWS->x(0).rawData();
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     TS_ASSERT_EQUALS(xAxis.size(), 2)
     TS_ASSERT_DELTA(xAxis[0], 5.73, 1E-5)
     TS_ASSERT_DELTA(xAxis[1], 6.27, 1E-5)
-    const auto unit = outputWS->getAxis(0)->unit()->unitID();
-    TS_ASSERT_EQUALS(unit, "Wavelength");
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(192 * 256 + 2 * 32 * 256)[0], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(192 * 256 + 2 * 32 * 256 + 1)[0], 0.0, 1E-5)
+
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 600.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D11B_Kinetic() {
@@ -153,6 +170,7 @@ public:
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 256 + 2 * 32 * 256 + 2)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 256 + 2 * 32 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 256 + 2 * 32 * 256 + 1))
     TS_ASSERT(!outputWS->isHistogramData())
@@ -184,6 +202,7 @@ public:
     TS_ASSERT_EQUALS(xAxis.size(), nExpectedFrames)
     TS_ASSERT_DELTA(xAxis[0], 0, 1E-9)
     TS_ASSERT_DELTA(xAxis[13], 13, 1E-9)
+    // check loaded data contains expected values
     const auto &mon1 = outputWS->y(192 * 256 + 2 * 32 * 256).rawData();
     const auto &mon1err = outputWS->e(192 * 256 + 2 * 32 * 256).rawData();
     TS_ASSERT_EQUALS(mon1.size(), nExpectedFrames)
@@ -196,9 +215,15 @@ public:
     TS_ASSERT_DELTA(mon2[0], 0.05, 1E-3)
     TS_ASSERT_EQUALS(mon2err.size(), nExpectedFrames)
     TS_ASSERT_DELTA(mon2err[0], 0, 1E-9)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(0)[84], 1.0, 1E-5)
+    // check for the correct unit
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Empty");
+
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 0.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D22() {
@@ -213,6 +238,7 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 128 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 1))
     TS_ASSERT(outputWS->isHistogramData())
@@ -222,6 +248,7 @@ public:
     V3D pos = component->getPos();
     TS_ASSERT_DELTA(pos.Z(), 8, 0.01)
     TS_ASSERT_DELTA(pos.X(), -0.35, 0.01)
+    // check loaded data contains expected values
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec6 = outputWS->y(6).rawData();
     const auto &err6 = outputWS->e(6).rawData();
@@ -230,9 +257,16 @@ public:
     TS_ASSERT_DELTA(xAxis[1], 5.25, 1E-5)
     TS_ASSERT_EQUALS(spec6[0], 45)
     TS_ASSERT_DELTA(err6[0], sqrt(45), 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256)[0], 245681.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256)[0], 495.66218, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256 + 1)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256 + 1)[0], 0.0, 1E-5)
+    // check for the correct unit
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 120.);
+    checkWavelength(outputWS, 5.);
   }
 
   void test_D22B_Cycle211() {
@@ -249,6 +283,7 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 128 * 256 + 96 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256 + 1))
     TS_ASSERT(outputWS->isHistogramData())
@@ -283,7 +318,17 @@ public:
     TS_ASSERT_EQUALS(qx, 0.)
     TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
     TS_ASSERT_EQUALS(qz, 0.)
+    // check loaded data contains expected values
+    const auto &xAxis = outputWS->x(0).rawData();
+    TS_ASSERT_DELTA(xAxis[0], 5.7, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 6.3, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256 + 96 * 256)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256 + 96 * 256)[0], 0.0, 1E-5)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 60.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D22B() {
@@ -298,6 +343,7 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 128 * 256 + 96 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256 + 1))
     TS_ASSERT(outputWS->isHistogramData())
@@ -332,7 +378,84 @@ public:
     TS_ASSERT_EQUALS(qx, 0.)
     TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
     TS_ASSERT_EQUALS(qz, 0.)
+    // check loaded data contains expected values
+    const auto &xAxis = outputWS->x(0).rawData();
+    TS_ASSERT_DELTA(xAxis[0], 10.4595, 1E-5)
+    TS_ASSERT_DELTA(xAxis[1], 11.5605, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(17263)[0], 100.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(17263)[0], 10.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256 + 96 * 256)[0], 74361.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256 + 96 * 256)[0], 272.69213, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256 + 96 * 256 + 1)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256 + 96 * 256 + 1)[0], 0.0, 1E-5)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 60.);
+    checkWavelength(outputWS, 11.01);
+  }
+
+  void test_D22B_Kinetic() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "089120.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 128 * 256 + 96 * 256 + 2)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256 + 1))
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(128 * 256 + 96 * 256))
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    TS_ASSERT(outputWS->isCommonBins())
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 400)
+    const auto &instrument = outputWS->getInstrument();
+    const auto &run = outputWS->run();
+    TS_ASSERT(run.hasProperty("Detector 1.det1_calc"));
+    TS_ASSERT(run.hasProperty("L2"));
+    const double detCalc = run.getPropertyAsSingleValue("Detector 1.det1_calc");
+    const double l2 = run.getPropertyAsSingleValue("L2");
+    TS_ASSERT_EQUALS(detCalc, l2);
+    IComponent_const_sptr comp = instrument->getComponentByName("detector_back");
+    V3D pos = comp->getPos();
+    TS_ASSERT(run.hasProperty("Detector 1.det1_calc"))
+    double det2_calc = run.getLogAsSingleValue("Detector 1.det1_calc");
+    TS_ASSERT(run.hasProperty("Detector 1.dtr1_actual"))
+    double dtr2_act = run.getLogAsSingleValue("Detector 1.dtr1_actual");
+    TS_ASSERT_DELTA(pos.Z(), det2_calc, 1E-6)
+    TS_ASSERT_DELTA(pos.X(), -dtr2_act / 1000., 1E-6)
+    comp = instrument->getComponentByName("detector_front");
+    pos = comp->getPos();
+    TS_ASSERT(run.hasProperty("Detector 2.det2_calc"))
+    double det1_calc = run.getLogAsSingleValue("Detector 2.det2_calc");
+    TS_ASSERT(run.hasProperty("Detector 2.dtr2_actual"))
+    double dtr1_act = run.getLogAsSingleValue("Detector 2.dtr2_actual");
+    TS_ASSERT_DELTA(pos.Z(), det1_calc, 1E-6)
+    TS_ASSERT_DELTA(pos.X(), -dtr1_act / 1000., 1E-6)
+    TS_ASSERT(run.hasProperty("Detector 2.dan2_actual"))
+    double dan1_act = run.getLogAsSingleValue("Detector 2.dan2_actual");
+    double angle, qx, qy, qz;
+    comp->getRotation().getAngleAxis(angle, qx, qy, qz);
+    TS_ASSERT_DELTA(angle, dan1_act, 1E-6)
+    TS_ASSERT_EQUALS(qx, 0.)
+    TS_ASSERT_DELTA(std::fabs(qy), 1., 1E-6)
+    TS_ASSERT_EQUALS(qz, 0.)
+    // check loaded data contains expected values
+    const auto &xAxis = outputWS->x(0).rawData();
+    TS_ASSERT_DELTA(xAxis[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(xAxis[5], 5.0, 1E-5)
+    TS_ASSERT_DELTA(xAxis[399], 399.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(51192)[155], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(51192)[155], 1.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256 + 96 * 256)[0], 173.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256 + 96 * 256)[0], 13.15295, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(128 * 256 + 96 * 256 + 1)[0], 0.05, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(128 * 256 + 96 * 256 + 1)[0], 0.0, 1E-5)
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 20.);
+    checkWavelength(outputWS, 6.);
   }
 
   void test_D16_GAMMA() {
@@ -346,6 +469,7 @@ public:
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
     const auto &instrument = outputWS->getInstrument();
@@ -370,6 +494,7 @@ public:
     TS_ASSERT_DELTA(tl_pos.Z(), 0.95711, 1E-5);
     TS_ASSERT_DELTA(br_pos.X(), -0.01657, 1E-5);
     TS_ASSERT_DELTA(br_pos.Z(), 1.01250, 1E-5);
+    // check loaded data contains expected values
     const auto &xAxis = outputWS->x(0).rawData();
     const auto &spec = outputWS->y(51972).rawData();
     const auto &err = outputWS->e(51972).rawData();
@@ -378,10 +503,17 @@ public:
     TS_ASSERT_DELTA(xAxis[1], 7.035, 1E-3)
     TS_ASSERT_EQUALS(spec[0], 17)
     TS_ASSERT_DELTA(err[0], sqrt(17), 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(320 * 320)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(320 * 320)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(320 * 320 + 1)[0], 124744.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->e(320 * 320 + 1)[0], 353.19117, 1E-5)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 30.);
+    checkWavelength(outputWS, 7.);
   }
 
-  void test_D16_OMEGA() {
+  void test_D16_OMEGA_SCAN_SINGLE_POINT() {
+    // test d16 scan data in the format where every file is a point
     LoadILLSANS alg;
     alg.setChild(true);
     alg.initialize();
@@ -392,11 +524,74 @@ public:
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_ASSERT(outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
+    // check loaded data contains expected values
+    const auto &xAxis = outputWS->x(0).rawData();
+    TS_ASSERT_EQUALS(xAxis.size(), 2)
+    TS_ASSERT_DELTA(xAxis[0], 4.776, 1E-3)
+    TS_ASSERT_DELTA(xAxis[1], 4.824, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 3.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 1.732, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(320 * 320)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(320 * 320)[0], 0.0, 1E-3) // apparently, the error is 0
+    TS_ASSERT_DELTA(outputWS->y(320 * 320 + 1)[0], 213094.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(320 * 320 + 1)[0], 461.621, 1E-3)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 5.);
+    checkWavelength(outputWS, 4.8);
+  }
+
+  void test_D16_OMEGA_CONCATENATED_SCAN() {
+    // test d16 scan data in a scan file, i.e. with multiple points in a single file
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "025786.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 261)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 320 * 320 + 2);
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 15.);
+    checkWavelength(outputWS, 4.45);
+  }
+
+  void test_D16B() {
+    LoadILLSANS alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "066321.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0));
+    TS_ASSERT(outputWS->detectorInfo().isMonitor(192 * 1152));
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 6)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 192 * 1152 + 1);
+    // check loaded data contains expected values
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 5.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->x(0)[5], 6.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 3304.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(0)[0], 57.480, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(192 * 1152 - 1)[5], 1131.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(192 * 1152 - 1)[5], 33.630, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(192 * 1152)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(192 * 1152)[0], 0.0, 1E-3)
+    checkTimeFormat(outputWS);
+    checkDuration(outputWS, 3.);
+    checkWavelength(outputWS, 4.45);
   }
 
   void test_D33_MONO() {
@@ -411,6 +606,7 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 256 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(256 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(256 * 256 + 1))
     TS_ASSERT(outputWS->isHistogramData())
@@ -437,6 +633,8 @@ public:
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 41.5);
+    checkWavelength(outputWS, 10.);
   }
 
   void test_D33_LTOF() {
@@ -451,22 +649,30 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 256 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 200)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(256 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(256 * 256 + 1))
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     TS_ASSERT(!outputWS->isCommonBins())
-    const auto &x = outputWS->x(0).rawData();
-    TS_ASSERT_DELTA(x[0], 0.04969, 1E-5)
-    TS_ASSERT_DELTA(x[1], 0.14873, 1E-5)
-    TS_ASSERT_DELTA(x[200], 19.85713, 1E-5)
     const auto &run = outputWS->run();
     TS_ASSERT(run.hasProperty("tof_mode"))
     const auto tof = run.getLogData("tof_mode");
     TS_ASSERT_EQUALS(tof->value(), "TOF");
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+    // check loaded data contains expected values
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 0.04969, 1E-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 0.14873, 1E-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[200], 19.85713, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(0)[124], 1.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(0)[124], 1.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(256 * 256)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(256 * 256)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(256 * 256)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(256 * 256)[0], 0.0, 1E-3)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 30.);
   }
 
   void test_D33_VTOF() {
@@ -481,28 +687,44 @@ public:
     TS_ASSERT(outputWS)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 256 * 256 + 2)
     TS_ASSERT_EQUALS(outputWS->blocksize(), 30)
+    TS_ASSERT(!outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(256 * 256))
     TS_ASSERT(outputWS->detectorInfo().isMonitor(256 * 256 + 1))
     TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     TS_ASSERT(!outputWS->isCommonBins())
-    const auto &x = outputWS->x(0).rawData();
-    TS_ASSERT_DELTA(x[0], 0., 1E-5)
-    TS_ASSERT_DELTA(x[1], 0.1998, 1E-5)
-    TS_ASSERT_DELTA(x[2], 0.3996, 1E-5)
     const auto &run = outputWS->run();
     TS_ASSERT(run.hasProperty("tof_mode"))
     const auto tof = run.getLogData("tof_mode");
     TS_ASSERT_EQUALS(tof->value(), "TOF");
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+    // check loaded data contains expected values
+    TS_ASSERT_DELTA(outputWS->x(0)[0], 0.0, 1E-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[1], 0.1998, 1E-5)
+    TS_ASSERT_DELTA(outputWS->x(0)[2], 0.3996, 1E-5)
+    TS_ASSERT_DELTA(outputWS->y(0)[23], 1.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(0)[23], 1.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(256 * 256)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(256 * 256)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->y(256 * 256)[0], 0.0, 1E-3)
+    TS_ASSERT_DELTA(outputWS->e(256 * 256)[0], 0.0, 1E-3)
     checkTimeFormat(outputWS);
+    checkDuration(outputWS, 120.);
   }
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
     TS_ASSERT(
         Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(outputWS->run().getProperty("start_time")->value()));
+  }
+  void checkDuration(MatrixWorkspace_const_sptr outputWS, const double val) {
+    TS_ASSERT(outputWS->run().hasProperty("duration"));
+    TS_ASSERT_DELTA(outputWS->run().getPropertyAsSingleValue("duration"), val, 0.1);
+  }
+  void checkWavelength(MatrixWorkspace_const_sptr outputWS, const double val) {
+    TS_ASSERT(outputWS->run().hasProperty("wavelength"));
+    TS_ASSERT_DELTA(outputWS->run().getPropertyAsSingleValue("wavelength"), val, 0.1);
   }
 };
 

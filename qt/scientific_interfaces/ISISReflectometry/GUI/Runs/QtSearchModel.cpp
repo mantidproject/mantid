@@ -218,4 +218,40 @@ void QtSearchModel::setSaved() { m_hasUnsavedChanges = false; }
 SearchResult const &QtSearchModel::getRowData(int index) const { return m_runDetails[index]; }
 
 SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
+
+std::string QtSearchModel::getSearchResultsCSV() const { return makeSearchResultsCSV(getRows()); }
+
+std::string QtSearchModel::makeSearchResultsCSV(SearchResults const &results) const {
+  if (results.empty()) {
+    return "";
+  }
+  std::string csv = makeSearchResultsCSVHeaders();
+  for (SearchResult const &result : results) {
+    // Should be suppressed until C++20. std::accumulate is less efficient as it makes needless copies.
+    // cppcheck-suppress useStlAlgorithm
+    csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "\n";
+  }
+  return csv;
+}
+
+std::string QtSearchModel::makeSearchResultsCSVHeaders() const {
+  std::string header;
+  header +=
+      headerData(static_cast<int>(Column::RUN), Qt::Orientation::Horizontal, Qt::DisplayRole).toString().toStdString() +
+      ",";
+  header += headerData(static_cast<int>(Column::TITLE), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            ",";
+  header += headerData(static_cast<int>(Column::EXCLUDE), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            ",";
+  header += headerData(static_cast<int>(Column::COMMENT), Qt::Orientation::Horizontal, Qt::DisplayRole)
+                .toString()
+                .toStdString() +
+            "\n";
+  return header;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -9,6 +9,7 @@ import unittest
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
+from mantid.dataobjects import Workspace2D
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
@@ -334,6 +335,12 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args['MonitorWorkspace'] = 'test_monitor_ws_group'
         self._assert_run_algorithm_fails(args)
         mtd.remove('test_monitor_ws_group')
+
+    def test_validation_fails_when_workspace_has_zero_counts(self):
+        input_ws = Workspace2D()
+        args = self._default_args
+        args['InputWorkspace'] = input_ws
+        self._assert_run_algorithm_throws(args)
 
     def _create_test_workspace(self):
         input_ws = CreateSampleWorkspace("Event",BankPixelWidth=1, BinWidth=20000)

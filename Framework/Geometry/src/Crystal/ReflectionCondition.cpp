@@ -9,6 +9,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <stdexcept>
 
 namespace Mantid::Geometry {
 

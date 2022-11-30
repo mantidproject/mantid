@@ -21,7 +21,7 @@ class MeshObject;
 }
 namespace DataHandling {
 
-class DLLExport LoadBinaryStl : public LoadStl {
+class MANTID_DATAHANDLING_DLL LoadBinaryStl : public LoadStl {
 public:
   static constexpr int HEADER_SIZE = 80;
   static constexpr uint32_t TRIANGLE_DATA_SIZE = 50;

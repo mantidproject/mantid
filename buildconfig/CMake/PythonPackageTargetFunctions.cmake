@@ -50,7 +50,7 @@ function(add_python_package pkg_name)
 
   # create the developer setup which just creates a pth file rather than copying things over
   set(_outputs ${_egg_link} ${_startup_script} ${_startup_exe})
-  set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK_PY})
+  set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
   add_custom_command(
     OUTPUT ${_outputs}
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE}

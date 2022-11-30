@@ -10,12 +10,12 @@
 // Includes
 //--------------------------------------
 #include <QGroupBox>
+#include <QLineEdit>
 #include <QWidget>
 
 //--------------------------------------
 // Qt forward declarations
 //--------------------------------------
-class QLineEdit;
 class QComboBox;
 class QRadioButton;
 class QLabel;
@@ -87,7 +87,7 @@ struct BaseInstantiator {
   /// Default constructor
   BaseInstantiator() {}
   /// Virtual destructor
-  virtual ~BaseInstantiator() {}
+  virtual ~BaseInstantiator() = default;
   /// Create an instance
   virtual ShapeDetails *createInstance() const = 0;
 
@@ -124,7 +124,7 @@ public:
   /// Constructor
   ShapeDetails(QWidget *parent = nullptr) : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
   /// Constructor
-  ~ShapeDetails() override {}
+  ~ShapeDetails() override = default;
 
   /// Write out the XML definition for this shape
   virtual QString writeXML() const = 0;

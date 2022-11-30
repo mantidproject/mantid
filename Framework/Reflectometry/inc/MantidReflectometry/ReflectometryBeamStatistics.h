@@ -15,7 +15,7 @@ namespace Reflectometry {
 
 /** Calculates statistical quantities of a reflectometry workspace.
  */
-class MANTID_REFLECTOMETRY_DLL ReflectometryBeamStatistics : public API::Algorithm {
+class MANTID_REFLECTOMETRY_DLL ReflectometryBeamStatistics final : public API::Algorithm {
 public:
   struct LogEntry {
     const static std::string BEAM_RMS_VARIATION;

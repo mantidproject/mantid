@@ -8,6 +8,7 @@
 //#include "MantidDataObjects/MDTransfDEHelper.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -34,7 +35,7 @@ enum defaultDimID {
 };
 }
 
-class DLLExport MDTransfAxisNames {
+class MANTID_MDALGORITHMS_DLL MDTransfAxisNames {
 public:
   /// function returns default dimension id-s for different Q and dE modes,
   /// defined by this class

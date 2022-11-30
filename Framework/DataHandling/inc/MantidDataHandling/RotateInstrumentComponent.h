@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument/Component.h"
 
 namespace Mantid {
@@ -39,7 +40,7 @@ to the component.</LI>
 @author Roman Tolchenov, Tessella Support Services plc
 @date 21/01/2009
 */
-class DLLExport RotateInstrumentComponent : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL RotateInstrumentComponent : public API::DistributedAlgorithm {
 public:
   /// Default constructor
   RotateInstrumentComponent();

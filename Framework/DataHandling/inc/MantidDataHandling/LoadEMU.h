@@ -14,6 +14,7 @@
 #include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/FileDescriptor.h"
@@ -73,7 +74,7 @@ protected:
                            std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks
-  void setupDetectorMasks(std::vector<bool> &roi);
+  void setupDetectorMasks(const std::vector<bool> &roi);
 
   // shared member variables
   DataObjects::EventWorkspace_sptr m_localWorkspace;
@@ -116,7 +117,7 @@ Optional Properties:
 </UL>
 
 */
-class DLLExport LoadEMUTar : public LoadEMU<Kernel::FileDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadEMUTar : public LoadEMU<Kernel::FileDescriptor> {
 public:
   int version() const override;
   const std::vector<std::string> seeAlso() const override;
@@ -153,7 +154,7 @@ Optional Properties:
 </UL>
 
 */
-class DLLExport LoadEMUHdf : public LoadEMU<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadEMUHdf : public LoadEMU<Kernel::NexusDescriptor> {
 public:
   int version() const override;
   const std::vector<std::string> seeAlso() const override;

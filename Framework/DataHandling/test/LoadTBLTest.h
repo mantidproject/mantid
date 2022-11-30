@@ -26,7 +26,7 @@ public:
 
   LoadTBLTest() : m_filename("LoadTBLTest.tbl"), m_wsName("LoadTBLTestWS"), m_abspath() {}
 
-  ~LoadTBLTest() override {}
+  ~LoadTBLTest() override = default;
 
   void testFileNoQuotes() {
     // create a file with each line containing different but valid data format

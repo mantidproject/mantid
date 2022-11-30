@@ -11,6 +11,12 @@
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/NexusIOHelper.h"
+
+// clang-format off
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
+
 #include <algorithm>
 #include <utility>
 
@@ -93,7 +99,7 @@ std::vector<uint64_t> LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) 
   // the event list for that pulse) as a uint64 vector.
   // The Nexus standard does not specify if this is to be 32-bit or 64-bit
   // integers, so we use the NeXusIOHelper to do the conversion on the fly.
-  auto event_index = NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
+  auto event_index = Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(file, "event_index");
 
   // Look for the sign that the bank is empty
   if (event_index.size() == 1) {
@@ -238,8 +244,8 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
   // We thus have to consider 32-bit or 64-bit options, and we
   // explicitly allow downcasting using the additional AllowDowncasting
   // template argument.
-  auto vec = NeXus::NeXusIOHelper::readNexusSlab<float, NeXus::NeXusIOHelper::AllowNarrowing>(file, key, m_loadStart,
-                                                                                              m_loadSize);
+  auto vec = Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::AllowNarrowing>(
+      file, key, m_loadStart, m_loadSize);
   file.getAttr("units", tof_unit);
   file.closeData();
   // Convert Tof to microseconds

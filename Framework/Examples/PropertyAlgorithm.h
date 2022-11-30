@@ -15,12 +15,12 @@ namespace Algorithms {
     @author Roman Tolchenov, ISIS, RAL
     @date 01/05/2008
  */
-class PropertyAlgorithm : public API::Algorithm {
+class PropertyAlgorithm final : public API::Algorithm {
 public:
   /// no arg constructor
   PropertyAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  ~PropertyAlgorithm() override {}
+  ~PropertyAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PropertyAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

@@ -38,12 +38,12 @@ General properties
 +----------------------------------+--------------------------------------------------+------------------------+
 | ``algorithms.deprecated``        | Action upon invoking a deprecated algorithm.     | ``Log`` or ``Raise``   |
 |                                  | ``Log`` causes a log message at error level.     |                        |
-|                                  |``Raise`` causes a ``RuntimError``.               |                        |
+|                                  | ``Raise`` causes a ``RuntimError``.              |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
 | ``algorithms.alias.deprecated``  | Action upon invoking the algorithm via one of    | ``Log`` or ``Raise``   |
 |                                  | its deprecated aliases.                          |                        |
 |                                  | ``Log`` causes a log message at error level.     |                        |
-|                                  |``Raise`` causes a ``RuntimError``.               |                        |
+|                                  | ``Raise`` causes a ``RuntimError``.              |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |

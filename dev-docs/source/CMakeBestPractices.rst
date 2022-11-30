@@ -131,6 +131,7 @@ With the move to conda, we have created a CMake export target for the Framework 
 2. Add the install commands which ensures the target is exported.
 
 .. code-block:: cmake
+
     set(TARGET_EXPORT_NAME "MantidNewTargetTargets")
     mtd_install_framework_lib(TARGETS NewTarget EXPORT_NAME ${TARGET_EXPORT_NAME})
 

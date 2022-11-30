@@ -172,7 +172,6 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   std::vector<double> const startXs = getProperty("StartXs");
   std::vector<double> const endXs = getProperty("EndXs");
   auto const fittingType = getPropertyValue("FittingType");
-  auto const filepath = getPropertyValue("Filepath");
   IFunction_sptr function = getProperty("Function");
   std::string const outputBaseName = getProperty("OutputBaseName");
 
@@ -184,7 +183,7 @@ std::map<std::string, std::string> GeneratePythonFitScript::validateInputs() {
   if (endXs.size() != inputWorkspaces.size())
     errors["EndXs"] = "The number of End Xs must be equal to the number of input workspaces.";
   if (fittingType == "Sequential") {
-    if (auto const multiDomainFunction = std::dynamic_pointer_cast<MultiDomainFunction>(function))
+    if (std::dynamic_pointer_cast<MultiDomainFunction>(function))
       errors["Function"] = "The Function cannot be a MultiDomainFunction when in Sequential fit mode.";
   }
   if (fittingType == "Simultaneous") {
@@ -229,7 +228,12 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   bool plotOutput = getProperty("PlotOutput");
   if (plotOutput) {
     generatedScript += "\n";
-    generatedScript += getFileContents("GeneratePythonFitScript_PlottingOutput.py.in");
+    std::vector<double> const startXs = getProperty("StartXs");
+    if (startXs.size() == 1u) {
+      generatedScript += getFileContents("GeneratePythonFitScript_PlottingSingleOutput.py.in");
+    } else {
+      generatedScript += getFileContents("GeneratePythonFitScript_PlottingMultiOutput.py.in");
+    }
   }
 
   return generatedScript;

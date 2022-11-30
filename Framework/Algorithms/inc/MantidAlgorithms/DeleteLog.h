@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL DeleteLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DeleteLog final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -10,6 +10,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
+#include <algorithm>
+
 using Mantid::Beamline::ComponentType;
 
 namespace Mantid::Geometry::ComponentInfoBankHelpers {
@@ -63,12 +65,9 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo, 
   // banks containing monitors are not considered saveable as are not
   // NXDetectors
   auto detectors = compInfo.detectorsInSubtree(idx);
-  for (auto det : detectors) {
-    if (detInfo.isMonitor(det))
-      return false;
-  }
 
-  return true;
+  return std::none_of(detectors.cbegin(), detectors.cend(),
+                      [&detInfo](const auto &det) { return detInfo.isMonitor(det); });
 }
 
 /** Finds all ancestors up to the root of a component

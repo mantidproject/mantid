@@ -20,7 +20,8 @@ reason the output unit is 1/cm.
 Q Unit Conversion
 #################
 
-Section includes explanation for the effect of setting AccountForGravity to true.
+This section includes an explanation for the effect of setting
+``AccountForGravity`` to true along with ``ExtraLength``.
 
 The equation for :math:`Q` as a function of wavelength, :math:`\lambda`,
 and neglecting gravity, is
@@ -34,15 +35,26 @@ the y-axis then :math:`\theta` is
 
 .. math:: \theta = \frac{1}{2} arcsin\left (\frac{\sqrt{x^2+y^2}}{L_2} \right )
 
-Including gravity adds another term to this equation which becomes:
+Including gravity this becomes:
 
-.. math:: \theta = \frac{1}{2} arcsin\left (\frac{ \sqrt{x^2+\left (y+\frac{gm^2}{2h^2} \lambda^2 L_2^2 \right)^2}}{L_2} \right )
+.. math:: \theta = \frac{1}{2} arcsin\left (\frac{ \sqrt{x^2+\left (y+\frac{gm^2}{2h^2} \lambda^2 L_{corr}^2 \right)^2}}{L_2} \right )
 
 where :math:`m` is the particle's mass, :math:`g` is the acceleration
 due to gravity and :math:`h` is `plank's
-constant <http://en.wikipedia.org/wiki/Planks_constant>`__ (this assumes
-neutrons are all travelling in horizontal at sample, and that
-:math:`x=y=0` would be beam centre at :math:`\lambda = 0`).
+constant <http://en.wikipedia.org/wiki/Planks_constant>`__ .
+
+The correction assumes that :math:`x=y=0` would be beam centre at :math:`\lambda = 0`.
+In order to correct for the fact that the beam may not be travelling horizontal
+at the sample an extra path length (``ExtraLength`` property) can be included in the
+numerator where
+
+.. math:: L_{corr}^2 = (L_2 + L_{extra})^2 - L_{extra}^2
+
+The value of :math:`L_{extra}` is likely :math:`0.5*L_1`, where :math:`L_1` is the
+collimation length, but may be less than this depending on where scraper baffles
+are inside the collimation.
+See :ref:`algm-TOFSANSResolutionByPixel` for more detail on the how the collimation
+length ties in with the resolution calculation.
 
 Normalizing the input workspace
 ###############################

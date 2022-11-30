@@ -15,12 +15,12 @@ namespace Algorithms {
     @author Roman Tolchenov, ISIS, RAL
     @date 02/05/2008
  */
-class ModifyData : public API::Algorithm {
+class ModifyData final : public API::Algorithm {
 public:
   /// no arg constructor
   ModifyData() : API::Algorithm() {}
   /// virtual destructor
-  ~ModifyData() override {}
+  ~ModifyData() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ModifyData"; }
   /// Algorithm's version for identification overriding a virtual method

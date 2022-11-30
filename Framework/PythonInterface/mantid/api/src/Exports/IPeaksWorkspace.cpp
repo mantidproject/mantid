@@ -137,7 +137,7 @@ private:
    * @return a setter function wrapped with the bpl::extract function for the
    * setter's value type
    */
-  template <typename T> SetterType setterFunction(MemberFunc<T> func) {
+  template <typename T> SetterType setterFunction(const MemberFunc<T> func) {
     return [func](IPeak &peak, const object &value) {
       extract<T> extractor{value};
       if (!extractor.check()) {
@@ -157,7 +157,7 @@ private:
    * @return a setter function wrapped with the bpl::extract function for the
    * setter's value type
    */
-  SetterType setterFunction(MemberFuncV3D func) {
+  SetterType setterFunction(const MemberFuncV3D func) {
     return [func](IPeak &peak, const object &value) {
       extract<const V3D &> extractor{value};
       if (!extractor.check()) {
@@ -183,7 +183,8 @@ private:
  * @param row_or_col An integer giving the row if value is a string or the
  * column if value is an index
  */
-std::pair<int, std::string> getRowAndColumnName(IPeaksWorkspace &self, const object &col_or_row, const int row_or_col) {
+std::pair<int, std::string> getRowAndColumnName(const IPeaksWorkspace &self, const object &col_or_row,
+                                                const int row_or_col) {
   extract<std::string> columnNameExtractor{col_or_row};
   std::string columnName;
   int rowIndex;

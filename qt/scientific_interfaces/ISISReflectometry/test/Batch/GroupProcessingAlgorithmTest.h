@@ -12,7 +12,15 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::GroupProcessing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
+using MantidQt::API::IAlgorithmRuntimeProps;
+
+namespace {
+void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name, double expected) {
+  TS_ASSERT_DELTA(static_cast<double>(props.getProperty(name)), expected, 1e-6);
+}
+} // namespace
 
 class GroupProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
@@ -79,15 +87,16 @@ public:
   }
 
   void testLookupRowQResolutionUsedForParamsIfStitchingOptionsEmpty() {
+    auto lookupTable = makeLookupTableWithTwoAnglesAndWildcard();
     auto experiment =
         Experiment(AnalysisMode::PointDetector, ReductionType::Normal, SummationType::SumInLambda, false, false,
                    BackgroundSubtraction(), PolarizationCorrections(PolarizationCorrectionType::None),
                    FloodCorrections(FloodCorrectionType::Workspace), TransmissionStitchOptions(),
-                   std::map<std::string, std::string>(), makeLookupTableWithTwoAnglesAndWildcard());
+                   std::map<std::string, std::string>(), std::move(lookupTable));
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.010000");
+    assertProperty(*result, "Params", -0.01);
   }
 
   void testQResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
@@ -99,7 +108,7 @@ public:
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithMixedQResolutions();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.015000");
+    assertProperty(*result, "Params", -0.015);
   }
 
   void testQOutputResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
@@ -111,7 +120,7 @@ public:
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithOutputQResolutions();
     auto result = createAlgorithmRuntimeProps(model, group);
-    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.016000");
+    assertProperty(*result, "Params", -0.016);
   }
 
 private:

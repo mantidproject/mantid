@@ -22,7 +22,7 @@ namespace Algorithms {
   [A. R. Wildes (2006) Neutron News, 17:2, 17-25,
   DOI: 10.1080/10448630600668738]
 */
-class MANTID_ALGORITHMS_DLL PolarizationCorrectionWildes : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionWildes final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

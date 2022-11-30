@@ -13,12 +13,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QIcon>
 #include <QPainter>
-#include <QSplitterHandle>
-#endif
 #include <QSplitter>
+#include <QSplitterHandle>
 #include <utility>
 
 namespace MantidQt {
@@ -26,7 +24,6 @@ namespace CustomInterfaces {
 namespace IDA {
 
 // Used for painting an Icon onto the handle of the splitter on workbench
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 class SplitterHandle : public QSplitterHandle {
 public:
   SplitterHandle(QIcon icon, Qt::Orientation orientation, QSplitter *parent = nullptr)
@@ -53,7 +50,6 @@ public:
 private:
   QIcon m_icon;
 };
-#endif
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotView : public IIndirectFitPlotView {
   Q_OBJECT

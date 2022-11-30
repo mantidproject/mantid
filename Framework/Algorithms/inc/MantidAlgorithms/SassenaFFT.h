@@ -23,7 +23,7 @@ namespace Algorithms {
   @date 2012-05-29
   */
 
-class MANTID_ALGORITHMS_DLL SassenaFFT : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SassenaFFT final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SassenaFFT"; }

@@ -10,16 +10,14 @@
 Force for ILL backscattering raw
 """
 
-from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
+from mantidqt.plotting.functions import pcolormesh
 import sys
 import math
 import os.path
 import numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
-
-MTD_PLOT = import_mantidplot()
 
 
 #  Routines for Ascii file of raw data
@@ -428,9 +426,9 @@ def plotForce(inWS, Plot):
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
-        MTD_PLOT.plotSpectrum(inWS, plot_list)
+        plotSpectrum(inWS, plot_list)
     if Plot == 'Contour' or Plot == 'Both':
-        MTD_PLOT.importMatrixWorkspace(inWS).plotGraph2D()
+        pcolormesh(inWS)
 
 
 def ChangeAngles(inWS, instr, theta):

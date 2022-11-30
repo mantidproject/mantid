@@ -1,0 +1,1 @@
+- Added 'Concise View' check box to the Slice Viewer Peak View to show a reduced number of columns in the peak table view.

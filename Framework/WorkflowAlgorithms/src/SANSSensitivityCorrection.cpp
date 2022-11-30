@@ -148,7 +148,7 @@ void SANSSensitivityCorrection::exec() {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity
     // workspace...
-    if (!floodWS && fileCheck(fileName)) {
+    if (fileCheck(fileName)) {
       g_log.debug() << "SANSSensitivityCorrection :: Loading sensitivity file: " << fileName << "\n";
       auto loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);

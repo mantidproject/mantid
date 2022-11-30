@@ -8,15 +8,13 @@ from copy import copy
 import numpy as np
 from scipy import ndimage, interpolate
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
-from mantid.kernel import Direction, StringListValidator, FloatArrayProperty, RebinParamsValidator
+from mantid.kernel import Direction, IntListValidator, StringListValidator, FloatArrayProperty, RebinParamsValidator
 from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing
 
 
 class FitIncidentSpectrum(PythonAlgorithm):
     _input_ws = None
     _output_ws = None
-    _scipy_not_old = hasattr(interpolate.UnivariateSpline, "derivative")
-    # check if scipy version is greater than 0.12.1 i.e it has the derivative function
 
     def category(self):
         return 'Diffraction\\Fitting'
@@ -26,8 +24,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
     def summary(self):
         return 'Calculate a fit for an incident spectrum using different methods. ' \
-               'Outputs a workspace containing the functionalized fit and its first ' \
-               'derivative.'
+               'Outputs a workspace containing the functionalized fit, its first ' \
+               'derivative and (optionally) its second derivative.'
 
     def version(self):
         return 1
@@ -68,6 +66,9 @@ class FitIncidentSpectrum(PythonAlgorithm):
             validator=StringListValidator(['GaussConvCubicSpline', 'CubicSpline', 'CubicSplineViaMantid']),
             doc='The method for fitting the incident spectrum.')
 
+        self.declareProperty(name='DerivOrder', defaultValue=1, validator=IntListValidator([1,2]),
+                             doc='Whether to return the first or first and second derivative of the fit function')
+
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
@@ -75,6 +76,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
         self._binning_for_calc = self.getProperty('BinningForCalc').value
         self._binning_for_fit = self.getProperty('BinningForFit').value
         self._fit_spectrum_with = self.getProperty('FitSpectrumWith').value
+        self._deriv_order = self.getProperty('DerivOrder').value
 
     def PyExec(self):
         self._setup()
@@ -102,10 +104,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
-            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x_bin_centers, s=1e7)
+            fit, fit_prime, fit_prime_prime = self.fit_cubic_spline(x_fit, y_fit, x_bin_centers, s=1e7)
         elif self._fit_spectrum_with == 'CubicSplineViaMantid':
             # Fit using cubic spline via Mantid
-            fit, fit_prime = self.fit_cubic_spline_via_mantid_spline_smoothing(
+            fit, fit_prime, fit_prime_prime = self.fit_cubic_spline_via_mantid_spline_smoothing(
                 self._input_ws,
                 params_input=self._binning_for_fit,
                 params_output=self._binning_for_calc,
@@ -113,15 +115,21 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 MaxNumberOfBreaks=0)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
-            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x_bin_centers, sigma=0.5)
+            fit, fit_prime, fit_prime_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x_bin_centers, sigma=0.5)
 
         # Create output workspace
         unit = self._input_ws.getAxis(0).getUnit().unitID()
+        data_y = fit
+        if self._deriv_order >= 1:
+            data_y = np.append(data_y, fit_prime)
+        if self._deriv_order >= 2:
+            data_y = np.append(data_y, fit_prime_prime)
+        data_y /= rebin_norm
         output_workspace = CreateWorkspace(
             DataX=x,
-            DataY=np.append(fit, fit_prime)/rebin_norm,
+            DataY=data_y,
             UnitX=unit,
-            NSpec=2,
+            NSpec=1 + self._deriv_order,
             Distribution=False,
             ParentWorkspace=self._input_ws,
             StoreInADS=False)
@@ -139,25 +147,20 @@ class FitIncidentSpectrum(PythonAlgorithm):
         avg, var = moving_average(y_fit)
         spline_fit = interpolate.UnivariateSpline(x_fit, y_fit, w=1. / np.sqrt(var))
         fit = spline_fit(x)
-        if self._scipy_not_old:
-            spline_fit_prime = spline_fit.derivative()
-            fit_prime = spline_fit_prime(x)
-        else:
-            index = np.arange(len(x))
-            fit_prime = np.empty(len(x))
-            for pos in index:
-                dx = (x[1] - x[0])/1000
-                y1 = spline_fit(x[pos] - dx)
-                y2 = spline_fit(x[pos] + dx)
-                fit_prime[pos] = (y2-y1)/dx
-        return fit, fit_prime
+        fit_primes = [None, None]
+        for i in range(self._deriv_order):
+            spline_fit_prime = spline_fit.derivative(i + 1)
+            fit_primes[i] = spline_fit_prime(x)
+        return fit, fit_primes[0], fit_primes[1]
 
     def fit_cubic_spline(self, x_fit, y_fit, x, s=1e15):
         # Fit with Cubic Spline
         tck = interpolate.splrep(x_fit, y_fit, s=s)
         fit = interpolate.splev(x, tck, der=0)
-        fit_prime = interpolate.splev(x, tck, der=1)
-        return fit, fit_prime
+        fit_primes = [None, None]
+        for i in range(self._deriv_order):
+            fit_primes[i] = interpolate.splev(x, tck, der= i + 1)
+        return fit, fit_primes[0], fit_primes[1]
 
     def fit_cubic_spline_via_mantid_spline_smoothing(self, InputWorkspace, params_input, params_output, **kwargs):
         # Fit with Cubic Spline using the mantid SplineSmoothing algorithm
@@ -168,8 +171,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
             StoreInADS=False)
         fit_tuple = SplineSmoothing(
             InputWorkspace=rebinned,
-            OutputWorkspaceDeriv='fit_prime',
-            DerivOrder=1,
+            OutputWorkspaceDeriv='fit_primes',
+            DerivOrder=self._deriv_order,
             StoreInADS=False,
             **kwargs)
         fit = Rebin(
@@ -177,14 +180,16 @@ class FitIncidentSpectrum(PythonAlgorithm):
             Params=params_output,
             PreserveEvents=True,
             StoreInADS=False)
-        fit_prime = Rebin(
+        fit_primes = Rebin(
             InputWorkspace=fit_tuple.OutputWorkspaceDeriv[0],
             Params=params_output,
             PreserveEvents=True,
             StoreInADS=False)
         fit_array = copy(fit.readY(0))
-        fit_prime_array = copy(fit_prime.readY(0))
-        return fit_array, fit_prime_array
+        fit_primes_array = [None, None]
+        for i in range(self._deriv_order):
+            fit_primes_array[i] = copy(fit_primes.readY(i))
+        return fit_array, fit_primes_array[0], fit_primes_array[1]
 
 
 AlgorithmFactory.subscribe(FitIncidentSpectrum)

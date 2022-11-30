@@ -8,7 +8,7 @@
 import math
 import numpy as np
 from mantid.simpleapi import *
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspace, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction, logger)
 
@@ -223,12 +223,17 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         logger.information('Sample : ms = %i ' % self._ms)
 
         if self._emode != 'Efixed':
-            # require both sample and can ws have wavelength as x-axis
-            if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['SampleWorkspace'] = 'Workspace must have units of wavelength.'
+            if not isinstance(mtd[sample_ws_name], MatrixWorkspace):
+                issues['SampleWorkspace'] = "The SampleWorkspace must be a MatrixWorkspace."
+            elif mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                # require both sample and can ws have wavelength as x-axis
+                issues['SampleWorkspace'] = 'The SampleWorkspace must have units of wavelength.'
 
-            if self._use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
+            if self._use_can:
+                if not isinstance(mtd[can_ws_name], MatrixWorkspace):
+                    issues['CanWorkspace'] = "The CanWorkspace must be a MatrixWorkspace."
+                elif mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                    issues['CanWorkspace'] = 'The CanWorkspace must have units of wavelength.'
 
         return issues
 

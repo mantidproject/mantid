@@ -123,7 +123,7 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
-                                     grouping_file_name=grouping_file_name, empty_run_number=empty_runs,
+                                     grouping_file_name=grouping_file_name, empty_inst_run_number=empty_runs,
                                      vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file)
 
 

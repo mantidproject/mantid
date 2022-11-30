@@ -18,16 +18,16 @@ Some initial setup is required on your Windows system before the Linux environme
 2. In the Windows Start menu open `Turn Windows features on or off`.
 3. Make sure `Windows System for Linux` and `Virtual Machine Platform` are ticked. Click OK.
 
-If you now open a File Explorer and go to the `\\wsl$` directory. This will be the location of your linux subsystem.
+If you now open a File Explorer and go to the `\\\\wsl$` directory. This will be the location of your linux subsystem.
 
 Install a Ubuntu-18.04 Subsystem
 ################################
 
-1. Go to the Microsoft Store and install Ubuntu 18.04. Notice that a new `Ubuntu-18.04` directory has appeared in the `\\wsl$` location. This is your Ubuntu 18.04 subsystem.
+1. Go to the Microsoft Store and install Ubuntu 18.04. Notice that a new `Ubuntu-18.04` directory has appeared in the `\\\\wsl$` location. This is your Ubuntu 18.04 subsystem.
 2. In the Windows Start menu type Ubuntu 18.04 to open its terminal. If it says you are missing a package then follow the link provided to install this package.
 3. Enter a username and password in the terminal when prompted.
 
-You are now in an Ubuntu 18.04 terminal. Any files in the `\\wsl$\Ubuntu-18.04\home\<user name>` directory will appear in this Ubuntu environment.
+You are now in an Ubuntu 18.04 terminal. Any files in the `\\\\wsl$\\Ubuntu-18.04\\home\\<user name>` directory will appear in this Ubuntu environment.
 
 Install a Centos7 Subsystem
 ###########################
@@ -52,7 +52,7 @@ Install a Centos7 Subsystem
 
   wsl --import Centos7 .\CentosImage\ centos7.tar
 
-Notice that a new `Centos7` directory has appeared in the `\\wsl$` location. Any files in the `\\wsl$\Centos7\root` directory will appear in this Centos7 environment.
+Notice that a new `Centos7` directory has appeared in the `\\\\wsl$` location. Any files in the `\\\\wsl$\\Centos7\\root` directory will appear in this Centos7 environment.
 
 Running a Linux Subsystem
 #########################

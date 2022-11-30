@@ -9,6 +9,8 @@
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 
+#include <algorithm>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}
@@ -85,11 +87,10 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
     throw std::runtime_error("Attempted to get row for group clipboard item");
 
   auto result = std::vector<boost::optional<Row>>();
-  for (auto const &subtree : subtrees()) {
-    auto rowsToAdd = createRowsForSubtree(subtree);
-    for (auto &row : rowsToAdd)
-      result.emplace_back(row);
-  }
+  std::for_each(subtrees().cbegin(), subtrees().cend(), [this, &result](const auto &subtree) {
+    const auto rowsToAdd = createRowsForSubtree(subtree);
+    std::copy(rowsToAdd.cbegin(), rowsToAdd.cend(), std::back_inserter(result));
+  });
   return result;
 }
 

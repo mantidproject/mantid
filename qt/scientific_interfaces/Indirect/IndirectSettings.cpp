@@ -7,24 +7,16 @@
 #include "IndirectSettings.h"
 #include "IndirectInterface.h"
 #include "IndirectSettingsHelper.h"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtIcons/Icon.h"
 
 constexpr auto SETTINGS_ICON = "mdi.settings";
-#endif
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSettings)
 
 IndirectSettings::IndirectSettings(QWidget *parent) : MantidQt::API::UserSubWindow(parent) { m_uiForm.setupUi(this); }
 
-QIcon IndirectSettings::icon() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QIcon(":/configure.png");
-#else
-  return Icons::getIcon(SETTINGS_ICON);
-#endif
-}
+QIcon IndirectSettings::icon() { return Icons::getIcon(SETTINGS_ICON); }
 
 void IndirectSettings::initLayout() {
   m_presenter = std::make_unique<IndirectSettingsPresenter>(this);
@@ -58,25 +50,8 @@ std::map<std::string, QVariant> IndirectSettings::getSettings() const {
 void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
 
 void IndirectSettings::closeSettings() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  getDockedOrFloatingWindow()->close();
-#else
   if (auto settingsWindow = window())
     settingsWindow->close();
-#endif
 }
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-QWidget *IndirectSettings::getDockedOrFloatingWindow() {
-  QWidget *widget = this;
-  while (widget) {
-    auto const className = std::string(widget->metaObject()->className());
-    if (className == "DockedWindow" || widget->isWindow())
-      return widget;
-    widget = widget->parentWidget();
-  }
-  return window();
-}
-#endif
 
 } // namespace MantidQt::CustomInterfaces

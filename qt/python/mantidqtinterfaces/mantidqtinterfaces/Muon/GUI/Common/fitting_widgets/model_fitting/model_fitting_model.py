@@ -313,5 +313,5 @@ class ModelFittingModel(BasicFittingModel):
         """Returns a list of tick labels to use as override labels if the parameter values are strings."""
         if parameter_name in parameters:
             parameter_values = parameters[parameter_name]
-            return parameter_values if type(parameter_values[0]) == str else []
+            return parameter_values[0] if all(isinstance(n, str) for n in parameter_values[0]) else []
         return []

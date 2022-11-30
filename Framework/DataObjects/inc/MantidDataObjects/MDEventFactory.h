@@ -29,7 +29,7 @@ namespace DataObjects {
 // preliminary definition to satisfy gcc
 template <size_t nd> class LOOP;
 
-class DLLExport MDEventFactory {
+class MANTID_DATAOBJECTS_DLL MDEventFactory {
   /** definition which states how many dimensions to generate. This defines the
    *number of dimensions in MD wokspace supported by Mantid
    *IF THIS NUMBER CHANGES, ONE HAS TO RUN generate_mdevent_declarations.py

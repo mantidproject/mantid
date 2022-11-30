@@ -51,18 +51,12 @@ GET_POINTER_SPECIALIZATION(ITableWorkspace)
 namespace {
 
 // Numpy PyArray_IsIntegerScalar is broken for Python 3 for numpy < 1.11
-#if PY_MAJOR_VERSION >= 3
 #define TO_LONG PyLong_AsLong
 #define STR_CHECK PyUnicode_Check
 #if NPY_API_VERSION < 0x0000000a //(1.11)
 #define IS_ARRAY_INTEGER(obj) (PyLong_Check(obj) || PyArray_IsScalar((obj), Integer))
 #else
 #define IS_ARRAY_INTEGER PyArray_IsIntegerScalar
-#endif
-#else // Python 2
-#define IS_ARRAY_INTEGER PyArray_IsIntegerScalar
-#define TO_LONG PyInt_AsLong
-#define STR_CHECK PyString_Check
 #endif
 
 /// Boost macro for "looping" over builtin types

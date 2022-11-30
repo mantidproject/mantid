@@ -19,6 +19,7 @@ This algorithm is the first step in the ILL reflectometry reduction workflow. It
 #. normalizes to experiment time or monitor counts (optional)
 #. subtracts time-independent background (optional)
 #. converts to wavelength
+#. calculates gravity correction to wavelength and reflected angle (optional)
 
 The algorithm can be thought as an 'advanced loader', and should be used to load both direct beam and reflected beam measurements.
 

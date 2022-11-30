@@ -9,7 +9,7 @@
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 namespace Mantid::MDAlgorithms {
-InvalidParameter::InvalidParameter() {}
+InvalidParameter::InvalidParameter() = default;
 
 InvalidParameter::InvalidParameter(std::string value) : m_value(std::move(value)) {}
 

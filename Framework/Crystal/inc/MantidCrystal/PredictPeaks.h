@@ -30,7 +30,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-04-29 16:30:52.986094
  */
-class MANTID_CRYSTAL_DLL PredictPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictPeaks final : public API::Algorithm {
 public:
   PredictPeaks();
 

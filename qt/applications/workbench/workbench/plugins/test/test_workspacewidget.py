@@ -179,6 +179,22 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
             self.ws_widget._do_sample_material(self.ws_names)
         self.assert_widget_type_doesnt_exist(SAMPLE_MATERIAL_DIALOG_TYPE)
 
+    @mock.patch('mantidqt.plotting.sample_shape.plot_sample_container_and_components', autospec=True)
+    def test_show_sample_plots_with_single_workspace_name(self, mock_plot_sample_container_and_components):
+        """
+        Sample material dialog should work with a single workspace selected
+        """
+        self.ws_widget._show_sample_shape([self.ws_names[0]])
+        mock_plot_sample_container_and_components.assert_called_once_with(self.ws_names[0])
+
+    @mock.patch('mantidqt.plotting.sample_shape.plot_sample_container_and_components', autospec=True)
+    def test_show_sample_doesnt_plot_with_multiple_workspace_names(self, mock_plot_sample_container_and_components):
+        """
+        Sample material dialog should not open if multiple workspaces are selected.
+        """
+        self.ws_widget._show_sample_shape(self.ws_names)
+        mock_plot_sample_container_and_components.assert_not_called()
+
     def test_empty_workspaces(self):
         self.ws_widget._ads.clear()
         self.assertEqual(self.ws_widget.empty_of_workspaces(), True)

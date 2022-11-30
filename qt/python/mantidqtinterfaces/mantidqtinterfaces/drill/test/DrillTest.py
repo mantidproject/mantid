@@ -138,6 +138,11 @@ class DrillTest(unittest.TestCase):
     ###########################################################################
 
     def setUp(self):
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        config['default.facility'] = "ILL"
+        config['default.instrument'] = "D11"
+
         # avoid popup messages
         patch = mock.patch('mantidqtinterfaces.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
@@ -167,11 +172,6 @@ class DrillTest(unittest.TestCase):
         # shown window
         self.view.isHidden = mock.Mock()
         self.view.isHidden.return_value = False
-
-        self.facility = config['default.facility']
-        self.instrument = config['default.instrument']
-        config['default.facility'] = "ILL"
-        config['default.instrument'] = "D11"
 
     def tearDown(self):
         config['default.facility'] = self.facility
@@ -259,18 +259,19 @@ class DrillTest(unittest.TestCase):
         mFileDialog.getOpenFileName.return_value = ["test", "test"]
         mJson.load.return_value = {
                 'Instrument': 'D11',
-                'AcquisitionMode': 'SANS',
+                'AcquisitionMode': 'SANS v1',
                 'GlobalSettings': {},
                 'Samples': [],
                 }
         QTest.mouseClick(self.view.load, Qt.LeftButton)
         self.assertEqual(self.model.instrument, "D11")
         self.assertEqual(self.view.instrumentselector.currentText(), "D11")
-        self.assertEqual(self.model.acquisitionMode, "SANS")
-        self.assertEqual(self.view.modeSelector.currentText(), "SANS")
-        self.assertEqual(self.model.algorithm, RundexSettings.ALGORITHM['SANS'])
+        self.assertEqual(self.model.acquisitionMode, "SANS v1")
+        self.assertEqual(self.view.modeSelector.currentText(), "SANS v1")
+        self.assertEqual(self.model.algorithm,
+                         RundexSettings.ALGORITHM['SANS v1'])
         self.assertEqual(self.view.table.columnCount(),
-                         len(RundexSettings.COLUMNS['SANS']))
+                         len(RundexSettings.COLUMNS['SANS v1']))
 
     @mock.patch('mantidqtinterfaces.drill.presenter.DrillPresenter.QFileDialog')
     @mock.patch('mantidqtinterfaces.drill.model.DrillRundexIO.json')
@@ -282,19 +283,19 @@ class DrillTest(unittest.TestCase):
         visualSettings = {
                 'FoldedColumns': [],
                 'HiddenColumns': [],
-                'ColumnsOrder': RundexSettings.COLUMNS['SANS']
+                'ColumnsOrder': RundexSettings.COLUMNS['SANS v1']
                 }
-        visualSettings.update(RundexSettings.VISUAL_SETTINGS["SANS"])
+        visualSettings.update(RundexSettings.VISUAL_SETTINGS["SANS v1"])
         json = {
                 'Instrument': 'D11',
-                'AcquisitionMode': 'SANS',
+                'AcquisitionMode': 'SANS v1',
                 'VisualSettings': visualSettings,
                 'GlobalSettings': {p.getName(): p.getValue()
                                    for p in self.model.getParameters()},
                 'ExportAlgorithms' : [
                     algo
-                    for algo in RundexSettings.EXPORT_ALGORITHMS['SANS'].keys()
-                    if RundexSettings.EXPORT_ALGORITHMS['SANS'][algo]
+                    for algo in RundexSettings.EXPORT_ALGORITHMS['SANS v1'].keys()
+                    if RundexSettings.EXPORT_ALGORITHMS['SANS v1'][algo]
                     ]
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])

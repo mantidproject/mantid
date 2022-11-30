@@ -84,8 +84,8 @@ public:
     }
 
     TransformHKL alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", WSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
@@ -127,8 +127,8 @@ public:
     ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
 
     TransformHKL alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
@@ -137,9 +137,137 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(0, 1, 0))
-    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2, 0, 0))
-    TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0, 0, -3))
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2, 0, 0));
+    TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0, 0, -3));
+  }
+
+  void test_exec_ModVectorTransform() {
+    auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
+    AnalysisDataService::Instance().addOrReplace("ws", ws);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(5, 6, 7, 90, 90, 120);
+
+    V3D mod_vec_0(0.01, 0.02, 0.03);
+    V3D mod_vec_1(-0.02, 0.03, 0.05);
+    V3D mod_vec_2(0.03, -0.02, -0.04);
+
+    Matrix<double> modHKL(3, 3, false);
+    modHKL.setColumn(0, mod_vec_0);
+    modHKL.setColumn(1, mod_vec_1);
+    modHKL.setColumn(2, mod_vec_2);
+
+    Matrix<double> UB = lattice->getUB();
+    Matrix<double> modUB = UB * modHKL;
+
+    lattice->setModVec1(mod_vec_0);
+    lattice->setModVec2(mod_vec_1);
+    lattice->setModVec3(mod_vec_2);
+    lattice->setModHKL(modHKL);
+    lattice->setModUB(modUB);
+
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(V3D(1, 0, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 2, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
+
+    V3D mnp(1, 1, 1);
+
+    int n_peaks = ws->getNumberPeaks();
+    for (int i = 0; i < n_peaks; i++) {
+      IPeak &peak = ws->getPeak(i);
+      V3D hkl = peak.getHKL();
+      peak.setHKL(hkl + modHKL * mnp);
+      peak.setIntHKL(hkl);
+      peak.setIntMNP(mnp);
+      peak.setQSampleFrame(peak.getQSampleFrame() + modUB * mnp * 2 * M_PI, boost::none);
+    }
+
+    TransformHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
+
+    // specify a matrix that will swap H and K and negate L
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(0.03, 1.02, -0.04));
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2.03, 0.02, -0.04));
+    TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0.03, 0.02, -3.04));
+  }
+
+  void test_exec_ModVectorTransformImproperModUB() {
+    auto ws = std::make_shared<LeanElasticPeaksWorkspace>();
+    AnalysisDataService::Instance().addOrReplace("ws", ws);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>(5, 6, 7, 90, 90, 120);
+
+    V3D mod_vec_0(0.01, 0.02, 0.03);
+    V3D mod_vec_1(-0.02, 0.03, 0.05);
+    V3D mod_vec_2(0.03, -0.02, -0.04);
+
+    Matrix<double> modHKL(3, 3, false);
+    modHKL.setColumn(0, mod_vec_0);
+    modHKL.setColumn(1, mod_vec_1);
+    modHKL.setColumn(2, mod_vec_2);
+
+    Matrix<double> UB = lattice->getUB();
+
+    lattice->setModVec1(mod_vec_0);
+    lattice->setModVec2(mod_vec_1);
+    lattice->setModVec3(mod_vec_2);
+    lattice->setModHKL(modHKL);
+
+    Matrix<double> modUB = lattice->getModUB();
+
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        TS_ASSERT_DELTA(modUB[i][j], 0, 0.0001);
+      }
+    }
+
+    modUB = UB * modHKL;
+
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
+    ws->addPeak(V3D(1, 0, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 2, 0), SpecialCoordinateSystem::HKL);
+    ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
+
+    V3D mnp(1, 1, 1);
+
+    int n_peaks = ws->getNumberPeaks();
+    for (int i = 0; i < n_peaks; i++) {
+      IPeak &peak = ws->getPeak(i);
+      V3D hkl = peak.getHKL();
+      peak.setHKL(hkl + modHKL * mnp);
+      peak.setIntHKL(hkl);
+      peak.setIntMNP(mnp);
+      peak.setQSampleFrame(peak.getQSampleFrame() + modUB * mnp * 2 * M_PI, boost::none);
+    }
+
+    TransformHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
+
+    // specify a matrix that will swap H and K and negate L
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("HKLTransform", "0,1,0,1,0,0,0,0,-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(0.03, 1.02, -0.04));
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(2.03, 0.02, -0.04));
+    TS_ASSERT_EQUALS(ws->getPeak(2).getHKL(), V3D(0.03, 0.02, -3.04));
+
+    modUB = ws->sample().getOrientedLattice().getModUB();
+
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        TS_ASSERT_DELTA(modUB[i][j], 0, 0.0001);
+      }
+    }
   }
 
   void test_exec_skip_FindError() {
@@ -151,8 +279,8 @@ public:
     ws->addPeak(V3D(0, 0, 3), SpecialCoordinateSystem::HKL);
 
     TransformHKL alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.1"));
 
@@ -164,16 +292,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(2, 1, 0))
-    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(0, 0, -3))
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(2, 1, 0));
+    TS_ASSERT_EQUALS(ws->getPeak(1).getHKL(), V3D(0, 0, -3));
 
     auto lat = ws->sample().getOrientedLattice();
 
-    TS_ASSERT_DELTA(lat.errora(), 0.0, 1e-6)
-    TS_ASSERT_DELTA(lat.errorb(), 0.0, 1e-6)
-    TS_ASSERT_DELTA(lat.errorc(), 0.0, 1e-6)
-    TS_ASSERT_DELTA(lat.erroralpha(), 0.0, 1e-6)
-    TS_ASSERT_DELTA(lat.errorbeta(), 0.0, 1e-6)
-    TS_ASSERT_DELTA(lat.errorgamma(), 0.0, 1e-6)
+    TS_ASSERT_DELTA(lat.errora(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(lat.errorb(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(lat.errorc(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(lat.erroralpha(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(lat.errorbeta(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(lat.errorgamma(), 0.0, 1e-6);
   }
 };

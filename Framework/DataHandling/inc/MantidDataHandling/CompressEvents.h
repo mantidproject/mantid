@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -24,7 +25,7 @@ namespace DataHandling {
     @author Janik Zikovsky, SNS
     @date Jan 19, 2011
 */
-class DLLExport CompressEvents : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL CompressEvents : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CompressEvents"; };

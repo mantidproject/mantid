@@ -5,14 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
+from abc import ABCMeta, abstractmethod
+import importlib
+import os
 import warnings
 
-import systemtesting
-import os
-from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
-from IndirectImport import is_supported_f2py_platform
-#==============================================================================
+import systemtesting
+
+
+def _is_quasielasticbayes_available():
+    return importlib.util.find_spec('quasielasticbayes')
 
 
 def _cleanup_files(dirname, filenames):
@@ -33,7 +36,7 @@ def _cleanup_files(dirname, filenames):
 class QLresTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         prefix = 'rt_'
@@ -77,7 +80,7 @@ class QLresTest(systemtesting.MantidSystemTest):
 class ResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         import IndirectBayes as Main
@@ -109,7 +112,7 @@ class ResNormTest(systemtesting.MantidSystemTest):
 class QuestTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -148,7 +151,7 @@ class QuestTest(systemtesting.MantidSystemTest):
 class QSeTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -191,7 +194,7 @@ class QSeTest(systemtesting.MantidSystemTest):
 class QLDataTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -235,7 +238,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
 class QLResNormTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         sname = 'irs26176_graphite002_red'
@@ -283,7 +286,7 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 class QLWidthTest(systemtesting.MantidSystemTest):
 
     def skipTests(self):
-        return not is_supported_f2py_platform()
+        return not _is_quasielasticbayes_available()
 
     def runTest(self):
         prefix = 'wt_'

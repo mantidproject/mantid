@@ -14,6 +14,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <algorithm>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -154,9 +156,8 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
     // Scale the proton charge by the number of chunks
     TimeSeriesProperty<double> *pcharge = chunk->mutableRun().getTimeSeriesProperty<double>("proton_charge");
     auto values = pcharge->valuesAsVector();
-    for (auto &value : values) {
-      value /= m_numChunks;
-    }
+    std::transform(values.cbegin(), values.cend(), values.begin(),
+                   [this](const auto &value) { return value / m_numChunks; });
     pcharge->replaceValues(pcharge->timesAsVector(), values);
     chunk->mutableRun().integrateProtonCharge();
   }

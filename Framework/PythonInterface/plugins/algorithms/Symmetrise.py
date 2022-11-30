@@ -10,7 +10,7 @@ import numpy as np
 
 import mantid.simpleapi as ms
 from mantid import logger, mtd
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, WorkspaceFactory, Progress)
 from mantid.kernel import Direction, IntArrayProperty
 
@@ -158,7 +158,10 @@ class Symmetrise(PythonAlgorithm):
         from IndirectCommon import CheckHistZero
         issues = dict()
 
-        input_workspace_name = self.getPropertyValue('InputWorkspace')
+        input_workspace = self.getProperty('InputWorkspace').value
+        if not isinstance(input_workspace, MatrixWorkspace):
+            issues['InputWorkspace'] = "The InputWorkspace must be a MatrixWorkspace."
+            return issues
 
         # Validate spectra range
         spectra_range = self.getProperty('SpectraRange').value
@@ -169,9 +172,9 @@ class Symmetrise(PythonAlgorithm):
             spec_min = spectra_range[0]
             spec_max = spectra_range[1]
 
-            num_sample_spectra, _ = CheckHistZero(input_workspace_name)
-            min_spectra_number = mtd[input_workspace_name].getSpectrum(0).getSpectrumNo()
-            max_spectra_number = mtd[input_workspace_name].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
+            num_sample_spectra, _ = CheckHistZero(input_workspace.name())
+            min_spectra_number = input_workspace.getSpectrum(0).getSpectrumNo()
+            max_spectra_number = input_workspace.getSpectrum(num_sample_spectra - 1).getSpectrumNo()
 
             if spec_min < min_spectra_number:
                 issues['SpectraRange'] = 'Minimum spectra must be greater than or equal to %d' % min_spectra_number
@@ -200,7 +203,7 @@ class Symmetrise(PythonAlgorithm):
             issues['XMax'] = 'XMax must be greater than XMin'
 
         # Valudate X range against workspace X range
-        sample_x = mtd[input_workspace_name].readX(0)
+        sample_x = input_workspace.readX(0)
         sample_x_min = sample_x.min()
         sample_x_max = sample_x.max()
 

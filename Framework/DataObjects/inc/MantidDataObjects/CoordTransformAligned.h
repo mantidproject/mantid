@@ -8,7 +8,7 @@
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/VectorParameter.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/DllConfig.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -35,7 +35,7 @@ DECLARE_VECTOR_PARAMETER(ScalingParam, coord_t)
   @author Janik Zikovsky
   @date 2011-08-29
 */
-class DLLExport CoordTransformAligned : public Mantid::API::CoordTransform {
+class MANTID_DATAOBJECTS_DLL CoordTransformAligned : public Mantid::API::CoordTransform {
 public:
   CoordTransformAligned(const size_t inD, const size_t outD, const size_t *dimensionToBinFrom, const coord_t *origin,
                         const coord_t *scaling);

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <cxxtest/BenchmarkUtil.h>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
@@ -259,16 +260,20 @@ public:
   void test_convert_counts_to_frequency_for_each_item() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++)
-      for (auto &item : m_hist)
+      for (auto &item : m_hist) {
         total += item.frequency();
+        CxxTest::doNotOptimize(&total);
+      }
   }
 
   void test_convert_counts_to_frequency_once_per_histogram() {
     double total = 0;
     for (size_t i = 0; i < nHists; i++) {
       const auto &frequencies = m_hist.frequencies();
-      for (auto &frequency : frequencies)
+      for (auto &frequency : frequencies) {
         total += frequency;
+        CxxTest::doNotOptimize(&total);
+      }
     }
   }
 
@@ -277,8 +282,10 @@ public:
     double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       for (auto &item : m_hist) {
-        if (item.counts() > floor)
+        if (item.counts() > floor) {
           total += item.frequency();
+          CxxTest::doNotOptimize(&total);
+        }
       }
     }
   }
@@ -289,9 +296,12 @@ public:
     for (size_t i = 0; i < nHists; i++) {
       const auto &counts = m_hist.counts();
       const auto &frequencies = m_hist.frequencies();
-      for (size_t j = 0; j < histSize; ++j)
-        if (counts[j] > floor)
+      for (size_t j = 0; j < histSize; ++j) {
+        if (counts[j] > floor) {
           total += frequencies[j];
+          CxxTest::doNotOptimize(&total);
+        }
+      }
     }
   }
 

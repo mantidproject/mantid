@@ -21,16 +21,14 @@
 #include <QLatin1Char>
 #include <QLatin1String>
 #include <QResource>
-#include <boost/lexical_cast.hpp>
-#include <memory>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QStandardPaths>
-#endif
 #include <QString>
 #include <QTemporaryFile>
 #include <QTextStream>
 #include <QUrl>
 #include <QWidget>
+#include <boost/lexical_cast.hpp>
+#include <memory>
 #include <stdexcept>
 
 namespace MantidQt::MantidWidgets {
@@ -46,7 +44,7 @@ Mantid::Kernel::Logger g_log("MantidHelpWindow");
 } // namespace
 
 // initialise the help window
-pqHelpWindow *MantidHelpWindow::g_helpWindow = nullptr;
+QPointer<pqHelpWindow> MantidHelpWindow::g_helpWindow;
 
 /// Base url for all of the files in the project.
 const QString BASE_URL("qthelp://org.mantidproject/doc/");
@@ -64,10 +62,10 @@ const QString COLLECTION_FILE("MantidProject.qhc");
 /**
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
-MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags)
+MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
     : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""), m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
-  if (!bool(g_helpWindow)) {
+  if (!helpWindowExists()) {
     this->determineFileLocs();
 
     // see if chache file exists and remove it - shouldn't be necessary, but it
@@ -87,7 +85,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
 
     // create the help engine with the found location
     g_log.debug() << "Loading " << m_collectionFile << "\n";
-    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()), parent);
+    auto helpEngine = new QHelpEngine(QString(m_collectionFile.c_str()));
     QObject::connect(helpEngine, SIGNAL(warning(QString)), this, SLOT(warning(QString)));
     g_log.debug() << "Making local cache copy for saving information at " << m_cacheFile << "\n";
 
@@ -100,7 +98,7 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
     g_log.debug() << "helpengine.setupData() returned " << helpEngine->setupData() << "\n";
 
     // create a new help window
-    g_helpWindow = new pqHelpWindow(helpEngine, parent, flags);
+    g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
     g_helpWindow->setWindowTitle(QString("Mantid - Help"));
     g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
 
@@ -113,9 +111,6 @@ MantidHelpWindow::MantidHelpWindow(QWidget *parent, const Qt::WindowFlags &flags
     g_helpWindow->raise();
   }
 }
-
-/// Destructor does nothing.
-MantidHelpWindow::~MantidHelpWindow() { this->shutdown(); }
 
 void MantidHelpWindow::showHelp(const QString &url) {
   g_log.debug() << "open help window for \"" << url.toStdString() << "\"\n";
@@ -135,7 +130,7 @@ void MantidHelpWindow::openWebpage(const QUrl &url) {
 void MantidHelpWindow::showPage(const QString &url) { this->showPage(QUrl(url)); }
 
 void MantidHelpWindow::showPage(const QUrl &url) {
-  if (bool(g_helpWindow)) {
+  if (helpWindowExists()) {
     if (url.isEmpty())
       this->showHelp(DEFAULT_URL);
     else
@@ -193,7 +188,7 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
     help_url = QString::fromStdString(alg->helpURL());
   }
-  if (bool(g_helpWindow)) {
+  if (helpWindowExists()) {
     if (help_url.isEmpty()) {
       QString url(BASE_URL);
       url += "algorithms/";
@@ -239,7 +234,7 @@ void MantidHelpWindow::showAlgorithm(const QString &name, const int version) {
  * the concept index.
  */
 void MantidHelpWindow::showConcept(const string &name) {
-  if (bool(g_helpWindow)) {
+  if (helpWindowExists()) {
     QString url(BASE_URL);
     url += "concepts/";
     if (name.empty())
@@ -272,7 +267,7 @@ void MantidHelpWindow::showConcept(const QString &name) { this->showConcept(name
  * the fit function index.
  */
 void MantidHelpWindow::showFitFunction(const std::string &name) {
-  if (bool(g_helpWindow)) {
+  if (helpWindowExists()) {
     QString url(BASE_URL);
     url += "fitting/fitfunctions/";
     auto functionUrl = url + QString(name.c_str()) + ".html";
@@ -320,7 +315,7 @@ void MantidHelpWindow::showCustomInterface(const QString &name, const QString &a
  */
 void MantidHelpWindow::showCustomInterface(const std::string &name, const std::string &area,
                                            const std::string &section) {
-  if (bool(g_helpWindow)) {
+  if (helpWindowExists()) {
     QString url(BASE_URL);
     url += "interfaces/";
     if (!area.empty()) {
@@ -443,11 +438,8 @@ void MantidHelpWindow::determineFileLocs() {
 
   // determine cache file location
   m_cacheFile = COLLECTION_FILE.toStdString();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString dataLoc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-#else
+
   QString dataLoc = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/data";
-#endif
 
   if (dataLoc.endsWith("mantidproject")) {
     Poco::Path path(dataLoc.toStdString(), m_cacheFile);

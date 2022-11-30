@@ -9,6 +9,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Tolerance.h"
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -145,9 +146,7 @@ public:
     @return this *= D
   */
   V3D &operator*=(const double D) noexcept {
-    for (auto &pt : m_pt) {
-      pt *= D;
-    }
+    std::for_each(m_pt.begin(), m_pt.end(), [D](auto &pt) { pt *= D; });
     return *this;
   }
 
@@ -158,9 +157,7 @@ public:
     \todo ADD TOLERANCE
   */
   V3D &operator/=(const double D) noexcept {
-    for (auto &pt : m_pt) {
-      pt /= D;
-    }
+    std::for_each(m_pt.begin(), m_pt.end(), [D](auto &pt) { pt /= D; });
     return *this;
   }
 

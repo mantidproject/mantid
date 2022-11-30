@@ -405,7 +405,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         peak1 = peak_table.row(0)
         peak2 = peak_table.row(1)
 
-        self.assertEquals(self.peakids, actual_peaks)
+        self.assertEqual(self.peakids, actual_peaks)
         self.assertEqual(0, refit_peak_table.rowCount())
         self.assertEqual(refit_peak_table.getColumnNames(), peak_table.getColumnNames())
 

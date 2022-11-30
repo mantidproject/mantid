@@ -182,7 +182,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   try {
     doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(), headers);
   } catch (Exception::InternetError &ex) {
-    if (ex.errorCode() == InternetHelper::HTTP_NOT_MODIFIED) {
+    if (ex.errorCode() == static_cast<int>(InternetHelper::HTTPStatus::NOT_MODIFIED)) {
       // No changes since last time
       return fileMap;
     } else {
@@ -362,8 +362,9 @@ include in the request.
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
 */
-int DownloadInstrument::doDownloadFile(const std::string &urlFile, const std::string &localFilePath,
-                                       const StringToStringMap &headers) {
+InternetHelper::HTTPStatus DownloadInstrument::doDownloadFile(const std::string &urlFile,
+                                                              const std::string &localFilePath,
+                                                              const StringToStringMap &headers) {
   Poco::File localFile(localFilePath);
   if (localFile.exists()) {
     if (!localFile.canWrite()) {
@@ -380,10 +381,9 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile, const std::st
     }
   }
 
-  int retStatus = 0;
   GitHubApiHelper inetHelper;
   inetHelper.headers().insert(headers.begin(), headers.end());
-  retStatus = inetHelper.downloadFile(urlFile, localFilePath);
+  const auto retStatus = inetHelper.downloadFile(urlFile, localFilePath);
   return retStatus;
 }
 

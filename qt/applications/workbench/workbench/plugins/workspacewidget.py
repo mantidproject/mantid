@@ -14,12 +14,13 @@ from mantid.kernel import logger
 from mantidqt.plotting import functions
 from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names, plot_md_ws_from_names, \
                                         superplot_from_names, superplot_with_errors_from_names
+from mantidqt.plotting import sample_shape
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
@@ -81,6 +82,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.plotContourClicked.connect(
             partial(self._do_plot_3D, plot_type='contour'))
         self.workspacewidget.sampleMaterialClicked.connect(self._do_sample_material)
+        self.workspacewidget.sampleShapeClicked.connect(self._show_sample_shape)
         self.workspacewidget.superplotClicked.connect(self._do_superplot)
         self.workspacewidget.superplotWithErrsClicked.connect(
                 self._do_superplot_with_errors)
@@ -349,6 +351,22 @@ class WorkspaceWidget(PluginWidget):
                                "'{}':\n{}\n".format(names[0], exception))
         else:
             logger.warning("Sample material can only be viewed for a single workspace.")
+
+    def _show_sample_shape(self, workspace_names):
+        """
+        Create a 3D Plot of the SampleShape from the selected workspaces
+
+        :param names: A list of workspace names
+        """
+        if len(workspace_names) == 1:
+
+            try:
+                sample_shape.plot_sample_container_and_components(workspace_names[0])
+            except Exception as exception:
+                logger.warning("Could not show sample shape for workspace "
+                               "'{}':\n{}\n".format(workspace_names[0], exception))
+        else:
+            logger.warning("Plot Sample Shape can only be viewed for a single workspace.")
 
     def _action_double_click_workspace(self, name):
         ws = self._ads.retrieve(name)

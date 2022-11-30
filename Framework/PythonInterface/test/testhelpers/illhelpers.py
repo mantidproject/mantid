@@ -153,6 +153,16 @@ def add_slit_configuration_D17(ws, slit2Width, slit3Width):
     run.addProperty('VirtualSlitAxis.s3w_actual_width', float(slit3Width), 'mm', True)
 
 
+def create_empty_figaro_workspace():
+    kwargs = {
+        'InstrumentName': 'FIGARO',
+        'child': True
+    }
+    alg = run_algorithm('LoadEmptyInstrument', **kwargs)
+    ws = alg.getProperty('OutputWorkspace').value
+    return ws
+
+
 def create_poor_mans_d17_workspace():
     kwargs = {
         'InstrumentName': 'D17',

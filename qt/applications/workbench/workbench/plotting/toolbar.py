@@ -51,6 +51,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     sig_waterfall_fill_area_triggered = QtCore.Signal()
     sig_waterfall_conversion = QtCore.Signal(bool)
     sig_change_line_collection_colour_triggered = QtCore.Signal(QtGui.QColor)
+    sig_hide_plot_triggered = QtCore.Signal()
 
     toolitems = (
         MantidNavigationTool('Home', 'Reset axes limits', 'mdi.home', 'on_home_clicked', None),
@@ -79,7 +80,8 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         MantidNavigationTool('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
         MantidNavigationTool('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None),
         MantidStandardNavigationTools.SEPARATOR,
-        MantidNavigationTool('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None)
+        MantidNavigationTool('Help', 'Open plotting help documentation', 'mdi.help', 'launch_plot_help', None),
+        MantidNavigationTool('Hide', 'Hide the plot', 'mdi.eye', 'hide_plot', None)
     )
 
     def __init__(self, canvas, parent, coordinates=True):
@@ -88,6 +90,9 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         # Adjust icon size or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
         self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
+
+    def hide_plot(self):
+        self.sig_hide_plot_triggered.emit()
 
     def copy_to_clipboard(self):
         self.sig_copy_to_clipboard_triggered.emit()
@@ -236,7 +241,8 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
         # For contour and wireframe plots, add a toolbar option to change the colour of the lines.
         if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
-            self.set_up_color_selector_toolbar_button(fig)
+            if any(isinstance(col, LineCollection) for col in fig.get_axes()[0].collections):
+                self.set_up_color_selector_toolbar_button(fig)
 
         if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()

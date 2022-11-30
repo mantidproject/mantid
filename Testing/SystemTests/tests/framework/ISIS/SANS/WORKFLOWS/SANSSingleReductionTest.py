@@ -381,6 +381,7 @@ class SANSSingleReductionTest(SingleReductionTest):
                                                           can_direct=can_direct,
                                                           output_settings=output_settings)
         output_workspace = single_reduction_alg.getProperty("OutputWorkspaceMerged").value
+        output_hab_scaled = single_reduction_alg.getProperty("OutputWorkspaceHABScaled").value
         output_scale_factor = single_reduction_alg.getProperty("OutScaleFactor").value
         output_shift_factor = single_reduction_alg.getProperty("OutShiftFactor").value
 
@@ -390,6 +391,10 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         self.assertTrue(abs(expected_shift - output_shift_factor) < tolerance)
         self.assertTrue(abs(expected_scale - output_scale_factor) < tolerance)
+
+        scaled_file_name = "SANSSingleReduction_Scaled_HAB.nxs"
+        self._compare_to_reference(output_hab_scaled, scaled_file_name,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(scaled_file_name))
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_Merged_1D.nxs"

@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
@@ -115,11 +116,12 @@ void Rebin2D::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < static_cast<int64_t>(numYBins); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     m_progress->report("Computing polygon intersections");
     const double vlo = oldYEdges[i];
     const double vhi = oldYEdges[i + 1];
+
     for (size_t j = 0; j < numXBins; ++j) {
       // For each input polygon test where it intersects with
       // the output grid and assign the appropriate weights of Y/E
@@ -133,9 +135,9 @@ void Rebin2D::exec() {
       }
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (useFractionalArea) {
     FractionalRebinning::finalizeFractionalRebin(*outputRB);
     outputRB->finalize(true);
@@ -175,9 +177,9 @@ MatrixWorkspace_sptr Rebin2D::createOutputWorkspace(const MatrixWorkspace_const_
   const int newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
   // and now the workspace
   HistogramData::BinEdges binEdges(newXBins);
-  MatrixWorkspace_sptr outputWS;
+  Workspace2D_sptr outputWS;
   if (!useFractionalArea) {
-    outputWS = create<MatrixWorkspace>(*parent, newYSize - 1, binEdges);
+    outputWS = create<Workspace2D>(*parent, newYSize - 1, binEdges);
   } else {
     outputWS = create<RebinnedOutput>(*parent, newYSize - 1, binEdges);
   }

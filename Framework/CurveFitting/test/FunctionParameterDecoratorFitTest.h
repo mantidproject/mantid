@@ -33,7 +33,7 @@ class SimpleFunctionParameterDecorator : public FunctionParameterDecorator {
 
 public:
   SimpleFunctionParameterDecorator() {}
-  ~SimpleFunctionParameterDecorator() override {}
+  ~SimpleFunctionParameterDecorator() override = default;
 
   std::string name() const override { return "SimpleFunctionParameterDecorator"; }
 

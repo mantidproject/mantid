@@ -137,13 +137,11 @@ def add_runs(runs,  # noqa: C901
 
         lastFile = os.path.splitext(lastFile)[0]
         # Now save the added file
-        outFile = lastFile + '-add.' + 'nxs' if outFile is None else outFile
-        outFile_monitors = lastFile + '-add_monitors.' + 'nxs' if outFile_monitors is None else outFile_monitors
-        if save_directory is not None:
-            # In ISIS SANS gui, an output directory can be specified.
-            # If one has, add it to filepath here
-            outFile = save_directory + outFile
-            outFile_monitors = save_directory + outFile_monitors
+        prefix = save_directory if save_directory else ''
+        if outFile is None:
+            outFile = prefix + lastFile + '-add.' + 'nxs'
+        if outFile_monitors is None:
+            outFile_monitors = prefix + lastFile + '-add_monitors.' + 'nxs'
         sanslog.notice("Writing file: {}".format(outFile))
 
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:

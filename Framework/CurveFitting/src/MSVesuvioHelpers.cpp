@@ -27,7 +27,7 @@ double finalEnergyAuDD(const double randv) {
   // Tabulated values of absoprtion energies from S.F. Mughabghab, Neutron Cross
   // Sections, Academic
   // Press, Orlando, Florida, 1984.
-  static const double ENERGIES[300] = {
+  static const std::vector<double> ENERGIES = {
       2000.0, 2020.7, 2041.5, 2062.2, 2082.9, 2103.7, 2124.4, 2145.2, 2165.9, 2186.6, 2207.4, 2228.1, 2248.8, 2269.6,
       2290.3, 2311.0, 2331.8, 2352.5, 2373.2, 2394.0, 2414.7, 2435.5, 2456.2, 2476.9, 2497.7, 2518.4, 2539.1, 2559.9,
       2580.6, 2601.3, 2622.1, 2642.8, 2663.5, 2684.3, 2705.0, 2725.8, 2746.5, 2767.2, 2788.0, 2808.7, 2829.4, 2850.2,
@@ -50,7 +50,7 @@ double finalEnergyAuDD(const double randv) {
       7515.7, 7536.5, 7557.2, 7577.9, 7598.7, 7619.4, 7640.1, 7660.9, 7681.6, 7702.3, 7723.1, 7743.8, 7764.5, 7785.3,
       7806.0, 7826.8, 7847.5, 7868.2, 7889.0, 7909.7, 7930.4, 7951.2, 7971.9, 7992.6, 8013.4, 8034.1, 8054.8, 8075.6,
       8096.3, 8117.1, 8137.8, 8158.5, 8179.3, 8200.0};
-  static const double XVALUES[300] = {
+  static const std::vector<double> XVALUES = {
       0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
       0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
       0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00010, 0.00010,
@@ -77,13 +77,15 @@ double finalEnergyAuDD(const double randv) {
       1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000,
       1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000};
 
-  const double *xp1 = std::lower_bound(XVALUES, XVALUES + 300, randv);
-  if (xp1 == XVALUES + 300)
+  const auto xp1 = std::lower_bound(XVALUES.begin(), XVALUES.end(), randv);
+  if (xp1 == XVALUES.end())
     return 0.0;
-  const double *xm1 = xp1 - 1;
-  const double *ep1 = ENERGIES + (xp1 - XVALUES);
-  const double *em1 = ep1 - 1;
-  const double ef = (*em1) + (randv - *xm1) * (*ep1 - *em1) / (*xp1 - *xm1);
+  if (xp1 == XVALUES.begin())
+    return 0.0;
+  const auto xm1 = xp1 - 1;
+  const auto ep1 = ENERGIES.begin() + (xp1 - XVALUES.begin());
+  const auto em1 = ep1 - 1;
+  const auto ef = (*em1) + (randv - *xm1) * (*ep1 - *em1) / (*xp1 - *xm1);
   if (ef < 100.0)
     return 0.0;
   else
@@ -101,7 +103,7 @@ double finalEnergyAuYap(const double randv) {
   // Tabulated values of absoprtion energies from S.F. Mughabghab, Neutron Cross
   // Sections, Academic
   // Press, Orlando, Florida, 1984.
-  static const double ENERGIES[600] = {
+  static const std::vector<double> ENERGIES = {
       4000.0, 4003.3, 4006.7, 4010.0, 4013.4, 4016.7, 4020.0, 4023.4, 4026.7, 4030.1, 4033.4, 4036.7, 4040.1, 4043.4,
       4046.7, 4050.1, 4053.4, 4056.8, 4060.1, 4063.4, 4066.8, 4070.1, 4073.5, 4076.8, 4080.1, 4083.5, 4086.8, 4090.2,
       4093.5, 4096.8, 4100.2, 4103.5, 4106.8, 4110.2, 4113.5, 4116.9, 4120.2, 4123.5, 4126.9, 4130.2, 4133.6, 4136.9,
@@ -145,7 +147,7 @@ double finalEnergyAuYap(const double randv) {
       5869.8, 5873.1, 5876.5, 5879.8, 5883.1, 5886.5, 5889.8, 5893.2, 5896.5, 5899.8, 5903.2, 5906.5, 5909.8, 5913.2,
       5916.5, 5919.9, 5923.2, 5926.5, 5929.9, 5933.2, 5936.6, 5939.9, 5943.2, 5946.6, 5949.9, 5953.3, 5956.6, 5959.9,
       5963.3, 5966.6, 5970.0, 5973.3, 5976.6, 5980.0, 5983.3, 5986.6, 5990.0, 5993.3, 5996.7, 6000.0};
-  static const double XVALUES[600] = {
+  static const std::vector<double> XVALUES = {
       0.00000, 0.00000, 0.00000, 0.00002, 0.00003, 0.00003, 0.00004, 0.00005, 0.00005, 0.00006, 0.00007, 0.00007,
       0.00008, 0.00009, 0.00010, 0.00010, 0.00011, 0.00012, 0.00013, 0.00014, 0.00015, 0.00015, 0.00016, 0.00017,
       0.00018, 0.00019, 0.00020, 0.00021, 0.00022, 0.00023, 0.00024, 0.00025, 0.00026, 0.00027, 0.00028, 0.00029,
@@ -197,12 +199,14 @@ double finalEnergyAuYap(const double randv) {
       0.99990, 0.99991, 0.99991, 0.99992, 0.99992, 0.99993, 0.99993, 0.99994, 0.99994, 0.99994, 0.99995, 0.99995,
       0.99996, 0.99996, 0.99997, 0.99997, 0.99997, 0.99998, 0.99998, 0.99998, 0.99999, 0.99999, 1.00000, 1.00000};
 
-  const double *xp1 = std::lower_bound(XVALUES, XVALUES + 600, randv);
-  if (xp1 == XVALUES + 600)
+  const auto xp1 = std::lower_bound(XVALUES.begin(), XVALUES.end(), randv);
+  if (xp1 == XVALUES.end())
     return 0.0;
-  const double *xm1 = xp1 - 1;
-  const double *ep1 = ENERGIES + (xp1 - XVALUES);
-  const double *em1 = ep1 - 1;
+  if (xp1 == XVALUES.begin())
+    return 0.0;
+  const auto xm1 = xp1 - 1;
+  const auto ep1 = ENERGIES.begin() + (xp1 - XVALUES.begin());
+  const auto em1 = ep1 - 1;
   return (*em1) + (randv - *xm1) * (*ep1 - *em1) / (*xp1 - *xm1);
 }
 
@@ -214,7 +218,7 @@ double finalEnergyAuYap(const double randv) {
  * @return A value to use for the final energy
  */
 double finalEnergyUranium(const double randv) {
-  static const double ENERGIES[201] = {
+  static const std::vector<double> ENERGIES = {
       5959.0, 5967.7, 5976.4, 5985.1, 5993.8, 6002.5, 6011.2, 6019.9, 6028.6, 6037.3, 6046.0, 6054.8, 6063.5, 6072.2,
       6080.9, 6089.6, 6098.3, 6107.0, 6115.7, 6124.4, 6133.1, 6141.8, 6150.5, 6159.2, 6167.9, 6176.6, 6185.3, 6194.0,
       6202.7, 6211.4, 6220.1, 6228.9, 6237.6, 6246.3, 6255.0, 6263.7, 6272.4, 6281.1, 6289.8, 6298.5, 6307.2, 6315.9,
@@ -230,7 +234,7 @@ double finalEnergyUranium(const double randv) {
       7421.4, 7430.1, 7438.9, 7447.6, 7456.3, 7465.0, 7473.7, 7482.4, 7491.1, 7499.8, 7508.5, 7517.2, 7525.9, 7534.6,
       7543.3, 7552.0, 7560.7, 7569.4, 7578.1, 7586.8, 7595.5, 7604.2, 7613.0, 7621.7, 7630.4, 7639.1, 7647.8, 7656.5,
       7665.2, 7673.9, 7682.6, 7691.3, 7700.0};
-  static const double XVALUES[201] = {
+  static const std::vector<double> XVALUES = {
       0.00000, 0.00000, 0.00000, 0.00020, 0.00030, 0.00040, 0.00050, 0.00060, 0.00070, 0.00080, 0.00090, 0.00110,
       0.00120, 0.00140, 0.00150, 0.00170, 0.00190, 0.00210, 0.00230, 0.00250, 0.00270, 0.00290, 0.00310, 0.00340,
       0.00360, 0.00390, 0.00410, 0.00440, 0.00470, 0.00500, 0.00530, 0.00560, 0.00590, 0.00620, 0.00650, 0.00690,
@@ -249,12 +253,14 @@ double finalEnergyUranium(const double randv) {
       0.99930, 0.99940, 0.99950, 0.99960, 0.99960, 0.99970, 0.99980, 0.99980, 0.99990, 0.99990, 0.99990, 1.00000,
       1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000};
 
-  const double *xp1 = std::lower_bound(XVALUES, XVALUES + 201, randv);
-  if (xp1 == XVALUES + 201)
+  const auto xp1 = std::lower_bound(XVALUES.begin(), XVALUES.end(), randv);
+  if (xp1 == XVALUES.end())
     return 0.0;
-  const double *xm1 = xp1 - 1;
-  const double *ep1 = ENERGIES + (xp1 - XVALUES);
-  const double *em1 = ep1 - 1;
+  if (xp1 == XVALUES.begin())
+    return 0.0;
+  const auto xm1 = xp1 - 1;
+  const auto ep1 = ENERGIES.begin() + (xp1 - XVALUES.begin());
+  const auto em1 = ep1 - 1;
   return (*em1) + (randv - *xm1) * (*ep1 - *em1) / (*xp1 - *xm1);
 }
 

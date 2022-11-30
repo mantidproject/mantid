@@ -266,7 +266,7 @@ void AlignDetectors::align(const ConversionFactors &converter, Progress &progres
   auto eventW = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < m_numberOfSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     try {
       // Get the input spectrum number at this workspace index
       auto &spec = outputWS->getSpectrum(size_t(i));
@@ -294,9 +294,9 @@ void AlignDetectors::align(const ConversionFactors &converter, Progress &progres
       }
     }
     progress.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (eventW) {
     if (eventW->getTofMin() < 0.) {
       std::stringstream msg;

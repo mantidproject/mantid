@@ -17,7 +17,7 @@ namespace WorkflowAlgorithms {
 
     Sensitivity correction for SANS
 */
-class DLLExport SANSSensitivityCorrection : public API::Algorithm {
+class DLLExport SANSSensitivityCorrection final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SANSSensitivityCorrection"; }

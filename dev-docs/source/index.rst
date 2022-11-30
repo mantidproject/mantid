@@ -23,6 +23,8 @@ Guides
    Standards/index
    Testing/index
    DoxygenSetup
+   NewStarterC++
+   NewStarterPython
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
@@ -116,9 +118,11 @@ Tools
    FlowchartCreation
    VisualStudioBuildImpact
    PyCharm
+   CLion
    VSCode
    Eclipse
    WindowsSubsystemForLinux
+   ObtainingABenchmarkForMantidFitting
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -135,6 +139,9 @@ Tools
 :doc:`PyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
 
+:doc:`CLion`
+   Describes how to set up CLion to build and debug using a Ninja generator (Windows/Linux only).
+
 :doc:`VSCode`
    Guide to using VSCode for C++ with Mantid.
 
@@ -143,6 +150,9 @@ Tools
 
 :doc:`WindowsSubsystemForLinux`
    Guide for setting up Ubuntu 18.04 and Centos7 as subsystems on Windows (WSL2).
+
+:doc:`ObtainingABenchmarkForMantidFitting`
+   Guide for setting up an environment to perform a benchmark of Mantid fitting minimizers.
 
 =======
 Testing
@@ -198,6 +208,7 @@ GUI Development
    MVPDesign
    MVPTutorial/index
    QtDesignerForPython
+   BalsamiqWireframes
    MantidUsedIconsTable
    ISISReflectometryInterface
 
@@ -254,9 +265,8 @@ Component Overviews
    LoadAlgorithmHook
    Logging
    MatplotlibInCpp
-   MultiThreadingInAlgorithms
+   MultiThreadingInMantid
    PythonVSCppAlgorithms
-   RemoteJobSubmissionAPI
    SampleLogsDev
    Widgets/Plotting
    WritingAnAlgorithm

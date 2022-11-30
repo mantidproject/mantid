@@ -163,7 +163,7 @@ ClickableLabel::ClickableLabel(QWidget *parent) : QLabel(parent) {}
 /**
  * Destructor.
  */
-ClickableLabel::~ClickableLabel() {}
+ClickableLabel::~ClickableLabel() = default;
 
 /**
  * Catches the mouse press event and emits the signal.
@@ -237,7 +237,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
   connect(m_icons[RESTORE], SIGNAL(clicked()), this, SLOT(toggleUseHistory()));
 
   /// Save the documentation tooltip
-  m_doc = QString::fromStdString(prop->briefDocumentation());
+  m_doc = QString::fromStdString(prop->documentation());
 
   if (!isOptionalProperty(prop)) {
     if (!m_doc.isEmpty())
@@ -251,7 +251,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent, 
 
 /** Destructor
  */
-PropertyWidget::~PropertyWidget() {}
+PropertyWidget::~PropertyWidget() = default;
 
 /**
  * Set this widget's value.

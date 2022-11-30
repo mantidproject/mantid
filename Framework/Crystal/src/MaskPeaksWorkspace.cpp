@@ -85,7 +85,7 @@ void MaskPeaksWorkspace::exec() {
   const std::vector<Peak> &peaks = peaksW->getPeaks();
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputW, *peaksW, *tablews))
   for (int i = 0; i < static_cast<int>(peaks.size()); i++) { // NOLINT
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const Peak &peak = peaks[i];
     // get the peak location on the detector
     double col = peak.getCol();
@@ -144,9 +144,9 @@ void MaskPeaksWorkspace::exec() {
         API::TableRow newrow = tablews->appendRow();
         newrow << x0 << xf << Kernel::Strings::toString(spectra);
       }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end loop over peaks
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Mask bins
   auto maskbinstb = createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
@@ -187,15 +187,11 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi, cons
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
 
   if (det) {
-    if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0)
+    if (x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0) {
+      // throw std::runtime_error("Failed to find workspace index for x=" + std::to_string(x) + " y=" +
+      // std::to_string(y) + "(max x=" + std::to_string(det->xpixels()) +
+      // ", max y=" + std::to_string(det->ypixels()) + ")"); // Useful for debugging
       return EMPTY_INT();
-    if ((x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
-        || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
-    {
-      std::stringstream msg;
-      msg << "Failed to find workspace index for x=" << x << " y=" << y << "(max x=" << det->xpixels()
-          << ", max y=" << det->ypixels() << ")";
-      throw std::runtime_error(msg.str());
     }
 
     int pixelID = det->getAtXY(x, y)->getID();

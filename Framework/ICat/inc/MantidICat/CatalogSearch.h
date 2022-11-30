@@ -39,12 +39,12 @@ namespace ICat {
   @author Sofia Antony, ISIS Rutherford Appleton Laboratory
   @date 04/11/2013
  */
-class MANTID_ICAT_DLL CatalogSearch : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogSearch final : public API::Algorithm {
 public:
   /// constructor
   CatalogSearch() : API::Algorithm() {}
   /// destructor
-  ~CatalogSearch() override {}
+  ~CatalogSearch() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogSearch"; }
   /// Summary of algorithms purpose

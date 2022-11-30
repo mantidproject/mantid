@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** BinaryOperateMasks : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL BinaryOperateMasks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL BinaryOperateMasks final : public API::Algorithm {
 public:
   BinaryOperateMasks();
   ~BinaryOperateMasks() override;

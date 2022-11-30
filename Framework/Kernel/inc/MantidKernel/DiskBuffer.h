@@ -39,7 +39,7 @@ class ISaveable;
 
   @date 2011-12-30
 */
-class DLLExport DiskBuffer {
+class MANTID_KERNEL_DLL DiskBuffer {
 public:
   /** A map for the list of free space blocks in the file.
    * Index 1: Position in the file.

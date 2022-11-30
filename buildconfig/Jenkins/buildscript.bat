@@ -70,18 +70,24 @@ if NOT DEFINED MANTID_DATA_STORE (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
+set SYSTEMTESTS=
 
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
 )
 
-:: BUILD_PACKAGE can be provided as a job parameter on the pull requests
+:: BUILD_PACKAGE and RUN_SYSTEMTESTS can be provided as job parameters on pull requests
 if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
   if not "%BUILD_PACKAGE%" == "%BUILD_PACKAGE:true=%" (
     set BUILDPKG=yes
   ) else (
     set BUILDPKG=no
+  )
+  if not "%RUN_SYSTEMTESTS%" == "%RUN_SYSTEMTESTS:true=%" (
+    set SYSTEMTESTS=yes
+  ) else (
+    set SYSTEMTESTS=no
   )
 )
 :: Never want package for debug builds
@@ -221,7 +227,6 @@ echo Note: not running doc-test target as it currently takes too long
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
 :: If the install kit needs to be built,  create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
   cmake --build . --target docs-qthelp -- /p:Configuration=%BUILD_CONFIG%  /verbosity:minimal
@@ -229,4 +234,14 @@ if "%BUILDPKG%" == "yes" (
   :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
+)
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Run system tests if it's a PR build and the RUN_SYSTEMTESTS option is true
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if "%SYSTEMTESTS%" == "yes" (
+  if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
+    set EXTRA_ARGS=--exclude-in-pull-requests
+  )
+  call %WORKSPACE%\buildconfig\Jenkins\systemtests.bat
 )

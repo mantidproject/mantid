@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import Abins, mtd, DeleteWorkspace
+from mantid.simpleapi import Abins, Abins2D, mtd, DeleteWorkspace
 
 import abins
 from abins.constants import (ALL_INSTRUMENTS, ALL_SUPPORTED_AB_INITIO_PROGRAMS,
@@ -484,4 +484,45 @@ class AbinsCASTEPIsotopes(systemtesting.MantidSystemTest, HelperTestingClass):
 
     def validate(self):
         self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+#------------------------------------------------------------------------------
+# Tests for 2D S
+#------------------------------------------------------------------------------
+
+
+class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
+    """
+    Check Abins2D runs successfully for a typical use case
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "AbinsCRYSTAL2D"
+
+        self.ref_result = name + ".nxs"
+        self.set_ab_initio_program("CRYSTAL")
+        self.set_name(name)
+        self.set_order(QUANTUM_ORDER_TWO)
+        self.set_instrument_name("MARI")
+        params_2d = {'Chopper': 'A',
+                     'ChopperFrequency': str(300),
+                     'IncidentEnergy': str(200),
+                     'EnergyUnits': 'meV'}
+
+        Abins2D(AbInitioProgram="CRYSTAL",
+                VibrationalOrPhononFile="TolueneScratchAbins" + self._extension[self._ab_initio_program],
+                TemperatureInKelvin=self._temperature,
+                Instrument=self._instrument_name,
+                Atoms=self._atoms, SumContributions=self._sum_contributions,
+
+                QuantumOrderEventsNumber=str(self._quantum_order_event), autoconvolution=True,
+                ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name,
+                **params_2d)
+
+    def validate(self):
+        self.tolerance = 1e-4
         return self._output_name, self.ref_result

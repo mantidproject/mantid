@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @author Gesner Passos, ISIS
 */
-class MANTID_ALGORITHMS_DLL RingProfile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RingProfile final : public API::Algorithm {
 public:
   RingProfile();
 

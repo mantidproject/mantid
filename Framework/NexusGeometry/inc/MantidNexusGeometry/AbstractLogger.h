@@ -20,7 +20,7 @@ class MANTID_NEXUSGEOMETRY_DLL AbstractLogger {
 public:
   virtual void warning(const std::string &warning) = 0;
   virtual void error(const std::string &error) = 0;
-  virtual ~AbstractLogger() {}
+  virtual ~AbstractLogger() = default;
 };
 
 template <typename T> class LogAdapter : public AbstractLogger {

@@ -224,9 +224,10 @@ QColor MiniPlotMpl::getCurveColor(const QString &label) const {
 bool MiniPlotMpl::isYLogScale() const { return m_canvas->gca().getYScale() == LOG_SCALE_NAME; }
 
 /**
- * Redraws the canvas
+ * Redraws the canvas only if in the GUI event loop. This avoids a crash when calling draw() on a plot which is on a
+ * different tab to the currently selected tab.
  */
-void MiniPlotMpl::replot() { m_canvas->draw(); }
+void MiniPlotMpl::replot() { m_canvas->drawIdle(); }
 
 /**
  * Remove the active curve, keeping any stored curves

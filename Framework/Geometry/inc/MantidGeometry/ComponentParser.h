@@ -21,7 +21,7 @@ namespace Geometry {
   @author Janik Zikovsky
   @date 2011-09-07
 */
-class DLLExport ComponentParser : public Poco::XML::ContentHandler {
+class MANTID_GEOMETRY_DLL ComponentParser : public Poco::XML::ContentHandler {
 public:
   /// Signals start of element
   void startElement(const Poco::XML::XMLString &, const Poco::XML::XMLString &localName, const Poco::XML::XMLString &,

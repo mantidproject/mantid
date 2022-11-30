@@ -114,10 +114,11 @@ AffineMatrixParameter *AffineMatrixParameter::clone() const {
 bool AffineMatrixParameter::isValid() const { return m_isValid; }
 
 //----------------------------------------------------------------------------------------------
-/** Assignemnt operator.
+/** Assignment operator.
  * @param other : another affine matrix to assign from.
  * @return ref to assigned object
  */
+// cppcheck-suppress operatorEqVarError
 AffineMatrixParameter &AffineMatrixParameter::operator=(const AffineMatrixParameter &other) {
   if ((other.m_affineMatrix.numCols() != this->m_affineMatrix.numCols()) ||
       (other.m_affineMatrix.numRows() != this->m_affineMatrix.numRows())) {

@@ -45,7 +45,7 @@ struct V3DTrueComparator {
   }
 };
 
-class DLLExport LoadStl : public LoadSingleMesh {
+class MANTID_DATAHANDLING_DLL LoadStl : public LoadSingleMesh {
 public:
   LoadStl(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType)
       : LoadSingleMesh(std::move(filename), mode, scaleType), m_setMaterial(false) {}

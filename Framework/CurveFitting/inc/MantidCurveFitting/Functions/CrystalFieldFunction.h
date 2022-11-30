@@ -8,7 +8,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldControl.h"
 
 #include <unordered_map>
@@ -70,6 +70,8 @@ public:
   void setUpForFit() override;
   /// Get the tie for i-th parameter
   API::ParameterTie *getTie(size_t i) const override;
+  /// Checks if whether tie should be ignored
+  bool ignoreTie(const API::ParameterTie &tie) const override;
   /// Get the i-th constraint
   API::IConstraint *getConstraint(size_t i) const override;
   //@}

@@ -128,6 +128,40 @@ class ResultsTabPresenterTest(unittest.TestCase):
         self.mock_view.set_output_results_button_enabled.assert_called_once_with(
             True)
 
+    def test_adding_new_fit_via_list_works(
+            self):
+        ws1 = "ws1; parameters"
+        ws2 = "ws2; parameters"
+        fit_ws = "ws3; workspaces"
+        ws3 = "ws3; parameters"
+
+        # list is [row number, ticked, enabled] -> first selected, second is not
+        orig_ws_list_state = {ws1: [0, True, True], ws2: [1, False, True]}
+        final_ws_list_state = [ws1, ws2, ws3]
+        test_functions = ['func1', 'func2']
+        self.mock_model.fit_functions.return_value = test_functions
+        self.mock_model.fit_selection.return_value = final_ws_list_state
+        self.mock_view.fit_result_workspaces.return_value = orig_ws_list_state
+
+        presenter = ResultsTabPresenter(self.mock_view, self.mock_model)
+        presenter._get_workspace_list = mock.MagicMock(return_value=([ws1, ws2, ws3], "func1"))
+        # previous test verifies this is correct on construction
+        self.mock_view.set_output_results_button_enabled.reset_mock()
+        # add a new fit_ws
+        fit_info = [mock_fit_info(fit_ws)]
+
+        presenter.on_new_fit_performed(fit_info)
+
+        self.mock_model.fit_functions.assert_called_once_with()
+        # only the first ws and the new one are selected
+        self.mock_model.fit_selection.assert_called_once_with([ws1, ws3])
+        self.mock_view.set_fit_function_names.assert_called_once_with(
+            test_functions)
+        self.mock_view.set_fit_result_workspaces.assert_called_once_with(
+            final_ws_list_state)
+        self.mock_view.set_output_results_button_enabled.assert_called_once_with(
+            True)
+
     def test_redoing_fit_to_updates_selections(
             self):
         ws1 = "ws1; parameters"

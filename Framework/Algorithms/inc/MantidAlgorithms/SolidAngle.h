@@ -21,7 +21,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 26/01/2009
 */
-class MANTID_ALGORITHMS_DLL SolidAngle : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SolidAngle final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SolidAngle"; }

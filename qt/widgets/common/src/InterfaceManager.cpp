@@ -217,7 +217,7 @@ InterfaceManager::InterfaceManager() {
 }
 
 /// Destructor
-InterfaceManager::~InterfaceManager() {}
+InterfaceManager::~InterfaceManager() = default;
 
 void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory) {
   m_helpViewer = factory;

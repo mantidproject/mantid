@@ -37,10 +37,7 @@ namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SortHKL)
 
-SortHKL::SortHKL() {
-  m_pointGroups = getAllPointGroups();
-  m_refConds = getAllReflectionConditions();
-}
+SortHKL::SortHKL() : m_pointGroups(getAllPointGroups()), m_refConds(getAllReflectionConditions()) {}
 
 SortHKL::~SortHKL() = default;
 

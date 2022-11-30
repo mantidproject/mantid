@@ -121,4 +121,66 @@ public:
     TS_ASSERT_EQUALS(fun.getParameter("C"), 0.0);
     TS_ASSERT_EQUALS(fun.getParameter("D"), 0.0);
   }
+
+  void test_default_calculation_of_step_size_with_zero_parameter_value() {
+    MockFunction fun;
+
+    const double parameterValue = 0.0;
+
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue), std::numeric_limits<double>::epsilon() * 100);
+  }
+
+  void test_default_calculation_of_step_size_with_small_parameter_values() {
+    MockFunction fun;
+
+    const double parameterValue1 = 100.0 * std::numeric_limits<double>::min();
+    const double parameterValue2 = -100.0 * std::numeric_limits<double>::min();
+
+    const double expectedStep = std::numeric_limits<double>::epsilon() * 100;
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue1), expectedStep);
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue2), expectedStep);
+  }
+
+  void test_default_calculation_of_step_size_with_larger_parameter_values() {
+    MockFunction fun;
+
+    const double parameterValue1 = 5.0;
+    const double parameterValue2 = -5.0;
+
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue1), parameterValue1 * 0.001);
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue2), parameterValue2 * 0.001);
+  }
+
+  void test_sqrt_epsilon_calculation_of_step_size_with_zero_parameter_value() {
+    MockFunction fun;
+    fun.setStepSizeMethod(MockFunction::StepSizeMethod::SQRT_EPSILON);
+
+    const double parameterValue = 0.0;
+
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue), sqrt(std::numeric_limits<double>::epsilon()));
+  }
+
+  void test_sqrt_epsilon_calculation_of_step_size_with_small_parameter_values() {
+    MockFunction fun;
+    fun.setStepSizeMethod(MockFunction::StepSizeMethod::SQRT_EPSILON);
+
+    const double parameterValue1 = 0.9;
+    const double parameterValue2 = -0.9;
+
+    const double expectedStep = sqrt(std::numeric_limits<double>::epsilon());
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue1), expectedStep);
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue2), expectedStep);
+  }
+
+  void test_sqrt_epsilon_calculation_of_step_size_with_large_parameter_values() {
+    MockFunction fun;
+    fun.setStepSizeMethod(MockFunction::StepSizeMethod::SQRT_EPSILON);
+
+    const double parameterValue1 = 1.1;
+    const double parameterValue2 = -1.1;
+
+    const double sqrtEpsilon = sqrt(std::numeric_limits<double>::epsilon());
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue1), parameterValue1 * sqrtEpsilon);
+    TS_ASSERT_EQUALS(fun.calculateStepSize(parameterValue2), parameterValue2 * sqrtEpsilon);
+  }
 };

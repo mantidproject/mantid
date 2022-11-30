@@ -29,12 +29,12 @@ namespace ICat {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 06/12/2013
 */
-class MANTID_ICAT_DLL CatalogPublish : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogPublish final : public API::Algorithm {
 public:
   /// constructor
   CatalogPublish() : API::Algorithm() {}
   /// Destructor
-  ~CatalogPublish() override {}
+  ~CatalogPublish() override = default;
   /// Algorithm's name for identification.
   const std::string name() const override { return "CatalogPublish"; }
   /// Summary of algorithms purpose.

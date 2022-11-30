@@ -11,7 +11,10 @@ Description
 
 Saves the given workspace to a file which will be formatted in the
 SESANS data format. A workspace with a single spectrum is expected,
-where the X values are wavelength and the Y values are polarisation
+where the X values are wavelength and the Y values are polarisation.
+
+The sample thickness from the run metadata is used to normalise the polarisation data.
+The :literal:`OverrideSampleThickness` parameter can be used to specify a different value for this if needed.
 
 Usage
 -----
@@ -22,12 +25,13 @@ Usage
 
    import os
 
-   # Create dummy workspace
+   # Create dummy workspace with sample thickness metadata
    dataX = [1,2,3,4,5]
    dataY = [6,1,9,14]
    dataE = [1,1,4,5]
    out_ws = CreateWorkspace(dataX, dataY, dataE)
    out_ws.setTitle("Dummy workspace")
+   out_ws.sample().setThickness(10)
 
    file_path = os.path.join(config["defaultsave.directory"], "example.ses")
 

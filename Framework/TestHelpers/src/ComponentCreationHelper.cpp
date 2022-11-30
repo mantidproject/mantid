@@ -36,6 +36,7 @@
 #include "MantidKernel/V2D.h"
 
 #include <Poco/Path.h>
+#include <algorithm>
 #include <memory>
 
 using namespace Mantid::Geometry;
@@ -330,10 +331,8 @@ std::shared_ptr<DetectorGroup> createRingOfCylindricalDetectors(const double R_m
   auto vecOfDetectors = createVectorOfCylindricalDetectors(R_min, R_max, z0);
   std::vector<std::shared_ptr<const IDetector>> groupMembers;
   groupMembers.reserve(vecOfDetectors.size());
-  for (auto &det : vecOfDetectors) {
-    groupMembers.emplace_back(std::move(det));
-  }
-
+  std::transform(vecOfDetectors.begin(), vecOfDetectors.end(), std::back_inserter(groupMembers),
+                 [](auto &det) { return std::move(det); });
   return std::make_shared<DetectorGroup>(std::move(groupMembers));
 }
 
@@ -536,9 +535,10 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels, dou
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
  * @param bankDistanceFromSample :: How far the bank is from the sample
+ * @param addMonitor :: whether to add a monitor detector to the instrument
  */
 Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing,
-                                                double bankDistanceFromSample) {
+                                                double bankDistanceFromSample, bool addMonitor) {
   auto testInst = std::make_shared<Instrument>("basic_rect");
 
   for (int banknum = 1; banknum <= num_banks; banknum++) {
@@ -548,6 +548,13 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, doubl
     V3D bankPos(0.0, 0.0, bankDistanceFromSample * banknum);
     Quat bankRot{}; // Identity
     addRectangularBank(*testInst, banknum * pixels * pixels, pixels, pixelSpacing, bankName.str(), bankPos, bankRot);
+  }
+
+  if (addMonitor) {
+    // A monitor
+    auto *mon = new Detector("test-monitor", 2 /*detector id*/, nullptr);
+    testInst->add(mon);
+    testInst->markAsMonitor(mon);
   }
 
   addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0), "source");

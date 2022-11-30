@@ -28,7 +28,7 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
 
   public:
     FakeAlgorithm() {}
-    ~FakeAlgorithm() override {}
+    ~FakeAlgorithm() override = default;
     const std::string name() const override { return "Fake Algorithm"; };
     int version() const override { return 1; };
     const std::string category() const override { return ""; };

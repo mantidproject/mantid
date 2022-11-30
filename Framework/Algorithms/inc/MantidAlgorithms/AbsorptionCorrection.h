@@ -78,6 +78,8 @@ public:
   }
 
 protected:
+  ~AbsorptionCorrection() = default;
+
   /** A virtual function in which additional properties of an algorithm should
    * be declared.
    *  Called by init().

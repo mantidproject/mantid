@@ -11,9 +11,13 @@
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 
-#include <nexus/NeXusFile.hpp>
+#include <cstdint>
 
 class BankPulseTimes;
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 namespace DataHandling {

@@ -110,7 +110,7 @@ void VesuvioCalculateGammaBackground::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))
   for (int64_t i = 0; i < nhist; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const size_t outputIndex = i;
     auto indexIter = m_indices.cbegin();
     std::advance(indexIter, i);
@@ -120,9 +120,9 @@ void VesuvioCalculateGammaBackground::exec() {
       g_log.information("No detector defined for index=" + std::to_string(inputIndex) + ". Skipping correction.");
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("BackgroundWorkspace", m_backgroundWS);
   setProperty("CorrectedWorkspace", m_correctedWS);

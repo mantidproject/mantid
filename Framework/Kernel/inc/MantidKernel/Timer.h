@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace Kernel {
 
-typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point_ns;
+using time_point_ns = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 /** A simple class that provides a wall-clock (not processor time) timer.
 

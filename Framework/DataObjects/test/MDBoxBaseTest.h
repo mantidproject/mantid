@@ -26,7 +26,7 @@ TMDE_CLASS
 class MDBoxBaseTester : public MDBoxBase<MDE, nd> {
 public:
   MDBoxBaseTester() : MDBoxBase<MDE, nd>() {}
-  ~MDBoxBaseTester() override {}
+  ~MDBoxBaseTester() override = default;
   MDBoxBaseTester(uint64_t /*filePos*/) : MDBoxBase<MDE, nd>() {}
   MDBoxBaseTester(const MDBoxBaseTester &source) : MDBoxBase<MDE, nd>(source, source.getBoxController()) {}
 

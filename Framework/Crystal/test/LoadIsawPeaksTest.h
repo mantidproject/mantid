@@ -9,14 +9,18 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
@@ -213,5 +217,40 @@ public:
     TS_ASSERT_DELTA(p.getDSpacing(), 2.9288, 0.001);
     TS_ASSERT_DELTA(ws->getPeaks()[1].getDSpacing(), 2.4928, 0.001);
     TS_ASSERT_DELTA(ws->getPeaks()[2].getDSpacing(), 2.9677, 0.001);
+  }
+  void test_mod_skip_UB() {
+    LoadIsawPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setPropertyValue("Filename", "TOPAZ_2479.peaks");
+    alg.setPropertyValue("OutputWorkspace", "TOPAZ_2479");
+
+    TS_ASSERT(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    PeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve("TOPAZ_2479")));
+    TS_ASSERT(ws);
+
+    ws->getPeak(0).setIntMNP(V3D(1, -1, 2));
+
+    std::string outfile = "./SaveIsawModulated.peaks";
+    SaveIsawPeaks save;
+    TS_ASSERT_THROWS_NOTHING(save.initialize());
+    TS_ASSERT(save.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("InputWorkspace", "TOPAZ_2479"));
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("Filename", outfile));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+    TS_ASSERT(save.isExecuted());
+
+    LoadIsawPeaks load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT(load.isInitialized());
+    load.setPropertyValue("Filename", outfile);
+    load.setPropertyValue("OutputWorkspace", "peaks");
+
+    TS_ASSERT(load.execute());
+    TS_ASSERT(load.isExecuted());
   }
 };

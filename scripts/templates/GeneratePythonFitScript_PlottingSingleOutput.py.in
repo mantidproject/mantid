@@ -1,0 +1,21 @@
+# Plot the results of the fit
+fig, axes = plt.subplots(nrows=2,
+                         ncols=len(output_workspaces),
+                         sharex=True,
+                         gridspec_kw={"height_ratios": [2, 1]},
+                         subplot_kw={"projection": "mantid"})
+
+workspace = AnalysisDataService.retrieve(output_workspaces[0])
+axes[0].errorbar(workspace, "rs", wkspIndex=0, label="Data", markersize=2)
+axes[0].errorbar(workspace, "b-", wkspIndex=1, label="Fit")
+axes[0].set_title(output_workspaces[0])
+axes[0].set_xlabel("")
+axes[0].tick_params(axis="both", direction="in")
+axes[0].legend()
+
+axes[1].errorbar(workspace, "ko", wkspIndex=2, markersize=2)
+axes[1].set_ylabel("Difference")
+axes[1].tick_params(axis="both", direction="in")
+
+fig.subplots_adjust(hspace=0)
+fig.show()

@@ -47,7 +47,8 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
                                                                                         // LoadILLIndirect
       && !descriptor.pathExists("/entry0/instrument/VirtualChopper")                    // This one is for
                                                                                         // LoadILLReflectometry
-      && !descriptor.pathExists("/entry0/data_scan") // This one is handled by LoadILLDiffraction
+      && !descriptor.pathExists("/entry0/data_scan")     // This one is handled by LoadILLDiffraction
+      && !descriptor.pathExists("/entry0/instrument/Tx") // This eliminates SALSA data
   ) {
     return 80;
   } else {
@@ -112,7 +113,7 @@ void LoadILLTOF2::exec() {
  *
  * @return List of monitor data
  */
-std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(NeXus::NXEntry &firstEntry) {
+std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &firstEntry) {
 
   std::vector<std::vector<int>> monitorList;
 
@@ -140,7 +141,7 @@ std::vector<std::vector<int>> LoadILLTOF2::getMonitorInfo(NeXus::NXEntry &firstE
  *
  * @param firstEntry The NeXus entry
  */
-void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
+void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
 
@@ -227,7 +228,7 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry, const std::vector<std::ve
  *
  * @param entry :: The Nexus entry
  */
-void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
+void LoadILLTOF2::loadTimeDetails(const NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
@@ -351,8 +352,8 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vec
   if (moni.containsDataSet("time_of_flight")) {
     if (convertToTOF) {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
-                m_channelWidth / 2; // to make sure the bin centre is correct
+        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) +
+                m_channelWidth / 2; // to make sure the bin centre is positive
       }
     } else {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {

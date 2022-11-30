@@ -8,7 +8,6 @@
 
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -30,7 +29,7 @@ namespace DataObjects {
  * @date 2011-03-23 17:04:02.621325
  */
 TMDE_CLASS
-class DLLExport MDBin {
+class MANTID_DATAOBJECTS_DLL MDBin {
 public:
   MDBin();
 

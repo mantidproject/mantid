@@ -23,7 +23,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL TOFSANSResolutionByPixel : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL TOFSANSResolutionByPixel final : public API::Algorithm {
 public:
   /// Default constructor
   TOFSANSResolutionByPixel();

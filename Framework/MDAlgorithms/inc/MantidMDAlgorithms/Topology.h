@@ -28,7 +28,7 @@ Abstract type represents topology for visualisation.
 @date 27/10/2010
 */
 
-class DLLExport Topology {
+class MANTID_MDALGORITHMS_DLL Topology {
 
 public:
   virtual void applyOrdering(Mantid::API::Point3D **unOrderedPoints) const = 0;

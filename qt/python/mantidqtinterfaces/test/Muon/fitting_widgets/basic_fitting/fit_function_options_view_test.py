@@ -9,17 +9,14 @@ import unittest
 from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_function_options_view import (FitFunctionOptionsView,
                                                                                                         RAW_DATA_TABLE_ROW)
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
-class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
+class FitFunctionOptionsViewTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -28,11 +25,9 @@ class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
     def setUp(self):
         self.view = FitFunctionOptionsView()
         self.view.show()
-        self.assert_widget_created()
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_has_been_initialized_with_the_raw_data_option_shown(self):
         self.view = FitFunctionOptionsView()

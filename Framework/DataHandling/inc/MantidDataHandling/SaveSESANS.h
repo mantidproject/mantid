@@ -33,7 +33,7 @@ namespace DataHandling {
   @author Joseph Ramsay, ISIS
   @date 19/07/2017
 */
-class MANTID_DATAHANDLING_DLL SaveSESANS : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveSESANS final : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;
@@ -46,8 +46,11 @@ private:
   // Length of the longest attribute name in headers (+4 for readability in the
   // file)
   const int MAX_HDR_LENGTH = 23;
+  // Tolerance to use when comparing two doubles for equality
+  const double TOLERANCE = 1e-09;
   const std::vector<std::string> fileExtensions{".ses", ".SES", ".sesans", ".SESANS"};
   const std::vector<std::string> mandatoryDoubleProperties{"ThetaZMax", "ThetaYMax", "EchoConstant"};
+  double m_sampleThickness = EMPTY_DBL();
 
   void init() override;
   void exec() override;

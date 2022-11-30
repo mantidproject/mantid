@@ -28,6 +28,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL CalculateCountRate : public API::Algorithm {
 public:
+  virtual ~CalculateCountRate() = default;
   const std::string name() const override;
   int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"ChangePulsetime"}; }

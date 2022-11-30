@@ -40,10 +40,9 @@ PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace)
 }
 
 PoldiPeakCollection::PoldiPeakCollection(const CrystalStructure &crystalStructure, double dMin, double dMax)
-    : m_peaks(), m_intensityType(Integral), m_profileFunctionName(), m_pointGroup() {
-  m_pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroup(crystalStructure.spaceGroup());
-
-  m_unitCell = crystalStructure.cell();
+    : m_peaks(), m_intensityType(Integral), m_profileFunctionName(),
+      m_pointGroup(PointGroupFactory::Instance().createPointGroupFromSpaceGroup(crystalStructure.spaceGroup())),
+      m_unitCell(crystalStructure.cell()) {
 
   ReflectionGenerator generator(crystalStructure, ReflectionConditionFilter::StructureFactor);
 

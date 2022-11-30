@@ -8,7 +8,6 @@
 
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -16,7 +15,7 @@ namespace DataObjects {
 
 /** PeakShapeEllipsoid : PeakShape representing a 3D ellipsoid
  */
-class DLLExport PeakShapeEllipsoid : public PeakShapeBase {
+class MANTID_DATAOBJECTS_DLL PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
   PeakShapeEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions, const std::vector<double> &abcRadii,

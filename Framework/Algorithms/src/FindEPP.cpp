@@ -60,11 +60,11 @@ void FindEPP::exec() {
   // Loop over spectra
   PARALLEL_FOR_IF(threadSafe(*m_inWS, *m_outWS))
   for (int64_t index = 0; index < numberspectra; ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     fitGaussian(index);
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   setProperty("OutputWorkspace", m_outWS);
 }
@@ -76,7 +76,7 @@ void FindEPP::fitGaussian(int64_t index) {
   auto spectrum = static_cast<size_t>(index);
   m_outWS->cell<int>(spectrum, 0) = static_cast<int>(spectrum);
 
-  const auto &x = m_inWS->x(spectrum).rawData();
+  const auto x = m_inWS->points(spectrum);
   const auto &y = m_inWS->y(spectrum).rawData();
   const auto &e = m_inWS->e(spectrum).rawData();
 

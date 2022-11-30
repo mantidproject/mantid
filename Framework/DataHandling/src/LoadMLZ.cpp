@@ -143,7 +143,7 @@ void LoadMLZ::maskDetectors(const NeXus::NXEntry &entry) {
 /**
  * Set the instrument name along with its path on the nexus file
  */
-void LoadMLZ::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
+void LoadMLZ::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = m_mlzloader.findInstrumentNexusPath(firstEntry);
 
@@ -207,7 +207,7 @@ void LoadMLZ::initInstrumentSpecific() {
  * Load the time details from the nexus file.
  * @param entry :: The Nexus entry
  */
-void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
+void LoadMLZ::loadTimeDetails(const NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
@@ -338,7 +338,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadMLZ::loadExperimentDetails(NXEntry &entry) {
+void LoadMLZ::loadExperimentDetails(const NXEntry &entry) {
   // TODO: Do the rest
   // Pick out the geometry information
 

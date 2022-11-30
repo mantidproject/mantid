@@ -1,0 +1,2 @@
+- When a file with mantid algorithms is loaded, and the user accepts workbench adding the mantid API import line,
+  the new import is always added to the top of the file

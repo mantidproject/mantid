@@ -660,6 +660,8 @@ Parameters
 **calib_file.nxs**
     The tube calibration file to use.
 
+.. _ISIS_SANS_User_File_QRes-ref:
+
 QRESOLUTION
 -----------
 

@@ -15,7 +15,7 @@
     </reference-frame>
   </defaults>
   <component type="fermi_chopper">
-    <location x="0.0" y="0.0" z="-3.3"/>
+    <location x="0.0" y="0.0" z="-0.551"/>
   </component>
   <type name="fermi_chopper" is="Source"/>
   <component type="sample-position">
@@ -27,7 +27,7 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location z="-0.533" name="monitor"/>
+      <location z="-0.362" name="monitor"/>
     </component>
   </type>
   <type name="monitor" is="monitor">

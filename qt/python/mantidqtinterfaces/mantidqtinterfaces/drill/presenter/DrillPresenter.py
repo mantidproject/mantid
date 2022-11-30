@@ -77,6 +77,7 @@ class DrillPresenter:
                 )
         self.model.processingDone.connect(self.onProcessingDone)
         self.model.newSample.connect(self.onNewSample)
+        self.model.newMode.connect(self.onNewMode)
 
         self._syncViewHeader()
         if self._resetTable():
@@ -266,7 +267,13 @@ class DrillPresenter:
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
         if group:
-            result = self.model.processGroup(rows)
+            acquisionMode = self.model.getAcquisitionMode()
+            if ((acquisionMode in RundexSettings.PROCESSING_MODE)
+                and (RundexSettings.PROCESSING_MODE[acquisionMode]
+                     == RundexSettings.GROUP_BY_GROUP)):
+                result = self.model.processGroupByGroup(rows)
+            else:
+                result = self.model.processGroup(rows)
         else:
             result = self.model.process(rows)
         if not result:
@@ -327,21 +334,37 @@ class DrillPresenter:
         if self._resetTable():
             self.model.addSample(0)
 
+    def onNewMode(self, instrument, acquisitionMode):
+        """
+        Triggered when the instrument and/or acquisition mode changed in the
+        model.
+
+        Args:
+            instrument (str): name of the instrument
+            acquisitionMode (str): name of the acquisition mode
+        """
+        self._syncViewHeader()
+        self._resetTable()
+
     def onLoad(self):
         """
         Triggered when the user want to load a file. This methods start a
         QDialog to get the file path from the user.
         """
-        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
+        defaultSaveDirectory = config["defaultsave.directory"]
+        if not defaultSaveDirectory:
+            defaultSaveDirectory = "."
+        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex',
+                                               defaultSaveDirectory,
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return
         self._resetTable()
         self.model.setIOFile(filename[0])
-        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
         self.view.setVisualSettings(self.model.getVisualSettings())
+        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.view.setWindowModified(False)
 
     def onSave(self):
@@ -362,8 +385,11 @@ class DrillPresenter:
         will open a dialog to select the file even if one has previously been
         used.
         """
+        defaultSaveDirectory = config["defaultsave.directory"]
+        if not defaultSaveDirectory:
+            defaultSaveDirectory = "."
         filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
-                                               './*.mrd',
+                                               defaultSaveDirectory + '/*.mrd',
                                                "Rundex (*.mrd);;All (*)")
         if not filename[0]:
             return

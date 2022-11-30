@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtCore import QObject, Signal, Slot
+from qtpy.QtCore import QObject, Signal, Slot, Qt
+from qtpy.QtWidgets import QApplication
 
 from mantid import ConfigService
 from mantidqt.plotting.markers import PeakMarker, RangeMarker
@@ -138,6 +139,30 @@ class FitInteractiveTool(QObject):
         if should_redraw:
             self.canvas.draw()
 
+    def update_hover_cursor(self, event):
+        """
+        Change cursor to horizontal arrows when hovering over markers.
+        :param event: A MPL mouse event.
+        """
+        # when clicking and dragging, the marker class controls the cursor
+        if event.button is not None:
+            return
+
+        x, y = event.xdata, event.ydata
+        if x is None or y is None:
+            return
+
+        if self.fit_range.min_marker.is_above(x, y) or self.fit_range.max_marker.is_above(x, y):
+            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+            return
+
+        for pm in self.peak_markers:
+            if pm.left_width.is_above(x, y) or pm.right_width.is_above(x, y) or pm.centre_marker.is_above(x, y):
+                QApplication.setOverrideCursor(Qt.SizeHorCursor)
+                return
+
+        QApplication.restoreOverrideCursor()
+
     def start_move_markers(self, event):
         """
         Start moving markers under the mouse.
@@ -151,7 +176,7 @@ class FitInteractiveTool(QObject):
         selected_peak = None
         for pm in self.peak_markers:
             pm.mouse_move_start(x, y)
-            if pm.is_moving:
+            if pm.is_moving():
                 selected_peak = pm
         if selected_peak is not None:
             self.select_peak(selected_peak)

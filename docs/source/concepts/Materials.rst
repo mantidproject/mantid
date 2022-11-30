@@ -60,24 +60,35 @@ The number density is defined as
 
 It can can be generated in one of several ways:
 
-1. Specifying it directly with ``SampleNumberDensity``.
+1. Specifying it directly with ``NumberDensity``.
 2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
    the algorithm calculate it from the OrientedLattice on the
    ``InputWorkspace``).
-3. Specifying the mass density. In this case the number density is calculated as
+3. If a chemical formula consisting of a single element has been supplied the number density will be looked up from Mantid tables
+4. The default behaviour is to deduce it from an effective number density (see below) and an optional packing fraction supplied as ``PackingFraction`` (which is assumed to be 1 if not supplied)
 
-.. math:: \rho_{n,eff} = f \rho_n = \frac{N_{atoms} \rho_m N_A}{\sum_{i}n_{i}M_i}
+The effective number density is defined as
 
-where :math:`f` is the packing fraction, :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_i` is the relative molecular mass of the ith atom.
+.. math:: \rho_{n,eff} = f \rho_n
 
-4. Specifying ``SampleEffectiveNumberDensity`` and ``SamplePackingFraction`` to calculate it from the equation above.
-5. Specifying only ``SampleEffectiveNumberDensity`` (in this case, the packing fraction is assumed to be 1).
-6. A combination of ``SampleEffectiveNumberDensity`` or ``SamplePackingFraction`` with the parameters from method 2 or 3.
+where :math:`f` is the packing fraction
+
+It can be specified in one of several ways:
+
+1. Specifiying it directly with ``EffectiveNumberDensity``
+2. Specifying the mass density. In this case the effective number density is calculated as follows:
+
+.. math:: \rho_{n,eff} = \frac{N_{atoms} \rho_m N_A}{\sum_{i}n_{i}M_i}
+
+where :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_i` is the relative molecular mass of the ith atom.
+
+3. The default behaviour is to set it equal to the full number density multipled by the optional packing fraction (which is assumed to be 1 if not supplied)
+
 
 The effective number density, :math:`\rho_{n,eff}`, should be used for :ref:`absorption calculations<Sample Corrections>`.
 However, the number density, :math:`\rho_n` should be used for refinements and converting between real space representations.
 
-When the number density is provided or generated from one of the above methods, both the packing fraction :math:`f` and effective number density :math:`\rho_{n,eff}` are computed from the above equation if they were not specified.
+If both a number density and effective number density are supplied using the non-default behaviours then a packing fraction will be calculated from their ratio.
 
 Attenuation Coefficients
 ##############################

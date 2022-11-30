@@ -38,7 +38,7 @@ Error Reporter test
 - Input some additional information into the main textbox. Try to include characters that need to be escaped such as ``"``
 - Tick the `Remember Me` checkbox
 - Click the `Don't share any information` button
-- Check with the database admin that an error report was sent **without** a name, email or stacktrace.
+- Check with the database admin that an error report was **not** sent.
 
 ---------------
 
@@ -68,7 +68,7 @@ Error Reporter test
 - Make sure the `Continue` radio button is checked
 - Click the `Don't share any information` button
 - You should be returned to the main Mantid window
-- Check with the database admin that an error report was sent **without** a name, email, stacktrace or textbox.
+- Check with the database admin that an error report was **not** sent.
 
 ---------------
 

@@ -7,6 +7,8 @@
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
+#include <algorithm>
+
 namespace Mantid::Geometry {
 
 /// Default constructor. Creates a group with one symmetry operation (identity).
@@ -55,12 +57,13 @@ Group Group::operator*(const Group &other) const {
   std::vector<SymmetryOperation> result;
   result.reserve(order() * other.order());
 
-  for (const auto &operation : m_allOperations) {
-    for (const auto &otherOp : other.m_allOperations) {
-      result.emplace_back(operation * otherOp);
-    }
-  }
-
+  // performs multiplication between all operations in the Group and the all from the other Group
+  std::transform(
+      m_allOperations.begin(), m_allOperations.end(), std::back_inserter(result), [&result, &other](auto &operation) {
+        std::transform(other.m_allOperations.begin(), other.m_allOperations.end(), std::back_inserter(result),
+                       [&operation](const auto &otherOp) { return operation * otherOp; });
+        return operation;
+      });
   return Group(result);
 }
 
@@ -69,9 +72,9 @@ Group Group::operator*(const Group &other) const {
 std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   std::vector<Kernel::V3D> result;
   result.reserve(m_allOperations.size());
-  for (const auto &operation : m_allOperations) {
-    result.emplace_back(Geometry::getWrappedVector(operation * vector));
-  }
+  std::transform(m_allOperations.cbegin(), m_allOperations.cend(), std::back_inserter(result),
+                 [&vector](const auto &operation) { return Geometry::getWrappedVector(operation * vector); });
+
   std::sort(result.begin(), result.end(), AtomPositionsLessThan());
   result.erase(std::unique(result.begin(), result.end()), result.end());
 

@@ -125,7 +125,7 @@ void TOFSANSResolution::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*reducedWS, *iqWS))
   for (int i = 0; i < numberOfSpectra; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding\n";
       continue;
@@ -204,9 +204,9 @@ void TOFSANSResolution::exec() {
     }
 
     progress.report("Computing Q resolution");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Normalize according to the chosen weighting scheme
   // Note: we are looping over bins, therefore the xLength-1.

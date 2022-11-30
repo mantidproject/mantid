@@ -9,7 +9,6 @@
 #include "MantidDataHandling/ISISJournal.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include <Poco/Net/HTTPResponse.h>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -72,9 +71,9 @@ public:
   // The constructor specifies the string that we want sendRequest to return
   MockInternetHelper(std::string const &returnString) : m_returnString(returnString){};
 
-  MOCK_METHOD2(sendRequestProxy, int(std::string const &, std::ostream &));
+  MOCK_METHOD2(sendRequestProxy, InternetHelper::HTTPStatus(std::string const &, std::ostream &));
 
-  int sendRequest(std::string const &url, std::ostream &serverReply) override {
+  InternetHelper::HTTPStatus sendRequest(std::string const &url, std::ostream &serverReply) override {
     serverReply << m_returnString;
     return sendRequestProxy(url, serverReply);
   }
@@ -238,7 +237,7 @@ private:
     m_internetHelper = internetHelper.get();
     auto journal = ISISJournal("INTER", "19_4", std::move(internetHelper));
     // Ensure the internet helper returns an ok status by default.
-    auto status = Poco::Net::HTTPResponse::HTTP_OK;
+    auto status = InternetHelper::HTTPStatus::OK;
     ON_CALL(*m_internetHelper, sendRequestProxy(_, _)).WillByDefault(Return(status));
     return journal;
   }
@@ -254,7 +253,7 @@ private:
   ISISJournal::RunData emptyFilters() { return ISISJournal::RunData{}; }
 
   void expectURLNotFound() {
-    auto status = Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
+    auto status = InternetHelper::HTTPStatus::NOT_FOUND;
     EXPECT_CALL(*m_internetHelper, sendRequestProxy(_, _)).Times(1).WillOnce(Return(status));
   }
 

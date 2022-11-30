@@ -21,7 +21,7 @@ namespace Algorithms {
    algorithms
     to provide an integrated value over q and q^2..
 */
-class MANTID_ALGORITHMS_DLL ElasticWindow : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ElasticWindow final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ElasticWindow"; }

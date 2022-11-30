@@ -93,7 +93,7 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
 
     def test_qy(self):  # qy_max, qy_dqy, qy_dqy_opt
         value_max, value_step = 0.06, 0.002
-        i.LimitsQXY(0.0, value_max, value_step, 'LIN')
+        i.LimitsQXY(0.0, value_max, value_step)
         self.checkFloat(i.ReductionSingleton().QXY2, value_max)
         self.checkFloat(i.ReductionSingleton().DQXY, value_step)
 

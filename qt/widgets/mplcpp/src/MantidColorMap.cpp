@@ -9,7 +9,12 @@
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 #include <QInputDialog>
+#include <QLabel>
 #include <QStringList>
 #include <QWidget>
 
@@ -24,16 +29,36 @@ namespace MantidQt::Widgets::MplCpp {
  * @param parent A widget to act as parent for the chooser dialog
  * @return
  */
-QString MantidColorMap::chooseColorMap(const QString &previous, QWidget *parent) {
+std::pair<QString, bool> MantidColorMap::chooseColorMap(const std::pair<QString, bool> &previous, QWidget *parent) {
   static QStringList allowedCMaps{"coolwarm", "gray", "jet", "plasma", "summer", "winter", "viridis"};
-  const int currentIdx = allowedCMaps.indexOf(previous);
-  bool ok;
-  QString item = QInputDialog::getItem(parent, "Select colormap...", "Name:", allowedCMaps,
-                                       currentIdx >= 0 ? currentIdx : 0, false, &ok);
-  if (ok && !item.isEmpty())
-    return item;
-  else
+  const int currentIdx = allowedCMaps.indexOf(previous.first);
+
+  // create simple dialog to capture color map and highlight flag
+  QDialog colormapDialog(parent);
+  QFormLayout form(&colormapDialog);
+
+  QComboBox *colorMapCombo = new QComboBox(&colormapDialog);
+  colorMapCombo->addItems(allowedCMaps);
+  colorMapCombo->setCurrentIndex(currentIdx >= 0 ? currentIdx : 0);
+  form.addRow(colorMapCombo);
+
+  QCheckBox *highlightZeroCounts = new QCheckBox(&colormapDialog);
+  highlightZeroCounts->setChecked(previous.second);
+  form.addRow(new QLabel("Highlight Detectors With Zero Counts"), highlightZeroCounts);
+
+  QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &colormapDialog);
+  form.addRow(&buttonBox);
+  QObject::connect(&buttonBox, SIGNAL(accepted()), &colormapDialog, SLOT(accept()));
+  QObject::connect(&buttonBox, SIGNAL(rejected()), &colormapDialog, SLOT(reject()));
+
+  // display modal dialog
+  if (colormapDialog.exec() == QDialog::Accepted) {
+    QString item = colorMapCombo->currentText();
+    bool highlightZeros = highlightZeroCounts->isChecked();
+    return std::make_pair(item, highlightZeros);
+  } else {
     return previous;
+  }
 }
 
 /**

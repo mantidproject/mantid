@@ -135,7 +135,28 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
     throw std::runtime_error(msg.str());
   }
   m_curSpectra.reset();
+  localWorkspace->setDistribution(setDistribution(file));
   return localWorkspace;
+}
+
+bool LoadAscii2::setDistribution(std::ifstream &file) {
+  bool isDistribution = false;
+  const bool distributionFlag = getProperty("ForceDistributionTrue");
+  if (distributionFlag) {
+    isDistribution = true;
+  } else {
+    std::string newLine;
+    // reset to start of ifstream
+    file.clear();
+    file.seekg(0);
+    while (std::getline(file, newLine)) {
+      if (newLine.find("Distribution=true") != std::string::npos) {
+        isDistribution = true;
+        break;
+      }
+    }
+  }
+  return isDistribution;
 }
 
 /// Attempts to read a table workspace from the file.
@@ -783,6 +804,9 @@ void LoadAscii2::init() {
   mustBePosInt->setLower(0);
   declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,
                   "If given, skip this number of lines at the start of the file.");
+  declareProperty("ForceDistributionTrue", false,
+                  "(default: false) If true, the loaded workspace is set to Distribution=true. If true, "
+                  "the Distribution flag, which may be in the file header, is ignored.");
 }
 
 /**

@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL ChangeLogTime : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChangeLogTime final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

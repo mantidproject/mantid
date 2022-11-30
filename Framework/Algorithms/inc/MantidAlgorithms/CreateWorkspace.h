@@ -34,7 +34,7 @@ namespace Algorithms {
  *
  *
  */
-class MANTID_ALGORITHMS_DLL CreateWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override { return "CreateWorkspace"; } ///< @return the algorithms name
   /// Summary of algorithms purpose

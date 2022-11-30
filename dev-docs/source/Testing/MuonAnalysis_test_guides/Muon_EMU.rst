@@ -16,7 +16,7 @@ This is to give a clean state so it is easier to find the correct results table.
 
 -------------------------
 
-.. _ionic_diffusion_test:
+.. _emu_ionic_diffusion_test:
 
 Ionic Diffusion Test
 --------------------
@@ -65,7 +65,7 @@ Ionic Diffusion Test
 
 --------------------------------
 
-.. _superconducting_copper_test:
+.. _emu_superconducting_copper_test:
 
 Superconducting Copper Test
 ---------------------------

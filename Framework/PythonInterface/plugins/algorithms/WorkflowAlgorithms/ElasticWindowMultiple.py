@@ -207,7 +207,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 return float(sample_param[index])
         else:
             logger.information('Vertical axis is in run number')
-            unit = ('Run No', 'last 3 digits')
+            unit = ('Run No', ' last 3 digits')
 
             def axis_value(index):
                 return float(run_numbers[index][-3:])

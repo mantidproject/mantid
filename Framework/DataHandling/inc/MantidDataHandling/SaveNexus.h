@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/SerialAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include <climits>
 
 namespace Mantid {
@@ -27,7 +28,7 @@ exported data </LI>
 @author Freddie Akeroyd, STFC ISIS Facility, GB
 @date 24/01/2008
 */
-class DLLExport SaveNexus : public API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveNexus : public API::SerialAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveNexus"; };

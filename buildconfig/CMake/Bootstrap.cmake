@@ -18,7 +18,7 @@ if(MSVC AND NOT CONDA_ENV)
       CACHE PATH "Location to clone third party dependencies to"
   )
   set(THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git")
-  set(THIRD_PARTY_GIT_SHA1 02d17753f5232c2e8ba0faf94e1d189e4241ca9d)
+  set(THIRD_PARTY_GIT_SHA1 5fae8989a249099f00265d53f47d7b6a9b87e352)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)

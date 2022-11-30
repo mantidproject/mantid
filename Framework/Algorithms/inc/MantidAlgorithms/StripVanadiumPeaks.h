@@ -41,7 +41,7 @@ namespace Algorithms {
     @author Janik Zikovsky, SNS
     @date 2010-09-10
 */
-class MANTID_ALGORITHMS_DLL StripVanadiumPeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL StripVanadiumPeaks final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   StripVanadiumPeaks();

@@ -1,4 +1,4 @@
-set(TEST_PY_FILES PyChopTest.py)
+set(TEST_PY_FILES PyChopInstrumentTest.py)
 
 if(ENABLE_WORKBENCH)
   set(PYUNITTEST_QT_API pyqt5) # force to use qt5
@@ -10,4 +10,6 @@ endif()
 add_subdirectory(Muon)
 add_subdirectory(MultiPlotting)
 add_subdirectory(sample_transmission_calculator)
+add_subdirectory(SimpleScanViewer)
 add_subdirectory(TOFTOF)
+add_subdirectory(dns_powder_tof)

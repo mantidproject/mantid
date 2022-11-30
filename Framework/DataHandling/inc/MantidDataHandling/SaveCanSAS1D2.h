@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "SaveCanSAS1D.h"
 #include <fstream>
 
@@ -60,7 +61,7 @@ stylesheet
 @author Gesner Passos, Rutherford Appleton Laboratory
 @date 11/04/2013
 */
-class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
+class MANTID_DATAHANDLING_DLL SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override { return {"LoadCanSAS1D"}; }

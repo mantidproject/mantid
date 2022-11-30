@@ -21,6 +21,9 @@ set(TEST_PY_FILES
     # Focus
     engineering_diffraction/tabs/focus/test/test_focus_model.py
     engineering_diffraction/tabs/focus/test/test_focus_presenter.py
+    # GSAS2
+    engineering_diffraction/tabs/gsas2/test/test_gsas2_model.py
+    engineering_diffraction/tabs/gsas2/test/test_gsas2_presenter.py
     # IO
     engineering_diffraction/test/engineering_diffraction_io_test.py
 )

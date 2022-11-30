@@ -8,7 +8,7 @@
 #
 #
 from posixpath import join as joinsettings
-from qtpy.QtCore import QSettings
+from qtpy.QtCore import QSettings, QVariant
 
 
 class UserConfig(object):
@@ -44,17 +44,6 @@ class UserConfig(object):
             self.qsettings.remove('Editors/SessionTabs')
             self.set_qsettings_values(default_settings)
 
-        # fixup the values of booleans - they do not evaluate correctly when read from the config file
-        for key in self.all_keys():
-            try:
-                value = self.get(key)
-            except (KeyError, TypeError):
-                continue
-            if value == 'true':
-                self.set(key, True)
-            elif value == 'false':
-                self.set(key, False)
-
     def set_qsettings_values(self, default_settings):
         configFileKeys = self.qsettings.allKeys()
         for key in default_settings.keys():
@@ -82,25 +71,12 @@ class UserConfig(object):
         ``config.get('main/window/size')`` If no option is found then
         a KeyError is raised
         """
-
-        def raise_keyerror(key):
-            raise KeyError('Unknown config item requested: "{}"'.format(option))
-
-        full_option = self._check_section_option_is_valid(option, second)
-        if type is None:
-            # return whatever the QSettings object returns
-            value = self.qsettings.value(full_option)
-            if value is None:
-                raise_keyerror(full_option)
-            else:
-                return value
-        else:
-            # PyQt QSettings with the type parameter tries to always return the type even if no value exists
-            # We still want a KeyError if it does not exist
-            if self.has(option, second):
-                return self.qsettings.value(full_option, type=type)
-            else:
-                raise_keyerror(option)
+        try:
+            return self._get_setting(option, second, type)
+        except TypeError:
+            # The 'PyQt_PyObject' (1024) type is sometimes used for settings which have an unknown type.
+            value = self._get_setting(option, second, type=QVariant.typeToName(1024))
+            return value if isinstance(value, type) else type(*value)
 
     def has(self, option, second=None):
         """Return a True if the key exists in the
@@ -164,3 +140,19 @@ class UserConfig(object):
             if not isinstance(second, str):
                 raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(second), second))
             return joinsettings(option, second)
+
+    def _get_setting(self, option, second=None, type=None):
+        """Return a value for an option. If two arguments are given the first
+        is the group/section and the second is the option within it.
+        ``config.get('main', 'window/size')`` is equivalent to
+        ``config.get('main/window/size')`` If no option is found then
+        a KeyError is raised
+        """
+        full_option = self._check_section_option_is_valid(option, second)
+        if type is None:
+            # Some platforms only ever store string values in QSettings so the type of stored settings can get lost
+            raise ValueError("Please specify the type of the setting you are retrieving.")
+        if not self.has(option, second):
+            # If a setting does not exist, we want to raise a KeyError
+            raise KeyError(f"Unknown config item requested: '{option}'")
+        return self.qsettings.value(full_option, type=type)

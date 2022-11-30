@@ -38,7 +38,7 @@ class DataItem;
 
   @date 2012-01-20
 */
-class DLLExport WriteLock {
+class MANTID_KERNEL_DLL WriteLock {
 public:
   WriteLock(const DataItem &item);
   WriteLock(const WriteLock &) = delete;

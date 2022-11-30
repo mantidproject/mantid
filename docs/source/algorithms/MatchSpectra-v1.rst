@@ -37,12 +37,12 @@ Usage
 .. testcode:: MatchSpectra
 
     import numpy as np
-    x = np.arange(100, dtype=np.float)
+    x = np.arange(100, dtype=float)
     x = np.tile(x, 2)
-    y = np.arange(100, dtype=np.float)
+    y = np.arange(100, dtype=float)
     y = np.tile(y, 2)
     y[100:200] += 10
-    dy = np.zeros(y.size, dtype=np.float) + 1.
+    dy = np.zeros(y.size, dtype=float) + 1.
     CreateWorkspace(OutputWorkspace='MatchSpectra_input',
                     DataX=x,
                     DataY=y,

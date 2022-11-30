@@ -70,7 +70,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
             MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')
 
     def test_window(self):
-        self.assertEquals("Frequency Domain Analysis", self.context.window_title)
+        self.assertEqual("Frequency Domain Analysis", self.context.window_title)
 
     def test_get_workspace_names_returns_no_time_domain_workspaces(self):
         self.populate_ADS()

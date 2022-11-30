@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -28,7 +27,7 @@ namespace Geometry {
  @date 01/10/2010
  */
 
-class DLLExport CompositeImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
+class MANTID_GEOMETRY_DLL CompositeImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
 public:
   //---------------------------------- Override base-class methods---
   bool isPointContained(const coord_t *coords) override;

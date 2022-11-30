@@ -9,7 +9,7 @@
 # another part of AbinsModules.
 import os
 import re
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
@@ -17,12 +17,34 @@ from mantid.kernel import Atom, Direction, StringListValidator, StringArrayPrope
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 import abins
-from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ALL_SAMPLE_FORMS, ATOM_PREFIX
-from abins.instruments import get_instrument
+from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
+from abins.instruments import get_instrument, Instrument
 
 
 class AbinsAlgorithm:
     """Class providing shared utility for multiple inheritence by 1D, 2D implementations"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)  # i.e. forward everything to PythonAlgorithm
+
+        # User input private properties
+        self._instrument_name = None
+
+        self._vibrational_or_phonon_data_file = None
+        self._ab_initio_program = None
+        self._out_ws_name = None
+        self._temperature = None
+        self._atoms = None
+        self._sum_contributions = None
+        self._save_ascii = None
+        self._scale_by_cross_section = None
+
+        self._num_quantum_order_events = None
+        self._autoconvolution = None
+        self._energy_units = None
+
+        # Interally-used private properties
+        self._max_event_order = None
+        self._bin_width = None
 
     def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""
@@ -31,17 +53,16 @@ class AbinsAlgorithm:
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
 
         self._temperature = self.getProperty("TemperatureInKelvin").value
-        self._bin_width = self.getProperty("BinWidthInWavenumber").value
-        self._sample_form = self.getProperty("SampleForm").value
 
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
         self._save_ascii = self.getProperty("SaveAscii").value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
 
+        self._energy_units = self.getProperty("EnergyUnits").value
+
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
-
         self._max_event_order = self._num_quantum_order_events # This default can be replaced in child class
 
     def set_instrument(self) -> None:
@@ -53,6 +74,9 @@ class AbinsAlgorithm:
                                               **self._instrument_kwargs)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
+
+    def get_instrument(self) -> Union[Instrument, None]:
+        return self._instrument
 
     def declare_common_properties(self) -> None:
         """Declare properties common to Abins 1D and 2D versions"""
@@ -77,14 +101,6 @@ class AbinsAlgorithm:
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
 
-        self.declareProperty(name="BinWidthInWavenumber", defaultValue=1.0, doc="Width of bins used during rebining.")
-
-        self.declareProperty(name="SampleForm",
-                             direction=Direction.Input,
-                             defaultValue="Powder",
-                             validator=StringListValidator(ALL_SAMPLE_FORMS),
-                             doc="Form of the sample: Powder.")
-
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S."
                                  "If left blank, workspaces with S for all types of atoms will be calculated. "
@@ -108,6 +124,15 @@ class AbinsAlgorithm:
                              validator=StringListValidator(['1', '2']),
                              doc="Number of quantum order effects included in the calculation "
                                  "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
+
+        self.declareProperty(name="Autoconvolution", defaultValue=False,
+                             doc="Estimate higher quantum orders by convolution with fundamental spectrum.")
+
+        self.declareProperty(name="EnergyUnits",
+                             defaultValue="cm-1",
+                             direction=Direction.Input,
+                             validator=StringListValidator(["cm-1", "meV"]),
+                             doc="Energy units for output workspace and experimental file")
 
     def declare_instrument_properties(
             self, default: str = "TOSCA",
@@ -146,7 +171,8 @@ class AbinsAlgorithm:
                 if (
                         (instrument in abins.parameters.instruments)
                         and (parameter_name in abins.parameters.instruments[instrument])):
-                    valid_choices += sorted(list(abins.parameters.instruments[instrument][parameter_name]))
+                    valid_choices += list(abins.parameters.instruments[instrument][parameter_name])
+            valid_choices = sorted(list(set(valid_choices)))
 
             self.declareProperty(name=property_name,
                                  direction=Direction.Input,
@@ -202,10 +228,6 @@ class AbinsAlgorithm:
         temperature = self.getProperty("TemperatureInKelvin").value
         if temperature < 0:
             issues["TemperatureInKelvin"] = "Temperature must be positive."
-
-        bin_width = self.getProperty("BinWidthInWavenumber").value
-        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
         return issues
 

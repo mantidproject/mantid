@@ -21,7 +21,7 @@ namespace Geometry {
  * A ConvexPolygon with only 4 vertices. Better performance as no dynamic
  * allocation
  */
-class DLLExport Quadrilateral final : public ConvexPolygon {
+class MANTID_GEOMETRY_DLL Quadrilateral final : public ConvexPolygon {
 public:
   /// Constructor with the four vertices
   Quadrilateral(const Kernel::V2D &lowerLeft, const Kernel::V2D &lowerRight, const Kernel::V2D &upperRight,

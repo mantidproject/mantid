@@ -64,8 +64,8 @@ void LoadCanSAS1D2::exec() {
    @param output_name: The name of the OutputWorkspace, in order to create the
    workspaces with similar names.
  */
-void LoadCanSAS1D2::processTransmission(std::vector<MatrixWorkspace_sptr> &trans_gp, const std::string &trans_name,
-                                        const std::string &output_name) {
+void LoadCanSAS1D2::processTransmission(const std::vector<MatrixWorkspace_sptr> &trans_gp,
+                                        const std::string &trans_name, const std::string &output_name) {
 
   std::string trans_wsname = std::string(output_name).append("_trans_").append(trans_name);
   const std::string fileName = getPropertyValue("Filename");

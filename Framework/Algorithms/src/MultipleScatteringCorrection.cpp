@@ -296,7 +296,7 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
   // -- loop over the spectra/detectors
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outws))
   for (int64_t workspaceIndex = 0; workspaceIndex < numHists; ++workspaceIndex) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // locate the spectrum and its detector
     if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
@@ -352,9 +352,9 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.notice() << "finished integration.\n";
 }
@@ -472,7 +472,7 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   // -- loop over the spectra/detectors
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outws))
   for (int64_t workspaceIndex = 0; workspaceIndex < numHists; ++workspaceIndex) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // locate the spectrum and its detector
     if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
@@ -538,9 +538,9 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
       outws->setHistogram(workspaceIndex, histNew);
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   g_log.notice() << "finished integration.\n";
 }
 
@@ -641,7 +641,7 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (int64_t indexTo = 0; indexTo < numVolumeElements; ++indexTo) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     const auto posTo = distGraber.m_elementPositions[indexTo];
     Track track(posTo, V3D{0, 0, 1}); // take object creation out of the loop
@@ -670,9 +670,9 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       L12s[idx] = checkzero(rayLengthOne1 - rayLengthOne2);
     }
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
@@ -700,7 +700,7 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS))
   for (int64_t indexTo = 0; indexTo < numVolumeElements; ++indexTo) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // find the position of first scattering element (container or sample)
     const auto posTo = indexTo < numVolumeElementsContainer
                            ? distGraberContainer.m_elementPositions[indexTo]
@@ -732,9 +732,9 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       L12sContainer[idx] = checkzero(rayLen1_container - rayLen2_container);
       L12sSample[idx] = checkzero(rayLen1_sample - rayLen2_sample);
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**

@@ -18,6 +18,7 @@ namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace CurveFitting::Algorithms;
+using namespace Mantid::API;
 
 namespace {
 ///@cond
@@ -28,11 +29,9 @@ const char *MASS_NAME = "Mass";
 
 ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"), m_wsIndex(0), m_startX(0.0), m_endX(0.0),
-      m_voigt(), m_resolutionFunction(), m_yspace(), m_modQ(), m_e0(), m_mass(0.0) {
-  using namespace Mantid::API;
-  m_resolutionFunction =
-      std::dynamic_pointer_cast<VesuvioResolution>(FunctionFactory::Instance().createFunction("VesuvioResolution"));
-}
+      m_voigt(), m_resolutionFunction(std::dynamic_pointer_cast<VesuvioResolution>(
+                     FunctionFactory::Instance().createFunction("VesuvioResolution"))),
+      m_yspace(), m_modQ(), m_e0(), m_mass(0.0) {}
 
 //-------------------------------------- Function evaluation
 //-----------------------------------------

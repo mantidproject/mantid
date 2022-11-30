@@ -36,7 +36,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ImageInfoModelMatrixWS : public ImageInfoModel 
 public:
   ImageInfoModelMatrixWS(Mantid::API::MatrixWorkspace_sptr workspace);
 
-  ImageInfoModel::ImageInfo info(const double x, const double y, const double signal) const override;
+  ImageInfoModel::ImageInfo info(const double x, const double y, const double signal,
+                                 const QMap<QString, QString> &extraValues) const override;
 
 private:
   void setUnitsInfo(ImageInfoModel::ImageInfo *info, int infoIndex, const size_t wsIndex, const double x) const;

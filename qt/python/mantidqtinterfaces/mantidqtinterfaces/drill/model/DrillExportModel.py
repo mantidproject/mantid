@@ -20,14 +20,10 @@ import os
 class DrillExportModel:
 
     """
-    Dictionnary containing algorithms and activation state.
+    Dictionnary containing algorithm (name, extension) tuples and activation
+    state.
     """
     _exportAlgorithms = None
-
-    """
-    Dictionnary of export file extensions.
-    """
-    _exportExtensions = None
 
     """
     Dictionnary of export algorithm short doc.
@@ -57,20 +53,14 @@ class DrillExportModel:
             acquisitionMode (str): acquisition mode
         """
         self._exportAlgorithms = {k: v for k, v in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
-        self._exportExtensions = dict()
         self._exportDocs = dict()
-        for a in self._exportAlgorithms.keys():
-            if a in RundexSettings.EXPORT_ALGO_EXTENSION:
-                self._exportExtensions[a] = \
-                    RundexSettings.EXPORT_ALGO_EXTENSION[a]
+        for (a, _) in self._exportAlgorithms.keys():
             try:
                 alg = AlgorithmManager.createUnmanaged(a)
                 self._exportDocs[a] = alg.summary()
             except:
                 pass
         self._pool = DrillAlgorithmPool()
-        self._pool.signals.taskError.connect(self._onTaskError)
-        self._pool.signals.taskSuccess.connect(self._onTaskSuccess)
         self._exports = dict()
         self._successExports = dict()
 
@@ -81,16 +71,7 @@ class DrillExportModel:
         Returns:
             list(str): names of algorithms
         """
-        return [algo for algo in self._exportAlgorithms.keys()]
-
-    def getAlgorithmExtentions(self):
-        """
-        Get the extension used for the output file of each export algorithm.
-
-        Returns:
-            dict(str:str): dictionnary algo:extension
-        """
-        return {k:v for k,v in self._exportExtensions.items()}
+        return [(algo, ext) for (algo, ext) in self._exportAlgorithms.keys()]
 
     def getAlgorithmDocs(self):
         """
@@ -106,7 +87,7 @@ class DrillExportModel:
         Get the state of a specific algorithm.
 
         Args:
-            algorithm: name of the algo
+            algorithm (str, str): name of the algo and output file extension
         """
         if algorithm in self._exportAlgorithms:
             return self._exportAlgorithms[algorithm]
@@ -118,7 +99,7 @@ class DrillExportModel:
         Activate a spefific algorithm.
 
         Args:
-            algorithm (str): name of the algo
+            algorithm (str, str)): name of the algo and output file extension
         """
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = True
@@ -128,7 +109,7 @@ class DrillExportModel:
         Inactivate a specific algorithm.
 
         Args:
-            algorithm (str): name of the algo
+            algorithm (str, str): name of the algo and output file extension
         """
         if algorithm in self._exportAlgorithms:
             self._exportAlgorithms[algorithm] = False
@@ -158,17 +139,14 @@ class DrillExportModel:
         except:
             return False
 
-    def _onTaskSuccess(self, name):
+    def _onTaskSuccess(self, wsName, filename):
         """
         Triggered when the export finished with success.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
         """
-        name = name.split(':')
-        wsName = name[0]
-        filename = name[1]
-
         if wsName not in self._successExports:
             self._successExports[wsName] = set()
         self._successExports[wsName].add(filename)
@@ -179,18 +157,15 @@ class DrillExportModel:
                 del self._exports[wsName]
                 self._logSuccessExport(wsName)
 
-    def _onTaskError(self, name, msg):
+    def _onTaskError(self, wsName, filename, msg):
         """
         Triggered when the export failed.
 
         Args:
-            name (str): the task name
+            wsName (str): name of the exported workspace
+            filename (str): name of the file
             msg (str): error msg
         """
-        name = name.split(':')
-        wsName = name[0]
-        filename = name[1]
-
         logger.error("Error while exporting workspace {}.".format(wsName))
         logger.error(msg)
 
@@ -244,7 +219,7 @@ class DrillExportModel:
             return
 
         tasks = list()
-        for algo,active in self._exportAlgorithms.items():
+        for (algo, ext), active in self._exportAlgorithms.items():
             if not active:
                 continue
             if not self._validCriteria(outputWs, algo):
@@ -256,10 +231,8 @@ class DrillExportModel:
             for wsName in mtd.getObjectNames(contain=workspaceName):
                 if isinstance(mtd[wsName], WorkspaceGroup):
                     continue
-
                 filename = os.path.join(
-                        exportPath,
-                        wsName + RundexSettings.EXPORT_ALGO_EXTENSION[algo])
+                        exportPath, wsName + ext)
                 name = wsName + ":" + filename
                 if wsName not in self._exports:
                     self._exports[wsName] = set()
@@ -272,11 +245,17 @@ class DrillExportModel:
                         kwargs['LogList'] = [log.strip() for log in log_list] # removes white spaces
                     if 'Reflectometry' in algo:
                         kwargs['WriteHeader'] = True
-                        kwargs['FileExtension'] = 'custom'
+                        kwargs['FileExtension'] = ext
+                        kwargs['Theta'] = mtd[wsName].getRun().getProperty('san.value')
                     else:
                         kwargs['WriteXError'] = True
                 task = DrillTask(name, algo, InputWorkspace=wsName,
                                  FileName=filename, **kwargs)
+                task.addSuccessCallback(lambda wsName=wsName, filename=filename:
+                                        self._onTaskSuccess(wsName, filename))
+                task.addErrorCallback(lambda msg, wsName=wsName,
+                                             filename=filename:
+                                      self._onTaskError(wsName, filename, msg))
                 tasks.append(task)
 
         self._pool.addProcesses(tasks)

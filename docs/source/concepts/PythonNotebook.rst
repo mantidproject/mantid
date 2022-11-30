@@ -1,120 +1,60 @@
 .. _PythonNotebook:
 
-==========================
-MantidPython and Notebook
-==========================
+====================================
+Access Mantid in Python and Notebook
+====================================
 
-MantidPython can be used to access all of the functionality of the Mantid Framework outside of the Workbench interface.
+All the functionality of Mantid can be accessed outside of the Workbench interface.
 
-The Jupyter Notebook is a web-based interactive computational environment where you can combine code execution, text, mathematics, plots and rich media into a single document.
+To access Mantid in python, simply install the
+mantid framework alongside python (we recommend using `Conda <https://download.mantidproject.org/conda.html>`_).
+Alternatively, the python packaged with MantidWorkbench can be launched from the command line,
+using the correct path detailed below.
 
-Launching on different platforms
-================================
+A Jupyter Notebook is a web-based interactive computational environment where you can combine code execution, text,
+mathematics, plots and rich media into a single document.
+To access this, you need to install ``notebook`` onto the Python version that has ``mantid`` installed.
+Again, we recommend using a conda environment that contains both ``notebook`` and ``mantid``.
+If you want to launch a Jupyter Notebook from MantidWorkbench, then you will have to use Conda or Pip to install
+``notebook`` onto the packaged python version.
 
-Windows
--------
-
-Open a Command Prompt.
-
-
-Launch MantidPython:
-
-.. code-block:: python
-
-   C:\MantidInstall\bin\mantidpython.bat --classic
-
-Launch Jupyter Notebook:
-
-.. code-block:: python
-
-   C:\MantidInstall\bin\mantidpython.bat notebook
-
-
-MacOS
------
-
-Open Terminal.
-
-
-Launch MantidPython:
-
-.. code-block:: python
-
-   /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
-
-Launch Jupyter Notebook:
-
-.. code-block:: python
-
-   /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython notebook
-
-
-Ubuntu
-------
-
-Open Terminal.
-
-
-Launch MantidPython:
-
-.. code-block:: python
-
-   /opt/Mantid/bin/mantidpython --classic
-
-Launch Jupyter Notebook:
-
-.. code-block:: python
-
-   /opt/Mantid/bin/mantidpython notebook --notebook-dir="~"
-
-
-Accessing Algorithms
+Packaged Python Path
 ====================
 
-In MantidPython or an Jupyter Notebook, accessing the Mantid Framework should be as simple as:
+Find the packaged python within MantidWorkbench on each OS:
+
+* Windows: ``[INSTALL_PATH]\bin\python.exe`` where ``INSTALL_PATH`` eg. ``'C:\MantidInstall\bin\python.exe'``
+* Linux: ``/opt/mantidworkbench/bin/python3``
+* MacOS: ``/Applications/MantidWorkbench.app/Contents/Resources/bin/python3``
+
+Commands
+========
+
+In Python or a Jupyter Notebook, accessing parts of the Mantid framework should be as simple as:
 
 .. code-block:: python
 
    from mantid.simpleapi import *
 
-If this doesn't work, the path to the Mantid Installation directory should be set:
+Run a python script:
 
 .. code-block:: python
 
-   import sys
-   sys.path.append('PATH')
+   /path/to/python script.py
 
-Where the 'PATH' should be:
-
-* Windows: ``[INSTALL_PATH]\bin`` where ``INSTALL_PATH`` eg. ``'C:\MantidInstall\bin\'``
-* Linux: ``/opt/Mantid/bin:/opt/Mantid/lib`` for an official release and ``/opt/mantidnightly/bin:/opt/mantidnightly/lib`` for a nightly development build
-* MacOS: ``/Applications/MantidWorkbench.app/Contents/MacOS``
-
-
-
-Running a Script
-================
-
-Simply call the script after the MantidPython or Notebook launch command:
-
-Run a python script on MacOS:
+Run a notebook:
 
 .. code-block:: python
 
-   /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic script.py
+   /path/to/python -m notebook "Downloads\Introduction to using Mantid with IPython Notebook.ipynb"
 
-Run a notebook on Windows:
-
-.. code-block:: python
-
-   C:\MantidInstall\bin\mantidpython.bat notebook "Downloads\Introduction to using Mantid with IPython Notebook.ipynb"
-
-`Download this Example Notebook <http://sourceforge.net/projects/mantid/files/IPython%20Notebook/Introduction%20to%20using%20Mantid%20with%20IPython%20Notebook.ipynb/download>`_
+Download an Example Notebook `here <http://sourceforge.net/projects/mantid/files/IPython%20Notebook/Introduction%20to%20using%20Mantid%20with%20IPython%20Notebook.ipynb/download>`_.
 
 
 Script and Notebook Generation
 ==============================
 
-After processing a workspace in Mantid, the history of how this data was manipulated can be converted to a script or a notebook, with the use of :ref:`algm-GeneratePythonScript` or :ref:`algm-GenerateIPythonNotebook` respectively.
+After processing a workspace in Mantid, the history of how this data was manipulated can be converted to a script
+or a notebook, with the use of :ref:`algm-GeneratePythonScript` or :ref:`algm-GenerateIPythonNotebook` respectively.
 
 .. categories:: Concepts

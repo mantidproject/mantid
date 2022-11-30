@@ -20,7 +20,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-05-25
  */
-class MANTID_CRYSTAL_DLL SaveIsawPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveIsawPeaks final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawPeaks"; };

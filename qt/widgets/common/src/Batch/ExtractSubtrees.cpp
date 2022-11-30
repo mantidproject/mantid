@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
+#include <algorithm>
 #include <boost/iterator/transform_iterator.hpp>
 #include <tuple>
 

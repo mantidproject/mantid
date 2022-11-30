@@ -190,8 +190,8 @@ public:
   QList<PropertyHandler *> getPeakList();
 
   // Plot the function on a graph
-  bool &hasPlot() { return m_hasPlot; }
-  void setHasPlot(bool &state) { m_hasPlot = state; };
+  bool hasPlot() const { return m_hasPlot; }
+  void setHasPlot(const bool state) { m_hasPlot = state; };
   void removeAllPlots();
 
   void fit();

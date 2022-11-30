@@ -142,13 +142,13 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
     filterEventList(eventList, minVal, maxVal, log, Y);
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Create a table workspace to hold the sum.
   ITableWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().createTable();
@@ -392,7 +392,7 @@ template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel:
   Progress prog(this, 0.0, 1.0, numSpec);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
     const auto pulseTimes = eventList.getPulseTimes();
     for (auto pulseTime : pulseTimes) {
@@ -405,9 +405,9 @@ template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel:
     }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // The errors are the sqrt of the counts so long as we don't deal with
   // weighted events.

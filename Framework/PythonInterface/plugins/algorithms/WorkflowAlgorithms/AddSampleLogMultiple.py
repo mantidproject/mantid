@@ -108,7 +108,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
             issues['LogUnits'] = 'Number of log units must be 0 or match the number of log names'
 
         if self.getProperty('ParseType').value and num_types != 0:
-            issue['LogTypes'] = 'LogTypes array not used when ParseType=True'
+            issues['LogTypes'] = 'LogTypes array not used when ParseType=True'
 
         if num_names > 0 and num_types != 0 and num_types != num_names:
             issues['LogTypes'] = 'Number of log types must be 0 or match the number of log names'

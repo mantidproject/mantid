@@ -8,8 +8,11 @@
 
 #include "WideInt.h"
 
+#include <algorithm>
 #include <array>
 #include <cstring>
+#include <iterator>
+#include <numeric>
 
 /// @cond DOXYGEN_BUG
 namespace std {
@@ -687,13 +690,8 @@ public:
 private:
   template <typename T>
   constexpr static void divide(const T &lhserator, const T &denominator, T &quotient, T &remainder) {
-    bool is_zero = true;
-    for (auto c : denominator.m_arr) {
-      if (c != 0) {
-        is_zero = false;
-        break;
-      }
-    }
+    bool is_zero =
+        std::all_of(std::cbegin(denominator.m_arr), std::cend(denominator.m_arr), [](const auto &c) { return c == 0; });
 
     if (is_zero) {
       throw std::domain_error("divide by zero");
@@ -1412,10 +1410,7 @@ constexpr uint512_t operator"" _cppui512(const char *n) { return uint512_t::_imp
 
 template <size_t Bits, typename Signed> struct hash<wide_integer<Bits, Signed>> {
   std::size_t operator()(const wide_integer<Bits, Signed> &lhs) const {
-    size_t res = 0;
-    for (auto n : lhs.m_arr) {
-      res += n;
-    }
+    size_t res = std::accumulate(std::cbegin(lhs.m_arr), std::cend(lhs.m_arr), 0);
     return hash<size_t>()(res);
   }
 };

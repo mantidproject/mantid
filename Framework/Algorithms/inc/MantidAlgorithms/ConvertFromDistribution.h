@@ -25,7 +25,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 17/11/2008
 */
-class MANTID_ALGORITHMS_DLL ConvertFromDistribution : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertFromDistribution final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertFromDistribution"; }

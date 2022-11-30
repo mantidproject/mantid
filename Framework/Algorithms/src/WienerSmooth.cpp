@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/WienerSmooth.h"
 
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -199,8 +198,7 @@ API::MatrixWorkspace_sptr WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspac
   // define the spline
   API::IFunction_sptr spline = API::FunctionFactory::Instance().createFunction("BSpline");
   auto xInterval = getStartEnd(X, inputWS->isHistogramData());
-  spline->setAttributeValue("StartX", xInterval.first);
-  spline->setAttributeValue("EndX", xInterval.second);
+  setSplineDataBounds(spline, xInterval.first, xInterval.second);
   spline->setAttributeValue("NBreak", static_cast<int>(nbreak));
   // fix the first and last parameters to the first and last data values
   spline->setParameter(0, Y.front());
@@ -405,6 +403,17 @@ API::MatrixWorkspace_sptr WienerSmooth::copyInput(const API::MatrixWorkspace_spt
   alg->execute();
   API::MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
   return ws;
+}
+
+void WienerSmooth::setSplineDataBounds(API::IFunction_sptr &spline, const double startX, const double endX) {
+  const double currentEndX = spline->getAttribute("EndX").asDouble();
+  if (startX >= currentEndX) {
+    spline->setAttributeValue("EndX", endX);
+    spline->setAttributeValue("StartX", startX);
+  } else {
+    spline->setAttributeValue("StartX", startX);
+    spline->setAttributeValue("EndX", endX);
+  }
 }
 
 } // namespace Mantid::Algorithms

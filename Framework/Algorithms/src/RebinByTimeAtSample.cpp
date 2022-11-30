@@ -64,7 +64,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorks
   // Go through all the histograms and set the data
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outputWS))
   for (int i = 0; i < histnumber; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     Correction correction = strategy.calculate(i);
 
@@ -84,9 +84,9 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorks
 
     // Report progress
     prog.report(name());
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**

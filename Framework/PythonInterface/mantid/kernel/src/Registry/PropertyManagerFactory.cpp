@@ -27,12 +27,8 @@ namespace PythonInterface::Registry {
  */
 std::shared_ptr<Kernel::PropertyManager> createPropertyManager(const boost::python::dict &mapping) {
   auto pmgr = std::make_shared<PropertyManager>();
-#if PY_MAJOR_VERSION >= 3
   object view(mapping.attr("items")());
   object itemIter(handle<>(PyObject_GetIter(view.ptr())));
-#else
-  object itemIter(mapping.attr("iteritems")());
-#endif
   auto length = len(mapping);
   for (ssize_t i = 0; i < length; ++i) {
     const object keyValue(handle<>(PyIter_Next(itemIter.ptr())));

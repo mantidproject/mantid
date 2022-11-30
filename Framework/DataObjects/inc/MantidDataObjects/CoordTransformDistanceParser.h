@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidDataObjects/CoordTransformAffineParser.h"
-#include "MantidKernel/System.h"
 #include <memory>
 
 namespace Mantid {
@@ -20,7 +19,7 @@ class CoordTransformDistance;
  * @author Owen Arnold
  * @date 25/july/2011
  */
-class DLLExport CoordTransformDistanceParser : public CoordTransformAffineParser {
+class MANTID_DATAOBJECTS_DLL CoordTransformDistanceParser : public CoordTransformAffineParser {
 public:
   CoordTransformDistanceParser();
   Mantid::API::CoordTransform *createTransform(Poco::XML::Element *coordTransElement) const override;

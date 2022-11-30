@@ -78,7 +78,7 @@ public:
   using AbstractFactory = AbstractInstantiator<Base>;
   /// Destroys the DynamicFactory and deletes the instantiators for
   /// all registered classes.
-  virtual ~DynamicFactory() {}
+  virtual ~DynamicFactory() = default;
 
   /// Creates a new instance of the class with the given name.
   /// The class must have been registered with subscribe() (typically done via a

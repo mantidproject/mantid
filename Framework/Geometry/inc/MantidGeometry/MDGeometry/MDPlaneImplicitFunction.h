@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -18,7 +17,7 @@ namespace Geometry {
 
   @date 2011-13-12
 */
-class DLLExport MDPlaneImplicitFunction : public MDImplicitFunction {
+class MANTID_GEOMETRY_DLL MDPlaneImplicitFunction : public MDImplicitFunction {
 public:
   /// Default constructor.
   MDPlaneImplicitFunction();

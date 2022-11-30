@@ -53,8 +53,8 @@ class IndexSatellitePeaks(PythonAlgorithm):
                              doc="Number of independant q vectors")
 
         self.declareProperty('ClusterThreshold', 1.5, direction=Direction.Input,
-                             doc="Threshold for automaticallty deciding on the number of q vectors to use. If NumOfQs found is set then this \
-                             is property is ignored.")
+                             doc="Threshold for automaticallty deciding on the number of q vectors to use. "
+                             "If NumOfQs found is set then this is property is ignored.")
 
     def PyExec(self):
         tolerance = self.getProperty("Tolerance").value

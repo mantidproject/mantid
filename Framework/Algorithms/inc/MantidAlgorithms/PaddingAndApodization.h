@@ -34,7 +34,7 @@ Required Properties:
 @author Anthony Lim
 @date 10/08/2017
 */
-class MANTID_ALGORITHMS_DLL PaddingAndApodization : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PaddingAndApodization final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PaddingAndApodization"; }

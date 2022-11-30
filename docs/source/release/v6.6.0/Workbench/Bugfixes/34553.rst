@@ -1,0 +1,1 @@
+- Fixed bug with AddSampleLogMultiple where including log types and keeping the parser box ticked would crash Mantid.

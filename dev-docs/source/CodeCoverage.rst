@@ -127,7 +127,7 @@ CLI
   .. code-block :: shell
 
     # Where <path> is the directory or file to run
-    bin/mantidpython --classic -m coverage run -m pytest <path>
+    PYTHONPATH=/path/to/build/bin python3 -m coverage run -m pytest <path>
 
 - To limit coverage information to only project files add the `--source` flag:
 
@@ -135,13 +135,13 @@ CLI
 
     # Where /path/to/src/ contains Mantid source code
     # Note this cannot use the home dir, i.e. ~/path/to/src
-    bin/mantidpython --classic -m coverage run --source=</path/to/src/> -m pytest <path>
+    PYTHONPATH=/path/to/build/bin python3 -m coverage run --source=</path/to/src/> -m pytest <path>
 
 - Example: To run coverage for the entire project
 
-    .. code-block :: shell
+  .. code-block :: shell
 
-      bin/mantidpython --classic -m coverage run --source /mantid_src -m pytest /mantid_src
+    PYTHONPATH=/path/to/build/bin python3 -m coverage run --source /mantid_src -m pytest /mantid_src
 
 - Generate out a html report in the directory you ran tests from:
 

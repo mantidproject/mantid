@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidKernel/System.h"
 
 #include <string>
 
@@ -23,7 +23,7 @@ namespace DataObjects {
 /** PeakShapeBase : Base class for concrete PeakShapes containing common code.
  */
 
-class DLLExport PeakShapeBase : public Mantid::Geometry::PeakShape {
+class MANTID_DATAOBJECTS_DLL PeakShapeBase : public Mantid::Geometry::PeakShape {
 
 public:
   /// Constructor

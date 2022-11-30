@@ -51,14 +51,14 @@ Fitting with resolution function
 .. code-block:: python
 
    from CrystalField import CrystalField, CrystalFieldFit, Background, Function, ResolutionModel
-   from mantidqtinterfaces.PyChop import PyChop2
+   from pychop.Instruments import Instrument
 
    # load the data
    data_ws1 = Load('MER38435_10p22meV.txt')
    data_ws2 = Load('MER38436_10p22meV.txt')
 
    # Sets up a resolution function
-   merlin = PyChop2('MERLIN', 'G', 250.)
+   merlin = Instrument('MERLIN', 'G', 250.)
    merlin.setEi(10.)
    resmod = ResolutionModel(merlin.getResolution, xstart=-10, xend=9.0, accuracy=0.01)
 

@@ -99,7 +99,7 @@ void LoadLLB::exec() {
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
-void LoadLLB::setInstrumentName(NeXus::NXEntry &entry) {
+void LoadLLB::setInstrumentName(const NeXus::NXEntry &entry) {
 
   m_instrumentPath = "nxinstrument";
   m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
@@ -140,7 +140,7 @@ void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
-void LoadLLB::loadTimeDetails(NeXus::NXEntry &entry) {
+void LoadLLB::loadTimeDetails(const NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("nxbeam/incident_wavelength");
   // Apparently this is in the wrong units
@@ -233,7 +233,7 @@ void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition, double 
   }
 }
 
-void LoadLLB::loadRunDetails(NXEntry &entry) {
+void LoadLLB::loadRunDetails(const NXEntry &entry) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 

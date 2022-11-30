@@ -15,7 +15,7 @@ namespace Algorithms {
 /** CreateFlatEventWorkspace : Creates a flat event workspace that can be used
   for background removal.
 */
-class MANTID_ALGORITHMS_DLL CreateFlatEventWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateFlatEventWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

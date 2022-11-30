@@ -27,6 +27,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 
+#include <algorithm>
 #include <fstream>
 
 using namespace Mantid;
@@ -102,11 +103,7 @@ void LoadGSASInstrumentFile::exec() {
   // Check Histogram type - only PNTR is currently supported
   std::string histType = getHistogramType(lines);
   if (histType != "PNTR") {
-    if (histType.size() == 4) {
-      throw std::runtime_error("Histogram type " + histType + " not supported \n");
-    } else {
-      throw std::runtime_error("Error on checking histogram type: " + histType + "\n");
-    }
+    throw std::runtime_error("Error on checking histogram type: " + histType + "\n");
   }
 
   size_t numBanks = getNumberOfBanks(lines);
@@ -167,9 +164,8 @@ void LoadGSASInstrumentFile::exec() {
     } else {
       // Else, use all available banks
       bankIds.reserve(bankparammap.size());
-      for (const auto &bank : bankparammap) {
-        bankIds.emplace_back(static_cast<int>(bank.first));
-      }
+      std::transform(bankparammap.cbegin(), bankparammap.cend(), std::back_inserter(bankIds),
+                     [](const auto &bank) { return static_cast<int>(bank.first); });
     }
 
     // Generate workspaceOfBank

@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
 using Mantid::CurveFitting::ComplexFortranMatrix;
@@ -16,7 +16,7 @@ using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::GSLVector;
+using Mantid::CurveFitting::EigenVector;
 using Mantid::CurveFitting::IntFortranVector;
 
 using namespace Mantid::CurveFitting::Functions;
@@ -92,7 +92,7 @@ public:
     bkq(4, 2) = -3.8296;
     bkq(4, 4) = -2.3210;
 
-    GSLVector en1;
+    EigenVector en1;
     {
       DoubleFortranVector en;
       ComplexFortranMatrix wf;
@@ -102,7 +102,7 @@ public:
       en1 = en;
     }
 
-    GSLVector en2;
+    EigenVector en2;
     {
       DoubleFortranVector en;
       ComplexFortranMatrix wf;

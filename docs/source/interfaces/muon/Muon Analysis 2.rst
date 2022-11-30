@@ -17,6 +17,8 @@ This interface is used to analyse the time domain data collected on Muon instrum
 accessed from the main menu of MantidWorkbench, in *Interfaces → Muon → Muon Analysis*. For sample
 datasets, please visit `Muon - Downloads <https://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_.
 
+Advanced users can access additional features such as model analysis, raw plots and the fit script generator using :ref:`Feature Flags <Muon_Feature_Flags-ref>`.
+
 Loading
 -------
 

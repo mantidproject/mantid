@@ -981,20 +981,19 @@ def LimitsWav(lmin, lmax, step, bin_type):
     ReductionSingleton().to_wavelen.set_rebin(lmin, bin_sym + str(step), lmax)
 
 
-def LimitsQXY(qmin, qmax, step, type):
+def LimitsQXY(qmin, qmax, step):
     """
         To set the bin parameters for the algorithm Qxy()
         @param qmin: the first Q value to include
         @param qmaz: the last Q value to include
         @param step: bin width
-        @param type: pass LOG for logarithmic binning
     """
-    _printMessage('LimitsQXY(' + str(qmin) + ', ' + str(qmax) + ', ' + str(step) + ', ' + str(type) + ')')
+    _printMessage('LimitsQXY(' + str(qmin) + ', ' + str(qmax) + ', ' + str(step) + ')')
     settings = ReductionSingleton().user_settings
     if settings is None:
         raise RuntimeError('MaskFile() first')
 
-    settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/' + type,
+    settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step),
                              ReductionSingleton())
 
 

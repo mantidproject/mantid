@@ -68,6 +68,7 @@ set(SRC_FILES
     src/LoadILLPolarizationFactors.cpp
     src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
+    src/LoadILLSALSA.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
@@ -285,6 +286,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
     inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
+    inc/MantidDataHandling/LoadILLSALSA.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
@@ -493,6 +495,7 @@ set(TEST_FILES
     LoadILLPolarizationFactorsTest.h
     LoadILLPolarizedDiffractionTest.h
     LoadILLReflectometryTest.h
+    LoadILLSALSATest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
     LoadILLTest.h
@@ -694,6 +697,12 @@ endif()
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(
+  DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/DataHandling> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(DataHandling FALSE)
 
 # Installation settings
 if(CONDA_ENV)

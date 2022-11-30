@@ -1,0 +1,2 @@
+* Improve estimation of resolution parameters in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` (more robust to outliers).
+*Made Lorentz correction in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` optional.

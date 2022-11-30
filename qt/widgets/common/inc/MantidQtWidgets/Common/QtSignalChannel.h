@@ -48,7 +48,9 @@ signals:
   void messageReceived(const Message &msg);
 
 private:
-  Q_DISABLE_COPY(QtSignalChannel)
+  // Delete the copy constructor and assignment operator
+  QtSignalChannel(const QtSignalChannel &) = delete;
+  QtSignalChannel &operator=(const QtSignalChannel &) = delete;
 
   /// Optional source (use std::string to avoid conversion in comparison)
   QString m_source;

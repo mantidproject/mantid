@@ -119,7 +119,7 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const {
   int y = effectiveRect.y();
   int lineHeight = 0;
 
-  foreach (QLayoutItem *item, itemList) {
+  for (const auto &item : itemList) {
     QWidget *wid = item->widget();
     int spaceX = horizontalSpacing();
     if (spaceX == -1)

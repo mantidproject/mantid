@@ -1,0 +1,1 @@
+- Fixed an issue where the live data output would update during processing of a new chunk of live data; it now only updates with the final IvsQ result, avoiding the axes changing during processing.

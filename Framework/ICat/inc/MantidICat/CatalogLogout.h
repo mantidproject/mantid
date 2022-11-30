@@ -21,12 +21,12 @@ namespace ICat {
   @author Sofia Antony, STFC Rutherford Appleton Laboratory
   @date 23/07/2010
   */
-class MANTID_ICAT_DLL CatalogLogout : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogLogout final : public API::Algorithm {
 public:
   /// Constructor
   CatalogLogout() : API::Algorithm() {}
   /// Destructor
-  ~CatalogLogout() override {}
+  ~CatalogLogout() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogLogout"; }
   /// Summary of algorithms purpose.

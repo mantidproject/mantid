@@ -11,13 +11,12 @@ namespace Mantid::Kernel {
 
 /** Constructor
  */
-StringContainsValidator::StringContainsValidator() { m_requiredStrings = std::vector<std::string>(); }
+StringContainsValidator::StringContainsValidator() : m_requiredStrings(std::vector<std::string>()) {}
 
 /** Constructor with required sub strings
  */
-StringContainsValidator::StringContainsValidator(const std::vector<std::string> &strings) {
-  m_requiredStrings = strings;
-}
+StringContainsValidator::StringContainsValidator(const std::vector<std::string> &strings)
+    : m_requiredStrings(strings) {}
 
 /**
  * @return A clone of the current state of the validator

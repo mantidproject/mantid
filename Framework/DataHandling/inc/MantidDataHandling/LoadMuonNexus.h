@@ -10,9 +10,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -47,7 +47,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class DLLExport LoadMuonNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMuonNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default constructor
   LoadMuonNexus();

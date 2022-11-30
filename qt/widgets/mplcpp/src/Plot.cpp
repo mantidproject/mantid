@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -15,6 +16,7 @@
 #include "MantidQtWidgets/MplCpp/Plot.h"
 #include <utility>
 
+using Mantid::API::MatrixWorkspace_sptr;
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
@@ -34,6 +36,15 @@ Python::Object functionsModule() { return Python::NewRef(PyImport_ImportModule("
  */
 Python::Object constructArgs(const std::vector<std::string> &workspaces) {
   return Python::NewRef(Py_BuildValue("(O)", Converters::ToPyList<std::string>()(workspaces).ptr()));
+}
+
+/**
+ * Construct a Python list from a vector of workspace pointers
+ * @param workspaces A list of MatrixWorkspace_sptr
+ * @return A new Python list object
+ */
+Python::Object constructArgs(const std::vector<MatrixWorkspace_sptr> &workspaces) {
+  return Python::NewRef(Py_BuildValue("(O)", Converters::ToPyList<MatrixWorkspace_sptr>()(workspaces).ptr()));
 }
 
 /**
@@ -115,6 +126,16 @@ Python::Object plot(const std::vector<std::string> &workspaces, boost::optional<
 }
 
 Python::Object plot(const QStringList &workspaces, boost::optional<std::vector<int>> spectrumNums,
+                    boost::optional<std::vector<int>> wkspIndices, boost::optional<Python::Object> fig,
+                    boost::optional<QHash<QString, QVariant>> plotKwargs,
+                    boost::optional<QHash<QString, QVariant>> axProperties, boost::optional<std::string> windowTitle,
+                    bool errors, bool overplot, bool tiled) {
+  GlobalInterpreterLock lock;
+  return plot(constructArgs(workspaces), std::move(spectrumNums), std::move(wkspIndices), std::move(fig),
+              std::move(plotKwargs), std::move(axProperties), std::move(windowTitle), errors, overplot, tiled);
+}
+
+Python::Object plot(const std::vector<MatrixWorkspace_sptr> &workspaces, boost::optional<std::vector<int>> spectrumNums,
                     boost::optional<std::vector<int>> wkspIndices, boost::optional<Python::Object> fig,
                     boost::optional<QHash<QString, QVariant>> plotKwargs,
                     boost::optional<QHash<QString, QVariant>> axProperties, boost::optional<std::string> windowTitle,

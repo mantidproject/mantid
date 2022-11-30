@@ -44,7 +44,7 @@ class ImagesTabWidgetPresenter:
                 image.colorbar.set_label(props.label)
 
             image.set_cmap(props.colormap)
-            if props.interpolation and (not isinstance(image, QuadMesh) or not isinstance(image, Poly3DCollection)):
+            if props.interpolation and not (isinstance(image, QuadMesh) or isinstance(image, Poly3DCollection)):
                 image.set_interpolation(props.interpolation)
 
             update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)

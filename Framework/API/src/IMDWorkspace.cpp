@@ -20,9 +20,8 @@ namespace Mantid::API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
 IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
-    : Workspace(storageMode), Mantid::API::MDGeometry() {
-  m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
-}
+    : Workspace(storageMode), Mantid::API::MDGeometry(),
+      m_convention(Kernel::ConfigService::Instance().getString("Q.convention")) {}
 
 /** Creates a single iterator and returns it.
  *

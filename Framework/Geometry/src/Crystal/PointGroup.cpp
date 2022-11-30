@@ -5,15 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidKernel/System.h"
-
-#include <boost/algorithm/string.hpp>
-#include <memory>
-#include <set>
-
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidKernel/System.h"
+
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <memory>
+#include <set>
 
 namespace Mantid::Geometry {
 using Kernel::IntMatrix;
@@ -97,9 +97,8 @@ bool PointGroup::isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) c
 std::vector<V3D> PointGroup::getAllEquivalents(const Kernel::V3D &hkl) const {
   std::vector<V3D> equivalents;
   equivalents.reserve(m_allOperations.size());
-  for (const auto &operation : m_allOperations) {
-    equivalents.emplace_back(operation.transformHKL(hkl));
-  }
+  std::transform(m_allOperations.cbegin(), m_allOperations.cend(), std::back_inserter(equivalents),
+                 [&hkl](const auto &operation) { return operation.transformHKL(hkl); });
   return equivalents;
 }
 
@@ -198,9 +197,8 @@ std::vector<PointGroup_sptr> getAllPointGroups() {
   std::vector<std::string> allSymbols = pointGroupFactory.getAllPointGroupSymbols();
   std::vector<PointGroup_sptr> out;
   out.reserve(allSymbols.size());
-  for (const auto &symbol : allSymbols) {
-    out.emplace_back(pointGroupFactory.createPointGroup(symbol));
-  }
+  std::transform(allSymbols.cbegin(), allSymbols.cend(), std::back_inserter(out),
+                 [&pointGroupFactory](const auto &symbol) { return pointGroupFactory.createPointGroup(symbol); });
   return out;
 }
 

@@ -63,7 +63,7 @@ void addLogDataToRun(Mantid::API::Run &run, MapClass &aMap, LoggerType &logger) 
 } // namespace
 
 /// Empty default constructor
-LoadLog::LoadLog() {}
+LoadLog::LoadLog() = default;
 
 /// Initialisation method.
 void LoadLog::init() {

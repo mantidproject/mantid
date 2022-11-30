@@ -8,7 +8,7 @@
 from systemtesting import MantidSystemTest
 from mantid.simpleapi import CreateWorkspace, LinearBackground, FlatBackground, Gaussian, CalculateChiSquared, mtd
 from CrystalField.fitting import makeWorkspace
-from mantidqtinterfaces.PyChop import PyChop2
+from pychop.Instruments import Instrument
 import numpy as np
 
 
@@ -111,7 +111,7 @@ class CrystalFieldPythonInterface(MantidSystemTest):
         rm = ResolutionModel(self.my_func, xstart=0.0, xend=24.0, accuracy=0.01)
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, Temperature=44.0, ResolutionModel=rm)
 
-        marires = PyChop2('MARI')
+        marires = Instrument('MARI')
         marires.setChopper('S')
         marires.setFrequency(250)
         marires.setEi(30)

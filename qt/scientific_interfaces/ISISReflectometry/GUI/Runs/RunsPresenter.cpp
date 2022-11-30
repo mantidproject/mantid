@@ -12,14 +12,12 @@
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "QtCatalogSearcher.h"
 
 #include <algorithm>
-#include <fstream>
-#include <iterator>
-#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -28,6 +26,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry RunsPresenter");
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -43,11 +45,12 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
  */
 RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressableView,
                              const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                             std::vector<std::string> instruments, IReflMessageHandler *messageHandler)
+                             std::vector<std::string> instruments, IReflMessageHandler *messageHandler,
+                             IFileHandler *fileHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
-      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_instruments(std::move(instruments)),
-      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_fileHandler(fileHandler),
+      m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -116,10 +119,7 @@ void RunsPresenter::notifySearchFailed() {
   }
 }
 
-void RunsPresenter::notifyTransfer() {
-  transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
-  notifyRowStateChanged();
-}
+void RunsPresenter::notifyTransfer() { transfer(m_view->getSelectedSearchRows(), TransferMatch::Any); }
 
 // Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
@@ -130,6 +130,32 @@ void RunsPresenter::notifyChangeInstrumentRequested() {
     m_view->setSearchInstrument(instrumentName());
   else
     m_mainPresenter->notifyChangeInstrumentRequested(newName);
+}
+
+void RunsPresenter::notifyExportSearchResults() const {
+  auto csv = m_searcher->getSearchResultsCSV();
+  if (csv.empty()) {
+    m_messageHandler->giveUserCritical(
+        "No search results loaded. Enter an Investigation ID (and a cycle if using) to load results.", "Error");
+    return;
+  }
+
+  auto filename = m_messageHandler->askUserForSaveFileName("CSV (*.csv)");
+  if (filename.empty()) {
+    return;
+  }
+
+  // Append a .csv extension if the user didn't add one manually.
+  if (filename.find_last_of('.') == std::string::npos ||
+      filename.substr(filename.find_last_of('.') + 1) != std::string("csv")) {
+    filename += ".csv";
+  }
+
+  try {
+    m_fileHandler->saveCSVToFile(filename, csv);
+  } catch (std::runtime_error &e) {
+    m_messageHandler->giveUserCritical(e.what(), "Error");
+  }
 }
 
 // Notification from a child presenter that the instrument needs to be changed
@@ -163,10 +189,14 @@ void RunsPresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
   tablePresenter()->notifyRowStateChanged(item);
 }
 
-void RunsPresenter::notifyRowOutputsChanged() { tablePresenter()->notifyRowOutputsChanged(); }
+void RunsPresenter::notifyRowModelChanged() {
+  tablePresenter()->notifyRowModelChanged();
+  tablePresenter()->notifyRowStateChanged();
+}
 
-void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
-  tablePresenter()->notifyRowOutputsChanged(item);
+void RunsPresenter::notifyRowModelChanged(boost::optional<Item const &> item) {
+  tablePresenter()->notifyRowModelChanged(item);
+  tablePresenter()->notifyRowStateChanged(item);
 }
 
 void RunsPresenter::notifyBatchLoaded() { m_tablePresenter->notifyBatchLoaded(); }
@@ -180,6 +210,7 @@ void RunsPresenter::notifyReductionResumed() {
 void RunsPresenter::notifyReductionPaused() {
   updateWidgetEnabledState();
   tablePresenter()->notifyReductionPaused();
+  notifyRowStateChanged();
 }
 
 /** Returns true if performing a new autoreduction search i.e. with different
@@ -234,6 +265,7 @@ void RunsPresenter::notifyAutoreductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->notifyAutoreductionResumed();
   m_progressView->setAsEndlessIndicator();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyAutoreductionPaused() {
@@ -241,6 +273,7 @@ void RunsPresenter::notifyAutoreductionPaused() {
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
   tablePresenter()->notifyAutoreductionPaused();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyAnyBatchReductionResumed() {
@@ -278,6 +311,12 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 std::string RunsPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
 
 void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
+
+void RunsPresenter::notifyRowContentChanged(Row &changedRow) { m_mainPresenter->notifyRowContentChanged(changedRow); }
+
+void RunsPresenter::notifyGroupNameChanged(Group &changedGroup) {
+  m_mainPresenter->notifyGroupNameChanged(changedGroup);
+}
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
@@ -441,6 +480,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);
+    m_mainPresenter->notifyRunsTransferred();
   }
 }
 
@@ -471,6 +511,7 @@ std::string RunsPresenter::liveDataReductionAlgorithm() { return "ReflectometryR
 
 std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
+  g_log.warning("Note that lookup of experiment settings by angle/title is not supported for live data.");
   auto options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
   options->setPropertyValue("InputWorkspace", inputWorkspace);
@@ -483,7 +524,7 @@ std::string RunsPresenter::liveDataReductionOptions(const std::string &inputWork
 IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   auto alg = AlgorithmManager::Instance().create("StartLiveData");
   alg->initialize();
-  alg->setChild(true);
+  alg->setChild(false);
   alg->setLogging(false);
   auto const instrument = m_view->getSearchInstrument();
   auto const inputWorkspace = "TOF_live";
@@ -574,6 +615,8 @@ void RunsPresenter::finishHandle(const IAlgorithm *alg) {
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
+  g_log.warning("Live data monitor stopped; re-starting the monitor.");
+  startMonitor();
 }
 
 /** Handler called when the monitor algorithm errors
@@ -584,5 +627,9 @@ void RunsPresenter::errorHandle(const IAlgorithm *alg, const std::string &what) 
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
+  if (what != "Algorithm terminated") {
+    g_log.warning("Live data error: " + what + "; re-starting the monitor.");
+    startMonitor();
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @author Gesner Passos, ISIS
 */
-class MANTID_ALGORITHMS_DLL RadiusSum : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RadiusSum final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

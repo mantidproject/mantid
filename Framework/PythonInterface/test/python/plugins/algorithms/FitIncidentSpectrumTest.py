@@ -8,7 +8,7 @@ import unittest
 import numpy as np
 from mantid.simpleapi import AnalysisDataService, FitIncidentSpectrum, CalculateEfficiencyCorrection, CloneWorkspace, ConvertToPointData, \
     CreateSampleWorkspace, DeleteWorkspace, LoadAscii, Multiply, CreateWorkspace, Rebin, Divide
-from testhelpers import run_algorithm
+from testhelpers import create_algorithm, run_algorithm
 
 
 class FitIncidentSpectrumTest(unittest.TestCase):
@@ -95,6 +95,23 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
+    def test_fit_cubic_spline_both_derivatives(self):
+        binning_for_calc = "0.2,0.1,3.0"
+        binning_for_fit = "0.2,0.1,4.0"
+        alg_test = run_algorithm(
+            "FitIncidentSpectrum",
+            InputWorkspace=self.incident_wksp,
+            OutputWorkspace="fit_wksp",
+            BinningForCalc=binning_for_calc,
+            BinningForFit=binning_for_fit,
+            FitSpectrumWith="CubicSpline",
+            DerivOrder=2)
+        self.assertTrue(alg_test.isExecuted())
+        fit_wksp = AnalysisDataService.retrieve("fit_wksp")
+        # check values at peak at wavelength~1.0 A
+        self.assertAlmostEqual(fit_wksp.readY(0)[8], 43064.09, 2)
+        self.assertAlmostEqual(fit_wksp.readY(1)[8], -9772.89, 2)
+        self.assertAlmostEqual(fit_wksp.readY(2)[8], -494934.77, 2)
 
 if __name__ == '__main__':
     unittest.main()

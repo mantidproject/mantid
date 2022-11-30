@@ -17,9 +17,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/EigenJacobian.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
-#include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -29,7 +29,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
-using Mantid::CurveFitting::GSLJacobian;
+using Mantid::CurveFitting::EigenJacobian;
 using Mantid::CurveFitting::HistogramDomainCreator;
 using Mantid::CurveFitting::Algorithms::Fit;
 
@@ -122,7 +122,7 @@ public:
     TS_ASSERT_DELTA(values->getCalculated(8), 2.1 * 0.0433343771, 1e-9);
     TS_ASSERT_DELTA(values->getCalculated(9), 2.1 * 0.0302240668, 1e-9);
 
-    GSLJacobian jacobian(fun, 10);
+    EigenJacobian jacobian(fun, 10);
     fun.functionDeriv(*domain, jacobian);
 
     FunctionValues values1(*domain);
@@ -213,7 +213,7 @@ public:
     TS_ASSERT_DELTA(values.getCalculated(8), 0.0298776137685, 1e-9);
     TS_ASSERT_DELTA(values.getCalculated(9), 0.00537128264648, 1e-9);
 
-    GSLJacobian jacobian(fun, 10);
+    EigenJacobian jacobian(fun, 10);
     fun.functionDeriv(domain, jacobian);
 
     FunctionValues values1(domain);

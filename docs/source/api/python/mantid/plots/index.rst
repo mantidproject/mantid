@@ -229,16 +229,30 @@ When using ``mantid`` projection
 --------------------------------
 
 .. autoclass:: mantid.plots.MantidAxes
-   :members: plot, errorbar, scatter, contour,
-             contourf, pcolor, pcolorfast, pcolormesh, tripcolor,
-             tricontour, tricontourf
+
+   .. automethod:: contour
+   .. automethod:: contourf
+   .. automethod:: errorbar
+   .. automethod:: pcolor
+   .. automethod:: pcolorfast
+   .. automethod:: pcolormesh
+   .. automethod:: plot
+   .. automethod:: scatter
+   .. automethod:: tripcolor
+   .. automethod:: tricontour
+   .. automethod:: tricontourf
 
 When using ``mantid3d`` projection
 ----------------------------------
 
 .. autoclass:: mantid.plots.MantidAxes3D
-   :members: plot, scatter, plot_wireframe, plot_surface, contour,
-             contourf
+
+   .. automethod:: contour
+   .. automethod:: contourf
+   .. automethod:: plot
+   .. automethod:: plot_surface
+   .. automethod:: plot_wireframe
+   .. automethod:: scatter
 
 Functions to use when **mantid** projection is not available
 ------------------------------------------------------------
@@ -246,7 +260,6 @@ Functions to use when **mantid** projection is not available
 .. automodule:: mantid.plots.axesfunctions
    :members: plot, errorbar, scatter, contour, contourf, pcolor,
              pcolorfast, pcolormesh, tripcolor, tricontour, tricontourf
-
 
 Functions to use when **mantid3d** projection is not available
 --------------------------------------------------------------
@@ -264,5 +277,3 @@ Helper functions
              get_md_data2d_bin_bounds, get_md_data2d_bin_centers,
              get_spectrum, get_matrix_2d_data,get_uneven_data,
              get_sample_log, get_axes_labels
-
-

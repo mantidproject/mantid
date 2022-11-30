@@ -42,7 +42,7 @@ private:
     using MDImplicitFunction::isPointContained;
     std::string getName() const override { return "MockImplicitFunctionB"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunctionB() override {}
+    ~MockImplicitFunctionB() override = default;
   };
 
   class MockImplicitFunctionParserA : public Mantid::API::ImplicitFunctionParser {

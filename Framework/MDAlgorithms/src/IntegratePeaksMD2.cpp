@@ -457,22 +457,14 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
   double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius[0], 3) - std::pow(BackgroundOuterRadius[0], 3));
   // volume of PeakRadius sphere
   double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius[0], 3);
-  //
-  // If the following OMP pragma is included, this algorithm seg faults
-  // sporadically when processing multiple TOPAZ runs in a script, on
-  // Scientific Linux 6.2.  Typically, it seg faults after 2 to 6 runs are
-  // processed, though occasionally it will process all 8 requested in the
-  // script without crashing.  Since the lower level codes already use OpenMP,
-  // parallelizing at this level is only marginally useful, giving about a
-  // 5-10% speedup.  Perhaps is should just be removed permanantly, but for
-  // now it is commented out to avoid the seg faults.  Refs #5533
-  // PRAGMA_OMP(parallel for schedule(dynamic, 10) )
+
   // Initialize progress reporting
   int nPeaks = peakWS->getNumberPeaks();
   Progress progress(this, 0., 1., nPeaks);
+  bool doParallel = cylinderBool ? false : Kernel::threadSafe(*ws, *peakWS);
+  PARALLEL_FOR_IF(doParallel)
   for (int i = 0; i < nPeaks; ++i) {
-    if (this->getCancel())
-      break; // User cancellation
+    PARALLEL_START_INTERRUPT_REGION
     progress.report();
 
     // Get a direct ref to that peak.
@@ -592,7 +584,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
           // Use the manually specified radii instead of finding them via
           // findEllipsoid
           std::transform(PeakRadius.begin(), PeakRadius.end(), std::back_inserter(eigenvals),
-                         [](double &r) { return std::pow(r, 2.0); });
+                         [](double r) { return std::pow(r, 2.0); });
           eigenvects.push_back(V3D(1.0, 0.0, 0.0));
           eigenvects.push_back(V3D(0.0, 1.0, 0.0));
           eigenvects.push_back(V3D(0.0, 0.0, 1.0));
@@ -636,9 +628,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
           std::vector<double> eigenvals_background_inner;
           std::vector<double> eigenvals_background_outer;
           std::transform(BackgroundInnerRadius.begin(), BackgroundInnerRadius.end(),
-                         std::back_inserter(eigenvals_background_inner), [](double &r) { return std::pow(r, 2.0); });
+                         std::back_inserter(eigenvals_background_inner), [](double r) { return std::pow(r, 2.0); });
           std::transform(BackgroundOuterRadius.begin(), BackgroundOuterRadius.end(),
-                         std::back_inserter(eigenvals_background_outer), [](double &r) { return std::pow(r, 2.0); });
+                         std::back_inserter(eigenvals_background_outer), [](double r) { return std::pow(r, 2.0); });
 
           if (BackgroundOuterRadiusVector[0] > PeakRadiusVector[0]) {
             // transform ellispoid onto sphere of radius = R
@@ -664,11 +656,11 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
             bgSignal = bgSignalOuter - bgSignalInner;
             bgErrorSquared = bgErrorSquaredInner + bgErrorSquaredOuter;
             g_log.debug() << "unscaled background signal from ellipsoid integration = " << bgSignal << '\n';
-            const double scaleFactor = (PeakRadius[0] * PeakRadius[1] * PeakRadius[2]) /
-                                       (BackgroundOuterRadius[0] * BackgroundOuterRadius[1] * BackgroundOuterRadius[2] -
-                                        BackgroundInnerRadius[0] * BackgroundInnerRadius[1] * BackgroundInnerRadius[2]);
-            bgSignal *= scaleFactor;
-            bgErrorSquared *= scaleFactor * scaleFactor;
+            const double scale = (PeakRadius[0] * PeakRadius[1] * PeakRadius[2]) /
+                                 (BackgroundOuterRadius[0] * BackgroundOuterRadius[1] * BackgroundOuterRadius[2] -
+                                  BackgroundInnerRadius[0] * BackgroundInnerRadius[1] * BackgroundInnerRadius[2]);
+            bgSignal *= scale;
+            bgErrorSquared *= pow(scale, 2);
           }
           // set peak shape
           // get radii in same proprtion as eigenvalues
@@ -767,9 +759,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
         signal = 0.;
         for (size_t j = 0; j < numSteps; j++) {
           if (j < peakMin || j > peakMax)
-            background_total = background_total + wsProfile2D->mutableY(i)[j];
+            background_total = background_total + wsProfile2D->y(i)[j];
           else
-            signal = signal + wsProfile2D->mutableY(i)[j];
+            signal = signal + wsProfile2D->y(i)[j];
         }
         errorSquared = std::fabs(signal);
       } else {
@@ -891,7 +883,9 @@ template <typename MDE, size_t nd> void IntegratePeaksMD2::integrate(typename MD
     g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << " (sig^2 " << errorSquared
                         << "), with background " << bgSignal + ratio * background_total << " (sig^2 "
                         << bgErrorSquared + ratio * ratio * std::fabs(background_total) << ") subtracted.\n";
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
   // This flag is used by the PeaksWorkspace to evaluate whether it has
   // been integrated.
   peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true);

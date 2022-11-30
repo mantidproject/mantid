@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IMDNode.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/ISaveable.h"
 
 namespace Mantid {
@@ -21,7 +22,7 @@ identifying the data positions in a file in conjuction with DB
 
 @date March 15, 2013
 */
-class DLLExport MDBoxSaveable : public Kernel::ISaveable {
+class MANTID_DATAOBJECTS_DLL MDBoxSaveable : public Kernel::ISaveable {
 public:
   MDBoxSaveable(API::IMDNode *const);
 

@@ -177,6 +177,7 @@ public:
   void testNotifyAutosaveDisabled() {
     auto presenter = makePresenter();
     // There are no calls to the view
+    EXPECT_CALL(m_view, disableSaveIndividualRowsCheckbox()).Times(1);
     presenter.notifyAutosaveDisabled();
     verifyAndClear();
   }
@@ -184,6 +185,7 @@ public:
   void testNotifyAutosaveEnabled() {
     auto presenter = makePresenter();
     expectGetValidSaveDirectory();
+    EXPECT_CALL(m_view, enableSaveIndividualRowsCheckbox()).Times(1);
     presenter.notifyAutosaveEnabled();
     verifyAndClear();
   }
@@ -191,9 +193,47 @@ public:
   void testNotifyAutosaveEnabledWithInvalidPath() {
     auto presenter = makePresenter();
     expectGetInvalidSaveDirectory();
+    EXPECT_CALL(m_view, enableSaveIndividualRowsCheckbox()).Times(0);
     EXPECT_CALL(m_view, disallowAutosave()).Times(1);
     EXPECT_CALL(m_view, errorInvalidSaveDirectory()).Times(1);
     presenter.notifyAutosaveEnabled();
+    verifyAndClear();
+  }
+
+  void testNotifySaveIndividualRowsEnabled() {
+    auto presenter = makePresenter();
+    // There are no calls to the view
+    presenter.notifySaveIndividualRowsEnabled();
+    verifyAndClear();
+  }
+
+  void testNotifySaveIndividualRowsDisabled() {
+    auto presenter = makePresenter();
+    // There are no calls to the view
+    presenter.notifySaveIndividualRowsDisabled();
+    verifyAndClear();
+  }
+
+  void testShouldAutosaveGroupRowsFalseByDefault() {
+    auto presenter = makePresenter();
+    bool saveRows = presenter.shouldAutosaveGroupRows();
+    TS_ASSERT(!saveRows);
+    verifyAndClear();
+  }
+
+  void testShouldAutosaveGroupRowsWhenSaveIndividualRowsIsEnabled() {
+    auto presenter = makePresenter();
+    presenter.notifySaveIndividualRowsEnabled();
+    bool saveRows = presenter.shouldAutosaveGroupRows();
+    TS_ASSERT(saveRows);
+    verifyAndClear();
+  }
+
+  void testShouldAutosaveGroupRowsWhenSaveIndividualRowsIsDisabled() {
+    auto presenter = makePresenter();
+    presenter.notifySaveIndividualRowsDisabled();
+    bool saveRows = presenter.shouldAutosaveGroupRows();
+    TS_ASSERT(!saveRows);
     verifyAndClear();
   }
 

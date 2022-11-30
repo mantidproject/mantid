@@ -48,9 +48,8 @@ public:
   explicit AlgorithmHistory(const Algorithm *const alg,
                             const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
                             const double &duration = -1.0, std::size_t uexeccount = 0);
-  ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
-  AlgorithmHistory(const AlgorithmHistory &);
+  AlgorithmHistory(const AlgorithmHistory &) = default;
   AlgorithmHistory(std::string name, int vers, std::string uuid,
                    const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
                    const double &duration = -1.0, std::size_t uexeccount = 0);

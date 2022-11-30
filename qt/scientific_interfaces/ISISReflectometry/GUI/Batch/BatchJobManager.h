@@ -30,7 +30,7 @@ class PreviewRow;
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchJobManager : public IBatchJobManager {
 public:
-  BatchJobManager(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
+  BatchJobManager(IBatch &batch, std::unique_ptr<IReflAlgorithmFactory> algFactory = nullptr);
 
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -49,8 +49,8 @@ public:
   void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
   void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
-  std::vector<std::string>
-  algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const override;
+  std::vector<std::string> algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                                                           bool includeGrpRows) const override;
 
   boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) override;
   boost::optional<Item const &> notifyWorkspaceRenamed(std::string const &oldName, std::string const &newName) override;
@@ -63,8 +63,7 @@ public:
   bool getProcessAll() const override;
 
 protected:
-  Batch &m_batch;
-  // TODO use algFactory to wrap and test calls to createConfiguredAlgorithm
+  IBatch &m_batch;
   std::unique_ptr<IReflAlgorithmFactory> m_algFactory;
   bool m_isProcessing;
   bool m_isAutoreducing;
@@ -76,7 +75,7 @@ protected:
 private:
   int itemsInSelection(Item::ItemCountFunction countFunction) const;
 
-  std::vector<std::string> getWorkspacesToSave(Group const &group) const;
+  std::vector<std::string> getWorkspacesToSave(Group const &group, bool includeRows) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
   size_t getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   template <typename T> bool isSelected(T const &item);

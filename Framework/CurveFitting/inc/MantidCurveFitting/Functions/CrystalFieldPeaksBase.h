@@ -9,7 +9,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/EigenFortranDefs.h"
 
 namespace Mantid {
 namespace CurveFitting {

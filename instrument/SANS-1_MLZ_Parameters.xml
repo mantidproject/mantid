@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter-file instrument = "SANS-1_MLZ">
+
+    <component-link name="SANS-1_MLZ">
+      <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.-->
+      <parameter name="x-pixel-size" type="number">
+        <value val="8"/>
+      </parameter>
+      <parameter name="y-pixel-size" type="number">
+        <value val="8"/>
+      </parameter>
+    </component-link>
+
+</parameter-file>

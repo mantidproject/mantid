@@ -133,6 +133,8 @@ Examples are given in the series of figures on the right.
 Building and Running Mantid with MPI Support
 ############################################
 
+Firstly, you may also need to check out :ref:`PythonNotebook`.
+
 Build with MPI support
 ----------------------
 
@@ -178,11 +180,11 @@ For example:
       print(ws.readY(i))
 
 
-Run Python with ``mpirun`` and the desired number of MPI ranks, by using the new ``-n`` flag to ``mantidpython``:
+Run Python with ``mpirun`` and the desired number of MPI ranks, by using the ``-np`` flag to ``python``:
 
 .. code-block:: sh
 
-  mantidpython -n 3 test.py
+  mpirun -np 3 python test.py
 
 Possible output:
 

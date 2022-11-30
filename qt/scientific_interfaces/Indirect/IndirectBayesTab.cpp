@@ -23,6 +23,13 @@ IndirectBayesTab::~IndirectBayesTab() { m_propTree->unsetFactoryForManager(m_dbl
  */
 void IndirectBayesTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
+void IndirectBayesTab::setFileExtensionsByName(bool filter) { (void)filter; }
+
+void IndirectBayesTab::updateProperties(QtProperty *prop, double val) {
+  (void)prop;
+  (void)val;
+}
+
 /**
  * Format the tree widget so its easier to read the contents. It changes the
  * background colour and item indentation.

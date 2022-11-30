@@ -34,7 +34,7 @@ using API::WorkspaceProperty;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
-LoadMuonLog::LoadMuonLog() {}
+LoadMuonLog::LoadMuonLog() = default;
 
 /// Initialisation method.
 void LoadMuonLog::init() {

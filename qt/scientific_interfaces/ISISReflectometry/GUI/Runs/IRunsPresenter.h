@@ -33,8 +33,8 @@ public:
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyRowStateChanged() = 0;
   virtual void notifyRowStateChanged(boost::optional<Item const &> item) = 0;
-  virtual void notifyRowOutputsChanged(boost::optional<Item const &> item) = 0;
-  virtual void notifyRowOutputsChanged() = 0;
+  virtual void notifyRowModelChanged(boost::optional<Item const &> item) = 0;
+  virtual void notifyRowModelChanged() = 0;
   virtual void notifyBatchLoaded() = 0;
 
   virtual void notifyReductionPaused() = 0;
@@ -49,6 +49,8 @@ public:
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyTableChanged() = 0;
+  virtual void notifyRowContentChanged(Row &changedRow) = 0;
+  virtual void notifyGroupNameChanged(Group &changedGroup) = 0;
   virtual void settingsChanged() = 0;
   virtual void notifyChangesSaved() = 0;
   virtual bool hasUnsavedChanges() const = 0;

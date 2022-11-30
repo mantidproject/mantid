@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/UnaryOperationMD.h"
 
 namespace Mantid {
@@ -17,7 +16,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-08
 */
-class DLLExport PowerMD : public UnaryOperationMD {
+class MANTID_MDALGORITHMS_DLL PowerMD : public UnaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

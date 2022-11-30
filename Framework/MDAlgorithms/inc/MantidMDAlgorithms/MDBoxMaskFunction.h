@@ -20,10 +20,9 @@ private:
 
 public:
   // constructor
-  MDBoxMaskFunction(const Mantid::Kernel::V3D &pos, const double &radiusSquared) {
-    m_pos = pos;
-    m_radiusSquared = radiusSquared;
-  }
+  MDBoxMaskFunction(const Mantid::Kernel::V3D &pos, const double &radiusSquared)
+      : m_pos(pos), m_radiusSquared(radiusSquared) {}
+
   using MDImplicitFunction::isPointContained; // Avoids Intel compiler
                                               // warning.
   bool isPointContained(const coord_t *coords) override {

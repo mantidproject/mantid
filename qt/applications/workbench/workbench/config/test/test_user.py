@@ -83,17 +83,17 @@ class ConfigUserTest(TestCase):
 
     def test_stored_value_not_in_defaults_is_retrieved(self):
         self.cfg.set('main', 'key1', 1)
-        self.assertEqual(1, self.cfg.get('main', 'key1'))
+        self.assertEqual(1, self.cfg.get('main', 'key1', type=int))
 
     def test_value_not_in_settings_retrieves_default_if_it_exists(self):
-        self.assertEqual(100, self.cfg.get('main', 'a_default_key'))
-        self.assertEqual(100, self.cfg.get('main/a_default_key'))
+        self.assertEqual(100, self.cfg.get('main', 'a_default_key', type=int))
+        self.assertEqual(100, self.cfg.get('main/a_default_key', type=int))
 
     def test_boolean_with_default_false_can_be_retrieved(self):
-        self.assertEqual(False, self.cfg.get('main', 'bool_option'))
-        self.assertEqual(False, self.cfg.get('main/bool_option'))
+        self.assertEqual(False, self.cfg.get('main', 'bool_option', type=bool))
+        self.assertEqual(False, self.cfg.get('main/bool_option', type=bool))
 
-        self.assertEqual(True, self.cfg.get('main/bool_option2'))
+        self.assertEqual(True, self.cfg.get('main/bool_option2', type=bool))
 
     def test_has_keys(self):
         self.assertTrue(self.cfg.has('main', 'a_default_key'))
@@ -116,8 +116,8 @@ class ConfigUserTest(TestCase):
             },
         }
         with ConfigUserManager("lowercase", defaults) as cfg:
-            self.assertFalse(cfg.get('main/lowercase_bool_option'))
-            self.assertTrue(cfg.get('main/lowercase_bool_option2'))
+            self.assertFalse(cfg.get('main/lowercase_bool_option', type=bool))
+            self.assertTrue(cfg.get('main/lowercase_bool_option2', type=bool))
 
     def test_all_keys_with_specified_group(self):
         with ConfigUserManager("allkeys") as cfg:
@@ -135,10 +135,10 @@ class ConfigUserTest(TestCase):
     # ----------------------------------------------
 
     def test_get_raises_error_with_invalid_section_type(self):
-        self.assertRaises(TypeError, self.cfg.get, 1, 'key1')
+        self.assertRaises(TypeError, self.cfg.get, 1, 'key1', type=int)
 
     def test_get_raises_error_with_invalid_option_type(self):
-        self.assertRaises(TypeError, self.cfg.get, 'section', 1)
+        self.assertRaises(TypeError, self.cfg.get, 'section', 1, type=int)
 
     def test_get_raises_error_with_missing_key_when_type_provided(self):
         self.assertRaises(KeyError, self.cfg.get, 'not_a_key', type=bool)
@@ -147,8 +147,8 @@ class ConfigUserTest(TestCase):
         self.assertRaises(TypeError, self.cfg.get, 'main', 'bool_option', type='QStringList')
 
     def test_get_raises_keyerror_with_no_saved_setting_or_default(self):
-        self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key')
-        self.assertRaises(KeyError, self.cfg.get, 'main/missing-key')
+        self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key', type=str)
+        self.assertRaises(KeyError, self.cfg.get, 'main/missing-key', type=str)
 
     def test_set_raises_error_with_invalid_section_type(self):
         self.assertRaises(TypeError, self.cfg.set, 1, 'key1', 1)

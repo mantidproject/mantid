@@ -33,6 +33,7 @@ class MCInteractionVolume;
  */
 class MANTID_ALGORITHMS_DLL XrayAbsorptionCorrection : public API::Algorithm {
 public:
+  virtual ~XrayAbsorptionCorrection() = default;
   /// Algorithm's name
   const std::string name() const override { return "XrayAbsorptionCorrection"; }
   /// Algorithm's version

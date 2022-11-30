@@ -30,9 +30,9 @@ using isisds_error_report_t = void (*)(int, int, const char *);
 #define INVALID_SOCKET -1
 #endif /* _WIN32 */
 
-typedef enum { ISISDSDAEAccess = 0, ISISDSCRPTAccess = 1 } ISISDSAccessMode;
+using ISISDSAccessMode = enum { ISISDSDAEAccess = 0, ISISDSCRPTAccess = 1 };
 
-typedef enum { ISISDSUnknown = 0, ISISDSInt32 = 1, ISISDSReal32 = 2, ISISDSReal64 = 3, ISISDSChar = 4 } ISISDSDataType;
+using ISISDSDataType = enum { ISISDSUnknown = 0, ISISDSInt32 = 1, ISISDSReal32 = 2, ISISDSReal64 = 3, ISISDSChar = 4 };
 
 static int isisds_type_size[] = {0, 4, 4, 8, 1};
 static const char *isisds_type_name[] = {"Unknown", "Int32", "Real32", "Real64", "Char"};

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 /// @cond Exclude from doxygen documentation
 namespace Poco {
@@ -47,7 +48,7 @@ Required Properties:
 @author Anders Markvardsen, ISIS, RAL
 @date 19/4/2010
 */
-class DLLExport LoadParameterFile : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadParameterFile : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadParameterFile"; };

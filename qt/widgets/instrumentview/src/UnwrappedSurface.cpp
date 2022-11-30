@@ -17,9 +17,6 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 
 #include <QApplication>
 #include <QMenu>
@@ -634,35 +631,8 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
  * @param lines :: lines from the project file to load state from
  */
 void UnwrappedSurface::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  ProjectionSurface::loadFromProject(lines);
-  API::TSVSerialiser tsv(lines);
-
-  if (tsv.selectLine("Zoom")) {
-    double x0, y0, x1, y1;
-    tsv >> x0 >> y0 >> x1 >> y1;
-    RectF bounds(QPointF(x0, y0), QPointF(x1, y1));
-
-    m_zoomStack.push(m_viewRect);
-    m_viewRect = bounds;
-    updateView();
-    emit updateInfoText();
-  }
-
-  if (tsv.selectLine("PeaksWorkspaces")) {
-    size_t workspaceCount = tsv.values("PeaksWorkspaces").size();
-    for (size_t i = 0; i < workspaceCount; ++i) {
-      std::string name;
-      tsv >> name;
-      auto ws = retrievePeaksWorkspace(name);
-      if (ws)
-        setPeaksWorkspace(ws);
-    }
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("UnwrappedSurface::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -689,23 +659,7 @@ Mantid::API::IPeaksWorkspace_sptr UnwrappedSurface::retrievePeaksWorkspace(const
  * @return a string representing the state of the surface
  */
 std::string UnwrappedSurface::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv;
-  tsv.writeRaw(ProjectionSurface::saveToProject());
-
-  tsv.writeLine("Zoom");
-  tsv << m_viewRect.x0() << m_viewRect.y0();
-  tsv << m_viewRect.x1() << m_viewRect.y1();
-
-  tsv.writeLine("PeaksWorkspaces");
-  for (auto overlay : m_peakShapes) {
-    tsv << overlay->getPeaksWorkspace()->getName();
-  }
-
-  return tsv.outputLines();
-#else
   throw std::runtime_error("UnwrappedSurface::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidQt::MantidWidgets

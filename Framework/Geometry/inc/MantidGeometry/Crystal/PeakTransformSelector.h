@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidKernel/System.h"
 #include <set>
 
 namespace Mantid {
@@ -16,7 +15,7 @@ namespace Geometry {
 @class PeakTransformSelector
 Used to choose an appropriate PeakTransformFactory
 */
-class DLLExport PeakTransformSelector {
+class MANTID_GEOMETRY_DLL PeakTransformSelector {
 public:
   /// Constructor
   PeakTransformSelector();

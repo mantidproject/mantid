@@ -166,10 +166,8 @@ DetectorSearcher::DetectorSearchResult DetectorSearcher::searchUsingNearestNeigh
 
   if (hitDetector) {
     return std::make_tuple(true, m_indexMap[index]);
-  }
-
-  // Tube Gap Parameter specifically applies to tube instruments
-  if (!hitDetector && m_instrument->hasParameter("tube-gap")) {
+  } else if (m_instrument->hasParameter("tube-gap")) {
+    // Tube Gap Parameter specifically applies to tube instruments
     return handleTubeGap(detectorDir, neighbours);
   }
 

@@ -28,7 +28,7 @@ namespace MDAlgorithms {
   * @date 31-05-2012
 */
 
-class DLLExport MDTransfQ3D : public MDTransfModQ {
+class MANTID_MDALGORITHMS_DLL MDTransfQ3D : public MDTransfModQ {
 public:
   /// the name, this ChildAlgorithm is known to users (will appear in selection
   /// list)

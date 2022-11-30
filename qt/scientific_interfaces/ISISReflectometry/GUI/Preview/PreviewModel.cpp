@@ -9,16 +9,23 @@
 #include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Tolerance.h"
+#include "ROIType.h"
 
+#include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
+#include <optional>
 #include <string>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
@@ -72,21 +79,64 @@ void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceN
  */
 void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumBanks(*m_runDetails); }
 
+void PreviewModel::reduceAsync(IJobManager &jobManager) { jobManager.startReduction(*m_runDetails); }
+
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
 MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
+MatrixWorkspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
 
-std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
+std::optional<double> PreviewModel::getDefaultTheta() const {
+  auto theta = getThetaFromLogs("Theta");
+  if (theta && *theta > Tolerance) {
+    return theta;
+  }
+  return std::nullopt;
+}
 
-void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
+PreviewRow const &PreviewModel::getPreviewRow() const { return *m_runDetails; }
+
+boost::optional<ProcessingInstructions> PreviewModel::getSelectedBanks() const {
+  return m_runDetails->getSelectedBanks();
+}
+
+void PreviewModel::setLoadedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setLoadedWs(workspace); }
+
+void PreviewModel::setSummedWs(Mantid::API::MatrixWorkspace_sptr workspace) { m_runDetails->setSummedWs(workspace); }
+
+void PreviewModel::setTheta(double theta) { m_runDetails->setTheta(theta); }
+void PreviewModel::setSelectedBanks(boost::optional<ProcessingInstructions> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
+}
+
+boost::optional<ProcessingInstructions> PreviewModel::getProcessingInstructions(ROIType regionType) const {
+  return m_runDetails->getProcessingInstructions(regionType);
+}
+
+void PreviewModel::setSelectedRegion(ROIType regionType, Selection const &selection) {
+  if (selection.size() == 0) {
+    m_runDetails->setProcessingInstructions(regionType, boost::none);
+    return;
+  }
+  // TODO We will need to allow for more complex selections, but for now the selection just consists two y indices per
+  if (selection.size() % 2 != 0) {
+    throw std::runtime_error("Program error: unexpected selection size; must be multiple of 2; got " +
+                             std::to_string(selection.size()));
+  }
+  // For now we just support a y axis of spectrum number so round to the nearest integer
+  auto processingInstructions = ProcessingInstructions{};
+  for (size_t i = 0; i < selection.size(); i += 2) {
+    auto const start = static_cast<int>(std::round(selection[i]));
+    auto const end = static_cast<int>(std::round(selection[i + 1]));
+    if (!processingInstructions.empty()) {
+      processingInstructions += ",";
+    }
+    processingInstructions += std::to_string(start) + "-" + std::to_string(end);
+  }
+  m_runDetails->setProcessingInstructions(regionType, std::move(processingInstructions));
 }
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
-}
-
-std::string PreviewModel::detIDsToString(std::vector<Mantid::detid_t> const &indices) const {
-  return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
 }
 
 void PreviewModel::exportSummedWsToAds() const {
@@ -96,4 +146,31 @@ void PreviewModel::exportSummedWsToAds() const {
     g_log.error("Could not export summed WS. No rectangular selection has been made on the instrument viewer.");
   }
 }
+
+void PreviewModel::exportReducedWsToAds() const {
+  if (auto reducedWs = m_runDetails->getReducedWs()) {
+    AnalysisDataService::Instance().addOrReplace("preview_reduced_ws", reducedWs);
+  } else {
+    g_log.error(
+        "Could not export reduced WS. No selection has been made on the instrument viewer and/or region selector.");
+  }
+}
+
+std::optional<double> PreviewModel::getThetaFromLogs(const std::string &logName) const {
+  const Mantid::API::Run &run = getLoadedWs()->run();
+  if (!run.hasProperty(logName)) {
+    return std::nullopt;
+  }
+  Property *logData = run.getLogData(logName);
+  auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
+  auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
+
+  if (logPWV) {
+    return *logPWV;
+  } else if (logTSP && logTSP->realSize() > 0) {
+    return logTSP->lastValue();
+  }
+  return std::nullopt;
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

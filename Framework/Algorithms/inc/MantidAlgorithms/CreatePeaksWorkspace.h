@@ -17,7 +17,7 @@ namespace Algorithms {
  * @author Janik Zikovsky
  * @date 2011-04-26 08:49:10.540441
  */
-class MANTID_ALGORITHMS_DLL CreatePeaksWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreatePeaksWorkspace final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CreatePeaksWorkspace"; };

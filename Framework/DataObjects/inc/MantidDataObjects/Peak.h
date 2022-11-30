@@ -13,7 +13,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
 #include <memory>
@@ -32,7 +31,7 @@ namespace DataObjects {
  * (calculated from Q-lab or provided wavelength)
  *
  */
-class DLLExport Peak : public BasePeak {
+class MANTID_DATAOBJECTS_DLL Peak : public BasePeak {
 public:
   Peak();
   Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QLabFrame,

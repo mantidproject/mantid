@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <string>
 
 namespace Mantid {
@@ -24,7 +24,7 @@ class Property;
   @author Janik Zikovsky
   @date 2011-08-26
 */
-class DLLExport IPropertySettings {
+class MANTID_KERNEL_DLL IPropertySettings {
 public:
   /// Constructor
   IPropertySettings() = default;

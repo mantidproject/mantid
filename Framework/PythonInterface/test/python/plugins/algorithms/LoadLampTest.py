@@ -64,9 +64,9 @@ class LoadLampTest(unittest.TestCase):
         run = ws.getRun()
         self.assertTrue(run)
         self.assertTrue(isinstance(run, Run))
-        self.assertEquals(len(run.keys()), 31)
+        self.assertEqual(len(run.keys()), 31)
         self.assertTrue(run.hasProperty('4) Wavelength'))
-        self.assertEquals(run.getProperty('4) Wavelength').value, 2.52)
+        self.assertEqual(run.getProperty('4) Wavelength').value, 2.52)
 
 if __name__ == '__main__':
     unittest.main()

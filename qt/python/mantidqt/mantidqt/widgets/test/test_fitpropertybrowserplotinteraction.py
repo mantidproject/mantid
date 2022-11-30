@@ -75,6 +75,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.canvas = MagicMock()
         self.figure = MagicMock()
         self.axes = MagicMock(spec=MantidAxes)
+        self.axes.get_autoscale_on.return_value=False
         self.figure.get_axes.return_value = [self.axes]
         self.canvas.figure = self.figure
         self.browser_plot_interaction = FitPropertyBrowserPlotInteraction(self.fit_browser, self.canvas)
@@ -114,6 +115,16 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.browser_plot_interaction.evaluate_function.assert_called_once_with(workspace_name, FUNCTION_2,
                                                                                 prefix + '.' + FUNCTION_2.name())
 
+    def test_plot_current_guess_handles_invalid_function(self):
+        workspace_name = "test_workspace"
+        prefix = 'f1'
+        self.setup_mock_fit_browser(self.create_workspace2D, workspace_name, FUNCTION_2, prefix)
+        self.browser_plot_interaction.evaluate_function = Mock()
+        self.browser_plot_interaction.evaluate_function.side_effect = ValueError()
+
+        self.browser_plot_interaction.plot_current_guess()
+        self.axes.plot.assert_not_called()
+
     def test_plot_current_guess_correctly_calls_plot(self):
         workspace_name = "test_workspace"
         prefix = 'f1'
@@ -125,6 +136,18 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
         self.axes.plot.assert_called_once_with(ANY, wkspIndex=1, label=prefix + '.' + FUNCTION_2.name(),
                                                distribution=True,
                                                update_axes_labels=False, autoscale_on_update=False)
+
+    def test_plot_guess_doesnt_alter_autoscale(self):
+        workspace_name = "test_workspace"
+        prefix = 'f1'
+        self.setup_mock_fit_browser(self.create_workspace2D, workspace_name, FUNCTION_2, prefix)
+
+        ax = self.figure.get_axes()[0]
+        orig_autoscale = ax.get_autoscale_on()
+        self.browser_plot_interaction.plot_current_guess()
+        set_autoscale_call_count = ax.autoscale.call_count
+        if set_autoscale_call_count > 0:
+            ax.autoscale.assert_called_with(orig_autoscale, ANY) # checks most recent call
 
     def test_plot_guess_all_plots_for_table_workspaces(self):
         table_name = "table_name"

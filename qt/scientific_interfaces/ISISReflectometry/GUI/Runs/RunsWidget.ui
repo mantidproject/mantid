@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>RunsWidget</class>
  <widget class="QWidget" name="RunsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>450</width>
+    <height>474</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>RunsTab</string>
   </property>
@@ -88,10 +96,10 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>The instrument used for the investigation to search for</string>
+            <string>The instrument used for the investigation to search for. Note: This changes the instrument globally within mantid, affecting all batches</string>
            </property>
            <property name="whatsThis">
-            <string>Specifies which instrument you're searching for data from.</string>
+            <string>Specifies which instrument you're searching for data from. This changes the instrument globally within mantid, affecting all batches.</string>
            </property>
           </widget>
          </item>
@@ -285,6 +293,16 @@
            </property>
            <property name="value">
             <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="buttonExport">
+           <property name="text">
+            <string>Export</string>
+           </property>
+           <property name="toolButtonStyle">
+            <enum>Qt::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
@@ -487,6 +505,14 @@
    </property>
    <property name="whatsThis">
     <string>Pause any processing or auto-processing that is in progress. Pressing Autoprocess again after pausing will resume from where it was stopped, unless the instrument or investigation ID has changed, in which case the table will cleared and auto-processing will restart</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="toolTip">
+    <string>Export the search results to a .csv file. Note: You must press enter or click out of any edited cells before exporting the results.</string>
    </property>
   </action>
  </widget>

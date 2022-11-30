@@ -46,6 +46,7 @@ void QtRunsView::initLayout() {
   m_ui.setupUi(this);
 
   m_ui.buttonTransfer->setDefaultAction(m_ui.actionTransfer);
+  m_ui.buttonExport->setDefaultAction(m_ui.actionExport);
 
   // Expand the process runs column at the expense of the search column
   m_ui.splitterTables->setStretchFactor(0, 0);
@@ -61,6 +62,7 @@ void QtRunsView::initLayout() {
   m_ui.actionAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
   m_ui.actionSearch->setIcon(getIcon("mdi.folder", "black", 1.3));
   m_ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
+  m_ui.actionExport->setIcon(getIcon("mdi.content-save", "black", 1.3));
 
   m_algoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
   m_monitorAlgoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
@@ -262,6 +264,15 @@ void QtRunsView::on_actionTransfer_triggered() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
                                                                 {"ISIS Reflectometry", "RunsTab", "Transfer"}, false);
   m_notifyee->notifyTransfer();
+}
+
+/**
+ * This slot notifies the presenter that the "Export" button has been pressed
+ */
+void QtRunsView::on_actionExport_triggered() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(Mantid::Kernel::FeatureType::Feature,
+                                                                {"ISIS Reflectometry", "RunsTab", "Export"}, false);
+  m_notifyee->notifyExportSearchResults();
 }
 
 /**

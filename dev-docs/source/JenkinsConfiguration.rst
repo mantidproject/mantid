@@ -10,62 +10,71 @@ Jenkins Configuration
 Summary
 #######
 
-Mantid uses the `Jenkins <https://jenkins.io/>`__ automation server to support the continuous integration requirements of Mantid.
-This document aims to describe the general setup of the system.
+Mantid uses the `Jenkins <https://jenkins.io/>`__ automation server to support
+its continuous integration needs.
+This document describes the general setup of the system.
 
 Introduction
 ############
 
-Jenkins works on a 'master -> worker' principle.
-The master node is responsible for orchestrating jobs and managing the agents, where the work is actually performed.
-The master node is located at https://builds.mantidproject.org and each facility is responsible for providing hardware to act as agents for the various required configurations.
+Jenkins works on a 'controller -> agent' principle.
+The controller is responsible for orchestrating jobs and managing the agents where the work is actually performed.
+The controller node is located at https://builds.mantidproject.org and
+each facility is responsible for providing hardware to act as agents for the various required configurations.
 
 Setting up a New Agent
 ######################
 
-.. note::
-  If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/main/jenkins-node>`__.
-
-Machine Setup
--------------
-
-Set up a local ``builder`` account that will be used by the agent.
-
-Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
-In addition, install a standalone `Python <https://www.python.org/downloads/windows/>`__ interpreter so the system tests are able to install the mantid package.
-Do not use the embeddable zip, use the full installer and ensure python.exe is on the `PATH`.
-
-.. note::
-   For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__ may be used in place of a full Visual Studio install from version 2017 onwards (the 2015 tools contain a broken `vcvarsall.bat`).
-   The same options should be used as for the full install.
-
 Windows
 -------
 
-Ensure that the location of ``msbuild.exe`` (``C:\Windows\Microsoft.NET\Framework64\v4.0.30319``) is on the ``PATH``.
-For conda-build we need to ensure that we can have long paths, on Windows 10 and up it is possible using a registry key. Change "Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled (Type: REG_DWORD)" to 1
+First install the prerequisites tools that cannot be provided through Conda:
+
+#. Install the `Command line Visual C++ 2019 build tools <https://visualstudio.microsoft.com/downloads/>`__.
+   2019 matches the version used by conda-forge.
+   You may need to scroll to the botton and "click Older Downloads" to find it.
+   Once the installer has downloaded run it as administrator and select the
+   C++ workload.
+#. Install `Git for Windows <https://git-scm.com/download/win>`__ using the
+   64-bit Standalone Installer. Once downloaded run it as administrator and
+   ensure the installation location is ``C:\ProgramFiles\Git``.
+   When the installer has finished, open a PowerShell prompt as administrator
+   and run ``git config --system --get core.longpaths true`` to configure
+   Git for long paths.
+#. Configure long paths in the registry by running ``regedit`` from a
+   Powershell administrator prompt and setting the
+   ``Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled``
+   key to ``1``.
+#. Install Java from `Adoptium <https://adoptium.net/en-GB/temurin/releases/?version=11>`__
+   Select ``OS=Windows``, ``Architecture=x64``, `Package Type=JRE``, ``Version=11``.
+   Install as administrator and add to that ``PATH`` for all users.
+#. Reboot the machine
 
 Agent Connection
 ^^^^^^^^^^^^^^^^
 
-There are following additional steps required to be able to connect a Windows agent using JNLP as a Windows service:
+To connect the agent to Jenkins you will need to login to the controller at
+https://builds.mantidproject.org. Once logged in:
 
-#. Setup the agent on the master node using "New Node" under https://builds.mantidproject.org/computer/.
-   If "New Node" is not visible then you do not have the required permissions - ask an admin for help.
-   It is recommended that you copy from an existing node of a similar type.
-#. Once configured on the master, remote desktop to the agent, open a browser and connect to the webpage of the agent, .e.g. https://builds.mantidproject.org/computer/ornl-pc73896/
-#. Click on the **connect** button to launch the JNLP client.
-#. Once the client is launched, you can select "Install as Windows Service" from the clients menu.
-   If you have a proxy then see the section below for further configuration steps.
-#. Once installed change the recovery behaviour for the service.
-   Do this by right-clicking on the Jenkins service->Properties->Recovery.
-   Change the first, second, subsequent failures to restart the service.
-#. Change the account that the service uses to log on by right-clicking on the Jenkins service->Properties->Log On and enter the details in the builder account
-#. Change the "Startup type:" of the service to be "Automatic (Delayed Start)"
-#. Ensure the msbuild directory is on the ``PATH``
-#. Finally reboot the agent (this is the easiest way for the Jenkins to start trying to reconnect to it)
-
-Note that changes to ``PATH`` require restarting the Jenkins service in order to be reflected in the build environment.
+#. Click "New Node" at https://builds.mantidproject.org/computer/.
+#. It is recommended to select "Copy Existing Node" and choose another Windows-based
+   agent.
+#. Set the name to following the pattern ``FACILITY-HOSTNAME``.
+#. Edit the description to describe where the machine is located.
+#. Edit the ``win-64`` label to ``xwin-64`` to avoid the node being added to the
+   pool straight away.
+#. Under the "Environment variables" section at the bottom change the values to
+   match the node properties, e.g. build threads to match number of cores.
+#. Click "Save" to be returned to the front page of the new node.
+#. On the desktop of the node visit
+   https://builds.mantidproject.org/computer/<node-name>/jenkins-agent.jnlp,
+   where ``<node-name>`` is the name of the node when created above.
+   Take note of the download location for the next step.
+#. Open PowerShell as an administrator and change directory to that noted in the
+   previous step. Run the agent file: `.\jenkins-agent.jnlp`.
+#. In the GUI that pops up a ``File`` menu will appear after a few seconds
+#. Click ``File->Install Service``.
+#. Check back on the Jenkins agent description page and it should be connected.
 
 Connecting Through a Proxy Server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -74,43 +83,20 @@ It is a little more tricky to add Windows agents connected through a proxy.
 To do this you must modify the Java arguments that are used to start the ``jenkins-slave`` process.
 Once the "Install as a Windows Service" has completed you should:
 
-#. Find a directory on the machine such as ``C:\Jenkins``` or whatever was configured in the agent config.
+#. Find the directory on the machine, such as ``C:\Jenkins``, that was configured as the Jenkins filesystem root
 #. Open the ``jenkins-slave.xml`` file
-#. Edit the tag and add ``-Dhttp.proxyHost=PROXYHOST -Dhttp.proxyPort=PROXYPORT`` to the list
+#. Edit the java arguments tag and add ``-Dhttp.proxyHost=PROXYHOST -Dhttp.proxyPort=PROXYPORT`` to the list
 #. Save the file and restart the service (or machine)
 
 Linux
 -----
 
-#. Install OpenSSH server, ``ccache``, ``curl`` and ``xvfb``.
-#. From the ``builder`` account run ``ccache --max-size=20G``.
-#. Any machines acting as performance test servers will require ``mysqldb`` to be installed.
+Linux-based nodes should use the Docker-based setup described
+`here <https://github.com/mantidproject/dockerfiles/tree/main/jenkins-node>`__.
+The base OS does not need to be RancherOS and can be anything as long as Docker
+will run.
 
-Ubuntu
-^^^^^^
-
-Install ``gdebi-core`` package to allow installing ``.deb`` files.
-
-The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively.
-Use ``visudo`` to add the following exception for ``builder``::
-
-    # Allow no password for gdebi
-    builder       ALL=(ALL)NOPASSWD:/usr/bin/gdebi, /usr/bin/dpkg
-    ## Disable tty requirement for gdebi and dpkg command
-    Defaults!/usr/bin/gdebi     !requiretty
-    Defaults!/usr/bin/dpkg      !requiretty
-
-Red Hat
-^^^^^^^
-
-The ``builder`` account must be setup to be able to run ``yum`` non-interactively.
-Use ``visudo`` to add the following exception for ``builder``::
-
-    ## Allow no password for yum
-    builder       ALL = NOPASSWD: /usr/bin/yum,/bin/rpm
-    ## Disable tty requirement for yum command
-    Defaults!/bin/rpm           !requiretty
-    Defaults!/usr/bin/yum       !requiretty
+The agent will connect automatically when the Docker container starts running.
 
 Mac OS
 ------
@@ -118,17 +104,8 @@ Mac OS
 Enable `SSH ("Remote Login") and VNC ("Remote Management") <https://apple.stackexchange.com/a/73919>`__.
 If you have connection issues from a non-OS X client then try adjusting your color depth settings (True Color 32bpp works on Remmina).
 
-The ``builder`` account must be setup to be able to cp packages non-interactively.
-Use ``visudo`` to add the following exception for ``builder``::
-
-
-    # Allow builder to copy packages without a password
-    builder  ALL=(ALL)NOPASSWD:/bin/cp, /bin/rm
-    # Disable tty requirement
-    Defaults!/bin/cp        !requiretty
-    Defaults!/bin/rm        !requiretty
-
-In order to run the Qt tests, which require a connection to the windowing system, the user that is running the Jenkins agent must have logged in.
+In order to run the Qt tests, which require a connection to the windowing system,
+the user that is running the Jenkins agent must have logged in.
 This is most easily done by VNC - connect, log in, then disconnect.
 If you see errors such as::
 
@@ -142,8 +119,8 @@ Finally, disable saved application states that cause a dialog to be raised after
     defaults write org.python.python NSQuitAlwaysKeepsWindows -bool false
     defaults write org.mantidproject.MantidPlot NSQuitAlwaysKeepsWindows -bool false
 
-Linux/Mac Connection Notes
---------------------------
+Agent Connection
+^^^^^^^^^^^^^^^^
 
 The Jenkins JNLP connections are maintained by a crontab entry.
 The script is in the `mantid repository <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/jenkins-slave.sh>`__.

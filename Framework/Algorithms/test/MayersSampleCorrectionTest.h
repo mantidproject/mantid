@@ -45,11 +45,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(2.307439, signal.front(), delta);
-    TS_ASSERT_DELTA(2.314956, signal.back(), delta);
+    TS_ASSERT_DELTA(2.135321, signal.front(), delta);
+    TS_ASSERT_DELTA(2.155129, signal.back(), delta);
 
-    TS_ASSERT_DELTA(1.631606, error.front(), delta);
-    TS_ASSERT_DELTA(1.636921, error.back(), delta);
+    TS_ASSERT_DELTA(1.509900, error.front(), delta);
+    TS_ASSERT_DELTA(1.523906, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {

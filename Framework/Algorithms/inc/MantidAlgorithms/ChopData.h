@@ -20,7 +20,7 @@ namespace Algorithms {
   @author Michael Whitty
   @date 03/02/2011
 */
-class MANTID_ALGORITHMS_DLL ChopData : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChopData final : public API::Algorithm {
 public:
   const std::string name() const override { return "ChopData"; }                  ///< @return the algorithms name
   const std::string category() const override { return "Transforms\\Splitting"; } ///< @return the algorithms category

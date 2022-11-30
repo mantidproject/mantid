@@ -32,9 +32,9 @@ class IObject;
 */
 class MANTID_GEOMETRY_DLL vtkGeometryCacheReader {
 private:
-  Poco::XML::Document *mDoc;     ///< The XML document
-  Poco::XML::DOMParser *pParser; ///< The XML parser
-  std::string mFileName;         ///< The file name
+  Poco::XML::Document *m_doc;      ///< The XML document
+  Poco::XML::DOMParser *m_pParser; ///< The XML parser
+  std::string m_filename;          ///< The file name
   // Private Methods
   void Init();
   Poco::XML::Element *getElementByObjectName(const std::string &name);

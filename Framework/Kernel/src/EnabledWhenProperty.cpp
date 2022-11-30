@@ -27,9 +27,8 @@ namespace Mantid::Kernel {
  */
 EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName, const ePropertyCriterion when,
                                          const std::string &value)
-    : IPropertySettings() {
-  m_propertyDetails = std::make_shared<PropertyDetails>(PropertyDetails{otherPropName, when, value});
-}
+    : IPropertySettings(),
+      m_propertyDetails(std::make_shared<PropertyDetails>(PropertyDetails{otherPropName, when, value})) {}
 
 /** Multiple conditions constructor - takes two enable when property
  * objects and returns the product of of the with the specified
@@ -61,11 +60,9 @@ EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &conditionOne
 EnabledWhenProperty::EnabledWhenProperty(std::shared_ptr<EnabledWhenProperty> &&conditionOne,
                                          std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
                                          eLogicOperator logicOperator)
-    : IPropertySettings() {
-  // Initialise with POD compatible syntax
-  m_comparisonDetails = std::make_shared<ComparisonDetails<EnabledWhenProperty>>(
-      ComparisonDetails<EnabledWhenProperty>{std::move(conditionOne), std::move(conditionTwo), logicOperator});
-}
+    : IPropertySettings(),
+      m_comparisonDetails(std::make_shared<ComparisonDetails<EnabledWhenProperty>>(
+          ComparisonDetails<EnabledWhenProperty>{std::move(conditionOne), std::move(conditionTwo), logicOperator})) {}
 
 EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &other)
     : IPropertySettings(), m_propertyDetails{other.m_propertyDetails}, m_comparisonDetails{other.m_comparisonDetails} {}

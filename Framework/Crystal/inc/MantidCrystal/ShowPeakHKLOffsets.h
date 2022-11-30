@@ -26,7 +26,7 @@ offset and run number and detector number
 
 namespace Mantid {
 namespace Crystal {
-class MANTID_CRYSTAL_DLL ShowPeakHKLOffsets : public API::Algorithm {
+class MANTID_CRYSTAL_DLL ShowPeakHKLOffsets final : public API::Algorithm {
 public:
   const std::string name() const override { return "ShowPeakHKLOffsets"; };
 

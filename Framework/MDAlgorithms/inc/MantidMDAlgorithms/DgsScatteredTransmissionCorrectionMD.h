@@ -15,7 +15,7 @@ using Mantid::DataObjects::MDEventWorkspace;
 namespace Mantid {
 namespace MDAlgorithms {
 
-class MANTID_MDALGORITHMS_DLL DgsScatteredTransmissionCorrectionMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL DgsScatteredTransmissionCorrectionMD final : public API::Algorithm {
 public:
   DgsScatteredTransmissionCorrectionMD() {}
   const std::string name() const override { return "DgsScatteredTransmissionCorrectionMD"; }

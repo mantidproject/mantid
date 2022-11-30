@@ -16,7 +16,7 @@ namespace Algorithms {
  * a single workspace from all the detector (non-monitor, not masked) spectra
  * in that workspace. The results is a single value for the entire workspace.
  */
-class MANTID_ALGORITHMS_DLL WeightedMeanOfWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL WeightedMeanOfWorkspace final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

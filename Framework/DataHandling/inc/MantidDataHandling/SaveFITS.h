@@ -16,7 +16,7 @@ namespace DataHandling {
 /**
   SaveFITS : Save images in FITS formats.
 */
-class DLLExport SaveFITS final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveFITS final : public API::Algorithm {
 public:
   const std::string name() const override final;
 

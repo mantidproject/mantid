@@ -66,7 +66,7 @@ ALC MultiPeriod Data
 .. _ALC_single_period:
 
 ALC Single Period Data
----------------------
+----------------------
 
 **Time required 5 minutes**
 

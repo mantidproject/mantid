@@ -1,24 +1,22 @@
 # Testing
-set(TEST_FILES ALFCustomInstrumentModelTest.h ALFCustomInstrumentPresenterTest.h)
+set(TEST_FILES ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h ALFInstrumentPresenterTest.h)
+
+set(TEST_HELPERS ALFAnalysisMocks.h ALFInstrumentMocks.h MockInstrumentActor.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../
-  LINK_LIBS Mantid::DataObjects
-            ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES}
-            ${CORE_MANTIDLIBS}
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
+  TEST_HELPER_SRCS ${TEST_HELPERS}
+  INCLUDE_DIRS ../
+  LINK_LIBS Mantid::API
+            Mantid::DataObjects
+            Mantid::Geometry
+            Mantid::Kernel
+            Mantid::PythonInterfaceCore
             Python::Python
-            ${OPENGL_gl_LIBRARY}
-            ${OPENGL_glu_LIBRARY}
             gmock
-  QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS MantidScientificInterfacesDirect MantidQtWidgetsCommon MantidQtWidgetsInstrumentView
-                   MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
 

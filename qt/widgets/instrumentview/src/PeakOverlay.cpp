@@ -245,13 +245,18 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
       return;
     }
     // Project the peak (detector) position onto u,v coords
-    double u, v, uscale, vscale;
-    m_surface->project(pos, u, v, uscale, vscale);
-
-    // Create a peak marker at this position
-    PeakMarker2D *r = new PeakMarker2D(*this, u, v, m_peakIntensityScale->getScaledMarker(peak.getIntensity(), style));
-    r->setPeak(peak, i);
-    addMarker(r);
+    try {
+      double u, v, uscale, vscale;
+      m_surface->project(pos, u, v, uscale, vscale);
+      // Create a peak marker at this position
+      PeakMarker2D *r =
+          new PeakMarker2D(*this, u, v, m_peakIntensityScale->getScaledMarker(peak.getIntensity(), style));
+      r->setPeak(peak, i);
+      addMarker(r);
+    } catch (const std::runtime_error &ex) {
+      g_log.error(ex.what());
+      return;
+    }
   }
 
   deselectAll();

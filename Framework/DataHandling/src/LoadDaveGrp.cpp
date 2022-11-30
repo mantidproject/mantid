@@ -16,6 +16,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace Mantid::DataHandling {
@@ -133,10 +134,8 @@ void LoadDaveGrp::exec() {
 
   // Scale the x-axis if it is in micro-eV to get it to meV
   const bool isUeV = getProperty("IsMicroEV");
-  if (isUeV) {
-    for (auto &value : xAxis)
-      value /= 1000.0;
-  }
+  if (isUeV)
+    std::transform(xAxis.cbegin(), xAxis.cend(), xAxis.begin(), [](const auto &value) { return value / 1000.0; });
 
   setWorkspaceAxes(outputWorkspace, xAxis, yAxis);
 

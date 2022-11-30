@@ -40,7 +40,7 @@ template <> struct IsPtrType<decltype(nullptr)> : public std::true_type {};
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 */
-class DLLExport IValidator {
+class MANTID_KERNEL_DLL IValidator {
 public:
   /// Constructor
   IValidator() = default;

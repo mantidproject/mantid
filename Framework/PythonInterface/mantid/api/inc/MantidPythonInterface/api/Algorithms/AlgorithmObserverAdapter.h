@@ -19,7 +19,7 @@ It provides access from the C++ side to methods defined in python
 on subclasses of AlgorithmObserver.
 This allows the virtual methods to be overriden by python subclasses.
  */
-class DLLExport AlgorithmObserverAdapter : public API::AlgorithmObserver {
+class DLLExport AlgorithmObserverAdapter final : public API::AlgorithmObserver {
 public:
   explicit AlgorithmObserverAdapter(PyObject *self);
   AlgorithmObserverAdapter(const AlgorithmObserverAdapter &) = delete;

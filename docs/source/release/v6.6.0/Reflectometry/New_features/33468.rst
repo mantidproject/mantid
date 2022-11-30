@@ -1,0 +1,1 @@
+- It is now possible to save the content of the ``Search Runs`` table into a ``.csv`` file, allowing the table to be used as a logbook.

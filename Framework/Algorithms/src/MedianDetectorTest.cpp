@@ -259,7 +259,7 @@ int MedianDetectorTest::maskOutliers(const std::vector<double> &medianvec, const
         }
       }
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   return numFailed;
@@ -309,7 +309,7 @@ int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr &countsW
     g_log.debug() << "new component with " << nhist << " spectra.\n";
     for (size_t i = 0; i < nhist; ++i) {
       g_log.debug() << "Counts workspace index=" << i << ", Mask workspace index=" << hists.at(i) << '\n';
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       ++steps;
       // update the progressbar information
       if (steps % progStep == 0) {
@@ -346,9 +346,9 @@ int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr &countsW
         ++numFailed;
       }
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Log finds
     g_log.information() << numFailed << " spectra failed the median tests.\n";

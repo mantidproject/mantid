@@ -104,7 +104,7 @@ Check that not all peaks are colinear and throw if they are not.
 @param peakCandidates : Potential peaks
 @throws runtime_error if all colinear peaks have been provided
 */
-void IndexSXPeaks::validateNotColinear(std::vector<PeakCandidate> &peakCandidates) const {
+void IndexSXPeaks::validateNotColinear(const std::vector<PeakCandidate> &peakCandidates) const {
   // Find two non-colinear peaks
   bool all_collinear = true;
   size_t npeaks = peakCandidates.size();
@@ -182,6 +182,7 @@ void IndexSXPeaks::exec() {
     V3D Qs = peak.getQSampleFrame() / (2.0 * M_PI);
     peaks.emplace_back(Qs[0], Qs[1], Qs[2]);
   }
+  assert(peaks.size() >= 2);
 
   // Sanity check the generated peaks.
   validateNotColinear(peaks);

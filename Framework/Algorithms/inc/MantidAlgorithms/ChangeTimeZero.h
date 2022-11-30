@@ -16,7 +16,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL ChangeTimeZero : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChangeTimeZero final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeTimeZero"; };

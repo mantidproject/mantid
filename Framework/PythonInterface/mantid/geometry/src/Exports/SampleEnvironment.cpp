@@ -23,5 +23,7 @@ void export_SampleEnvironment() {
            return_value_policy<reference_existing_object>())
       .def("getComponent", &SampleEnvironment::getComponent, (args("self", "index")),
            "Returns the requested IObject. Index 0 is considered the container",
-           return_value_policy<reference_existing_object>());
+           return_value_policy<reference_existing_object>())
+      .def("nelements", &SampleEnvironment::nelements, (args("self")),
+           "Returns the number of elements the environment is composed of.");
 }

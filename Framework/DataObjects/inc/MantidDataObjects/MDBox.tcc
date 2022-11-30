@@ -103,8 +103,8 @@ template <typename MDE, size_t nd>
 MDBox<MDE, nd>::MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
                       const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector,
                       EventIterator begin, EventIterator end)
-    : MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), m_Saveable(nullptr), m_bIsMasked(false) {
-  data = std::vector<MDE>(begin, end);
+    : MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), m_Saveable(nullptr), data(std::vector<MDE>(begin, end)),
+      m_bIsMasked(false) {
   MDBoxBase<MDE, nd>::calcCaches(data.begin(), data.end());
   if (this->m_BoxController->isFileBacked())
     this->setFileBacked();

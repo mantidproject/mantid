@@ -16,13 +16,6 @@
 #include <string>
 
 namespace MantidQt {
-
-namespace API {
-class BatchAlgorithmRunner;
-class IConfiguredAlgorithm;
-using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
-} // namespace API
-
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
@@ -32,7 +25,7 @@ IBatchView is the base view class for the Reflectometry "Batch"
 tab. It contains no QT specific functionality as that should be handled by a
 subclass.
 */
-class IBatchView : public IJobRunner {
+class IBatchView {
 public:
   virtual ~IBatchView() = default;
   virtual IRunsView *runs() const = 0;

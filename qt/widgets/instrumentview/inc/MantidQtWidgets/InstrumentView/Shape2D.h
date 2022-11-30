@@ -54,7 +54,7 @@ public:
   /// Constructor.
   Shape2D();
   /// Virtual destructor.
-  virtual ~Shape2D() {}
+  virtual ~Shape2D() = default;
 
   // --- Public pure virtual methods --- //
 

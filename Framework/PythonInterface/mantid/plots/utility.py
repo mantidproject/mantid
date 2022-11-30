@@ -66,7 +66,6 @@ def artists_hidden(artists):
 def autoscale_on_update(ax, state, axis='both'):
     """
     Context manager to temporarily change value of autoscale_on_update
-
     :param matplotlib.axes.Axes ax: The axes to disable autoscale on
     :param bool state: True turns auto-scaling on, False off
     :param str axis: {'both', 'x', 'y'} The axis to set the scaling on
@@ -165,9 +164,11 @@ def row_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().rowspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().rowspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
-        return ax.rowNum
+        # An 'inset' axes does not have a rowNum, so return None
+        return ax.rowNum if hasattr(ax, 'rowNum') else None
 
 
 def col_num(ax):
@@ -176,9 +177,11 @@ def col_num(ax):
     Version check to avoid calling depreciated method in matplotlib > 3.2
     """
     if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        return ax.get_subplotspec().colspan.start
+        # An 'inset' axes does not have a subplotspec, so return None
+        return ax.get_subplotspec().colspan.start if hasattr(ax, 'get_subplotspec') else None
     else:
-        return ax.colNum
+        # An 'inset' axes does not have a colNum, so return None
+        return ax.colNum if hasattr(ax, 'colNum') else None
 
 
 def zoom_axis(ax, coord, x_or_y, factor):

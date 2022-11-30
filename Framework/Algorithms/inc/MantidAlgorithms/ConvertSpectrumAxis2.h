@@ -33,7 +33,7 @@ namespace Algorithms {
    converted. </LI>
     </UL>
 */
-class MANTID_ALGORITHMS_DLL ConvertSpectrumAxis2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertSpectrumAxis2 final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpectrumAxis"; }

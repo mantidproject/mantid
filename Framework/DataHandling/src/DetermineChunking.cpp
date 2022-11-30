@@ -19,6 +19,11 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+// clang-format off
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
+
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;

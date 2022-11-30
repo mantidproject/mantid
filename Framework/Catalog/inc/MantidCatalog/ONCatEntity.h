@@ -56,6 +56,7 @@ class MANTID_CATALOG_DLL ONCatEntity {
 public:
   ONCatEntity() = delete;
   ONCatEntity(const ONCatEntity &);
+  ONCatEntity &operator=(ONCatEntity other);
   ~ONCatEntity();
 
   // These are the only two fields the ONCat API guarantees will be there

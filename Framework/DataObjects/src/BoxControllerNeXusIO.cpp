@@ -15,6 +15,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <H5Cpp.h>
+#include <algorithm>
 #include <string>
 
 namespace Mantid::DataObjects {
@@ -36,9 +37,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
       m_EventDataVersion(EventDataVersion::EDVGoniometer), m_ReadConversion(noConversion) {
   m_BlockSize[1] = 5 + m_bc->getNDims();
 
-  for (auto &EventHeader : EventHeaders) {
-    m_EventsTypeHeaders.emplace_back(EventHeader);
-  }
+  std::copy(std::cbegin(EventHeaders), std::cend(EventHeaders), std::back_inserter(m_EventsTypeHeaders));
 
   m_EventsTypesSupported.resize(2);
   m_EventsTypesSupported[LeanEvent] = MDLeanEvent<1>::getTypeName();
@@ -359,14 +358,14 @@ void BoxControllerNeXusIO::setEventDataVersion(const size_t &traitsCount) {
   auto edv = static_cast<EventDataVersion>(traitsCount);
   // sucks I couldn't create this list dynamically
   std::initializer_list<EDV> valid_versions = {EDV::EDVLean, EDV::EDVOriginal, EDV::EDVGoniometer};
-  for (auto const &valid_edv : valid_versions) {
-    if (edv == valid_edv) {
-      setEventDataVersion(valid_edv);
-      return;
-    }
+  const auto valid_edv = std::find(std::cbegin(valid_versions), std::cend(valid_versions), edv);
+  if (valid_edv != std::cend(valid_versions)) {
+    setEventDataVersion(*valid_edv);
+    return;
+  } else {
+    // should not reach here
+    throw std::invalid_argument("Could not find a valid version");
   }
-  // should not reach here
-  throw std::invalid_argument("Could not find a valid version");
 }
 
 int64_t BoxControllerNeXusIO::dataEventCount(void) const {

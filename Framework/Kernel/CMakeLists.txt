@@ -174,7 +174,6 @@ set(INC_FILES
     inc/MantidKernel/DeltaEMode.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
-    inc/MantidKernel/DllConfig.h
     inc/MantidKernel/DllOpen.h
     inc/MantidKernel/DocumentationHeader.h
     inc/MantidKernel/DynamicFactory.h
@@ -525,6 +524,12 @@ target_compile_definitions(Kernel PUBLIC -DH5_BUILT_AS_DYNAMIC_LIB)
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(
+  Kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Kernel> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(Kernel TRUE)
+
 # This section deals with creating the MantidVersion implementation
 
 # DON'T try to update the MantidVersion source file if we were not able to determine it from git and the file already
@@ -543,9 +548,10 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h
 )
 
-# This section deals with creating the GithubApiHelper implementation
+# This section deals with creating the GithubApiHelper implementation Defaults to 40-character string to allocate the
+# appropriate amount of space in the final binary for it to be replaced if necessary
 set(GITHUB_AUTHORIZATION_TOKEN
-    ""
+    "unsetunsetunsetunsetunsetunsetunsetunset"
     CACHE STRING "token used for authenticated read access to github"
 )
 configure_file(
@@ -594,7 +600,8 @@ set(ALGORITHMDEPRECATED "Raise")
 configure_file(../Properties/Mantid.properties.template ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 
 # Then, copy into appropriate place
-if(MSVC)
+get_property(_is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_is_multi_config)
   file(
     GENERATE
     OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIG>/Mantid.properties
@@ -656,7 +663,7 @@ mtd_install_files(
 # Installation settings
 if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidKernelTargets")
-  mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
+  mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
   mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()

@@ -208,30 +208,30 @@ private:
   }
 
   /// find method to get the index of integer cell value in a table workspace
-  void find(size_t /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(size_t /*value*/, size_t & /*row*/, size_t /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  double cell value in a table workspace
-  void find(double /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(double /*value*/, size_t & /*row*/, size_t /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  float cell value in a table workspace
-  void find(float /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(float /*value*/, size_t & /*row*/, size_t /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  API::Boolean value cell in a table
   /// workspace
-  void find(API::Boolean /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(API::Boolean /*value*/, size_t & /*row*/, size_t /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of cellstd::string  value in a table
   /// workspace
-  void find(const std::string & /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(const std::string & /*value*/, size_t & /*row*/, size_t /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table
   /// workspace
-  void find(const Mantid::Kernel::V3D & /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(const Mantid::Kernel::V3D & /*value*/, size_t & /*row*/, size_t /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("LeanElasticPeaksWorkspace::find() not implemented.");
   }
 

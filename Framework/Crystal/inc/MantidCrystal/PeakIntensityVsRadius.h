@@ -16,7 +16,7 @@ namespace Crystal {
 
   @date 2011-12-02
 */
-class MANTID_CRYSTAL_DLL PeakIntensityVsRadius : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PeakIntensityVsRadius final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

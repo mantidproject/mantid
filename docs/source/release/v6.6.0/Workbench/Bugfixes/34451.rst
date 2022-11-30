@@ -1,0 +1,1 @@
+- Saving script from history dialog in Linux will be saved with :code:`.py` extension

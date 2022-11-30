@@ -160,7 +160,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   m_uiForm.dsSampleInput->isOptional(true);
 }
 
-AbsorptionCorrections::~AbsorptionCorrections() {}
+AbsorptionCorrections::~AbsorptionCorrections() = default;
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();

@@ -333,19 +333,6 @@ void ScriptRepositoryView::RepoDelegate::paint(QPainter *painter, const QStyleOp
 
 QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
   QIcon icon;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  if (state == RepoModel::remoteOnlySt())
-    icon = QIcon::fromTheme("system-software-install", QIcon(QPixmap(":/win/download")));
-  else if (state == RepoModel::remoteChangedSt() || state == RepoModel::bothChangedSt())
-    icon = QIcon::fromTheme("bottom", QIcon(QPixmap(":win/system-software-update")));
-  else if (state == RepoModel::updatedSt())
-    icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok")));
-  else if (state == RepoModel::localOnlySt() || state == RepoModel::localChangedSt())
-    icon = QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
-  else if (state == RepoModel::downloadSt() || state == RepoModel::uploadSt())
-    icon = QIcon(QPixmap(":win/running_process"));
-  return icon;
-#else
   if (state == RepoModel::remoteOnlySt())
     icon = Icons::getIcon("mdi.download");
   else if (state == RepoModel::remoteChangedSt() || state == RepoModel::bothChangedSt()) {
@@ -359,7 +346,6 @@ QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
   else if (state == RepoModel::uploadSt())
     icon = Icons::getIcon("mdi.progress-upload");
   return icon;
-#endif
 }
 
 /** Reacts to the iteraction with the user when he clicks on the buttons
@@ -442,11 +428,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
   if (painter->device() == nullptr)
     return;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QStyleOptionViewItemV4 modifiedOption(option);
-#else
   QStyleOptionViewItem modifiedOption(option);
-#endif
 
   QPoint p = modifiedOption.rect.center();
   QSize curr = modifiedOption.rect.size();
@@ -535,12 +517,8 @@ void ScriptRepositoryView::RemoveEntryDelegate::paint(QPainter *painter, const Q
 
   if (entry_type == "protected")
     return;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  icon = QIcon::fromTheme("emptytrash", QIcon(QPixmap(":/win/emptytrash")));
-#else
+
   icon = Icons::getIcon("mdi.trash-can");
-  ;
-#endif
 
   // define the region to draw the icon
   QRect buttonRect(option.rect);

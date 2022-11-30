@@ -818,14 +818,14 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
     inetHelper.setBody(form);
     std::stringstream server_reply;
 
-    int status;
+    Kernel::InternetHelper::HTTPStatus status{Kernel::InternetHelper::HTTPStatus::BAD_REQUEST};
     try {
       status = inetHelper.sendRequest(remote_upload, server_reply);
     } catch (Kernel::Exception::InternetError &ie) {
-      status = ie.errorCode();
+      status = static_cast<Kernel::InternetHelper::HTTPStatus>(ie.errorCode());
     }
 
-    g_log.information() << "ScriptRepository upload status: " << status << '\n';
+    g_log.information() << "ScriptRepository upload status: " << static_cast<int>(status) << '\n';
     std::stringstream answer;
     { // remove the status message from the end of the reply, in order not to
       // get exception from the read_json parser
@@ -1120,14 +1120,14 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(const std::string &url, con
     // send the request to the server
     inetHelper.setBody(form);
     std::stringstream server_reply;
-    int status;
+    Kernel::InternetHelper::HTTPStatus status{Kernel::InternetHelper::HTTPStatus::BAD_REQUEST};
     try {
       status = inetHelper.sendRequest(url, server_reply);
     } catch (Kernel::Exception::InternetError &ie) {
-      status = ie.errorCode();
+      status = static_cast<Kernel::InternetHelper::HTTPStatus>(ie.errorCode());
     }
 
-    g_log.debug() << "ScriptRepository delete status: " << status << '\n';
+    g_log.debug() << "ScriptRepository delete status: " << static_cast<int>(status) << '\n';
 
     {
       // get the answer from the server
@@ -1336,9 +1336,9 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file, const std
     inetHelper.setTimeout(timeout);
 
     // std::stringstream ss;
-    int status = inetHelper.downloadFile(url_file, local_file_path);
+    const auto status = inetHelper.downloadFile(url_file, local_file_path);
 
-    g_log.debug() << "Answer from mantid web: " << status << '\n';
+    g_log.debug() << "Answer from mantid web: " << static_cast<int>(status) << '\n';
   } catch (Kernel::Exception::InternetError &ie) {
     std::stringstream info;
     info << "Failed to download " << given_path << " because it failed to find this file at the link "

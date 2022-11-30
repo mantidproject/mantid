@@ -54,6 +54,7 @@ set(TEST_PY_FILES
     FractionalIndexingTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
+    GroupBySampleChangerPositionTest.py
     HB2AReduceTest.py
     HB3AAdjustSampleNormTest.py
     HB3AFindPeaksTest.py
@@ -65,6 +66,7 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
@@ -75,6 +77,7 @@ set(TEST_PY_FILES
     LoadLiveDataTest.py
     LoadLampTest.py
     LoadLogPropertyTableTest.py
+    LoadSANS1MLZTest.py
     LoadMultipleGSSTest.py
     LoadNMoldyn3AsciiTest.py
     LoadNMoldyn4Ascii1DTest.py
@@ -90,7 +93,6 @@ set(TEST_PY_FILES
     MeanTest.py
     MedianBinWidthTest.py
     MergeCalFilesTest.py
-    MuscatSofQWTest.py
     MuonMaxEntTest.py
     NMoldyn4InterpolationTest.py
     NOMADMedianDetectorTestTest.py

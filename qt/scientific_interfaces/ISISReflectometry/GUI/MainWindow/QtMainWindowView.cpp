@@ -21,13 +21,15 @@
 #include <QMessageBox>
 #include <QToolButton>
 
+#include <fstream>
+
 namespace MantidQt {
 
 using MantidWidgets::SlitCalculator;
 
 namespace CustomInterfaces::ISISReflectometry {
 
-// Do not change the last arguement as you will break backwards compatibility
+// Do not change the last argument as you will break backwards compatibility
 // with project save it should be the same as one of the tags in the decoder.
 DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder, "ISIS Reflectometry")
 
@@ -72,17 +74,14 @@ void QtMainWindowView::initLayout() {
   auto instruments = std::vector<std::string>({{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  Plotter plotter(this);
-#else
   Plotter plotter;
-#endif
+
   auto makeRunsTablePresenter = RunsTablePresenterFactory(instruments, thetaTolerance, std::move(plotter));
 
   auto messageHandler = this;
   auto fileHandler = this;
   auto makeRunsPresenter =
-      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance, instruments, messageHandler);
+      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance, instruments, messageHandler, fileHandler);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
@@ -90,9 +89,9 @@ void QtMainWindowView::initLayout() {
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
   auto makePreviewPresenter = PreviewPresenterFactory();
 
-  auto makeBatchPresenter =
-      std::make_unique<BatchPresenterFactory>(std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter,
-                                              makeInstrumentPresenter, makePreviewPresenter, makeSaveSettingsPresenter);
+  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
+      std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter, makeInstrumentPresenter,
+      makePreviewPresenter, makeSaveSettingsPresenter, messageHandler);
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
@@ -228,5 +227,15 @@ void QtMainWindowView::saveJSONToFile(std::string const &filename, QMap<QString,
 QMap<QString, QVariant> QtMainWindowView::loadJSONFromFile(std::string const &filename) {
   return MantidQt::API::loadJSONFromFile(QString::fromStdString(filename));
 }
+
+void QtMainWindowView::saveCSVToFile(const std::string &filename, const std::string &content) const {
+  std::ofstream outFile(filename, std::ios::trunc);
+  if (!outFile) {
+    throw std::runtime_error("Saving to " + filename + "failed. Please try again.");
+  }
+  outFile << content;
+  outFile.close();
+}
+
 } // namespace CustomInterfaces::ISISReflectometry
 } // namespace MantidQt

@@ -32,7 +32,7 @@ class TestableFunctionParameterDecorator : public FunctionParameterDecorator {
 
 public:
   TestableFunctionParameterDecorator() {}
-  ~TestableFunctionParameterDecorator() override {}
+  ~TestableFunctionParameterDecorator() override = default;
 
   std::string name() const override { return "TestableFunctionParameterDecorator"; }
 

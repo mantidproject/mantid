@@ -15,7 +15,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
@@ -35,7 +34,7 @@ namespace MDAlgorithms {
  * @author Janik Zikovsky
  * @date 2011-03-29 11:28:06.048254
  */
-class DLLExport BinMD : public SlicingAlgorithm {
+class MANTID_MDALGORITHMS_DLL BinMD : public SlicingAlgorithm {
 public:
   BinMD();
 

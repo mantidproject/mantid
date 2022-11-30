@@ -44,8 +44,9 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters &params) 
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if (isEmpty(params.numberDensity) && isEmpty(params.numberDensityEffective) && isEmpty(params.packingFraction)) {
-      result["NumberDensity"] = "The number density or effective number density must "
+    if (isEmpty(params.numberDensity) && isEmpty(params.numberDensityEffective) && isEmpty(params.packingFraction) &&
+        isEmpty(params.zParameter) && isEmpty(params.unitCellVolume)) {
+      result["NumberDensity"] = "The number density or effective number density or Z Parameter\\Unit Cell Volume must "
                                 " be specified with a user-defined material";
     }
 
@@ -58,16 +59,6 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters &params) 
                               "both the effective number density and "
                               "packing fraction are set. Only two can "
                               "be specified at most.";
-  }
-
-  if (isEmpty(params.massDensity) && isEmpty(params.zParameter) && isEmpty(params.unitCellVolume)) {
-    // Checks if only the packing fraction has been specified with no other
-    // way of computing the number density or eff. number density
-    if (isEmpty(params.numberDensity) && isEmpty(params.numberDensityEffective) && !isEmpty(params.packingFraction)) {
-      result["PackingFraction"] = "Cannot determine number density from only "
-                                  " the packing fraction. The number density "
-                                  " or effective number density is also needed.";
-    }
   }
 
   // If these are all set, then number density and eff. number density can be

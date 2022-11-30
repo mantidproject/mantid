@@ -2,7 +2,7 @@
 <parameter-file instrument="FIGARO">
 
 	<component-link name="FIGARO">
-		<parameter name="deltaE-mode" type="string">
+		<parameter name="deltaE-mode" type="string" visible="false">
 			<value val="direct" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
@@ -43,17 +43,41 @@
 		<parameter name="conjoin_sample_logs_fail_tolerances" type="string" visible="false">
 			<value val="" />
 		</parameter>
-		<parameter name="chopper_window_opening">
+		<parameter name="chopper_window_opening" visible="false">
 		<!-- Chopper opening window [degrees]-->
 			<value val="45.0"/>
 		</parameter>
-		<parameter name="DH1Z">
+		<parameter name="chopper_radius" visible="false">
+		<!-- Chopper radius [m]-->
+			<value val="0.305"/>
+		</parameter>
+		<parameter name="DH1Z" visible="false">
 		 <!-- The sample to first height motor position along Z [m]-->
  		 	<value val="1.135" />
- 	  </parameter>
-		<parameter name="DH2Z">
-		 <!-- The sample to second height motor position along Z [m]-->
- 		 	<value val="2.077" />
- 	  </parameter>
+		</parameter>
+		<parameter name="DH2Z" visible="false" >
+		  <!-- The sample to second height motor position along Z [m]-->
+		  <value val="2.077" />
+		</parameter>
+
+		<parameter name="correct_chopper_sample_distance" type="bool" visible="false">
+		  <value val="true" valid-to="2022-04-20T23:59:59"/>
+		  <value val="false" valid-from="2022-04-20T23:59:59"/>
+		</parameter>
+
+	  <parameter name="logbook_default_parameters" type="string" visible="false">
+	    <value val="experiment identifier:/entry0/experiment_identifier:s,
+			start time:/entry0/start_time:s,
+			duration:/entry0/duration:d,
+			title:/entry0/title:s,
+			angle:/entry0/instrument/MainParameters/Incident_angle:f,
+			bgs3:/entry0/instrument/BGS3/value:f" />
+	  </parameter>
+	  <parameter name="logbook_optional_parameters" type="string" visible="false">
+	    <value val="sample changer:/entry0/instrument/VirtualSampleChanger/wanted_changer:f" />
+	  </parameter>
+		<parameter name="reduction_logs_to_save" type="string" visible="false">
+		  <value val="MainParameters.Master_chopper_phase,MainParameters.Master_chopper_speed,MainParameters.Slave_chopper_phase,MainParameters.Slave_chopper_speed,MainParameters.Pixel_width,MainParameters.open_offset,MainParameters.pickup_offset,san.value,VirtualAxis.DAN_actual_angle,MainParameters.Slit2_size,MainParameters.Slit3_size,MainParameters.MidChopper_Sample,Distance.Chopper1_Sample,Distance.ChopperGap,Distance.MidChopper_Sample,Distance.S2_S3,Distance.S3_Sample,Distance.Sample_centerOfDetector_distance"/>
+		</parameter>
 	</component-link>
 </parameter-file>

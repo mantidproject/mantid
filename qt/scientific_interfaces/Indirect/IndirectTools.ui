@@ -31,11 +31,6 @@
         <string>Transmission</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabLoadILL">
-       <attribute name="title">
-        <string>Load ILL</string>
-       </attribute>
-      </widget>
      </widget>
     </item>
     <item>

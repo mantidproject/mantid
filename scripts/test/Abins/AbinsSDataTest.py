@@ -4,10 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from copy import deepcopy
+import logging
 import unittest
+
 import numpy as np
 from numpy.testing import assert_almost_equal
-import logging
+
 import abins
 from abins import SData
 from abins.sdata import SDataByAngle
@@ -23,6 +26,12 @@ class AbinsSDataTest(unittest.TestCase):
                                        {'order_1': np.array([0., 0.001, 1., 1., 0.])}},
                             'atom_1': {'s':
                                        {'order_1': np.array([0., 1.001, 2., 0., 3.])}}}
+
+        self.sample_data_two_orders = {
+            'atom_0': {'s': {'order_1': np.linspace(0, 2, 5),
+                             'order_2': np.linspace(2, 4, 5)}},
+            'atom_1': {'s': {'order_1': np.linspace(3, 1, 5),
+                             'order_2': np.linspace(2, 1, 5)}}}
 
         self.frequencies = np.linspace(105, 145, 5)
         self.bin_width = 10
@@ -131,15 +140,35 @@ class AbinsSDataTest(unittest.TestCase):
         self.assertTrue(np.allclose(sliced_items[1]['order_1'],
                                     self.sample_data['atom_1']['s']['order_1']))
 
-    def test_s_data_apply_dw(self):
-        from copy import deepcopy
-        sdata_dict = {'atom_0':
-                      {'s': {'order_1': np.linspace(0, 2, 5),
-                             'order_2': np.linspace(2, 4, 5)}},
-                      'atom_1':
-                      {'s': {'order_1': np.linspace(3, 1, 5),
-                             'order_2': np.linspace(2, 1, 5)}}}
+    def test_s_data_multiply(self):
+        s_data = SData(data=deepcopy(self.sample_data_two_orders),
+                       frequencies=self.frequencies)
 
+        factors = np.array([[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]])
+
+        s_data_multiplied = s_data * factors
+
+        assert_almost_equal(s_data_multiplied[0]['order_1'],
+                            np.linspace(0, 2, 5) * factors[0])
+        assert_almost_equal(s_data_multiplied[0]['order_2'],
+                            np.linspace(2, 4, 5) * factors[1])
+        assert_almost_equal(s_data_multiplied[1]['order_1'],
+                            np.linspace(3, 1, 5) * factors[0])
+        assert_almost_equal(s_data_multiplied[1]['order_2'],
+                            np.linspace(2, 1, 5) * factors[1])
+
+        # Check there was no side-effect on initial sdata
+        assert_almost_equal(
+            s_data[0]['order_2'],
+            self.sample_data_two_orders['atom_0']['s']['order_2'])
+
+        # Now check that in-place mult gives the same results
+        s_data *= factors
+        for atom1, atom2 in zip(s_data, s_data_multiplied):
+            assert_almost_equal(atom1['order_1'], atom2['order_1'])
+            assert_almost_equal(atom1['order_2'], atom2['order_2'])
+
+    def test_s_data_apply_dw(self):
         dw = np.random.RandomState(42).rand(2, 5)
 
         for min_order, max_order, expected in [
@@ -157,7 +186,7 @@ class AbinsSDataTest(unittest.TestCase):
                                'order_2': np.linspace(2, 1, 5) * dw[1, :]}})
                                ]:
 
-            sdata = SData(data=deepcopy(sdata_dict),
+            sdata = SData(data=deepcopy(self.sample_data_two_orders),
                           frequencies=self.frequencies)
             sdata.apply_dw(dw, min_order=min_order, max_order=max_order)
             for atom_key, atom_data in sdata.extract().items():

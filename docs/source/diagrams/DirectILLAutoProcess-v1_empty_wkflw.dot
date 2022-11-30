@@ -1,0 +1,47 @@
+digraph Sample {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    Mask
+    Group
+    Save
+  }
+
+  subgraph params {
+    $param_style
+    Runs
+    MaskWorkspace
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DirectILLCollectData
+    MaskDetectors
+    SaveOutput
+    GroupDetectors
+  }
+
+  Runs -> DirectILLCollectData
+  DirectILLCollectData -> Mask
+  MaskWorkspace -> MaskCreation
+  MaskCreation -> MaskWorkspace
+  MaskWorkspace -> MaskDetectors
+  Mask -> MaskDetectors
+  MaskDetectors -> Group
+  Mask -> Group
+  Group -> GroupDetectors
+  GroupDetectors -> Save
+  Group -> Save
+  Save -> SaveOutput
+  SaveOutput -> OutputWorkspace
+  Save -> OutputWorkspace
+}
+
+
+

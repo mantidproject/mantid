@@ -125,7 +125,7 @@ fi
 
 if [[ ${JOB_NAME} == *debug* ]]; then
     BUILD_CONFIG="Debug"
-    elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
     BUILD_CONFIG="RelWithDbg"
 else
     BUILD_CONFIG="Release"
@@ -155,7 +155,7 @@ if [[ ${PRBUILD} == true ]]; then
     DO_DOCTESTS_USER=false
     DO_BUILD_DEVDOCS=false
     DO_BUILD_PKG=${BUILD_PACKAGE:-false}
-    DO_SYSTEMTESTS=false
+    DO_SYSTEMTESTS=${RUN_SYSTEMTESTS:-false}
 
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing if there are any non-doc or gui changes
@@ -163,7 +163,7 @@ if [[ ${PRBUILD} == true ]]; then
             DO_BUILD_PKG=true
             DO_SYSTEMTESTS=true
         fi
-        elif [[ ${ON_UBUNTU} == true ]]; then
+    elif [[ ${ON_UBUNTU} == true ]]; then
         # ubuntu does the docs build
         if ${SCRIPT_DIR}/check_for_changes dev-docs-only; then
             DO_BUILD_CODE=false
@@ -212,7 +212,7 @@ fi
 ###############################################################################
 if [[ ${JOB_NAME} == *clang* ]]; then
     USE_CLANG=true
-    elif [[ ${ON_MACOS} == true ]] ; then
+elif [[ ${ON_MACOS} == true ]] ; then
     if [[ ! $(command -v icpc) ]] ; then
         USE_CLANG=true
     fi
@@ -332,7 +332,7 @@ fi
 ###############################################################################
 if [ "$(command -v ninja)" ]; then
     CMAKE_GENERATOR="-G Ninja"
-    elif [ "$(command -v ninja-build)" ]; then
+elif [ "$(command -v ninja-build)" ]; then
     CMAKE_GENERATOR="-G Ninja"
 fi
 
@@ -474,7 +474,12 @@ fi
 ###############################################################################
 if [[ ${DO_SYSTEMTESTS} == true ]]; then
     if [[ ${PRBUILD} == true ]]; then
-        EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+        # Don't run installer tests if package isn't built.
+		if [[ ${DO_BUILD_PKG} == false ]]; then
+		    RUN_INSTALLER_TESTS=false BUILD_CONFIG=$BUILD_CONFIG EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+		else
+            EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
+		fi
     else
         $SCRIPT_DIR/systemtests
     fi

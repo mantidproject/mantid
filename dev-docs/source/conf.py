@@ -9,7 +9,6 @@ from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme
 from distutils.version import LooseVersion
 
-
 # -- General configuration ------------------------------------------------
 if LooseVersion(sphinx_version) > LooseVersion("1.6"):
 
@@ -20,6 +19,7 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
             app.add_css_file("custom.css")
         else:
             app.add_stylesheet("custom.css")  # v1.6-1.8
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -64,7 +64,7 @@ pygments_style = 'sphinx'
 # -- Options for pngmath --------------------------------------------------
 
 # Load the preview package into latex
-pngmath_latex_preamble=r'\usepackage[active]{preview}'
+pngmath_latex_preamble = r'\usepackage[active]{preview}'
 
 # Ensures that the vertical alignment of equations is correct.
 # See http://sphinx-doc.org/ext/math.html#confval-pngmath_use_preview
@@ -115,7 +115,7 @@ html_show_copyright = False
 # custom.css rather than here.
 html_theme_options = {
     # Navigation bar title.
-    'navbar_title': " ", # deliberate single space so it's not visible
+    'navbar_title': " ",  # deliberate single space so it's not visible
     # Tab name for entire site.
     'navbar_site_name': "Mantid",
     # Add links to the nav bar. Third param of tuple is true to create absolute url.
@@ -136,6 +136,8 @@ html_theme_options = {
     'bootstrap_version': "3",
     # Ensure the nav bar always stays on top of page.
     'navbar_fixed_top': "false",
+    # Don't limit the width
+    'body_max_width': "none"
 }
 
 # -- Options for Epub output ---------------------------------------------------
@@ -161,7 +163,7 @@ epub_identifier = "www.mantidproject.org"
 #The publication scheme for the epub_identifier. This is put in the Dublin Core metadata.
 #For published books the scheme is 'ISBN'. If you use the project homepage, 'URL' seems reasonable.
 #The default value is 'unknown'.
-epub_scheme='URL'
+epub_scheme = 'URL'
 
 #A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string.
 #The default value is 'unknown'.

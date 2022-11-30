@@ -71,8 +71,8 @@ class anAbsorptionShape(object):
 
         # the workspace used for testing correct properties settings
         rhash = random.randint(1,100000)
-        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace=
-            '_adsShape_' + str(rhash),NumBanks=1,BankPixelWidth=1) # noqa: E127
+        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace='_adsShape_' + str(rhash),
+                                                    NumBanks=1,BankPixelWidth=1) # noqa: E127
 
         if MaterialValue is not None:
             self.material = MaterialValue
@@ -244,7 +244,7 @@ class anAbsorptionShape(object):
         if len(anAbsorptionShape._Defined_Shapes) == 0:
             anAbsorptionShape._Defined_Shapes = \
                 {'Cylinder':     Cylinder(),      'FlatPlate':FlatPlate(),
-                'HollowCylinder':HollowCylinder(),'Sphere':   Sphere()}  # noqa: E127
+                 'HollowCylinder':HollowCylinder(),'Sphere':   Sphere()}  # noqa: E127
 
         if not isinstance(str_val, str):
             raise ValueError(
@@ -452,8 +452,8 @@ class FlatPlate(anAbsorptionShape):
     @shape.setter
     def shape(self,value):
         shape_dict = self._set_list_property(value,
-            'FlatPlate',['Height','Width','Thick'],
-            ['Center','Angle'],[[0.,0.,0.],0.])  # noqa: E127
+                                             'FlatPlate',['Height','Width','Thick'],
+                                             ['Center','Angle'],[[0.,0.,0.],0.])  # noqa: E127
 
         self._ShapeDescription = shape_dict
 
@@ -522,9 +522,9 @@ class HollowCylinder(anAbsorptionShape):
     @shape.setter
     def shape(self,value):
         shape_dict = self._set_list_property(value,
-            'HollowCylinder',
-            ['Height','InnerRadius','OuterRadius'],
-            ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])  # noqa: E127
+                                             'HollowCylinder',
+                                             ['Height','InnerRadius','OuterRadius'],
+                                             ['Axis','Center'],[[0.,1.,0.],[0.,0.,0.]])  # noqa: E127
         #
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:
@@ -629,8 +629,8 @@ class Sphere(anAbsorptionShape):
     @shape.setter
     def shape(self,value):
         shape_dict = self._set_list_property(value,
-            'Sphere',['Radius'],
-            ['Center'],[[0.,0.,0.]])  # noqa: E127
+                                             'Sphere',['Radius'],
+                                             ['Center'],[[0.,0.,0.]])  # noqa: E127
 
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:

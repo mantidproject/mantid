@@ -1,0 +1,1 @@
+A crash is now avoided when extracting a tube in ALFView while an invalid axis is selected.

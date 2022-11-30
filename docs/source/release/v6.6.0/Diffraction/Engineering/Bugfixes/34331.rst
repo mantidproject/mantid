@@ -1,0 +1,2 @@
+- Correct the tabbing order between widgets on the Engineering Diffraction interface.
+- Add a scrollbar to the GSASII tab to allow a smaller interface height, like the fitting tab.

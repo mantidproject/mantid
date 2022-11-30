@@ -18,7 +18,7 @@ namespace Algorithms {
    input
     workspace are (e.g. TOF).
 */
-class MANTID_ALGORITHMS_DLL FilterByXValue : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FilterByXValue final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

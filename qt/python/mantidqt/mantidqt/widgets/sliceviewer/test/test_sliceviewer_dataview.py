@@ -9,14 +9,14 @@ from typing import Dict
 from unittest import mock
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
-from mantidqt.widgets.sliceviewer.view import SliceViewerDataView
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.views.view import SliceViewerDataView
 
 
 @start_qapplication
 class SliceviewerDataViewTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.view",
+        self.patcher = mock.patch.multiple("mantidqt.widgets.sliceviewer.views.dataview",
                                            DimensionWidget=mock.DEFAULT,
                                            QGridLayout=mock.DEFAULT,
                                            QHBoxLayout=mock.DEFAULT,
@@ -40,7 +40,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.mpl_toolbar.regionSelectionClicked.connect.assert_called_once_with(self.view.on_region_selection_toggle)
         self.view.mpl_toolbar.homeClicked.connect.assert_called_once_with(self.view.on_home_clicked)
         self.view.mpl_toolbar.nonOrthogonalClicked.connect.assert_called_once_with(self.view.on_non_orthogonal_axes_toggle)
-        self.view.mpl_toolbar.zoomPanClicked.connect.assert_called_once_with(self.view.presenter.deactivate_peak_adding)
+        self.view.mpl_toolbar.zoomPanClicked.connect.assert_called_once_with(self.view.presenter.zoom_pan_clicked)
         self.view.mpl_toolbar.zoomPanFinished.connect.assert_called_once_with(self.view.on_data_limits_changed)
 
     def test_color_bar_signals_connected(self):
@@ -168,6 +168,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
     def test_plot_matrix(self):
         self.view.image = None
         self.view.clear_image = mock.Mock()
+        self.view.on_track_cursor_state_change = mock.Mock()
         self.view.ax = mock.Mock()
         self.view.colorbar = mock.Mock()
 
@@ -183,6 +184,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.image = original_image
         self.view.image.transpose = self.view.dimensions.transpose
         self.view.clear_image = mock.Mock()
+        self.view.on_track_cursor_state_change = mock.Mock()
         self.view.ax = mock.Mock()
         self.view.colorbar = mock.Mock()
 
@@ -255,6 +257,18 @@ class SliceviewerDataViewTest(unittest.TestCase):
 
         self.view._line_plots.plotter.delete_line_plot_lines.assert_not_called()
         self.view._line_plots.plotter.update_line_plot_labels.assert_not_called()
+
+    def test_get_default_scale_norm_conf_none(self):
+        self.view.conf = None
+        scale = self.view.get_default_scale_norm()
+        self.assertEqual(scale, 'Linear')
+
+    def test_get_default_scale_norm_scalenorm(self):
+        self.view.conf = mock.Mock()
+        self.view.conf.has = mock.Mock(return_value=True)
+        self.view.conf.get = mock.Mock(return_value='Log')
+        scale = self.view.get_default_scale_norm()
+        self.assertEqual(scale, 'SymmetricLog10')
 
 
 if __name__ == '__main__':

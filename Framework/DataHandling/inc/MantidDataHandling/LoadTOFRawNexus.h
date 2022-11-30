@@ -12,6 +12,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
@@ -26,7 +27,7 @@ namespace DataHandling {
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and
  stores it in a 2D workspace.
  */
-class DLLExport LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default Constructor
   LoadTOFRawNexus();

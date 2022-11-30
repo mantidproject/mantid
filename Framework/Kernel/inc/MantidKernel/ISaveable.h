@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <list>
 #include <mutex>
 #ifndef Q_MOC_RUN
@@ -25,7 +25,7 @@ namespace Kernel {
 */
 // forward declaration
 
-class DLLExport ISaveable {
+class MANTID_KERNEL_DLL ISaveable {
 public:
   ISaveable();
   ISaveable(const ISaveable &other);

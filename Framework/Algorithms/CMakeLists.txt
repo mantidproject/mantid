@@ -17,6 +17,7 @@ set(SRC_FILES
     src/ApplyInstrumentToPeaks.cpp
     src/ApplyTransmissionCorrection.cpp
     src/AverageLogData.cpp
+    src/BeamProfileFactory.cpp
     src/Bin2DPowderDiffraction.cpp
     src/BinaryOperateMasks.cpp
     src/BinaryOperation.cpp
@@ -360,6 +361,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ApplyInstrumentToPeaks.h
     inc/MantidAlgorithms/ApplyTransmissionCorrection.h
     inc/MantidAlgorithms/AverageLogData.h
+    inc/MantidAlgorithms/BeamProfileFactory.h
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
     inc/MantidAlgorithms/BinaryOperateMasks.h
     inc/MantidAlgorithms/BinaryOperation.h
@@ -718,6 +720,7 @@ set(TEST_FILES
     ApplyInstrumentToPeaksTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
+    BeamProfileFactoryTest.h
     Bin2DPowderDiffractionTest.h
     BinaryOperateMasksTest.h
     BinaryOperationTest.h

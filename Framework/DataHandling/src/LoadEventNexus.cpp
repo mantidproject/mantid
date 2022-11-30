@@ -7,6 +7,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -15,6 +17,7 @@
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/ParallelEventLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -39,7 +42,6 @@ using Mantid::Types::Core::DateAndTime;
 using std::map;
 using std::string;
 using std::vector;
-using namespace ::NeXus;
 
 namespace Mantid::DataHandling {
 
@@ -461,9 +463,12 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
   if (file.hasAttr("units"))
     file.getAttr("units", units);
   // Read in the pulse times
-  auto pulse_times = NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
+  auto pulse_times = Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
+  if (pulse_times.empty()) {
+    throw std::invalid_argument("Cannot find run start; event_time_zero contains no pulse times");
+  }
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
   return std::make_pair(DateAndTime(pulse_times.front() * conv, 0.0) + offset.totalNanoseconds(),
@@ -884,7 +889,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
       if (nxStat != NX_ERROR) {
         LoadHelper loadHelper;
-        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun());
+        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun(), "", true);
         NXclose(&nxHandle);
       }
     }
@@ -974,7 +979,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
         m_file->openGroup(entry_name, classType);
 
-        if (takeTimesFromEvents) {
+        // get the number of events
+        const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
+        bool hasTotalCounts = true;
+        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix, *descriptor);
+        bankNames.emplace_back(entry_name);
+        bankNumEvents.emplace_back(num);
+
+        if (takeTimesFromEvents && num > 0) {
           /* If we are here, we are loading logs, but have failed to establish
            * the run_start from the proton_charge log. We are going to get this
            * from our event_time_zero instead
@@ -982,12 +994,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
           auto localFirstLast = firstLastPulseTimes(*m_file, this->g_log);
           firstPulseT = std::min(firstPulseT, localFirstLast.first);
         }
-        // get the number of events
-        const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
-        bool hasTotalCounts = true;
-        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames, prefix, *descriptor);
-        bankNames.emplace_back(entry_name);
-        bankNumEvents.emplace_back(num);
 
         // Look for weights in simulated file
         const std::string absoluteEventWeightName = prefix + "/event_weight";
@@ -1060,9 +1066,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   if ((!someBanks.empty()) && (!monitors)) {
     std::vector<std::string> eventedBanks;
     eventedBanks.reserve(someBanks.size());
-    for (const auto &bank : someBanks) {
-      eventedBanks.emplace_back(bank + "_events");
-    }
+    std::transform(someBanks.cbegin(), someBanks.cend(), std::back_inserter(eventedBanks),
+                   [](const auto &bank) { return bank + "_events"; });
+
     // check that all of the requested banks are in the file
     const auto invalidBank =
         std::find_if(eventedBanks.cbegin(), eventedBanks.cend(), [&bankNames](const auto &someBank) {
@@ -1183,12 +1189,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
         auto numHistograms = static_cast<int64_t>(m_ws->getNumberHistograms());
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_ws))
         for (int64_t i = 0; i < numHistograms; ++i) {
-          PARALLEL_START_INTERUPT_REGION
+          PARALLEL_START_INTERRUPT_REGION
           // Do the offsetting
           m_ws->getSpectrum(i).addTof(mT0);
-          PARALLEL_END_INTERUPT_REGION
+          PARALLEL_END_INTERRUPT_REGION
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        PARALLEL_CHECK_INTERRUPT_REGION
         // set T0 in the run parameters
         API::Run &run = m_ws->mutableRun();
         run.addProperty<double>("T0", mT0, true);

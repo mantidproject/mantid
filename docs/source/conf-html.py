@@ -38,6 +38,8 @@ html_theme_options = {
     'bootstrap_version': "3",
     # Ensure the nav bar always stays on top of page.
     'navbar_fixed_top': "false",
+    # Don't limit the width
+    'body_max_width': "none"
 }
 
 # -- Fix up angstrom symbol for mathjax

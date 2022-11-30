@@ -21,11 +21,8 @@ using Kernel::V3D;
  */
 GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo, const size_t index,
                                      const double extraLength)
-    : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
-  m_samplePos = spectrumInfo.samplePosition();
-  m_beamLine = m_samplePos - spectrumInfo.sourcePosition();
-  m_beamLineNorm = 2.0 * spectrumInfo.l1();
-
+    : m_samplePos(spectrumInfo.samplePosition()), m_beamLine(m_samplePos - spectrumInfo.sourcePosition()),
+      m_beamLineNorm(2.0 * spectrumInfo.l1()), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
   // this is the LineOfSight assuming no drop, the drop is added (and
   // subtracted) later in the code when required
   m_cachedLineOfSight = spectrumInfo.position(index) - m_samplePos;

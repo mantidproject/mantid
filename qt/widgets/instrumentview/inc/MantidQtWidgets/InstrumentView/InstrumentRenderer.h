@@ -33,6 +33,7 @@ private:
   ColorMap m_colorMap;
   bool m_isUsingLayers;
   size_t m_layer;
+  bool m_HighlightDetsWithZeroCount;
 
 public:
   InstrumentRenderer(const InstrumentActor &actor);
@@ -47,7 +48,7 @@ public:
 
   void changeNthPower(double nth_power);
 
-  void loadColorMap(const QString &fname);
+  void loadColorMap(const std::pair<QString, bool> &cmap);
 
   const ColorMap &getColorMap() const { return m_colorMap; }
 

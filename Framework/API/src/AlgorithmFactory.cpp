@@ -11,6 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <memory>
 #include <sstream>
@@ -387,12 +388,13 @@ std::vector<AlgorithmDescriptor> AlgorithmFactoryImpl::getDescriptors(bool inclu
         res.emplace_back(desc);
         // Add alias to results if included
         if (!desc.alias.empty() && includeAliases) {
-          /*AlgorithmDescriptor aliasDesc;
-          aliasDesc.name = desc.alias;
-          aliasDesc.category = desc.category;
-          aliasDesc.version = desc.version;
-          res.emplace_back(aliasDesc);*/
-          res.emplace_back(AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
+          // Avoid adding lowercase aliases to the algorithm tab
+          std::string lowerCaseName = desc.name;
+          std::transform(desc.name.cbegin(), desc.name.cend(), lowerCaseName.begin(),
+                         [](unsigned char c) { return std::tolower(c); });
+          if (lowerCaseName != desc.alias) {
+            res.emplace_back(AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
+          }
         }
       }
     }

@@ -21,9 +21,10 @@ to perform generic part of the transformation from a matrix workspace of a real
 instrument to
 physical MD workspace of an experimental results (e.g Q-space).
 */
-class DLLExport PreprocessDetectorsToMD : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL PreprocessDetectorsToMD : public API::Algorithm {
 public:
   PreprocessDetectorsToMD();
+  virtual ~PreprocessDetectorsToMD() = default;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "PreprocessDetectorsToMD"; };

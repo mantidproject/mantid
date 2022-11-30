@@ -39,6 +39,15 @@ const IObject &SampleEnvironment::getComponent(const size_t index) const {
   return *(m_components[index]);
 }
 
+const IObject_const_sptr SampleEnvironment::getComponentPtr(const size_t index) const {
+  if (index > this->nelements()) {
+    std::stringstream msg;
+    msg << "Requested SampleEnvironment element that is out of range: " << index << " < " << this->nelements();
+    throw std::out_of_range(msg.str());
+  }
+  return m_components[index];
+}
+
 /**
  * @return An axis-aligned BoundingBox object that encompasses the whole kit.
  */

@@ -69,7 +69,7 @@ target_include_directories(
 )
 
 # Set the name of the generated library
-set_target_properties(Parallel PROPERTIES OUTPUT_NAME MantidParallel COMPILE_DEFINITIONS IN_MANTID_PARALLEL)
+set_target_properties(Parallel PROPERTIES OUTPUT_NAME MantidParallel)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Parallel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
@@ -93,9 +93,10 @@ target_include_directories(
   EventParallelLoader PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 add_dependencies(EventParallelLoader Mantid::Kernel)
-# set the name of generated executable
+# set the name of generated executable Have to manually define Parallel_EXPORTS on this target - automatically defined
+# via generate_mantid_export_header for Parallel target
 set_target_properties(
-  EventParallelLoader PROPERTIES OUTPUT_NAME MantidNexusParallelLoader COMPILE_DEFINITIONS IN_MANTID_PARALLEL
+  EventParallelLoader PROPERTIES OUTPUT_NAME MantidNexusParallelLoader COMPILE_DEFINITIONS Parallel_EXPORTS
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -120,10 +121,20 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(
+  Parallel PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Parallel> $<INSTALL_INTERFACE:include/Mantid>
+)
+target_include_directories(
+  EventParallelLoader PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Parallel>
+                             $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(Parallel FALSE)
+
 # Installation settings
 if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidParallelTargets")
-  mtd_install_framework_lib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME})
+  mtd_install_framework_lib(TARGETS Parallel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
   mtd_install_targets(TARGETS Parallel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()

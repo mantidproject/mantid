@@ -53,21 +53,40 @@ Setup the mantid conda environment
 Configure CMake and generate build files
 ----------------------------------------
 
-* Still using the terminal or powershell prompt from the last step and in your mantid source directory.
+* You can configure CMake using an MSVC or Ninja generator. Choose one of the following:
+    * For MSVC, use the terminal or powershell prompt from the last step.
+    * For Ninja, open the ``x64 Native Tools Command Prompt for VS 2019`` from your search bar.
+
+* Navigate to your mantid source directory.
 * Run ``conda activate mantid-developer`` to activate your conda environment.
-* Inside of your mantid source directory run either:
+* If you want your build directory inside your source directory, run either:
 
-    * ``cmake --preset=win`` if you want your build directory inside your source directory, or
-    * ``cmake --preset=win -B {BUILD_DIR}`` to specify a different build directory.
+    * ``cmake --preset=win-msvc`` for configuring with MSVC, or
+    * ``cmake --preset=win-ninja`` for configuring with Ninja.
 
-Compile and Build using Visual Studio
-----------------------------------------------------------
+* Alternatively, if you want to specify a different build directory, run either:
+    * ``cmake --preset=win-msvc -B {BUILD_DIR}``, or
+    * ``cmake --preset=win-ninja -B {BUILD_DIR}``
+
+Compile and Build using MSVC
+----------------------------
 
 * Open visual studio with ``visualstudio.bat`` then click build.
-* It's not possible to compile in Debug on Windows with conda libraries, however Release, and RelWithDebInfo for Debugging will compile fine.
+* It's not possible to compile in Debug on Windows with conda libraries, however Release, RelWithDebInfo, and DebugWithRelRuntime for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
 
+Compile and Build using Ninja
+-----------------------------
+
+* Navigate to the build directory using the ``x64 Native Tools Command Prompt for VS 2019`` from the previous step.
+* To build Mantid Workbench use: ``ninja``
+* To build the unit tests use: ``ninja AllTests``
+
+Building and debugging with CLion
+---------------------------------
+Please follow the Windows related instructions on :ref:`this page <clion-ref>`.
+
 CMake Conda variables
------------------------
+---------------------
 There are two Conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a Conda environment, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
 The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. These options can be passed to CMake on the command line using -DCONDA_ENV=True for example.

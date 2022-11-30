@@ -38,6 +38,16 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
                              doc='Group name for the output workspace(s).')
         self.declareProperty("UseNewFilterAlgorithm", True, doc='If true, use the new FilterEvents algorithm instead of FilterByTime.')
 
+    def validateInputs(self):
+        issues = {}
+        workspace = self.getProperty("InputWorkspace").value
+        # Skip check for workspace groups
+        if not workspace:
+            return issues
+        if workspace.run().getProtonCharge() < 1e-9:
+            issues["InputWorkspace"] = "Cannot slice workspace with zero proton charge"
+        return issues
+
     def PyExec(self):
         self._input_ws = self.getProperty("InputWorkspace").value
         self._output_ws_group_name = self.getPropertyValue("OutputWorkspace")

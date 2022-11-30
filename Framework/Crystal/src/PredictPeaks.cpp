@@ -43,9 +43,8 @@ using namespace Mantid::Kernel;
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
-    : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator(), m_qConventionFactor(qConventionFactor()) {
-  m_refConds = getAllReflectionConditions();
-}
+    : m_refConds(getAllReflectionConditions()), m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator(),
+      m_qConventionFactor(qConventionFactor()) {}
 
 /** Initialize the algorithm's properties.
  */

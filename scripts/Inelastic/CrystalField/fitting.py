@@ -6,21 +6,31 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import IFunction, AlgorithmManager, mtd
 from mantid.kernel import logger
-from mantid.simpleapi import CalculateChiSquared, FunctionFactory, plotSpectrum
+from mantid.simpleapi import (CalculateChiSquared, CreateEmptyTableWorkspace, EvaluateFunction, FunctionFactory,
+                              FunctionWrapper, plotSpectrum)
 from .function import PeaksFunction, PhysicalProperties, ResolutionModel, Background, Function
 from .energies import energies
 from .normalisation import split2range, ionname2Nre
 from .CrystalFieldMultiSite import CrystalFieldMultiSite
 from scipy.constants import physical_constants
+from scipy.optimize._numdiff import approx_derivative
 import numpy as np
 import re
 import scipy.optimize as sp
+from typing import Callable, Dict, List, Tuple
 import warnings
+
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma. Multi-spectrum case.
 FN_MS_PATTERN = re.compile('f(\\d+)\\.f(\\d+)\\.(.+)')
+
+CONSTRAINTS_PATTERN = re.compile(r'constraints=\((.*?)\)')
+FWHM_PATTERN = re.compile(r'FWHM[X|Y]\d+=\(\),')
+PHYSICAL_PROPERTIES_PATTERN = re.compile(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)')
+TEMPERATURES_PATTERN = re.compile(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)')
+TIES_PATTERN = re.compile(r',ties=\((.*?)\)')
 
 
 def makeWorkspace(xArray, yArray):
@@ -336,9 +346,9 @@ class CrystalField(object):
         return out
 
     def makeMultiSpectrumFunction(self):
-        fun = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
-        fun = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun)
-        fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+        fun = re.sub(FWHM_PATTERN, '', str(self.function))
+        fun = re.sub(TEMPERATURES_PATTERN, r'\1\3\2', fun)
+        fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
         return fun
 
     @property
@@ -904,19 +914,34 @@ class CrystalField(object):
 
         return self._getPhysProp(PhysicalProperties(pptype, *args, **kwargs), workspace, ws_index)
 
+    def _calc_gJuB(self):
+        gj = 2.0 if (self._nre < 1) else self.lande_g[self._nre - 1]
+        gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
+        return gJuB
+
+    def getDipoleMatrixComponent(self, nComponent, gJuB = None):
+        self._calcEigensystem() #will not recalculate if already called (unless _dirty_eigensystem)
+        if gJuB is None:
+            gJuB = self._calc_gJuB()
+
+        if nComponent == 'X' or nComponent == 'x':
+            _, _, h_n = energies(self._nre, BextX=1.0)
+        elif nComponent == 'Y' or nComponent == 'y':
+            _, _, h_n = energies(self._nre, BextY=1.0)
+        elif nComponent == 'Z' or nComponent == 'z':
+            _, _, h_n = energies(self._nre, BextZ=1.0)
+        else:
+            raise Exception('Invalid Argument, nComponent must be: X, Y or Z (case insensitive)')
+
+        i_n = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(h_n, self._eigenvectors))
+        return np.multiply(i_n, np.conj(i_n))/(gJuB ** 2)
+
     def getDipoleMatrix(self):
         """Returns the dipole transition matrix as a numpy array"""
-        self._calcEigensystem()
-        _, _, hx = energies(self._nre, BextX=1.0)
-        _, _, hy = energies(self._nre, BextY=1.0)
-        _, _, hz = energies(self._nre, BextZ=1.0)
-        ix = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hx, self._eigenvectors))
-        iy = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hy, self._eigenvectors))
-        iz = np.dot(np.conj(np.transpose(self._eigenvectors)), np.dot(hz, self._eigenvectors))
-        gj = 2. if (self._nre < 1) else self.lande_g[self._nre - 1]
-        gJuB = gj * physical_constants['Bohr magneton in eV/T'][0] * 1000.
-        trans = np.multiply(ix, np.conj(ix)) + np.multiply(iy, np.conj(iy)) + np.multiply(iz, np.conj(iz))
-        return trans / (gJuB ** 2)
+        gJuB = self._calc_gJuB()
+        trans = self.getDipoleMatrixComponent('X', gJuB) + self.getDipoleMatrixComponent('Y', gJuB) \
+                + self.getDipoleMatrixComponent('Z', gJuB)
+        return trans
 
     def plot(self, i=0, workspace=None, ws_index=0, name=None):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
@@ -1057,11 +1082,11 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search(r',ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search(TIES_PATTERN, str(self.crystalFieldFunction))
         return re.sub(FN_PATTERN, '', ties.group(1)).rstrip(',') if ties else ''
 
     def _getFieldConstraints(self):
-        constraints = re.search(r'constraints=\((.*?)\)', str(self.crystalFieldFunction))
+        constraints = re.search(CONSTRAINTS_PATTERN, str(self.crystalFieldFunction))
         return constraints.group(1) if constraints else ''
 
     def _getPhysProp(self, ppobj, workspace, ws_index):
@@ -1170,8 +1195,9 @@ class CrystalFieldSite(object):
         if self.crystalField.NumberOfSpectra > 1:
             differentIntensities = False
             for x in range(self.crystalField.NumberOfSpectra):
-                if self.crystalField.IntensityScaling[x] is not other.IntensityScaling[x] and other.IntensityScaling[x] != 1.0:
-                    if self.crystalField.IntensityScaling[x] == 1.0:
+                if not (np.isclose(self.crystalField.IntensityScaling[x], other.IntensityScaling[x])
+                        or np.isclose(other.IntensityScaling[x], 1.0)):
+                    if np.isclose(self.crystalField.IntensityScaling[x], 1.0):
                         params['sp'+str(x)+'.IntensityScaling'] = other.IntensityScaling[x]
                     else:
                         differentIntensities = True
@@ -1256,6 +1282,124 @@ class CrystalFieldFit(object):
         else:
             self._monte_carlo_single(**kwargs)
         self.model.FixAllPeaks = fix_all_peaks
+
+    def gofit(self, algorithm_callable: Callable, **kwargs) -> None:
+        """
+        Performs a fit using an algorithm from the GOFit python package.
+        @param algorithm_callable: The algorithm callable from the GOFit python package.
+        @param kwargs: Keyword arguments. The following keywords are understood:
+
+            - jacobian: A boolean to specify whether to use a Jacobian (regularisation and multistart only).
+            - parameter_bounds: A dictionary of tuples containing the upper and lower bounds for each parameter
+                                (multistart and alternating only).
+
+        the remaining kwargs are passed to the GOFit algorithm callable.
+        """
+        # Get the name of the algorithm as the name of the callable python function.
+        algorithm_name = algorithm_callable.__name__
+
+        # Find the B parameters and Shape parameters we want to optimize across, and their initial values
+        b_parameters, shape_parameters, p0 = self._find_b_and_shape_parameters_to_optimize()
+        all_parameters = b_parameters + shape_parameters
+
+        # Read the x, y and error data from the input workspace.
+        x, y, e = self._input_workspace.readX(0), self._input_workspace.readY(0), self._input_workspace.readE(0)
+
+        # Find the number of data points, and parameters.
+        m = self._input_workspace.getNumberBins(0)
+        n = len(all_parameters)
+
+        # Create a wrapper around a callable mantid fitting function
+        callable_func = FunctionWrapper(self.model.function, all_parameters)
+
+        def wrapped_func(*params):
+            return callable_func(x, *params)
+
+        # Calculates the residual using a non-linear least squares cost function
+        def residual(params):
+            return np.ravel((y - wrapped_func(*np.array(params))) / e)
+
+        # Pop the 'parameter_bounds' and 'jacobian' arguments
+        parameter_bounds = kwargs.pop("parameter_bounds", dict())
+        jacobian = kwargs.pop("jacobian", False)
+
+        # Get the algorithm args to use for the specific algorithm we are using
+        algorithm_args = [m, n] + self._get_algorithm_args(algorithm_name, all_parameters, b_parameters, p0, residual,
+                                                           parameter_bounds, jacobian)
+
+        # Attempt to do a fit using one of the GOFit algorithms. A TypeError can occur when provided an invalid kwarg
+        try:
+            params, status = algorithm_callable(*algorithm_args, **kwargs)
+        except TypeError as ex:
+            logger.error(str(ex))
+        else:
+            print(f"GOFit exited with status code {status}.")
+            self._process_gofit_output(all_parameters, params, "_" + algorithm_name)
+
+    def _get_algorithm_args(self, algorithm_name: str, all_parameters: List[str], b_parameters: List[str],
+                            p0: List[float], residual: Callable, parameter_bounds: Dict[str, Tuple[float, float]],
+                            jacobian: bool) -> List:
+        """Gets the algorithm arguments to be used for a specific GOFit algorithm."""
+        algorithm_args = []
+        if algorithm_name == "regularisation":
+            algorithm_args.append(np.array(p0))
+        elif algorithm_name == "alternating":
+            algorithm_args.extend([len(b_parameters), np.array(p0)])
+
+        if algorithm_name == "multistart" or algorithm_name == "alternating":
+            xl, xu = self._parse_lower_and_upper_bounds(all_parameters, parameter_bounds)
+            algorithm_args.extend([np.array(xl), np.array(xu)])
+
+        algorithm_args.append(residual)
+
+        if jacobian and (algorithm_name == "regularisation" or algorithm_name == "multistart"):
+            algorithm_args.append(lambda p: approx_derivative(residual, p, method="2-point"))
+        return algorithm_args
+
+    def _find_b_and_shape_parameters_to_optimize(self) -> Tuple[List[str], List[str], List[float]]:
+        """Finds the B parameters and Shape parameters we want to optimize across."""
+        b_params, shape_params, initial_values = [], [], []
+        for i in range(self.model.function.nParams()):
+            name = self.model.function.parameterName(i)
+            value = self.model.function.getParameterValue(i)
+            if (name.startswith('B') or name.startswith('IB')) and value != 0.0:
+                b_params.append(name)
+                initial_values.append(value)
+            elif "FWHM" in name or name == "IntensityScaling":
+                shape_params.append(name)
+                initial_values.append(value)
+        return b_params, shape_params, initial_values
+
+    @staticmethod
+    def _parse_lower_and_upper_bounds(parameters_names: List[str],
+                                      parameter_bounds: Dict[str, Tuple[float, float]]) -> Tuple[List[float], List[float]]:
+        """Parses the lower and upper bounds into two separate lists."""
+        xl, xu = [], []
+        for name in parameters_names:
+            bounds = parameter_bounds.get(name, [0, 1])
+            xl.append(bounds[0])
+            xu.append(bounds[1])
+        return xl, xu
+
+    def _process_gofit_output(self, parameter_names: List[str], parameter_values: List[float], suffix: str = "") -> None:
+        """Create an output workspace with the fitted data, and a parameter table."""
+        for name, value in zip(parameter_names, parameter_values):
+            self.model.function.setParameter(name, value)
+
+        output_name = self._fit_properties["Output"] if "Output" in self._fit_properties else self._output_workspace_base_name
+        EvaluateFunction(Function=str(self.model.function),
+                         InputWorkspace=self._input_workspace,
+                         OutputWorkspace=output_name + suffix)
+        self._create_parameter_table(output_name, suffix)
+
+    def _create_parameter_table(self, output_name: str, suffix: str) -> None:
+        """Creates a table workspace to display the output parameters from a GOFit."""
+        parameter_table = CreateEmptyTableWorkspace(OutputWorkspace=output_name + suffix + "_parameters")
+        parameter_table.setTitle("Fit Parameters")
+        parameter_table.addColumn("str", "Parameter")
+        parameter_table.addColumn("float", "Value")
+        for i in range(self.model.function.nParams()):
+            parameter_table.addRow([self.model.function.parameterName(i), self.model.function.getParameterValue(i)])
 
     def two_step_fit(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
         logger.warning("Please note that this is a first experimental version of the two_step_fit algorithm.")
@@ -1354,7 +1498,7 @@ class CrystalFieldFit(object):
             fun = self._function
         for par_id in [id for id in range(fun.nParams()) if not fun.isFixed(id)]:
             parName = fun.getParamName(par_id)
-            if parName in CrystalField.field_parameter_names or "IntensityScaling" in parName:
+            if (parName in CrystalField.field_parameter_names or "IntensityScaling" in parName) and parName not in fun.getTies():
                 self._free_cef_parameters.append(par_id)
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
@@ -1418,7 +1562,7 @@ class CrystalFieldFit(object):
         if 'CrystalFieldMultiSpectrum' in fun:
             # Hack to ensure that 'PhysicalProperties' attribute is first
             # otherwise it won't set up other attributes properly
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('EstimateFitParameters')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -1467,12 +1611,12 @@ class CrystalFieldFit(object):
             else:
                 fun = str(self._function)
         if 'CrystalFieldMultiSpectrum' in fun:
-            fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
+            fun = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)
         alg.setProperty('InputWorkspace', self._input_workspace)
-        alg.setProperty('Output', 'fit')
+        alg.setProperty('Output', self._output_workspace_base_name)
         self._set_fit_properties(alg)
         alg.execute()
         function = alg.getProperty('Function').value
@@ -1495,7 +1639,7 @@ class CrystalFieldFit(object):
         for workspace in self._input_workspace[1:]:
             alg.setProperty('InputWorkspace_%s' % i, workspace)
             i += 1
-        alg.setProperty('Output', 'fit')
+        alg.setProperty('Output', self._output_workspace_base_name)
         self._set_fit_properties(alg)
         alg.execute()
         function = alg.getProperty('Function').value
@@ -1543,14 +1687,14 @@ class CrystalFieldFit(object):
             ws_kwargs['InputWorkspace'] = self._input_workspace[0]
             i = 1
             for workspace in self._input_workspace[1:]:
-                ws_kwargs['InputWorkspace_{}'.format(i)] = workspace
+                ws_kwargs[f'InputWorkspace_{i}'] = workspace
                 i += 1
             # clean up multispectrum function to prevent problems during evaluation
             # e.g. remove FWHMX0/FWHMY0 and FWHMX1/FWHMY1
-            fun_str = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(fun))
+            fun_str = re.sub(FWHM_PATTERN, '', str(fun))
             # move Temperature and PhysicalProperties settings to front
-            fun_str = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun_str)
-            fun_str = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun_str)
+            fun_str = re.sub(TEMPERATURES_PATTERN, r'\1\3\2', fun_str)
+            fun_str = re.sub(PHYSICAL_PROPERTIES_PATTERN, r'\1\3\2', fun_str)
             # remove peaks above MaxPeakCount
             fun_str = re.sub(r'f[0-9]+\.f(['+str(fun.getAttributeValue("MaxPeakCount"))+r'-9]|[1-9][0-9])\.\w+=.*?,','', fun_str)
             return CalculateChiSquared(fun_str, **ws_kwargs)[1]

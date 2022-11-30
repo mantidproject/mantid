@@ -28,7 +28,7 @@ void IndirectSettingsView::emitApplyClicked() { emit applyClicked(); }
 void IndirectSettingsView::emitCancelClicked() { emit cancelClicked(); }
 
 void IndirectSettingsView::openHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Indirect Settings"), QString("indirect"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Indirect Settings"), QString("indirect"));
 }
 
 void IndirectSettingsView::setSelectedFacility(QString const &text) {

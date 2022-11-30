@@ -28,7 +28,7 @@ Improvements
 Bugfixes
 ########
 
-- Fix bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
+* Fix bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where detector position was incorrectly determined on a workspace where the workspace index didn't match the detector
   index e.g. if the workspace was loaded with ``SpectrumMin`` specified to exclude some monitors.
 * Fixed bug in :ref:`algm-ConvertToMDMinMaxLocal` where wrong min max calculated if the workspace includes monitor spectra or spectra without any detectors.
 * Added parser for input Names to :ref:`algm-CreateMDHistoWorkspace` to allow inputs such as `Names='[H,0,0],[0,K,0],[0,0,L]'`.

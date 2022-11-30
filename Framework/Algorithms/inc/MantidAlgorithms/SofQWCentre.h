@@ -33,7 +33,7 @@ common bins. </LI>
 @author Russell Taylor, Tessella plc
 @date 24/02/2010
 */
-class MANTID_ALGORITHMS_DLL SofQWCentre : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SofQWCentre final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SofQWCentre"; }

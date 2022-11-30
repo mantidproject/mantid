@@ -176,9 +176,11 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
             calib_dirs.pop(0)  # only save to RB directory to limit number files saved
 
     for calib_dir in calib_dirs:
-        create_output_files(calib_dir, calibration, focused_ceria)
+        prm_filepath = create_output_files(calib_dir, calibration, focused_ceria)
 
     mantid.DeleteWorkspace(ceria_workspace)
+
+    return [prm_filepath]  # only from last calib_dir
 
 
 def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
@@ -231,14 +233,15 @@ def load_existing_calibration_files(calibration):
     if not path.exists(prm_filepath):
         msg = f"Could not open GSAS calibration file: {prm_filepath}"
         logger.warning(msg)
-        return
+        return None
     try:
         # read diff constants from prm
         write_diff_consts_to_table_from_prm(prm_filepath)
     except RuntimeError:
         logger.error(f"Invalid file selected: {prm_filepath}")
-        return
+        return None
     calibration.load_relevant_calibration_files()
+    return [prm_filepath]
 
 
 def write_diff_consts_to_table_from_prm(prm_filepath):
@@ -357,6 +360,8 @@ def create_output_files(calibration_dir, calibration, ws_foc):
             copy2(nxs_filepath, nxs_filepath_bank)
     logger.notice(f"\n\nCalibration files saved to: \"{calibration_dir}\"\n\n")
 
+    return prm_filepath  # if both banks, do not pass individual banks (prm_filepath_bank) to GSAS II tab
+
 
 def getParametersFromDetector(instrument, detector):
     """
@@ -429,6 +434,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
 
     # Loop over runs and focus
     focused_files_list = []
+    focused_files_gsas2_list = []
     output_workspaces = []  # List of focused workspaces to plot.
     for sample_path in sample_paths:
         ws_sample = _load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
@@ -439,8 +445,11 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
             ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
-            nxs_paths = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
+            nxs_paths, gss_path = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             focused_files_list.extend(nxs_paths)  # list of .nsx paths for that sample using last dir in focus_dirs
+            print(type(gss_path), len(gss_path))
+            focused_files_gsas2_list.extend(gss_path)
+            print(type(focused_files_gsas2_list), len(focused_files_gsas2_list))
             output_workspaces.append(ws_foc.name())
 
     # Plot the output
@@ -449,7 +458,7 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
         if plot_output:
             _plot_focused_workspaces(output_workspaces)
 
-    return focused_files_list
+    return focused_files_list, focused_files_gsas2_list
 
 
 def process_vanadium(vanadium_path, calibration, full_calib):
@@ -541,8 +550,11 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
     for focus_dir in focus_dirs:
         if not path.exists(focus_dir):
             makedirs(focus_dir)
-        mantid.SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'),
-                       SplitFiles=False, UseSpectrumNumberAsBankID=True)
+
+        gss_path = path.join(focus_dir, ascii_fname + '.gss')
+        gss_paths = [gss_path]
+        mantid.SaveGSS(InputWorkspace=sample_ws_foc, Filename=gss_path,
+                       SplitFiles=False, UseSpectrumNumberAsBankID=True, Append=False)
         mantid.SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
                               SplitFiles=False, Format="TOPAS")
         # Save nxs per spectrum
@@ -559,7 +571,7 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
             nxs_path = path.join(focus_dir, filename)
             mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
             nxs_paths.append(nxs_path)
-    return nxs_paths  # from last focus_dir only
+    return nxs_paths, gss_paths  # from last focus_dir only
 
 
 def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):

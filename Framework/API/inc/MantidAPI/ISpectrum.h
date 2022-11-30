@@ -95,11 +95,11 @@ public:
   virtual HistogramData::Histogram histogram() const { return histogramRef(); }
   /// Sets the Histogram associated with this spectrum.
   template <typename... T> void setHistogram(T &&...data) {
-    HistogramData::Histogram histogram(std::forward<T>(data)...);
+    HistogramData::Histogram hist(std::forward<T>(data)...);
     // Check for the special case EventList, it only accepts histograms without
     // Y and E data.
-    checkAndSanitizeHistogram(histogram);
-    mutableHistogramRef() = std::move(histogram);
+    checkAndSanitizeHistogram(hist);
+    mutableHistogramRef() = std::move(hist);
   }
 
   HistogramData::Histogram::YMode yMode() const { return histogramRef().yMode(); }

@@ -30,6 +30,8 @@
 
 #include <boost/algorithm/string/split.hpp>
 
+#include <algorithm>
+
 constexpr double deg2rad = M_PI / 180.0;
 
 namespace Mantid::Algorithms {
@@ -45,9 +47,13 @@ using namespace DataObjects;
 void Q1DWeighted::init() {
   auto wsValidator = std::make_shared<CompositeValidator>(CompositeRelation::OR);
   auto monoValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
+  auto monoUnitValidator = std::make_shared<CompositeValidator>(CompositeRelation::OR);
   auto tofValidator = std::make_shared<CompositeValidator>(CompositeRelation::AND);
 
-  monoValidator->add<WorkspaceUnitValidator>("Empty");
+  monoUnitValidator->add<WorkspaceUnitValidator>("Label"); // case for D16 omega scan, which has unit "Omega scan"
+  monoUnitValidator->add<WorkspaceUnitValidator>("Empty"); // case for kinetic data
+
+  monoValidator->add(monoUnitValidator);
   monoValidator->add<HistogramValidator>(false);
   monoValidator->add<InstrumentValidator>();
 
@@ -131,7 +137,6 @@ void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   m_nQ = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(binParams, m_qBinEdges)) - 1;
 
   m_isMonochromatic = inputWS->getAxis(0)->unit()->unitID() != "Wavelength";
-
   // number of spectra in the input
   m_nSpec = inputWS->getNumberHistograms();
 
@@ -317,12 +322,8 @@ void Q1DWeighted::getWedgeParams(const std::vector<std::string> &params,
  * @return true if a symetrical wedge already exists
  */
 bool Q1DWeighted::checkIfSymetricalWedge(Q1DWeighted::Wedge &wedge) {
-
-  for (Q1DWeighted::Wedge params : m_wedgesParameters) {
-    if (wedge.isSymmetric(params))
-      return true;
-  }
-  return false;
+  return std::any_of(m_wedgesParameters.cbegin(), m_wedgesParameters.cend(),
+                     [&wedge](const auto &params) { return wedge.isSymmetric(params); });
 }
 
 /**
@@ -368,7 +369,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   // first we loop over spectra
   for (int index = 0; index < static_cast<int>(m_nSpec); ++index) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto i = static_cast<size_t>(index);
     // skip spectra with no detectors, monitors or masked spectra
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
@@ -483,9 +484,9 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
       }
       progress.report("Computing I(Q)");
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**
@@ -544,15 +545,15 @@ void Q1DWeighted::fillMonochromaticOutput(MatrixWorkspace_sptr &outputWS, const 
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double norm = m_normalisation[iout][iSample][iq];
       if (norm != 0.) {
         YOut[iq] = m_intensities[iout][iSample][iq] / norm;
         EOut[iq] = m_errors[iout][iSample][iq] / (norm * norm);
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 }
 
@@ -571,16 +572,16 @@ void Q1DWeighted::fillTOFOutput(MatrixWorkspace_sptr &outputWS, const size_t iou
   for (size_t il = 0; il < m_nBins; ++il) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int iq = 0; iq < static_cast<int>(m_nQ); ++iq) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const double norm = m_normalisation[iout][il][iq];
       if (norm != 0.) {
         YOut[iq] += m_intensities[iout][il][iq] / norm;
         EOut[iq] += m_errors[iout][il][iq] / (norm * norm);
         normLambda[iq] += 1.;
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   for (size_t i = 0; i < m_nQ; ++i) {

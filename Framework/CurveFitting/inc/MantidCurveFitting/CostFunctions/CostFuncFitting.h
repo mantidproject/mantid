@@ -12,8 +12,8 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+#include "MantidCurveFitting/EigenVector.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,9 +42,9 @@ public:
   /// Get name of i-th parameter
   std::string parameterName(size_t i) const;
   /// Set all parameters
-  void setParameters(const GSLVector &params);
+  void setParameters(const EigenVector &params);
   /// Get all parameters into a GSLVector
-  void getParameters(GSLVector &params) const;
+  void getParameters(EigenVector &params) const;
 
   /// Calculate value of cost function
   virtual double val() const override;
@@ -55,8 +55,8 @@ public:
   /// Calculate the value, the first and the second derivatives of the cost
   /// function
   virtual double valDerivHessian(bool evalDeriv = true, bool evalHessian = true) const;
-  const GSLVector &getDeriv() const;
-  const GSLMatrix &getHessian() const;
+  const EigenVector &getDeriv() const;
+  const EigenMatrix &getHessian() const;
   void push();
   void pop();
   void drop();
@@ -70,10 +70,10 @@ public:
   /// @param covar :: Returned covariance matrix, here as
   /// @param epsrel :: Is used to remove linear-dependent columns
   ///
-  virtual void calCovarianceMatrix(GSLMatrix &covar, double epsrel = 1e-8);
+  virtual void calCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8);
 
   /// Calculate fitting errors
-  virtual void calFittingErrors(const GSLMatrix &covar, double chi2);
+  virtual void calFittingErrors(const EigenMatrix &covar, double chi2);
   /// Get the domain the fitting function is applied to
   API::FunctionDomain_sptr getDomain() const { return m_domain; }
   /// Get FunctionValues where function values are stored.
@@ -85,7 +85,7 @@ public:
 
 protected:
   /// Calculates covariance matrix for fitting function's active parameters.
-  virtual void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel = 1e-8);
+  virtual void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8);
   /// Increment to the cost function by evaluating it on a domain
   virtual void addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values) const = 0;
 
@@ -97,7 +97,7 @@ protected:
 
   bool isValid() const;
   void checkValidity() const;
-  void calTransformationMatrixNumerically(GSLMatrix &tm);
+  void calTransformationMatrixNumerically(EigenMatrix &tm);
   void setDirty();
 
   /// Shared pointer to the fitting function
@@ -122,12 +122,12 @@ protected:
   bool m_includePenalty;
 
   mutable double m_value;
-  mutable GSLVector m_der;
-  mutable GSLMatrix m_hessian;
+  mutable EigenVector m_der;
+  mutable EigenMatrix m_hessian;
 
   mutable bool m_pushed;
   mutable double m_pushedValue;
-  mutable GSLVector m_pushedParams;
+  mutable EigenVector m_pushedParams;
 
   friend class CurveFitting::SeqDomain;
   friend class CurveFitting::ParDomain;

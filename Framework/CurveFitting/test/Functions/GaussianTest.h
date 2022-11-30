@@ -30,7 +30,7 @@ using namespace Mantid::CurveFitting::Constraints;
 // Algorithm to force Gaussian1D to be run by simplex algorithm
 class SimplexGaussian : public Gaussian {
 public:
-  ~SimplexGaussian() override {}
+  ~SimplexGaussian() override = default;
   std::string name() const override { return "SimplexGaussian"; }
 
 protected:

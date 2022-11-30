@@ -150,6 +150,23 @@ class ToolBarTest(unittest.TestCase):
             for is_grid in (True, False):
                 self._test_grid_button_state_for_3d_plot(plot_type, is_grid, mock_qappthread)
 
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_hide_button_hides_window(self, mock_qappthread):
+        """ Check that the window is hidden when hide plot button is pressed"""
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+        axes.plot([-10, 10], [1, 2])
+
+        canvas = MantidFigureCanvas(fig)
+        fig_manager = FigureManagerWorkbench(canvas, 1)
+        # This is only called when show() is called on the figure manager, so we have to manually call it here.
+        fig_manager.toolbar.set_buttons_visibility(fig)
+        fig_manager.window.show()
+        fig_manager.toolbar.hide_plot()
+
+        self.assertTrue(fig_manager.window.isHidden())
+
     def _test_grid_button_state_for_3d_plot(self, plot_type, is_grid, mock_qappthread):
         """Check whether grid button check state is correct for a given plot type"""
         mock_qappthread.return_value = mock_qappthread

@@ -31,9 +31,9 @@ using namespace Functions;
 
 void ConvolveWorkspaces::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace1", "", Direction::Input),
-                  "The name of the first input workspace.");
+                  "The name of the resolution workspace");
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("Workspace2", "", Direction::Input),
-                  "The name of the second input workspace.");
+                  "The name of the data workspace.");
 
   declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
@@ -47,7 +47,7 @@ void ConvolveWorkspaces::exec() {
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  Workspace2D_sptr outputWS = std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws1));
+  Workspace2D_sptr outputWS = std::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(ws2));
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms()) {
@@ -58,9 +58,9 @@ void ConvolveWorkspaces::exec() {
   // Now convolve the histograms
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *ws2, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_progress->report();
-    outputWS->setSharedX(i, ws1->sharedX(i));
+    outputWS->setSharedX(i, ws2->sharedX(i));
     auto &Yout = outputWS->mutableY(i);
     Convolution conv;
 
@@ -76,17 +76,18 @@ void ConvolveWorkspaces::exec() {
 
     conv.addFunction(fun);
     size_t N = Yout.size();
+    size_t Nx = outputWS->mutableX(i).size();
     const double *firstX = &outputWS->mutableX(i)[0];
-    FunctionDomain1DView xView(firstX, N);
+    FunctionDomain1DView xView(firstX, Nx);
     FunctionValues out(xView);
     conv.function(xView, out);
 
     for (size_t j = 0; j < N; j++) {
       Yout[j] = out.getCalculated(j);
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
 }

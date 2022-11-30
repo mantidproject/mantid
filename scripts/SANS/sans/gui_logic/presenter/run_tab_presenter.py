@@ -282,8 +282,6 @@ class RunTabPresenter(PresenterCommon):
         # Set the q range
         self._view.q_1d_step_type = [RangeStepType.LIN.value,
                                      RangeStepType.LOG.value]
-        self._view.q_xy_step_type = [RangeStepType.LIN.value,
-                                     RangeStepType.LOG.value]
 
     def _handle_output_directory_changed(self, new_directory):
         """
@@ -382,8 +380,7 @@ class RunTabPresenter(PresenterCommon):
         # 2. Get the full file path
         user_file_path = FileFinder.getFullPath(user_file_path)
         if not os.path.exists(user_file_path):
-            path_error = "The user path {} does not exist. Make sure a valid user file path"
-            " has been specified.".format(user_file_path)
+            path_error = f"The user path {user_file_path} does not exist. Make sure a valid user file path has been specified."
             self._on_user_file_load_failure(path_error, error_msg + " when finding file.")
             return
 
@@ -991,7 +988,6 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view_q_rebin_string()
         self._set_on_view("q_xy_max")
         self._set_on_view("q_xy_step")
-        self._set_on_view("q_xy_step_type")
 
         self._set_on_view("gravity_on_off")
         self._set_on_view("gravity_extra_length")
@@ -1105,7 +1101,6 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_state_model_q_1d_rebin_string(state_model)
             self._set_on_custom_model("q_xy_max", state_model)
             self._set_on_custom_model("q_xy_step", state_model)
-            self._set_on_custom_model("q_xy_step_type", state_model)
 
             self._set_on_custom_model("gravity_on_off", state_model)
             self._set_on_custom_model("gravity_extra_length", state_model)

@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include <cfloat>
+#include <cxxtest/BenchmarkUtil.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
@@ -166,6 +167,7 @@ public:
     Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
     for (size_t i = 0; i < ntests; ++i) {
       totalArea += test.area();
+      CxxTest::doNotOptimize(&totalArea);
     }
   }
 };

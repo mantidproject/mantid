@@ -36,12 +36,13 @@
 // clang-format on
 
 #include <boost/iterator/counting_iterator.hpp>
-#include <memory>
 #include <boost/scoped_array.hpp>
 
 #include <Poco/Path.h>
 
+#include <algorithm>
 #include <cmath>
+#include <memory>
 #include <limits>
 
 namespace Mantid::DataHandling {
@@ -410,9 +411,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
         // Populate deadTimes
         deadTimes.reserve(specToLoad.size());
-        for (auto &spectra : specToLoad) {
-          deadTimes.emplace_back(deadTimesData[spectra - 1]);
-        }
+        std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(deadTimes),
+                       [&deadTimesData](const auto &spectra) { return deadTimesData[spectra - 1]; });
         // Load into table
         TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
         setProperty("DeadTimeTable", table);
@@ -425,9 +425,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
           specToLoad.emplace_back(i);
         }
         deadTimes.reserve(specToLoad.size());
-        for (const auto &spectrum : specToLoad) {
-          deadTimes.emplace_back(deadTimesData[spectrum - 1]);
-        }
+        std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(deadTimes),
+                       [deadTimesData](const auto &spectra) { return deadTimesData[spectra - 1]; });
         // Load into table
         TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
         setProperty("DeadTimeTable", table);
@@ -513,9 +512,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
           // m_entrynumber = 0 && m_numberOfPeriods = 1 means that user did not
           // select
           // any periods but there is only one in the dataset
-          for (auto spec : specToLoad) {
-            grouping.emplace_back(groupingData[spec - 1]);
-          }
+          std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(grouping),
+                         [&groupingData](const auto spec) { return groupingData[spec - 1]; });
         } else {
           // User selected an entry number
           for (auto &spec : specToLoad) {
@@ -535,9 +533,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
         for (int i = 1; i < m_numberOfSpectra + 1; i++) {
           specToLoad.emplace_back(i);
         }
-        for (const auto &spectrum : specToLoad) {
-          grouping.emplace_back(groupingData[spectrum - 1]);
-        }
+        std::transform(specToLoad.cbegin(), specToLoad.cend(), std::back_inserter(grouping),
+                       [&groupingData](const auto spectrum) { return groupingData[spectrum - 1]; });
         // Load into table
         TableWorkspace_sptr table = createDetectorGroupingTable(specToLoad, grouping);
         if (table->rowCount() != 0)

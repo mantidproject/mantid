@@ -13,8 +13,8 @@ The algorithm transforms a single spectrum workspace containing
 spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]`
 (as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF
 (pair distribution function) as described below and also the reverse. The available PDF types are the
-reduced pair distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, and the
-radial distribution function :math:`RDF(r)`.
+reduced pair distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, the
+radial distribution function :math:`RDF(r)`, and the total radial distribution function :math:`G_k(r)`.
 
 The output from this algorithm will have an x-range between 0.0 and the maximum parameter of the output,
 i.e. if converting from `g(r)` to `S(Q)` the output will be between 0.0 and `Qmax`.
@@ -107,6 +107,19 @@ otherwise
    <center>
 
 :math:`RDF(r) = 4 \pi \rho_0 r^2 g(r)`
+
+.. raw:: html
+
+   </center>
+
+**G_k(r)**
+##########
+
+.. raw:: html
+
+   <center>
+
+:math:`G_k(r) = \frac{0.01 * \langle b_{coh} \rangle ^2 G^{PDF}(r)}{(4 \pi)^2 \rho_0 r} = 0.01 * \langle b_{coh} \rangle ^2 [g(r)-1]`
 
 .. raw:: html
 

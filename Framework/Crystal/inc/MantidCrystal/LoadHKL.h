@@ -21,7 +21,7 @@ namespace Crystal {
  * @author Vickie Lynch, SNS
  * @date 2012-01-25
  */
-class MANTID_CRYSTAL_DLL LoadHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL LoadHKL final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadHKL"; };

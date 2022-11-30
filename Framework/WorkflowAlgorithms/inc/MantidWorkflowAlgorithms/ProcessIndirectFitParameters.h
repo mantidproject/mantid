@@ -20,7 +20,7 @@ namespace Algorithms {
   @author Elliot Oram, ISIS, RAL
   @date 12/08/2015
 */
-class DLLExport ProcessIndirectFitParameters : public API::Algorithm {
+class DLLExport ProcessIndirectFitParameters final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

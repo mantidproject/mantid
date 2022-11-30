@@ -22,7 +22,7 @@ namespace {
 Mantid::Kernel::Logger g_log("WorkspaceWidget");
 }
 
-MantidTreeModel::MantidTreeModel() {}
+MantidTreeModel::MantidTreeModel() = default;
 
 // Data display and saving methods
 void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames) {

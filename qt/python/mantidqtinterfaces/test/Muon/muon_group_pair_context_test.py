@@ -202,11 +202,11 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.context.reset_group_and_pairs_to_default(workspace, 'EMU', 'longitudanal', 1)
 
-        self.assertEquals(self.context.group_names, ['fwd', 'bwd'])
-        self.assertEquals(self.context.pair_names, ['long'])
-        self.assertEquals(self.context.diff_names, [])
+        self.assertEqual(self.context.group_names, ['fwd', 'bwd'])
+        self.assertEqual(self.context.pair_names, ['long'])
+        self.assertEqual(self.context.diff_names, [])
         for group in self.context.groups:
-            self.assertEquals(group.periods, [1])
+            self.assertEqual(group.periods, [1])
 
     def test_that_reset_to_default_groups_creates_correct_groups_and_pairs_for_multi_period_data(self):
         workspace = CreateSampleWorkspace()
@@ -214,19 +214,19 @@ class MuonGroupPairContextTest(unittest.TestCase):
 
         self.context.reset_group_and_pairs_to_default(workspace, 'EMU', 'longitudanal', 2)
 
-        self.assertEquals(self.context.group_names, ['fwd1', 'bwd1', 'fwd2', 'bwd2'])
-        self.assertEquals(self.context.pair_names, ['long1', 'long2'])
-        self.assertEquals(self.context.diff_names, ['pair_diff1'])
-        self.assertEquals(self.context.groups[0].periods, [1])
-        self.assertEquals(self.context.groups[1].periods, [1])
-        self.assertEquals(self.context.groups[2].periods, [2])
-        self.assertEquals(self.context.pairs[0].forward_group, 'fwd1')
-        self.assertEquals(self.context.pairs[0].backward_group, 'bwd1')
-        self.assertEquals(self.context.pairs[1].forward_group, 'fwd2')
-        self.assertEquals(self.context.pairs[1].backward_group, 'bwd2')
-        self.assertEquals(self.context.diffs[0].positive, 'long1')
-        self.assertEquals(self.context.diffs[0].negative, 'long2')
-        self.assertEquals(self.context.selected, 'long1')
+        self.assertEqual(self.context.group_names, ['fwd1', 'bwd1', 'fwd2', 'bwd2'])
+        self.assertEqual(self.context.pair_names, ['long1', 'long2'])
+        self.assertEqual(self.context.diff_names, ['pair_diff1'])
+        self.assertEqual(self.context.groups[0].periods, [1])
+        self.assertEqual(self.context.groups[1].periods, [1])
+        self.assertEqual(self.context.groups[2].periods, [2])
+        self.assertEqual(self.context.pairs[0].forward_group, 'fwd1')
+        self.assertEqual(self.context.pairs[0].backward_group, 'bwd1')
+        self.assertEqual(self.context.pairs[1].forward_group, 'fwd2')
+        self.assertEqual(self.context.pairs[1].backward_group, 'bwd2')
+        self.assertEqual(self.context.diffs[0].positive, 'long1')
+        self.assertEqual(self.context.diffs[0].negative, 'long2')
+        self.assertEqual(self.context.selected, 'long1')
 
     def test_get_group_pair_name_and_run_from_workspace_name(self):
         group_1 = MuonGroup('group_1', [1, 3, 5, 7, 9])

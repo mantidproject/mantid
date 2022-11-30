@@ -275,7 +275,7 @@ void DirectILLTubeBackground::exec() {
   API::Progress progress(this, 0.0, 1.0, componentNames.size());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int64_t i = 0; i < static_cast<int64_t>(componentNames.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto const &componentName = componentNames[static_cast<size_t>(i)];
     progress.report("Processing " + componentName);
     checkComponentExists(componentName, *instrument);
@@ -290,9 +290,9 @@ void DirectILLTubeBackground::exec() {
     auto averageWS = peakExcludingAverage(*componentWS, bounds.peakStarts, bounds.peakEnds);
     auto fittedComponentBkg = fitComponentBackground(averageWS, bkgRanges);
     writeComponentBackgroundToOutput(*fittedComponentBkg, *bkgWS, wsIndexRange.first);
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   if (!ws->isDistribution()) {
     for (size_t i = 0; i < bkgWS->getNumberHistograms(); ++i) {
       bkgWS->convertToCounts(i);

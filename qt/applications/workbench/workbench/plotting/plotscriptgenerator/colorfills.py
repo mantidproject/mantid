@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from matplotlib import rcParams
 from matplotlib.image import AxesImage
 from matplotlib.colors import LogNorm
 from matplotlib.collections import QuadMesh
@@ -22,7 +23,7 @@ mpl_default_kwargs = {
     'alpha': None,
     'label': '',
     'zorder': 0,
-    'interpolation': 'nearest'
+    'interpolation': rcParams['image.interpolation']
 }
 
 

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidKernel/Logger.h"
 
@@ -19,7 +20,7 @@ namespace DataHandling {
 namespace {
 Mantid::Kernel::Logger g_log("LoadSingleMesh");
 }
-class DLLExport LoadSingleMesh : public MeshFileIO {
+class MANTID_DATAHANDLING_DLL LoadSingleMesh : public MeshFileIO {
 public:
   LoadSingleMesh(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType);
   virtual ~LoadSingleMesh();

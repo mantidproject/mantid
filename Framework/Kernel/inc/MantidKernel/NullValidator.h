@@ -17,7 +17,7 @@ namespace Kernel {
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 */
-class DLLExport NullValidator final : public IValidator {
+class MANTID_KERNEL_DLL NullValidator final : public IValidator {
 public:
   IValidator_sptr clone() const override;
 

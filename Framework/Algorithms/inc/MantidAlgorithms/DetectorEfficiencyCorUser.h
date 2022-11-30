@@ -34,7 +34,7 @@ namespace Algorithms {
 
  Formula_eff must be defined in the instrument parameters file.
  */
-class MANTID_ALGORITHMS_DLL DetectorEfficiencyCorUser : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorEfficiencyCorUser final : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

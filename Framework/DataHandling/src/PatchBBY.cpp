@@ -71,7 +71,7 @@ template <class T> bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &
     return false;
   }
 }
-bool loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value) {
+bool loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value) {
   try {
     NeXus::NXChar buffer = entry.openNXChar(path);
     buffer.load();

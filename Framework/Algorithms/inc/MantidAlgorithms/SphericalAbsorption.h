@@ -63,7 +63,7 @@ namespace Algorithms {
     @author Vickie Lynch, SNS
     @date 08/16/2011
 */
-class MANTID_ALGORITHMS_DLL SphericalAbsorption : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SphericalAbsorption final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   SphericalAbsorption();

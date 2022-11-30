@@ -41,7 +41,7 @@ and
 A_{eq} x = 0
 \f]
  */
-class DLLExport SLSQPMinimizer {
+class MANTID_KERNEL_DLL SLSQPMinimizer {
 public:
   /**
    * Constructor
@@ -131,7 +131,6 @@ private:
   public:
     /// Construct
     template <typename T> FunctionWrapper(const T &func) : m_funcHolder(std::make_unique<TypeHolder<T>>(func)) {}
-    ~FunctionWrapper() {}
     /**
      * Calls user supplied function
      * @param x - The current pt

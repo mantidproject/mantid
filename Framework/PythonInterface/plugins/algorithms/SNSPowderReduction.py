@@ -512,7 +512,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if can_run_ws_name in mtd:
                 hstry = mtd[can_run_ws_name].getHistory()
                 if not hstry.empty():
-                    alg = hstry.getAlgorithm(0)
+                    alg = hstry.getAlgorithmHistory(0)
                     if alg.name() == "SNSPowderReduction":
                         if alg.getPropertyValue("TypeOfCorrection") != self._absMethod:
                             self.log().information(

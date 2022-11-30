@@ -20,9 +20,6 @@
 namespace Mantid {
 namespace Kernel {
 namespace MultiFileNameParsing {
-/// Parses a string consisting of only run number info, into a vector of vector
-/// of run numbers.
-MANTID_KERNEL_DLL std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
 /// Suggests a workspace name, given a vector of file names. (Which we assume
 /// will be added.)
 MANTID_KERNEL_DLL std::string suggestWorkspaceName(const std::vector<std::string> &fileNames);
@@ -86,6 +83,13 @@ public:
   std::string runString() const { return m_runString; }
   /// Return the parsed extension string.
   std::string extString() const { return m_extString; }
+  /// Parses a string consisting of only run number info, into a vector of vector
+  /// of run numbers.
+  std::vector<std::vector<unsigned int>> parseMultiRunString(std::string runString);
+  /// Return the setting for trimming whitespaces in run string
+  bool trimWhiteSpaces() const;
+  /// Set the flag for trimming whitespaces in run string
+  void setTrimWhiteSpaces(const bool &setting);
 
 private:
   /// Clear all member variables.
@@ -101,10 +105,10 @@ private:
   std::string m_multiFileName;
   /// The various sections of the given string to parse.
   std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
-  /// The instrument-specific run zero padding value.
-  // int m_zeroPadding;
   /// All the valid instrument names.
   std::set<std::string, ReverseCaselessCompare> m_validInstNames;
+  /// Flag to determine if string input should be trimmed of whitespace
+  bool m_trimWhiteSpaces;
 };
 
 /**

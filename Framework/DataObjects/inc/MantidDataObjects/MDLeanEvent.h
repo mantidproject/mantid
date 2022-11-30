@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/MortonIndex/BitInterleaving.h"
 #include "MantidDataObjects/MortonIndex/CoordinateConversion.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -57,7 +57,7 @@ template <size_t nd> void swap(MDLeanEvent<nd> &first, MDLeanEvent<nd> &second);
  */
 struct EventAccessor {};
 
-template <size_t nd> class DLLExport MDLeanEvent {
+template <size_t nd> class MANTID_DATAOBJECTS_DLL MDLeanEvent {
 public:
   /**
    * Additional index type defenitions
@@ -83,7 +83,7 @@ public:
     static
         typename std::enable_if<std::is_same<EventAccessor, typename Accessor::EventAccessType>::value, MortonT>::type
         getIndex(const MDLeanEvent<nd> &event) {
-      return event.getIndex();
+      return event.index;
     }
   };
   template <class Accessor> friend struct AccessFor;
@@ -108,7 +108,7 @@ protected:
 #pragma pack(push, 1)
   union {
     coord_t center[nd];
-    MortonT index;
+    MortonT index = 0;
   };
 #pragma pack(pop)
 
@@ -134,8 +134,6 @@ private:
     for (unsigned i = 0; i < nd; ++i)
       center[i] = coords[i];
   }
-
-  const MortonT getIndex() const { return index; }
 
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
@@ -332,26 +330,24 @@ public:
    @return totalSignal -- total signal in the vector of events
    @return totalErr   -- total error corresponting to the vector of events
   */
-  static inline void eventsToData(const std::vector<MDLeanEvent<nd>> &events, std::vector<coord_t> &data, size_t &ncols,
-                                  double &totalSignal, double &totalErrSq) {
+  static inline void eventsToData(const std::vector<MDLeanEvent<nd>> &mdLeanEvents, std::vector<coord_t> &data,
+                                  size_t &ncols, double &totalSignal, double &totalErrSq) {
     ncols = nd + 2;
-    size_t nEvents = events.size();
+    size_t nEvents = mdLeanEvents.size();
     data.resize(nEvents * ncols);
 
     totalSignal = 0;
     totalErrSq = 0;
 
-    size_t index(0);
-    for (const MDLeanEvent<nd> &event : events) {
-      float signal = event.signal;
-      float errorSquared = event.errorSquared;
-      data[index++] = static_cast<coord_t>(signal);
-      data[index++] = static_cast<coord_t>(errorSquared);
+    size_t dataIndex(0);
+    for (const MDLeanEvent<nd> &mdLeanEvent : mdLeanEvents) {
+      data[dataIndex++] = static_cast<coord_t>(mdLeanEvent.signal);
+      data[dataIndex++] = static_cast<coord_t>(mdLeanEvent.errorSquared);
       for (size_t d = 0; d < nd; d++)
-        data[index++] = event.center[d];
+        data[dataIndex++] = mdLeanEvent.center[d];
       // Track the total signal
-      totalSignal += signal_t(signal);
-      totalErrSq += signal_t(errorSquared);
+      totalSignal += signal_t(mdLeanEvent.signal);
+      totalErrSq += signal_t(mdLeanEvent.errorSquared);
     }
   }
 

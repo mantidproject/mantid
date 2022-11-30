@@ -16,7 +16,7 @@ using namespace Mantid::API;
 class ToyAlgorithm : public Algorithm {
 public:
   ToyAlgorithm() : Algorithm() {}
-  ~ToyAlgorithm() override {}
+  ~ToyAlgorithm() override = default;
   const std::string name() const override { return "ToyAlgorithm"; } ///< Algorithm's name for identification
   int version() const override { return 1; }                         ///< Algorithm's version for identification
   const std::string category() const override { return "Cat"; }      ///< Algorithm's category for identification
@@ -37,7 +37,7 @@ public:
 class ToyAlgorithmTwo : public Algorithm {
 public:
   ToyAlgorithmTwo() : Algorithm() {}
-  ~ToyAlgorithmTwo() override {}
+  ~ToyAlgorithmTwo() override = default;
 
   const std::string name() const override { return "ToyAlgorithm"; } ///< Algorithm's name for identification
   int version() const override { return 2; }                         ///< Algorithm's version for identification
@@ -59,7 +59,7 @@ public:
 class ToyAlgorithmThree : public Algorithm {
 public:
   ToyAlgorithmThree() : Algorithm() {}
-  ~ToyAlgorithmThree() override {}
+  ~ToyAlgorithmThree() override = default;
 
   const std::string name() const override { return "ToyAlgorithm"; } ///< Algorithm's name for identification
   int version() const override { return 2; }                         ///< Algorithm's version for identification
@@ -77,7 +77,7 @@ public:
 class CategoryAlgorithm : public Algorithm {
 public:
   CategoryAlgorithm() : Algorithm() {}
-  ~CategoryAlgorithm() override {}
+  ~CategoryAlgorithm() override = default;
 
   const std::string name() const override { return "CategoryAlgorithm"; } ///< Algorithm's name for identification
   int version() const override { return 1; }                              ///< Algorithm's version for identification
@@ -88,6 +88,23 @@ public:
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("prop3", 10.5);
+  }
+  void exec() override {}
+};
+
+class LowerCaseAliasAlgorithm : public Algorithm {
+public:
+  LowerCaseAliasAlgorithm() : Algorithm() {}
+  ~LowerCaseAliasAlgorithm() override = default;
+  const std::string name() const override { return "Lower"; }
+  int version() const override { return 1; }                          ///< Algorithm's version for identification
+  const std::string category() const override { return "Lowercase"; } ///< Algorithm's category for identification
+  const std::string alias() const override { return "lower"; }
+  const std::string summary() const override { return "Test summary"; }
+
+  void init() override {
+    declareProperty("prop1", "value");
+    declareProperty("prop2", 1);
   }
   void exec() override {}
 };

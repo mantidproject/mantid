@@ -1,0 +1,1 @@
+- Fix a bug where the live data monitor would stop running when it encounters a transmission run. This was because the reduction would fail when the angle is zero.

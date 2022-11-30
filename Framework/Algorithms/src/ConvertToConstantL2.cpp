@@ -90,7 +90,7 @@ void ConvertToConstantL2::exec() {
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_outputWS->setHistogram(i, m_inputWS->histogram(i));
 
     // Should not move the monitors
@@ -124,9 +124,9 @@ void ConvertToConstantL2::exec() {
     m_outputWS->mutableX(i) -= deltaTOF;
 
     prog.report("Aligning elastic line...");
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   this->setProperty("OutputWorkspace", this->m_outputWS);
 }

@@ -75,7 +75,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -86,7 +86,7 @@ class FocusTest(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus()
+        self.focus_results = run_focus_no_absorption()
 
     def validate(self):
         # check output files as expected
@@ -117,8 +117,101 @@ class FocusTest(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
-            config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
+
+
+class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_absorption("98533", paalman_pings=True)
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, 'POLARIS98533.nxs')
+        assert_output_file_exists(user_output, 'POLARIS98533.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-d.dat'.format(bankno))
+
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), 'Si')
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-6
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPaalmanPings.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
+
+
+class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_absorption("98533", paalman_pings=False)
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, 'POLARIS98533.nxs')
+        assert_output_file_exists(user_output, 'POLARIS98533.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-d.dat'.format(bankno))
+
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), 'Si')
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-5
+        # MayersSampleCorrection involves a fit that may give slightly different results on different OS
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
 
 
 class FocusTestChopperMode(systemtesting.MantidSystemTest):
@@ -148,6 +241,7 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
             _try_delete(spline_path)
             _try_delete(output_dir)
         finally:
+            mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
 
 
@@ -163,15 +257,15 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
-        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        expected_peak_values = [-0.00092,
-                                0.24875,
-                                0.43894,
-                                0.20343,
-                                0.9777]
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked
+        expected_peak_values = [0.8808,
+                                1.1001,
+                                2.9530,
+                                4.6600,
+                                4.3528]
         for index, ws in enumerate(self.pdf_output):
-            self.assertAlmostEqual(ws.dataY(0)[37], expected_peak_values[index], places=3)
+            idx = get_bin_number_at_given_r(ws.dataX(0), 3.9)
+            self.assertAlmostEqual(ws.dataY(0)[idx], expected_peak_values[index], places=3)
 
 
 class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
@@ -188,8 +282,8 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.00835, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5806, places=3)
 
 
 class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
@@ -225,7 +319,7 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
         # a truncated WS
-        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 197, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 255, places=3)
 
 
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
@@ -242,26 +336,32 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 1.0207, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 2.8955, places=3)
 
 
-class TotalScatteringFilterTest(systemtesting.MantidSystemTest):
+class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
 
     pdf_output = None
+    r_min = 1.0
 
     def runTest(self):
         setup_mantid_paths()
         # Load Focused ws
         mantid.LoadNexus(Filename=total_scattering_input_file, OutputWorkspace='98533-ResultTOF')
         q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
-        self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, freq_params=[1])
+        self.pdf_output = run_total_scattering('98533', True, q_lims=q_lims, pdf_type="g(r)", freq_params=[self.r_min])
 
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 0.90692, places=3)
+        x_data = self.pdf_output.dataX(0)
+        y_data = self.pdf_output.dataY(0)
+        idx_to_check_filter = 5
+        self.assertTrue(x_data[idx_to_check_filter] < self.r_min)
+        self.assertAlmostEqual(y_data[idx_to_check_filter], 0.0, places=1)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(y_data[idx], 2.6743, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
@@ -278,8 +378,8 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
-        # After rebin this is at X index 37
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[37], 6.93898, places=3)
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.8486, places=3)
 
 
 def run_total_scattering(run_number, merge_banks, q_lims=None, delta_q=None, delta_r=None, pdf_type="G(r)",
@@ -324,7 +424,7 @@ def run_vanadium_calibration():
     return splined_ws, unsplined_ws
 
 
-def run_focus():
+def run_focus_no_absorption():
     run_number = 98533
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
@@ -338,7 +438,8 @@ def run_focus():
     inst_object = setup_inst_object(mode="PDF")
     return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
                              do_absorb_corrections=False, sample_empty=sample_empty,
-                             sample_empty_scale=sample_empty_scale)
+                             sample_empty_scale=sample_empty_scale,
+                             van_normalisation_method="Relative")
 
 
 def run_focus_no_chopper(run_number):
@@ -357,11 +458,37 @@ def run_focus_no_chopper(run_number):
                              sample_empty_scale=sample_empty_scale)
 
 
+def run_focus_absorption(run_number, paalman_pings=False):
+    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+    sample_empty_scale = 0.5  # ignored if paalman_pings True
+
+    # Copy the required splined file into place first (instead of relying on generated one)
+    splined_file_name = "POLARIS00098532_splined.nxs"
+
+    original_splined_path = os.path.join(input_dir, splined_file_name)
+    shutil.copy(original_splined_path, spline_path)
+
+    inst_object = setup_inst_object("PDF", with_container=True)
+    if paalman_pings:
+        inst_object._inst_settings.empty_can_subtraction_method = "PaalmanPings"  # the default is Simple
+        inst_object._inst_settings.paalman_pings_events_per_point = 1
+
+        return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
+                                 do_absorb_corrections=True, sample_empty=sample_empty,
+                                 multiple_scattering=False,
+                                 van_normalisation_method="Relative")
+    else:
+        return inst_object.focus(run_number=run_number, input_mode="Summed", do_van_normalisation=True,
+                                 do_absorb_corrections=True, sample_empty=sample_empty,
+                                 sample_empty_scale=sample_empty_scale, multiple_scattering=False,
+                                 van_normalisation_method="Relative")
+
+
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
 
 
-def setup_inst_object(mode):
+def setup_inst_object(mode, with_container=False):
     user_name = "Test"
     if mode:
         inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
@@ -372,6 +499,8 @@ def setup_inst_object(mode):
 
     sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape='cylinder')
     sample_details.set_material(chemical_formula='Si')
+    if with_container:
+        sample_details.set_container(radius=0.3175, chemical_formula='V')
     inst_obj.set_sample_details(sample=sample_details)
 
     return inst_obj
@@ -385,4 +514,12 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)
+
+
+def get_bin_number_at_given_r(r_data, r):
+    r_edges = r_data
+    r_centres = (r_edges[:-1] + r_edges[1:]) / 2
+    diffs = [abs(i - r) for i in r_centres]
+    idx = diffs.index(min(diffs))
+    return idx

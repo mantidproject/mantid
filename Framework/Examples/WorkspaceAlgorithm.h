@@ -15,12 +15,12 @@ namespace Algorithms {
     @author Roman Tolchenov, ISIS, RAL
     @date 02/05/2008
  */
-class WorkspaceAlgorithm : public API::Algorithm {
+class WorkspaceAlgorithm final : public API::Algorithm {
 public:
   /// no arg constructor
   WorkspaceAlgorithm() : API::Algorithm() {}
   /// virtual destructor
-  ~WorkspaceAlgorithm() override {}
+  ~WorkspaceAlgorithm() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "WorkspaceAlgorithm"; }
   /// Algorithm's version for identification overriding a virtual method

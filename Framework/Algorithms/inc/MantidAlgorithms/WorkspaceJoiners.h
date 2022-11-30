@@ -32,6 +32,8 @@ public:
   const std::string summary() const override { return "Join two workspaces together by appending their spectra."; }
 
 protected:
+  ~WorkspaceJoiners() = default;
+
   API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2);
   DataObjects::EventWorkspace_sptr execEvent(const DataObjects::EventWorkspace &eventWs1,
                                              const DataObjects::EventWorkspace &eventWs2);
@@ -42,7 +44,6 @@ protected:
   /// Abstract method to be implemented in concrete algorithm classes
   virtual void fixSpectrumNumbers(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
                                   API::MatrixWorkspace &output) = 0;
-
   std::unique_ptr<API::Progress> m_progress; ///< Progress reporting object
 };
 

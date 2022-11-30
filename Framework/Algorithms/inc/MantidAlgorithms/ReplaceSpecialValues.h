@@ -32,7 +32,7 @@ public:
     return "Replaces instances of NaN and infinity in the workspace with user "
            "defined numbers. If a replacement value is not provided the check "
            "will not occur. This algorithm can also be used to replace numbers "
-           "whose absolute value is larger than a user-defined threshold.";
+           "whose value is larger than a user-defined threshold.";
   }
 
   /// Algorithm's version for identification
@@ -79,6 +79,8 @@ private:
   /// to
   /// be performed
   bool m_checkErrors;
+  bool m_useAbsolute; ///< Flag to indicate if the algorithm should use the absolute value when comparing big and small
+                      ///< checks.
 };
 
 } // namespace Algorithms

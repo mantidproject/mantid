@@ -41,10 +41,11 @@ expected along with additional keys specifying the values (all values are assume
 be in centimeters):
 
 - ``FlatPlate``: Width, Height, Thick, Center, Angle
-- ``Cylinder``: Height, Radius, Center
-- ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center
+- ``Cylinder``: Height, Radius, Center, Axis
+- ``HollowCylinder``: Height, InnerRadius, OuterRadius, Center, Axis
 - ``FlatPlateHolder``: Width, Height, Thick, Center, Angle, FrontThick, BackThick. This is a CSG union of 2 FlatPlates tightly wrapping a FlatPlate sample. To be used for the ContainerGeometry.
 - ``HollowCylinderHolder``: Height, InnerRadius, InnerOuterRadius, OuterInnerRadius, OuterRadius, Center. This is a CSG union of 2 HollowCylinders tightly wrapping a HollowCylinder sample. To be used for the ContainerGeometry.
+- ``Sphere``: Center, Radius
 - ``CSG``: Value is a string containing any generic shape as detailed in :ref:`HowToDefineGeometricShape`
 
 The ``Center`` key is expected to be a list of three values indicating the :python:`[X,Y,Z]`
@@ -190,22 +191,16 @@ used for the dictionary parameters.
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
                        'NumberDensity': 0.1})
 
-**Example - Specify shape using CSG object**
+**Example - Use sphere sample geometry**
 
 .. testcode:: Ex4
 
    # A fake host workspace, replace this with your real one.
    ws = CreateSampleWorkspace()
-   # Specify a Sphere geometry using CSG
-   sphere_xml = " \
-   <sphere id='some-sphere'> \
-       <centre x='0.0'  y='0.0' z='0.0' /> \
-       <radius val='0.5' /> \
-   </sphere> \
-   <algebra val='some-sphere' /> \
-   "
-   # Set sample geometry of workspace to this CSG object Sphere
-   SetSample(ws, Geometry={'Shape': 'CSG', 'Value': sphere_xml})
+
+   # Set sample geometry of workspace to a Sphere
+   SetSample(ws, Geometry={'Shape': 'Sphere',
+                 'Radius': 2.0, 'Center': [0.,0.,0.]})
 
 **Example - Flat plate sample in a flat plate holder container**
 
@@ -258,6 +253,24 @@ used for the dictionary parameters.
                     'Center': [0.,0.,0.]},
           ContainerMaterial={'ChemicalFormula': 'Al',
                     'NumberDensity': 0.01})
+
+**Example - Specify shape using CSG object**
+
+.. testcode:: Ex8
+
+   # A fake host workspace, replace this with your real one.
+   ws = CreateSampleWorkspace()
+   # Specify an Infinite Cylinder geometry using CSG
+   infinite_cylinder_xml = " \
+   <infinite-cylinder id='some-cylinder'> \
+       <centre x='0.0'  y='0.2' z='0' /> \
+	   <axis x='0.0'  y='0.2' z='0' /> \
+       <radius val='1' /> \
+   </infinite-cylinder> \
+   <algebra val='some-cylinder' /> \
+   "
+   # Set sample geometry of workspace to this CSG object Sphere
+   SetSample(ws, Geometry={'Shape': 'CSG', 'Value': infinite_cylinder_xml})
 
 **Example - SetGoniometer to apply automatic rotation to Sample Shape.**
 

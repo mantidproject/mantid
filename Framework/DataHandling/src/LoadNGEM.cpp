@@ -49,7 +49,7 @@ uint64_t swapUint64(uint64_t word) {
  * @param bigEndian The big endian formatted event.
  * @param smallEndian The resulting small endian formatted event.
  */
-void correctForBigEndian(EventUnion &bigEndian, EventUnion &smallEndian) {
+void correctForBigEndian(const EventUnion &bigEndian, EventUnion &smallEndian) {
   smallEndian.splitWord.words[0] = swapUint64(bigEndian.splitWord.words[1]);
   smallEndian.splitWord.words[1] = swapUint64(bigEndian.splitWord.words[0]);
 }
@@ -95,7 +95,8 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int &event
  * @param events The main events data.
  * @param dataWorkspace The workspace to add the data to.
  */
-void createEventWorkspace(const double &maxToF, const double &binWidth, std::vector<DataObjects::EventList> &events,
+void createEventWorkspace(const double &maxToF, const double &binWidth,
+                          const std::vector<DataObjects::EventList> &events,
                           DataObjects::EventWorkspace_sptr &dataWorkspace) {
   // Round up number of bins needed
   std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));

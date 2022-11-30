@@ -68,7 +68,7 @@ private:
   double expWidth() const;
 };
 
-// typedef std::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+// using TableWorkspace_sptr = std::shared_ptr<TableWorkspace>;
 
 using Bk2BkExpConvPV_sptr = std::shared_ptr<Bk2BkExpConvPV>;
 

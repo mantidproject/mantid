@@ -161,7 +161,8 @@ class SuperplotViewSide(QDockWidget):
         ws_list.setMinimumSize(QSize(size0 + size1, 0))
         self.workspaceSelector.setWorkspaceTypes(["Workspace2D",
                                                   "WorkspaceGroup",
-                                                  "EventWorkspace"])
+                                                  "EventWorkspace",
+                                                  "RebinnedOutput"])
         self.setAcceptDrops(True)
 
     def dragEnterEvent(self, event):
@@ -236,6 +237,8 @@ class SuperplotView:
 
         side = self._side_view
         side.visibilityChanged.connect(self._presenter.on_visibility_changed)
+        side.normaliseCheckbox.clicked.connect(
+                self._presenter.on_normalise_checked)
         side.addButton.clicked.connect(self._presenter.on_add_button_clicked)
         side.workspacesList.itemSelectionChanged.connect(
                 self._presenter.on_workspace_selection_changed)

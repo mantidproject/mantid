@@ -1,0 +1,2 @@
+- Fix bugs in :ref:`SelectCellWithForm <algm-SelectCellWithForm>` and ref:`SelectCellOfType <algm-SelectCellOfType>` that incorrectly transform modulation vectors.
+- Fix bug where modulation vectors are not transformed in :ref:`TransformHKL <algm-TransformHKL>`.

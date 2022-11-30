@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class MANTID_DATAHANDLING_DLL SaveBankScatteringAngles : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveBankScatteringAngles final : public API::Algorithm {
 public:
   const std::string name() const override;
 

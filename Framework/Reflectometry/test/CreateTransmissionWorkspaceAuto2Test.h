@@ -62,7 +62,7 @@ public:
     m_dataWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
   }
 
-  ~CreateTransmissionWorkspaceAuto2Test() override {}
+  ~CreateTransmissionWorkspaceAuto2Test() override = default;
 
   void test_init() {
     CreateTransmissionWorkspaceAuto2 alg;

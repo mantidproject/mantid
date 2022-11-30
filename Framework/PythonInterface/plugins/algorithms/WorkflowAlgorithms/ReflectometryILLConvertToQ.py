@@ -6,12 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import ILL_utilities as utils
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace, PropertyMode,
+                        Run, WorkspaceUnitValidator)
 from mantid.kernel import (Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution, Multiply,
-                              ReflectometryMomentumTransfer)
+from mantid.simpleapi import (CloneWorkspace, ConvertAxisByFormula, ConvertToPointData, CreateWorkspace, Divide, GroupToXResolution,
+                              Multiply, ReflectometryMomentumTransfer)
 import ReflectometryILL_common as common
 import scipy.constants as constants
+import numpy as np
+from typing import List, Tuple
 
 
 class Prop:
@@ -21,6 +24,7 @@ class Prop:
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
     SUBALG_LOGGING = 'SubalgorithmLogging'
+    THETA_CORRECTION = "ThetaCorrection"
 
 
 class SubalgLogging:
@@ -30,265 +34,329 @@ class SubalgLogging:
 
 class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
 
+    @staticmethod
+    def _foreground(sample_logs: Run) -> List[float]:
+        """Returns a [start, end] list defining the foreground workspace indices from provided sample logs metadata.
+
+        Keyword arguments:
+        sample_logs -- metadata used as source of foreground information
+        """
+        start = sample_logs.getProperty(common.SampleLogs.FOREGROUND_START).value
+        end = sample_logs.getProperty(common.SampleLogs.FOREGROUND_END).value
+        return [start, end]
+
+    @staticmethod
+    def _sum_type(sample_logs: Run) -> float:
+        """Returns the sum type applied to ws from metadata.
+
+        Keyword arguments:
+        logs -- source of metadata
+        """
+        return sample_logs.getProperty(common.SampleLogs.SUM_TYPE).value
+
+    @staticmethod
+    def _tof_channel_width(sample_logs: Run) -> float:
+        """Returns the time of flight bin width from metadata.
+
+        Keyword arguments:
+        sample_logs -- source of metadata
+        """
+        return sample_logs.getProperty('PSD.time_of_flight_0').value
+
     def category(self):
-        """Return algorithm's categories."""
+        """Returns algorithm's categories."""
         return 'ILL\\Reflectometry;Workflow\\Reflectometry'
 
     def name(self):
-        """Return the name of the algorithm."""
+        """Returns the name of the algorithm."""
         return 'ReflectometryILLConvertToQ'
 
     def summary(self):
-        """Return a summary of the algorithm."""
+        """Returns a summary of the algorithm."""
         return 'Converts a reflectivity workspace from wavelength to momentum transfer.'
 
     def seeAlso(self):
-        """Return a list of related algorithm names."""
-        return ['ReflectometryILLPolarizationCor', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground',
-                'ReflectometryMomentumTransfer', 'ReflectometryILLAutoProcess']
+        """Returns a list of related algorithm names."""
+        return [
+            'ReflectometryILLPolarizationCor', 'ReflectometryILLPreprocess', 'ReflectometryILLSumForeground',
+            'ReflectometryMomentumTransfer', 'ReflectometryILLAutoProcess'
+        ]
 
     def version(self):
-        """Return the version of the algorithm."""
+        """Returns the version of the algorithm."""
         return 1
 
     def PyExec(self):
-        """Execute the algorithm."""
-        self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
-        cleanupMode = self.getProperty(Prop.CLEANUP).value
-        self._cleanup = utils.Cleanup(cleanupMode, self._subalgLogging)
-        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
-        self._names = utils.NameSource(wsPrefix, cleanupMode)
+        """Executes the algorithm."""
+        self._subalg_logging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
+        cleanup_mode = self.getProperty(Prop.CLEANUP).value
+        self._cleanup = utils.Cleanup(cleanup_mode, self._subalg_logging)
+        ws_prefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        self._names = utils.NameSource(ws_prefix, cleanup_mode)
 
-        ws, directWS = self._inputWS()
+        ws, direct_ws = self._input_ws()
 
-        ws = self._correctForChopperOpenings(ws, directWS)
-        ws = self._convertToMomentumTransfer(ws)
+        ws = self._correct_for_chopper_openings(ws, direct_ws)
+        ws = self._convert_to_momentum_transfer(ws)
+        if not self.getProperty('ThetaCorrection').isDefault:
+            theta_ws = self.getProperty('ThetaCorrection').value
+            theta_ws_in_q = CloneWorkspace(InputWorkspace=theta_ws, OutputWorkspace='{}_in_Q'.format(theta_ws.name()))
+            theta0 = ws.spectrumInfo().twoTheta(0) / 2.0
+            theta_ws_in_q = ConvertAxisByFormula(
+                InputWorkspace=theta_ws_in_q,
+                OutputWorkspace=theta_ws_in_q.name(),
+                Axis='X',
+                Formula='4*pi*{}/x'.format(np.sin(theta0)),
+                AxisUnits='MomentumTransfer',
+            )
+            theta_ws_in_q.setDx(0, ws.readDx(0))
+            theta_ws_in_q = self._to_point_data(theta_ws_in_q)
+            theta_ws_in_q = self._group_points(theta_ws_in_q, 'theta_')
+            self._cleanup.cleanupLater(theta_ws_in_q)
+        sum_in_lambda = self._sum_type(ws.run()) == common.SUM_IN_LAMBDA
+        if sum_in_lambda:
+            direct_ws = self._same_q_and_dq(ws, direct_ws, 'direct_')
 
-        sumInLambda = self._sumType(ws.run()) == 'SumInLambda'
-        if sumInLambda:
-            directWS = self._sameQAndDQ(ws, directWS, 'direct_')
-        ws = self._toPointData(ws)
-        ws = self._groupPoints(ws)
+        ws = self._to_point_data(ws)
+        ws = self._group_points(ws)
 
-        if sumInLambda:
-            directWS = self._toPointData(directWS, 'direct_')
-            directWS = self._groupPoints(directWS, 'direct_')
-            ws = self._divideByDirect(ws, directWS)
+        if sum_in_lambda:
+            direct_ws = self._to_point_data(direct_ws, 'direct_')
+            direct_ws = self._group_points(direct_ws, 'direct_')
+            ws = self._divide_by_direct(ws, direct_ws)
+
+        if not self.getProperty('ThetaCorrection').isDefault:
+            ws.setX(0, ws.readX(0) * theta_ws_in_q.readY(0))
 
         self._finalize(ws)
 
     def PyInit(self):
-        """Initialize the input and output properties of the algorithm."""
-        positiveFloat = FloatBoundedValidator(lower=0., exclusive=True)
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.INPUT_WS,
-                defaultValue='',
-                direction=Direction.Input,
-                validator=WorkspaceUnitValidator('Wavelength')),
-            doc='A reflectivity workspace in wavelength to be converted to Q.')
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.OUTPUT_WS,
-                defaultValue='',
-                direction=Direction.Output),
-            doc='The input workspace in momentum transfer.')
-        self.declareProperty(
-            Prop.SUBALG_LOGGING,
-            defaultValue=SubalgLogging.OFF,
-            validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
-            doc='Enable or disable child algorithm logging.')
-        self.declareProperty(
-            Prop.CLEANUP,
-            defaultValue=utils.Cleanup.ON,
-            validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
-            doc='Enable or disable intermediate workspace cleanup.')
-        self.declareProperty(
-            MatrixWorkspaceProperty(
-                Prop.DIRECT_FOREGROUND_WS,
-                defaultValue='',
-                direction=Direction.Input,
-                validator=WorkspaceUnitValidator('Wavelength')),
-            doc='Summed direct beam workspace.')
-        self.declareProperty(
-            Prop.GROUPING_FRACTION,
-            defaultValue=Property.EMPTY_DBL,
-            validator=positiveFloat,
-            doc='If set, group the output by steps of this fraction multiplied by Q resolution')
+        """Initializes the input and output properties of the algorithm."""
+        positive_float = FloatBoundedValidator(lower=0., exclusive=True)
+        self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='A reflectivity workspace in wavelength to be converted to Q.')
+
+        self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS, defaultValue='', direction=Direction.Output),
+                             doc='The input workspace in momentum transfer.')
+
+        self.declareProperty(Prop.SUBALG_LOGGING,
+                             defaultValue=SubalgLogging.OFF,
+                             validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
+                             doc='Enable or disable child algorithm logging.')
+
+        self.declareProperty(Prop.CLEANUP,
+                             defaultValue=utils.Cleanup.ON,
+                             validator=StringListValidator([utils.Cleanup.ON, utils.Cleanup.OFF]),
+                             doc='Enable or disable intermediate workspace cleanup.')
+
+        self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_FOREGROUND_WS,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='Summed direct beam workspace.')
+
+        self.declareProperty(Prop.GROUPING_FRACTION,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positive_float,
+                             doc='If set, group the output by steps of this fraction multiplied by Q resolution')
+
+        self.declareProperty(MatrixWorkspaceProperty(Prop.THETA_CORRECTION,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=WorkspaceUnitValidator('Wavelength')),
+                             doc='Theta correction factors from gravity correction.')
 
     def validateInputs(self):
-        """Validate the input properties."""
+        """Validates the input properties."""
         issues = dict()
-        inputWS = self.getProperty(Prop.INPUT_WS).value
-        if inputWS.getNumberHistograms() != 1:
+        input_ws = self.getProperty(Prop.INPUT_WS).value
+        if input_ws.getNumberHistograms() != 1:
             issues[Prop.INPUT_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
-        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
-        if directWS.getNumberHistograms() != 1:
+        direct_ws = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+        if direct_ws.getNumberHistograms() != 1:
             issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
-        run = inputWS.run()
+        run = input_ws.run()
         if not run.hasProperty(common.SampleLogs.SUM_TYPE):
-            issues[Prop.INPUT_WS] = "'" + common.SampleLogs.SUM_TYPE + "' entry missing in sample logs"
+            issues[Prop.INPUT_WS] = "'{}' entry missing in sample logs".format(common.SampleLogs.SUM_TYPE)
         else:
-            sumType = run.getProperty(common.SampleLogs.SUM_TYPE).value
-            if sumType not in ['SumInLambda', 'SumInQ']:
-                issues[Prop.INPUT_WS] = "Unknown sum type in sample logs: '" + sumType + "'. Allowed values: 'SumInLambda' or 'SumInQ'."
+            sum_type = run.getProperty(common.SampleLogs.SUM_TYPE).value
+            if sum_type not in [common.SUM_IN_LAMBDA, common.SUM_IN_Q]:
+                issues[Prop.INPUT_WS] = "Unknown sum type in sample logs: '{}'. Allowed values: 'SumInLambda' or 'SumInQ'.".format(sum_type)
             else:
-                if sumType == 'SumInLambda':
-                    if directWS.blocksize() != inputWS.blocksize():
+                if sum_type == common.SUM_IN_LAMBDA:
+                    if direct_ws.blocksize() != input_ws.blocksize():
                         issues[Prop.DIRECT_FOREGROUND_WS] = 'Number of bins does not match with InputWorkspace.'
-                    directXs = directWS.readX(0)
-                    inputXs = inputWS.readX(0)
-                    if directXs[0] != inputXs[0] or directXs[-1] != inputXs[-1]:
+                    direct_xs = direct_ws.readX(0)
+                    input_xs = input_ws.readX(0)
+                    if direct_xs[0] != input_xs[0] or direct_xs[-1] != input_xs[-1]:
                         issues[Prop.DIRECT_FOREGROUND_WS] = 'Binning does not match with InputWorkspace.'
         return issues
 
-    def _convertToMomentumTransfer(self, ws):
-        """Convert the X units of ws to momentum transfer."""
+    def _convert_to_momentum_transfer(self, ws: MatrixWorkspace) -> MatrixWorkspace:
+        """Converts the X units of ws to momentum transfer using ReflectometryMomentumTransfer algorithm, and returns
+        the result of the conversion.
+
+        Keyword arguments:
+        ws -- workspace to have its X axis converted to momentum transfer
+        """
         logs = ws.run()
-        reflectedForeground = self._foreground(logs)
-        instrumentName = common.instrumentName(ws)
-        sumType = logs.getProperty(common.SampleLogs.SUM_TYPE).value
-        pixelSize = common.pixelSize(instrumentName)
-        detResolution = common.detectorResolution()
-        chopperSpeed = common.chopperSpeed(logs, instrumentName)
-        chopperOpening = common.chopperOpeningAngle(logs, instrumentName)
-        chopperRadius = 0.36 if instrumentName == 'D17' else 0.305
-        chopperPairDist = common.chopperPairDistance(logs, instrumentName)
-        tofBinWidth = self._TOFChannelWidth(logs)
-        qWSName = self._names.withSuffix('in_momentum_transfer')
-        qWS = ReflectometryMomentumTransfer(
-            InputWorkspace=ws,
-            OutputWorkspace=qWSName,
-            SummationType=sumType,
-            ReflectedForeground=reflectedForeground,
-            PixelSize=pixelSize,
-            DetectorResolution=detResolution,
-            ChopperSpeed=chopperSpeed,
-            ChopperOpening=chopperOpening,
-            ChopperRadius=chopperRadius,
-            ChopperPairDistance=chopperPairDist,
-            FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
-            SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
-            TOFChannelWidth=tofBinWidth,
-            EnableLogging=self._subalgLogging)
+        reflected_foreground = self._foreground(logs)
+        instrument = ws.getInstrument()
+        instrument_name = common.instrument_name(ws)
+        sum_type = logs.getProperty(common.SampleLogs.SUM_TYPE).value
+        pixel_size = common.pixel_size(instrument_name)
+        det_resolution = common.detector_resolution()
+        chopper_speed = common.chopper_speed(logs, instrument)
+        chopper_opening = common.chopper_opening_angle(logs, instrument)
+        chopper_radius = instrument.getNumberParameter('chopper_radius')[0]
+        chopper_pair_dist = common.chopper_pair_distance(logs, instrument)
+        tof_bin_width = self._tof_channel_width(logs)
+        q_ws_name = self._names.withSuffix('in_momentum_transfer')
+        q_ws = ReflectometryMomentumTransfer(InputWorkspace=ws,
+                                             OutputWorkspace=q_ws_name,
+                                             SummationType=sum_type,
+                                             ReflectedForeground=reflected_foreground,
+                                             PixelSize=pixel_size,
+                                             DetectorResolution=det_resolution,
+                                             ChopperSpeed=chopper_speed,
+                                             ChopperOpening=chopper_opening,
+                                             ChopperRadius=chopper_radius,
+                                             ChopperPairDistance=chopper_pair_dist,
+                                             FirstSlitName='slit2',
+                                             FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
+                                             SecondSlitName='slit3',
+                                             SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
+                                             TOFChannelWidth=tof_bin_width,
+                                             EnableLogging=self._subalg_logging)
         self._cleanup.cleanup(ws)
-        return qWS
+        return q_ws
 
-    def _correctForChopperOpenings(self, ws, directWS):
-        """Correct reflectivity values if chopper openings between RB and DB differ."""
+    def _correct_for_chopper_openings(self, ws: MatrixWorkspace, direct_ws: MatrixWorkspace) -> MatrixWorkspace:
+        """Corrects reflectivity values if chopper openings between RB and DB differ.
 
-        def opening(instrumentName, logs, Xs):
-            chopperGap = common.chopperPairDistance(logs, instrumentName)
-            chopperPeriod = 60. / common.chopperSpeed(logs, instrumentName)
-            openingAngle = common.chopperOpeningAngle(logs, instrumentName)
-            return chopperGap * constants.m_n / constants.h / chopperPeriod * Xs * 1e-10 + openingAngle / 360.
+        Keyword arguments:
+        ws -- workspace to be corrected
+        direct_ws -- direct beam workspace
+        """
+        def opening(instr, logs, x_s):
+            chopperGap = common.chopper_pair_distance(logs, instr)
+            chopperPeriod = 60. / common.chopper_speed(logs, instr)
+            openingAngle = common.chopper_opening_angle(logs, instr)
+            return chopperGap * constants.m_n / constants.h / chopperPeriod * x_s * 1e-10 + openingAngle / 360.
 
-        instrumentName = common.instrumentName(ws)
-        Xbins = ws.readX(0)
-        Xs = (Xbins[:-1] + Xbins[1:]) / 2.
-        reflectedOpening = opening(instrumentName, ws.run(), Xs)
-        directOpening = opening(instrumentName, directWS.run(), Xs)
-        corFactorWSName = self._names.withSuffix('chopper_opening_correction_factors')
-        corFactorWS = CreateWorkspace(
-            OutputWorkspace=corFactorWSName,
-            DataX=Xbins,
-            DataY=directOpening / reflectedOpening,
-            UnitX=ws.getAxis(0).getUnit().unitID(),
-            ParentWorkspace=ws,
-            EnableLogging=self._subalgLogging)
-        correctedWSName = self._names.withSuffix('corrected_by_chopper_opening')
-        correctedWS = Multiply(
-            LHSWorkspace=ws,
-            RHSWorkspace=corFactorWS,
-            OutputWorkspace=correctedWSName,
-            EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(corFactorWS)
+        instrument = ws.getInstrument()
+        x_bins = ws.readX(0)
+        xs = (x_bins[:-1] + x_bins[1:]) / 2.
+        reflected_opening = opening(instrument, ws.run(), xs)
+        direct_opening = opening(instrument, direct_ws.run(), xs)
+        cor_factor_ws_name = self._names.withSuffix('chopper_opening_correction_factors')
+        cor_factor_ws = CreateWorkspace(OutputWorkspace=cor_factor_ws_name,
+                                        DataX=x_bins,
+                                        DataY=direct_opening / reflected_opening,
+                                        UnitX=ws.getAxis(0).getUnit().unitID(),
+                                        ParentWorkspace=ws,
+                                        EnableLogging=self._subalg_logging)
+        corrected_ws_name = self._names.withSuffix('corrected_by_chopper_opening')
+        corrected_ws = Multiply(LHSWorkspace=ws,
+                                RHSWorkspace=cor_factor_ws,
+                                OutputWorkspace=corrected_ws_name,
+                                EnableLogging=self._subalg_logging)
+        self._cleanup.cleanup(cor_factor_ws)
         self._cleanup.cleanup(ws)
-        return correctedWS
+        return corrected_ws
 
-    def _finalize(self, ws):
-        """Set OutputWorkspace to ws and clean up."""
+    def _divide_by_direct(self, ws: MatrixWorkspace, direct_ws: MatrixWorkspace) -> MatrixWorkspace:
+        """Divides ws by the direct beam.
+
+        Keyword arguments:
+        ws -- workspace to be normalized to direct beam
+        direct_ws -- workspace containing direct beam data
+        """
+        reflectivity_ws_name = self._names.withSuffix('reflectivity')
+        reflectivity_ws = Divide(LHSWorkspace=ws,
+                                 RHSWorkspace=direct_ws,
+                                 OutputWorkspace=reflectivity_ws_name,
+                                 EnableLogging=self._subalg_logging)
+        self._cleanup.cleanup(direct_ws)
+        reflectivity_ws.setYUnit('Reflectivity')
+        reflectivity_ws.setYUnitLabel('Reflectivity')
+        # The X error data is lost in Divide.
+        reflectivity_ws.setDx(0, ws.readDx(0))
+        self._cleanup.cleanup(ws)
+        return reflectivity_ws
+
+    def _finalize(self, ws: MatrixWorkspace) -> None:
+        """Sets workspace ws to OutputWorkspace and clean up.
+
+        Keyword arguments:
+        ws -- workspace to be set as output
+        """
         self.setProperty(Prop.OUTPUT_WS, ws)
         self._cleanup.cleanup(ws)
         self._cleanup.finalCleanup()
 
-    def _divideByDirect(self, ws, directWS):
-        """Divide ws by the direct beam."""
-        reflectivityWSName = self._names.withSuffix('reflectivity')
-        reflectivityWS = Divide(
-            LHSWorkspace=ws,
-            RHSWorkspace=directWS,
-            OutputWorkspace=reflectivityWSName,
-            EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(directWS)
-        reflectivityWS.setYUnit('Reflectivity')
-        reflectivityWS.setYUnitLabel('Reflectivity')
-        # The X error data is lost in Divide.
-        reflectivityWS.setDx(0, ws.readDx(0))
-        self._cleanup.cleanup(ws)
-        return reflectivityWS
+    def _group_points(self, ws: MatrixWorkspace, extra_label='') -> MatrixWorkspace:
+        """Group bins by Q resolution.
 
-    def _foreground(self, sampleLogs):
-        """Return a [start, end] list defining the foreground workspace indices."""
-        start = sampleLogs.getProperty(common.SampleLogs.FOREGROUND_START).value
-        end = sampleLogs.getProperty(common.SampleLogs.FOREGROUND_END).value
-        return [start, end]
-
-    def _groupPoints(self, ws, extraLabel=''):
-        """Group bins by Q resolution."""
+        Keyword arguments:
+        ws -- workspace to be grouped
+        extra_label -- optional label to be added to the name of the output workspace
+        """
         if self.getProperty(Prop.GROUPING_FRACTION).isDefault:
             return ws
-        qFraction = self.getProperty(Prop.GROUPING_FRACTION).value
-        groupedWSName = self._names.withSuffix(extraLabel + 'grouped')
-        groupedWS = GroupToXResolution(
-            InputWorkspace=ws,
-            OutputWorkspace=groupedWSName,
-            FractionOfDx=qFraction,
-            EnableLogging=self._subalgLogging)
+        q_fraction = self.getProperty(Prop.GROUPING_FRACTION).value
+        grouped_ws_name = self._names.withSuffix('{}grouped'.format(extra_label))
+        grouped_ws = GroupToXResolution(InputWorkspace=ws,
+                                        OutputWorkspace=grouped_ws_name,
+                                        FractionOfDx=q_fraction,
+                                        EnableLogging=self._subalg_logging)
         self._cleanup.cleanup(ws)
-        return groupedWS
+        self._cleanup.cleanupLater(grouped_ws_name)
+        return grouped_ws
 
-    def _inputWS(self):
-        """Return the input workspace."""
+    def _input_ws(self) -> Tuple[MatrixWorkspace, MatrixWorkspace]:
+        """Returns the input workspace and the workspace containing direct beam data."""
         ws = self.getProperty(Prop.INPUT_WS).value
         self._cleanup.protect(ws)
-        directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
-        self._cleanup.protect(directWS)
-        return ws, directWS
+        direct_ws = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+        self._cleanup.protect(direct_ws)
+        return ws, direct_ws
 
-    def _sameQAndDQ(self, ws, directWS, extraLabel=''):
-        """Create a new workspace with Y and E from directWS and X and DX data from ws."""
-        qWSName = self._names.withSuffix(extraLabel + 'in_momentum_transfer')
-        qWS = CreateWorkspace(
-            OutputWorkspace=qWSName,
+    def _same_q_and_dq(self, ws: MatrixWorkspace, direct_ws: MatrixWorkspace, extra_label='') -> MatrixWorkspace:
+        """Creates a new workspace with Y and E data coming from direct_ws and X and DX data from ws. The parent workspace
+        of the output is direct_ws.
+
+        Keyword arguments:
+        ws -- source of X and DX information
+        direct_ws -- source of Y and E information, parent of the output
+        """
+        q_ws_name = self._names.withSuffix('{}in_momentum_transfer'.format(extra_label))
+        q_ws = CreateWorkspace(
+            OutputWorkspace=q_ws_name,
             DataX=ws.readX(0),
-            DataY=directWS.readY(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
-            DataE=directWS.readE(0)[::-1],
+            DataY=direct_ws.readY(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
+            DataE=direct_ws.readE(0)[::-1],
             Dx=ws.readDx(0),
             UnitX=ws.getAxis(0).getUnit().unitID(),
-            ParentWorkspace=directWS,
-            EnableLogging=self._subalgLogging)
-        return qWS
+            ParentWorkspace=direct_ws,
+            EnableLogging=self._subalg_logging)
+        return q_ws
 
-    def _sumType(self, logs):
-        """Return the sum type applied to ws."""
-        return logs.getProperty(common.SampleLogs.SUM_TYPE).value
+    def _to_point_data(self, ws, extra_label=''):
+        """Converts ws from binned to point data and returns the point data workspace.
 
-    def _TOFChannelWidth(self, sampleLogs):
-        """Return the time of flight bin width."""
-        return sampleLogs.getProperty('PSD.time_of_flight_0').value
-
-    def _toPointData(self, ws, extraLabel=''):
-        """Convert ws from binned to point data."""
-        pointWSName = self._names.withSuffix(extraLabel + 'as_points')
-        pointWS = ConvertToPointData(
-            InputWorkspace=ws,
-            OutputWorkspace=pointWSName,
-            EnableLogging=self._subalgLogging)
+        Keyword arguments:
+        ws -- workspace to be converted
+        extra_label -- optional label for the output workspace name's suffix
+        """
+        point_ws_name = self._names.withSuffix('{}as_points'.format(extra_label))
+        point_ws = ConvertToPointData(InputWorkspace=ws, OutputWorkspace=point_ws_name, EnableLogging=self._subalg_logging)
         self._cleanup.cleanup(ws)
-        return pointWS
+        return point_ws
 
 
 AlgorithmFactory.subscribe(ReflectometryILLConvertToQ)

@@ -17,7 +17,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

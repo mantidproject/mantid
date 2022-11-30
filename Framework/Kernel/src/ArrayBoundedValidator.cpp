@@ -118,6 +118,10 @@ template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearLower() noexcept
 
 template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearUpper() noexcept { m_actualValidator.clearUpper(); }
 
+template <typename TYPE> void ArrayBoundedValidator<TYPE>::setError(const TYPE &value) noexcept {
+  m_actualValidator.setError(value);
+}
+
 // Required explicit instantiations
 template class ArrayBoundedValidator<double>;
 template class ArrayBoundedValidator<int32_t>;

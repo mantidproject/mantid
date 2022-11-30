@@ -10,6 +10,7 @@ set(TEST_FILES
     ReflectometryReductionOne2Test.h
     ReflectometryReductionOneAuto2Test.h
     ReflectometryReductionOneAuto3Test.h
+    ReflectometryWorkflowBase2Test.h
     ReflectometryTransformKiKfTest.h
     ReflectometryTransformPTest.h
     ReflectometryTransformQxQzTest.h

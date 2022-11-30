@@ -18,7 +18,7 @@ namespace Algorithms {
   @author Robert Whitley, RAL
   @date 2011-11-30
 */
-class MANTID_MUON_DLL ApplyDeadTimeCorr : public API::Algorithm {
+class MANTID_MUON_DLL ApplyDeadTimeCorr final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDeadTimeCorr"; };

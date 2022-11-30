@@ -14,7 +14,7 @@ namespace Algorithms {
 
 /** RemoveMaskedSpectra removes all masked spectra.
  */
-class MANTID_ALGORITHMS_DLL RemoveMaskedSpectra : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveMaskedSpectra final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

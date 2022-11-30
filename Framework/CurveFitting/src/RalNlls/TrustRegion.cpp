@@ -12,13 +12,10 @@
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <limits>
 #include <string>
-
-#include <cmath>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
 
 namespace Mantid::CurveFitting::NLLS {
 
@@ -34,7 +31,8 @@ const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
 void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
   auto n = J.len2();
   A.allocate(n, n);
-  gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, J.gsl(), J.gsl(), 0.0, A.gsl());
+
+  A.mutator() = J.inspector().transpose() * J.inspector();
 }
 
 /**  Given an (m x n)  matrix J held by columns as a vector,
@@ -45,15 +43,11 @@ void matmultInner(const DoubleFortranMatrix &J, DoubleFortranMatrix &A) {
  *  @param sn :: The smalles sv.
  */
 void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
+  Eigen::BDCSVD<Eigen::MatrixXd> svd(J.inspector());
+  auto S = svd.singularValues();
 
-  auto n = J.len2();
-  DoubleFortranMatrix U = J;
-  DoubleFortranMatrix V(n, n);
-  DoubleFortranVector S(n);
-  DoubleFortranVector work(n);
-  gsl_linalg_SV_decomp(U.gsl(), V.gsl(), S.gsl(), work.gsl());
-  s1 = S(1);
-  sn = S(n);
+  s1 = S(0);
+  sn = S(S.size() - 1);
 }
 
 /** Compute the 2-norm of a vector which is a square root of the
@@ -63,7 +57,7 @@ void getSvdJ(const DoubleFortranMatrix &J, double &s1, double &sn) {
 double norm2(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
-  return gsl_blas_dnrm2(v.gsl());
+  return v.norm();
 }
 
 /** Multiply a matrix by a vector.
@@ -76,7 +70,8 @@ void multJ(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFor
   if (Jx.len() != J.len1()) {
     Jx.allocate(J.len1());
   }
-  gsl_blas_dgemv(CblasNoTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jx.gsl());
+
+  Jx.mutator() = J.inspector() * x.inspector();
 }
 
 /** Multiply a transposed matrix by a vector.
@@ -89,7 +84,8 @@ void multJt(const DoubleFortranMatrix &J, const DoubleFortranVector &x, DoubleFo
   if (Jtx.len() != J.len2()) {
     Jtx.allocate(J.len2());
   }
-  gsl_blas_dgemv(CblasTrans, 1.0, J.gsl(), x.gsl(), 0.0, Jtx.gsl());
+
+  Jtx.mutator() = J.inspector().transpose() * x.inspector();
 }
 
 /** Dot product of two vectors.
@@ -191,15 +187,11 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
   // hf = hf + (1/yts) (y# - Sk d)^T y:
   alpha = 1 / yts;
-  // call dGER(n,n,alpha,w.ysharpSks,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, w.ysharpSks.gsl(), w.y.gsl(), hf.gsl());
-  // hf = hf + (1/yts) y^T (y# - Sk d):
-  // call dGER(n,n,alpha,w.y,1,w.ysharpSks,1,hf,n)
-  gsl_blas_dger(alpha, w.y.gsl(), w.ysharpSks.gsl(), hf.gsl());
-  // hf = hf - ((y# - Sk d)^T d)/((yts)**2)) * y y^T
+
+  w.hf.mutator() = alpha * w.ysharpSks.mutator() * w.y.mutator().transpose() + w.hf.mutator();
+  w.hf.mutator() = alpha * w.y.mutator() * w.ysharpSks.mutator().transpose() + w.hf.mutator();
   alpha = -dotProduct(w.ysharpSks, w.d) / (pow(yts, 2));
-  // call dGER(n,n,alpha,w.y,1,w.y,1,hf,n)
-  gsl_blas_dger(alpha, w.y.gsl(), w.y.gsl(), hf.gsl());
+  w.hf.mutator() = alpha * w.y.mutator() * w.y.mutator().transpose() + w.hf.mutator();
 }
 
 /** Update the trust region radius which is hidden in NLLS_workspace w

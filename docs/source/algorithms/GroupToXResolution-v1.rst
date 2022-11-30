@@ -48,9 +48,9 @@ Usage
    grouped = GroupToXResolution(original)
    # Plot side-by-side comparison.
    fig, (left, right) = plt.subplots(ncols=2, subplot_kw={'projection':'mantid'})
-   left.errorbar(original, linestyle='None')
+   left.errorbar(original, linestyle='-')
    left.set_title('Original')
-   right.errorbar(grouped, linestyle='None')
+   right.errorbar(grouped, linestyle='-')
    right.set_title('Grouped')
    # Uncomment the next line to show the plot window.
    #fig.show()

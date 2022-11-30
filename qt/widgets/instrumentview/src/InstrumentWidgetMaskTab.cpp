@@ -5,9 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -1256,46 +1253,8 @@ void InstrumentWidgetMaskTab::changedIntegrationRange(double /*unused*/, double 
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv(lines);
-
-  if (!tsv.selectSection("masktab"))
-    return;
-
-  std::string tabLines;
-  tsv >> tabLines;
-  API::TSVSerialiser tab(tabLines);
-
-  std::vector<QPushButton *> buttons{m_move,         m_pointer,        m_ellipse,  m_rectangle,
-                                     m_ring_ellipse, m_ring_rectangle, m_free_draw};
-
-  tab.selectLine("ActiveTools");
-  for (auto button : buttons) {
-    bool value;
-    tab >> value;
-    button->setChecked(value);
-  }
-
-  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on, m_roi_on};
-
-  tab.selectLine("ActiveType");
-  for (auto type : typeButtons) {
-    bool value;
-    tab >> value;
-    type->setChecked(value);
-  }
-
-  if (tab.selectLine("MaskViewWorkspace")) {
-    // the view was masked. We should load reapply this from a cached
-    // workspace in the project folder
-    std::string maskWSName;
-    tab >> maskWSName;
-    loadMaskViewFromProject(maskWSName);
-  }
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentWidgetMaskTab::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 /** Load a mask workspace applied to the instrument actor from the project
@@ -1369,36 +1328,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentWidgetMaskTab::loadMask(const std::s
  * @return a string representing the state of the mask tab
  */
 std::string InstrumentWidgetMaskTab::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  API::TSVSerialiser tsv;
-  API::TSVSerialiser tab;
-
-  std::vector<QPushButton *> buttons{m_move,         m_pointer,        m_ellipse,  m_rectangle,
-                                     m_ring_ellipse, m_ring_rectangle, m_free_draw};
-
-  tab.writeLine("ActiveTools");
-  for (auto button : buttons) {
-    tab << button->isChecked();
-  }
-
-  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on, m_roi_on};
-
-  tab.writeLine("ActiveType");
-  for (auto type : typeButtons) {
-    tab << type->isChecked();
-  }
-
-  // Save the masks applied to view but not saved to a workspace
-  auto wsName = m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
-  bool success = saveMaskViewToProject(wsName);
-  if (success)
-    tab.writeLine("MaskViewWorkspace") << wsName;
-
-  tsv.writeSection("masktab", tab.outputLines());
-  return tsv.outputLines();
-#else
   throw std::runtime_error("InstrumentWidgetMaskTab::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /** Save a mask workspace containing masks applied to the instrument view

@@ -20,7 +20,7 @@ class MeshObject;
 }
 namespace DataHandling {
 
-class DLLExport LoadOff : public LoadSingleMesh {
+class MANTID_DATAHANDLING_DLL LoadOff : public LoadSingleMesh {
 public:
   LoadOff(const std::string &filename, ScaleUnits scaleType);
   std::unique_ptr<Geometry::MeshObject> readShape() override;

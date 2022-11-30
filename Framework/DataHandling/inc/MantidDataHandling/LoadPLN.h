@@ -20,6 +20,7 @@
 #include "LoadANSTOHelper.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/NexusDescriptor.h"
@@ -55,7 +56,7 @@ Optional Properties:
 </UL>
 
 */
-class DLLExport LoadPLN : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadPLN : public API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   int version() const override;
@@ -92,11 +93,11 @@ protected:
                            std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks
-  void setupDetectorMasks(std::vector<bool> &roi);
+  void setupDetectorMasks(const std::vector<bool> &roi);
 
   // shared member variables
   DataObjects::EventWorkspace_sptr m_localWorkspace;
-  int32_t m_datasetIndex;
+  int32_t m_datasetIndex{0};
   std::string m_startRun;
   std::vector<double> m_detectorL2;
 };

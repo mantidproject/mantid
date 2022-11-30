@@ -188,17 +188,17 @@ void MDNormSCD::cacheInputs() {
  * @return A string donating the energy transfer mode of the input workspace
  */
 std::string MDNormSCD::inputEnergyMode() const {
-  const auto &hist = m_inputWS->getHistory();
-  const size_t nalgs = hist.size();
-  const auto &lastAlgorithm = hist.lastAlgorithm();
+  const auto &history = m_inputWS->getHistory();
+  const size_t nalgs = history.size();
+  const auto &lastAlgorithm = history.lastAlgorithm();
 
   std::string emode;
   if (lastAlgorithm->name() == "ConvertToMD") {
     emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgorithm->name() == "Load" || hist.lastAlgorithm()->name() == "LoadMD") &&
-             hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
+  } else if ((lastAlgorithm->name() == "Load" || history.lastAlgorithm()->name() == "LoadMD") &&
+             history.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    PropertyHistories histvec = hist.getAlgorithmHistory(nalgs - 2)->getProperties();
+    PropertyHistories histvec = history.getAlgorithmHistory(nalgs - 2)->getProperties();
     for (auto &hist : histvec) {
       if (hist->name() == "dEAnalysisMode") {
         emode = hist->value();
@@ -414,7 +414,7 @@ void MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
 
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {
-  PARALLEL_START_INTERUPT_REGION
+  PARALLEL_START_INTERRUPT_REGION
 
   if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
     continue;
@@ -480,9 +480,9 @@ for (int64_t i = 0; i < ndets; i++) {
   }
   prog->report();
 
-  PARALLEL_END_INTERUPT_REGION
+  PARALLEL_END_INTERRUPT_REGION
 }
-PARALLEL_CHECK_INTERUPT_REGION
+PARALLEL_CHECK_INTERRUPT_REGION
 if (m_accumulate) {
   std::transform(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(), m_normWS->mutableSignalArray(),
                  [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });

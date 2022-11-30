@@ -31,7 +31,6 @@ SyncedCheckboxes::SyncedCheckboxes(QAction *menu, QAbstractButton *button, bool 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-SyncedCheckboxes::~SyncedCheckboxes() {}
 
 //----------------------------------------------------------------------------------------------
 /** Manually toggle the state of both checkboxes

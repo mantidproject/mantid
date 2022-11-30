@@ -30,7 +30,7 @@ OAuthToken::OAuthToken(std::string tokenType, int expiresIn, std::string accessT
       m_expiresIn(expiresIn), m_accessToken(std::move(accessToken)), m_scope(std::move(scope)),
       m_refreshToken(std::move(refreshToken)) {}
 
-OAuthToken::~OAuthToken() {}
+OAuthToken::~OAuthToken() = default;
 
 OAuthToken OAuthToken::fromJSONStream(std::istream &tokenStringStream) {
   try {

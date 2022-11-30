@@ -37,7 +37,7 @@ using namespace API;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
-RemoveLogs::RemoveLogs() {}
+RemoveLogs::RemoveLogs() = default;
 
 /// Initialisation method.
 void RemoveLogs::init() {
@@ -63,9 +63,8 @@ void RemoveLogs::exec() {
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
   std::vector<std::string> logNames;
   logNames.reserve(logData.size());
-  for (const auto property : logData) {
-    logNames.emplace_back(property->name());
-  }
+  std::transform(logData.cbegin(), logData.cend(), std::back_inserter(logNames),
+                 [](const auto &property) { return property->name(); });
   for (const auto &name : logNames) {
     auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), name);
     if (location == keepLogs.cend()) {

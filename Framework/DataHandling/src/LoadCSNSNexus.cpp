@@ -16,6 +16,8 @@
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <algorithm>
 /************************/
 
 namespace Mantid::DataHandling {
@@ -146,11 +148,8 @@ bool LoadCSNSNexus::checkBanknames(const std::vector<std::string> &inputNames) {
   if (inputNames.size() == 0)
     return false;
   else if (inputNames.size() > 1) {
-    for (const auto &name : inputNames) {
-      if (name.compare(0, 6, "module") != 0)
-        return false;
-    }
-    return true;
+    return std::all_of(inputNames.cbegin(), inputNames.cend(),
+                       [](const auto &name) { return name.compare(0, 6, "module") == 0; });
   } else
     return true;
 }
@@ -270,8 +269,8 @@ void LoadCSNSNexus::loadHistData(MatrixWorkspace_sptr &workspace, const std::vec
 
   std::vector<double> err;
   err.resize(histData.size());
-  for (const auto &hist : histData)
-    err.push_back(sqrt(hist));
+  std::transform(histData.cbegin(), histData.cend(), std::back_inserter(err),
+                 [](auto const &hist) { return sqrt(hist); });
 
   auto it_start = histData.begin();
   auto it_end = it_start + timeNums - 1;

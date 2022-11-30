@@ -1,36 +1,66 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
-#include "ALFCustomInstrumentModel.h"
-#include "ALFCustomInstrumentPresenter.h"
 
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
+#include "ALFAnalysisModel.h"
+#include "ALFAnalysisView.h"
+#include "ALFInstrumentModel.h"
+#include "ALFInstrumentView.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
-#include <tuple>
+#include <QString>
+#include <QVBoxLayout>
 
 namespace MantidQt::CustomInterfaces {
 
 DECLARE_SUBWINDOW(ALFView)
 
-/// static logger
-Mantid::Kernel::Logger g_log("ALFView");
-
-ALFView::ALFView(QWidget *parent)
-    : UserSubWindow(parent), m_view(nullptr), m_presenter(nullptr), m_analysisPane(nullptr) {
+ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
   this->setWindowTitle("ALF View");
-  m_model = new ALFCustomInstrumentModel();
-  m_view = new ALFCustomInstrumentView(m_model->getInstrument(), this);
-  auto analysisView = new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, m_view);
-  auto analysisModel = new MantidWidgets::PlotFitAnalysisPaneModel();
-  m_analysisPane = new MantidWidgets::PlotFitAnalysisPanePresenter(analysisView, analysisModel);
 
-  m_presenter = new ALFCustomInstrumentPresenter(m_view, m_model, m_analysisPane);
+  m_instrumentPresenter =
+      std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
+
+  m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
+                                                               std::make_unique<ALFAnalysisModel>());
+
+  m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
-void ALFView::initLayout() { this->setCentralWidget(m_view); }
+
+void ALFView::initLayout() {
+  auto *splitter = new QSplitter(Qt::Horizontal);
+  splitter->addWidget(m_instrumentPresenter->getInstrumentView());
+  splitter->addWidget(m_analysisPresenter->getView());
+
+  auto mainWidget = new QSplitter(Qt::Vertical);
+  mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
+  mainWidget->addWidget(splitter);
+
+  auto centralWidget = new QWidget();
+  auto verticalLayout = new QVBoxLayout(centralWidget);
+  verticalLayout->addWidget(mainWidget);
+  verticalLayout->addWidget(createHelpWidget());
+
+  this->setCentralWidget(centralWidget);
+}
+
+QWidget *ALFView::createHelpWidget() {
+  m_help = new QPushButton("?");
+  m_help->setMaximumWidth(25);
+  connect(m_help, SIGNAL(clicked()), this, SLOT(openHelp()));
+
+  auto *helpWidget = new QWidget();
+  auto helpLayout = new QHBoxLayout(helpWidget);
+  helpLayout->addWidget(m_help);
+  helpLayout->addItem(new QSpacerItem(1000, 20, QSizePolicy::Expanding, QSizePolicy::Expanding));
+  return helpWidget;
+}
+
+void ALFView::openHelp() { MantidQt::API::HelpWindow::showCustomInterface(QString("direct/ALF View")); }
 
 } // namespace MantidQt::CustomInterfaces

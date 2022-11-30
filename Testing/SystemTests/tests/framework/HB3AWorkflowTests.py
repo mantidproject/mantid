@@ -161,7 +161,7 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
         self.assertEqual(peak0.getL(), 10)
         self.assertEqual(peak0.getRunNumber(), 182)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008, places=5)
-        self.assertAlmostEqual(peak0.getIntensity(), 6581.5580392, places=5)
+        self.assertAlmostEqual(peak0.getIntensity(), 6578.5329412, places=5)
         self.assertEqual(peak0.getBinCount(), 827)
 
         peak1 = integrated.getPeak(integrated.getNumberPeaks()-1)
@@ -170,7 +170,7 @@ class MultiFileFindPeaksIntegrate(systemtesting.MantidSystemTest):
         self.assertEqual(peak1.getL(), 0)
         self.assertEqual(peak1.getRunNumber(), 183)
         self.assertAlmostEqual(peak1.getWavelength(), 1.008, places=5)
-        self.assertAlmostEqual(peak1.getIntensity(), 11853.7538139, places=5)
+        self.assertAlmostEqual(peak1.getIntensity(), 11316.7193962, places=5)
         self.assertEqual(peak1.getBinCount(), 134)
 
         DeleteWorkspaces([ws_name+'_data',
@@ -217,7 +217,7 @@ class MultiFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
         self.assertEqual(peak0.getL(), -11)
         self.assertEqual(peak0.getRunNumber(), 182)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008, places=5)
-        self.assertAlmostEqual(peak0.getIntensity(), 127.20005, places=5)
+        self.assertAlmostEqual(peak0.getIntensity(), 127.13211, places=5)
         self.assertEqual(peak0.getBinCount(), 0)
 
         peak1 = integrated.getPeak(integrated.getNumberPeaks()-1)
@@ -226,7 +226,7 @@ class MultiFilePredictPeaksIntegrate(systemtesting.MantidSystemTest):
         self.assertEqual(peak1.getL(), 1)
         self.assertEqual(peak1.getRunNumber(), 183)
         self.assertAlmostEqual(peak1.getWavelength(), 1.008, places=5)
-        self.assertAlmostEqual(peak1.getIntensity(), 66.0945249, places=5)
+        self.assertAlmostEqual(peak1.getIntensity(), 60.928141, places=5)
         self.assertEqual(peak1.getBinCount(), 0)
 
         DeleteWorkspaces([ws_name+'_data',
@@ -285,7 +285,7 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
         self.assertEqual(peak0.getL(), 8)
         self.assertEqual(peak0.getRunNumber(), 182)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008, places=5)
-        self.assertAlmostEqual(peak0.getIntensity(), 124.408590, places=5)
+        self.assertAlmostEqual(peak0.getIntensity(), 122.269802, places=5)
         self.assertEqual(peak0.getBinCount(), 0)
 
         peak1 = integrated.getPeak(integrated.getNumberPeaks()-1)
@@ -294,7 +294,7 @@ class MultiFilePredictPeaksUBFromFindPeaksIntegrate(systemtesting.MantidSystemTe
         self.assertEqual(peak1.getL(), 3)
         self.assertEqual(peak1.getRunNumber(), 183)
         self.assertAlmostEqual(peak1.getWavelength(), 1.008, places=5)
-        self.assertAlmostEqual(peak1.getIntensity(), 101.3689957, places=5)
+        self.assertAlmostEqual(peak1.getIntensity(), 101.175119, places=5)
         self.assertEqual(peak1.getBinCount(), 0)
 
         DeleteWorkspaces([ws_name+'_data',

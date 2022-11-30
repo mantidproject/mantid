@@ -118,7 +118,7 @@ class SANSSave(DataProcessorAlgorithm):
             try:
                 save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
             except (RuntimeError, ValueError) as e:
-                logger.warning(f"Cannot save workspace using SANSSave. "
+                logger.warning("Cannot save workspace using SANSSave. "
                                "This workspace needs to be the result of a SANS reduction, "
                                "and must be appropriate for saving 1D or 2D reduced data.")
                 raise e

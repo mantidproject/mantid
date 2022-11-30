@@ -1,0 +1,1 @@
+The plotting panel on the ALFView pick tab is now expanded by default when first opening the interface.

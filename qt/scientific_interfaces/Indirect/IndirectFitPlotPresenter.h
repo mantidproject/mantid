@@ -11,7 +11,7 @@
 
 #include "DllConfig.h"
 #include "LazyAsyncRunner.h"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

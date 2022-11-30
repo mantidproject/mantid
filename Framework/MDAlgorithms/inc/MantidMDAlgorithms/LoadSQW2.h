@@ -11,6 +11,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/FileDescriptor.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <fstream>
 
 namespace Mantid {
@@ -25,7 +26,7 @@ class OrientedLattice;
 
 namespace MDAlgorithms {
 
-class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_MDALGORITHMS_DLL LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;
   int version() const override;

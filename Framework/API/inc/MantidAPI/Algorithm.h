@@ -42,7 +42,7 @@ class Value;
 namespace Mantid {
 namespace Kernel {
 // this is declared in MantidKernel/Timer.h
-typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point_ns;
+using time_point_ns = std::chrono::time_point<std::chrono::high_resolution_clock>;
 } // namespace Kernel
 namespace Indexing {
 class SpectrumIndexSet;

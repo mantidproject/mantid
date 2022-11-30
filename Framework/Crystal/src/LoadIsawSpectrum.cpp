@@ -122,6 +122,9 @@ void LoadIsawSpectrum::exec() {
     }
   }
 
+  if (spectra.size() < 1)
+    throw std::runtime_error("The number of spectra in the loaded file is zero.");
+
   MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", spectra.size(), spectra[0].size(), spectra[0].size()));
   outWS->setInstrument(inst);

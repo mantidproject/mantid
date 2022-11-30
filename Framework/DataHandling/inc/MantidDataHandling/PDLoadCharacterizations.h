@@ -10,7 +10,7 @@
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -18,7 +18,7 @@ namespace DataHandling {
 /** LoadPDCharacterizations : Load a characterization file used in Powder
   Diffraction Reduction.
 */
-class DLLExport PDLoadCharacterizations : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL PDLoadCharacterizations : public API::ParallelAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

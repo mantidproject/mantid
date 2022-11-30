@@ -60,7 +60,7 @@ void StringDialogEditor::setText(const QString &txt) { m_lineEdit->setText(txt);
  */
 QString StringDialogEditor::getText() const { return m_lineEdit->text(); }
 
-StringDialogEditor::~StringDialogEditor() {}
+StringDialogEditor::~StringDialogEditor() = default;
 
 /**
  * Slot which sets the property with the current text in the editor.

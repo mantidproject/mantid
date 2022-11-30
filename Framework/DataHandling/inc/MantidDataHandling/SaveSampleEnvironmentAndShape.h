@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Matrix.h"
 
@@ -19,7 +20,7 @@ namespace DataHandling {
 /**
  * Save the Shape of the sample and environment into a single binary .stl file
  */
-class DLLExport SaveSampleEnvironmentAndShape : public Mantid::API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveSampleEnvironmentAndShape : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveSampleEnvironmentAndShape"; }

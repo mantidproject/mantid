@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include <fstream>
 
 namespace Poco {
@@ -78,8 +79,9 @@ Required properties:
 @author Sofia Antony, Rutherford Appleton Laboratory
 @date 19/01/2010
 */
-class DLLExport SaveCanSAS1D : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveCanSAS1D : public API::Algorithm {
 public:
+  virtual ~SaveCanSAS1D() = default;
   const std::string name() const override { return "SaveCanSAS1D"; }
   const std::string summary() const override { return "Save a MatrixWorkspace to a file in the canSAS 1-D format"; }
   int version() const override { return 1; }

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <string>
 
 namespace Mantid {
@@ -14,7 +14,7 @@ namespace Kernel {
 
 /** ProxyInfo : Container for carrying around network proxy information
  */
-class DLLExport ProxyInfo {
+class MANTID_KERNEL_DLL ProxyInfo {
 private:
   std::string m_host;
   int m_port;

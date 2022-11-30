@@ -89,13 +89,13 @@ public:
   }
 
   std::vector<Cell> emptyCellsArray() {
-    return std::vector<MantidQt::MantidWidgets::Batch::Cell>(9, MantidQt::MantidWidgets::Batch::Cell(""));
+    return std::vector<MantidQt::MantidWidgets::Batch::Cell>(10, MantidQt::MantidWidgets::Batch::Cell(""));
   }
 
   std::vector<Cell> cellsArray(std::string const &run = "12345", std::string const &theta = "0.5",
                                std::string const &trans1 = "", std::string const &trans2 = "") {
     return std::vector<Cell>{Cell(run), Cell(theta), Cell(trans1), Cell(trans2), Cell(""),
-                             Cell(""),  Cell(""),    Cell(""),     Cell("")};
+                             Cell(""),  Cell(""),    Cell(""),     Cell(""),     Cell("")};
   }
 
   void expectIsProcessing() {

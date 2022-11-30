@@ -52,7 +52,7 @@ public:
   /// Constructor
   FindPeaks();
   /// Virtual destructor
-  ~FindPeaks() override {}
+  ~FindPeaks() override = default;
   /// Algorithm's name
   const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -15,7 +15,7 @@ namespace DataObjects {
 /**
   1D histogram implementation.
 */
-class DLLExport Histogram1D : public Mantid::API::ISpectrum {
+class MANTID_DATAOBJECTS_DLL Histogram1D : public Mantid::API::ISpectrum {
 private:
   /// Histogram object holding the histogram data.
   HistogramData::Histogram m_histogram;

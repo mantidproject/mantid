@@ -179,7 +179,7 @@ private:
   class TestablePoldiCreatePeaksFromCell : public PoldiCreatePeaksFromCell {
   public:
     TestablePoldiCreatePeaksFromCell() : PoldiCreatePeaksFromCell() {}
-    ~TestablePoldiCreatePeaksFromCell() override {}
+    ~TestablePoldiCreatePeaksFromCell() override = default;
 
     friend class PoldiCreatePeaksFromCellTest;
   };

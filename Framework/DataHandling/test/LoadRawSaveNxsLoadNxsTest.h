@@ -17,6 +17,7 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -24,6 +25,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -201,10 +203,54 @@ public:
     // 11:11:13  CHANGE PERIOD 12",
     // now enabled after changing 12=> 1 (and added one more space character
     // before CHANGE).
-    std::cout << timeSeriesString;
     TS_ASSERT_EQUALS(timeSeriesString.substr(0, 38), "2008-Jun-17 11:11:13   CHANGE PERIOD 1");
 
     remove(outputFile.c_str());
+  }
+
+  void testSaveLoadSingleValuedWs() {
+    // Tests LoadNexusProcessed saving and loading a single valued workspace
+    MatrixWorkspace_sptr singleValuedWs = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
+    // step 1: save the single valued workspace
+    saveNexusP.setProperty("InputWorkspace", singleValuedWs);
+    outputFile = "testSaveLoadSingleValuedWs.nxs";
+    remove(outputFile.c_str());
+    saveNexusP.setPropertyValue("FileName", outputFile);
+    outputFile = saveNexusP.getPropertyValue("Filename");
+
+    TS_ASSERT_THROWS_NOTHING(saveNexusP.execute());
+    TS_ASSERT(saveNexusP.isExecuted());
+    TS_ASSERT(Poco::File(outputFile).exists());
+
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    // specify name of workspace
+    myOutputSpace = "singleValuedWs";
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
+    // file name to load
+    inputFile = outputFile;
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", inputFile));
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("FileName"));
+    TS_ASSERT(!result.compare(inputFile));
+    TS_ASSERT_THROWS_NOTHING(result = algToBeTested.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT(!result.compare(myOutputSpace));
+
+    // Test that nexus precessed file is successfully loaded
+    // The loading of the current version of nexus processed is tested here.
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+
+    // get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(myOutputSpace));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+    // Check two X vectors are the same
+    TS_ASSERT((output->dataX(0)) == (singleValuedWs->dataX(0)));
+    // Check two Y arrays have the same number of elements
+    TS_ASSERT_EQUALS(output->dataY(0).size(), singleValuedWs->dataY(0).size());
   }
 
 private:

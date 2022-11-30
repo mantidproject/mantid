@@ -18,12 +18,12 @@ class GridSpecTest(unittest.TestCase):
     def test_noMax(self):
         self.engine = gridspecEngine()
         result = self.engine.getGridSpec(100)
-        self.assertNotEquals(result, None)
+        self.assertNotEqual(result, None)
 
     def test_underMax(self):
         self.engine = gridspecEngine(max_plot=10)
         result = self.engine.getGridSpec(8)
-        self.assertNotEquals(result, None)
+        self.assertNotEqual(result, None)
 
     def test_overMax(self):
         self.engine = gridspecEngine(max_plot=10)

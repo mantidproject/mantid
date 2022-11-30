@@ -9,6 +9,8 @@ subgraph params {
   calFileName       [label="CalFileName"]
   sampleGeometry    [label="SampleGeometry"]
   sampleMaterial    [label="SampleMaterial"]
+  placzekOrder      [label="PlaczekOrder"]
+  sampleTemp        [label="SampleTemp"]
 }
 
 subgraph algorithms {
@@ -17,7 +19,7 @@ subgraph algorithms {
   ExtractSpectra                    [label="ExtractSpectra v1"]
   ConvertUnits1                     [label="ConvertUnits v1"]
   FitIncidentSpectrum               [label="FitIncidentSpectrum v1"]
-  CalculatePlaczekSelfScattering    [label="CalculatePlaczekSelfScattering v1"]
+  CalculatePlaczek                  [label="CalculatePlaczek v1"]
   LoadCalFile                       [label="LoadCalFile v1"]
   GroupDetectors                    [label="GroupDetectors v2"]
   CreateWorkspace                   [label="CreateWorkspace v1"]
@@ -40,10 +42,12 @@ SetSample                       -> ExtractSpectra
 FindMonitorSpectra              -> ExtractSpectra
 ExtractSpectra                  -> ConvertUnits1
 ConvertUnits1                   -> FitIncidentSpectrum
-FitIncidentSpectrum             -> CalculatePlaczekSelfScattering
+FitIncidentSpectrum             -> CalculatePlaczek
 calFileName                     -> LoadCalFile
 LoadCalFile                     -> GroupDetectors
-CalculatePlaczekSelfScattering  -> ConvertUnits2
+placzekOrder                    -> CalculatePlaczek
+sampleTemp                      -> CalculatePlaczek
+CalculatePlaczek                -> ConvertUnits2
 ConvertUnits2                   -> Rebin
 Rebin                           -> GroupDetectors
 LoadCalFile                     -> GetPixelNumberInDetector

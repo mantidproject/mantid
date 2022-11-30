@@ -9,6 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/DllConfig.h"
+#include "MantidGeometry/Crystal/ConventionalCell.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +22,7 @@ namespace Crystal {
     @author Dennis Mikkelson
     @date   2012-02-13
   */
-class MANTID_CRYSTAL_DLL SelectCellWithForm : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SelectCellWithForm final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SelectCellWithForm"; };
@@ -42,7 +44,11 @@ public:
   }
 
   static Kernel::Matrix<double> DetermineErrors(std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
+                                                const Kernel::Matrix<double> &modUB,
                                                 const API::IPeaksWorkspace_sptr &ws, double tolerance);
+
+  static void ApplyTransform(Kernel::Matrix<double> &newUB, API::IPeaksWorkspace_sptr &ws, double tolerance,
+                             int &num_indexed, double &average_error);
 
 private:
   /// Initialise the properties

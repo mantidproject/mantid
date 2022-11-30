@@ -8,9 +8,9 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -31,7 +31,7 @@ namespace DataHandling {
   @author
   @date 2011-11-02
 */
-class DLLExport LoadMask : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadMask : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMask"; };

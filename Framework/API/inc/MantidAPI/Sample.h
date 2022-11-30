@@ -51,6 +51,8 @@ public:
   const std::string &getName() const;
   /// Set the name of the sample
   void setName(const std::string &name);
+  /// Check if sample has a valid shape
+  bool hasShape() const;
   /// Return the sample shape
   const Geometry::IObject &getShape() const;
   /// Return a pointer to the sample shape

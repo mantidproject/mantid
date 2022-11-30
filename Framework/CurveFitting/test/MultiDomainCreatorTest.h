@@ -285,10 +285,119 @@ public:
     TS_ASSERT_EQUALS(f3->m_workspace, ws3);
   }
 
-private:
-  void doTestOutputSpectrum(const MatrixWorkspace_sptr &ws, size_t index) {
+  void test_output_composite_members() {
+    MultiDomainCreatorTest_Manager manager;
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("WS1", "", Direction::Input));
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("WS2", "", Direction::Input));
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>("WS3", "", Direction::Input));
+
+    std::vector<std::string> propNames{"WS1", "WS2", "WS3"};
+    MultiDomainCreator multi(&manager, propNames);
+
+    manager.setProperty("WS1", ws1);
+    manager.setProperty("WS2", ws2);
+    manager.setProperty("WS3", ws3);
+
+    FitMW *creator = new FitMW(&manager, "WS1");
+    creator->declareDatasetProperties("1");
+    creator->separateCompositeMembersInOutput(true, false);
+    multi.setCreator(0, creator);
+    creator = new FitMW(&manager, "WS2");
+    creator->declareDatasetProperties("2");
+    creator->separateCompositeMembersInOutput(true, false);
+    multi.setCreator(1, creator);
+    creator = new FitMW(&manager, "WS3");
+    creator->separateCompositeMembersInOutput(true, false);
+    creator->declareDatasetProperties("3");
+    multi.setCreator(2, creator);
+
+    manager.setProperty("WorkspaceIndex1", 0);
+    manager.setProperty("WorkspaceIndex2", 0);
+    manager.setProperty("WorkspaceIndex3", 0);
+
+    auto mdfun = std::make_shared<MultiDomainFunction>();
+
+    std::shared_ptr<CompositeFunction> mfun = std::make_shared<CompositeFunction>();
+
+    std::shared_ptr<UserFunction> fun1 = std::make_shared<UserFunction>();
+    fun1->setAttributeValue("Formula", "a + b*x");
+    fun1->setParameter("a", 0.55);
+    fun1->setParameter("b", 0.00);
+
+    std::shared_ptr<UserFunction> fun2 = std::make_shared<UserFunction>();
+    fun2->setAttributeValue("Formula", "c*x + d");
+    fun2->setParameter("c", 0.00);
+    fun2->setParameter("d", 0.55);
+
+    mfun->addFunction(fun1);
+    mfun->addFunction(fun2);
+
+    mdfun->addFunction(mfun);
+    mdfun->setDomainIndex(0, 0);
+
+    fun1 = std::make_shared<UserFunction>();
+    fun1->setAttributeValue("Formula", "a + b*x");
+    fun1->setParameter("a", 1.05);
+    fun1->setParameter("b", 0.00);
+
+    fun2 = std::make_shared<UserFunction>();
+    fun2->setAttributeValue("Formula", "c*x + b");
+    fun2->setParameter("c", 0.00);
+    fun2->setParameter("b", 1.05);
+
+    std::shared_ptr<CompositeFunction> mfun2 = std::make_shared<CompositeFunction>();
+    mfun2->addFunction(fun1);
+    mfun2->addFunction(fun2);
+
+    mdfun->addFunction(mfun2);
+    mdfun->setDomainIndex(1, 1);
+
+    fun1 = std::make_shared<UserFunction>();
+    fun1->setAttributeValue("Formula", "a + b*x");
+    fun1->setParameter("a", 1.55);
+    fun1->setParameter("b", 0.00);
+
+    fun2 = std::make_shared<UserFunction>();
+    fun2->setAttributeValue("Formula", "c*x + b");
+    fun2->setParameter("c", 0.00);
+    fun2->setParameter("b", 1.55);
+
+    std::shared_ptr<CompositeFunction> mfun3 = std::make_shared<CompositeFunction>();
+    mfun3->addFunction(fun1);
+    mfun3->addFunction(fun2);
+
+    mdfun->addFunction(mfun3);
+    mdfun->setDomainIndex(2, 2);
+
+    auto ws = multi.createOutputWorkspace("out_", mdfun, FunctionDomain_sptr(), FunctionValues_sptr(), "OUT_WS");
     TS_ASSERT(ws);
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
+
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    TS_ASSERT(group);
+
+    TS_ASSERT_EQUALS(group->size(), 3);
+
+    auto ows1 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    doTestOutputSpectrum(ows1, 0, 5);
+    auto ows2 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    doTestOutputSpectrum(ows2, 1, 5);
+    auto ows3 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
+    doTestOutputSpectrum(ows3, 2, 5);
+
+    WorkspaceGroup_sptr outWS = manager.getProperty("OUT_WS");
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getItem(0)->getName(), "out_Workspace_0");
+    TS_ASSERT_EQUALS(outWS->getItem(1)->getName(), "out_Workspace_1");
+    TS_ASSERT_EQUALS(outWS->getItem(2)->getName(), "out_Workspace_2");
+    manager.store("OUT_WS");
+    TS_ASSERT_EQUALS(outWS->getName(), "out_Workspaces");
+    AnalysisDataService::Instance().clear();
+  }
+
+private:
+  void doTestOutputSpectrum(const MatrixWorkspace_sptr &ws, size_t index, size_t nHistograms = 3) {
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHistograms);
     auto &data = ws->readY(0);
     auto &calc = ws->readY(1);
     auto &diff = ws->readY(2);

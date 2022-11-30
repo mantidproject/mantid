@@ -17,7 +17,7 @@ namespace CustomDialogs {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 14/01/2014
 */
-class CatalogPublishDialog : public API::AlgorithmDialog {
+class CatalogPublishDialog final : public API::AlgorithmDialog {
   Q_OBJECT
 
 public:

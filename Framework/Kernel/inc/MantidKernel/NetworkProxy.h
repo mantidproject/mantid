@@ -15,7 +15,7 @@ namespace Kernel {
 
 /** NetworkProxy : Network proxy utility for getting network proxy information.
  */
-class DLLExport NetworkProxy {
+class MANTID_KERNEL_DLL NetworkProxy {
 public:
   /// Constructor
   NetworkProxy();

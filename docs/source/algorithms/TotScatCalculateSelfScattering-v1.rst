@@ -17,7 +17,7 @@ sub-algorithms as listed below.
 #. :ref:`algm-ExtractSpectra` Extracts the monitor spectrum closest to the sample (incident spectrum).
 #. :ref:`algm-ConvertUnits` Converts incident spectrum to wavelength.
 #. :ref:`algm-FitIncidentSpectrum` Fit a curve to the incident spectrum.
-#. :ref:`algm-CalculatePlaczekSelfScattering` Calculate the Placzek self scattering factor for each pixel.
+#. :ref:`algm-CalculatePlaczek` Calculate the Placzek self scattering factor for each pixel.
 #. :ref:`algm-ConvertUnits` Convert the Placzek correction into MomentumTransfer
 #. :ref:`algm-Rebin` Rebin correction before GroupDetectors.
 #. :ref:`algm-LoadCalFile` Loads the detector calibration.

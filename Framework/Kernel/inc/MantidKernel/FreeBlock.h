@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -19,7 +19,7 @@ namespace Kernel {
   @author Janik Zikovsky, SNS
   @date 2011-08-04
 */
-class DLLExport FreeBlock {
+class MANTID_KERNEL_DLL FreeBlock {
 public:
   /// Default constructor
   FreeBlock() : m_filePos(0), m_size(0) {}

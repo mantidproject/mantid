@@ -103,12 +103,16 @@ void UserFunction::setAttribute(const std::string &attName, const Attribute &val
  *  @param nData :: The size of the fitted data.
  */
 void UserFunction::function1D(double *out, const double *xValues, const size_t nData) const {
+  if (m_formula.empty()) {
+    throw std::invalid_argument("Empty formula supplied for user function");
+  }
   for (size_t i = 0; i < nData; i++) {
     m_x = xValues[i];
     try {
       out[i] = m_parser->Eval();
     } catch (mu::Parser::exception_type &e) {
-      throw std::invalid_argument("Error evaluating function: " + e.GetMsg());
+      throw std::invalid_argument("Error evaluating function \"" + m_formula + "\" for x=" + std::to_string(m_x) +
+                                  ": " + e.GetMsg());
     }
   }
 }

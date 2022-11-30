@@ -10,6 +10,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 #include <memory>
 
@@ -54,7 +55,7 @@ using EventListMap =
     std::unordered_map<int64_t, std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>>;
 using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
-class DLLExport Integrate3DEvents {
+class MANTID_MDALGORITHMS_DLL Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,

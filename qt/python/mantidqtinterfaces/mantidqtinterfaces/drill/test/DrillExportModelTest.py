@@ -14,18 +14,13 @@ from mantidqtinterfaces.drill.model.DrillExportModel import DrillExportModel
 class DrillExportModelTest(unittest.TestCase):
 
     EXPORT_ALGORITHMS = {
-            "a1": {"ea1": True, "ea2": False},
-            "a2": {"ea2": True}
+            "a1": {("ea1", ".txt"): True, ("ea2", ".xml"): False},
+            "a2": {("ea2", ".xml"): True}
             }
 
     EXPORT_ALGO_CRITERIA = {
             "ea1": "%param% == 'test'",
             "ea2": "%param% != 'test'"
-            }
-
-    EXPORT_ALGO_EXTENSION = {
-            "ea1": ".txt",
-            "ea2": ".xml"
             }
 
     def setUp(self):
@@ -53,12 +48,6 @@ class DrillExportModelTest(unittest.TestCase):
         self.mAlgoCriteria = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch.dict("mantidqtinterfaces.drill.model.DrillExportModel"
-                                ".RundexSettings.EXPORT_ALGO_EXTENSION",
-                                self.EXPORT_ALGO_EXTENSION, clear=True)
-        self.mAlgoExtension = patch.start()
-        self.addCleanup(patch.stop)
-
         patch = mock.patch("mantidqtinterfaces.drill.model.DrillExportModel"
                            ".DrillAlgorithmPool")
         self.mTasksPool = patch.start()
@@ -75,8 +64,6 @@ class DrillExportModelTest(unittest.TestCase):
     def test_init(self):
         self.assertDictEqual(self.exportModel._exportAlgorithms,
                              self.EXPORT_ALGORITHMS["a1"])
-        self.mTasksPool.signals.taskError.connect.assert_called_once()
-        self.mTasksPool.signals.taskSuccess.connect.assert_called_once()
         self.assertEqual(self.exportModel._exports, {})
         self.assertEqual(self.exportModel._successExports, {})
 
@@ -85,28 +72,39 @@ class DrillExportModelTest(unittest.TestCase):
         self.assertEqual(algs, [a for a in self.EXPORT_ALGORITHMS["a1"]])
 
     def test_isAlgorithmActivated(self):
-        self.assertEqual(self.exportModel._exportAlgorithms["ea1"], True)
-        self.assertEqual(self.exportModel.isAlgorithmActivated("ea1"), True)
-        self.exportModel._exportAlgorithms["ea1"] = False
-        self.assertEqual(self.exportModel.isAlgorithmActivated("ea1"), False)
-        self.assertEqual(self.exportModel._exportAlgorithms["ea2"], False)
-        self.assertEqual(self.exportModel.isAlgorithmActivated("ea2"), False)
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea1", ".txt")], True)
+        self.assertEqual(
+                self.exportModel.isAlgorithmActivated(("ea1", ".txt")), True)
+        self.exportModel._exportAlgorithms[("ea1", ".txt")] = False
+        self.assertEqual(
+                self.exportModel.isAlgorithmActivated(("ea1", ".txt")), False)
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea2", ".xml")], False)
+        self.assertEqual(
+                self.exportModel.isAlgorithmActivated(("ea2", ".xml")), False)
 
     def test_activateAlgorithm(self):
-        self.assertEqual(self.exportModel._exportAlgorithms["ea2"], False)
-        self.exportModel.activateAlgorithm("ea2")
-        self.assertEqual(self.exportModel._exportAlgorithms["ea2"], True)
-        self.exportModel.activateAlgorithm("ea2")
-        self.assertEqual(self.exportModel._exportAlgorithms["ea2"], True)
-        self.exportModel.activateAlgorithm("ea3")
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea2",".xml")], False)
+        self.exportModel.activateAlgorithm(("ea2", ".xml"))
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea2"), (".xml")], True)
+        self.exportModel.activateAlgorithm(("ea2", ".xml"))
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea2", ".xml")], True)
+        self.exportModel.activateAlgorithm(("ea3", ".data"))
 
     def test_inactivateAlgorithm(self):
-        self.assertEqual(self.exportModel._exportAlgorithms["ea1"], True)
-        self.exportModel.inactivateAlgorithm("ea1")
-        self.assertEqual(self.exportModel._exportAlgorithms["ea1"], False)
-        self.exportModel.inactivateAlgorithm("ea1")
-        self.assertEqual(self.exportModel._exportAlgorithms["ea1"], False)
-        self.exportModel.inactivateAlgorithm("ea3")
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea1", ".txt")], True)
+        self.exportModel.inactivateAlgorithm(("ea1", ".txt"))
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea1", ".txt")], False)
+        self.exportModel.inactivateAlgorithm(("ea1", ".txt"))
+        self.assertEqual(
+                self.exportModel._exportAlgorithms[("ea1", ".txt")], False)
+        self.exportModel.inactivateAlgorithm(("ea3", ".data"))
 
     def test_valid_Criteria(self):
         mHist = self.mMtd.__getitem__.return_value.getHistory.return_value
@@ -120,13 +118,13 @@ class DrillExportModelTest(unittest.TestCase):
         self.exportModel._logSuccessExport = mock.Mock()
         self.exportModel._exports = {"workspace1": {"filename1", "filename2"},
                                      "workspace2": {"filename3"}}
-        self.exportModel._onTaskSuccess("workspace1:filename1")
+        self.exportModel._onTaskSuccess("workspace1", "filename1")
         self.assertDictEqual(self.exportModel._successExports,
                              {"workspace1": {"filename1"}})
         self.assertDictEqual(self.exportModel._exports,
                              {"workspace1": {"filename2"},
                               "workspace2": {"filename3"}})
-        self.exportModel._onTaskSuccess("workspace1:filename2")
+        self.exportModel._onTaskSuccess("workspace1", "filename2")
         self.assertDictEqual(self.exportModel._successExports,
                              {"workspace1": {"filename1", "filename2"}})
         self.assertDictEqual(self.exportModel._exports,
@@ -137,7 +135,8 @@ class DrillExportModelTest(unittest.TestCase):
         self.exportModel._logSuccessExport = mock.Mock()
         self.exportModel._exports = {"workspace1": {"filename1", "filename2"},
                                      "workspace2": {"filename3"}}
-        self.exportModel._onTaskError("workspace2:filename3", "error message")
+        self.exportModel._onTaskError("workspace2", "filename3",
+                                      "error message")
         self.mLogger.error.assert_called()
         self.assertDictEqual(self.exportModel._exports,
                              {"workspace1": {"filename1", "filename2"}})

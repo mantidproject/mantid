@@ -19,10 +19,10 @@ class FileLoadingTest(unittest.TestCase):
             file_info = mock.NonCallableMock()
             result = FileLoading.load_user_file(file_path=mock_path, file_information=file_info)
             mocked_parser.parse_toml_file.assert_called_once_with(mock_path, file_information=file_info)
-            self.assertEquals(result, mocked_parser.parse_toml_file.return_value)
+            self.assertEqual(result, mocked_parser.parse_toml_file.return_value)
 
     def test_wraps_exceptions_toml(self):
-        expected_wrapped = [KeyError(), ValueError()]
+        expected_wrapped = [KeyError(), NotImplementedError(), ValueError()]
 
         for known_exception in expected_wrapped:
             with mock.patch("sans.gui_logic.models.file_loading.TomlParser") as mocked_module:

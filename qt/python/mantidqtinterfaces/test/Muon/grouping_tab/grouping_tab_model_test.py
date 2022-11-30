@@ -21,7 +21,7 @@ class GroupingTabModelTest(unittest.TestCase):
 
         status = model.reset_groups_and_pairs_to_default()
 
-        self.assertEquals(status, "success")
+        self.assertEqual(status, "success")
         self.context.group_pair_context.reset_group_and_pairs_to_default.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY, 4)
 
     def test_reset_group_and_pairs_to_default_correctly_identifies_maximum_number_of_periods_for_multiple_runs(self):
@@ -29,7 +29,7 @@ class GroupingTabModelTest(unittest.TestCase):
         model = GroupingTabModel(self.context)
 
         status = model.reset_groups_and_pairs_to_default()
-        self.assertEquals(status, "success")
+        self.assertEqual(status, "success")
 
         self.context.group_pair_context.reset_group_and_pairs_to_default.assert_called_once_with(mock.ANY, mock.ANY, mock.ANY, 4)
 
@@ -38,7 +38,7 @@ class GroupingTabModelTest(unittest.TestCase):
         model = GroupingTabModel(self.context)
 
         status = model.reset_groups_and_pairs_to_default()
-        self.assertEquals(status, "failed")
+        self.assertEqual(status, "failed")
 
 
 if __name__ == '__main__':

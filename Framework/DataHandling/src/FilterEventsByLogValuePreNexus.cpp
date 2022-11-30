@@ -215,7 +215,7 @@ FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {}
+FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
@@ -383,11 +383,11 @@ void FilterEventsByLogValuePreNexus::exec() {
     const int64_t numberOfSpectra = m_localWorkspace->getNumberHistograms();
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < numberOfSpectra; i++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_localWorkspace->getSpectrum(i).setSortOrder(DataObjects::PULSETIME_SORT);
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   // Save output
@@ -774,10 +774,8 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
   const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine maximum pixel id
-  m_detid_max = 0; // seems like a safe lower bound
-  for (const auto detID : detIDs)
-    if (detID > m_detid_max)
-      m_detid_max = detID;
+  const auto it = std::max_element(detIDs.cbegin(), detIDs.cend());
+  m_detid_max = it == detIDs.cend() ? 0 : *it; // in case detIDs is empty
 
   // Pad all the pixels
   m_progress->report("Padding Pixels");
@@ -911,7 +909,7 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
     //--------------------------------------------------------------------
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int blockNum = 0; blockNum < int(numBlocks); blockNum++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       // Find the workspace for this particular thread
       EventWorkspace_sptr ws;
@@ -945,9 +943,9 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
       // Report progress
       m_progress->report("Load Event PreNeXus");
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     g_log.information() << tim << " to load the data.\n";
 
@@ -955,7 +953,7 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
     // MERGE WORKSPACES BACK TOGETHER
     //--------------------------------------------------------------------
     if (m_parallelProcessing) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_progress->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
       // Merge all workspaces, index by index.
@@ -985,9 +983,9 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
       }
 
       g_log.debug() << tim << " to merge workspaces together.\n";
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Delete the buffers for each thread.
     for (size_t i = 0; i < numThreads; i++) {
@@ -1298,16 +1296,16 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); // NOLINT
          ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(m_numEvents)) {
         uint64_t realeventindex = eventindex & VETOFLAG;
         m_vecEventIndex[i] = realeventindex;
       }
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
 #if 0
         // Examine whether it is a veto
@@ -1344,15 +1342,15 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
           }
         }
       } // END
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 #endif
 
     // Check
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(m_numEvents)) {
@@ -1361,9 +1359,9 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
         }
       }
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     g_log.notice() << "Number of veto pulses = " << numveto << ", Number of error-event-index pulses = " << numerror
                    << "\n";
@@ -1484,7 +1482,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     //--------------------------------------------------------------------
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int blockNum = 0; blockNum < int(numBlocks); blockNum++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       // Find the workspace for this particular thread
       EventWorkspace_sptr ws;
@@ -1518,9 +1516,9 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       // Report progress
       m_progress->report("Load Event PreNeXus");
 
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     g_log.information() << tim << " to load the data.\n";
 
@@ -1528,7 +1526,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     // MERGE WORKSPACES BACK TOGETHER
     //--------------------------------------------------------------------
     if (m_parallelProcessing) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       m_progress->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
 
       // Merge all workspaces, index by index.
@@ -1558,9 +1556,9 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       }
 
       g_log.debug() << tim << " to merge workspaces together.\n";
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // Delete the buffers for each thread.
     for (size_t i = 0; i < numThreads; i++) {
@@ -1982,10 +1980,8 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(const DataObjects::Even
   const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine maximum pixel id
-  m_detid_max = 0; // seems like a safe lower bound
-  for (const auto detID : detIDs)
-    if (detID > m_detid_max)
-      m_detid_max = detID;
+  const auto it = std::max_element(detIDs.cbegin(), detIDs.cend());
+  m_detid_max = it == detIDs.cend() ? 0 : *it; // in case detIDs is empty
 
   // Pad all the pixels
   m_progress->report("Padding Pixels of workspace");

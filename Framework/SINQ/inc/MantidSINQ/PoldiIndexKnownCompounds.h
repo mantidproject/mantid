@@ -45,6 +45,7 @@ struct MANTID_SINQ_DLL IndexCandidatePair {
   */
 class MANTID_SINQ_DLL PoldiIndexKnownCompounds : public API::Algorithm {
 public:
+  virtual ~PoldiIndexKnownCompounds() = default;
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

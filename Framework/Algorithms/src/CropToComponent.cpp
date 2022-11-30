@@ -98,6 +98,12 @@ void CropToComponent::exec() {
 std::map<std::string, std::string> CropToComponent::validateInputs() {
   std::map<std::string, std::string> result;
   Mantid::API::MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+
+  if (!inputWorkspace) {
+    result["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace.";
+    return result;
+  }
+
   std::vector<std::string> componentNames = getProperty("ComponentNames");
 
   // Make sure that the component exists on the input workspace

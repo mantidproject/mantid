@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(AverageLogData)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-AverageLogData::AverageLogData() {}
+AverageLogData::AverageLogData() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

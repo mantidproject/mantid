@@ -20,12 +20,12 @@ namespace Muon {
 @date 2018-05-31
 */
 
-class MANTID_MUON_DLL LoadAndApplyMuonDetectorGrouping : public API::Algorithm {
+class MANTID_MUON_DLL LoadAndApplyMuonDetectorGrouping final : public API::Algorithm {
 public:
   /// (Empty) Constructor
   LoadAndApplyMuonDetectorGrouping() : API::Algorithm() {}
   /// Virtual destructor
-  ~LoadAndApplyMuonDetectorGrouping() {}
+  virtual ~LoadAndApplyMuonDetectorGrouping() = default;
   /// Algorithm's name
   const std::string name() const override { return "LoadAndApplyMuonDetectorGrouping"; }
   /// Algorithm's version
@@ -74,7 +74,7 @@ private:
   Mantid::API::WorkspaceGroup_sptr addGroupedWSWithDefaultName(Mantid::API::Workspace_sptr inputWS);
 
   /// Throw an error if the detector IDs in grouping are not in workspace
-  void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping, const Mantid::API::Workspace_sptr &workspace);
+  void checkDetectorIDsInWorkspace(const Mantid::API::Grouping &grouping, const Mantid::API::Workspace_sptr &workspace);
 
   /// Check if the group/pair names are valid, and if all the groups which
   /// are paired are also included as groups.

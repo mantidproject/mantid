@@ -74,4 +74,20 @@ public:
 
     row.resetState();
   }
+
+  void test_set_get_lookup_row_index() {
+    auto row = makeEmptyRow();
+    auto index = boost::optional<size_t>{1};
+    row.setLookupIndex(index);
+    TS_ASSERT(row.lookupIndex().is_initialized());
+    TS_ASSERT_EQUALS(row.lookupIndex().get(), index.get());
+  }
+
+  void test_set_get_no_lookup_row_index() {
+    auto row = makeEmptyRow();
+    auto index = boost::none;
+    row.setLookupIndex(index);
+    TS_ASSERT(!row.lookupIndex().is_initialized());
+    TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
+  }
 };

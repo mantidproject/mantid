@@ -32,6 +32,7 @@ public:
   virtual bool hasUnsavedChanges() const = 0;
   virtual void setUnsaved() = 0;
   virtual void setSaved() = 0;
+  virtual std::string getSearchResultsCSV() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

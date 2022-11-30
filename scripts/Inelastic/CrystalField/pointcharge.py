@@ -6,7 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from scipy import constants
+import re
 import warnings
+
+CHARGES_PATTERN = re.compile(r'^[A-z]+')
 
 
 class PointCharge(object):
@@ -364,9 +367,8 @@ class PointCharge(object):
         for name, coords in self._atoms.items():
             pos[name] = [c for c in sg.getEquivalentPositions(coords)]
             if name not in self._charges.keys():
-                import re
                 try:
-                    charges[name] = self._charges[re.match('^[A-z]+', name).group(0)]
+                    charges[name] = self._charges[re.match(CHARGES_PATTERN, name).group(0)]
                 except (KeyError, AttributeError):
                     warnstr = 'Atom type ''%s'' in structure not in list of charges. Assuming q=0' % (name)
                     warnings.warn(warnstr, RuntimeWarning)

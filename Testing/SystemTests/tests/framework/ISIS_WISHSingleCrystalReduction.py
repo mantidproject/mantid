@@ -162,7 +162,7 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
         # correct Vanadium run for absorption
         van = Divide(LHSWorkspace=van, RHSWorkspace=abs_cor, OutputWorkspace=van)
         # smooth data
-        SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3, NumberOfNeighbours=6)
+        van = SmoothNeighbours(InputWorkspace=van, OutputWorkspace=van, Radius=3, NumberOfNeighbours=6)
         SmoothData(InputWorkspace=van, OutputWorkspace=van, NPoints=300)
 
     def validate(self):

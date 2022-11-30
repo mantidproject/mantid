@@ -39,7 +39,7 @@ class EQSANSQ2DTest(unittest.TestCase):
                              NaNValue=0, NaNError=0)
         Integration(InputWorkspace=self.test_ws_name + "_Iqxy", OutputWorkspace="__tmp")
         SumSpectra(InputWorkspace="__tmp", OutputWorkspace="summed")
-        self.assertAlmostEquals(mtd["summed"].readY(0)[0], 7.24077, 6)
+        self.assertAlmostEqual(mtd["summed"].readY(0)[0], 7.24077, 6)
         for ws in ["__tmp", "summed"]:
             if mtd.doesExist(ws):
                 DeleteWorkspace(Workspace=ws)

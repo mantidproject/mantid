@@ -30,12 +30,12 @@ namespace ICat {
  @author Sofia Antony, ISIS Rutherford Appleton Laboratory
  @date 07/07/2010
 */
-class MANTID_ICAT_DLL CatalogDownloadDataFiles : public API::Algorithm {
+class MANTID_ICAT_DLL CatalogDownloadDataFiles final : public API::Algorithm {
 public:
   /// Constructor
   CatalogDownloadDataFiles() : API::Algorithm(), m_prog(0.0) {}
   /// Destructor
-  ~CatalogDownloadDataFiles() override {}
+  ~CatalogDownloadDataFiles() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CatalogDownloadDataFiles"; }
   /// Summary of algorithms purpose.

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 
@@ -20,10 +20,10 @@ namespace DataHandling {
 
 /** DownloadFile : Downloads a file from a url to the file system
  */
-class DLLExport DownloadFile : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL DownloadFile : public API::Algorithm {
 public:
   DownloadFile();
-  ~DownloadFile() override;
+  virtual ~DownloadFile() override;
 
   const std::string name() const override;
   int version() const override;

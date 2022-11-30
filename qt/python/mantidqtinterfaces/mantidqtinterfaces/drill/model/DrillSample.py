@@ -62,6 +62,11 @@ class DrillSample(QObject):
     _controller = None
 
     """
+    Reference to the exporter.
+    """
+    _exporter = None
+
+    """
     Sent if the group changed.
     """
     groupChanged = Signal()
@@ -95,6 +100,15 @@ class DrillSample(QObject):
             controller (DrillParameterController): parameter controller
         """
         self._controller = controller
+
+    def setExporter(self, exporter):
+        """
+        Set the exporter.
+
+        Args:
+            exporter (DrillExportModel): new exporter
+        """
+        self._exporter = exporter
 
     def setIndex(self, index):
         """
@@ -265,6 +279,8 @@ class DrillSample(QObject):
         """
         logger.information("Processing of sample {0} finished with sucess"
                            .format(self._index + 1))
+        if self._exporter is not None:
+            self._exporter.run(self)
         self._status = self.STATUS_PROCESSED
         self.statusChanged.emit()
 
@@ -275,8 +291,9 @@ class DrillSample(QObject):
         Args:
             msg (str): error message
         """
-        logger.error("Error while processing sample {0}: {1}"
-                     .format(self._index + 1, msg))
+        if msg:
+            logger.error("Error while processing sample {0}: {1}"
+                         .format(self._index + 1, msg))
         self._status = self.STATUS_ERROR
         self.statusChanged.emit()
 

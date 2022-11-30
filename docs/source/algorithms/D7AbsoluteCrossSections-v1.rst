@@ -36,7 +36,7 @@ preserving the input unit without undergoing any conversions, which can be usefu
 relevant output, depending on the technique. It will be equivalent to `Q` option for `Powder` data, `Qxy` for single crystal, and in the TOF mode, it will be a group of data
 as a function of spectrum number versus energy exchange (equivalent to `Input` in TOF), :math:`2\theta` versus energy exchange, and :math:`S (Q, \omega)` distribution (as in `Qw`).
 
-For the TOF-mode, it is possible to provide user-defined binning for the momentum-exchange axis, used by :ref:`SOfQWNormalisedPolygons <algm-SOfQWNormalisedPolygons>` algorithm. If this
+For the TOF-mode, it is possible to provide user-defined binning for the momentum-exchange axis, used by :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` algorithm. If this
 property is not defined, the algorithm will automatically provide non-equidistant binning that is suitable for the data distribution.
 
 This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to an appropriate scale.

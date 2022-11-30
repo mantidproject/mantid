@@ -28,7 +28,8 @@ using namespace Mantid::API;
  * @param view :: The view we are handling
  */
 SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver)
-    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false) {
+    : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false),
+      m_shouldSaveIndividualRows(false) {
 
   m_view->subscribe(this);
   populateWorkspaceList();
@@ -124,6 +125,7 @@ void SavePresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;
+    m_view->enableSaveIndividualRowsCheckbox();
   } else {
     m_shouldAutosave = false;
     m_view->disallowAutosave();
@@ -131,7 +133,14 @@ void SavePresenter::enableAutosave() {
   }
 }
 
-void SavePresenter::disableAutosave() { m_shouldAutosave = false; }
+void SavePresenter::disableAutosave() {
+  m_shouldAutosave = false;
+  m_view->disableSaveIndividualRowsCheckbox();
+}
+
+void SavePresenter::notifySaveIndividualRowsEnabled() { m_shouldSaveIndividualRows = true; }
+
+void SavePresenter::notifySaveIndividualRowsDisabled() { m_shouldSaveIndividualRows = false; }
 
 void SavePresenter::onSavePathChanged() {
   if (shouldAutosave() && !isValidSaveDirectory(m_view->getSavePath()))
@@ -139,6 +148,8 @@ void SavePresenter::onSavePathChanged() {
 }
 
 bool SavePresenter::shouldAutosave() const { return m_shouldAutosave; }
+
+bool SavePresenter::shouldAutosaveGroupRows() const { return m_shouldSaveIndividualRows; }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
  * workspaces
@@ -244,12 +255,12 @@ void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceName
 /** Saves selected workspaces */
 void SavePresenter::saveSelectedWorkspaces() {
   // Check that at least one workspace has been selected for saving
-  auto workspaceNames = m_view->getSelectedWorkspaces();
-  if (workspaceNames.empty()) {
+  auto wkspNames = m_view->getSelectedWorkspaces();
+  if (wkspNames.empty()) {
     m_view->noWorkspacesSelected();
   } else {
     try {
-      saveWorkspaces(workspaceNames);
+      saveWorkspaces(wkspNames);
     } catch (std::exception &e) {
       m_view->cannotSaveWorkspaces(e.what());
     } catch (...) {

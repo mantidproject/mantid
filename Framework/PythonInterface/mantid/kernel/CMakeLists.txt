@@ -9,6 +9,7 @@ set(EXPORT_FILES
     src/Exports/ConfigObserver.cpp
     src/Exports/ConfigPropertyObserver.cpp
     src/Exports/DataItem.cpp
+    src/Exports/HTTPStatus.cpp
     src/Exports/IPropertyManager.cpp
     src/Exports/Property.cpp
     src/Exports/IValidator.cpp

@@ -99,7 +99,7 @@ void CorrectKiKf::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     double Efi = 0;
     // Now get the detector object for this histogram to check if monitor
     // or to get Ef for indirect geometry
@@ -151,9 +151,9 @@ void CorrectKiKf::exec() {
       eOut[j] = eIn[j] * kioverkf;
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (negativeEnergyWarning)
     g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!\n";
@@ -209,7 +209,7 @@ void CorrectKiKf::execEvent() {
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Now get the detector object for this histogram to check if monitor
     // or to get Ef for indirect geometry
     if (emodeStr == "Indirect") {
@@ -247,9 +247,9 @@ void CorrectKiKf::execEvent() {
     }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   outputWS->clearMRU();
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {

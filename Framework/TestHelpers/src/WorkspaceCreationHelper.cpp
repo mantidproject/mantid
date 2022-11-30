@@ -407,10 +407,11 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(int nhist, 
  * Latitude/longitude corresponds to two theta if longitude/latitude equals zero
  */
 Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc,
-                                                            const int nbins, const std::string &instrumentName) {
-  constexpr double x0 = 0.5;
-  auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, x0);
-  inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+                                                            const int nbins, const double x0, const double deltax,
+                                                            const std::string &instrumentName,
+                                                            const std::string &xunit) {
+  auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, x0, deltax);
+  inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(xunit);
 
   InstrumentCreationHelper::addInstrumentWithGeographicalDetectorsToWorkspace(*inputWorkspace, nlat, nlong, anginc,
                                                                               instrumentName);

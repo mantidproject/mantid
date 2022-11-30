@@ -11,6 +11,8 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
+
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <numeric>
@@ -317,9 +319,8 @@ double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
 double MeshObject2D::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
-  for (const auto &vertex : m_vertices) {
-    scaledVertices.emplace_back(scaleFactor * vertex);
-  }
+  std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),
+                 [&scaleFactor](const auto &vertex) { return vertex * scaleFactor; });
   MeshObject2D meshScaled(m_triangles, scaledVertices, m_material);
   return meshScaled.solidAngle(observer);
 }

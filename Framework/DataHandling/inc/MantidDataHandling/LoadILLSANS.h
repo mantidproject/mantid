@@ -9,7 +9,6 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -18,7 +17,7 @@ namespace DataHandling {
 /** LoadILLSANS; supports D11, D22 and D33 (TOF/monochromatic)
  */
 
-class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLSANS();
   const std::string name() const override;
@@ -30,7 +29,7 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  enum MultichannelType { TOF, KINETIC };
+  enum MultichannelType { TOF, KINETIC, SCAN };
   struct DetectorPosition {
     double distanceSampleRear;
     double distanceSampleBottomTop;
@@ -55,6 +54,7 @@ private:
   void exec() override;
   void setInstrumentName(const NeXus::NXEntry &, const std::string &);
   DetectorPosition getDetectorPositionD33(const NeXus::NXEntry &, const std::string &);
+  void setNumberOfMonitors();
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD11B(NeXus::NXEntry &, const std::string &);
@@ -62,9 +62,12 @@ private:
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t, const MultichannelType type = MultichannelType::TOF);
-
+  void getDataDimensions(const NeXus::NXInt &data, int &numberOfChannels, int &numberOfTubes,
+                         int &numberOfPixelsPerTube);
   size_t loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firstIndex = 0,
                               const MultichannelType type = MultichannelType::TOF);
+  size_t loadDataFromD16ScanMonitors(const NeXus::NXEntry &firstEntry, size_t firstIndex,
+                                     const std::vector<double> &binning);
   size_t loadDataFromTubes(NeXus::NXInt &, const std::vector<double> &, size_t,
                            const MultichannelType type = MultichannelType::TOF);
   void runLoadInstrument();
@@ -88,11 +91,13 @@ private:
   std::string m_resMode;                           ///< Resolution mode for D11 and D22
   bool m_isTOF;                                    ///< TOF or monochromatic flag
   double m_sourcePos;                              ///< Source Z (for D33 TOF)
-  bool m_isD16Omega;                               ///< Data come from a D16 omega scan flag
+  bool m_isD16Omega;                               ///< Data comes from a D16 omega scan flag
+  size_t m_numberOfMonitors;                       ///< Number of monitors in this instrument
 
   void setFinalProperties(const std::string &filename);
   std::vector<double> getVariableTimeBinning(const NeXus::NXEntry &, const std::string &, const NeXus::NXInt &,
                                              const NeXus::NXFloat &) const;
+  std::vector<double> getOmegaBinning(const NeXus::NXEntry &entry, const std::string &path) const;
 };
 
 } // namespace DataHandling

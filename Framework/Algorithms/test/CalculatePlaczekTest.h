@@ -98,6 +98,55 @@ public:
     TS_ASSERT_DELTA(outputWS->readY(0)[1], 10.0000479592, 1e-8);
   }
 
+  void test_no_temp_in_log() {
+    // ---- Create the simple workspace ----
+    Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 100, 380);
+    const std::string inwsn = "inws2";
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inwsn, InputWorkspace);
+    // add sample
+    addSampleMaterialToWorkspace(inwsn);
+
+    // ---- Get the incident spectrum ----
+    const std::string IncidentSpectaWSN = "incidentSpectrumWS";
+    generateIncidentSpectrum(IncidentSpectaWSN);
+
+    CalculatePlaczek alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("InputWorkspace", inwsn);
+    alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN);
+    alg.setProperty("Order", 2);
+    alg.setProperty("CrystalDensity", 0.01);
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
+  void test_not_enough_spectra() {
+    // ---- Create the simple workspace ----
+    Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 100, 380);
+    const std::string inwsn = "inws2";
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inwsn, InputWorkspace);
+    // add sample
+    addSampleMaterialToWorkspace(inwsn);
+
+    // ---- Get the incident spectrum ----
+    const std::string IncidentSpectaWSN = "incidentSpectrumWS";
+    generateIncidentSpectrum_2(IncidentSpectaWSN);
+
+    CalculatePlaczek alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("InputWorkspace", inwsn);
+    alg.setPropertyValue("IncidentSpectra", IncidentSpectaWSN);
+    alg.setProperty("Order", 2);
+    alg.setProperty("SampleTemperature", 300.0); // K
+    alg.setProperty("CrystalDensity", 0.01);
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+  }
+
 private:
   // generate incident spectrum data
   // NOTE:
@@ -176,6 +225,40 @@ private:
     alg->setProperty("DataX", xVec);
     alg->setProperty("DataY", yVec);
     alg->setProperty("NSpec", 3);
+    alg->setProperty("UnitX", "Wavelength");
+    alg->execute();
+  }
+
+  // generate only 2 spectra instead of 3
+  void generateIncidentSpectrum_2(const std::string &wsname) {
+    const double xMin = 0.06;
+    const double xMax = 2.0;
+    const double xStep = 0.01;
+    std::vector<double> xVec, yVec, yPrimeVec;
+
+    // make the lambda vector
+    for (double x = xMin; x < xMax; x += xStep) {
+      xVec.emplace_back(x);
+    }
+
+    // make the amplitude vector
+    yVec = generateIncidentSpectrum(xVec);
+
+    // make the first order derivitive vector
+    yPrimeVec = generateIncidentSpectrumPrime(xVec);
+
+    // extend the y vector to contain the other two dimension
+    for (double yp : yPrimeVec) {
+      yVec.emplace_back(yp);
+    }
+
+    // create the workspace
+    Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+    alg->initialize();
+    alg->setProperty("OutputWorkspace", wsname);
+    alg->setProperty("DataX", xVec);
+    alg->setProperty("DataY", yVec);
+    alg->setProperty("NSpec", 2);
     alg->setProperty("UnitX", "Wavelength");
     alg->execute();
   }

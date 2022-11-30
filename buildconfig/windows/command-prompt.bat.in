@@ -2,9 +2,13 @@
 ::
 :: Sets up the environment configured for Mantid by CMake and
 :: starts the appropriate version of Visual Studio
-
-call %~dp0thirdpartypaths.bat
-set VCVARS=@MSVC_VAR_LOCATION@
 set UseEnv=true
+
+setlocal
+set CONDA_ENV_DIR=@CONDA_BASE_DIR@
+set PYTHONPATH=@CMAKE_LIBRARY_OUTPUT_DIRECTORY@
+set VCVARS=@MSVC_VAR_LOCATION@
+
 :: Start command line
-%COMSPEC% /k ""%VCVARS%\vcvarsall.bat"" amd64
+%COMSPEC% /k "conda activate %CONDA_ENV_DIR% && "%VCVARS%\vcvarsall.bat" amd64"
+endlocal

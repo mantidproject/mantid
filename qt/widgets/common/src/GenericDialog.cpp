@@ -54,7 +54,7 @@ GenericDialog::GenericDialog(QWidget *parent) : AlgorithmDialog(parent), m_algoP
 /**
  * Destructor
  */
-GenericDialog::~GenericDialog() {}
+GenericDialog::~GenericDialog() = default;
 
 //----------------------------------
 // Protected member functions

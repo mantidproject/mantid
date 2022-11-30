@@ -256,6 +256,9 @@ QGroupBox:title {
   <tabstop>radio_loadCalib</tabstop>
   <tabstop>finder_path</tabstop>
   <tabstop>check_cropCalib</tabstop>
+  <tabstop>widget_cropping.combo_bank</tabstop>
+  <tabstop>widget_cropping.edit_crop</tabstop>
+  <tabstop>widget_cropping.finder_custom</tabstop>
   <tabstop>check_plotOutput</tabstop>
   <tabstop>button_calibrate</tabstop>
  </tabstops>

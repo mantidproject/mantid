@@ -44,12 +44,12 @@ std::string getObjName(const H5::H5Object &obj) {
     throw H5::Exception("getObjName", "Object must have a name, but name length is 0");
   }
   // Object's name exists, retrieve it
-  else if (name_size > 0) {
+  else {
     char *name_C = new char[name_size + 1]; // temporary C-string
     memset(name_C, 0, name_size + 1);       // clear buffer
 
     // Use overloaded function
-    name_size = getObjName(obj, name_C, name_size + 1);
+    getObjName(obj, name_C, name_size + 1);
 
     // Convert the C object name to return
     obj_name = name_C;

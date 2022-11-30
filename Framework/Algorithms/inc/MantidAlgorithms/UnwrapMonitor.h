@@ -29,10 +29,10 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 */
-class MANTID_ALGORITHMS_DLL UnwrapMonitor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapMonitor final : public API::Algorithm {
 public:
   UnwrapMonitor();
-  ~UnwrapMonitor() override {}
+  ~UnwrapMonitor() override = default;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose

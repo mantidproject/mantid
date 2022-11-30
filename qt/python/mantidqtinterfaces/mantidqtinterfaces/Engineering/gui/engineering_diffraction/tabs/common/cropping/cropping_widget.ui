@@ -185,6 +185,7 @@
  <tabstops>
   <tabstop>combo_bank</tabstop>
   <tabstop>edit_crop</tabstop>
+  <tabstop>finder_custom</tabstop>
  </tabstops>
  <resources/>
  <connections/>

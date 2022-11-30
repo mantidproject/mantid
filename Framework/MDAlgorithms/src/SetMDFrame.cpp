@@ -132,6 +132,7 @@ std::map<std::string, std::string> SetMDFrame::validateInputs() {
       !std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws)) {
     invalidProperties.insert(std::make_pair("InputWorkspace", "The input workspace has to be either "
                                                               "an MDEvent or MDHisto Workspace."));
+    return invalidProperties;
   }
 
   std::vector<int> axesInts = this->getProperty("Axes");

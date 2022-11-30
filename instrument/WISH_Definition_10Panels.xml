@@ -167,7 +167,7 @@
  </type>
 <type name="panel06">
  <component type="WISHpanel">
-<location  x=" 0.96521    " z="  1.9790    " name="WISHpanel01" > <facing x="0" y="0" z="0"/> </location>
+<location  x=" 0.96521    " z="  1.9790    " name="WISHpanel06" > <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  <type name="WISHpanel">

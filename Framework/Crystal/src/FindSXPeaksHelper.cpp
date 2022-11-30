@@ -444,9 +444,10 @@ AllPeaksStrategy::getAllPeaks(const HistogramData::HistogramX &x, const Histogra
     // 2. Not recording + above treshold => start recording
     // 3. Recording + below threshold => stop recording
     // 4. Recording + above threshold => continue recording
-    if (!isRecording && !isAboveThreshold) {
+    if (!isRecording && (!std::isfinite(signal) || !isAboveThreshold)) {
       continue;
-    } else if (!isRecording && isAboveThreshold) {
+    } else if (!isRecording && isAboveThreshold && std::isfinite(signal)) {
+      // only start recording if is finite as NaN values will be found to be above threshold
       currentPeak = std::make_unique<PeakContainer>(y);
       currentPeak->startRecord(it);
       isRecording = true;
@@ -456,6 +457,7 @@ AllPeaksStrategy::getAllPeaks(const HistogramData::HistogramX &x, const Histogra
       currentPeak = nullptr;
       isRecording = false;
     } else {
+      // this will continue to record NaN if previous point was above the background
       currentPeak->record(it);
     }
   }
@@ -654,8 +656,11 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::
       }
     }
 
-    // Add the max peak
-    peaks.emplace_back(*maxPeak);
+    // Add the max peak if valid
+    if (maxPeak) {
+      // check not null as is case when intensity is NaN (though this shouldn't occur now)
+      peaks.emplace_back(*maxPeak);
+    }
   }
   return peaks;
 }

@@ -8,6 +8,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/V3D.h"
+
+#include <algorithm>
 #include <cfloat>
 #include <iomanip>
 #include <ios>
@@ -897,9 +899,8 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
 
   std::vector<double> components;
   components.reserve(cellTokens.size());
-  for (const auto &token : cellTokens) {
-    components.emplace_back(boost::lexical_cast<double>(token));
-  }
+  std::transform(cellTokens.cbegin(), cellTokens.cend(), std::back_inserter(components),
+                 [](const auto &token) { return boost::lexical_cast<double>(token); });
 
   switch (components.size()) {
   case 3:

@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/BankPulseTimes.h"
 
+#include <nexus/NeXusFile.hpp>
+
 using namespace Mantid::Kernel;
 //===============================================================================================
 // BankPulseTimes

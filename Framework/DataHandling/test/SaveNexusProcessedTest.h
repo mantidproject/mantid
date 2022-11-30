@@ -860,7 +860,7 @@ public:
       wsIndex.emplace_back(i);
     }
     SaveNexusProcessed alg;
-    TS_ASSERT_THROWS_NOTHING(alg.saveSpectraDetectorMapNexus(*ws, th.file.get(), wsIndex);)
+    TS_ASSERT_THROWS_NOTHING(alg.saveSpectraDetectorMapNexus(*ws, th.file.get(), wsIndex, ::NeXus::LZW);)
     TS_ASSERT_THROWS_NOTHING(th.file->openData("detector_index"))
     std::vector<int32_t> data;
     TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
@@ -895,7 +895,7 @@ public:
       wsIndex.emplace_back(i);
     }
     SaveNexusProcessed alg;
-    TS_ASSERT_THROWS_NOTHING(alg.saveSpectrumNumbersNexus(*ws, th.file.get(), wsIndex);)
+    TS_ASSERT_THROWS_NOTHING(alg.saveSpectrumNumbersNexus(*ws, th.file.get(), wsIndex, ::NeXus::LZW);)
     TS_ASSERT_THROWS_NOTHING(th.file->openData("spectra"))
     std::vector<int32_t> data;
     TS_ASSERT_THROWS_NOTHING(th.file->getData(data))

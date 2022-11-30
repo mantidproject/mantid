@@ -58,11 +58,11 @@ class LoadWAND(DataProcessorAlgorithm):
         for i, run in enumerate(runs):
             data = np.zeros((512 * 480 * 8), dtype=np.int64)
             with h5py.File(run, 'r') as f:
-                monitor_count = f['/entry/monitor1/total_counts'].value[0]
-                duration = f['/entry/duration'].value[0]
-                run_number = f['/entry/run_number'].value[0]
+                monitor_count = f['/entry/monitor1/total_counts'][0]
+                duration = f['/entry/duration'][0]
+                run_number = f['/entry/run_number'][0]
                 for b in range(8):
-                    data += np.bincount(f['/entry/bank' + str(b + 1) + '_events/event_id'].value, minlength=512 * 480 * 8)
+                    data += np.bincount(f['/entry/bank' + str(b + 1) + '_events/event_id'][()], minlength=512 * 480 * 8)
             data = data.reshape((480 * 8, 512))
             if grouping == 2:
                 data = data[::2, ::2] + data[1::2, ::2] + data[::2, 1::2] + data[1::2, 1::2]

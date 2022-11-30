@@ -112,12 +112,19 @@ void TransformHKL::exec() {
   UB = UB * hkl_tran_inverse;
   g_log.notice() << "Transformed UB = " << UB << '\n';
   o_lattice.setUB(UB);
+
+  Matrix<double> modHKL = o_lattice.getModHKL();
+
+  Matrix<double> modUB = UB * modHKL;
+
+  o_lattice.setModHKL(hkl_tran * modHKL);
+
   std::vector<double> sigabc(6);
 
   bool redetermine_error = this->getProperty("FindError");
 
   if (redetermine_error) {
-    SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
+    SelectCellWithForm::DetermineErrors(sigabc, UB, modUB, ws, tolerance);
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
   } else {
     o_lattice.setError(0, 0, 0, 0, 0, 0);
@@ -137,9 +144,9 @@ void TransformHKL::exec() {
     V3D hkl(peak.getHKL());
     V3D ihkl(peak.getIntHKL());
     peak.setIntHKL(hkl_tran * ihkl);
-    miller_indices.emplace_back(hkl_tran * ihkl);
+    miller_indices.emplace_back(hkl_tran * hkl - modHKL * peak.getIntMNP());
     peak.setHKL(hkl_tran * hkl);
-    q_vectors.emplace_back(peak.getQSampleFrame());
+    q_vectors.emplace_back(peak.getQSampleFrame() - modUB * peak.getIntMNP() * 2 * M_PI);
     num_indexed++;
   }
 

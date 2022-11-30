@@ -200,7 +200,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
                 if use_lorentz:
                     # ILL Neutron Data Booklet, Second Edition, Section 2.9, Part 4.1, Equation 7
                     peak = __tmp_pw.getPeak(0)
-                    lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                    lorentz = abs(np.sin(peak.getScattering()) * np.cos(peak.getAzimuthal()))
                     peak.setIntensity(peak.getIntensity() * lorentz)
                     peak.setSigmaIntensity(peak.getSigmaIntensity() * lorentz)
 

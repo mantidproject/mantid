@@ -17,7 +17,7 @@ namespace Algorithms {
 /** Performs Gaussian fits over each spectrum to find the Elastic Peak
  Position (EPP).
 */
-class MANTID_ALGORITHMS_DLL FindEPP : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FindEPP final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

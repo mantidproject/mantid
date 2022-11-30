@@ -167,7 +167,7 @@ size_t SaveSampleEnvironmentAndShape::addMeshToVector(const Mantid::Geometry::Me
   // increase the triangles by the offset, so they refer to the new index of
   // the vertices
   std::transform(std::begin(triangles), std::end(triangles), std::begin(triangles),
-                 [&offset](uint32_t &val) { return val + uint32_t(offset); });
+                 [&offset](const uint32_t &val) { return val + uint32_t(offset); });
   m_vertices.insert(std::end(m_vertices), std::begin(vertices), std::end(vertices));
   m_triangle.insert(std::end(m_triangle), std::begin(triangles), std::end(triangles));
 

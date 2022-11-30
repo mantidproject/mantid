@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/IDTypes.h"
@@ -18,12 +19,12 @@ class LoadMuonNexusV2NexusHelper;
 // Create time zero table
 DataObjects::TableWorkspace_sptr createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros);
 
-class DLLExport LoadMuonStrategy {
+class MANTID_DATAHANDLING_DLL LoadMuonStrategy {
 public:
   // Constructor
   LoadMuonStrategy(Kernel::Logger &g_log, std::string filename, LoadMuonNexusV2NexusHelper &nexusLoader);
   // Virtual destructor
-  virtual ~LoadMuonStrategy() {}
+  virtual ~LoadMuonStrategy() = default;
   // Load muon log data
   virtual void loadMuonLogData() = 0;
   // Returns the good frames from the nexus entry

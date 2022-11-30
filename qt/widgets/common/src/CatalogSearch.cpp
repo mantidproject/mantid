@@ -42,7 +42,6 @@ CatalogSearch::CatalogSearch(QWidget *parent)
 /**
  * Destructor
  */
-CatalogSearch::~CatalogSearch() {}
 
 /**
  * Initialise the  default layout.

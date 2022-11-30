@@ -253,6 +253,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, 
   }
 
   debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";
+  g_log.debug() << debugString;
 
   // Put Environment into sample.
   sample.setEnvironment(std::move(environment));

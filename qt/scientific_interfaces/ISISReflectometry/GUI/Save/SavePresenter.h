@@ -33,6 +33,7 @@ public:
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
   bool shouldAutosave() const override;
+  bool shouldAutosaveGroupRows() const override;
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
@@ -46,6 +47,8 @@ public:
   void notifySaveSelectedWorkspaces() override;
   void notifyAutosaveDisabled() override;
   void notifyAutosaveEnabled() override;
+  void notifySaveIndividualRowsEnabled() override;
+  void notifySaveIndividualRowsDisabled() override;
   void notifySavePathChanged() override;
 
 private:
@@ -83,6 +86,7 @@ private:
   ISaveView *m_view;
   std::unique_ptr<IAsciiSaver> m_saver;
   bool m_shouldAutosave;
+  bool m_shouldSaveIndividualRows;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

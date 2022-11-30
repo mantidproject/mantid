@@ -30,7 +30,7 @@ orientation .
 @author Ruth Mikkelson, SNS,ORNL
 @date 01/26/2013
 */
-class MANTID_CRYSTAL_DLL OptimizeCrystalPlacement : public API::Algorithm {
+class MANTID_CRYSTAL_DLL OptimizeCrystalPlacement final : public API::Algorithm {
 public:
   const std::string name() const override { return "OptimizeCrystalPlacement"; };
   /// Summary of algorithms purpose

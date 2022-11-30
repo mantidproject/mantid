@@ -33,9 +33,7 @@ Kernel::Logger g_log("vtkGeometryCacheReader");
 /**
  * Constructor
  */
-vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) {
-  mFileName = std::move(filename);
-  mDoc = nullptr;
+vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) : m_doc(nullptr), m_filename(std::move(filename)) {
   Init();
 }
 
@@ -43,8 +41,8 @@ vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) {
  * Destructor
  */
 vtkGeometryCacheReader::~vtkGeometryCacheReader() {
-  mDoc->release();
-  delete pParser;
+  m_doc->release();
+  delete m_pParser;
 }
 
 /**
@@ -52,11 +50,11 @@ vtkGeometryCacheReader::~vtkGeometryCacheReader() {
  */
 void vtkGeometryCacheReader::Init() {
   // Set up the DOM parser and parse xml file
-  pParser = new DOMParser();
+  m_pParser = new DOMParser();
   try {
-    mDoc = pParser->parse(mFileName);
+    m_doc = m_pParser->parse(m_filename);
   } catch (...) {
-    throw Kernel::Exception::FileError("Unable to parse File:", mFileName);
+    throw Kernel::Exception::FileError("Unable to parse File:", m_filename);
   }
 }
 
@@ -104,7 +102,7 @@ void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
  * Get the Element by using the object name
  */
 Poco::XML::Element *vtkGeometryCacheReader::getElementByObjectName(const std::string &name) {
-  Element *pRoot = mDoc->documentElement();
+  Element *pRoot = m_doc->documentElement();
   if (pRoot == nullptr || pRoot->nodeName() != "VTKFile")
     return nullptr;
   Element *pPolyData = pRoot->getChildElement("PolyData");
@@ -118,7 +116,6 @@ Poco::XML::Element *vtkGeometryCacheReader::getElementByObjectName(const std::st
  */
 void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle, int noOfPoints, std::vector<double> &points) {
   if (pEle == nullptr) {
-    noOfPoints = 0;
     return;
   }
   // Allocate memory
@@ -143,7 +140,6 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle, int noOfPoints
  */
 void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle, int noOfTriangles, std::vector<uint32_t> &faces) {
   if (pEle == nullptr) {
-    noOfTriangles = 0;
     return;
   }
   // Allocate memory

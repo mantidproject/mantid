@@ -12,5 +12,5 @@
 namespace Mantid::API {
 
 /// Default constructor
-ArchiveSearchFactoryImpl::ArchiveSearchFactoryImpl() {}
+ArchiveSearchFactoryImpl::ArchiveSearchFactoryImpl() = default;
 } // namespace Mantid::API

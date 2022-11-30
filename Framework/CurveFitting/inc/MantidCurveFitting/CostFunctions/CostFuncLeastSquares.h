@@ -10,8 +10,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
-#include "MantidCurveFitting/GSLMatrix.h"
-#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/EigenMatrix.h"
+#include "MantidCurveFitting/EigenVector.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -33,7 +33,7 @@ public:
   std::string shortName() const override { return "Chi-sq"; };
 
 protected:
-  void calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel = 1e-8) override;
+  void calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8) override;
 
   void addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sptr values) const override;
   void addValDerivHessian(API::IFunction_sptr function, API::FunctionDomain_sptr domain,

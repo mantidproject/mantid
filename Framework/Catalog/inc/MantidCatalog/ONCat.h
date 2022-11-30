@@ -102,6 +102,7 @@ public:
 
   ONCat() = delete;
   ONCat(const ONCat &other);
+  ONCat &operator=(const ONCat &other);
   ~ONCat();
 
   bool isUserLoggedIn() const;

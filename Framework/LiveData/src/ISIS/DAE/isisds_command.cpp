@@ -59,7 +59,7 @@
 
 /** Try to align to 64 bit (8 bytes) boundaries
  */
-typedef struct {
+using isisds_open_t = struct {
   int len;
   int ver_major;
   int ver_minor;
@@ -68,19 +68,19 @@ typedef struct {
   int pad[1];
   char user[32];
   char host[64];
-} isisds_open_t;
+};
 
 /** used for sends and replies once a connection open
  * try to align to 64 bits (8 bytes) boundaries
  */
-typedef struct {
+using isisds_command_header_t = struct {
   int len;  /* of this structure plus any additional data (in bytes) */
   int type; /* ISISDSDataType */
   int ndims;
   int dims_array[11];
   char command[32];
   /* additional data (if any) will follow this */
-} isisds_command_header_t;
+};
 
 /* wait until read len bytes, return <=0 on error */
 static int recv_all(SOCKET s, void *buffer, int len, int flags) {

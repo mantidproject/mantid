@@ -25,7 +25,7 @@ namespace Algorithms {
  @author Ricardo Ferraz Leal
  @date 30/01/2013
  */
-class MANTID_ALGORITHMS_DLL ConvertToConstantL2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertToConstantL2 final : public API::Algorithm {
 public:
   /// Default constructor
   ConvertToConstantL2();

@@ -9,9 +9,9 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
-
 #include "MantidKernel/ArrayProperty.h"
 
+#include <algorithm>
 #include <boost/numeric/conversion/cast.hpp>
 
 namespace {
@@ -103,8 +103,8 @@ std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::getInputWorkspaces() const
   if (!workspaceNames.empty()) {
     workspaces.reserve(workspaceNames.size());
     auto &ADS = AnalysisDataService::Instance();
-    for (const auto &name : workspaceNames)
-      workspaces.emplace_back(ADS.retrieveWS<MatrixWorkspace>(name));
+    std::transform(workspaceNames.cbegin(), workspaceNames.cend(), std::back_inserter(workspaces),
+                   [&ADS](const auto &name) { return ADS.retrieveWS<MatrixWorkspace>(name); });
   } else
     workspaces.emplace_back(getProperty("InputWorkspace"));
   return workspaces;

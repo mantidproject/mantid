@@ -130,7 +130,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
             Minimizer='L-BFGS-B')
         # Check Y-position of first bank hasn't changed
         row = mtd['cal_adjustments'].row(1)
-        self.assertAlmostEquals(row['Yposition'], y, places=5)
+        self.assertAlmostEqual(row['Yposition'], y, places=5)
         DeleteWorkspaces(['perturbed'])
 
     def test_fix_yaw(self) -> None:
@@ -145,7 +145,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
             Minimizer='L-BFGS-B')
         # Check no change in the rotations around Z-axis of first bank
         row = mtd['cal_displacements'].row(0)
-        self.assertAlmostEquals(row['DeltaGamma'], 0.0, places=5)
+        self.assertAlmostEqual(row['DeltaGamma'], 0.0, places=5)
         DeleteWorkspaces(['perturbed'])
 
 if __name__ == '__main__':

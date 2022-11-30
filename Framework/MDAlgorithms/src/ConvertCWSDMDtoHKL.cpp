@@ -204,25 +204,25 @@ void ConvertCWSDMDtoHKL::exportEvents(const IMDEventWorkspace_sptr &mdws, std::v
 //--------------------------------------------------------------------------
 /** Save Q-sample to file
  */
-void ConvertCWSDMDtoHKL::saveMDToFile(std::vector<std::vector<coord_t>> &vec_event_qsample,
-                                      std::vector<float> &vec_event_signal) {
+void ConvertCWSDMDtoHKL::saveMDToFile(const std::vector<std::vector<coord_t>> &vecEventQsample,
+                                      const std::vector<float> &vecEventSignal) {
   // Get file name
   std::string filename = getPropertyValue("QSampleFileName");
 
   // Abort with an empty string
   if (filename.empty())
     return;
-  if (vec_event_qsample.size() != vec_event_signal.size())
+  if (vecEventQsample.size() != vecEventSignal.size())
     throw std::runtime_error("Input vectors of Q-sample and signal have different sizes.");
 
   // Write to file
   std::ofstream ofile;
   ofile.open(filename.c_str());
 
-  size_t numevents = vec_event_qsample.size();
+  size_t numevents = vecEventQsample.size();
   for (size_t i = 0; i < numevents; ++i) {
-    ofile << vec_event_qsample[i][0] << ", " << vec_event_qsample[i][1] << ", " << vec_event_qsample[i][2] << ", "
-          << vec_event_signal[i] << "\n";
+    ofile << vecEventQsample[i][0] << ", " << vecEventQsample[i][1] << ", " << vecEventQsample[i][2] << ", "
+          << vecEventSignal[i] << "\n";
   }
   ofile.close();
 }
@@ -230,20 +230,19 @@ void ConvertCWSDMDtoHKL::saveMDToFile(std::vector<std::vector<coord_t>> &vec_eve
 //--------------------------------------------------------------------------
 /** Save HKL to file for 3D visualization
  */
-void ConvertCWSDMDtoHKL::saveEventsToFile(const std::string &filename, std::vector<Kernel::V3D> &vec_event_pos,
-                                          std::vector<signal_t> &vec_event_signal,
-                                          std::vector<detid_t> &vec_event_detid) {
+void ConvertCWSDMDtoHKL::saveEventsToFile(const std::string &filename, std::vector<Kernel::V3D> &vecEventPos,
+                                          const std::vector<signal_t> &vecEventSignal,
+                                          const std::vector<detid_t> &vecEventDetid) {
   // Check
-  if (vec_event_detid.size() != vec_event_pos.size() || vec_event_pos.size() != vec_event_signal.size())
+  if (vecEventDetid.size() != vecEventPos.size() || vecEventPos.size() != vecEventSignal.size())
     throw std::invalid_argument("Input vectors for HKL, signal and detector ID have different size.");
 
   std::ofstream ofile;
   ofile.open(filename.c_str());
 
-  size_t numevents = vec_event_pos.size();
-  for (size_t i = 0; i < numevents; ++i) {
-    ofile << vec_event_pos[i].X() << ", " << vec_event_pos[i].Y() << ", " << vec_event_pos[i].Z() << ", "
-          << vec_event_signal[i] << ", " << vec_event_detid[i] << "\n";
+  for (size_t i = 0; i < vecEventPos.size(); ++i) {
+    ofile << vecEventPos[i].X() << ", " << vecEventPos[i].Y() << ", " << vecEventPos[i].Z() << ", " << vecEventSignal[i]
+          << ", " << vecEventDetid[i] << "\n";
   }
   ofile.close();
 }

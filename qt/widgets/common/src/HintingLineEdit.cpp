@@ -31,7 +31,7 @@ HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
   connect(this, SIGNAL(editingFinished()), this, SLOT(hideHints()));
 }
 
-HintingLineEdit::~HintingLineEdit() {}
+HintingLineEdit::~HintingLineEdit() = default;
 
 /** Handle a key press event.
 

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-
+import sys
 import systemtesting
 from mantid.simpleapi import *
 
@@ -32,6 +32,9 @@ class ConvToMDCompareDefaultVsIndexing(systemtesting.MantidSystemTest):
                       'One Peak']
 
     test_pix_width = ['10', '20']
+
+    def skipTests(self):
+        return sys.platform.startswith("win")
 
     def runTest(self):
         for func in self.test_functions:

@@ -1,0 +1,1 @@
+* Fixed a bug in sliceviewer where a matplotlib deprecation warning appears when toggling on the nonorthogonal axes.

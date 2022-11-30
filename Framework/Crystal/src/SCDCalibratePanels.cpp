@@ -85,16 +85,16 @@ void SCDCalibratePanels::exec() {
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 1; num < 64; ++num) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       std::ostringstream mess;
       mess << "bank" << num;
       IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
       PARALLEL_CRITICAL(MyBankNames)
       if (comp)
         MyBankNames.insert(mess.str());
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     for (int i = 0; i < nPeaks; ++i) {
       std::string name = peaksWs->getPeak(i).getBankName();
@@ -170,16 +170,16 @@ void SCDCalibratePanels::exec() {
   Geometry::OrientedLattice lattice0 = peaksWs->mutableSample().getOrientedLattice();
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
   for (int i = 0; i < nPeaks; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     DataObjects::Peak &peak = peaksWs->getPeak(i);
     try {
       peak.setInstrument(inst2);
     } catch (const std::exception &exc) {
       g_log.notice() << "Problem in applying calibration to peak " << i << " : " << exc.what() << "\n";
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Find U again for optimized geometry and index peaks
   findU(peaksWs);
@@ -211,7 +211,7 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
   PARALLEL_FOR_IF(Kernel::threadSafe(*ColWksp, *RowWksp, *TofWksp))
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const std::string &bankName = *std::next(MyBankNames.begin(), i);
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
@@ -245,9 +245,9 @@ void SCDCalibratePanels::exec() {
         icount++;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   string colFilename = getProperty("ColFilename");
   string rowFilename = getProperty("RowFilename");
@@ -580,7 +580,7 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
   for (int bankIndex = 0; bankIndex < static_cast<int>(MyBankNames.size()); ++bankIndex) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const std::string &iBank = *std::next(MyBankNames.begin(), bankIndex);
     const std::string bankName = "__PWS_" + iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
@@ -701,8 +701,8 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
     AnalysisDataService::Instance().remove(bankName);
     SCDPanelErrors det;
     det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, scaleWidth, scaleHeight, iBank, peaksWs);
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 } // namespace Mantid::Crystal

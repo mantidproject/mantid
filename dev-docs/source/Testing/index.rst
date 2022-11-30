@@ -23,7 +23,6 @@ creation is outlined in :ref:`issue_tracking`.
    Core/Core
    SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
-   MuonInterface/MuonTesting
    ElementalAnalysis/ElementalAnalysisTests
    IndirectInelastic/IndirectInelasticAcceptanceTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide

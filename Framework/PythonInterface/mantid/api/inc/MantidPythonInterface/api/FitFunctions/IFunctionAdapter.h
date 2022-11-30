@@ -40,6 +40,9 @@ public:
 
   /// Declare an attribute with an initial value
   void declareAttribute(const std::string &name, const boost::python::object &defaultValue);
+  /// Declare an attribute with an initial value and validator
+  void declareAttribute(const std::string &name, const boost::python::object &defaultValue,
+                        const boost::python::object &validator);
   /// Get a named attribute value
   static PyObject *getAttributeValue(const IFunction &self, const std::string &name);
   /// Returns the attribute's value as a Python object

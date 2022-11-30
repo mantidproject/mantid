@@ -5,12 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
-
 #include "MantidGeometry/Crystal/MatrixVectorPairParser.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/algorithm/string.hpp>
-#include <strstream>
+#include <sstream>
 
 namespace Mantid::Geometry {
 

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "../../Reduction/LookupRow.h"
-#include "InvalidDefaultsError.h"
-#include "ThetaValuesValidationError.h"
+#include "InvalidLookupRowCells.h"
+#include "LookupCriteriaError.h"
 #include <vector>
 
 namespace MantidQt {
@@ -16,15 +16,15 @@ namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTableValidationError {
 public:
-  LookupTableValidationError(std::vector<InvalidDefaultsError> validationErrors,
-                             boost::optional<ThetaValuesValidationError> fullTableError);
+  LookupTableValidationError(std::vector<InvalidLookupRowCells> validationErrors,
+                             boost::optional<LookupCriteriaError> fullTableError);
 
-  std::vector<InvalidDefaultsError> const &errors() const;
-  boost::optional<ThetaValuesValidationError> fullTableError() const;
+  std::vector<InvalidLookupRowCells> const &errors() const;
+  boost::optional<LookupCriteriaError> fullTableError() const;
 
 private:
-  std::vector<InvalidDefaultsError> m_validationErrors;
-  boost::optional<ThetaValuesValidationError> m_fullTableError;
+  std::vector<InvalidLookupRowCells> m_validationErrors;
+  boost::optional<LookupCriteriaError> m_fullTableError;
 };
 
 } // namespace ISISReflectometry

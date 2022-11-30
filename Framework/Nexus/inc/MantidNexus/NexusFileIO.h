@@ -11,6 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/VectorColumn.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/DllConfig.h"
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -23,8 +24,8 @@
 
 namespace Mantid {
 namespace NeXus {
-DLLExport int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
-                                 std::vector<std::string> &definition);
+MANTID_NEXUS_DLL int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
+                                        std::vector<std::string> &definition);
 
 /** @class NexusFileIO NexusFileIO.h NeXus/NexusFileIO.h
 
@@ -34,7 +35,7 @@ Save and Load NexusProcessed classes, though it could be extended to
 other Nexus formats. It might be replaced in future by methods using
 the new Nexus C++ API.
 */
-class DLLExport NexusFileIO {
+class MANTID_NEXUS_DLL NexusFileIO {
 
 public:
   // Helper typedef

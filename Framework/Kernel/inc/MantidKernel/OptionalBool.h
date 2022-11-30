@@ -37,6 +37,7 @@ public:
   OptionalBool(Value arg);
   virtual ~OptionalBool() = default;
   bool operator==(const OptionalBool &other) const;
+  bool operator!=(const OptionalBool &other) const;
   Value getValue() const;
 
 private:

@@ -10,12 +10,11 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
 
-class DLLExport MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace {
+class MANTID_DATAOBJECTS_DLL MaskWorkspace : public SpecialWorkspace2D, public API::IMaskWorkspace {
 public:
   MaskWorkspace() = default;
   MaskWorkspace(std::size_t numvectors);

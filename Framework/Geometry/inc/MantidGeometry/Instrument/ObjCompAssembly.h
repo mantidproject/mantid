@@ -42,6 +42,7 @@ public:
   ObjCompAssembly(const std::string &, IComponent *reference = nullptr);
   //! Copy constructor
   ObjCompAssembly(const ObjCompAssembly &);
+  ObjCompAssembly &operator=(const ObjCompAssembly &);
   ~ObjCompAssembly() override;
   //! Make a clone of the present component
   IComponent *clone() const override;
@@ -86,7 +87,7 @@ private:
   ObjCompAssembly &operator=(const ICompAssembly &);
 
   /// the group of child components
-  std::vector<ObjComponent *> group;
+  std::vector<ObjComponent *> m_group;
 };
 
 /// Shared pointer to ObjCompAssembly

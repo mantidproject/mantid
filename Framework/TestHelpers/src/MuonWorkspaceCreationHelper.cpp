@@ -190,7 +190,7 @@ ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec, std::vector<double
  * @param timeZeros :: Vector of time zeros for each spectra
  * @return TableWorkspace with time zeros in each row for all spectra
  */
-ITableWorkspace_sptr createTimeZeroTable(const size_t &numSpec, std::vector<double> &timeZeros) {
+ITableWorkspace_sptr createTimeZeroTable(const size_t &numSpec, const std::vector<double> &timeZeros) {
 
   auto timeZeroTable =
       std::dynamic_pointer_cast<ITableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));

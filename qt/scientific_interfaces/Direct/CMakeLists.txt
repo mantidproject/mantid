@@ -1,8 +1,16 @@
-set(SRC_FILES ALFView.cpp ALFCustomInstrumentView.cpp ALFCustomInstrumentPresenter.cpp ALFCustomInstrumentModel.cpp)
+set(SRC_FILES
+    ALFAnalysisModel.cpp
+    ALFAnalysisPresenter.cpp
+    ALFAnalysisView.cpp
+    ALFInstrumentModel.cpp
+    ALFInstrumentPresenter.cpp
+    ALFInstrumentView.cpp
+    ALFView.cpp
+)
 
-set(MOC_FILES ALFView.h ALFCustomInstrumentView.h ALFCustomInstrumentPresenter.h)
+set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFView.h)
 
-set(INC_FILES DllConfig.h ALFCustomInstrumentModel.h ALFCustomInstrumentMocks.h)
+set(INC_FILES ALFAnalysisModel.h ALFAnalysisPresenter.h ALFInstrumentModel.h ALFInstrumentPresenter.h DllConfig.h)
 
 # Target
 mtd_add_qt_library(
@@ -12,15 +20,7 @@ mtd_add_qt_library(
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   DEFS IN_MANTIDQT_DIRECT
-  LINK_LIBS Mantid::DataObjects
-            ${CORE_MANTIDLIBS}
-            Mantid::PythonInterfaceCore
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${PYTHON_LIBRARIES}
-            ${OPENGL_gl_LIBRARY}
-            ${OPENGL_glu_LIBRARY}
-  QT5_LINK_LIBS Qt5::OpenGL
+  LINK_LIBS Mantid::API Mantid::DataObjects Mantid::Geometry Mantid::Kernel Mantid::PythonInterfaceCore Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5

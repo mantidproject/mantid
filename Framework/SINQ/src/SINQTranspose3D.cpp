@@ -68,8 +68,8 @@ void SINQTranspose3D::doYXZ(const IMDHistoWorkspace_sptr &inWS) {
 
   const auto inVal = inWS->getSignalArray();
   const auto inErr = inWS->getErrorSquaredArray();
-  auto outVal = outWS->mutableSignalArray();
-  auto outErr = outWS->mutableErrorSquaredArray();
+  Mantid::signal_t *outVal = outWS->mutableSignalArray();
+  Mantid::signal_t *outErr = outWS->mutableErrorSquaredArray();
   for (unsigned int xx = 0; xx < x->getNBins(); xx++) {
     for (unsigned int yy = 0; yy < y->getNBins(); yy++) {
       for (unsigned int zz = 0; zz < z->getNBins(); zz++) {
@@ -104,8 +104,8 @@ void SINQTranspose3D::doXZY(const IMDHistoWorkspace_sptr &inWS) {
 
   const auto inVal = inWS->getSignalArray();
   const auto inErr = inWS->getErrorSquaredArray();
-  auto outVal = outWS->mutableSignalArray();
-  auto outErr = outWS->mutableErrorSquaredArray();
+  Mantid::signal_t *outVal = outWS->mutableSignalArray();
+  Mantid::signal_t *outErr = outWS->mutableErrorSquaredArray();
   xdim = static_cast<unsigned int>(x->getNBins());
   ydim = static_cast<unsigned int>(y->getNBins());
   zdim = static_cast<unsigned int>(z->getNBins());
@@ -143,8 +143,8 @@ void SINQTranspose3D::doTRICS(const IMDHistoWorkspace_sptr &inWS) {
 
   const auto inVal = inWS->getSignalArray();
   const auto inErr = inWS->getErrorSquaredArray();
-  auto outVal = outWS->mutableSignalArray();
-  auto outErr = outWS->mutableErrorSquaredArray();
+  Mantid::signal_t *outVal = outWS->mutableSignalArray();
+  Mantid::signal_t *outErr = outWS->mutableErrorSquaredArray();
   xdim = static_cast<unsigned int>(x->getNBins());
   ydim = static_cast<unsigned int>(y->getNBins());
   zdim = static_cast<unsigned int>(z->getNBins());

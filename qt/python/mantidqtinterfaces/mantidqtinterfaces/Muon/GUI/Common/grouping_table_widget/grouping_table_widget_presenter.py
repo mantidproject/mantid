@@ -220,9 +220,13 @@ class GroupingTablePresenter(object):
 
         self._remove_groups_with_invalid_detectors()
 
+        groupWarning = False
+
         for group in self._model.groups:
             to_analyse = True if group.name in self._model.selected_groups else False
             display_period_warning = self._model.validate_periods_list(group.periods)
+            if display_period_warning != RowValid.valid_for_all_runs:
+                groupWarning = True
             color = row_colors[display_period_warning]
             tool_tip = row_tooltips[display_period_warning]
             self.add_group_to_view(group, to_analyse, color, tool_tip)
@@ -232,6 +236,9 @@ class GroupingTablePresenter(object):
 
         if self._view.group_range_use_first_good_data.isChecked():
             self._view.group_range_min.setText(str(self._model.get_first_good_data_from_file()))
+
+        if groupWarning:
+            self._view.warning_popup("Warning: Please check the grouping tab. \n Some periods are unavailable.")
 
         self._view.enable_updates()
 

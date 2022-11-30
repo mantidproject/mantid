@@ -948,7 +948,7 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY, MantidImage &im
  * @param rebinnedY raw data after rebin (Y values)
  * @param rebinnedE raw data after rebin (E/error values)
  */
-void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE, MantidImage &rebinnedY,
+void LoadFITS::doRebin(size_t rebin, const MantidImage &imageY, const MantidImage &imageE, MantidImage &rebinnedY,
                        MantidImage &rebinnedE) {
   if (1 >= rebin)
     return;

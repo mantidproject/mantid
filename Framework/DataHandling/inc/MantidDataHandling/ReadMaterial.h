@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MaterialBuilder.h"
 #include <map>
@@ -22,7 +23,7 @@ using ValidationErrors = std::map<std::string, std::string>;
    MaterialBuilder
 */
 
-class DLLExport ReadMaterial {
+class MANTID_DATAHANDLING_DLL ReadMaterial {
 public:
   /**
     This struct contains the parameters for constructing a material,

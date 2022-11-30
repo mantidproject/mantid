@@ -8,6 +8,7 @@
 
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/FileDescriptor.h"
 
 #include <list>
@@ -30,7 +31,8 @@ data.</li>
 @author Roman Tolchenov, Tessella plc
 @date 3/07/09
 */
-class DLLExport LoadAscii : public API::IFileLoader<Kernel::FileDescriptor>, public API::DeprecatedAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadAscii : public API::IFileLoader<Kernel::FileDescriptor>,
+                                          public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   LoadAscii();

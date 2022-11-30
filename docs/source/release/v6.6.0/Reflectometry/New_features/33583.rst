@@ -1,0 +1,5 @@
+- :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>` can now load NeXus files v3 from D17 and FIGARO measurements from cycle 192 onwards.
+- Gravity correction has been implemented for FIGARO data reduction in :ref:`ReflectometryILLPreProcess <algm-ReflectometryILLPreProcess>` and :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
+- :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>` now outputs configuration .out file containing a summary of the performed reduction.
+- :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>` does not have the `UseManualScaleFactors` bollean property to decide whether to use provided manual scale factors. The redundancy has been removed and now when the factors are provided, they will be used in :ref:`Stitch <algm-Stich>` algorithm.
+- `default-incident-monitor-spectrum` has been corrected for D17 from 257 to 256, allowing for proper monitor normalisation for data from cycle 211 and beyond.

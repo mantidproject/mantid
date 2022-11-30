@@ -104,7 +104,7 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
   mach_port_t port = mach_host_self();
   host_page_size(port, &pageSize);
   resident_set = static_cast<size_t>(t_info.resident_size * pageSize);
-  vm_usage = static_cast<size_t>(t_info.virtual_size * pageSize / 1024.0);
+  vm_usage = static_cast<size_t>(t_info.virtual_size * pageSize / 1024L);
 #elif _WIN32
   // Adapted from
   // http://msdn.microsoft.com/en-us/library/windows/desktop/ms682050%28v=vs.85%29.aspx

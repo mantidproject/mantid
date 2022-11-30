@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -15,8 +15,9 @@ namespace DataHandling {
 /** CheckMantidVersion : Checks if the current version of Mantid is the most
   recent
 */
-class DLLExport CheckMantidVersion : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL CheckMantidVersion : public API::Algorithm {
 public:
+  virtual ~CheckMantidVersion() = default;
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

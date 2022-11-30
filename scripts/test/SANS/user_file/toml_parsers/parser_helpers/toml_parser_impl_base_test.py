@@ -20,6 +20,13 @@ class TomlParserImplBaseTest(unittest.TestCase):
         self.assertIsNone(instance.get_mandatory_val(["is", "there"]))
         self.assertEqual(expected_mock, instance.get_mandatory_val(["mock"]))
 
+    def test_get_mandatory_key_with_mixed_types(self):
+        # Should be able to handle an explicit None value
+        expected_mock = mock.NonCallableMock()
+        in_dict = {"1": {"2": expected_mock}}
+        instance = TomlParserImplBase(in_dict)
+        self.assertEqual(expected_mock, instance.get_mandatory_val(["1", 2]))
+
     def test_get_mandatory_key_throws(self):
         in_dict = {"here": None}
         with self.assertRaisesRegex(MissingMandatoryParam, "this.not_there.foo"):

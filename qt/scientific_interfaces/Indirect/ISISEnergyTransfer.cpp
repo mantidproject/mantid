@@ -96,6 +96,17 @@ void ungroupWorkspace(std::string const &workspaceName) {
   ungroup->execute();
 }
 
+void groupWorkspaceBySampleChanger(std::string const &workspaceName) {
+  auto group = AlgorithmManager::Instance().create("GroupBySampleChangerPosition");
+  group->initialize();
+  group->setProperty("InputWorkspace", workspaceName);
+  std::string prefix = workspaceName;
+  prefix.erase(workspaceName.find("_Reduced"), 8);
+  group->setProperty("OutputGroupPrefix", prefix);
+  group->setProperty("OutputGroupSuffix", "Reduced");
+  group->execute();
+}
+
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
   auto loader = AlgorithmManager::Instance().create("Load");
   loader->initialize();
@@ -212,10 +223,15 @@ void saveAclimax(std::string const &workspaceName, std::string const &outputName
 
 } // namespace
 
+std::string UNGROUPED = "Ungrouped";
+std::string GROUP = "Group";
+std::string GROUPBYSAMPLE = "Group by sample";
+
 namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
+
 ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
@@ -250,6 +266,11 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
   // Allows empty workspace selector when initially selected
   m_uiForm.dsCalibrationFile->isOptional(true);
 
+  // Add grouping options
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(UNGROUPED));
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUP));
+  m_uiForm.cbGroupOutput->addItem(QString::fromStdString(GROUPBYSAMPLE));
+
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
@@ -264,7 +285,7 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI, QWidget *pa
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ISISEnergyTransfer::~ISISEnergyTransfer() {}
+ISISEnergyTransfer::~ISISEnergyTransfer() = default;
 
 void ISISEnergyTransfer::setup() {}
 
@@ -516,8 +537,13 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       m_outputWorkspaces = outputGroup->getNames();
       m_pythonExportWsName = m_outputWorkspaces[0];
 
-      if (!m_uiForm.ckGroupOutput->isChecked())
+      if (m_uiForm.cbGroupOutput->currentText().toStdString() == UNGROUPED) {
         ungroupWorkspace(outputGroup->getName());
+      } else if (m_uiForm.cbGroupOutput->currentText().toStdString() == GROUPBYSAMPLE) {
+        groupWorkspaceBySampleChanger(outputGroup->getName());
+        // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
+        ungroupWorkspace(outputGroup->getName());
+      }
 
       setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
 

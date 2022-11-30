@@ -221,8 +221,6 @@ void Convolution::functionFFTMode(const FunctionDomain &domain, FunctionValues &
     return;
   }
 
-  IFunction1D_sptr resolution = std::dynamic_pointer_cast<IFunction1D>(getFunction(0));
-
   // check for delta functions
   std::vector<std::shared_ptr<DeltaFunction>> dltFuns;
   double dltF = 0;

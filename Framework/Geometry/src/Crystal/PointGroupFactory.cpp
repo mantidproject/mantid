@@ -5,10 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidKernel/LibraryManager.h"
+
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <utility>
 
@@ -56,9 +57,8 @@ bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
 std::vector<std::string> PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
   pointGroups.reserve(m_generatorMap.size());
-  for (const auto &generator : m_generatorMap) {
-    pointGroups.emplace_back(generator.first);
-  }
+  std::transform(m_generatorMap.cbegin(), m_generatorMap.cend(), std::back_inserter(pointGroups),
+                 [](const auto &generator) { return generator.first; });
   return pointGroups;
 }
 

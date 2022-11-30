@@ -237,6 +237,20 @@ class SuperplotPresenter:
                 pass
             self._canvas.draw_idle()
 
+    def on_normalise_checked(self, checked: bool):
+        """
+        Transmit the normalisation checkbox state to the model.
+
+        Args:
+            checked (bool): True when the checkbox is checked
+        """
+        self._model.normalise(checked)
+        self._update_plot(True)
+        figure = self._canvas.figure
+        axes = figure.gca()
+        axes.relim()
+        axes.autoscale()
+
     def on_drop(self, name):
         """
         Triggered when a drop event is received in the list widget. Here, name
@@ -360,67 +374,24 @@ class SuperplotPresenter:
                     spectra.append(data[1])
             self._view.set_spectra_list(name, spectra)
 
-    def _update_plot(self):
+    def _update_plot(self, replot:bool=False):
         """
         Update the plot. This function overplots the memorized data with the
         currently selected workspace and spectrum index. It keeps a memory of
-        the last plot and removes it if is not part of the memorised data.
+        the last plot and removes it if is not part of the memorised data. It
+        can also replot all curves if needed.
+
+        Args:
+            replot (bool): if True, all curves are removed and replotted
         """
         selection = self._view.get_selection()
-        current_spectrum_index = self._view.get_spectrum_slider_position()
         plotted_data = self._model.get_plotted_data()
-        mode = self._view.get_mode()
 
         figure = self._canvas.figure
         axes = figure.gca()
-        artists = axes.get_tracked_artists()
 
-        # remove curves not in plotted_data
-        for artist in artists:
-            ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
-            ws_name = ws.name()
-            if (ws_name, sp) not in plotted_data:
-                axes.remove_artists_if(lambda a: a==artist)
-            else:
-                label = artist.get_label()
-                try:
-                    color = artist.get_color()
-                except:
-                    color = artist.lines[0].get_color()
-                if color == self._model.get_workspace_color(ws_name):
-                    self._model.set_workspace_color(ws_name, None)
-                self._view.modify_spectrum_label(ws_name, sp, label, color)
-
-        # add selection to plot
-        for ws_name, spectra in selection.items():
-            if (current_spectrum_index not in spectra
-               and not self._view.is_spectrum_selection_disabled()):
-                spectra.append(current_spectrum_index)
-            for sp in spectra:
-                if sp == -1:
-                    continue
-                if (ws_name, sp) not in plotted_data:
-                    ws = mtd[ws_name]
-                    kwargs = self.get_kwargs_from_settings()
-                    if mode == self.SPECTRUM_MODE_TEXT:
-                        kwargs["axis"] = MantidAxType.SPECTRUM
-                        kwargs["specNum"] = ws.getSpectrumNumbers()[sp]
-                    else:
-                        kwargs["axis"] = MantidAxType.BIN
-                        kwargs["wkspIndex"] = sp
-
-                    color = self._model.get_workspace_color(ws_name)
-                    if color:
-                        kwargs["color"] = color
-                    if self._error_bars:
-                        lines = axes.errorbar(ws, **kwargs)
-                        label = lines.get_label()
-                        color = lines.lines[0].get_color()
-                    else:
-                        lines = axes.plot(ws, **kwargs)
-                        label = lines[0].get_label()
-                        color = lines[0].get_color()
-                    self._model.set_workspace_color(ws_name, color)
+        self._remove_unneeded_curves(replot)
+        self._plot_selection()
 
         if selection or plotted_data:
             axes.set_axis_on()
@@ -438,6 +409,114 @@ class SuperplotPresenter:
             axes.set_axis_off()
             axes.set_title("")
         self._canvas.draw_idle()
+
+    def _remove_unneeded_curves(self, replot: bool):
+        """
+        Removes all unneeded curves from the actual plot.
+
+        Args:
+            replot (bool): if True, all remaining curves are reploted
+        """
+        plotted_data = self._model.get_plotted_data()
+        mode = self._view.get_mode()
+        normalised = self._model.is_normalised()
+
+        figure = self._canvas.figure
+        axes = figure.gca()
+        artists = axes.get_tracked_artists()
+
+        for artist in artists:
+            try:
+                ws, sp = axes.get_artists_workspace_and_workspace_index(artist)
+            except KeyError:
+                # avoid race condition when many workspaces are remove from the
+                # ADS at the same type
+                continue
+            ws_name = ws.name()
+            if (ws_name, sp) not in plotted_data:
+                axes.remove_artists_if(lambda a: a==artist)
+            else:
+                label = artist.get_label()
+                try:
+                    color = artist.get_color()
+                except:
+                    color = artist.lines[0].get_color()
+                if color == self._model.get_workspace_color(ws_name):
+                    self._model.set_workspace_color(ws_name, None)
+                self._view.modify_spectrum_label(ws_name, sp, label, color)
+                if replot:
+                    axes.remove_artists_if(lambda a: a==artist)
+                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
+                                                    mode, color)
+                    ws = mtd[ws_name]
+                    if self._error_bars:
+                        axes.errorbar(ws, **kwargs)
+                    else:
+                        axes.plot(ws, **kwargs)
+
+    def _plot_selection(self):
+        """
+        Adds selected workspaces/spectra to the plot.
+        """
+        selection = self._view.get_selection()
+        current_spectrum_index = self._view.get_spectrum_slider_position()
+        plotted_data = self._model.get_plotted_data()
+        mode = self._view.get_mode()
+        normalised = self._model.is_normalised()
+
+        figure = self._canvas.figure
+        axes = figure.gca()
+
+        # add selection to plot
+        for ws_name, spectra in selection.items():
+            if (current_spectrum_index not in spectra
+               and not self._view.is_spectrum_selection_disabled()):
+                spectra.append(current_spectrum_index)
+            for sp in spectra:
+                if sp == -1:
+                    continue
+                if (ws_name, sp) not in plotted_data:
+                    color = self._model.get_workspace_color(ws_name)
+                    kwargs = self._fill_plot_kwargs(ws_name, sp, normalised,
+                                                    mode, color)
+                    if ws_name not in mtd:
+                        continue
+                    ws = mtd[ws_name]
+                    if self._error_bars:
+                        lines = axes.errorbar(ws, **kwargs)
+                        color = lines.lines[0].get_color()
+                    else:
+                        lines = axes.plot(ws, **kwargs)
+                        color = lines[0].get_color()
+                    self._model.set_workspace_color(ws_name, color)
+
+    def _fill_plot_kwargs(self, ws_name: str, spectrum: int, normalise: bool,
+                          mode: str, color: str) -> dict:
+        """
+        Fill the keywork arguments dictionnary needed by the mantid plot
+        function.
+
+        Args:
+            ws_name (str): name of the workspace
+            spectrum (int): index of the spectrum
+            normalise (bool): True if the plot has to be normalised
+            mode (self.SPECTRUM_MODE_TEXT or self.BIN_MODE_TEXT): spectrum or
+                bin mode plot
+            color (str): color of the curve
+
+        Returns:
+            dict(str: str): plot keywork arguments
+        """
+        kwargs = dict()
+        kwargs["wkspIndex"] = spectrum
+        if normalise is True:
+            kwargs["normalise_spectrum"] = True
+        if mode == self.SPECTRUM_MODE_TEXT:
+            kwargs["axis"] = MantidAxType.SPECTRUM
+        elif mode == self.BIN_MODE_TEXT:
+            kwargs["axis"] = MantidAxType.BIN
+        kwargs["color"] = color
+        return kwargs
 
     def on_workspace_selection_changed(self):
         """

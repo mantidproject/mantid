@@ -291,9 +291,11 @@ class AdvancedSetupScript(BaseScriptElement):
             if string_tmp:
                 items = string_tmp.replace("{", "").replace("}", "").split(",")
                 keys_tmp = [item.split(":")[0].replace("'", "") for item in items]
-                vals_tmp = [float(item.split(":")[1].replace("'", "")) for item in items]
-                for count, value in enumerate(keys_tmp):
-                    self.samplegeometry[value] = vals_tmp[count]
+                vals_tmp = [item.split(":")[1].replace("'", "").strip() for item in items]
+                if vals_tmp.count("") == 0:
+                    vals_tmp = [float(item) for item in vals_tmp]
+                    for count, value in enumerate(keys_tmp):
+                        self.samplegeometry[value] = vals_tmp[count]
 
             self.containershape = BaseScriptElement.getStringElement(instrument_dom, "containershape",
                                                                      default=AdvancedSetupScript.containershape)

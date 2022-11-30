@@ -116,6 +116,8 @@ public:
    */
   void toList(const std::string &sep = ",");
 
+  static const std::vector<std::string> DEFAULT_OPS_STR;
+
 private:
   /// copy contructor
   Expression(const Expression *pexpr);

@@ -22,7 +22,7 @@ namespace Crystal {
  @author Vickie Lynch, SNS, ORNL
  @date 02/08/2011
  */
-class MANTID_CRYSTAL_DLL PeakIntegration : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PeakIntegration final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PeakIntegration"; }

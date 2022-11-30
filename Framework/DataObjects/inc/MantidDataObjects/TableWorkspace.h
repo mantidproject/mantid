@@ -209,42 +209,42 @@ public:
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(size_t value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(size_t value, size_t &row, size_t col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an string cell value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(const std::string &value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(const std::string &value, size_t &row, size_t col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an float value in a table
    * workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(float value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(float value, size_t &row, size_t col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an API::Bollean value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(API::Boolean value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(API::Boolean value, size_t &row, size_t col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an double cell value in a
    * table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(double value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(double value, size_t &row, size_t col) override { findValue(value, row, col); }
   /** This method finds the row and column index of an Mantid::Kernel::V3D cell
    * value in a table workspace
    * @param value :: -value to search
    * @param  row  row number of the value  searched
    * @param  col  column number of the value searched
    */
-  void find(const Mantid::Kernel::V3D &value, size_t &row, const size_t &col) override { findValue(value, row, col); }
+  void find(const Mantid::Kernel::V3D &value, size_t &row, size_t col) override { findValue(value, row, col); }
   /** Casts cells through converting their values to/from double without type
    * checking;
    * Can produce stuped results in case if the type is in any way not related to
@@ -273,7 +273,7 @@ private:
   TableWorkspace *doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// template method to find a given value in a table.
-  template <typename Type> void findValue(const Type value, size_t &row, const size_t &colIndex) {
+  template <typename Type> void findValue(const Type value, size_t &row, size_t colIndex) {
 
     try {
       TableColumn_ptr<Type> tc_sptr = getColumn(colIndex);
@@ -297,51 +297,6 @@ private:
   }
 
   void addColumn(const std::shared_ptr<API::Column> &column);
-
-  /** This method finds the row and column index of an integer cell value in a
-   * table workspace
-   * @param value :: -value to search
-   * @param  row  row number of the value  searched
-   * @param  col  column number of the value searched
-   */
-  virtual void find(size_t value, size_t &row, size_t &col) { findValue(value, row, col); }
-  /** This method finds the row and column index of an string cell value in a
-   * table workspace
-   * @param value :: -value to search
-   * @param  row  row number of the value  searched
-   * @param  col  column number of the value searched
-   */
-  virtual void find(const std::string &value, size_t &row, size_t &col) {
-    findValue(std::move(std::move(std::move(std::move(std::move(std::move(std::move(std::move(value)))))))), row, col);
-  }
-  /** This method finds the row and column index of an float value in a table
-   * workspace
-   * @param value :: -value to search
-   * @param  row  row number of the value  searched
-   * @param  col  column number of the value searched
-   */
-  virtual void find(float value, size_t &row, size_t &col) { findValue(value, row, col); }
-  /** This method finds the row and column index of an API::Bollean value in a
-   * table workspace
-   * @param value :: -value to search
-   * @param  row  row number of the value  searched
-   * @param  col  column number of the value searched
-   */
-  virtual void find(API::Boolean value, size_t &row, size_t &col) { findValue(value, row, col); }
-  /** This method finds the row and column index of an double cell value in a
-   * table workspace
-   * @param value :: -value to search
-   * @param  row  row number of the value  searched
-   * @param  col  column number of the value searched
-   */
-  virtual void find(double value, size_t &row, size_t &col) { findValue(value, row, col); }
-  /** This method finds the row and column index of an Mantid::Kernel::V3D cell
-   * value in a table workspace
-   * @param value :: -value to search
-   * @param  row  row number of the value  searched
-   * @param  col  column number of the value searched
-   */
-  void find(const Mantid::Kernel::V3D &value, size_t &row, size_t &col) { findValue(value, row, col); }
 
 private:
   /// Used in std::find_if algorithm to find a Column with name \a name.

@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
 
@@ -41,7 +42,7 @@ class LoadDataSet
 };
 */
 
-class DLLExport LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Algorithm's name
   const std::string name() const override { return "LoadSassena"; }

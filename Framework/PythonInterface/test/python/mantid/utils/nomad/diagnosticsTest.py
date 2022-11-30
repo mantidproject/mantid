@@ -291,7 +291,7 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
 
     def test_tube_range(self):
         ranges = _NOMADMedianDetectorTest().tube_range
-        self.assertEquals(ranges[0], [0, 14 * 8])
+        self.assertEqual(ranges[0], [0, 14 * 8])
         self.assertEqual(ranges[-1], [81 * 8, 99 * 8])
 
     def test_tube_in_flat_panel(self):

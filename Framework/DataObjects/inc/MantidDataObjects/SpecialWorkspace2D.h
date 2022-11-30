@@ -28,7 +28,7 @@ public:
   enum e { AND, OR, XOR, NOT };
 };
 
-class DLLExport SpecialWorkspace2D : public Workspace2D {
+class MANTID_DATAOBJECTS_DLL SpecialWorkspace2D : public Workspace2D {
 public:
   SpecialWorkspace2D() = default;
   SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors = false);
@@ -55,7 +55,7 @@ public:
 
   std::set<detid_t> getDetectorIDs(const std::size_t workspaceIndex) const;
 
-  void binaryOperation(std::shared_ptr<const SpecialWorkspace2D> &ws, const unsigned int operatortype);
+  void binaryOperation(const std::shared_ptr<const SpecialWorkspace2D> &ws, const unsigned int operatortype);
   void binaryOperation(const unsigned int operatortype);
 
   virtual void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews);

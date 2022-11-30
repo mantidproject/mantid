@@ -19,7 +19,7 @@ namespace DataObjects {
   @author Owen Arnold
   @date 31/08/2011
 */
-class DLLExport MementoTableWorkspace : public TableWorkspace {
+class MANTID_DATAOBJECTS_DLL MementoTableWorkspace : public TableWorkspace {
 public:
   MementoTableWorkspace &operator=(const MementoTableWorkspace &) = delete;
   static bool isMementoWorkspace(const Mantid::API::ITableWorkspace &candidate);

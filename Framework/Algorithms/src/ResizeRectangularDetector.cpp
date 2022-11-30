@@ -71,11 +71,10 @@ void ResizeRectangularDetector::exec() {
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
   } else {
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "workspace and it does not seem to be valid as "
-                               "input (must be either MatrixWorkspace or "
-                               "PeaksWorkspace");
+    throw std::runtime_error("Could not get a valid instrument from the "
+                             "workspace and it does not seem to be valid as "
+                             "input (must be either MatrixWorkspace or "
+                             "PeaksWorkspace");
   }
 
   std::string ComponentName = getPropertyValue("ComponentName");

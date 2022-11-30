@@ -335,7 +335,7 @@ def combine_spatial_banks(tables: WorkspaceGroup,
         table = tables.getItem(i)
 
         # check type
-        message = f'Cannot process Corelli combine_spatial_banks, table ' + str(i) + ' is not of type TableWorkspace'
+        message = f'Cannot process Corelli combine_spatial_banks, table {str(i)} is not of type TableWorkspace'
         assert isinstance(table, TableWorkspace), message
 
         # check column names

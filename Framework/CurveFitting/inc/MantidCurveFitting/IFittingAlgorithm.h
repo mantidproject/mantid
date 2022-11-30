@@ -55,6 +55,7 @@ private:
 
 protected:
   void setFunction();
+  void setStepSizeMethod();
   void addWorkspaces();
   std::vector<std::string> getCostFunctionNames() const;
   void declareCostFunctionProperty();

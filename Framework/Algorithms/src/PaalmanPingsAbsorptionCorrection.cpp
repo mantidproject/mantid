@@ -163,7 +163,7 @@ void PaalmanPingsAbsorptionCorrection::exec() {
   // Loop over the spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *ass, *assc, *acc, *acsc))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // Copy over bins
     ass->setSharedX(i, m_inputWS->sharedX(i));
     assc->setSharedX(i, m_inputWS->sharedX(i));
@@ -247,9 +247,9 @@ void PaalmanPingsAbsorptionCorrection::exec() {
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was " << m_sampleL1s.size() << '\n';
 

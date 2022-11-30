@@ -50,8 +50,8 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
   case NarrowPeak: {
     createAlg.setPropertyValue("Function", "User Defined");
     createAlg.setPropertyValue("UserDefinedFunction", "name=Gaussian, PeakCentre=5, Height=1, Sigma=0.05");
-    createAlg.setProperty("XMin", 0.);
-    createAlg.setProperty("XMax", 10.);
+    createAlg.setProperty("XMin", -0.05);
+    createAlg.setProperty("XMax", 10.05);
     createAlg.setProperty("BinWidth", 0.1);
     createAlg.setProperty("NumBanks", 1);
     break;
@@ -59,8 +59,8 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
 
   case FitFailed: {
     createAlg.setPropertyValue("Function", "Exp Decay");
-    createAlg.setProperty("XMin", 0.);
-    createAlg.setProperty("XMax", 100.);
+    createAlg.setProperty("XMin", -0.5);
+    createAlg.setProperty("XMax", 100.5);
     createAlg.setProperty("BinWidth", 1.);
     createAlg.setProperty("NumBanks", 1);
     break;
@@ -136,13 +136,13 @@ public:
 
     for (size_t row = 0; row < 2; ++row) {
       TS_ASSERT_EQUALS(outputWS->cell<std::string>(row, 8), "success");
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 1), 6005.25, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 2), 8.817, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 3), 89.3248, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 4), 7.2306, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 5), 4.8384, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 1), 6000.0, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 2), 8.7644, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 3), 89.3189, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 4), 7.2309, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 5), 4.8388, m_delta);
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 6), 0.6161, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 7), 0.1643, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 7), 0.1712, m_delta);
     }
   }
 

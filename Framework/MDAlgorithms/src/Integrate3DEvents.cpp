@@ -48,7 +48,7 @@ using Mantid::Kernel::V3D;
 Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list, Kernel::DblMatrix UBinv,
     double radius, const bool useOnePercentBackgroundCorrection)
-    : m_UBinv(std::move(UBinv)), m_radius(radius), maxOrder(0), crossterm(0),
+    : m_UBinv(std::move(UBinv)), m_radius(radius), maxOrder(0), crossterm(false),
       m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hkl_key = getHklKey(peak_q_list[it].second);

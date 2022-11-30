@@ -12,7 +12,7 @@ import json
 import copy
 
 from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
+from sans.common.enums import (ReductionDimensionality, SANSFacility)
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         validation_message)
@@ -40,7 +40,6 @@ class StateConvertToQ(metaclass=JsonSerializable):
         # 2D settings
         self.q_xy_max = None  # : Float (Positive)
         self.q_xy_step = None  # : Float (Positive)
-        self.q_xy_step_type: RangeStepType = None
 
         # -----------------------
         # Q Resolution specific
@@ -165,9 +164,6 @@ class StateConvertToQBuilder(object):
 
     def set_reduction_dimensionality(self, val):
         self.state.reduction_dimensionality = val
-
-    def set_q_xy_step_type(self, val):
-        self.state.q_xy_step_type = val
 
 
 # ------------------------------------------

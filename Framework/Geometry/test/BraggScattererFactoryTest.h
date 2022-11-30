@@ -45,7 +45,7 @@ private:
   class MockScatterer : public BraggScatterer {
   public:
     MockScatterer() : BraggScatterer() {}
-    ~MockScatterer() override {}
+    ~MockScatterer() override = default;
 
     std::string name() const override { return "MockScatterer"; }
     GNU_DIAG_OFF_SUGGEST_OVERRIDE

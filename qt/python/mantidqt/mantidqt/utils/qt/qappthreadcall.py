@@ -7,9 +7,12 @@
 import functools
 import inspect
 import sys
+from typing import Any, Callable, Optional, Sequence
 
 from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Slot
 from qtpy.QtWidgets import QApplication
+
+from mantid.py36compat import dataclass
 
 
 class QAppThreadCall(QObject):
@@ -18,25 +21,42 @@ class QAppThreadCall(QObject):
     on the same thread as the qApp object. If QApplication does not yet exist
     at the point of call then a direct call is made
     """
-    __slots__ = ["callee", "_args", "_kwargs", "_result", "_exc_info", "_moved_to_app"]
+
+    @dataclass
+    class CallArgs:
+        """Encapsulate the arguments to a callable"""
+        args: list
+
+    @dataclass
+    class CallResult:
+        """Encapsulate the result of a object call"""
+        result: Any
+        exc_info: Optional[tuple]
 
     @staticmethod
-    def is_qapp_thread():
+    def is_qapp_thread() -> bool:
         """Returns True iff a QApplication instance exists and the current
         thread matches the thread the QApplication was created in
         """
         qapp = QApplication.instance()
         return qapp is None or (QThread.currentThread() == qapp.thread())
 
-    def __init__(self, callee, blocking=True):
-        QObject.__init__(self)
-        self.callee = callee
-        self.blocking = blocking
-        functools.update_wrapper(self.__call__.__func__, callee)
-        self._moved_to_app = False
-        self._store_function_args(None, None)
+    __slots__ = ["_callable", "_blocking", "_moved_to_app", "_pending_calls", "_completed_calls"]
 
-    def __call__(self, *args, **kwargs):
+    def __init__(self, callable: Callable, blocking: bool = True):
+        """
+        :param callable: A callable that should be executed on the QApplication thread
+        :param blocking: If True, the asynchronous call will block until completed
+        """
+        super().__init__()
+        functools.update_wrapper(self.__call__.__func__, callable)
+
+        self._callable = callable
+        self._blocking = blocking
+        self._moved_to_app = False
+        self._pending_calls, self._completed_calls = [], []
+
+    def __call__(self, *args: Sequence) -> Any:
         """
         If the current thread is the qApp thread then this
         performs a straight call to the wrapped callable_obj. Otherwise
@@ -44,26 +64,49 @@ class QAppThreadCall(QObject):
         BlockingQueuedConnection.
         """
         if self.is_qapp_thread():
-            return self.callee(*args, **kwargs)
+            return self._callable(*args)
         else:
             self._ensure_self_on_qapp_thread()
-            self._store_function_args(args, kwargs)
-            connection_type = Qt.BlockingQueuedConnection if self.blocking else Qt.AutoConnection
-            QMetaObject.invokeMethod(self, "on_call", connection_type)
-            if self._exc_info is not None:
-                raise self._exc_info[1].with_traceback(self._exc_info[2])
-            return self._result
+            connection_type = Qt.BlockingQueuedConnection if self._blocking else Qt.AutoConnection
+
+            # A given object wraps a single callable. If calls are non-blocking
+            # then a second call can enter this method before the previous has
+            # had time to perform _on_call. Queue up the arguments to ensure
+            # they are processed in the correct order. This method and _on_call
+            # are very closely tied together. We append arguments to the end of a pending list
+            # and pop results from the front of a results list. _on_call must understand
+            # this ordering too.
+            self._pending_calls.append(QAppThreadCall.CallArgs(args))
+            QMetaObject.invokeMethod(self, "_on_call", connection_type)
+
+            # Only return/re-raise exceptions in the blocking case or else the
+            # user has moved on
+            if self._blocking:
+                call_result = self._completed_calls.pop(0)
+                if call_result.exc_info is not None:
+                    raise call_result.exc_info[1].with_traceback(call_result.exc_info[2])
+                else:
+                    return call_result.result
+            else:
+                # It makes little sense to return anything from a non-blocking call
+                # as the client cannot have waited for it
+                return None
 
     @Slot()
-    def on_call(self):
+    def _on_call(self) -> None:
         """Perform a call to a GUI function across a
-        thread and return the result
+        thread. All exceptions are caught internally and stored to be propagated
         """
+        # Changes to this method will very likely require changes to the __call__
+        # method, especially w.r.t how the arguments and results are queued.
+        result, exc_info = None, None
         try:
-            self._result = \
-                self.callee(*self._args, **self._kwargs)
+            call_info = self._pending_calls.pop(0)
+            result = self._callable(*call_info.args)
         except Exception:  # pylint: disable=broad-except
-            self._exc_info = sys.exc_info()
+            exc_info = sys.exc_info()
+
+        self._completed_calls.append(QAppThreadCall.CallResult(result, exc_info))
 
     # private api
     def _ensure_self_on_qapp_thread(self):
@@ -74,14 +117,6 @@ class QAppThreadCall(QObject):
 
         self.moveToThread(QApplication.instance().thread())
         self._moved_to_app = True
-
-    def _store_function_args(self, args, kwargs):
-        """
-        Store arguments for future function call and reset result/exception info
-        from previous call
-        """
-        self._args, self._kwargs = args, kwargs
-        self._result, self._exc_info = None, None
 
 
 def force_method_calls_to_qapp_thread(instance, *, all_methods=False):

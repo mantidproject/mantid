@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
@@ -86,7 +87,7 @@ struct WorkspaceReplacementFlagHolder {
   ~WorkspaceReplacementFlagHolder() { m_worskpaceReplacementFlag = false; }
 
 private:
-  WorkspaceReplacementFlagHolder();
+  WorkspaceReplacementFlagHolder() = delete;
   bool &m_worskpaceReplacementFlag;
 };
 
@@ -255,6 +256,10 @@ void InstrumentWidget::hideHelp() { m_help->setVisible(false); }
 QString InstrumentWidget::getWorkspaceName() const { return m_workspaceName; }
 
 std::string InstrumentWidget::getWorkspaceNameStdString() const { return m_workspaceName.toStdString(); }
+
+Mantid::API::Workspace_sptr InstrumentWidget::getWorkspaceClone() {
+  return getWorkspaceFromADS(getWorkspaceNameStdString())->clone();
+}
 
 void InstrumentWidget::renameWorkspace(const std::string &workspace) {
   m_workspaceName = QString::fromStdString(workspace);
@@ -762,6 +767,10 @@ void InstrumentWidget::updateIntegrationWidget(bool init) {
     } else {
       m_xIntegration->setRange(0, 0);
     }
+  } else {
+    if (minRange > 0 || maxRange > 0) {
+      m_xIntegration->setWholeRange();
+    }
   }
 
   m_xIntegration->setUnits(QString::fromStdString(ws->getAxis(0)->unit()->caption()));
@@ -795,22 +804,23 @@ void InstrumentWidget::tabChanged(int /*unused*/) {
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
  * @param cmapNameOrPath Name of a color map or a file path
+ * @param highlightZeroDets Whether to highlight detectors with zero counts
  */
-void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
+void InstrumentWidget::changeColormap(const QString &cmapNameOrPath, const bool highlightZeroDets) {
   if (!m_instrumentActor)
     return;
   const auto currentCMap = m_instrumentActor->getCurrentColorMap();
 
-  QString selection;
+  std::pair<QString, bool> selection;
   if (cmapNameOrPath.isEmpty()) {
     // ask user
     selection = ColorMap::chooseColorMap(currentCMap, this);
-    if (selection.isEmpty()) {
+    if (selection.first.isEmpty()) {
       // assume cancelled request
       return;
     }
   } else {
-    selection = ColorMap::exists(cmapNameOrPath);
+    selection = std::make_pair(ColorMap::exists(cmapNameOrPath), highlightZeroDets);
   }
 
   if (selection == currentCMap) {
@@ -1019,7 +1029,7 @@ void InstrumentWidget::saveSettings() {
 }
 
 void InstrumentWidget::helpClicked() {
-  MantidDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
+  HelpWindow::showPage(std::string("qthelp://org.mantidproject/doc/workbench/instrumentviewer.html"));
 }
 
 void InstrumentWidget::set3DAxesState(bool on) {
@@ -1333,7 +1343,7 @@ void InstrumentWidget::setBackgroundColor(const QColor &color) {
  * Get the surface info string
  */
 QString InstrumentWidget::getSurfaceInfoText() const {
-  ProjectionSurface *surface = getSurface().get();
+  auto surface = getSurface();
   return surface ? surface->getInfoText() : "";
 }
 
@@ -1570,6 +1580,7 @@ void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::sh
     m_thread.quit();
   }
   if (hasWorkspace(ws_name)) {
+    m_pickTab->resetOriginalWorkspace();
     emit preDeletingHandle();
     close();
     return;
@@ -1594,6 +1605,7 @@ void InstrumentWidget::renameHandle(const std::string &oldName, const std::strin
 
 void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
+  m_pickTab->resetOriginalWorkspace();
   close();
 }
 

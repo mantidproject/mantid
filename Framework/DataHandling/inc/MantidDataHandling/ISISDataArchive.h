@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IArchiveSearch.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 
 #include <sstream>
 #include <string>
@@ -24,7 +24,7 @@ This class is for searching the ISIS data archive
 @author Roman Tolchenov, Tessella plc
 @date 27/07/2010
 */
-class DLLExport ISISDataArchive : public API::IArchiveSearch {
+class MANTID_DATAHANDLING_DLL ISISDataArchive : public API::IArchiveSearch {
 public:
   /// Returns the path to a filename given the list of extensions to try
   std::string getArchivePath(const std::set<std::string> &filenames,

@@ -11,7 +11,7 @@ from sans.state.AllStates import AllStates
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
-                                          simple_range, DetectorId, event_binning_string_values, det_fit_range,
+                                          simple_range, q_xy_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
 from sans.user_file.toml_parsers.toml_parser import TomlParser
 from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
@@ -348,8 +348,8 @@ class CommandInterfaceStateDirector(object):
                 elif is_old_first_entry_a_list and is_new_entry_a_list:
                     old_values.append(value)
                 else:
-                    raise RuntimeError("CommandInterfaceStateDirector: Trying to insert {0} which is a list into {0} "
-                                       "which is collection of non-list elements".format(value, old_values))
+                    raise RuntimeError(f"CommandInterfaceStateDirector: Trying to insert {value} which is a list into {old_values} "
+                                       "which is collection of non-list elements")
             elif isinstance(value, list) and treat_list_as_element:
                 self._processed_state_settings.update({key: [value]})
             elif isinstance(value, list):
@@ -531,6 +531,38 @@ class CommandInterfaceStateDirector(object):
 
         self.add_to_processed_state_settings(new_state_entries)
 
+    def _process_wavrange_lists(self, wav_min, wav_max, existing_wavelength):
+        """If a wavrange is given as lists of min/max values, then construct a binning string to set the
+        wavelength ranges. Returns the wavelength step and step type; the latter is converted to a range type if
+        the inputs are lists."""
+        def is_set(val):
+            return val is not None
+
+        def is_list(val):
+            return is_set(val) and isinstance(val, list)
+
+        # If one input is a list, they must both be lists of the same length
+        if is_list(wav_min) != is_list(wav_max):
+            raise RuntimeError("CommandInterfaceStateDirector: The lower and upper wavelength bounds must both be the same type (got"
+                               " a mixture of single value and list)")
+        if is_list(wav_min) and is_list(wav_max) and len(wav_min) != len(wav_max):
+            raise RuntimeError(
+                "CommandInterfaceStateDirector: the wav_start and wav_end inputs must contain the same number of values")
+
+        step = existing_wavelength.wavelength_interval.wavelength_step
+
+        if not is_list(wav_min):
+            return step, existing_wavelength.wavelength_step_type
+
+        # Construct the binning string
+        wav_pairs = []
+        for a, b in zip(wav_min, wav_max):
+            wav_pairs.append(str(a) + '-' + str(b))
+        binning = ",".join(map(str, wav_pairs))
+        self.add_to_processed_state_settings({OtherId.WAVELENGTH_RANGE: binning})
+
+        return step, existing_wavelength.wavelength_step_type_range
+
     def _process_wavrange(self, command):
         wav_min = command.values[0]
         wav_max = command.values[1]
@@ -546,11 +578,10 @@ class CommandInterfaceStateDirector(object):
             existing_wavelength = self._processed_state_obj.wavelength
             new_wav_min = wav_min if wav_min else existing_wavelength.wavelength_interval.wavelength_full_range[0]
             new_wav_max = wav_max if wav_max else existing_wavelength.wavelength_interval.wavelength_full_range[1]
-            new_range = simple_range(start=new_wav_min, stop=new_wav_max,
-                                     step=existing_wavelength.wavelength_interval.wavelength_step,
-                                     step_type=existing_wavelength.wavelength_step_type)
 
             if wav_min is not None or wav_max is not None:
+                step, step_type = self._process_wavrange_lists(new_wav_min, new_wav_max, existing_wavelength)
+                new_range = simple_range(start=new_wav_min, stop=new_wav_max, step=step, step_type=step_type)
                 copied_entry = {LimitsId.WAVELENGTH: new_range}
                 self.add_to_processed_state_settings(copied_entry)
         else:
@@ -569,8 +600,7 @@ class CommandInterfaceStateDirector(object):
         q_min = command.values[0]
         q_max = command.values[1]
         q_step = command.values[2]
-        q_step_type = command.values[3]
-        new_state_entries = {LimitsId.QXY: simple_range(start=q_min, stop=q_max, step=q_step, step_type=q_step_type)}
+        new_state_entries = {LimitsId.QXY: q_xy_range(start=q_min, stop=q_max, step=q_step)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_compatibility_mode(self, command):

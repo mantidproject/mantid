@@ -63,9 +63,6 @@ public:
    *be 2 of them to pass the test.
    */
   void do_test_2D_slice(size_t ndims, std::vector<size_t> nonIntegr) {
-    // create an MD histo workspace
-    size_t size = 1;
-    // property values for CreateMDHistoWorkspace
     std::vector<size_t> numberOfBins(ndims);
     std::vector<std::string> names(ndims);
     // property values for SliceMDHisto
@@ -75,7 +72,6 @@ public:
       names[i] = "x_" + boost::lexical_cast<std::string>(i);
       if (nonIntegr.end() != std::find(nonIntegr.begin(), nonIntegr.end(), i)) {
         size_t nbins = 3 + i;
-        size *= nbins;
         numberOfBins[i] = nbins;
         // if it's a non-integrated dimension - don't slice
         end[i] = static_cast<coord_t>(nbins);
@@ -482,7 +478,6 @@ public:
     nonInteger[0] = 0;
     nonInteger[1] = 1;
     const size_t ndims = 4;
-    size_t size = 1;
 
     // property values for CreateMDHistoWorkspace
     std::vector<size_t> numberOfBins(ndims);
@@ -494,7 +489,6 @@ public:
       names[i] = "x_" + boost::lexical_cast<std::string>(i);
       if (nonInteger.end() != std::find(nonInteger.begin(), nonInteger.end(), i)) {
         size_t nbins = 3 + i;
-        size *= nbins;
         numberOfBins[i] = nbins;
         // if it's a non-integrated dimension - don't slice
         end[i] = static_cast<coord_t>(nbins);

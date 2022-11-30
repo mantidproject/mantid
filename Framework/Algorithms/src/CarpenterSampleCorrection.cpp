@@ -77,14 +77,14 @@ void CarpenterSampleCorrection::exec() {
   const auto NUM_HIST = static_cast<int64_t>(inputWksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*absWksp))
   for (int64_t i = 0; i < NUM_HIST; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto &y = absWksp->mutableY(i);
     for (size_t j = 0; j < y.size(); j++) {
       y[j] = 1.0 / y[j];
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Compute the overall correction (= 1/A - MS ) to multiply by
   auto correctionWksp = minus(absWksp, msWksp);

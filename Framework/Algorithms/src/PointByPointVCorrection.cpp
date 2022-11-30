@@ -59,7 +59,7 @@ void PointByPointVCorrection::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS1, *inputWS2, *outputWS))
   for (int i = 0; i < nHist; i++) // Looping on all histograms
   {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     outputWS->setSharedX(i, inputWS1->sharedX(i));
 
@@ -131,9 +131,9 @@ void PointByPointVCorrection::exec() {
     check_masks(inputWS1, inputWS2, i);
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   outputWS->setYUnitLabel("Counts normalised to a vanadium");
   outputWS->setDistribution(false);

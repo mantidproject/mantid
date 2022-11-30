@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/NexusFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include <nexus/NeXusFile.hpp>
 #include <vector>
 
@@ -33,7 +34,7 @@ data.</LI>
 
 @author Martyn Gigg, Tessella plc
 */
-class DLLExport LoadNexusLogs : public API::NexusFileLoader {
+class MANTID_DATAHANDLING_DLL LoadNexusLogs : public API::NexusFileLoader {
 public:
   /// Default constructor
   LoadNexusLogs();

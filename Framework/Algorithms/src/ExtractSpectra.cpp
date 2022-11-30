@@ -202,7 +202,7 @@ void ExtractSpectra::execEvent() {
   Progress prog(this, 0.0, 1.0, eventW->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW))
   for (int i = 0; i < static_cast<int>(eventW->getNumberHistograms()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     EventList &el = eventW->getSpectrum(i);
 
     switch (el.getEventType()) {
@@ -231,9 +231,9 @@ void ExtractSpectra::execEvent() {
     }
     propagateBinMasking(*eventW, i);
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /// Propagate bin masking if there is any.
@@ -245,7 +245,10 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i
       if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
         filteredMask[maskIndex - m_minX] = mask.second;
     }
-    workspace.setMaskedBins(i, filteredMask);
+    if (filteredMask.size() > 0)
+      workspace.setMaskedBins(i, filteredMask);
+    else
+      workspace.setUnmaskedBins(i);
   }
 }
 

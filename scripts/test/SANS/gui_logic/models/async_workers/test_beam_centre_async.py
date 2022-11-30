@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from mock import call
+from unittest.mock import call
 
 from sans.common.enums import DetectorType
 from sans.gui_logic.models.async_workers.beam_centre_async import BeamCentreAsync

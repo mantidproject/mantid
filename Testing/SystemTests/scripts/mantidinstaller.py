@@ -15,9 +15,6 @@ import time
 
 # global script path
 scriptLog = None
-# distributions
-RPMBASED = ['redhat', 'centos', 'fedora']
-DEBBASED = ['ubuntu', 'debian']
 
 
 def createScriptLog(path):
@@ -77,38 +74,11 @@ def get_installer(package_dir, do_install=True):
         @param package_dir :: The directory to search for packages
         @param do_install :: True if installation is to be performed
     """
-    # == for testing conda build of mantid-framework ==========
     import os
     if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
         return CondaInstaller(package_dir, do_install)
-    # =========================================================
-    system = platform.system()
-    if system == 'Windows':
-        return NSISInstaller(package_dir, do_install)
-    elif system == 'Linux':
-        dist = linux_distro_distributor().lower()
-        if any(map(lambda name: name in dist, DEBBASED)):
-            return DebInstaller(package_dir, do_install)
-        elif any(map(lambda name: name in dist, RPMBASED)):
-            return RPMInstaller(package_dir, do_install)
-        else:
-            scriptfailure('Unknown Linux flavour: %s' % str(dist))
-    elif system == 'Darwin':
-        return DMGInstaller(package_dir, do_install)
     else:
         raise scriptfailure("Unsupported platform")
-
-
-def linux_distro_distributor():
-    """Extract the distributor for the current Linux distribution
-    """
-    try:
-        lsb_descr = subprocess.check_output('lsb_release --id', shell=True,
-                                            stderr=subprocess.STDOUT).decode('utf-8')
-        return lsb_descr.strip()[len('Distributor ID:')+1:].strip()
-    except subprocess.CalledProcessError as exc:
-        return f'Unknown distribution: lsb_release --id failed {exc}'
-
 
 def run(cmd):
     """Run a command in a subprocess"""
@@ -166,156 +136,9 @@ class MantidInstaller(object):
         raise NotImplementedError("Override the do_uninstall method")
 
 
-class NSISInstaller(MantidInstaller):
-    """Uses an NSIS installer
-    to install Mantid
-    """
-
-    def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'mantid*.exe', do_install)
-        package = os.path.basename(self.mantidInstaller)
-        install_prefix = 'C:/'
-        if 'mantidnightly' in package:
-            install_prefix += 'MantidNightlyInstall'
-        elif 'mantidunstable' in package:
-            install_prefix += 'MantidUnstableInstall'
-        else:
-            install_prefix += 'MantidInstall'
-
-        self.uninstallPath = install_prefix + '/Uninstall.exe'
-        self.python_cmd = install_prefix + '/bin/mantidpython.bat'
-
-    def do_install(self):
-        """
-            The NSIS installer spawns a new process and returns immediately.
-            We use the start command with the /WAIT option to make it stay around
-            until completion.
-            The chained "&& exit 1" ensures that if the return code of the
-            installer > 0 then the resulting start process exits with a return code
-            of 1 so we can pick this up as a failure
-        """
-        run('start "Installer" /B /WAIT ' + self.mantidInstaller + ' /S')
-
-    def do_uninstall(self):
-        "Runs the uninstall exe"
-        # The NSIS uninstaller actually runs a new process & detaches itself from the parent
-        # process so that it is able to remove itself. This means that the /WAIT has no affect
-        # because the parent appears to finish almost immediately
-        run(self.uninstallPath + ' /S')
-        # Wait for 30 seconds for it to finish
-        log("Waiting 30 seconds for uninstaller to finish")
-        time.sleep(30)
-
-
-class LinuxInstaller(MantidInstaller):
-    """Defines common properties for linux-based packages"""
-
-    def __init__(self, package_dir, filepattern,
-                 do_install):
-        MantidInstaller.__init__(self, package_dir, filepattern, do_install)
-        package = os.path.basename(self.mantidInstaller)
-        install_prefix = '/opt'
-        if 'mantidnightly' in package:
-            install_prefix += '/mantidnightly'
-        elif 'mantidunstable' in package:
-            install_prefix += '/mantidunstable'
-        else:
-            install_prefix += '/Mantid'
-
-        if 'python3' in package:
-            install_prefix += '-python3'
-
-        self.python_cmd = install_prefix + '/bin/mantidpython'
-
-
-class DebInstaller(LinuxInstaller):
-    """Uses a deb package to install mantid
-    """
-
-    def __init__(self, package_dir, do_install):
-        LinuxInstaller.__init__(self, package_dir, 'mantid*.deb', do_install)
-
-    def do_install(self):
-        """Uses gdebi to run the install
-        """
-        run('sudo gdebi -n ' + self.mantidInstaller)
-
-    def do_uninstall(self):
-        """Removes the debian package
-        """
-        package_name = os.path.basename(self.mantidInstaller).split("_")[0]
-        run('sudo dpkg --purge %s' % package_name)
-
-
-class RPMInstaller(LinuxInstaller):
-    """Uses a rpm package to install mantid
-    """
-
-    def __init__(self, package_dir, do_install):
-        LinuxInstaller.__init__(self, package_dir, 'mantid*.rpm', do_install)
-
-    def do_install(self):
-        """Uses yum to run the install. Current user must be in sudoers
-        """
-        try:
-            run('sudo rpm -e ' + self.mantidInstaller)
-        except Exception:
-            # Assume it doesn't exist
-            pass
-        try:
-            run('sudo yum -y install ' + self.mantidInstaller)
-        except Exception as exc:
-            # This reports an error if the same package is already installed
-            if 'does not update installed package' in str(exc):
-                log("Current version is up-to-date, continuing.\n")
-            else:
-                raise
-
-    def do_uninstall(self):
-        """Removes the rpm package
-        """
-        package_name = os.path.basename(self.mantidInstaller).split("-")[0]
-        run('sudo yum -y erase %s' % package_name)
-
-
-class DMGInstaller(MantidInstaller):
-    """Uses an OS X dmg file to install mantid
-    """
-    def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'mantid*.dmg', do_install)
-        package = os.path.basename(self.mantidInstaller)
-        if 'mantidnightly' in package:
-            self.bundle_name = 'MantidWorkbenchNightly.app'
-        elif 'mantidunstable' in package:
-            self.bundle_name = 'MantidWorkbenchUnstable.app'
-        else:
-            self.bundle_name = 'MantidWorkbench.app'
-
-        self.python_cmd = f'/Applications/{self.bundle_name}/Contents/MacOS/mantidpython'
-
-    def do_install(self):
-        """Mounts the dmg and copies the application into the right place.
-        """
-        p = subprocess.Popen(['hdiutil','attach',self.mantidInstaller],
-                             stdin=subprocess.PIPE,stdout=subprocess.PIPE)
-        p.stdin.write(b'yes') # This accepts the GPL
-        p.communicate()[0] # This captures (and discards) the GPL text
-        mantidInstallerName = os.path.basename(self.mantidInstaller)
-        mantidInstallerName = mantidInstallerName.replace('.dmg','')
-        try:
-            run(f'sudo cp -a /Volumes/{mantidInstallerName}/{self.bundle_name} /Applications/')
-        finally:
-            run(f'hdiutil detach /Volumes/{mantidInstallerName}/')
-
-    def do_uninstall(self):
-        # protect against empty bundle name removing /Applications
-        if self.bundle_name:
-            run(f'sudo rm -fr /Applications/{self.bundle_name}')
-
-
 class CondaInstaller(MantidInstaller):
 
-    python_args = "" # not mantidpython. just normal python
+    python_args = ""  # just normal python
 
     def __init__(self, package_dir, do_install=True):
         filepattern = "mantid-framework*.tar.bz2"
@@ -334,7 +157,7 @@ class CondaInstaller(MantidInstaller):
         run('%s %s' % (script, self.mantidInstaller))
 
     def do_uninstall(self):
-        """Removes the debian package
+        """Removes the conda package
         """
         # run('rm -rf %s' % self.conda_mantid_env_prefix)
 

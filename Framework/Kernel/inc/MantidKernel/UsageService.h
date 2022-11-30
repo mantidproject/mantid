@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
@@ -101,7 +102,7 @@ protected:
   /// generates the message body for a feature usage message
   virtual std::string generateFeatureUsageMessage();
   /// sends a report over the internet
-  virtual int sendReport(const std::string &message, const std::string &url);
+  virtual Kernel::InternetHelper::HTTPStatus sendReport(const std::string &message, const std::string &url);
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<UsageServiceImpl>;
@@ -115,8 +116,8 @@ private:
   /// Send featureUsageReport
   void sendFeatureUsageReport(const bool synchronous);
 
-  int sendStartupAsyncImpl(const std::string &message);
-  int sendFeatureAsyncImpl(const std::string &message);
+  InternetHelper::HTTPStatus sendStartupAsyncImpl(const std::string &message);
+  InternetHelper::HTTPStatus sendFeatureAsyncImpl(const std::string &message);
 
   /// A method to handle the timerCallbacks
   void timerCallback(Poco::Timer &);
@@ -140,9 +141,9 @@ private:
   Types::Core::DateAndTime m_startTime;
 
   /// Async method for sending startup notifications
-  Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_startupActiveMethod;
+  Poco::ActiveMethod<InternetHelper::HTTPStatus, std::string, UsageServiceImpl> m_startupActiveMethod;
   /// Async method for sending feature notifications
-  Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
+  Poco::ActiveMethod<InternetHelper::HTTPStatus, std::string, UsageServiceImpl> m_featureActiveMethod;
 
   /// Stores the base url of the usage system
   std::string m_url;

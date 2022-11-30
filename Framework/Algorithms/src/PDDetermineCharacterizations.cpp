@@ -11,6 +11,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -233,7 +234,7 @@ double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std:
       const std::string units = run.getProperty(name)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        double value = run.getLogAsSingleValue(name);
+        double value = run.getLogAsSingleValue(name, Kernel::Math::TimeAveragedMean);
         if (value == 0.) {
           std::stringstream msg;
           msg << "'" << name << "' has a mean value of zero " << units;

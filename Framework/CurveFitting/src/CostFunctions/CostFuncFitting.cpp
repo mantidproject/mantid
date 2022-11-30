@@ -9,7 +9,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidAPI/IConstraint.h"
-#include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidCurveFitting/EigenJacobian.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Exception.h"
 
@@ -119,19 +120,26 @@ void CostFuncFitting::checkValidity() const {
 /**
  * Calculates covariance matrix for fitting function's active parameters.
  */
-void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel) {
+void CostFuncFitting::calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel) {
   // construct the jacobian
-  GSLJacobian J(*m_function, m_values->size());
+  EigenJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
-  auto j = J.getJ();
-  assert(j->size2 == na);
+  const auto &j = J.getJ();
+  assert(static_cast<size_t>(j.cols()) == na);
   covar.resize(na, na);
 
   // calculate the derivatives
   m_function->functionDeriv(*m_domain, J);
 
   // let the GSL to compute the covariance matrix
-  gsl_multifit_covar(j, epsrel, covar.gsl());
+  EigenMatrix covarTr(covar.tr());
+  EigenMatrix tempJTr;
+  tempJTr = j.transpose();
+  gsl_matrix_const_view tempJTrGSL = getGSLMatrixView_const(tempJTr.inspector());
+  gsl_matrix_view covarTrGSL = getGSLMatrixView(covarTr.mutator());
+
+  gsl_multifit_covar(&tempJTrGSL.matrix, epsrel, &covarTrGSL.matrix);
+  covar = covarTr.tr();
 }
 
 /** Calculates covariance matrix
@@ -139,9 +147,9 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar, double epsrel)
  * @param covar :: Returned covariance matrix
  * @param epsrel :: Is used to remove linear-dependent columns
  */
-void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
+void CostFuncFitting::calCovarianceMatrix(EigenMatrix &covar, double epsrel) {
   checkValidity();
-  GSLMatrix c;
+  EigenMatrix c;
   calActiveCovarianceMatrix(c, epsrel);
 
   size_t np = m_function->nParams();
@@ -159,7 +167,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
     covar = c;
   } else {
     // else do the transformation
-    GSLMatrix tm;
+    EigenMatrix tm;
     calTransformationMatrixNumerically(tm);
     covar = tm.tr() * c * tm;
   }
@@ -171,7 +179,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
  *   It can be calculated with calCovarianceMatrix().
  * @param chi2 :: The final chi-squared of the fit.
  */
-void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
+void CostFuncFitting::calFittingErrors(const EigenMatrix &covar, double chi2) {
   checkValidity();
   size_t np = m_function->nParams();
   auto covarMatrix = std::shared_ptr<Kernel::Matrix<double>>(new Kernel::Matrix<double>(np, np));
@@ -207,7 +215,7 @@ void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
  * Calculate the transformation matrix T by numeric differentiation
  * @param tm :: The output transformation matrix.
  */
-void CostFuncFitting::calTransformationMatrixNumerically(GSLMatrix &tm) {
+void CostFuncFitting::calTransformationMatrixNumerically(EigenMatrix &tm) {
   const double epsilon = std::numeric_limits<double>::epsilon() * 100;
   size_t np = m_function->nParams();
   size_t na = nParams();
@@ -256,7 +264,7 @@ void CostFuncFitting::reset() const {
  * Copy the parameter values from a GSLVector.
  * @param params :: A vector to copy the parameters from
  */
-void CostFuncFitting::setParameters(const GSLVector &params) {
+void CostFuncFitting::setParameters(const EigenVector &params) {
   auto np = nParams();
   if (np != params.size()) {
     throw Kernel::Exception::FitSizeWarning(params.size(), np);
@@ -271,7 +279,7 @@ void CostFuncFitting::setParameters(const GSLVector &params) {
  * Copy the parameter values to a GSLVector.
  * @param params :: A vector to copy the parameters to
  */
-void CostFuncFitting::getParameters(GSLVector &params) const {
+void CostFuncFitting::getParameters(EigenVector &params) const {
   auto np = nParams();
   if (params.size() != np) {
     params.resize(np);
@@ -370,10 +378,8 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
 
   m_value = 0.0;
 
-  if (evalDeriv) {
-    m_der.resize(numParams);
-    m_der.zero();
-  }
+  m_der.resize(numParams);
+  m_der.zero();
   if (evalHessian) {
     m_hessian.resize(numParams, numParams);
     m_hessian.zero();
@@ -441,7 +447,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv, bool evalHessian) const 
 /**
  * Return cached or calculate the drivatives.
  */
-const GSLVector &CostFuncFitting::getDeriv() const {
+const EigenVector &CostFuncFitting::getDeriv() const {
   if (m_pushed) {
     return m_der;
   }
@@ -454,7 +460,7 @@ const GSLVector &CostFuncFitting::getDeriv() const {
 /**
  * Return cached or calculate the Hessian.
  */
-const GSLMatrix &CostFuncFitting::getHessian() const {
+const EigenMatrix &CostFuncFitting::getHessian() const {
   if (m_pushed) {
     return m_hessian;
   }

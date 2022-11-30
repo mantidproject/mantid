@@ -78,6 +78,10 @@ std::map<std::string, std::string> LorentzCorrection::validateInputs() {
   // check units if the SCD option is selected
   if (processingType == TOF_SCD) {
     MatrixWorkspace_const_sptr wksp = this->getProperty(PropertyNames::INPUT_WKSP);
+    if (!wksp) {
+      result[PropertyNames::INPUT_WKSP] = "The workspace must be a MatrixWorkspace.";
+      return result;
+    }
     // code is a variant of private method from WorkspaceUnitValidator
     const auto unit = wksp->getAxis(0)->unit();
     if ((!unit) || (unit->unitID().compare("Wavelength"))) {
@@ -125,7 +129,7 @@ void LorentzCorrection::processTOF_SCD(MatrixWorkspace_sptr &wksp, Progress &pro
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int64_t i = 0; i < numHistos; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i))
       continue;
@@ -151,9 +155,9 @@ void LorentzCorrection::processTOF_SCD(MatrixWorkspace_sptr &wksp, Progress &pro
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp, Progress &prog) {
@@ -165,7 +169,7 @@ void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp, Progress &prog
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int64_t i = 0; i < numHistos; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
 
     if (!spectrumInfo.hasDetectors(i))
       continue;
@@ -189,9 +193,9 @@ void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp, Progress &prog
 
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 } // namespace Mantid::Algorithms

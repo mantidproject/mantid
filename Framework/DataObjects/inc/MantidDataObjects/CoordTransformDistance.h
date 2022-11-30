@@ -8,9 +8,9 @@
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/VectorParameter.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -36,7 +36,7 @@ DECLARE_VECTOR_PARAMETER(DimensionsUsedVectorParam, bool)
  * @author Janik Zikovsky
  * @date 2011-04-25 14:48:33.517020
  */
-class DLLExport CoordTransformDistance : public Mantid::API::CoordTransform {
+class MANTID_DATAOBJECTS_DLL CoordTransformDistance : public Mantid::API::CoordTransform {
 public:
   CoordTransformDistance(const size_t inD, const coord_t *center, const bool *dimensionsUsed, const size_t outD = 1,
                          const std::vector<Kernel::V3D> &eigenvects = std::vector<Kernel::V3D>(0),

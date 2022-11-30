@@ -15,6 +15,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <algorithm>
+
 namespace Mantid::DataHandling {
 DECLARE_ALGORITHM(ISISJournalGetExperimentRuns)
 
@@ -54,7 +56,7 @@ std::vector<IJournal::RunData> getRuns(IJournal *journal, std::string const &inv
  * @returns : a table workspace containing one row for each run, with columns
  * for the data fields of interest (name, number and title)
  */
-ITableWorkspace_sptr convertRunDataToTable(std::vector<IJournal::RunData> &runs) {
+ITableWorkspace_sptr convertRunDataToTable(const std::vector<IJournal::RunData> &runs) {
   auto workspace = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
   workspace->addColumn("str", "Name");
@@ -63,7 +65,11 @@ ITableWorkspace_sptr convertRunDataToTable(std::vector<IJournal::RunData> &runs)
 
   for (auto &run : runs) {
     TableRow row = workspace->appendRow();
-    row << run[RUN_NAME] << run[RUN_NUMBER] << run[RUN_TITLE];
+    const auto runNameIt = run.find(RUN_NAME);
+    const auto runNumberIt = run.find(RUN_NUMBER);
+    const auto runTitleIt = run.find(RUN_TITLE);
+    if (runNameIt != run.cend() && runNumberIt != run.cend() && runTitleIt != run.cend())
+      row << runNameIt->second << runNumberIt->second << runTitleIt->second;
   }
   return workspace;
 }
@@ -74,8 +80,8 @@ ITableWorkspace_sptr convertRunDataToTable(std::vector<IJournal::RunData> &runs)
 std::vector<std::string> getInstruments() {
   auto instruments = std::vector<std::string>();
   const auto &instrInfo = ConfigService::Instance().getFacility("ISIS").instruments();
-  for (const auto &instrument : instrInfo)
-    instruments.emplace_back(instrument.name());
+  std::transform(instrInfo.cbegin(), instrInfo.cend(), std::back_inserter(instruments),
+                 [](const auto instrument) { return instrument.name(); });
   return instruments;
 }
 

@@ -339,7 +339,7 @@ private:
 
   public:
     TestableSpaceGroupFactory() : SpaceGroupFactoryImpl() {}
-    ~TestableSpaceGroupFactory() override {}
+    ~TestableSpaceGroupFactory() override = default;
   };
 
   class MockSpaceGroupGenerator : public AbstractSpaceGroupGenerator {

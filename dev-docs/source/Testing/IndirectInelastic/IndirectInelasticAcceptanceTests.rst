@@ -37,7 +37,8 @@ Data reduction
 #. Make sure that you keep the ``_calib`` workspace, it is needed for the next test
 #. Enter ``Run number`` 59057-59059 and check ``Sum Files``
 #. Set ``Reflection`` to 004
-#. This should produce a new ``_calib`` workspace, with ``004`` in the name
+#. This should produce a new ``_calib`` workspace, with ``004`` in the name.
+#. Before moving on, set ``Reflection`` to 002
 
 **Time required 5-10 minutes**
 
@@ -45,11 +46,12 @@ Data reduction
 
 #. Open ``Interfaces`` > ``Indirect`` > ``Data reduction``
 #. Make sure ``Instrument`` is set to ``IRIS``
+#. Make sure the tab is set to ``ISIS Energy Transfer``
 #. Check the ``Sum Files`` box
 #. In the ``Run files`` box enter ``26184-26185``
 #. Click ``Run``
 #. Check the ``Use Calib File`` box
-#. Change ``File`` to ``Workspace`` and choose the ``_calib`` workspace previously created (From the previous test)
+#. Change ``File`` to ``Workspace`` and choose the ``_calib`` workspace previously created (55878 from the previous test)
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
 #. Choose ``Plot spectrum``, note the number of spectra, should be 51
@@ -136,8 +138,8 @@ Data analysis I(Q, T)
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
-#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 6 table. **NB** keep this workspace for the next test
-#. Click ``Plot Current View`` this should plot the same data as the preview window
+#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a workspace with 51 histograms and 86 bins. **NB** keep this workspace for the next test
+#. Click ``Plot Current preview`` this should plot the same data as the preview window
 #. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
 
@@ -159,7 +161,8 @@ Data analysis I(Q, T) Fit
 #. Check ``All Spectra``
 #. Click ``Add`` and close the dialogue.
 #. Set ``Exponential`` to 1
-#. Set ``EndX`` to 0.14
+#. In the data table set ``EndX`` for WS Index 0 to 0.14
+#. Using shift select the ``EndX`` for all spectra and click unify range, this should set the ``EndX`` for all spectra to 0.14
 #. Click ``Run``
 #. This should produce a fit and a difference plot in the window
 #. Click ``Plot current preview`` this should open a plot with three datasets plotted

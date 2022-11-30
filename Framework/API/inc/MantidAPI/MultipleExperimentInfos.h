@@ -21,6 +21,7 @@ class MANTID_API_DLL MultipleExperimentInfos {
 public:
   MultipleExperimentInfos() = default;
   MultipleExperimentInfos(const MultipleExperimentInfos &other);
+  MultipleExperimentInfos &operator=(const MultipleExperimentInfos &other);
   virtual ~MultipleExperimentInfos() = default;
 
   ExperimentInfo_sptr getExperimentInfo(const uint16_t expInfoIndex);

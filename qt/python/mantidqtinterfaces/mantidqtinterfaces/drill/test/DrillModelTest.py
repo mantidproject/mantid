@@ -240,6 +240,47 @@ class DrillModelTest(unittest.TestCase):
         self.assertDictEqual(self.model.getProcessingParameters(0), params)
 
     @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillTask")
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.RundexSettings")
+    def test_processGroupByGroup(self, mSettings, mTask):
+        mSettings.GROUPED_COLUMNS = {"a1": ["p1", "p2"]}
+        self.model.acquisitionMode = "a1"
+        self.model.algorithm = "algo"
+        self.model._parameters = []
+        g0 = mock.Mock()
+        g0.getName.return_value = "g0"
+        g1 = mock.Mock()
+        g1.getName.return_value = "g1"
+        s0 = mock.Mock()
+        s0.getGroup.return_value = g0
+        s0.getParameterValues.return_value = {"p1": "v0", "p2": "v0",
+                                              "p3": "v0",
+                                              "OutputWorkspace": "out"}
+        s1 = mock.Mock()
+        s1.getGroup.return_value = g0
+        s1.getParameterValues.return_value = {"p1": "v1", "p2": "v1",
+                                              "p3": "v1"}
+        s2 = mock.Mock()
+        s2.getGroup.return_value = g1
+        s2.getParameterValues.return_value = {"p1": "v2", "p2": "v2",
+                                              "p3": "v2"}
+        s3 = mock.Mock()
+        s3.getGroup.return_value = None
+        s3.getParameterValues.return_value = {"p1": "v3", "p2": "v3",
+                                              "p3": "v3"}
+        g0.getSamples.return_value = [s0, s1]
+        g0.getMaster.return_value = s0
+        g1.getSamples.return_value = [s2]
+        g1.getMaster.return_value = None
+        self.model._samples = [s0, s1, s2, s3]
+        self.assertFalse(self.model.processGroupByGroup([3]))
+        self.assertTrue(self.model.processGroupByGroup([0, 1, 2, 3]))
+        calls = [mock.call("g0", "algo", p1='v0,v1', p2='v0,v1', p3="v0",
+                           OutputWorkspace="out"),
+                 mock.call("g1", "algo", p1='v2', p2='v2', p3="v2")]
+        mTask.assert_has_calls(calls, any_order=True)
+        self.model.tasksPool.addProcesses.assert_called_once()
+
+    @mock.patch("mantidqtinterfaces.drill.model.DrillModel.DrillTask")
     def test_process(self, mTask):
         self.model.getProcessingParameters = mock.Mock()
         self.model.getProcessingParameters.return_value = {}
@@ -254,26 +295,6 @@ class DrillModelTest(unittest.TestCase):
         self.model.process([2])
         mTask.assert_not_called()
         self.model.tasksPool.addProcesses.assert_called_once_with([])
-
-    def test_onTaskStated(self):
-        s0 = mock.Mock()
-        self.model._samples = [s0]
-        self.model._onTaskStarted(0)
-        s0.onProcessStarted.assert_called_once()
-
-    def test_onTaskSuccess(self):
-        self.model.exportModel = mock.Mock()
-        s0 = mock.Mock()
-        self.model._samples = [s0]
-        self.model._onTaskSuccess(0)
-        s0.onProcessSuccess.assert_called_once()
-        self.model.exportModel.run.assert_called_once_with(s0)
-
-    def test_onTaskError(self):
-        s0 = mock.Mock()
-        self.model._samples = [s0]
-        self.model._onTaskError(0, "test")
-        s0.onProcessError.assert_called_once_with("test")
 
     def test_onProcessingProgress(self):
         self.model.progressUpdate = mock.Mock()

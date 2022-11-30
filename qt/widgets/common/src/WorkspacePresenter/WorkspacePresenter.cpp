@@ -18,7 +18,7 @@ namespace MantidQt::MantidWidgets {
 WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView *view)
     : m_view(view), m_adapter(std::make_unique<ADSAdapter>()) {}
 
-WorkspacePresenter::~WorkspacePresenter() {}
+WorkspacePresenter::~WorkspacePresenter() = default;
 
 /// Initialises the view weak pointer for the Workspace Provider.
 void WorkspacePresenter::init() { m_adapter->registerPresenter(m_view->getPresenterWeakPtr()); }

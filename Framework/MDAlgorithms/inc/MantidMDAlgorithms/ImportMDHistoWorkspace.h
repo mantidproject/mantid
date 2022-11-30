@@ -17,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2012-06-20
 */
-class DLLExport ImportMDHistoWorkspace : public ImportMDHistoWorkspaceBase {
+class MANTID_MDALGORITHMS_DLL ImportMDHistoWorkspace : public ImportMDHistoWorkspaceBase {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

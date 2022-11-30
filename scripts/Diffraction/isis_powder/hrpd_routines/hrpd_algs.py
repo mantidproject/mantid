@@ -95,7 +95,7 @@ def get_run_details(run_number_string, inst_settings, is_vanadium):
     grouping_file_name = inst_settings.grouping_file_name
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium, empty_run_number=empty_run,
+                                     is_vanadium_run=is_vanadium, empty_inst_run_number=empty_run,
                                      vanadium_string=vanadium_run, grouping_file_name=grouping_file_name)
 
 

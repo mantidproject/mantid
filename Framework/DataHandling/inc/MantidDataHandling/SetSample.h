@@ -56,6 +56,7 @@ private:
                                             const Geometry::ReferenceFrame &refFrame) const;
   std::string createCylinderLikeXML(const Kernel::PropertyManager &args, const Geometry::ReferenceFrame &refFrame,
                                     bool hollow, const std::string &id = "sample-shape") const;
+  std::string createSphereXML(const Kernel::PropertyManager &args) const;
   void validateGeometry(std::map<std::string, std::string> &errors, const Kernel::PropertyManager &args,
                         const std::string &flavour);
   void validateMaterial(std::map<std::string, std::string> &errors, const Kernel::PropertyManager &inputArgs,

@@ -34,7 +34,7 @@ def convert_value_to_arg_string(value):
             kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key),
                                             convert_value_to_arg_string(val)))
         return "{{{}}}".format(', '.join(kv_pairs))
-    if isinstance(value, (float, np.float)):
+    if isinstance(value, float):
         return str(round_to_sig_figs(value, 5))
     return str(value)
 

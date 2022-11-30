@@ -12,7 +12,6 @@
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QRadioButton>
 
 using namespace MantidQt::CustomDialogs;

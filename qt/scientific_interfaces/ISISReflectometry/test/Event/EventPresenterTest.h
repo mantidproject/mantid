@@ -186,6 +186,7 @@ public:
 
   void testChangingSliceCountNotifiesMainPresenter() {
     auto presenter = makePresenter();
+    presenter.notifySliceTypeChanged(SliceType::UniformEven);
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyUniformSliceCountChanged(1);
     verifyAndClear();
@@ -195,6 +196,20 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifyCustomSliceValuesChanged("");
+    verifyAndClear();
+  }
+
+  void testNoSlicingOccursWhenSliceTypeIsNone() {
+    auto presenter = makePresenter();
+    presenter.notifySliceTypeChanged(SliceType::None);
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(0);
+    presenter.notifyUniformSliceCountChanged(2);
+    presenter.notifyUniformSecondsChanged(2);
+    presenter.notifyCustomSliceValuesChanged("string");
+    presenter.notifyLogSliceBreakpointsChanged("");
+    presenter.notifyLogBlockNameChanged("");
+
     verifyAndClear();
   }
 

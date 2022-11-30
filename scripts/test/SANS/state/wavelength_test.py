@@ -46,6 +46,26 @@ class StateWavelengthTest(unittest.TestCase):
         state.wavelength_step_type = RangeStepType.NOT_SET
         self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.NOT_SET)
 
+    def test_convert_step_type_from_LIN_to_RANGE_LIN(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.LIN
+        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LIN)
+
+    def test_convert_step_type_from_LOG_to_RANGE_LOG(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.LOG
+        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LOG)
+
+    def test_convert_step_type_does_not_change_RANGE_LIN(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.RANGE_LIN
+        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LIN)
+
+    def test_convert_step_type_does_not_change_RANGE_LOG(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.RANGE_LOG
+        self.assertEqual(state.wavelength_step_type_range,  RangeStepType.RANGE_LOG)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder

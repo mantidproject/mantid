@@ -150,7 +150,7 @@ def quickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
     first_run_name=str(run_numbers[0])
     dqq = NRCalculateSlitResolution(Workspace=first_run_name+'_IvsQ')
     stitched_name=stitchedWorkspaceName(run_numbers[0], run_numbers[-1])
-    Stitch1DMany(InputWorkspaces=reduced_runs, OutputWorkspace=stitched_name, Params='-'+str(dqq), ScaleRHSWorkspace=1)
+    Stitch1DMany(InputWorkspaces=reduced_runs, OutputWorkspace=stitched_name, Params='-'+str(dqq), IndexOfReference=0)
 
 
 def twoAngleFit(workspace_name, scalefactor, expected_fit_params, expected_fit_covariance):

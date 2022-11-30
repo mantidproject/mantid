@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h"
 
 namespace Mantid {
@@ -15,7 +16,7 @@ namespace MDAlgorithms {
 
   @date 2012-06-21
 */
-class DLLExport CreateMDHistoWorkspace : public MDAlgorithms::ImportMDHistoWorkspaceBase {
+class MANTID_MDALGORITHMS_DLL CreateMDHistoWorkspace : public MDAlgorithms::ImportMDHistoWorkspaceBase {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

@@ -1,0 +1,1 @@
+- Fixed a bug where property values were shortened in history

@@ -13,7 +13,6 @@
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 namespace Mantid {
@@ -24,7 +23,7 @@ namespace MDAlgorithms {
 @date 01/10/2010
 */
 
-class DLLExport InvalidParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
+class MANTID_MDALGORITHMS_DLL InvalidParameterParser : public Mantid::API::ImplicitFunctionParameterParser {
 public:
   InvalidParameterParser();
   Mantid::API::ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) override;

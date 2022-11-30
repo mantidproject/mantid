@@ -45,6 +45,17 @@ namespace MantidWidgets {
 
 class InstrumentRenderer;
 
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IInstrumentActor {
+public:
+  virtual std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const = 0;
+  virtual std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const = 0;
+  virtual const Mantid::Geometry::ComponentInfo &componentInfo() const = 0;
+  virtual const Mantid::Geometry::DetectorInfo &detectorInfo() const = 0;
+
+  virtual size_t getWorkspaceIndex(size_t index) const = 0;
+  virtual void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const = 0;
+};
+
 /**
 \class  InstrumentActor
 \brief  InstrumentActor class is wrapper actor for the instrument.
@@ -57,7 +68,7 @@ interface for picked ObjComponent and other
 operation for selective rendering of the instrument
 
 */
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentActor : public QObject, public IInstrumentActor {
   Q_OBJECT
 public:
   /// Invalid workspace index in detector index to workspace index lookup
@@ -84,12 +95,11 @@ public:
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
-  std::vector<size_t> getMonitors() const;
-  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
+  std::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const override;
   /// Get the associated data workspace
-  std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
-  const Mantid::Geometry::ComponentInfo &componentInfo() const;
-  const Mantid::Geometry::DetectorInfo &detectorInfo() const;
+  std::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const override;
+  const Mantid::Geometry::ComponentInfo &componentInfo() const override;
+  const Mantid::Geometry::DetectorInfo &detectorInfo() const override;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
   std::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
   /// set the mask workspace
@@ -112,13 +122,13 @@ public:
   /// Get the color map.
   const ColorMap &getColorMap() const;
   /// Load a new color map from a file
-  void loadColorMap(const QString & /*fname*/, bool reset_colors = true);
+  void loadColorMap(const std::pair<QString, bool> & /*cmap*/, bool reset_colors = true);
   /// Change the colormap scale type.
   void changeScaleType(int /*type*/);
   /// Change the colormap power scale exponent.
   void changeNthPower(double /*nth_power*/);
   /// Get the file name of the current color map.
-  QString getCurrentColorMap() const { return m_currentCMap; }
+  std::pair<QString, bool> getCurrentColorMap() const { return m_currentCMap; }
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool /*on*/);
   /// extracts a mask workspace from the visualised workspace
@@ -170,7 +180,7 @@ public:
   /// Get displayed color of a detector by its index.
   GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector Index.
-  size_t getWorkspaceIndex(size_t index) const;
+  size_t getWorkspaceIndex(size_t index) const override;
   /// Get the workspace indices of a list of detectors by their detector Index
   std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const;
   /// Get the integrated counts of a detector by its detector Index.
@@ -180,7 +190,7 @@ public:
   /// Sum the counts in detectors.
   void sumDetectors(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y) const;
   /// Calc indexes for min and max bin values
-  void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const;
+  void getBinMinMaxIndex(size_t wi, size_t &imin, size_t &imax) const override;
 
   /// Update the detector colors to match the integrated counts within the
   /// current integration range.
@@ -254,9 +264,9 @@ private:
   mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// A helper object that keeps bin masking data.
   mutable MaskBinsData m_maskBinsData;
-  QString m_currentCMap;
+  std::pair<QString, bool> m_currentCMap;
   /// integrated spectra
-  std::vector<double> m_specIntegrs;
+  std::vector<double> m_integratedSignal;
   /// The workspace data and bin range limits
   double m_WkspBinMinValue, m_WkspBinMaxValue;
   // The user requested data and bin ranges

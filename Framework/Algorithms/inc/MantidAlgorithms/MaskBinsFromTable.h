@@ -17,7 +17,7 @@ namespace Algorithms {
 
   @date 2012-06-04
 */
-class MANTID_ALGORITHMS_DLL MaskBinsFromTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsFromTable final : public API::Algorithm {
 public:
   MaskBinsFromTable();
 

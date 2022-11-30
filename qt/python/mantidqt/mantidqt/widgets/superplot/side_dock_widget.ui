@@ -24,7 +24,7 @@
     <property name="topMargin">
      <number>0</number>
     </property>
-    <item row="1" column="0" colspan="3">
+    <item row="2" column="0" colspan="3">
      <widget class="QTreeWidget" name="workspacesList">
       <property name="selectionMode">
        <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -63,8 +63,27 @@
       </property>
      </widget>
     </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="normaliseCheckbox">
+      <property name="text">
+       <string>Normalise by max</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0" colspan="2">
      <widget class="WorkspaceSelector" name="workspaceSelector">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>1</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="toolTip">
        <string>Select a workspace</string>
       </property>

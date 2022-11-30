@@ -48,7 +48,7 @@ multiperiod file)
 @author Sofia Antony,ISIS,RAL
 @date 12/04/2010
 */
-class DLLExport LoadRawBin0 : public LoadRawHelper {
+class MANTID_DATAHANDLING_DLL LoadRawBin0 : public LoadRawHelper {
 public:
   /// Default constructor
   LoadRawBin0();

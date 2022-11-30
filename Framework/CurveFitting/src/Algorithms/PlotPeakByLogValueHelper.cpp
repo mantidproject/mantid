@@ -50,7 +50,7 @@ void parseValueRange(const std::string &index, double &start, double &end, int &
       end = start;
       wi = NOT_SET;
       spec = NOT_SET;
-    } else if (range.count() > 1) {
+    } else {
       std::string errorMessage = std::string("Provided incorrect range values. Range is "
                                              "specfifed by start_value:stop_value, but "
                                              "provided ") +
@@ -138,15 +138,12 @@ void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start, d
   const std::vector<std::string> wsNames = wsg->getNames();
 
   for (const auto &wsName : wsNames) {
-    auto workspace =
-        std::dynamic_pointer_cast<API::MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve(wsName));
-    if (!workspace)
-      continue;
-    auto workspaceIndices = getWorkspaceIndicesFromAxes(*workspace, wi, spec, start, end);
+    if (auto workspace =
+            std::dynamic_pointer_cast<API::MatrixWorkspace>(API::AnalysisDataService::Instance().retrieve(wsName))) {
+      auto workspaceIndices = getWorkspaceIndicesFromAxes(*workspace, wi, spec, start, end);
 
-    for (auto workspaceIndex : workspaceIndices) {
-      nameList.emplace_back(wsName, workspaceIndex, period);
-      if (workspace) {
+      for (auto workspaceIndex : workspaceIndices) {
+        nameList.emplace_back(wsName, workspaceIndex, period);
         nameList.back().ws = workspace;
       }
     }
@@ -187,18 +184,14 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws, int works
       }
     }
   } else { // numeric axis
-    if (workspaceIndex >= 0) {
-      out.clear();
-    } else {
-      if (workspaceIndex <= SpecialIndex::WHOLE_RANGE) {
-        start = (*axis)(0);
-        end = (*axis)(axis->length() - 1);
-      }
-      for (size_t i = 0; i < axis->length(); ++i) {
-        double s = (*axis)(i);
-        if (s >= start && s <= end) {
-          out.emplace_back(static_cast<int>(i));
-        }
+    if (workspaceIndex <= SpecialIndex::WHOLE_RANGE) {
+      start = (*axis)(0);
+      end = (*axis)(axis->length() - 1);
+    }
+    for (size_t i = 0; i < axis->length(); ++i) {
+      double s = (*axis)(i);
+      if (s >= start && s <= end) {
+        out.emplace_back(static_cast<int>(i));
       }
     }
   }

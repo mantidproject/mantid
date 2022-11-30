@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -43,7 +44,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class DLLExport LoadMuonNexus2 : public LoadMuonNexus {
+class MANTID_DATAHANDLING_DLL LoadMuonNexus2 : public LoadMuonNexus {
 public:
   /// Default constructor
   LoadMuonNexus2();

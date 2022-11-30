@@ -23,7 +23,7 @@ namespace Algorithms {
  @author Vickie Lynch SNS, ORNL
  @date 12/02/2010
  */
-class MANTID_ALGORITHMS_DLL DiffractionEventCalibrateDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DiffractionEventCalibrateDetectors final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "DiffractionEventCalibrateDetectors"; }

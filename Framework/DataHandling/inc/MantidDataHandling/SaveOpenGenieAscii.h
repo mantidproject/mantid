@@ -10,12 +10,13 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include <iosfwd>
 
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport SaveOpenGenieAscii : public Mantid::API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveOpenGenieAscii : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   SaveOpenGenieAscii() = default;

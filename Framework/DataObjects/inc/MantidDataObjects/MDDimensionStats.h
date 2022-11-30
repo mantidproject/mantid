@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -18,7 +17,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-19 10:55:12.567192
  */
-class DLLExport MDDimensionStats {
+class MANTID_DATAOBJECTS_DLL MDDimensionStats {
 public:
   /// Constructor
   MDDimensionStats() : total(0.0), totalApproxVariance(0.0), numPoints(0) {}

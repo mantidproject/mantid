@@ -44,7 +44,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
         try:
             simpleapi.DakotaChiSquared(self.datafile, 'CNCS_7860_event.nxs', self.chifile)
         except RuntimeError as e:
-            self.assertNotEquals(str(e).find('Wrong workspace type for calculated file'), -1)
+            self.assertNotEqual(str(e).find('Wrong workspace type for calculated file'), -1)
         except:
             assert False, "Raised the wrong exception type"
         else:
@@ -52,7 +52,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
         try:
             simpleapi.DakotaChiSquared('CNCS_7860_event.nxs', self.simfile, self.chifile)
         except RuntimeError as e:
-            self.assertNotEquals(str(e).find('Wrong workspace type for data file'), -1)
+            self.assertNotEqual(str(e).find('Wrong workspace type for data file'), -1)
         except:
             assert False, "Raised the wrong exception type"
         else:
@@ -64,7 +64,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
         try:
             simpleapi.DakotaChiSquared(self.datafile, self.simwrongfile, self.chifile)
         except RuntimeError as e:
-            self.assertNotEquals(str(e).find('The file sizes are different'), -1)
+            self.assertNotEqual(str(e).find('The file sizes are different'), -1)
         except:
             assert False, "Raised the wrong exception type"
         else:

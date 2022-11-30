@@ -66,9 +66,8 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
 
   // Set up the search box
   m_form->searchBox->completer()->setCompletionMode(QCompleter::PopupCompletion);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
   m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
-#endif
+
   connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this, SLOT(searchBoxChanged(const QString &)));
 
   // Construct the QTreeWidget based on the map information of categories and
@@ -237,9 +236,9 @@ void SelectFunctionDialog::rejectFunction() {
 void SelectFunctionDialog::helpClicked() const {
   auto function = getFunction();
   if (!function.isEmpty()) {
-    MantidQt::API::HelpWindow::showFitFunction(nullptr, function.toStdString());
+    MantidQt::API::HelpWindow::showFitFunction(function.toStdString());
   } else { // No function selected open fit function index
-    MantidQt::API::HelpWindow::showFitFunction(nullptr, "");
+    MantidQt::API::HelpWindow::showFitFunction("");
   }
 }
 

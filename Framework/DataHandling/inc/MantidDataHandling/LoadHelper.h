@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /** LoadHelper : Auxiliary File for Loading Files
  */
-class DLLExport LoadHelper {
+class MANTID_DATAHANDLING_DLL LoadHelper {
 public:
   virtual ~LoadHelper() = default;
 
@@ -32,7 +32,8 @@ public:
   double calculateEnergy(double);
   double calculateTOF(double, double);
   double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
-  void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName = "");
+  void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName = "",
+                             bool useFullPath = false);
   void dumpNexusAttributes(NXhandle nxfileID);
   std::string dateTimeInIsoFormat(const std::string &);
 
@@ -42,7 +43,7 @@ public:
 
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
-                                       std::string &parent_class, int level);
+                                       std::string &parent_class, int level, bool useFullPath);
 };
 } // namespace DataHandling
 // namespace DataHandling

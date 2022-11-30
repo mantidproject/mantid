@@ -1339,8 +1339,8 @@ CompGrp::CompGrp(Rule *Parent, std::unique_ptr<Rule> Cx)
   @param Cx :: Complementary object below
 */
 {
-  if (Cx)
-    Cx->setParent(this);
+  if (A)
+    A->setParent(this);
 }
 
 CompGrp::CompGrp(const CompGrp &Cother)

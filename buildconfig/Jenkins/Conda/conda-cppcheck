@@ -1,0 +1,45 @@
+#!/bin/bash -ex
+
+# This script will set up a conda environment before running the cppcheck shell script.
+#
+# Script usage:
+# conda-cppcheck <job-name> <path-to-workspace>
+#
+# Example command to run a PR build on ubuntu:
+# conda-cppcheck pull_requests-cppcheck $WORKSPACE
+#
+# Expected args:
+#   1. JOB_NAME: If the name of the job contains 'pull_requests', the script checks for any C++ file changes. If
+#                there are none, then it exits early with code 0.
+#   2. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
+#                 this argument do not use \\ or \ in the path.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
+
+# Check arguments passed are 2, and aren't optional flags.
+if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
+    echo "Pass 2 arguments: conda-cppcheck <job-name> <path-to-workspace>"
+    exit 1
+fi
+JOB_NAME=$1
+WORKSPACE=$2
+shift 2
+
+# Check if C++ files have changed. If not, then skip the check
+if [[ $JOB_NAME == *pull_requests* ]]; then
+    # This relies on the fact pull requests use pull/$PR-NAME
+    # which squashes the branch into a single merge commit
+    cd $WORKSPACE
+
+    if $SCRIPT_DIR/check_for_changes cpp; then
+        echo "No C++ files have changed. Skipping check."
+        exit 0
+    fi
+fi
+
+# Mamba
+setup_mamba $WORKSPACE/mambaforge
+create_and_activate_mantid_developer_env
+
+# Run
+$SCRIPT_DIR/cppcheck.sh

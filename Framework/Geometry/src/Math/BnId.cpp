@@ -88,7 +88,7 @@ int BnId::equivalent(const BnId &A) const
   for (size_t i = 0; i < size; i++) {
     if (Tval[i] * A.Tval[i] < 0) // true * false == -1.
       return 0;
-    if (retval == 1 && Tval[i] != Tval[i])
+    if (retval == 1 && Tval[i] != A.Tval[i])
       retval = 2;
   }
   return retval;

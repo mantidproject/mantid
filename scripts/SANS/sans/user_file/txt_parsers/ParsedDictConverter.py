@@ -245,7 +245,6 @@ class ParsedDictConverter(IStateParser):
                 raise RuntimeError("Qxy cannot handle settings of type: L/Q l1,dl1,l3,dl2,l2 [/LIN|/LOG] ")
             else:
                 state.q_xy_step = limits_qxy.step
-                state.q_xy_step_type = limits_qxy.step_type
 
         # Get the Gravity settings
         self._set_single_entry(state, "use_gravity", GravityId.ON_OFF)

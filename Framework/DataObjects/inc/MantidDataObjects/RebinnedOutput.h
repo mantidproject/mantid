@@ -22,7 +22,7 @@ namespace DataObjects {
 
   @date 2012-04-05
 */
-class DLLExport RebinnedOutput : public Workspace2D {
+class MANTID_DATAOBJECTS_DLL RebinnedOutput : public Workspace2D {
 public:
   RebinnedOutput() : m_finalized(false), m_hasSqrdErrs(true) {}
   RebinnedOutput(bool finalized, bool hasSqrdErrs) : m_finalized(finalized), m_hasSqrdErrs(hasSqrdErrs) {}

@@ -108,7 +108,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
                 name = name[name.rfind("_")+1:]
                 self.assertTrue(name in ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic',
                                          'SFMagnetic'])
-            self.assertEquals(entry.isHistogramData(), isHistogram)
+            self.assertEqual(entry.isHistogramData(), isHistogram)
             self.assertTrue(not entry.isDistribution())
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)

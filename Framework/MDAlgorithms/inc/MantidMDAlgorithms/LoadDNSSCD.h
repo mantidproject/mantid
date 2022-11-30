@@ -12,8 +12,8 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <vector>
 
 namespace Mantid {
@@ -24,7 +24,7 @@ namespace MDAlgorithms {
   @author Marina Ganeva
   @date 2018-02-15
 */
-class DLLExport LoadDNSSCD : public API::IFileLoader<Kernel::FileDescriptor> {
+class MANTID_MDALGORITHMS_DLL LoadDNSSCD : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadDNSSCD();
 

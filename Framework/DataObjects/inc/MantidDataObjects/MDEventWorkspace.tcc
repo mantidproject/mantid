@@ -77,10 +77,6 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
   }
 }
 
-//-----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TMDE(MDEventWorkspace)::~MDEventWorkspace() {}
 /**Make workspace file backed if it has not been already file backed
  * @param fileName -- short or full file name of the file, which should be used
  * as the file back end
@@ -459,9 +455,8 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t st
   this->getBox()->getBoxes(boxes, 1000, false);
   boxes_filtered.reserve(boxes.size());
 
-  for (const auto box : boxes) {
-    boxes_filtered.emplace_back(dynamic_cast<MDBoxBase<MDE, nd> *>(box));
-  }
+  std::transform(boxes.cbegin(), boxes.cend(), std::back_inserter(boxes_filtered),
+                 [](const auto box) { return dynamic_cast<MDBoxBase<MDE, nd> *>(box); });
 
   // Now sort by ID
   using ibox_t = MDBoxBase<MDE, nd> *;

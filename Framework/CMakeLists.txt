@@ -170,7 +170,7 @@ if(CONDA_ENV)
 
   write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake
-    VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+    VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}
     COMPATIBILITY SameMajorVersion
   )
 

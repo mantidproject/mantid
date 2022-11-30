@@ -123,10 +123,6 @@ void SaveMD2::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) 
   if (getProperty("SaveSample"))
     MDBoxFlatTree::saveAffineTransformMatricies(file.get(), std::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
-  // Check that the typedef has not been changed. The NeXus types would need
-  // changing if it does!
-  assert(sizeof(signal_t) == sizeof(double));
-
   file->makeGroup("data", "NXdata", true);
 
   // Save each axis dimension as an array

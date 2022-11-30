@@ -111,7 +111,8 @@ public:
     MaterialBuilder builder;
     auto mat = builder.setName("Nickel").setAtomicNumber(28).setMassDensity(4).build();
 
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0410414, 0.001);
+    TS_ASSERT_DELTA(mat.numberDensityEffective(), 0.0410414, 0.001);
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0913375, 0.001);
   }
 
   void test_Number_Density_Set_By_AtomicNumber_ZParameter_And_Cell_Volume() {

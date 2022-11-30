@@ -123,7 +123,7 @@ int PeaksWorkspace::getNumberPeaks() const { return int(m_peaks.size()); }
 //---------------------------------------------------------------------------------------------
 /** @return the convention
  */
-std::string PeaksWorkspace::getConvention() const { return convention; }
+std::string PeaksWorkspace::getConvention() const { return m_convention; }
 
 //---------------------------------------------------------------------------------------------
 /** Removes the indicated peak
@@ -342,7 +342,7 @@ std::vector<std::pair<std::string, std::string>> PeaksWorkspace::peakInfo(const 
   V3D Qsamp;
   Kernel::Matrix<double> Gon(3, 3, true);
 
-  if (seqNum >= 0 && NPeaks == getNumberPeaks())
+  if (seqNum >= 0)
     Gon = getPeak(seqNum).getGoniometerMatrix();
   if (labCoords) {
 

@@ -29,9 +29,10 @@ namespace IndirectDataValidationHelper {
  */
 bool validateDataIsOneOf(UserInputValidator &uiv, DataSelector *dataSelector, std::string const &inputType,
                          DataType const &primaryType, std::vector<DataType> const &otherTypes, bool silent) {
-  for (auto const type : otherTypes)
-    if (validateDataIsOfType(uiv, dataSelector, inputType, type, true))
-      return true;
+  if (std::any_of(otherTypes.cbegin(), otherTypes.cend(),
+                  [&](auto const &type) { return validateDataIsOfType(uiv, dataSelector, inputType, type, true); })) {
+    return true;
+  }
 
   return validateDataIsOfType(uiv, dataSelector, inputType, primaryType, silent);
 }

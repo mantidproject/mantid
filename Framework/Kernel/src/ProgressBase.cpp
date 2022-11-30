@@ -75,7 +75,7 @@ ProgressBase &ProgressBase::operator=(const ProgressBase &rhs) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ProgressBase::~ProgressBase() {}
+ProgressBase::~ProgressBase() = default;
 
 //----------------------------------------------------------------------------------------------
 /** Increments the loop counter by 1, then

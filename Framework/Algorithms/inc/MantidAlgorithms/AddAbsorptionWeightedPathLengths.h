@@ -25,7 +25,7 @@ namespace Algorithms {
   @author Danny Hindson
   @date 2020-05-07
 */
-class MANTID_ALGORITHMS_DLL AddAbsorptionWeightedPathLengths : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddAbsorptionWeightedPathLengths final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "AddAbsorptionWeightedPathLengths"; };

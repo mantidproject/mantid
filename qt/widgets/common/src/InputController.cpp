@@ -59,6 +59,7 @@ void InputController3DMove::mouseMoveEvent(QMouseEvent *event) {
   } else if (event->buttons() & Qt::MidButton) {
     emit zoom(event->x(), event->y());
   }
+  InputController::mouseMoveEvent(event);
 }
 
 /**
@@ -245,6 +246,7 @@ void InputControllerMoveUnwrapped::mouseMoveEvent(QMouseEvent *event) {
     m_rect.setBottomRight(QPoint(event->x(), event->y()));
     emit setSelectionRect(m_rect);
   }
+  InputController::mouseMoveEvent(event);
 }
 
 /**

@@ -20,13 +20,14 @@ import mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
-from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_ADS_observer import MuonADSObserver
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqt.utils.observer_pattern import Observable
 from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonRun
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_diff import MuonDiff
 from typing import List
+from mantid.dataobjects import TableWorkspace
 
 
 class MuonContext(object):
@@ -45,7 +46,7 @@ class MuonContext(object):
         self.base_directory = base_directory
         self.workspace_suffix = workspace_suffix
         self._plot_panes_context = plot_panes_context
-        self.ads_observer = MuonContextADSObserver(
+        self.ads_observer = MuonADSObserver(
             self.remove_workspace,
             self.clear_context,
             self.workspace_replaced)
@@ -536,6 +537,9 @@ class MuonContext(object):
         # required as the renameHandler returns a name instead of a workspace.
         if isinstance(workspace, str):
             workspace_name = workspace
+        elif isinstance(workspace, TableWorkspace):
+            # if its a table ws do nothing in the main part of the GUI
+            return
         else:
             workspace_name = workspace.name()
 
@@ -543,7 +547,6 @@ class MuonContext(object):
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
-        self.results_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
         self.deleted_plots_notifier.notify_subscribers(workspace)
 

@@ -288,6 +288,8 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points, const doub
   std::transform(points.begin(), points.end(), std::back_inserter(breakPoints),
                  [&xs](const auto &point) { return xs[point]; });
 
+  m_cspline->setAttribute("EndX", API::IFunction::Attribute(breakPoints.back()));
+  m_cspline->setAttribute("StartX", API::IFunction::Attribute(breakPoints.front()));
   m_cspline->setAttribute("BreakPoints", API::IFunction::Attribute(breakPoints));
 
   int i = 0;

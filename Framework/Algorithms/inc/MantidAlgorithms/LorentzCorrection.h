@@ -15,7 +15,7 @@ namespace Algorithms {
 /** LorentzCorrection : Algorithm Performs a lorentz correction
   (sin(theta)^2)/(wavelength^4) on a MatrixWorkspace in units of wavelength
 */
-class MANTID_ALGORITHMS_DLL LorentzCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL LorentzCorrection final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

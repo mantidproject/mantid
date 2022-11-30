@@ -22,7 +22,7 @@ namespace MDAlgorithms {
   * @date 25-05-2012
 */
 
-class DLLExport ConvToMDSelector {
+class MANTID_MDALGORITHMS_DLL ConvToMDSelector {
 public:
   enum ConverterType { DEFAULT, INDEXED };
   /**

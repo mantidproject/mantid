@@ -44,7 +44,6 @@ MantidEVWorker::MantidEVWorker() {}
 /**
  *  Default destructor
  */
-MantidEVWorker::~MantidEVWorker() {}
 
 /**
  *  Utility method to get the type of a workspace.  If the named workspace

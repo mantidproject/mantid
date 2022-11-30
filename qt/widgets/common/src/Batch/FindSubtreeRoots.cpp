@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
+#include <algorithm>
+
 namespace MantidQt::MantidWidgets::Batch {
 
 auto FindSubtreeRoots::operator()(std::vector<RowLocation> region) -> boost::optional<std::vector<RowLocation>> {

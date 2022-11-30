@@ -11,6 +11,7 @@
 
 #include <memory>
 
+#include <algorithm>
 #include <list>
 #include <string>
 #include <vector>
@@ -26,7 +27,7 @@ namespace Kernel {
 
 enum class CompositeRelation { AND = 0, OR = 1 };
 
-class DLLExport CompositeValidator : public IValidator {
+class MANTID_KERNEL_DLL CompositeValidator : public IValidator {
 public:
   /// Default constructor
   CompositeValidator(const CompositeRelation &relation = CompositeRelation::AND);
@@ -51,14 +52,10 @@ public:
   /// Returns true if the child list contains a validator of the specified
   /// template type
   template <typename T> bool contains() {
-    for (const auto &validator : m_children) {
-      // avoid std::dynamic_pointer cast to avoid constructing
-      // a temporary shared_ptr type
-      if (dynamic_cast<T *>(validator.get())) {
-        return true;
-      }
-    }
-    return false;
+    // avoid std::dynamic_pointer cast to avoid constructing
+    // a temporary shared_ptr type
+    return std::any_of(m_children.cbegin(), m_children.cend(),
+                       [](const IValidator_sptr &validator) { return dynamic_cast<T *>(validator.get()) != nullptr; });
   }
 
 private:

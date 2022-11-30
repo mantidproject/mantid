@@ -130,7 +130,7 @@ class SANSILLAutoProcessTest(unittest.TestCase):
         item = ws.getItem(0)
         self.assertTrue(isinstance(item, MatrixWorkspace))
         self.assertEqual(item.getAxis(0).getUnit().unitID(), "MomentumTransfer")
-        self.assertEquals(item.getNumberHistograms(), 1)
+        self.assertEqual(item.getNumberHistograms(), 1)
 
 
 if __name__ == "__main__":

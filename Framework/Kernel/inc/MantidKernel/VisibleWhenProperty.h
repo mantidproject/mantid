@@ -17,7 +17,7 @@ namespace Kernel {
 /** Same as EnabledWhenProperty, but returns the value for the
  * isVisible() property instead of the isEnabled() property.
  */
-class DLLExport VisibleWhenProperty : public EnabledWhenProperty {
+class MANTID_KERNEL_DLL VisibleWhenProperty : public EnabledWhenProperty {
 public:
   /// Constructs a VisibleWhenProperty object which checks the property
   /// with name given and if it matches the criteria makes it visible

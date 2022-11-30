@@ -11,7 +11,11 @@ from os import path
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from Engineering.common.calibration_info import CalibrationInfo
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, \
+    settings_view, settings_presenter
 from testhelpers import assert_any_call_partial
+from qtpy.QtCore import QCoreApplication
+from workbench.config import APPNAME
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model"
 enggutils_path = "Engineering.EnggUtils"
@@ -34,6 +38,41 @@ class CalibrationModelTest(unittest.TestCase):
         mock_load_full_calib.assert_called_once()
         mock_write_diff_consts.assert_called_once_with(self.calibration_info.prm_filepath)
         self.calibration_info.load_relevant_calibration_files.assert_called_once()
+
+    @patch(file_path + '.output_settings.get_output_path')
+    @patch(enggutils_path + '.create_new_calibration')
+    @patch(enggutils_path + '.run_calibration')
+    @patch(file_path + ".load_full_instrument_calibration")
+    def test_first_time_create_uses_correct_default_save_directory(self, mock_load_cal,
+                                                                   mock_run_cal,
+                                                                   mock_enggutils_create_new_calibration,
+                                                                   mock_get_output_path):
+        default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
+        QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
+        presenter = settings_presenter.SettingsPresenter(mock.create_autospec(settings_model.SettingsModel),
+                                                         mock.create_autospec(settings_view.SettingsView))
+        presenter.settings = {  # "save_location" is not defined
+                              "full_calibration": "cal",
+                              "logs": "some,logs",
+                              "primary_log": "some",
+                              "sort_ascending": True,
+                              "default_peak": "BackToBackExponential"
+                              }
+        presenter._validate_settings()  # save_location now set to the default value at runtime
+        self.assertEqual(presenter.settings['save_location'], default_save_location)
+
+        self.calibration_info.group = GROUP.BOTH
+        mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
+        mock_load_cal.return_value = "full_calibration"
+
+        # this is the runtime return from output_settings.get_output_path()
+        # if called at define time in a default parameter value then this value is not used
+        mock_get_output_path.return_value = default_save_location
+
+        self.model.create_new_calibration(self.calibration_info, rb_num=None, plot_output=False)  # save_dir not given
+        mock_enggutils_create_new_calibration.assert_called_once_with(self.calibration_info, None, False,
+                                                                      default_save_location, "full_calibration")
+        QCoreApplication.setApplicationName(APPNAME)  # reset to 'mantidworkbench' in case required by other tests
 
     @patch(enggutils_path + '.mantid.DeleteWorkspace')
     @patch(enggutils_path + '.create_output_files')

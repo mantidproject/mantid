@@ -16,7 +16,6 @@ SelectionNotificationServiceImpl::SelectionNotificationServiceImpl() {}
 /**
  * Empty private destructor
  */
-SelectionNotificationServiceImpl::~SelectionNotificationServiceImpl() {}
 
 /**
  *  Method to send out the QPointSelection signal to all objects that

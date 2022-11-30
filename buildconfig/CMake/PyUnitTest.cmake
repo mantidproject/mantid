@@ -12,11 +12,6 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     set(_module_dir ${CMAKE_BINARY_DIR}/bin)
   endif()
 
-  set(_test_runner ${_module_dir}/mantidpython)
-  if(WIN32)
-    set(_test_runner ${_test_runner}.bat)
-  endif()
-
   if(NOT PYUNITTEST_RUNNER)
     set(_test_runner_module ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/test/testhelpers/testrunner.py)
   else()
@@ -25,17 +20,34 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
 
   # Environment
   if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(_python_path ${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH})
+    set(_python_path ${_test_src_dir};${PYUNITTEST_PYTHONPATH_EXTRA};$ENV{PYTHONPATH};${_module_dir})
     # cmake list separator and Windows environment separator are the same so escape the cmake one
     string(REPLACE ";" "\\;" _python_path "${_python_path}")
   else()
     string(REPLACE ";" ":" _python_path "${PYUNITTEST_PYTHONPATH_EXTRA}")
-    set(_python_path ${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH})
+    set(_python_path ${_test_src_dir}:${_python_path}:$ENV{PYTHONPATH}:${_module_dir})
   endif()
   # Define the environment
   list(APPEND _test_environment "PYTHONPATH=${_python_path}")
   if(PYUNITTEST_QT_API)
     list(APPEND _test_environment "QT_API=${PYUNITTEST_QT_API}")
+  endif()
+
+  # The scripts need jemalloc to be resolved to the runtime library as the plain .so symlink is only present when a
+  # -dev/-devel package is present
+  if(JEMALLOCLIB_FOUND)
+    get_filename_component(JEMALLOC_RUNTIME_LIB ${JEMALLOC_LIBRARIES} REALPATH)
+    # We only want to use the major version number
+    string(REGEX REPLACE "([0-9]+)\.[0-9]+\.[0-9]+$" "\\1" JEMALLOC_RUNTIME_LIB ${JEMALLOC_RUNTIME_LIB})
+  endif()
+
+  # set preload as jemalloc, unless if using address sanitizer as this confuses things
+  if(NOT WITH_ASAN)
+    set(LOCAL_PRELOAD ${JEMALLOC_RUNTIME_LIB})
+    if(LD_PRELOAD)
+      set(LOCAL_PRELOAD ${LOCAL_PRELOAD}:$ENV{LD_PRELOAD})
+    endif()
+    list(APPEND _test_environment "LD_PRELOAD=${LOCAL_PRELOAD}")
   endif()
 
   # Add all of the individual tests so that they can be run in parallel
@@ -45,7 +57,7 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     # We duplicate the suitename so that it matches the junit output name
     set(_pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}")
     add_test(NAME ${_pyunit_separate_name}
-             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${_test_runner} --classic
+             COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" ${Python_EXECUTABLE}
                      ${_test_runner_module} ${_test_src_dir}/${_filename}
     )
     # Set the PYTHONPATH so that the built modules can be found

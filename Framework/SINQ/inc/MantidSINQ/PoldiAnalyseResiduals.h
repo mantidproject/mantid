@@ -26,6 +26,7 @@ namespace Poldi {
   */
 class MANTID_SINQ_DLL PoldiAnalyseResiduals : public API::Algorithm {
 public:
+  ~PoldiAnalyseResiduals() = default;
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

@@ -29,7 +29,7 @@ namespace Algorithms {
     @author Manh Duc Le, STFC
     @date 08/09/2016
 */
-class MANTID_ALGORITHMS_DLL MagFormFactorCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MagFormFactorCorrection final : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MagFormFactorCorrection"; }

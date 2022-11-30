@@ -18,7 +18,7 @@ namespace Geometry {
 @class PeakTransform
 Used to remap coordinates into a form consistent with an axis reordering.
 */
-class DLLExport PeakTransform {
+class MANTID_GEOMETRY_DLL PeakTransform {
 public:
   PeakTransform(std::string xPlotLabel, std::string yPlotLabel, const boost::regex &regexOne,
                 const boost::regex &regexTwo, const boost::regex &regexThree);

@@ -8,7 +8,7 @@
 #
 #
 # std imports
-from unittest import TestCase, main
+from unittest import TestCase, main, mock
 
 # third party imports
 import matplotlib
@@ -25,7 +25,6 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, CreateMDHistoWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names, plot_md_ws_from_names,
@@ -212,7 +211,7 @@ class FunctionsTest(TestCase):
         fig = pcolormesh_from_names([ws])
 
         mock_ConfigService.getString.assert_any_call('plots.images.Colormap')
-        self.assertEqual(fig.gca().images[0].colorbar.get_cmap(), spring_colormap)
+        self.assertEqual(fig.gca().images[0].colorbar.cmap, spring_colormap)
 
     def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
         fig = plt.figure()

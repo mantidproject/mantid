@@ -26,7 +26,7 @@ namespace Algorithms {
  represent the time channel number.
  This algorithm converts the channel number to time of flight
  */
-class MANTID_ALGORITHMS_DLL ConvertEmptyToTof : public API::Algorithm, public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertEmptyToTof final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

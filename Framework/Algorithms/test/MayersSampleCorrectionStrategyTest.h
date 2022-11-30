@@ -73,11 +73,11 @@ public:
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
     TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DELTA(2.308089, signal.front(), delta);
-    TS_ASSERT_DELTA(2.314809, signal.back(), delta);
+    TS_ASSERT_DELTA(2.139030, signal.front(), delta);
+    TS_ASSERT_DELTA(2.154289, signal.back(), delta);
 
-    TS_ASSERT_DELTA(1.632065, error.front(), delta);
-    TS_ASSERT_DELTA(1.636817, error.back(), delta);
+    TS_ASSERT_DELTA(1.512522, error.front(), delta);
+    TS_ASSERT_DELTA(1.523313, error.back(), delta);
   }
 
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data() {
@@ -95,11 +95,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(2.308089, signal.front(), delta);
-    TS_ASSERT_DELTA(2.314809, signal.back(), delta);
+    TS_ASSERT_DELTA(2.139030, signal.front(), delta);
+    TS_ASSERT_DELTA(2.154289, signal.back(), delta);
 
-    TS_ASSERT_DELTA(1.632065, error.front(), delta);
-    TS_ASSERT_DELTA(1.636817, error.back(), delta);
+    TS_ASSERT_DELTA(1.512522, error.front(), delta);
+    TS_ASSERT_DELTA(1.523313, error.back(), delta);
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
@@ -140,16 +140,15 @@ public:
     const auto &error = outHisto.e();
 
     // Check some values
-    // Check some values
     const double delta(1e-06);
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(2.307860, signal.front(), delta);
-    TS_ASSERT_DELTA(2.314794, signal.back(), delta);
+    TS_ASSERT_DELTA(2.137725, signal.front(), delta);
+    TS_ASSERT_DELTA(2.154205, signal.back(), delta);
 
-    TS_ASSERT_DELTA(1.631904, error.front(), delta);
-    TS_ASSERT_DELTA(1.636807, error.back(), delta);
+    TS_ASSERT_DELTA(1.511600, error.front(), delta);
+    TS_ASSERT_DELTA(1.523253, error.back(), delta);
   }
 
   void test_MutlipleScattering_NRuns_Parameter() {
@@ -166,16 +165,15 @@ public:
     const auto &error = outHisto.e();
 
     // Check some values
-    // Check some values
     const double delta(1e-06);
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(2.308851, signal.front(), delta);
-    TS_ASSERT_DELTA(2.323555, signal.back(), delta);
+    TS_ASSERT_DELTA(2.143376, signal.front(), delta);
+    TS_ASSERT_DELTA(2.204168, signal.back(), delta);
 
-    TS_ASSERT_DELTA(1.632604, error.front(), delta);
-    TS_ASSERT_DELTA(1.643002, error.back(), delta);
+    TS_ASSERT_DELTA(1.515596, error.front(), delta);
+    TS_ASSERT_DELTA(1.558582, error.back(), delta);
   }
 
   // ---------------------- Failure tests -----------------------------

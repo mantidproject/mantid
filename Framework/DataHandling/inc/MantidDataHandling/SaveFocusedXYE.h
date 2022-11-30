@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/SerialAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,7 +40,7 @@ namespace DataHandling {
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
   */
-class DLLExport SaveFocusedXYE : public API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveFocusedXYE : public API::SerialAlgorithm {
 public:
   enum HeaderType { XYE, MAUD, TOPAS };
   /// Algorithm's name

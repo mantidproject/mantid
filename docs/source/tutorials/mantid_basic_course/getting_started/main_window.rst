@@ -40,6 +40,9 @@ As a quick introduction, the main window contains these Toolboxes:
 
 **Note** to find out what Mantid version you are using, look at the first message in the :red:`Messages Box`. You can see I'm using Mantid 6.1.0.
 
+**Note** You can click on the top bar of each toolbox and drag it to edit the layout.
+To reset the layout for MantidWorkbench to the default, go to View > Restore Default Layout.
+
 Quick Intro to Workspaces and Bins
 ==================================
 

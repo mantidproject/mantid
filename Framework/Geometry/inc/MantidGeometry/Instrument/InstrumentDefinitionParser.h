@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -41,7 +40,7 @@ class ShapeFactory;
   @author Anders Markvardsen, ISIS, RAL
   @date 7/3/2008
 */
-class DLLExport InstrumentDefinitionParser {
+class MANTID_GEOMETRY_DLL InstrumentDefinitionParser {
 public:
   InstrumentDefinitionParser();
   InstrumentDefinitionParser(const std::string &filename, const std::string &instName, const std::string &xmlText);

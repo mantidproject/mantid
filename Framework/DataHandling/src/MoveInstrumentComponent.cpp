@@ -22,7 +22,7 @@ using namespace Geometry;
 using namespace API;
 
 /// Empty default constructor
-MoveInstrumentComponent::MoveInstrumentComponent() {}
+MoveInstrumentComponent::MoveInstrumentComponent() = default;
 
 /// Initialisation method.
 void MoveInstrumentComponent::init() {

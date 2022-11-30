@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid {
@@ -18,7 +17,7 @@ namespace MDAlgorithms {
 
   @date 2011-11-08
 */
-class DLLExport BooleanBinaryOperationMD : public BinaryOperationMD {
+class MANTID_MDALGORITHMS_DLL BooleanBinaryOperationMD : public BinaryOperationMD {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -27,6 +26,8 @@ public:
   int version() const override;
 
 protected:
+  ~BooleanBinaryOperationMD() = default;
+
   /// Return true if the algorithm can operate on a scalar.
   virtual bool acceptScalar() const { return true; }
   bool commutative() const override;

@@ -29,7 +29,7 @@ public:
   /// Define the possible scale types
   enum class ScaleType { Linear = 0, Log10 = 1, Power = 2 };
 
-  static QString chooseColorMap(const QString &previous, QWidget *parent);
+  static std::pair<QString, bool> chooseColorMap(const std::pair<QString, bool> &previous, QWidget *parent);
   static QString defaultColorMap();
   static QString exists(const QString &name);
 

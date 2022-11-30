@@ -525,13 +525,13 @@ def _frozen_get_del_attr(cls, fields):
                        ('self', 'name', 'value'),
                        (f'if type(self) is cls or name in {fields_str}:',
                         ' raise FrozenInstanceError(f"cannot assign to field {name!r}")',
-                        f'super(cls, self).__setattr__(name, value)'),
+                        'super(cls, self).__setattr__(name, value)'),
                        globals=globals),
             _create_fn('__delattr__',
                        ('self', 'name'),
                        (f'if type(self) is cls or name in {fields_str}:',
                         ' raise FrozenInstanceError(f"cannot delete field {name!r}")',
-                        f'super(cls, self).__delattr__(name)'),
+                        'super(cls, self).__delattr__(name)'),
                        globals=globals),
             )
 

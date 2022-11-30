@@ -44,4 +44,4 @@ class SaveProjectDialogTest(unittest.TestCase):
 
         self.presenter.save_as()
 
-        self.assertEqual(self.mock_conf.get('project/save_altered_workspaces_only'), True)
+        self.assertEqual(self.mock_conf.get('project/save_altered_workspaces_only', type=bool), True)

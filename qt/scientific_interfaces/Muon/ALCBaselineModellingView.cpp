@@ -19,7 +19,7 @@ namespace MantidQt::CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
-ALCBaselineModellingView::~ALCBaselineModellingView() {}
+ALCBaselineModellingView::~ALCBaselineModellingView() = default;
 
 void ALCBaselineModellingView::initialize() {
   m_ui.setupUi(m_widget);
@@ -199,7 +199,7 @@ void ALCBaselineModellingView::setSelectorValues(RangeSelector *selector,
 }
 
 void ALCBaselineModellingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"), QString("muon"));
+  MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }

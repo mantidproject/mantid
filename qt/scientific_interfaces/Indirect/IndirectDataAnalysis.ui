@@ -56,19 +56,9 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tabElwin">
-       <attribute name="title">
-        <string>Elwin</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabMSD">
        <attribute name="title">
         <string>MSD Fit</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabIqt">
-       <attribute name="title">
-        <string>I(Q, t)</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabIqtFit">

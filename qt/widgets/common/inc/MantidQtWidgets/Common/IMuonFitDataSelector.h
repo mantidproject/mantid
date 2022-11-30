@@ -22,7 +22,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON IMuonFitDataSelector {
 public:
   enum class FitType { Single, CoAdd, Simultaneous };
-  virtual ~IMuonFitDataSelector() {}
+  virtual ~IMuonFitDataSelector() = default;
   virtual QStringList getFilenames() const = 0;
   virtual double getStartTime() const = 0;
   virtual double getEndTime() const = 0;

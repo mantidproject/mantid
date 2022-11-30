@@ -16,7 +16,7 @@ namespace DataHandling {
     of DataBlocks. It represents a set of contiguous spectrum numbers
     which are to be consumed elsewhere.
 */
-class DLLExport DataBlockComposite : public DataBlock {
+class MANTID_DATAHANDLING_DLL DataBlockComposite : public DataBlock {
 public:
   specnum_t getMinSpectrumID() const override;
   void setMinSpectrumID(specnum_t) override;

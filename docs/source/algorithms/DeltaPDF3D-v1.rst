@@ -118,8 +118,8 @@ dominated by the Bragg peaks and will just be a 3D-PDF instead.
 
 .. testoutput:: fft1
 
-   The value at [1,0,0] is 4057.7079
-   The value at [0,1,0] is 5565.6700
+   The value at [1,0,0] is 4042.2047
+   The value at [0,1,0] is 5539.0284
 
 The results 3D-ΔPDF workspace looks like
 
@@ -150,8 +150,8 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
 .. testoutput:: fft2
 
-   The value at [1,0,0] is -738.9594
-   The value at [0,1,0] is 769.0027
+   The value at [1,0,0] is -754.4627
+   The value at [0,1,0] is 742.3611
 
 +--------------------------------------------------+--------------------------------------------------+
 | Intermediate workspace after reflections removed | Resulting 3D-ΔPDF                                |
@@ -175,8 +175,8 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
 .. testoutput:: fft3
 
-   The value at [1,0,0] is -477.1737
-   The value at [0,1,0] is 501.0818
+   The value at [1,0,0] is -501.2694
+   The value at [0,1,0] is 493.9502
 
 +---------------------------------------------------------------------+---------------------------------------------------------------------+
 | Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |
@@ -201,8 +201,8 @@ The fill value should be about the background level
 
 .. testoutput:: fft3_2
 
-   The value at [1,0,0] is -477.1737
-   The value at [0,1,0] is 501.0818
+   The value at [1,0,0] is -501.2694
+   The value at [0,1,0] is 493.9502
 
 +---------------------------------------------------------------------+---------------------------------------------------------------------+
 | Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |
@@ -251,8 +251,8 @@ Usage - KAREN
 
 .. testoutput:: karen
 
-   The value at [1,0,0] is -18.4259
-   The value at [0,1,0] is 18.4204
+   The value at [1,0,0] is -31.3149
+   The value at [0,1,0] is 31.3080
 
 +----------------------------------------------------------------+----------------------------------------------------------------+
 | Intermediate workspace after KAREN and window function applied | Resulting 3D-ΔPDF                                              |

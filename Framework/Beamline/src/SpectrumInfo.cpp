@@ -8,6 +8,8 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include <numeric>
+
 namespace Mantid::Beamline {
 
 SpectrumInfo::SpectrumInfo(const size_t numberOfDetectors)
@@ -25,11 +27,8 @@ size_t SpectrumInfo::size() const {
 
 /// Return count of all detectors used within spectrum
 size_t SpectrumInfo::detectorCount() const {
-  size_t count = 0;
-  for (const auto &spec : *m_spectrumDefinition) {
-    count += spec.size();
-  }
-  return count;
+  return std::accumulate(m_spectrumDefinition->begin(), m_spectrumDefinition->end(), size_t(0),
+                         [](size_t x, const Mantid::SpectrumDefinition &spec) { return x + spec.size(); });
 }
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.

@@ -58,6 +58,8 @@ public:
   virtual ~ExperimentInfo();
   /// Copy constructor
   ExperimentInfo(const ExperimentInfo &);
+  ExperimentInfo &operator=(const ExperimentInfo &);
+
   /// Copy everything from the given experiment object
   void copyExperimentInfoFrom(const ExperimentInfo *other);
   /// Clone us

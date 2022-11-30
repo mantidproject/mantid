@@ -7,10 +7,8 @@
 #include "IndirectDataAnalysis.h"
 
 #include "IndirectDataAnalysisConvFitTab.h"
-#include "IndirectDataAnalysisElwinTab.h"
 #include "IndirectDataAnalysisFqFitTab.h"
 #include "IndirectDataAnalysisIqtFitTab.h"
-#include "IndirectDataAnalysisIqtTab.h"
 #include "IndirectDataAnalysisMSDFitTab.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -27,9 +25,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   // All tabs MUST appear here to be shown in interface.
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
-  m_tabs.emplace(ELWIN, new IndirectDataAnalysisElwinTab(m_uiForm.twIDATabs->widget(ELWIN)));
   m_tabs.emplace(MSD_FIT, new IndirectDataAnalysisMSDFitTab(m_uiForm.twIDATabs->widget(MSD_FIT)));
-  m_tabs.emplace(IQT, new IndirectDataAnalysisIqtTab(m_uiForm.twIDATabs->widget(IQT)));
   m_tabs.emplace(IQT_FIT, new IndirectDataAnalysisIqtFitTab(m_uiForm.twIDATabs->widget(IQT_FIT)));
   m_tabs.emplace(CONV_FIT, new IndirectDataAnalysisConvFitTab(m_uiForm.twIDATabs->widget(CONV_FIT)));
   m_tabs.emplace(FQ_FIT, new IndirectDataAnalysisFqFitTab(m_uiForm.twIDATabs->widget(FQ_FIT)));
@@ -86,11 +82,7 @@ void IndirectDataAnalysis::initLayout() {
 /**
  * Allow Python to be called locally.
  */
-void IndirectDataAnalysis::initLocalPython() {
-  QString pyInput = "from mantid.simpleapi import *";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-  loadSettings();
-}
+void IndirectDataAnalysis::initLocalPython() { loadSettings(); }
 
 /**
  * Load the settings saved for this interface.

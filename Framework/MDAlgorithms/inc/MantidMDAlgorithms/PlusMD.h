@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid {
@@ -19,7 +18,7 @@ namespace MDAlgorithms {
 
   @date 2011-08-12
 */
-class DLLExport PlusMD : public BinaryOperationMD {
+class MANTID_MDALGORITHMS_DLL PlusMD : public BinaryOperationMD {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "PlusMD"; };

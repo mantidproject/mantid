@@ -76,8 +76,8 @@ class GenerateLogbookTest(unittest.TestCase):
     def _check_output(self, ws, numberEntries, numberColumns):
         self.assertTrue(mtd[ws])
         self.assertTrue(isinstance(mtd[ws], ITableWorkspace))
-        self.assertEquals(len(mtd[ws].row(0)), numberColumns)
-        self.assertEquals(len(mtd[ws].column(0)), numberEntries)
+        self.assertEqual(len(mtd[ws].row(0)), numberColumns)
+        self.assertEqual(len(mtd[ws].column(0)), numberEntries)
 
 
 if __name__ == '__main__':

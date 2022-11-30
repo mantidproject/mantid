@@ -37,7 +37,7 @@ public:
   class SubAlgorithm : public Algorithm {
   public:
     SubAlgorithm() : Algorithm() {}
-    ~SubAlgorithm() override {}
+    ~SubAlgorithm() override = default;
     const std::string name() const override { return "SubAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -100,7 +100,7 @@ public:
   class NewlineAlgorithm : public Algorithm {
   public:
     NewlineAlgorithm() : Algorithm() {}
-    ~NewlineAlgorithm() override {}
+    ~NewlineAlgorithm() override = default;
     const std::string name() const override { return "Foo\n\rBar"; }
     const std::string summary() const override { return "Test"; }
     int version() const override { return 1; }
@@ -130,7 +130,7 @@ public:
   class NestedAlgorithm : public DataProcessorAlgorithm {
   public:
     NestedAlgorithm() : DataProcessorAlgorithm() {}
-    ~NestedAlgorithm() override {}
+    ~NestedAlgorithm() override = default;
     const std::string name() const override { return "NestedAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -162,7 +162,7 @@ public:
   class TopLevelAlgorithm : public DataProcessorAlgorithm {
   public:
     TopLevelAlgorithm() : DataProcessorAlgorithm() {}
-    ~TopLevelAlgorithm() override {}
+    ~TopLevelAlgorithm() override = default;
     const std::string name() const override { return "TopLevelAlgorithm"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -192,7 +192,7 @@ public:
   class AlgorithmWithDynamicProperty : public Algorithm {
   public:
     AlgorithmWithDynamicProperty() : Algorithm() {}
-    ~AlgorithmWithDynamicProperty() override {}
+    ~AlgorithmWithDynamicProperty() override = default;
     const std::string name() const override { return "AlgorithmWithDynamicProperty"; }
     int version() const override { return 1; }
     const std::string category() const override { return "Cat;Leopard;Mink"; }
@@ -240,7 +240,8 @@ public:
   }
 
   void test_Build_Simple() {
-    std::string result[] = {"TopLevelAlgorithm(InputWorkspace='test_input_"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "TopLevelAlgorithm(InputWorkspace='test_input_"
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
@@ -285,7 +286,8 @@ public:
     const auto &wsHist = outputWS->history();
     ScriptBuilder builder(wsHist.createView());
     const auto generatedText = builder.build();
-    const auto expectedText = "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
+    const auto expectedText = "from mantid.simpleapi import *\n\n"
+                              "PropertyManagerInputAlgorithm(InputWorkspace='test_input_workspace', "
                               "Dict='{\"Int\":1,\"String\":\"option\"}', "
                               "OutputWorkspace='test_Build_With_PropertyManagerProperty_Out')\n";
 
@@ -296,7 +298,8 @@ public:
 
   void test_newline_chars_removed() {
     // Check that any newline chars are removed
-    std::string result[] = {"FooBar(InputWorkspace='test_input_workspace',"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "FooBar(InputWorkspace='test_input_workspace',"
                             " OutputWorkspace='test_output_workspace')",
                             ""};
 
@@ -339,7 +342,8 @@ public:
 
     std::string algTimestamp{" # " + executionTime};
 
-    std::string result[] = {"TopLevelAlgorithm(InputWorkspace='test_input_"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "TopLevelAlgorithm(InputWorkspace='test_input_"
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')" +
                                 algTimestamp,
@@ -362,6 +366,8 @@ public:
 
   void test_Build_Unrolled() {
     std::string result[] = {
+        "from mantid.simpleapi import *",
+        "",
         "",
         "# Child algorithms of TopLevelAlgorithm",
         "",
@@ -407,6 +413,8 @@ public:
 
   void test_Partially_Unrolled() {
     std::string result[] = {
+        "from mantid.simpleapi import *",
+        "",
         "",
         "# Child algorithms of TopLevelAlgorithm",
         "",
@@ -463,7 +471,8 @@ public:
   void test_Build_Simple_with_backslash() {
     // checks that property values with \ get prefixed with r, eg.
     // filename=r'c:\test\data.txt'
-    std::string result[] = {"TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_"
+    std::string result[] = {"from mantid.simpleapi import *", "",
+                            "TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_"
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
@@ -497,7 +506,8 @@ public:
 
   void test_Build_Dynamic_Property() {
     // importantly the Dynamic Property should not be written into the script
-    std::string result = "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
+    std::string result = "from mantid.simpleapi import *\n\n"
+                         "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
                          "OutputWorkspace='test_output_workspace', PropertyA='A', "
                          "PropertyB='B', DynamicInputProperty='C')\n";
 

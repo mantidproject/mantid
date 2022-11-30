@@ -87,6 +87,7 @@ set(EXPORT_FILES
     src/Exports/Citation.cpp
     src/Exports/IPreview.cpp
     src/Exports/PreviewManager.cpp
+    src/Exports/RegionSelectorObserver.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)

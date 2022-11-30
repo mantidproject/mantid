@@ -28,7 +28,7 @@ class V3D;
 namespace FrameworkTestHelpers {
 
 namespace JSONTestInstrumentBuilder {
-void initialiseRoot(Json::Value &root, const std::string &name);
+void initialiseRoot(const Json::Value &root, const std::string &name);
 Json::Value &addNXEntry(Json::Value &root, const std::string &name);
 Json::Value &addNXSample(Json::Value &entry, const std::string &name);
 Json::Value &addNXInstrument(Json::Value &entry, const std::string &name);

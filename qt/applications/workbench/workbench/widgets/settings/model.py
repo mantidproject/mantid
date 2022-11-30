@@ -20,7 +20,7 @@ class SettingsModel:
             for setting in settings:
                 if CONF.has(setting):
                     if setting != GeneralProperties.USER_LAYOUT.value:
-                        value = CONF.get(setting)
+                        value = CONF.get(setting, type=str)
                 else:
                     value = ConfigService.getString(setting)
                 file.write(setting + '=' + str(value) + '\n')

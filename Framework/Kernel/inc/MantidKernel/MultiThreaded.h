@@ -89,18 +89,18 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
 
 /** Begins a block to skip processing is the algorithm has been interupted
  * Note the end of the block if not defined that must be added by including
- * PARALLEL_END_INTERUPT_REGION at the end of the loop
+ * PARALLEL_END_INTERRUPT_REGION at the end of the loop
  */
-#define PARALLEL_START_INTERUPT_REGION                                                                                 \
+#define PARALLEL_START_INTERRUPT_REGION                                                                                \
   if (!m_parallelException && !m_cancel) {                                                                             \
     try {
 
 /** Ends a block to skip processing is the algorithm has been interupted
  * Note the start of the block if not defined that must be added by including
- * PARALLEL_START_INTERUPT_REGION at the start of the loop
+ * PARALLEL_START_INTERRUPT_REGION at the start of the loop
  */
-#define PARALLEL_END_INTERUPT_REGION                                                                                   \
-  } /* End of try block in PARALLEL_START_INTERUPT_REGION */                                                           \
+#define PARALLEL_END_INTERRUPT_REGION                                                                                  \
+  } /* End of try block in PARALLEL_START_INTERRUPT_REGION */                                                          \
   catch (std::exception & ex) {                                                                                        \
     if (!m_parallelException) {                                                                                        \
       m_parallelException = true;                                                                                      \
@@ -110,11 +110,11 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
   catch (...) {                                                                                                        \
     m_parallelException = true;                                                                                        \
   }                                                                                                                    \
-  } // End of if block in PARALLEL_START_INTERUPT_REGION
+  } // End of if block in PARALLEL_START_INTERRUPT_REGION
 
 /** Adds a check after a Parallel region to see if it was interupted
  */
-#define PARALLEL_CHECK_INTERUPT_REGION                                                                                 \
+#define PARALLEL_CHECK_INTERRUPT_REGION                                                                                \
   if (m_parallelException) {                                                                                           \
     g_log.debug("Exception thrown in parallel region");                                                                \
     throw std::runtime_error(this->name() + ": error (see log)");                                                      \

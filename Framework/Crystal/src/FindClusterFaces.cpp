@@ -310,7 +310,7 @@ void FindClusterFaces::exec() {
   Progress progress(this, 0.0, 1.0, nSteps);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int it = 0; it < nIterators; ++it) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     ClusterFaces &localClusterFaces = clusterFaces[it];
     auto mdIterator = mdIterators[it].get();
 
@@ -320,9 +320,9 @@ void FindClusterFaces::exec() {
     } else {
       executeUnFiltered(mdIterator, localClusterFaces, progress, clusterImage, imageShape);
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   const bool limitRows = getProperty("LimitRows");
   const int maxRows = getProperty("MaximumRows");

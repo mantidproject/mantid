@@ -593,7 +593,6 @@ q_max                            Max momentum transfer value for 1D reduction  *
 q_1d_rebin_string                Rebin string for Q1D                          *StringParameter*                             N,                              if 1D  N         -
 q_xy_max                         Max momentum transfer value for 2D reduction  *PositiveFloatParameter*                      N,                              if 2D  N         -
 q_xy_step                        Momentum transfer step for 2D reduction       *PositiveFloatParameter*                      N,                              if 2D  N         -
-q_xy_step_type                   The step type, i.e. lin or log                *Enum(RangeStepType)*                         N,                              if 2D  N         -
 use_q_resolution                 If should perform a q resolution calculation  *BoolParameter*                               Y                               N                False
 q_resolution_collimation_length  Collimation length                            *PositiveFloatParameter*                      N, if performing q resolution   N                -
 q_resolution_delta_r             Virtual ring width on the detector            *PositiveFloatParameter*                      N, if performing q resolution   N                -
@@ -756,14 +755,14 @@ interface method (*parse_line* which takes a single line to parse)
 needs to be provided.
 
 For an overview of the user file commands, please see the
-`user file documentation <https://www.mantidproject.org/SANS_User_File_Commands>`_ .
+:ref:`user file documentation <ISIS_SANS_User_File_QRes-ref>`.
 
 Director for *ISISCommandInterface* (CLI)
 *****************************************
 
 The *ISISCommandInterface* is used by some of the power users among the instrument scientists. It is
 an efficient way to customize reductions which require small tweaks between different reductions.
-Please consult the `scripting documentation <https://www.mantidproject.org/Scripting_SANS_Reductions>`_
+Please consult the :ref:`scripting documentation <ScriptingSANSReductions>`
 for the *ISISCommandInterface* for more information.
 
 The principal component which sets up the state behind the scene is *CommandInterfaceStateDirector*. It has to deal

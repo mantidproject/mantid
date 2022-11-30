@@ -24,7 +24,9 @@ scattering spectra (INS).
 Abins requires a file containing ab-initio phonon data to perform INS analysis.
 Several formats are supported for phonon modes containing frequency and displacement data at given q-points: CASTEP (.phonon), CRYSTAL (.out), GAUSSIAN (.log), DMOL3 (.outmol) or VASP (.xml).
 For VASP XML inputs, it is also permitted to use a "selective dynamics" in which some atoms are frozen.
-These would typically form a rigid substrate (e.g. a noble metal surface) for an adsorbed molecule of lightweight atoms, and are omitted from the calculated spectrum.
+In this case, data is only available for the moving atoms and contributions from the other atoms are omitted from the calculated spectrum.
+This may be a suitable model for systems where the frozen atoms form a rigid substrate (e.g. a noble metal surface) for an adsorbed molecule of lightweight atoms.
+It is not recommended where there is significant vibrational coupling between frozen and moving atoms, or where substrate modes would occupy a similar frequency range to the adsorbate.
 
 Alternatively, force-constants data can be provided and a fine q-point mesh will be sampled automatically.
 In this case the supported formats are CASTEP (.castep_bin generated with ``phonon_write_force_constants = True``)
@@ -41,7 +43,7 @@ More information about the implemented working equations can be found :ref:`here
 After successful analysis a user obtains a Mantid Workspace Group which stores theoretical spectra (and,
 optionally, experimental data).
 Currently a user can produce theoretical spectra for given atoms (e.g. 'atom_1', the first atom listed in the input
-data) or types of atom (for example for benzene two element symbols: C, H) and for each quantum event (up to fourth
+data) or types of atom (for example for benzene two element symbols: C, H) and for each quantum event (up to tenth
 order).
 Total theoretical spectra can also be generated, summing over all considered quantum events for that atom or element.
 The user can also produce a total spectrum for the whole considered system.
@@ -51,7 +53,7 @@ spectra.
 
 Abins is in constant development and suggestions for improvements are very welcome. For any such contributions please
 contact Dr. Sanghamitra Mukhopadhyay.
-If you are developing or hacking on Abins, see the :ref:`AbinsImplementation` notes which outline some of the key conventions, practices and pitfalls.
+If you are developing or modifying Abins, see the :ref:`AbinsImplementation` notes which outline some of the key conventions, practices and pitfalls.
 
 If Abins is used as part of your data analysis routines, please cite the relevant reference [1]_.
 
