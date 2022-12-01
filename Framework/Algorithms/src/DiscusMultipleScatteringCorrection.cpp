@@ -75,15 +75,12 @@ private:
 
 namespace Mantid::Algorithms {
 
-std::unique_ptr<DiscusData2D> DiscusData2D::CreateCopy(bool clearY) {
+std::unique_ptr<DiscusData2D> DiscusData2D::createCopy(bool clearY) {
   auto data2DNew = std::make_unique<DiscusData2D>();
   data2DNew->m_data.resize(m_data.size());
   for (size_t i = 0; i < m_data.size(); i++) {
     data2DNew->m_data[i].X = m_data[i].X;
-    if (clearY)
-      data2DNew->m_data[i].Y = std::vector<double>(m_data[i].Y.size(), 0.);
-    else
-      data2DNew->m_data[i].Y = m_data[i].Y;
+    data2DNew->m_data[i].Y = clearY ? std::vector<double>(m_data[i].Y.size(), 0.) : m_data[i].Y;
   }
   data2DNew->m_specAxis = m_specAxis;
   return data2DNew;
@@ -382,19 +379,19 @@ void DiscusMultipleScatteringCorrection::prepareStructureFactors() {
   if (SQWSGroup) {
     std::string matName = m_sampleShape->material().name();
     auto SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
-    AddWorkspaceToDiscus2DData(m_sampleShape, matName, SQWSGroupMember);
+    addWorkspaceToDiscus2DData(m_sampleShape, matName, SQWSGroupMember);
     if (nEnvComponents > 0) {
       matName = m_env->getContainer().material().name();
       SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
-      AddWorkspaceToDiscus2DData(m_env->getContainer().getShapePtr(), matName, SQWSGroupMember);
+      addWorkspaceToDiscus2DData(m_env->getContainer().getShapePtr(), matName, SQWSGroupMember);
     }
     for (size_t i = 1; i < nEnvComponents; i++) {
       matName = m_env->getComponent(i).material().name();
       SQWSGroupMember = std::static_pointer_cast<MatrixWorkspace>(SQWSGroup->getItem(matName));
-      AddWorkspaceToDiscus2DData(m_env->getComponentPtr(i), matName, SQWSGroupMember);
+      addWorkspaceToDiscus2DData(m_env->getComponentPtr(i), matName, SQWSGroupMember);
     }
   } else {
-    AddWorkspaceToDiscus2DData(m_sampleShape, m_sampleShape->material().name(),
+    addWorkspaceToDiscus2DData(m_sampleShape, m_sampleShape->material().name(),
                                std::dynamic_pointer_cast<MatrixWorkspace>(suppliedSQWS));
     MatrixWorkspace_sptr isotropicSQ = DataObjects::create<Workspace2D>(
         *std::dynamic_pointer_cast<MatrixWorkspace>(suppliedSQWS), static_cast<size_t>(1),
@@ -402,12 +399,12 @@ void DiscusMultipleScatteringCorrection::prepareStructureFactors() {
     if (nEnvComponents > 0) {
       std::string_view matName = m_env->getContainer().material().name();
       g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
-      AddWorkspaceToDiscus2DData(m_env->getContainer().getShapePtr(), matName, isotropicSQ);
+      addWorkspaceToDiscus2DData(m_env->getContainer().getShapePtr(), matName, isotropicSQ);
     }
     for (size_t i = 1; i < nEnvComponents; i++) {
       std::string_view matName = m_env->getComponent(i).material().name();
       g_log.information() << "Creating isotropic structure factor for " << matName << std::endl;
-      AddWorkspaceToDiscus2DData(m_env->getComponentPtr(i), matName, isotropicSQ);
+      addWorkspaceToDiscus2DData(m_env->getComponentPtr(i), matName, isotropicSQ);
     }
   }
 }
@@ -416,7 +413,7 @@ void DiscusMultipleScatteringCorrection::prepareStructureFactors() {
  * Function to convert between a Matrix workspace and the internal simplified 2D data structure. This decouples the
  * internal calculation logic from the Mantid workspaces
  */
-void DiscusMultipleScatteringCorrection::AddWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape,
+void DiscusMultipleScatteringCorrection::addWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape,
                                                                     const std::string_view &matName,
                                                                     API::MatrixWorkspace_sptr SQWS) {
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
@@ -438,12 +435,12 @@ void DiscusMultipleScatteringCorrection::AddWorkspaceToDiscus2DData(const Geomet
   auto specAxis = dynamic_cast<NumericAxis *>(SQWS->getAxis(1));
   std::vector<DiscusData1D> data;
   for (size_t i = 0; i < SQWS->getNumberHistograms(); i++) {
-    data.push_back(DiscusData1D{SQWS->histogram(i).dataX(), SQWS->histogram(i).dataY()});
+    data.emplace_back(SQWS->histogram(i).dataX(), SQWS->histogram(i).dataY());
   }
   ComponentWorkspaceMapping SQWSMapping{
       shape, matName,
       std::make_shared<DiscusData2D>(data, std::make_shared<std::vector<double>>(specAxis->getValues()))};
-  SQWSMapping.logSQ = SQWSMapping.SQ->CreateCopy();
+  SQWSMapping.logSQ = SQWSMapping.SQ->createCopy();
   convertToLogWorkspace(SQWSMapping.logSQ);
   m_SQWSs.push_back(SQWSMapping);
 }
@@ -833,7 +830,7 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
 void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
   for (auto &SQWSMapping : m_SQWSs) {
     auto &SQWS = SQWSMapping.SQ;
-    std::shared_ptr<DiscusData2D> outputWS = SQWS->CreateCopy(true);
+    std::shared_ptr<DiscusData2D> outputWS = SQWS->createCopy(true);
     std::vector<double> IOfQYFull;
     // loop through the S(Q) spectra for the different energy transfer values
     for (size_t iW = 0; iW < SQWS->getNumberHistograms(); iW++) {
@@ -1403,7 +1400,7 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
       if (m_importanceSampling) {
         auto newComponentWorkspaces = componentWorkspaces;
         for (auto &SQWSMapping : currentComponentWorkspaces)
-          SQWSMapping.InvPOfQ = SQWSMapping.InvPOfQ->CreateCopy();
+          SQWSMapping.InvPOfQ = SQWSMapping.InvPOfQ->createCopy();
         prepareCumulativeProbForQ(k, newComponentWorkspaces);
         currentComponentWorkspaces = newComponentWorkspaces;
       }
@@ -1732,7 +1729,7 @@ const Geometry::IObject *DiscusMultipleScatteringCorrection::updateWeightAndPosi
     double muL = trackSegLength * vmu;
     totalMuL += muL;
     // some overlap between the quantities stored here but since calculated them all may as well store them all
-    geometryObjects.push_back(std::make_tuple(geometryObj, vmu, muL, sigma_total));
+    geometryObjects.emplace_back(geometryObj, vmu, muL, sigma_total);
   }
 
   // randomly sample distance travelled across a total muL and work out which component this sits in
@@ -1836,7 +1833,7 @@ void DiscusMultipleScatteringCorrection::createInvPOfQWorkspaces(ComponentWorksp
   for (auto &SQWSMapping : matWSs) {
     auto &QSQ = SQWSMapping.QSQ;
     size_t expectedMaxSize =
-        std::accumulate(QSQ->histograms().begin(), QSQ->histograms().end(), static_cast<size_t>(0),
+        std::accumulate(QSQ->histograms().cbegin(), QSQ->histograms().cend(), static_cast<size_t>(0),
                         [](const size_t value, const DiscusData1D &histo) { return value + histo.Y.size(); });
     auto ws = std::make_shared<DiscusData2D>(std::vector<DiscusData1D>(nhists), nullptr);
     ws->histogram(0).X.reserve(expectedMaxSize);

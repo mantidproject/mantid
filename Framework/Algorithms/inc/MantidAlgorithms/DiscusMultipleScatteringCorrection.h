@@ -36,6 +36,8 @@ struct DiscusData1D {
   // separate vectors of X and Y rather than vector of pairs to mirror Histogram class and support edges\points
   std::vector<double> X;
   std::vector<double> Y;
+  DiscusData1D(){};
+  DiscusData1D(std::vector<double> X, std::vector<double> Y) : X(std::move(X)), Y(std::move(Y)) {}
 };
 
 class DiscusData2D {
@@ -43,7 +45,7 @@ public:
   DiscusData2D() : m_data(std::vector<DiscusData1D>{}), m_specAxis(nullptr){};
   DiscusData2D(const std::vector<DiscusData1D> &data, const std::shared_ptr<std::vector<double>> &specAxis)
       : m_data(data), m_specAxis(specAxis){};
-  std::unique_ptr<DiscusData2D> CreateCopy(bool clearY = false);
+  std::unique_ptr<DiscusData2D> createCopy(bool clearY = false);
   size_t getNumberHistograms() { return m_data.size(); }
   DiscusData1D &histogram(const size_t i) { return m_data[i]; }
   std::vector<DiscusData1D> &histograms() { return m_data; }
@@ -154,7 +156,7 @@ private:
   double getQSQIntegral(const DiscusData1D &QSQScaleFactor, double k);
   const ComponentWorkspaceMapping *findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
                                                          const Geometry::IObject *shapeObjectWithScatter);
-  void AddWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape, const std::string_view &matName,
+  void addWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape, const std::string_view &matName,
                                   API::MatrixWorkspace_sptr ws);
   long long m_callsToInterceptSurface{0};
   long long m_IkCalculations{0};
