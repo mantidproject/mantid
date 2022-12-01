@@ -43,12 +43,17 @@ class Polaris(AbstractInst):
             paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point,
         )
 
-    def create_vanadium(self, **kwargs):
+    def create_vanadium(self, test=False, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        vanadium_d = self._create_vanadium(
-            run_number_string=self._inst_settings.run_in_range, do_absorb_corrections=self._inst_settings.do_absorb_corrections
-        )
+
+        per_detector = False
+        if "per_detector" in kwargs.keys():
+            per_detector = bool(kwargs["per_detector"])
+
+        vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
+                                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                                           per_detector=per_detector, test=test)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)

@@ -67,13 +67,14 @@ def create_van(instrument, run_details, absorb):
     return d_spacing_group
 
 
-def create_van_per_detector(instrument, run_details, absorb):
+def create_van_per_detector(instrument, run_details, absorb, test=False):
     """
     Creates a splined vanadium run for the following instrument. Requires the run_details for the
     vanadium workspace we will process and whether to apply absorption corrections.
     :param instrument: The instrument object that will be used to supply various instrument specific methods
     :param run_details: The run details associated with this vanadium run
     :param absorb: Boolean flag whether to apply absorption corrections
+    :param: test: Only true when running automated tests
     :return: Processed workspace group in dSpacing (but not splined)
     """
     van = run_details.vanadium_run_numbers
@@ -82,13 +83,20 @@ def create_van_per_detector(instrument, run_details, absorb):
                                                                input_batching=INPUT_BATCHING.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
+    if test:
+        input_van_ws = crop_to_small_ws_for_test(input_van_ws)
+
     instrument.create_solid_angle_corrections(input_van_ws, run_details)
 
-    if not (run_details.empty_runs is None):
-        summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_runs,
+    if not (run_details.empty_inst_runs is None):
+        summed_empty = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_inst_runs,
                                                    instrument=instrument)
-        mantid.SaveNexus(Filename=run_details.summed_empty_file_path, InputWorkspace=summed_empty)
+        if test:
+            summed_empty = crop_to_small_ws_for_test(summed_empty)
+        if not test:
+            mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty)
         corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws, empty_sample=summed_empty)
+        mantid.SaveNexus(corrected_van_ws, "/home/danielmurphy/Desktop/test_corrected_van_ws.nxs")
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
@@ -177,7 +185,11 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
     mantid.ConvertUnits(InputWorkspace=vanadium_splines, Target="TOF", OutputWorkspace=out_name)
     mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,
                             EndWorkspaceIndex=ADS.retrieve(out_name).getNumberHistograms()-1,
-                            NCoeff=instrument._inst_settings.spline_coeff,
+                            NCoeff=5,   # instrument._inst_settings.spline_coeff,
                             OutputWorkspace=out_name, EnableLogging=False)
     out_spline_van_file_path = run_details.splined_vanadium_file_path
     mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=out_name)
+
+
+def crop_to_small_ws_for_test(input_workspace):
+    pass  # dummy function to protect production code and overridden during testing
