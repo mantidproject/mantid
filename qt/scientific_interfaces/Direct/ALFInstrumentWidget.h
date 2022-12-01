@@ -17,6 +17,9 @@ public:
   explicit ALFInstrumentWidget(QString workspaceName);
 
   void handleActiveWorkspaceDeleted() override;
+
+private:
+  MantidWidgets::InstrumentWidget::TabCustomizations getTabCustomizations() const;
 };
 
 } // namespace MantidQt::CustomInterfaces
