@@ -26,6 +26,7 @@
 namespace {
 
 QString const DEFAULT_TUBES_TOOLTIP = "No tubes have been selected";
+QString const PEAK_CENTRE_TOOLTIP = "The centre of the Gaussian peak function.";
 QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes. The two theta of a tube is taken to "
                                   "be the two theta at which the Out of Plane angle is closest to zero.";
 
@@ -135,10 +136,11 @@ void ALFAnalysisView::setupTwoThetaWidget(QGridLayout *layout) {
   m_numberOfTubes = new QLabel("0 tubes");
   m_numberOfTubes->setStyleSheet(INFO_LABEL_STYLE);
   m_numberOfTubes->setToolTip(DEFAULT_TUBES_TOOLTIP);
+  m_numberOfTubes->setAlignment(Qt::AlignCenter);
 
   layout->addWidget(new QLabel("Two theta:"), 0, 0);
   layout->addWidget(m_averageTwoTheta, 0, 1, 1, 3);
-  layout->addWidget(m_numberOfTubes, 0, 4, Qt::AlignCenter);
+  layout->addWidget(m_numberOfTubes, 0, 4);
 
   // Add an empty label to act as empty space
   layout->addWidget(new QLabel(""), 1, 4);
@@ -164,6 +166,7 @@ void ALFAnalysisView::setupFitRangeWidget(QGridLayout *layout, double const star
 void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const centre) {
   m_peakCentre = new QLineEdit(QString::number(centre));
   m_peakCentre->setValidator(new QDoubleValidator(m_peakCentre));
+  m_peakCentre->setToolTip(PEAK_CENTRE_TOOLTIP);
 
   connect(m_peakCentre, SIGNAL(editingFinished()), this, SLOT(notifyPeakCentreEditingFinished()));
 
@@ -171,10 +174,10 @@ void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const ce
   layout->addWidget(m_peakCentre, 3, 1, 1, 3);
 
   m_fitStatus = new QLabel("");
-  m_fitStatus->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+  m_fitStatus->setAlignment(Qt::AlignCenter);
   setPeakCentreStatus("");
 
-  layout->addWidget(m_fitStatus, 3, 4, Qt::AlignCenter);
+  layout->addWidget(m_fitStatus, 3, 4);
 }
 
 void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }
