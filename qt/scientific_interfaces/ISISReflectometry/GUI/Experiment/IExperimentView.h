@@ -87,6 +87,8 @@ public:
   virtual void disableCostFunction() = 0;
   virtual void enablePolarizationCorrections() = 0;
   virtual void disablePolarizationCorrections() = 0;
+  virtual void enablePolarizationEfficiencies() = 0;
+  virtual void disablePolarizationEfficiencies() = 0;
   virtual void enableFloodCorrectionInputs() = 0;
   virtual void disableFloodCorrectionInputs() = 0;
 

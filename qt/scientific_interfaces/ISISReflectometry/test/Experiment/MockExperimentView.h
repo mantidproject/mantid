@@ -70,6 +70,8 @@ public:
 
   MOCK_METHOD0(enablePolarizationCorrections, void());
   MOCK_METHOD0(disablePolarizationCorrections, void());
+  MOCK_METHOD0(enablePolarizationEfficiencies, void());
+  MOCK_METHOD0(disablePolarizationEfficiencies, void());
   MOCK_METHOD0(enableFloodCorrectionInputs, void());
   MOCK_METHOD0(disableFloodCorrectionInputs, void());
   MOCK_CONST_METHOD0(getTransmissionStartOverlap, double());

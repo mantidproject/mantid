@@ -218,6 +218,8 @@ public:
     verifyAndClear();
   }
 
+  void testPolarizationCorrectionOptionDisablesWorkspaceInput() { runTestThatPolarizationCorrectionsDisabled(); }
+
   void testTogglePolarizationCorrectionOptionEnablesWorkspaceInput() {
     runTestThatPolarizationCorrectionsUsesParameterFile();
   }
@@ -844,6 +846,11 @@ private:
     EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return(true));
   }
 
+  void assertPolarizationAnalysisNone(ExperimentPresenter const &presenter) {
+    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().correctionType(),
+                     PolarizationCorrectionType::None);
+  }
+
   void assertPolarizationAnalysisParameterFile(ExperimentPresenter const &presenter) {
     TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections().correctionType(),
                      PolarizationCorrectionType::ParameterFile);
@@ -890,31 +897,36 @@ private:
   void runTestThatPolarizationCorrectionsDisabled() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(1).WillOnce(Return(false));
+    // Called twice, once for getting it for the model, once for checking if the efficiencies selector needs disabling.
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
+    EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
+
+    assertPolarizationAnalysisNone(presenter);
     verifyAndClear();
   }
 
   void runTestThatPolarizationCorrectionsUsesParameterFile() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 
     assertPolarizationAnalysisParameterFile(presenter);
-
     verifyAndClear();
   }
 
   void runTestThatPolarizationCorrectionsUsesWorkspace() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(true));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("test_ws"));
+    EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 

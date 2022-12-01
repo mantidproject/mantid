@@ -108,6 +108,8 @@ public:
 
   void enablePolarizationCorrections() override;
   void disablePolarizationCorrections() override;
+  void enablePolarizationEfficiencies() override;
+  void disablePolarizationEfficiencies() override;
 
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;

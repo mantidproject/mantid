@@ -270,6 +270,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.transStitchParamsEdit->setEnabled(enabled);
   m_ui.transScaleRHSCheckBox->setEnabled(enabled);
   m_ui.polCorrCheckBox->setEnabled(enabled);
+  m_ui.polCorrEfficienciesWsSelector->setEnabled(enabled);
   stitchOptionsLineEdit().setEnabled(enabled);
   m_ui.reductionTypeComboBox->setEnabled(enabled);
   m_ui.summationTypeComboBox->setEnabled(enabled);
@@ -326,6 +327,7 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.transStitchParamsEdit);
   connectSettingsChange(*m_ui.transScaleRHSCheckBox);
   connectSettingsChange(*m_ui.polCorrCheckBox);
+  connectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -347,6 +349,7 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.transStitchParamsEdit);
   disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
   disconnectSettingsChange(*m_ui.polCorrCheckBox);
+  disconnectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -527,6 +530,16 @@ void QtExperimentView::enablePolarizationCorrections() {
 void QtExperimentView::disablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(false);
   m_ui.polCorrCheckLabel->setEnabled(false);
+}
+
+void QtExperimentView::enablePolarizationEfficiencies() {
+  m_ui.polCorrEfficienciesWsSelector->setEnabled(true);
+  m_ui.polCorrEfficienciesLabel->setEnabled(true);
+}
+
+void QtExperimentView::disablePolarizationEfficiencies() {
+  m_ui.polCorrEfficienciesWsSelector->setEnabled(false);
+  m_ui.polCorrEfficienciesLabel->setEnabled(false);
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {

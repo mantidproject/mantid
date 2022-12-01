@@ -202,9 +202,15 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   if (instrumentName == "INTER" || instrumentName == "SURF") {
     m_view->setPolarizationCorrectionOption(false);
     m_view->disablePolarizationCorrections();
-  } else {
-    m_view->enablePolarizationCorrections();
+    m_view->disablePolarizationEfficiencies();
+    return;
   }
+  m_view->enablePolarizationCorrections();
+  if (m_view->getPolarizationCorrectionOption()) {
+    m_view->enablePolarizationEfficiencies();
+    return;
+  }
+  m_view->disablePolarizationEfficiencies();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
