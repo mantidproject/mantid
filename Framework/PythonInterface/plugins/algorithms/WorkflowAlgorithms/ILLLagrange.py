@@ -8,7 +8,9 @@
 from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty, FileProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import *
+
 import numpy as np
+from typing import List
 
 
 class ILLLagrange(DataProcessorAlgorithm):
@@ -85,28 +87,8 @@ class ILLLagrange(DataProcessorAlgorithm):
         empty_cell_files = self.getPropertyValue('ContainerRuns').split(',')
 
         # empty cell treatment, if there is any
-        if empty_cell_files[0]:
-            # load and format empty cell
-            empty_cell_data = self.load_and_concatenate(empty_cell_files)
-            empty_cell_data = self.merge_adjacent_points(empty_cell_data)
-            energy, detector_counts, errors = self.get_counts_and_errors(empty_cell_data)
-
-            self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
-
-            CreateWorkspace(outputWorkspace=self.empty_cell_ws,
-                            DataX=energy,
-                            DataY=detector_counts,
-                            DataE=errors,
-                            UnitX="Energy")
-
-            self.intermediate_workspaces.append(self.empty_cell_ws)
-
-            # correct by water
-            if self.water_correction is not None:
-                correctedECname = "__" + self.output_ws_name + "_waterCorrectedEC"
-                self.correct_data(self.empty_cell_ws, correctedECname)
-
-                self.intermediate_workspaces.append(correctedECname)
+        if empty_cell_files[0] != str():
+            self.process_empty_cell(empty_cell_files)
 
         # sample load and formatting
         sample_files = self.getPropertyValue('SampleRuns').split(',')
@@ -287,6 +269,32 @@ class ILLLagrange(DataProcessorAlgorithm):
                  OutputWorkspace=corrected_ws)
 
         DeleteWorkspace(Workspace="__interp_water" + self.output_ws_name)
+
+    def process_empty_cell(self, empty_cell_files: List[str]):
+        """
+        Process empty cell files
+        @param empty_cell_files list with paths to empty cell data
+        """
+        # load and format empty cell
+        empty_cell_data = self.load_and_concatenate(empty_cell_files)
+        empty_cell_data = self.merge_adjacent_points(empty_cell_data)
+        energy, detector_counts, errors = self.get_counts_and_errors(empty_cell_data)
+
+        self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
+
+        CreateWorkspace(outputWorkspace=self.empty_cell_ws,
+                        DataX=energy,
+                        DataY=detector_counts,
+                        DataE=errors,
+                        UnitX="Energy")
+
+        self.intermediate_workspaces.append(self.empty_cell_ws)
+
+        # correct by water
+        if self.water_correction is not None:
+            correctedECname = "__{}_waterCorrectedEC".format(self.output_ws_name)
+            self.correct_data(self.empty_cell_ws, correctedECname)
+            self.intermediate_workspaces.append(correctedECname)
 
     def subtract_empty_cell(self):
         """
