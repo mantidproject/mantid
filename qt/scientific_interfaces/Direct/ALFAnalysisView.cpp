@@ -121,8 +121,8 @@ QWidget *ALFAnalysisView::createPlotToolbar() {
   auto toolbarWidget = new QWidget();
   auto *toolbarLayout = new QHBoxLayout(toolbarWidget);
   toolbarLayout->setMargin(0);
-  toolbarLayout->addWidget(m_resetButton);
   toolbarLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  toolbarLayout->addWidget(m_resetButton);
 
   return toolbarWidget;
 }
