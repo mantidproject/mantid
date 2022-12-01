@@ -335,6 +335,82 @@ class SliceViewerTest(unittest.TestCase):
         self.view.data_view.deactivate_tool.assert_called_once_with(ToolItemText.ZOOM)
         self.view.data_view.track_cursor.setChecked.assert_called_once_with(False)
 
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewXAxisEditor")
+    def test_x_axes_editor_is_opened_on_x_axes_double_click(self, mock_xaxis_editor):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        event = mock.MagicMock()
+        event.dblclick = True
+        event.button = 1
+        self.view.data_view.nonorthogonal_mode = False
+        self.view.data_view.ax = mock.MagicMock()
+        self.view.data_view.ax.xaxis.contains.return_value = (True, {})
+        self.view.data_view.ax.yaxis.contains.return_value = (False, {})
+        self.view.data_view.canvas = mock.MagicMock()
+        self.view.data_view.canvas.buttond = mock.MagicMock()
+        self.view.data_view.canvas.buttond.get.return_value = 1
+
+        presenter.canvas_clicked(event)
+
+        mock_xaxis_editor.assert_called_once()
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewYAxisEditor")
+    def test_y_axes_editor_is_opened_on_y_axes_double_click(self, mock_yaxis_editor):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        event = mock.MagicMock()
+        event.dblclick = True
+        event.button = 1
+        self.view.data_view.nonorthogonal_mode = False
+        self.view.data_view.ax = mock.MagicMock()
+        self.view.data_view.ax.yaxis.contains.return_value = (True, {})
+        self.view.data_view.ax.xaxis.contains.return_value = (False, {})
+        self.view.data_view.canvas = mock.MagicMock()
+        self.view.data_view.canvas.buttond = mock.MagicMock()
+        self.view.data_view.canvas.buttond.get.return_value = 1
+
+        presenter.canvas_clicked(event)
+
+        mock_yaxis_editor.assert_called_once()
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewXAxisEditor")
+    def test_x_axes_editor_is_opened_on_x_axes_tick_lable_double_click(self, mock_xaxis_editor):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        event = mock.MagicMock()
+        event.dblclick = True
+        event.button = 1
+        self.view.data_view.nonorthogonal_mode = False
+        self.view.data_view.ax = mock.MagicMock()
+        tick_lable = mock.MagicMock()
+        tick_lable.contains.return_value = (True, {})
+        self.view.data_view.ax.get_xticklabels.return_value = [tick_lable]
+        self.view.data_view.ax.yaxis.contains.return_value = (False, {})
+        self.view.data_view.canvas = mock.MagicMock()
+        self.view.data_view.canvas.buttond = mock.MagicMock()
+        self.view.data_view.canvas.buttond.get.return_value = 1
+
+        presenter.canvas_clicked(event)
+
+        mock_xaxis_editor.assert_called_once()
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewYAxisEditor")
+    def test_y_axes_editor_is_opened_on_y_axes_tick_lable_double_click(self, mock_yaxis_editor):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        event = mock.MagicMock()
+        event.dblclick = True
+        event.button = 1
+        self.view.data_view.nonorthogonal_mode = False
+        self.view.data_view.ax = mock.MagicMock()
+        tick_lable = mock.MagicMock()
+        tick_lable.contains.return_value = (True, {})
+        self.view.data_view.ax.get_yticklabels.return_value = [tick_lable]
+        self.view.data_view.ax.xaxis.contains.return_value = (False, {})
+        self.view.data_view.canvas = mock.MagicMock()
+        self.view.data_view.canvas.buttond = mock.MagicMock()
+        self.view.data_view.canvas.buttond.get.return_value = 1
+
+        presenter.canvas_clicked(event)
+
+        mock_yaxis_editor.assert_called_once()
+
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_sliceinfo")
     def test_cut_view_toggled_off(self, mock_get_sliceinfo):
         presenter = SliceViewer(None, model=self.model, view=self.view)
