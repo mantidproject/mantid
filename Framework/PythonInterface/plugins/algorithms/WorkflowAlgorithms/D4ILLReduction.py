@@ -334,7 +334,7 @@ class D4ILLReduction(PythonAlgorithm):
         except FileNotFoundError:
             self.log().warning("Bank calibration file not found or not provided.")
             bank_shifts = [zero_angle_corr] * n_banks
-        except RuntimeError as e:
+        except (RuntimeError, IndexError) as e:
             self.log().warning(str(e))
             self.log().warning("Padding the shifts list with zero angle correction.")
             bank_shifts.extend([zero_angle_corr]*(np.zeros(len(bank_shifts)-n_banks)))
