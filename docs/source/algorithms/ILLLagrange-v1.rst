@@ -11,14 +11,14 @@ Description
 -----------
 This algorithm reduces data from IN1 - Lagrange.
 
-It can take as input multiples files from a single monochromator scan, the associated empty cell runs, a correction file
-if needed. Reduction consists in multiplying the data by the correction factor from the correction file, and subtracting
+It can take as input multiples files from a single monochromator scan, the associated empty cell runs, and a correction file
+if needed. Reduction consists of multiplying the data by the correction factor from the correction file, and subtracting
 the empty cell from the raw data.
 
 The X-axis of the result data can be offset by the incident energy using `UseIncidentEnergy`, and be converted to wave
 number instead of the default energy using `ConvertToWaveNumber`.
 
-All the files in each field are merged together in a single curve, with very close points being merged together to avoid
+All the files in each field are merged together in a single curve, with very close points being removed to avoid
 interpolation artifacts.
 
 Since the binning can be different between the raw data, the empty cell and the correction file, values are interpolated
@@ -34,7 +34,7 @@ Usage
 
 **Simple Example**
 
-.. testcode:: ExSimpleILLLagrange
+.. code-block:: python
 
     # full correction of a single monochromator scan, with multiple files
     result = ILLLagrange(SampleRuns='012869:012871',
@@ -43,10 +43,9 @@ Usage
                          UseIncidentEnergy=False,
                          ConvertToWaveNumber=False)
 
-
 **Multiple monochromators example**
 
-.. testcode:: ExMultipleMonoILLLagrange
+.. code-block:: python
 
     # complete reduction example for an entire experiment
 
