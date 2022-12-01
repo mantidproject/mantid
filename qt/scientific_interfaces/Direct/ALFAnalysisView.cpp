@@ -90,6 +90,10 @@ QWidget *ALFAnalysisView::createPlotWidget() {
 
   m_plot = new MantidWidgets::PreviewPlot();
 
+  // Set override axis labels to be more concise
+  m_plot->setOverrideAxisLabel(MantidWidgets::AxisID::XBottom, "Out of plane angle (degrees)");
+  m_plot->setOverrideAxisLabel(MantidWidgets::AxisID::YLeft, "Counts");
+
   // Remove padding from the preview plot
   QHash<QString, QVariant> kwargs;
   kwargs.insert("pad", 0);
@@ -111,7 +115,7 @@ QWidget *ALFAnalysisView::createPlotWidget() {
 
 QWidget *ALFAnalysisView::createPlotToolbar() {
   m_resetButton = new QPushButton(MantidQt::Icons::getIcon("mdi.replay"), "");
-  m_resetButton->setToolTip("Reset peak centre");
+  m_resetButton->setToolTip("Reset extracted plot");
   connect(m_resetButton, SIGNAL(clicked()), this, SLOT(notifyResetClicked()));
 
   auto toolbarWidget = new QWidget();
