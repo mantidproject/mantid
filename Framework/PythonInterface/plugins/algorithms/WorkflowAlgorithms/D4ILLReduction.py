@@ -8,12 +8,11 @@
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     MultipleFileProperty, Progress, PythonAlgorithm, WorkspaceGroup, \
     WorkspaceGroupProperty
-from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
+from mantid.kernel import DeltaEModeType, Direction, FloatBoundedValidator, StringListValidator, UnitConversion
 from mantid.simpleapi import ConvertAxisByFormula, CloneWorkspace, CreateSingleValuedWorkspace, CreateWorkspace, \
     DeadTimeCorrection, DeleteWorkspace, DeleteWorkspaces, Divide, ExtractMonitors, GroupWorkspaces, LoadAndMerge, \
     MaskDetectorsIf, MoveInstrumentComponent, mtd, Multiply, RenameWorkspace, SaveAscii, SumOverlappingTubes
 import numpy as np
-from scipy.constants import physical_constants
 
 
 class D4ILLReduction(PythonAlgorithm):
@@ -231,13 +230,9 @@ class D4ILLReduction(PythonAlgorithm):
         ws: (str) name of the workspace with x-axis in 2theta units
         return: (str) name of the workspace converted to q
         """
-        Ei = mtd[ws].getRun().getLogData('Ei').value * 1.60218e-22  # in J, meV->J
+        Ei = mtd[ws].getRun().getLogData('Ei').value
         if self.getProperty('Wavelength').isDefault and Ei != 0:
-            h = physical_constants['Planck constant'][0]  # in m^2 kg / s
-            neutron_mass = physical_constants['neutron mass'][0]  # in kg
-            v = np.sqrt(2.0 * Ei / neutron_mass)  # in m /s
-            momentum = neutron_mass * v  # in m * kg / s
-            wavelength = h / momentum * 1e10  # in Angstroem
+            wavelength = UnitConversion.run('Energy', 'Wavelength', Ei, 0, 0, 0, DeltaEModeType.Elastic, 0.0)
         else:
             wavelength = self.getProperty('Wavelength').value
         ConvertAxisByFormula(
