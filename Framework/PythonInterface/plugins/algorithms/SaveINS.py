@@ -86,12 +86,12 @@ class SaveINS(PythonAlgorithm):
             # cell parameters
             wl = 0.7  # dummy wavelength value (ignored for TOF Laue)
             alatt = [cell.a(), cell.b(), cell.c(), cell.alpha(), cell.beta(), cell.gamma()]
-            f_handle.write(f"CELL {wl} {' '.join([str(param) for param in alatt])}\n")
+            f_handle.write(f"CELL {wl:.1f} {' '.join([f'{param:.4f}' for param in alatt])}\n")
             # n formula units and cell parameter errors
             nfu = material.numberDensity*cell.volume()
             errors = [cell.errora(), cell.errorb(), cell.errorc(),
                       cell.erroralpha(), cell.errorbeta(), cell.errorgamma()]
-            f_handle.write(f"ZERR {nfu} {' '.join([str(err) for err in errors])}\n")
+            f_handle.write(f"ZERR {nfu:.0f} {' '.join([f'{err:.4f}' for err in errors])}\n")
             # lattice type
             latt_type = self.LATT_TYPE_MAP[spgr.getHMSymbol()[0]]
             # check if not centrosymmetric
@@ -115,12 +115,12 @@ class SaveINS(PythonAlgorithm):
                     b = xs_info['coh_scatt_length']
                     mu = (xs_info['tot_scatt_xs'] + 0.6*xs_info['abs_xs']/1.798)/cell.volume()  # per atom
                     mf = atom.mass
-                    f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b} 0 0 {mu} 0 {mf}\n")
-            f_handle.write(f"UNIT {' '.join([str(nfu*natom) for natom in natoms])}\n")  # total num in unit cell
+                    f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b:.4f} 0 0 {mu:.4f} 0 {mf:.4f}\n")
+            f_handle.write(f"UNIT {' '.join([f'{nfu*natom:.0f}' for natom in natoms])}\n")  # total num in unit cell
             # Neutron TOF flags
             f_handle.write("MERG 0\n")  # do not merge same reflection at different lambda
             f_handle.write("HKLF 2\n")  # tells SHELX the columns saved in the reflection file
-            f_handle.write("END")  # tells SHELX the columns saved in the reflection file
+            f_handle.write("END")
 
 
 AlgorithmFactory.subscribe(SaveINS)
