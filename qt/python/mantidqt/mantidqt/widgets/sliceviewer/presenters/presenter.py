@@ -102,7 +102,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         Tell the view to display a new plot of an MDHistoWorkspace
         """
         data_view = self.view.data_view
-        limits = data_view.get_axes_limits()
+        limits = data_view.get_data_limits_to_fill_current_axes()
 
         if limits is None or not WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws):
             data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
@@ -115,7 +115,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         data_view = self.view.data_view
-        limits = data_view.get_axes_limits()
+        limits = data_view.get_data_limits_to_fill_current_axes()
 
         # The value at the i'th index of this tells us that the axis with that value (0 or 1) will display dimension i
         dimension_indices = self.view.dimensions.get_states()
@@ -153,7 +153,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.model.get_data(self.get_slicepoint(),
                                 bin_params=data_view.dimensions.get_bin_params(),
                                 dimension_indices=data_view.dimensions.get_states(),
-                                limits=data_view.get_axes_limits(),
+                                limits=data_view.get_data_limits_to_fill_current_axes(),
                                 transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
@@ -184,8 +184,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
     def get_proj_matrix(self):
         return self.model.get_proj_matrix()
 
-    def get_axes_limits(self):
-        return self.view.data_view.get_axes_limits()
+    def get_data_limits_to_fill_current_axes(self):
+        return self.view.data_view.get_data_limits_to_fill_current_axes()
 
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
@@ -297,7 +297,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         data_view = self.view.data_view
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
-            data_view.disable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             # set transform from sliceinfo but ignore view as non-ortho state not set yet
             data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
@@ -306,10 +305,13 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
             data_view.enable_tool_button(ToolItemText.REGIONSELECTION)
-            if self.model.can_support_non_axis_cuts():
-                data_view.enable_tool_button(ToolItemText.NONAXISALIGNEDCUTS)
 
         self.new_plot()
+
+        # replot the cut if one was displayed before
+        if self._cutviewer_presenter is not None and self._cutviewer_presenter.view.cut_rep is not None:
+            self._cutviewer_presenter.show_view()
+            self._cutviewer_presenter.update_cut()
 
     def normalization_changed(self, norm_type):
         """
@@ -344,7 +346,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.view.add_widget_to_splitter(self._cutviewer_presenter.get_view())
             self._cutviewer_presenter.show_view()
             data_view.deactivate_tool(ToolItemText.ZOOM)
-            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS, ToolItemText.NONORTHOGONAL_AXES]:
+            for tool in [ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS]:
                 data_view.deactivate_and_disable_tool(tool)
             # turn off cursor tracking as this causes plot to resize interfering with interactive cutting tool
             data_view.track_cursor.setChecked(False)  # on_track_cursor_state_change(False)

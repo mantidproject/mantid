@@ -80,7 +80,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view.help_button = mock.Mock()
         data_view.nonorthogonal_mode = False
         data_view.nonortho_transform = None
-        data_view.get_axes_limits.return_value = None
+        data_view.get_data_limits_to_fill_current_axes.return_value = None
         return data_view
 
     def setUp(self):
@@ -291,8 +291,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.plot_MDH.assert_called_once()
         data_view_mock.enable_tool_button.assert_has_calls(
             (mock.call(ToolItemText.LINEPLOTS),
-             mock.call(ToolItemText.REGIONSELECTION),
-             mock.call(ToolItemText.NONAXISALIGNEDCUTS)))
+             mock.call(ToolItemText.REGIONSELECTION)))
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_non_orthogonal_axes_toggled_off_not_enable_non_axis_cuts_if_not_supported(self, mock_sliceinfo_cls):
@@ -330,8 +329,7 @@ class SliceViewerTest(unittest.TestCase):
         # test correct buttons disabled
         self.view.data_view.deactivate_and_disable_tool.assert_has_calls([mock.call(tool) for tool in
                                                                           (ToolItemText.REGIONSELECTION,
-                                                                           ToolItemText.LINEPLOTS,
-                                                                           ToolItemText.NONORTHOGONAL_AXES)])
+                                                                           ToolItemText.LINEPLOTS)])
         self.view.data_view.deactivate_tool.assert_called_once_with(ToolItemText.ZOOM)
         self.view.data_view.track_cursor.setChecked.assert_called_once_with(False)
 

@@ -271,7 +271,7 @@ class SliceViewerDataView(QWidget):
         self.ax.set_ylim(extent[2], extent[3])
         # Set the original data limits which get passed to the ImageInfoWidget so that
         # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
-        self._orig_lims = self.get_axes_limits()
+        self._orig_lims = self.get_data_limits_to_fill_current_axes()
 
         self.on_track_cursor_state_change(self.track_cursor_checked())
 
@@ -453,9 +453,10 @@ class SliceViewerDataView(QWidget):
         """Set a given tool button disabled so it cannot be interacted with"""
         self.mpl_toolbar.set_action_enabled(tool_text, False)
 
-    def get_axes_limits(self):
+    def get_data_limits_to_fill_current_axes(self):
         """
-        Return the limits on the image axes transformed into the nonorthogonal frame if appropriate
+        Return the data limits required to fill the current image axes
+        transformed into the nonorthogonal frame if appropriate
         """
         if self.image is None:
             return None
@@ -464,8 +465,10 @@ class SliceViewerDataView(QWidget):
             if self.nonorthogonal_mode:
                 inv_tr = self.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
+                # transform top left and bottom right corner so data fills the initial or zoomed rectangle
                 xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
                 xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             return xlim, ylim
 

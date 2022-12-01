@@ -32,6 +32,14 @@ class TransformTest(unittest.TestCase):
         assert_allclose(x, xpinv)
         assert_allclose(y, ypinv)
 
+    def test_nonorthogonal_origin_unaltered(self):
+        transform = NonOrthogonalTransform(angle=np.radians(40.))
+        x, y = 0., 0.
+        xp, yp = transform.tr(x, y)
+
+        self.assertEqual(xp, 0)
+        self.assertEqual(yp, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

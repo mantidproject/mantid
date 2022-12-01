@@ -152,6 +152,9 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_controlPanelLayout->addWidget(aWidget);
 
+  m_controlPanelLayout->setCollapsible(0, false);
+  m_controlPanelLayout->setCollapsible(1, false);
+
   m_mainLayout->addWidget(m_controlPanelLayout);
 
   m_xIntegration = new XIntegrationControl(this);
