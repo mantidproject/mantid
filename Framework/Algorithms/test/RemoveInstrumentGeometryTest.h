@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/RemoveInstrumentGeometry.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include <cxxtest/TestSuite.h>
@@ -80,5 +81,72 @@ public:
     TS_ASSERT(instr->isEmptyInstrument());
   }
 
-  void test_md_ws() {}
+  // Helper method to create a MDHW
+  std::string createMDHistoWorkspace(const uint16_t nExperimentInfosToAdd = 3) {
+
+    Workspace2D_sptr ws2D = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3, true);
+    const std::string wsName = "TestRemoveInstrumentMDWorkspace";
+
+    auto instrument = ws2D->getInstrument();
+
+    auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
+    ws->getExperimentInfo(0)->setInstrument(instrument);
+
+    for (uint16_t i = 1; i < nExperimentInfosToAdd; ++i) {
+      ExperimentInfo_sptr experimentInfo = std::make_shared<ExperimentInfo>();
+      ws->addExperimentInfo(experimentInfo);
+      ws->getExperimentInfo(i)->setInstrument(instrument);
+    }
+
+    AnalysisDataService::Instance().addOrReplace(wsName, ws);
+
+    return wsName;
+  }
+
+  void test_md_ws_remove_all() {
+    std::string inputWS = createMDHistoWorkspace(5);
+    std::string wsName("TestRemoveInstrumentMDWorkspaceOutput");
+
+    RemoveInstrumentGeometry alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MDHistoWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(wsName));
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumExperimentInfo(), 5);
+    for (uint16_t i = 0; i < 5; ++i) {
+      TS_ASSERT(ws->getExperimentInfo(i)->getInstrument()->isEmptyInstrument());
+    }
+  }
+
+  void test_md_ws_remove_partial() {
+    std::string inputWS = createMDHistoWorkspace(5);
+    std::string wsName("TestRemoveInstrumentMDWorkspaceOutput");
+
+    RemoveInstrumentGeometry alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MDExperimentInfoNumbers", "1,3"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MDHistoWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(wsName));
+    TS_ASSERT(ws);
+    TS_ASSERT_EQUALS(ws->getNumExperimentInfo(), 5);
+    for (uint16_t i = 0; i < 5; ++i) {
+      if (i % 2 == 0) {
+        TS_ASSERT(!(ws->getExperimentInfo(i)->getInstrument()->isEmptyInstrument()));
+      } else {
+        TS_ASSERT(ws->getExperimentInfo(i)->getInstrument()->isEmptyInstrument());
+      }
+    }
+  }
 };
