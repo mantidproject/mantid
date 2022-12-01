@@ -90,6 +90,11 @@ QWidget *ALFAnalysisView::createPlotWidget() {
 
   m_plot = new MantidWidgets::PreviewPlot();
 
+  // Remove padding from the preview plot
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("pad", 0);
+  m_plot->setTightLayout(kwargs);
+
   // Set the preview plot background as transparent.
   m_plot->canvas()->gcf().setFaceColor("None");
   m_plot->canvas()->setStyleSheet("background-color:transparent;");
