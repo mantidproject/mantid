@@ -160,11 +160,10 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
     return PolarizationCorrections(PolarizationCorrectionType::None);
   }
   auto const correctionsWorkspace = m_view->getPolarizationEfficienciesWorkspace();
-  if (correctionsWorkspace == "") {
+  if (correctionsWorkspace.empty()) {
     return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
   }
-  return PolarizationCorrections(PolarizationCorrectionType(PolarizationCorrectionType::Workspace),
-                                 correctionsWorkspace);
+  return PolarizationCorrections(PolarizationCorrectionType::Workspace, correctionsWorkspace);
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
