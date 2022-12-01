@@ -67,6 +67,7 @@ dependencies:
   - xorg-libxtst>=1.2.3
 
   # Development tooling
+  - black  # may be out of sync with pre-commit
   - cppcheck==2.5
   - gcovr>=4.2
   - pre-commit>=2.12.0

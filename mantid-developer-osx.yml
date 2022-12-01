@@ -48,6 +48,7 @@ dependencies:
   - toml>=0.10.2
   - zlib>=1.2.11
   # Needed only for development
+  - black  # may be out of sync with pre-commit
   - cppcheck==2.5
   - pre-commit>=2.12.0
 
