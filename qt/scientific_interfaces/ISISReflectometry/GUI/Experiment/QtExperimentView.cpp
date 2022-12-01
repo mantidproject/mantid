@@ -98,6 +98,7 @@ void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmF
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemoveLookupRowRequested()));
   initOptionsTable(algorithmForTooltips);
   initFloodControls();
+  initPolCorrEfficienciesControls();
 
   auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace", "ScaleRHSWorkspace"});
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
@@ -207,6 +208,11 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
 
   const int padding = 20;
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
+}
+
+void QtExperimentView::initPolCorrEfficienciesControls() {
+  m_ui.polCorrEfficienciesWsSelector->setOptional(true);
+  m_ui.polCorrEfficienciesWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void QtExperimentView::initFloodControls() {

@@ -143,6 +143,7 @@ private:
   void initLayout(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initOptionsTable(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initFloodControls();
+  void initPolCorrEfficienciesControls();
   void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
   void registerExperimentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
   void setToolTipAsPropertyDocumentation(QWidget &widget, std::string const &propertyName,
