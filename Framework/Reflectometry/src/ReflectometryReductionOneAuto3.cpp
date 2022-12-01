@@ -977,8 +977,9 @@ ReflectometryReductionOneAuto3::findPolarizationCorrectionMethod(const API::Matr
       if (std::find(CorrectionMethod::WILDES_AXES.begin(), CorrectionMethod::WILDES_AXES.end(), axis.label(i)) !=
           CorrectionMethod::WILDES_AXES.end()) {
         return CorrectionMethod::WILDES;
-      } else if (std::find(CorrectionMethod::FREDRIKZE_AXES.begin(), CorrectionMethod::FREDRIKZE_AXES.end(),
-                           axis.label(i)) != CorrectionMethod::FREDRIKZE_AXES.end()) {
+      }
+      if (std::find(CorrectionMethod::FREDRIKZE_AXES.begin(), CorrectionMethod::FREDRIKZE_AXES.end(), axis.label(i)) !=
+          CorrectionMethod::FREDRIKZE_AXES.end()) {
         return CorrectionMethod::FREDRIKZE;
       }
     }
