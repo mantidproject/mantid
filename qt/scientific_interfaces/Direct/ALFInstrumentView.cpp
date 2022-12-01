@@ -7,8 +7,8 @@
 #include "ALFInstrumentView.h"
 
 #include "ALFInstrumentPresenter.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "ALFInstrumentWidget.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
