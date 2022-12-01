@@ -132,9 +132,14 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
                                              const std::vector<double> &timeSec, std::string &startStr) {
   // Check the type. Boolean stored as UINT8
   bool typeIsBool(false);
+
+  std::vector<::NeXus::AttrInfo> infos = file->getAttrInfos();
   // Check for boolean attribute
-  if (file->hasAttr("boolean")) {
-    typeIsBool = true;
+  for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it) {
+    if (it->name == "boolean") {
+      typeIsBool = true;
+      break;
+    }
   }
 
   std::vector<Types::Core::DateAndTime> times;
@@ -185,12 +190,13 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
   }
 
   std::string unitsStr;
-  if (file->hasAttr("units")) {
-    try {
-      file->getAttr("units", unitsStr);
-    } catch (::NeXus::Exception &) {
+  for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it) {
+    if (it->name == "units") {
+      unitsStr = file->getStrAttr(*it);
+      break;
     }
   }
+
   file->closeData();
   file->closeGroup();
   // add units
