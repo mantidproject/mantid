@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS script helpers for elastic powder reduction.
+DNS script helpers for reduction of elastic powder data.
 """
 
 import numpy as np
@@ -15,7 +15,8 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import \
     DNSError
 from mantid.simpleapi import (BinMD, CreateSingleValuedWorkspace, DivideMD,
                               GroupWorkspaces, IntegrateMDHistoWorkspace,
-                              LoadDNSSCD, MinusMD, MultiplyMD, PlusMD, mtd)
+                              LoadDNSSCD, MinusMD, MultiplyMD, PlusMD, mtd,
+                              DeleteWorkspace, SetMDUsingMask)
 
 
 def background_subtraction(workspace_name, factor=1):
@@ -40,6 +41,7 @@ def background_subtraction(workspace_name, factor=1):
     scaling = ratio * factor
     background_scaled = MultiplyMD(mtd[background_name], scaling)
     mtd[workspace_name] = mtd[workspace_name] - background_scaled
+    remove_nan_and_negative_from_ws(workspace_name)
     return mtd[workspace_name]
 
 
@@ -47,13 +49,15 @@ def flipping_ratio_correction(workspace):
     """
     Given SF channel, SF and NSF are corrected for finite flipping ratio.
     """
+    # need to be fixed below
     if workspace.endswith('_nsf'):
         return False
     nsf_workspace = ''.join((workspace[:-2], 'nsf'))
     try:
         mtd[nsf_workspace]
     except KeyError:
-        raise_error(f'no matching nsf workspace found for {workspace}')
+        raise_error(f'Flipping ratio correction is selected, but no '
+                    f'matching nsf workspace found for {workspace}')
         return False
     sf_workspace = workspace
     sf = sf_workspace[-4:]
@@ -66,8 +70,8 @@ def flipping_ratio_correction(workspace):
         mtd[nicr_sf] # pylint: disable=pointless-statement
         mtd[nicr_nsf] # pylint: disable=pointless-statement
     except KeyError:
-        raise_error(
-            f'no matching NiCr workspace found for {workspace}')
+        raise_error(f'Flipping ratio correction is selected, but no '
+                    f'matching NiCr workspace found for {workspace}')
         return False
     new_nicr_sf = DivideMD(nicr_sf, nicr_sf_norm)
     new_nicr_nsf = DivideMD(nicr_nsf, nicr_nsf_norm)
@@ -145,17 +149,21 @@ def raise_error(error):
 
 
 def vanadium_correction(workspace_name,
+                        binning,
                         vana_set=None,
                         ignore_vana_fields=False,
                         sum_vana_sf_nsf=False):
     """
-    Correction of workspace for detector efficiency, angular coverage, lorentz
-    factor based on vanadium data.
+    Correction of workspace for detector efficiency, angular coverage,
+    and Lorentz factor based on vanadium data.
 
-    Key-Arguments
-    vana_set = used Vanadium data, if not given fields matching sample are used.
-    ignore_vana_fields = if True fields of vanadium files will be ignored.
-    sum_vana_sf_nsf ) if True SF and NSF channels of vanadium are summed.
+    Key-Arguments:
+    vana_set: set of selected vanadium data. If not given, the fields
+    matching those of the selected sample data are used.
+    ignore_vana_fields: if True, the fields of vanadium files will
+    be ignored.
+    sum_vana_sf_nsf: if True, SF and NSF channels of vanadium are
+    summed.
     """
     vana_sum = None
     vana_sum_norm = None
@@ -171,16 +179,18 @@ def vanadium_correction(workspace_name,
             for field in vana_set:
                 if field != 'path':
                     vana_name = '_'.join(('vana', field))
-                    vana_norm = '_'.join((vana_name, 'norm'))
+                    vana_norm_name = '_'.join((vana_name, 'norm'))
                     try:
+                        remove_nan_and_negative_from_ws(vana_name)
+                        remove_nan_and_negative_from_ws(vana_norm_name)
                         vana = mtd[vana_name]
-                        vana_norm = mtd[vana_norm]
+                        vana_norm_name = mtd[vana_norm_name]
                     except KeyError:
                         raise_error(f'No vanadium file for field {field_name}.'
                                     ' ')
                         return mtd[workspace_name]
                     vana_list.append(vana)
-                    norm_list.append(vana_norm)
+                    norm_list.append(vana_norm_name)
             vana_sum = sum(vana_list)
             vana_sum_norm = sum(norm_list)
         else:
@@ -194,43 +204,60 @@ def vanadium_correction(workspace_name,
         vana_nsf_norm = '_'.join((vana_nsf, 'norm'))
         vana_sf_norm = '_'.join((vana_sf, 'norm'))
         try:
+            remove_nan_and_negative_from_ws(vana_sf)
+            remove_nan_and_negative_from_ws(vana_sf_norm)
             vana_sf = mtd[vana_sf]
             vana_sf_norm = mtd[vana_sf_norm]
         except KeyError:
             raise_error(
                 f'No vanadium file for {polarization}_sf .'
                 ' You can choose to ignore'
-                ' vanadium fields in the options.')
+                ' vanadium fields by selecting "Options"'
+                ' -> "Detector Efficiency Correction" ->'
+                ' "Ignore Vanadium Fields".')
             return mtd[workspace_name]
         try:
+            remove_nan_and_negative_from_ws(vana_nsf)
+            remove_nan_and_negative_from_ws(vana_nsf_norm)
             vana_nsf = mtd[vana_nsf]
             vana_nsf_norm = mtd[vana_nsf_norm]
         except KeyError:
             raise_error(
                 f'No vanadium file for {polarization}_nsf. '
                 f'You can choose to ignore'
-                ' vanadium fields in the options.')
+                ' vanadium fields by selecting "Options"'
+                ' -> "Detector Efficiency Correction" ->'
+                ' "Ignore Vanadium Fields".')
             return mtd[workspace_name]
         vana_sum = vana_sf + vana_nsf
         vana_sum_norm = vana_sf_norm + vana_nsf_norm
     else:
         vana_name = '_'.join(('vana', field_name))
-        vana_norm = '_'.join((vana_name, 'norm'))
+        vana_norm_name = '_'.join((vana_name, 'norm'))
         try:
+            remove_nan_and_negative_from_ws(vana_name)
+            remove_nan_and_negative_from_ws(vana_norm_name)
             vana_sum = mtd[vana_name]
-            vana_sum_norm = mtd[vana_norm]
+            vana_sum_norm = mtd[vana_norm_name]
         except KeyError:
             raise_error(f'No vanadium file for {field_name}.'
                         ' You can choose to ignore'
-                        ' vanadium fields in the options.')
+                        ' vanadium fields by selecting "Options"'
+                        ' -> "Detector Efficiency Correction" ->'
+                        ' "Ignore Vanadium Fields".')
             return mtd[workspace_name]
     # common code, which will be run regardless of the case
+    rounding_limit = 0.05
+    int_lower_limit = (binning[0] - rounding_limit) / 2.0
+    int_upper_limit = (binning[1] + rounding_limit) / 2.0
     vana_total = IntegrateMDHistoWorkspace(vana_sum,
-                                           P1Bin=[4.7, 124.8],
-                                           P2Bin=[])
+                                           P1Bin=[int_lower_limit, int_upper_limit],
+                                           P2Bin=[],
+                                           P3Bin=[])
     vana_total_norm = IntegrateMDHistoWorkspace(vana_sum_norm,
-                                                P1Bin=[4.7, 124.8],
-                                                P2Bin=[])
+                                                P1Bin=[int_lower_limit, int_upper_limit],
+                                                P2Bin=[],
+                                                P3Bin=[])
     vana_total = CreateSingleValuedWorkspace(
         DataValue=vana_total.getSignalArray()[0][0][0],
         ErrorValue=np.sqrt(vana_total.getErrorSquaredArray()[0][0][0]))

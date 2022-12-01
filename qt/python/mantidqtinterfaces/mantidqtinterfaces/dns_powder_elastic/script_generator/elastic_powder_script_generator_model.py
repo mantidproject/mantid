@@ -217,7 +217,8 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_vana_correction_string(self):
         if self._vana_correction:
             return f"{self._spacing}vanadium_correction(workspace," \
-                   " vana_set=standard_data['vana'], " \
+                   " binning, " \
+                   "vana_set=standard_data['vana'], " \
                    f"ignore_vana_fields={self._ignore_vana}, " \
                    f"sum_vana_sf_nsf={self._sum_sf_nsf})"
         return ""

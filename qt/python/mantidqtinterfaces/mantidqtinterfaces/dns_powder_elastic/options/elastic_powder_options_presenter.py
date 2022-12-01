@@ -11,8 +11,6 @@ DNS powder elastic options tab presenter of DNS reduction GUI.
 
 from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter \
     import DNSCommonOptionsPresenter
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset \
-    import automatic_two_theta_binning
 
 
 class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
@@ -21,7 +19,43 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
         super().__init__(parent=parent, name=name, view=view, model=model)
         # connect signals
         self.view.sig_get_wavelength.connect(self._determine_wavelength)
-        self.view.sig_auto_binning_clicked.connect(self._set_automatic_binning)
+        self.view.sig_auto_binning_clicked.connect(self._set_auto_binning)
+        self.view.sig_auto_binning_clicked.connect(self._set_manual_binning_parameter_limits)
+
+    def _set_auto_binning(self):
+        """
+        Getting binning parameters from selected sample data.
+        """
+        if self.param_dict['file_selector']['full_data']:
+            sample_data = self.param_dict['file_selector']['full_data']
+            two_theta_params_dict = get_automatic_two_theta_binning(sample_data)
+            own_options = self.get_option_dict()
+            for parameter in two_theta_params_dict.keys():
+                own_options[parameter] = two_theta_params_dict[parameter]
+            self.set_view_from_param()
+
+    def _set_manual_binning_parameter_limits(self):
+        if self.param_dict['file_selector']['full_data']:
+            sample_data = self.param_dict['file_selector']['full_data']
+            auto_bin_params = get_automatic_two_theta_binning(sample_data)
+            min_lower_limit = auto_bin_params['two_theta_min']
+            min_upper_limit = auto_bin_params['two_theta_max'] - auto_bin_params['two_theta_step']
+            max_lower_limit = auto_bin_params['two_theta_min'] + auto_bin_params['two_theta_step']
+            max_upper_limit = auto_bin_params['two_theta_max']
+            self.view._map['two_theta_min'].setMinimum(min_lower_limit )
+            self.view._map['two_theta_min'].setMaximum(min_upper_limit)
+            self.view._map['two_theta_max'].setMinimum(max_lower_limit)
+            self.view._map['two_theta_max'].setMaximum(max_upper_limit)
+
+    def _get_automatic_binning_state(self):
+        return self.view._map['automatic_binning'].isChecked()
+
+    def tab_got_focus(self):
+        auto_binning_is_on = self._get_automatic_binning_state()
+        if auto_binning_is_on:
+            self._set_auto_binning()
+        else:
+            self._set_manual_binning_parameter_limits()
 
     def process_request(self):
         own_options = self.get_option_dict()
@@ -39,30 +73,19 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
                     command, command_line_options[command]
                 )
 
-    def _set_automatic_binning(self):
-        """
-        Getting binning parameters from selected sample data.
-        """
-        if self.param_dict['file_selector']['full_data']:
-            sample_data = self.param_dict['file_selector']['full_data']
-            binning_dict = automatic_two_theta_binning(sample_data)
 
-            two_theta_min = binning_dict['min']
-            two_theta_max = binning_dict['max']
-            two_theta_bin_size = 0.5
-            number_bins = (two_theta_max - two_theta_min) / two_theta_bin_size + 1
-
-            own_options = self.get_option_dict()
-            own_options['two_theta_min'] = two_theta_min
-            own_options['two_theta_max'] = two_theta_max
-            own_options['nbins'] = number_bins
-            own_options['two_theta_bin_size'] = two_theta_bin_size
-            self.set_view_from_param()
-
-    def _get_automatic_binning_state(self):
-        return self.view._map['automatic_binning'].isChecked()
-
-    def tab_got_focus(self):
-        auto_binning_is_on = self._get_automatic_binning_state()
-        if auto_binning_is_on:
-            self._set_automatic_binning()
+def get_automatic_two_theta_binning(sample_data):
+    '''
+    Determines automatic two theta binning parameters from selected sample data.
+    '''
+    det_rot = [-x['det_rot'] for x in sample_data]
+    two_theta_last_det = 115.0
+    two_theta_max = (max(det_rot) + two_theta_last_det)
+    two_theta_min = (min(det_rot))
+    two_theta_step = 0.5
+    number_two_theta_bins = int(round((two_theta_max - two_theta_min) / two_theta_step) + 1)
+    two_theta_binning_dict = {'two_theta_min': two_theta_min,
+                              'two_theta_max': two_theta_max,
+                              'two_theta_step': two_theta_step,
+                              'nbins': number_two_theta_bins}
+    return two_theta_binning_dict
