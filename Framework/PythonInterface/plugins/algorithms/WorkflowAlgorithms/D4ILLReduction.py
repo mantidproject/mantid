@@ -181,16 +181,21 @@ class D4ILLReduction(PythonAlgorithm):
         """
         y_values = []
         det_no = 0
-        with open(efficiency_file_name, "r") as efficiency:
-            for line in efficiency:
-                if "#" in line:
-                    continue
-                line = line.strip(' ')
-                columns = line.split()
-                if columns:
-                    corr_val = float(columns[2])
-                    y_values.append(corr_val if corr_val >= 0 else np.nan)
-                    det_no += 1
+        try:
+            with open(efficiency_file_name, "r") as efficiency:
+                for line in efficiency:
+                    if "#" in line:
+                        continue
+                    line = line.strip(' ')
+                    columns = line.split()
+                    if columns:
+                        corr_val = float(columns[2])
+                        y_values.append(corr_val if corr_val >= 0 else np.nan)
+                        det_no += 1
+        except (RuntimeError, IndexError, FileNotFoundError) as e:
+            self.log().warning(str(e))
+            self.log().warning("The efficiency correction file does not exist or is faulty.")
+            return
         eff_corr_ws = 'eff_corr_ws'
         x_values = np.array(0)
         CreateWorkspace(DataX=x_values, DataY=np.array(y_values), NSpec=len(y_values), OutputWorkspace=eff_corr_ws)
@@ -208,6 +213,8 @@ class D4ILLReduction(PythonAlgorithm):
             return ws
         calibration_file = self.getPropertyValue('EfficiencyCalibrationFile')
         eff_corr_ws = self._create_efficiency_correction(calibration_file)
+        if eff_corr_ws is None:  # provided efficiency correction file was faulty
+            return ws
 
         output_ws = '{}_efficiency_corrected'.format(ws)
         Divide(LHSWorkspace=ws, RHSWorkspace=eff_corr_ws, OutputWorkspace=output_ws)
