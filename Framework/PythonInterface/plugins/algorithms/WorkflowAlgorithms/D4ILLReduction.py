@@ -190,7 +190,7 @@ class D4ILLReduction(PythonAlgorithm):
                     columns = line.split()
                     if columns:
                         corr_val = float(columns[2])
-                        y_values.append(corr_val if corr_val >= 0 else np.nan)
+                        y_values.append(corr_val if corr_val > 0 else np.nan)
                         det_no += 1
         except (RuntimeError, IndexError, FileNotFoundError) as e:
             self.log().warning(str(e))
