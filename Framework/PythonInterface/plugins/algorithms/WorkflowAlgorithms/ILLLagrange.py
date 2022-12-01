@@ -226,11 +226,10 @@ class ILLLagrange(DataProcessorAlgorithm):
             if point[0] - data[current_writing_index][0] < self.EPSILON:
                 data[current_writing_index][1] = point[1]
                 data[current_writing_index][2] = point[2]
-                # TODO decide on a merging behaviour for multiple points
-                # for now, if two points are close enough there are merged,
-                # and their mean energy is taken as the new energy for the new point,
-                # then this new energy is compared with next point.
-                # this could be troublesome if there are a lot of points separated by very short distances,
+                # The merging behaviour for multiple points needs to be considered in the future.
+                # For now, if two points are close enough the latter is removed,
+                # then the comparison continues with next point.
+                # This could be troublesome if there are a lot of points separated by very short distances,
                 # but it normally shouldn't happen on Lagrange data
             else:
                 current_writing_index += 1
