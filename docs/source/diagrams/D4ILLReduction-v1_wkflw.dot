@@ -58,7 +58,7 @@ digraph Sample {
   Divide2 -> OutputWorkspace
   Normalise -> OutputWorkspace
   OutputWorkspace -> ExportAscii
-  ExportAscii -> SaveASCII
+  ExportAscii -> SaveAscii
 }
 
 
