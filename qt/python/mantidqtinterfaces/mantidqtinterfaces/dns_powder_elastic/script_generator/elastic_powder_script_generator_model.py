@@ -139,7 +139,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             self._standard_data = DNSElasticDataset(data=file_selector['standard_data_tree_model'],
                                                     path=paths['standards_dir'],
                                                     is_sample=False,
-                                                    fields=self._sample_data.fields)
+                                                    banks=self._sample_data['banks'])
 
     @staticmethod
     def _get_header_lines():

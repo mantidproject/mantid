@@ -29,7 +29,7 @@ class DNSElasticDataset(ObjectDict):
     This is a dictionary but can also be accessed like attributes.
     """
 
-    def __init__(self, data, path, is_sample=True, fields=None, banks=None):
+    def __init__(self, data, path, is_sample=True, banks=None):
         super().__init__()
         if data:
             self['is_sample'] = is_sample
