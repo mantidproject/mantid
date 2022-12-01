@@ -29,10 +29,12 @@ class DNSElasticDataset(ObjectDict):
     This is a dictionary but can also be accessed like attributes.
     """
 
-    def __init__(self, data, path, is_sample=True, fields=None):
+    def __init__(self, data, path, is_sample=True, fields=None, banks=None):
         super().__init__()
         if data:
             self['is_sample'] = is_sample
+            if not is_sample and banks is not None:
+                data = remove_unnecessary_standard_banks(data, banks)
             self['banks'] = get_bank_positions(data)
             self['fields'] = get_sample_fields(data)
             self['omega'] = automatic_omega_binning(data)
@@ -77,15 +79,6 @@ class DNSElasticDataset(ObjectDict):
         if self.data_dic.get(sample_type, 0):
             return len(self.banks)
         return 0
-
-
-def automatic_two_theta_binning(sample_data):
-    det_rot = [-x['det_rot'] for x in sample_data]
-    two_theta_last_det = 115.0
-    two_theta_max = (max(det_rot) + two_theta_last_det)
-    two_theta_min = (min(det_rot))
-    two_theta_step_min = 0.1
-    return DNSBinning(two_theta_min, two_theta_max, two_theta_step_min)
 
 
 def round_step(step, rounding_limit=0.05):
@@ -176,11 +169,13 @@ def get_datatype_from_sample_name(sample_name):
     return datatype
 
 
-def remove_non_measured_fields(standard_data, sample_fields):
-    standard_data = [
-        entry for entry in standard_data if entry['field'] in sample_fields
-    ]
-    return standard_data
+def remove_unnecessary_standard_banks(standard_data, sample_banks, rounding_limit=0.05):
+    standard_data_clean = []
+    for file_dict in standard_data:
+        for sample_bank in sample_banks:
+            if np.isclose(file_dict['det_rot'], sample_bank, atol=rounding_limit):
+                standard_data_clean.append(file_dict)
+    return standard_data_clean
 
 
 def get_bank_positions(sample_data, rounding_limit=0.05):

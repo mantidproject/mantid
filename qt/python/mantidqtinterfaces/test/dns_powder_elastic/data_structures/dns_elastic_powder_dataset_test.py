@@ -17,10 +17,9 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
     get_file_selector_full_data
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import (
-    automatic_two_theta_binning, get_two_theta_step, round_step,
-    get_omega_step, list_to_set, automatic_omega_binning,
+    round_step, get_omega_step, list_to_set, automatic_omega_binning,
     get_proposal_from_filename, get_sample_fields, create_dataset,
-    get_datatype_from_sample_name, remove_non_measured_fields,
+    get_datatype_from_sample_name, remove_unnecessary_standard_banks,
     get_bank_positions)
 
 
@@ -64,23 +63,6 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertEqual(test_v, 1)
         test_v = self.ds.get_number_banks()
         self.assertEqual(test_v, 0)
-
-    @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
-           'dns_elastic_powder_dataset.DNSBinning')
-    def test_automatic_ttheta_binning(self, mock_binning):
-        test_v = automatic_two_theta_binning(self.full_data)
-        self.assertEqual(test_v, mock_binning.return_value)
-        mock_binning.assert_called_once_with(9.0, 124.0, 5.0)
-
-    def test_get_two_theta_step(self):
-        test_v = get_two_theta_step([0, 1, 2])
-        self.assertEqual(test_v, 1)
-        test_v = get_two_theta_step([0, 0.01, 2])
-        self.assertEqual(test_v, 2)
-        test_v = get_two_theta_step([0, 0.66, 0.99, 1.33, 1.66])
-        self.assertEqual(test_v, 5)
-        test_v = get_two_theta_step([0, 0.49, 1.01])
-        self.assertEqual(test_v, 1 / 2)
 
     def test_round_step(self):
         test_v = round_step(1.99, rounding_limit=0.05)
@@ -144,9 +126,9 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertEqual(test_v, 'empty')
 
     def test_remove_non_measured_fields(self):
-        test_v = remove_non_measured_fields(self.standard_data, ['x_sf'])
+        test_v = remove_unnecessary_standard_banks(self.standard_data, ['x_sf'])
         self.assertEqual(test_v, [])
-        test_v = remove_non_measured_fields(self.standard_data, ['z7_nsf'])
+        test_v = remove_unnecessary_standard_banks(self.standard_data, ['z7_nsf'])
         self.assertIsInstance(test_v, list)
         self.assertEqual(len(test_v), 2)
         self.assertEqual(test_v[0]['file_number'], 788058)
