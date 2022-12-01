@@ -82,7 +82,7 @@ class ILLLagrange(DataProcessorAlgorithm):
 
         # load correction
         if correction_file:
-            self.load_correction(correction_file)
+            self.water_correction = np.loadtxt(correction_file)
 
         empty_cell_files = self.getPropertyValue('ContainerRuns').split(',')
 
@@ -237,13 +237,6 @@ class ILLLagrange(DataProcessorAlgorithm):
                 data[current_writing_index] = point
 
         return data[:current_writing_index + 1]
-
-    def load_correction(self, file):
-        """
-        Load correction data
-        @param file the .txt file from which to load the correction
-        """
-        self.water_correction = np.loadtxt(file)
 
     def correct_data(self, ws_to_correct, corrected_ws):
         """
