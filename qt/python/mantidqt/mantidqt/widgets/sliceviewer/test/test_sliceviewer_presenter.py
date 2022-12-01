@@ -13,6 +13,7 @@ from unittest import mock
 from unittest.mock import patch, call
 from mantid.api import IMDHistoWorkspace
 from mantid.kernel import SpecialCoordinateSystem
+from mantidqt.utils.qt.testing import start_qapplication
 
 import matplotlib
 
@@ -22,7 +23,7 @@ sys.modules['mantid.simpleapi'] = mock.MagicMock()
 
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
 from mantidqt.widgets.sliceviewer.presenters.presenter import (PeaksViewerCollectionPresenter,
-                                                               SliceViewer)  # noqa: E402
+                                                               SliceViewer, SliceViewXAxisEditor, SliceViewYAxisEditor)  # noqa: E402
 from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
@@ -68,6 +69,7 @@ def create_mdhistoworkspace_mock():
     return workspace
 
 
+@start_qapplication
 class SliceViewerTest(unittest.TestCase):
 
     def createMockDataView(self):
@@ -372,16 +374,16 @@ class SliceViewerTest(unittest.TestCase):
         mock_yaxis_editor.assert_called_once()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewXAxisEditor")
-    def test_x_axes_editor_is_opened_on_x_axes_tick_lable_double_click(self, mock_xaxis_editor):
+    def test_x_axes_editor_is_opened_on_x_axes_tick_label_double_click(self, mock_xaxis_editor):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         event = mock.MagicMock()
         event.dblclick = True
         event.button = 1
         self.view.data_view.nonorthogonal_mode = False
         self.view.data_view.ax = mock.MagicMock()
-        tick_lable = mock.MagicMock()
-        tick_lable.contains.return_value = (True, {})
-        self.view.data_view.ax.get_xticklabels.return_value = [tick_lable]
+        tick_label = mock.MagicMock()
+        tick_label.contains.return_value = (True, {})
+        self.view.data_view.ax.get_xticklabels.return_value = [tick_label]
         self.view.data_view.ax.yaxis.contains.return_value = (False, {})
         self.view.data_view.canvas = mock.MagicMock()
         self.view.data_view.canvas.buttond = mock.MagicMock()
@@ -392,16 +394,16 @@ class SliceViewerTest(unittest.TestCase):
         mock_xaxis_editor.assert_called_once()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewYAxisEditor")
-    def test_y_axes_editor_is_opened_on_y_axes_tick_lable_double_click(self, mock_yaxis_editor):
+    def test_y_axes_editor_is_opened_on_y_axes_tick_label_double_click(self, mock_yaxis_editor):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         event = mock.MagicMock()
         event.dblclick = True
         event.button = 1
         self.view.data_view.nonorthogonal_mode = False
         self.view.data_view.ax = mock.MagicMock()
-        tick_lable = mock.MagicMock()
-        tick_lable.contains.return_value = (True, {})
-        self.view.data_view.ax.get_yticklabels.return_value = [tick_lable]
+        tick_label = mock.MagicMock()
+        tick_label.contains.return_value = (True, {})
+        self.view.data_view.ax.get_yticklabels.return_value = [tick_label]
         self.view.data_view.ax.xaxis.contains.return_value = (False, {})
         self.view.data_view.canvas = mock.MagicMock()
         self.view.data_view.canvas.buttond = mock.MagicMock()
@@ -410,6 +412,30 @@ class SliceViewerTest(unittest.TestCase):
         presenter.canvas_clicked(event)
 
         mock_yaxis_editor.assert_called_once()
+
+    def test_x_axes_editor_calls_dimensions_changed(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter.dimensions_changed = mock.MagicMock()
+
+        mock_axes = mock.MagicMock()
+        mock_axes.get_xlim = mock.MagicMock(return_value=[0, 1])
+        xaxes_edit = SliceViewXAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, slice_viewer=presenter)
+
+        xaxes_edit.on_ok()
+
+        presenter.dimensions_changed.assert_called_once()
+
+    def test_y_axes_editor_calls_dimensions_changed(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter.dimensions_changed = mock.MagicMock()
+
+        mock_axes = mock.MagicMock()
+        mock_axes.get_ylim = mock.MagicMock(return_value=[0, 1])
+        yaxes_edit = SliceViewYAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, slice_viewer=presenter)
+
+        yaxes_edit.on_ok()
+
+        presenter.dimensions_changed.assert_called_once()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.get_sliceinfo")
     def test_cut_view_toggled_off(self, mock_get_sliceinfo):
