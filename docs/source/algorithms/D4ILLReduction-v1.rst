@@ -12,6 +12,7 @@ Description
 This is the main algorithm performing the liquid diffraction reduction for data recorded with the ILL instrument D4. The algorithm's workflow diagram can be found below.
 
 The raw data will be corrected for, in order:
+
 1. Dead time, applied separately to monitor and detectors data
 2. Imperfect banks placement, using both zero angle correction and ASCII input file correcting bank angle around the sample
 3. Relative efficiency, using input ASCII file with one efficiency value per detector
