@@ -37,8 +37,8 @@ namespace CorrectionMethod {
 static const std::string WILDES{"Wildes"};
 static const std::string FREDRIKZE{"Fredrikze"};
 
-static const std::vector<std::string> WILDES_AXES = {{"P1", "P2", "F1", "F2"}};
-static const std::vector<std::string> FREDRIKZE_AXES = {{"Pp", "Ap", "Rho", "Alpha"}};
+static const std::vector<std::string> WILDES_AXES = {"P1", "P2", "F1", "F2"};
+static const std::vector<std::string> FREDRIKZE_AXES = {"Pp", "Ap", "Rho", "Alpha"};
 
 // Map correction methods to which correction-option property name they use
 static const std::map<std::string, std::string> OPTION_NAME{{CorrectionMethod::WILDES, Prop::FLIPPERS},
