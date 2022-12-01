@@ -74,6 +74,7 @@ class ISISPowderCalibrateUnitTest(TestCase):
         if with_container:
             sample_details.set_container(radius=0.3175, chemical_formula='V')
         inst_obj.set_sample_details(sample=sample_details)
+        inst_obj._inst_settings.spline_coeff = 5
 
         return inst_obj
 
@@ -87,11 +88,22 @@ class ISISPowderCalibrateUnitTest(TestCase):
 
     @patch("isis_powder.routines.calibrate.crop_to_small_ws_for_test", side_effect=crop_to_small_ws_for_test)
     @patch("isis_powder.polaris_routines.polaris_algs.mantid.MaskDetectors")
-    def test_create_vanadium_per_detector(self, mock_mask_spectra, mock_override_crop_for_test):
+    def test_create_van_per_detector(self, mock_mask_spectra, mock_override_crop_for_test):
         pdf_inst_obj = self.setup_inst_object("PDF")
+        pdf_inst_obj._is_vanadium = True
         run_details = pdf_inst_obj._get_run_details(run_number_string="98532")
         unsplined_workspace = calibrate.create_van_per_detector(instrument=pdf_inst_obj, run_details=run_details,
                                                                 absorb=True, test=True)
+        expected_per_bank = Load("/home/danielmurphy/Desktop/calibrate/unsplined_workspace.nxs")
+        match_bool, _ = CompareWorkspaces(expected_per_bank, unsplined_workspace)
+        self.assertTrue(match_bool)
+
+    @patch("isis_powder.routines.calibrate.crop_to_small_ws_for_test", side_effect=crop_to_small_ws_for_test)
+    @patch("isis_powder.polaris_routines.polaris_algs.mantid.MaskDetectors")
+    def test_create_vanadium_per_detector(self, mock_mask_spectra, mock_override_crop_for_test):
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        unsplined_workspace = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
+                                                           multiple_scattering=False, per_detector=True, test=True)
         expected_per_bank = Load("/home/danielmurphy/Desktop/calibrate/unsplined_workspace.nxs")
         match_bool, _ = CompareWorkspaces(expected_per_bank, unsplined_workspace)
         self.assertTrue(match_bool)

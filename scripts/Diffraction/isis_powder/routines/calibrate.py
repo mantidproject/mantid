@@ -96,9 +96,7 @@ def create_van_per_detector(instrument, run_details, absorb, test=False):
         if not test:
             mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty)
         corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws, empty_sample=summed_empty)
-        mantid.SaveNexus(corrected_van_ws, "/home/danielmurphy/Desktop/test_corrected_van_ws.nxs")
 
-    # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
     if absorb:
@@ -185,11 +183,11 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
     mantid.ConvertUnits(InputWorkspace=vanadium_splines, Target="TOF", OutputWorkspace=out_name)
     mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,
                             EndWorkspaceIndex=ADS.retrieve(out_name).getNumberHistograms()-1,
-                            NCoeff=5,   # instrument._inst_settings.spline_coeff,
+                            NCoeff=instrument._inst_settings.spline_coeff,
                             OutputWorkspace=out_name, EnableLogging=False)
     out_spline_van_file_path = run_details.splined_vanadium_file_path
     mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=out_name)
 
 
 def crop_to_small_ws_for_test(input_workspace):
-    pass  # dummy function to protect production code and overridden during testing
+    return input_workspace  # dummy function to protect production code and overridden during testing

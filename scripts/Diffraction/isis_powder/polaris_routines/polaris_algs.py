@@ -8,7 +8,7 @@ import numpy as np
 import math
 
 import mantid.simpleapi as mantid
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, MatrixWorkspace
 from mantid.kernel import MaterialBuilder
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
@@ -69,20 +69,28 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
-    converted_workspaces = []
-    for ws_index in range(vanadium_ws.getNumberOfEntries()):
-        ws = vanadium_ws.getItem(ws_index)
-        previous_units = ws.getAxis(0).getUnit().unitID()
+    if isinstance(vanadium_ws, MatrixWorkspace):
+        converted_output = vanadium_ws
+        current_units = converted_output.getAxis(0).getUnit().unitID()
+        if current_units != WORKSPACE_UNITS.tof:
+            converted_output = mantid.ConvertUnits(InputWorkspace=converted_output, Target=WORKSPACE_UNITS.tof)
 
-        if previous_units != WORKSPACE_UNITS.tof:
-            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+    if isinstance(vanadium_ws, WorkspaceGroup):
+        converted_workspaces = []
+        for ws_index in range(vanadium_ws.getNumberOfEntries()):
+            ws = vanadium_ws.getItem(ws_index)
+            previous_units = ws.getAxis(0).getUnit().unitID()
 
-        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
-        converted_workspaces.append(ws)
+            if previous_units != WORKSPACE_UNITS.tof:
+                ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
 
-    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
-    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
-    mantid.DeleteWorkspace(converted_group)
+            ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+            converted_workspaces.append(ws)
+
+        converted_output = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+
+    mantid.SaveNexus(InputWorkspace=converted_output, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_output)
 
 
 def generate_ts_pdf(
