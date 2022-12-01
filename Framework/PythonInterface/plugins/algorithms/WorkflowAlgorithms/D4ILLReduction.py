@@ -337,14 +337,14 @@ class D4ILLReduction(PythonAlgorithm):
                         angular_shift = float(columns[1]) + zero_angle_corr
                         bank_shifts.append(angular_shift)
                 if len(bank_shifts) != n_banks:
-                    raise RuntimeError("Bank shifts calibration file does not entries for all banks.")
+                    raise RuntimeError("Bank shifts calibration file does not have entries for all banks.")
         except FileNotFoundError:
             self.log().warning("Bank calibration file not found or not provided.")
             bank_shifts = [zero_angle_corr] * n_banks
         except (RuntimeError, IndexError) as e:
             self.log().warning(str(e))
             self.log().warning("Padding the shifts list with zero angle correction.")
-            bank_shifts.extend([zero_angle_corr]*(np.zeros(len(bank_shifts)-n_banks)))
+            bank_shifts.extend([zero_angle_corr]*(np.zeros(n_banks - len(bank_shifts))))
         return bank_shifts
 
     def _load_data(self, progress):
