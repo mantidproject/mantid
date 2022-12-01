@@ -526,26 +526,6 @@ bool InelasticDataManipulationElwinTabView::isLoadHistory() { return m_uiForm.ck
 
 bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupInput->isChecked(); }
 
-double InelasticDataManipulationElwinTabView::getIntegrationStart() {
-  return m_dblManager->value(m_properties["IntegrationStart"]);
-}
-
-double InelasticDataManipulationElwinTabView::getIntegrationEnd() {
-  return m_dblManager->value(m_properties["IntegrationEnd"]);
-}
-
-double InelasticDataManipulationElwinTabView::getBackgroundStart() {
-  return m_dblManager->value(m_properties["BackgroundStart"]);
-}
-
-double InelasticDataManipulationElwinTabView::getBackgroundEnd() {
-  return m_dblManager->value(m_properties["BackgroundEnd"]);
-}
-
-bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {
-  return m_blnManager->value(m_properties["BackgroundSubtraction"]);
-}
-
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
 
 std::string InelasticDataManipulationElwinTabView::getLogName() { return m_uiForm.leLogName->text().toStdString(); }

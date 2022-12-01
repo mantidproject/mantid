@@ -55,11 +55,6 @@ public:
   void clearInputFiles();
 
   // getters for m_properties
-  double getIntegrationStart();
-  double getIntegrationEnd();
-  double getBackgroundStart();
-  double getBackgroundEnd();
-  bool getBackgroundSubtraction();
   bool getNormalise();
   std::string getLogName();
   std::string getLogValue();
