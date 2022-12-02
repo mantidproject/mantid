@@ -5,12 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty, FileProperty
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspace, MatrixWorkspaceProperty,\
+    FileProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
 import numpy as np
-from typing import List
+from typing import List, Tuple
 
 
 class ILLLagrange(DataProcessorAlgorithm):
@@ -129,7 +130,7 @@ class ILLLagrange(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self.output_ws_name)
         GroupWorkspaces(OutputWorkspace='__' + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
 
-    def load_and_concatenate(self, files):
+    def load_and_concatenate(self, files: List[str]) -> np.ndarray:
         """
         Taking Lagrange data files as input, load the interesting data from it and concatenate them into one numpy array
         @param files the ascii data files to load and concatenate together
@@ -184,15 +185,17 @@ class ILLLagrange(DataProcessorAlgorithm):
                               dtype=float,
                               skiprows=header_index + 2,
                               usecols=(energy_col, monitor_counts_col, detector_counts_col))
-
             loaded_data = np.vstack((loaded_data, data)) if loaded_data is not None else data
-
+        if np.shape(loaded_data)[0] == 0:
+            raise RuntimeError("Provided files contain no data in the LAGRANGE format.")
         return loaded_data
 
-    def get_counts_and_errors(self, data):
+    def get_counts_and_errors(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float]]:
         """
         Compute and return correct energy, normalized detector counts and errors
-        @param data the data to format
+
+        Args:
+        @param data: the data to format
         @return 3 arrays, with the values being incident energy, normalized detector counts, errors
         """
 
@@ -230,10 +233,12 @@ class ILLLagrange(DataProcessorAlgorithm):
             correction = None
         return correction
 
-    def merge_adjacent_points(self, data):
+    def merge_adjacent_points(self, data: np.ndarray) -> np.ndarray:
         """
         Merge points that are close to one another together, summing their values
-        @param data a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
+
+        Args:
+        @param data: a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
         @return a (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
         """
         # sort by incident energy
@@ -256,7 +261,7 @@ class ILLLagrange(DataProcessorAlgorithm):
 
         return data[:current_writing_index + 1]
 
-    def correct_data(self, ws_to_correct, corrected_ws):
+    def correct_data(self, ws_to_correct: MatrixWorkspace, corrected_ws: MatrixWorkspace):
         """
         Apply water correction to the provided data
         @param ws_to_correct the name of the workspace holding the data to be corrected
