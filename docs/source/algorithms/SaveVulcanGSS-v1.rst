@@ -4,10 +4,11 @@
 
 .. relatedalgorithms::
 
-.. properties:: This algorithm is deprecated as of 2022-11-30
+.. properties:: 
 
 Description
 -----------
+This algorithm is deprecated as of 2022-11-30
 
 This workflow algorithm is to export a MatrixWorkspace to a GSAS data file,
 which is close enough to the GSAS file generated from VULCAN's V-drive.
