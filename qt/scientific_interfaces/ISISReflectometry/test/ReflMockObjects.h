@@ -285,6 +285,7 @@ public:
   MOCK_METHOD2(saveJSONToFile, void(std::string const &, QMap<QString, QVariant> const &));
   MOCK_METHOD1(loadJSONFromFile, QMap<QString, QVariant>(const std::string &));
   MOCK_CONST_METHOD2(saveCSVToFile, void(std::string const &, std::string const &));
+  MOCK_CONST_METHOD1(fileExists, bool(std::string const &));
 };
 
 class MockJobRunner : public IJobRunner {

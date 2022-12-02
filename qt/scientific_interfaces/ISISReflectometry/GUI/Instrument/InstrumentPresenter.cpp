@@ -8,8 +8,6 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "InstrumentOptionDefaults.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <ostream>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -25,9 +23,10 @@ boost::optional<RangeInLambda> rangeOrNone(const RangeInLambda &range, const boo
 }
 } // namespace
 
-InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instrument,
+InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instrument, IFileHandler *fileHandler,
                                          std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults)
-    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view), m_model(std::move(instrument)) {
+    : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view), m_model(std::move(instrument)),
+      m_fileHandler(fileHandler) {
   m_view->subscribe(this);
 }
 
@@ -46,16 +45,8 @@ void InstrumentPresenter::notifyRestoreDefaultsRequested() {
 
 void InstrumentPresenter::notifyEditingCalibFilePathFinished() {
   auto const calibrationFilePath = m_view->getCalibrationFilePath();
-  if (!calibrationFilePath.empty()) {
-    try {
-      auto pocoPath = Poco::Path().parseDirectory(calibrationFilePath);
-      auto pocoFile = Poco::File(pocoPath);
-      if (!pocoFile.exists())
-        m_view->errorInvalidCalibrationFilePath();
-    } catch (Poco::PathSyntaxException &) {
-      m_view->errorInvalidCalibrationFilePath();
-    }
-  }
+  if (!calibrationFilePath.empty() && !m_fileHandler->fileExists(calibrationFilePath))
+    m_view->errorInvalidCalibrationFilePath();
 }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }

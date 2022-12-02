@@ -344,6 +344,7 @@ public:
   void testEnteringInvalidCalibrationFilePathTriggersError() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("test"));
+    EXPECT_CALL(m_fileHandler, fileExists("test")).WillOnce(Return(false));
     EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(1);
     presenter.notifyEditingCalibFilePathFinished();
     verifyAndClear();
@@ -352,15 +353,8 @@ public:
   void testEnteringEmptyCalibrationFilePathDoesNotTriggerError() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return(""));
+    EXPECT_CALL(m_fileHandler, fileExists("")).Times(0);
     EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(0);
-    presenter.notifyEditingCalibFilePathFinished();
-    verifyAndClear();
-  }
-
-  void testEnteringSpecialCharactersAsCalibrationFilePathTriggersError() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("?"));
-    EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(1);
     presenter.notifyEditingCalibFilePathFinished();
     verifyAndClear();
   }
@@ -368,6 +362,7 @@ public:
 private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
+  NiceMock<MockFileHandler> m_fileHandler;
 
   Instrument makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
@@ -397,8 +392,8 @@ private:
 
   InstrumentPresenter makePresenter(
       std::unique_ptr<IInstrumentOptionDefaults> defaultOptions = std::make_unique<MockInstrumentOptionDefaults>()) {
-    auto presenter =
-        InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), std::move(defaultOptions));
+    auto presenter = InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), &m_fileHandler,
+                                         std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }

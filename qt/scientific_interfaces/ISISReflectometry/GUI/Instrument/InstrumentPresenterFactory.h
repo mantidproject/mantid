@@ -18,11 +18,14 @@ namespace ISISReflectometry {
 
 class InstrumentPresenterFactory {
 public:
-  InstrumentPresenterFactory() {}
+  InstrumentPresenterFactory(IFileHandler *fileHandler) : m_fileHandler(fileHandler) {}
 
   std::unique_ptr<IInstrumentPresenter> make(IInstrumentView *view) {
-    return std::make_unique<InstrumentPresenter>(view, Instrument());
+    return std::make_unique<InstrumentPresenter>(view, Instrument(), m_fileHandler);
   }
+
+private:
+  IFileHandler *m_fileHandler;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

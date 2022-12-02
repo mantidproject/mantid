@@ -8,6 +8,7 @@
 
 #include "../../Reduction/Instrument.h"
 #include "Common/DllConfig.h"
+#include "GUI/Common/IFileHandler.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
 #include "InstrumentOptionDefaults.h"
@@ -27,7 +28,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter : public InstrumentView
                                                            public IInstrumentPresenter {
 public:
   InstrumentPresenter(
-      IInstrumentView *view, Instrument instrument,
+      IInstrumentView *view, Instrument instrument, IFileHandler *fileHandler,
       std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults = std::make_unique<InstrumentOptionDefaults>());
   Instrument const &instrument() const override;
 
@@ -52,6 +53,7 @@ private:
   IInstrumentView *m_view;
   Instrument m_model;
   IBatchPresenter *m_mainPresenter;
+  IFileHandler *m_fileHandler;
 
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();
