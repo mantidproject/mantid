@@ -192,8 +192,11 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
   std::string unitsStr;
   for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it) {
     if (it->name == "units") {
-      unitsStr = file->getStrAttr(*it);
-      break;
+      try {
+        unitsStr = file->getStrAttr(*it);
+        break;
+      } catch (::NeXus::Exception &) {
+      }
     }
   }
 
