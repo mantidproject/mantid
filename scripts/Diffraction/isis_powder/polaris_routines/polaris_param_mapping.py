@@ -38,6 +38,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="pdf_type", int_name="pdf_type"),
     ParamMapEntry(ext_name="per_detector", int_name="per_detector", optional=True),
     ParamMapEntry(ext_name="placzek_order", int_name='placzek_order', optional=True),
+    ParamMapEntry(ext_name="placzek_run_number", int_name='placzek_run_number', optional=True),
     ParamMapEntry(ext_name="q_lims", int_name="q_lims", optional=True),
     ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),
     ParamMapEntry(ext_name="run_number", int_name="run_number"),
