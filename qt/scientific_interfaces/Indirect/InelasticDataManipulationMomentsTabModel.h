@@ -8,7 +8,6 @@
 
 #include "DllConfig.h"
 #include "IndirectDataValidationHelper.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include <typeinfo>
 
 using namespace Mantid::API;
