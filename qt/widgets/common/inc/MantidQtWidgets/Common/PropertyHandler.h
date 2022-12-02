@@ -54,7 +54,7 @@ public:
   // properties from the browser
   void removeFunction();
 
-  void renameChildren() const;
+  void renameChildren(std::shared_ptr<Mantid::API::CompositeFunction> cf);
 
   void refreshTies();
 

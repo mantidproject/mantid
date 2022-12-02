@@ -461,8 +461,8 @@ void PropertyHandler::removeFunction() {
         break;
       }
     }
-    ph->renameChildren();
-    ph->refreshTies();
+    ph->renameChildren(cf);
+    // ph->refreshTies();
     m_browser->setFitEnabled(cf->nFunctions() > 0);
   }
 }
@@ -497,20 +497,27 @@ void PropertyHandler::refreshTies() {
   }
 }
 
-void PropertyHandler::renameChildren() const {
+void PropertyHandler::renameChildren(std::shared_ptr<Mantid::API::CompositeFunction> cf) {
   m_browser->m_changeSlotsEnabled = false;
-  // update tie properties, as the parameter names may change
   QMap<QString, QtProperty *>::const_iterator it = m_ties.begin();
   for (; it != m_ties.end(); ++it) {
     QString parName = it.key();
+    QString fullName = functionPrefix() + "." + parName;
     QtProperty *prop = it.value();
-    Mantid::API::ParameterTie *tie = m_fun->getTie(m_fun->parameterIndex(parName.toStdString()));
+    Mantid::API::ParameterTie *tie = cf->getTie(cf->parameterIndex(fullName.toStdString()));
     if (!tie) {
-      // remove gui tie
-      // QtProperty *parProp = getParameterProperty(parName);
-      // parProp->removeSubProperty(prop);
+      // In this case the tie has been removed from the composite function since it contained a refference to
+      // the function which was removed
+      QtProperty *parProp = getParameterProperty(parName);
+      if (parProp != nullptr) {
+        parProp->removeSubProperty(prop);
+        m_ties.remove(parName);
+        parProp->setEnabled(true);
+      }
       continue;
     }
+    // Refresh gui value incase it has been updated by the composite function re-indexing it's functions
+    // after one is removed
     QStringList qtie = QString::fromStdString(tie->asString()).split("=");
     if (qtie.size() < 2)
       continue;
@@ -525,7 +532,7 @@ void PropertyHandler::renameChildren() const {
       continue;
     QtProperty *nameProp = h->item()->property();
     nameProp->setPropertyName(h->functionName());
-    h->renameChildren();
+    h->renameChildren(cf);
   }
   m_browser->m_changeSlotsEnabled = true;
 }
