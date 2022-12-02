@@ -10,35 +10,36 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Remove Instrument Geometry from workspace.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - RemoveInstrumentGeometry**
 
 .. testcode:: RemoveInstrumentGeometryExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    # create some workspace with an instrument
+    ws = CreateSampleWorkspace()
+    print("Instrument Geometry exists:  {}".format(!ws.getInstrument().isEmptyInstrument()))
 
-   wsOut = RemoveInstrumentGeometry()
+    # delete instrument geometry
+    RemoveInstrumentGeometry(ws)
+    print("Instrument Geometry exists (should be false):  {}".format(!ws.getInstrument().isEmptyInstrument()))
 
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+.. testcleanup:: RemoveInstrumentGeometry
+
+   DeleteWorkspace(ws)
+
+
 
 Output:
 
 .. testoutput:: RemoveInstrumentGeometryExample
 
-  The output workspace has ?? spectra
+    Instrument Geometry exists:  True
+    Instrument Geometry exists (should be false):  False
 
 .. categories::
 
