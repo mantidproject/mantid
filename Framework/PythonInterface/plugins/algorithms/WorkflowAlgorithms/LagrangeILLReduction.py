@@ -14,7 +14,7 @@ import numpy as np
 from typing import List, Tuple
 
 
-class ILLLagrange(DataProcessorAlgorithm):
+class LagrangeILLReduction(DataProcessorAlgorithm):
 
     progress = None
     output_ws_name = None
@@ -52,7 +52,7 @@ class ILLLagrange(DataProcessorAlgorithm):
 
     @staticmethod
     def name():
-        return 'ILLLagrange'
+        return 'LagrangeILLReduction'
 
     def setup(self):
         self.use_incident_energy = self.getProperty('UseIncidentEnergy').value
@@ -329,4 +329,4 @@ class ILLLagrange(DataProcessorAlgorithm):
         DeleteWorkspace(Workspace="__interp" + self.empty_cell_ws)
 
 
-AlgorithmFactory.subscribe(ILLLagrange)
+AlgorithmFactory.subscribe(LagrangeILLReduction)

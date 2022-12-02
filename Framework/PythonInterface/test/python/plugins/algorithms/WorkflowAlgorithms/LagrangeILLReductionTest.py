@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import mtd
-from mantid.simpleapi import config, ILLLagrange
+from mantid.simpleapi import config, LagrangeILLReduction
 import unittest
 
 
-class ILLLagrangeTest(unittest.TestCase):
+class LagrangeILLReductionTest(unittest.TestCase):
 
     _facility = None
     _data_search_dirs = None
@@ -29,14 +29,14 @@ class ILLLagrangeTest(unittest.TestCase):
         mtd.clear()
 
     def test_only_one_run(self):
-        result = ILLLagrange(SampleRuns='012869')
+        result = LagrangeILLReduction(SampleRuns='012869')
         self.check_result(result, "Energy", 150, 21.4992, 96.019)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_multiple_runs(self):
-        result = ILLLagrange(SampleRuns='012869:012871')
+        result = LagrangeILLReduction(SampleRuns='012869:012871')
 
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
@@ -44,21 +44,21 @@ class ILLLagrangeTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_water_correction(self):
-        result = ILLLagrange(SampleRuns='012869:012871', ContainerRuns='012882:012884')
+        result = LagrangeILLReduction(SampleRuns='012869:012871', ContainerRuns='012882:012884')
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
         self.assertAlmostEqual(result.readY(0)[10], -0.017195, 4)
         self.assertAlmostEqual(result.readY(0)[80], -0.015001, 4)
 
     def test_calibration_correction(self):
-        result = ILLLagrange(SampleRuns='012869:012871', CorrectionFile='correction-water-cu220-2020.txt')
+        result = LagrangeILLReduction(SampleRuns='012869:012871', CorrectionFile='correction-water-cu220-2020.txt')
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014376, 4)
         self.assertAlmostEqual(result.readY(0)[80], 0.012939, 4)
 
     def test_all_corrections(self):
-        result = ILLLagrange(SampleRuns='012869:012871',
+        result = LagrangeILLReduction(SampleRuns='012869:012871',
                              ContainerRuns='012882:012884',
                              CorrectionFile='correction-water-cu220-2020.txt')
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
@@ -67,7 +67,7 @@ class ILLLagrangeTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], -0.013009, 4)
 
     def test_incident_energy(self):
-        result = ILLLagrange(SampleRuns='012869:012871', UseIncidentEnergy=True)
+        result = LagrangeILLReduction(SampleRuns='012869:012871', UseIncidentEnergy=True)
 
         self.check_result(result, "Energy", 276, 25.9992, 451.0527)
 
@@ -75,7 +75,7 @@ class ILLLagrangeTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
     def test_convert_to_wavenumber(self):
-        result = ILLLagrange(SampleRuns='012869:012871', ConvertToWaveNumber=True)
+        result = LagrangeILLReduction(SampleRuns='012869:012871', ConvertToWaveNumber=True)
         self.check_result(result, "Energy_inWavenumber", 276, 173.4028, 3601.6907)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)

@@ -37,11 +37,11 @@ Usage
 .. code-block:: python
 
     # full correction of a single monochromator scan, with multiple files
-    result = ILLLagrange(SampleRuns='012869:012871',
-                         ContainerRuns='012882:012884',
-                         CorrectionFile='correction-water-cu220-2020.txt',
-                         UseIncidentEnergy=False,
-                         ConvertToWaveNumber=False)
+    result = LagrangeILLReduction(SampleRuns='012869:012871',
+                                  ContainerRuns='012882:012884',
+                                  CorrectionFile='correction-water-cu220-2020.txt',
+                                  UseIncidentEnergy=False,
+                                  ConvertToWaveNumber=False)
 
 **Multiple monochromators example**
 
@@ -75,12 +75,12 @@ Usage
 
     # treating data for each monochromator
     for mono in samples.keys():
-        ILLLagrange(SampleRuns=samples[mono],
-                    ContainerRuns=ec[mono],
-                    CorrectionFile=corr[mono],
-                    OutputWorkspace=mono,
-                    UseIncidentEnergy=False,
-                    ConvertToWaveNumber=False)
+        LagrangeILLReduction(SampleRuns=samples[mono],
+                             ContainerRuns=ec[mono],
+                             CorrectionFile=corr[mono],
+                             OutputWorkspace=mono,
+                             UseIncidentEnergy=False,
+                             ConvertToWaveNumber=False)
 
     # stitching the results
     Stitch(InputWorkspaces=",".join(samples.keys()), ReferenceWorkspace='Si311', OutputWorkspace="stitched")
