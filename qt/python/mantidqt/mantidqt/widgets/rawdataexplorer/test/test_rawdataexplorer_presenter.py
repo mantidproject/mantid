@@ -88,7 +88,7 @@ class RawDataExplorerPresenterTest(unittest.TestCase):
 
         self.presenter.setup_connections()
 
-        path = "/new/path/"
+        path = os.path.abspath("/new/path/")
         self.presenter.view.file_tree_path_changed.emit(path)
         self.presenter.on_file_dialog_choice.assert_called_with(path)
 
