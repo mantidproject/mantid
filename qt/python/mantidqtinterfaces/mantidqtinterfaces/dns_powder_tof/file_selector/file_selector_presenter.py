@@ -37,9 +37,9 @@ class DNSFileSelectorPresenter(DNSObserver):
         Reading of new files, if filtered is True, only the files in the
         range specified by start and end.
         """
-        file_number_range = [start, end]
         if self.param_dict:
             data_path = self.param_dict['paths']['data_dir']
+            file_number_range = [start, end]
             number_of_files, loaded, datafiles, file_number_range_filtered = \
                 self.model.set_datafiles_to_load(data_path, file_number_range,
                                                  filtered, watcher)
@@ -58,20 +58,6 @@ class DNSFileSelectorPresenter(DNSObserver):
             if not standard_found and not self_call:
                 if self.model.try_unzip(data_path, standard_path):
                     self._read_standard(self_call=True)
-
-    def tab_got_focus(self):
-        standard_path = self.param_dict['paths']['standards_dir']
-        # The first time that the standard data path is provided
-        # and the user clicks on the file selector tab, then the
-        # file selector presenter's dictionary needs to be filled
-        # with standard data info under the 'standard_data_tree_model'
-        # key (default setting). To implement this, standard data
-        # click is realized. After that, a sample data view is
-        # provided to the user.
-        if standard_path and self._standard_data_counter==0:
-            self._standard_data_clicked()
-            self._sample_data_clicked()
-            self._standard_data_counter += 1
 
     def _cancel_loading(self):
         self.model.set_loading_canceled(True)
@@ -105,13 +91,6 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _auto_select_standard(self, state):
         if state == 2:
             self._check_all_visible_scans()
-
-    # scan selection
-    def _automatic_select_all_standard_files(self):
-        self._read_standard()
-        self._check_all_visible_scans()
-        self.view.show_status_message(
-            'automatically loaded all standard files', 30)
 
     def _check_all_visible_scans(self):
         self.model.check_scans_by_rows(self._get_non_hidden_rows())
@@ -209,7 +188,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         own_options = self.get_option_dict()
         if (own_options['auto_select_standard'] and not
                 own_options['standard_data_tree_model']):
-            self._automatic_select_all_standard_files()
+            self._auto_select_standard(state=2)
 
     def set_view_from_param(self):
         """
@@ -225,6 +204,21 @@ class DNSFileSelectorPresenter(DNSObserver):
                 print(f'Of {len(file_numbers)} loaded checked '
                       f'file numbers {not_found} were not found '
                       'in list of datafiles')
+
+    def tab_got_focus(self):
+        standard_path = self.param_dict['paths']['standards_dir']
+        # The first time that the standard data path is provided
+        # and the user clicks on the file selector tab, then the
+        # file selector presenter's dictionary needs to be filled
+        # with standard data info under the 'standard_data_tree_model'
+        # key (default setting). To implement this, standard data
+        # click is realized. After that, a sample data view is
+        # provided to the user.
+        if standard_path and self._standard_data_counter == 0:
+            self._standard_data_clicked()
+            self._sample_data_clicked()
+            self._standard_data_counter += 1
+        self.view.hide_tof(hidden='_tof' not in self.modus)
 
     def process_commandline_request(self, command_dict):
         start = int(command_dict['files'][0]['start'])
@@ -258,6 +252,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         own_options = self.get_option_dict()
         if own_options['auto_select_standard']:
             self._check_all_visible_scans()
+        self._filter_standard()
         # re-adjust view to column width
         self._format_view()
 
