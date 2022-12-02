@@ -118,8 +118,13 @@ class RawDataExplorerPresenterTest(unittest.TestCase):
         config.setDataSearchDirs(data_search_dirs)
 
     def test_set_working_directory(self):
-        # tODO relies to much on the file tree to test easily
-        pass
+        self.presenter.view.repositoryPath = mock.Mock()
+        self.presenter.view.fileTree = mock.Mock()
+
+        path = os.path.abspath('/')
+        self.presenter.set_working_directory(path)
+        self.presenter.view.repositoryPath.setText.assert_called_once_with(path)
+        self.presenter.view.fileTree.model().setRootPath.assert_called_with(path)
 
     def test_on_qlineedit(self):
         self.presenter.view.repositoryPath.setText(os.path.abspath(os.sep))
