@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/RemoveInstrumentGeometry.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,6 +39,10 @@ void RemoveInstrumentGeometry::init() {
                   "An input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("MDExperimentInfoNumbers"),
+                  "For MD workspaces, the ExperimentInfo indices to have the instrument removed."
+                  "If empty, the instrument will be removed from all ExperimentInfo objects."
+                  "The parameter is ignored for any other workspace type.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -44,6 +50,12 @@ void RemoveInstrumentGeometry::init() {
  */
 void RemoveInstrumentGeometry::exec() {
   // TODO Auto-generated execute stub
+  API::Workspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  API::Workspace_sptr outputWS = this->getProperty("OutputWorkspace");
+  if (outputWS != inputWS) {
+    outputWS = inputWS->clone();
+  }
+  this->setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms
