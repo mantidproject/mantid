@@ -16,13 +16,13 @@ It is located tiled under the workspace manager widget.
 The root directory can be selected by either directly typing the path in the editable line or browsing through it via the button.
 It is also possible to navigate by clicking on the directories in the tree.
 
-To open a file, one just need to click on it, or to move using the keyboard.
+To open a file, one just need to click on it, or to move using the keyboard arrow keys.
 If a preview is already opened, it will be closed or replaced to show this new workspace.
 
 Accumulate mode
 ---------------
 
-One can also accumulate the values by maintaining the `Ctrl` key pressed and clicking on all the files to sum.
+One can also accumulate the values by keeping the `Ctrl` key pressed and clicking on files of interest.
 As long as they can be added, the values will be accumulated in a workspace and shown in the preview.
 It is not possible to remove a file from the accumulation, one must start another sum.
 
