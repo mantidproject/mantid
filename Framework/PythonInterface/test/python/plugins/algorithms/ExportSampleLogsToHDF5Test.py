@@ -45,8 +45,8 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             self.assertTrue("Sample Logs" in output_file)
             logs_group = output_file["Sample Logs"]
-            self.assertEqual(logs_group["Test1"].value, 1.0)
-            self.assertEqual(logs_group["Test2"].value[0], b"Test2")
+            self.assertEqual(logs_group["Test1"][()], 1.0)
+            self.assertEqual(logs_group["Test2"][()], b"Test2")
 
     def test_blacklistExcludesLogs(self):
         input_ws = self._create_sample_workspace()
@@ -72,7 +72,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
 
         with h5py.File(self.TEMP_FILE_NAME, "r") as output_file:
             logs_group = output_file["Sample Logs"]
-            self.assertEqual(logs_group["TestLog"].value, 1.5)
+            self.assertEqual(logs_group["TestLog"][()], 1.5)
 
     def test_unitAreAddedIfPresent(self):
         input_ws = self._create_sample_workspace()

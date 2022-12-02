@@ -86,10 +86,10 @@ class IOTest(unittest.TestCase):
 
         data = self.loader.load(list_of_datasets=["wheels", "chairs"])
 
-        self.assertEqual([{"Winter": False, "Punctured": False, "Brand": "Mercedes", "Age": 2},
-                          {"Winter": False, "Punctured": False, "Brand": "Mercedes", "Age": 3},
-                          {"Winter": False, "Punctured": False, "Brand": "Mercedes", "Age": 5},
-                          {"Winter": False, "Punctured": True,  "Brand": "Mercedes", "Age":  7}],
+        self.assertEqual([{"Winter": False, "Punctured": False, "Brand": b"Mercedes", "Age": 2},
+                          {"Winter": False, "Punctured": False, "Brand": b"Mercedes", "Age": 3},
+                          {"Winter": False, "Punctured": False, "Brand": b"Mercedes", "Age": 5},
+                          {"Winter": False, "Punctured": True,  "Brand": b"Mercedes", "Age":  7}],
                          data["datasets"]["wheels"])
 
         self.assertEqual({"AdjustableHeadrests": True, "ExtraPadding": True},
