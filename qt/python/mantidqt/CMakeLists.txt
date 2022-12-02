@@ -125,9 +125,9 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/plotconfigdialog/test/test_apply_all_properties.py
     mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
     mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
-    mantidqt/widgets/rawdataexplorer/test/test_model.py
-    mantidqt/widgets/rawdataexplorer/test/test_presenter.py
-    mantidqt/widgets/rawdataexplorer/test/test_view.py
+    mantidqt/widgets/rawdataexplorer/test/test_rawdataexplorer_model.py
+    mantidqt/widgets/rawdataexplorer/test/test_rawdataexplorer_presenter.py
+    mantidqt/widgets/rawdataexplorer/test/test_rawdataexplorer_view.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
     mantidqt/widgets/regionselector/test/test_regionselector_presenter.py
