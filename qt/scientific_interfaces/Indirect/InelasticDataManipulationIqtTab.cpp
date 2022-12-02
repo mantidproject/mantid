@@ -72,108 +72,53 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 
 namespace MantidQt::CustomInterfaces::IDA {
 InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent)
-    : InelasticDataManipulationTab(parent), m_iqtTree(nullptr), m_iqtResFileType(), m_selectedSpectrum(0) {
-  m_uiForm.setupUi(parent);
+    : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationIqtTabView>(parent)),
+      m_iqtResFileType(), m_selectedSpectrum(0) {
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraTiled));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
 }
 
-InelasticDataManipulationIqtTab::~InelasticDataManipulationIqtTab() { m_iqtTree->unsetFactoryForManager(m_dblManager); }
+InelasticDataManipulationIqtTab::~InelasticDataManipulationIqtTab() {}
 
 void InelasticDataManipulationIqtTab::setup() {
-  m_iqtTree = new QtTreePropertyBrowser();
-  m_uiForm.properties->addWidget(m_iqtTree);
-
-  // Number of decimal places in property browsers.
-  static const unsigned int NUM_DECIMALS = 6;
-  // Create and configure properties
-  m_properties["ELow"] = m_dblManager->addProperty("ELow");
-  m_dblManager->setDecimals(m_properties["ELow"], NUM_DECIMALS);
-
-  m_properties["EWidth"] = m_dblManager->addProperty("EWidth");
-  m_dblManager->setDecimals(m_properties["EWidth"], NUM_DECIMALS);
-  m_properties["EWidth"]->setEnabled(false);
-
-  m_properties["EHigh"] = m_dblManager->addProperty("EHigh");
-  m_dblManager->setDecimals(m_properties["EHigh"], NUM_DECIMALS);
-
-  m_properties["SampleBinning"] = m_dblManager->addProperty("SampleBinning");
-  m_dblManager->setDecimals(m_properties["SampleBinning"], 0);
-
-  m_properties["SampleBins"] = m_dblManager->addProperty("SampleBins");
-  m_dblManager->setDecimals(m_properties["SampleBins"], 0);
-  m_properties["SampleBins"]->setEnabled(false);
-
-  m_properties["ResolutionBins"] = m_dblManager->addProperty("ResolutionBins");
-  m_dblManager->setDecimals(m_properties["ResolutionBins"], 0);
-  m_properties["ResolutionBins"]->setEnabled(false);
-
-  m_iqtTree->addProperty(m_properties["ELow"]);
-  m_iqtTree->addProperty(m_properties["EWidth"]);
-  m_iqtTree->addProperty(m_properties["EHigh"]);
-  m_iqtTree->addProperty(m_properties["SampleBinning"]);
-  m_iqtTree->addProperty(m_properties["SampleBins"]);
-  m_iqtTree->addProperty(m_properties["ResolutionBins"]);
-
-  m_dblManager->setValue(m_properties["SampleBinning"], 10);
-
-  m_iqtTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-
-  // Format the tree widget so its easier to read the contents
-  m_iqtTree->setIndentation(0);
-  for (auto const &item : m_properties)
-    m_iqtTree->setBackgroundColor(m_iqtTree->topLevelItem(item), QColor(246, 246, 246));
-
-  setPreviewSpectrumMaximum(0);
-
-  auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
-  xRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
-
   // signals / slots & validators
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRangeSelector(QtProperty *, double)));
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SLOT(plotInput(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(updateDisplayedBinParameters()));
+  connect(m_view.get(), SIGNAL(sampDataReady(const QString &)), this, SLOT(plotInput(const QString &)));
+
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
-  connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this, SLOT(errorsClicked()));
 
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
+  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
+  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
+  connect(m_view.get(), SIGNAL(plotCurrentPreview()), this, SLOT(plotCurrentPreview()));
 
-  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(updateEnergyRange(int)));
-
-  m_uiForm.dsInput->isOptional(true);
-  m_uiForm.dsResolution->isOptional(true);
+  connect(m_view.get(), SIGNAL(PreviewSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
 }
 
 void InelasticDataManipulationIqtTab::run() {
-  m_uiForm.ppPlot->watchADS(false);
+  m_view->setWatchADS(false);
   setRunIsRunning(true);
 
-  updateDisplayedBinParameters();
+  m_view->updateDisplayedBinParameters();
 
   // Construct the result workspace for Python script export
-  QString const sampleName = m_uiForm.dsInput->getCurrentDataName();
+  QString const sampleName = QString::fromStdString(m_view->getSampleName());
   m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
 
-  QString const wsName = m_uiForm.dsInput->getCurrentDataName();
-  QString const resName = m_uiForm.dsResolution->getCurrentDataName();
-  QString const nIterations = m_uiForm.spIterations->cleanText();
-  bool const calculateErrors = m_uiForm.cbCalculateErrors->isChecked();
+  auto const wsName = m_view->getSampleName();
+  auto const resName = m_view->getResolutionName();
+  auto const nIterations = m_view->getIterations();
+  bool const calculateErrors = m_view->getCalculateErrors();
 
-  double const energyMin = m_dblManager->value(m_properties["ELow"]);
-  double const energyMax = m_dblManager->value(m_properties["EHigh"]);
-  double const numBins = m_dblManager->value(m_properties["SampleBinning"]);
+  double const energyMin = m_view->getELow();
+  double const energyMax = m_view->getEHigh();
+  double const numBins = m_view->getSampleBinning();
 
   auto IqtAlg = AlgorithmManager::Instance().create("TransformToIqt");
   IqtAlg->initialize();
 
-  IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
-  IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
-  IqtAlg->setProperty("NumberOfIterations", nIterations.toStdString());
+  IqtAlg->setProperty("SampleWorkspace", wsName);
+  IqtAlg->setProperty("ResolutionWorkspace", resName);
+  IqtAlg->setProperty("NumberOfIterations", nIterations);
   IqtAlg->setProperty("CalculateErrors", calculateErrors);
 
   IqtAlg->setProperty("EnergyMin", energyMin);
@@ -193,10 +138,10 @@ void InelasticDataManipulationIqtTab::run() {
  * @param error If the algorithm failed
  */
 void InelasticDataManipulationIqtTab::algorithmComplete(bool error) {
-  m_uiForm.ppPlot->watchADS(true);
+  m_view->setWatchADS(true);
   setRunIsRunning(false);
   if (error)
-    setSaveResultEnabled(false);
+    m_view->setSaveResultEnabled(false);
   else
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
 }
@@ -215,95 +160,26 @@ void InelasticDataManipulationIqtTab::runClicked() {
   runTab();
 }
 
-void InelasticDataManipulationIqtTab::errorsClicked() { m_uiForm.spIterations->setEnabled(isErrorsEnabled()); }
-
-bool InelasticDataManipulationIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
-
 /**
  * Ensure we have present and valid file/ws inputs.
  *
  * The underlying Fourier transform of Iqt
  * also means we must enforce several rules on the parameters.
  */
-bool InelasticDataManipulationIqtTab::validate() {
-  UserInputValidator uiv;
-
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
-  uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
-
-  auto const eLow = m_dblManager->value(m_properties["ELow"]);
-  auto const eHigh = m_dblManager->value(m_properties["EHigh"]);
-
-  if (eLow >= eHigh)
-    uiv.addErrorMessage("ELow must be less than EHigh.\n");
-
-  auto const message = uiv.generateErrorMessage();
-  showMessageBox(message);
-
-  return message.isEmpty();
-}
-
-/**
- * Calculates binning parameters.
- */
-void InelasticDataManipulationIqtTab::updateDisplayedBinParameters() {
-  auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
-  auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
-
-  auto &ads = AnalysisDataService::Instance();
-  if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
-    return;
-
-  double energyMin = m_dblManager->value(m_properties["ELow"]);
-  double energyMax = m_dblManager->value(m_properties["EHigh"]);
-  double numBins = m_dblManager->value(m_properties["SampleBinning"]);
-
-  if (numBins == 0)
-    return;
-  if (energyMin == 0 && energyMax == 0)
-    return;
-
-  bool success(false);
-  float energyWidth(0.0f);
-  int resolutionBins(0), sampleBins(0);
-  std::tie(success, energyWidth, sampleBins, resolutionBins) =
-      calculateBinParameters(sampleName, resolutionName, energyMin, energyMax, numBins);
-  if (success) {
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-               SLOT(updateRangeSelector(QtProperty *, double)));
-
-    // Update data in property editor
-    m_dblManager->setValue(m_properties["EWidth"], energyWidth);
-    m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
-    m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
-
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-            SLOT(updateRangeSelector(QtProperty *, double)));
-
-    // Warn for low number of resolution bins
-    if (resolutionBins < 5)
-      showMessageBox("Results may be inaccurate as ResolutionBins is "
-                     "less than 5.\nLower the SampleBinning.");
-  }
-}
-
-void InelasticDataManipulationIqtTab::loadTabSettings(const QSettings &settings) {
-  m_uiForm.dsInput->readSettings(settings.group());
-  m_uiForm.dsResolution->readSettings(settings.group());
-}
+bool InelasticDataManipulationIqtTab::validate() { return m_view->validate(); }
 
 void InelasticDataManipulationIqtTab::handlePreviewSpectrumChanged(int spectra) {
   setSelectedSpectrum(spectra);
-  plotInput(m_uiForm.ppPlot);
+  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
 void InelasticDataManipulationIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Iqt");
-  m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_view->setSampleFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setSampleWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_view->setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_view->setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
 void InelasticDataManipulationIqtTab::plotInput(const QString &wsname) {
@@ -313,171 +189,23 @@ void InelasticDataManipulationIqtTab::plotInput(const QString &wsname) {
     setInputWorkspace(workspace);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     showMessageBox(QString("Unable to retrieve workspace: " + wsname));
-    setPreviewSpectrumMaximum(0);
+    m_view->setPreviewSpectrumMaximum(0);
     return;
   }
 
-  setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
-
-  plotInput(m_uiForm.ppPlot);
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
-
-  try {
-    auto const range = getXRangeFromWorkspace(workspace);
-    double rounded_min(range.first);
-    double rounded_max(range.second);
-    const std::string instrName(workspace->getInstrument()->getName());
-    if (instrName == "BASIS") {
-      xRangeSelector->setRange(range.first, range.second);
-      m_dblManager->setValue(m_properties["ELow"], rounded_min);
-      m_dblManager->setValue(m_properties["EHigh"], rounded_max);
-      m_dblManager->setValue(m_properties["EWidth"], 0.0004);
-      m_dblManager->setValue(m_properties["SampleBinning"], 1);
-    } else {
-      rounded_min = floor(rounded_min * 10 + 0.5) / 10.0;
-      rounded_max = floor(rounded_max * 10 + 0.5) / 10.0;
-
-      // corrections for if nearest value is outside of range
-      if (rounded_max > range.second) {
-        rounded_max -= 0.1;
-      }
-
-      if (rounded_min < range.first) {
-        rounded_min += 0.1;
-      }
-
-      // check incase we have a really small range
-      if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0) {
-        xRangeSelector->setRange(rounded_min, rounded_max);
-        m_dblManager->setValue(m_properties["ELow"], rounded_min);
-        m_dblManager->setValue(m_properties["EHigh"], rounded_max);
-      } else {
-        xRangeSelector->setRange(range.first, range.second);
-        m_dblManager->setValue(m_properties["ELow"], range.first);
-        m_dblManager->setValue(m_properties["EHigh"], range.second);
-      }
-      // set default value for width
-      m_dblManager->setValue(m_properties["EWidth"], 0.005);
-    }
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
-
-  updateDisplayedBinParameters();
+  m_view->setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
+  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
+  m_view->setRangeSelectorDefault(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
+  m_view->updateDisplayedBinParameters();
 }
-
-/**
- * Plots the selected spectrum of the input workspace.
- *
- * @param previewPlot The preview plot widget in which to plot the input
- *                    input workspace.
- */
-void InelasticDataManipulationIqtTab::plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
-  previewPlot->clear();
-  auto inputWS = getInputWorkspace();
-  auto spectrum = getSelectedSpectrum();
-
-  if (inputWS && inputWS->x(spectrum).size() > 1)
-    previewPlot->addSpectrum("Sample", getInputWorkspace(), spectrum);
-}
-
-void InelasticDataManipulationIqtTab::setPreviewSpectrumMaximum(int value) {
-  m_uiForm.spPreviewSpec->setMaximum(value);
-}
-
-/**
- * Updates the range selectors and properties when range selector is moved.
- *
- * @param min Range selector min value
- * @param max Range selector max value
- */
-void InelasticDataManipulationIqtTab::rangeChanged(double min, double max) {
-  double oldMin = m_dblManager->value(m_properties["ELow"]);
-  double oldMax = m_dblManager->value(m_properties["EHigh"]);
-
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
-
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateRangeSelector(QtProperty *, double)));
-
-  if (fabs(oldMin - min) > 0.0000001) {
-    m_dblManager->setValue(m_properties["ELow"], min);
-    xRangeSelector->setMinimum(min);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["EHigh"], -min);
-      xRangeSelector->setMaximum(-min);
-    }
-  }
-
-  if (fabs(oldMax - max) > 0.0000001) {
-    m_dblManager->setValue(m_properties["EHigh"], max);
-    xRangeSelector->setMaximum(max);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["ELow"], -max);
-      xRangeSelector->setMinimum(-max);
-    }
-  }
-
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRangeSelector(QtProperty *, double)));
-}
-
-/**
- * Updates the range selectors when the ELow or EHigh property is changed in the
- * table.
- *
- * @param prop The property which has been changed
- * @param val The new position for the range selector
- */
-void InelasticDataManipulationIqtTab::updateRangeSelector(QtProperty *prop, double val) {
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
-
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateRangeSelector(QtProperty *, double)));
-
-  if (prop == m_properties["ELow"]) {
-    setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["EHigh"], -val);
-      setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
-    }
-
-  } else if (prop == m_properties["EHigh"]) {
-    setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
-    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
-      m_dblManager->setValue(m_properties["ELow"], -val);
-      setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, -val);
-    }
-  }
-
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRangeSelector(QtProperty *, double)));
-
-  updateDisplayedBinParameters();
-}
-
-void InelasticDataManipulationIqtTab::updateEnergyRange(int state) {
-  if (state != 0) {
-    auto const value = m_dblManager->value(m_properties["ELow"]);
-    m_dblManager->setValue(m_properties["EHigh"], -value);
-  }
-}
-
-void InelasticDataManipulationIqtTab::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void InelasticDataManipulationIqtTab::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void InelasticDataManipulationIqtTab::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveResultEnabled(enabled);
+  m_view->setRunEnabled(enabled);
+  m_view->setSaveResultEnabled(enabled);
 }
 
 void InelasticDataManipulationIqtTab::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  m_view->setRunText(running);
   setButtonsEnabled(!running);
 }
 

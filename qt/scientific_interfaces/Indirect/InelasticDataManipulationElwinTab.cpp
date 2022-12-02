@@ -12,7 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>
 
@@ -107,6 +106,7 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
 
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
   connect(m_view.get(), SIGNAL(addDataClicked()), this, SLOT(showAddWorkspaceDialog()));
   connect(m_view.get(), SIGNAL(removeDataClicked()), this, SLOT(removeSelectedData()));
 
