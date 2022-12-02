@@ -462,38 +462,7 @@ void PropertyHandler::removeFunction() {
       }
     }
     ph->renameChildren(cf);
-    // ph->refreshTies();
     m_browser->setFitEnabled(cf->nFunctions() > 0);
-  }
-}
-
-void PropertyHandler::refreshTies() {
-  if (m_cf) {
-    m_browser->m_changeSlotsEnabled = false;
-    for (int i = 0; i < m_cf->nFunctions(); i++) {
-      PropertyHandler *h = getHandler(i);
-      QMap<QString, QtProperty *> ties = h->getTies();
-      for (QString paramName : ties.keys()) {
-        QString fullName = h->functionPrefix() + "." + paramName;
-        size_t paramIndex = m_cf->parameterIndex(fullName.toStdString());
-        const auto tie = m_cf->getTie(paramIndex);
-        QtProperty *prop = ties[paramName];
-        if (!tie) { // tie has been removed from function so needs to removed from gui
-          QtProperty *paramProp = h->getParameterProperty(paramName);
-          if (paramProp != nullptr) {
-            paramProp->removeSubProperty(prop);
-            ties.remove(paramName);
-            paramProp->setEnabled(true);
-          }
-        } else {
-          QStringList tie_strs = QString::fromStdString(tie->asString()).split("=");
-          if (tie_strs.size() < 2)
-            continue;
-          m_browser->m_stringManager->setValue(prop, tie_strs[1]);
-        }
-      }
-    }
-    m_browser->m_changeSlotsEnabled = true;
   }
 }
 

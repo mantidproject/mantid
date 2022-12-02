@@ -56,8 +56,6 @@ public:
 
   void renameChildren(std::shared_ptr<Mantid::API::CompositeFunction> cf);
 
-  void refreshTies();
-
   /// Creates name for this function to be displayed
   /// in the browser
   QString functionName() const;
