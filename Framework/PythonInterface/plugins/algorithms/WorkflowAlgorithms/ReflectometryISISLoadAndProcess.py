@@ -256,11 +256,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.log().information(f'Loading polarization efficiency information from workspace \"{efficiencies_ws}\"')
             return AnalysisDataService.retrieve(efficiencies_ws)
 
-        args = {'InputRunList': [efficiencies_ws], 'EventMode': False}
-        alg = self.createChildAlgorithm('ReflectometryISISPreprocess', **args)
-        alg.setRethrows(True)
-
+        alg = self.createChildAlgorithm('LoadNexus')
         try:
+            alg.setRethrows(True)
+            alg.setProperty('Filename', efficiencies_ws)
             alg.execute()
         except:
             raise RuntimeError(f'Could not load polarization efficiency information from file \"{efficiencies_ws}\"')
