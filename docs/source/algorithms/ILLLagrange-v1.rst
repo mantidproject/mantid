@@ -11,7 +11,7 @@ Description
 -----------
 This algorithm reduces data from IN1 - Lagrange.
 
-It can take as input multiples files from a single monochromator scan, the associated empty cell runs, and a correction file
+It can take as input multiple files from a single monochromator scan, the associated empty cell runs, and a correction file
 if needed. Reduction consists of multiplying the data by the correction factor from the correction file, and subtracting
 the empty cell from the raw data.
 
