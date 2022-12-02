@@ -82,7 +82,7 @@ class ILLLagrange(DataProcessorAlgorithm):
 
         # load correction
         if correction_file:
-            self.water_correction = np.loadtxt(correction_file)
+            self.water_correction = self.get_water_correction(correction_file)
 
         empty_cell_files = self.getPropertyValue('ContainerRuns').split(',')
 
@@ -210,6 +210,25 @@ class ILLLagrange(DataProcessorAlgorithm):
             errors[index] = np.sqrt(line[2]) / line[1]
 
         return energy, detector_counts, errors
+
+    def get_water_correction(self, correction_file: str) -> np.ndarray:
+        """
+        Loads the provided water correction and passes these values.
+
+        Args:
+        @param correction_file: path to the file with water correction
+        @return Numpy array with loaded correction data
+        """
+        try:
+            correction = np.loadtxt(correction_file)
+        except FileNotFoundError:
+            self.log().warning("Water correction file {} not found.".format(correction_file))
+            correction = None
+        except (RuntimeError, ValueError) as e:
+            self.log().warning("Water correction file is faulty.")
+            self.log().warning(str(e))
+            correction = None
+        return correction
 
     def merge_adjacent_points(self, data):
         """
