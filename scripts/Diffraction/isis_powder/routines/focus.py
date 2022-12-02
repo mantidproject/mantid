@@ -7,12 +7,14 @@
 from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
+from mantid.dataobjects import Workspace2D
 
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
 import math
 import numpy
 import os
+# from typing import Union
 
 
 def focus(
@@ -163,16 +165,67 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(
-    instrument,
-    perform_vanadium_norm,
-    run_number_string,
-    absorb,
-    sample_details,
-    empty_can_subtraction_method,
-    paalman_pings_events_per_point=None,
-):
-    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string, instrument=instrument)
+def _apply_vanadium_corrections_per_detector(instrument, input_workspace: Workspace2D,
+                                             perform_vanadium_norm, vanadium_splines: Workspace2D):
+
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
+    # Remove Masked and Monitor spectra
+    input_workspace, vanadium_splines = _prepare_for_correction(data_workspace=input_workspace,
+                                                                correction_workspace=vanadium_splines)
+    processed_spectra = mantid.Divide(LHSWorkspace=input_workspace,
+                                      RHSWorkspace=vanadium_splines,
+                                      AllowDifferentNumberSpectra=True)
+    processed_spectra = mantid.ReplaceSpecialValues(InputWorkspace=processed_spectra,
+                                                    NaNValue=0, InfinityValue=0)
+    return processed_spectra
+
+
+def _apply_placzek_corrections(instrument, input_workspace: Workspace2D, placzek_run_number, sample_details, run_details):
+    raw_ws = mantid.Load(Filename='POLARIS' + str(placzek_run_number) + '.nxs')
+    sample_geometry = common.generate_sample_geometry(sample_details)
+    sample_material = common.generate_sample_material(sample_details)
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
+        InputWorkspace=raw_ws,
+        CalFileName=run_details.offset_file_path,
+        SampleGeometry=sample_geometry,
+        SampleMaterial=sample_material,
+        CrystalDensity=sample_details.material_object.crystal_density)
+
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer", EMode='Elastic')
+    input_workspace, self_scattering_correction = _prepare_for_correction(data_workspace=input_workspace,
+                                                                          correction_workspace=self_scattering_correction)
+    input_workspace = mantid.Subtract(LHSWorkspace=input_workspace,
+                                      RHSWorkspace=self_scattering_correction,
+                                      AllowDifferentNumberSpectra=True)
+    return input_workspace
+
+
+def _prepare_for_correction(data_workspace: Workspace2D, correction_workspace: Workspace2D):
+
+    # Remove Masked and Monitor spectra
+    mantid.ExtractMonitors(InputWorkspace=correction_workspace,
+                           DetectorWorkspace="correction_workspace",
+                           MonitorWorkspace="correction_workspace_monitors")
+    correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="correction_workspace")
+    correction_workspace.clearMonitorWorkspace()
+
+    mantid.ExtractMonitors(InputWorkspace=data_workspace,
+                           DetectorWorkspace="data_workspace",
+                           MonitorWorkspace="data_workspace_monitors")
+    data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
+    data_workspace.clearMonitorWorkspace()
+
+    # Match workspaces
+    correction_workspace = mantid.RebinToWorkspace(WorkspaceToRebin="correction_workspace",
+                                                   WorkspaceToMatch="data_workspace")
+
+    return data_workspace, correction_workspace
+
+
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details,
+                          empty_can_subtraction_method, paalman_pings_events_per_point=None):
+    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
+                                                          instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
     vanadium_splines = None
     van = "van_{}".format(run_details.vanadium_run_numbers)
