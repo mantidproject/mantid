@@ -85,34 +85,13 @@ def _focus_one_ws(
             empty_ws_string=run_details.sample_empty, instrument=instrument, scale_factor=scale_factor
         )
 
-    if absorb and empty_can_subtraction_method == "PaalmanPings":
-        if run_details.sample_empty:  # need summed_empty including container
-            input_workspace = instrument._apply_paalmanpings_absorb_and_subtract_empty(
-                workspace=input_workspace,
-                summed_empty=summed_empty,
-                sample_details=sample_details,
-                paalman_pings_events_per_point=paalman_pings_events_per_point,
-            )
-            # Crop to largest acceptable TOF range
-            input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
-        else:
-            raise TypeError("The PaalmanPings absorption method requires 'sample_empty' to be supplied.")
-    else:
-        if summed_empty:
-            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_ws=summed_empty)
-        # Crop to largest acceptable TOF range
-        input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
-
-        if absorb:
-            input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
-        else:
-            # Set sample material if specified by the user
-            if sample_details is not None:
-                mantid.SetSample(
-                    InputWorkspace=input_workspace,
-                    Geometry=sample_details.generate_sample_geometry(),
-                    Material=sample_details.generate_sample_material(),
-                )
+    input_workspace = _absorb_and_empty_corrections(input_workspace, instrument, run_details, sample_details, absorb, summed_empty,
+                                                    empty_can_subtraction_method)
+    placzek_run_number = instrument._inst_settings.placzek_run_number
+    if placzek_run_number:
+        if instrument._inst_settings.per_detector:
+            input_workspace = _apply_placzek_corrections(input_workspace, instrument, perform_vanadium_norm,
+                                                         vanadium_path, placzek_run_number, sample_details, run_details)
 
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationFile=run_details.offset_file_path)
@@ -153,6 +132,53 @@ def _focus_one_ws(
     return d_spacing_group
 
 
+def _absorb_and_empty_corrections(input_workspace, instrument, run_details, sample_details, absorb, summed_empty,
+                                  empty_can_subtraction_method):
+    if absorb and empty_can_subtraction_method == 'PaalmanPings':
+        if run_details.sample_empty: # need summed_empty including container
+            input_workspace = instrument._apply_paalmanpings_absorb_and_subtract_empty(
+                input_workspace=input_workspace,
+                summed_empty=summed_empty,
+                sample_details=sample_details,
+                paalman_pings_events_per_point=paalman_pings_events_per_point)
+            # Crop to largest acceptable TOF range
+            input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+        else:
+            raise TypeError("The PaalmanPings absorption method requires 'sample_empty' to be supplied.")
+    else:
+        if summed_empty:
+            input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, empty_sample=summed_empty)
+        # Crop to largest acceptable TOF range
+        input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+
+        if absorb:
+            input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+        else:
+            # Set sample material if specified by the user
+            if sample_details is not None:
+                mantid.SetSample(InputWorkspace=input_workspace,
+                                 Geometry=sample_details.generate_sample_geometry(),
+                                 Material=sample_details.generate_sample_material())
+    return input_workspace
+
+
+def apply_per_detector_placzek(input_workspace, insturment, perform_vanadium_norm, vanadium_path, placzek_run_number,
+                               sample_details, run_details):
+    mantid.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace="DataBeforeCorrections")
+    # apply per detector vanadium correction on uncalibrated data
+    input_workspace = _apply_vanadium_corrections_per_detector(instrument=instrument,
+                                                               input_workspace=input_workspace,
+                                                               perform_vanadium_norm=perform_vanadium_norm,
+                                                               vanadium_splines=vanadium_path)
+    # Currently, only supported for POLARIS instrument
+    input_workspace = _apply_placzek_corrections(instrument=instrument,
+                                                 input_workspace=input_workspace,
+                                                 placzek_run_number=placzek_run_number,
+                                                 sample_details=sample_details,
+                                                 run_details=run_details)
+    return input_workspace
+
+
 def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
     split_data_spectra = common.extract_ws_spectra(input_workspace)
@@ -180,16 +206,17 @@ def _apply_vanadium_corrections_per_detector(instrument, input_workspace: Worksp
     return processed_spectra
 
 
-def _apply_placzek_corrections(instrument, input_workspace: Workspace2D, placzek_run_number, sample_details, run_details):
+def _apply_placzek_corrections(input_workspace, instrument, perform_vanadium_norm, vanadium_path,
+                               placzek_run_number, sample_details, run_details):
     raw_ws = mantid.Load(Filename='POLARIS' + str(placzek_run_number) + '.nxs')
-    sample_geometry = common.generate_sample_geometry(sample_details)
-    sample_material = common.generate_sample_material(sample_details)
+    sample_geometry = sample_details.generate_sample_geometry()
+    sample_material = sample_details.generate_sample_material()
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
         InputWorkspace=raw_ws,
         CalFileName=run_details.offset_file_path,
         SampleGeometry=sample_geometry,
         SampleMaterial=sample_material,
-        CrystalDensity=sample_details.material_object.crystal_density)
+        CrystalDensity=sample_details.material_object.number_density_effective)
 
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer", EMode='Elastic')
     input_workspace, self_scattering_correction = _prepare_for_correction(data_workspace=input_workspace,

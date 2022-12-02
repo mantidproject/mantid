@@ -115,6 +115,46 @@ class ISISPowderFocusUnitTest(TestCase):
         match_bool, _ = CompareWorkspaces(expected_per_bank, output)
         self.assertTrue(match_bool)
 
+    def test_focus_per_detector_no_input_batching(self):
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        pdf_inst_obj._inst_settings.input_mode = "PDF"
+        pdf_inst_obj._inst_settings.per_detector = True
+        self.assertRaisesRegex(ValueError, "Input batching not passed through. Please contact development team.",
+                               focus.focus, run_number_string=98532, instrument=pdf_inst_obj,
+                               perform_vanadium_norm=True, absorb=True, sample_details=pdf_inst_obj._sample_details)
+
+    def test_focus_per_detector_individual_input_batching(self):
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
+                                         multiple_scattering=False)
+        ADS.clear()  # clear ADS to work around bug issue #34749
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        pdf_inst_obj._inst_settings.input_mode = INPUT_BATCHING.Individual
+        pdf_inst_obj._inst_settings.per_detector = True
+        pdf_inst_obj._inst_settings.placzek_run_number = 98533
+        output = focus.focus(run_number_string=98532, instrument=pdf_inst_obj, perform_vanadium_norm=True, absorb=True,
+                             sample_details=pdf_inst_obj._sample_details)
+        SaveNexus(output, "/home/danielmurphy/Desktop/focus/focused_per_bank.nxs")
+        expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_bank.nxs")
+        match_bool, _ = CompareWorkspaces(expected_per_bank, output)
+        self.assertTrue(match_bool)
+
+    def test_focus_per_detector_summed_input_batching(self):
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        _ = pdf_inst_obj.create_vanadium(first_cycle_run_no=98532, do_absorb_corrections=True,
+                                         multiple_scattering=False)
+        ADS.clear()  # clear ADS to work around bug issue #34749
+        pdf_inst_obj = self.setup_inst_object("PDF")
+        pdf_inst_obj._inst_settings.input_mode = INPUT_BATCHING.Summed
+        pdf_inst_obj._inst_settings.per_detector = True
+        pdf_inst_obj._inst_settings.placzek_run_number = 98533
+        output = focus.focus(run_number_string=98532, instrument=pdf_inst_obj, perform_vanadium_norm=True, absorb=True,
+                             sample_details=pdf_inst_obj._sample_details)
+        SaveNexus(output, "/home/danielmurphy/Desktop/focus/focused_per_bank.nxs")
+        expected_per_bank = Load("/home/danielmurphy/Desktop/focus/focused_per_bank.nxs")
+        match_bool, _ = CompareWorkspaces(expected_per_bank, output)
+        self.assertTrue(match_bool)
+
 
 if __name__ == '__main__':
     main()
