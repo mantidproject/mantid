@@ -154,6 +154,21 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   }
 }
 
+void LoadHelper::addMetadataToWsRun(const H5::Group &group, API::Run &runDetails, std::string metadataKey) {
+  for (size_t i = 0; i < group.getNumObjs(); i++) {
+    H5G_obj_t type = group.getObjTypeByIdx(i);
+    std::string name = group.getObjnameByIdx(i);
+    switch (type) {
+    case H5G_GROUP:
+      break;
+    case H5G_DATASET:
+      break;
+    default:
+      continue;
+    }
+  }
+}
+
 /**
  * Recursively add properties from a nexus file to
  * the workspace run.
