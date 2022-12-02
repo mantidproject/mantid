@@ -208,10 +208,11 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         for index, line in enumerate(data):
             energy[index] = line[0] - offset
-
-            detector_counts[index] = line[2] / line[1]
-            errors[index] = np.sqrt(line[2]) / line[1]
-
+            monitor_counts = line[1]
+            det_counts = line[2]
+            monitor_errors = np.sqrt(monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
+            detector_counts[index] = det_counts / monitor_counts
+            errors[index] = np.sqrt(det_counts + ((det_counts**2) * monitor_errors**2) / monitor_counts**2) / monitor_counts
         return energy, detector_counts, errors
 
     def get_water_correction(self, correction_file: str) -> np.ndarray:
