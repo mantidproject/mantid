@@ -363,6 +363,7 @@ private:
   NiceMock<MockInstrumentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
   NiceMock<MockFileHandler> m_fileHandler;
+  NiceMock<MockMessageHandler> m_messageHandler;
 
   Instrument makeModelWithMonitorOptions(MonitorCorrections monitorCorrections) {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
@@ -393,7 +394,7 @@ private:
   InstrumentPresenter makePresenter(
       std::unique_ptr<IInstrumentOptionDefaults> defaultOptions = std::make_unique<MockInstrumentOptionDefaults>()) {
     auto presenter = InstrumentPresenter(&m_view, ModelCreationHelper::makeEmptyInstrument(), &m_fileHandler,
-                                         std::move(defaultOptions));
+                                         &m_messageHandler, std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }

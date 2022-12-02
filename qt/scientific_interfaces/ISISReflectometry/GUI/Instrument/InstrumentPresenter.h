@@ -9,6 +9,7 @@
 #include "../../Reduction/Instrument.h"
 #include "Common/DllConfig.h"
 #include "GUI/Common/IFileHandler.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
 #include "InstrumentOptionDefaults.h"
@@ -28,11 +29,11 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter : public InstrumentView
                                                            public IInstrumentPresenter {
 public:
   InstrumentPresenter(
-      IInstrumentView *view, Instrument instrument, IFileHandler *fileHandler,
+      IInstrumentView *view, Instrument instrument, IFileHandler *fileHandler, IReflMessageHandler *messageHandler,
       std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults = std::make_unique<InstrumentOptionDefaults>());
   Instrument const &instrument() const override;
 
-  // IInstrumentPresenver overrides
+  // IInstrumentPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
@@ -45,6 +46,7 @@ public:
   void notifySettingsChanged() override;
   void notifyRestoreDefaultsRequested() override;
   void notifyEditingCalibFilePathFinished() override;
+  void notifyBrowseToCalibrationFileRequested() override;
 
 protected:
   std::unique_ptr<IInstrumentOptionDefaults> m_instrumentDefaults;
@@ -54,6 +56,7 @@ private:
   Instrument m_model;
   IBatchPresenter *m_mainPresenter;
   IFileHandler *m_fileHandler;
+  IReflMessageHandler *m_messageHandler;
 
   boost::optional<RangeInLambda> wavelengthRangeFromView();
   boost::optional<RangeInLambda> monitorBackgroundRangeFromView();

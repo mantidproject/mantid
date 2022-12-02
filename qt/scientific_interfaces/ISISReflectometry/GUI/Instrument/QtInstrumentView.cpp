@@ -7,7 +7,6 @@
 #include "QtInstrumentView.h"
 #include "MantidKernel/UsageService.h"
 
-#include <QFileDialog>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
@@ -95,12 +94,7 @@ void QtInstrumentView::disconnectSettingsChange(QCheckBox &edit) {
 
 void QtInstrumentView::onSettingsChanged() { m_notifyee->notifySettingsChanged(); }
 
-void QtInstrumentView::browseToCalibrationFile() {
-  auto calibrationFilePath = QFileDialog::getOpenFileName(this, QString(), QString(), tr("Data Files (*.dat)"));
-  if (!calibrationFilePath.isEmpty()) {
-    m_ui.calibrationPathEdit->setText(calibrationFilePath);
-  }
-}
+void QtInstrumentView::browseToCalibrationFile() { m_notifyee->notifyBrowseToCalibrationFileRequested(); }
 
 void QtInstrumentView::editingCalibFilePathFinished() { m_notifyee->notifyEditingCalibFilePathFinished(); }
 

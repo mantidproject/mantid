@@ -88,7 +88,7 @@ void QtMainWindowView::initLayout() {
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
-  auto makeInstrumentPresenter = InstrumentPresenterFactory(fileHandler);
+  auto makeInstrumentPresenter = InstrumentPresenterFactory(fileHandler, messageHandler);
   auto makePreviewPresenter = PreviewPresenterFactory();
 
   auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(

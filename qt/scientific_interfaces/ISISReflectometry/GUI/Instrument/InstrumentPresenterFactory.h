@@ -18,14 +18,16 @@ namespace ISISReflectometry {
 
 class InstrumentPresenterFactory {
 public:
-  InstrumentPresenterFactory(IFileHandler *fileHandler) : m_fileHandler(fileHandler) {}
+  InstrumentPresenterFactory(IFileHandler *fileHandler, IReflMessageHandler *messageHandler)
+      : m_fileHandler(fileHandler), m_messageHandler(messageHandler) {}
 
   std::unique_ptr<IInstrumentPresenter> make(IInstrumentView *view) {
-    return std::make_unique<InstrumentPresenter>(view, Instrument(), m_fileHandler);
+    return std::make_unique<InstrumentPresenter>(view, Instrument(), m_fileHandler, m_messageHandler);
   }
 
 private:
   IFileHandler *m_fileHandler;
+  IReflMessageHandler *m_messageHandler;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

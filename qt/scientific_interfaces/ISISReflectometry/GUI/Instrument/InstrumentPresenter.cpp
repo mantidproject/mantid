@@ -24,9 +24,10 @@ boost::optional<RangeInLambda> rangeOrNone(const RangeInLambda &range, const boo
 } // namespace
 
 InstrumentPresenter::InstrumentPresenter(IInstrumentView *view, Instrument instrument, IFileHandler *fileHandler,
+                                         IReflMessageHandler *messageHandler,
                                          std::unique_ptr<IInstrumentOptionDefaults> instrumentDefaults)
     : m_instrumentDefaults(std::move(instrumentDefaults)), m_view(view), m_model(std::move(instrument)),
-      m_fileHandler(fileHandler) {
+      m_fileHandler(fileHandler), m_messageHandler(messageHandler) {
   m_view->subscribe(this);
 }
 
@@ -47,6 +48,13 @@ void InstrumentPresenter::notifyEditingCalibFilePathFinished() {
   auto const calibrationFilePath = m_view->getCalibrationFilePath();
   if (!calibrationFilePath.empty() && !m_fileHandler->fileExists(calibrationFilePath))
     m_view->errorInvalidCalibrationFilePath();
+}
+
+void InstrumentPresenter::notifyBrowseToCalibrationFileRequested() {
+  auto calibrationFilePath = m_messageHandler->askUserForLoadFileName("Data Files (*.dat)");
+  if (!calibrationFilePath.empty()) {
+    m_view->setCalibrationFilePath(calibrationFilePath);
+  }
 }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }

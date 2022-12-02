@@ -26,6 +26,7 @@ public:
   virtual void notifySettingsChanged() = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifyEditingCalibFilePathFinished() = 0;
+  virtual void notifyBrowseToCalibrationFileRequested() = 0;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IInstrumentView {
