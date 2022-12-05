@@ -7,7 +7,7 @@
 import os.path as osp
 import numpy as np
 from mantid.api import (AlgorithmFactory, FileProperty, FileAction, IPeaksWorkspaceProperty, PythonAlgorithm)
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import StringListValidator, Direction, logger
 from enum import Enum
 
 
@@ -115,11 +115,17 @@ class SaveReflections(PythonAlgorithm):
         file_name = self.getPropertyValue("Filename")
         split_files = self.getProperty("SplitFiles").value
         # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
-        max_intens = max(workspace.column('Intens'))
-        max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
-        min_exponent = -2  # 2 decimal points in SHELX, FullProf, Jana2006 and GSAS-II
-        # find scale factor to scale intensity to largest value in the available width (e.g. 9999.99 for SHELX)
-        scale = 1 if max_intens < 10 ** max_exponent else ((10 ** max_exponent) - 10 ** min_exponent) / max_intens
+        scale = 1
+        if workspace.getNumberPeaks() > 0:
+            max_intens = max(workspace.column('Intens'))
+            max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
+            min_exponent = -2  # 2 decimal points in SHELX, FullProf, Jana2006 and GSAS-II
+            if max_intens >= 10 ** max_exponent:
+                # find scale factor to scale intensity to largest value in the available width (e.g. 9999.99 for SHELX)
+                scale = ((10 ** max_exponent) - 10 ** min_exponent) / max_intens
+        else:
+            logger.warning(f'Peaks workspace {workspace.name()} is empty - an empty file will be produced.')
+
         FORMAT_MAP[output_format]()(file_name, workspace, split_files, scale)
 
 
