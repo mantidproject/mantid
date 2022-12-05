@@ -288,10 +288,6 @@ void ReflectometryReductionOneAuto3::init() {
   // Polarization correction
   declareProperty(std::make_unique<PropertyWithValue<bool>>("PolarizationAnalysis", false, Direction::Input),
                   "Apply polarization corrections");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("PolarizationEfficiencies", "", Direction::Input,
-                                                                       PropertyMode::Optional),
-                  "A workspace to be used for polarization analysis that contains the efficiency factors as "
-                  "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
 
   // Flood correction
   std::vector<std::string> propOptions = {"Workspace", "ParameterFile"};
@@ -326,6 +322,11 @@ void ReflectometryReductionOneAuto3::init() {
                       std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 
   initTransmissionOutputProperties();
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("PolarizationEfficiencies", "", Direction::Input,
+                                                                       PropertyMode::Optional),
+                  "A workspace to be used for polarization analysis that contains the efficiency factors as "
+                  "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
 }
 
 /** Execute the algorithm.
@@ -1003,7 +1004,8 @@ std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(con
   if (numWorkspacesInGrp == 2) {
     return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PNR
                                                              : CorrectionOption::FLIPPERS_NO_ANALYSER;
-  } else if (numWorkspacesInGrp == 4) {
+  }
+  if (numWorkspacesInGrp == 4) {
     return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA : CorrectionOption::FLIPPERS_FULL;
   }
   throw std::runtime_error("Only input workspace groups with two or four periods are supported");

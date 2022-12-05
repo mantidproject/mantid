@@ -75,6 +75,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._declareReductionProperties()
         self._declareTransmissionProperties()
         self._declareOutputProperties()
+        self._declarePolarizationEfficiencyProperties()
 
     def PyExec(self):
         """Execute the algorithm."""
@@ -193,16 +194,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
             'SubtractBackground', 'BackgroundProcessingInstructions', 'BackgroundCalculationMethod',
             'DegreeOfPolynomial', 'CostFunction',
-            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis'
-        ]
-        self._copy_properties_from_reduction_algorithm(properties)
-
-        self.declareProperty('PolarizationEfficiencies', "",
-                             'A workspace or file name containing the polarization efficiency factors for either '
-                             'the Wildes or Fredrikze correction methods.', Direction.Input)
-
-        properties = [
-            'FloodCorrection', 'FloodWorkspace',
+            'NormalizeByIntegratedMonitors', 'PolarizationAnalysis', 'FloodCorrection', 'FloodWorkspace',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1'
         ]
         self._copy_properties_from_reduction_algorithm(properties)
@@ -233,6 +225,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                       Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS, Prop.OUTPUT_WS_LAM,
                       Prop.OUTPUT_WS_TRANS, Prop.OUTPUT_WS_FIRST_TRANS, Prop.OUTPUT_WS_SECOND_TRANS]
         self._copy_properties_from_reduction_algorithm(properties)
+
+    def _declarePolarizationEfficiencyProperties(self):
+        self.declareProperty('PolarizationEfficiencies', "",
+                             'A workspace or file name containing the polarization efficiency factors for either '
+                             'the Wildes or Fredrikze correction methods.', Direction.Input)
 
     def _getInputWorkspaces(self, runs, isTrans):
         """Convert the given run numbers into real workspace names. Uses workspaces from
