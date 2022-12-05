@@ -11,7 +11,7 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 
-from mantid.simpleapi import mtd, CreateWorkspace
+from mantid.simpleapi import CreateWorkspace, LoadEmptyInstrument, LoadInstrument, mtd
 from mantid.api import PreviewType
 
 from mantidqt.widgets.rawdataexplorer.model import PreviewModel, RawDataExplorerModel
@@ -87,8 +87,29 @@ class RawDataExplorerModelTest(unittest.TestCase):
         self.assertFalse(self.model.can_delete_workspace("ws_1"))
 
     def test_choose_preview(self):
-        # TODO a lot of different cases to cover
-        pass
+        # test PLOT1D
+        inst_name = 'd7'  # acquisition type NON-TOF
+        LoadEmptyInstrument(OutputWorkspace=inst_name, InstrumentName='D7')
+        preview_d7 = self.model.choose_preview(inst_name)
+        self.assertEqual(preview_d7, PreviewType.PLOT1D)
+
+        # test PLOT2D
+        ws_name = 'd7_tof'
+        CreateWorkspace(OutputWorkspace=ws_name, DataX=[0, 1]*(132+1), DataY=[0, 0]*(132+1), NSpec=133,
+                        UnitX="TOF")
+        inst_name = 'D7'  # this time, the acquisition type is TOF
+        LoadInstrument(Workspace=ws_name, InstrumentName=inst_name, RewriteSpectraMap=True)
+        preview_d7_tof = self.model.choose_preview(ws_name)
+        self.assertEqual(preview_d7_tof, PreviewType.PLOT2D)
+
+        # test SVIEW
+        # will need to be implemented when support of this preview type is added
+
+        # test DEFAULT
+        inst_name = 'BILBY'  # example of unsupported but plottable instrument
+        LoadEmptyInstrument(OutputWorkspace=inst_name, InstrumentName=inst_name)
+        preview_default = self.model.choose_preview(inst_name)
+        self.assertEqual(preview_default, PreviewType.IVIEW)
 
     def test_determine_acquisition_mode(self):
         ws = CreateWorkspace(DataX='1,1,1,1', DataY='1,4,2,7', NSpec=4)
