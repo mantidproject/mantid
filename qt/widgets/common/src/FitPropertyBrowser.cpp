@@ -1431,28 +1431,27 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
     QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
-    const size_t index = compositeFunction()->parameterIndex(parName.toStdString());
-    const auto old_tie = compositeFunction()->getTie(index);
-    const std::string old_tie_str = old_tie->asString();
-    QString old_exp = QString::fromStdString(old_tie_str.substr(old_tie_str.find("=") + 1));
+    // Get the tie expression stored in the function in case the new expression is invalid
+    // and the GUI needs to be reset
+    const size_t parIndex = compositeFunction()->parameterIndex(parName.toStdString());
+    const auto oldTie = compositeFunction()->getTie(parIndex);
+    const std::string oldTieStr = oldTie->asString();
+    QString oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
 
-    QString str = m_stringManager->value(prop);
+    QString exp = m_stringManager->value(prop);
 
-    std::string old_exp_str = old_exp.toStdString();
-    std::string str_str = str.toStdString();
-
-    if (old_exp == str)
+    if (oldExp == exp)
       return;
 
     Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(compositeFunction().get(), parName.toStdString());
     try {
-      tie->set(str.toStdString());
-      h->addTie(parName + "=" + str);
+      tie->set(exp.toStdString());
+      h->addTie(parName + "=" + exp);
     } catch (...) {
       std::string msg = "Failed to update tie on " + parName.toStdString();
       QMessageBox::critical(this, "Mantid - Error", msg.c_str());
 
-      m_stringManager->setValue(prop, old_exp);
+      m_stringManager->setValue(prop, oldExp);
     }
     delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
