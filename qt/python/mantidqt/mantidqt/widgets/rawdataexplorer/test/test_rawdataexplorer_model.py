@@ -47,8 +47,19 @@ class RawDataExplorerModelTest(unittest.TestCase):
         mtd.clear()
 
     def test_modify_preview(self):
-        # TODO this is the meat of the raw data explorer preview handling, but testing it is not straight forward
-        pass
+        new_file = "data"
+        self.model.load_file = mock.MagicMock()
+        self.model.choose_preview = mock.MagicMock()
+        self.model.memory_manager = mock.MagicMock()
+        sig_new_preview = mock.MagicMock()
+        self.model.sig_new_preview.connect(sig_new_preview)
+        self.assertEqual(len(self.model._previews), 0)  # checking if there were no previous previews
+        self.model.modify_preview(new_file)
+        self.model.load_file.assert_called_once_with(new_file, new_file)
+        self.model.memory_manager.workspace_interacted_with.assert_called_once_with(new_file)
+        self.model.choose_preview.assert_called_once_with(new_file)
+        self.assertEqual(len(self.model._previews), 1)  # checking if a new preview has been added
+        sig_new_preview.assert_called_once()  # checking the signal has been emitted
 
     # not testing load_file: it just runs load, it would be slow for nothing
 
