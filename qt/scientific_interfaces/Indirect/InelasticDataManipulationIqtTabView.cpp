@@ -78,7 +78,6 @@ InelasticDataManipulationIqtTabView::InelasticDataManipulationIqtTabView(QWidget
   m_uiForm.setupUi(parent);
   m_dblEdFac = new DoubleEditorFactory(this);
   m_dblManager = new QtDoublePropertyManager();
-  setup();
 }
 
 InelasticDataManipulationIqtTabView::~InelasticDataManipulationIqtTabView() {
@@ -122,8 +121,6 @@ void InelasticDataManipulationIqtTabView::setup() {
   m_iqtTree->addProperty(m_properties["SampleBins"]);
   m_iqtTree->addProperty(m_properties["ResolutionBins"]);
 
-  m_dblManager->setValue(m_properties["SampleBinning"], 10);
-
   m_iqtTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   // Format the tree widget so its easier to read the contents
@@ -138,19 +135,26 @@ void InelasticDataManipulationIqtTabView::setup() {
 
   // signals / slots & validators
   connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SIGNAL(sampDataReady(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SIGNAL(resDataReady(const QString &)));
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(updateDisplayedBinParameters()));
+  connect(m_uiForm.spIterations, SIGNAL(valueChanged(int)), this, SIGNAL(iterationsChanged(int)));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SIGNAL(plotCurrentPreview()));
-  connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this, SLOT(errorsClicked()));
+  connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SIGNAL(errorsClicked(int)));
+  connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(handleErrorsClicked(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SIGNAL(PreviewSpectrumChanged(int)));
   connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(updateEnergyRange(int)));
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRangeSelector(QtProperty *, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SIGNAL(valueChanged(QtProperty *, double)));
 
   m_uiForm.dsInput->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
+  iterationsChanged(m_uiForm.spIterations->value());
+  errorsClicked(1);
+  m_dblManager->setValue(m_properties["SampleBinning"], 10);
 }
 
 void InelasticDataManipulationIqtTabView::setPreviewSpectrumMaximum(int value) {
@@ -422,31 +426,10 @@ void InelasticDataManipulationIqtTabView::updateEnergyRange(int state) {
   }
 }
 
-void InelasticDataManipulationIqtTabView::errorsClicked() {
-  m_uiForm.spIterations->setEnabled(m_uiForm.cbCalculateErrors->isChecked());
-}
+void InelasticDataManipulationIqtTabView::handleErrorsClicked(int state) { m_uiForm.spIterations->setEnabled(state); }
 
-// getters for properties
 std::string InelasticDataManipulationIqtTabView::getSampleName() {
   return m_uiForm.dsInput->getCurrentDataName().toStdString();
 }
-
-std::string InelasticDataManipulationIqtTabView::getResolutionName() {
-  return m_uiForm.dsResolution->getCurrentDataName().toStdString();
-}
-
-std::string InelasticDataManipulationIqtTabView::getIterations() {
-  return m_uiForm.spIterations->cleanText().toStdString();
-}
-
-double InelasticDataManipulationIqtTabView::getELow() { return m_dblManager->value(m_properties["ELow"]); }
-
-double InelasticDataManipulationIqtTabView::getEHigh() { return m_dblManager->value(m_properties["EHigh"]); }
-
-double InelasticDataManipulationIqtTabView::getSampleBinning() {
-  return m_dblManager->value(m_properties["SampleBinning"]);
-}
-
-bool InelasticDataManipulationIqtTabView::getCalculateErrors() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 } // namespace MantidQt::CustomInterfaces

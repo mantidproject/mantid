@@ -39,26 +39,24 @@ public:
   void setSaveResultEnabled(bool enabled);
   void setRunText(bool running);
   void setWatchADS(bool watch);
+  void setup();
 
   // getters for properties
   std::string getSampleName();
-  std::string getResolutionName();
-  std::string getIterations();
-  double getELow();
-  double getEHigh();
-  double getSampleBinning();
-  bool getCalculateErrors();
 
 signals:
   void sampDataReady(const QString &);
+  void resDataReady(const QString &);
+  void iterationsChanged(int);
+  void errorsClicked(int);
   void PreviewSpectrumChanged(int);
   void runClicked();
   void saveClicked();
   void plotCurrentPreview();
   void showMessageBox(const QString &message);
+  void valueChanged(QtProperty *, double);
 
 private:
-  void setup();
   void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
                            double newValue);
   void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty, RangeSelector *rangeSelector,
@@ -77,7 +75,7 @@ private slots:
   void rangeChanged(double min, double max);
   void updateRangeSelector(QtProperty *prop, double val);
   void updateEnergyRange(int state);
-  void errorsClicked();
+  void handleErrorsClicked(int);
 };
 
 } // namespace CustomInterfaces
