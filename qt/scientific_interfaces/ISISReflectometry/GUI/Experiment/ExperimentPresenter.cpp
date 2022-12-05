@@ -154,9 +154,16 @@ BackgroundSubtraction ExperimentPresenter::backgroundSubtractionFromView() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const correctionType = m_view->getPolarizationCorrectionOption() ? PolarizationCorrectionType::ParameterFile
-                                                                        : PolarizationCorrectionType::None;
-  return PolarizationCorrections(correctionType);
+  auto const correctionsChecked = m_view->getPolarizationCorrectionOption();
+
+  if (!correctionsChecked) {
+    return PolarizationCorrections(PolarizationCorrectionType::None);
+  }
+  auto const correctionsWorkspace = m_view->getPolarizationEfficienciesWorkspace();
+  if (correctionsWorkspace.empty()) {
+    return PolarizationCorrections(PolarizationCorrectionType::ParameterFile);
+  }
+  return PolarizationCorrections(PolarizationCorrectionType::Workspace, correctionsWorkspace);
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
@@ -194,9 +201,15 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   if (instrumentName == "INTER" || instrumentName == "SURF") {
     m_view->setPolarizationCorrectionOption(false);
     m_view->disablePolarizationCorrections();
-  } else {
-    m_view->enablePolarizationCorrections();
+    m_view->disablePolarizationEfficiencies();
+    return;
   }
+  m_view->enablePolarizationCorrections();
+  if (m_view->getPolarizationCorrectionOption()) {
+    m_view->enablePolarizationEfficiencies();
+    return;
+  }
+  m_view->disablePolarizationEfficiencies();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
