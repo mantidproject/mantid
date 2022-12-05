@@ -38,10 +38,13 @@ class PreviewModelTest(unittest.TestCase):
 
 class RawDataExplorerModelTest(unittest.TestCase):
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.mocked_presenter = mock.MagicMock()
         self.mocked_memory_manager = mock.MagicMock()
         self.model = RawDataExplorerModel(self.mocked_presenter, self.mocked_memory_manager)
+
+    def tearDown(self):
+        mtd.clear()
 
     def test_modify_preview(self):
         # TODO this is the meat of the raw data explorer preview handling, but testing it is not straight forward
