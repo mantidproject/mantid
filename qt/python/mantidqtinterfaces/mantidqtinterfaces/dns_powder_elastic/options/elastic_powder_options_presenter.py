@@ -19,8 +19,10 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
         super().__init__(parent=parent, name=name, view=view, model=model)
         # connect signals
         self.view.sig_get_wavelength.connect(self._determine_wavelength)
+        self.view.sig_two_theta_min_changed.connect(self._evaluate_max_bin_size)
+        self.view.sig_two_theta_max_changed.connect(self._evaluate_max_bin_size)
+        self.view.sig_auto_binning_clicked.connect(self._set_manual_binning_lims)
         self.view.sig_auto_binning_clicked.connect(self._set_auto_binning)
-        self.view.sig_auto_binning_clicked.connect(self._set_manual_binning_parameter_limits)
 
     def _set_auto_binning(self):
         """
@@ -34,18 +36,19 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
                 own_options[parameter] = two_theta_params_dict[parameter]
             self.set_view_from_param()
 
-    def _set_manual_binning_parameter_limits(self):
+    def _set_manual_binning_lims(self):
         if self.param_dict['file_selector']['full_data']:
             sample_data = self.param_dict['file_selector']['full_data']
             auto_bin_params = get_automatic_two_theta_binning(sample_data)
             min_lower_limit = auto_bin_params['two_theta_min']
-            min_upper_limit = auto_bin_params['two_theta_max'] - auto_bin_params['two_theta_step']
-            max_lower_limit = auto_bin_params['two_theta_min'] + auto_bin_params['two_theta_step']
+            min_upper_limit = auto_bin_params['two_theta_max'] - auto_bin_params['two_theta_bin_size']
+            max_lower_limit = auto_bin_params['two_theta_min'] + auto_bin_params['two_theta_bin_size']
             max_upper_limit = auto_bin_params['two_theta_max']
             self.view._map['two_theta_min'].setMinimum(min_lower_limit )
             self.view._map['two_theta_min'].setMaximum(min_upper_limit)
             self.view._map['two_theta_max'].setMinimum(max_lower_limit)
             self.view._map['two_theta_max'].setMaximum(max_upper_limit)
+            self._evaluate_max_bin_size()
 
     def _get_automatic_binning_state(self):
         return self.view._map['automatic_binning'].isChecked()
@@ -55,7 +58,7 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
         if auto_binning_is_on:
             self._set_auto_binning()
         else:
-            self._set_manual_binning_parameter_limits()
+            self._set_manual_binning_lims()
 
     def process_request(self):
         own_options = self.get_option_dict()
@@ -73,6 +76,13 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
                     command, command_line_options[command]
                 )
 
+    def _evaluate_max_bin_size(self):
+        if self.param_dict['file_selector']['full_data'] and not self._get_automatic_binning_state():
+            own_options = self.get_option_dict()
+            two_theta_max = own_options['two_theta_max']
+            two_theta_min = own_options['two_theta_min']
+            self.view._map['two_theta_bin_size'].setMaximum(two_theta_max - two_theta_min)
+
 
 def get_automatic_two_theta_binning(sample_data):
     '''
@@ -86,6 +96,6 @@ def get_automatic_two_theta_binning(sample_data):
     number_two_theta_bins = int(round((two_theta_max - two_theta_min) / two_theta_step) + 1)
     two_theta_binning_dict = {'two_theta_min': two_theta_min,
                               'two_theta_max': two_theta_max,
-                              'two_theta_step': two_theta_step,
+                              'two_theta_bin_size': two_theta_step,
                               'nbins': number_two_theta_bins}
     return two_theta_binning_dict

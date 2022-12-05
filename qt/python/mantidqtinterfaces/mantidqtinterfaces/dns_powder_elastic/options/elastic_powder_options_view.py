@@ -57,6 +57,8 @@ class DNSElasticPowderOptionsView(DNSView):
 
     # signals
     sig_get_wavelength = Signal()
+    sig_two_theta_max_changed = Signal()
+    sig_two_theta_min_changed = Signal()
     sig_auto_binning_clicked = Signal(int)
 
     def deactivate_get_wavelength(self):
@@ -112,6 +114,12 @@ class DNSElasticPowderOptionsView(DNSView):
         if state:
             self.sig_get_wavelength.emit()
 
+    def _two_theta_min_changed(self):
+        self.sig_two_theta_min_changed.emit()
+
+    def _two_theta_max_changed(self):
+        self.sig_two_theta_max_changed.emit()
+
     def _attach_signal_slots(self):
         self._map['wavelength'].valueChanged.connect(
             self.deactivate_get_wavelength)
@@ -127,5 +135,9 @@ class DNSElasticPowderOptionsView(DNSView):
             self._disable_sum_vanadium)
         self._map['ignore_vana_fields'].stateChanged.connect(
             self._disable_ignore_vana)
+        self._map['two_theta_min'].valueChanged.connect(
+            self._two_theta_min_changed)
+        self._map['two_theta_max'].valueChanged.connect(
+            self._two_theta_max_changed)
         self._map['automatic_binning'].stateChanged.connect(
             self._automatic_binning_clicked)
