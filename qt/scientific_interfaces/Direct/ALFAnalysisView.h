@@ -48,6 +48,8 @@ public:
   virtual void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void removeFitSpectrum() = 0;
 
+  virtual void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) = 0;
+
   virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeak() const = 0;
 
@@ -55,7 +57,7 @@ public:
   virtual double peakCentre() const = 0;
   virtual void setPeakCentreStatus(std::string const &status) = 0;
 
-  virtual void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) = 0;
+  virtual void setRotationAngle(std::optional<double> rotation) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 };
@@ -78,6 +80,8 @@ public:
   void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void removeFitSpectrum() override;
 
+  void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) override;
+
   void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
   Mantid::API::IPeakFunction_const_sptr getPeak() const override;
 
@@ -85,7 +89,7 @@ public:
   double peakCentre() const override;
   void setPeakCentreStatus(std::string const &status) override;
 
-  void setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) override;
+  void setRotationAngle(std::optional<double> rotation) override;
 
   void displayWarning(std::string const &message) override;
 
@@ -114,7 +118,8 @@ private:
   QLabel *m_fitStatus;
   QLineEdit *m_averageTwoTheta;
   QLabel *m_numberOfTubes;
-  QLineEdit *m_rAngle;
+  QLineEdit *m_rotationAngle;
+  QLabel *m_fitRequired;
 
   IALFAnalysisPresenter *m_presenter;
 };

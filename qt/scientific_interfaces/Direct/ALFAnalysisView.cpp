@@ -28,10 +28,10 @@ namespace {
 QString const DEFAULT_TUBES_TOOLTIP = "No tubes have been selected";
 QString const FIT_BUTTON_TOOLTIP =
     "Fit to find the Peak Centre. Repeated Fits will attempt to refine the Peak Centre value further.";
-QString const PEAK_CENTRE_TOOLTIP = "The centre of the Gaussian peak function, V.";
+QString const PEAK_CENTRE_TOOLTIP = "The centre of the Gaussian peak function, V, in degrees.";
 QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes. The two theta of a tube is taken to "
                                   "be the two theta at which the Out of Plane angle is closest to zero.";
-QString const R_ANGLE_TOOLTIP = "The R parameter angle. R = V / (2*sin(theta))";
+QString const ROTATION_ANGLE_TOOLTIP = "The Rotation or tilt angle, R, in degrees. R = V / (2*sin(theta))";
 
 QString const INFO_LABEL_STYLE = "QLabel { border-radius: 5px; border: 2px solid black; }";
 QString const ERROR_LABEL_STYLE = "QLabel { color: red; border-radius: 5px; border: 2px solid red; }";
@@ -198,12 +198,16 @@ void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const ce
 }
 
 void ALFAnalysisView::setupRAngleWidget(QGridLayout *layout) {
-  m_rAngle = new QLineEdit("-");
-  m_rAngle->setReadOnly(true);
-  m_rAngle->setToolTip(R_ANGLE_TOOLTIP);
+  m_rotationAngle = new QLineEdit("-");
+  m_rotationAngle->setReadOnly(true);
+  m_rotationAngle->setToolTip(ROTATION_ANGLE_TOOLTIP);
+  m_fitRequired = new QLabel("*");
+  m_fitRequired->setToolTip("A Fit to find the peak centre is required.");
+  m_fitRequired->setStyleSheet("QLabel { color: red; }");
 
-  layout->addWidget(new QLabel("R:"), 5, 0);
-  layout->addWidget(m_rAngle, 5, 1, 1, 3);
+  layout->addWidget(new QLabel("Rotation:"), 5, 0);
+  layout->addWidget(m_rotationAngle, 5, 1, 1, 3);
+  layout->addWidget(m_fitRequired, 5, 4);
 }
 
 void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }
@@ -237,6 +241,13 @@ void ALFAnalysisView::addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &wo
 
 void ALFAnalysisView::removeFitSpectrum() { m_plot->removeSpectrum("Fitted Data"); }
 
+void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {
+  m_averageTwoTheta->setText(average ? QString::number(*average) : "-");
+  m_numberOfTubes->setText(all.size() == 1u ? QString::number(all.size()) + " tube"
+                                            : QString::number(all.size()) + " tubes");
+  m_numberOfTubes->setToolTip(constructNumberOfTubesTooltip(all));
+}
+
 void ALFAnalysisView::setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) {
   setPeakCentre(peak->getParameter("PeakCentre"));
 
@@ -257,11 +268,9 @@ void ALFAnalysisView::setPeakCentreStatus(std::string const &status) {
   m_fitStatus->setToolTip(tooltip);
 }
 
-void ALFAnalysisView::setAverageTwoTheta(std::optional<double> average, std::vector<double> const &all) {
-  m_averageTwoTheta->setText(average ? QString::number(*average) : "-");
-  m_numberOfTubes->setText(all.size() == 1u ? QString::number(all.size()) + " tube"
-                                            : QString::number(all.size()) + " tubes");
-  m_numberOfTubes->setToolTip(constructNumberOfTubesTooltip(all));
+void ALFAnalysisView::setRotationAngle(std::optional<double> rotation) {
+  m_rotationAngle->setText(rotation ? QString::number(*rotation) : "-");
+  m_fitRequired->setVisible(!rotation);
 }
 
 void ALFAnalysisView::displayWarning(std::string const &message) {

@@ -155,6 +155,18 @@ public:
     TS_ASSERT_EQUALS(3u, m_model->numberOfTubes());
   }
 
+  void test_rotationAngle_returns_nullopt_if_the_fit_status_is_empty() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    TS_ASSERT_EQUALS(std::nullopt, m_model->rotationAngle());
+  }
+
+  void test_rotationAngle_returns_the_correct_value_with_valid_data() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    m_model->doFit(m_range);
+
+    TS_ASSERT_DIFFERS(1.2000, *m_model->rotationAngle(), 0.000001);
+  }
+
 private:
   MatrixWorkspace_sptr m_workspace;
   std::string m_workspaceName;

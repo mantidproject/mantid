@@ -125,6 +125,8 @@ public:
     EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
     EXPECT_CALL(*m_view, replot()).Times(1);
 
+    expectUpdateRotationAngleCalled();
+
     m_presenter->notifyPeakCentreEditingFinished();
   }
 
@@ -134,12 +136,14 @@ public:
 
     // Assert not called as the peak centre remains the same
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(0);
-    EXPECT_CALL(*m_model, getPeakCopy()).Times(0).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(0);
     EXPECT_CALL(*m_view, setPeak(_)).Times(0);
-    EXPECT_CALL(*m_model, fitStatus()).Times(0).WillOnce(Return(""));
+    EXPECT_CALL(*m_model, fitStatus()).Times(0);
     EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(0);
     EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
     EXPECT_CALL(*m_view, replot()).Times(0);
+
+    expectUpdateRotationAngleNotCalled();
 
     m_presenter->notifyPeakCentreEditingFinished();
   }
@@ -159,12 +163,16 @@ public:
 
     EXPECT_CALL(*m_view, replot()).Times(1);
 
+    expectUpdateRotationAngleCalled();
+
     m_presenter->notifyPeakCentreEditingFinished();
   }
 
   void test_notifyFitClicked_will_display_a_warning_when_data_is_not_extracted() {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
+
+    expectUpdateRotationAngleNotCalled();
 
     m_presenter->notifyFitClicked();
   }
@@ -174,6 +182,8 @@ public:
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
     EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
+
+    expectUpdateRotationAngleNotCalled();
 
     m_presenter->notifyFitClicked();
   }
@@ -185,6 +195,8 @@ public:
 
     EXPECT_CALL(*m_model, doFit(m_range)).Times(1);
 
+    expectUpdateRotationAngleCalled();
+
     m_presenter->notifyFitClicked();
   }
 
@@ -194,11 +206,15 @@ public:
     // Assert no call to calculateEstimate
     EXPECT_CALL(*m_model, calculateEstimate(_)).Times(0);
 
+    expectUpdateRotationAngleCalled();
+
     m_presenter->notifyResetClicked();
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
     expectCalculateEstimate();
+    expectUpdateRotationAngleCalled();
+
     m_presenter->notifyResetClicked();
   }
 
@@ -228,6 +244,18 @@ private:
     EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
 
     EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
+  }
+
+  void expectUpdateRotationAngleCalled() {
+    std::optional<double> const angle(1.20003);
+    EXPECT_CALL(*m_model, rotationAngle()).Times(1).WillOnce(Return(angle));
+    EXPECT_CALL(*m_view, setRotationAngle(angle)).Times(1);
+  }
+
+  void expectUpdateRotationAngleNotCalled() {
+    // Assert these functions are not called
+    EXPECT_CALL(*m_model, rotationAngle()).Times(0);
+    EXPECT_CALL(*m_view, setRotationAngle(_)).Times(0);
   }
 
   std::string m_workspaceName;
