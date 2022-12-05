@@ -9,6 +9,8 @@ set(TEST_PY_FILES
     CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py
     D4ILLReductionTest.py
+    D7AbsoluteCrossSectionsTest.py
+    D7YIGPositionCalibrationTest.py
     DirectILL_commonTest.py
     DirectILLApplySelfShieldingTest.py
     DirectILLAutoProcessTest.py
@@ -44,8 +46,7 @@ set(TEST_PY_FILES
     ISISIndirectDiffractionReductionTest.py
     ISISIndirectEnergyTransferTest.py
     ISISIndirectEnergyTransferWrapperTest.py
-    D7YIGPositionCalibrationTest.py
-    D7AbsoluteCrossSectionsTest.py
+    LagrangeILLReductionTest.py
     LoadWANDTest.py
     MatchAndMergeWorkspacesTest.py
     MDNormSCDPreprocessIncoherentTest.py
@@ -63,6 +64,7 @@ set(TEST_PY_FILES
     ReflectometryILLPreprocessTest.py
     ReflectometryISISSumBanksTest.py
     ReflectometryILLSumForegroundTest.py
+    ReflectometryISISCalibrationTest.py
     ReflectometryISISLoadAndProcessTest.py
     ReflectometryISISPreprocessTest.py
     ResNorm2Test.py

@@ -617,25 +617,19 @@ def LimitsWav(lmin, lmax, step, bin_type):
     director.add_command(wavelength_command)
 
 
-def LimitsQXY(qmin, qmax, step, type):
+def LimitsQXY(qmin, qmax, step):
     """
         To set the bin parameters for the algorithm Qxy()
         @param qmin: the first Q value to include
         @param qmaz: the last Q value to include
         @param step: bin width
-        @param type: pass LOG for logarithmic binning
     """
     qmin = float(qmin)
     qmax = float(qmax)
     step = float(step)
 
-    print_message('LimitsQXY(' + str(qmin) + ', ' + str(qmax) + ', ' + str(step) + ', ' + str(type) + ')')
-    step_type_string = type.strip().upper()
-    if step_type_string == "LOGARITHMIC" or step_type_string == "LOG":
-        step_type = RangeStepType.LOG
-    else:
-        step_type = RangeStepType.LIN
-    qxy_command = NParameterCommand(command_id=NParameterCommandId.QXY_LIMIT, values=[qmin, qmax, step, step_type])
+    print_message('LimitsQXY(' + str(qmin) + ', ' + str(qmax) + ', ' + str(step) + ')')
+    qxy_command = NParameterCommand(command_id=NParameterCommandId.QXY_LIMIT, values=[qmin, qmax, step])
     director.add_command(qxy_command)
 
 

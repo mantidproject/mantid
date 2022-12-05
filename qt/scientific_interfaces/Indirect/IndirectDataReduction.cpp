@@ -13,9 +13,6 @@
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
 #include "ISISEnergyTransfer.h"
-#include "IndirectMoments.h"
-#include "IndirectSqw.h"
-#include "IndirectSymmetrise.h"
 #include "IndirectTransmission.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -82,9 +79,6 @@ void IndirectDataReduction::initLayout() {
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");
-  addTab<IndirectSymmetrise>("Symmetrise");
-  addTab<IndirectSqw>("S(Q, w)");
-  addTab<IndirectMoments>("Moments");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
@@ -432,10 +426,7 @@ void IndirectDataReduction::filterUiForFacility(const QString &facility) {
   }
 
   // These tabs work at any facility (always at end of tabs)
-  enabledTabs << "Transmission"
-              << "Symmetrise"
-              << "S(Q, w)"
-              << "Moments";
+  enabledTabs << "Transmission";
 
   // First remove all tabs
   while (m_uiForm.twIDRTabs->count() > 0) {

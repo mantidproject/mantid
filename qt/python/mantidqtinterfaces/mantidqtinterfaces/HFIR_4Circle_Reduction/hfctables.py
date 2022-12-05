@@ -1907,7 +1907,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param error: error of HKL
         """
         # Check
-        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.'.format(type(i_row))
+        assert isinstance(i_row, int), f'Row number (index) must be integer but not {type(i_row)}.'
 
         if isinstance(hkl, list) or isinstance(hkl, tuple):
             assert len(hkl) == 3, 'In case HKL is list of tuple, its size must be equal to 3 but not %d.' \

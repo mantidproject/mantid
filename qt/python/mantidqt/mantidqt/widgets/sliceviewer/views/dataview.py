@@ -9,7 +9,7 @@ import sys
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget, QGridLayout, QVBoxLayout, QCheckBox, QLabel, QComboBox, QHBoxLayout, QStatusBar, \
-    QToolButton
+    QToolButton, QSizePolicy
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
 
@@ -99,6 +99,8 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.addWidget(self.colorbar_label)
         norm_scale = self.get_default_scale_norm()
         self.colorbar = ColorbarWidget(self, norm_scale)
+        # fix colour bar to stop plot and color bar making small size readjustments when the image info table updates
+        self.colorbar.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         self.colorbar.cmap.setToolTip("Colormap options")
         self.colorbar.crev.setToolTip("Reverse colormap")
         self.colorbar.norm.setToolTip("Colormap normalisation options")
@@ -269,7 +271,7 @@ class SliceViewerDataView(QWidget):
         self.ax.set_ylim(extent[2], extent[3])
         # Set the original data limits which get passed to the ImageInfoWidget so that
         # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
-        self._orig_lims = self.get_axes_limits()
+        self._orig_lims = self.get_data_limits_to_fill_current_axes()
 
         self.on_track_cursor_state_change(self.track_cursor_checked())
 
@@ -325,7 +327,7 @@ class SliceViewerDataView(QWidget):
         if self.image is not None:
             if self.line_plots_active:
                 self._line_plots.plotter.delete_line_plot_lines()
-            self.image_info_widget.cursorAt(DBLMAX, DBLMAX, DBLMAX)
+            self._image_info_tracker.on_cursor_outside_axes()
             if hasattr(self.ax, "remove_artists_if"):
                 self.ax.remove_artists_if(lambda art: art == self.image)
             else:
@@ -388,7 +390,8 @@ class SliceViewerDataView(QWidget):
                                                     transform=self.nonortho_transform,
                                                     do_transform=self.nonorthogonal_mode,
                                                     widget=self.image_info_widget,
-                                                    cursor_transform=self._orig_lims)
+                                                    cursor_transform=self._orig_lims,
+                                                    presenter=self.presenter)
 
         if state:
             self._image_info_tracker.connect()
@@ -398,6 +401,7 @@ class SliceViewerDataView(QWidget):
             self._image_info_tracker.disconnect()
             if self._line_plots and not self._region_selection_on:
                 self._line_plots.disconnect()
+        self._image_info_tracker.on_cursor_outside_axes()
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
@@ -449,9 +453,10 @@ class SliceViewerDataView(QWidget):
         """Set a given tool button disabled so it cannot be interacted with"""
         self.mpl_toolbar.set_action_enabled(tool_text, False)
 
-    def get_axes_limits(self):
+    def get_data_limits_to_fill_current_axes(self):
         """
-        Return the limits on the image axes transformed into the nonorthogonal frame if appropriate
+        Return the data limits required to fill the current image axes
+        transformed into the nonorthogonal frame if appropriate
         """
         if self.image is None:
             return None
@@ -460,8 +465,10 @@ class SliceViewerDataView(QWidget):
             if self.nonorthogonal_mode:
                 inv_tr = self.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
+                # transform top left and bottom right corner so data fills the initial or zoomed rectangle
                 xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
                 xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             return xlim, ylim
 

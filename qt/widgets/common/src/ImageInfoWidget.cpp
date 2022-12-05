@@ -30,9 +30,11 @@ ImageInfoWidget::ImageInfoWidget(QWidget *parent)
  * @param x X position if the cursor
  * @param y Y position if the cursor
  * @param signal Signal value at cursor position
+ * @param extraValues A map of extra column names and values to display
  */
-void ImageInfoWidget::cursorAt(const double x, const double y, const double signal) {
-  m_presenter->cursorAt(x, y, signal);
+void ImageInfoWidget::cursorAt(const double x, const double y, const double signal,
+                               const QMap<QString, QString> &extraValues) {
+  m_presenter->cursorAt(x, y, signal, extraValues);
 }
 
 /**

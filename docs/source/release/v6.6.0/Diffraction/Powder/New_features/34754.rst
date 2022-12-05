@@ -1,0 +1,1 @@
+- Introduce an input parameter in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` to specify that the input workspaces are from event filtering. In such a situation, the overall reduction time could be reduced significantly.

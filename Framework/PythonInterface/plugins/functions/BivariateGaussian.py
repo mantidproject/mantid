@@ -157,8 +157,8 @@ class BivariateGaussian(IFunction1D):
                 if penalty is not None:
                     self.setConstraintPenaltyFactor(param, penalty)
             except ValueError:
-                raise UserWarning("Cannot set parameter {:s} for mbvg.  Valid choices are "
-                                  + "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')".format(param))
+                raise UserWarning(f"Cannot set parameter {param} for mbvg.  Valid choices are "
+                                   "('A', 'MuX', 'MuY', 'SigX', 'SigY', 'SigP', 'Bg')")
 
     def function2D(self, t):
         """

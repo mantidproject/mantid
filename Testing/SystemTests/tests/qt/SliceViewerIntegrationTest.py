@@ -426,7 +426,7 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystem
 
         pres.view.data_view.plot_matrix(ws)
 
-        self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
+        self.assertEqual(pres.view.data_view.get_data_limits_to_fill_current_axes()[0], (xmin, xmax))
 
 
 class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -442,7 +442,7 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest
 
         pres.view.data_view.plot_matrix(ws)
 
-        self.assertEqual(pres.view.data_view.get_axes_limits()[0], (xmin, xmax))
+        self.assertEqual(pres.view.data_view.get_data_limits_to_fill_current_axes()[0], (xmin, xmax))
 
 
 class SliceViewerTestCloseEvent(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -474,13 +474,13 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
         pres = SliceViewer(ws_nonrotho)
 
         # assert limits of orthog
-        limits_orthog = pres.view.data_view.get_axes_limits()
+        limits_orthog = pres.view.data_view.get_data_limits_to_fill_current_axes()
         self.assertEqual(limits_orthog[0], limits[0:2])
         self.assertEqual(limits_orthog[1], limits[2:])
 
         # set nonorthog view and retrieve new limits
         pres.nonorthogonal_axes(True)
-        limits_nonorthog = pres.view.data_view.get_axes_limits()
+        limits_nonorthog = pres.view.data_view.get_data_limits_to_fill_current_axes()
         self.assertAlmostEqual(limits_nonorthog[0][0], -19, delta=1e-5)
         self.assertAlmostEqual(limits_nonorthog[0][1], 19, delta=1e-5)
         self.assertEqual(limits_nonorthog[1], limits[2:])

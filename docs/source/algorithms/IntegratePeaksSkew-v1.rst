@@ -35,8 +35,7 @@ Note this algorithm can apply the Lorentz correction to the integrated intensity
 
 For each peak the algorithm proceeds as follows:
 
-1.  Calculates an initial TOF window using the input parameter ``FractionalTOFWindow`` or (if ``FractionalTOFWindow = 0``)
-    evaluating a resolution function of the form
+1.  Calculates an initial TOF window evaluating a resolution function of the form
 
         .. math::
 

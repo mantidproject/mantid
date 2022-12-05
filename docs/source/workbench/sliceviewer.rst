@@ -160,7 +160,7 @@ in the table.
    :width: 75%
    :align: center
 
-Note at present this tool cannot be used in non-orthogonal view, or for workspaces that contain non-Q dimensions.
+Note at present this tool cannot be used for workspaces that contain non-Q dimensions.
 
 .. _sliceviewer_cursor:
 
@@ -195,6 +195,7 @@ and for an MDWorkspace:
 - Signal
 - x
 - y
+- H, K, L (if workspace has HKL coordinates)
 
 .. figure:: ../images/wb-sliceviewer51-cursorinfo-md.png
    :class: screenshot

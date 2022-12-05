@@ -14,6 +14,8 @@ class NonOrthogonalTransform:
     """
     Defines transformations to move between an orthogonal system and a non-orthogonal system
     defined by the lattice and projection vectors.
+    The transformation leaves the origin unaffected which means it can be used to transform
+    both points and vectors
     """
     def __init__(self, angle: float):
         """

@@ -1,0 +1,56 @@
+#!/bin/bash
+# Collection of utility functions related to Mamba
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Download mamba, install into a given location &
+# source the profiles to ensure mamba is callable
+# Args:
+#   1. Install prefix
+#   2. Optional. If provided, the name of an environment to create and activate
+#   3. Optional. If true is specified any existing mamba installation is removed
+setup_mamba () {
+  local install_prefix=$1
+  local env_name=$2
+  local clean=false
+  if [ $# -eq 3 ]; then
+    clean=$3
+  fi
+  $SCRIPT_DIR/download-and-install-mambaforge $install_prefix $clean
+  source $install_prefix/etc/profile.d/conda.sh
+  source $install_prefix/etc/profile.d/mamba.sh
+
+  if [ -n "$env_name" ]; then
+    create_and_activate_env "$env_name"
+  fi
+}
+
+# Assuming the mamba command is available,
+# create and activate a mamba environment
+# Args:
+#  1. Name of environment.
+#  2. Optional environment file
+create_and_activate_env() {
+  local env_name=$1
+  local env_file=$2
+  if [ -z "$env_file" ]; then
+    mamba create --yes --name $env_name
+  else
+    mamba env create --force --name $env_name --file $env_file
+  fi
+  mamba activate $env_name
+}
+
+# Assuming the mamba command is available,
+# create and activate a mamba environment
+# Args:
+create_and_activate_mantid_developer_env() {
+  if [[ $OSTYPE == 'msys'* ]]; then
+    local env_file=$WORKSPACE/mantid-developer-win.yml
+  elif [[ $OSTYPE == 'darwin'* ]]; then
+    local env_file=$WORKSPACE/mantid-developer-osx.yml
+  else
+    local env_file=$WORKSPACE/mantid-developer-linux.yml
+  fi
+  create_and_activate_env mantid-developer $env_file
+}

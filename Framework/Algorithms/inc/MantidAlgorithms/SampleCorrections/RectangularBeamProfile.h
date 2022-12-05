@@ -46,7 +46,7 @@ private:
   const unsigned short m_horIdx;
   const double m_width;
   const double m_height;
-  /*std::array<double, 3>*/ Kernel::V3D m_min;
+  Kernel::V3D m_min;
   Kernel::V3D m_beamDir;
 };
 

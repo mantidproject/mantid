@@ -28,6 +28,8 @@
 # Possible parameters:
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
 if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
@@ -35,21 +37,10 @@ if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
     exit 1
 fi
 
-# SCRIPT_DIR discovery from https://stackoverflow.com/a/9107028 by https://stackoverflow.com/users/1184238/andrew-norrie
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE=$1
 shift
 CMAKE_PRESET=$1
 shift
-
-EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
-
-CONDA_ENV_NAME="mantid-developer"
 
 if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
@@ -72,7 +63,7 @@ ENABLE_DEV_DOCS=false
 CLEAN_BUILD=false
 CLEAN_EXTERNAL_PROJECTS=false
 USE_CORE_DUMPS=false
-EXTRA_CMAKE_FLAGS=""
+EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -102,24 +93,21 @@ do
   shift
 done
 
-# Setup Mambaforge
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH $CLEAN_BUILD
-
-# Setup Conda environment
-$SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_CONDA_PATH $CONDA_ENV_NAME
-
-# Activate Conda environment
-. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
-conda activate $CONDA_ENV_NAME
-
-# Clean the source tree to remove stale configured files ignoring the build directory
-cd $WORKSPACE
-git clean -d -x --force --exclude=build --exclude=mambaforge --exclude=".Xauthority-*"
-
-# Clean up build folder
+# Clean the source tree to remove stale configured files. Only remove
+# the build and mambaforge directories if this is a clean build
+pushd $WORKSPACE
 if [[ $CLEAN_BUILD  == true ]]; then
-    rm -rf $BUILD_DIR
+    # git clean will delete most things in build but leave subrepositories such as build/_deps/span-src
+    # so we need to remove the whole of build/ by hand
+    rm -fr $BUILD_DIR
+else
+    git_clean_excludes_extra="--exclude=build --exclude=mambaforge"
 fi
+git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
+
+# Mamba
+setup_mamba $WORKSPACE/mambaforge "" $CLEAN_BUILD
+create_and_activate_mantid_developer_env
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
@@ -128,12 +116,11 @@ if [ -d $BUILD_DIR ]; then
       ENABLE_UNIT_TESTS=false
       ENABLE_SYSTEM_TESTS=false
     fi
+    rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
+    find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
+else
+  mkdir -p $BUILD_DIR
 fi
-
-mkdir -p $BUILD_DIR
-
-rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
-find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
 
 if [[ ${CLEAN_EXTERNAL_PROJECTS} == true ]]; then
     rm -rf $BUILD_DIR/eigen-*
@@ -143,7 +130,7 @@ fi
 # Clean up artifacts from previous builds
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 
-# Run the script that handles the actual building
+# Run the script that handles the build
 $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
 # Run unit and system tests

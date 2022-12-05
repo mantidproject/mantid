@@ -21,6 +21,8 @@
 #include <QMessageBox>
 #include <QToolButton>
 
+#include <fstream>
+
 namespace MantidQt {
 
 using MantidWidgets::SlitCalculator;
@@ -79,7 +81,7 @@ void QtMainWindowView::initLayout() {
   auto messageHandler = this;
   auto fileHandler = this;
   auto makeRunsPresenter =
-      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance, instruments, messageHandler);
+      RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance, instruments, messageHandler, fileHandler);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
@@ -225,5 +227,15 @@ void QtMainWindowView::saveJSONToFile(std::string const &filename, QMap<QString,
 QMap<QString, QVariant> QtMainWindowView::loadJSONFromFile(std::string const &filename) {
   return MantidQt::API::loadJSONFromFile(QString::fromStdString(filename));
 }
+
+void QtMainWindowView::saveCSVToFile(const std::string &filename, const std::string &content) const {
+  std::ofstream outFile(filename, std::ios::trunc);
+  if (!outFile) {
+    throw std::runtime_error("Saving to " + filename + "failed. Please try again.");
+  }
+  outFile << content;
+  outFile.close();
+}
+
 } // namespace CustomInterfaces::ISISReflectometry
 } // namespace MantidQt

@@ -188,6 +188,8 @@ void QtCatalogSearcher::setSaved() { results().setSaved(); }
 
 SearchCriteria QtCatalogSearcher::searchCriteria() const { return m_searchCriteria; }
 
+std::string QtCatalogSearcher::getSearchResultsCSV() const { return results().getSearchResultsCSV(); }
+
 bool QtCatalogSearcher::hasActiveCatalogSession() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();
   return !sessions.empty();

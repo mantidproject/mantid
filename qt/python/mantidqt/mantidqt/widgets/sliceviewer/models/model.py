@@ -549,6 +549,15 @@ class SliceViewerModel(SliceViewerBaseModel):
 
         return xcut_name, ycut_name, help_msg
 
+    def get_hkl_from_xyz(self, xdim, ydim, zdim, xdata, ydata, zdata):
+        basis_transform = self.get_proj_matrix()
+        if basis_transform is not None:
+            hkl = basis_transform[:, xdim] * xdata + basis_transform[:, ydim] * ydata \
+                  + basis_transform[:, zdim] * zdata
+        else:
+            hkl = {0., 0., 0.}
+        return hkl
+
 
 # private functions
 def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],

@@ -29,10 +29,12 @@ using namespace Mantid::CurveFitting::Algorithms;
 namespace {
 // Functor to generate spline values
 struct NormGaussianFunc1 {
+  NormGaussianFunc1(double centre = 0.) : m_centre(centre){};
   double operator()(double x, int) {
     double sig = 0.1;
-    return exp(-pow(x, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
+    return exp(-pow(x - m_centre, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);
   }
+  double m_centre;
 };
 // Functor to generate spline values
 struct NormGaussianFunc2 {
@@ -51,7 +53,7 @@ public:
     // Convolution of normalized Gaussians should have sigma =
     // sqrt(sig1^2+sig2^2)
     Workspace2D_sptr ws1 =
-        WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc1(), 1, -2.0, 2.0, 0.01, false);
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc1(0.), 1, -2.0, 2.0, 0.01, false);
     Workspace2D_sptr ws2 =
         WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc2(), 1, -2.0, 2.0, 0.01, false);
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp1", ws1));
@@ -83,6 +85,31 @@ public:
     }
     AnalysisDataService::Instance().remove("wksp1");
     AnalysisDataService::Instance().remove("wksp2");
+  }
+
+  void test_xRangeOfOutput() {
+    ConvolveWorkspaces alg;
+
+    Workspace2D_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc1(15.), 1, 10.0, 20.0, 0.01, false);
+    Workspace2D_sptr ws_res =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(NormGaussianFunc1(0.), 1, -5.0, 5.0, 0.01, false);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp", ws));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("wksp_res", ws_res));
+
+    alg.initialize();
+    alg.isInitialized();
+    alg.setChild(true);
+    alg.setPropertyValue("OutputWorkspace", "Conv");
+    alg.setProperty("Workspace1", "wksp_res");
+    alg.setProperty("Workspace2", "wksp");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    Workspace2D_sptr ows = alg.getProperty("OutputWorkspace");
+    auto xs = ows->x(0);
+    TS_ASSERT_DELTA(xs[0], 10.0, 1e-15);
+    TS_ASSERT_DELTA(xs[1000], 20.0, 1e-15);
   }
 };
 
