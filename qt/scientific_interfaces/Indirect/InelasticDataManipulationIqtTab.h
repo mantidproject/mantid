@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "InelasticDataManipulationIqtTabModel.h"
 #include "InelasticDataManipulationIqtTabView.h"
 #include "InelasticDataManipulationTab.h"
 #include "ui_InelasticDataManipulationIqtTab.h"
@@ -44,12 +45,17 @@ private:
   void setRunIsRunning(bool running);
 
   std::unique_ptr<InelasticDataManipulationIqtTabView> m_view;
+  std::unique_ptr<InelasticDataManipulationIqtTabModel> m_model;
   bool m_iqtResFileType;
   int m_selectedSpectrum;
   Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
 
 private slots:
   void algorithmComplete(bool error);
+  void handleResDataReady(const QString &resWorkspace);
+  void handleIterationsChanged(int iterations);
+  void handleErrorsClicked(int state);
+  void handleValueChanged(QtProperty *, double);
   void handlePreviewSpectrumChanged(int spectra);
   void plotInput(const QString &wsname);
   void runClicked();

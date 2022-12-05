@@ -23,57 +23,12 @@ using namespace MantidQt::CustomInterfaces;
 
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
-
-/**
- * Calculate the number of bins in the sample & resolution workspaces
- * @param wsName The sample workspace name
- * @param resName the resolution woskapce name
- * @param energyMin Minimum energy for chosen bin range
- * @param energyMax Maximum energy for chosen bin range
- * @param binReductionFactor The factor by which to reduce the number of bins
- * @return A 4-tuple where the first entry denotes whether the
- * calculation was successful or not. The final 3 values
- * are EWidth, SampleBins, ResolutionBins if the calculation succeeded,
- * otherwise they are undefined.
- */
-std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsName, std::string const &resName,
-                                                         double energyMin, double energyMax,
-                                                         double binReductionFactor) {
-  ITableWorkspace_sptr propsTable;
-  try {
-    const auto paramTableName = "__IqtProperties_temp";
-    auto toIqt = AlgorithmManager::Instance().createUnmanaged("TransformToIqt");
-    toIqt->initialize();
-    toIqt->setChild(true); // record this as internal
-    toIqt->setProperty("SampleWorkspace", wsName);
-    toIqt->setProperty("ResolutionWorkspace", resName);
-    toIqt->setProperty("ParameterWorkspace", paramTableName);
-    toIqt->setProperty("EnergyMin", energyMin);
-    toIqt->setProperty("EnergyMax", energyMax);
-    toIqt->setProperty("BinReductionFactor", binReductionFactor);
-    toIqt->setProperty("DryRun", true);
-    toIqt->execute();
-    propsTable = toIqt->getProperty("ParameterWorkspace");
-    // the algorithm can create output even if it failed...
-    auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-    deleter->initialize();
-    deleter->setChild(true);
-    deleter->setProperty("Workspace", paramTableName);
-    deleter->execute();
-  } catch (std::exception &) {
-    return std::make_tuple(false, 0.0f, 0, 0);
-  }
-  assert(propsTable);
-  return std::make_tuple(true, propsTable->getColumn("EnergyWidth")->cell<float>(0),
-                         propsTable->getColumn("SampleOutputBins")->cell<int>(0),
-                         propsTable->getColumn("ResolutionBins")->cell<int>(0));
-}
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
 InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent)
     : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationIqtTabView>(parent)),
-      m_iqtResFileType(), m_selectedSpectrum(0) {
+      m_model(std::make_unique<InelasticDataManipulationIqtTabModel>()), m_iqtResFileType(), m_selectedSpectrum(0) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
 }
@@ -83,6 +38,11 @@ InelasticDataManipulationIqtTab::~InelasticDataManipulationIqtTab() {}
 void InelasticDataManipulationIqtTab::setup() {
   // signals / slots & validators
   connect(m_view.get(), SIGNAL(sampDataReady(const QString &)), this, SLOT(plotInput(const QString &)));
+  connect(m_view.get(), SIGNAL(resDataReady(const QString &)), this, SLOT(handleResDataReady(const QString &)));
+  connect(m_view.get(), SIGNAL(iterationsChanged(int)), this, SLOT(handleIterationsChanged(int)));
+  connect(m_view.get(), SIGNAL(errorsClicked(int)), this, SLOT(handleErrorsClicked(int)));
+  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(handleValueChanged(QtProperty *, double)));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
@@ -92,6 +52,8 @@ void InelasticDataManipulationIqtTab::setup() {
   connect(m_view.get(), SIGNAL(plotCurrentPreview()), this, SLOT(plotCurrentPreview()));
 
   connect(m_view.get(), SIGNAL(PreviewSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
+
+  m_view->setup();
 }
 
 void InelasticDataManipulationIqtTab::run() {
@@ -103,32 +65,7 @@ void InelasticDataManipulationIqtTab::run() {
   // Construct the result workspace for Python script export
   QString const sampleName = QString::fromStdString(m_view->getSampleName());
   m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
-
-  auto const wsName = m_view->getSampleName();
-  auto const resName = m_view->getResolutionName();
-  auto const nIterations = m_view->getIterations();
-  bool const calculateErrors = m_view->getCalculateErrors();
-
-  double const energyMin = m_view->getELow();
-  double const energyMax = m_view->getEHigh();
-  double const numBins = m_view->getSampleBinning();
-
-  auto IqtAlg = AlgorithmManager::Instance().create("TransformToIqt");
-  IqtAlg->initialize();
-
-  IqtAlg->setProperty("SampleWorkspace", wsName);
-  IqtAlg->setProperty("ResolutionWorkspace", resName);
-  IqtAlg->setProperty("NumberOfIterations", nIterations);
-  IqtAlg->setProperty("CalculateErrors", calculateErrors);
-
-  IqtAlg->setProperty("EnergyMin", energyMin);
-  IqtAlg->setProperty("EnergyMax", energyMax);
-  IqtAlg->setProperty("BinReductionFactor", numBins);
-  IqtAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
-
-  IqtAlg->setProperty("DryRun", false);
-
-  m_batchAlgoRunner->addAlgorithm(IqtAlg);
+  m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -167,6 +104,26 @@ void InelasticDataManipulationIqtTab::runClicked() {
  * also means we must enforce several rules on the parameters.
  */
 bool InelasticDataManipulationIqtTab::validate() { return m_view->validate(); }
+
+void InelasticDataManipulationIqtTab::handleResDataReady(const QString &resWorkspace) {
+  m_model->setResWorkspace(resWorkspace.toStdString());
+}
+
+void InelasticDataManipulationIqtTab::handleIterationsChanged(int iterations) {
+  m_model->setNIterations(std::to_string(iterations));
+}
+
+void InelasticDataManipulationIqtTab::handleValueChanged(QtProperty *prop, double value) {
+  if (prop->propertyName() == "ELow") {
+    m_model->setEnergyMin(value);
+  } else if (prop->propertyName() == "EHigh") {
+    m_model->setEnergyMax(value);
+  } else if (prop->propertyName() == "SampleBinning") {
+    m_model->setNumBins(value);
+  }
+}
+
+void InelasticDataManipulationIqtTab::handleErrorsClicked(int state) { m_model->setCalculateErrors(state); }
 
 void InelasticDataManipulationIqtTab::handlePreviewSpectrumChanged(int spectra) {
   setSelectedSpectrum(spectra);
@@ -236,6 +193,7 @@ MatrixWorkspace_sptr InelasticDataManipulationIqtTab::getInputWorkspace() const 
  * @param inputWorkspace  The workspace to set.
  */
 void InelasticDataManipulationIqtTab::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
+  m_model->setSampleWorkspace(inputWorkspace->getName());
   m_inputWorkspace = std::move(inputWorkspace);
 }
 
