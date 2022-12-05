@@ -28,9 +28,10 @@ namespace {
 QString const DEFAULT_TUBES_TOOLTIP = "No tubes have been selected";
 QString const FIT_BUTTON_TOOLTIP =
     "Fit to find the Peak Centre. Repeated Fits will attempt to refine the Peak Centre value further.";
-QString const PEAK_CENTRE_TOOLTIP = "The centre of the Gaussian peak function.";
+QString const PEAK_CENTRE_TOOLTIP = "The centre of the Gaussian peak function, V.";
 QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes. The two theta of a tube is taken to "
                                   "be the two theta at which the Out of Plane angle is closest to zero.";
+QString const R_ANGLE_TOOLTIP = "The R parameter angle. R = V / (2*sin(theta))";
 
 QString const INFO_LABEL_STYLE = "QLabel { border-radius: 5px; border: 2px solid black; }";
 QString const ERROR_LABEL_STYLE = "QLabel { color: red; border-radius: 5px; border: 2px solid red; }";
@@ -136,6 +137,7 @@ QWidget *ALFAnalysisView::createFitWidget(double const start, double const end) 
   setupTwoThetaWidget(analysisLayout);
   setupFitRangeWidget(analysisLayout, start, end);
   setupPeakCentreWidget(analysisLayout, (start + end) / 2.0);
+  setupRAngleWidget(analysisLayout);
 
   return analysisPane;
 }
@@ -190,6 +192,18 @@ void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const ce
   setPeakCentreStatus("");
 
   layout->addWidget(m_fitStatus, 3, 4);
+
+  // Add an empty label to act as empty space
+  layout->addWidget(new QLabel(""), 4, 4);
+}
+
+void ALFAnalysisView::setupRAngleWidget(QGridLayout *layout) {
+  m_rAngle = new QLineEdit("-");
+  m_rAngle->setReadOnly(true);
+  m_rAngle->setToolTip(R_ANGLE_TOOLTIP);
+
+  layout->addWidget(new QLabel("R:"), 5, 0);
+  layout->addWidget(m_rAngle, 5, 1, 1, 3);
 }
 
 void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }

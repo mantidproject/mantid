@@ -103,6 +103,7 @@ private:
   void setupTwoThetaWidget(QGridLayout *layout);
   void setupFitRangeWidget(QGridLayout *layout, double const start, double const end);
   void setupPeakCentreWidget(QGridLayout *layout, double const centre);
+  void setupRAngleWidget(QGridLayout *layout);
 
   MantidWidgets::PreviewPlot *m_plot;
   MantidWidgets::PeakPicker *m_peakPicker;
@@ -113,6 +114,7 @@ private:
   QLabel *m_fitStatus;
   QLineEdit *m_averageTwoTheta;
   QLabel *m_numberOfTubes;
+  QLineEdit *m_rAngle;
 
   IALFAnalysisPresenter *m_presenter;
 };
