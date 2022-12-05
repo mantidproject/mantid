@@ -137,11 +137,7 @@ QWidget *ALFAnalysisView::createFitWidget(double const start, double const end) 
   setupTwoThetaWidget(analysisLayout);
   setupFitRangeWidget(analysisLayout, start, end);
   setupPeakCentreWidget(analysisLayout, (start + end) / 2.0);
-<<<<<<< HEAD
   setupRotationAngleWidget(analysisLayout);
-=======
-  setupRAngleWidget(analysisLayout);
->>>>>>> d6895ed6a94 (Setup R angle widget)
 
   return analysisPane;
 }
