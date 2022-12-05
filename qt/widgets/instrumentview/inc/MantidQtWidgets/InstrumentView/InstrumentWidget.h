@@ -218,6 +218,7 @@ signals:
   void preDeletingHandle();
   void clearingHandle();
   void maskedWorkspaceOverlayed();
+  void instrumentActorReset();
 
 protected:
   /// Implements AlgorithmObserver's finish handler

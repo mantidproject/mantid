@@ -32,6 +32,7 @@ public:
   Mantid::API::IPeakFunction_sptr peak() const;
 
   void select(bool select);
+  void setVisible(bool visible);
 
 signals:
   void changed();
@@ -40,6 +41,7 @@ private slots:
   void handleMouseDown(const QPoint &point);
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
+  void handleMouseHovering(const QPoint &point);
 
   void redrawMarker();
 

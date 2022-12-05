@@ -98,6 +98,12 @@ void PeakMarker::select() { callMethodNoCheck<void>(pyobj(), "select"); }
 void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
 
 /**
+ * @brief Sets the marker as visible or invisible.
+ * @param visible If true the marker is set as visible.
+ */
+void PeakMarker::setVisible(bool visible) { callMethodNoCheck<void>(pyobj(), "set_visible", visible); }
+
+/**
  * @brief Notifies the relevant marker to start moving.
  * @param x The x position of the mouse press in axes coords.
  * @param y The y position of the mouse press in axes coords.
@@ -122,5 +128,12 @@ bool PeakMarker::mouseMove(double x, double y) {
   auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
+
+/**
+ * @brief Notifies when the mouse is hovering over the plot.
+ * @param x The x position of the mouse press in axes coords.
+ * @param y The y position of the mouse press in axes coords.
+ */
+void PeakMarker::mouseMoveHover(double x, double y) { callMethodNoCheck<void>(pyobj(), "mouse_move_hover", x, y); }
 
 } // namespace MantidQt::Widgets::MplCpp

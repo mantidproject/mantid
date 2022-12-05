@@ -33,8 +33,13 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   m_instrumentWidget->removeTab("Draw");
   m_instrumentWidget->hideHelp();
 
-  connect(m_instrumentWidget->getInstrumentDisplay()->getSurface().get(), SIGNAL(shapeChangeFinished()), this,
-          SLOT(notifyShapeChanged()));
+  connect(m_instrumentWidget, SIGNAL(instrumentActorReset()), this, SLOT(reconnectInstrumentActor()));
+  reconnectInstrumentActor();
+
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
 
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->expandPlotPanel();
@@ -57,6 +62,10 @@ QWidget *ALFInstrumentView::generateLoadWidget() {
   loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   return loadWidget;
+}
+
+void ALFInstrumentView::reconnectInstrumentActor() {
+  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyShapeChanged()));
 }
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
