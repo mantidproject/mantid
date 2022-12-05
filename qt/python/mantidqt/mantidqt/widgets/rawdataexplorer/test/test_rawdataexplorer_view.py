@@ -39,8 +39,6 @@ class PreviewViewTest(unittest.TestCase):
         self.preview_view.on_close.assert_called_once()
         self.preview_view._widget.container.emit_close.assert_called_once()
 
-        # TODO check also for closing connection ?
-
     def test_show_workspace_sview(self):
         self.preview_view.get_widget = mock.Mock()
         self.preview_view._type = self.preview_view.SVIEW
@@ -189,7 +187,7 @@ class PreviewViewTest(unittest.TestCase):
         self.preview_view._widget.replace_workspace.assert_called_once_with(ws_name)
 
     def test_change_workspace_sview(self):
-        # TODO first write the relevant code then test it
+        # First write the relevant code for the use of slice viewer, then test it
         pass
 
     @mock.patch('mantidqt.widgets.rawdataexplorer.view.plotBin')
@@ -247,9 +245,6 @@ class RawDataExplorerViewTest(unittest.TestCase):
         self.view.browse.clicked.disconnect()
         self.view.fileTree.sig_new_current.disconnect()
 
-    def test_constructor(self):
-        pass
-
     def test_add_preview(self):
         preview = self.view.add_preview()
         self.assertEqual(len(self.view._previews), 1)
@@ -304,10 +299,6 @@ class RawDataExplorerViewTest(unittest.TestCase):
 
         self.view.browse.clicked.emit()
         self.view.show_directory_manager.assert_called_once()
-
-        # TODO qt is not happy being passed a mock. Too smart for its own good. No idea how to bypass that for now
-        # self.view.fileTree.sig_new_current.emit(mock.MagicMock())
-        # self.view.on_item_selected.assert_called_once()
 
     @mock.patch("mantidqt.widgets.rawdataexplorer.view.QFileDialog")
     def test_show_directory_manager(self, dialog):
