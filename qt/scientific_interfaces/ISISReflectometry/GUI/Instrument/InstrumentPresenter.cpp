@@ -44,12 +44,6 @@ void InstrumentPresenter::notifyRestoreDefaultsRequested() {
   restoreDefaults();
 }
 
-void InstrumentPresenter::notifyEditingCalibFilePathFinished() {
-  auto const calibrationFilePath = m_view->getCalibrationFilePath();
-  if (!calibrationFilePath.empty() && !m_fileHandler->fileExists(calibrationFilePath))
-    m_view->errorInvalidCalibrationFilePath();
-}
-
 void InstrumentPresenter::notifyBrowseToCalibrationFileRequested() {
   auto calibrationFilePath = m_messageHandler->askUserForLoadFileName("Data Files (*.dat)");
   if (!calibrationFilePath.empty()) {
@@ -99,6 +93,16 @@ void InstrumentPresenter::updateWidgetValidState() {
     m_view->showMonitorIntegralRangeValid();
   else
     m_view->showMonitorIntegralRangeInvalid();
+
+  updateCalibrationFileValidState(m_model.calibrationFilePath());
+}
+
+void InstrumentPresenter::updateCalibrationFileValidState(const std::string &calibrationFilePath) {
+  if (!calibrationFilePath.empty() && !m_fileHandler->fileExists(calibrationFilePath)) {
+    m_view->showCalibrationFilePathInvalid();
+  } else {
+    m_view->showCalibrationFilePathValid();
+  }
 }
 
 void InstrumentPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
@@ -189,11 +193,17 @@ DetectorCorrections InstrumentPresenter::detectorCorrectionsFromView() {
   return DetectorCorrections(correctPositions, correctionType);
 }
 
+std::string InstrumentPresenter::calibrationFilePathFromView() {
+  auto const calibrationFilePath = m_view->getCalibrationFilePath();
+  updateCalibrationFileValidState(calibrationFilePath);
+  return calibrationFilePath;
+}
+
 void InstrumentPresenter::updateModelFromView() {
   auto const wavelengthRange = wavelengthRangeFromView();
   auto const monitorCorrections = monitorCorrectionsFromView();
   auto const detectorCorrections = detectorCorrectionsFromView();
-  auto const calibrationFilePath = m_view->getCalibrationFilePath();
+  auto const calibrationFilePath = calibrationFilePathFromView();
   m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath);
 }
 

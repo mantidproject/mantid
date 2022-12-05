@@ -22,6 +22,10 @@ namespace {
 void showAsInvalid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }"); }
 
 void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
+
+void showAsInvalid(QLineEdit &lineEdit) { lineEdit.setStyleSheet("QLineEdit { background-color: #ffb8ad; }"); }
+
+void showAsValid(QLineEdit &lineEdit) { lineEdit.setStyleSheet(""); }
 } // namespace
 
 /** Constructor
@@ -96,8 +100,6 @@ void QtInstrumentView::onSettingsChanged() { m_notifyee->notifySettingsChanged()
 
 void QtInstrumentView::browseToCalibrationFile() { m_notifyee->notifyBrowseToCalibrationFileRequested(); }
 
-void QtInstrumentView::editingCalibFilePathFinished() { m_notifyee->notifyEditingCalibFilePathFinished(); }
-
 void QtInstrumentView::onRestoreDefaultsRequested() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "InstrumentTab", "RestoreDefaults"}, false);
@@ -128,7 +130,6 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
   registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
-  connect(m_ui.calibrationPathEdit, SIGNAL(editingFinished()), this, SLOT(editingCalibFilePathFinished()));
 }
 
 void QtInstrumentView::connectInstrumentSettingsWidgets() {
@@ -296,7 +297,7 @@ void QtInstrumentView::setCalibrationFilePath(std::string const &value) {
   m_ui.calibrationPathEdit->setText(QString::fromStdString(value));
 }
 
-void QtInstrumentView::errorInvalidCalibrationFilePath() {
-  QMessageBox::critical(this, "Invalid file", "The calibration file specified cannot be found.");
-}
+void QtInstrumentView::showCalibrationFilePathInvalid() { showAsInvalid(*m_ui.calibrationPathEdit); }
+
+void QtInstrumentView::showCalibrationFilePathValid() { showAsValid(*m_ui.calibrationPathEdit); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

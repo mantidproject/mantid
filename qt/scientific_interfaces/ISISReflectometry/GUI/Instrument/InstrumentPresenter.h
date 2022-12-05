@@ -45,7 +45,6 @@ public:
   // InstrumentViewSubscriber overrides
   void notifySettingsChanged() override;
   void notifyRestoreDefaultsRequested() override;
-  void notifyEditingCalibFilePathFinished() override;
   void notifyBrowseToCalibrationFileRequested() override;
 
 protected:
@@ -64,10 +63,12 @@ private:
   MonitorCorrections monitorCorrectionsFromView();
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();
+  std::string calibrationFilePathFromView();
   void updateModelFromView();
   void updateViewFromModel();
   void updateWidgetEnabledState();
   void updateWidgetValidState();
+  void updateCalibrationFileValidState(const std::string &calibrationFilePath);
   bool isProcessing() const;
   bool isAutoreducing() const;
 };
