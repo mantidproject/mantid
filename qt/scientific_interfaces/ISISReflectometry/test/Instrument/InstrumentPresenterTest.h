@@ -345,8 +345,8 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return("test"));
     EXPECT_CALL(m_fileHandler, fileExists("test")).WillOnce(Return(false));
-    EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(1);
-    presenter.notifyEditingCalibFilePathFinished();
+    EXPECT_CALL(m_view, showCalibrationFilePathInvalid()).Times(1);
+    presenter.notifySettingsChanged();
     verifyAndClear();
   }
 
@@ -354,8 +354,8 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getCalibrationFilePath()).WillOnce(Return(""));
     EXPECT_CALL(m_fileHandler, fileExists("")).Times(0);
-    EXPECT_CALL(m_view, errorInvalidCalibrationFilePath()).Times(0);
-    presenter.notifyEditingCalibFilePathFinished();
+    EXPECT_CALL(m_view, showCalibrationFilePathValid()).Times(1);
+    presenter.notifySettingsChanged();
     verifyAndClear();
   }
 
