@@ -550,7 +550,7 @@ class PelicanReduction(PythonAlgorithm):
         else:
             self._load_merge(analyse_runs, output_ws, self._analyse_load_opts)
 
-        # if minimum_tof then shift the tof by the gate period
+        # if frame overlap is enabled then shift the tof by the gate period
         if self._frame_overlap:
             # if max energy gain is not set at the UI display the actual value used
             if not self.getProperty('MaxEnergyGain').value.strip():
