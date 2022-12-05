@@ -12,8 +12,11 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** RemoveInstrumentGeometry : TODO: DESCRIPTION
- */
+/** RemoveInstrumentGeometry :
+
+  Removes instrument geometry records from a given workspace.
+*/
+
 class MANTID_ALGORITHMS_DLL RemoveInstrumentGeometry : public API::Algorithm {
 public:
   const std::string name() const override;
