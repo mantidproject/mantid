@@ -152,10 +152,11 @@ def find_event_folder(hdf_path: str, search_directories: List[str]) -> Tuple[str
             pass
 
     # first check for adjacent histmem subfolder
-    ev_base = os.path.normpath(os.path.join(base_dir, '../histserv'))
-    ev_path = os.path.normpath(os.path.join(ev_base, dir_name))
-    if os.path.isdir(ev_path):
-        return ev_base, dir_name, datasets
+    for reldir in ['../histserv', './hsdata']:
+        ev_base = os.path.normpath(os.path.join(base_dir, reldir))
+        ev_path = os.path.normpath(os.path.join(ev_base, dir_name))
+        if os.path.isdir(ev_path):
+            return ev_base, dir_name, datasets
 
     # else run through the list of search directories
     # for sdir in config.getDataSearchDirs():

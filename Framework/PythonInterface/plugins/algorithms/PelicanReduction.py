@@ -126,6 +126,21 @@ class PelicanReduction(PythonAlgorithm):
         self.declareProperty(name='FrameOverlap', defaultValue=False,
                              doc='Set if the energy transfer extends over a frame.')
 
+        self.declareProperty(name='CalibrateTOF', defaultValue=False,
+                             doc='Determine the TOF correction from the elastic peak in the data.')
+
+        self.declareProperty(name='TOFCorrection',
+                             defaultValue='',
+                             doc='The TOF correction in usec that aligns the elastic peak.')
+
+        self.declareProperty(name='AnalyseTubes',
+                             defaultValue='',
+                             doc='Detector tubes to be used in the data analysis.')
+
+        self.declareProperty(name='MaxEnergyGain',
+                             defaultValue='',
+                             doc='Energy gain in meV used to adjust the min TOF with frame overlap.')
+
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Name for the reduced workspace.')
@@ -134,11 +149,6 @@ class PelicanReduction(PythonAlgorithm):
                                           action=FileAction.OptionalDirectory,
                                           direction=Direction.Input),
                              doc='Path to save and restore merged workspaces.')
-
-        self.declareProperty(FileProperty('SampleRunsFolder', '',
-                                          action=FileAction.OptionalDirectory,
-                                          direction=Direction.Input),
-                             doc='Folder where the sample runs can be found.')
 
         self.declareProperty(name='KeepIntermediateWorkspaces', defaultValue=False,
                              doc='Whether to keep the intermediate sample and calibration\n'
@@ -383,8 +393,13 @@ class PelicanReduction(PythonAlgorithm):
 
         self._file_extn = self._cfg.get_param(
             str, 'processing', 'file_extn', '.nx.hdf')
+
         self._analyse_tubes = self._cfg.get_param(
             str, 'processing', 'analyse_tubes', '0-180')
+        tubes = self.getProperty('AnalyseTubes').value
+        if tubes:
+            self._analyse_tubes = tubes
+        logger.warning('Analysis tubes : {}'.format(self._analyse_tubes))
 
         self._ev_range = self.getProperty('EnergyTransfer').value
         self._q_range = self.getProperty('MomentumTransfer').value
@@ -392,9 +407,6 @@ class PelicanReduction(PythonAlgorithm):
 
         self._search_path = [x.strip() for x in self._cfg.get_param(
             str, 'processing', 'search_path', '.').split(';')]
-        source_folder = self.getPropertyValue('SampleRunsFolder').strip()
-        if source_folder:
-            self._search_path += source_folder.split(';')
 
         self._cal_peak_intensity = self._cfg.get_bool(
             'processing', 'integrate_over_peak', True)
@@ -425,10 +437,20 @@ class PelicanReduction(PythonAlgorithm):
 
         self._tof_correction = self._cfg.get_param(
             float, 'processing', 'tof_correction', -258.0)
+        self._calibrate_tof = self.getProperty('CalibrateTOF').value
+        tof_value = self.getProperty('TOFCorrection').value.strip()
+        if tof_value:
+            self._tof_correction = float(tof_value)
+        if self._calibrate_tof:
+            logger.warning("Calibrate TOF enabled.")
+        else:
+            logger.warning("TOF correction : {:.1f} usec".format(self._tof_correction))
+
         self._max_energy_gain = self._cfg.get_param(
             float, 'processing', 'max_energy_gain', DEF_MAX_ENERGY_GAIN)
-        self._calibrate_tof = self._cfg.get_bool(
-            'processing', 'calibrate_tof', False)
+        svalue = self.getProperty('MaxEnergyGain').value.strip()
+        if svalue:
+            self._max_energy_gain = float(svalue)
 
         # set up the loader options used in the scan and reduce
         self._analyse_load_opts = {'BinaryEventPath': './hsdata',
@@ -530,9 +552,10 @@ class PelicanReduction(PythonAlgorithm):
 
         # if minimum_tof then shift the tof by the gate period
         if self._frame_overlap:
-            if self._max_energy_gain == DEF_MAX_ENERGY_GAIN:
-                logger.warning("Using default 'max_energy_gain' = {:.1f} meV, if needed define exact value in the ini file.".format(
-                    DEF_MAX_ENERGY_GAIN))
+            # if max energy gain is not set at the UI display the actual value used
+            if not self.getProperty('MaxEnergyGain').value.strip():
+                logger.warning("Using default 'MaxEnergyGain' = {:.1f} meV".format(
+                    self._max_energy_gain))
             ows = mtd[output_ws]
             try:
                 gate_period = ows.getRun().getProperty('GatePeriod').value[0]
@@ -580,6 +603,15 @@ class PelicanReduction(PythonAlgorithm):
                    event_dirs=self._search_dirs, params=params,
                    filter=self._filter_ws, scratch=self._scratch,
                    progress=self._progress)
+
+        # highlight the values determined by the calibration process
+        if lopts['CalibrateTOFBias']:
+            run = mtd[output_ws].getRun()
+            tof = run.getProperty('TOFCorrection').value
+            if len(tof) > 1:
+                logger.warning("Calibrated TOF : {:.1f} +- {:.1f} usec for {} runs".format(np.mean(tof), np.std(tof), len(tof)))
+            else:
+                logger.warning("Calibrated TOF : {:.1f} usec".format(tof[0]))
 
 
 # Register algorithm with Mantid

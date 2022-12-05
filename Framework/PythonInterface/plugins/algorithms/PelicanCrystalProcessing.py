@@ -89,6 +89,21 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         self.declareProperty(name='FrameOverlap', defaultValue=False,
                              doc='Set if the energy transfer extends over a frame.')
 
+        self.declareProperty(name='CalibrateTOF', defaultValue=False,
+                             doc='Determine the TOF correction from the elastic peak in the data.')
+
+        self.declareProperty(name='TOFCorrection',
+                             defaultValue='',
+                             doc='The TOF correction in usec that aligns the elastic peak.')
+
+        self.declareProperty(name='AnalyseTubes',
+                             defaultValue='',
+                             doc='Detector tubes to be used in the data analysis.')
+
+        self.declareProperty(name='MaxEnergyGain',
+                             defaultValue='',
+                             doc='Energy gain in meV used to adjust the min TOF with frame overlap.')
+
         self.declareProperty(name='FixedDetector', defaultValue=True,
                              doc='Fix detector positions to the first run')
 
@@ -101,11 +116,6 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
                                           action=FileAction.OptionalDirectory,
                                           direction=Direction.Input),
                              doc='Path to save and restore merged workspaces.')
-
-        self.declareProperty(FileProperty('SampleRunsFolder', '',
-                                          action=FileAction.OptionalDirectory,
-                                          direction=Direction.Input),
-                             doc='Folder where the sample runs can be found.')
 
         self.declareProperty(FileProperty('ConfigurationFile', '',
                                           action=FileAction.OptionalLoad,
@@ -147,8 +157,11 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
                 MomentumTransfer=self.getPropertyValue('MomentumTransfer'), Processing='NXSPE',
                 LambdaOnTwoMode=self.getProperty('LambdaOnTwoMode').value,
                 FrameOverlap=self.getProperty('FrameOverlap').value,
+                CalibrateTOF=self.getProperty('CalibrateTOF').value,
+                TOFCorrection=self.getProperty('TOFCorrection').value,
+                AnalyseTubes=self.getProperty('AnalyseTubes').value,
                 ScratchFolder=scratch_folder, OutputWorkspace='nxspe',
-                SampleRunsFolder=self.getPropertyValue('SampleRunsFolder'),
+                MaxEnergyGain=self.getPropertyValue('MaxEnergyGain'),
                 ConfigurationFile=self.getPropertyValue('ConfigurationFile'))
 
             # the nxspe file named 'nxspe_spe_2D.nxspe'is moved to the output folder and renamed
