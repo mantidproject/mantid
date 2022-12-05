@@ -150,6 +150,11 @@ class DNSFileSelectorPresenter(DNSObserver):
             self._read_standard()
         self._filter_standard()
 
+    def _changed_to_sample(self):
+        if not self.model.get_number_of_scans():
+            self._read_all()
+        self._filter_scans()
+
     # change of modi
     def _is_modus_tof(self):
         return '_tof' in self.modus
@@ -239,9 +244,7 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _sample_data_clicked(self):
         self.view.set_sample_data_tree_model(self.model.get_sample_data_model())
         self.model.set_active_model(standard=False)
-        if not self.model.get_number_of_scans():
-            self._read_all()
-        self._filter_scans()
+        self._changed_to_sample()
         # re-adjust view to column width
         self._format_view()
 
@@ -252,7 +255,6 @@ class DNSFileSelectorPresenter(DNSObserver):
         own_options = self.get_option_dict()
         if own_options['auto_select_standard']:
             self._check_all_visible_scans()
-        self._filter_standard()
         # re-adjust view to column width
         self._format_view()
 
