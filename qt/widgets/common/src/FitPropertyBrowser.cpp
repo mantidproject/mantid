@@ -1449,9 +1449,8 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
       tie->set(str.toStdString());
       h->addTie(parName + "=" + str);
     } catch (...) {
-      g_log.error() << "Failed to update tie on " << parName.toLatin1().constData() << "\n";
-      // throw std::runtime_error("Failed to update tie on " + parName.toStdString() + " Error in expresseion " +
-      // parName.toStdString() + "=" + str.toStdString());
+      std::string msg = "Failed to update tie on " + parName.toStdString();
+      QMessageBox::critical(this, "Mantid - Error", msg.c_str());
 
       m_stringManager->setValue(prop, old_exp);
     }

@@ -1010,8 +1010,6 @@ void QtStringPropertyManager::setValue(QtProperty *property, const QString &val)
     return;
 
   QtStringPropertyManagerPrivate::Data data = it.value();
-  auto data_str = data.val.toStdString();
-  auto val_str = val.toStdString();
 
   if (data.val == val)
     return;
