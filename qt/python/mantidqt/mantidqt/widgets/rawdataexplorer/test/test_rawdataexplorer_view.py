@@ -10,7 +10,7 @@ from unittest import mock
 import sys
 
 from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import QDir
+from qtpy.QtCore import QDir, QItemSelectionModel
 
 from mantidqt.widgets.rawdataexplorer.view import PreviewView, RawDataExplorerView
 
@@ -278,12 +278,20 @@ class RawDataExplorerViewTest(unittest.TestCase):
         self.assertEqual(self.view._current_selection, set())
 
     def test_select_last_clicked(self):
-        # TODO there really is no satisfactory way to test that without a fake file system so the file model is sensible
-        pass
+        # This is a less-than-satisfactory way to test this method. The alternative would require a mocked file system
+        self.view.fileTree.clear_selection = mock.Mock()
+        self.view.fileTree.selectionModel = mock.MagicMock()
+        self.view.get_path = mock.Mock(return_value='/')
+
+        self.view.select_last_clicked()
+
+        self.view.fileTree.clear_selection.assert_called_once()
+        self.view.fileTree.selectionModel().setCurrentIndex.assert_called_once_with(
+            None, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        self.assertEqual(self.view._current_selection, set('/'))
 
     def test_on_item_selected(self):
-
-        # TODO this only checks the code actually runs (and then not by much since we don't enter the for loop)
+        # This only checks the code actually runs (and then not by much since we don't enter the for loop)
         # but without pyfakefs (and possibly even with it, I'm not sure how well it interacts with Qt's C++ backend)
         # testing this function requires basically mocking all high level calls to the file model which is both a pain
         # and stupid since we would in the end only be checking that mock works correctly, having replaced every
