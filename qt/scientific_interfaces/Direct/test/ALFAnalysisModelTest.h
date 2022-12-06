@@ -162,9 +162,10 @@ public:
 
   void test_rotationAngle_returns_the_correct_value_with_valid_data() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    m_model->setPeakCentre(0.1);
     m_model->doFit(m_range);
 
-    TS_ASSERT_DIFFERS(1.2000, *m_model->rotationAngle(), 0.000001);
+    TS_ASSERT_DELTA(-0.0557, *m_model->rotationAngle(), 0.0001);
   }
 
 private:
