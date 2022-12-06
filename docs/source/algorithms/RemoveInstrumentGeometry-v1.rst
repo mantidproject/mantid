@@ -22,13 +22,14 @@ Usage
 
     # create some workspace with an instrument
     ws = CreateSampleWorkspace()
-    print("Instrument Geometry exists:  {}".format(!ws.getInstrument().isEmptyInstrument()))
+    print("Instrument Geometry exists:  {}".format(ws.getInstrument().nElements() > 0))
 
     # delete instrument geometry
-    RemoveInstrumentGeometry(ws)
-    print("Instrument Geometry exists (should be false):  {}".format(!ws.getInstrument().isEmptyInstrument()))
+    ws = RemoveInstrumentGeometry(ws)
+    print("Instrument Geometry is empty:  {}".format(ws.getInstrument().nElements() == 0))
 
-.. testcleanup:: RemoveInstrumentGeometry
+
+.. testcleanup:: RemoveInstrumentGeometryExample
 
    DeleteWorkspace(ws)
 
@@ -39,7 +40,7 @@ Output:
 .. testoutput:: RemoveInstrumentGeometryExample
 
     Instrument Geometry exists:  True
-    Instrument Geometry exists (should be false):  False
+    Instrument Geometry is empty:  True
 
 .. categories::
 
