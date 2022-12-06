@@ -200,6 +200,11 @@ public:
     m_presenter->notifyFitClicked();
   }
 
+  void test_that_notifyExportWorkspaceToADSClicked_calls_the_expected_model_function() {
+    EXPECT_CALL(*m_model, exportWorkspaceCopyToADS()).Times(1);
+    m_presenter->notifyExportWorkspaceToADSClicked();
+  }
+
   void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
 

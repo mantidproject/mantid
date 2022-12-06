@@ -117,6 +117,10 @@ QWidget *ALFAnalysisView::createPlotWidget() {
 }
 
 QWidget *ALFAnalysisView::createPlotToolbar() {
+  m_exportToADS = new QPushButton(MantidQt::Icons::getIcon("mdi.export-variant"), "");
+  m_exportToADS->setToolTip("Export plot to workspace. The workspace is named 'ALFView_exported'");
+  connect(m_exportToADS, SIGNAL(clicked()), this, SLOT(notifyExportWorkspaceToADSClicked()));
+
   m_resetButton = new QPushButton(MantidQt::Icons::getIcon("mdi.replay"), "");
   m_resetButton->setToolTip("Reset extracted plot");
   connect(m_resetButton, SIGNAL(clicked()), this, SLOT(notifyResetClicked()));
@@ -125,6 +129,7 @@ QWidget *ALFAnalysisView::createPlotToolbar() {
   auto *toolbarLayout = new QHBoxLayout(toolbarWidget);
   toolbarLayout->setMargin(0);
   toolbarLayout->addItem(new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  toolbarLayout->addWidget(m_exportToADS);
   toolbarLayout->addWidget(m_resetButton);
 
   return toolbarWidget;
@@ -215,6 +220,8 @@ void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerC
 void ALFAnalysisView::notifyPeakCentreEditingFinished() { m_presenter->notifyPeakCentreEditingFinished(); }
 
 void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
+
+void ALFAnalysisView::notifyExportWorkspaceToADSClicked() { m_presenter->notifyExportWorkspaceToADSClicked(); }
 
 void ALFAnalysisView::notifyResetClicked() { m_presenter->notifyResetClicked(); }
 

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -20,6 +21,8 @@
 using namespace Mantid::API;
 
 namespace {
+
+std::string const WS_EXPORT_NAME("ALFView_exported");
 
 MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
@@ -91,10 +94,11 @@ namespace MantidQt::CustomInterfaces {
 
 ALFAnalysisModel::ALFAnalysisModel()
     : m_function(createCompositeFunction(createFlatBackground(), createGaussian())), m_fitStatus(""), m_twoThetas(),
-      m_extractedWorkspace() {}
+      m_extractedWorkspace(), m_fitWorkspace() {}
 
 void ALFAnalysisModel::clear() {
   m_extractedWorkspace = nullptr;
+  m_fitWorkspace = nullptr;
   m_fitStatus = "";
   m_twoThetas.clear();
 }
@@ -104,6 +108,7 @@ void ALFAnalysisModel::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr c
   m_extractedWorkspace = workspace;
   m_twoThetas = twoThetas;
   m_fitStatus = "";
+  m_fitWorkspace = nullptr;
 }
 
 Mantid::API::MatrixWorkspace_sptr ALFAnalysisModel::extractedWorkspace() const { return m_extractedWorkspace; }
@@ -124,8 +129,9 @@ MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &ra
 
   m_function = alg->getProperty("Function");
   m_fitStatus = alg->getPropertyValue("OutputStatus");
+  m_fitWorkspace = alg->getProperty("OutputWorkspace");
 
-  return alg->getProperty("OutputWorkspace");
+  return m_fitWorkspace;
 }
 
 void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range) {
@@ -150,6 +156,15 @@ IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspa
     return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
   }
   return createCompositeFunction(createFlatBackground(), createGaussian());
+}
+
+void ALFAnalysisModel::exportWorkspaceCopyToADS() const {
+  // The ADS should not be used anywhere else apart from here. Note that a copy is exported.
+  if (m_fitWorkspace) {
+    AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, m_fitWorkspace->clone());
+  } else if (m_extractedWorkspace) {
+    AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, m_extractedWorkspace->clone());
+  }
 }
 
 void ALFAnalysisModel::setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) {

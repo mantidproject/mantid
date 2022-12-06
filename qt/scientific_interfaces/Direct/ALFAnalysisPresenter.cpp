@@ -74,6 +74,8 @@ void ALFAnalysisPresenter::notifyFitClicked() {
   updateRotationAngleInViewFromModel();
 }
 
+void ALFAnalysisPresenter::notifyExportWorkspaceToADSClicked() { m_model->exportWorkspaceCopyToADS(); }
+
 void ALFAnalysisPresenter::notifyResetClicked() {
   calculateEstimate();
   updatePeakCentreInViewFromModel();
