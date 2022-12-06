@@ -26,6 +26,8 @@
 namespace {
 
 QString const DEFAULT_TUBES_TOOLTIP = "No tubes have been selected";
+QString const FIT_BUTTON_TOOLTIP =
+    "Fit to find the Peak Centre. Repeated Fits will attempt to refine the Peak Centre value further.";
 QString const PEAK_CENTRE_TOOLTIP = "The centre of the Gaussian peak function.";
 QString const TWO_THETA_TOOLTIP = "The average two theta of the extracted tubes. The two theta of a tube is taken to "
                                   "be the two theta at which the Out of Plane angle is closest to zero.";
@@ -168,6 +170,7 @@ void ALFAnalysisView::setupFitRangeWidget(QGridLayout *layout, double const star
   layout->addWidget(m_end, 2, 3);
 
   m_fitButton = new QPushButton("Fit");
+  m_fitButton->setToolTip(FIT_BUTTON_TOOLTIP);
   connect(m_fitButton, SIGNAL(clicked()), this, SLOT(notifyFitClicked()));
   layout->addWidget(m_fitButton, 2, 4);
 }
