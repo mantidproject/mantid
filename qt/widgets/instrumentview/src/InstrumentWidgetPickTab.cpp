@@ -1293,11 +1293,7 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
 /**
  * Update the miniplot for a selected detector.
  */
-void DetectorPlotController::updatePlot() {
-  if (!m_instrWidget->isTabFolded()) {
-    m_plot->replot();
-  }
-}
+void DetectorPlotController::updatePlot() { m_plot->replot(); }
 
 /**
  * Clear the plot.
