@@ -30,14 +30,42 @@ class Instrument;
 
 namespace Algorithms {
 
+// define some simple classes to store 2D datasets instead of using MatrixWorkspace internally
+// This couples the algorithm more loosely to Mantid and avoids some complexity in choosing whether
+// to call readX, dataX etc
+struct DiscusData1D {
+  // separate vectors of X and Y rather than vector of pairs to mirror Histogram class and support edges\points
+  std::vector<double> X;
+  std::vector<double> Y;
+  DiscusData1D(){};
+  DiscusData1D(std::vector<double> X, std::vector<double> Y) : X(std::move(X)), Y(std::move(Y)) {}
+};
+
+class DiscusData2D {
+public:
+  DiscusData2D() : m_data(std::vector<DiscusData1D>{}), m_specAxis(nullptr){};
+  DiscusData2D(const std::vector<DiscusData1D> &data, const std::shared_ptr<std::vector<double>> &specAxis)
+      : m_data(data), m_specAxis(specAxis){};
+  std::unique_ptr<DiscusData2D> createCopy(bool clearY = false);
+  size_t getNumberHistograms() { return m_data.size(); }
+  DiscusData1D &histogram(const size_t i) { return m_data[i]; }
+  std::vector<DiscusData1D> &histograms() { return m_data; }
+  const std::vector<double> &getSpecAxisValues();
+
+private:
+  std::vector<DiscusData1D> m_data;
+  // optional spectrum axis
+  std::shared_ptr<std::vector<double>> m_specAxis;
+};
+
 struct ComponentWorkspaceMapping {
   Geometry::IObject_const_sptr ComponentPtr;
   std::string_view materialName;
-  API::MatrixWorkspace_sptr SQ;
-  API::MatrixWorkspace_sptr logSQ{};
-  std::shared_ptr<DataObjects::Histogram1D> QSQScaleFactor{};
-  API::MatrixWorkspace_sptr QSQ{};
-  API::MatrixWorkspace_sptr InvPOfQ{};
+  std::shared_ptr<DiscusData2D> SQ;
+  std::shared_ptr<DiscusData2D> logSQ{};
+  std::shared_ptr<DiscusData1D> QSQScaleFactor{};
+  std::shared_ptr<DiscusData2D> QSQ{};
+  std::shared_ptr<DiscusData2D> InvPOfQ{};
   std::shared_ptr<int> scatterCount = std::make_shared<int>(0);
 };
 
@@ -73,13 +101,13 @@ protected:
                                                                  const size_t nXPoints, const size_t rows,
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
-  double interpolateFlat(const API::ISpectrum &histToInterpolate, double x);
-  std::tuple<double, int> sampleQW(const API::MatrixWorkspace_sptr &CumulativeProb, double x);
-  double interpolateSquareRoot(const API::ISpectrum &histToInterpolate, double x);
-  double interpolateGaussian(const API::ISpectrum &histToInterpolate, double x);
+  double interpolateFlat(const DiscusData1D &histToInterpolate, double x);
+  std::tuple<double, int> sampleQW(const std::shared_ptr<DiscusData2D> &CumulativeProb, double x);
+  double interpolateSquareRoot(const DiscusData1D &histToInterpolate, double x);
+  double interpolateGaussian(const DiscusData1D &histToInterpolate, double x);
   double Interpolate2D(const ComponentWorkspaceMapping &SQWSMapping, double q, double w);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
-  void integrateCumulative(const API::ISpectrum &h, const double xmin, const double xmax, std::vector<double> &resultX,
+  void integrateCumulative(const DiscusData1D &h, const double xmin, const double xmax, std::vector<double> &resultX,
                            std::vector<double> &resultY, const bool returnCumulative);
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
@@ -113,7 +141,7 @@ private:
   void correctForWorkspaceNameClash(std::string &wsName);
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   void createInvPOfQWorkspaces(ComponentWorkspaceMappings &matWSs, size_t nhists);
-  void convertToLogWorkspace(const API::MatrixWorkspace_sptr &SOfQ);
+  void convertToLogWorkspace(const std::shared_ptr<DiscusData2D> &SOfQ);
   void calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs, const std::vector<double> &specialKs);
   void prepareCumulativeProbForQ(double kinc, const ComponentWorkspaceMappings &PInvOfQs);
   void prepareQSQ(double kinc);
@@ -126,15 +154,17 @@ private:
   std::vector<std::tuple<double, int, double>> generateInputKOutputWList(const double efixed,
                                                                          const std::vector<double> &xPoints);
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>
-  integrateQSQ(const API::MatrixWorkspace_sptr &QSQ, double kinc, const bool returnCumulative);
-  double getQSQIntegral(const API::ISpectrum &QSQScaleFactor, double k);
+  integrateQSQ(const std::shared_ptr<DiscusData2D> &QSQ, double kinc, const bool returnCumulative);
+  double getQSQIntegral(const DiscusData1D &QSQScaleFactor, double k);
   const ComponentWorkspaceMapping *findMatchingComponent(const ComponentWorkspaceMappings &componentWorkspaces,
                                                          const Geometry::IObject *shapeObjectWithScatter);
+  void addWorkspaceToDiscus2DData(const Geometry::IObject_const_sptr &shape, const std::string_view &matName,
+                                  API::MatrixWorkspace_sptr ws);
   long long m_callsToInterceptSurface{0};
   long long m_IkCalculations{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts{};
-  std::shared_ptr<const DataObjects::Histogram1D> m_sigmaSS; // scattering cross section as a function of k
+  std::shared_ptr<const DiscusData1D> m_sigmaSS; // scattering cross section as a function of k
   // vectors of S(Q,w) and derived quantities. One entry for sample and each environment component
   ComponentWorkspaceMappings m_SQWSs;
   Geometry::IObject_const_sptr m_sampleShape;
