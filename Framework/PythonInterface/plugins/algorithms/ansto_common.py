@@ -957,7 +957,7 @@ def extrapolate_grid_edges(grid):
     Using the difference along each edge and vertices (dx+dy).
     """
     m, n = grid.shape
-    grid_ = np.zeros((m+2, n+2), dtype=np.float)
+    grid_ = np.zeros((m+2, n+2), dtype=np.float64)
     dgx = np.diff(grid, axis=1)
     dgy = np.diff(grid, axis=0)
     grid_[1:-1,0] = grid[:,0] - dgx[:,0]
@@ -979,8 +979,8 @@ def fractional_map(grids : List[NDArray], base_pixels : List[int],
                    bin_edges : List[float]) ->Tuple[Dict[int,List[int]],Dict[int,List[float]]]:
     # Assumes a collection of 2D panels with base pixel offset.
     # The bands are monotonically increasing.
-    pixel_map = {i : [] for i in range(len(bin_edges))}
-    pixel_wgts = {i : [] for i in range(len(bin_edges))}
+    pixel_map = {i : [] for i in range(len(bin_edges) - 1)}
+    pixel_wgts = {i : [] for i in range(len(bin_edges) - 1)}
 
     for grid, base_pixel in zip(grids, base_pixels):
 
@@ -999,7 +999,7 @@ def fractional_map(grids : List[NDArray], base_pixels : List[int],
         ynew = np.arange(-0.5, n+1, 1)
         fgrid = fn(xnew, ynew)
 
-        area_values = np.zeros(len(bin_edges), dtype=np.float)
+        area_values = np.zeros(len(bin_edges), dtype=np.float64)
         for i in range(m):
             for j in range(n):
                 det_id = i*n + j + base_pixel
