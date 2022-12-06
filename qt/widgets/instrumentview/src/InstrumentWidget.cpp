@@ -1564,7 +1564,7 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   auto matrixWS = std::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
   if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
     emit preDeletingHandle();
-    close();
+    handleActiveWorkspaceDeleted();
     return;
   }
   // try to detect if the instrument changes (unlikely if the workspace
@@ -1587,7 +1587,7 @@ void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::sh
   if (hasWorkspace(ws_name)) {
     m_pickTab->resetOriginalWorkspace();
     emit preDeletingHandle();
-    close();
+    handleActiveWorkspaceDeleted();
     return;
   }
   Mantid::API::IPeaksWorkspace_sptr pws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
@@ -1611,8 +1611,13 @@ void InstrumentWidget::renameHandle(const std::string &oldName, const std::strin
 void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
   m_pickTab->resetOriginalWorkspace();
-  close();
+  handleActiveWorkspaceDeleted();
 }
+
+/**
+ * Handles when the workspace opened in the instrument view is removed from the ADS.
+ */
+void InstrumentWidget::handleActiveWorkspaceDeleted() { close(); }
 
 /**
  * Overlay a peaks workspace on the surface projection
