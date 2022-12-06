@@ -154,7 +154,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   }
 }
 
-void LoadHelper::addMetadataToWsRun(const H5::Group &group, API::Run &runDetails, std::string metadataKey) {
+void LoadHelper::addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std::string metadataKey) {
   for (size_t i = 0; i < group.getNumObjs(); i++) {
     H5G_obj_t type = group.getObjTypeByIdx(i);
     std::string name = group.getObjnameByIdx(i);
