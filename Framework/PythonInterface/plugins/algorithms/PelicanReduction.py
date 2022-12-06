@@ -8,6 +8,7 @@ import os
 import re
 import math
 import numpy as np
+from typing import List, Dict
 
 #import debugpy
 
@@ -24,9 +25,7 @@ from mantid.simpleapi import (
 
 from ansto_common import (ScratchFolder, FilterPixelsTubes, IniParameters, hdf_files_from_runs,
                           expand_directories, load_merge, range_to_values, extract_hdf_params,
-                          HdfKey, LoaderOptions)
-from typing import List
-
+                          append_ini_params, HdfKey, LoaderOptions)
 
 # some defaults
 DEF_MAX_ENERGY_GAIN = 1000.0
@@ -305,9 +304,11 @@ class PelicanReduction(PythonAlgorithm):
         except:
             SumSpectra(InputWorkspace=reduced_2D,
                        OutputWorkspace=red_1DQ, RemoveSpecialValues=True)
-        self._append_ini_params(red_1D)
-        self._append_ini_params(red_1DQ)
-        self._append_ini_params(reduced_2D)
+        options = self._cfg.get_section('processing')
+        actuals = self.processing_options()
+        append_ini_params(red_1D, options, actuals)
+        append_ini_params(red_1DQ, options, actuals)
+        append_ini_params(reduced_2D, options, actuals)
         grouped = [red_1D, red_1DQ, reduced_2D]
         GroupWorkspaces(InputWorkspaces=grouped, OutputWorkspace=output_ws)
         self.setProperty('OutputWorkspace', output_ws)
@@ -327,15 +328,6 @@ class PelicanReduction(PythonAlgorithm):
 
         # average the normalization over the tube
         self._average_over_tube(output_ws, output_ws)
-
-    def _append_ini_params(self, output_ws: str) -> None:
-
-        # all the options are under a 'processing' section
-        run = mtd[output_ws].getRun()
-        options = self._cfg.get_section('processing')
-        skeys = sorted(options.keys())
-        for k in skeys:
-            run.addProperty('ini_' + k, options[k], True)
 
     def set_efixed(self, sample_path: str) -> None:
         # the instrument offers a lambda on two mode which effectively
@@ -362,6 +354,23 @@ class PelicanReduction(PythonAlgorithm):
         Kt = MEV_TO_WAVEVECTOR * math.sqrt(self._efixed + max_xfer)
         Qmax_sqrd = Ki**2 + Kt**2 - 2 * Ki * Kt * math.cos(TWO_THETA)
         self._q_range = '0.0, 0.02, {:.1f}'.format(math.sqrt(Qmax_sqrd))
+
+    def processing_options(self) -> Dict[str, str]:
+        # returns a dict of parameters that are not visible from the UI
+        # and affect the processing results
+        options = {}
+        options['analysis_tubes'] = self._analyse_tubes
+        options['integrate_over_peak'] = str(self._cal_peak_intensity)
+        options['average_peak_width'] = str(self._average_peak_width)
+        options['active_pixels'] = "{}-{}".format(self._pixel_range[0], self._pixel_range[1])
+        options['lo_integ_range'] = "{:.3f}".format(self._lo_integ_range)
+        options['hi_integ_range'] = "{:.3f}".format(self._hi_integ_range)
+        options['reset_negatives'] = str(self._reset_negatives)
+        options['sample_scale'] = "{:.3f}".format(self._sample_scale)
+        options['calibration_scale'] = "{:.3f}".format(self._calibration_scale)
+        options['cal_background_scale'] = "{:.3f}".format(self._cal_background_scale)
+
+        return options
 
     def setUp(self) -> None:
 

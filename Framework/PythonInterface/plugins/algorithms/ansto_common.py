@@ -464,11 +464,14 @@ def setup_axis(ws_tag: str, curAxis: Dict[str, Any]):
     ws.replaceAxis(1, newAxis)
 
 
-def append_ini_params(output_ws: str, kv_pairs: List[Tuple[str, str]]):
-
-    # all the options are under a 'processing' section
+def append_ini_params(output_ws: str, ini_options : Dict[str, str], ui_options: Dict[str, str]) -> None:
+    # ui_options have precedent over the ini file options
     run = mtd[output_ws].getRun()
-    options = dict(kv_pairs)
+    options = {}
+    for k, v in ini_options.items():
+        options[k] = v
+    for k, v in ui_options.items():
+        options[k] = v
     skeys = sorted(options.keys())
     for k in skeys:
         run.addProperty('ini_' + k, options[k], True)
@@ -816,7 +819,6 @@ def load_merge(loader: Algorithm, runs: List[str], output_ws: str, lopts: Loader
         RenameWorkspace(InputWorkspace=merged, OutputWorkspace=output_ws)
 
     if scratch is not None and updated:
-        # self._append_ini_params(output_ws)
         scratch.copy_to_scratch_folder(output_ws, loaded, lopts)
 
     if filter:
@@ -870,7 +872,7 @@ class IniParameters(ConfigParser):
 
     def get_section(self, tag : str) -> Dict[str, str]:
         try:
-            options = dict(self.items('processing'))
+            options = dict(self.items(tag))
         except (NoOptionError, NoSectionError):
             options = {}
         return options
