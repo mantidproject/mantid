@@ -56,7 +56,7 @@ NeXus::NXInt getIntDataset(const NeXus::NXEntry &, const std::string &);
 NeXus::NXDouble getDoubleDataset(const NeXus::NXEntry &, const std::string &);
 
 void replaceZeroErrors(const API::MatrixWorkspace_sptr &, double);
-void addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std::string matadataKey = "");
+void addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std::string prependString = "");
 
 void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
                                      std::string &parent_class, int level, bool useFullPath);
