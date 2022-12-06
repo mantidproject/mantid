@@ -34,12 +34,10 @@ void InelasticDataManipulationIqtTabModel::setupTransformToIqt(MantidQt::API::Ba
   IqtAlg->setProperty("ResolutionWorkspace", m_resWorkspace);
   IqtAlg->setProperty("NumberOfIterations", m_nIterations);
   IqtAlg->setProperty("CalculateErrors", m_calculateErrors);
-
   IqtAlg->setProperty("EnergyMin", m_energyMin);
   IqtAlg->setProperty("EnergyMax", m_energyMax);
   IqtAlg->setProperty("BinReductionFactor", m_numBins);
   IqtAlg->setProperty("OutputWorkspace", outputWorkspace);
-
   IqtAlg->setProperty("DryRun", false);
 
   batchAlgoRunner->addAlgorithm(IqtAlg);

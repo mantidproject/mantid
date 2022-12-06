@@ -259,6 +259,8 @@ void InelasticDataManipulationIqtTabView::rangeChanged(double min, double max) {
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRangeSelector(QtProperty *, double)));
+
+  updateDisplayedBinParameters();
 }
 
 void InelasticDataManipulationIqtTabView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace,
