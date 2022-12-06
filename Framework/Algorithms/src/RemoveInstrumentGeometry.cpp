@@ -75,25 +75,16 @@ void RemoveInstrumentGeometry::exec() {
   } else {
     MultipleExperimentInfos_sptr outputMDWS = std::dynamic_pointer_cast<Mantid::API::MultipleExperimentInfos>(outputWS);
     if (outputMDWS != nullptr) { // it is an MD workspace
-                                 // for which experiment indices do we need to remove the instrument geometry?
-      std::vector<uint16_t> indicesToRemoveInstrument;
-      std::string indicesToRemoveInstrument_str = this->getProperty("MDExperimentInfoNumbers");
-      if (!indicesToRemoveInstrument_str.empty()) {
-        std::vector<std::string> strs;
-        boost::split(strs, indicesToRemoveInstrument_str, boost::is_any_of(","));
-        if (!strs.empty()) {
-          std::transform(strs.begin(), strs.end(), std::back_inserter(indicesToRemoveInstrument),
-                         [&](std::string s) { return boost::lexical_cast<uint16_t>(s); });
-        } else {
-          throw std::invalid_argument("Invalid argument MDExperimentInfoNumbers");
-        }
-      } else { // use all available indices
+                                 // which experiments do we remove instrument geometry from?
+      std::vector<int> indicesToRemoveInstrument = this->getProperty("MDExperimentInfoNumbers");
+
+      if (indicesToRemoveInstrument.empty()) { // remove instrument geometry from all experiments
         indicesToRemoveInstrument.resize(outputMDWS->getNumExperimentInfo());
-        std::iota(indicesToRemoveInstrument.begin(), indicesToRemoveInstrument.end(), 0U);
+        std::iota(indicesToRemoveInstrument.begin(), indicesToRemoveInstrument.end(), 0);
       }
 
       for (uint16_t i = 0; i < indicesToRemoveInstrument.size(); i++) {
-        auto ei = outputMDWS->getExperimentInfo(indicesToRemoveInstrument[i]);
+        auto ei = outputMDWS->getExperimentInfo(static_cast<uint16_t>(indicesToRemoveInstrument[i]));
         ei->setInstrument(emptyInstrument);
       }
     } else {
