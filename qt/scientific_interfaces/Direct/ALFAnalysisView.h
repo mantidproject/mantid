@@ -10,10 +10,10 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QSplitter>
 #include <QString>
 #include <QWidget>
 
@@ -89,28 +89,30 @@ public:
 
   void displayWarning(std::string const &message) override;
 
-public slots:
+private slots:
   void notifyPeakPickerChanged();
   void notifyPeakCentreEditingFinished();
-  void notifyUpdateEstimateClicked();
   void notifyFitClicked();
+  void notifyResetClicked();
 
 private:
   void setupPlotFitSplitter(double const start, double const end);
-  QWidget *createFitPane(double const start, double const end);
-  QWidget *setupFitRangeWidget(double const start, double const end);
-  QWidget *setupFitButtonsWidget();
-  QWidget *setupResultsWidget(double const centre);
+  QWidget *createPlotWidget();
+  QWidget *createPlotToolbar();
+  QWidget *createFitWidget(double const start, double const end);
+  void setupTwoThetaWidget(QGridLayout *layout);
+  void setupFitRangeWidget(QGridLayout *layout, double const start, double const end);
+  void setupPeakCentreWidget(QGridLayout *layout, double const centre);
 
   MantidWidgets::PreviewPlot *m_plot;
   MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
-  QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
-  QPushButton *m_updateEstimateButton;
+  QPushButton *m_resetButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
   QLineEdit *m_averageTwoTheta;
+  QLabel *m_numberOfTubes;
 
   IALFAnalysisPresenter *m_presenter;
 };

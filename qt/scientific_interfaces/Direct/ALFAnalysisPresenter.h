@@ -35,7 +35,7 @@ public:
   virtual void notifyPeakPickerChanged() = 0;
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
-  virtual void notifyUpdateEstimateClicked() = 0;
+  virtual void notifyResetClicked() = 0;
 
   virtual std::size_t numberOfTubes() const = 0;
 
@@ -54,7 +54,7 @@ public:
   void notifyPeakPickerChanged() override;
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
-  void notifyUpdateEstimateClicked() override;
+  void notifyResetClicked() override;
 
   std::size_t numberOfTubes() const override;
 
@@ -64,7 +64,7 @@ private:
   std::optional<std::string> validateFitValues() const;
   bool checkPeakCentreIsWithinFitRange() const;
 
-  void calculateEstimate(bool const silent = false);
+  void calculateEstimate();
 
   void updateViewFromModel();
   void updatePlotInViewFromModel();

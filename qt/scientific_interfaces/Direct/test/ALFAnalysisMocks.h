@@ -37,7 +37,7 @@ public:
   MOCK_METHOD0(notifyPeakPickerChanged, void());
   MOCK_METHOD0(notifyPeakCentreEditingFinished, void());
   MOCK_METHOD0(notifyFitClicked, void());
-  MOCK_METHOD0(notifyUpdateEstimateClicked, void());
+  MOCK_METHOD0(notifyResetClicked, void());
 
   MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
 

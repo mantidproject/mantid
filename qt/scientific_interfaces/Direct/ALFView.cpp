@@ -13,6 +13,7 @@
 #include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
+#include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
 

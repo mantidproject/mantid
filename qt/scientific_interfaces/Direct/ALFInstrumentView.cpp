@@ -31,6 +31,7 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   reconnectInstrumentActor();
 
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+  connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
