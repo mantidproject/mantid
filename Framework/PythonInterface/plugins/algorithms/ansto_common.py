@@ -11,7 +11,6 @@ import numpy as np
 import h5py
 import json
 
-from collections import defaultdict
 from scipy.interpolate import RectBivariateSpline
 from typing import (Tuple, List, Union, NamedTuple, Dict, Any, Callable, TypeVar)
 
@@ -980,8 +979,8 @@ def fractional_map(grids : List[NDArray], base_pixels : List[int],
                    bin_edges : List[float]) ->Tuple[Dict[int,List[int]],Dict[int,List[float]]]:
     # Assumes a collection of 2D panels with base pixel offset.
     # The bands are monotonically increasing.
-    pixel_map : Dict[int, List[int]] = defaultdict(list)
-    pixel_wgts : Dict[int, List[float]] = defaultdict(list)
+    pixel_map = {i : [] for i in range(len(bin_edges))}
+    pixel_wgts = {i : [] for i in range(len(bin_edges))}
 
     for grid, base_pixel in zip(grids, base_pixels):
 
