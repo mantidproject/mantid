@@ -202,12 +202,12 @@ void LoadILLReflectometry::exec() {
   NXEntry firstEntry{root.openFirstEntry()};
   initNames(firstEntry);
   sampleAngle(firstEntry);
-  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
+  std::vector<std::string> monitorNames{getMonitorNames()};
   loadDataDetails(firstEntry);
-  initWorkspace(monitorsData);
+  initWorkspace(monitorNames);
   LoadHelper::loadEmptyInstrument(m_localWorkspace, m_instrument == Supported::D17 ? "D17" : "FIGARO");
   loadNexusEntriesIntoProperties();
-  loadData(firstEntry, monitorsData, getXValues());
+  loadData(firstEntry, monitorNames, getXValues());
   firstEntry.close();
   root.close();
   initPixelWidth();
@@ -283,17 +283,17 @@ void LoadILLReflectometry::convertTofToWavelength() {
  * Creates the workspace and initialises member variables with
  * the corresponding values
  *
- * @param monitorsData :: Monitors data already loaded
+ * @param monitorNames :: Monitors data already loaded
  */
-void LoadILLReflectometry::initWorkspace(const std::vector<std::vector<int>> &monitorsData) {
+void LoadILLReflectometry::initWorkspace(const std::vector<std::string> &monitorNames) {
 
-  g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
-  for (size_t i = 0; i < monitorsData.size(); ++i) {
-    if (monitorsData[i].size() != m_numberOfChannels)
-      g_log.debug() << "Data size of monitor ID " << i << " is " << monitorsData[i].size() << '\n';
+  g_log.debug() << "Number of monitors: " << monitorNames.size() << '\n';
+  for (size_t i = 0; i < monitorNames.size(); ++i) {
+    if (monitorNames[i].size() != m_numberOfChannels)
+      g_log.debug() << "Data size of monitor ID " << i << " is " << monitorNames[i].size() << '\n';
   }
   // create the workspace
-  m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfHistograms + monitorsData.size(),
+  m_localWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfHistograms + monitorNames.size(),
                                                                    HistogramData::BinEdges(m_numberOfChannels + 1));
 
   if (m_acqMode)
@@ -343,30 +343,13 @@ double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
 }
 
 /**
- * Load single monitor
- *
- * @param entry :: The Nexus entry
- * @param monitor_data :: A std::string containing the Nexus path to the monitor
- *data
- * @return monitor :: A std::vector containing monitor values
- */
-std::vector<int> LoadILLReflectometry::loadSingleMonitor(const NeXus::NXEntry &entry, const std::string &monitor_data) {
-  auto data = LoadHelper::getIntDataset(entry, monitor_data);
-  data.load();
-  return std::vector<int>(data(), data() + data.size());
-}
-
-/**
  * Load monitor data
  *
- * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors of monitors containing monitor values
  */
-std::vector<std::vector<int>> LoadILLReflectometry::loadMonitors(const NeXus::NXEntry &entry) {
-  g_log.debug("Read monitor data...");
-  // vector of monitors with one entry
-  const std::vector<std::vector<int>> monitors{loadSingleMonitor(entry, "monitor1/data"),
-                                               loadSingleMonitor(entry, "monitor2/data")};
+std::vector<std::string> LoadILLReflectometry::getMonitorNames() {
+  // vector of paths to monitor data
+  const std::vector<std::string> monitors{"monitor1/data", "monitor2/data"};
   return monitors;
 }
 
@@ -486,14 +469,14 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * Load data from nexus file
  *
  * @param entry :: The Nexus file entry
- * @param monitorsData :: Monitors data already loaded
+ * @param monitorNames :: Monitors data already loaded
  * @param xVals :: X values
  */
-void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitorsData,
+void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorNames,
                                     const std::vector<double> &xVals) {
   auto data = LoadHelper::getIntDataset(entry, "data");
   data.load();
-  const int nb_monitors = static_cast<int>(monitorsData.size());
+  const int nb_monitors = static_cast<int>(monitorNames.size());
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
@@ -650,6 +633,8 @@ double LoadILLReflectometry::detectorRotation() {
  * preprocessing algorithm. However loader should still support loading
  * reflected beams standalone, hence sample angle is the only option if
  * BraggAngle is not manually specified.
+ *
+ * @param entry :: The Nexus file entry
  */
 void LoadILLReflectometry::sampleAngle(const NeXus::NXEntry &entry) {
   std::string entryName;
