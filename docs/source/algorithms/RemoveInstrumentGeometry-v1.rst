@@ -22,11 +22,11 @@ Usage
 
     # create some workspace with an instrument
     ws = CreateSampleWorkspace()
-    print("Instrument Geometry exists:  {}".format(ws.getInstrument().nElements() > 0))
+    print("Instrument Geometry exists:  {}".format(ws.getInstrument().nelements() > 0))
 
     # delete instrument geometry
     ws = RemoveInstrumentGeometry(ws)
-    print("Instrument Geometry is empty:  {}".format(ws.getInstrument().nElements() == 0))
+    print("Instrument Geometry is empty:  {}".format(ws.getInstrument().nelements() == 0))
 
 
 .. testcleanup:: RemoveInstrumentGeometryExample
