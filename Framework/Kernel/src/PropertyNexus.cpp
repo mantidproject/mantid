@@ -131,16 +131,7 @@ void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::str
 std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::string &group,
                                              const std::vector<double> &timeSec, std::string &startStr) {
   // Check the type. Boolean stored as UINT8
-  bool typeIsBool(false);
-
-  std::vector<::NeXus::AttrInfo> infos = file->getAttrInfos();
-  // Check for boolean attribute
-  for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it) {
-    if (it->name == "boolean") {
-      typeIsBool = true;
-      break;
-    }
-  }
+  bool typeIsBool = file->hasAttr("boolean");
 
   std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
@@ -189,13 +180,15 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
     break;
   }
 
+  std::vector<::NeXus::AttrInfo> infos = file->getAttrInfos();
   std::string unitsStr;
-  for (std::vector<::NeXus::AttrInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it) {
+  for (auto it = infos.cbegin(); it != infos.cend(); ++it) {
     if (it->name == "units") {
       try {
         unitsStr = file->getStrAttr(*it);
         break;
       } catch (::NeXus::Exception &) {
+        // let it drop on the floor
       }
     }
   }
