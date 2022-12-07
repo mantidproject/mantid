@@ -130,9 +130,6 @@ void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::str
  */
 std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::string &group,
                                              const std::vector<double> &timeSec, std::string &startStr) {
-  // Check the type. Boolean stored as UINT8
-  bool typeIsBool = file->hasAttr("boolean");
-
   std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
     // Use a default start time
@@ -169,10 +166,16 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
   case ::NeXus::CHAR:
     retVal = makeStringProperty(file, group, times);
     break;
-  case ::NeXus::UINT8:
+  case ::NeXus::UINT8: {
+    // Check the type at the group level. Boolean stored as UINT8
+    file->closeData();
+    const bool typeIsBool = file->hasAttr("boolean");
+    file->openData("value");
+
     if (typeIsBool)
       retVal = makeTimeSeriesBoolProperty(file, group, times);
     break;
+  }
   case ::NeXus::INT8:
   case ::NeXus::INT16:
   case ::NeXus::UINT16:
