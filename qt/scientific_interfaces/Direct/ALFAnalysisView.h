@@ -114,6 +114,7 @@ private:
   MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
   QPushButton *m_fitButton;
+  QPushButton *m_externalPlot;
   QPushButton *m_exportToADS;
   QPushButton *m_resetButton;
   QLineEdit *m_peakCentre;
