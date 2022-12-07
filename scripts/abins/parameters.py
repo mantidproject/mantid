@@ -153,6 +153,7 @@ sampling = {
     "s_relative_threshold": 0.01,  # low cutoff for S intensity (fraction of maximum S)
     "s_absolute_threshold": 1e-7,  # low cutoff for S intensity (absolute value)
     "broadening_scheme": "auto",
+    'broadening_range': 3,  # N*SIGMA cutoff for broadening kernels
     "force_constants": {  # Parameters related to imported Force Constants data (e.g. Phonopy .yaml)
         "qpt_cutoff": 15.0
     },  # Distance in Angstrom determining q-point sampling mesh
