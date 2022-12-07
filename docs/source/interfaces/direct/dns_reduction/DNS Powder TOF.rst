@@ -28,8 +28,3 @@ Tabs Usage and Description
 * :ref:`Options <dns_powder_tof_options_tab-ref>`
 * :ref:`Script Generator <dns_powder_tof_script_generator_tab-ref>`
 * :ref:`Plotting <dns_powder_tof_plotting_tab-ref>`
-
-Used By
--------
-
-:ref:`DNS Reduction <dns_reduction-ref>`

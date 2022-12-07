@@ -6,12 +6,12 @@ DNS Reduction
 
 This interface can be used to perform reduction of data collected at the
 DNS instrument at MLZ. Three different types of data can be loaded with
-the help of this interface. These datatypes correspond to the following
+the help of this interface. These data types correspond to the following
 operational modes of the instrument: "Powder TOF", "Powder Elastic", and
-"Single Crystal Elastic". Additionally, the interface provides a posibility
+"Single Crystal Elastic". Additionally, the interface provides a possibility
 of simulating DNS data using the "Simulation" mode.
 
-At the moment the interface only works for data collected by the
+At the moment, the interface only works for data collected by the
 polarization analysis detector bank, but not those collected by the
 position sensitive detector.
 

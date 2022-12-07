@@ -1,7 +1,7 @@
 .. _dns_powder_tof_paths_tab-ref:
 
-DNS Paths Tab
--------------
+DNS Reduction - Paths Tab
+-------------------------
 
 .. image::  ../../../images/DNS_interface_powder_tof_overview.png
    :align: center
@@ -9,14 +9,14 @@ DNS Paths Tab
 
 \
 
-In this tab you can set the path to the datafiles for processing, as well as to the locations where the output files will be stored.
-The **Data Directory** field is mandatory and a user should browse to the location where the data files are located. If
+In this tab, a user sets the path to the data files for processing, as well as to the locations where the output files will be stored.
+The **Data Directory** field is mandatory, and the user should browse to the location where the data files are located. If
 **Automatically Set Other Directories** checkbox is selected, the paths for PSD and Standard Files directories will be automatically
 set to default values. The folders for the processed files and generated reduction scripts will be set to default values, as well.
 Once a DNS data file is found in the **Data Directory**, the proposal number and username will be automatically displayed (if available)
 in the corresponding fields.
 
-If the GUI is called from commandline, the current working directory is automatically chosen as the **Data Directory**.
+If the GUI is called from command line, the current working directory is automatically chosen as the **Data Directory**.
 
 Main Controls Summary
 ^^^^^^^^^^^^^^^^^^^^^
@@ -34,8 +34,8 @@ Main Controls Summary
 +------------------------------+--------------------------------------------------------------------------------------------------+
 
 In order to speed up the performance of data processing, the list of files that are contained in the **Data Directory** is cached to
-the file named ``last_filelist.txt``. In order to clean up the cache, click on the **Clear Cached Filelist** button.
+the file named ``last_filelist.txt``. In order to clean up the cache, click on the **Clear Cached** button.
 
-Whenever a user operates regularly with the same set of input/output directories, it might be convenient to save the corresponding
-configuration of input/output folders to an ``.xml`` file. This can be done by clicking on the "File" → "Save As" buttons at the top
+Whenever the user operates regularly with the same set of input/output directories, it might be convenient to save the corresponding
+configuration of input/output folders to an ``.xml`` file. This can be done by clicking on the "File" → "Save As" buttons in the top
 left corner of the GUI. After the configuration has been saved, it can simply be loaded by chosing "File" → "Open" → ``config_filename.xml``.
