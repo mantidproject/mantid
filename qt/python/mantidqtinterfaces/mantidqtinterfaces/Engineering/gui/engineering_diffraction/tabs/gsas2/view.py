@@ -30,7 +30,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         super(GSAS2View, self).__init__(parent)
         self.setupUi(self)
 
-        self.instrument_group_file_finder.setLabelText("Instrument Group")
+        self.instrument_group_file_finder.setLabelText("Instrument Group TEST")
         self.instrument_group_file_finder.isForRunFiles(False)
         self.instrument_group_file_finder.setFileExtensions([".prm"])
         self.instrument_group_file_finder.allowMultipleFiles(True)
