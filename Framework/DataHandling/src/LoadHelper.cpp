@@ -154,6 +154,22 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   }
 }
 
+namespace {
+void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
+  H5T_class_t typeClass = dataset.getTypeClass();
+  switch (typeClass) {
+  case H5T_INTEGER:
+    // TODO read dataset
+    break;
+  case H5T_FLOAT:
+    // TODO read dataset
+    break;
+  default:
+    break;
+  }
+}
+} // namespace
+
 void LoadHelper::addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std::string prependString) {
   for (size_t i = 0; i < group.getNumObjs(); i++) {
     H5G_obj_t type = group.getObjTypeByIdx(i);
@@ -173,7 +189,7 @@ void LoadHelper::addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std:
     case H5G_DATASET:
       keyss << name;
       innerDataSet = group.openDataSet(name);
-      // TODO read dataset and add it to the run
+      addDatasetToRun(innerDataSet, keyss.str(), runDetails);
       innerDataSet.close();
       break;
     default:
