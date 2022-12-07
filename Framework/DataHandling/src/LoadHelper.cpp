@@ -158,10 +158,20 @@ void LoadHelper::addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std:
   for (size_t i = 0; i < group.getNumObjs(); i++) {
     H5G_obj_t type = group.getObjTypeByIdx(i);
     std::string name = group.getObjnameByIdx(i);
+    H5::Group innerGroup;
+    std::ostringstream keyss;
+    keyss << prependString;
     switch (type) {
     case H5G_GROUP:
+      keyss << name;
+      keyss << ".";
+      innerGroup = group.openGroup(name);
+      addMetadataToWsRun(innerGroup, runDetails, keyss.str());
+      innerGroup.close();
       break;
     case H5G_DATASET:
+      keyss << name;
+      // TODO read dataset and add it to the run
       break;
     default:
       continue;
