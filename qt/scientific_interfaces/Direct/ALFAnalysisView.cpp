@@ -228,6 +228,8 @@ void ALFAnalysisView::notifyFitClicked() { m_presenter->notifyFitClicked(); }
 
 void ALFAnalysisView::notifyExportWorkspaceToADSClicked() { m_presenter->notifyExportWorkspaceToADSClicked(); }
 
+void ALFAnalysisView::notifyExternalPlotClicked() { m_presenter->notifyExternalPlotClicked(); }
+
 void ALFAnalysisView::notifyResetClicked() { m_presenter->notifyResetClicked(); }
 
 void ALFAnalysisView::replot() { m_plot->replot(); }

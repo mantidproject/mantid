@@ -76,6 +76,8 @@ void ALFAnalysisPresenter::notifyFitClicked() {
 
 void ALFAnalysisPresenter::notifyExportWorkspaceToADSClicked() { m_model->exportWorkspaceCopyToADS(); }
 
+void ALFAnalysisPresenter::notifyExternalPlotClicked() { m_model->openExternalPlot(); }
+
 void ALFAnalysisPresenter::notifyResetClicked() {
   calculateEstimate();
   updatePeakCentreInViewFromModel();

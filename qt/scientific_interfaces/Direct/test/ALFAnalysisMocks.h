@@ -38,6 +38,7 @@ public:
   MOCK_METHOD0(notifyPeakCentreEditingFinished, void());
   MOCK_METHOD0(notifyFitClicked, void());
   MOCK_METHOD0(notifyExportWorkspaceToADSClicked, void());
+  MOCK_METHOD0(notifyExternalPlotClicked, void());
   MOCK_METHOD0(notifyResetClicked, void());
 
   MOCK_CONST_METHOD0(numberOfTubes, std::size_t());
@@ -86,6 +87,7 @@ public:
   MOCK_METHOD1(calculateEstimate, void(std::pair<double, double> const &range));
 
   MOCK_CONST_METHOD0(exportWorkspaceCopyToADS, void());
+  MOCK_CONST_METHOD0(openExternalPlot, void());
 
   MOCK_METHOD1(setPeakParameters, void(Mantid::API::IPeakFunction_const_sptr const &peak));
   MOCK_METHOD1(setPeakCentre, void(double const centre));

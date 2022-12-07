@@ -98,6 +98,7 @@ private slots:
   void notifyPeakCentreEditingFinished();
   void notifyFitClicked();
   void notifyExportWorkspaceToADSClicked();
+  void notifyExternalPlotClicked();
   void notifyResetClicked();
 
 private:

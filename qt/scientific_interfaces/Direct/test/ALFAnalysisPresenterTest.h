@@ -205,6 +205,11 @@ public:
     m_presenter->notifyExportWorkspaceToADSClicked();
   }
 
+  void test_that_notifyExternalPlotClicked_calls_the_expected_model_function() {
+    EXPECT_CALL(*m_model, openExternalPlot()).Times(1);
+    m_presenter->notifyExternalPlotClicked();
+  }
+
   void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
 

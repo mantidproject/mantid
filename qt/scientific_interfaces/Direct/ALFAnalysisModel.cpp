@@ -14,6 +14,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <algorithm>
 #include <numeric>
@@ -141,6 +142,7 @@ void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range)
     m_function = createCompositeFunction(createFlatBackground(), createGaussian());
   }
   m_fitStatus = "";
+  m_fitWorkspace = nullptr;
 }
 
 IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
@@ -160,11 +162,28 @@ IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspa
 
 void ALFAnalysisModel::exportWorkspaceCopyToADS() const {
   // The ADS should not be used anywhere else apart from here. Note that a copy is exported.
-  if (m_fitWorkspace) {
-    AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, m_fitWorkspace->clone());
-  } else if (m_extractedWorkspace) {
-    AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, m_extractedWorkspace->clone());
+  if (auto const workspace = plottedWorkspace()) {
+    AnalysisDataService::Instance().addOrReplace(WS_EXPORT_NAME, workspace->clone());
   }
+}
+
+void ALFAnalysisModel::openExternalPlot() const {
+  // Externally plot the extracted workspace or fitted workspace depending on which one is available.
+  MantidQt::Widgets::MplCpp::plot({plottedWorkspace()}, boost::none, plottedWorkspaceIndices());
+}
+
+MatrixWorkspace_sptr ALFAnalysisModel::plottedWorkspace() const {
+  if (m_fitWorkspace) {
+    return m_fitWorkspace;
+  } else if (m_extractedWorkspace) {
+    return m_extractedWorkspace;
+  } else {
+    return nullptr;
+  }
+}
+
+std::vector<int> ALFAnalysisModel::plottedWorkspaceIndices() const {
+  return m_fitWorkspace ? std::vector<int>{0, 1} : std::vector<int>{0};
 }
 
 void ALFAnalysisModel::setPeakParameters(Mantid::API::IPeakFunction_const_sptr const &peak) {

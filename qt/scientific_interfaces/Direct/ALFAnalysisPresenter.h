@@ -36,6 +36,7 @@ public:
   virtual void notifyPeakCentreEditingFinished() = 0;
   virtual void notifyFitClicked() = 0;
   virtual void notifyExportWorkspaceToADSClicked() = 0;
+  virtual void notifyExternalPlotClicked() = 0;
   virtual void notifyResetClicked() = 0;
 
   virtual std::size_t numberOfTubes() const = 0;
@@ -56,6 +57,7 @@ public:
   void notifyPeakCentreEditingFinished() override;
   void notifyFitClicked() override;
   void notifyExportWorkspaceToADSClicked() override;
+  void notifyExternalPlotClicked() override;
   void notifyResetClicked() override;
 
   std::size_t numberOfTubes() const override;
