@@ -107,7 +107,7 @@ private:
   void setupTwoThetaWidget(QGridLayout *layout);
   void setupFitRangeWidget(QGridLayout *layout, double const start, double const end);
   void setupPeakCentreWidget(QGridLayout *layout, double const centre);
-  void setupRAngleWidget(QGridLayout *layout);
+  void setupRotationAngleWidget(QGridLayout *layout);
 
   MantidWidgets::PreviewPlot *m_plot;
   MantidWidgets::PeakPicker *m_peakPicker;

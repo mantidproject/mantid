@@ -137,7 +137,7 @@ QWidget *ALFAnalysisView::createFitWidget(double const start, double const end) 
   setupTwoThetaWidget(analysisLayout);
   setupFitRangeWidget(analysisLayout, start, end);
   setupPeakCentreWidget(analysisLayout, (start + end) / 2.0);
-  setupRAngleWidget(analysisLayout);
+  setupRotationAngleWidget(analysisLayout);
 
   return analysisPane;
 }
@@ -197,7 +197,7 @@ void ALFAnalysisView::setupPeakCentreWidget(QGridLayout *layout, double const ce
   layout->addWidget(new QLabel(""), 4, 4);
 }
 
-void ALFAnalysisView::setupRAngleWidget(QGridLayout *layout) {
+void ALFAnalysisView::setupRotationAngleWidget(QGridLayout *layout) {
   m_rotationAngle = new QLineEdit("-");
   m_rotationAngle->setReadOnly(true);
   m_rotationAngle->setToolTip(ROTATION_ANGLE_TOOLTIP);
