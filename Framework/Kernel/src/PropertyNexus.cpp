@@ -183,17 +183,13 @@ std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::str
     break;
   }
 
-  std::vector<::NeXus::AttrInfo> infos = file->getAttrInfos();
+  // verifying that the attribute exists makes this very slow in NeXus v4.4.3
+  // because of the change in how nxgetnextattr is implemented
   std::string unitsStr;
-  for (auto it = infos.cbegin(); it != infos.cend(); ++it) {
-    if (it->name == "units") {
-      try {
-        unitsStr = file->getStrAttr(*it);
-        break;
-      } catch (::NeXus::Exception &) {
-        // let it drop on the floor
-      }
-    }
+  try {
+    file->getAttr("units", unitsStr);
+  } catch (::NeXus::Exception &) {
+    // let it drop on the floor
   }
 
   file->closeData();
