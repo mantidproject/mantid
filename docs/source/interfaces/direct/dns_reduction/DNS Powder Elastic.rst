@@ -12,7 +12,7 @@ DNS Powder Elastic
 
 \
 
-This mode of the DNS Reduction GUI can be used to perform reduction of
+This mode of the DNS Reduction GUI can be used to reduce
 polarized and unpolarized powder diffraction data collected at the DNS
 instrument at MLZ. In the case when polarized data are loaded, the separation
 of scattering contributions by polarization analysis can be performed.
@@ -23,8 +23,9 @@ interface by clicking on "Tools" → "Change Mode" and selecting the
 
 Below the interface menu, there are various tabs for data processing.
 These tabs should be called from left to right during the data processing.
-"Paths", "Data", and "Script Generator" tabs of this operational mode of
-the DNS Reduction GUI are identical to those of the "Powder TOF" mode.
+The functionality of the "Paths", "Data", and "Script Generator" tabs of this
+operational mode of the DNS Reduction GUI is identical to that of the
+"Powder TOF" mode.
 
 Tabs Usage and Description
 --------------------------
@@ -32,10 +33,5 @@ Tabs Usage and Description
 * :ref:`Paths <dns_powder_tof_paths_tab-ref>`
 * :ref:`Data <dns_powder_tof_data_tab-ref>`
 * :ref:`Options <dns_powder_elastic_options_tab-ref>`
-* :ref:`Script Generator <dns_powder_tof_script_generator_tab-ref>`
+* :ref:`Script Generator <dns_powder_elastic_script_generator_tab-ref>`
 * :ref:`Plotting <dns_powder_elastic_plotting_tab-ref>`
-
-Used By
--------
-
-:ref:`DNS Reduction <dns_reduction-ref>`
