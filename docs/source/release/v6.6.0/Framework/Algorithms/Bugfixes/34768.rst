@@ -1,0 +1,1 @@
+The algorithm GUI for UpdateInstrumentFromFile now accepts .DAT files for the Filename property.

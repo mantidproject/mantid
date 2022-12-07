@@ -8,14 +8,16 @@
 
 #include "DllConfig.h"
 
+#include "MantidKernel/V3D.h"
+
 #include <optional>
 #include <string>
 
-#include <QAction>
-#include <QPushButton>
-#include <QSplitter>
-#include <QString>
 #include <QWidget>
+
+namespace Mantid::Geometry {
+class ComponentInfo;
+}
 
 namespace MantidQt {
 
@@ -24,11 +26,12 @@ class FileFinderWidget;
 }
 
 namespace MantidWidgets {
-class InstrumentWidget;
+class IInstrumentActor;
 }
 
 namespace CustomInterfaces {
 
+class ALFInstrumentWidget;
 class IALFInstrumentPresenter;
 
 class MANTIDQT_DIRECT_DLL IALFInstrumentView {
@@ -37,12 +40,17 @@ public:
   virtual void setUpInstrument(std::string const &fileName) = 0;
 
   virtual QWidget *generateLoadWidget() = 0;
-  virtual MantidWidgets::InstrumentWidget *getInstrumentView() = 0;
+  virtual ALFInstrumentWidget *getInstrumentView() = 0;
 
   virtual void subscribePresenter(IALFInstrumentPresenter *presenter) = 0;
 
   virtual std::optional<std::string> getFile() = 0;
   virtual void setRunQuietly(std::string const &runNumber) = 0;
+
+  virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
+  virtual Mantid::Geometry::ComponentInfo const &componentInfo() const = 0;
+
+  virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -56,27 +64,29 @@ public:
   void setUpInstrument(std::string const &fileName) override;
 
   QWidget *generateLoadWidget() override;
-  MantidWidgets::InstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
+  ALFInstrumentWidget *getInstrumentView() override { return m_instrumentWidget; };
 
   void subscribePresenter(IALFInstrumentPresenter *presenter) override;
 
   std::optional<std::string> getFile() override;
   void setRunQuietly(std::string const &runNumber) override;
 
+  MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
+  Mantid::Geometry::ComponentInfo const &componentInfo() const override;
+
+  std::vector<std::size_t> getSelectedDetectors() const override;
+
   void warningBox(std::string const &message) override;
 
 private slots:
+  void reconnectInstrumentActor();
   void fileLoaded();
+  void notifyShapeChanged();
   void selectWholeTube();
-  void extractSingleTube();
-  void averageTube();
 
 private:
   API::FileFinderWidget *m_files;
-  MantidWidgets::InstrumentWidget *m_instrumentWidget;
-  QAction *m_extractAction;
-  QAction *m_averageAction;
-
+  ALFInstrumentWidget *m_instrumentWidget;
   IALFInstrumentPresenter *m_presenter;
 };
 } // namespace CustomInterfaces

@@ -12,6 +12,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
@@ -102,7 +103,7 @@ void LoadLLB::exec() {
 void LoadLLB::setInstrumentName(const NeXus::NXEntry &entry) {
 
   m_instrumentPath = "nxinstrument";
-  m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(entry, m_instrumentPath + "/name");
 
   if (m_instrumentName.empty()) {
     throw std::runtime_error("Cannot read the instrument name from the Nexus file!");
@@ -220,7 +221,7 @@ void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition, double 
   double l2 = m_localWorkspace->spectrumInfo().l2(1);
 
   double theoreticalElasticTOF =
-      (m_loader.calculateTOF(l1, m_wavelength) + m_loader.calculateTOF(l2, m_wavelength)) * 1e6; // microsecs
+      (LoadHelper::calculateTOF(l1, m_wavelength) + LoadHelper::calculateTOF(l2, m_wavelength)) * 1e6; // microsecs
 
   g_log.debug() << "elasticPeakPosition : " << static_cast<float>(elasticPeakPosition) << '\n';
   g_log.debug() << "l1 : " << l1 << '\n';
@@ -252,7 +253,7 @@ void LoadLLB::loadRunDetails(const NXEntry &entry) {
   double wavelength = entry.getFloat("nxbeam/incident_wavelength");
   runDetails.addProperty<double>("wavelength", wavelength);
 
-  double energy = m_loader.calculateEnergy(wavelength);
+  double energy = LoadHelper::calculateEnergy(wavelength);
   runDetails.addProperty<double>("Ei", energy, true); // overwrite
 
   std::string title = entry.getString("title");

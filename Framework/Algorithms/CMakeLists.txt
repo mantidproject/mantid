@@ -17,6 +17,7 @@ set(SRC_FILES
     src/ApplyInstrumentToPeaks.cpp
     src/ApplyTransmissionCorrection.cpp
     src/AverageLogData.cpp
+    src/BeamProfileFactory.cpp
     src/Bin2DPowderDiffraction.cpp
     src/BinaryOperateMasks.cpp
     src/BinaryOperation.cpp
@@ -28,7 +29,6 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
-    src/DiscusMultipleScatteringCorrection.cpp
     src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePlaczekSelfScattering2.cpp
@@ -114,6 +114,7 @@ set(SRC_FILES
     src/DiffractionFocussing.cpp
     src/DiffractionFocussing2.cpp
     src/DirectILLTubeBackground.cpp
+    src/DiscusMultipleScatteringCorrection.cpp
     src/Divide.cpp
     src/EQSANSCorrectFrame.cpp
     src/EQSANSResolution.cpp
@@ -260,6 +261,7 @@ set(SRC_FILES
     src/Regroup.cpp
     src/RemoveBackground.cpp
     src/RemoveBins.cpp
+    src/RemoveInstrumentGeometry.cpp
     src/RemoveLowResTOF.cpp
     src/RemoveMaskedSpectra.cpp
     src/RemovePromptPulse.cpp
@@ -360,6 +362,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ApplyInstrumentToPeaks.h
     inc/MantidAlgorithms/ApplyTransmissionCorrection.h
     inc/MantidAlgorithms/AverageLogData.h
+    inc/MantidAlgorithms/BeamProfileFactory.h
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
     inc/MantidAlgorithms/BinaryOperateMasks.h
     inc/MantidAlgorithms/BinaryOperation.h
@@ -371,7 +374,6 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
-    inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h
     inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
@@ -457,6 +459,7 @@ set(INC_FILES
     inc/MantidAlgorithms/DiffractionFocussing.h
     inc/MantidAlgorithms/DiffractionFocussing2.h
     inc/MantidAlgorithms/DirectILLTubeBackground.h
+    inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h
     inc/MantidAlgorithms/Divide.h
     inc/MantidAlgorithms/EQSANSCorrectFrame.h
     inc/MantidAlgorithms/EQSANSResolution.h
@@ -607,6 +610,7 @@ set(INC_FILES
     inc/MantidAlgorithms/Regroup.h
     inc/MantidAlgorithms/RemoveBackground.h
     inc/MantidAlgorithms/RemoveBins.h
+    inc/MantidAlgorithms/RemoveInstrumentGeometry.h
     inc/MantidAlgorithms/RemoveLowResTOF.h
     inc/MantidAlgorithms/RemoveMaskedSpectra.h
     inc/MantidAlgorithms/RemovePromptPulse.h
@@ -718,6 +722,7 @@ set(TEST_FILES
     ApplyInstrumentToPeaksTest.h
     ApplyTransmissionCorrectionTest.h
     AverageLogDataTest.h
+    BeamProfileFactoryTest.h
     Bin2DPowderDiffractionTest.h
     BinaryOperateMasksTest.h
     BinaryOperationTest.h
@@ -729,7 +734,6 @@ set(TEST_FILES
     CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
-    DiscusMultipleScatteringCorrectionTest.h
     CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
     CalculatePlaczekTest.h
@@ -817,6 +821,7 @@ set(TEST_FILES
     DiffractionFocussing2Test.h
     DiffractionFocussingTest.h
     DirectILLTubeBackgroundTest.h
+    DiscusMultipleScatteringCorrectionTest.h
     DivideTest.h
     EQSANSCorrectFrameTest.h
     EditInstrumentGeometryTest.h
@@ -956,6 +961,7 @@ set(TEST_FILES
     RegroupTest.h
     RemoveBackgroundTest.h
     RemoveBinsTest.h
+    RemoveInstrumentGeometryTest.h
     RemoveLowResTOFTest.h
     RemoveMaskedSpectraTest.h
     RemovePromptPulseTest.h

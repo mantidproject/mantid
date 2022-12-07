@@ -152,6 +152,9 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_controlPanelLayout->addWidget(aWidget);
 
+  m_controlPanelLayout->setCollapsible(0, false);
+  m_controlPanelLayout->setCollapsible(1, false);
+
   m_mainLayout->addWidget(m_controlPanelLayout);
 
   m_xIntegration = new XIntegrationControl(this);
@@ -256,6 +259,10 @@ void InstrumentWidget::hideHelp() { m_help->setVisible(false); }
 QString InstrumentWidget::getWorkspaceName() const { return m_workspaceName; }
 
 std::string InstrumentWidget::getWorkspaceNameStdString() const { return m_workspaceName.toStdString(); }
+
+Mantid::API::Workspace_sptr InstrumentWidget::getWorkspaceClone() {
+  return getWorkspaceFromADS(getWorkspaceNameStdString())->clone();
+}
 
 void InstrumentWidget::renameWorkspace(const std::string &workspace) {
   m_workspaceName = QString::fromStdString(workspace);
@@ -374,6 +381,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
+  emit instrumentActorReset();
+
   if (m_useThread) {
     m_instrumentActor->moveToThread(&m_thread);
     m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
@@ -1340,7 +1349,7 @@ void InstrumentWidget::setBackgroundColor(const QColor &color) {
  * Get the surface info string
  */
 QString InstrumentWidget::getSurfaceInfoText() const {
-  ProjectionSurface *surface = getSurface().get();
+  auto surface = getSurface();
   return surface ? surface->getInfoText() : "";
 }
 
@@ -1556,7 +1565,7 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   auto matrixWS = std::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
   if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
     emit preDeletingHandle();
-    close();
+    handleActiveWorkspaceDeleted();
     return;
   }
   // try to detect if the instrument changes (unlikely if the workspace
@@ -1577,8 +1586,9 @@ void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::sh
     m_thread.quit();
   }
   if (hasWorkspace(ws_name)) {
+    m_pickTab->resetOriginalWorkspace();
     emit preDeletingHandle();
-    close();
+    handleActiveWorkspaceDeleted();
     return;
   }
   Mantid::API::IPeaksWorkspace_sptr pws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
@@ -1601,8 +1611,14 @@ void InstrumentWidget::renameHandle(const std::string &oldName, const std::strin
 
 void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
-  close();
+  m_pickTab->resetOriginalWorkspace();
+  handleActiveWorkspaceDeleted();
 }
+
+/**
+ * Handles when the workspace opened in the instrument view is removed from the ADS.
+ */
+void InstrumentWidget::handleActiveWorkspaceDeleted() { close(); }
 
 /**
  * Overlay a peaks workspace on the surface projection

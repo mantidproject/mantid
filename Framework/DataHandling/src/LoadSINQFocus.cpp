@@ -12,6 +12,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
@@ -110,12 +111,12 @@ void LoadSINQFocus::exec() {
  */
 void LoadSINQFocus::setInstrumentName(const NeXus::NXEntry &entry) {
 
-  m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
+  m_instrumentPath = LoadHelper::findInstrumentNexusPath(entry);
 
   if (m_instrumentPath.empty()) {
     throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
   }
-  m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
+  m_instrumentName = LoadHelper::getStringFromNexusPath(entry, m_instrumentPath + "/name");
   size_t pos = m_instrumentName.find(' ');
   m_instrumentName = m_instrumentName.substr(0, pos);
 }
@@ -157,7 +158,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   NXInt data = dataGroup.openIntData();
   data.load();
 
-  std::vector<double> timeBinning = m_loader.getTimeBinningFromNexusPath(entry, "merged/time_binning");
+  std::vector<double> timeBinning = LoadHelper::getTimeBinningFromNexusPath(entry, "merged/time_binning");
   auto &x = m_localWorkspace->mutableX(0);
   x.assign(timeBinning.begin(), timeBinning.end());
 

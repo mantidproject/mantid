@@ -1,0 +1,1 @@
+- Fix the inverted 2 theta axis of the output for data treated using `SANSILLParameterScan`.

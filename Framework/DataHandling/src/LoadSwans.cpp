@@ -130,17 +130,16 @@ void LoadSwans::placeDetectorInSpace() {
   g_log.information() << "Moving detector " << componentName << " " << distance << " meters and " << angle
                       << " degrees.\n";
 
-  LoadHelper helper;
   constexpr double deg2rad = M_PI / 180.0;
-  V3D pos = helper.getComponentPosition(m_ws, componentName);
+  V3D pos = LoadHelper::getComponentPosition(m_ws, componentName);
   double angle_rad = angle * deg2rad;
   V3D newpos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
-  helper.moveComponent(m_ws, componentName, newpos);
+  LoadHelper::moveComponent(m_ws, componentName, newpos);
 
   // Apply a local rotation to stay perpendicular to the beam
   constexpr V3D axis(0.0, 1.0, 0.0);
   Quat rotation(angle, axis);
-  helper.rotateComponent(m_ws, componentName, rotation);
+  LoadHelper::rotateComponent(m_ws, componentName, rotation);
 }
 
 /**

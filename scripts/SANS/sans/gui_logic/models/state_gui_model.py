@@ -519,15 +519,6 @@ class StateGuiModel(ModelCommon):
         self._all_states.convert_to_q.q_xy_step = value
 
     @property
-    def q_xy_step_type(self):
-        # Can return None
-        return self._all_states.convert_to_q.q_xy_step_type
-
-    @q_xy_step_type.setter
-    def q_xy_step_type(self, value):
-        self._all_states.convert_to_q.q_xy_step_type = value
-
-    @property
     def r_cut(self):
         val = self._all_states.convert_to_q.radius_cutoff
         return meter_2_millimeter(self._get_val_or_default(val, 0))

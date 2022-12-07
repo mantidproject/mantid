@@ -1,0 +1,1 @@
+It is now possible to delete the workspace loaded into ALFView and then load in a new dataset without issue

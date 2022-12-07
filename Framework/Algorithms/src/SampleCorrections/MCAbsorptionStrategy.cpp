@@ -9,7 +9,6 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/V3D.h"
 
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 
 namespace Mantid {

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadILLTOF2.h"
 #include "MantidTypes/Core/DateAndTimeHelpers.h"

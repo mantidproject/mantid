@@ -593,7 +593,6 @@ q_max                            Max momentum transfer value for 1D reduction  *
 q_1d_rebin_string                Rebin string for Q1D                          *StringParameter*                             N,                              if 1D  N         -
 q_xy_max                         Max momentum transfer value for 2D reduction  *PositiveFloatParameter*                      N,                              if 2D  N         -
 q_xy_step                        Momentum transfer step for 2D reduction       *PositiveFloatParameter*                      N,                              if 2D  N         -
-q_xy_step_type                   The step type, i.e. lin or log                *Enum(RangeStepType)*                         N,                              if 2D  N         -
 use_q_resolution                 If should perform a q resolution calculation  *BoolParameter*                               Y                               N                False
 q_resolution_collimation_length  Collimation length                            *PositiveFloatParameter*                      N, if performing q resolution   N                -
 q_resolution_delta_r             Virtual ring width on the detector            *PositiveFloatParameter*                      N, if performing q resolution   N                -

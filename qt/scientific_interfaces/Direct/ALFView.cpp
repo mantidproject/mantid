@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
+#include "ALFAnalysisModel.h"
+#include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
+#include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 
+#include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
 
@@ -26,9 +27,8 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
   m_instrumentPresenter =
       std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
 
-  m_analysisPresenter = std::make_unique<MantidWidgets::PlotFitAnalysisPanePresenter>(
-      new MantidWidgets::PlotFitAnalysisPaneView(-15.0, 15.0, this),
-      std::make_unique<MantidWidgets::PlotFitAnalysisPaneModel>());
+  m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
+                                                               std::make_unique<ALFAnalysisModel>());
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
@@ -38,9 +38,15 @@ void ALFView::initLayout() {
   splitter->addWidget(m_instrumentPresenter->getInstrumentView());
   splitter->addWidget(m_analysisPresenter->getView());
 
+  splitter->setCollapsible(0, false);
+  splitter->setCollapsible(1, false);
+
   auto mainWidget = new QSplitter(Qt::Vertical);
   mainWidget->addWidget(m_instrumentPresenter->getLoadWidget());
   mainWidget->addWidget(splitter);
+
+  mainWidget->setCollapsible(0, false);
+  mainWidget->setCollapsible(1, false);
 
   auto centralWidget = new QWidget();
   auto verticalLayout = new QVBoxLayout(centralWidget);

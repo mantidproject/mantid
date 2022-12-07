@@ -316,7 +316,7 @@ def try_get_sample_log(workspace, log_name):
 
 def check_e_fixed_are_equal(workspace1, workspace2):
     if getEfixed(workspace1) != getEfixed(workspace2):
-        raise ValueError('Workspaces {0} and {1} have a different EFixed.' % (workspace1, workspace2))
+        raise ValueError('Workspaces {str(workspace1)} and {str(workspace2)} have a different EFixed.')
 
 
 def is_technique_direct(workspace):

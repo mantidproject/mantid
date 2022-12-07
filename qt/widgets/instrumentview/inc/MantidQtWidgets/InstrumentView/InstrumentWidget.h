@@ -121,6 +121,7 @@ public:
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
+  Mantid::API::Workspace_sptr getWorkspaceClone();
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
@@ -197,6 +198,8 @@ public:
   /// Whether the side tab is currently visible or is folded
   bool isTabFolded() const;
 
+  IInstrumentDisplay *getInstrumentDisplay() const { return m_instrumentDisplay.get(); };
+
 signals:
   void enableLighting(bool /*_t1*/);
   void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
@@ -215,6 +218,7 @@ signals:
   void preDeletingHandle();
   void clearingHandle();
   void maskedWorkspaceOverlayed();
+  void instrumentActorReset();
 
 protected:
   /// Implements AlgorithmObserver's finish handler
@@ -357,6 +361,8 @@ private:
                           const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void renameHandle(const std::string &oldName, const std::string &newName) override;
   void clearADSHandle() override;
+  /// close the widget after an ADS event removes the workspace
+  virtual void handleActiveWorkspaceDeleted();
   /// overlay a peaks workspace on the projection surface
   void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
   /// overlay a masked workspace on the projection surface

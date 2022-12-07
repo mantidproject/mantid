@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFInstrumentPresenter.h"
 
+#include "ALFAnalysisPresenter.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 namespace MantidQt::CustomInterfaces {
 
@@ -22,10 +22,9 @@ ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::un
 
 QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
 
-MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
+ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
-void ALFInstrumentPresenter::subscribeAnalysisPresenter(
-    MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter *presenter) {
+void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) {
   m_analysisPresenter = presenter;
 }
 
@@ -34,6 +33,8 @@ void ALFInstrumentPresenter::loadRunNumber() {
   if (!filepath) {
     return;
   }
+
+  m_analysisPresenter->clear();
   if (auto const message = loadAndTransform(*filepath)) {
     m_view->warningBox(*message);
   }
@@ -48,18 +49,11 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
   }
 }
 
-void ALFInstrumentPresenter::extractSingleTube() {
-  m_model->extractSingleTube();
+void ALFInstrumentPresenter::notifyShapeChanged() {
+  m_model->setSelectedDetectors(m_view->componentInfo(), m_view->getSelectedDetectors());
 
-  m_analysisPresenter->addSpectrum(m_model->extractedWsName());
-  m_analysisPresenter->updateEstimateClicked();
+  auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
+  m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
 }
-
-void ALFInstrumentPresenter::averageTube() {
-  m_model->averageTube();
-  m_analysisPresenter->addSpectrum(m_model->extractedWsName());
-}
-
-bool ALFInstrumentPresenter::showAverageTubeOption() const { return m_model->showAverageTubeOption(); }
 
 } // namespace MantidQt::CustomInterfaces

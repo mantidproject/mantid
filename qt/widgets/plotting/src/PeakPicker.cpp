@@ -24,6 +24,7 @@ PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
   connect(m_plot, SIGNAL(mouseDown(QPoint)), this, SLOT(handleMouseDown(QPoint)));
   connect(m_plot, SIGNAL(mouseMove(QPoint)), this, SLOT(handleMouseMove(QPoint)));
   connect(m_plot, SIGNAL(mouseUp(QPoint)), this, SLOT(handleMouseUp(QPoint)));
+  connect(m_plot, SIGNAL(mouseHovering(QPoint)), this, SLOT(handleMouseHovering(QPoint)));
 
   connect(m_plot, SIGNAL(redraw()), this, SLOT(redrawMarker()));
 }
@@ -48,6 +49,8 @@ void PeakPicker::select(bool select) {
   else
     m_peakMarker->deselect();
 }
+
+void PeakPicker::setVisible(bool visible) { m_peakMarker->setVisible(visible); }
 
 void PeakPicker::handleMouseDown(const QPoint &point) {
   const auto dataCoords = m_plot->toDataCoords(point);
@@ -74,6 +77,11 @@ void PeakPicker::handleMouseMove(const QPoint &point) {
 void PeakPicker::handleMouseUp(const QPoint &point) {
   UNUSED_ARG(point);
   m_peakMarker->mouseMoveStop();
+}
+
+void PeakPicker::handleMouseHovering(const QPoint &point) {
+  const auto dataCoords = m_plot->toDataCoords(point);
+  m_peakMarker->mouseMoveHover(dataCoords.x(), dataCoords.y());
 }
 
 void PeakPicker::redrawMarker() { m_peakMarker->redraw(); }

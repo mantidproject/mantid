@@ -8,7 +8,9 @@
 #   4. RELEASES_TAG_NAME_NAME GitHub tag name. Creates a release with a tag of this name
 #   5. RELEASES_TAG_SHA Git tag target SHA.
 #   Remainder PACKAGES: A list of args that will be uploaded to github release cloud.
-#
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
+
 # Parse arguments
 WORKSPACE=$1
 GITHUB_TOKEN=$2
@@ -29,20 +31,9 @@ github_release_cmd() {
   gh release --repo $RELEASES_REPO "$@"
 }
 
-# Setup conda environment for github cli tool
-EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
-CONDA_ENV_NAME=mantid-github-upload
-SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH false
-$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
-$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME gh -y
-. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
-conda activate $CONDA_ENV_NAME
+# Mamba
+setup_mamba $WORKSPACE/mambaforge publish-gh
+mamba install --yes gh
 
 # Create a release and attach the given assets.
 # The workflow here is attempting ensure there is always something on GitHub. As

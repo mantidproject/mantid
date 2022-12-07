@@ -309,7 +309,7 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
 
 void PreviewPlot::replot() {
   if (m_allowRedraws) {
-    m_canvas->draw();
+    m_canvas->drawIdle();
     emit redraw();
   }
 }
@@ -469,6 +469,8 @@ bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseMove(position);
+  } else {
+    emit mouseHovering(evt->pos());
   }
   return stopEvent;
 }

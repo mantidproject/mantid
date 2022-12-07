@@ -1695,7 +1695,7 @@ class MainWindow(QMainWindow):
             scan_no = ret_obj[1]
             pt_no = ret_obj[2]
         else:
-            self.pop_one_button_dialog('Unable to plot detector counts as a 2D image due to '.format(ret_obj))
+            self.pop_one_button_dialog(f'Unable to plot detector counts as a 2D image due to {ret_obj}')
             return
 
         if self.ui.checkBox_autoMask.isChecked():

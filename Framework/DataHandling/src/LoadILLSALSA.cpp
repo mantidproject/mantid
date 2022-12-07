@@ -260,8 +260,7 @@ void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
   NXhandle nxHandle;
   NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-  DataHandling::LoadHelper loadHelper;
-  loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
+  LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
   NXclose(&nxHandle);
 }
 } // namespace Mantid::DataHandling

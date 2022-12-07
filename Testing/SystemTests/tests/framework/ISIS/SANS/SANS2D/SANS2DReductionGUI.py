@@ -147,7 +147,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
         i.ReductionSingleton().user_settings.readLimitValues('L/R '+'41 '+'-1 '+'1', i.ReductionSingleton())
         i.LimitsWav(1.5,12.5,0.125,'LIN')
         i.ReductionSingleton().user_settings.readLimitValues('L/Q .001,.001,.0126,-.08,.2', i.ReductionSingleton())
-        i.LimitsQXY(0.0,0.05,0.001,'LIN')
+        i.LimitsQXY(0.0,0.05,0.001)
         i.SetPhiLimit(-90.0,90.0, True)
         i.SetDetectorFloodFile('','REAR')
         i.SetDetectorFloodFile('','FRONT')

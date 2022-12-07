@@ -7,62 +7,37 @@
 #include "ALFInstrumentView.h"
 
 #include "ALFInstrumentPresenter.h"
+#include "ALFInstrumentWidget.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
-#include <map>
 #include <string>
 
 #include <QMessageBox>
 #include <QSizePolicy>
 #include <QSpacerItem>
-
-namespace {
-
-bool hasCurve(std::map<std::string, bool> properties) {
-  auto const stored = properties.find("plotStored");
-  auto const curve = properties.find("hasCurve");
-  return (stored != properties.cend() && stored->second) || (curve != properties.cend() && curve->second);
-}
-
-std::function<bool(std::map<std::string, bool>)> canExtractTube = [](std::map<std::string, bool> properties) -> bool {
-  return (properties.find("isTube")->second && hasCurve(properties));
-};
-
-} // namespace
+#include <QString>
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentView::ALFInstrumentView(QWidget *parent)
-    : QWidget(parent), m_files(), m_instrumentWidget(), m_extractAction(), m_averageAction() {}
+ALFInstrumentView::ALFInstrumentView(QWidget *parent) : QWidget(parent), m_files(), m_instrumentWidget() {}
 
 void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
-  m_instrumentWidget =
-      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true, false,
-                                          MantidWidgets::InstrumentWidget::Dependencies());
-  m_instrumentWidget->removeTab("Instrument");
-  m_instrumentWidget->removeTab("Draw");
-  m_instrumentWidget->hideHelp();
+  m_instrumentWidget = new ALFInstrumentWidget(QString::fromStdString(fileName));
+
+  connect(m_instrumentWidget, SIGNAL(instrumentActorReset()), this, SLOT(reconnectInstrumentActor()));
+  reconnectInstrumentActor();
+
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+  connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
 
   auto pickTab = m_instrumentWidget->getPickTab();
-
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
-
-  // set up extract single tube
-  m_extractAction = new QAction("Extract Single Tube", this);
-  connect(m_extractAction, SIGNAL(triggered()), this, SLOT(extractSingleTube()));
-  pickTab->addToContextMenu(m_extractAction, canExtractTube);
-
-  std::function<bool(std::map<std::string, bool>)> canAverageTube =
-      [&](std::map<std::string, bool> properties) -> bool {
-    return (m_presenter->showAverageTubeOption() && properties.find("isTube")->second && hasCurve(properties));
-  };
-
-  // set up add to average
-  m_averageAction = new QAction("Add Tube To Average", this);
-  connect(m_averageAction, SIGNAL(triggered()), this, SLOT(averageTube()));
-  pickTab->addToContextMenu(m_averageAction, canAverageTube);
 }
 
 QWidget *ALFInstrumentView::generateLoadWidget() {
@@ -81,6 +56,10 @@ QWidget *ALFInstrumentView::generateLoadWidget() {
   loadLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   return loadWidget;
+}
+
+void ALFInstrumentView::reconnectInstrumentActor() {
+  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyShapeChanged()));
 }
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
@@ -107,20 +86,29 @@ void ALFInstrumentView::fileLoaded() {
   m_presenter->loadRunNumber();
 }
 
+void ALFInstrumentView::notifyShapeChanged() { m_presenter->notifyShapeChanged(); }
+
+MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() const {
+  return m_instrumentWidget->getInstrumentActor();
+}
+
+Mantid::Geometry::ComponentInfo const &ALFInstrumentView::componentInfo() const {
+  auto &actor = m_instrumentWidget->getInstrumentActor();
+  return actor.componentInfo();
+}
+
+std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
+  std::vector<size_t> detectorIndices;
+  // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"
+  // (although weather it's treated as a mask or not is up to the caller)
+  m_instrumentWidget->getInstrumentDisplay()->getSurface()->getMaskedDetectors(detectorIndices);
+  return detectorIndices;
+}
+
 void ALFInstrumentView::selectWholeTube() {
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->setPlotType(MantidQt::MantidWidgets::IWPickPlotType::TUBE_INTEGRAL);
   pickTab->setTubeXUnits(MantidQt::MantidWidgets::IWPickXUnits::OUT_OF_PLANE_ANGLE);
-}
-
-void ALFInstrumentView::extractSingleTube() {
-  m_instrumentWidget->getPickTab()->savePlotToWorkspace();
-  m_presenter->extractSingleTube();
-}
-
-void ALFInstrumentView::averageTube() {
-  m_instrumentWidget->getPickTab()->savePlotToWorkspace();
-  m_presenter->averageTube();
 }
 
 void ALFInstrumentView::warningBox(std::string const &message) {

@@ -11,6 +11,8 @@
 #   --label: The label to remove from the channel (defaults to nightly)
 #
 # All remaining arguments are package names to remove
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source $SCRIPT_DIR/mamba-utils
 
 WORKSPACE=$1
 ANACONDA_TOKEN=$2
@@ -40,14 +42,6 @@ do
   shift
 done
 
-EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-if [[ $OSTYPE == "msys" ]]; then
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
-else
-    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
-fi
-CONDA_ENV_NAME=mantid-anaconda-delete
-RECIPES_DIR=$WORKSPACE/conda-recipes
 SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 
 ###
@@ -77,12 +71,9 @@ function delete_package() {
 }
 ###
 
-# Setup Mambaforge and a conda environment
-$SCRIPT_DIR/download-and-install-mambaforge $EXPECTED_MAMBAFORGE_PATH $EXPECTED_CONDA_PATH true
-$EXPECTED_CONDA_PATH env remove -n $CONDA_ENV_NAME
-$EXPECTED_CONDA_PATH create -n $CONDA_ENV_NAME curl jq -y
-. $WORKSPACE/mambaforge/etc/profile.d/conda.sh
-conda activate $CONDA_ENV_NAME
+# Mamba
+setup_mamba $WORKSPACE/mambaforge "deletion-anaconda"
+mamba install --yes curl jq
 
 for name in "$@"; do
   delete_package $CHANNEL $name $LABEL

@@ -11,7 +11,7 @@ from sans.state.AllStates import AllStates
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
                                           fit_general, FitId, monitor_file, mask_angle_entry, LimitsId, range_entry,
-                                          simple_range, DetectorId, event_binning_string_values, det_fit_range,
+                                          simple_range, q_xy_range, DetectorId, event_binning_string_values, det_fit_range,
                                           single_entry_with_detector)
 from sans.user_file.toml_parsers.toml_parser import TomlParser
 from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
@@ -348,8 +348,8 @@ class CommandInterfaceStateDirector(object):
                 elif is_old_first_entry_a_list and is_new_entry_a_list:
                     old_values.append(value)
                 else:
-                    raise RuntimeError("CommandInterfaceStateDirector: Trying to insert {0} which is a list into {0} "
-                                       "which is collection of non-list elements".format(value, old_values))
+                    raise RuntimeError(f"CommandInterfaceStateDirector: Trying to insert {value} which is a list into {old_values} "
+                                       "which is collection of non-list elements")
             elif isinstance(value, list) and treat_list_as_element:
                 self._processed_state_settings.update({key: [value]})
             elif isinstance(value, list):
@@ -600,8 +600,7 @@ class CommandInterfaceStateDirector(object):
         q_min = command.values[0]
         q_max = command.values[1]
         q_step = command.values[2]
-        q_step_type = command.values[3]
-        new_state_entries = {LimitsId.QXY: simple_range(start=q_min, stop=q_max, step=q_step, step_type=q_step_type)}
+        new_state_entries = {LimitsId.QXY: q_xy_range(start=q_min, stop=q_max, step=q_step)}
         self.add_to_processed_state_settings(new_state_entries)
 
     def _process_compatibility_mode(self, command):

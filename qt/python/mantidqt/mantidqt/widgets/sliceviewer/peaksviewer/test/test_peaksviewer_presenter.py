@@ -117,7 +117,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         presenter.notify(PeaksViewerPresenter.Event.PeakSelected)
 
         mock_model.viewlimits.assert_called_once_with(0)
-        self.mock_view.set_axes_limits.assert_called_once_with(*viewlimits, auto_transform=False)
+        self.mock_view.set_axes_limits.assert_called_once_with(*viewlimits, auto_transform=True)
 
     def test_single_peak_selection_if_peaks_not_drawn(self, mock_peaks_list_presenter):
         # peaks not drawn if one fo viewing axes non-Q
