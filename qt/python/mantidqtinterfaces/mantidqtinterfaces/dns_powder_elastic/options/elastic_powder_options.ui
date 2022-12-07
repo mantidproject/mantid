@@ -60,14 +60,14 @@
      </property>
      <layout class="QFormLayout" name="formLayout">
       <item row="1" column="0">
-       <widget class="QLabel" name="l_ttheta_min">
+       <widget class="QLabel" name="l_two_theta_min">
         <property name="text">
          <string>2θ min</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="dSB_ttheta_min">
+       <widget class="QDoubleSpinBox" name="dSB_two_theta_min">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -77,14 +77,14 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="Lttheta_max">
+       <widget class="QLabel" name="l_two_theta_max">
         <property name="text">
          <string>2θ max</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="dSB_ttheta_max">
+       <widget class="QDoubleSpinBox" name="dSB_two_theta_max">
         <property name="enabled">
          <bool>false</bool>
         </property>

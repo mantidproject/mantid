@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Class which loads and stores a single DNS datafile in a dictionary.
+Class which loads and stores DNS elastic powder datafile information
+in a dictionary.
 """
 
 import os
@@ -37,7 +38,7 @@ class DNSDataset(ObjectDict):
         self.script_name = create_script_name(data)
         self.banks = get_bank_positions(data)
         self.fields = get_sample_fields(data)
-        self.ttheta = automatic_ttheta_binning(data)
+        self.two_theta = automatic_two_theta_binning(data)
         self.omega = automatic_omega_binning(data)
         self.data_dic = create_dataset(data, path)
 
@@ -98,27 +99,27 @@ class DNSDataset(ObjectDict):
 
 # helper functions
 def create_script_name(sample_data):
-    lowest_fn = min([entry['file_number'] for entry in sample_data])
-    highest_fn = max([entry['file_number'] for entry in sample_data])
+    lowest_file_number = min([entry['file_number'] for entry in sample_data])
+    highest_file_number = max([entry['file_number'] for entry in sample_data])
     sample_name = '_and_'.join(
         set(entry['sample_type'] for entry in sample_data))
-    return f'{sample_name}_{lowest_fn}_to_{highest_fn}.py'
+    return f'{sample_name}_{lowest_file_number}_to_{highest_file_number}.py'
 
 
-def automatic_ttheta_binning(sample_data):
+def automatic_two_theta_binning(sample_data):
     det_rot = [-x['det_rot'] for x in sample_data]
-    ttheta_max = (max(det_rot) + 115)
-    ttheta_min = (min(det_rot))
-    ttheta = list(set(det_rot))
-    add_ttheta = []
-    for tt in ttheta:
-        add_ttheta.append(tt + 5)
-    ttheta.extend(add_ttheta)
-    ttheta_step = get_ttheta_step(ttheta)
-    return DNSBinning(ttheta_min, ttheta_max, ttheta_step)
+    two_theta_max = (max(det_rot) + 115)
+    two_theta_min = (min(det_rot))
+    two_theta = list(set(det_rot))
+    add_two_theta = []
+    for angle in two_theta:
+        add_two_theta.append(angle + 5)
+    two_theta.extend(add_two_theta)
+    two_theta_step = get_two_theta_step(two_theta)
+    return DNSBinning(two_theta_min, two_theta_max, two_theta_step)
 
 
-def get_ttheta_step(angles, rounding_limit=0.05):
+def get_two_theta_step(angles, rounding_limit=0.05):
     angles = sorted(angles)
     diff_rot = [abs(angles[i] - angles[i + 1]) for i in range(len(angles) - 1)]
     diff_rot = [i for i in diff_rot if i >= rounding_limit]

@@ -272,19 +272,31 @@ def xyz_separation(x_sf, y_sf, z_sf, z_nsf):
     ]
 
 
-def non_mag_sep(sf_workspace, nsf_workspace):
+def non_magnetic_separation(sf_workspace_name, nsf_workspace_name):
     """
-    Separation for non-magnetic samples based on SF/NSF measurements.
+    Separation for non-magnetic samples based on names of workspaces
+    for sf and nsf channels.
     """
-    sample_name = sf_workspace[:-3]
-    mtd[f'{sample_name}_nuclear_coh'] = \
-        mtd[nsf_workspace] - 0.5 * mtd[sf_workspace]
-    mtd[f'{sample_name}_spin_incoh'] = 1.5 * mtd[sf_workspace]
-    GroupWorkspaces([
-        f'{sample_name}_nuclear_coh', f'{sample_name}_spin_incoh'
-    ],
-        OutputWorkspace='separated')
-    return [
-        mtd[f'{sample_name}_nuclear_coh'],
-        mtd[f'{sample_name}_spin_incoh']
-    ]
+    sample_name = sf_workspace_name[:-3]
+    nuclear_coh_name = '_'.join((sample_name, 'nuclear_coh'))
+    spin_incoh_name =  '_'.join((sample_name, 'spin_incoh'))
+    mtd[nuclear_coh_name] = mtd[nsf_workspace_name] - 0.5 * mtd[sf_workspace_name]
+    mtd[spin_incoh_name] = 1.5 * mtd[sf_workspace_name]
+    GroupWorkspaces([mtd[nuclear_coh_name], mtd[spin_incoh_name]],
+                    OutputWorkspace='separated')
+    return [mtd[nuclear_coh_name], mtd[spin_incoh_name]]
+
+
+def remove_special_values_ws(ws):
+    '''
+    Creates a mask for any non-positive values inside the workspace
+    (including nans) and uses this mask to replace the corresponding
+    values with 0.
+    '''
+    mask_ws = ~(ws > 0)
+    SetMDUsingMask(InputWorkspace=ws,
+                   OutputWorkspace=ws,
+                   Value='0',
+                   MaskWorkspace=mask_ws)
+    DeleteWorkspace(mask_ws)
+    return ws

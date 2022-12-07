@@ -7,13 +7,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS elastic powder plot model.
+DNS powder elastic plotting tab model.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import \
     DNSObsModel
 from mantidqtinterfaces.dns_powder_elastic.helpers.converters import \
-    el_twotheta_to_d, el_twotheta_to_q
+    elastic_two_theta_to_d, elastic_two_theta_to_q
 
 from mantid.simpleapi import mtd
 
@@ -74,7 +74,7 @@ class DNSElasticPowderPlotModel(DNSObsModel):
 
 
 def _get_x(ws):
-    x = mtd[f'mat_{ws}'].extractX()[0] * 2
+    x = mtd[f'mat_{ws}'].extractX()[0] * 2.0
     x = (abs(x[1] - x[0]) / 2 + x)[0:-1]
     return x
 
@@ -89,9 +89,9 @@ def _get_yerr(ws):
 
 def _convert_x_axis(x, x_axis, wavelength):
     if x_axis == 'd':
-        return el_twotheta_to_d(x, wavelength)
+        return elastic_two_theta_to_d(x, wavelength)
     if x_axis == 'q':
-        return el_twotheta_to_q(x, wavelength)
+        return elastic_two_theta_to_q(x, wavelength)
     return x
 
 

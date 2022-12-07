@@ -42,10 +42,10 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.sample_data.create_subtract.return_value = ['knso_x_sf']
         cls.sample_data.format_dataset.return_value = '12345'
         cls.sample_data.fields = []
-        cls.sample_data.ttheta = mock.Mock()
-        cls.sample_data.ttheta.bin_edge_min = 1
-        cls.sample_data.ttheta.bin_edge_max = 6
-        cls.sample_data.ttheta.nbins = 5
+        cls.sample_data.two_theta = mock.Mock()
+        cls.sample_data.two_theta.bin_edge_min = 1
+        cls.sample_data.two_theta.bin_edge_max = 6
+        cls.sample_data.two_theta.nbins = 5
         cls.sample_data.banks = [1, 2, 3]
         cls.sample_data.script_name = '123.txt'
         cls.standard_data = mock.create_autospec(DNSDataset)
@@ -53,10 +53,10 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.standard_data.data_dic = get_elastic_standard_datadic()
         cls.standard_data.format_dataset.return_value = '123456'
         cls.standard_data.fields = []
-        cls.standard_data.ttheta = mock.Mock()
-        cls.standard_data.ttheta.bin_edge_min = 1
-        cls.standard_data.ttheta.bin_edge_max = 6
-        cls.standard_data.ttheta.nbins = 5
+        cls.standard_data.two_theta = mock.Mock()
+        cls.standard_data.two_theta.bin_edge_min = 1
+        cls.standard_data.two_theta.bin_edge_max = 6
+        cls.standard_data.two_theta.nbins = 5
         cls.standard_data.banks = [1, 2, 3]
         cls.standard_data.script_name = '123.txt'
 

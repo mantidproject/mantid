@@ -22,7 +22,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
     get_file_selector_fulldat
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_dataset import (
-    create_script_name, automatic_ttheta_binning, get_ttheta_step, round_step,
+    create_script_name, automatic_two_theta_binning, get_two_theta_step, round_step,
     get_omega_step, list_to_set, automatic_omega_binning,
     get_proposal_from_filename, get_sample_fields, create_dataset,
     get_datatype_from_sample_name, remove_non_measured_fields,
@@ -50,7 +50,7 @@ class DNSDatasetTest(unittest.TestCase):
         self.assertTrue(hasattr(self.ds, 'is_sample'))
         self.assertTrue(hasattr(self.ds, 'script_name'))
         self.assertTrue(hasattr(self.ds, 'fields'))
-        self.assertTrue(hasattr(self.ds, 'ttheta'))
+        self.assertTrue(hasattr(self.ds, 'two_theta'))
         self.assertTrue(hasattr(self.ds, 'omega'))
         self.assertTrue(hasattr(self.ds, 'data_dic'))
         self.assertIsInstance(self.ds.data_dic, dict)
@@ -94,18 +94,18 @@ class DNSDatasetTest(unittest.TestCase):
     @patch('mantidqtinterfaces.dns_powder_elastic.data_structures.'
            'dns_dataset.DNSBinning')
     def test_automatic_ttheta_binning(self, mock_binning):
-        testv = automatic_ttheta_binning(self.fulldata)
+        testv = automatic_two_theta_binning(self.fulldata)
         self.assertEqual(testv, mock_binning.return_value)
         mock_binning.assert_called_once_with(9.0, 124.0, 5.0)
 
     def test_get_ttheta_step(self):
-        testv = get_ttheta_step([0, 1, 2])
+        testv = get_two_theta_step([0, 1, 2])
         self.assertEqual(testv, 1)
-        testv = get_ttheta_step([0, 0.01, 2])
+        testv = get_two_theta_step([0, 0.01, 2])
         self.assertEqual(testv, 2)
-        testv = get_ttheta_step([0, 0.33, 0.66, 1.33, 1.66])
+        testv = get_two_theta_step([0, 0.33, 0.66, 1.33, 1.66])
         self.assertEqual(testv, 1 / 3)
-        testv = get_ttheta_step([0, 0.49, 1.01])
+        testv = get_two_theta_step([0, 0.49, 1.01])
         self.assertEqual(testv, 1 / 2)
 
     def test_round_step(self):

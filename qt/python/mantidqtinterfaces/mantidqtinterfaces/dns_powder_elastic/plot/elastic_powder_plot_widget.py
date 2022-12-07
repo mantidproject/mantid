@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Powder Plot widget.
+DNS powder elastic plotting widget.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import \
@@ -20,6 +20,7 @@ from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_view \
 
 
 class DNSElasticPowderPlotWidget(DNSWidget):
+
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSElasticPowderPlotView(parent=parent.view)

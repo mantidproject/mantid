@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-List of workspaces for Plotting.
+List of workspaces for plotting.
 """
 
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -16,6 +16,7 @@ class DNSPlotListModel(QStandardItemModel):
     """
     QT Model to store DNS mantid workspace names for plotting.
     """
+
     def get_checked_item_names(self):
         return [item.text() for item in self.get_items() if item.checkState()]
 

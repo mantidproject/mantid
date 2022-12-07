@@ -12,12 +12,12 @@ DNS unit converters.
 from numpy import deg2rad, pi, sin
 
 
-def el_twotheta_to_d(twotheta, wavelength):
-    return wavelength / (2 * sin(deg2rad(twotheta / 2.0)))
+def elastic_two_theta_to_d(two_theta, wavelength):
+    return wavelength / (2.0 * sin(deg2rad(two_theta / 2.0)))
 
 
-def el_twotheta_to_q(twotheta, wavelength):
-    return pi * 4 * sin(deg2rad(twotheta / 2.0)) / wavelength
+def elastic_two_theta_to_q(two_theta, wavelength):
+    return pi * 4.0 * sin(deg2rad(two_theta / 2.0)) / wavelength
 
 
 def convert_hkl_string(hkl):

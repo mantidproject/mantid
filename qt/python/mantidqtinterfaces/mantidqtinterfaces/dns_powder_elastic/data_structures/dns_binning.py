@@ -6,7 +6,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
 
 class DNSBinning(ObjectDict):
     """
-    Stores DNSBinning information, if the number of bins is not given
+    Stores DNS binning information. If the number of bins is not given,
     it is calculated from the step size, also defines bin_edges.
     """
 

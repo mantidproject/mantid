@@ -103,7 +103,7 @@
         <enum>QLayout::SetMaximumSize</enum>
        </property>
        <item>
-        <widget class="QComboBox" name="combB_xaxis_scale">
+        <widget class="QComboBox" name="combB_x_axis_scale">
          <item>
           <property name="text">
            <string>2 theta</string>

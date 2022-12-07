@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Options Presenter - Tab of DNS Reduction GUI.
+DNS powder elastic options tab presenter of DNS reduction GUI.
 """
 
-from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter\
+from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter \
     import DNSCommonOptionsPresenter
 
 
 class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
+
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         # connect signals
@@ -24,11 +25,13 @@ class DNSElasticPowderOptionsPresenter(DNSCommonOptionsPresenter):
         if own_options['get_wavelength']:
             self._determine_wavelength()
 
-    def process_commandline_request(self, cl_options):
+    def process_commandline_request(self, command_line_options):
         self.view.set_single_state_by_name('use_dx_dy', True)
         for command in [
-                'det_efficiency', 'flipping_ratio', 'separation_xyz',
-                'separation_coh_inc'
+            'det_efficiency', 'flipping_ratio', 'separation_xyz',
+            'separation_coh_inc'
         ]:
-            if command in cl_options:
-                self.view.set_single_state_by_name(command, cl_options[command])
+            if command in command_line_options:
+                self.view.set_single_state_by_name(
+                    command, command_line_options[command]
+                )

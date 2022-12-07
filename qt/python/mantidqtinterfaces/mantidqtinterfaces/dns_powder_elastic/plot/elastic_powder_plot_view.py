@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS Widget to plot elastic powder data.
+DNS powder elastic plotting view.
 """
 
 from threading import Timer
@@ -25,7 +25,7 @@ from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list \
     import DNSPlotListModel
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 
-LINESTYLES = {
+LINE_STYLES = {
     0: '-',
     1: '.',
     2: '.-'}
@@ -33,7 +33,7 @@ LINESTYLES = {
 
 class DNSElasticPowderPlotView(DNSView):
     """
-    DNS Widget to plot elastic powder data.
+    DNS widget to plot elastic powder data.
     """
     NAME = 'Plotting'
 
@@ -62,7 +62,7 @@ class DNSElasticPowderPlotView(DNSView):
             'log_scale': content.cB_log_scale,
             'linestyle': content.tB_linestyle,
             'errorbar': content.tB_errorbar,
-            'xaxis_scale': content.combB_xaxis_scale,
+            'x_axis_scale': content.combB_x_axis_scale,
         }
 
         self._map['down'].setIcon(icons.get_icon("mdi.arrow-down"))
@@ -76,24 +76,15 @@ class DNSElasticPowderPlotView(DNSView):
         self.ax = None
         self.static_canvas.figure.tight_layout()
         self.model = DNSPlotListModel(self.datalist)
-        self.model.itemChanged.connect(self._something_changed)
-        self._map['down'].clicked.connect(self.model.down)
-        self._map['up'].clicked.connect(self.model.up)
-        self._map['deselect'].clicked.connect(self._uncheck_items)
-        self._map['separated'].clicked.connect(self.check_separated)
-        self._map['grid'].clicked.connect(self._grid_state_change)
-        self._map['log_scale'].stateChanged.connect(self._log_change)
-        self._map['raw'].clicked.connect(self.check_raw)
-        self._map['linestyle'].clicked.connect(self._line_style_change)
-        self._map['errorbar'].clicked.connect(self._error_bar_change)
-        self._map['xaxis_scale'].currentIndexChanged.connect(
-            self._something_changed)
+
+        # connect signals
+        self._attach_signal_slots()
 
     sig_plot = Signal()
     sig_grid_state_change = Signal(bool)  # bool = if to draw
     sig_error_bar_change = Signal()
     sig_linestyle_change = Signal()
-    sig_log_change = Signal(bool)  # bool = if logscale
+    sig_log_change = Signal(bool)  # bool = if log scale
 
     def _log_change(self):
         log = self._map['log_scale'].checkState()
@@ -146,12 +137,12 @@ class DNSElasticPowderPlotView(DNSView):
             self.ax.figure.clear()
 
     def get_x_axis(self):
-        return self._map['xaxis_scale'].currentText()
+        return self._map['x_axis_scale'].currentText()
 
     def _plot(self):
         self.sig_plot.emit()
 
-    def set_yscale(self, scale):
+    def set_y_scale(self, scale):
         self.ax.set_yscale(scale)
         self.draw()
 
@@ -181,15 +172,14 @@ class DNSElasticPowderPlotView(DNSView):
 
     def single_error_plot(self, x, y, y_err, label, capsize, linestyle):
         # pylint: disable=too-many-arguments
-        self.ax.errorbar(x,
-                         y,
+        self.ax.errorbar(x, y,
                          yerr=y_err,
-                         fmt=LINESTYLES[linestyle],
+                         fmt=LINE_STYLES[linestyle],
                          label=label,
                          capsize=capsize)
 
     def single_plot(self, x, y, label, linestyle):
-        self.ax.plot(x, y, LINESTYLES[linestyle], label=label)
+        self.ax.plot(x, y, LINE_STYLES[linestyle], label=label)
 
     def create_plot(self, norm):
         if self.ax:
@@ -213,3 +203,17 @@ class DNSElasticPowderPlotView(DNSView):
     def _on_timer(self):
         self.static_canvas.figure.tight_layout()
         self.draw()
+
+    def _attach_signal_slots(self):
+        self.model.itemChanged.connect(self._something_changed)
+        self._map['down'].clicked.connect(self.model.down)
+        self._map['up'].clicked.connect(self.model.up)
+        self._map['deselect'].clicked.connect(self._uncheck_items)
+        self._map['separated'].clicked.connect(self.check_separated)
+        self._map['grid'].clicked.connect(self._grid_state_change)
+        self._map['log_scale'].stateChanged.connect(self._log_change)
+        self._map['raw'].clicked.connect(self.check_raw)
+        self._map['linestyle'].clicked.connect(self._line_style_change)
+        self._map['errorbar'].clicked.connect(self._error_bar_change)
+        self._map['x_axis_scale'].currentIndexChanged.connect(
+            self._something_changed)

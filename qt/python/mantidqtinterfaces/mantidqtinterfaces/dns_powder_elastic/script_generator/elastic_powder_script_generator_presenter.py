@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS script generator for elastic powder data.
+DNS script generator presenter for elastic powder data.
 """
 
-from mantidqtinterfaces.dns_powder_tof.script_generator.\
+from mantidqtinterfaces.dns_powder_tof.script_generator. \
     common_script_generator_presenter import DNSScriptGeneratorPresenter
 
 
 class DNSElasticPowderScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
+
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self._plot_list = []

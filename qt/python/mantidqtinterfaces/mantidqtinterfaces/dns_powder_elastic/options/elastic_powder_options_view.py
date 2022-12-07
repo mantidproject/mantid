@@ -45,8 +45,8 @@ class DNSElasticPowderOptionsView(DNSView):
             'norm_monitor': self._content.rB_norm_monitor,
             'wavelength': self._content.dSB_wavelength,
             'get_wavelength': self._content.cB_get_wavelength,
-            'ttheta_min': self._content.dSB_ttheta_min,
-            'ttheta_max': self._content.dSB_ttheta_max,
+            'ttheta_min': self._content.dSB_two_theta_min,
+            'ttheta_max': self._content.dSB_two_theta_max,
         }
 
         # connect signals

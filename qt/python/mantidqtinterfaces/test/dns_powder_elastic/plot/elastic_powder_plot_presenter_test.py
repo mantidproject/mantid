@@ -86,10 +86,10 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
 
     def test_change_log(self):
         self.presenter._change_log(True)
-        self.view.set_yscale.assert_called_once_with('symlog')
+        self.view.set_y_scale.assert_called_once_with('symlog')
         self.view.reset_mock()
         self.presenter._change_log(False)
-        self.view.set_yscale.assert_called_once_with('linear')
+        self.view.set_y_scale.assert_called_once_with('linear')
 
     @patch('mantidqtinterfaces.dns_powder_elastic.plot.'
            'elastic_powder_plot_presenter.'
@@ -177,7 +177,7 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._get_workspaces(), [0, 1])
 
     def test_get_scriptnumber(self):
-        self.assertEqual(self.presenter._get_scriptnumber(), 0)
+        self.assertEqual(self.presenter._get_script_number(), 0)
 
     def test_tab_got_focus(self):
         self.presenter.tab_got_focus()
