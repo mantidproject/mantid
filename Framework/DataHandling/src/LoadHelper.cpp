@@ -199,9 +199,14 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
     if ((size == 4) && (sign == H5T_SGN_2))
       addDataToRun<int32_t, int>(buffer, dimsSize[0], runDetails, name);
   } break;
-  case H5T_FLOAT:
-    // TODO read dataset
-    break;
+  case H5T_FLOAT: {
+    H5::FloatType type = dataset.getFloatType();
+    size_t size = type.getSize();
+    if (size == 4)
+      addDataToRun<float, double>(buffer, dimsSize[0], runDetails, name);
+    if (size == 8)
+      addDataToRun<double, double>(buffer, dimsSize[0], runDetails, name);
+  } break;
   default:
     break;
   }
