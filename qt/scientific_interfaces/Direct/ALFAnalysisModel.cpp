@@ -169,7 +169,9 @@ void ALFAnalysisModel::exportWorkspaceCopyToADS() const {
 
 void ALFAnalysisModel::openExternalPlot() const {
   // Externally plot the extracted workspace or fitted workspace depending on which one is available.
-  MantidQt::Widgets::MplCpp::plot({plottedWorkspace()}, boost::none, plottedWorkspaceIndices());
+  if (auto const workspace = plottedWorkspace()) {
+    MantidQt::Widgets::MplCpp::plot({workspace}, boost::none, plottedWorkspaceIndices());
+  }
 }
 
 MatrixWorkspace_sptr ALFAnalysisModel::plottedWorkspace() const {

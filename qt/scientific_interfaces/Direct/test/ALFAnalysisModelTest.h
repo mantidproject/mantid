@@ -168,6 +168,10 @@ public:
     TS_ASSERT_DELTA(-0.0557, *m_model->rotationAngle(), 0.0001);
   }
 
+  void test_openExternalPlot_does_not_error_if_data_is_not_extracted() {
+    TS_ASSERT_THROWS_NOTHING(m_model->openExternalPlot());
+  }
+
   void test_exportWorkspaceCopyToADS_does_not_create_an_exported_workspace_if_data_is_not_extracted() {
     m_model->exportWorkspaceCopyToADS();
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(m_exportWorkspaceName));
