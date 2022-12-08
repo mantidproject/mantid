@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QApplication
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-MARKER_SENSITIVITY = 3
+MARKER_SENSITIVITY = 5
 
 
 class HorizontalMarker(QObject):

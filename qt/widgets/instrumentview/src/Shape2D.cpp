@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QWheelEvent>
 
+#include <QApplication>
 #include <QLine>
 #include <QMap>
 #include <QVector2D>
@@ -25,8 +26,6 @@ namespace MantidQt::MantidWidgets {
 
 // number of control points common for all shapes
 const size_t Shape2D::NCommonCP = 4;
-// size (== width/2 == height/2) of each control point
-const double Shape2D::sizeCP = 3;
 
 /**
  * Set default border color to red and fill color to default Qt color
@@ -61,7 +60,7 @@ void Shape2D::draw(QPainter &painter) const {
     if (m_editing) {
       // if editing show all CP, make them bigger and opaque
       np = getNControlPoints();
-      rsize = sizeCP;
+      rsize = static_cast<double>(controlPointSize());
       alpha = 255;
     }
     for (size_t i = 0; i < np; ++i) {
@@ -82,6 +81,11 @@ void Shape2D::draw(QPainter &painter) const {
  * Return total number of control points for this shape.
  */
 size_t Shape2D::getNControlPoints() const { return NCommonCP + this->getShapeNControlPoints(); }
+
+/**
+ * Return the radius to use for the control points.
+ */
+int Shape2D::controlPointSize() const { return QApplication::font().pointSize(); }
 
 /**
  * Return coordinates of i-th control point.

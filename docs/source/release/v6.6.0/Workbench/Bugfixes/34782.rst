@@ -1,0 +1,1 @@
+The sensitivity of vertial and horizontal lines on plots, including the peak picker and range selector tools, has been increased.
