@@ -233,6 +233,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             self.log().warning(str(e))
             correction = None
         else:
+            # if the sample is in energy transfer unit, we need to make the correction consistent by subtracting constant offset
+            if not self.use_incident_energy:
+                correction[:, 0] -= self.INCIDENT_ENERGY_OFFSET
             water_corr_ws = "__{}_waterCorrection".format(self.output_ws_name)
             CreateWorkspace(OutputWorkspace=water_corr_ws,
                             DataX=correction[:, 0],

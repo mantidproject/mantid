@@ -54,17 +54,17 @@ class LagrangeILLReductionTest(unittest.TestCase):
         result = LagrangeILLReduction(SampleRuns='012869:012871', CorrectionFile='correction-water-cu220-2020.txt')
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
-        self.assertAlmostEqual(result.readY(0)[10], 0.014376, 4)
-        self.assertAlmostEqual(result.readY(0)[80], 0.012939, 4)
+        self.assertAlmostEqual(result.readY(0)[10], 0.01478, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 0.01176, 4)
 
     def test_all_corrections(self):
         result = LagrangeILLReduction(SampleRuns='012869:012871',
-                             ContainerRuns='012882:012884',
-                             CorrectionFile='correction-water-cu220-2020.txt')
+                                      ContainerRuns='012882:012884',
+                                      CorrectionFile='correction-water-cu220-2020.txt')
         self.check_result(result, "Energy", 276, 21.4992, 446.5527)
 
-        self.assertAlmostEqual(result.readY(0)[10], -0.017252, 4)
-        self.assertAlmostEqual(result.readY(0)[80], -0.013009, 4)
+        self.assertAlmostEqual(result.readY(0)[10], -0.01684, 4)
+        self.assertAlmostEqual(result.readY(0)[80], -0.01418, 4)
 
     def test_incident_energy(self):
         result = LagrangeILLReduction(SampleRuns='012869:012871', UseIncidentEnergy=True)
