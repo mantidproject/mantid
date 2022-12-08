@@ -156,14 +156,15 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
 
 namespace {
 
-template <typename T> void addDataToRun(void *data, size_t n, API::Run &runDetails, const std::string &name) {
-  std::vector<T> values(n);
-  memcpy(values.data(), data, n * sizeof(T));
+template <typename DataType, typename RunType>
+void addDataToRun(void *data, size_t n, API::Run &runDetails, const std::string &name) {
+  std::vector<DataType> values(n);
+  memcpy(values.data(), data, n * sizeof(DataType));
   if (values.size() == 1)
-    runDetails.addProperty(name, values[0]);
+    runDetails.addProperty(name, static_cast<RunType>(values[0]));
   else
-    for (T &value : values)
-      runDetails.addProperty(name, value);
+    for (DataType &value : values)
+      runDetails.addProperty(name, static_cast<RunType>(value));
 }
 
 void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
@@ -186,17 +187,17 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
     size_t size = type.getSize();
     H5T_sign_t sign = type.getSign();
     if ((size == 1) && (sign == H5T_SGN_NONE))
-      addDataToRun<uint8_t>(buffer, dimsSize[0], runDetails, name);
+      addDataToRun<uint8_t, int>(buffer, dimsSize[0], runDetails, name);
     if ((size == 1) && (sign == H5T_SGN_2))
-      addDataToRun<int8_t>(buffer, dimsSize[0], runDetails, name);
+      addDataToRun<int8_t, int>(buffer, dimsSize[0], runDetails, name);
     if ((size == 2) && (sign == H5T_SGN_NONE))
-      addDataToRun<uint16_t>(buffer, dimsSize[0], runDetails, name);
+      addDataToRun<uint16_t, int>(buffer, dimsSize[0], runDetails, name);
     if ((size == 2) && (sign == H5T_SGN_2))
-      addDataToRun<int16_t>(buffer, dimsSize[0], runDetails, name);
+      addDataToRun<int16_t, int>(buffer, dimsSize[0], runDetails, name);
     if ((size == 4) && (sign == H5T_SGN_NONE))
-      addDataToRun<uint32_t>(buffer, dimsSize[0], runDetails, name);
+      addDataToRun<uint32_t, int>(buffer, dimsSize[0], runDetails, name);
     if ((size == 4) && (sign == H5T_SGN_2))
-      addDataToRun<int32_t>(buffer, dimsSize[0], runDetails, name);
+      addDataToRun<int32_t, int>(buffer, dimsSize[0], runDetails, name);
   } break;
   case H5T_FLOAT:
     // TODO read dataset
