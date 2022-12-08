@@ -208,6 +208,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
+    algorithms/WorkflowAlgorithms/D4ILLReduction.py
     algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
