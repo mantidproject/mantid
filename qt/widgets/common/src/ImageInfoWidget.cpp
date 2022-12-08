@@ -19,7 +19,7 @@ namespace MantidQt::MantidWidgets {
  * @param parent A QWidget to act as the parent widget
  */
 ImageInfoWidget::ImageInfoWidget(QWidget *parent)
-    : IImageInfoWidget(parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
+    : QTableWidget(0, 0, parent), m_presenter(std::make_unique<ImageInfoPresenter>(this)) {
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   horizontalHeader()->hide();

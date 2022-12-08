@@ -37,7 +37,8 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None):
+    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None,
+                 image_info_widget=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -57,7 +58,10 @@ class SliceViewerDataView(QWidget):
         self.colorbar_layout.setContentsMargins(0, 0, 0, 0)
         self.colorbar_layout.setSpacing(0)
 
-        self.image_info_widget = ImageInfoWidget(self)
+        if image_info_widget is None:
+            self.image_info_widget = ImageInfoWidget(self)
+        else:
+            self.image_info_widget = image_info_widget
         self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(

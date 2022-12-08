@@ -15,8 +15,6 @@ namespace MantidWidgets {
 
 class EXPORT_OPT_MANTIDQT_COMMON IImageInfoWidget {
 public:
-  IImageInfoWidget(QWidget *parent = nullptr) {}
-
   virtual void cursorAt(const double x, const double y, const double signal,
                         const QMap<QString, QString> &extraValues) = 0;
   virtual void showInfo(const ImageInfoModel::ImageInfo &info) = 0;
