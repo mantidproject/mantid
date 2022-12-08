@@ -33,11 +33,11 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   reconnectInstrumentActor();
 
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
-  connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
+  // connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
-  connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(singleTubePicked(size_t)));
+  connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(notifyWholeTubeSelected(size_t)));
 
   auto pickTab = m_instrumentWidget->getPickTab();
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
@@ -95,11 +95,6 @@ MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() c
   return m_instrumentWidget->getInstrumentActor();
 }
 
-Mantid::Geometry::ComponentInfo const &ALFInstrumentView::componentInfo() const {
-  auto &actor = m_instrumentWidget->getInstrumentActor();
-  return actor.componentInfo();
-}
-
 std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
   auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
       m_instrumentWidget->getInstrumentDisplay()->getSurface());
@@ -110,21 +105,39 @@ std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
   return detectorIndices;
 }
 
+std::vector<std::size_t> ALFInstrumentView::getFullSelectedDetectors() const {
+  auto dets = getSelectedDetectors();
+  return m_instrumentWidget->findWholeTubeDetectorIndices(dets);
+}
+
 void ALFInstrumentView::selectWholeTube() {
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->setPlotType(MantidQt::MantidWidgets::IWPickPlotType::TUBE_INTEGRAL);
   pickTab->setTubeXUnits(MantidQt::MantidWidgets::IWPickXUnits::OUT_OF_PLANE_ANGLE);
 }
 
-void ALFInstrumentView::singleTubePicked(std::size_t pickID) {
-  auto const wholeTubeIndices = m_instrumentWidget->findWholeTubeDetectorIndices({pickID});
+void ALFInstrumentView::notifyWholeTubeSelected(std::size_t pickID) {
+  m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+}
+
+void ALFInstrumentView::clearMaskedShapes() {
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
+  surface->blockSignals(true);
+  surface->clearMaskedShapes();
+  surface->blockSignals(false);
+}
+
+void ALFInstrumentView::drawRectangleAbove(std::vector<std::size_t> const &detectorIndices) {
+  if (detectorIndices.empty()) {
+    return;
+  }
 
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
 
   QPoint firstDetPos, lastDetPos;
   QSize firstDetSize, lastDetSize;
-  surface->detectorPixelPositionAndSize(wholeTubeIndices.front(), firstDetPos, firstDetSize);
-  surface->detectorPixelPositionAndSize(wholeTubeIndices.back(), lastDetPos, lastDetSize);
+  surface->detectorPixelPositionAndSize(detectorIndices.front(), firstDetPos, firstDetSize);
+  surface->detectorPixelPositionAndSize(detectorIndices.back(), lastDetPos, lastDetSize);
 
   if (!firstDetPos.isNull() && !lastDetPos.isNull() && !firstDetSize.isNull() && !lastDetSize.isNull()) {
     auto x1 = lastDetPos.x() + lastDetSize.width() / 2;
@@ -132,7 +145,9 @@ void ALFInstrumentView::singleTubePicked(std::size_t pickID) {
     auto x2 = firstDetPos.x() - firstDetSize.width() / 2;
     auto y2 = firstDetPos.y() + firstDetSize.height() / 2;
 
-    surface->tryMe(x1, y1, x2, y2);
+    surface->blockSignals(true);
+    surface->drawShape2DStatically("rectangle", Qt::green, QColor(255, 255, 255, 80), QPoint(x1, y1), QPoint(x2, y2));
+    surface->blockSignals(false);
   }
 }
 

@@ -20,6 +20,7 @@ class QWheelEvent;
 class QKeyEvent;
 class QPainter;
 class QPixmap;
+class QPoint;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -63,7 +64,6 @@ public:
   /// Returns true if a surface using this controller can show
   /// a context menu on right-click
   bool canShowContextMenu() const { return m_canShowContextMenu; }
-  virtual void tryMe(double x1, double y1, double x2, double y2){};
 
 signals:
   void enabled();
@@ -149,7 +149,9 @@ public:
   void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
   void keyPressEvent(QKeyEvent * /*unused*/) override;
   void leaveEvent(QEvent * /*unused*/) override;
-  void tryMe(double x1, double y1, double x2, double y2) override;
+
+  void drawShape2DStatically(const QString &type, const QColor &borderColor, const QColor &fillColor,
+                             const QPoint &topLeftPos, const QPoint &bottomRightPos);
 
 signals:
   /// Deselect all selected shapes

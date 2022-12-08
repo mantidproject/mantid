@@ -242,6 +242,11 @@ public:
   /// Load masks from a table workspace
   void loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
 
+  /// Draw a 2D shape onto the surface with the given coordinates
+  void drawShape2DStatically(const QString &type, const QColor &borderColor, const QColor &fillColor,
+                             const QPoint &topLeftPos, const QPoint &bottomRightPos);
+  void clearMaskedShapes();
+
   //-----------------------------------
   //    Peaks overlay methods
   //-----------------------------------
@@ -262,8 +267,6 @@ public:
   bool getShowPeakLabelsFlag() const { return m_showPeakLabels; }
   void setShowPeakRelativeIntensityFlag(bool on);
   bool getShowPeakRelativeIntensityFlag() const { return m_showPeakRelativeIntensity; }
-
-  void tryMe(double x1, double y1, double x2, double y2);
 
 signals:
 

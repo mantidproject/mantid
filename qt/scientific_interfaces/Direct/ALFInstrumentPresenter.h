@@ -11,7 +11,7 @@
 
 #include <optional>
 #include <string>
-#include <utility>
+#include <vector>
 
 #include <QWidget>
 
@@ -31,7 +31,8 @@ public:
 
   virtual void loadRunNumber() = 0;
 
-  virtual void notifyShapeChanged() = 0;
+  virtual void notifyShapeChanged(bool updateFromView = true) = 0;
+  virtual void notifyTubesSelected(std::vector<std::size_t> const &detectorIndices) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -46,7 +47,8 @@ public:
 
   void loadRunNumber() override;
 
-  void notifyShapeChanged() override;
+  void notifyShapeChanged(bool updateFromView = true) override;
+  void notifyTubesSelected(std::vector<std::size_t> const &detectorIndices) override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);
@@ -55,6 +57,7 @@ private:
 
   IALFInstrumentView *m_view;
   std::unique_ptr<IALFInstrumentModel> m_model;
+  bool m_redrawShapes{true};
 };
 
 } // namespace MantidQt::CustomInterfaces

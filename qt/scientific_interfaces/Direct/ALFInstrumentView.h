@@ -48,9 +48,12 @@ public:
   virtual void setRunQuietly(std::string const &runNumber) = 0;
 
   virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
-  virtual Mantid::Geometry::ComponentInfo const &componentInfo() const = 0;
 
   virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
+  virtual std::vector<std::size_t> getFullSelectedDetectors() const = 0;
+
+  virtual void clearMaskedShapes() = 0;
+  virtual void drawRectangleAbove(std::vector<std::size_t> const &detectorIndices) = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -72,9 +75,12 @@ public:
   void setRunQuietly(std::string const &runNumber) override;
 
   MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
-  Mantid::Geometry::ComponentInfo const &componentInfo() const override;
 
   std::vector<std::size_t> getSelectedDetectors() const override;
+  std::vector<std::size_t> getFullSelectedDetectors() const override;
+
+  void clearMaskedShapes() override;
+  void drawRectangleAbove(std::vector<std::size_t> const &detectorIndices) override;
 
   void warningBox(std::string const &message) override;
 
@@ -83,7 +89,8 @@ private slots:
   void fileLoaded();
   void notifyShapeChanged();
   void selectWholeTube();
-  void singleTubePicked(size_t);
+  void notifyWholeTubeSelected(size_t pickID);
+  // void singleTubePicked(size_t);
 
 private:
   API::FileFinderWidget *m_files;

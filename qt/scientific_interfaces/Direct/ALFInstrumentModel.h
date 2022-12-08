@@ -39,8 +39,8 @@ public:
   virtual std::string loadedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
-  virtual void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                    std::vector<std::size_t> const &detectorIndices) = 0;
+  virtual void setSelectedDetectors(std::vector<std::size_t> const &detectorIndices) = 0;
+  virtual void addSelectedDetectors(std::vector<std::size_t> const &detectorIndices) = 0;
   virtual std::vector<std::size_t> selectedDetectors() const = 0;
 
   virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
@@ -57,8 +57,8 @@ public:
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
   std::size_t runNumber() const override;
 
-  void setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                            std::vector<std::size_t> const &detectorIndices) override;
+  void setSelectedDetectors(std::vector<std::size_t> const &detectorIndices) override;
+  void addSelectedDetectors(std::vector<std::size_t> const &detectorIndices) override;
   inline std::vector<std::size_t> selectedDetectors() const noexcept override { return m_detectorIndices; };
 
   std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>

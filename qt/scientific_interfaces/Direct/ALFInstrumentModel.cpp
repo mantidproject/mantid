@@ -59,28 +59,6 @@ void appendTwoThetaClosestToZero(std::vector<double> &twoThetas,
   }
 }
 
-/*
- * Finds all the detector indices in a tube if at least one detector index from that tube is provided.
- * @param componentInfo : The component info object which stores info about all detectors in their tubes
- * @param partTubeDetectorIndices : The detector indices that could come from different parts of multiple tubes
- * @return A vector of detector indices for representing entire tubes being selected.
- */
-std::vector<std::size_t> findWholeTubeDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                                std::vector<std::size_t> const &partTubeDetectorIndices) {
-  std::vector<std::size_t> wholeTubeIndices;
-  for (auto const &detectorIndex : partTubeDetectorIndices) {
-    auto const iter = std::find(wholeTubeIndices.cbegin(), wholeTubeIndices.cend(), detectorIndex);
-    // Check that the indices for this tube haven't already been added
-    if (iter == wholeTubeIndices.cend()) {
-      // Find all of the detector indices for the whole tube
-      auto const detectors = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
-      std::transform(detectors.cbegin(), detectors.cend(), std::back_inserter(wholeTubeIndices),
-                     [](auto const &index) { return index; });
-    }
-  }
-  return wholeTubeIndices;
-}
-
 double calculateError(Mantid::HistogramData::HistogramE const &eValues, std::size_t const binIndexMin,
                       std::size_t const binIndexMax) {
   // Calculate the squared values
@@ -228,9 +206,14 @@ std::size_t ALFInstrumentModel::runNumber() const {
   return 0u;
 }
 
-void ALFInstrumentModel::setSelectedDetectors(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                              std::vector<std::size_t> const &detectorIndices) {
-  m_detectorIndices = findWholeTubeDetectors(componentInfo, detectorIndices);
+void ALFInstrumentModel::setSelectedDetectors(std::vector<std::size_t> const &detectorIndices) {
+  m_detectorIndices = detectorIndices;
+}
+
+void ALFInstrumentModel::addSelectedDetectors(std::vector<std::size_t> const &detectorIndices) {
+  m_detectorIndices.insert(m_detectorIndices.end(), detectorIndices.cbegin(), detectorIndices.cend());
+  std::sort(m_detectorIndices.begin(), m_detectorIndices.end());
+  m_detectorIndices.erase(std::unique(m_detectorIndices.begin(), m_detectorIndices.end()), m_detectorIndices.end());
 }
 
 std::tuple<MatrixWorkspace_sptr, std::vector<double>>

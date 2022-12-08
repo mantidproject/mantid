@@ -49,11 +49,21 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
   }
 }
 
-void ALFInstrumentPresenter::notifyShapeChanged() {
-  m_model->setSelectedDetectors(m_view->componentInfo(), m_view->getSelectedDetectors());
+void ALFInstrumentPresenter::notifyShapeChanged(bool updateFromView) {
+  if (updateFromView) {
+    m_model->setSelectedDetectors(m_view->getFullSelectedDetectors());
+  }
+
+  m_view->clearMaskedShapes();
+  m_view->drawRectangleAbove(m_model->selectedDetectors()); // block signals
 
   auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
   m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
+}
+
+void ALFInstrumentPresenter::notifyTubesSelected(std::vector<std::size_t> const &detectorIndices) {
+  m_model->addSelectedDetectors(detectorIndices);
+  notifyShapeChanged(false);
 }
 
 } // namespace MantidQt::CustomInterfaces

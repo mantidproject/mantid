@@ -115,10 +115,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   connect(alignController, SIGNAL(selection(QRect)), this, SLOT(alignPeaks(QRect)));
 }
 
-void ProjectionSurface::tryMe(double x1, double y1, double x2, double y2) {
-  m_inputControllers[InteractionMode::EditShapeMode]->tryMe(x1, y1, x2, y2);
-}
-
 ProjectionSurface::~ProjectionSurface() {
   if (m_viewImage) {
     delete m_viewImage;
@@ -659,6 +655,24 @@ void ProjectionSurface::saveShapesToTableWorkspace() { m_maskShapes.saveToTableW
 void ProjectionSurface::loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws) {
   m_maskShapes.loadFromTableWorkspace(ws);
 }
+
+/**
+ * Draw a 2D shape onto the surface with the given coordinates
+ * @param type :: The shape type such as 'rectangle'
+ * @param borderColor :: The color of the shapes border
+ * @param fillColor :: The color of the shapes fill
+ * @param topLeftPos :: The position of the top left corner in pixels
+ * @param bottomRightPos :: The position of the bottom right corner in pixels
+ */
+void ProjectionSurface::drawShape2DStatically(const QString &type, const QColor &borderColor, const QColor &fillColor,
+                                              const QPoint &topLeftPos, const QPoint &bottomRightPos) {
+  auto drawController = dynamic_cast<InputControllerDrawShape *>(m_inputControllers[InteractionMode::EditShapeMode]);
+  if (drawController) {
+    drawController->drawShape2DStatically(type, borderColor, fillColor, topLeftPos, bottomRightPos);
+  }
+}
+
+void ProjectionSurface::clearMaskedShapes() { m_maskShapes.clear(); }
 
 /**
  * Return a combined list of peak parkers from all overlays
