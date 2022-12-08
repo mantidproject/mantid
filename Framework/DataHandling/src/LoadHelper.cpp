@@ -155,6 +155,17 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
 }
 
 namespace {
+
+template <typename T> void addDataToRun(void *data, size_t n, API::Run &runDetails, const std::string &name) {
+  std::vector<T> values(n);
+  memcpy(values.data(), data, n * sizeof(T));
+  if (values.size() == 1)
+    runDetails.addProperty(name, values[0]);
+  else
+    for (T &value : values)
+      runDetails.addProperty(name, value);
+}
+
 void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
   // get dataset dimensions
   H5::DataSpace dataspace = dataset.getSpace();
