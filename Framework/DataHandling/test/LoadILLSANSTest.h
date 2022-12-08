@@ -590,6 +590,17 @@ public:
     TS_ASSERT_DELTA(outputWS->e(192 * 1152 - 1)[5], 33.630, 1E-3)
     TS_ASSERT_DELTA(outputWS->y(192 * 1152)[0], 0.0, 1E-3)
     TS_ASSERT_DELTA(outputWS->e(192 * 1152)[0], 0.0, 1E-3)
+    // check for correct positions
+    const auto firstPixelPos = outputWS->detectorInfo().position(0);
+    TS_ASSERT_DELTA(firstPixelPos.X(), 0.7844, 1E-4);
+    TS_ASSERT_DELTA(firstPixelPos.Y(), -0.1920, 1E-4);
+    TS_ASSERT_DELTA(firstPixelPos.Z(), 0.8409, 1E-4);
+
+    const auto lastPixelPos = outputWS->detectorInfo().position(192 * 1152 - 1);
+    TS_ASSERT_DELTA(lastPixelPos.X(), -0.7844, 1E-4);
+    TS_ASSERT_DELTA(lastPixelPos.Y(), 0.1920, 1E-4);
+    TS_ASSERT_DELTA(lastPixelPos.Z(), 0.8409, 1E-4);
+
     checkTimeFormat(outputWS);
     checkDuration(outputWS, 3.);
     checkWavelength(outputWS, 4.45);

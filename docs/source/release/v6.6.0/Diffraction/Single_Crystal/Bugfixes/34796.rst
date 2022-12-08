@@ -1,0 +1,1 @@
+- :ref:`SaveReflections <algm-SaveReflections>` now warns if an empty peak table is saved and doesn't fail with an error

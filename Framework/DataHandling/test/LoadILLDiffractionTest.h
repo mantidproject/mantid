@@ -33,9 +33,10 @@ public:
   static void destroySuite(LoadILLDiffractionTest *suite) { delete suite; }
 
   LoadILLDiffractionTest() {
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D1B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D1B/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D4/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN5/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/PANTHER/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/SHARP/");
@@ -618,6 +619,36 @@ public:
     TS_ASSERT_EQUALS(outputWS->readX(13)[0], 0.0)
     TS_ASSERT_DELTA(outputWS->readY(13)[0], 1394.0, 1E-5)
     TS_ASSERT_DELTA(outputWS->readE(13)[0], 37.33630, 1E-5)
+
+    checkTimeFormat(outputWS);
+  }
+
+  void test_D4C() {
+    const int NUMBER_OF_DETECTORS = 9 * 64;
+    const int NUMBER_OF_MONITORS = 1;
+
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "387229.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TwoThetaOffset", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NUMBER_OF_DETECTORS + NUMBER_OF_MONITORS)
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT(detInfo.isMonitor(0))
+    TS_ASSERT(!detInfo.isMonitor(576))
+    auto firstTube = detInfo.position({1, 0});
+    TS_ASSERT_DELTA(firstTube.angle(V3D(0, 0, 1)) * RAD_2_DEG, 10.695, 1e-3)
+
+    TS_ASSERT_DELTA(outputWS->y(0)[0], 871001, 0.1)
+    TS_ASSERT_DELTA(outputWS->y(1)[0], 16076, 0.1)
+    TS_ASSERT_DELTA(outputWS->y(17)[0], 16492, 0.1)
+    TS_ASSERT_DELTA(outputWS->y(576)[0], 17781, 0.1)
 
     checkTimeFormat(outputWS);
   }

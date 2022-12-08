@@ -7,12 +7,13 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QSplitter>
 #include <QString>
 #include <QWidget>
 
@@ -23,8 +24,9 @@
 namespace MantidQt {
 
 namespace MantidWidgets {
+class PeakPicker;
 class PreviewPlot;
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -38,10 +40,16 @@ public:
 
   virtual void subscribePresenter(IALFAnalysisPresenter *presenter) = 0;
 
+  virtual void replot() = 0;
+
   virtual std::pair<double, double> getRange() const = 0;
 
   virtual void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
   virtual void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
+  virtual void removeFitSpectrum() = 0;
+
+  virtual void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) = 0;
+  virtual Mantid::API::IPeakFunction_const_sptr getPeak() const = 0;
 
   virtual void setPeakCentre(double const centre) = 0;
   virtual double peakCentre() const = 0;
@@ -62,10 +70,16 @@ public:
 
   void subscribePresenter(IALFAnalysisPresenter *presenter) override;
 
+  void replot() override;
+
   std::pair<double, double> getRange() const override;
 
   void addSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
   void addFitSpectrum(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void removeFitSpectrum() override;
+
+  void setPeak(Mantid::API::IPeakFunction_const_sptr const &peak) override;
+  Mantid::API::IPeakFunction_const_sptr getPeak() const override;
 
   void setPeakCentre(double const centre) override;
   double peakCentre() const override;
@@ -75,26 +89,30 @@ public:
 
   void displayWarning(std::string const &message) override;
 
-public slots:
+private slots:
+  void notifyPeakPickerChanged();
   void notifyPeakCentreEditingFinished();
-  void notifyUpdateEstimateClicked();
   void notifyFitClicked();
+  void notifyResetClicked();
 
 private:
   void setupPlotFitSplitter(double const start, double const end);
-  QWidget *createFitPane(double const start, double const end);
-  QWidget *setupFitRangeWidget(double const start, double const end);
-  QWidget *setupFitButtonsWidget();
-  QWidget *setupResultsWidget(double const centre);
+  QWidget *createPlotWidget();
+  QWidget *createPlotToolbar();
+  QWidget *createFitWidget(double const start, double const end);
+  void setupTwoThetaWidget(QGridLayout *layout);
+  void setupFitRangeWidget(QGridLayout *layout, double const start, double const end);
+  void setupPeakCentreWidget(QGridLayout *layout, double const centre);
 
   MantidWidgets::PreviewPlot *m_plot;
+  MantidWidgets::PeakPicker *m_peakPicker;
   QLineEdit *m_start, *m_end;
-  QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
-  QPushButton *m_updateEstimateButton;
+  QPushButton *m_resetButton;
   QLineEdit *m_peakCentre;
   QLabel *m_fitStatus;
   QLineEdit *m_averageTwoTheta;
+  QLabel *m_numberOfTubes;
 
   IALFAnalysisPresenter *m_presenter;
 };

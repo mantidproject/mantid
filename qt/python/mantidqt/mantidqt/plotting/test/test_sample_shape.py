@@ -9,6 +9,8 @@
 #
 
 from numpy.testing import assert_array_equal, assert_allclose
+from os import path, remove
+from tempfile import gettempdir
 from unittest import TestCase, main
 from unittest.mock import patch, Mock
 import numpy as np
@@ -18,7 +20,7 @@ matplotlib.use('AGG')  # noqa
 import mantid
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, SetSample, LoadSampleShape, DeleteWorkspace,
-                              LoadInstrument, SetUB, RenameWorkspace)
+                              LoadInstrument, SetUB, RenameWorkspace, LoadNexus, SaveNexusESS)
 from mantidqt.plotting import sample_shape
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
 
@@ -320,6 +322,17 @@ class PlotSampleShapeTest(TestCase):
         figure = sample_shape.plot_sample_container_and_components(workspace.name())
         self.assertTrue(figure)
         self.assertEqual(1, mock_add_arrow.call_count)
+
+    @patch("mantidqt.plotting.sample_shape.add_arrow")
+    def test_add_arrow_called_once_for_nexus_ws(self, mock_add_arrow):
+        workspace = CreateSampleWorkspace(OutputWorkspace="ws_shape")
+        temp_file_name = path.join(gettempdir(), 'ws_shape.nxs')
+        SaveNexusESS(workspace, temp_file_name)
+        workspace = LoadNexus(temp_file_name)
+        figure = sample_shape.plot_sample_container_and_components(workspace.name())
+        self.assertTrue(figure)
+        self.assertEqual(1, mock_add_arrow.call_count)
+        remove(temp_file_name)
 
     @patch("mantidqt.plotting.sample_shape.call_set_mesh_axes_equal")
     @patch("mantidqt.plotting.sample_shape.add_beam_arrow")

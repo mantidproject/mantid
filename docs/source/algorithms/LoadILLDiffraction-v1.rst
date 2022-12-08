@@ -10,8 +10,8 @@
 Description
 -----------
 
-This is the loader for the raw `.nxs` files produced by the powder diffractometers at ILL.
-Currently it supports the instruments D20, D1B and D2B.
+This is the loader for the raw `.nxs` files produced by the powder and liquid diffractometers at ILL.
+Currently it supports the instruments D20, D1B, D2B, and D4.
 
 The *TwoThetaOffset* parameter corresponding to the rotation of the detector is optional and only used for D1B. It is to be provided in degrees.
 
@@ -119,6 +119,37 @@ Output:
 
   The output has 1 bin (detector scan) and 1281 spectra
 
+<<<<<<< HEAD
+=======
+**Example - LoadILLDiffraction - D4**
+
+.. testcode:: LoadILLDiffractionD4Example
+
+   ws = LoadILLDiffraction(Filename='ILL/D4/387230.nxs')
+
+   print('The output has {0} bin and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadILLDiffractionD4Example
+
+   The output has 1 bin and 577 spectra
+
+**Example - LoadILLDiffraction - IN5**
+
+.. testcode:: LoadILLDiffractionIN5Example
+
+  ws = LoadILLDiffraction(Filename='ILL/IN5/199857.nxs')
+
+  print('The output has {0} bin (omega scan) and {1} spectra'.format(ws.blocksize(), ws.getNumberHistograms()))
+
+Output:
+
+.. testoutput:: LoadILLDiffractionIN5Example
+
+  The output has 17 bin (omega scan) and 98305 spectra
+
+>>>>>>> origin/main
 .. categories::
 
 .. sourcelink::

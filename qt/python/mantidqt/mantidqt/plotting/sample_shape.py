@@ -326,7 +326,6 @@ def set_perspective(plot_axes, workspace=None, beam_direction=None):
         # guess the original beam_direction and raise warning
         plot_axes.view_init(vertical_axis='y', elev=30, azim=-135)
         raise Exception("set_perspective must be called with either beam_direction or a workspace")
-
     if direction_not_valid(beam_direction):
         frame = workspace.getInstrument().getReferenceFrame()
         if frame.pointingUpAxis() == "Y" and frame.pointingAlongBeamAxis() == "Z":
@@ -426,7 +425,7 @@ def add_beam_arrow(plot_axes, workspace):
     # Add arrow along beam direction
     source = workspace.getInstrument().getSource()
     sample = workspace.getInstrument().getSample()
-    if source and sample:
+    if source is not None and sample is not None:
         beam_origin = plot_axes.get_xlim3d()[0], plot_axes.get_ylim3d()[0], plot_axes.get_zlim3d()[0]
         beam_direction = calculate_beam_direction(source, sample)
         add_arrow(plot_axes, beam_direction, origin=beam_origin)

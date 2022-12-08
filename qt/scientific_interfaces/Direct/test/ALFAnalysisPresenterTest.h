@@ -49,9 +49,6 @@ public:
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFAnalysisView>>();
     m_presenter = std::make_unique<ALFAnalysisPresenter>(m_view.get(), std::move(model));
-
-    m_view->setPeakCentre(m_peakCentre);
-    m_model->setPeakCentre(m_peakCentre);
   }
 
   void tearDown() override {
@@ -71,6 +68,8 @@ public:
 
     EXPECT_CALL(*m_model, setExtractedWorkspace(_, twoThetas)).Times(1);
 
+    expectCalculateEstimate();
+
     EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
 
@@ -81,12 +80,84 @@ public:
     m_presenter->setExtractedWorkspace(nullptr, twoThetas);
   }
 
-  void test_notifyPeakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
-    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
-    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
+  void test_notifyPeakPickerChanged_will_removeFitSpectrum_if_fit_status_is_empty() {
+    EXPECT_CALL(*m_view, getPeak()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_model, setPeakParameters(_)).Times(1);
 
     EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
+
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
+
+    // Assert is not called as is unnecessary
+    EXPECT_CALL(*m_view, replot()).Times(0);
+
+    m_presenter->notifyPeakPickerChanged();
+  }
+
+  void test_notifyPeakPickerChanged_will_not_removeFitSpectrum_if_fit_status_is_not_empty() {
+    EXPECT_CALL(*m_view, getPeak()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_model, setPeakParameters(_)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return("Success"));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("Success")).Times(1);
+
+    // Assert is not called
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
+
+    // Assert is not called as is unnecessary
+    EXPECT_CALL(*m_view, replot()).Times(0);
+
+    m_presenter->notifyPeakPickerChanged();
+  }
+
+  void test_notifyPeakCentreEditingFinished_sets_the_peak_centre_in_the_model_and_fit_status_in_the_view() {
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, peakCentre()).Times(1).WillOnce(Return(0.0));
+    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
+
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
+
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
+    EXPECT_CALL(*m_view, replot()).Times(1);
+
+    m_presenter->notifyPeakCentreEditingFinished();
+  }
+
+  void test_notifyPeakCentreEditingFinished_does_not_update_anything_if_the_peak_centre_remains_the_same() {
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, peakCentre()).Times(1).WillOnce(Return(m_peakCentre + 0.000000001));
+
+    // Assert not called as the peak centre remains the same
+    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(0);
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(0).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_)).Times(0);
+    EXPECT_CALL(*m_model, fitStatus()).Times(0).WillOnce(Return(""));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(0);
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
+    EXPECT_CALL(*m_view, replot()).Times(0);
+
+    m_presenter->notifyPeakCentreEditingFinished();
+  }
+
+  void test_notifyPeakCentreEditingFinished_does_not_remove_fit_spectrum_when_fit_status_is_not_empty() {
+    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
+    EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
+
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return("Success"));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("Success")).Times(1);
+
+    // Assert is not called
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(0);
+
+    EXPECT_CALL(*m_view, replot()).Times(1);
 
     m_presenter->notifyPeakCentreEditingFinished();
   }
@@ -119,28 +190,16 @@ public:
 
   void test_that_calculateEstimate_is_not_called_when_data_is_not_extracted() {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*m_view, displayWarning("Need to have extracted data to do a fit or estimate.")).Times(1);
 
-    m_presenter->notifyUpdateEstimateClicked();
-  }
+    // Assert no call to calculateEstimate
+    EXPECT_CALL(*m_model, calculateEstimate(_)).Times(0);
 
-  void test_that_calculateEstimate_is_not_called_when_the_peak_centre_is_invalid() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(-1.0));
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
-    EXPECT_CALL(*m_view, displayWarning("The Peak Centre provided is outside the fit range.")).Times(1);
-
-    m_presenter->notifyUpdateEstimateClicked();
+    m_presenter->notifyResetClicked();
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
-    EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
-
-    EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
-
-    m_presenter->notifyUpdateEstimateClicked();
+    expectCalculateEstimate();
+    m_presenter->notifyResetClicked();
   }
 
   void test_numberOfTubes_will_call_the_model_method() {
@@ -164,6 +223,13 @@ public:
   }
 
 private:
+  void expectCalculateEstimate() {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
+
+    EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
+  }
+
   std::string m_workspaceName;
   std::pair<double, double> m_range;
   double m_peakCentre;

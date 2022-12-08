@@ -62,6 +62,8 @@ public:
 
   void test_LoadDiffraction_D2B() { checkLoader("ILL/D2B/535401", "LoadILLDiffraction"); }
 
+  void test_LoadDiffraction_D4() { checkLoader("ILL/D4/387230", "LoadILLDiffraction"); }
+
   void test_LoadDiffraction_D20() {
     checkLoader("ILL/D20/967076", "LoadILLDiffraction");
     checkLoader("ILL/D20/967087", "LoadILLDiffraction");
