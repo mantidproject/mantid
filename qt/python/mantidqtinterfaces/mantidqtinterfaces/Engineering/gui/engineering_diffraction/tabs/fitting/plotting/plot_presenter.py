@@ -65,25 +65,43 @@ class FittingPlotPresenter(object):
         self.view.update_fitbrowser()
         self.set_progress_bar_zero()
 
+    def update_browser(self):
+        # update last fit in fit browser and save setup
+        fitprop = self.fitprop_list[-1]
+        function_string = fitprop['properties']['Function']
+        status = fitprop['status']
+        ws_name = fitprop['properties']['InputWorkspace']
+        self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
+
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
-        self.worker = AsyncTask(self.do_fit_all, (ws_names_list, do_sequential),
+        previous_fit_browser = self.view.read_fitprop_from_browser()
+        self.worker = AsyncTask(self.do_fit_all, (previous_fit_browser,
+                                                  ws_names_list, do_sequential),
+                                success_cb=self._on_worker_success,
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._finished)
         self.worker.start()
 
-    def _on_worker_error(self, _=None):
-        print("Error occurred while running all fit.")
+    # =======================
+    # Fit Asynchronous Thread
+    # =======================
+
+    def _on_worker_success(self, async_success):
+        self.fitprop_list = async_success.output
+
+    def _on_worker_error(self, async_failure=None):
+        error_message = str(async_failure)
+        if "unknown" not in error_message:
+            logger.error(str(async_failure))
 
     def _finished(self, _=None):
         self.fit_all_done_notifier.notify_subscribers(self.fitprop_list)
-        self.fitprop_list = None
 
-    def do_fit_all(self, ws_name_list, do_sequential=True):
+    def do_fit_all(self, previous_fitprop,  ws_name_list, do_sequential=True):
         fitprop_list = []
-        prev_fitprop = self.view.read_fitprop_from_browser()
         for ws_name in ws_name_list:
             logger.notice(f'Starting to fit workspace {ws_name}')
-            fitprop = deepcopy(prev_fitprop)
+            fitprop = deepcopy(previous_fitprop)
             # update I/O workspace name
             fitprop['properties']['Output'] = ws_name
             fitprop['properties']['InputWorkspace'] = ws_name
@@ -95,14 +113,16 @@ class FittingPlotPresenter(object):
             fitprop['properties']['Function'] = funcstr
             if "success" in fitprop['status'].lower() and do_sequential:
                 # update function in prev fitprop to use for next workspace
-                prev_fitprop['properties']['Function'] = funcstr
-            # update last fit in fit browser and save setup
-            self.view.update_browser(fit_output.OutputStatus, funcstr, ws_name)
+                previous_fitprop['properties']['Function'] = funcstr
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
 
         logger.notice('Sequential fitting finished.')
-        self.fitprop_list = fitprop_list
+        return fitprop_list
+
+    # ==============================
+    # Indeterminate Fit Progress Bar
+    # ==============================
 
     def fit_toggle(self):
         """Toggle fit browser and tool on/off"""
@@ -115,10 +135,6 @@ class FittingPlotPresenter(object):
                 self.view.show_fit_progress_bar()
         self.set_progress_bar_zero()
 
-    # ==============================
-    # Indeterminate Fit Progress Bar
-    # ==============================
-
     def set_progress_bar(self):
         if self.fitprop_list:
             self.set_final_state_progress_bar(output_list=self.fitprop_list)
@@ -127,7 +143,7 @@ class FittingPlotPresenter(object):
 
     def set_final_state_progress_bar(self, output_list, status=None):
         if not status:
-            status = output_list[0]['status'].lower()
+            status = output_list[-1]['status'].lower()
         if "success" in status:
             self.set_progress_bar_success(status)
         else:

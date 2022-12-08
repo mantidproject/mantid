@@ -48,7 +48,8 @@ class FittingDataPresenter(object):
         self.view.set_fit_buttons_enabled(fit_enabled)
 
     def fit_completed(self, fit_props):
-        self.model.update_fit(fit_props)
+        if fit_props:
+            self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
         ws_name_list = self.model.get_active_ws_sorted_by_primary_log()
