@@ -49,21 +49,30 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
   }
 }
 
-void ALFInstrumentPresenter::notifyShapeChanged(bool updateFromView) {
-  if (updateFromView) {
-    m_model->setSelectedDetectors(m_view->getFullSelectedDetectors());
+void ALFInstrumentPresenter::notifyInstrumentActorReset() { updateAnalysisViewFromModel(); }
+
+void ALFInstrumentPresenter::notifyShapeChanged() {
+  if (m_model->setSelectedTubes(m_view->getFullSelectedDetectors())) {
+    updateInstrumentViewFromModel();
+    updateAnalysisViewFromModel();
   }
-
-  m_view->clearMaskedShapes();
-  m_view->drawRectangleAbove(m_model->selectedDetectors()); // block signals
-
-  auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
-  m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
 }
 
-void ALFInstrumentPresenter::notifyTubesSelected(std::vector<std::size_t> const &detectorIndices) {
-  m_model->addSelectedDetectors(detectorIndices);
-  notifyShapeChanged(false);
+void ALFInstrumentPresenter::notifyTubesSelected(std::vector<DetectorTube> const &tubes) {
+  if (!tubes.empty() && m_model->addSelectedTube(tubes.front())) {
+    updateInstrumentViewFromModel();
+    updateAnalysisViewFromModel();
+  }
+}
+
+void ALFInstrumentPresenter::updateInstrumentViewFromModel() {
+  m_view->clearShapes();
+  m_view->drawRectangleAbove(m_model->selectedTubes());
+}
+
+void ALFInstrumentPresenter::updateAnalysisViewFromModel() {
+  auto const [workspace, twoThetas] = m_model->generateOutOfPlaneAngleWorkspace(m_view->getInstrumentActor());
+  m_analysisPresenter->setExtractedWorkspace(workspace, twoThetas);
 }
 
 } // namespace MantidQt::CustomInterfaces

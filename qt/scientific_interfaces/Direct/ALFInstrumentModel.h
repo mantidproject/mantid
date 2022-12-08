@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DetectorTube.h"
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
@@ -39,9 +40,9 @@ public:
   virtual std::string loadedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
-  virtual void setSelectedDetectors(std::vector<std::size_t> const &detectorIndices) = 0;
-  virtual void addSelectedDetectors(std::vector<std::size_t> const &detectorIndices) = 0;
-  virtual std::vector<std::size_t> selectedDetectors() const = 0;
+  virtual bool setSelectedTubes(std::vector<DetectorTube> const &detectorIndices) = 0;
+  virtual bool addSelectedTube(DetectorTube const &detectorIndices) = 0;
+  virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
   virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const = 0;
@@ -57,9 +58,9 @@ public:
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
   std::size_t runNumber() const override;
 
-  void setSelectedDetectors(std::vector<std::size_t> const &detectorIndices) override;
-  void addSelectedDetectors(std::vector<std::size_t> const &detectorIndices) override;
-  inline std::vector<std::size_t> selectedDetectors() const noexcept override { return m_detectorIndices; };
+  bool setSelectedTubes(std::vector<DetectorTube> const &detectorIndices) override;
+  bool addSelectedTube(DetectorTube const &detectorIndices) override;
+  inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
   std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
@@ -72,10 +73,10 @@ private:
                           Mantid::API::MatrixWorkspace_const_sptr const &workspace,
                           Mantid::Geometry::ComponentInfo const &componentInfo,
                           Mantid::Geometry::DetectorInfo const &detectorInfo) const;
-  std::size_t numberOfDetectorsPerTube(Mantid::Geometry::ComponentInfo const &componentInfo) const;
-  std::size_t numberOfTubes(MantidQt::MantidWidgets::IInstrumentActor const &actor) const;
 
-  std::vector<std::size_t> m_detectorIndices;
+  inline std::size_t numberOfTubes() const noexcept { return m_tubes.size(); }
+
+  std::vector<DetectorTube> m_tubes;
 };
 
 } // namespace CustomInterfaces

@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 
+#include "DetectorTube.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <vector>
@@ -25,7 +26,7 @@ public:
 private:
   MantidWidgets::InstrumentWidget::TabCustomizations getTabCustomizations() const;
 
-  std::vector<std::size_t> findWholeTubeDetectorIndices(std::vector<std::size_t> const &partTubeDetectorIndices);
+  std::vector<DetectorTube> findWholeTubeDetectorIndices(std::vector<std::size_t> const &partTubeDetectorIndices);
 };
 
 } // namespace MantidQt::CustomInterfaces

@@ -52,22 +52,24 @@ void ALFInstrumentWidget::handleActiveWorkspaceDeleted() {
   resetInstrumentActor(true, true, 0.0, 0.0, true);
 }
 
-std::vector<std::size_t>
+std::vector<DetectorTube>
 ALFInstrumentWidget::findWholeTubeDetectorIndices(std::vector<std::size_t> const &partTubeDetectorIndices) {
   auto &componentInfo = m_instrumentActor->componentInfo();
 
-  std::vector<std::size_t> wholeTubeIndices;
+  std::vector<DetectorTube> tubes;
+  std::vector<std::size_t> allocatedIndices;
   for (auto const &detectorIndex : partTubeDetectorIndices) {
-    auto const iter = std::find(wholeTubeIndices.cbegin(), wholeTubeIndices.cend(), detectorIndex);
+    auto const iter = std::find(allocatedIndices.cbegin(), allocatedIndices.cend(), detectorIndex);
     // Check that the indices for this tube haven't already been added
-    if (iter == wholeTubeIndices.cend() && componentInfo.isDetector(detectorIndex)) {
+    if (iter == allocatedIndices.cend() && componentInfo.isDetector(detectorIndex)) {
       // Find all of the detector indices for the whole tube
-      auto const detectors = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
-      std::transform(detectors.cbegin(), detectors.cend(), std::back_inserter(wholeTubeIndices),
+      auto tubeDetectorIndices = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
+      std::transform(tubeDetectorIndices.cbegin(), tubeDetectorIndices.cend(), std::back_inserter(allocatedIndices),
                      [](auto const &index) { return index; });
+      tubes.emplace_back(tubeDetectorIndices);
     }
   }
-  return wholeTubeIndices;
+  return tubes;
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 
+#include "DetectorTube.h"
 #include "MantidKernel/V3D.h"
 
 #include <optional>
@@ -50,10 +51,10 @@ public:
   virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
 
   virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
-  virtual std::vector<std::size_t> getFullSelectedDetectors() const = 0;
+  virtual std::vector<DetectorTube> getFullSelectedDetectors() const = 0;
 
-  virtual void clearMaskedShapes() = 0;
-  virtual void drawRectangleAbove(std::vector<std::size_t> const &detectorIndices) = 0;
+  virtual void clearShapes() = 0;
+  virtual void drawRectangleAbove(std::vector<DetectorTube> const &detectorIndices) = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -77,20 +78,20 @@ public:
   MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
 
   std::vector<std::size_t> getSelectedDetectors() const override;
-  std::vector<std::size_t> getFullSelectedDetectors() const override;
+  std::vector<DetectorTube> getFullSelectedDetectors() const override;
 
-  void clearMaskedShapes() override;
-  void drawRectangleAbove(std::vector<std::size_t> const &detectorIndices) override;
+  void clearShapes() override;
+  void drawRectangleAbove(std::vector<DetectorTube> const &detectorIndices) override;
 
   void warningBox(std::string const &message) override;
 
 private slots:
   void reconnectInstrumentActor();
   void fileLoaded();
+  void notifyInstrumentActorReset();
   void notifyShapeChanged();
   void selectWholeTube();
   void notifyWholeTubeSelected(size_t pickID);
-  // void singleTubePicked(size_t);
 
 private:
   API::FileFinderWidget *m_files;

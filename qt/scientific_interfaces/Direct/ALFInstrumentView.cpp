@@ -62,7 +62,7 @@ QWidget *ALFInstrumentView::generateLoadWidget() {
 }
 
 void ALFInstrumentView::reconnectInstrumentActor() {
-  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyShapeChanged()));
+  connect(&m_instrumentWidget->getInstrumentActor(), SIGNAL(refreshView()), this, SLOT(notifyInstrumentActorReset()));
 }
 
 void ALFInstrumentView::subscribePresenter(IALFInstrumentPresenter *presenter) { m_presenter = presenter; }
@@ -89,6 +89,8 @@ void ALFInstrumentView::fileLoaded() {
   m_presenter->loadRunNumber();
 }
 
+void ALFInstrumentView::notifyInstrumentActorReset() { m_presenter->notifyInstrumentActorReset(); }
+
 void ALFInstrumentView::notifyShapeChanged() { m_presenter->notifyShapeChanged(); }
 
 MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() const {
@@ -105,7 +107,7 @@ std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
   return detectorIndices;
 }
 
-std::vector<std::size_t> ALFInstrumentView::getFullSelectedDetectors() const {
+std::vector<DetectorTube> ALFInstrumentView::getFullSelectedDetectors() const {
   auto dets = getSelectedDetectors();
   return m_instrumentWidget->findWholeTubeDetectorIndices(dets);
 }
@@ -120,34 +122,37 @@ void ALFInstrumentView::notifyWholeTubeSelected(std::size_t pickID) {
   m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
 }
 
-void ALFInstrumentView::clearMaskedShapes() {
+void ALFInstrumentView::clearShapes() {
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
   surface->blockSignals(true);
   surface->clearMaskedShapes();
   surface->blockSignals(false);
 }
 
-void ALFInstrumentView::drawRectangleAbove(std::vector<std::size_t> const &detectorIndices) {
-  if (detectorIndices.empty()) {
+void ALFInstrumentView::drawRectangleAbove(std::vector<DetectorTube> const &tubeDetectorIndices) {
+  if (tubeDetectorIndices.empty()) {
     return;
   }
 
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
 
-  QPoint firstDetPos, lastDetPos;
-  QSize firstDetSize, lastDetSize;
-  surface->detectorPixelPositionAndSize(detectorIndices.front(), firstDetPos, firstDetSize);
-  surface->detectorPixelPositionAndSize(detectorIndices.back(), lastDetPos, lastDetSize);
+  for (auto const &tube : tubeDetectorIndices) {
+    QPoint firstDetPos, lastDetPos;
+    QSize firstDetSize, lastDetSize;
+    surface->detectorPixelPositionAndSize(tube.front(), firstDetPos, firstDetSize);
+    surface->detectorPixelPositionAndSize(tube.back(), lastDetPos, lastDetSize);
 
-  if (!firstDetPos.isNull() && !lastDetPos.isNull() && !firstDetSize.isNull() && !lastDetSize.isNull()) {
-    auto x1 = lastDetPos.x() + lastDetSize.width() / 2;
-    auto y1 = lastDetPos.y() - lastDetSize.height() / 2;
-    auto x2 = firstDetPos.x() - firstDetSize.width() / 2;
-    auto y2 = firstDetPos.y() + firstDetSize.height() / 2;
+    if (!firstDetPos.isNull() && !lastDetPos.isNull() && !firstDetSize.isNull() && !lastDetSize.isNull()) {
+      auto x1 = lastDetPos.x() + lastDetSize.width() / 2;
+      auto y1 = lastDetPos.y() - lastDetSize.height() / 2;
+      auto x2 = firstDetPos.x() - firstDetSize.width() / 2;
+      auto y2 = firstDetPos.y() + firstDetSize.height() / 2;
 
-    surface->blockSignals(true);
-    surface->drawShape2DStatically("rectangle", Qt::green, QColor(255, 255, 255, 80), QPoint(x1, y1), QPoint(x2, y2));
-    surface->blockSignals(false);
+      // It is important to block signals when drawing the shape
+      surface->blockSignals(true);
+      surface->drawShape2DStatically("rectangle", Qt::green, QColor(255, 255, 255, 80), QPoint(x1, y1), QPoint(x2, y2));
+      surface->blockSignals(false);
+    }
   }
 }
 

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ALFInstrumentModel.h"
+#include "DetectorTube.h"
 #include "DllConfig.h"
 
 #include <optional>
@@ -31,8 +32,9 @@ public:
 
   virtual void loadRunNumber() = 0;
 
-  virtual void notifyShapeChanged(bool updateFromView = true) = 0;
-  virtual void notifyTubesSelected(std::vector<std::size_t> const &detectorIndices) = 0;
+  virtual void notifyInstrumentActorReset() = 0;
+  virtual void notifyShapeChanged() = 0;
+  virtual void notifyTubesSelected(std::vector<DetectorTube> const &tubeDetectorIndices) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -47,17 +49,19 @@ public:
 
   void loadRunNumber() override;
 
-  void notifyShapeChanged(bool updateFromView = true) override;
-  void notifyTubesSelected(std::vector<std::size_t> const &detectorIndices) override;
+  void notifyInstrumentActorReset() override;
+  void notifyShapeChanged() override;
+  void notifyTubesSelected(std::vector<DetectorTube> const &tubeDetectorIndices) override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);
+  void updateInstrumentViewFromModel();
+  void updateAnalysisViewFromModel();
 
   IALFAnalysisPresenter *m_analysisPresenter;
 
   IALFInstrumentView *m_view;
   std::unique_ptr<IALFInstrumentModel> m_model;
-  bool m_redrawShapes{true};
 };
 
 } // namespace MantidQt::CustomInterfaces
