@@ -7,7 +7,7 @@
 
 from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspace, MatrixWorkspaceProperty,\
     FileProperty
-from mantid.kernel import Direction
+from mantid.kernel import Direction, StringListValidator
 from mantid.simpleapi import *
 
 import numpy as np
@@ -38,6 +38,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     MONITOR_COUNT_COL_DEFAULT = 2
     DETECTOR_COUNT_COL_DEFAULT = 5
 
+    # normalisation approach
+    normalise_by = None
+
     @staticmethod
     def category():
         return 'ILL\\Indirect'
@@ -57,18 +60,30 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     def setup(self):
         self.use_incident_energy = self.getProperty('UseIncidentEnergy').value
         self.convert_to_wavenumber = self.getProperty('ConvertToWaveNumber').value
+        self.normalise_by = self.getPropertyValue('NormaliseBy')
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('SampleRuns', action=FileAction.Load, extensions=['']),
                              doc='Sample run(s).')
+
         self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['']),
                              doc='Container run(s) (empty cell)')
+
         self.declareProperty(FileProperty('CorrectionFile', '', action=FileAction.OptionalLoad, extensions=['.txt']),
                              doc='Correction reference file.')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing reduced data.')
+
+        self.declareProperty(name="NormaliseBy",
+                             defaultValue="Monitor",
+                             validator=StringListValidator(["Monitor", "None"]),
+                             direction=Direction.Input,
+                             doc="What normalisation approach to use on data.")
+
         self.declareProperty(name='UseIncidentEnergy', defaultValue=False,
                              doc='Show the energies as incident energies, not transfer ones.')
+
         self.declareProperty(name='ConvertToWaveNumber', defaultValue=False,
                              doc='Convert axis unit to energy in wave number (cm-1)')
 
@@ -192,7 +207,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     def get_counts_and_errors(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float]]:
         """
-        Compute and return correct energy, normalized detector counts and errors
+        Compute and return correct energy, (optionally) normalized detector counts and errors
 
         Args:
         @param data: the data to format
@@ -211,8 +226,12 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             monitor_counts = line[1]
             det_counts = line[2]
             monitor_errors = np.sqrt(monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
-            detector_counts[index] = det_counts / monitor_counts
-            errors[index] = np.sqrt(det_counts + ((det_counts**2) * monitor_errors**2) / monitor_counts**2) / monitor_counts
+            detector_counts[index] = det_counts
+            if self.normalise_by == "Monitor":
+                detector_counts[index] /= monitor_counts
+                errors[index] = np.sqrt(det_counts + ((det_counts**2) * monitor_errors**2) / monitor_counts**2) / monitor_counts
+            else:
+                errors[index] = np.sqrt(detector_counts[index])
         return energy, detector_counts, errors
 
     def get_water_correction(self, correction_file: str) -> np.ndarray:

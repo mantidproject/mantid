@@ -68,7 +68,6 @@ class LagrangeILLReductionTest(unittest.TestCase):
 
     def test_incident_energy(self):
         result = LagrangeILLReduction(SampleRuns='012869:012871', UseIncidentEnergy=True)
-
         self.check_result(result, "Energy", 276, 25.9992, 451.0527)
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
@@ -80,6 +79,12 @@ class LagrangeILLReductionTest(unittest.TestCase):
 
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
+
+    def test_no_normalisation(self):
+        result = LagrangeILLReduction(SampleRuns='012869:012871', NormaliseBy='None')
+        self.check_result(result, "Energy", 276, 21.4992, 446.5527)
+        self.assertAlmostEqual(result.readY(0)[10], 2165, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 1642, 4)
 
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
