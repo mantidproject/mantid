@@ -7,6 +7,7 @@
 #include "ALFInstrumentWidget.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 
 using namespace Mantid::API;
@@ -49,6 +50,24 @@ void ALFInstrumentWidget::handleActiveWorkspaceDeleted() {
   // instrument view.
   loadEmptyInstrument("ALF", getWorkspaceNameStdString());
   resetInstrumentActor(true, true, 0.0, 0.0, true);
+}
+
+std::vector<std::size_t>
+ALFInstrumentWidget::findWholeTubeDetectorIndices(std::vector<std::size_t> const &partTubeDetectorIndices) {
+  auto &componentInfo = m_instrumentActor->componentInfo();
+
+  std::vector<std::size_t> wholeTubeIndices;
+  for (auto const &detectorIndex : partTubeDetectorIndices) {
+    auto const iter = std::find(wholeTubeIndices.cbegin(), wholeTubeIndices.cend(), detectorIndex);
+    // Check that the indices for this tube haven't already been added
+    if (iter == wholeTubeIndices.cend()) {
+      // Find all of the detector indices for the whole tube
+      auto const detectors = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
+      std::transform(detectors.cbegin(), detectors.cend(), std::back_inserter(wholeTubeIndices),
+                     [](auto const &index) { return index; });
+    }
+  }
+  return wholeTubeIndices;
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -148,6 +148,12 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event) {
   }
 }
 
+void InputControllerDrawShape::tryMe(double x1, double y1, double x2, double y2) {
+  emit addShape("rectangle", x1, y1, Qt::green, QColor(255, 255, 255, 80));
+  emit moveRightBottomTo(x2, y2);
+  emit finishSelection(m_rect);
+}
+
 /**
  * Process the mouse move event. If the left mouse button is down sends editing
  * signals.

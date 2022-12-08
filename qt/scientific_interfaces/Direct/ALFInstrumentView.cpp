@@ -10,6 +10,7 @@
 #include "ALFInstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
+#include "MantidQtWidgets/Common/InputController.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
@@ -36,6 +37,7 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesCleared()), this, SLOT(notifyShapeChanged()));
+  connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(singleTubePicked(size_t)));
 
   auto pickTab = m_instrumentWidget->getPickTab();
   connect(pickTab->getSelectTubeButton(), SIGNAL(clicked()), this, SLOT(selectWholeTube()));
@@ -112,6 +114,26 @@ void ALFInstrumentView::selectWholeTube() {
   auto pickTab = m_instrumentWidget->getPickTab();
   pickTab->setPlotType(MantidQt::MantidWidgets::IWPickPlotType::TUBE_INTEGRAL);
   pickTab->setTubeXUnits(MantidQt::MantidWidgets::IWPickXUnits::OUT_OF_PLANE_ANGLE);
+}
+
+void ALFInstrumentView::singleTubePicked(std::size_t pickID) {
+  auto const wholeTubeIndices = m_instrumentWidget->findWholeTubeDetectorIndices({pickID});
+
+  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
+
+  QPoint firstDetPos, lastDetPos;
+  QSize firstDetSize, lastDetSize;
+  surface->detectorPixelPositionAndSize(wholeTubeIndices.front(), firstDetPos, firstDetSize);
+  surface->detectorPixelPositionAndSize(wholeTubeIndices.back(), lastDetPos, lastDetSize);
+
+  if (!firstDetPos.isNull() && !lastDetPos.isNull() && !firstDetSize.isNull() && !lastDetSize.isNull()) {
+    auto x1 = lastDetPos.x() + lastDetSize.width() / 2;
+    auto y1 = lastDetPos.y() - lastDetSize.height() / 2;
+    auto x2 = firstDetPos.x() - firstDetSize.width() / 2;
+    auto y2 = firstDetPos.y() + firstDetSize.height() / 2;
+
+    surface->tryMe(x1, y1, x2, y2);
+  }
 }
 
 void ALFInstrumentView::warningBox(std::string const &message) {

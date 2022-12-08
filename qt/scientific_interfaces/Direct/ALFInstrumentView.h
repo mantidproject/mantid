@@ -83,6 +83,7 @@ private slots:
   void fileLoaded();
   void notifyShapeChanged();
   void selectWholeTube();
+  void singleTubePicked(size_t);
 
 private:
   API::FileFinderWidget *m_files;

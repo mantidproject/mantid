@@ -10,6 +10,8 @@
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
+#include <vector>
+
 namespace MantidQt::CustomInterfaces {
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentWidget : public MantidWidgets::InstrumentWidget {
@@ -22,6 +24,8 @@ public:
 
 private:
   MantidWidgets::InstrumentWidget::TabCustomizations getTabCustomizations() const;
+
+  std::vector<std::size_t> findWholeTubeDetectorIndices(std::vector<std::size_t> const &partTubeDetectorIndices);
 };
 
 } // namespace MantidQt::CustomInterfaces

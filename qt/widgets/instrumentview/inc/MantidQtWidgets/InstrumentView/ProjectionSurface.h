@@ -20,9 +20,12 @@
 #include <QImage>
 #include <QList>
 #include <QMap>
+#include <QPoint>
+#include <QSize>
 #include <QStack>
 
 #include <memory>
+#include <tuple>
 
 namespace Mantid {
 namespace Geometry {
@@ -192,6 +195,12 @@ public:
   /// @param fillColor :: The fill color.
   void startCreatingFreeShape(const QColor &borderColor, const QColor &fillColor = QColor());
 
+  /// Get the position of a detector in its centre, and its size, in terms of pixels.
+  /// @param detectorIndex :: The index of the detector.
+  /// @param position :: The central position of the detector in pixels.
+  /// @param size :: The size of the detector in pixels.
+  virtual void detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const;
+
   // Properties methods which allow the mask shapes to be modified with a
   // property browser.
 
@@ -253,6 +262,8 @@ public:
   bool getShowPeakLabelsFlag() const { return m_showPeakLabels; }
   void setShowPeakRelativeIntensityFlag(bool on);
   bool getShowPeakRelativeIntensityFlag() const { return m_showPeakRelativeIntensity; }
+
+  void tryMe(double x1, double y1, double x2, double y2);
 
 signals:
 

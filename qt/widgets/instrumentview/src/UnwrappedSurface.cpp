@@ -403,6 +403,23 @@ void UnwrappedSurface::setFlippedView(bool on) {
   }
 }
 
+void UnwrappedSurface::detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const {
+  const int vwidth = m_viewImage->width();
+  const int vheight = m_viewImage->height();
+  const double dw = fabs(m_viewRect.width() / vwidth);
+  const double dh = fabs(m_viewRect.height() / vheight);
+
+  for (auto &udet : m_unwrappedDetectors) {
+    if (udet.detIndex == detectorIndex) {
+      position.setX(static_cast<int>((udet.u - m_viewRect.x0()) / dw));
+      position.setY(vheight - static_cast<int>((udet.v - m_viewRect.y0()) / dh));
+      size.setWidth(int(udet.width / dw));
+      size.setHeight(int(udet.height / dh));
+      break;
+    }
+  }
+}
+
 /**
  * Draw the surface onto an image without OpenGL
  * @param image :: Image to draw on.

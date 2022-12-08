@@ -115,6 +115,10 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   connect(alignController, SIGNAL(selection(QRect)), this, SLOT(alignPeaks(QRect)));
 }
 
+void ProjectionSurface::tryMe(double x1, double y1, double x2, double y2) {
+  m_inputControllers[InteractionMode::EditShapeMode]->tryMe(x1, y1, x2, y2);
+}
+
 ProjectionSurface::~ProjectionSurface() {
   if (m_viewImage) {
     delete m_viewImage;
@@ -636,6 +640,11 @@ void ProjectionSurface::startCreatingShape2D(const QString &type, const QColor &
 
 void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor, const QColor &fillColor) {
   emit signalToStartCreatingFreeShape(borderColor, fillColor);
+}
+
+void ProjectionSurface::detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const {
+  throw std::runtime_error(
+      "ProjectionSurface::detectorPixelPositionAndSize has no implementation for this projection type.");
 }
 
 /**

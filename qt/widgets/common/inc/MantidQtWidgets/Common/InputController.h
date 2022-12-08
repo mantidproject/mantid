@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/V3D.h"
+
 #include "DllOption.h"
 #include <QColor>
 #include <QMouseEvent>
@@ -61,6 +63,7 @@ public:
   /// Returns true if a surface using this controller can show
   /// a context menu on right-click
   bool canShowContextMenu() const { return m_canShowContextMenu; }
+  virtual void tryMe(double x1, double y1, double x2, double y2){};
 
 signals:
   void enabled();
@@ -146,6 +149,7 @@ public:
   void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
   void keyPressEvent(QKeyEvent * /*unused*/) override;
   void leaveEvent(QEvent * /*unused*/) override;
+  void tryMe(double x1, double y1, double x2, double y2) override;
 
 signals:
   /// Deselect all selected shapes

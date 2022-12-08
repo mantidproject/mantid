@@ -19,6 +19,7 @@
 #include <QList>
 #include <QMap>
 #include <QPainter>
+#include <QPoint>
 #include <QSet>
 #include <QStack>
 
@@ -109,6 +110,9 @@ public:
   virtual std::string saveToProject() const override;
   /// Get a handle to a peaks workspace from a name
   std::shared_ptr<Mantid::API::IPeaksWorkspace> retrievePeaksWorkspace(const std::string &name) const;
+
+  /// Get the position of a detector in its centre, and its size, in terms of pixels.
+  void detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const override;
 
 protected slots:
 
