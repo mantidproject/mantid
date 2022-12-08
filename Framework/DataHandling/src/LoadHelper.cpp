@@ -156,6 +156,16 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
 
 namespace {
 void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
+  // get dataset dimensions
+  H5::DataSpace dataspace = dataset.getSpace();
+  size_t nDims = dataspace.getSimpleExtentNdims();
+  std::vector<hsize_t> dimsSize(nDims);
+  dataspace.getSimpleExtentDims(dimsSize.data(), NULL);
+
+  // exclude large dataset
+  if ((nDims > 1) || (dimsSize[0] > 9))
+    return;
+
   H5T_class_t typeClass = dataset.getTypeClass();
   switch (typeClass) {
   case H5T_INTEGER:
