@@ -178,9 +178,36 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
     break;
   }
 }
+
+bool excludeGroup(H5::Group &group) {
+  // check group name
+  if (group.getObjName() == "data")
+    return true;
+
+  // check NXclass attribute
+  const std::string nxClassAttr = "NXclass";
+
+  if (!group.attrExists(nxClassAttr))
+    return false;
+
+  H5::Attribute attr = group.openAttribute(nxClassAttr);
+  H5T_class_t typeClass = attr.getTypeClass();
+  if (typeClass != H5T_STRING) {
+    attr.close();
+    return false;
+  }
+  size_t strSize = attr.getInMemDataSize();
+  std::string value;
+  value.resize(strSize);
+  attr.read(attr.getDataType(), value.data());
+  attr.close();
+  return (value == "NXData" || value == "ILL_data_scan_vars" || value == "NXill_data_scan_vars");
+}
 } // namespace
 
 void LoadHelper::addMetadataToWsRun(H5::Group &group, API::Run &runDetails, std::string prependString) {
+  if (excludeGroup(group))
+    return;
   for (size_t i = 0; i < group.getNumObjs(); i++) {
     H5G_obj_t type = group.getObjTypeByIdx(i);
     std::string name = group.getObjnameByIdx(i);
