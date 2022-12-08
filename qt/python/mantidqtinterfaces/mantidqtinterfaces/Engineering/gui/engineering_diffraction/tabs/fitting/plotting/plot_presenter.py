@@ -8,6 +8,7 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
 from mantid.simpleapi import Fit, logger
+from mantidqt.utils.asynchronous import AsyncTask
 from copy import deepcopy
 
 PLOT_KWARGS = {"linestyle": "", "marker": "x", "markersize": "3"}
@@ -33,12 +34,11 @@ class FittingPlotPresenter(object):
         self.workspace_added_observer = GenericObserverWithArgPassing(self.add_workspace_to_plot)
         self.workspace_removed_observer = GenericObserverWithArgPassing(self.remove_workspace_from_plot)
         self.all_workspaces_removed_observer = GenericObserver(self.clear_plot)
-        self.fit_all_started_observer = GenericObserverWithArgPassing(self.do_fit_all)
         self.fit_all_done_notifier = GenericObservable()
-        self.fit_started_observer = GenericObserver(self.set_progress_bar_to_in_progress)
-        self.fit_complete_observer = GenericObserverWithArgPassing(self.set_final_state_progress_bar)
 
         self.setup_toolbar()
+        self.worker = None
+        self.fitprop_list = None
 
     def setup_toolbar(self):
         self.view.set_slot_for_display_all()
@@ -65,11 +65,22 @@ class FittingPlotPresenter(object):
         self.view.update_fitbrowser()
         self.set_progress_bar_zero()
 
+    def do_fit_all_async(self, ws_names_list, do_sequential=True):
+        self.worker = AsyncTask(self.do_fit_all, (ws_names_list, do_sequential),
+                                error_cb=self._on_worker_error,
+                                finished_cb=self._finished)
+        self.worker.start()
+
+    def _on_worker_error(self, _=None):
+        print("Error occurred while running all fit.")
+
+    def _finished(self, _=None):
+        self.fit_all_done_notifier.notify_subscribers(self.fitprop_list)
+        self.fitprop_list = None
+
     def do_fit_all(self, ws_name_list, do_sequential=True):
-        self.set_progress_bar_to_in_progress()
         fitprop_list = []
         prev_fitprop = self.view.read_fitprop_from_browser()
-        final_status = None
         for ws_name in ws_name_list:
             logger.notice(f'Starting to fit workspace {ws_name}')
             fitprop = deepcopy(prev_fitprop)
@@ -89,11 +100,9 @@ class FittingPlotPresenter(object):
             self.view.update_browser(fit_output.OutputStatus, funcstr, ws_name)
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
-            final_status = fit_output.OutputStatus
 
-        self.set_final_state_progress_bar(output_list=None, status=final_status)
         logger.notice('Sequential fitting finished.')
-        self.fit_all_done_notifier.notify_subscribers(fitprop_list)
+        self.fitprop_list = fitprop_list
 
     def fit_toggle(self):
         """Toggle fit browser and tool on/off"""
@@ -109,6 +118,12 @@ class FittingPlotPresenter(object):
     # ==============================
     # Indeterminate Fit Progress Bar
     # ==============================
+
+    def set_progress_bar(self):
+        if self.fitprop_list:
+            self.set_final_state_progress_bar(output_list=self.fitprop_list)
+        else:
+            self.set_progress_bar_zero()
 
     def set_final_state_progress_bar(self, output_list, status=None):
         if not status:

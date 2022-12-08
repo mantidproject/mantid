@@ -40,10 +40,7 @@ class FittingDataPresenter(object):
         self.all_plots_removed_notifier = GenericObservable()
         self.fit_all_started_notifier = GenericObservable()
         # Observers
-        self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
-        #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
-        self.fit_all_done_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.focus_run_observer = GenericObserverWithArgPassing(
             self.view.set_default_files)
 
