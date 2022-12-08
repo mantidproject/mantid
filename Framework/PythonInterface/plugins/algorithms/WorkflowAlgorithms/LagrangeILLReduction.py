@@ -232,6 +232,13 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             self.log().warning("Water correction file is faulty.")
             self.log().warning(str(e))
             correction = None
+        else:
+            water_corr_ws = "__{}_waterCorrection".format(self.output_ws_name)
+            CreateWorkspace(OutputWorkspace=water_corr_ws,
+                            DataX=correction[:, 0],
+                            DataY=correction[:, 1],
+                            UnitX='Energy')
+            self.intermediate_workspaces.append(water_corr_ws)
         return correction
 
     def merge_adjacent_points(self, data: np.ndarray) -> np.ndarray:
@@ -276,16 +283,16 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         interpolated_corr = np.interp(energy, self.water_correction[:, 0], self.water_correction[:, 1])
 
-        CreateWorkspace(OutputWorkspace="__interp_water" + self.output_ws_name,
+        interpolated_water_ws = "__{}_waterInterpolated".format(self.output_ws_name)
+        CreateWorkspace(OutputWorkspace=interpolated_water_ws,
                         DataX=energy,
                         DataY=interpolated_corr,
                         UnitX='Energy')
+        self.intermediate_workspaces.append(interpolated_water_ws)
 
         Multiply(LHSWorkspace=ws_to_correct,
-                 RHSWorkspace="__interp_water" + self.output_ws_name,
+                 RHSWorkspace=interpolated_water_ws,
                  OutputWorkspace=corrected_ws)
-
-        DeleteWorkspace(Workspace="__interp_water" + self.output_ws_name)
 
     def process_empty_cell(self, empty_cell_files: List[str]):
         """
