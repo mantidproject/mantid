@@ -64,4 +64,7 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
  * @param ws A pointer to a Workspace object
  */
 void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
+
+void ImageInfoWidget::setRowCount(const int count) { QTableWidget::setRowCount(count); }
+
 } // namespace MantidQt::MantidWidgets
