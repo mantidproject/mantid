@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import BaseDirective  #pylint: disable=unused-import
+from mantiddoc.directives.base import BaseDirective  # pylint: disable=unused-import
 import os
 
 
@@ -40,9 +40,7 @@ class InterfaceDirective(BaseDirective):
             picture = self._create_screenshot(widget_name=self.options.get("widget", None))
         except RuntimeError:
             picture = None
-        self._insert_screenshot_link(picture,
-                                     align=self.options.get("align", None),
-                                     width=self.options.get("width", None))
+        self._insert_screenshot_link(picture, align=self.options.get("align", None), width=self.options.get("width", None))
         return []
 
     def interface_name(self):
@@ -64,9 +62,8 @@ class InterfaceDirective(BaseDirective):
 
         # Generate image
         from mantiddoc.tools.screenshot import custominterface_screenshot
-        return custominterface_screenshot(self.interface_name(),
-                                          screenshots_dir,
-                                          widget_name=widget_name)
+
+        return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name=widget_name)
 
     def _insert_screenshot_link(self, picture, align=None, width=None):
         """
@@ -106,19 +103,14 @@ class InterfaceDirective(BaseDirective):
             caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
         if align is not None:
-            self.add_rst(f".. figure:: {path}\n"
-                         f"   :class: screenshot\n"
-                         f"   :width: {width}px\n"
-                         f"   :align: {align}\n\n"
-                         f"   {caption}\n\n")
+            self.add_rst(
+                f".. figure:: {path}\n" f"   :class: screenshot\n" f"   :width: {width}px\n" f"   :align: {align}\n\n" f"   {caption}\n\n"
+            )
         else:
-            self.add_rst(f".. figure:: {path}\n"
-                         f"   :class: screenshot\n"
-                         f"   :width: {width}px\n\n"
-                         f"   {caption}\n\n")
+            self.add_rst(f".. figure:: {path}\n" f"   :class: screenshot\n" f"   :width: {width}px\n\n" f"   {caption}\n\n")
 
 
-#------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 
 
 def setup(app):
@@ -128,4 +120,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('interface', InterfaceDirective)
+    app.add_directive("interface", InterfaceDirective)
