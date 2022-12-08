@@ -181,9 +181,23 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
   dataset.read(buffer, dataset.getDataType());
   H5T_class_t typeClass = dataset.getTypeClass();
   switch (typeClass) {
-  case H5T_INTEGER:
-    // TODO read dataset
-    break;
+  case H5T_INTEGER: {
+    H5::IntType type = dataset.getIntType();
+    size_t size = type.getSize();
+    H5T_sign_t sign = type.getSign();
+    if ((size == 1) && (sign == H5T_SGN_NONE))
+      addDataToRun<uint8_t>(buffer, dimsSize[0], runDetails, name);
+    if ((size == 1) && (sign == H5T_SGN_2))
+      addDataToRun<int8_t>(buffer, dimsSize[0], runDetails, name);
+    if ((size == 2) && (sign == H5T_SGN_NONE))
+      addDataToRun<uint16_t>(buffer, dimsSize[0], runDetails, name);
+    if ((size == 2) && (sign == H5T_SGN_2))
+      addDataToRun<int16_t>(buffer, dimsSize[0], runDetails, name);
+    if ((size == 4) && (sign == H5T_SGN_NONE))
+      addDataToRun<uint32_t>(buffer, dimsSize[0], runDetails, name);
+    if ((size == 4) && (sign == H5T_SGN_2))
+      addDataToRun<int32_t>(buffer, dimsSize[0], runDetails, name);
+  } break;
   case H5T_FLOAT:
     // TODO read dataset
     break;
