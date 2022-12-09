@@ -70,6 +70,26 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
   endforeach(part ${ARGN})
 endfunction()
 
+# PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
+# This add the named system test and reun the individually
+
+function(PYSYSTEMTEST_ADD_TEST)
+
+  # Add all of the individual tests so that they can be run in parallel
+  foreach(part ${ARGN})
+    set(_test_name ${part})
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+      add_test(NAME ${_test_name} COMMAND systemtest_no_update.bat -R ${_test_name})
+    else()
+      add_test(NAME ${_test_name} COMMAND systemtest_no_update -R ${_test_name})
+    endif()
+
+    if(PYUNITTEST_RUN_SERIAL)
+      set_tests_properties(${_pyunit_separate_name} PROPERTIES RUN_SERIAL 1)
+    endif()
+  endforeach(part ${ARGN})
+endfunction()
+
 # Defines a macro to check that each file contains a call to unittest.main() The arguments should be the source
 # directory followed by the test files as list, e.g. check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_FILES} )
 #
