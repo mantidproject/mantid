@@ -660,6 +660,15 @@ bool Shape2DCollection::isMasked(double x, double y) const {
   return false;
 }
 
+bool Shape2DCollection::isIntersecting(const QRectF &rect) const {
+  foreach (Shape2D *shape, m_shapes) {
+    if (shape->isIntersecting(rect)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 QList<QPoint> Shape2DCollection::getMaskedPixels() const {
   QList<QPoint> pixels;
   QTransform inv = m_transform.inverted();

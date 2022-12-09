@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QLine>
 #include <QMap>
+#include <QRectF>
 #include <QVector2D>
 
 #include <algorithm>
@@ -170,6 +171,13 @@ bool Shape2D::isMasked(const QPointF &p) const {
   return m_fill_color != QColor() &&
          contains(QTransform().rotate(-m_boundingRotation).map(p - m_boundingRect.center()) + m_boundingRect.center());
 }
+
+/**
+ * Check if the shape is intersecting a QRectF.
+ *
+ * @param rect :: The QRectF to check for intersecting.
+ */
+bool Shape2DRectangle::isIntersecting(const QRectF &rect) const { return rect.intersects(m_boundingRect.toQRectF()); }
 
 /** Load shape 2D state from a Mantid project file
  * @param lines :: lines from the project file to load state from

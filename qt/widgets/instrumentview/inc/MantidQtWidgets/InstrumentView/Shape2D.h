@@ -15,6 +15,7 @@
 
 class QPainter;
 class QMouseEvent;
+class QRectF;
 class QWheelEvent;
 
 namespace MantidQt {
@@ -101,6 +102,8 @@ public:
   /// is a point "masked" by the shape. Only filled regions of a shape mask a
   /// point
   virtual bool isMasked(const QPointF & /*p*/) const;
+  // is a detector intersected by the shape
+  virtual bool isIntersecting(const QRectF &rect) const { return false; };
   /// Set border color.
   virtual void setColor(const QColor &color) { m_color = color; }
   /// Get border color.
@@ -249,6 +252,7 @@ public:
   /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
   std::string type() const override { return "rectangle"; }
+  bool isIntersecting(const QRectF &rect) const override;
 
 protected:
   void drawShape(QPainter &painter) const override;

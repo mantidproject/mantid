@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include <string>
 
@@ -98,10 +99,12 @@ Mantid::Geometry::ComponentInfo const &ALFInstrumentView::componentInfo() const 
 }
 
 std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
+  auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
+      m_instrumentWidget->getInstrumentDisplay()->getSurface());
+
   std::vector<size_t> detectorIndices;
-  // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"
-  // (although weather it's treated as a mask or not is up to the caller)
-  m_instrumentWidget->getInstrumentDisplay()->getSurface()->getMaskedDetectors(detectorIndices);
+  // Find the detectors which are being intersected by the "masked" shapes.
+  surface->getIntersectingDetectors(detectorIndices);
   return detectorIndices;
 }
 

@@ -16,6 +16,7 @@
 
 class QPainter;
 class QMouseEvent;
+class QRectF;
 class QWheelEvent;
 class QKeyEvent;
 
@@ -87,6 +88,8 @@ public:
                            // warning)
   // is a point in real space masked by any of the shapes
   bool isMasked(double x, double y) const;
+  // Is a QRectF intersecting one of the shapes
+  bool isIntersecting(const QRectF &rect) const;
   // collect all screen pixels that are masked by the shapes
   QList<QPoint> getMaskedPixels() const;
 
