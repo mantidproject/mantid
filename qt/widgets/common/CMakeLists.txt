@@ -49,6 +49,7 @@ set(SRC_FILES
     src/ImageInfoModelMD.cpp
     src/ImageInfoPresenter.cpp
     src/ImageInfoWidget.cpp
+    src/ImageInfoWidgetMini.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
@@ -182,6 +183,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/IFunctionView.h
     inc/MantidQtWidgets/Common/IImageInfoWidget.h
     inc/MantidQtWidgets/Common/ImageInfoWidget.h
+    inc/MantidQtWidgets/Common/ImageInfoWidgetMini.h
     inc/MantidQtWidgets/Common/InputController.h
     inc/MantidQtWidgets/Common/InstrumentSelector.h
     inc/MantidQtWidgets/Common/LineEditWithClear.h
