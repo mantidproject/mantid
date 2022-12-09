@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspace, MatrixWorkspaceProperty,\
+from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty,\
     FileProperty
 from mantid.kernel import Direction, StringListValidator
 from mantid.simpleapi import *
@@ -291,7 +291,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         return data[:current_writing_index + 1]
 
-    def correct_data(self, ws_to_correct: MatrixWorkspace, corrected_ws: MatrixWorkspace):
+    def correct_data(self, ws_to_correct: str, corrected_ws: str):
         """
         Apply water correction to the provided data
         @param ws_to_correct the name of the workspace holding the data to be corrected
@@ -305,7 +305,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         interpolated_corr = np.interp(energy, self.water_correction[:, 0], self.water_correction[:, 1])
 
-        interpolated_water_ws = "__{}_waterInterpolated".format(self.output_ws_name)
+        interpolated_water_ws = "{}_waterInterpolated".format(ws_to_correct)
         CreateWorkspace(OutputWorkspace=interpolated_water_ws,
                         DataX=energy,
                         DataY=interpolated_corr,
