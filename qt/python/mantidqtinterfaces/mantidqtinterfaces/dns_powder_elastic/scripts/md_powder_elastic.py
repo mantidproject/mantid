@@ -30,65 +30,72 @@ def background_subtraction(workspace_name, factor=1):
     else:
         field_name = workspace_name[-5:]
     background_name = '_'.join(('empty', field_name))
-    workspace_norm = '_'.join((workspace_name, 'norm'))
-    background_norm = '_'.join((background_name, 'norm'))
+    workspace_norm_name = '_'.join((workspace_name, 'norm'))
+    background_norm_name = '_'.join((background_name, 'norm'))
     try:
         mtd[background_name]
     except KeyError:
         raise_error(f'No background file for {field_name}')
         return mtd[workspace_name]
-    ratio = DivideMD(mtd[workspace_norm], mtd[background_norm])
+    ratio = DivideMD(mtd[workspace_norm_name], mtd[background_norm_name])
+    remove_special_values_ws(ratio)
     scaling = ratio * factor
+    remove_special_values_ws(scaling)
     background_scaled = MultiplyMD(mtd[background_name], scaling)
-    mtd[workspace_name] = mtd[workspace_name] - background_scaled
-    remove_nan_and_negative_from_ws(workspace_name)
+    remove_special_values_ws(background_scaled)
+    MinusMD(mtd[workspace_name], background_scaled, OutputWorkspace=mtd[workspace_name])
+    remove_special_values_ws(mtd[workspace_name])
     return mtd[workspace_name]
 
 
-def flipping_ratio_correction(workspace):
+def flipping_ratio_correction(workspace_name):
     """
     Given SF channel, SF and NSF are corrected for finite flipping ratio.
     """
     # need to be fixed below
-    if workspace.endswith('_nsf'):
+    if workspace_name.endswith('_nsf'):
         return False
-    nsf_workspace = ''.join((workspace[:-2], 'nsf'))
+    nsf_workspace_name = ''.join((workspace_name[:-2], 'nsf'))
     try:
-        mtd[nsf_workspace]
+        mtd[nsf_workspace_name]
     except KeyError:
         raise_error(f'Flipping ratio correction is selected, but no '
-                    f'matching nsf workspace found for {workspace}')
+                    f'matching nsf workspace found for {workspace_name}')
         return False
-    sf_workspace = workspace
-    sf = sf_workspace[-4:]
-    nsf = nsf_workspace[-5:]
-    nicr_sf = '_'.join(('nicr', sf))
-    nicr_nsf = '_'.join(('nicr', nsf))
-    nicr_sf_norm = '_'.join((nicr_sf, 'norm'))
-    nicr_nsf_norm = '_'.join((nicr_nsf, 'norm'))
+    sf_workspace_name = workspace_name
+    sf_field_name = sf_workspace_name[-4:]
+    nsf_field_name = nsf_workspace_name[-5:]
+    nicr_sf_field_name = '_'.join(('nicr', sf_field_name))
+    nicr_nsf_field_name = '_'.join(('nicr', nsf_field_name))
+    nicr_sf_field_norm_name = '_'.join((nicr_sf_field_name, 'norm'))
+    nicr_nsf_field_norm_name = '_'.join((nicr_nsf_field_name, 'norm'))
     try:
-        mtd[nicr_sf] # pylint: disable=pointless-statement
-        mtd[nicr_nsf] # pylint: disable=pointless-statement
+        mtd[nicr_sf_field_name] # pylint: disable=pointless-statement
+        mtd[nicr_nsf_field_name] # pylint: disable=pointless-statement
     except KeyError:
         raise_error(f'Flipping ratio correction is selected, but no '
-                    f'matching NiCr workspace found for {workspace}')
+                    f'matching NiCr workspace found for {workspace_name}')
         return False
-    new_nicr_sf = DivideMD(nicr_sf, nicr_sf_norm)
-    new_nicr_nsf = DivideMD(nicr_nsf, nicr_nsf_norm)
+    new_nicr_sf = DivideMD(mtd[nicr_sf_field_name], mtd[nicr_sf_field_norm_name])
+    remove_special_values_ws(new_nicr_sf)
+    new_nicr_nsf = DivideMD(mtd[nicr_nsf_field_name], mtd[nicr_nsf_field_norm_name])
+    remove_special_values_ws(new_nicr_nsf)
 
     # 1/k, where k = NSF/SF - 1
     inverse_fr_divider = MinusMD(new_nicr_nsf, new_nicr_sf)
+    remove_special_values_ws(inverse_fr_divider)
     inverse_fr = DivideMD(new_nicr_sf, inverse_fr_divider)
+    remove_special_values_ws(inverse_fr)
 
     # apply correction
-    nsf_sf_diff = MinusMD(nsf_workspace, sf_workspace)
+    nsf_sf_diff = MinusMD(mtd[nsf_workspace_name], mtd[sf_workspace_name])
+    remove_special_values_ws(nsf_sf_diff)
     diff_ifr = MultiplyMD(nsf_sf_diff, inverse_fr)
-    mtd[sf_workspace] = MinusMD(sf_workspace,
-                                diff_ifr,
-                                OutputWorkspace=sf_workspace)
-    mtd[nsf_workspace] = PlusMD(nsf_workspace,
-                                diff_ifr,
-                                OutputWorkspace=nsf_workspace)
+    remove_special_values_ws(diff_ifr)
+    MinusMD(mtd[sf_workspace_name], diff_ifr, OutputWorkspace=mtd[sf_workspace_name])
+    remove_special_values_ws(mtd[sf_workspace_name])
+    PlusMD(mtd[nsf_workspace_name], diff_ifr, OutputWorkspace=mtd[nsf_workspace_name])
+    remove_special_values_ws(mtd[nsf_workspace_name])
     return True
 
 
@@ -167,7 +174,7 @@ def vanadium_correction(workspace_name,
     """
     vana_sum = None
     vana_sum_norm = None
-    workspace_norm = '_'.join((workspace_name, 'norm'))
+    workspace_norm_name = '_'.join((workspace_name, 'norm'))
     if workspace_name.endswith('_sf'):
         field_name = workspace_name[-4:]
     else:
@@ -181,16 +188,15 @@ def vanadium_correction(workspace_name,
                     vana_name = '_'.join(('vana', field))
                     vana_norm_name = '_'.join((vana_name, 'norm'))
                     try:
-                        remove_nan_and_negative_from_ws(vana_name)
-                        remove_nan_and_negative_from_ws(vana_norm_name)
                         vana = mtd[vana_name]
-                        vana_norm_name = mtd[vana_norm_name]
+                        remove_special_values_ws(vana)
+                        vana_norm = mtd[vana_norm_name]
+                        remove_special_values_ws(vana_norm)
                     except KeyError:
-                        raise_error(f'No vanadium file for field {field_name}.'
-                                    ' ')
+                        raise_error(f'No vanadium file for field {field_name}.')
                         return mtd[workspace_name]
                     vana_list.append(vana)
-                    norm_list.append(vana_norm_name)
+                    norm_list.append(vana_norm)
             vana_sum = sum(vana_list)
             vana_sum_norm = sum(norm_list)
         else:
@@ -199,15 +205,15 @@ def vanadium_correction(workspace_name,
                 ' vanadium files to be added.')
     elif sum_vana_sf_nsf:
         polarization = field_name.split('_')[0]
-        vana_nsf = '_'.join(('vana', polarization, 'nsf'))
-        vana_sf = '_'.join(('vana', polarization, 'sf'))
-        vana_nsf_norm = '_'.join((vana_nsf, 'norm'))
-        vana_sf_norm = '_'.join((vana_sf, 'norm'))
+        vana_nsf_name = '_'.join(('vana', polarization, 'nsf'))
+        vana_sf_name = '_'.join(('vana', polarization, 'sf'))
+        vana_nsf_norm_name = '_'.join((vana_nsf_name, 'norm'))
+        vana_sf_norm_name = '_'.join((vana_sf_name, 'norm'))
         try:
-            remove_nan_and_negative_from_ws(vana_sf)
-            remove_nan_and_negative_from_ws(vana_sf_norm)
-            vana_sf = mtd[vana_sf]
-            vana_sf_norm = mtd[vana_sf_norm]
+            vana_sf = mtd[vana_sf_name]
+            remove_special_values_ws(vana_sf)
+            vana_sf_norm = mtd[vana_sf_norm_name]
+            remove_special_values_ws(vana_sf_norm)
         except KeyError:
             raise_error(
                 f'No vanadium file for {polarization}_sf .'
@@ -217,10 +223,10 @@ def vanadium_correction(workspace_name,
                 ' "Ignore Vanadium Fields".')
             return mtd[workspace_name]
         try:
-            remove_nan_and_negative_from_ws(vana_nsf)
-            remove_nan_and_negative_from_ws(vana_nsf_norm)
-            vana_nsf = mtd[vana_nsf]
-            vana_nsf_norm = mtd[vana_nsf_norm]
+            vana_nsf = mtd[vana_nsf_name]
+            remove_special_values_ws(vana_nsf)
+            vana_nsf_norm = mtd[vana_nsf_norm_name]
+            remove_special_values_ws(vana_nsf_norm)
         except KeyError:
             raise_error(
                 f'No vanadium file for {polarization}_nsf. '
@@ -235,10 +241,10 @@ def vanadium_correction(workspace_name,
         vana_name = '_'.join(('vana', field_name))
         vana_norm_name = '_'.join((vana_name, 'norm'))
         try:
-            remove_nan_and_negative_from_ws(vana_name)
-            remove_nan_and_negative_from_ws(vana_norm_name)
             vana_sum = mtd[vana_name]
+            remove_special_values_ws(vana_sum)
             vana_sum_norm = mtd[vana_norm_name]
+            remove_special_values_ws(vana_sum_norm)
         except KeyError:
             raise_error(f'No vanadium file for {field_name}.'
                         ' You can choose to ignore'
@@ -265,10 +271,15 @@ def vanadium_correction(workspace_name,
         DataValue=vana_total_norm.getSignalArray()[0][0][0],
         ErrorValue=np.sqrt(vana_total_norm.getErrorSquaredArray()[0][0][0]))
     coef_u = vana_sum / vana_total
+    remove_special_values_ws(coef_u)
     coef_norm = vana_sum_norm / vana_total_norm
+    remove_special_values_ws(coef_norm)
     coef = coef_u / coef_norm
-    MultiplyMD(coef, workspace_norm, OutputWorkspace=workspace_norm)
-    DivideMD(workspace_name, workspace_norm, OutputWorkspace=workspace_name)
+    remove_special_values_ws(coef)
+    MultiplyMD(coef, mtd[workspace_norm_name], OutputWorkspace=mtd[workspace_norm_name])
+    remove_special_values_ws(mtd[workspace_norm_name])
+    DivideMD(mtd[workspace_name], mtd[workspace_norm_name], OutputWorkspace=mtd[workspace_name])
+    remove_special_values_ws(mtd[workspace_name])
     return mtd[workspace_name]
 
 
