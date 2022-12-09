@@ -285,29 +285,27 @@ def vanadium_correction(workspace_name,
 
 def xyz_separation(x_sf, y_sf, z_sf, z_nsf):
     """
-    Separation of polarized experiments based on x,y,z SF and z NSF channel.
+    Separation of polarized experiments based on names of workspaces
+    for x_sf, y_sf, z_sf and z_nsf channels.
     """
     sample_name = x_sf[:-5]
-    xsf_plus_ysf = PlusMD(x_sf, y_sf)
-    twice_zsf = mtd[z_sf] * 2
-    three_zsf = mtd[z_sf] * 3
-    half_imag = xsf_plus_ysf - twice_zsf
-    one_third_inc = three_zsf - xsf_plus_ysf
-    one_third_inc = one_third_inc * 0.5
-    mag_inc_sum = half_imag + one_third_inc
-    mtd[f'{sample_name}_magnetic'] = half_imag * 2
-    mtd[f'{sample_name}_spin_incoh'] = one_third_inc * 3
-    mtd[f'{sample_name}_nuclear_coh'] = mtd[z_nsf] - mag_inc_sum
-    GroupWorkspaces([
-        f'{sample_name}_magnetic', f'{sample_name}_spin_incoh',
-        f'{sample_name}_nuclear_coh'
-    ],
+    magnetic_name = '_'.join((sample_name, 'magnetic'))
+    spin_incoh_name = '_'.join((sample_name, 'spin_incoh'))
+    nuclear_coh_name = '_'.join((sample_name, 'nuclear_coh'))
+
+    x_sf_plus_y_sf = PlusMD(mtd[x_sf], mtd[y_sf])
+    twice_z_sf = mtd[z_sf] * 2.0
+    three_z_sf = mtd[z_sf] * 3.0
+    half_magnetic = x_sf_plus_y_sf - twice_z_sf
+    one_third_incoh = 0.5 * (three_z_sf - x_sf_plus_y_sf)
+
+    mtd[magnetic_name] = half_magnetic * 2.0
+    mtd[spin_incoh_name] = one_third_incoh * 3.0
+    mtd[nuclear_coh_name] = mtd[z_nsf] - half_magnetic - one_third_incoh
+    GroupWorkspaces(
+        [mtd[magnetic_name], mtd[spin_incoh_name], mtd[nuclear_coh_name]],
         OutputWorkspace='separated')
-    return [
-        mtd[f'{sample_name}_nuclear_coh'],
-        mtd[f'{sample_name}_magnetic'],
-        mtd[f'{sample_name}_spin_incoh']
-    ]
+    return [mtd[nuclear_coh_name], mtd[magnetic_name], mtd[spin_incoh_name]]
 
 
 def non_magnetic_separation(sf_workspace_name, nsf_workspace_name):

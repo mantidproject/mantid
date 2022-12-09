@@ -46,7 +46,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         self._nexus = None
         self._norm = None
 
-    def _check_all_fields_there(self, fields):
+    def _check_xyz_separation(self, fields):
         ts = all(field in fields
                  for field in ['x_sf', 'y_sf', 'z_sf', 'z_nsf'])
         return ts

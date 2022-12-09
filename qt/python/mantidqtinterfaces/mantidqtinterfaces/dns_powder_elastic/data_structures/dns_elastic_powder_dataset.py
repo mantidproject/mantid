@@ -37,6 +37,8 @@ class DNSElasticDataset(ObjectDict):
                 data = remove_unnecessary_standard_banks(data, banks)
             self['banks'] = get_bank_positions(data)
             self['fields'] = get_sample_fields(data)
+            if is_sample:
+                self['xyz_data'] = get_sample_fields_each_bank(data)
             self['omega'] = automatic_omega_binning(data)
             self['data_dic'] = create_dataset(data, path)
 
@@ -191,6 +193,19 @@ def get_bank_positions(sample_data, rounding_limit=0.05):
         if not inside:
             new_arr.append(bank)
     return new_arr
+
+
+def get_sample_fields_each_bank(sample_data):
+    det_banks = get_bank_positions(sample_data)
+    angle_and_fields_data = {}
+    for det_bank in det_banks:
+        fields = []
+        for file_dict in sample_data:
+            if det_bank == file_dict['det_rot']:
+                field = field_dict.get(file_dict['field'], file_dict['field'])
+                fields.append(field)
+        angle_and_fields_data[det_bank] = set(fields)
+    return angle_and_fields_data
 
 
 def _get_path_string(dataset, sample_name):
