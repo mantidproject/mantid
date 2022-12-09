@@ -41,8 +41,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
                                     OutputWorkspace=data_ws_name + "_rebinned",
                                     GSSFilename=filename,
                                     IPTS=12345,
-                                    GSSParmFileName='test.prm',
-                                    rethrow=True)
+                                    GSSParmFileName='test.prm')
 
             self.assertTrue(alg_test.isExecuted())
         # check & verify
@@ -91,9 +90,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
                                     OutputWorkspace=data_ws_name + "_rebinned",
                                     GSSFilename="tempout.gda",
                                     IPTS=12345,
-                                    GSSParmFileName='test.prm',
-                                    rethrow=True)
-
+                                    GSSParmFileName='test.prm')
 
             self.assertTrue(alg_test.isExecuted())
         # check & verify
