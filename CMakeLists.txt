@@ -349,3 +349,8 @@ if(ENABLE_CPACK)
   # let people know what is coming out the other end
   message(STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}")
 endif()
+
+# adding system test to it
+set(SYSTEST_NAMES AbinsTest.AbinsCRYSTAL2D AbinsTest.AbinsCRYSTALTestScratch)
+# function to add system test
+pysystemtest_add_test(${SYSTEST_NAMES})
