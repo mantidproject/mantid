@@ -13,6 +13,8 @@
 namespace MantidQt::CustomInterfaces {
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentWidget : public MantidWidgets::InstrumentWidget {
+  Q_OBJECT
+
 public:
   explicit ALFInstrumentWidget(QString workspaceName);
 
