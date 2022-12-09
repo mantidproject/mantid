@@ -225,9 +225,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             energy[index] = line[0] - offset
             monitor_counts = line[1]
             det_counts = line[2]
-            monitor_errors = np.sqrt(monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
             detector_counts[index] = det_counts
             if self.normalise_by == "Monitor":
+                monitor_errors = np.sqrt(monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
                 detector_counts[index] /= monitor_counts
                 errors[index] = np.sqrt(det_counts + ((det_counts**2) * monitor_errors**2) / monitor_counts**2) / monitor_counts
             else:
