@@ -225,5 +225,10 @@ if(COVERAGE)
   coverage_setup(${SRCS_FILENAME} OFF "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 endif()
 
+# adding system test to it
+set(SYSTEST_NAMES AbinsTest.AbinsCRYSTAL2D AbinsTest.AbinsCRYSTALTestScratch)
+# function to add system test
+pysystemtest_add_test(${SYSTEST_NAMES})
+
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists for an explanation
 add_subdirectory(Framework/PostInstall)
