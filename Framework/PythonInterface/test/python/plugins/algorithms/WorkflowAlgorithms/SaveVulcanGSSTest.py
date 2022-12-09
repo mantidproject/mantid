@@ -48,19 +48,6 @@ class SaveVulcanGSSTest(unittest.TestCase):
         except Exception as ex:
             self.assertRaises(RuntimeError)
 
-        # check outputs
-        # output_workspace = AnalysisDataService.retrieve(data_ws_name+"_rebinned")
-
-        # self.assertEqual(output_workspace.getNumberHistograms(), 1)
-        # self.assertEqual(len(output_workspace.readX(0)), 132)
-
-        # # Delete the TESTING file
-        # AnalysisDataService.remove("InputWorkspace")
-        # AnalysisDataService.remove(bin_ws_name)
-        # AnalysisDataService.remove(data_ws_name+"_rebinned")
-
-        # os.remove(filename)
-
         return
 
     def test_save_gss_vdrive(self):
@@ -96,46 +83,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # check & verify
         except Exception as ex:
             self.assertRaises(RuntimeError)
-        # # check outputs
-        # output_workspace = AnalysisDataService.retrieve(data_ws_name+"_rebinned")
 
-        # self.assertEqual(output_workspace.getNumberHistograms(), 3)
-        # self.assertEqual(len(output_workspace.readX(0)), 99)
-
-        # # Delete the TESTING file
-        # AnalysisDataService.remove("InputWorkspace")
-        # AnalysisDataService.remove('vulcan_sim_table')
-        # AnalysisDataService.remove(data_ws_name+"_rebinned")
-
-
-    # def test_saveGSS_no_binning(self):
-    #     """ Test to Save a GSAS file without rebin to Vdrive's standard binning
-    #     """
-    #     # Create a test data file and workspace
-    #     binfilename = "testbin.dat"
-    #     self._createBinFile(binfilename)
-    #
-    #     datawsname = "TestInputWorkspace"
-    #     self._create_data_workspace(datawsname)
-    #
-    #     # Execute
-    #     alg_test = run_algorithm("SaveVulcanGSS",
-    #             InputWorkspace = datawsname,
-    #             OutputWorkspace = datawsname+"_rebinned",
-    #             GSSFilename = "tempout.gda")
-    #
-    #     self.assertTrue(alg_test.isExecuted())
-    #
-    #     # Verify ....
-    #     outputws = AnalysisDataService.retrieve(datawsname+"_rebinned")
-    #     #self.assertEqual(4, tablews.rowCount())
-    #
-    #     # Delete the test hkl file
-    #     os.remove(binfilename)
-    #     AnalysisDataService.remove("InputWorkspace")
-    #     AnalysisDataService.remove(datawsname+"_rebinned")
-    #
-    #     return
 
     @staticmethod
     def _create_binning_workspace(bin_ws_name, tof0, delta, num_pts):
