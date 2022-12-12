@@ -22,14 +22,14 @@ def skip_member(app, what, name, obj, skip, options):
                show_inheritance and noindex that are true if the flag option of same name was given to the auto directive
     """
     exclusions = (
-        'from_bytes',
-        'to_bytes',
-        'real',
-        'imag',
-        'real',
-        'conjugate',
-        'denominator',
-        'numerator',
+        "from_bytes",
+        "to_bytes",
+        "real",
+        "imag",
+        "real",
+        "conjugate",
+        "denominator",
+        "numerator",
     )
 
     exclude = name in exclusions

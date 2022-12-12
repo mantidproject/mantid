@@ -38,7 +38,7 @@ class View(QtWidgets.QWidget):
         self.addItemToTable("Frequency", self.freq, 2)
         self.addItemToTable("Phase", self.phi, 3)
 
-        self.plot = QtWidgets.QPushButton('Add', self)
+        self.plot = QtWidgets.QPushButton("Add", self)
         self.plot.setStyleSheet("background-color:lightgrey")
 
         grid.addWidget(self.plot)

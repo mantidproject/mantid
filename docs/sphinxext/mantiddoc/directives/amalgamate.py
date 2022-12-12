@@ -37,7 +37,7 @@ class CompilationDirective(BaseDirective):
         if os.path.exists(script_dir):
             for file in os.listdir(script_dir):
                 if file.endswith(".rst"):
-                    with open(script_dir + '/' + file) as f:
+                    with open(script_dir + "/" + file) as f:
                         contents = f.read()
                         self.add_rst(contents)
 
@@ -47,11 +47,11 @@ class CompilationDirective(BaseDirective):
         # the location of documentation
         source_dir = self.state.document.settings.env.srcdir
         # the location of the release notes for this version
-        release_dir = self.source().rsplit('/', 1)[0]
+        release_dir = self.source().rsplit("/", 1)[0]
         # argument provided to amalgamate directive
         args = self.arguments[0]
-        if args[0] != '/':
-            args = '/' + args
+        if args[0] != "/":
+            args = "/" + args
         path_to_notes = release_dir + args
         return os.path.abspath(os.path.join(source_dir, path_to_notes))
 
@@ -63,4 +63,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('amalgamate', CompilationDirective)
+    app.add_directive("amalgamate", CompilationDirective)

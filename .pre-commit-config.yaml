@@ -45,3 +45,10 @@ repos:
         # Have to manually copy this from the .flake8 as flake8 will just ignore the config if the file is passed
         exclude: Framework/PythonInterface/test|qt/applications/workbench/workbench/app/resources.py|qt/python/mantidqt/mantidqt/resources.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt4.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py|Testing/PerformanceTests|Testing/SystemTests/lib|Testing/SystemTests/scripts|Testing/SystemTests/tests/framework/reference|scripts/ErrorReporter/ui_errorreport.py
         args: ['--extend-ignore=E999,F821,E402,E127']
+
+  - repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+      - id: black
+        # this is matching the version mantid builds with in conda
+        exclude: Framework|qt|scripts|Testing

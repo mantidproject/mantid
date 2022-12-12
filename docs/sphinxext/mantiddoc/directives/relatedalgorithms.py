@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import AlgorithmBaseDirective  #pylint: disable=unused-import
+from mantiddoc.directives.base import AlgorithmBaseDirective  # pylint: disable=unused-import
 
 
 class RelatedalgorithmsDirective(AlgorithmBaseDirective):
@@ -25,7 +25,7 @@ class RelatedalgorithmsDirective(AlgorithmBaseDirective):
         link_rst = ""
         if seeAlsoList:
             for seeAlsoEntry in seeAlsoList:
-                #test the algorithm exists
+                # test the algorithm exists
                 try:
                     alg = self.create_mantid_algorithm(seeAlsoEntry)
                     link_rst += ":ref:`%s <algm-%s>`, " % (alg.name(), alg.name())
@@ -33,8 +33,10 @@ class RelatedalgorithmsDirective(AlgorithmBaseDirective):
                     env = self.state.document.settings.env
                     try:
                         env.app.warn(
-                            'relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'
-                            .format(seeAlsoEntry, self.algorithm_name(), self.algorithm_version()))
+                            'relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.format(
+                                seeAlsoEntry, self.algorithm_name(), self.algorithm_version()
+                            )
+                        )
                     except AttributeError:
                         pass
 
@@ -56,4 +58,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('relatedalgorithms', RelatedalgorithmsDirective)
+    app.add_directive("relatedalgorithms", RelatedalgorithmsDirective)

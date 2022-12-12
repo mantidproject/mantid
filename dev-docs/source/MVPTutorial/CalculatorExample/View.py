@@ -26,10 +26,10 @@ class View(QtWidgets.QDialog):
         self.table.setHorizontalHeaderLabels("name;value;".split(";"))
 
         # Set display values in the widgets
-        keys = ['value 1', 'operation', 'value 2', 'display', 'result']
+        keys = ["value 1", "operation", "value 2", "display", "result"]
         self.combo = {}
-        self.create_combo_table(1, 1, 'operations')
-        self.create_combo_table(3, 1, 'display')
+        self.create_combo_table(1, 1, "operations")
+        self.create_combo_table(3, 1, "display")
         for row in range(len(keys)):
             self.set_names(keys[row], row)
 
@@ -37,14 +37,14 @@ class View(QtWidgets.QDialog):
         grid = QtWidgets.QGridLayout()
         grid.addWidget(self.table)
 
-        self.button = QtWidgets.QPushButton('Calculate', self)
+        self.button = QtWidgets.QPushButton("Calculate", self)
         self.button.setStyleSheet("background-color:lightgrey")
         grid.addWidget(self.button)
 
         # Connect button click handler method to the button's 'clicked' signal
         self.button.clicked.connect(self.btn_click)
         # connect method to handle combo box selection changing to the corresponding signal
-        self.combo['display'].currentIndexChanged.connect(self.display_changed)
+        self.combo["display"].currentIndexChanged.connect(self.display_changed)
 
         # Set the layout for the view widget
         self.setLayout(grid)
@@ -60,7 +60,7 @@ class View(QtWidgets.QDialog):
     # Populate view
     def create_combo_table(self, row, col, key):
         self.combo[key] = QtWidgets.QComboBox()
-        options = ['test']
+        options = ["test"]
         self.combo[key].addItems(options)
         self.table.setCellWidget(row, col, self.combo[key])
 
@@ -91,7 +91,7 @@ class View(QtWidgets.QDialog):
         return float(self.table.item(row, 1).text())
 
     def get_operation(self):
-        return self.combo['operations'].currentText()
+        return self.combo["operations"].currentText()
 
     def get_display(self):
         return self.combo["display"].currentText()
