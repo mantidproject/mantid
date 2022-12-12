@@ -25,6 +25,9 @@ class IAlgorithm;
 } // namespace Mantid
 
 namespace MantidQt {
+// namespace MantidWidgets {
+// class DataSelector;
+// }
 namespace API {
 
 /**
@@ -53,8 +56,6 @@ class EXPORT_OPT_MANTIDQT_COMMON FileFinderWidget : public API::MantidWidget {
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
   Q_ENUMS(ButtonOpts)
   Q_ENUMS(LiveButtonOpts)
-
-  friend class DataSelector;
 
 public:
   /// options for bringing up the load file dialog
