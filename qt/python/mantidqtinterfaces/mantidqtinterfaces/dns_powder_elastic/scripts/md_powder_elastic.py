@@ -52,7 +52,6 @@ def flipping_ratio_correction(workspace_name):
     """
     Given SF channel, SF and NSF are corrected for finite flipping ratio.
     """
-    # need to be fixed below
     sf_workspace_name = workspace_name
     if workspace_name.endswith('_nsf'):
         return False
