@@ -191,7 +191,7 @@ Provide flags on an index by index basis
 Qt::ItemFlags QtSearchModel::flags(const QModelIndex &index) const {
   const auto column = static_cast<Column>(index.column());
   if (!index.isValid())
-    return nullptr;
+    return {};
   else if (column == Column::EXCLUDE || column == Column::COMMENT)
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
   else

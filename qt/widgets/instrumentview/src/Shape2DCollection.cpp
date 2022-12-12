@@ -175,7 +175,7 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x, int y) const
     return new Shape2DFree(p);
   }
 
-  QStringList complexType = type.split(' ', QString::SkipEmptyParts);
+  QStringList complexType = type.split(' ', Qt::SkipEmptyParts);
 
   if (complexType.size() < 2)
     return nullptr;
