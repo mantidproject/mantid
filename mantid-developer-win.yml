@@ -34,7 +34,7 @@ dependencies:
   - python-dateutil>=2.8.1
   - python=3.8.*
   - pyyaml>=5.4.1
-  - qscintilla2>=2.11.2
+  - qscintilla2
   - qt>=5.15,<6
   - qtconsole>=5.0.3,<6
   - qtpy>=1.9.0
