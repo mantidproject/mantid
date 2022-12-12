@@ -336,11 +336,12 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return 'empty' not in self._standard_data.data_dic.keys()
 
     def _xyz_separation_not_possible(self):
-        selected_xyz_data = self._sample_data['xyz_data']
+        selected_angle_fields_data = self._sample_data['angle_fields_data']
         separation_possibility_list = []
         incomplete_banks_list = []
-        for det_bank_angle in selected_xyz_data.keys():
-            separation_possible = self._check_xyz_separation(selected_xyz_data[det_bank_angle])
+        for det_bank_angle in selected_angle_fields_data.keys():
+            separation_possible = self._check_xyz_separation(
+                selected_angle_fields_data[det_bank_angle])
             separation_possibility_list.append(separation_possible)
             if not separation_possible:
                 incomplete_banks_list.append(det_bank_angle)
@@ -351,6 +352,25 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _coh_incoh_separation_not_possible(self):
         separation_possible = self._get_nsf_sf_pairs()
         return not separation_possible
+
+    def _flipping_ratio_not_possible(self):
+        selected_angle_fields_data = self._sample_data['angle_fields_data']
+        flipping_ratio_possibility_list = []
+        incomplete_banks_list = []
+        for det_bank_angle in selected_angle_fields_data.keys():
+            sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith('_sf')])
+            sf_fields_components = [field.replace("_sf", "") for field in sf_fields]
+            nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith('_nsf')])
+            nsf_fields_components = [field.replace("_nsf", "") for field in nsf_fields]
+            if nsf_fields_components == sf_fields_components:
+                flipping_ratio_possible = True
+            else:
+                flipping_ratio_possible = False
+                incomplete_banks_list.append(det_bank_angle)
+            flipping_ratio_possibility_list.append(flipping_ratio_possible)
+        is_possible = all(flipping_ratio_possibility_list)
+        angles = ', '.join(map(str, sorted(incomplete_banks_list)))
+        return not is_possible, angles
 
     def _bank_positions_not_compatible(self, tol=0.05):
         if self._corrections:
@@ -383,17 +403,22 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         found then the empty string will be returned.
         '''
         if self._corrections and not self._standard_data:
-            return('Standard data have to be selected to perform reduction '
-                   'of sample data.')
+            return ('Standard data have to be selected to perform reduction '
+                    'of sample data.')
         if self._bank_positions_not_compatible():
-            return('Detector rotation angles of the selected standard data do '
-                   'not match the angles of the selected sample data.')
+            return ('Detector rotation angles of the selected standard data do '
+                    'not match the angles of the selected sample data.')
         if self._vana_correction and self._vana_not_in_standard():
             return ('Detector efficiency correction option is chosen, '
                     'but the number of selected vanadium scans is 0.')
         if self._nicr_correction and self._nicr_not_in_standard():
             return ('Flipping ratio correction option is chosen, but '
                     'the number of selected NiCr scans is 0.')
+        if self._nicr_correction and self._flipping_ratio_not_possible()[0]:
+            return ('Flipping ratio correction option is chosen, but '
+                    'no pair of SF and NSF measurements are found '
+                    'for the following bank rotation angles: '
+                    f'{self._flipping_ratio_not_possible()[1]}')
         if self._sample_background_correction and self._empty_not_in_standard():
             return ('Background subtraction from sample is chosen, but '
                     'the number of selected empty scans is 0.')
@@ -406,12 +431,12 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                     'number of selected empty scans, needed for '
                     'background subtraction from NiCr, is 0.')
         if self._non_magnetic and self._coh_incoh_separation_not_possible():
-            return('No pair of SF and NSF measurements are found for '
-                   'performing separation of coherent and incoherent '
-                   'contributions for the selected sample.')
+            return ('No pair of SF and NSF measurements are found for '
+                    'performing separation of coherent and incoherent '
+                    'contributions for the selected sample.')
         if self._xyz and self._xyz_separation_not_possible()[0]:
-            return('Not all fields necessary for performing XYZ '
-                   'separation analysis are found in the selected '
-                   'sample files for the following bank rotation '
-                   f'angles: {self._xyz_separation_not_possible()[1]}.')
+            return ('Not all fields necessary for performing XYZ '
+                    'separation analysis are found in the selected '
+                    'sample files for the following bank rotation '
+                    f'angles: {self._xyz_separation_not_possible()[1]}.')
         return ''

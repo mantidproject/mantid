@@ -38,7 +38,7 @@ class DNSElasticDataset(ObjectDict):
             self['banks'] = get_bank_positions(data)
             self['fields'] = get_sample_fields(data)
             if is_sample:
-                self['xyz_data'] = get_sample_fields_each_bank(data)
+                self['angle_fields_data'] = get_sample_fields_each_bank(data)
             self['omega'] = automatic_omega_binning(data)
             self['data_dic'] = create_dataset(data, path)
 
