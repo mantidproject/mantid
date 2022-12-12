@@ -72,4 +72,26 @@ ALFInstrumentWidget::findWholeTubeDetectorIndices(std::vector<std::size_t> const
   return tubes;
 }
 
+void ALFInstrumentWidget::drawRectanglesAbove(std::vector<DetectorTube> const &tubes) {
+  auto surface = std::dynamic_pointer_cast<MantidWidgets::UnwrappedSurface>(m_instrumentDisplay->getSurface());
+
+  for (auto const &tube : tubes) {
+    drawRectangleAbove(surface, tube);
+  }
+}
+
+void ALFInstrumentWidget::drawRectangleAbove(std::shared_ptr<MantidWidgets::UnwrappedSurface> surface,
+                                             DetectorTube const &tube) {
+  auto const firstDetectorRect = surface->detectorQRectInPixels(tube.front());
+  auto const lastDetectorRect = surface->detectorQRectInPixels(tube.back());
+
+  if (!firstDetectorRect.isNull() && !lastDetectorRect.isNull()) {
+    // It is important to block signals when drawing the shape to prevent calling 'notifyShapeChanged'
+    surface->blockSignals(true);
+    surface->drawShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80), lastDetectorRect.topLeft(),
+                         firstDetectorRect.bottomRight(), false);
+    surface->blockSignals(false);
+  }
+}
+
 } // namespace MantidQt::CustomInterfaces

@@ -7,7 +7,6 @@ set(SRC_FILES
     ALFInstrumentView.cpp
     ALFInstrumentWidget.cpp
     ALFView.cpp
-    DetectorTube.cpp
 )
 
 set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFInstrumentWidget.h ALFView.h)

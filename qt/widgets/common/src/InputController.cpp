@@ -11,7 +11,6 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
-#include <QPoint>
 
 #include <cmath>
 
@@ -223,17 +222,6 @@ void InputControllerDrawShape::startCreatingShape2D(const QString &type, const Q
 void InputControllerDrawShape::onDisabled() {
   m_creating = false;
   emit disabled();
-}
-
-/**
- * Draw a 2D shape without dynamic movement from the mouse.
- */
-void InputControllerDrawShape::drawShape2DStatically(const QString &type, const QColor &borderColor,
-                                                     const QColor &fillColor, const QPoint &topLeftPos,
-                                                     const QPoint &bottomRightPos) {
-  emit addShape(type, topLeftPos.x(), topLeftPos.y(), borderColor, fillColor);
-  emit moveRightBottomTo(bottomRightPos.x(), bottomRightPos.y());
-  // emit finishSelection(m_rect);
 }
 
 //--------------------------------------------------------------------------------

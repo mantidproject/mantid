@@ -50,11 +50,10 @@ public:
 
   virtual MantidWidgets::IInstrumentActor const &getInstrumentActor() const = 0;
 
-  virtual std::vector<std::size_t> getSelectedDetectors() const = 0;
-  virtual std::vector<DetectorTube> getFullSelectedDetectors() const = 0;
+  virtual std::vector<DetectorTube> getSelectedDetectors() const = 0;
 
   virtual void clearShapes() = 0;
-  virtual void drawRectangleAbove(std::vector<DetectorTube> const &detectorIndices) = 0;
+  virtual void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) = 0;
 
   virtual void warningBox(std::string const &message) = 0;
 };
@@ -77,11 +76,10 @@ public:
 
   MantidWidgets::IInstrumentActor const &getInstrumentActor() const override;
 
-  std::vector<std::size_t> getSelectedDetectors() const override;
-  std::vector<DetectorTube> getFullSelectedDetectors() const override;
+  std::vector<DetectorTube> getSelectedDetectors() const override;
 
   void clearShapes() override;
-  void drawRectangleAbove(std::vector<DetectorTube> const &detectorIndices) override;
+  void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) override;
 
   void warningBox(std::string const &message) override;
 

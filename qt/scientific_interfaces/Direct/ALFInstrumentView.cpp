@@ -33,6 +33,8 @@ void ALFInstrumentView::setUpInstrument(std::string const &fileName) {
   reconnectInstrumentActor();
 
   auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface().get();
+  // This signal has been disconnected as we do not want a copy and paste event to update the analysis plot, unless
+  // the pasted shape is subsequently moved
   // connect(surface, SIGNAL(shapeCreated()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(notifyShapeChanged()));
   connect(surface, SIGNAL(shapesRemoved()), this, SLOT(notifyShapeChanged()));
@@ -97,19 +99,15 @@ MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() c
   return m_instrumentWidget->getInstrumentActor();
 }
 
-std::vector<std::size_t> ALFInstrumentView::getSelectedDetectors() const {
+std::vector<DetectorTube> ALFInstrumentView::getSelectedDetectors() const {
   auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
       m_instrumentWidget->getInstrumentDisplay()->getSurface());
 
   std::vector<size_t> detectorIndices;
   // Find the detectors which are being intersected by the "masked" shapes.
   surface->getIntersectingDetectors(detectorIndices);
-  return detectorIndices;
-}
-
-std::vector<DetectorTube> ALFInstrumentView::getFullSelectedDetectors() const {
-  auto dets = getSelectedDetectors();
-  return m_instrumentWidget->findWholeTubeDetectorIndices(dets);
+  // Find all the detector indices in the entirety of the selected tubes
+  return m_instrumentWidget->findWholeTubeDetectorIndices(detectorIndices);
 }
 
 void ALFInstrumentView::selectWholeTube() {
@@ -129,30 +127,9 @@ void ALFInstrumentView::clearShapes() {
   surface->blockSignals(false);
 }
 
-void ALFInstrumentView::drawRectangleAbove(std::vector<DetectorTube> const &tubeDetectorIndices) {
-  if (tubeDetectorIndices.empty()) {
-    return;
-  }
-
-  auto surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
-
-  for (auto const &tube : tubeDetectorIndices) {
-    QPoint firstDetPos, lastDetPos;
-    QSize firstDetSize, lastDetSize;
-    surface->detectorPixelPositionAndSize(tube.front(), firstDetPos, firstDetSize);
-    surface->detectorPixelPositionAndSize(tube.back(), lastDetPos, lastDetSize);
-
-    if (!firstDetPos.isNull() && !lastDetPos.isNull() && !firstDetSize.isNull() && !lastDetSize.isNull()) {
-      auto x1 = lastDetPos.x() + lastDetSize.width() / 2;
-      auto y1 = lastDetPos.y() - lastDetSize.height() / 2;
-      auto x2 = firstDetPos.x() - firstDetSize.width() / 2;
-      auto y2 = firstDetPos.y() + firstDetSize.height() / 2;
-
-      // It is important to block signals when drawing the shape
-      surface->blockSignals(true);
-      surface->drawShape2DStatically("rectangle", Qt::green, QColor(255, 255, 255, 80), QPoint(x1, y1), QPoint(x2, y2));
-      surface->blockSignals(false);
-    }
+void ALFInstrumentView::drawRectanglesAbove(std::vector<DetectorTube> const &tubes) {
+  if (!tubes.empty()) {
+    m_instrumentWidget->drawRectanglesAbove(tubes);
   }
 }
 

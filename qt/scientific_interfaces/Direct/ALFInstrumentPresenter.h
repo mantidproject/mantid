@@ -34,7 +34,7 @@ public:
 
   virtual void notifyInstrumentActorReset() = 0;
   virtual void notifyShapeChanged() = 0;
-  virtual void notifyTubesSelected(std::vector<DetectorTube> const &tubeDetectorIndices) = 0;
+  virtual void notifyTubesSelected(std::vector<DetectorTube> const &tubes) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentPresenter final : public IALFInstrumentPresenter {
@@ -51,7 +51,7 @@ public:
 
   void notifyInstrumentActorReset() override;
   void notifyShapeChanged() override;
-  void notifyTubesSelected(std::vector<DetectorTube> const &tubeDetectorIndices) override;
+  void notifyTubesSelected(std::vector<DetectorTube> const &tubes) override;
 
 private:
   std::optional<std::string> loadAndTransform(const std::string &run);

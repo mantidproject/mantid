@@ -21,6 +21,8 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QPoint>
+#include <QSize>
 #include <QTransform>
 
 #include <cfloat>
@@ -403,21 +405,22 @@ void UnwrappedSurface::setFlippedView(bool on) {
   }
 }
 
-void UnwrappedSurface::detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const {
+QRect UnwrappedSurface::detectorQRectInPixels(std::size_t detectorIndex) const {
   const int vwidth = m_viewImage->width();
   const int vheight = m_viewImage->height();
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height() / vheight);
 
-  for (auto &udet : m_unwrappedDetectors) {
-    if (udet.detIndex == detectorIndex) {
-      position.setX(static_cast<int>((udet.u - m_viewRect.x0()) / dw));
-      position.setY(vheight - static_cast<int>((udet.v - m_viewRect.y0()) / dh));
-      size.setWidth(int(udet.width / dw));
-      size.setHeight(int(udet.height / dh));
-      break;
+  for (const auto &detector : m_unwrappedDetectors) {
+    if (detector.detIndex == detectorIndex) {
+      const auto size = QSize(int(detector.width / dw), int(detector.height / dh));
+      const auto position =
+          QPoint(int(static_cast<int>((detector.u - m_viewRect.x0()) / dw - size.width() / 2.0)),
+                 int(vheight - static_cast<int>((detector.v - m_viewRect.y0()) / dh) - size.height() / 2.0));
+      return QRect(position, size);
     }
   }
+  return QRect();
 }
 
 /**

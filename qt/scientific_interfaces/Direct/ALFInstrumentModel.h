@@ -40,8 +40,8 @@ public:
   virtual std::string loadedWsName() const = 0;
   virtual std::size_t runNumber() const = 0;
 
-  virtual bool setSelectedTubes(std::vector<DetectorTube> const &detectorIndices) = 0;
-  virtual bool addSelectedTube(DetectorTube const &detectorIndices) = 0;
+  virtual bool setSelectedTubes(std::vector<DetectorTube> tubes) = 0;
+  virtual bool addSelectedTube(DetectorTube const &tube) = 0;
   virtual std::vector<DetectorTube> selectedTubes() const = 0;
 
   virtual std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
@@ -58,14 +58,16 @@ public:
   inline std::string loadedWsName() const noexcept override { return "ALFData"; };
   std::size_t runNumber() const override;
 
-  bool setSelectedTubes(std::vector<DetectorTube> const &detectorIndices) override;
-  bool addSelectedTube(DetectorTube const &detectorIndices) override;
+  bool setSelectedTubes(std::vector<DetectorTube> tubes) override;
+  bool addSelectedTube(DetectorTube const &tube) override;
   inline std::vector<DetectorTube> selectedTubes() const noexcept override { return m_tubes; };
 
   std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>
   generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const override;
 
 private:
+  bool tubeExists(DetectorTube const &tube) const;
+
   void collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor, std::vector<double> &x,
                         std::vector<double> &y, std::vector<double> &e, std::vector<double> &twoThetas) const;
   void collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe, std::vector<double> &twoThetas,

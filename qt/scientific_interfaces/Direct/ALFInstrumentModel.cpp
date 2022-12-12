@@ -206,28 +206,34 @@ std::size_t ALFInstrumentModel::runNumber() const {
   return 0u;
 }
 
-bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> const &detectorIndices) {
-  if (detectorIndices.size() != m_tubes.size()) {
-    m_tubes = detectorIndices;
+bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
+  // If the number of tubes is different then we need definitely need to update the stored tubes
+  if (tubes.size() != m_tubes.size()) {
+    m_tubes = std::move(tubes);
     return true;
-  } else {
-    for (auto const &tubeIndices : detectorIndices) {
-      auto const newTube = std::find(m_tubes.cbegin(), m_tubes.cend(), tubeIndices) == m_tubes.cend();
-      if (newTube) {
-        m_tubes = detectorIndices;
-        return true;
-      }
-    }
-    return false;
   }
+
+  // Check if a new tube exists in the provided tubes
+  for (auto const &tube : tubes) {
+    if (!tubeExists(tube)) {
+      m_tubes = std::move(tubes);
+      return true;
+    }
+  }
+  return false;
 }
 
-bool ALFInstrumentModel::addSelectedTube(DetectorTube const &detectorIndices) {
-  auto const newTube = std::find(m_tubes.cbegin(), m_tubes.cend(), detectorIndices) == m_tubes.cend();
-  if (newTube) {
-    m_tubes.emplace_back(detectorIndices);
+bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {
+  auto const isNewTube = !tubeExists(tube);
+  if (isNewTube) {
+    m_tubes.emplace_back(tube);
   }
-  return newTube;
+
+  return isNewTube;
+}
+
+bool ALFInstrumentModel::tubeExists(DetectorTube const &tube) const {
+  return std::find(m_tubes.cbegin(), m_tubes.cend(), tube) != m_tubes.cend();
 }
 
 std::tuple<MatrixWorkspace_sptr, std::vector<double>>

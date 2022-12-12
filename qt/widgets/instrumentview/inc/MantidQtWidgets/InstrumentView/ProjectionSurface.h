@@ -25,7 +25,6 @@
 #include <QStack>
 
 #include <memory>
-#include <tuple>
 
 namespace Mantid {
 namespace Geometry {
@@ -195,12 +194,6 @@ public:
   /// @param fillColor :: The fill color.
   void startCreatingFreeShape(const QColor &borderColor, const QColor &fillColor = QColor());
 
-  /// Get the position of a detector in its centre, and its size, in terms of pixels.
-  /// @param detectorIndex :: The index of the detector.
-  /// @param position :: The central position of the detector in pixels.
-  /// @param size :: The size of the detector in pixels.
-  virtual void detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const;
-
   // Properties methods which allow the mask shapes to be modified with a
   // property browser.
 
@@ -243,8 +236,8 @@ public:
   void loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
 
   /// Draw a 2D shape onto the surface with the given coordinates
-  void drawShape2DStatically(const QString &type, const QColor &borderColor, const QColor &fillColor,
-                             const QPoint &topLeftPos, const QPoint &bottomRightPos);
+  void drawShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor, const QPoint &topLeftPos,
+                   const QPoint &bottomRightPos, const bool select);
   void clearMaskedShapes();
 
   //-----------------------------------

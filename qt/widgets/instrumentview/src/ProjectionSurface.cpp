@@ -638,11 +638,6 @@ void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor, const 
   emit signalToStartCreatingFreeShape(borderColor, fillColor);
 }
 
-void ProjectionSurface::detectorPixelPositionAndSize(std::size_t detectorIndex, QPoint &position, QSize &size) const {
-  throw std::runtime_error(
-      "ProjectionSurface::detectorPixelPositionAndSize has no implementation for this projection type.");
-}
-
 /**
  * Save shapes drawn on the view to a table workspace
  */
@@ -663,12 +658,14 @@ void ProjectionSurface::loadShapesFromTableWorkspace(const Mantid::API::ITableWo
  * @param fillColor :: The color of the shapes fill
  * @param topLeftPos :: The position of the top left corner in pixels
  * @param bottomRightPos :: The position of the bottom right corner in pixels
+ * @param select :: True if you want the shape to be selected immediately after drawing
  */
-void ProjectionSurface::drawShape2DStatically(const QString &type, const QColor &borderColor, const QColor &fillColor,
-                                              const QPoint &topLeftPos, const QPoint &bottomRightPos) {
-  auto drawController = dynamic_cast<InputControllerDrawShape *>(m_inputControllers[InteractionMode::EditShapeMode]);
-  if (drawController) {
-    drawController->drawShape2DStatically(type, borderColor, fillColor, topLeftPos, bottomRightPos);
+void ProjectionSurface::drawShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor,
+                                    const QPoint &topLeftPos, const QPoint &bottomRightPos, const bool select) {
+  m_maskShapes.addShape(type, topLeftPos.x(), topLeftPos.y(), borderColor, fillColor);
+  m_maskShapes.moveRightBottomTo(bottomRightPos.x(), bottomRightPos.y());
+  if (!select) {
+    m_maskShapes.deselectAll();
   }
 }
 

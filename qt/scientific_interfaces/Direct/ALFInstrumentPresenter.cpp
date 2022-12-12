@@ -52,7 +52,7 @@ std::optional<std::string> ALFInstrumentPresenter::loadAndTransform(const std::s
 void ALFInstrumentPresenter::notifyInstrumentActorReset() { updateAnalysisViewFromModel(); }
 
 void ALFInstrumentPresenter::notifyShapeChanged() {
-  if (m_model->setSelectedTubes(m_view->getFullSelectedDetectors())) {
+  if (m_model->setSelectedTubes(m_view->getSelectedDetectors())) {
     updateInstrumentViewFromModel();
     updateAnalysisViewFromModel();
   }
@@ -67,7 +67,7 @@ void ALFInstrumentPresenter::notifyTubesSelected(std::vector<DetectorTube> const
 
 void ALFInstrumentPresenter::updateInstrumentViewFromModel() {
   m_view->clearShapes();
-  m_view->drawRectangleAbove(m_model->selectedTubes());
+  m_view->drawRectanglesAbove(m_model->selectedTubes());
 }
 
 void ALFInstrumentPresenter::updateAnalysisViewFromModel() {

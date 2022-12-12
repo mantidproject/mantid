@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/V3D.h"
-
 #include "DllOption.h"
 #include <QColor>
 #include <QMouseEvent>
@@ -20,7 +18,6 @@ class QWheelEvent;
 class QKeyEvent;
 class QPainter;
 class QPixmap;
-class QPoint;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -149,9 +146,6 @@ public:
   void mouseReleaseEvent(QMouseEvent * /*unused*/) override;
   void keyPressEvent(QKeyEvent * /*unused*/) override;
   void leaveEvent(QEvent * /*unused*/) override;
-
-  void drawShape2DStatically(const QString &type, const QColor &borderColor, const QColor &fillColor,
-                             const QPoint &topLeftPos, const QPoint &bottomRightPos);
 
 signals:
   /// Deselect all selected shapes
