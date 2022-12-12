@@ -140,30 +140,20 @@ if(EXISTS "$ENV{PyQt5_ROOT_DIR}")
 endif()
 
 # =============================================================================
-# Set SIP_DIR. The find_path calls will prefer custom locations over standard locations (HINTS).
-# Common locations followed by OS-dependent versions
+# Set SIP_DIR. The find_path calls will prefer custom locations over standard locations (HINTS). Common locations
+# followed by OS-dependent versions
 list(APPEND _sip_hints ${_python_site_packages})
 list(APPEND _sip_suffixes "share/sip/PyQt5" "PyQt5/bindings")
 if(WIN32)
   list(APPEND _sip_hints ${_python_prefix})
-  list(APPEND _sip_suffixes "sip/PyQt5" )
+  list(APPEND _sip_suffixes "sip/PyQt5")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND _sip_hints "/usr/local/opt")
-  list(
-    APPEND
-    _sip_suffixes
-    "share/PyQt5"
-    "pyqt/share/sip/Qt5"
-    "mantid-pyqt5/share/sip/Qt5"
-  )
+  list(APPEND _sip_suffixes "share/PyQt5" "pyqt/share/sip/Qt5" "mantid-pyqt5/share/sip/Qt5")
 else()
   list(APPEND _sip_hints ${_python_prefix}/share)
-  list(
-    APPEND
-    _sip_suffixes
-    "python${Python_MAJOR_VERSION}${Python_MINOR_VERSION}-sip/PyQt5"
-    "python${Python_MAJOR_VERSION}-sip/PyQt5"
-    "sip/PyQt5"
+  list(APPEND _sip_suffixes "python${Python_MAJOR_VERSION}${Python_MINOR_VERSION}-sip/PyQt5"
+       "python${Python_MAJOR_VERSION}-sip/PyQt5" "sip/PyQt5"
   )
 endif()
 
