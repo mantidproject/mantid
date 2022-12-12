@@ -103,7 +103,10 @@ public:
   /// point
   virtual bool isMasked(const QPointF & /*p*/) const;
   // is a detector intersected by the shape
-  virtual bool isIntersecting(const QRectF &rect) const { return false; };
+  virtual bool isIntersecting(const QRectF &rect) const {
+    (void)rect;
+    return false;
+  };
   /// Set border color.
   virtual void setColor(const QColor &color) { m_color = color; }
   /// Get border color.
