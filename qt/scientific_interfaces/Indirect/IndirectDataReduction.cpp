@@ -361,7 +361,7 @@ void IndirectDataReduction::readSettings() {
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_dataDir.replace(" ", "");
   if (m_dataDir.length() > 0)
-    m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+    m_dataDir = m_dataDir.split(";", Qt::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   QSettings settings;
