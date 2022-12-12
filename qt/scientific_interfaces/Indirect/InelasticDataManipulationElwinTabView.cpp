@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -28,45 +28,46 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
-std::string extractLastOf(const std::string &str, const std::string &delimiter) {
-  auto const cutIndex = str.rfind(delimiter);
-  if (cutIndex != std::string::npos)
-    return str.substr(cutIndex + 1, str.size() - cutIndex);
-  return str;
-}
-
-template <typename Iterator, typename Functor>
-std::vector<std::string> transformElements(Iterator const fromIter, Iterator const toIter, Functor const &functor) {
-  std::vector<std::string> newVector;
-  newVector.reserve(toIter - fromIter);
-  std::transform(fromIter, toIter, std::back_inserter(newVector), functor);
-  return newVector;
-}
-
-template <typename T, typename Predicate> void removeElementsIf(std::vector<T> &vector, Predicate const &filter) {
-  auto const iter = std::remove_if(vector.begin(), vector.end(), filter);
-  if (iter != vector.end())
-    vector.erase(iter, vector.end());
-}
-
-std::vector<std::string> extractSuffixes(QStringList const &files, std::string const &delimiter) {
-  return transformElements(files.begin(), files.end(), [&](QString const &file) {
-    QFileInfo const fileInfo(file);
-    return extractLastOf(fileInfo.baseName().toStdString(), delimiter);
-  });
-}
-
-std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
-  auto suffixes = extractSuffixes(files, "_");
-
-  removeElementsIf(suffixes, [&](std::string const &suffix) { return suffix != "red" && suffix != "sqw"; });
-  return suffixes;
-}
-
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   auto const xValues = workspace->x(0);
   return QPair<double, double>(xValues.front(), xValues.back());
 }
+
+namespace Regexes {
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
+const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
+const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
+} // namespace Regexes
+
+class ExcludeRegionDelegate : public QItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                        const QModelIndex & /*index*/) const override {
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
+    lineEdit->setValidator(validator.release());
+    return lineEdit.release();
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toString();
+    static_cast<QLineEdit *>(editor)->setText(value);
+  }
+
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
+    model->setData(index, lineEdit->text(), Qt::EditRole);
+  }
+
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                            const QModelIndex & /*index*/) const override {
+    editor->setGeometry(option.rect);
+  }
+};
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -165,81 +166,52 @@ void InelasticDataManipulationElwinTabView::setup() {
 
   m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
   m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
+
+  setHorizontalHeaders();
 }
 
 IndirectPlotOptionsView *InelasticDataManipulationElwinTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
 
-QTableWidget *InelasticDataManipulationElwinTabView::getDataTable() const { return m_uiForm.tbElwinData; }
-
-bool InelasticDataManipulationElwinTabView::validate() {
-  if (validateFileSuffix()) {
-    UserInputValidator uiv;
-    auto rangeOne = std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]),
-                                   m_dblManager->value(m_properties["IntegrationEnd"]));
-    uiv.checkValidRange("Range One", rangeOne);
-
-    bool useTwoRanges = m_blnManager->value(m_properties["BackgroundSubtraction"]);
-    if (useTwoRanges) {
-      auto rangeTwo = std::make_pair(m_dblManager->value(m_properties["BackgroundStart"]),
-                                     m_dblManager->value(m_properties["BackgroundEnd"]));
-      uiv.checkValidRange("Range Two", rangeTwo);
-      uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
-    }
-
-    auto const errorMessage = uiv.generateErrorMessage();
-    if (!errorMessage.isEmpty())
-      showMessageBox(errorMessage);
-    return errorMessage.isEmpty();
-  } else
-    return false;
+void InelasticDataManipulationElwinTabView::setHorizontalHeaders() {
+  QStringList headers;
+  headers << "Workspace"
+          << "WS Index";
+  m_uiForm.tbElwinData->setColumnCount(headers.size());
+  m_uiForm.tbElwinData->setHorizontalHeaderLabels(headers);
+  auto header = m_uiForm.tbElwinData->horizontalHeader();
+  header->setSectionResizeMode(0, QHeaderView::Stretch);
+  m_uiForm.tbElwinData->setItemDelegateForColumn(headers.size() - 1,
+                                                 std::make_unique<ExcludeRegionDelegate>().release());
+  m_uiForm.tbElwinData->verticalHeader()->setVisible(false);
 }
-bool InelasticDataManipulationElwinTabView::validateFileSuffix() {
-  UserInputValidator uiv;
 
-  if (m_uiForm.inputChoice->currentIndex() == 0) {
-    uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
-    auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
-    if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
-      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
-  }
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage);
-  return errorMessage.isEmpty();
+void InelasticDataManipulationElwinTabView::clearDataTable() { m_uiForm.tbElwinData->setRowCount(0); }
+
+void InelasticDataManipulationElwinTabView::addTableEntry(size_t row, std::string const &name, int spectrum) {
+  m_uiForm.tbElwinData->insertRow(static_cast<int>(row));
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
+  auto flags = cell->flags();
+  flags ^= Qt::ItemIsEditable;
+  cell->setFlags(flags);
+  setCell(std::move(cell), row, 0);
+
+  cell = std::make_unique<QTableWidgetItem>(QString::number(spectrum));
+  cell->setFlags(flags);
+  setCell(std::move(cell), row, 1);
 }
+
+void InelasticDataManipulationElwinTabView::setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column) {
+  m_uiForm.tbElwinData->setItem(static_cast<int>(row), column, cell.release());
+}
+
+QModelIndexList InelasticDataManipulationElwinTabView::getSelectedData() {
+  return m_uiForm.tbElwinData->selectionModel()->selectedIndexes();
+}
+
+FileFinderWidget *InelasticDataManipulationElwinTabView::getFileFinderWidget() { return m_uiForm.dsInputFiles; }
 
 void InelasticDataManipulationElwinTabView::setFBSuffixes(QStringList const suffix) {
   m_uiForm.dsInputFiles->setFileExtensions(suffix);
-}
-
-void InelasticDataManipulationElwinTabView::setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws,
-                                                                 const QPair<double, double> &range) {
-  auto inst = ws->getInstrument();
-  auto analyser = inst->getStringParameter("analyser");
-
-  if (analyser.size() > 0) {
-    auto comp = inst->getComponentByName(analyser[0]);
-
-    if (comp) {
-      auto params = comp->getNumberParameter("resolution", true);
-
-      // set the default instrument resolution
-      if (!params.empty()) {
-        double res = params[0];
-        m_dblManager->setValue(m_properties["IntegrationStart"], -res);
-        m_dblManager->setValue(m_properties["IntegrationEnd"], res);
-
-        m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
-        m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
-      } else {
-        m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
-        m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
-      }
-    } else {
-      showMessageBox("Warning: The instrument definition file for the input "
-                     "workspace contains an invalid value.");
-    }
-  }
 }
 
 void InelasticDataManipulationElwinTabView::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
@@ -412,6 +384,38 @@ void InelasticDataManipulationElwinTabView::updateRS(QtProperty *prop, double va
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateRS(QtProperty *, double)));
 }
 
+void InelasticDataManipulationElwinTabView::setIntegrationStart(double value) {
+  m_dblManager->setValue(m_properties["IntegrationStart"], value);
+}
+
+double InelasticDataManipulationElwinTabView::getIntegrationStart() {
+  return m_dblManager->value(m_properties["IntegrationStart"]);
+}
+
+void InelasticDataManipulationElwinTabView::setIntegrationEnd(double value) {
+  m_dblManager->setValue(m_properties["IntegrationEnd"], value);
+}
+
+double InelasticDataManipulationElwinTabView::getIntegrationEnd() {
+  return m_dblManager->value(m_properties["IntegrationEnd"]);
+}
+
+void InelasticDataManipulationElwinTabView::setBackgroundStart(double value) {
+  m_dblManager->setValue(m_properties["BackgroundStart"], value);
+}
+
+double InelasticDataManipulationElwinTabView::getBackgroundStart() {
+  return m_dblManager->value(m_properties["BackgroundStart"]);
+}
+
+void InelasticDataManipulationElwinTabView::setBackgroundEnd(double value) {
+  m_dblManager->setValue(m_properties["BackgroundEnd"], value);
+}
+
+double InelasticDataManipulationElwinTabView::getBackgroundEnd() {
+  return m_dblManager->value(m_properties["BackgroundEnd"]);
+}
+
 /**
  * Set the position of the range selectors on the mini plot
  *
@@ -499,11 +503,13 @@ void InelasticDataManipulationElwinTabView::setAvailableSpectra(WorkspaceIndex m
 
 void InelasticDataManipulationElwinTabView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                                                                 const std::vector<WorkspaceIndex>::const_iterator &to) {
+  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SIGNAL(selectedSpectrumChanged(int)));
   m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
   m_uiForm.cbPlotSpectrum->clear();
 
   for (auto spectrum = from; spectrum < to; ++spectrum)
     m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SIGNAL(selectedSpectrumChanged(int)));
 }
 
 int InelasticDataManipulationElwinTabView::getCurrentInputIndex() { return m_uiForm.inputChoice->currentIndex(); }
@@ -527,6 +533,10 @@ bool InelasticDataManipulationElwinTabView::isLoadHistory() { return m_uiForm.ck
 bool InelasticDataManipulationElwinTabView::isGroupInput() { return m_uiForm.ckGroupInput->isChecked(); }
 
 bool InelasticDataManipulationElwinTabView::getNormalise() { return m_blnManager->value(m_properties["Normalise"]); }
+
+bool InelasticDataManipulationElwinTabView::getBackgroundSubtraction() {
+  return m_blnManager->value(m_properties["BackgroundSubtraction"]);
+}
 
 std::string InelasticDataManipulationElwinTabView::getLogName() { return m_uiForm.leLogName->text().toStdString(); }
 

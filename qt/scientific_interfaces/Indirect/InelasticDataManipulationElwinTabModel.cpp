@@ -50,14 +50,14 @@ void InelasticDataManipulationElwinTabModel::setupGroupAlgorithm(MantidQt::API::
 void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
     MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceBaseName,
     std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
-    std::string sampleEnvironmentLogValue) {
+    std::string const &sampleEnvironmentLogValue) {
 
   workspaceBaseName += "_elwin_";
 
-  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
-  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
-  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
-  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
+  auto const qWorkspace = (workspaceBaseName + "eq").toStdString();
+  auto const qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
+  auto const elfWorkspace = (workspaceBaseName + "elf").toStdString();
+  auto const eltWorkspace = (workspaceBaseName + "elt").toStdString();
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
@@ -86,7 +86,7 @@ void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
   batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(runtimeProps));
 }
 
-void InelasticDataManipulationElwinTabModel::ungroupAlgorithm(const std::string &InputWorkspace) {
+void InelasticDataManipulationElwinTabModel::ungroupAlgorithm(std::string const &InputWorkspace) {
   auto ungroupAlg = AlgorithmManager::Instance().create("UnGroupWorkspace");
   ungroupAlg->initialize();
   ungroupAlg->setProperty("InputWorkspace", InputWorkspace);

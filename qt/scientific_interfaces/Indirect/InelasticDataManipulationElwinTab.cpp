@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -36,7 +36,7 @@ bool doesExistInADS(std::string const &workspaceName) {
 
 std::vector<std::string> getOutputWorkspaceSuffices() { return {"_eq", "_eq2", "_elf", "_elt"}; }
 
-std::string extractLastOf(const std::string &str, const std::string &delimiter) {
+std::string extractLastOf(std::string const &str, std::string const &delimiter) {
   auto const cutIndex = str.rfind(delimiter);
   if (cutIndex != std::string::npos)
     return str.substr(cutIndex + 1, str.size() - cutIndex);
@@ -75,49 +75,6 @@ std::vector<std::string> getFilteredSuffixes(QStringList const &files) {
   return suffixes;
 }
 
-namespace Regexes {
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
-const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
-const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
-const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
-} // namespace Regexes
-
-class ExcludeRegionDelegate : public QItemDelegate {
-public:
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
-                        const QModelIndex & /*index*/) const override {
-    auto lineEdit = std::make_unique<QLineEdit>(parent);
-    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
-    lineEdit->setValidator(validator.release());
-    return lineEdit.release();
-  }
-
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-    const auto value = index.model()->data(index, Qt::EditRole).toString();
-    static_cast<QLineEdit *>(editor)->setText(value);
-  }
-
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
-    auto *lineEdit = static_cast<QLineEdit *>(editor);
-    model->setData(index, lineEdit->text(), Qt::EditRole);
-  }
-
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
-                            const QModelIndex & /*index*/) const override {
-    editor->setGeometry(option.rect);
-  }
-};
-
-QStringList defaultHeaders() {
-  QStringList headers;
-  headers << "Workspace"
-          << "WS Index";
-  return headers;
-}
-
 class ScopedFalse {
   bool &m_ref;
   bool m_oldValue;
@@ -154,12 +111,6 @@ InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *pa
   connect(m_view.get(), SIGNAL(removeDataClicked()), this, SLOT(removeSelectedData()));
 
   m_parent = dynamic_cast<InelasticDataManipulation *>(parent);
-  m_dataTable = m_view->getDataTable();
-
-  const QStringList headers = defaultHeaders();
-  setHorizontalHeaders(headers);
-  m_dataTable->setItemDelegateForColumn(headers.size() - 1, std::make_unique<ExcludeRegionDelegate>().release());
-  m_dataTable->verticalHeader()->setVisible(false);
 }
 
 InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {}
@@ -294,7 +245,30 @@ void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
                    "was not produced - temperatures were not found.");
 }
 
-bool InelasticDataManipulationElwinTab::validate() { return m_view->validate(); }
+bool InelasticDataManipulationElwinTab::validate() {
+  UserInputValidator uiv;
+  if (m_view->getCurrentInputIndex() == 0) {
+    auto const inputFileWidget = m_view->getFileFinderWidget();
+    uiv.checkFileFinderWidgetIsValid("Input", inputFileWidget);
+    auto const suffixes = getFilteredSuffixes(inputFileWidget->getFilenames());
+    if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
+      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+  }
+
+  auto rangeOne = std::make_pair(m_view->getIntegrationStart(), m_view->getIntegrationEnd());
+  uiv.checkValidRange("Range One", rangeOne);
+  bool useTwoRanges = m_view->getBackgroundSubtraction();
+  if (useTwoRanges) {
+    auto rangeTwo = std::make_pair(m_view->getBackgroundStart(), m_view->getBackgroundEnd());
+    uiv.checkValidRange("Range Two", rangeTwo);
+    uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
+  }
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+  return errorMessage.isEmpty();
+}
 
 void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
   auto const tabName("Elwin");
@@ -401,7 +375,32 @@ void InelasticDataManipulationElwinTab::handlePreviewSpectrumChanged(int spectru
 }
 
 void InelasticDataManipulationElwinTab::updateIntegrationRange() {
-  m_view->setDefaultResolution(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
+  auto inst = getInputWorkspace()->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+  if (analyser.size() > 0) {
+    auto comp = inst->getComponentByName(analyser[0]);
+    if (comp) {
+      auto params = comp->getNumberParameter("resolution", true);
+
+      // set the default instrument resolution
+      if (!params.empty()) {
+        double res = params[0];
+
+        m_view->setIntegrationStart(-res);
+        m_view->setIntegrationEnd(res);
+
+        m_view->setBackgroundStart(-10 * res);
+        m_view->setBackgroundEnd(-9 * res);
+      } else {
+        auto range = getXRangeFromWorkspace(getInputWorkspace());
+        m_view->setIntegrationStart(range.first);
+        m_view->setIntegrationEnd(range.second);
+      }
+    } else {
+      showMessageBox("Warning: The instrument definition file for the input "
+                     "workspace contains an invalid value.");
+    }
+  }
 }
 
 void InelasticDataManipulationElwinTab::runClicked() {
@@ -515,48 +514,15 @@ void InelasticDataManipulationElwinTab::addDataToModel(IAddWorkspaceDialog const
 }
 
 void InelasticDataManipulationElwinTab::updateTableFromModel() {
-  ScopedFalse _signalBlock(m_emitCellChanged);
-  m_dataTable->setRowCount(0);
+  m_view->clearDataTable();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
-    addTableEntry(domainIndex);
+    m_view->addTableEntry(domainIndex.value, m_dataModel->getWorkspace(domainIndex)->getName(),
+                          m_dataModel->getSpectrum(domainIndex));
   }
 }
 
-void InelasticDataManipulationElwinTab::addTableEntry(FitDomainIndex row) {
-  m_dataTable->insertRow(static_cast<int>(row.value));
-  const auto &name = m_dataModel->getWorkspace(row)->getName();
-  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
-  auto flags = cell->flags();
-  flags ^= Qt::ItemIsEditable;
-  cell->setFlags(flags);
-  setCell(std::move(cell), row.value, 0);
-
-  cell = std::make_unique<QTableWidgetItem>(QString::number(m_dataModel->getSpectrum(row)));
-  cell->setFlags(flags);
-  setCell(std::move(cell), row.value, workspaceIndexColumn());
-}
-
-void InelasticDataManipulationElwinTab::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row,
-                                                int column) {
-  m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
-}
-
-void InelasticDataManipulationElwinTab::setCellText(const QString &text, FitDomainIndex row, int column) {
-  m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
-}
-
-int InelasticDataManipulationElwinTab::workspaceIndexColumn() const { return 1; }
-
-void InelasticDataManipulationElwinTab::setHorizontalHeaders(const QStringList &headers) {
-  m_dataTable->setColumnCount(headers.size());
-  m_dataTable->setHorizontalHeaderLabels(headers);
-
-  auto header = m_dataTable->horizontalHeader();
-  header->setSectionResizeMode(0, QHeaderView::Stretch);
-}
-
 void InelasticDataManipulationElwinTab::removeSelectedData() {
-  auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
+  auto selectedIndices = m_view->getSelectedData();
   std::sort(selectedIndices.begin(), selectedIndices.end());
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
     --item;
@@ -587,7 +553,7 @@ size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
 }
 
 void InelasticDataManipulationElwinTab::checkLoadedFiles() {
-  if (m_view->validateFileSuffix()) {
+  if (validate()) {
     newInputFiles();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
     updateIntegrationRange();
@@ -629,9 +595,9 @@ void InelasticDataManipulationElwinTab::setInputWorkspace(MatrixWorkspace_sptr i
  * the selected spectrum of the current input workspace.
  */
 void InelasticDataManipulationElwinTab::plotCurrentPreview() {
-  auto previewWs = getPreviewPlotWorkspace();
-  auto inputWs = getInputWorkspace();
-  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
+  auto const previewWs = getPreviewPlotWorkspace();
+  auto const inputWs = getInputWorkspace();
+  auto const index = boost::numeric_cast<size_t>(m_selectedSpectrum);
   auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 
   // Check a workspace has been selected

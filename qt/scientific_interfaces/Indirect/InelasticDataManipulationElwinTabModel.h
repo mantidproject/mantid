@@ -28,8 +28,8 @@ public:
                            std::string const &inputWorkspacesString, std::string const &inputGroupWsName);
   void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, QString workspaceBaseName,
                                   std::string const &inputGroupWsName, std::string const &sampleEnvironmentLogName,
-                                  std::string sampleEnvironmentLogValue);
-  void ungroupAlgorithm(const std::string &InputWorkspace);
+                                  std::string const &sampleEnvironmentLogValue);
+  void ungroupAlgorithm(std::string const &InputWorkspace);
   void setIntegrationStart(double integrationStart);
   void setIntegrationEnd(double integrationEnd);
   void setBackgroundStart(double backgroundStart);
