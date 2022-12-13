@@ -164,7 +164,7 @@ void addDataToRun(void *data, size_t n, API::Run &runDetails, const std::string 
     runDetails.addProperty(name, RunType(values[0]));
   else
     for (size_t i = 0; i < n; i++)
-      runDetails.addProperty(name, RunType(values.data()[i]));
+      runDetails.addProperty(name + "_" + std::to_string(i), RunType(values.data()[i]));
 }
 
 void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
