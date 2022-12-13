@@ -185,4 +185,15 @@ std::optional<double> ALFAnalysisModel::averageTwoTheta() const {
   return std::reduce(m_twoThetas.cbegin(), m_twoThetas.cend()) / static_cast<double>(numberOfTubes());
 }
 
+std::optional<double> ALFAnalysisModel::rotationAngle() const {
+  if (m_fitStatus.empty()) {
+    return std::nullopt;
+  }
+  auto const twoTheta = averageTwoTheta();
+  if (!twoTheta) {
+    return std::nullopt;
+  }
+  return peakCentre() / (2 * sin(*twoTheta));
+}
+
 } // namespace MantidQt::CustomInterfaces

@@ -67,6 +67,8 @@ public:
 
   MOCK_METHOD2(setAverageTwoTheta, void(std::optional<double> average, std::vector<double> const &all));
 
+  MOCK_METHOD1(setRotationAngle, void(std::optional<double> rotation));
+
   MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
@@ -93,6 +95,8 @@ public:
 
   MOCK_CONST_METHOD0(averageTwoTheta, std::optional<double>());
   MOCK_CONST_METHOD0(allTwoThetas, std::vector<double>());
+
+  MOCK_CONST_METHOD0(rotationAngle, std::optional<double>());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

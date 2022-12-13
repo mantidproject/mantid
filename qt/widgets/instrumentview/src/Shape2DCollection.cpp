@@ -482,12 +482,10 @@ bool Shape2DCollection::selectControlPointAt(int x, int y) {
   QPointF p = QPointF(x, y);
   if (!m_currentShape)
     return false;
+  auto const cpSensitivity = m_currentShape->controlPointSize() + 2;
   for (size_t i = 0; i < m_currentShape->getNControlPoints(); ++i) {
-    // QPointF cp = m_currentShape->getControlPoint(i) - p;
     QPointF cp = m_transform.map(m_currentShape->getControlPoint(i)) - p;
-    if (fabs(cp.x()) + fabs(cp.y()) <= sizeCP + 2)
-    // if (cp.manhattanLength() <= sizeCP + 2)
-    {
+    if (fabs(cp.x()) + fabs(cp.y()) <= cpSensitivity) {
       m_currentCP = i;
       return true;
     }
@@ -656,6 +654,15 @@ bool Shape2DCollection::isMasked(double x, double y) const {
   QPointF p(x, y);
   foreach (Shape2D *shape, m_shapes) {
     if (shape->isMasked(p)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Shape2DCollection::isIntersecting(const QRectF &rect) const {
+  foreach (Shape2D *shape, m_shapes) {
+    if (shape->isIntersecting(rect)) {
       return true;
     }
   }

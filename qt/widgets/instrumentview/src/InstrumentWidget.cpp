@@ -115,7 +115,7 @@ public:
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
                                    double scaleMin, double scaleMax, bool setDefaultView, bool useThread,
-                                   Dependencies deps)
+                                   Dependencies deps, TabCustomizations customizations)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(std::move(wsName)), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(
@@ -193,7 +193,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
   // Create the b=tabs
-  createTabs(settings);
+  createTabs(settings, customizations);
 
   settings.endGroup();
 
@@ -1446,7 +1446,7 @@ bool InstrumentWidget::isGLEnabled() const { return m_useOpenGL; }
 /**
  * Create and add the tab widgets.
  */
-void InstrumentWidget::createTabs(const QSettings &settings) {
+void InstrumentWidget::createTabs(const QSettings &settings, TabCustomizations customizations) {
   // Render Controls
   m_renderTab = new InstrumentWidgetRenderTab(this);
   m_qtConnect->connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
@@ -1454,7 +1454,7 @@ void InstrumentWidget::createTabs(const QSettings &settings) {
   m_renderTab->loadSettings(settings);
 
   // Pick controls
-  m_pickTab = new InstrumentWidgetPickTab(this);
+  m_pickTab = new InstrumentWidgetPickTab(this, customizations.pickTools);
   m_pickTab->loadSettings(settings);
 
   // Mask controls

@@ -4,29 +4,29 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 #!/usr/bin/env python
 import datetime
-import requests # python-requests
+import requests  # python-requests
 
 URL = "http://builds.mantidproject.org/job/master_systemtests"
-PLATFORMS=['rhel7','osx', 'win7', 'ubuntu', 'ubuntu-16.04']
+PLATFORMS = ["rhel7", "osx", "win7", "ubuntu", "ubuntu-16.04"]
 
 
 class TestCase(object):
     def __init__(self, kwargs):
-        self.status = kwargs['status']
+        self.status = kwargs["status"]
         if self.status == "REGRESSION":
             self.status = "FAILED"
-        self.name = kwargs['name']
+        self.name = kwargs["name"]
 
     def __str__(self):
         return self.name
 
 
 def getLabel(url):
-    label = url.split('label=')[-1]
-    return label.split('/')[0:2]
+    label = url.split("label=")[-1]
+    return label.split("/")[0:2]
 
 
 def addTestResult(results, case, label):
@@ -39,12 +39,12 @@ def addTestResult(results, case, label):
 
 def printResultCell(mark, length):
     if mark:
-        left = int(length/2)
-        right = length-left-1
-        print("%sx%s" % (' '*left, ' '*right),end=' ')
+        left = int(length / 2)
+        right = length - left - 1
+        print("%sx%s" % (" " * left, " " * right), end=" ")
     else:
-        print(' '*(length),end=' ')
-    print('|',end=' ')
+        print(" " * (length), end=" ")
+    print("|", end=" ")
 
 
 def generateTable(interesting, labels, heading):
@@ -53,7 +53,7 @@ def generateTable(interesting, labels, heading):
 
     print()
     print(heading)
-    print("-"*len(heading))
+    print("-" * len(heading))
     print()
 
     # get the maximum test name length
@@ -65,13 +65,13 @@ def generateTable(interesting, labels, heading):
     maxlength += 2
 
     # print out the heading line with separator
-    header = '| Test '+' '*(maxlength-5)+'|'
+    header = "| Test " + " " * (maxlength - 5) + "|"
     for label in labels:
-        header += ' '+label+' |'
+        header += " " + label + " |"
     print(header)
-    header = header.split('|')
-    header = ['-'*len(item) for item in header]
-    print('|'.join(header))
+    header = header.split("|")
+    header = ["-" * len(item) for item in header]
+    print("|".join(header))
 
     # sort the tests so the least tested is first
     ordered_tests = {}
@@ -87,7 +87,7 @@ def generateTable(interesting, labels, heading):
 
     # print the table
     for test in tests:
-        print('|', test, ' '*(maxlength-len(test)-2), '|',end=' ')
+        print("|", test, " " * (maxlength - len(test) - 2), "|", end=" ")
         for label in labels:
             printResultCell(label in interesting[test], len(label))
         print()
@@ -98,7 +98,7 @@ failed = {}
 totalCount = 0
 
 for platform in PLATFORMS:
-    url = URL+"-"+platform+"/lastCompletedBuild/testReport/api/json"
+    url = URL + "-" + platform + "/lastCompletedBuild/testReport/api/json"
     params = {}
 
     request = requests.get(url, params=params)
@@ -107,8 +107,8 @@ for platform in PLATFORMS:
         raise RuntimeError("'%s' returned %d" % (url, request.getcode()))
     json = request.json()
 
-    label=platform
-    totalCount += int(json['failCount'])+int(json['passCount'])+int(json['skipCount'])
+    label = platform
+    totalCount += int(json["failCount"]) + int(json["passCount"]) + int(json["skipCount"])
 
     for case in json["suites"][0]["cases"]:
         case = TestCase(case)
@@ -131,31 +131,34 @@ for key in failed.keys():
 labels.sort()
 
 # print out the yaml header so it gets parsed by jekyll
-print('---')
-print('layout: default')
-print('date:', datetime.datetime.now().strftime("%Y-%m-%d"))
-print('author: Peter Peterson')
-print('title: Currently Skipped System Tests')
-print('---')
+print("---")
+print("layout: default")
+print("date:", datetime.datetime.now().strftime("%Y-%m-%d"))
+print("author: Peter Peterson")
+print("title: Currently Skipped System Tests")
+print("---")
 
 print("Summary")
 print("=======")
 print
-print("* Job    : [%s](%s)" % ('Master Pipeline', 'http://builds.mantidproject.org/view/Master%20Pipeline/'),end='')
+print("* Job    : [%s](%s)" % ("Master Pipeline", "http://builds.mantidproject.org/view/Master%20Pipeline/"), end="")
 print(datetime.datetime.now().strftime("%Y-%m-%d"))
-print("* Labels :", ', '.join(labels))
-print("* Failed :", json['failCount'],end='')
+print("* Labels :", ", ".join(labels))
+print("* Failed :", json["failCount"], end="")
 if len(failed.keys()) < 2:
     print()
 else:
     print("(%d unique)" % len(failed.keys()))
-print("* Skipped:", json['skipCount'],end='')
+print("* Skipped:", json["skipCount"], end="")
 if len(skipped.keys()) < 2:
     print()
 else:
     print("(%d unique)" % len(skipped.keys()))
-print("* Total  :", totalCount,)
-print("(= %d * %d)" % (totalCount/len(labels), len(labels)))
+print(
+    "* Total  :",
+    totalCount,
+)
+print("(= %d * %d)" % (totalCount / len(labels), len(labels)))
 
 print()
 

@@ -45,6 +45,8 @@ public:
 
   virtual std::optional<double> averageTwoTheta() const = 0;
   virtual std::vector<double> allTwoThetas() const = 0;
+
+  virtual std::optional<double> rotationAngle() const = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAnalysisModel final : public IALFAnalysisModel {
@@ -73,6 +75,8 @@ public:
 
   std::optional<double> averageTwoTheta() const override;
   inline std::vector<double> allTwoThetas() const noexcept override { return m_twoThetas; };
+
+  std::optional<double> rotationAngle() const override;
 
 private:
   std::string extractedWsName(std::size_t const runNumber) const;

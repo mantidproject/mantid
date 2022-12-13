@@ -14,7 +14,8 @@ import sys
 
 
 class Demo(QtWidgets.QMainWindow):
-    """ Wrapper class for setting the main window"""
+    """Wrapper class for setting the main window"""
+
     def __init__(self, parent=None):
         super(Demo, self).__init__(parent)
 

@@ -68,8 +68,9 @@ private:
 
   void updateViewFromModel();
   void updatePlotInViewFromModel();
-  void updatePeakCentreInViewFromModel();
   void updateTwoThetaInViewFromModel();
+  void updatePeakCentreInViewFromModel();
+  void updateRotationAngleInViewFromModel();
 
   IALFAnalysisView *m_view;
   std::unique_ptr<IALFAnalysisModel> m_model;

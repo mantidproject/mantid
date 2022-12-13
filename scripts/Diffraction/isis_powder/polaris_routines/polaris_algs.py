@@ -238,9 +238,9 @@ def fast_fourier_filter(ws, rho0, freq_params=None):
         r_min = freq_params[0]
         # If no maximum r is given a high r_max prevents loss of detail on the output.
         if len(freq_params) > 1:
-            r_max = min(freq_params[1], 1000)
+            r_max = freq_params[1]
         else:
-            r_max = 1000
+            r_max = 200
         ws_name = str(ws)
         mantid.PDFFourierTransform(Inputworkspace=ws_name, OutputWorkspace=ws_name, SofQType="S(Q)-1", PDFType="g(r)",
                                    Filter=True, DeltaR=0.01, Rmax=r_max, Direction='Forward', rho0=rho0)
