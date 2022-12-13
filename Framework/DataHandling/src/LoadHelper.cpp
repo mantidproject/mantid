@@ -235,7 +235,8 @@ bool excludeGroup(H5::Group &group) {
   value.resize(strSize);
   attr.read(attr.getDataType(), value.data());
   attr.close();
-  return (value == "NXData" || value == "ILL_data_scan_vars" || value == "NXill_data_scan_vars");
+  return (value == "NXData" || value == "ILL_data_scan_vars" || value == "NXill_data_scan_vars" ||
+          value == "NXMonitor");
 }
 } // namespace
 
