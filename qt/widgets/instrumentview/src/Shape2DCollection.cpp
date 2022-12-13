@@ -293,7 +293,7 @@ void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
       QApplication::restoreOverrideCursor();
 
       // Since shapes can be flipped by, for example, dragging the bottom left point past the bottom right,
-      // m_currentCP can't be relyed upon to set the correct diagonal cursor
+      // m_currentCP can't be relyed upon to describe a point's relative position (e.g top left)
       QPointF centre = m_currentShape->origin();
       QPointF cp = m_currentShape->getControlPoint(m_currentCP);
       QPointF difference = centre - cp;
