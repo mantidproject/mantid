@@ -24,9 +24,9 @@ class PowderCalculator:
         if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
 
-        k_data = abins_data.get_kpoints_data()  # type: abins.KpointsData
-        self._frequencies = {}  # type: Dict[str, np.ndarray]
-        self._displacements = {}  # type: Dict[str, np.ndarray]
+        k_data: abins.KpointsData = abins_data.get_kpoints_data()
+        self._frequencies: Dict[str, np.ndarray] = {}
+        self._displacements: Dict[str, np.ndarray] = {}
 
         atoms_data = abins_data.get_atoms_data()
 
@@ -78,7 +78,7 @@ class PowderCalculator:
         masses = np.asarray([np.full(num_freq, mass) for mass in self._masses])
 
         # disp[num_atoms, num_freq, dim]
-        disp = self._displacements[k]  # type np.ndarray
+        disp: np.array = self._displacements[k]
 
         # factor[num_atoms, num_freq]
         factor = np.einsum('ij,j->ij', 1.0 / masses, CONSTANT / self._frequencies[k])
