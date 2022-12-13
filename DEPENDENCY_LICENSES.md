@@ -6,7 +6,7 @@
 | PowerScaleEngine, ScaleEngine |           | x         | GPL 2+                        | https://github.com/mantidproject/mantid/blob/master/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/Qwt/ScaleEngine.h    |
 | GNU Scientific Library        | x         |           | GPL V3                        | https://www.gnu.org/software/gsl/doc/html/gpl.html                                                                        |
 | NeXus                         | x         |           | GPL v2                        | https://metadata.ftp-master.debian.org/changelogs//main/n/nexus/nexus_4.4.3-4_copyright                                   |
-| Framework/ICat/GSoap*         | x         |           | GPL                           | https://github.com/mantidproject/mantid/blob/master/Framework/ICat/src/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.cpp |
+| Framework/ICat/GSoap*         | x         |           | GPL                           | https://github.com/mantidproject/mantid/blob/main/Framework/ICat/src/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.cpp |
 | qScintilla                    |           | x         | GPL V3/Commercial             | https://www.riverbankcomputing.com/software/qscintilla/intro                                                              |
 | sip                           |           | x         | SIP, GPL v2, GPL v3           | https://www.riverbankcomputing.com/software/sip/license                                                                   |
 | Qt                            |           | x         | (L)GPL v3                     | https://www.qt.io/licensing/                                                                                              |
