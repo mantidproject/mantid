@@ -1585,14 +1585,14 @@ void DetectorPlotController::prepareDataForIntegralsPlot(size_t detindex, std::v
         continue;
       // get the y-value for detector idet
       const auto &Y = ws->y(index);
-      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
+      xymap[xvalue] = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0.0);
       if (err) {
         const auto &E = ws->e(index);
         std::vector<double> tmp(imax - imin);
         // take squares of the errors
         std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin, tmp.begin(), std::multiplies<double>());
         // sum them
-        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
+        const double sum = std::accumulate(tmp.begin(), tmp.end(), 0.0);
         // take sqrt
         errmap[xvalue] = sqrt(sum);
       }
