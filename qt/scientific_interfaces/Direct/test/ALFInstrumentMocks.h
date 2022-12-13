@@ -12,6 +12,7 @@
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentPresenter.h"
 #include "ALFInstrumentView.h"
+#include "DetectorTube.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -49,9 +50,11 @@ public:
   MOCK_METHOD1(setRunQuietly, void(std::string const &runNumber));
 
   MOCK_CONST_METHOD0(getInstrumentActor, MantidWidgets::IInstrumentActor const &());
-  MOCK_CONST_METHOD0(componentInfo, Mantid::Geometry::ComponentInfo const &());
 
-  MOCK_CONST_METHOD0(getSelectedDetectors, std::vector<std::size_t>());
+  MOCK_CONST_METHOD0(getSelectedDetectors, std::vector<DetectorTube>());
+
+  MOCK_METHOD0(clearShapes, void());
+  MOCK_METHOD1(drawRectanglesAbove, void(std::vector<DetectorTube> const &tubes));
 
   MOCK_METHOD1(warningBox, void(std::string const &message));
 };
@@ -63,9 +66,9 @@ public:
   MOCK_CONST_METHOD0(loadedWsName, std::string());
   MOCK_CONST_METHOD0(runNumber, std::size_t());
 
-  MOCK_METHOD2(setSelectedDetectors, void(Mantid::Geometry::ComponentInfo const &componentInfo,
-                                          std::vector<std::size_t> const &detectorIndices));
-  MOCK_CONST_METHOD0(selectedDetectors, std::vector<std::size_t>());
+  MOCK_METHOD1(setSelectedTubes, bool(std::vector<DetectorTube> tubes));
+  MOCK_METHOD1(addSelectedTube, bool(DetectorTube const &tube));
+  MOCK_CONST_METHOD0(selectedTubes, std::vector<DetectorTube>());
 
   MOCK_CONST_METHOD1(generateOutOfPlaneAngleWorkspace,
                      std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>(
@@ -81,7 +84,9 @@ public:
 
   MOCK_METHOD0(loadRunNumber, void());
 
+  MOCK_METHOD0(notifyInstrumentActorReset, void());
   MOCK_METHOD0(notifyShapeChanged, void());
+  MOCK_METHOD1(notifyTubesSelected, void(std::vector<DetectorTube> const &tubes));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

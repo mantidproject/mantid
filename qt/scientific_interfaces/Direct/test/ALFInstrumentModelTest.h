@@ -33,39 +33,22 @@ using namespace testing;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
-V3D const SAMPLE_POSITION = V3D(0.0, 0.0, 0.0);
-V3D const SOURCE_POSITION = V3D(0.0, 0.0, -25.0);
-
-MatrixWorkspace_sptr generateExtractedWorkspace(std::string const &unit, std::string const &label = "",
-                                                double const yValue = 0.2) {
-  auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(1, 10, false, 0.1, yValue, 0.01, 0.3);
-
-  std::shared_ptr<Instrument> instrument = std::make_shared<Instrument>();
-  instrument->setName("ALF");
-
-  // Set source position
-  auto *source = new ObjComponent("source");
-  source->setPos(SOURCE_POSITION);
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // Set sample position
-  auto *sampleHolder = new Component("samplePos");
-  sampleHolder->setPos(SAMPLE_POSITION);
-  instrument->add(sampleHolder);
-  instrument->markAsSamplePos(sampleHolder);
-
-  workspace->setInstrument(instrument);
-
-  workspace->getAxis(0)->setUnit(unit);
-
-  if (!label.empty()) {
-    auto xUnit = std::dynamic_pointer_cast<Units::Label>(UnitFactory::Instance().create("Label"));
-    xUnit->setLabel("Label", label);
-    workspace->getAxis(0)->unit() = xUnit;
+std::vector<DetectorTube> findWholeTubes(Mantid::Geometry::ComponentInfo const &componentInfo,
+                                         std::vector<std::size_t> const &partTubeDetectorIndices) {
+  std::vector<DetectorTube> tubes;
+  std::vector<std::size_t> allocatedIndices;
+  for (auto const &detectorIndex : partTubeDetectorIndices) {
+    auto const iter = std::find(allocatedIndices.cbegin(), allocatedIndices.cend(), detectorIndex);
+    // Check that the indices for this tube haven't already been added
+    if (iter == allocatedIndices.cend() && componentInfo.isDetector(detectorIndex)) {
+      // Find all of the detector indices for the whole tube
+      auto tubeDetectorIndices = componentInfo.detectorsInSubtree(componentInfo.parent(detectorIndex));
+      std::transform(tubeDetectorIndices.cbegin(), tubeDetectorIndices.cend(), std::back_inserter(allocatedIndices),
+                     [](auto const &index) { return index; });
+      tubes.emplace_back(tubeDetectorIndices);
+    }
   }
-
-  return workspace;
+  return tubes;
 }
 
 } // namespace
@@ -83,8 +66,8 @@ public:
     m_ALFData = "ALF82301.raw";
     m_ALFEdgeCaseData = "ALF83743.raw";
 
-    m_singleTubeDetectorIDs = std::vector<std::size_t>{2500u, 2501u, 2502u};
-    m_multiTubeDetectorIDs = std::vector<std::size_t>{2500u, 2501u, 2502u, 3500u, 3501u, 3502u};
+    m_singleTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
+    m_multiTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}, {3500u, 3501u, 3502u}};
 
     m_instrumentActor = std::make_unique<NiceMock<MockInstrumentActor>>();
     m_model = std::make_unique<ALFInstrumentModel>();
@@ -122,22 +105,48 @@ public:
     TS_ASSERT_EQUALS(82301u, m_model->runNumber());
   }
 
-  void test_setSelectedDetectors_will_set_an_empty_vector_of_detector_ids_when_provided_an_empty_vector() {
-    auto workspace = generateExtractedWorkspace("dSpacing");
-    auto &compInfo = workspace->componentInfo();
-    m_model->setSelectedDetectors(compInfo, {});
+  void test_setSelectedTubes_will_set_an_empty_vector_of_tubes_when_provided_an_empty_vector() {
+    TS_ASSERT(m_model->setSelectedTubes({{0u, 1u}}));
 
-    TS_ASSERT(m_model->selectedDetectors().empty());
+    TS_ASSERT(m_model->setSelectedTubes({}));
+
+    TS_ASSERT(m_model->selectedTubes().empty());
   }
 
-  void test_setSelectedDetectors_will_select_the_detectors_in_an_entire_tube() {
+  void test_setSelectedTubes_returns_false_when_trying_to_set_the_tubes_to_a_list_which_is_the_same_as_previous() {
+    TS_ASSERT(m_model->setSelectedTubes({{0u, 1u}}));
+    TS_ASSERT(!m_model->setSelectedTubes({{0u, 1u}}));
+  }
+
+  void test_setSelectedTubes_will_select_the_detectors_in_an_entire_tube() {
     setSingleTubeSelected();
-    TS_ASSERT_EQUALS(512u, m_model->selectedDetectors().size());
+
+    auto const tubes = m_model->selectedTubes();
+    TS_ASSERT_EQUALS(1u, tubes.size());
+    TS_ASSERT_EQUALS(512u, tubes[0].size());
   }
 
-  void test_setSelectedDetectors_will_select_the_detectors_in_two_entire_tubes() {
+  void test_setSelectedTubes_will_select_the_detectors_in_two_entire_tubes() {
     setMultipleTubesSelected();
-    TS_ASSERT_EQUALS(1024u, m_model->selectedDetectors().size());
+
+    auto const tubes = m_model->selectedTubes();
+    TS_ASSERT_EQUALS(2u, tubes.size());
+    TS_ASSERT_EQUALS(512u, tubes[0].size());
+    TS_ASSERT_EQUALS(512u, tubes[1].size());
+  }
+
+  void test_addSelectedTube_will_add_a_tube_to_the_model_when_it_is_new() {
+    TS_ASSERT(m_model->addSelectedTube({{0u, 1u}}));
+    TS_ASSERT(m_model->addSelectedTube({{1u, 2u}}));
+
+    TS_ASSERT_EQUALS(2u, m_model->selectedTubes().size());
+  }
+
+  void test_addSelectedTube_will_not_add_a_tube_to_the_model_if_it_already_exists() {
+    TS_ASSERT(m_model->addSelectedTube({{0u, 1u}}));
+    TS_ASSERT(!m_model->addSelectedTube({{0u, 1u}}));
+
+    TS_ASSERT_EQUALS(1u, m_model->selectedTubes().size());
   }
 
   void test_generateOutOfPlaneAngleWorkspace_returns_nullptr_when_no_selected_detectors() {
@@ -191,7 +200,8 @@ public:
     m_model->loadAndTransform(m_ALFEdgeCaseData);
 
     auto const ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-    m_model->setSelectedDetectors(ws->componentInfo(), m_singleTubeDetectorIDs);
+    m_singleTubeDetectorIDs = findWholeTubes(ws->componentInfo(), {2500u, 2501u, 2502u});
+    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
 
     expectInstrumentActorCalls(12288u);
 
@@ -210,19 +220,23 @@ private:
   void setSingleTubeSelected() {
     m_model->loadAndTransform(m_ALFData);
 
-    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-    m_model->setSelectedDetectors(workspace->componentInfo(), m_singleTubeDetectorIDs);
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+    m_singleTubeDetectorIDs = findWholeTubes(workspace->componentInfo(), {2500u, 2501u, 2502u});
+
+    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
   }
 
   void setMultipleTubesSelected() {
     m_model->loadAndTransform(m_ALFData);
 
-    auto const workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
-    m_model->setSelectedDetectors(workspace->componentInfo(), m_multiTubeDetectorIDs);
+    auto const workspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+    m_multiTubeDetectorIDs = findWholeTubes(workspace->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
+
+    TS_ASSERT(m_model->setSelectedTubes(m_multiTubeDetectorIDs));
   }
 
   void expectInstrumentActorCalls(std::size_t const workspaceIndex = 0u) {
-    auto const loadedWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
+    auto const loadedWorkspace = ADS.retrieveWS<MatrixWorkspace>(m_model->loadedWsName());
 
     EXPECT_CALL(*m_instrumentActor, getWorkspace()).WillRepeatedly(Return(loadedWorkspace));
     EXPECT_CALL(*m_instrumentActor, componentInfo()).WillRepeatedly(ReturnRef(loadedWorkspace->componentInfo()));
@@ -237,8 +251,8 @@ private:
   std::string m_ALFData;
   std::string m_ALFEdgeCaseData;
 
-  std::vector<std::size_t> m_singleTubeDetectorIDs;
-  std::vector<std::size_t> m_multiTubeDetectorIDs;
+  std::vector<DetectorTube> m_singleTubeDetectorIDs;
+  std::vector<DetectorTube> m_multiTubeDetectorIDs;
 
   std::unique_ptr<NiceMock<MockInstrumentActor>> m_instrumentActor;
   std::unique_ptr<ALFInstrumentModel> m_model;

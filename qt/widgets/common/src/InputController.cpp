@@ -223,7 +223,6 @@ void InputControllerDrawShape::onDisabled() {
   m_creating = false;
   emit disabled();
 }
-
 //--------------------------------------------------------------------------------
 
 /**

@@ -214,13 +214,12 @@ bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
   }
 
   // Check if a new tube exists in the provided tubes
-  for (auto const &tube : tubes) {
-    if (!tubeExists(tube)) {
-      m_tubes = std::move(tubes);
-      return true;
-    }
+  const auto hasNewTube =
+      std::any_of(tubes.cbegin(), tubes.cend(), [&](const auto &tube) { return !tubeExists(tube); });
+  if (hasNewTube) {
+    m_tubes = std::move(tubes);
   }
-  return false;
+  return hasNewTube;
 }
 
 bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {

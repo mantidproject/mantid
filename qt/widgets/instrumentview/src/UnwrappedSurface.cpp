@@ -405,22 +405,25 @@ void UnwrappedSurface::setFlippedView(bool on) {
   }
 }
 
-QRect UnwrappedSurface::detectorQRectInPixels(std::size_t detectorIndex) const {
+QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) const {
+  const auto detIter =
+      std::find_if(m_unwrappedDetectors.cbegin(), m_unwrappedDetectors.cend(),
+                   [&detectorIndex](const auto &detector) { return detector.detIndex == detectorIndex; });
+
+  if (detIter == m_unwrappedDetectors.cend()) {
+    return QRect();
+  }
+
   const int vwidth = m_viewImage->width();
   const int vheight = m_viewImage->height();
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height() / vheight);
 
-  for (const auto &detector : m_unwrappedDetectors) {
-    if (detector.detIndex == detectorIndex) {
-      const auto size = QSize(int(detector.width / dw), int(detector.height / dh));
-      const auto position =
-          QPoint(int(static_cast<int>((detector.u - m_viewRect.x0()) / dw - size.width() / 2.0)),
-                 int(vheight - static_cast<int>((detector.v - m_viewRect.y0()) / dh) - size.height() / 2.0));
-      return QRect(position, size);
-    }
-  }
-  return QRect();
+  const auto size = QSize(int((*detIter).width / dw), int((*detIter).height / dh));
+  const auto position =
+      QPoint(int(static_cast<int>(((*detIter).u - m_viewRect.x0()) / dw - size.width() / 2.0)),
+             int(vheight - static_cast<int>(((*detIter).v - m_viewRect.y0()) / dh) - size.height() / 2.0));
+  return QRect(position, size);
 }
 
 /**
