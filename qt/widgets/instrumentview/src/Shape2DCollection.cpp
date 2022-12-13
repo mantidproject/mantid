@@ -285,7 +285,13 @@ void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy) {
  * override the cursor image.
  */
 void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
-  if (selectControlPointAt(x, y) || isOverSelectionAt(x, y)) {
+  if (selectControlPointAt(x, y)) {
+    if (!m_overridingCursor) {
+      m_overridingCursor = true;
+      (m_currentCP % 2 == 0) ? QApplication::setOverrideCursor(Qt::SizeBDiagCursor)
+                             : QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+    }
+  } else if (isOverSelectionAt(x, y)) {
     if (!m_overridingCursor) {
       m_overridingCursor = true;
       QApplication::setOverrideCursor(Qt::SizeAllCursor);
