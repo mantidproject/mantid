@@ -219,7 +219,7 @@ bool excludeGroup(H5::Group &group) {
     return true;
 
   // check NXclass attribute
-  const std::string nxClassAttr = "NXclass";
+  const std::string nxClassAttr = "NX_class";
 
   if (!group.attrExists(nxClassAttr))
     return false;
