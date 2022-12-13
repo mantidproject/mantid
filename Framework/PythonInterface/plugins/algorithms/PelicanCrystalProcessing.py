@@ -6,59 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import h5py
-from typing import Tuple, List, Sequence, Union
+from typing import Sequence
 
 from mantid import config
-from mantid.kernel import (Direction, StringArrayMandatoryValidator, StringArrayProperty, CompositeValidator)
+from mantid.kernel import (
+    Direction, StringArrayMandatoryValidator, StringArrayProperty, CompositeValidator)
 from mantid.api import (DataProcessorAlgorithm, FileProperty, FileAction, Progress)
-from mantid.simpleapi import *  # noqa
+from mantid.simpleapi import PelicanReduction, DeleteWorkspace, AlgorithmFactory
 
-CycleRun = Tuple[Union[int,None], int]
-CycleRuns = Tuple[Union[int,None], List[int]]
-
-
-def seq_to_list(iseqn : str) -> List[int]:
-    # convert a comma separated range of numbers returned as a list
-    # first clean all whitespaces
-    seqn = iseqn.replace(' ', '')
-    nlist = []
-    sqlist = seqn.split(',')
-    for rg in sqlist:
-        if rg == '':
-            continue
-        ss = rg.split('-')
-        try:
-            lo = int(ss[0])
-            hi = int(ss[-1])
-            if len(ss) == 1:
-                nlist.append(lo)
-            else:
-                for i in range(lo, hi+1):
-                    nlist.append(i)
-        except ValueError:
-            raise RuntimeError('Unexpected run sequence: {}'.format(seqn))
-
-    return nlist
-
-
-def cycle_and_runs(run_seq : str) -> CycleRuns:
-    # convert a run sequence as a string to the cycle and runs
-    ss = run_seq.split('::')
-    if len(ss) == 2:
-        return int(ss[0]), seq_to_list(ss[1])
-    else:
-        return None, seq_to_list(ss[0])
-
-
-def expand_as_cycle_runs(sample_runs : str) -> List[CycleRun]:
-    # expand a collection of cycle runs as a string to an explicit
-    # list of cycle run pairs
-    cycle_runs = []
-    for run_seq in sample_runs.split(';'):
-        cycle, runs = cycle_and_runs(run_seq)
-        for run in runs:
-            cycle_runs.append((cycle, run))
-    return cycle_runs
+from ansto_common import expanded_runs
 
 
 def copy_datset_nodes(src_hdf : str, dst_hdf : str, tags : Sequence[str]) -> None:
@@ -133,20 +89,33 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         self.declareProperty(name='FrameOverlap', defaultValue=False,
                              doc='Set if the energy transfer extends over a frame.')
 
+        self.declareProperty(name='CalibrateTOF', defaultValue=False,
+                             doc='Determine the TOF correction from the elastic peak in the data.')
+
+        self.declareProperty(name='TOFCorrection',
+                             defaultValue='',
+                             doc='The TOF correction in usec that aligns the elastic peak.')
+
+        self.declareProperty(name='AnalyseTubes',
+                             defaultValue='',
+                             doc='Detector tubes to be used in the data analysis.')
+
+        self.declareProperty(name='MaxEnergyGain',
+                             defaultValue='',
+                             doc='Energy gain in meV used to adjust the min TOF with frame overlap.')
+
         self.declareProperty(name='FixedDetector', defaultValue=True,
                              doc='Fix detector positions to the first run')
+
+        self.declareProperty(FileProperty('OutputFolder', '',
+                                          action=FileAction.Directory,
+                                          direction=Direction.Input),
+                             doc='Path to save the output nxspe files.')
 
         self.declareProperty(FileProperty('ScratchFolder', '',
                                           action=FileAction.OptionalDirectory,
                                           direction=Direction.Input),
                              doc='Path to save and restore merged workspaces.')
-
-        mandatoryOutputFolder = CompositeValidator()
-        mandatoryOutputFolder.add(StringArrayMandatoryValidator())
-        self.declareProperty(FileProperty('OutputFolder', '',
-                                          action=FileAction.Directory,
-                                          direction=Direction.Input),
-                             doc='Path to save the output nxspe files.')
 
         self.declareProperty(FileProperty('ConfigurationFile', '',
                                           action=FileAction.OptionalLoad,
@@ -165,35 +134,38 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         output_folder = self.getPropertyValue('OutputFolder')
         scratch_folder = self.getPropertyValue('ScratchFolder')
         keep_reduced_ws = self.getProperty('KeepReducedWorkspace').value
-        cycle_runs = expand_as_cycle_runs(sample_runs)
+        single_runs = expanded_runs(sample_runs)
 
         # set up progress bar
-        steps = len(cycle_runs) + 1
+        steps = len(single_runs) + 1
         self._progress = Progress(
             self, start=0.0, end=1.0, nreports=steps)
+        #grouped = []
 
         saveFolder = scratch_folder if scratch_folder else config['defaultsave.directory']
-        for cycle, run in cycle_runs:
+        for srun in single_runs:
 
-            if cycle:
-                srun = str(cycle) + ':: ' + str(run)
-            else:
-                srun = str(run)
-            self._progress.report("Processing run {}, ".format(run))
+            self._progress.report("Processing run {}, ".format(srun.run))
 
-            PelicanReduction(SampleRuns=srun, EmptyRuns=self.getPropertyValue('EmptyRuns'),
-                             EnergyTransfer=self.getPropertyValue(
-                                      'EnergyTransfer'),
-                             MomentumTransfer=self.getPropertyValue('MomentumTransfer'), Processing='NXSPE',
-                             LambdaOnTwoMode=self.getProperty(
-                                      'LambdaOnTwoMode').value,
-                             FrameOverlap=self.getProperty(
-                                      'FrameOverlap').value,
-                             ScratchFolder=scratch_folder, OutputWorkspace='nxspe',
-                             ConfigurationFile=self.getPropertyValue('ConfigurationFile'))
+            PelicanReduction(
+                SampleRuns=str(srun), EmptyRuns=self.getPropertyValue('EmptyRuns'),
+                ScaleEmptyRuns=self.getPropertyValue('ScaleEmptyRuns'),
+                CalibrationRuns=self.getPropertyValue('CalibrationRuns'),
+                EmptyCalibrationRuns=self.getPropertyValue(
+                    'EmptyCalibrationRuns'),
+                EnergyTransfer=self.getPropertyValue('EnergyTransfer'),
+                MomentumTransfer=self.getPropertyValue('MomentumTransfer'), Processing='NXSPE',
+                LambdaOnTwoMode=self.getProperty('LambdaOnTwoMode').value,
+                FrameOverlap=self.getProperty('FrameOverlap').value,
+                CalibrateTOF=self.getProperty('CalibrateTOF').value,
+                TOFCorrection=self.getProperty('TOFCorrection').value,
+                AnalyseTubes=self.getProperty('AnalyseTubes').value,
+                ScratchFolder=scratch_folder, OutputWorkspace='nxspe',
+                MaxEnergyGain=self.getPropertyValue('MaxEnergyGain'),
+                ConfigurationFile=self.getPropertyValue('ConfigurationFile'))
 
             # the nxspe file named 'nxspe_spe_2D.nxspe'is moved to the output folder and renamed
-            dfile = 'run_{:d}.nxspe'.format(run)
+            dfile = 'run_{:d}.nxspe'.format(srun.run)
             dpath = os.path.join(output_folder, dfile)
             if os.path.isfile(dpath):
                 os.remove(dpath)
@@ -212,7 +184,7 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
             # speed up processing, remove these files to save space
             if scratch_folder:
                 for sfile in ['PLN{:07d}_sample.nxs', 'PLN{:07d}.nxs']:
-                    tfile = sfile.format(run)
+                    tfile = sfile.format(srun.run)
                     tpath = os.path.join(scratch_folder, tfile)
                     os.remove(tpath)
 
