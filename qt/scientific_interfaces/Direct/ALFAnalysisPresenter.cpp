@@ -54,6 +54,7 @@ void ALFAnalysisPresenter::notifyPeakCentreEditingFinished() {
   if (!equalWithinTolerance(m_model->peakCentre(), newPeakCentre)) {
     m_model->setPeakCentre(newPeakCentre);
     updatePeakCentreInViewFromModel();
+    updateRotationAngleInViewFromModel();
   }
 }
 
@@ -70,11 +71,13 @@ void ALFAnalysisPresenter::notifyFitClicked() {
     m_view->displayWarning(ex.what());
   }
   updatePeakCentreInViewFromModel();
+  updateRotationAngleInViewFromModel();
 }
 
 void ALFAnalysisPresenter::notifyResetClicked() {
   calculateEstimate();
   updatePeakCentreInViewFromModel();
+  updateRotationAngleInViewFromModel();
 }
 
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
@@ -106,11 +109,16 @@ void ALFAnalysisPresenter::calculateEstimate() {
 
 void ALFAnalysisPresenter::updateViewFromModel() {
   updatePlotInViewFromModel();
-  updatePeakCentreInViewFromModel();
   updateTwoThetaInViewFromModel();
+  updatePeakCentreInViewFromModel();
+  updateRotationAngleInViewFromModel();
 }
 
 void ALFAnalysisPresenter::updatePlotInViewFromModel() { m_view->addSpectrum(m_model->extractedWorkspace()); }
+
+void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {
+  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
+}
 
 void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
   m_view->setPeak(m_model->getPeakCopy());
@@ -123,8 +131,6 @@ void ALFAnalysisPresenter::updatePeakCentreInViewFromModel() {
   m_view->replot();
 }
 
-void ALFAnalysisPresenter::updateTwoThetaInViewFromModel() {
-  m_view->setAverageTwoTheta(m_model->averageTwoTheta(), m_model->allTwoThetas());
-}
+void ALFAnalysisPresenter::updateRotationAngleInViewFromModel() { m_view->setRotationAngle(m_model->rotationAngle()); }
 
 } // namespace MantidQt::CustomInterfaces
