@@ -42,17 +42,20 @@ class FittingPresenter(object):
         self.plot_widget.view.fit_browser.fit_enabled_notifier.add_subscriber(
             self.data_widget.presenter.fit_enabled_observer)
 
-    def fit_all_started(self, ws_name_list, do_sequential=True):
+        self.connect_view_signals()
+
+    def fit_all_started(self, inputs):
+        ws_name_list, do_sequential = inputs
         # "all" refers to sequential/serial fit triggered in the data widget
         self.plot_widget.set_progress_bar_to_in_progress()
-        self.disable_view()
+        self.disable_view(fit_all=True)
         self.plot_widget.do_fit_all_async(ws_name_list, do_sequential)
 
     def fit_all_done(self, fit_props):
         # "all" refers to sequential/serial fit triggered in the data widget
         self.plot_widget.update_browser()
         self.plot_widget.set_progress_bar()
-        self.enable_view()
+        self.enable_view(fit_all=True)
         self.data_widget.presenter.fit_completed(fit_props=fit_props)
 
     def fit_started(self):
@@ -66,8 +69,22 @@ class FittingPresenter(object):
         self.plot_widget.set_final_state_progress_bar(fit_props)
         self.data_widget.presenter.fit_completed(fit_props=fit_props)
 
-    def disable_view(self, _=None):
-        self.view.setEnabled(False)
+    def disable_view(self, _=None, fit_all=False):
+        self.data_widget.view.setEnabled(False)
+        self.plot_widget.enable_view_components(False)
+        if fit_all:
+            self.plot_widget.view.show_cancel_button(True)
 
-    def enable_view(self, _=None):
-        self.view.setEnabled(True)
+    def enable_view(self, _=None, fit_all=False):
+        self.data_widget.view.setEnabled(True)
+        self.plot_widget.enable_view_components(True)
+        if fit_all:
+            self.plot_widget.view.show_cancel_button(False)
+
+    def connect_view_signals(self):
+        self.plot_widget.view.set_cancel_clicked(self.on_cancel_clicked)
+
+    def on_cancel_clicked(self):
+        self.plot_widget.on_cancel_clicked()
+        self.enable_view()
+        self.plot_widget.set_progress_bar_zero()

@@ -53,11 +53,11 @@ class FittingDataPresenter(object):
 
     def _start_seq_fit(self):
         ws_name_list = self.model.get_active_ws_sorted_by_primary_log()
-        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=True)
+        self.fit_all_started_notifier.notify_subscribers((ws_name_list, True))
 
     def _start_serial_fit(self):
         ws_name_list = self.model.get_active_ws_name_list()
-        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=False)
+        self.fit_all_started_notifier.notify_subscribers((ws_name_list, False))
 
     def _update_file_filter(self, region, xunit):
         self.view.update_file_filter(region, xunit)

@@ -65,12 +65,30 @@ class FittingPlotPresenter(object):
         self.view.update_fitbrowser()
         self.set_progress_bar_zero()
 
+    def on_cancel_clicked(self):
+        if self.worker:
+            self.worker.abort()
+            logger.warning("Fit cancelled and KeyboardInterrupt Exception expected.")
+            logger.warning("The fit property browser and output fit results may be out of sync.")
+            self.fitprop_list = None
+            self._finished()
+
+    def enable_view_components(self, enable: bool):
+        # enable / disable all widgets apart from the cancel button
+        self.view.fit_browser.setEnabled(enable)
+        self.view.dock_window.setEnabled(enable)
+        self.view.plot_dock.setEnabled(enable)
+
     def update_browser(self):
-        # update last fit in fit browser and save setup
-        fitprop = self.fitprop_list[-1]
-        function_string = fitprop['properties']['Function']
-        status = fitprop['status']
-        ws_name = fitprop['properties']['InputWorkspace']
+        status = None
+        function_string = None
+        ws_name = None
+        if self.fitprop_list:
+            # update last fit in fit browser and save setup
+            fitprop = self.fitprop_list[-1]
+            function_string = fitprop['properties']['Function']
+            status = fitprop['status']
+            ws_name = fitprop['properties']['InputWorkspace']
         self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
@@ -90,6 +108,7 @@ class FittingPlotPresenter(object):
         self.fitprop_list = async_success.output
 
     def _on_worker_error(self, async_failure=None):
+        # when the user cancels the fit all, this is not called
         error_message = str(async_failure)
         if "unknown" not in error_message:
             logger.error(str(async_failure))
@@ -97,7 +116,7 @@ class FittingPlotPresenter(object):
     def _finished(self, _=None):
         self.fit_all_done_notifier.notify_subscribers(self.fitprop_list)
 
-    def do_fit_all(self, previous_fitprop,  ws_name_list, do_sequential=True):
+    def do_fit_all(self, previous_fitprop, ws_name_list, do_sequential=True):
         fitprop_list = []
         for ws_name in ws_name_list:
             logger.notice(f'Starting to fit workspace {ws_name}')
@@ -117,7 +136,7 @@ class FittingPlotPresenter(object):
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
 
-        logger.notice('Sequential fitting finished.')
+        logger.notice(f'{"Serial" if not do_sequential else "Sequential"} fitting finished.')
         return fitprop_list
 
     # ==============================
