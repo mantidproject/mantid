@@ -161,10 +161,10 @@ void addDataToRun(void *data, size_t n, API::Run &runDetails, const std::string 
   std::vector<DataType> values(n);
   memcpy(values.data(), data, n * sizeof(DataType));
   if (values.size() == 1)
-    runDetails.addProperty(name, static_cast<RunType>(values[0]));
+    runDetails.addProperty(name, RunType(values[0]));
   else
-    for (DataType &value : values)
-      runDetails.addProperty(name, static_cast<RunType>(value));
+    for (size_t i = 0; i < n; i++)
+      runDetails.addProperty(name, RunType(values.data()[i]));
 }
 
 void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
