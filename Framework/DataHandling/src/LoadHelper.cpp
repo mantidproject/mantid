@@ -207,6 +207,16 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
     if (size == 8)
       addDataToRun<double, double>(buffer, dimsSize[0], runDetails, name);
   } break;
+  case H5T_STRING: {
+    H5::StrType type = dataset.getStrType();
+    if (type.getSize() <= 1)
+      break;
+    if (type.isVariableStr()) {
+      addDataToRun<char *, std::string>(buffer, dimsSize[0], runDetails, name);
+    } else {
+      addDataToRun<char *, std::string>(&buffer, 1, runDetails, name);
+    }
+  } break;
   default:
     break;
   }
