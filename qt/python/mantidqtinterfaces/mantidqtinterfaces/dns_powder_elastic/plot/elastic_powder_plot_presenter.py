@@ -24,9 +24,9 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
         self.view.sig_linestyle_change.connect(self._change_line_style)
         self.view.sig_log_change.connect(self._change_log)
 
-        self._error_bar = 0
+        self._error_bar = 2
         self._grid_state = 0
-        self._line_style = 0
+        self._line_style = 2
 
     def _change_log(self, log):
         if log:
