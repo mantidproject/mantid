@@ -1,0 +1,1 @@
+- Increase the speed of the fourier filter in the POLARIS total scattering reduction by reducing the Rmax parameter used in the pair of (forward and backward) PDFFourierTransform calls and optimising the integration code inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`

@@ -389,7 +389,7 @@ class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
         self.assertTrue(x_data[idx_to_check_filter] < self.r_min)
         self.assertAlmostEqual(y_data[idx_to_check_filter], 0.0, places=1)
         idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(y_data[idx], 2.6743, places=3)
+        self.assertAlmostEqual(y_data[idx], 2.6732, places=3)
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
