@@ -183,7 +183,7 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
   if ((nDims > 1) || (dimsSize[0] > 9))
     return;
 
-  void *buffer = malloc(dataset.getInMemDataSize() + 1);
+  void *buffer = operator new(dataset.getInMemDataSize() + 1);
   memset(buffer, 0, dataset.getInMemDataSize() + 1);
   dataset.read(buffer, dataset.getDataType());
   H5T_class_t typeClass = dataset.getTypeClass();
@@ -226,7 +226,7 @@ void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &ru
   default:
     break;
   }
-  free(buffer);
+  operator delete(buffer);
 }
 
 bool excludeGroup(H5::Group &group) {
