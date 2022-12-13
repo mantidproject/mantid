@@ -90,15 +90,17 @@ class ChunkingCompare(systemtesting.MantidSystemTest):
         return 24*1024  # GiB
 
     def runTest(self):
+        GRP_WKSP = 'SNAP_chnk_grouping'
+
         # 11MB file
         kwargs = {'Filename':'SNAP_45874',
-                  'Params':(.5,-.004,7)}
+                  'Params':(.5,-.004,7),
+                  'GroupingWorkspace': GRP_WKSP}
 
         # create grouping for two output spectra
         CreateGroupingWorkspace(InstrumentFilename='SNAP_Definition.xml',
                                 GroupDetectorsBy='Group',
-                                OutputWorkspace='SNAP_grouping')
-
+                                OutputWorkspace=GRP_WKSP)
         # process in 4 chunks
         AlignAndFocusPowderFromFiles(OutputWorkspace='with_chunks', MaxChunkSize=.01, **kwargs)
         # process without chunks
