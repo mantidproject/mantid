@@ -286,19 +286,27 @@ void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy) {
  */
 void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
   if (selectControlPointAt(x, y)) {
-    if (!m_overridingCursor) {
+    if (!m_overridingCursor || m_cursorOverShape) {
       m_overridingCursor = true;
+      m_cursorOverControlPoint = true;
+      m_cursorOverShape = false;
+      QApplication::restoreOverrideCursor();
       (m_currentCP % 2 == 0) ? QApplication::setOverrideCursor(Qt::SizeBDiagCursor)
                              : QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
     }
   } else if (isOverSelectionAt(x, y)) {
-    if (!m_overridingCursor) {
+    if (!m_overridingCursor || m_cursorOverControlPoint) {
       m_overridingCursor = true;
+      m_cursorOverShape = true;
+      m_cursorOverControlPoint = false;
+      QApplication::restoreOverrideCursor();
       QApplication::setOverrideCursor(Qt::SizeAllCursor);
     }
   } else if (m_overridingCursor) {
     deselectControlPoint();
     m_overridingCursor = false;
+    m_cursorOverShape = false;
+    m_cursorOverControlPoint = false;
     QApplication::restoreOverrideCursor();
   }
 }
