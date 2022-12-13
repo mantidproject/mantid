@@ -291,8 +291,24 @@ void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
       m_cursorOverControlPoint = true;
       m_cursorOverShape = false;
       QApplication::restoreOverrideCursor();
-      (m_currentCP % 2 == 0) ? QApplication::setOverrideCursor(Qt::SizeBDiagCursor)
-                             : QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+
+      // Since shapes can be flipped by, for example, dragging the bottom left point past the bottom right,
+      // m_currentCP can't be relyed upon to set the correct diagonal cursor
+      QPointF centre = m_currentShape->origin();
+      QPointF cp = m_currentShape->getControlPoint(m_currentCP);
+      QPointF difference = centre - cp;
+
+      if (difference.x() > 0) {
+        if (difference.y() > 0)
+          QApplication::setOverrideCursor(Qt::SizeBDiagCursor);
+        else
+          QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+      } else {
+        if (difference.y() > 0)
+          QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+        else
+          QApplication::setOverrideCursor(Qt::SizeBDiagCursor);
+      }
     }
   } else if (isOverSelectionAt(x, y)) {
     if (!m_overridingCursor || m_cursorOverControlPoint) {
