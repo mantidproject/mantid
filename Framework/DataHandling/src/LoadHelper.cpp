@@ -160,11 +160,16 @@ template <typename DataType, typename RunType>
 void addDataToRun(void *data, size_t n, API::Run &runDetails, const std::string &name) {
   std::vector<DataType> values(n);
   memcpy(values.data(), data, n * sizeof(DataType));
-  if (values.size() == 1)
-    runDetails.addProperty(name, RunType(values[0]));
-  else
-    for (size_t i = 0; i < n; i++)
-      runDetails.addProperty(name + "_" + std::to_string(i), RunType(values.data()[i]));
+  if (values.size() == 1) {
+    if (!runDetails.hasProperty(name))
+      runDetails.addProperty(name, RunType(values[0]));
+  } else {
+    for (size_t i = 0; i < n; i++) {
+      std::string key = name + "_" + std::to_string(i);
+      if (!runDetails.hasProperty(key))
+        runDetails.addProperty(key, RunType(values.data()[i]));
+    }
+  }
 }
 
 void addDatasetToRun(H5::DataSet &dataset, const std::string &name, API::Run &runDetails) {
