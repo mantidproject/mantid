@@ -27,12 +27,21 @@ namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentWidget::ALFInstrumentWidget(QString workspaceName)
     : MantidWidgets::InstrumentWidget(std::move(workspaceName), nullptr, true, true, 0.0, 0.0, true,
-                                      MantidWidgets::InstrumentWidget::Dependencies(), false) {
+                                      MantidWidgets::InstrumentWidget::Dependencies(), false, getTabCustomizations()) {
   removeTab("Instrument");
   removeTab("Draw");
   hideHelp();
 
-  getPickTab()->expandPlotPanel();
+  m_pickTab->expandPlotPanel();
+}
+
+MantidWidgets::InstrumentWidget::TabCustomizations ALFInstrumentWidget::getTabCustomizations() const {
+  MantidWidgets::InstrumentWidget::TabCustomizations customizations;
+  customizations.pickTools = std::vector<MantidWidgets::IWPickToolType>{
+      MantidWidgets::IWPickToolType::Zoom,       MantidWidgets::IWPickToolType::PixelSelect,
+      MantidWidgets::IWPickToolType::TubeSelect, MantidWidgets::IWPickToolType::PeakSelect,
+      MantidWidgets::IWPickToolType::EditShape,  MantidWidgets::IWPickToolType::DrawRectangle};
+  return customizations;
 }
 
 void ALFInstrumentWidget::handleActiveWorkspaceDeleted() {
