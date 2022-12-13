@@ -16,7 +16,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import \
 from mantid.simpleapi import (BinMD, CreateSingleValuedWorkspace, DivideMD,
                               GroupWorkspaces, IntegrateMDHistoWorkspace,
                               LoadDNSSCD, MinusMD, MultiplyMD, PlusMD, mtd,
-                              DeleteWorkspace, SetMDUsingMask)
+                              DeleteWorkspace, SetMDUsingMask, logger)
 
 
 def background_subtraction(workspace_name, factor=1):
@@ -38,13 +38,9 @@ def background_subtraction(workspace_name, factor=1):
         raise_error(f'No background file for {field_name}')
         return mtd[workspace_name]
     ratio = DivideMD(mtd[workspace_norm_name], mtd[background_norm_name])
-    remove_special_values_ws(ratio)
     scaling = ratio * factor
-    remove_special_values_ws(scaling)
     background_scaled = MultiplyMD(mtd[background_name], scaling)
-    remove_special_values_ws(background_scaled)
     MinusMD(mtd[workspace_name], background_scaled, OutputWorkspace=mtd[workspace_name])
-    remove_special_values_ws(mtd[workspace_name])
     return mtd[workspace_name]
 
 
@@ -76,25 +72,17 @@ def flipping_ratio_correction(workspace_name):
                     f'matching NiCr workspace found for {workspace_name}')
         return False
     new_nicr_sf = DivideMD(mtd[nicr_sf_field_name], mtd[nicr_sf_field_norm_name])
-    remove_special_values_ws(new_nicr_sf)
     new_nicr_nsf = DivideMD(mtd[nicr_nsf_field_name], mtd[nicr_nsf_field_norm_name])
-    remove_special_values_ws(new_nicr_nsf)
 
     # 1/k, where k = NSF/SF - 1
     inverse_fr_divider = MinusMD(new_nicr_nsf, new_nicr_sf)
-    remove_special_values_ws(inverse_fr_divider)
     inverse_fr = DivideMD(new_nicr_sf, inverse_fr_divider)
-    remove_special_values_ws(inverse_fr)
 
     # apply correction
     nsf_sf_diff = MinusMD(mtd[nsf_workspace_name], mtd[sf_workspace_name])
-    remove_special_values_ws(nsf_sf_diff)
     diff_ifr = MultiplyMD(nsf_sf_diff, inverse_fr)
-    remove_special_values_ws(diff_ifr)
     MinusMD(mtd[sf_workspace_name], diff_ifr, OutputWorkspace=mtd[sf_workspace_name])
-    remove_special_values_ws(mtd[sf_workspace_name])
     PlusMD(mtd[nsf_workspace_name], diff_ifr, OutputWorkspace=mtd[nsf_workspace_name])
-    remove_special_values_ws(mtd[nsf_workspace_name])
     return True
 
 
@@ -188,9 +176,7 @@ def vanadium_correction(workspace_name,
                     vana_norm_name = '_'.join((vana_name, 'norm'))
                     try:
                         vana = mtd[vana_name]
-                        remove_special_values_ws(vana)
                         vana_norm = mtd[vana_norm_name]
-                        remove_special_values_ws(vana_norm)
                     except KeyError:
                         raise_error(f'No vanadium file for field {field_name}.')
                         return mtd[workspace_name]
@@ -210,9 +196,7 @@ def vanadium_correction(workspace_name,
         vana_sf_norm_name = '_'.join((vana_sf_name, 'norm'))
         try:
             vana_sf = mtd[vana_sf_name]
-            remove_special_values_ws(vana_sf)
             vana_sf_norm = mtd[vana_sf_norm_name]
-            remove_special_values_ws(vana_sf_norm)
         except KeyError:
             raise_error(
                 f'No vanadium file for {polarization}_sf .'
@@ -223,9 +207,7 @@ def vanadium_correction(workspace_name,
             return mtd[workspace_name]
         try:
             vana_nsf = mtd[vana_nsf_name]
-            remove_special_values_ws(vana_nsf)
             vana_nsf_norm = mtd[vana_nsf_norm_name]
-            remove_special_values_ws(vana_nsf_norm)
         except KeyError:
             raise_error(
                 f'No vanadium file for {polarization}_nsf. '
@@ -241,9 +223,7 @@ def vanadium_correction(workspace_name,
         vana_norm_name = '_'.join((vana_name, 'norm'))
         try:
             vana_sum = mtd[vana_name]
-            remove_special_values_ws(vana_sum)
             vana_sum_norm = mtd[vana_norm_name]
-            remove_special_values_ws(vana_sum_norm)
         except KeyError:
             raise_error(f'No vanadium file for {field_name}.'
                         ' You can choose to ignore'
@@ -255,10 +235,12 @@ def vanadium_correction(workspace_name,
     rounding_limit = 0.05
     int_lower_limit = (binning[0] - rounding_limit) / 2.0
     int_upper_limit = (binning[1] + rounding_limit) / 2.0
+    remove_special_values_ws(vana_sum)
     vana_total = IntegrateMDHistoWorkspace(vana_sum,
                                            P1Bin=[int_lower_limit, int_upper_limit],
                                            P2Bin=[],
                                            P3Bin=[])
+    remove_special_values_ws(vana_sum_norm)
     vana_total_norm = IntegrateMDHistoWorkspace(vana_sum_norm,
                                                 P1Bin=[int_lower_limit, int_upper_limit],
                                                 P2Bin=[],
@@ -270,15 +252,10 @@ def vanadium_correction(workspace_name,
         DataValue=vana_total_norm.getSignalArray()[0][0][0],
         ErrorValue=np.sqrt(vana_total_norm.getErrorSquaredArray()[0][0][0]))
     coef_u = vana_sum / vana_total
-    remove_special_values_ws(coef_u)
     coef_norm = vana_sum_norm / vana_total_norm
-    remove_special_values_ws(coef_norm)
     coef = coef_u / coef_norm
-    remove_special_values_ws(coef)
     MultiplyMD(coef, mtd[workspace_norm_name], OutputWorkspace=mtd[workspace_norm_name])
-    remove_special_values_ws(mtd[workspace_norm_name])
     DivideMD(mtd[workspace_name], mtd[workspace_norm_name], OutputWorkspace=mtd[workspace_name])
-    remove_special_values_ws(mtd[workspace_name])
     return mtd[workspace_name]
 
 
@@ -324,11 +301,14 @@ def non_magnetic_separation(sf_workspace_name, nsf_workspace_name):
 
 def remove_special_values_ws(ws):
     '''
-    Creates a mask for any non-positive values inside the workspace
-    (including nans) and uses this mask to replace the corresponding
-    values with 0.
+    Creates a mask for any +/-infinity or +-nan values inside the
+    workspace and uses this mask to replace the corresponding values
+    with 0.
     '''
-    mask_ws = ~(ws > 0)
+    logger.warning(f"Warning: 'nan' and 'inf' values in the Workspace "
+                   f"{ws} have been replaced by 0 upon a call of the "
+                   f"vanadium_correction() function.")
+    mask_ws = ~((ws > -np.inf) & (ws < np.inf))
     SetMDUsingMask(InputWorkspace=ws,
                    OutputWorkspace=ws,
                    Value='0',
