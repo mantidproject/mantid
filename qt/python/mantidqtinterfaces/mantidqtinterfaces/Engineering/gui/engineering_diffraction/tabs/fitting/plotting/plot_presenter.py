@@ -67,11 +67,14 @@ class FittingPlotPresenter(object):
 
     def on_cancel_clicked(self):
         if self.worker:
-            self.worker.abort()
+            self.abort_worker()
             logger.warning("Fit cancelled and KeyboardInterrupt Exception expected.")
             logger.warning("The fit property browser and output fit results may be out of sync.")
             self.fitprop_list = None
             self._finished()
+
+    def abort_worker(self):
+        self.worker.abort()
 
     def enable_view_components(self, enable: bool):
         # enable / disable all widgets apart from the cancel button
@@ -117,10 +120,11 @@ class FittingPlotPresenter(object):
         self.fit_all_done_notifier.notify_subscribers(self.fitprop_list)
 
     def do_fit_all(self, previous_fitprop, ws_name_list, do_sequential=True):
+        prev_fitprop = previous_fitprop
         fitprop_list = []
         for ws_name in ws_name_list:
             logger.notice(f'Starting to fit workspace {ws_name}')
-            fitprop = deepcopy(previous_fitprop)
+            fitprop = deepcopy(prev_fitprop)
             # update I/O workspace name
             fitprop['properties']['Output'] = ws_name
             fitprop['properties']['InputWorkspace'] = ws_name
@@ -132,7 +136,7 @@ class FittingPlotPresenter(object):
             fitprop['properties']['Function'] = funcstr
             if "success" in fitprop['status'].lower() and do_sequential:
                 # update function in prev fitprop to use for next workspace
-                previous_fitprop['properties']['Function'] = funcstr
+                prev_fitprop['properties']['Function'] = funcstr
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
 
@@ -154,7 +158,7 @@ class FittingPlotPresenter(object):
                 self.view.show_fit_progress_bar()
         self.set_progress_bar_zero()
 
-    def set_progress_bar(self):
+    def update_progress_bar(self):
         if self.fitprop_list:
             self.set_final_state_progress_bar(output_list=self.fitprop_list)
         else:

@@ -54,7 +54,7 @@ class FittingPresenter(object):
     def fit_all_done(self, fit_props):
         # "all" refers to sequential/serial fit triggered in the data widget
         self.plot_widget.update_browser()
-        self.plot_widget.set_progress_bar()
+        self.plot_widget.update_progress_bar()
         self.enable_view(fit_all=True)
         self.data_widget.presenter.fit_completed(fit_props=fit_props)
 

@@ -112,7 +112,7 @@ class _Receiver(object):
 
 class BlockingAsyncTaskWithCallback(AsyncTask):
     def __init__(self, target, args=(), kwargs=None, success_cb=None, error_cb=None, blocking_cb=None,
-                 period_secs=0.05):
+                 period_secs=0.05, finished_cb=None):
         """Run the target in a separate thread and block the calling thread
         until execution is complete,the calling thread is blocked, except that
         the blocking_cb will be executed in every period in it.
@@ -136,9 +136,11 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         self.blocking_cb = create_callback(blocking_cb)
         self.success_cb = create_callback(success_cb)
         self.error_cb = create_callback(error_cb)
+        self.finished_cb = create_callback(finished_cb)
 
         self.recv = _Receiver(success_cb=success_cb, error_cb=error_cb)
-        self.task = AsyncTask(target, args, kwargs, success_cb=self.recv.on_success, error_cb=self.recv.on_error)
+        self.task = AsyncTask(target, args, kwargs, success_cb=self.recv.on_success, error_cb=self.recv.on_error,
+                              finished_cb=finished_cb)
 
     def start(self):
         """:returns: An AsyncTaskResult object"""
