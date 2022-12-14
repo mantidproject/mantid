@@ -63,6 +63,7 @@
       }
     },
     {
+      "vendor": { "microsoft.com/VisualStudioSettings/CMake/1.0": { "cacheRoot": "${sourceDir}/build" } },
       "name": "win-ninja",
       "displayName": "win-ninja",
       "description": "Default build options for a windows conda Ninja DebugWithRelRuntime build",
