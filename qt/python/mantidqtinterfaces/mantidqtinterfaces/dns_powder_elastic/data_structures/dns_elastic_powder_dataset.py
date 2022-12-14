@@ -119,12 +119,13 @@ def list_to_set(bank_list, rounding_limit=0.05):
 
 
 def automatic_omega_binning(sample_data):
-    omega = [x['sample_rot'] - x['det_rot'] for x in sample_data]
-    omega_max = max(omega)
-    omega_min = min(omega)
-    sample_rot = [x['sample_rot'] for x in sample_data]
-    omega_step = get_omega_step(sample_rot)
-    return DNSBinning(omega_min, omega_max, omega_step)
+    if sample_data:
+        omega = [x['sample_rot'] - x['det_rot'] for x in sample_data]
+        omega_max = max(omega)
+        omega_min = min(omega)
+        sample_rot = [x['sample_rot'] for x in sample_data]
+        omega_step = get_omega_step(sample_rot)
+        return DNSBinning(omega_min, omega_max, omega_step)
 
 
 def get_proposal_from_filename(filename, file_number):
