@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QApplication
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-MARKER_SENSITIVITY = 3
+MARKER_SENSITIVITY = 5
 
 
 class HorizontalMarker(QObject):
@@ -54,7 +54,7 @@ class HorizontalMarker(QObject):
                                linewidth=line_width,
                                linestyle=line_style,
                                animated=True)
-        self.axis.add_patch(self.patch)
+        self.axis.add_artist_correctly(self.patch)
         self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
         self.move_cursor = move_cursor
@@ -76,7 +76,10 @@ class HorizontalMarker(QObject):
         """
         Remove this marker from the canvas.
         """
-        self.patch.remove()
+        try:
+            self.patch.remove()
+        except ValueError:
+            pass
 
     def redraw(self):
         """
@@ -237,7 +240,7 @@ class VerticalMarker(QObject):
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
         self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
                                linewidth=line_width, linestyle=line_style, animated=True)
-        self.axis.add_patch(self.patch)
+        self.axis.add_artist_correctly(self.patch)
         self.axis.interactive_markers.append(self.patch)
         self.is_moving = False
         self.move_cursor = move_cursor
@@ -516,6 +519,8 @@ class PeakMarker(QObject):
         self.left_width = WidthMarker(canvas, x - fwhm / 2)
         self.right_width = WidthMarker(canvas, x + fwhm / 2)
         self.is_selected = False
+        # True if the mouse is currently hovering over the centre marker
+        self._centre_hover = False
 
     def redraw(self):
         """
@@ -598,6 +603,17 @@ class PeakMarker(QObject):
             if moved:
                 self.fwhm_changed.emit(self.peak_id, self.fwhm())
         return moved
+
+    def mouse_move_hover(self, x: float, y: float) -> None:
+        """
+        Check if the provided coordinate is above the centre marker.
+        """
+        is_above_centre = self.centre_marker.is_above(x, y)
+        if not self._centre_hover and is_above_centre:
+            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+        elif self._centre_hover and not is_above_centre:
+            QApplication.restoreOverrideCursor()
+        self._centre_hover = is_above_centre
 
     def is_moving(self):
         """

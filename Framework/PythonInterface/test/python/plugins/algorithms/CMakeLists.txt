@@ -8,6 +8,8 @@ set(TEST_PY_FILES
     AlignComponentsTest.py
     AngularAutoCorrelationsSingleAxisTest.py
     AngularAutoCorrelationsTwoAxesTest.py
+    AnstoCommonFractionalTest.py
+    AnstoCommonSearchTest.py
     ApplyDetectorScanEffCorrTest.py
     BinWidthAtXTest.py
     CalculateEfficiencyCorrectionTest.py

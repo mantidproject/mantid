@@ -13,6 +13,7 @@
 #include "InelasticDataManipulationTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "ui_InelasticDataManipulationElwinTab.h"
 
@@ -37,7 +38,7 @@ public:
   void setFBSuffixes(QStringList const suffix);
   void newPreviewFileSelected(const MatrixWorkspace_sptr &workspace);
   int getCurrentInputIndex();
-  FileFinderWidget *getFileFinderWidget();
+  API::FileFinderWidget *getFileFinderWidget();
   QString getPreviewWorkspaceName(int index);
   QString getPreviewFilename(int index);
   QStringList getInputFilenames();
@@ -53,7 +54,7 @@ public:
 
   // controls for dataTable
   void clearDataTable();
-  void addTableEntry(size_t row, std::string const &name, int spectrum);
+  void addTableEntry(int row, std::string const &name, int spectrum);
   void setCell(std::unique_ptr<QTableWidgetItem> cell, int row, int column);
   QModelIndexList getSelectedData();
 

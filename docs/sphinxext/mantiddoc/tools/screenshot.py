@@ -21,11 +21,12 @@ def _ensure_qapplication_started(func):
     """
     Decorator to ensure QApplication has been created
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         global _QAPP
         if QApplication.instance() is None:
-            _QAPP = QApplication(['screenshot'])
+            _QAPP = QApplication(["screenshot"])
         return func(*args, **kwargs)
 
     return wrapper
@@ -65,10 +66,7 @@ def algorithm_screenshot(name: str, directory: str, version: int = -1, ext: str 
 
 
 @_ensure_qapplication_started
-def custominterface_screenshot(name: str,
-                               directory: str,
-                               ext: str = ".png",
-                               widget_name: str = None):
+def custominterface_screenshot(name: str, directory: str, ext: str = ".png", widget_name: str = None):
     """
     Takes a snapshot of a custom interface and saves it as an image
     named "name.png"
@@ -95,9 +93,9 @@ def custominterface_screenshot(name: str,
         image_widget = window.findChild(QWidget, widget_name)
         if image_widget is None:
             raise RuntimeError(f"Widget '{widget_name}' does not exist in interface '{name}'")
-        filename = name.replace(' ', '_') + "_" + widget_name + "_widget" + ext
+        filename = name.replace(" ", "_") + "_" + widget_name + "_widget" + ext
     else:
-        filename = name.replace(' ', '_') + "_interface" + ext
+        filename = name.replace(" ", "_") + "_interface" + ext
     filepath = os.path.join(directory, filename)
     try:
         take_picture(image_widget, filepath)
@@ -124,7 +122,7 @@ def take_picture(widget: QWidget, filename: str) -> str:
     through a slot if the call is from a separate
     thread
     """
-    if hasattr(widget, 'grab'):
+    if hasattr(widget, "grab"):
         pix = widget.grab()
     else:
         pix = QPixmap.grabWidget(widget)
@@ -137,6 +135,7 @@ class Screenshot:
     """
     Captures the filename + meta information about it a screeshot
     """
+
     def __init__(self, filename: str, width: float, height: float):
         """
         :param filename: Filename of existing image

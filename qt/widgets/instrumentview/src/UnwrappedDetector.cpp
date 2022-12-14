@@ -8,6 +8,10 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 
+#include <QPointF>
+#include <QRectF>
+#include <QSizeF>
+
 using namespace Mantid::Geometry;
 
 namespace MantidQt::MantidWidgets {
@@ -27,5 +31,9 @@ UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) { this->ope
 UnwrappedDetector &UnwrappedDetector::operator=(const UnwrappedDetector &other) = default;
 
 bool UnwrappedDetector::empty() const { return detIndex == std::numeric_limits<size_t>::max(); }
+
+QRectF UnwrappedDetector::toQRectF() const {
+  return QRectF(QPointF(u - width / 2, v - height / 2), QSizeF(width, height));
+}
 
 } // namespace MantidQt::MantidWidgets

@@ -41,7 +41,7 @@ public:
   MOCK_METHOD1(setUpInstrument, void(const std::string &fileName));
 
   MOCK_METHOD0(generateLoadWidget, QWidget *());
-  MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget *());
+  MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
 
   MOCK_METHOD1(subscribePresenter, void(IALFInstrumentPresenter *presenter));
 
@@ -75,7 +75,7 @@ public:
 class MockALFInstrumentPresenter : public IALFInstrumentPresenter {
 public:
   MOCK_METHOD0(getLoadWidget, QWidget *());
-  MOCK_METHOD0(getInstrumentView, MantidWidgets::InstrumentWidget *());
+  MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
 
   MOCK_METHOD1(subscribeAnalysisPresenter, void(IALFAnalysisPresenter *presenter));
 

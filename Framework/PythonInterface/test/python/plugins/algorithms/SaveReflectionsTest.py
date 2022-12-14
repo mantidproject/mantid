@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest.mock import patch
 import tempfile
 import os
 import shutil
@@ -12,7 +13,7 @@ import numpy as np
 
 from mantid.api import FileFinder
 from mantid.kernel import V3D
-from mantid.simpleapi import (CloneWorkspace, CreatePeaksWorkspace, DeleteWorkspace,
+from mantid.simpleapi import (CloneWorkspace, CreatePeaksWorkspace, DeleteWorkspace, AnalysisDataService,
                               LoadEmptyInstrument, SetUB, SaveReflections, DeleteTableRows)
 
 
@@ -23,6 +24,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        AnalysisDataService.clear()
         shutil.rmtree(cls._test_dir)
 
     def setUp(self):
@@ -278,6 +280,12 @@ class SaveReflectionsTest(unittest.TestCase):
                           InputWorkspace=self._workspace,
                           Filename=file_name,
                           Format=output_format)
+
+    @patch('mantid.kernel.logger.warning')
+    def test_save_empty_peak_table(self, mock_log):
+        empty_peaks = CreatePeaksWorkspace(self._workspace, NumberOfPeaks=0)
+        SaveReflections(InputWorkspace=empty_peaks, Filename="test.int", Format="Jana")
+        mock_log.assert_called_once_with('Peaks workspace empty_peaks is empty - an empty file will be produced.')
 
     # Private api
     def _assert_file_content_equal(self, reference_result, file_name):

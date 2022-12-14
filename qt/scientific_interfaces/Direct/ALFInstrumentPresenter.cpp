@@ -22,7 +22,7 @@ ALFInstrumentPresenter::ALFInstrumentPresenter(IALFInstrumentView *view, std::un
 
 QWidget *ALFInstrumentPresenter::getLoadWidget() { return m_view->generateLoadWidget(); }
 
-MantidWidgets::InstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
+ALFInstrumentWidget *ALFInstrumentPresenter::getInstrumentView() { return m_view->getInstrumentView(); }
 
 void ALFInstrumentPresenter::subscribeAnalysisPresenter(IALFAnalysisPresenter *presenter) {
   m_analysisPresenter = presenter;

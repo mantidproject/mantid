@@ -516,8 +516,8 @@ void InelasticDataManipulationElwinTab::addDataToModel(IAddWorkspaceDialog const
 void InelasticDataManipulationElwinTab::updateTableFromModel() {
   m_view->clearDataTable();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
-    m_view->addTableEntry(domainIndex.value, m_dataModel->getWorkspace(domainIndex)->getName(),
-                          m_dataModel->getSpectrum(domainIndex));
+    m_view->addTableEntry(static_cast<int>(domainIndex.value), m_dataModel->getWorkspace(domainIndex)->getName(),
+                          static_cast<int>(m_dataModel->getSpectrum(domainIndex)));
   }
 }
 

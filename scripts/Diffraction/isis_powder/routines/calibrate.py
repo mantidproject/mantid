@@ -23,15 +23,15 @@ def create_van(instrument, run_details, absorb):
     # Always sum a range of inputs as its a vanadium run over multiple captures
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
                                                                input_batching=INPUT_BATCHING.Summed)
-    input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
+    corrected_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
-    instrument.create_solid_angle_corrections(input_van_ws, run_details)
+    instrument.create_solid_angle_corrections(corrected_van_ws, run_details)
 
     if not (run_details.empty_inst_runs is None):
-        summed_empty_inst = common.generate_summed_runs(empty_sample_ws_string=run_details.empty_inst_runs,
+        summed_empty_inst = common.generate_summed_runs(empty_ws_string=run_details.empty_inst_runs,
                                                         instrument=instrument)
         mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty_inst)
-        corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws, empty_sample=summed_empty_inst)
+        corrected_van_ws = common.subtract_summed_runs(ws_to_correct=corrected_van_ws, empty_ws=summed_empty_inst)
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)

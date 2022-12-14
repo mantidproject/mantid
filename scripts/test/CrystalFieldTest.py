@@ -1181,7 +1181,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         rm = CrystalField.ResolutionModel(func, 0, np.pi)
         self.assertEqual(len(rm.model[0]), 129)
         self.assertEqual(len(rm.model[1]), 129)
-        self.assertTrue(np.all(func(rm.model[0]) == rm.model[1]))
+        self.assertTrue(np.allclose(func(rm.model[0]), rm.model[1], 0.000001))
 
     def test_ResolutionModel_func_multi(self):
         def func0(x):
@@ -1205,9 +1205,9 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertEqual(len(rm.model[1][1]), 9)
         self.assertEqual(len(rm.model[2][0]), 17)
         self.assertEqual(len(rm.model[2][1]), 17)
-        self.assertTrue(np.all(func0(rm.model[0][0]) == rm.model[0][1]))
-        self.assertTrue(np.all(func1(rm.model[1][0]) == rm.model[1][1]))
-        self.assertTrue(np.all(func2(rm.model[2][0]) == rm.model[2][1]))
+        self.assertTrue(np.allclose(func0(rm.model[0][0]), rm.model[0][1], 0.000001))
+        self.assertTrue(np.allclose(func1(rm.model[1][0]), rm.model[1][1], 0.000001))
+        self.assertTrue(np.allclose(func2(rm.model[2][0]), rm.model[2][1], 0.000001))
 
     def test_ResolutionModel_array_single(self):
         x = [1, 2, 3]

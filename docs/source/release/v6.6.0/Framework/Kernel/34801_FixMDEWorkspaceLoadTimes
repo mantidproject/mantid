@@ -1,0 +1,1 @@
+- Reworked loadPropertyCommon to fix an issue with loading MDE worksapces taking long time to load

@@ -12,6 +12,7 @@ class AttributesDirective(PropertiesDirective):
     """
     Outputs the given fit function's properties into a ReST formatted table.
     """
+
     # Accept one required argument and no optional arguments.
     required_arguments, optional_arguments = 0, 0
     has_content = True
@@ -31,7 +32,7 @@ class AttributesDirective(PropertiesDirective):
         will describe a single attribute as a semicolon separated list
         Name;Type;Default;Description
         """
-        if self.algorithm_version() is None: # This is an IFunction
+        if self.algorithm_version() is None:  # This is an IFunction
             ifunc = self.create_mantid_ifunction(self.algorithm_name())
             if ifunc.nAttributes() <= 0:
                 return False
@@ -40,7 +41,7 @@ class AttributesDirective(PropertiesDirective):
             attributes = []
 
             # names for the table headers.
-            header = ('Name', 'Type', 'Default', 'Description')
+            header = ("Name", "Type", "Default", "Description")
 
             if len(self.content) > 0:
                 for line in self.content:
@@ -69,4 +70,4 @@ def setup(app):
     Args:
       app: The main Sphinx application object
     """
-    app.add_directive('attributes', AttributesDirective)
+    app.add_directive("attributes", AttributesDirective)

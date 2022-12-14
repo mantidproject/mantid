@@ -86,6 +86,8 @@ private:
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(const Mantid::API::IAlgorithm_sptr &alg,
                                                const Mantid::Geometry::Instrument_const_sptr &instrument);
+  std::string findPolarizationCorrectionMethod(const API::MatrixWorkspace_sptr &efficiencies);
+  std::string findPolarizationCorrectionOption(const std::string &correctionMethod);
   /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string> getPolarizationEfficiencies();
   void applyPolarizationCorrection(const std::string &outputIvsLam);

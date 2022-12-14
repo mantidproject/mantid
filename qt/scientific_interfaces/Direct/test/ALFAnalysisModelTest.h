@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
@@ -43,6 +44,7 @@ public:
 
   void test_that_the_model_is_instantiated_with_a_function_and_empty_fit_status() {
     TS_ASSERT_EQUALS(nullptr, m_model->extractedWorkspace());
+    TS_ASSERT_THROWS_NOTHING(m_model->getPeakCopy());
     TS_ASSERT_THROWS_NOTHING(m_model->peakCentre());
     TS_ASSERT_EQUALS("", m_model->fitStatus());
     TS_ASSERT_EQUALS(0u, m_model->numberOfTubes());
@@ -58,7 +60,7 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_Parameters"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("__fit_NormalisedCovarianceWorkspace"));
 
-    TS_ASSERT_EQUALS(0.0, m_model->peakCentre());
+    TS_ASSERT_EQUALS(0.0, m_model->getPeakCopy()->getParameter("PeakCentre"));
     TS_ASSERT_EQUALS("success", m_model->fitStatus());
   }
 
@@ -117,6 +119,24 @@ public:
     TS_ASSERT_EQUALS(std::vector<double>{29.5}, m_model->allTwoThetas());
   }
 
+  void test_setPeakParameters_will_update_the_parameters_in_the_gaussian() {
+    double height = 1.2;
+    double centre = 1.5;
+    double sigma = 1.8;
+
+    auto gaussian = FunctionFactory::Instance().createFunction("Gaussian");
+    gaussian->setParameter("Height", height);
+    gaussian->setParameter("PeakCentre", centre);
+    gaussian->setParameter("Sigma", sigma);
+
+    m_model->setPeakParameters(std::dynamic_pointer_cast<IPeakFunction>(gaussian));
+
+    auto const modelPeak = m_model->getPeakCopy();
+    TS_ASSERT_EQUALS(height, modelPeak->getParameter("Height"));
+    TS_ASSERT_EQUALS(centre, modelPeak->getParameter("PeakCentre"));
+    TS_ASSERT_EQUALS(sigma, modelPeak->getParameter("Sigma"));
+  }
+
   void test_that_clear_will_clear_the_two_thetas_and_extracted_workspace_from_the_model() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
 
@@ -133,6 +153,19 @@ public:
   void test_that_numberOfTubes_returns_the_number_of_two_thetas() {
     m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
     TS_ASSERT_EQUALS(3u, m_model->numberOfTubes());
+  }
+
+  void test_rotationAngle_returns_nullopt_if_the_fit_status_is_empty() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    TS_ASSERT_EQUALS(std::nullopt, m_model->rotationAngle());
+  }
+
+  void test_rotationAngle_returns_the_correct_value_with_valid_data() {
+    m_model->setExtractedWorkspace(m_workspace, m_twoThetas);
+    m_model->setPeakCentre(0.1);
+    m_model->doFit(m_range);
+
+    TS_ASSERT_DELTA(-0.0557, *m_model->rotationAngle(), 0.0001);
   }
 
 private:
