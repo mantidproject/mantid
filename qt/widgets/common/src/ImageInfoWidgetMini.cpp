@@ -10,7 +10,6 @@
 
 #include <QAbstractScrollArea>
 #include <QHeaderView>
-#include <QTableWidget>
 
 namespace MantidQt::MantidWidgets {
 
@@ -40,11 +39,11 @@ void ImageInfoWidgetMini::showInfo(const ImageInfoModel::ImageInfo &info) {
   if (info.empty())
     return;
   auto text = QString{};
-  const auto itemCount(info.size());
-  for (int i = 0; i < itemCount; ++i) {
-    text += info.name(i) + "=";
-    text += info.value(i) + ", ";
-  }
+  // TOF
+  text += info.name(0) + "=" + info.value(0) + ", ";
+  // Spectrum
+  text += info.name(1) + "=" + info.value(1);
+
   setText(text);
 }
 
