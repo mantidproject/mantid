@@ -155,9 +155,9 @@ class SliceViewerDataView(QWidget):
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
-        self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
         self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
         if not custom_image_info:
+            self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
             self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
 
     @property
