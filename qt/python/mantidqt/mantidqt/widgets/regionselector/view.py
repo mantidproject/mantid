@@ -31,7 +31,7 @@ class RegionSelectorView(QWidget):
         self._data_view.image_info_widget.setWorkspace(workspace)
 
     def create_dimensions(self, dims_info):
-        self._data_view.create_dimensions(dims_info=dims_info)
+        self._data_view.create_dimensions(dims_info=dims_info, custom_image_info=True)
 
     def create_axes_orthogonal(self, redraw_on_zoom):
         self._data_view.create_axes_orthogonal(redraw_on_zoom=redraw_on_zoom)

@@ -15,6 +15,7 @@
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
 #include "MantidAPI/RegionSelectorObserver.h"
+#include "MantidQtWidgets/Common/IImageInfoWidget.h"
 #include "MantidQtWidgets/Plotting/PlotWidget/PlotPresenter.h"
 #include <memory>
 
@@ -101,6 +102,7 @@ private:
   std::unique_ptr<IJobManager> m_jobManager;
   std::unique_ptr<IInstViewModel> m_instViewModel;
   std::unique_ptr<IPreviewDockedWidgets> m_dockedWidgets{nullptr};
+  std::unique_ptr<MantidQt::MantidWidgets::IImageInfoWidget> m_imageInfo;
   std::unique_ptr<MantidQt::Widgets::IRegionSelector> m_regionSelector;
   std::unique_ptr<MantidQt::MantidWidgets::PlotPresenter> m_plotPresenter;
   std::shared_ptr<StubRegionObserver> m_stubRegionObserver;

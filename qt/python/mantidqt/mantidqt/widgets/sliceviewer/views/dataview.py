@@ -60,8 +60,10 @@ class SliceViewerDataView(QWidget):
 
         if image_info_widget is None:
             self.image_info_widget = ImageInfoWidget(self)
+            custom_widget = False
         else:
             self.image_info_widget = image_info_widget
+            custom_widget = True
         self.image_info_widget.setToolTip("Information about the selected pixel")
         self.track_cursor = QCheckBox("Track Cursor", self)
         self.track_cursor.setToolTip(
@@ -74,7 +76,7 @@ class SliceViewerDataView(QWidget):
         self.dimensions_layout = QGridLayout()
         self.dimensions_layout.setHorizontalSpacing(10)
         if (dims_info):
-            self.create_dimensions(dims_info)
+            self.create_dimensions(dims_info, custom_widget)
         else:
             self.dimensions = None
 
@@ -149,13 +151,14 @@ class SliceViewerDataView(QWidget):
         layout.addWidget(self.status_bar, 3, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
-    def create_dimensions(self, dims_info):
+    def create_dimensions(self, dims_info, custom_image_info=False):
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
         self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
         self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
-        self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
+        if not custom_image_info:
+            self.dimensions_layout.addWidget(self.image_info_widget, 1, 1)
 
     @property
     def grid_on(self):
