@@ -53,6 +53,6 @@ void ImageInfoWidgetMini::showInfo(const ImageInfoModel::ImageInfo &info) {
  */
 void ImageInfoWidgetMini::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
 
-void ImageInfoWidgetMini::setRowCount(const int count) {}
+void ImageInfoWidgetMini::setRowCount(const int /*count*/) {}
 
 } // namespace MantidQt::MantidWidgets
