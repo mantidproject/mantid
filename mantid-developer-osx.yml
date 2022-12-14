@@ -45,6 +45,7 @@ dependencies:
   - tbb-devel=2021.*
   - texlive-core>=20180414
   - toml>=0.10.2
+  - versioningit>=2.1
   - zlib>=1.2.11
   # Needed only for development
   - black  # may be out of sync with pre-commit
