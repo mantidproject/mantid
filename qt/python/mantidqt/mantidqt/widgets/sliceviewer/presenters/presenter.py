@@ -10,6 +10,7 @@ import sys
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QCursor
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
@@ -23,6 +24,8 @@ from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, Peaks
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
+
+from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor
 
 DBLMAX = sys.float_info.max
 
@@ -421,6 +424,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self._peaks_presenter.clear_observer()
 
     def canvas_clicked(self, event):
+        data_view = self.view.data_view
         if self._peaks_presenter is not None and event.inaxes:
             sliceinfo = self.get_sliceinfo()
             if sliceinfo.can_support_peak_overlay():
@@ -429,6 +433,18 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
+        elif event.dblclick and event.button == data_view.canvas.buttond.get(Qt.LeftButton)\
+                and not data_view.nonorthogonal_mode:
+            if (data_view.ax.xaxis.contains(event)[0]
+                 or any(tick.contains(event)[0] for tick in data_view.ax.get_xticklabels())):
+                editor = SliceViewXAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
+                editor.move(QCursor.pos())
+                editor.exec_()
+            elif (data_view.ax.yaxis.contains(event)[0]
+                  or any(tick.contains(event)[0] for tick in data_view.ax.get_yticklabels())):
+                editor = SliceViewYAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
+                editor.move(QCursor.pos())
+                editor.exec_()
 
     def key_pressed(self, event) -> None:
         pass
@@ -527,6 +543,32 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             extra_cols = {}
         return extra_cols
+
+
+class SliceViewXAxisEditor(XAxisEditor):
+
+    def __init__(self, canvas, axes, dimensions_changed):
+        super(SliceViewXAxisEditor, self).__init__(canvas, axes)
+        self.dimensions_changed = dimensions_changed
+        self.ui.logBox.hide()
+        self.ui.gridBox.hide()
+
+    def on_ok(self):
+        super(SliceViewXAxisEditor, self).on_ok()
+        self.dimensions_changed()
+
+
+class SliceViewYAxisEditor(YAxisEditor):
+
+    def __init__(self, canvas, axes, dimensions_changed):
+        super(SliceViewYAxisEditor, self).__init__(canvas, axes)
+        self.dimensions_changed = dimensions_changed
+        self.ui.logBox.hide()
+        self.ui.gridBox.hide()
+
+    def on_ok(self):
+        super(SliceViewYAxisEditor, self).on_ok()
+        self.dimensions_changed()
 
 
 class SliceViewerManager:
