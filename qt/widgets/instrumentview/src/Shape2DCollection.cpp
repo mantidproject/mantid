@@ -301,13 +301,19 @@ void Shape2DCollection::touchShapeOrControlPointAt(int x, int y) {
       if (difference.x() > 0) {
         if (difference.y() > 0)
           QApplication::setOverrideCursor(Qt::SizeBDiagCursor);
-        else
+        else if (difference.y() < 0)
           QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
-      } else {
+        else
+          QApplication::setOverrideCursor(Qt::SizeHorCursor);
+      } else if (difference.x() < 0) {
         if (difference.y() > 0)
           QApplication::setOverrideCursor(Qt::SizeFDiagCursor);
-        else
+        else if (difference.y() < 0)
           QApplication::setOverrideCursor(Qt::SizeBDiagCursor);
+        else
+          QApplication::setOverrideCursor(Qt::SizeHorCursor);
+      } else {
+        QApplication::setOverrideCursor(Qt::SizeVerCursor);
       }
     }
   } else if (isOverSelectionAt(x, y)) {
