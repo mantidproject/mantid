@@ -8,14 +8,17 @@
 #include "MantidQtWidgets/RegionSelector/RegionSelector.h"
 #include "MantidAPI/RegionSelectorObserver.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/IImageInfoWidget.h"
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
 #include <QLayout>
 #include <QWidget>
 #include <boost/python/extract.hpp>
+#include <iostream>
 #include <vector>
 
 using Mantid::API::Workspace_sptr;
@@ -37,7 +40,8 @@ Python::Object newPresenter(Workspace_sptr workspace, MantidQt::MantidWidgets::I
     options["ws"] = workspace;
   }
   if (imageInfoWidget) {
-    options["image_info_widget"] = imageInfoWidget;
+    options["image_info_widget"] = Python::wrap(
+        static_cast<MantidQt::MantidWidgets::ImageInfoWidgetMini *>(imageInfoWidget), "ImageInfoWidgetMini");
   }
   auto constructor = presenterModule().attr("RegionSelector");
   return constructor(*boost::python::tuple(), **options);

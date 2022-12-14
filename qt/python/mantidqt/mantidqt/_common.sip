@@ -1089,6 +1089,48 @@ public:
     %End
 };
 
+class ImageInfoWidgetMini : public QLabel {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ImageInfoWidgetMini.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    ImageInfoWidgetMini(QWidget *parent = nullptr);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
+    %MethodCode
+    try {
+      sipCpp->cursorAt(a0, a1, a2, *a3);
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+    void setWorkspace(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+};
+
+
 // ---------------------------------
 // DataSelector
 // ---------------------------------
