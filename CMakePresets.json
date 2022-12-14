@@ -73,7 +73,8 @@
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
         "CONDA_ENV": true,
         "CMAKE_BUILD_TYPE": "DebugWithRelRuntime",
-        "USE_PRECOMPILED_HEADERS": "OFF"
+        "USE_PRECOMPILED_HEADERS": "OFF",
+        "CMAKE_MAKE_PROGRAM": "ninja.exe"
       }
     },
     {
