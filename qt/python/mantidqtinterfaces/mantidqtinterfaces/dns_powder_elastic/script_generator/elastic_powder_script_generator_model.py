@@ -354,9 +354,11 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         coh_incoh_separation_possibility_list = []
         incomplete_banks_list = []
         for det_bank_angle in selected_angle_fields_data.keys():
-            sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith('_sf')])
+            sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle]
+                                if field.endswith('_sf')])
             sf_fields_components = [field.replace("_sf", "") for field in sf_fields]
-            nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith('_nsf')])
+            nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle]
+                                 if field.endswith('_nsf')])
             nsf_fields_components = [field.replace("_nsf", "") for field in nsf_fields]
             if nsf_fields_components == sf_fields_components:
                 coh_incoh_separation_possible = True
@@ -373,9 +375,11 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         flipping_ratio_possibility_list = []
         incomplete_banks_list = []
         for det_bank_angle in selected_angle_fields_data.keys():
-            sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith('_sf')])
+            sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle]
+                                if field.endswith('_sf')])
             sf_fields_components = [field.replace("_sf", "") for field in sf_fields]
-            nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith('_nsf')])
+            nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle]
+                                 if field.endswith('_nsf')])
             nsf_fields_components = [field.replace("_nsf", "") for field in nsf_fields]
             if nsf_fields_components == sf_fields_components:
                 flipping_ratio_possible = True
@@ -421,30 +425,38 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             return ('Standard data have to be selected to perform reduction '
                     'of sample data.')
         if self._bank_positions_not_compatible():
-            return ('Detector rotation angles of the selected standard data do '
-                    'not match the angles of the selected sample data.')
+            return ('Detector rotation angles of the selected standard data '
+                    'do not match the angles of the selected sample data.')
         if self._vana_correction and self._vana_not_in_standard():
             return ('Detector efficiency correction option is chosen, '
-                    'but the number of selected vanadium scans is 0.')
+                    'but detector bank rotation angles of the selected '
+                    'vanadium files do not correspond to those of the '
+                    'selected sample files.')
+        if self._vana_correction and self._empty_not_in_standard():
+            return ('Detector efficiency correction option is chosen, '
+                    'but detector bank rotation angles of the selected "empty" '
+                    'files do not correspond to those of the selected '
+                    'sample files.')
         if self._nicr_correction and self._nicr_not_in_standard():
             return ('Flipping ratio correction option is chosen, but '
-                    'the number of selected NiCr scans is 0.')
-        if self._nicr_correction and self._flipping_ratio_not_possible()[0]:
-            return ('Flipping ratio correction option is chosen, but '
-                    'no complete pairs of SF and NSF measurements are '
-                    'found for the following bank rotation angles: '
-                    f'{self._flipping_ratio_not_possible()[1]}')
-        if self._sample_background_correction and self._empty_not_in_standard():
-            return ('Background subtraction from sample is chosen, but '
-                    'the number of selected empty scans is 0.')
-        if self._vana_correction and self._empty_not_in_standard():
-            return ('Vanadium correction option is chosen, but the '
-                    'number of selected empty scans, needed for '
-                    'background subtraction from vanadium, is 0.')
+                    'detector bank rotation angles of the selected NiCr '
+                    'files do not correspond to those of the selected '
+                    'sample files.')
         if self._nicr_correction and self._empty_not_in_standard():
             return ('Flipping ratio correction option is chosen, but '
-                    'the number of selected empty scans, needed for '
-                    'background subtraction from NiCr, is 0.')
+                    'detector bank rotation angles of the selected "empty" '
+                    'files do not correspond to those of the selected '
+                    'sample files.')
+        if self._sample_background_correction and self._empty_not_in_standard():
+            return ('Background subtraction from sample is chosen, but '
+                    'detector bank rotation angles of the selected "empty" '
+                    'files do not correspond to those of the selected '
+                    'sample files.')
+        if self._nicr_correction and self._flipping_ratio_not_possible()[0]:
+            return ('Flipping ratio correction option is chosen, but '
+                    'an incomplete set of pairs of SF and NSF measurements '
+                    'is found for the following bank rotation angles: '
+                    f'{self._flipping_ratio_not_possible()[1]}')
         if self._non_magnetic and self._coh_incoh_separation_not_possible()[0]:
             return ('No complete pairs of SF and NSF measurements are '
                     'found for performing separation of coherent and '
