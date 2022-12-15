@@ -110,6 +110,7 @@ set(TEST_PY_FILES
     SaveNexusPDTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
+    SaveINSTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
