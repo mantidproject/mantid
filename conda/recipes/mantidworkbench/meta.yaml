@@ -1,8 +1,8 @@
-{% set data = load_setup_py_data() %}
+{% set version = load_setup_py_data().get('version', '0.0.0') %}
 
 package:
   name: mantidworkbench
-  version: {{ data.get('version', '0.0.0') }}
+  version: {{ version }}
 
 source:
   path: ../../../
