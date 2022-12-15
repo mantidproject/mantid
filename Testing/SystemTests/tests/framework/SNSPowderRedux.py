@@ -188,8 +188,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
     cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
 
     def skipTests(self):
-        # disabled
-        return True
+        return _skip_test()
 
     def cleanup(self):
         return do_cleanup()
