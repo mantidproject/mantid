@@ -49,7 +49,11 @@ template <typename T> T *extract(const Object &obj) {
  */
 template <typename T> Object wrap(const T &obj, char const *nameOfType) {
   const auto sipapi = Detail::sipAPI();
-  auto pyObj = sipapi->api_convert_from_type(obj, sipapi->api_find_type(nameOfType), nullptr);
+  const auto type = sipapi->api_find_type(nameOfType);
+  if (!type) {
+    return Python::Object();
+  }
+  auto pyObj = sipapi->api_convert_from_type(obj, type, nullptr);
   return NewRef(pyObj);
 }
 
