@@ -1,0 +1,56 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: mantidworkbench
+  version: {{ data.get('version', '0.0.0') }}
+
+source:
+  path: ../../../
+
+build:
+  number: 0
+  entry_points:
+    - workbench = workbench.app.main:main
+  osx_is_app: true
+  ignore_run_exports_from:
+      - {{ compiler('cxx') }}
+
+requirements:
+  build:
+    - {{ compiler("cxx") }}
+    - ninja  # [unix]
+    - cmake
+    - git
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libx11-devel') }}  # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+  host:
+    - setuptools {{ setuptools }}
+    - mantidqt {{ version }}
+    - python
+  run:
+    - ipykernel {{ ipykernel }}
+    - psutil
+    - {{ pin_compatible("python", max_pin="x.x") }}
+    - matplotlib {{ matplotlib }}
+    - python.app  # [osx]
+    - qtconsole
+    - {{ pin_compatible("setuptools", max_pin="x.x") }}
+    - mantiddocs {{ version }}
+
+test:
+  imports:
+    - workbench
+
+about:
+  home: https://github.com/mantidproject/mantid
+  license: GPL-3.0-or-later
+  summary: MantidWorkbench provides a graphical user interface to the Mantid framework, supporting high-performance computing and visualisation of materials science data.
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg

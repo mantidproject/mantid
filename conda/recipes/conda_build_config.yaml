@@ -1,0 +1,66 @@
+c_compiler:
+  - gcc                      # [linux]
+  - clang                    # [osx]
+  - vs2019                   # [win]
+c_compiler_version:            # [unix]
+  - 13                         # [osx]
+  - 10                         # [linux]
+cxx_compiler:
+  - gxx                      # [linux]
+  - clangxx                  # [osx]
+  - vs2019                   # [win]
+cxx_compiler_version:          # [unix]
+  - 13                         # [osx]
+  - 10                         # [linux]
+llvm_openmp:                   # [osx]
+  - 13                         # [osx]
+
+python:
+  - 3.8
+
+boost:
+  - 1.77
+
+numpy:
+  - 1.19
+
+matplotlib:
+  - 3.5.*
+
+openssl:
+  - 1.1.1l.*
+
+setuptools:
+  - 48.0.*
+
+sphinx:
+  - 5.1.1
+
+sphinx_bootstrap_theme:
+  - 0.8.1
+
+qt:
+  - 5.12.*
+
+tbb:
+  - 2020.2.*
+
+hdf5:
+  - 1.10.*
+
+occt:
+  - 7.5.*
+
+gsl:
+  - 2.7
+
+ipykernel:
+  - <6
+
+pin_run_as_build:
+    boost:
+      max_pin: x.x
+
+# Otherwise it will find the wrong sdk, currently working on 10.10 as that is what Anaconda/conda-build does.
+CONDA_BUILD_SYSROOT:
+  - /opt/MacOSX10.10.sdk     # [osx]

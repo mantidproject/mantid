@@ -1,0 +1,55 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: mantiddocs
+  version: {{ data.get('version', '0.0.0') }}
+
+source:
+  path: ../../../
+
+source:
+  url: https://github.com/mantidproject/mantid/archive/{{ git_commit }}.tar.gz
+  sha256: 80ff0d522229ea55e155e7c131acb948d92cb464e5422e66b8d4d13efaeac561
+
+build:
+  noarch: generic
+  number: 0
+  ignore_run_exports_from:
+      - {{ compiler('cxx') }}
+      - python
+
+requirements:
+  build:
+    - {{ compiler("cxx") }}
+    - ninja  # [unix]
+    - cmake
+    - git
+    - {{ cdt('mesa-libgl-devel') }}  # [linux]
+    - {{ cdt('mesa-dri-drivers') }}  # [linux]
+    - {{ cdt('libxxf86vm') }}  # [linux]
+    - {{ cdt('libx11-devel') }}  # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+  host:
+    - python
+    - setuptools {{ setuptools }}
+    - sphinx {{ sphinx }}
+    - sphinx_bootstrap_theme
+    - mantidqt {{ version }}
+
+# there are no run requirements as it's just pure html
+
+test:
+  files:
+    - share/doc/index.html
+    - share/doc/mantid.png
+
+about:
+  home: https://github.com/mantidproject/mantid
+  license: GPL-3.0-or-later
+  summary: The QtHelp documentation for mantid
+
+extra:
+  recipe-maintainers:
+    - thomashampson
+    - sf1919
+    - martyngigg
