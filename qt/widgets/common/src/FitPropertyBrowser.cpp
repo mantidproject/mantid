@@ -1433,12 +1433,12 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
     // Get the tie expression stored in the function in case the new expression is invalid
     // and the GUI needs to be reset
-    const size_t parIndex = compositeFunction()->parameterIndex(parName.toStdString());
+    const auto parIndex = compositeFunction()->parameterIndex(parName.toStdString());
     const auto oldTie = compositeFunction()->getTie(parIndex);
-    const std::string oldTieStr = oldTie->asString();
-    QString oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
+    const auto oldTieStr = oldTie->asString();
+    const auto oldExp = QString::fromStdString(oldTieStr.substr(oldTieStr.find("=") + 1));
 
-    QString exp = m_stringManager->value(prop);
+    const auto exp = m_stringManager->value(prop);
 
     if (oldExp == exp)
       return;
