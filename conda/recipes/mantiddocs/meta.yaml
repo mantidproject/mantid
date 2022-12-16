@@ -35,6 +35,7 @@ requirements:
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme
     - mantidqt {{ version }}
+    - versioningit
 
 # there are no run requirements as it's just pure html
 

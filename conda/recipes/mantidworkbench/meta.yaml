@@ -30,6 +30,7 @@ requirements:
     - setuptools {{ setuptools }}
     - mantidqt {{ version }}
     - python
+    - versioningit
   run:
     - ipykernel {{ ipykernel }}
     - psutil

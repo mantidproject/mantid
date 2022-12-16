@@ -37,6 +37,7 @@ requirements:
     - qscintilla2
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
+    - versioningit
 
   run:
     - matplotlib {{ matplotlib }}
