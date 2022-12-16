@@ -143,6 +143,8 @@ void PreviewPresenter::notifyReductionCompleted() {
   plotLinePlot();
 }
 
+void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableLoadWidgets(); }
+
 void PreviewPresenter::notifySumBanksAlgorithmError() {
   clearRegionSelector();
   clearReductionPlot();

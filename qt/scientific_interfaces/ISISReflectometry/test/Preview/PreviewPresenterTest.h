@@ -172,6 +172,16 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
+  void test_notify_load_workspace_error_reenables_load_widgets() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    EXPECT_CALL(*mockView, enableLoadWidgets()).Times(1);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyLoadWorkspaceAlgorithmError();
+  }
+
   void test_notify_inst_view_select_rect_requested() {
     auto mockDockedWidgets = makePreviewDockedWidgets();
     expectInstViewSetToSelectRectMode(*mockDockedWidgets);

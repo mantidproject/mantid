@@ -86,6 +86,7 @@ public:
   void notifySumBanksCompleted() override;
   void notifyReductionCompleted() override;
 
+  void notifyLoadWorkspaceAlgorithmError() override;
   void notifySumBanksAlgorithmError() override;
   void notifyReductionAlgorithmError() override;
 
