@@ -10,5 +10,5 @@ method = "minor"
 
 [tool.versioningit.format]
 distance = "{base_version}.dev{distance}"
-dirty = "{base_version}+d{build_date:%Y%m%d}"
-distance-dirty = "{base_version}.dev{distance}+d{build_date:%Y%m%d%H%M}"
+dirty = "{base_version}+uncommitted"
+distance-dirty = "{base_version}.dev{distance}+uncommitted"

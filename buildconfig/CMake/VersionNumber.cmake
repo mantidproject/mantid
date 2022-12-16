@@ -26,7 +26,7 @@ if(_version_str MATCHES "([0-9]+)\\.([0-9]+)\\.([A-za-z0-9]+)(\\..+)?")
   set(VERSION_PATCH ${CMAKE_MATCH_3})
   set(VERSION_TWEAK ${CMAKE_MATCH_4})
 else()
-  message(FATAL_ERROR "Error extracting version elements from: ${_version_str}")
+  message(FATAL_ERROR "Error extracting version elements from: ${_version_str}\n${_error}")
 endif()
 message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}")
 
