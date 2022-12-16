@@ -480,6 +480,7 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
                                      const std::tuple<short, short, short> &axisOrder) {
 
   const bool customDetectorIDs = detectorIDs.size() != 0;
+  const bool excludeDetectorIDs = acceptedDetectorIDs.size() != 0;
 
   std::array dims = {data.dim0(), data.dim1(), data.dim2()};
   const auto nTubes = dims[std::get<0>(axisOrder)];
@@ -497,11 +498,12 @@ void LoadHelper::fillStaticWorkspace(const API::MatrixWorkspace_sptr &ws, const 
     binEdges = HistogramData::BinEdges(xAxis);
   int nSkipped = 0;
 
+#pragma omp parallel for if (!excludeDetectorIDs && Kernel::threadSafe(*ws))
   for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
     for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
       auto currentSpectrum = initialSpectrum + tube_no * nPixels + pixel_no;
-      if (acceptedDetectorIDs.size() != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
-                                                       currentSpectrum) == acceptedDetectorIDs.end()) {
+      if (excludeDetectorIDs != 0 && std::find(acceptedDetectorIDs.cbegin(), acceptedDetectorIDs.cend(),
+                                               currentSpectrum) == acceptedDetectorIDs.end()) {
         nSkipped++;
         continue;
       }
@@ -568,6 +570,7 @@ void LoadHelper::fillMovingWorkspace(const API::MatrixWorkspace_sptr &ws, const 
   const auto nScans = dims[std::get<2>(axisOrder)];
 
   int nSkipped = 0;
+#pragma omp parallel for if (Kernel::threadSafe(*ws))
   for (int tube_no = 0; tube_no < nTubes; ++tube_no) {
     for (int pixel_no = 0; pixel_no < nPixels; ++pixel_no) {
       auto currentDetector = initialSpectrum + tube_no * nPixels + pixel_no;
