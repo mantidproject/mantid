@@ -37,6 +37,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     ENERGY_COL_DEFAULT = 1
     MONITOR_COUNT_COL_DEFAULT = 2
     DETECTOR_COUNT_COL_DEFAULT = 5
+    TIME_COL_DEFAULT = 4
+    TEMPERATURE_COL_DEFAULT = 9
 
     # normalisation approach
     normalise_by = None
@@ -110,7 +112,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         sample_files = self.getPropertyValue('SampleRuns').split(',')
         sample_data = self.load_and_concatenate(sample_files)
         sample_data = self.merge_adjacent_points(sample_data)
-        energy, detector_counts, errors = self.get_counts_and_errors(sample_data)
+        energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
 
         raw_sample_ws = "__" + self.output_ws_name + "_rawSample"
         CreateWorkspace(outputWorkspace=raw_sample_ws,
@@ -118,6 +120,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                         DataY=detector_counts,
                         DataE=errors,
                         UnitX="Energy")
+
+        self.add_metadata(raw_sample_ws, time, temperature)
 
         self.intermediate_workspaces.append(raw_sample_ws)
 
@@ -145,6 +149,19 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self.output_ws_name)
         GroupWorkspaces(OutputWorkspace='__' + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
 
+    def add_metadata(self, ws: str, time: List[float], temperature: List[float]):
+        """
+        Adds metadata from provided loaded lists of values.
+
+        Args:
+        ws: workspace name where the metadata is to be added
+        time: list of time values to be added
+        temperature: list of temperature values to be added
+        """
+        run = mtd[ws].getRun()
+        run.addProperty("time", time, True)
+        run.addProperty("temperature", temperature, True)
+
     def load_and_concatenate(self, files: List[str]) -> np.ndarray:
         """
         Taking Lagrange data files as input, load the interesting data from it and concatenate them into one numpy array
@@ -158,6 +175,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             energy_col = -1
             detector_counts_col = -1
             monitor_counts_col = -1
+            time_col = -1
+            temperature_col = -1
 
             # we first open the file to find the size of the header and the position of the columns holding the data
             with open(file, "r") as f:
@@ -184,6 +203,14 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                             monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
                             self.log().warning("Could not find monitor counts column in file {}. "
                                                "Defaulting to column {}".format(file, self.MONITOR_COUNT_COL_DEFAULT))
+                        if "TIME" in next_line:
+                            time_col = next_line.index("TIME")
+                        else:
+                            time_col = self.TIME_COL_DEFAULT
+                        if "TT" in next_line:
+                            temperature_col = next_line.index("TT")
+                        else:
+                            temperature_col = self.TEMPERATURE_COL_DEFAULT
                         break
                 f.close()
 
@@ -194,29 +221,35 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                 energy_col = self.ENERGY_COL_DEFAULT
                 detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
                 monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
+                time_col = self.TIME_COL_DEFAULT
+                temperature_col = self.TEMPERATURE_COL_DEFAULT
 
             # load the relevant data, which position we just determined - angle, monitor count, detector count
             data = np.loadtxt(file,
                               dtype=float,
                               skiprows=header_index + 2,
-                              usecols=(energy_col, monitor_counts_col, detector_counts_col))
+                              usecols=(energy_col, monitor_counts_col, detector_counts_col, time_col, temperature_col))
             loaded_data = np.vstack((loaded_data, data)) if loaded_data is not None else data
         if np.shape(loaded_data)[0] == 0:
             raise RuntimeError("Provided files contain no data in the LAGRANGE format.")
         return loaded_data
 
-    def get_counts_and_errors(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float]]:
+    def get_counts_errors_metadata(self, data: np.ndarray) \
+            -> Tuple[List[float], List[int], List[float], List[float], List[float]]:
         """
-        Compute and return correct energy, (optionally) normalized detector counts and errors
+        Processes loaded data and metadata, computes and returns correct energy, (optionally) normalized detector counts
+        and errors.
 
         Args:
         @param data: the data to format
-        @return 3 arrays, with the values being incident energy, normalized detector counts, errors
+        @return 5 arrays, with the values being incident energy, normalized detector counts, errors, times, and temperatures
         """
 
-        energy = [0]*len(data)
-        detector_counts = [0]*len(data)
-        errors = [0]*len(data)
+        energy = [0] * len(data)
+        detector_counts = [0] * len(data)
+        errors = [0] * len(data)
+        time = [0] * len(data)
+        temperature = [0] * len(data)
 
         # if the user wants to see transfer energy, we subtract by the constant offset
         offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY_OFFSET
@@ -225,14 +258,19 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             energy[index] = line[0] - offset
             monitor_counts = line[1]
             det_counts = line[2]
+            time[index] = line[3]
+            temperature[index] = line[4]
+
             detector_counts[index] = det_counts
             if self.normalise_by == "Monitor":
-                monitor_errors = np.sqrt(monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
+                monitor_errors = np.sqrt(
+                    monitor_counts)  # the monitor errors are *not* assumed to be zero, and will be propagated
                 detector_counts[index] /= monitor_counts
-                errors[index] = np.sqrt(det_counts + ((det_counts**2) * monitor_errors**2) / monitor_counts**2) / monitor_counts
+                errors[index] = np.sqrt(
+                    det_counts + ((det_counts ** 2) * monitor_errors ** 2) / monitor_counts ** 2) / monitor_counts
             else:
                 errors[index] = np.sqrt(detector_counts[index])
-        return energy, detector_counts, errors
+        return energy, detector_counts, errors, time, temperature
 
     def get_water_correction(self, correction_file: str) -> np.ndarray:
         """
@@ -324,15 +362,17 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         # load and format empty cell
         empty_cell_data = self.load_and_concatenate(empty_cell_files)
         empty_cell_data = self.merge_adjacent_points(empty_cell_data)
-        energy, detector_counts, errors = self.get_counts_and_errors(empty_cell_data)
+        energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(empty_cell_data)
 
         self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
 
-        CreateWorkspace(outputWorkspace=self.empty_cell_ws,
+        CreateWorkspace(OutputWorkspace=self.empty_cell_ws,
                         DataX=energy,
                         DataY=detector_counts,
                         DataE=errors,
                         UnitX="Energy")
+
+        self.add_metadata(self.empty_cell_ws, time, temperature)
 
         self.intermediate_workspaces.append(self.empty_cell_ws)
 
