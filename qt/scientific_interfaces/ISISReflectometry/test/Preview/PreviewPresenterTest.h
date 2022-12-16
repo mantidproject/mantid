@@ -66,6 +66,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
 
@@ -82,6 +83,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
@@ -98,6 +100,7 @@ public:
     auto error = std::runtime_error("Test error");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
 
@@ -112,6 +115,7 @@ public:
     auto error = std::invalid_argument("Test error");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
 
@@ -539,6 +543,7 @@ private:
     auto ws = createLinearDetectorWorkspace();
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, enableLoadWidgets()).Times(1);
 
     EXPECT_CALL(mockDockedWidgets, resetInstView()).Times(1);
     EXPECT_CALL(mockModel, setSummedWs(ws)).Times(1);

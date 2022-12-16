@@ -36,6 +36,8 @@ public:
   virtual ~IPreviewView() = default;
   virtual void subscribe(PreviewViewSubscriber *notifyee) noexcept = 0;
   virtual QLayout *getDockedWidgetsLayout() noexcept = 0;
+  virtual void enableLoadWidgets() = 0;
+  virtual void disableLoadWidgets() = 0;
   virtual void enableApplyButton() = 0;
   virtual void disableApplyButton() = 0;
 

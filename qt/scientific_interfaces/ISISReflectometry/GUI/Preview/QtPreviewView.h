@@ -38,6 +38,8 @@ public:
 
   QLayout *getDockedWidgetsLayout() noexcept override;
 
+  void enableLoadWidgets() override;
+  void disableLoadWidgets() override;
   void enableApplyButton() override;
   void disableApplyButton() override;
 

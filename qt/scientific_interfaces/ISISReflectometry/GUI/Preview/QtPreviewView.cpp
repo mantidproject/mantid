@@ -31,6 +31,16 @@ void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_noti
 
 QLayout *QtPreviewView::getDockedWidgetsLayout() noexcept { return m_ui.dockable_widgets_layout; }
 
+void QtPreviewView::enableLoadWidgets() {
+  m_ui.load_button->setEnabled(true);
+  m_ui.workspace_line_edit->setEnabled(true);
+}
+
+void QtPreviewView::disableLoadWidgets() {
+  m_ui.load_button->setEnabled(false);
+  m_ui.workspace_line_edit->setEnabled(false);
+}
+
 void QtPreviewView::enableApplyButton() { m_ui.apply_button->setEnabled(true); }
 
 void QtPreviewView::disableApplyButton() { m_ui.apply_button->setEnabled(false); }

@@ -84,6 +84,7 @@ void PreviewPresenter::updateWidgetEnabledState() {
  * then we use that and continue to plot it; otherwise we start an async load.
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
+  m_view->disableLoadWidgets();
   auto const name = m_view->getWorkspaceName();
   try {
     if (m_model->loadWorkspaceFromAds(name)) {
@@ -102,6 +103,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // The model has already been updated by another callback to contain the loaded workspace. If loading fails
   // then it should bail out early and this method should never be called, so the workspace should
   // always be valid at this point.
+  m_view->enableLoadWidgets();
   auto ws = m_model->getLoadedWs();
   assert(ws);
 
