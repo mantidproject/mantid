@@ -280,11 +280,13 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4866_golden")
 
     def validateMethod(self):
-        self.tolerance = 1.0e-2
+        self.tolerance = 1.0e-1
+        self.tolerance_is_rel_err = True
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 1.0e-2
+        self.tolerance = 1.0e-1
+        self.tolerance_is_rel_err = True
         return ('PG3_4866','PG3_4866_golden')
 
 
