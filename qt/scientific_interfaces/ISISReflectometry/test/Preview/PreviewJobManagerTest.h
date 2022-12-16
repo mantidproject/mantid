@@ -180,6 +180,20 @@ public:
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmError(configuredAlgRef, ""), std::logic_error const &);
   }
 
+  void test_notify_algorithm_error_will_notify_when_load_algorithm_error_occurs() {
+    auto mockJobRunner = makeJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto previewRow = makePreviewRow();
+    auto loadAlg = makeConfiguredPreprocessAlg(previewRow);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(loadAlg);
+
+    EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceAlgorithmError).Times(1);
+
+    jobManager.notifyAlgorithmError(configuredAlgRef, "");
+  }
+
   void test_notify_algorithm_error_will_notify_when_sum_banks_algorithm_error_occurs() {
     auto mockJobRunner = makeJobRunner();
     auto mockSubscriber = MockJobManagerSubscriber();
