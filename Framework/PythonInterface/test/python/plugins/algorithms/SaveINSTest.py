@@ -20,7 +20,7 @@ class SaveINSTest(unittest.TestCase):
         cls.xtal = CrystalStructure('1 1 1', 'P 1 21/n 1', '')  # only used for spacegroup
         cls.file_start = ['TITL ws\n',
                           'REM This file was produced by mantid using SaveINS\n',
-                          'CELL 0.7 7.6508 13.2431 11.6243 90.0000 104.1183 90.0000\n',
+                          'CELL 1.0 7.6508 13.2431 11.6243 90.0000 104.1183 90.0000\n',
                           'ZERR 4 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000\n',
                           'LATT 1\n',
                           'SYMM -x+1/2,y+1/2,-z+1/2\n', 'SYMM -x,-y,-z\n',
@@ -93,11 +93,11 @@ class SaveINSTest(unittest.TestCase):
                 UseNaturalIsotopicAbundances=False)
 
         expected_lines = [*self.file_start,
-                          'SFAC C 0 0 0 0 0 0 0 0 6.6460 0 0 0.0049 0 12.0107\n',
-                          'SFAC H 0 0 0 0 0 0 0 0 3.7390 0 0 0.0719 0 1.0079\n',
-                          'SFAC N 0 0 0 0 0 0 0 0 9.3600 0 0 0.0106 0 14.0067\n',
-                          'SFAC O 0 0 0 0 0 0 0 0 5.8030 0 0 0.0037 0 15.9994\n',
-                          'SFAC S 0 0 0 0 0 0 0 0 2.8470 0 0 0.0011 0 32.0650\n',
+                          'SFAC C 0 0 0 0 0 0 0 0 6.6460 0 0 5.5529 0 12.0107\n',
+                          'SFAC H 0 0 0 0 0 0 0 0 3.7390 0 0 82.2050 0 1.0079\n',
+                          'SFAC N 0 0 0 0 0 0 0 0 9.3600 0 0 12.5667 0 14.0067\n',
+                          'SFAC O 0 0 0 0 0 0 0 0 5.8030 0 0 4.2321 0 15.9994\n',
+                          'SFAC S 0 0 0 0 0 0 0 0 2.8470 0 0 1.3208 0 32.0650\n',
                           *self.file_end]
 
 

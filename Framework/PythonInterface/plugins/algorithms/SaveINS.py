@@ -12,6 +12,7 @@ from mantid.geometry import SymmetryOperationFactory, SpaceGroupFactory
 class SaveINS(PythonAlgorithm):
     LATT_TYPE_MAP = {type: itype+1 for itype, type in enumerate(['P', 'I', 'R', 'F', 'A', 'B', 'C'])}
     INVERSION_OP = SymmetryOperationFactory.createSymOp("-x,-y,-z")
+    DUMMY_WAVELENGTH = 1.0
 
     def category(self):
         return "DataHandling\\Text;Crystal\\DataHandling"
@@ -84,9 +85,8 @@ class SaveINS(PythonAlgorithm):
             f_handle.write("REM This file was produced by mantid using SaveINS\n")  # comment line
 
             # cell parameters
-            wl = 0.7  # dummy wavelength value (ignored for TOF Laue)
             alatt = [cell.a(), cell.b(), cell.c(), cell.alpha(), cell.beta(), cell.gamma()]
-            f_handle.write(f"CELL {wl:.1f} {' '.join([f'{param:.4f}' for param in alatt])}\n")
+            f_handle.write(f"CELL {self.DUMMY_WAVELENGTH:.1f} {' '.join([f'{param:.4f}' for param in alatt])}\n")
             # n formula units and cell parameter errors
             nfu = material.numberDensity*cell.volume()
             errors = [cell.errora(), cell.errorb(), cell.errorc(),
@@ -113,8 +113,8 @@ class SaveINS(PythonAlgorithm):
                     label = atom.symbol
                     xs_info = atom.neutron()
                     b = xs_info['coh_scatt_length']
-                    mu = (xs_info['tot_scatt_xs'] + 0.6*xs_info['abs_xs']/1.798)/cell.volume()  # per atom
                     mf = atom.mass
+                    mu = xs_info['tot_scatt_xs'] + self.DUMMY_WAVELENGTH*xs_info['abs_xs']/1.798
                     f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b:.4f} 0 0 {mu:.4f} 0 {mf:.4f}\n")
             f_handle.write(f"UNIT {' '.join([f'{nfu*natom:.0f}' for natom in natoms])}\n")  # total num in unit cell
             # Neutron TOF flags
