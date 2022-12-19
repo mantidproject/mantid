@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
+from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
 
 
 class ErrorReportPresenterTest(unittest.TestCase):
@@ -128,6 +129,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.error_report_presenter._send_report_to_server.call_count, 0)
         self.error_report_presenter._handle_exit.assert_called_once_with(True)
+
+    def test_cut_down_stack_trace(self):
+        self.error_report_presenter._traceback = 'x'*(MAX_STACK_TRACE_LENGTH+100)
+        cut_down_stack_trace = self.error_report_presenter._cut_down_stack_trace()
+        self.assertEqual(len(cut_down_stack_trace), MAX_STACK_TRACE_LENGTH)
+        self.assertIn("\n...\n", cut_down_stack_trace)
 
 
 if __name__ == '__main__':
