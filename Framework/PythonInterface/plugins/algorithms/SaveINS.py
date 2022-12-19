@@ -120,7 +120,7 @@ class SaveINS(PythonAlgorithm):
                         # use empirical formula from Howard et al. J.Appl.Cryst. (1987). 20, 120 - 122
                         # https: // doi.org / 10.1107 / S0021889887087028
                         mu = 20.6 + self.DUMMY_WAVELENGTH*19.2
-                    f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b:.4f} 0 0 {mu:.4f} 0 {mf:.4f}\n")
+                    f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b:.4f} 0 0 {mu:.4f} 1.0 {mf:.4f}\n")
             f_handle.write(f"UNIT {' '.join([f'{nfu*natom:.0f}' for natom in natoms])}\n")  # total num in unit cell
             # Neutron TOF flags
             f_handle.write("MERG 0\n")  # do not merge same reflection at different lambda
