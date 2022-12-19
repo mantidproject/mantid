@@ -425,7 +425,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
         :param kwargs: any parameters or attributes that must be passed to the
                        composite function itself.
         """
-        if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
+        super().__init__(name=name)
+        if len(args) == 1 and not isinstance(args[0], FunctionWrapper):
             # We have a composite function to wrap
             self.fun = args[0]
         else:
