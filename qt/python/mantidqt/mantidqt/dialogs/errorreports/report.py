@@ -23,6 +23,7 @@ For example:
     The functions you used immediately before the problem
 
 Thank you!""")
+PLAIN_TEXT_MAX_LENGTH = 3200
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
@@ -46,6 +47,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.input_free_text.setPlainText(DEFAULT_PLAIN_TEXT)
             self.input_free_text.cursorPositionChanged.connect(self.check_placeholder_text)
 
+        self.free_text_length_label.setText(f"Character Limit: 0/{PLAIN_TEXT_MAX_LENGTH}")
+
         self.input_text = ""
         if not show_continue_terminate:
             self.continue_terminate_frame.hide()
@@ -60,6 +63,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
+        self.input_free_text.textChanged.connect(self.set_plain_text_length_lable)
         self.input_free_text.textChanged.connect(self.set_button_status)
 
         self.privacy_policy_label.linkActivated.connect(self.launch_privacy_policy)
@@ -120,7 +124,6 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def set_plain_text_edit_field(self):
         self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text",
                                                          expected_type=str)
-        self.set_plain_text_length_lable()
 
     def get_plain_text_edit_field(self, text_edit, expected_type):
         gui_element = getattr(self, text_edit)
@@ -130,8 +133,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
     def set_plain_text_length_lable(self):
         length = len(self.input_text)
-        self.free_text_length_label.setText(f"Character Limit: {length}/3200")
-        if length > 3200:
+        self.free_text_length_label.setText(f"Character Limit: {length}/{PLAIN_TEXT_MAX_LENGTH}")
+        if length > PLAIN_TEXT_MAX_LENGTH:
             self.free_text_length_label.setStyleSheet("color: red")
         else:
             self.free_text_length_label.setStyleSheet("color: black")
@@ -152,7 +155,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         else:
             self.nonIDShareButton.setEnabled(False)
 
-        if len(self.input_text) > 3200:
+        if len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
             self.fullShareButton.setEnabled(False)
             self.nonIDShareButton.setEnabled(False)
         else:
