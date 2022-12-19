@@ -20,6 +20,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     output_ws_name = None
     empty_cell_ws = None
     water_correction = None
+    water_corr_ws = None
     intermediate_workspaces = None
 
     INCIDENT_ENERGY_OFFSET = 4.5
@@ -114,7 +115,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         sample_data = self.merge_adjacent_points(sample_data)
         energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
 
-        raw_sample_ws = "__" + self.output_ws_name + "_rawSample"
+        raw_sample_ws = "__" + self.output_ws_name + "_rawS"
         CreateWorkspace(outputWorkspace=raw_sample_ws,
                         DataX=energy,
                         DataY=detector_counts,
@@ -128,7 +129,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         # sample correction by water
         if self.water_correction is not None:
 
-            water_corrected_ws = "__" + self.output_ws_name + "_waterCorrectedSample"
+            water_corrected_ws = "{}_Calibrated".format(raw_sample_ws)
             self.correct_data(raw_sample_ws, water_corrected_ws)
 
             self.intermediate_workspaces.append(water_corrected_ws)
@@ -293,12 +294,12 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             # if the sample is in energy transfer unit, we need to make the correction consistent by subtracting constant offset
             if not self.use_incident_energy:
                 correction[:, 0] -= self.INCIDENT_ENERGY_OFFSET
-            water_corr_ws = "__{}_waterCorrection".format(self.output_ws_name)
-            CreateWorkspace(OutputWorkspace=water_corr_ws,
+            self.water_corr_ws = "__{}_Calibration".format(self.output_ws_name)
+            CreateWorkspace(OutputWorkspace=self.water_corr_ws,
                             DataX=correction[:, 0],
                             DataY=correction[:, 1],
                             UnitX='Energy')
-            self.intermediate_workspaces.append(water_corr_ws)
+            self.intermediate_workspaces.append(self.water_corr_ws)
         return correction
 
     def merge_adjacent_points(self, data: np.ndarray) -> np.ndarray:
@@ -342,7 +343,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         interpolated_corr = np.interp(energy, self.water_correction[:, 0], self.water_correction[:, 1])
 
-        interpolated_water_ws = "{}_waterInterpolated".format(ws_to_correct)
+        sample_type = "EC" if "EC" in corrected_ws else "S"
+        interpolated_water_ws = "{}_interp{}".format(self.water_corr_ws, sample_type)
         CreateWorkspace(OutputWorkspace=interpolated_water_ws,
                         DataX=energy,
                         DataY=interpolated_corr,
@@ -377,9 +379,10 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         # correct by water
         if self.water_correction is not None:
-            correctedECname = "__{}_waterCorrectedEC".format(self.output_ws_name)
-            self.correct_data(self.empty_cell_ws, correctedECname)
-            self.intermediate_workspaces.append(correctedECname)
+            corrected_EC_name = "{}_Calibrated".format(self.empty_cell_ws)
+            self.correct_data(self.empty_cell_ws, corrected_EC_name)
+            self.intermediate_workspaces.append(corrected_EC_name)
+            self.empty_cell_ws = corrected_EC_name
 
     def subtract_empty_cell(self):
         """
@@ -387,15 +390,19 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         """
         # interpolating, because the empty cell may not have the same binning as the sample
         # let's hope that the spline behaves
+        interpolated_empty_cell_ws = "{}_interpS".format(self.empty_cell_ws)
         SplineInterpolation(WorkspaceToMatch=self.output_ws_name,
                             WorkspaceToInterpolate=self.empty_cell_ws,
-                            OutputWorkspace="__interp" + self.empty_cell_ws)
+                            OutputWorkspace=interpolated_empty_cell_ws)
+        self.intermediate_workspaces.append(interpolated_empty_cell_ws)
 
         Subtract(LHSWorkspace=self.output_ws_name,
-                 RHSWorkspace="__interp" + self.empty_cell_ws,
+                 RHSWorkspace=interpolated_empty_cell_ws,
                  OutputWorkspace=self.output_ws_name)
 
-        DeleteWorkspace(Workspace="__interp" + self.empty_cell_ws)
+        final_ws_name = "__{}_final".format(self.output_ws_name)
+        CloneWorkspace(InputWorkspace=self.output_ws_name, OutputWorkspace=final_ws_name)
+        self.intermediate_workspaces.append(final_ws_name)
 
 
 AlgorithmFactory.subscribe(LagrangeILLReduction)
