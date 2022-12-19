@@ -116,7 +116,9 @@ class ErrorReporterPresenter(object):
                                uptime='',
                                text_box=''):
         stack_trace = "".join(self._traceback)
-        stack_trace = stack_trace if len(stack_trace) > MAX_STACK_TRACE_LENGTH else self._cut_down_stack_trace()
+        if len(stack_trace) > MAX_STACK_TRACE_LENGTH:
+            self._view.display_stacktrace_warning(stack_trace)
+            stack_trace = self._cut_down_stack_trace()
 
         errorReporter = ErrorReporter(self._application, uptime,
                                       self._exit_code, share_identifiable, str(name), str(email),
