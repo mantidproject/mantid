@@ -77,13 +77,14 @@ class AsyncTask(threading.Thread):
 
         self.finished_cb()
 
-    def abort(self):
+    def abort(self, interrupt=True):
         """Cancel an asynchronous execution"""
         # Implementation is based on
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident),
-                                                   ctypes.py_object(KeyboardInterrupt))
-        #now try and cancel the running algorithm
+        if interrupt:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident),
+                                                       ctypes.py_object(KeyboardInterrupt))
+        # now try and cancel the running algorithm
         alg = IAlgorithm._algorithmInThread(self.ident)
         if alg is not None:
             alg.cancel()
@@ -217,7 +218,7 @@ class AsyncTaskFailure(AsyncTaskResult):
         error_name = type(self.exc_value).__name__
         filename, lineno, _, _ = extract_tb(self.stack)[-1]
         msg = self.exc_value.args
-        if isinstance(msg, tuple):
+        if msg and isinstance(msg, tuple):
             msg = msg[0]
         return '{} on line {} of \'{}\': {}'.format(error_name, lineno, filename, msg)
 

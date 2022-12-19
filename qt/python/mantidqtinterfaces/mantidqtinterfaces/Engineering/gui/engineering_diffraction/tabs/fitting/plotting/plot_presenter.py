@@ -68,13 +68,12 @@ class FittingPlotPresenter(object):
     def on_cancel_clicked(self):
         if self.worker:
             self.abort_worker()
-            logger.warning("Fit cancelled and KeyboardInterrupt Exception expected.")
-            logger.warning("The fit property browser and output fit results may be out of sync.")
+            logger.warning("Fit cancelled therefore the fitpropertybrowser and output fit results may be out of sync.")
             self.fitprop_list = None
             self._finished()
 
     def abort_worker(self):
-        self.worker.abort()
+        self.worker.abort(interrupt=False)
 
     def enable_view_components(self, enable: bool):
         # enable / disable all widgets apart from the cancel button
@@ -111,9 +110,8 @@ class FittingPlotPresenter(object):
         self.fitprop_list = async_success.output
 
     def _on_worker_error(self, async_failure=None):
-        # when the user cancels the fit all, this is not called
         error_message = str(async_failure)
-        if "unknown" not in error_message:
+        if "KeyboardInterrupt" not in error_message:
             logger.error(str(async_failure))
 
     def _finished(self, _=None):

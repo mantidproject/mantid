@@ -187,7 +187,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.on_cancel_clicked()
 
         self.presenter.worker.abort.assert_called_once()
-        self.assertEqual(2, mock_logger.call_count)
+        mock_logger.assert_called_once()
         self.assertEqual(None, self.presenter.fitprop_list)
         self.presenter._finished.assert_called_once()
 
@@ -211,6 +211,18 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.worker.abort = mock.MagicMock()
         self.presenter.abort_worker()
         self.presenter.worker.abort.assert_called_once()
+
+    @mock.patch(dir_path + ".logger.error")
+    def test_on_worker_error_valid(self, mock_logger):
+        error_message = "There was an error in the fitting routine."
+        self.presenter._on_worker_error(error_message)
+        mock_logger.assert_called_once_with("There was an error in the fitting routine.")
+
+    @mock.patch(dir_path + ".logger.error")
+    def test_on_worker_error_KeyboardInterrupt(self, mock_logger):
+        error_message = "KeyboardInterrupt: There was an error in the fitting routine."
+        self.presenter._on_worker_error(error_message)
+        mock_logger.assert_not_called()
 
 
 if __name__ == '__main__':
