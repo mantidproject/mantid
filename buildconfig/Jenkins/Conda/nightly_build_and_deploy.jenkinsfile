@@ -13,14 +13,14 @@ switch(GIT_BRANCH) {
     PUBLISH_PACKAGES_DEFAULT = true
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
-    GITHUB_RELEASES_TAG_DEFAULT = 'nightly'
+    GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['all']
     break
   default:
     PUBLISH_PACKAGES_DEFAULT = false
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
-    GITHUB_RELEASES_TAG_DEFAULT = 'unstable'
+    GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64']
     break
 }
@@ -44,7 +44,7 @@ pipeline {
       string(name: 'GITHUB_RELEASES_REPO', defaultValue: GITHUB_RELEASES_REPO_DEFAULT,
              description: 'The repository to house the release')
       string(name: 'GITHUB_RELEASES_TAG', defaultValue: GITHUB_RELEASES_TAG_DEFAULT,
-             description: 'The name of the tag for the release')
+             description: 'The name of the tag for the release. Use this only for release candidate builds.')
   }
   environment {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
@@ -226,7 +226,7 @@ pipeline {
           target: 'standalone-packages',
           flatten: true
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github\
-          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${generate_git_tag} ${GIT_SHA} ${WORKSPACE}/standalone-packages/*'
+          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*'
       }
     }
     stage ('Delete old non-main packages from Anaconda') {
@@ -347,6 +347,16 @@ def package_standalone_options(platform) {
       package_options += " --package-suffix ${PACKAGE_SUFFIX}"
   }
   return package_options.trim()
+}
+
+// Determine whether this build should be marked as a prerelease on GitHub.
+def prerelease_option() {
+  prerelease_flag = ""
+  // If a tag has not been specified, we assume it's for a prerelease version.
+  if(GITHUB_RELEASES_TAG.trim() == '') {
+    prerelease_flag = "--prerelease"
+  }
+  return prerelease_flag
 }
 
 def archive_conda_packages(platform, allowEmpty) {

@@ -5,8 +5,10 @@
 #                 not use \\ or \ in the path.
 #   2. TOKEN: Token for uploading to github.com
 #   3. RELEASES_REPO: Name, in owner/reponame format, of repository to publish to
-#   4. RELEASES_TAG_NAME_NAME GitHub tag name. Creates a release with a tag of this name
+#   4. RELEASES_TAG_NAME GitHub tag name. Creates a release with a tag of this name
 #   5. RELEASES_TAG_SHA Git tag target SHA.
+# Possible flags:
+#   --prerelease: Whether this is a prerelease build (e.g. nightly or unstable build).
 #   Remainder PACKAGES: A list of args that will be uploaded to github release cloud.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
@@ -18,6 +20,12 @@ RELEASES_REPO=$3
 RELEASES_TAG_NAME=$4
 RELEASES_TAG_SHA=$5
 shift 5
+
+PRERELEASE=false
+if [[ "$1" = "--prerelease" ]]; then
+    PRERELEASE=true
+    shift 1
+fi
 
 # The remaining arguments should be the packages to upload - is there anything?
 if [ $# -eq 0 ]; then
@@ -36,28 +44,27 @@ setup_mamba $WORKSPACE/mambaforge publish-gh
 mamba install --yes gh
 
 # Create a release and attach the given assets.
-# The workflow here is attempting ensure there is always something on GitHub. As
-# tags cannot be overwritten we have to delete and recreate the release/tag. If
-# we delete the existing tag/release first and then uploading the new one fails
-# we will be left with nothing on GitHub. For nightly releases we are better at least
-# leaving the previous nightly in place. The workflow is:
-#  - create new draft release with the suffix -staged
-#  - upload new assets to staged release
-#  - if above is successful delete old release
-#  - rename staged to correct tag/release name
 export GITHUB_TOKEN
-if [ "$RELEASES_TAG_NAME" == "nightly" ]; then
-  title="Nightly Builds"
-  notes="Use with caution. Not recommended for production use."
-  options="--draft=true --prerelease"
+if [[ $PRERELEASE == true ]]; then
+  title="Release $RELEASES_TAG_NAME"
+  notes="Nightly build. Use with caution. Not recommended for production use."
+  options="--draft=false --prerelease"
+  echo "Creating prerelease $RELEASES_TAG_NAME"
 else
   title="Release $RELEASES_TAG_NAME"
   notes=$title
   options="--draft=true"
+  echo "Creating draft release $RELEASES_TAG_NAME"
 fi
-staged_tag_name=$RELEASES_TAG_NAME-staged
-echo "Creating draft release $staged_tag_name"
-github_release_cmd create $staged_tag_name --title "$title" --notes "$notes" --target $RELEASES_TAG_SHA $options
+
+# Remove release with the same tag name.
+if github_release_cmd view $RELEASES_TAG_NAME >/dev/null; then
+    echo "Removing old tag & release $RELEASES_TAG_NAME"
+    curl -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/$RELEASES_REPO/git/refs/tags/$RELEASES_TAG_NAME
+    github_release_cmd delete $RELEASES_TAG_NAME --yes
+fi
+
+github_release_cmd create $RELEASES_TAG_NAME --title "$title" --notes "$notes" --target $RELEASES_TAG_SHA $options
 # there is a minor lag in creating the release - wait before we upload
 sleep 1
 
@@ -74,18 +81,7 @@ for asset in "$@"; do
       echo "Unknown asset type found \"${asset}\" Skipping upload."
       continue
     fi
-    echo "Uploading $asset, labelled as $asset#$label, to $staged_tag_name tag under $RELEASES_REPO"
-    github_release_cmd upload --clobber $staged_tag_name "$asset#$label"
+    echo "Uploading $asset, labelled as $asset#$label, to $RELEASES_TAG_NAME tag under $RELEASES_REPO"
+    github_release_cmd upload --clobber $RELEASES_TAG_NAME "$asset#$label"
 done
 
-if github_release_cmd view $RELEASES_TAG_NAME >/dev/null; then
-    echo "Removing old tag & release $RELEASES_TAG_NAME"
-    curl -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/$RELEASES_REPO/git/refs/tags/$RELEASES_TAG_NAME
-    github_release_cmd delete $RELEASES_TAG_NAME --yes
-fi
-
-echo "Renaming staged release to final $RELEASES_TAG_NAME name"
-if [ "$RELEASES_TAG_NAME" == "nightly" ]; then
-  options="--draft=false"
-fi
-github_release_cmd edit $staged_tag_name --tag $RELEASES_TAG_NAME $options
