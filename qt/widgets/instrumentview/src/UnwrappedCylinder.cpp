@@ -28,14 +28,15 @@ UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor, const Man
  */
 void UnwrappedCylinder::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale,
                                 double &vscale) const {
-  // projection to cylinder axis
-  v = pos.scalar_prod(m_zaxis);
+  double z = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);
   double y = pos.scalar_prod(m_yaxis);
+  // use equal area cylindrical projection with v = sin(latitude), u = longitude
+  v = z / sqrt(x * x + y * y + z * z);
   u = applyUCorrection(-atan2(y, x));
 
   uscale = 1. / sqrt(x * x + y * y);
-  vscale = 1.;
+  vscale = 1. / sqrt(x * x + y * y + z * z);
 }
 
 void UnwrappedCylinder::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {

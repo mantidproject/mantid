@@ -62,7 +62,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
-  explicit UnwrappedSurface(const InstrumentActor *rootActor);
+  explicit UnwrappedSurface(const InstrumentActor *rootActor, const bool correctAspectRatio = true);
 
   /** @name Implemented public virtual methods */
   //@{
@@ -158,6 +158,9 @@ protected:
   void createPeakShapes() const;
   //@}
 
+  RectF selectionRectUV() const;
+  RectF correctForAspectRatioAndZoom(const int widget_width, const int widget_height) const;
+
   double m_u_min;      ///< Minimum u
   double m_u_max;      ///< Maximum u
   double m_v_min;      ///< Minimum v
@@ -176,6 +179,8 @@ protected:
 
   /// Zoom stack
   QStack<RectF> m_zoomStack;
+
+  bool m_correctAspectRatio; ///< whether to maintain aspect ratio if widget has different aspect ratio to the data
 };
 
 } // namespace MantidWidgets

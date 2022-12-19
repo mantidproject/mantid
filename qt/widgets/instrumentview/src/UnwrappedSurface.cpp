@@ -49,9 +49,10 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight)
  * Constructor.
  * @param rootActor :: The instrument actor.
  */
-UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
+UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor, const bool correctAspectRatio)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX),
-      m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false) {
+      m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false),
+      m_correctAspectRatio(correctAspectRatio) {
   // create and set the move input controller
   InputControllerMoveUnwrapped *moveController = new InputControllerMoveUnwrapped(this);
   setInputController(MoveMode, moveController);
@@ -70,6 +71,77 @@ QString UnwrappedSurface::getDimInfo() const {
       .arg(m_viewRect.x1())
       .arg(m_viewRect.y0())
       .arg(m_viewRect.y1());
+}
+
+RectF UnwrappedSurface::selectionRectUV() const {
+  auto left = static_cast<double>(m_selectRect.left());
+  auto right = static_cast<double>(m_selectRect.right());
+  auto top = static_cast<double>(m_selectRect.top());
+  auto bottom = static_cast<double>(m_selectRect.bottom());
+
+  if (left > right) {
+    std::swap(left, right);
+  }
+
+  if (top > bottom) {
+    std::swap(top, bottom);
+  }
+
+  if (abs(m_selectRect.width()) <= 1 || abs(m_selectRect.height()) <= 1)
+    return RectF();
+
+  auto expandedViewRect = correctForAspectRatioAndZoom(m_viewImage->width(), m_viewImage->height());
+
+  const QSizeF viewSizeLogical(m_viewImage->width() / m_viewImage->devicePixelRatio(),
+                               m_viewImage->height() / m_viewImage->devicePixelRatio());
+
+  double sx = expandedViewRect.xSpan() / viewSizeLogical.width();
+  double sy = expandedViewRect.ySpan() / viewSizeLogical.height();
+
+  double x_min = left * sx + expandedViewRect.x0();
+  double x_max = right * sx + expandedViewRect.x0();
+  // Qt has y increasing in downward direction so map onto m_viewRect which has y increasing in upward direction
+  double y_min = (viewSizeLogical.height() - bottom) * sy + expandedViewRect.y0();
+  double y_max = (viewSizeLogical.height() - top) * sy + expandedViewRect.y0();
+
+  return RectF(QPointF(x_min, y_min), QPointF(x_max, y_max));
+}
+
+RectF UnwrappedSurface::correctForAspectRatioAndZoom(const int widget_width, const int widget_height) const {
+  // check if the scene is going to be stretched along x or y axes
+  // and correct the extent to make it look normal (from Viewport::correctForAspectRatioAndZoom)
+  double view_left = m_viewRect.x0();
+  double view_top = m_viewRect.y1();
+  double view_right = m_viewRect.x1();
+  double view_bottom = m_viewRect.y0();
+
+  // make sure the view rectangle has a finite area
+  if (view_left == view_right) {
+    view_left -= m_width_max / 2;
+    view_right += m_width_max / 2;
+  }
+  if (view_top == view_bottom) {
+    view_top += m_height_max / 2;
+    view_bottom -= m_height_max / 2;
+  }
+
+  if (m_correctAspectRatio) {
+    double xSize = std::abs(view_right - view_left);
+    double ySize = std::abs(view_top - view_bottom);
+    double r = ySize * widget_width / (xSize * widget_height);
+    if (r < 1.0) {
+      // ySize is too small
+      ySize /= r;
+      view_bottom = (view_bottom + view_top - ySize) / 2;
+      view_top = view_bottom + ySize;
+    } else {
+      // xSize is too small
+      xSize *= r;
+      view_left = (view_left + view_right - xSize) / 2;
+      view_right = view_left + xSize;
+    }
+  }
+  return RectF(QPointF(view_left, view_bottom), QPointF(view_right, view_top));
 }
 
 //------------------------------------------------------------------------------
@@ -99,6 +171,8 @@ void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
     view_bottom -= m_height_max / 2;
   }
 
+  auto expandedViewRect = correctForAspectRatioAndZoom(widget_width, widget_height);
+
   const double dw = fabs((view_right - view_left) / widget_width);
   const double dh = fabs((view_top - view_bottom) / widget_height);
 
@@ -109,7 +183,7 @@ void UnwrappedSurface::drawSurface(GLDisplay *widget, bool picking) const {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(view_left, view_right, view_bottom, view_top, -10, 10);
+  glOrtho(expandedViewRect.x0(), expandedViewRect.x1(), expandedViewRect.y0(), expandedViewRect.y1(), -10, 10);
 
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface")) {
     OpenGLError::log() << "glOrtho arguments:\n";
@@ -456,8 +530,13 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
 
   paint.fillRect(0, 0, vwidth, vheight, m_backgroundColor);
 
-  const double dw = fabs(m_viewRect.width() / vwidth);
-  const double dh = fabs(m_viewRect.height() / vheight);
+  // expand the view area to maintain aspect ratio (could have used QPainter viewport feature but do it this way to
+  // align with approach in drawSurface with OpenGL)
+  auto expandedViewRect = correctForAspectRatioAndZoom(vwidth, vheight);
+
+  QTransform transform;
+  expandedViewRect.findTransform(transform, QRectF(0, 0, vwidth, vheight));
+  paint.setTransform(transform);
 
   if (m_startPeakShapes) {
     createPeakShapes();
@@ -466,27 +545,9 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
 
-    int iw = int(udet.width / dw);
-    int ih = int(udet.height / dh);
-    if (iw < 4)
-      iw = 4;
-    if (ih < 4)
-      ih = 4;
-
-    double w = udet.width / 2;
-    double h = udet.height / 2;
-
-    if (!(m_viewRect.contains(udet.u - w, udet.v - h) || m_viewRect.contains(udet.u + w, udet.v + h)))
+    if (!(m_viewRect.contains(udet.u - udet.width / 2, udet.v - udet.height / 2) ||
+          m_viewRect.contains(udet.u + udet.width / 2, udet.v + udet.height / 2)))
       continue;
-
-    int u = 0;
-    if (!isFlippedView()) {
-      u = static_cast<int>((udet.u - m_viewRect.x0()) / dw);
-    } else {
-      u = static_cast<int>(vwidth - (udet.u - m_viewRect.x1()) / dw);
-    }
-
-    int v = vheight - static_cast<int>((udet.v - m_viewRect.y0()) / dh);
 
     QColor color;
     int index = int(i);
@@ -500,15 +561,11 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
       color = QColor(c.red(), c.green(), c.blue());
     }
 
-    paint.fillRect(u - iw / 2, v - ih / 2, iw, ih, color);
+    paint.fillRect(QRectF(udet.u - udet.width / 2, udet.v - udet.height / 2, udet.width, udet.height), color);
   }
 
   // draw custom stuff
   if (!picking) {
-    // TODO: this transform should be done for drawing the detectors
-    QTransform transform;
-    m_viewRect.findTransform(transform, QRectF(0, 0, vwidth, vheight));
-    paint.setTransform(transform);
     drawCustom(&paint);
   }
 }
