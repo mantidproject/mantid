@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
+import numpy as np
 
 
 class FunctionWrapper(object):
@@ -166,8 +167,6 @@ class FunctionWrapper(object):
         :param x:      x value or list of x values
         :param params: list of parameter values
         """
-        import numpy as np
-
         if isinstance(x, Workspace):
             # If the input is a workspace, simply return the output workspace.
             return self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=x)
