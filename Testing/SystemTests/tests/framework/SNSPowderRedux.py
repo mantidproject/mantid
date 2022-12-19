@@ -61,7 +61,8 @@ class PG3Analysis(systemtesting.MantidSystemTest):
     char_file = "PG3_characterization_2011_08_31-HR.txt"
 
     def skipTests(self):
-        return _skip_test()
+        # disabled
+        return True
 
     def cleanup(self):
         return do_cleanup()
