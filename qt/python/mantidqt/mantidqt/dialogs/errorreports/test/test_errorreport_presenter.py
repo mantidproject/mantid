@@ -136,6 +136,13 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.assertEqual(len(cut_down_stack_trace), MAX_STACK_TRACE_LENGTH)
         self.assertIn("\n...\n", cut_down_stack_trace)
 
+    def test_cut_down_stacktrace_is_called(self):
+        self.error_report_presenter._traceback = 'x' * (MAX_STACK_TRACE_LENGTH + 100)
+        self.error_report_presenter._cut_down_stacktrace = mock.MagicMock()
+        self.errorreport_mock_instance.sendErrorReport.return_value = 201
+        self.error_report_presenter._send_report_to_server()
+        self.error_report_presenter._cut_down_stacktrace.assert_called_once()
+
     def test_show_warning_for_long_stacktrace(self):
         stacktrace = 'x' * (MAX_STACK_TRACE_LENGTH + 100)
         self.error_report_presenter._traceback = stacktrace
