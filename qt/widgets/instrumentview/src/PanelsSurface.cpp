@@ -243,12 +243,17 @@ void PanelsSurface::init() {
 
   clearBanks();
   constructFromComponentInfo();
-  spreadBanks();
+  arrangeBanks();
 
   RectF surfaceRect;
   for (auto &flatBank : m_flatBanks) {
     RectF rect(flatBank->polygon.boundingRect());
-    surfaceRect.unite(rect);
+    if (surfaceRect.isEmpty()) {
+      // don't want to include origin in surfaceRect if all banks don't span the origin
+      surfaceRect.setVertex(0, rect.p0());
+      surfaceRect.setVertex(2, rect.p1());
+    } else
+      surfaceRect.unite(rect);
   }
 
   m_height_max = 0.1;
@@ -288,48 +293,6 @@ void PanelsSurface::setupAxes() {
 
 //-----------------------------------------------------------------------------------------------//
 
-/**
- * Add a flat bank from an assembly of detectors.
- * @param normal :: Normal vector to the bank's plane.
- * @param detectors :: List of detectorIndices.
- */
-void PanelsSurface::addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors) {
-  int index = m_flatBanks.size();
-  // save bank info
-  auto *info = new FlatBankInfo(this);
-  m_flatBanks << info;
-  // record the first detector index of the bank
-  info->startDetectorIndex = detectors.front();
-  info->endDetectorIndex = detectors.back();
-
-  // keep reference position on the bank's plane
-  const auto &detectorInfo = m_instrActor->detectorInfo();
-  auto pos0 = detectorInfo.position(detectors[0]);
-  auto pos1 = detectorInfo.position(detectors[1]) - pos0;
-
-  info->rotation = calcBankRotation(pos0, normal);
-  info->rotation.rotate(pos1);
-  pos1 += pos0;
-  QPointF p0(m_xaxis.scalar_prod(pos0), m_yaxis.scalar_prod(pos0));
-  QPointF p1(m_xaxis.scalar_prod(pos1), m_yaxis.scalar_prod(pos1));
-  QVector<QPointF> vert;
-  vert << p1 << p0;
-  info->polygon = QPolygonF(vert);
-
-  // initialise bank polygon with sensible bounding box points
-  initialisePolygonWithTransformedBoundingBoxPoints(info->polygon, m_instrActor->componentInfo(), detectors[0], pos0,
-                                                    info->rotation, m_xaxis, m_yaxis);
-
-#pragma omp parallel for ordered
-  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
-    auto detector = detectors[i];
-    addDetector(detector, pos0, index, info->rotation);
-    UnwrappedDetector &udet = m_unwrappedDetectors[detector];
-#pragma omp ordered
-    info->polygon << QPointF(udet.u, udet.v);
-  }
-}
-
 void PanelsSurface::processStructured(size_t rootIndex) {
   int index = m_flatBanks.size();
   const auto &componentInfo = m_instrActor->componentInfo();
@@ -349,6 +312,24 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   info->endDetectorIndex = lastRow.back();
 
   // set the outline
+  std::vector<V3D> cornersInXZ;
+  for (auto &corner : corners) {
+    auto pos = corner - ref;
+    info->rotation.rotate(pos);
+    pos += ref;
+    cornersInXZ.push_back(V3D(pos.X(), pos.Y(), 0.));
+  }
+
+  // further rotate in xy plane so all banks parallel
+  auto leftVector = cornersInXZ[3] - cornersInXZ[0];
+  leftVector.normalize();
+  if (abs(leftVector.scalar_prod(m_yaxis)) < 1.0) {
+    // Quat constructor crashes if given opposite vectors??
+    auto xyRotation = Mantid::Kernel::Quat(leftVector, m_yaxis);
+    // order important, apply xy rotation second
+    info->rotation = xyRotation * info->rotation;
+  }
+
   QVector<QPointF> verts;
   for (auto &corner : corners) {
     auto pos = corner - ref;
@@ -364,6 +345,10 @@ void PanelsSurface::processStructured(size_t rootIndex) {
       addDetector(j, ref, index, info->rotation);
     }
   }
+
+  auto compID = componentInfo.componentID(rootIndex);
+  auto component = m_instrActor->getInstrument()->getComponentByID(compID);
+  info->bankCentreOverride = component->getSideBySideViewPos();
 }
 
 void PanelsSurface::processGrid(size_t rootIndex) {
@@ -473,11 +458,15 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     p0 = p2;
     p1 = p3;
   }
+
+  auto compID = componentInfo.componentID(rootIndex);
+  auto component = m_instrActor->getInstrument()->getComponentByID(compID);
+  info->bankCentreOverride = component->getSideBySideViewPos();
+
   return bankIndex;
 }
 
-std::pair<std::vector<size_t>, Mantid::Kernel::V3D> PanelsSurface::processUnstructured(size_t rootIndex,
-                                                                                       std::vector<bool> &visited) {
+void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &visited) {
   Mantid::Kernel::V3D normal;
   const auto &detectorInfo = m_instrActor->detectorInfo();
   Mantid::Kernel::V3D pos0;
@@ -488,7 +477,7 @@ std::pair<std::vector<size_t>, Mantid::Kernel::V3D> PanelsSurface::processUnstru
   auto numDets = findNumDetectors(componentInfo, children);
 
   if (numDets == 0)
-    return std::make_pair(std::vector<size_t>(), Mantid::Kernel::V3D());
+    return;
 
   std::vector<size_t> detectors;
   detectors.reserve(numDets);
@@ -519,24 +508,60 @@ std::pair<std::vector<size_t>, Mantid::Kernel::V3D> PanelsSurface::processUnstru
     }
     detectors.emplace_back(child);
   }
-  return std::make_pair(detectors, normal);
+  if (detectors.size() > 1) {
+    int index = m_flatBanks.size();
+    // save bank info
+    auto *info = new FlatBankInfo(this);
+    m_flatBanks << info;
+    // record the first detector index of the bank
+    info->startDetectorIndex = detectors.front();
+    info->endDetectorIndex = detectors.back();
+
+    // keep reference position on the bank's plane
+    auto pos1 = detectorInfo.position(detectors[1]) - pos0;
+
+    info->rotation = calcBankRotation(pos0, normal);
+    info->rotation.rotate(pos1);
+    pos1 += pos0;
+    QPointF p0(m_xaxis.scalar_prod(pos0), m_yaxis.scalar_prod(pos0));
+    QPointF p1(m_xaxis.scalar_prod(pos1), m_yaxis.scalar_prod(pos1));
+    QVector<QPointF> vert;
+    vert << p1 << p0;
+    info->polygon = QPolygonF(vert);
+
+    // initialise bank polygon with sensible bounding box points
+    initialisePolygonWithTransformedBoundingBoxPoints(info->polygon, m_instrActor->componentInfo(), detectors[0], pos0,
+                                                      info->rotation, m_xaxis, m_yaxis);
+
+#pragma omp parallel for ordered
+    for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
+      auto detector = detectors[i];
+      addDetector(detector, pos0, index, info->rotation);
+      UnwrappedDetector &udet = m_unwrappedDetectors[detector];
+#pragma omp ordered
+      info->polygon << QPointF(udet.u, udet.v);
+    }
+
+    auto compID = componentInfo.componentID(rootIndex);
+    auto component = m_instrActor->getInstrument()->getComponentByID(compID);
+    info->bankCentreOverride = component->getSideBySideViewPos();
+  }
 }
 
-boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
-PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
+void PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
   const auto &componentInfo = m_instrActor->componentInfo();
   auto parentIndex = componentInfo.parent(rootIndex);
   auto componentType = componentInfo.componentType(parentIndex);
   if (componentType == ComponentType::Rectangular || componentType == ComponentType::Structured) {
     /* Do nothing until the root index of the structured bank. */
-    return boost::none;
+    return;
   }
 
   componentType = componentInfo.componentType(rootIndex);
   if (componentType == ComponentType::Rectangular || componentType == ComponentType::Structured) {
     processStructured(rootIndex);
     setBankVisited(componentInfo, rootIndex, visited);
-    return boost::none;
+    return;
   }
 
   if (componentType == ComponentType::OutlineComposite) {
@@ -546,16 +571,16 @@ PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
     } else {
       setBankVisited(componentInfo, parentIndex, visited);
     }
-    return boost::none;
+    return;
   }
 
   if (componentType == ComponentType::Grid) {
     processGrid(rootIndex);
     setBankVisited(componentInfo, rootIndex, visited);
-    return boost::none;
+    return;
   }
 
-  return processUnstructured(rootIndex, visited);
+  processUnstructured(rootIndex, visited);
 }
 
 void PanelsSurface::constructFromComponentInfo() {
@@ -567,14 +592,7 @@ void PanelsSurface::constructFromComponentInfo() {
 
     if (children.size() > 0 && !visited[i]) {
       visited[i] = true;
-      auto res = findFlatPanels(i, visited);
-      if (res != boost::none) {
-        std::vector<size_t> detectors;
-        Mantid::Kernel::V3D normal;
-        std::tie(detectors, normal) = res.get();
-        if (detectors.size() > 1)
-          addFlatBankOfDetectors(normal, detectors);
-      }
+      findFlatPanels(i, visited);
     } else if (children.size() == 0 && componentInfo.parent(i) == componentInfo.root()) {
       visited[i] = true;
     }
@@ -623,6 +641,50 @@ void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refP
   udet.uscale = udet.vscale = 1.0;
   this->calcSize(udet);
   m_unwrappedDetectors[detIndex] = udet;
+}
+
+/**
+ * Arrange the banks over the projection plane
+ *
+ */
+void PanelsSurface::arrangeBanks() {
+  bool overridesActive =
+      std::any_of(m_flatBanks.cbegin(), m_flatBanks.cend(), [](FlatBankInfo *b) { return b->bankCentreOverride; });
+  if (overridesActive) {
+    ApplyBankCentreOverrides();
+  } else {
+    spreadBanks();
+  }
+}
+
+/**
+ * Move banks that have a specified override position in the IDF to that position
+ *
+ */
+void PanelsSurface::ApplyBankCentreOverrides() {
+  for (int i = 0; i < m_flatBanks.size(); ++i) {
+    FlatBankInfo *info = m_flatBanks[i];
+    // not essential to calculate current bank centre if no override but useful for debugging
+    Mantid::Kernel::V2D currentBankCentre;
+    int nDetectorsInBank = 0;
+    for (size_t iDet = info->startDetectorIndex; iDet <= info->endDetectorIndex; ++iDet) {
+      UnwrappedDetector &udet = m_unwrappedDetectors[iDet];
+      currentBankCentre += {udet.u, udet.v};
+      nDetectorsInBank++;
+    }
+    currentBankCentre /= nDetectorsInBank;
+
+    if (info->bankCentreOverride) {
+      auto overrideBankCentre = *info->bankCentreOverride;
+      auto offset = overrideBankCentre - currentBankCentre;
+      info->polygon.translate(offset.X(), offset.Y());
+      for (size_t iDet = info->startDetectorIndex; iDet <= info->endDetectorIndex; ++iDet) {
+        UnwrappedDetector &udet = m_unwrappedDetectors[iDet];
+        udet.u += offset.X();
+        udet.v += offset.Y();
+      }
+    }
+  }
 }
 
 /**

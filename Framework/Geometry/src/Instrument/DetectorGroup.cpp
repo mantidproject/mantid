@@ -10,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/V2D.h"
 
 #include <numeric>
 
@@ -20,6 +21,7 @@ Kernel::Logger g_log("DetectorGroup");
 } // namespace
 
 using Kernel::Quat;
+using Kernel::V2D;
 using Kernel::V3D;
 
 /**
@@ -88,6 +90,9 @@ V3D DetectorGroup::getPos() const {
 
   return newPos /= static_cast<double>(m_detectors.size()); // protection against divide by zero in V3D
 }
+
+///  Side by side view override doesn't make sense for a detector group so return empty
+std::optional<Kernel::V2D> DetectorGroup::getSideBySideViewPos() const { return std::nullopt; }
 
 /// Gives the average distance of a group of detectors from the given component
 double DetectorGroup::getDistance(const IComponent &comp) const {

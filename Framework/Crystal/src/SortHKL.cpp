@@ -17,7 +17,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Utils.h"
