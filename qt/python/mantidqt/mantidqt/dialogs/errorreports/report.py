@@ -59,8 +59,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
-        self.input_free_text.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
+        self.input_free_text.textChanged.connect(self.set_button_status)
 
         self.privacy_policy_label.linkActivated.connect(self.launch_privacy_policy)
 
@@ -120,12 +120,21 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def set_plain_text_edit_field(self):
         self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text",
                                                          expected_type=str)
+        self.set_plain_text_length_lable()
 
     def get_plain_text_edit_field(self, text_edit, expected_type):
         gui_element = getattr(self, text_edit)
         value_as_string = gui_element.toPlainText()
 
         return expected_type(value_as_string) if value_as_string else ''
+
+    def set_plain_text_length_lable(self):
+        length = len(self.input_text)
+        self.free_text_length_label.setText(f"Character Limit: {length}/3200")
+        if length > 3200:
+            self.free_text_length_label.setStyleSheet("color: red")
+        else:
+            self.free_text_length_label.setStyleSheet("color: black")
 
     def check_placeholder_text(self):
         if not self.free_text_edited:
@@ -142,6 +151,12 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.nonIDShareButton.setEnabled(True)
         else:
             self.nonIDShareButton.setEnabled(False)
+
+        if len(self.input_text) > 3200:
+            self.fullShareButton.setEnabled(False)
+            self.nonIDShareButton.setEnabled(False)
+        else:
+            self.fullShareButton.setEnabled(True)
 
     def display_message_box(self, title, message, details):
         msg = QMessageBox(self)
