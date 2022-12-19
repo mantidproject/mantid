@@ -75,8 +75,10 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
     m_view->disableApplyButton();
+    m_view->disableLoadWidgets();
   } else {
     m_view->enableApplyButton();
+    m_view->enableLoadWidgets();
   }
 }
 
@@ -103,7 +105,6 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // The model has already been updated by another callback to contain the loaded workspace. If loading fails
   // then it should bail out early and this method should never be called, so the workspace should
   // always be valid at this point.
-  m_view->enableLoadWidgets();
   auto ws = m_model->getLoadedWs();
   assert(ws);
 
@@ -141,6 +142,7 @@ void PreviewPresenter::notifySumBanksCompleted() {
 void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
   plotLinePlot();
+  m_view->enableLoadWidgets();
 }
 
 void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableLoadWidgets(); }
@@ -150,7 +152,10 @@ void PreviewPresenter::notifySumBanksAlgorithmError() {
   clearReductionPlot();
 }
 
-void PreviewPresenter::notifyReductionAlgorithmError() { clearReductionPlot(); }
+void PreviewPresenter::notifyReductionAlgorithmError() {
+  clearReductionPlot();
+  m_view->enableLoadWidgets();
+}
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_dockedWidgets->setInstViewZoomState(false);

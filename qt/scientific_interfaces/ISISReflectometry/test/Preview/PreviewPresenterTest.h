@@ -352,6 +352,7 @@ public:
 
     expectProcessingEnabled(mainPresenter);
     expectApplyButtonDisabled(*mockView);
+    EXPECT_CALL(*mockView, disableLoadWidgets());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -364,6 +365,7 @@ public:
 
     expectProcessingDisabled(mainPresenter);
     expectApplyButtonEnabled(*mockView);
+    EXPECT_CALL(*mockView, enableLoadWidgets());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -376,6 +378,7 @@ public:
 
     expectAutoreducingEnabled(mainPresenter);
     expectApplyButtonDisabled(*mockView);
+    EXPECT_CALL(*mockView, disableLoadWidgets());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -388,6 +391,7 @@ public:
 
     expectAutoreducingDisabled(mainPresenter);
     expectApplyButtonEnabled(*mockView);
+    EXPECT_CALL(*mockView, enableLoadWidgets());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -553,7 +557,6 @@ private:
     auto ws = createLinearDetectorWorkspace();
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(mockView, enableLoadWidgets()).Times(1);
 
     EXPECT_CALL(mockDockedWidgets, resetInstView()).Times(1);
     EXPECT_CALL(mockModel, setSummedWs(ws)).Times(1);
