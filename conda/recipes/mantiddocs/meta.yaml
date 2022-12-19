@@ -7,10 +7,6 @@ package:
 source:
   path: ../../../
 
-source:
-  url: https://github.com/mantidproject/mantid/archive/{{ git_commit }}.tar.gz
-  sha256: 80ff0d522229ea55e155e7c131acb948d92cb464e5422e66b8d4d13efaeac561
-
 build:
   noarch: generic
   number: 0

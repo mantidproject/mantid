@@ -1,13 +1,12 @@
 // This script expects the following environment variables to be set by the Jenkins job:
-// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes
-// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from conda-recipes
-// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
+// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
+// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
+// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the mantid repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 
 // Determine default values of parameters. Some are based on the branch.
 ANACONDA_CHANNEL_DEFAULT = 'mantid'
 GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
-CONDA_RECIPES_BRANCH_NAME_DEFAULT = 'main'
 GIT_BRANCH = git_branch_name()
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
@@ -34,8 +33,6 @@ pipeline {
               description: 'Choose a platform to build & test the developer configuration.')
       choice(name: 'BUILD_PACKAGE', choices: PLATFORM_CHOICES,
               description: 'Choose a platform to build just this standalone package')
-      string(name: 'CONDA_RECIPES_BRANCH_NAME', defaultValue: CONDA_RECIPES_BRANCH_NAME_DEFAULT,
-             description: 'The name of the conda-recipes branch to build')
       string(name: 'PACKAGE_SUFFIX', defaultValue: PACKAGE_SUFFIX_DEFAULT,
              description: 'A string to append to the standalone package name')
       booleanParam(name: 'PUBLISH_PACKAGES', defaultValue: PUBLISH_PACKAGES_DEFAULT,
@@ -229,7 +226,7 @@ pipeline {
           target: 'standalone-packages',
           flatten: true
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github\
-          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${GITHUB_RELEASES_TAG} ${GIT_SHA} ${WORKSPACE}/standalone-packages/*'
+          ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${generate_git_tag} ${GIT_SHA} ${WORKSPACE}/standalone-packages/*'
       }
     }
     stage ('Delete old non-main packages from Anaconda') {
@@ -248,22 +245,6 @@ pipeline {
         checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
          ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
-      }
-    }
-    stage('Update conda-recipes') {
-      when {
-        beforeAgent true
-        beforeOptions true
-        expression { env.PUBLISH_PACKAGES == 'true' }
-      }
-      agent { label 'linux-64' }
-      environment {
-        GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
-        RECIPE_UPDATE_OPTIONS = recipe_update_options()
-      }
-      steps {
-        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/update-conda-recipes.sh ${GITHUB_TOKEN} ${GITHUB_USER_NAME} ${GITHUB_USER_EMAIL} ${RECIPE_UPDATE_OPTIONS}'
       }
     }
   }
@@ -319,7 +300,7 @@ def package_conda_options(platform, base_or_workbench) {
   if(base_or_workbench == 'base') {
     docs_flags = ""
     if(platform.startsWith('linux')) {
-      docs_flags = '--build-docs'
+      docs_flags = "--build-docs"
     }
     package_flags = "--build-mantid --build-qt ${docs_flags}"
   }
@@ -327,13 +308,26 @@ def package_conda_options(platform, base_or_workbench) {
     package_flags = "--build-workbench"
   }
 
-  release_version = ""
-  if(PACKAGE_SUFFIX.trim() == '') {
-    release_version = ' --release-version'
-  }
-  package_options = "${package_flags} ${release_version} \
-    --build-current-branch --recipes-tag ${CONDA_RECIPES_BRANCH_NAME}"
+  package_options = "${package_flags} --git-tag ${generate_git_tag()}"
   return package_options.trim()
+}
+
+def generate_git_tag() {
+  git_tag = ""
+    if(GITHUB_RELEASES_TAG.trim() != '') {
+    git_tag = "${GITHUB_RELEASES_TAG}"
+  }
+  else {
+    if(platform.startsWith('win')) {
+      workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+      bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/buildconfig/Jenkins/Conda/generate_version_number\""
+    } else {
+      git_tag = sh (
+        "${WORKSPACE}/buildconfig/Jenkins/Conda/generate_version_number"
+      ).trim()
+    }
+  }
+  return git_tag
 }
 
 def package_standalone(platform) {
@@ -378,16 +372,8 @@ def archive_standalone_package(platform) {
       fingerprint: true,
       onlyIfSuccessful: true
   } else {
-    unstable("Unknown platform (${platform}) detected while archving standalone package. Archiving skipped.")
+    unstable("Unknown platform (${platform}) detected while archiving standalone package. Archiving skipped.")
   }
-}
-
-def recipe_update_options() {
-  recipe_options = "--recipes-tag ${CONDA_RECIPES_BRANCH_NAME}"
-  if(PACKAGE_SUFFIX.trim() == '') {
-    recipe_options += ' --release-version'
-  }
-  return recipe_options
 }
 
 def archive_ctest_log(){
