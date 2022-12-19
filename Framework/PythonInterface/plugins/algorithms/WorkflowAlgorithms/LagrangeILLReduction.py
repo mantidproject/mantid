@@ -309,25 +309,24 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         @param data: a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
         @return a (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
         """
-        # sort by incident energy
-        data = data[data[:, 0].argsort()]
+        # create masked array sorted by incident energy
+        data_mask = np.ma.masked_array(data[data[:, 0].argsort()], mask=False)
 
-        # sum adjacent data points
-        current_writing_index = 0
-        for point in data:
-            if point[0] - data[current_writing_index][0] < self.EPSILON:
-                data[current_writing_index][1] = point[1]
-                data[current_writing_index][2] = point[2]
-                # The merging behaviour for multiple points needs to be considered in the future.
-                # For now, if two points are close enough the latter is removed,
-                # then the comparison continues with next point.
-                # This could be troublesome if there are a lot of points separated by very short distances,
-                # but it normally shouldn't happen on Lagrange data
-            else:
-                current_writing_index += 1
-                data[current_writing_index] = point
-
-        return data[:current_writing_index + 1]
+        # merge adjacent data points
+        n_masked = 0
+        for point_no, point in enumerate(data):
+            # The merging behaviour for multiple points needs to be considered in the future.
+            # For now, if two points are close enough the latter is removed,
+            # then the comparison continues with next point.
+            # This could be troublesome if there are a lot of points separated by very short distances,
+            # but it normally shouldn't happen on Lagrange data
+            try:
+                if (data[point_no+1][0] - point[0]) < self.EPSILON:
+                    data_mask.mask[point_no] = True
+                    n_masked += 1
+            except IndexError:
+                break
+        return data_mask.compressed().reshape(np.shape(data)[0]-n_masked, np.shape(data)[1])
 
     def correct_data(self, ws_to_correct: str, corrected_ws: str):
         """

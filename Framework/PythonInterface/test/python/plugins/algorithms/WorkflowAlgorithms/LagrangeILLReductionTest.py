@@ -86,6 +86,12 @@ class LagrangeILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(result.readY(0)[10], 2165, 4)
         self.assertAlmostEqual(result.readY(0)[80], 1642, 4)
 
+    def test_merging_close_initial_energies(self):
+        result = LagrangeILLReduction(SampleRuns='012869_close_scans', NormaliseBy='None')
+        self.check_result(result, "Energy", 148, 21.4992, 96.019)
+        self.assertAlmostEqual(result.readY(0)[10], 1972, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 1737, 4)
+
     def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
         self.assertEqual(ws.getNumberBins(), expected_bins)
