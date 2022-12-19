@@ -10,6 +10,7 @@ from typing import Optional
 from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
+from report import MAX_STACK_TRACE_LENGTH
 
 
 class ErrorReporterPresenter(object):
@@ -114,9 +115,13 @@ class ErrorReporterPresenter(object):
                                email='',
                                uptime='',
                                text_box=''):
+        stack_trace = "".join(self._traceback)
+        if len(stack_trace) > MAX_STACK_TRACE_LENGTH:
+            stack_trace = stack_trace[:(MAX_STACK_TRACE_LENGTH//2 - 2)] + "\n...\n" + stack_trace[:-(MAX_STACK_TRACE_LENGTH//2 - 3)]
+
         errorReporter = ErrorReporter(self._application, uptime,
                                       self._exit_code, share_identifiable, str(name), str(email),
-                                      str(text_box), "".join(self._traceback))
+                                      str(text_box), stack_trace)
         status = errorReporter.sendErrorReport()
 
         if status != 201:

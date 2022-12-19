@@ -24,6 +24,7 @@ For example:
 
 Thank you!""")
 PLAIN_TEXT_MAX_LENGTH = 3200
+MAX_STACK_TRACE_LENGTH = 10000
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
