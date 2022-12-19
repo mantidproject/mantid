@@ -66,7 +66,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
-    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
 
@@ -83,7 +83,7 @@ public:
     auto const workspaceName = std::string("test workspace");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
-    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
     expectLoadWorkspaceCompletedUpdatesInstrumentView(*mockDockedWidgets, *mockModel, *mockInstViewModel);
@@ -100,7 +100,7 @@ public:
     auto error = std::runtime_error("Test error");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
-    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
 
@@ -115,7 +115,7 @@ public:
     auto error = std::invalid_argument("Test error");
 
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
-    EXPECT_CALL(*mockView, disableLoadWidgets()).Times(1);
+    EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
 
@@ -176,7 +176,7 @@ public:
     auto mockModel = makeModel();
     auto mockView = std::make_unique<MockPreviewView>();
 
-    EXPECT_CALL(*mockView, enableLoadWidgets()).Times(1);
+    EXPECT_CALL(*mockView, enableMainWidget()).Times(1);
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyLoadWorkspaceAlgorithmError();
@@ -351,8 +351,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectProcessingEnabled(mainPresenter);
-    expectApplyButtonDisabled(*mockView);
-    EXPECT_CALL(*mockView, disableLoadWidgets());
+    EXPECT_CALL(*mockView, disableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -364,8 +363,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectProcessingDisabled(mainPresenter);
-    expectApplyButtonEnabled(*mockView);
-    EXPECT_CALL(*mockView, enableLoadWidgets());
+    EXPECT_CALL(*mockView, enableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -377,8 +375,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectAutoreducingEnabled(mainPresenter);
-    expectApplyButtonDisabled(*mockView);
-    EXPECT_CALL(*mockView, disableLoadWidgets());
+    EXPECT_CALL(*mockView, disableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -390,8 +387,7 @@ public:
     auto mainPresenter = MockBatchPresenter();
 
     expectAutoreducingDisabled(mainPresenter);
-    expectApplyButtonEnabled(*mockView);
-    EXPECT_CALL(*mockView, enableLoadWidgets());
+    EXPECT_CALL(*mockView, enableMainWidget());
 
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.acceptMainPresenter(&mainPresenter);
@@ -651,7 +647,7 @@ private:
 
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
                           MockRegionSelector &mockRegionSelector) {
-    EXPECT_CALL(mockView, setUpdateAngleButtonEnabled(false)).Times(1);
+    EXPECT_CALL(mockView, disableMainWidget()).Times(1);
     // Check theta is set
     auto theta = 0.3;
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
@@ -667,10 +663,6 @@ private:
     // Check reduction is executed
     EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
   }
-
-  void expectApplyButtonDisabled(MockPreviewView &mockView) { EXPECT_CALL(mockView, disableApplyButton()).Times(1); }
-
-  void expectApplyButtonEnabled(MockPreviewView &mockView) { EXPECT_CALL(mockView, enableApplyButton()).Times(1); }
 
   void expectProcessingEnabled(MockBatchPresenter &mainPresenter) {
     EXPECT_CALL(mainPresenter, isProcessing()).Times(AtLeast(1)).WillRepeatedly(Return(true));

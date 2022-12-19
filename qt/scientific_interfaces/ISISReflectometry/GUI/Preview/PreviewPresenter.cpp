@@ -74,11 +74,9 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 
 void PreviewPresenter::updateWidgetEnabledState() {
   if (m_mainPresenter->isProcessing() || m_mainPresenter->isAutoreducing()) {
-    m_view->disableApplyButton();
-    m_view->disableLoadWidgets();
+    m_view->disableMainWidget();
   } else {
-    m_view->enableApplyButton();
-    m_view->enableLoadWidgets();
+    m_view->enableMainWidget();
   }
 }
 
@@ -86,7 +84,7 @@ void PreviewPresenter::updateWidgetEnabledState() {
  * then we use that and continue to plot it; otherwise we start an async load.
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
-  m_view->disableLoadWidgets();
+  m_view->disableMainWidget();
   auto const name = m_view->getWorkspaceName();
   try {
     if (m_model->loadWorkspaceFromAds(name)) {
@@ -142,10 +140,10 @@ void PreviewPresenter::notifySumBanksCompleted() {
 void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
   plotLinePlot();
-  m_view->enableLoadWidgets();
+  m_view->enableMainWidget();
 }
 
-void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableLoadWidgets(); }
+void PreviewPresenter::notifyLoadWorkspaceAlgorithmError() { m_view->enableMainWidget(); }
 
 void PreviewPresenter::notifySumBanksAlgorithmError() {
   clearRegionSelector();
@@ -154,7 +152,7 @@ void PreviewPresenter::notifySumBanksAlgorithmError() {
 
 void PreviewPresenter::notifyReductionAlgorithmError() {
   clearReductionPlot();
-  m_view->enableLoadWidgets();
+  m_view->enableMainWidget();
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
@@ -259,7 +257,7 @@ void PreviewPresenter::plotLinePlot() {
 void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
 
 void PreviewPresenter::runReduction() {
-  m_view->setUpdateAngleButtonEnabled(false);
+  m_view->disableMainWidget();
   // Ensure the angle is up to date
   m_model->setTheta(m_view->getAngle());
   // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.

@@ -20,8 +20,8 @@ class MockPreviewView : public IPreviewView {
 public:
   MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
   MOCK_METHOD(QLayout *, getDockedWidgetsLayout, (), (noexcept, override));
-  MOCK_METHOD(void, enableLoadWidgets, (), (override));
-  MOCK_METHOD(void, disableLoadWidgets, (), (override));
+  MOCK_METHOD(void, enableMainWidget, (), (override));
+  MOCK_METHOD(void, disableMainWidget, (), (override));
   MOCK_METHOD(void, enableApplyButton, (), (override));
   MOCK_METHOD(void, disableApplyButton, (), (override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
