@@ -35,10 +35,6 @@ void QtPreviewView::enableMainWidget() { this->setEnabled(true); }
 
 void QtPreviewView::disableMainWidget() { this->setEnabled(false); }
 
-void QtPreviewView::enableApplyButton() { m_ui.apply_button->setEnabled(true); }
-
-void QtPreviewView::disableApplyButton() { m_ui.apply_button->setEnabled(false); }
-
 void QtPreviewView::connectSignals() const {
   // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));

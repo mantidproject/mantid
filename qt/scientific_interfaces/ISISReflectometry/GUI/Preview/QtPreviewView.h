@@ -40,8 +40,6 @@ public:
 
   void enableMainWidget() override;
   void disableMainWidget() override;
-  void enableApplyButton() override;
-  void disableApplyButton() override;
 
   std::string getWorkspaceName() const override;
   double getAngle() const override;
