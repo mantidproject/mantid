@@ -7,10 +7,10 @@
 from qtpy import QtCore
 from mantidqt.utils.qt import load_ui
 
-stackTRaceWarningUIBase, stackTRaceWarningUI = load_ui(__file__, 'stack_trace_warning.ui')
+stacktraceWarningUIBase, stacktraceWarningUI = load_ui(__file__, 'stacktrace_warning.ui')
 
 
-class StackTraceWarning(stackTRaceWarningUIBase, stackTRaceWarningUI):
+class StacktraceWarning(stacktraceWarningUIBase, stacktraceWarningUI):
 
     def __int__(self, parent=None):
         super(self.__class__, self).__init__(parent)

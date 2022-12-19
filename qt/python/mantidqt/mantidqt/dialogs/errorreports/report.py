@@ -13,7 +13,7 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 
 from .details import MoreDetailsDialog
-from .stack_trace_warning import StackTraceWarning
+from .stacktrace_warning import StacktraceWarning
 
 DEFAULT_PLAIN_TEXT = (
     """Please enter any additional information about your problems. (Max 3200 characters)
@@ -86,7 +86,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.details_dialog = MoreDetailsDialog(self)
 
         # Dialog window to show used stack trace if stack trace is over the size limit
-        self.stacktrace_warning = StackTraceWarning(self)
+        self.stacktrace_warning = StacktraceWarning(self)
 
         # Set default focus to the editing box, rather then letting qt try and guess
         self.input_free_text.setFocus()

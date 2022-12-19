@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>stackTraceWarning</class>
- <widget class="QDialog" name="stackTraceWarning">
+ <class>stacktraceWarning</class>
+ <widget class="QDialog" name="stacktraceWarning">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -39,7 +39,7 @@ p, li { white-space: pre-wrap; }
      </widget>
     </item>
     <item>
-     <widget class="QTextEdit" name="stackTraceText">
+     <widget class="QTextEdit" name="stacktraceText">
       <property name="readOnly">
        <bool>true</bool>
       </property>

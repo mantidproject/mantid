@@ -115,14 +115,14 @@ class ErrorReporterPresenter(object):
                                email='',
                                uptime='',
                                text_box=''):
-        stack_trace = "".join(self._traceback)
-        if len(stack_trace) > MAX_STACK_TRACE_LENGTH:
-            self._view.display_stacktrace_warning(stack_trace)
-            stack_trace = self._cut_down_stack_trace()
+        stacktrace = "".join(self._traceback)
+        if len(stacktrace) > MAX_STACK_TRACE_LENGTH:
+            self._view.display_stacktrace_warning(stacktrace)
+            stacktrace = self._cut_down_stack_trace()
 
         errorReporter = ErrorReporter(self._application, uptime,
                                       self._exit_code, share_identifiable, str(name), str(email),
-                                      str(text_box), stack_trace)
+                                      str(text_box), stacktrace)
         status = errorReporter.sendErrorReport()
 
         if status != 201:
