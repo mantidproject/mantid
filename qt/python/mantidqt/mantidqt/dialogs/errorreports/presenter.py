@@ -118,7 +118,7 @@ class ErrorReporterPresenter(object):
         stacktrace = "".join(self._traceback)
         if len(stacktrace) > MAX_STACK_TRACE_LENGTH:
             self._view.display_stacktrace_warning(stacktrace)
-            stacktrace = self._cut_down_stack_trace()
+            stacktrace = self._cut_down_stacktrace()
 
         errorReporter = ErrorReporter(self._application, uptime,
                                       self._exit_code, share_identifiable, str(name), str(email),
@@ -133,10 +133,10 @@ class ErrorReporterPresenter(object):
 
         return status
 
-    def _cut_down_stack_trace(self):
+    def _cut_down_stacktrace(self):
         # server has a max size for the stack trace, if exceeded will cause an error
-        stack_trace = "".join(self._traceback)
-        return stack_trace[:(MAX_STACK_TRACE_LENGTH//2 - 2)] + "\n...\n" + stack_trace[-(MAX_STACK_TRACE_LENGTH//2 - 3):]
+        stacktrace = "".join(self._traceback)
+        return stacktrace[:(MAX_STACK_TRACE_LENGTH//2 - 2)] + "\n...\n" + stacktrace[-(MAX_STACK_TRACE_LENGTH//2 - 3):]
 
     def show_view(self):
         self._view.show()
