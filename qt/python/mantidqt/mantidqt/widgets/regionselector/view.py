@@ -19,6 +19,7 @@ class RegionSelectorView(QWidget):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window)
         self._data_view = SliceViewerDataView(presenter, dims_info, None, self, None, image_info_widget)
+        self._data_view.help_button.hide()
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
