@@ -32,6 +32,7 @@ class LagrangeILLReductionTest(unittest.TestCase):
         result = LagrangeILLReduction(SampleRuns='012869')
         self.check_result(result, "Energy", 150, 21.4992, 96.019)
 
+        self.assertEqual(result.getRun().getLogData("run_title").value, "empty-cell-12mm-inner cu220")
         self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
         self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 

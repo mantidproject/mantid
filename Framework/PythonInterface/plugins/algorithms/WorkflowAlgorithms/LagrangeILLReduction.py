@@ -44,6 +44,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     # normalisation approach
     normalise_by = None
 
+    # workspace title
+    _title = None
+
     @staticmethod
     def category():
         return 'ILL\\Indirect'
@@ -162,6 +165,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         run = mtd[ws].getRun()
         run.addProperty("time", time, True)
         run.addProperty("temperature", temperature, True)
+        run.addProperty("run_title", self._title, True)
 
     def load_and_concatenate(self, files: List[str]) -> np.ndarray:
         """
@@ -182,6 +186,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             # we first open the file to find the size of the header and the position of the columns holding the data
             with open(file, "r") as f:
                 for index, line in enumerate(f):
+                    if line.startswith("TITLE:"):
+                        contents = line.split(' ')
+                        self._title = ' '.join(contents[1:-1])  # the metadata tag and the line break at the end
                     if line == "DATA_:\n":
                         header_index = index
                         next_line = f.__next__().split()
