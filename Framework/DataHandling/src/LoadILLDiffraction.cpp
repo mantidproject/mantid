@@ -241,10 +241,7 @@ void LoadILLDiffraction::loadMetaData() {
   }
   mutableRun.addProperty("run_list", mutableRun.getPropertyValueAsType<int>("run_number"));
 
-  if (mutableRun.hasProperty("Detector.calibration_file")) {
-    if (getPropertyValue("DataType") == "Raw")
-      mutableRun.getProperty("Detector.calibration_file")->setValue("none");
-  } else
+  if (!mutableRun.hasProperty("Detector.calibration_file"))
     mutableRun.addProperty("Detector.calibration_file", std::string("none"));
 }
 
