@@ -60,7 +60,11 @@ def get_value(log):
             return entry_descr
     else:
         # convert to numpy array to fix some issues converting _kernel.std_vector_dbl to string
-        return str(np.array(log.value))
+        opt = np.get_printoptions()
+        np.set_printoptions(threshold=np.inf, linewidth=np.inf)
+        s = str(np.array(log.value))
+        np.set_printoptions(**opt)  # reset the default options
+        return s
 
 
 class SampleLogsModel():
