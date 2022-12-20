@@ -1042,7 +1042,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const DiscusData1D 
                                                              const double xmax, std::vector<double> &resultX,
                                                              std::vector<double> &resultY,
                                                              const bool returnCumulative) {
-  assert(h.histogram().xMode() == HistogramData::Histogram::XMode::Points);
+  assert(h.X.size() == h.Y.size());
   const std::vector<double> &xValues = h.X;
   const std::vector<double> &yValues = h.Y;
 
