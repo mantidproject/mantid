@@ -58,7 +58,7 @@ pipeline {
     // the following step at the start of each subsequent stage:
     //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
     stage('Store git commit') {
-      agent any
+      agent { label 'linux-64' }
       steps {
         script {
           env.GIT_SHA = GIT_COMMIT
