@@ -173,7 +173,6 @@ set(MOC_FILES
     InelasticDataManipulationSqwTabView.h
     InelasticDataManipulationSymmetriseTab.h
     InelasticDataManipulationSymmetriseTabView.h
-    InelasticDataManipulationSymmetriseTabModel.h
     InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
@@ -202,6 +201,7 @@ set(INC_FILES
     IndirectSettingsHelper.h
     InelasticDataManipulationMomentsTabModel.h
     InelasticDataManipulationSqwTabModel.h
+    InelasticDataManipulationSymmetriseTabModel.h
     IqtFitModel.h
     MSDFitModel.h
     Notifier.h

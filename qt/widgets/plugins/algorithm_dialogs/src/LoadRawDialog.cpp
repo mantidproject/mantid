@@ -87,13 +87,13 @@ void LoadRawDialog::initLayout() {
   prop_line = new QHBoxLayout;
 
   auto *text_field = new QLineEdit;
-  text_field->setMaximumWidth(m_wsBox->fontMetrics().width("888888"));
+  text_field->setMaximumWidth(m_wsBox->fontMetrics().horizontalAdvance("888888"));
   prop_line->addWidget(new QLabel("Start:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMin", prop_line);
 
   text_field = new QLineEdit;
-  text_field->setMaximumWidth(m_wsBox->fontMetrics().width("888888"));
+  text_field->setMaximumWidth(m_wsBox->fontMetrics().horizontalAdvance("888888"));
   prop_line->addWidget(new QLabel("End:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMax", prop_line);

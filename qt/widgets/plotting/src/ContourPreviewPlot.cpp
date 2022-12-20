@@ -38,7 +38,7 @@ void ContourPreviewPlot::createLayout() {
   auto plotLayout = new QVBoxLayout(this);
   plotLayout->setContentsMargins(0, 0, 0, 0);
   plotLayout->setSpacing(0);
-  plotLayout->addWidget(m_canvas, 0, 0);
+  plotLayout->addWidget(m_canvas, 0);
   setLayout(plotLayout);
 }
 
