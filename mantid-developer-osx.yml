@@ -22,7 +22,7 @@ dependencies:
   - matplotlib=3.5.*
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy>=1.20.2
+  - numpy<=1.23
   - occt
   - pip>=21.0.1
   - poco=1.10.*
