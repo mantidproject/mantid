@@ -117,7 +117,6 @@ class ErrorReporterPresenter(object):
                                text_box=''):
         stacktrace = "".join(self._traceback)
         if len(stacktrace) > MAX_STACK_TRACE_LENGTH:
-            self._view.display_stacktrace_warning(stacktrace)
             stacktrace = self._cut_down_stacktrace()
 
         errorReporter = ErrorReporter(self._application, uptime,

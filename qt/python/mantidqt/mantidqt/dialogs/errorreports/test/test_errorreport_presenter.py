@@ -143,14 +143,6 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.error_report_presenter._send_report_to_server()
         self.error_report_presenter._cut_down_stacktrace.assert_called_once()
 
-    def test_show_warning_for_long_stacktrace(self):
-        stacktrace = 'x' * (MAX_STACK_TRACE_LENGTH + 100)
-        self.error_report_presenter._traceback = stacktrace
-        self.errorreport_mock_instance.sendErrorReport.return_value = 201
-        self.view.display_stacktrace_warning = mock.MagicMock()
-        self.error_report_presenter._send_report_to_server()
-        self.view.display_stacktrace_warning.assert_called_once_with(stacktrace)
-
 
 if __name__ == '__main__':
     unittest.main()
