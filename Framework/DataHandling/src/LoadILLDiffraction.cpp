@@ -98,11 +98,6 @@ void LoadILLDiffraction::init() {
                   "File path of the data file to load");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
-  declareProperty("DataType", "Auto", std::make_shared<StringListValidator>(calibrationOptions),
-                  "Select the type of data, with or without calibration "
-                  "already applied. If Auto then the calibrated data is "
-                  "loaded if available, otherwise the raw data is loaded.");
   declareProperty("TwoThetaOffset", 0.0, "2 theta offset for D1B data, in degrees.");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("AlignTubes", true, Direction::Input),
                   "Apply vertical and horizontal alignment of tubes as defined in IPF");
@@ -113,10 +108,6 @@ void LoadILLDiffraction::init() {
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
   std::map<std::string, std::string> issues;
-  if (getPropertyValue("DataType") == "Calibrated") {
-    issues["DataType"] = "Calibrated data requested, but only raw data exists "
-                         "in this NeXus file.";
-  }
   return issues;
 }
 
