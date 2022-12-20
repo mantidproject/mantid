@@ -933,8 +933,9 @@ def get_errorbar_bounds(container):
     y_segments = _get_y_errorbar_segments(container)
     if y_segments:
         coords = [array[:, 1] for array in y_segments if len(array.shape) == 2]
-        max_y = np.max(coords)
-        min_y = np.min(coords)
+        if coords:
+            max_y = np.max(coords)
+            min_y = np.min(coords)
     return min_x, max_x, min_y, max_y
 
 
