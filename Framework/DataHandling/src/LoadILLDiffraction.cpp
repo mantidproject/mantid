@@ -160,9 +160,6 @@ void LoadILLDiffraction::loadDataScan() {
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
   const bool hasCalibratedData = true;
-  if (dataType != "Raw" && hasCalibratedData) {
-    m_useCalibratedData = true;
-  }
   // Load the data
   std::string dataName;
   if (dataType == "Raw" && hasCalibratedData)
