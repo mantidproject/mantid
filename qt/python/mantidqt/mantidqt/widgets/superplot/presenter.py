@@ -393,6 +393,9 @@ class SuperplotPresenter:
         self._remove_unneeded_curves(replot)
         self._plot_selection()
 
+        legend = axes.get_legend()
+        if legend:
+            legend.remove()
         if selection or plotted_data:
             axes.set_axis_on()
             try:
@@ -403,9 +406,6 @@ class SuperplotPresenter:
             if legend:
                 legend_set_draggable(legend, True)
         else:
-            legend = axes.get_legend()
-            if legend:
-                legend.remove()
             axes.set_axis_off()
             axes.set_title("")
         self._canvas.draw_idle()
