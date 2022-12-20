@@ -120,7 +120,8 @@ class ErrorReporterPresenter(object):
             difference = len(stacktrace) - MAX_STACK_TRACE_LENGTH
             stacktrace = self._cut_down_stacktrace()
             self.error_log.warning(f"The middle {difference+5} characters of this stack trace has been removed"
-                                   r" and replaced with \n...\n in order to reduce it to 10,000 characters")
+                                   r" and replaced with \n...\n in order to"
+                                   f" reduce it to {MAX_STACK_TRACE_LENGTH} characters")
 
         errorReporter = ErrorReporter(self._application, uptime,
                                       self._exit_code, share_identifiable, str(name), str(email),
