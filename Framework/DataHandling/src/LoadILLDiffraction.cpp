@@ -158,14 +158,8 @@ void LoadILLDiffraction::loadDataScan() {
   NXEntry firstEntry = dataRoot.openFirstEntry();
   m_instName = firstEntry.getString("instrument/name");
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
-  const std::string dataType = getPropertyValue("DataType");
-  const bool hasCalibratedData = true;
   // Load the data
-  std::string dataName;
-  if (dataType == "Raw" && hasCalibratedData)
-    dataName = "data_scan/detector_data/raw_data";
-  else
-    dataName = "data_scan/detector_data/data";
+  std::string dataName = "data_scan/detector_data/data";
   g_log.notice() << "Loading data from " + dataName;
   auto data = firstEntry.openNXDataSet<int>(dataName);
   data.load();
