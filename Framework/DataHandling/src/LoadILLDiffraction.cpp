@@ -113,7 +113,7 @@ void LoadILLDiffraction::init() {
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
   std::map<std::string, std::string> issues;
-  if (getPropertyValue("DataType") == "Calibrated" && !containsCalibratedData(getPropertyValue("Filename"))) {
+  if (getPropertyValue("DataType") == "Calibrated") {
     issues["DataType"] = "Calibrated data requested, but only raw data exists "
                          "in this NeXus file.";
   }
@@ -159,7 +159,7 @@ void LoadILLDiffraction::loadDataScan() {
   m_instName = firstEntry.getString("instrument/name");
   m_startTime = DateAndTime(LoadHelper::dateTimeInIsoFormat(firstEntry.getString("start_time")));
   const std::string dataType = getPropertyValue("DataType");
-  const bool hasCalibratedData = containsCalibratedData(m_filename);
+  const bool hasCalibratedData = true;
   if (dataType != "Raw" && hasCalibratedData) {
     m_useCalibratedData = true;
   }
@@ -814,20 +814,6 @@ void LoadILLDiffraction::setSampleLogs() {
   if (m_maxHeight != 0.) {
     run.addLogData(new PropertyWithValue<double>("MaxHeight", m_maxHeight));
   }
-}
-
-/**
- * Returns true if the file contains calibrated data
- *
- * @param filename The filename to check
- * @return True if the file contains calibrated data, false otherwise
- */
-bool LoadILLDiffraction::containsCalibratedData(const std::string &filename) const {
-  NexusDescriptor descriptor(filename);
-  // This is unintuitive, but if the file has calibrated data there are entries
-  // for 'data' and 'raw_data'. If there is no calibrated data only 'data' is
-  // present.
-  return descriptor.pathExists("/entry0/data_scan/detector_data/raw_data");
 }
 
 /**

@@ -65,7 +65,6 @@ private:
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
   Kernel::V3D getReferenceComponentPosition(const API::MatrixWorkspace_sptr &instrumentWorkspace);
-  bool containsCalibratedData(const std::string &filename) const;
 
   std::vector<double> getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                                       const std::string &propertyName) const;
