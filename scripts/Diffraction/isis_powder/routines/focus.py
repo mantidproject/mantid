@@ -90,8 +90,9 @@ def _focus_one_ws(
     placzek_run_number = instrument._inst_settings.placzek_run_number
     if placzek_run_number:
         if instrument._inst_settings.per_detector:
-            input_workspace = _apply_placzek_corrections(input_workspace, instrument, perform_vanadium_norm,
+            input_workspace = apply_per_detector_placzek(input_workspace, instrument, perform_vanadium_norm,
                                                          vanadium_path, placzek_run_number, sample_details, run_details)
+            mantid.ConvertFromDistribution(input_workspace)
 
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationFile=run_details.offset_file_path)
@@ -103,13 +104,17 @@ def _focus_one_ws(
         mantid.DeleteWorkspace(solid_angle)
 
     # Focus the spectra into banks
-    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path)
-
+    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+                                             GroupingFileName=run_details.grouping_file_path)
     instrument.apply_calibration_to_focused_data(focused_ws)
 
-    calibrated_spectra = _apply_vanadium_corrections(
-        instrument=instrument, input_workspace=focused_ws, perform_vanadium_norm=perform_vanadium_norm, vanadium_splines=vanadium_path
-    )
+    if not instrument._inst_settings.per_detector or not placzek_run_number:
+        calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
+                                                         input_workspace=focused_ws,
+                                                         perform_vanadium_norm=perform_vanadium_norm,
+                                                         vanadium_splines=vanadium_path)
+    else:
+        calibrated_spectra = common.extract_ws_spectra(focused_ws)
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
@@ -162,7 +167,7 @@ def _absorb_and_empty_corrections(input_workspace, instrument, run_details, samp
     return input_workspace
 
 
-def apply_per_detector_placzek(input_workspace, insturment, perform_vanadium_norm, vanadium_path, placzek_run_number,
+def apply_per_detector_placzek(input_workspace, instrument, perform_vanadium_norm, vanadium_path, placzek_run_number,
                                sample_details, run_details):
     mantid.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace="DataBeforeCorrections")
     # apply per detector vanadium correction on uncalibrated data
@@ -171,11 +176,9 @@ def apply_per_detector_placzek(input_workspace, insturment, perform_vanadium_nor
                                                                perform_vanadium_norm=perform_vanadium_norm,
                                                                vanadium_splines=vanadium_path)
     # Currently, only supported for POLARIS instrument
-    input_workspace = _apply_placzek_corrections(instrument=instrument,
-                                                 input_workspace=input_workspace,
-                                                 placzek_run_number=placzek_run_number,
-                                                 sample_details=sample_details,
-                                                 run_details=run_details)
+    input_workspace = _apply_placzek_corrections(input_workspace, instrument, perform_vanadium_norm, vanadium_path,
+                                                 placzek_run_number, sample_details, run_details)
+
     return input_workspace
 
 
@@ -208,6 +211,7 @@ def _apply_vanadium_corrections_per_detector(instrument, input_workspace: Worksp
 
 def _apply_placzek_corrections(input_workspace, instrument, perform_vanadium_norm, vanadium_path,
                                placzek_run_number, sample_details, run_details):
+    # this correction should only be applied before focussing in the per_detector case
     raw_ws = mantid.Load(Filename='POLARIS' + str(placzek_run_number) + '.nxs')
     sample_geometry = sample_details.generate_sample_geometry()
     sample_material = sample_details.generate_sample_material()

@@ -10,6 +10,7 @@ from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 from mantid.kernel import logger
+from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
 class Polaris(AbstractInst):
@@ -48,14 +49,26 @@ class Polaris(AbstractInst):
         per_detector = False
         if "per_detector" in kwargs.keys():
             per_detector = bool(kwargs["per_detector"])
+        if self._inst_settings.per_detector:
+            per_detector = bool(self._inst_settings.per_detector)
 
         vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
                                            per_detector=per_detector, test=test)
+        self.ensure_per_detector_and_vanadium_output_are_in_sync(vanadium_d, per_detector)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
+
+    def ensure_per_detector_and_vanadium_output_are_in_sync(self, vanadium_d, per_detector):
+        correct_per_detector_condition = (isinstance(vanadium_d, MatrixWorkspace) and per_detector)
+        correct_per_bank_condition = (isinstance(vanadium_d, WorkspaceGroup) and not per_detector)
+        if not correct_per_detector_condition and not correct_per_bank_condition:
+            raise ValueError(f"The output from polaris._create_vanadium must be a WorkspaceGroup in the per_bank "
+                             f"routine (default) and must be MatrixWorkspace in the per_detector routine. In this case,"
+                             f"the output was type {type(vanadium_d)} and in the "
+                             f"{'per_detector' if per_detector else 'per_bank'} routine")
 
     def create_total_scattering_pdf(self, **kwargs):
         if "pdf_type" not in kwargs or kwargs["pdf_type"] not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
