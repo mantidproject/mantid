@@ -20,13 +20,13 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
         self.setUp()
 
     def setUp(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D20'
-        config.appendDataSearchSubDir('ILL/D20/')
-        self._m_tmp_file = path.join(gettempdir(), 'D20Calib1stIteration.nxs')
+        config["default.facility"] = "ILL"
+        config["default.instrument"] = "D20"
+        config.appendDataSearchSubDir("ILL/D20/")
+        self._m_tmp_file = path.join(gettempdir(), "D20Calib1stIteration.nxs")
 
     def requiredFiles(self):
-        return ['967076.nxs']
+        return ["967076.nxs"]
 
     def cleanup(self):
         mtd.clear()
@@ -34,11 +34,11 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
 
-        PowderILLEfficiency(CalibrationRun='967076.nxs', OutputWorkspace='calib')
+        PowderILLEfficiency(CalibrationRun="967076.nxs", OutputWorkspace="calib")
 
-        SaveNexusProcessed(InputWorkspace='calib', Filename=self._m_tmp_file)
+        SaveNexusProcessed(InputWorkspace="calib", Filename=self._m_tmp_file)
 
-        PowderILLEfficiency(CalibrationRun='967076.nxs', CalibrationFile=self._m_tmp_file, OutputWorkspace='calib-2nd')
+        PowderILLEfficiency(CalibrationRun="967076.nxs", CalibrationFile=self._m_tmp_file, OutputWorkspace="calib-2nd")
 
-        for i in range(mtd['calib-2nd'].getNumberHistograms()):
-            self.assertDelta(mtd['calib-2nd'].readY(i), 1., 1E-3)
+        for i in range(mtd["calib-2nd"].getNumberHistograms()):
+            self.assertDelta(mtd["calib-2nd"].readY(i), 1.0, 1e-3)

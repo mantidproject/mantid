@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import CloneWorkspace, LoadNexus, MoveInstrumentComponent
@@ -47,42 +47,42 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
     """
 
     def setUp(self):
-        self.load_run = '2500.nxs'
+        self.load_run = "2500.nxs"
         config["default.instrument"] = "SANS2D"
         SANS2D()
         MaskFile("MASKSANS2D_094i_RKH.txt")
-        self.control_name = '2500front_1D_4.6_12.85'
-        self.inst_comp = 'rear-detector'
+        self.control_name = "2500front_1D_4.6_12.85"
+        self.inst_comp = "rear-detector"
 
     def tearDown(self):
         mtd.clear()
 
     def test_accept_loaded_workspace_only_if_reload_false(self):
         my_workspace = Load(self.load_run)
-        #set the value for my_workspace to ensure it is the one used
+        # set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=False)
+        AssignSample(my_workspace, reload=False)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
 
         self.assertTrue(ws_name, my_workspace.name())
 
-        self.assertTrue(my_workspace.dataY(0)[10],5)
+        self.assertTrue(my_workspace.dataY(0)[10], 5)
         # ensure that it is able to execute the reduction
         Reduce()
         self.assertTrue(self.control_name in mtd)
 
     def test_accept_loaded_workspace_but_reload_the_data_file_if_reload_true(self):
         my_workspace = Load(self.load_run)
-        #set the value for my_workspace to ensure it is the one used
+        # set the value for my_workspace to ensure it is the one used
         aux = my_workspace.dataY(0)
-        aux[10]=5
-        my_workspace.setY(0,aux)
+        aux[10] = 5
+        my_workspace.setY(0, aux)
         # ask to use the loaded workspace
-        AssignSample(my_workspace,reload=True)
+        AssignSample(my_workspace, reload=True)
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # it is different, because, it will compose the name using its rule,
@@ -93,7 +93,7 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
 
     def test_should_not_accept_loaded_workspace_if_moved(self):
         my_workspace = Load(self.load_run)
-        MoveInstrumentComponent(my_workspace,self.inst_comp,X=2,Y=1,Z=0)
+        MoveInstrumentComponent(my_workspace, self.inst_comp, X=2, Y=1, Z=0)
         ## attempt to use a workspace that has been moved
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
@@ -116,7 +116,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
         self._success = False
         # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
-        suite.addTest( unittest.makeSuite(self.cl, "test"))
+        suite.addTest(unittest.makeSuite(self.cl, "test"))
         runner = unittest.TextTestRunner()
         # Run using either runner
         res = runner.run(suite)
@@ -129,42 +129,40 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
-
     def runTest(self):
         config["default.instrument"] = "SANS2D"
         SANS2D()
-        MaskFile('MASKSANS2D_094i_RKH.txt')
-        SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        MaskFile("MASKSANS2D_094i_RKH.txt")
+        SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        SetDetectorOffsets("FRONT", -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
         Gravity(False)
         Set1D()
-        Sample = LoadNexus('2500')
+        Sample = LoadNexus("2500")
         AssignSample(Sample, False)
         WavRangeReduction(4.6, 12.85, False)
 
     def validate(self):
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
+        self.disableChecking.append("Instrument")
+        return "2500front_1D_4.6_12.85", "SANS2DFrontNoGrav.nxs"
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
-
     def runTest(self):
         config["default.instrument"] = "SANS2D"
         SANS2D()
-        MaskFile('MASKSANS2D.091A')
+        MaskFile("MASKSANS2D.091A")
         Gravity(True)
         Set1D()
-        s = Load('992')
-        s_t = Load('988')
-        direct = Load('987')
+        s = Load("992")
+        s_t = Load("988")
+        direct = Load("987")
         direct_can = CloneWorkspace(direct)
-        c = Load('993')
-        c_t = Load('989')
-        AssignSample(s,False)
+        c = Load("993")
+        c_t = Load("989")
+        AssignSample(s, False)
         TransmissionSample(s_t, direct, False)
         AssignCan(c, False)
         TransmissionCan(c_t, direct_can, False)
@@ -172,9 +170,9 @@ class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
         CompWavRanges([3, 5, 7, 11], False)
 
     def validate(self):
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-    # testing one of the workspaces that is produced, best not to choose the
-    # first one in produced by the loop as this is the least error prone
-        return '992rear_1D_7.0_11.0','SANS2DWaveloops.nxs'
+        self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Axes")
+        self.disableChecking.append("Instrument")
+        # testing one of the workspaces that is produced, best not to choose the
+        # first one in produced by the loop as this is the least error prone
+        return "992rear_1D_7.0_11.0", "SANS2DWaveloops.nxs"

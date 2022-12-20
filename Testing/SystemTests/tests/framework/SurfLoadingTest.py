@@ -4,14 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 from LoadAndCheckBase import *
 
 
 class SurfLoadingTest(LoadAndCheckBase):
-    '''
+    """
     Test File loading and basic data integrity checks of SURF data in Mantid.
-    '''
+    """
 
     def get_raw_workspace_filename(self):
         return "SRF92132.raw"
@@ -29,4 +29,4 @@ class SurfLoadingTest(LoadAndCheckBase):
         return "SURF"
 
     def enable_instrument_checking(self):
-        return True # No IDF in Mantid
+        return True  # No IDF in Mantid

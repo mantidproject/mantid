@@ -4,14 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,too-few-public-methods
+# pylint: disable=no-init,too-few-public-methods
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.api import AnalysisDataService
-from sans.command_interface.ISISCommandInterface import (Set1D, Detector, MaskFile, AssignSample, WavRangeReduction,
-                                                         LARMOR)
+from sans.command_interface.ISISCommandInterface import Set1D, Detector, MaskFile, AssignSample, WavRangeReduction, LARMOR
 
 # test batch mode with sans2d and selecting a period in batch mode
 from sans.common.enums import SANSInstrument
@@ -59,8 +58,8 @@ class LARMORMultiPeriodEventModeLoadingTest_V2(systemtesting.MantidSystemTest):
         LARMOR()
         Set1D()
         Detector("DetectorBench")
-        MaskFile('USER_Larmor_163F_HePATest_r13038.txt')
-        AssignSample('13038')
+        MaskFile("USER_Larmor_163F_HePATest_r13038.txt")
+        AssignSample("13038")
         # Different in V2. We need to call the reduction in order to load the data. Hence we add the
         # WaveRangeReduction here.
         WavRangeReduction()

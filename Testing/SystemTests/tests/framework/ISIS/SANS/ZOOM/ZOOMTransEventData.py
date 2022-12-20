@@ -5,8 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_sans_system_test import ISISSansSystemTest
-from sans.command_interface.ISISCommandInterface import ZOOM, MaskFile, TransmissionSample, \
-    AssignSample, WavRangeReduction
+from sans.command_interface.ISISCommandInterface import ZOOM, MaskFile, TransmissionSample, AssignSample, WavRangeReduction
 from sans.common.enums import SANSInstrument
 from systemtesting import MantidSystemTest
 
@@ -24,7 +23,7 @@ class ZOOMTransmissionEventDataTest(MantidSystemTest):
         WavRangeReduction()
 
     def validate(self):
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("Instrument")
         return "9898_rear_1D_1.75_16.5", "ZOOM_trans_raw_event_ref.nxs"
 
 
@@ -33,6 +32,7 @@ class ZOOMTransmissionAddedEventDataTest(MantidSystemTest):
     """
     Loads data using added event mode transmission data
     """
+
     def runTest(self):
         ZOOM()
         MaskFile("USER_ZOOM_SANSteam_4m_SampleChanger_202A_12mm_Large_BEAMSTOP.txt")
@@ -41,7 +41,7 @@ class ZOOMTransmissionAddedEventDataTest(MantidSystemTest):
         WavRangeReduction()
 
     def validate(self):
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("Instrument")
         # Added data in both histogram and event mode should produce identical results
         return "9898_rear_1D_1.75_16.5", "ZOOM_trans_added_ref.nxs"
 
@@ -51,6 +51,7 @@ class ZOOMTransmissionAddedHistoDataTest(MantidSystemTest):
     """
     Loads data using added histo mode transmission data
     """
+
     def runTest(self):
         ZOOM()
         MaskFile("USER_ZOOM_SANSteam_4m_SampleChanger_202A_12mm_Large_BEAMSTOP.txt")
@@ -59,6 +60,6 @@ class ZOOMTransmissionAddedHistoDataTest(MantidSystemTest):
         WavRangeReduction()
 
     def validate(self):
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("Instrument")
         # Added data in both histogram and event mode should produce identical results
         return "9898_rear_1D_1.75_16.5", "ZOOM_trans_added_ref.nxs"

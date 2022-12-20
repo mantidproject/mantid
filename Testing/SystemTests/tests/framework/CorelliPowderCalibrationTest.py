@@ -27,31 +27,29 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
         return ["CORELLI_124036_banks42_87.nxs", "CORELLI_124036_adjustments.nxs"]
 
     def runTest(self):
-        LoadNexus(Filename='CORELLI_124036_banks42_87.nxs', OutputWorkspace='LaB6')
-        CorelliPowderCalibrationCreate(InputWorkspace='LaB6',
-                                       OutputWorkspacesPrefix='LaB6_',
-                                       SourceToSampleDistance=19.991,
-                                       TofBinning=[3000, -0.001, 16660],
-                                       PeakFunction='Gaussian',
-                                       PeakPositions=[1.3143, 1.3854, 1.6967, 1.8587, 2.0781, 2.3995, 2.9388, 4.1561],
-                                       SourceMaxTranslation=0.1,
-                                       ComponentList='bank42/sixteenpack,bank87/sixteenpack',
-                                       FixY=False,
-                                       ComponentMaxTranslation=0.02,
-                                       FixYaw=False,
-                                       ComponentMaxRotation=3.0)
-        table = mtd['LaB6_adjustments']
+        LoadNexus(Filename="CORELLI_124036_banks42_87.nxs", OutputWorkspace="LaB6")
+        CorelliPowderCalibrationCreate(
+            InputWorkspace="LaB6",
+            OutputWorkspacesPrefix="LaB6_",
+            SourceToSampleDistance=19.991,
+            TofBinning=[3000, -0.001, 16660],
+            PeakFunction="Gaussian",
+            PeakPositions=[1.3143, 1.3854, 1.6967, 1.8587, 2.0781, 2.3995, 2.9388, 4.1561],
+            SourceMaxTranslation=0.1,
+            ComponentList="bank42/sixteenpack,bank87/sixteenpack",
+            FixY=False,
+            ComponentMaxTranslation=0.02,
+            FixYaw=False,
+            ComponentMaxRotation=3.0,
+        )
+        table = mtd["LaB6_adjustments"]
         # Check position of the moderator
-        assert_allclose(table.row(0)['Zposition'], -20, atol=0.02)
+        assert_allclose(table.row(0)["Zposition"], -20, atol=0.02)
         # Check position of bank42
-        assert_allclose([table.row(1)[x] for x in ('Xposition', 'Yposition', 'Zposition')],
-                        [2.577, 0.063, 0.082], atol=0.04)
+        assert_allclose([table.row(1)[x] for x in ("Xposition", "Yposition", "Zposition")], [2.577, 0.063, 0.082], atol=0.04)
         # Check rotation of bank87
         assert_allclose(
-            [
-                table.row(2)[x]
-                for x in ("XdirectionCosine", "YdirectionCosine", "ZdirectionCosine")
-            ],
+            [table.row(2)[x] for x in ("XdirectionCosine", "YdirectionCosine", "ZdirectionCosine")],
             [-0.01, -1.00, 0.03],
             atol=0.05,
         )
@@ -122,12 +120,8 @@ class CorelliCalibrationApplyTest(MantidSystemTest):
 
     def get_target_instrument(self):
         self.ws_target = "ws_target"
-        LoadEmptyInstrument(
-            Filename="CORELLI_Definition.xml", OutputWorkspace=self.ws_target
-        )
-        ConvertToEventWorkspace(
-            InputWorkspace=self.ws_target, OutputWorkspace=self.ws_target
-        )
+        LoadEmptyInstrument(Filename="CORELLI_Definition.xml", OutputWorkspace=self.ws_target)
+        ConvertToEventWorkspace(InputWorkspace=self.ws_target, OutputWorkspace=self.ws_target)
         # explicitly translate component TO designated location
         MoveInstrumentComponent(
             Workspace=self.ws_target,
@@ -202,16 +196,10 @@ class CorelliCalibrationApplyTest(MantidSystemTest):
         # apply the calibration to a reference CORELLI instrument
         self.ws_reference = "ws_ref"
         self.ws_calbrated = "ws_cal"
-        LoadEmptyInstrument(
-            Filename="CORELLI_Definition.xml", OutputWorkspace=self.ws_reference
-        )
-        ConvertToEventWorkspace(
-            InputWorkspace=self.ws_reference, OutputWorkspace=self.ws_calbrated
-        )
+        LoadEmptyInstrument(Filename="CORELLI_Definition.xml", OutputWorkspace=self.ws_reference)
+        ConvertToEventWorkspace(InputWorkspace=self.ws_reference, OutputWorkspace=self.ws_calbrated)
         self.generate_calitab()
-        CorelliCalibrationApply(
-            Workspace=self.ws_calbrated, CalibrationTable=self.cali_table_name
-        )
+        CorelliCalibrationApply(Workspace=self.ws_calbrated, CalibrationTable=self.cali_table_name)
         # ensure that the calibration application take place
         _ws_ref = mtd[self.ws_reference]
         _ws_cal = mtd[self.ws_calbrated]
