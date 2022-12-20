@@ -1334,7 +1334,8 @@ std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCor
     ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
     const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
   // countZeroWeights for debugging and analysis of where importance sampling may help
-  std::vector<double> sumOfWeights(wValues.size(), 0.), countZeroWeights(wValues.size(), 0);
+  std::vector<int> countZeroWeights(wValues.size(), 0);
+  std::vector<double> sumOfWeights(wValues.size(), 0.);
   std::vector<double> weightsMeans(wValues.size(), 0.), deltas(wValues.size(), 0.), weightsM2(wValues.size(), 0.),
       weightsErrors(wValues.size(), 0.);
 
