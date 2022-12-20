@@ -94,7 +94,7 @@ Data analysis Elwin
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
 #. In the main GUI right-click on ``irs26174-26176_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
-#. This should plot two lines of :math:`A^2` vs :math:`Q`
+#. This should plot two lines of :math:`ln((meV))^{-1}` vs :math:`Q`
 #. Right-click on the ``irs26176_graphite002_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice; you will use this file in the next test
 
 Data analysis MSD
