@@ -1,0 +1,2 @@
+- An indeterminate progress bar has been added below the FitPropertyBrowser on the Engineering Diffraction Fitting tab.
+  This will display when the fit is in progress and whether the recent fit status was success or fail.

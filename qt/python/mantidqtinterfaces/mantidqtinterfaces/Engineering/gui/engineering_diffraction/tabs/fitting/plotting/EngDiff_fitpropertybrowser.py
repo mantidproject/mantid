@@ -34,6 +34,8 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.setDefaultPeakType(default_peak)
         self.fit_notifier = GenericObservable()
         self.fit_enabled_notifier = GenericObservable()
+        self.fit_started_notifier = GenericObservable()
+        self.algorithmStarted.connect(self.fitting_started_slot)
 
     def set_output_window_names(self):
         """
@@ -158,3 +160,11 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         """
         super(EngDiffFitPropertyBrowser, self).function_changed_slot()
         self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
+
+    @Slot()
+    def fitting_started_slot(self):
+        """
+        Set the progress bar to in progress.
+        # :param name: The name of Fit's input workspace.
+        """
+        self.fit_started_notifier.notify_subscribers()

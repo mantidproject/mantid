@@ -333,6 +333,7 @@ signals:
   void currentChanged() const;
   void functionRemoved();
   void algorithmFinished(const QString & /*_t1*/);
+  void algorithmStarted(const QString & /*_t1*/);
   void workspaceIndexChanged(int index);
   void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString & /*_t1*/);

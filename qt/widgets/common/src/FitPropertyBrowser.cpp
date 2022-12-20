@@ -1571,6 +1571,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
   }
 
   try {
+    emit algorithmStarted(QString::fromStdString(wsName));
     m_initialParameters.resize(compositeFunction()->nParams());
     for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       m_initialParameters[i] = compositeFunction()->getParameter(i);
