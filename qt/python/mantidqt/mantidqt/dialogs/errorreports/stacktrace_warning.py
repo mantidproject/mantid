@@ -20,4 +20,4 @@ class StacktraceWarning(stacktraceWarningUIBase, stacktraceWarningUI):
                             | QtCore.Qt.CustomizeWindowHint)
 
     def set_stacktrace_text(self, stacktrace_text):
-        self.stackTraceText.setText(stacktrace_text)
+        self.stacktraceText.setText(stacktrace_text)
