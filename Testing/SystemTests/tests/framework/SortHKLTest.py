@@ -13,36 +13,28 @@ from mantid.geometry import PointGroupFactory
 
 class HKLStatisticsTestMixin(object):
     def _init_test_data(self):
-        self._ws = CreateSimulationWorkspace(Instrument='TOPAZ',
-                                             BinParams='0,10000,20000',
-                                             UnitX='TOF',
-                                             OutputWorkspace='topaz_instrument_workspace')
+        self._ws = CreateSimulationWorkspace(
+            Instrument="TOPAZ", BinParams="0,10000,20000", UnitX="TOF", OutputWorkspace="topaz_instrument_workspace"
+        )
 
-        self._space_groups = ['Pm-3m', 'P4_mmm', 'Pmmm', 'Im-3m', 'Fm-3m', 'I4_mmm', 'Cmmm', 'Immm', 'Fmmm']
+        self._space_groups = ["Pm-3m", "P4_mmm", "Pmmm", "Im-3m", "Fm-3m", "I4_mmm", "Cmmm", "Immm", "Fmmm"]
 
-        self._centering_map = {'P': 'Primitive',
-                               'I': 'Body centred',
-                               'F': 'All-face centred',
-                               'C': 'C-face centred'}
+        self._centering_map = {"P": "Primitive", "I": "Body centred", "F": "All-face centred", "C": "C-face centred"}
 
-        self._base_directory = 'SortHKL/'
-        self._template_hkl = 'reflections_{0}.hkl'
-        self._template_ub = 'ub_parameters_{0}.json'
-        self._template_statistics = 'statistics_{0}.txt'
+        self._base_directory = "SortHKL/"
+        self._template_hkl = "reflections_{0}.hkl"
+        self._template_ub = "ub_parameters_{0}.json"
+        self._template_statistics = "statistics_{0}.txt"
 
     def _load_ub_parameters(self, space_group):
         filename = FileFinder.Instance().getFullPath(self._base_directory + self._template_ub.format(space_group))
 
         ub_parameters = {}
-        with open(filename, 'r') as ub_parameter_file:
+        with open(filename, "r") as ub_parameter_file:
             raw_ub_parameters = json.load(ub_parameter_file)
 
             # Mantid functions don't seem to like unicode so the dict is re-written
-            ub_parameters.update(
-                dict(
-                    [(str(x), y if isinstance(y, float) else str(y))
-                     for x, y in raw_ub_parameters.items()]
-                ))
+            ub_parameters.update(dict([(str(x), y if isinstance(y, float) else str(y)) for x, y in raw_ub_parameters.items()]))
 
         return ub_parameters
 
@@ -61,14 +53,13 @@ class HKLStatisticsTestMixin(object):
         return actual_hkls
 
     def _get_point_group(self, space_group):
-        return PointGroupFactory.createPointGroup(space_group[1:].replace('_', '/'))
+        return PointGroupFactory.createPointGroup(space_group[1:].replace("_", "/"))
 
     def _load_reference_statistics(self, space_group):
-        filename = FileFinder.Instance().getFullPath(
-            self._base_directory + self._template_statistics.format(space_group))
+        filename = FileFinder.Instance().getFullPath(self._base_directory + self._template_statistics.format(space_group))
 
         lines = []
-        with open(filename, 'r') as statistics_file:
+        with open(filename, "r") as statistics_file:
             for line in statistics_file:
                 lines.append(line)
 
@@ -77,14 +68,14 @@ class HKLStatisticsTestMixin(object):
 
         overall_statistics = dict(list(zip(keys, values)))
 
-        completentess = float(lines[3].split()[-1].replace('%', ''))
-        overall_statistics['Completeness'] = completentess
+        completentess = float(lines[3].split()[-1].replace("%", ""))
+        overall_statistics["Completeness"] = completentess
 
         return overall_statistics
 
 
 class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
-    ''' System test for SortHKL
+    """System test for SortHKL
 
     This system test compares some of the output of SortHKL to statistics produced
     by running the program SORTAV [1] on the same data set.
@@ -99,7 +90,7 @@ class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
 
     [1] SORTAV: ftp://ftp.hwi.buffalo.edu/pub/Blessing/Drear/sortav.use
         (and references therein).
-    '''
+    """
 
     def runTest(self):
         self._init_test_data()
@@ -114,25 +105,24 @@ class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
 
             self._compare_statistics(statistics, reference_statistics)
             # No need to check since intensities do no change
-            #self._check_sorted_hkls_consistency(sorted_hkls, space_group)
+            # self._check_sorted_hkls_consistency(sorted_hkls, space_group)
 
     def _run_sort_hkl(self, reflections, space_group):
         point_group_name = self._get_point_group(space_group).getName()
         centering_name = self._centering_map[space_group[0]]
 
         # pylint: disable=unused-variable
-        sorted_hkls, chi2, statistics, equivInten = SortHKL(InputWorkspace=reflections,
-                                                            PointGroup=point_group_name,
-                                                            LatticeCentering=centering_name)
+        sorted_hkls, chi2, statistics, equivInten = SortHKL(
+            InputWorkspace=reflections, PointGroup=point_group_name, LatticeCentering=centering_name
+        )
 
         return statistics.row(0), sorted_hkls
 
     def _compare_statistics(self, statistics, reference_statistics):
-        self.assertEqual(round(statistics['Multiplicity'], 1), round(reference_statistics['<N>'], 1))
-        self.assertEqual(round(statistics['Rpim'], 2), round(100.0 * reference_statistics['Rm'], 2))
-        self.assertEqual(statistics['No. of Unique Reflections'], int(reference_statistics['Nunique']))
-        self.assertDelta(round(statistics['Data Completeness'], 1), round(reference_statistics['Completeness'], 1),
-                         0.5)
+        self.assertEqual(round(statistics["Multiplicity"], 1), round(reference_statistics["<N>"], 1))
+        self.assertEqual(round(statistics["Rpim"], 2), round(100.0 * reference_statistics["Rm"], 2))
+        self.assertEqual(statistics["No. of Unique Reflections"], int(reference_statistics["Nunique"]))
+        self.assertDelta(round(statistics["Data Completeness"], 1), round(reference_statistics["Completeness"], 1), 0.5)
 
     def _check_sorted_hkls_consistency(self, sorted_hkls, space_group):
         peaks = [sorted_hkls.getPeak(i) for i in range(sorted_hkls.getNumberPeaks())]

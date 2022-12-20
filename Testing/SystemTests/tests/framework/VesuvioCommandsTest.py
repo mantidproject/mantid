@@ -11,13 +11,14 @@ and that mantid can be imported
 import systemtesting
 import numpy as np
 
-from mantid.api import (WorkspaceGroup, MatrixWorkspace)
+from mantid.api import WorkspaceGroup, MatrixWorkspace
 from mantid.simpleapi import *
 from vesuvio.commands import fit_tof
 from vesuvio.instrument import *
 
 
 # =====================================Helper Function=================================
+
 
 def _make_names_unique(names):
     name_count = dict()
@@ -38,12 +39,12 @@ def _test_caad_workspace(self, workspace_name, functions):
     except RuntimeError:
         self.fail("CAAD Workspace with name " + workspace_name + " does not exist in the ADS.")
 
-    self.assertTrue(isinstance(caad_workspace, WorkspaceGroup),
-                    "CAAD Workspace, '" + workspace_name + "', is not a WorkspaceGroup.")
+    self.assertTrue(isinstance(caad_workspace, WorkspaceGroup), "CAAD Workspace, '" + workspace_name + "', is not a WorkspaceGroup.")
 
     fit_caad_name = workspace_name + "_Calc"
-    self.assertTrue(caad_workspace.contains(fit_caad_name),
-                    "Calculated fit workspace, '" + fit_caad_name + "', not found in CAAD WorkspaceGroup.")
+    self.assertTrue(
+        caad_workspace.contains(fit_caad_name), "Calculated fit workspace, '" + fit_caad_name + "', not found in CAAD WorkspaceGroup."
+    )
 
     for suffix in _make_names_unique(functions):
         name = workspace_name + "_" + suffix
@@ -52,30 +53,29 @@ def _test_caad_workspace(self, workspace_name, functions):
 
 def _create_test_flags(background, multivariate=False):
     flags = dict()
-    flags['fit_mode'] = 'spectrum'
+    flags["fit_mode"] = "spectrum"
     if multivariate:
-        mass1 = {'value': 1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5}
+        mass1 = {"value": 1.0079, "function": "MultivariateGaussian", "SigmaX": 5, "SigmaY": 5, "SigmaZ": 5}
     else:
-        mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-                 'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
-    mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
-    mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
-    mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
-    flags['masses'] = [mass1, mass2, mass3, mass4]
-    flags['intensity_constraints'] = [0, 1, 0, -4]
+        mass1 = {"value": 1.0079, "function": "GramCharlier", "width": [2, 5, 7], "hermite_coeffs": [1, 0, 0], "k_free": 0, "sears_flag": 1}
+    mass2 = {"value": 16.0, "function": "Gaussian", "width": 10}
+    mass3 = {"value": 27.0, "function": "Gaussian", "width": 13}
+    mass4 = {"value": 133.0, "function": "Gaussian", "width": 30}
+    flags["masses"] = [mass1, mass2, mass3, mass4]
+    flags["intensity_constraints"] = [0, 1, 0, -4]
     if background:
-        flags['background'] = {'function': 'Polynomial', 'order': 3}
+        flags["background"] = {"function": "Polynomial", "order": 3}
     else:
-        flags['background'] = None
-    flags['ip_file'] = 'Vesuvio_IP_file_test.par'
-    flags['diff_mode'] = 'single'
-    flags['gamma_correct'] = True
-    flags['ms_flags'] = dict()
-    flags['ms_flags']['SampleWidth'] = 10.0
-    flags['ms_flags']['SampleHeight'] = 10.0
-    flags['ms_flags']['SampleDepth'] = 0.5
-    flags['ms_flags']['SampleDensity'] = 241
-    flags['fit_minimizer'] = 'Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08'
+        flags["background"] = None
+    flags["ip_file"] = "Vesuvio_IP_file_test.par"
+    flags["diff_mode"] = "single"
+    flags["gamma_correct"] = True
+    flags["ms_flags"] = dict()
+    flags["ms_flags"]["SampleWidth"] = 10.0
+    flags["ms_flags"]["SampleHeight"] = 10.0
+    flags["ms_flags"]["SampleDepth"] = 0.5
+    flags["ms_flags"]["SampleDensity"] = 241
+    flags["fit_minimizer"] = "Levenberg-Marquardt,AbsError=1e-08,RelError=1e-08"
 
     return flags
 
@@ -86,8 +86,7 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
-    self.assertLessEqual(abs_difference, abs(tolerance_value),
-                         msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
+    self.assertLessEqual(abs_difference, abs(tolerance_value), msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected, actual, tolerance))
 
 
 def _get_peak_height_and_index(workspace, ws_index):
@@ -102,8 +101,7 @@ def _get_peak_height_and_index(workspace, ws_index):
     return peak_height, peak_bin
 
 
-def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
-                       fit_mode='spectra', rebin_params=None):
+def load_and_crop_data(runs, spectra, ip_file, diff_mode="single", fit_mode="spectra", rebin_params=None):
     """
     @param runs The string giving the runs to load
     @param spectra A list of spectra to load
@@ -113,7 +111,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
     @param rebin_params Rebin parameter string to rebin data by (no rebin if None)
     """
     instrument = VESUVIO()
-    load_banks = (fit_mode == 'bank')
+    load_banks = fit_mode == "bank"
     output_name = runs + "_" + spectra + "_tof"
 
     if load_banks:
@@ -123,8 +121,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
         elif spectra == "backward":
             bank_ranges = instrument.backward_banks
         else:
-            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' "
-                             "for the spectra to load")
+            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' " "for the spectra to load")
         bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
         spectra = ";".join(bank_ranges)
     else:
@@ -139,22 +136,22 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
     else:
         diff_mode = "SingleDifference"
 
-    kwargs = {"Filename": runs,
-              "Mode": diff_mode, "InstrumentParFile": ip_file,
-              "SpectrumList": spectra, "SumSpectra": sum_spectra,
-              "OutputWorkspace": output_name, "StoreInADS": False}
+    kwargs = {
+        "Filename": runs,
+        "Mode": diff_mode,
+        "InstrumentParFile": ip_file,
+        "SpectrumList": spectra,
+        "SumSpectra": sum_spectra,
+        "OutputWorkspace": output_name,
+        "StoreInADS": False,
+    }
     full_range = LoadVesuvio(**kwargs)
-    tof_data = CropWorkspace(InputWorkspace=full_range,
-                             XMin=instrument.tof_range[0],
-                             XMax=instrument.tof_range[1],
-                             OutputWorkspace=output_name,
-                             StoreInADS=False)
+    tof_data = CropWorkspace(
+        InputWorkspace=full_range, XMin=instrument.tof_range[0], XMax=instrument.tof_range[1], OutputWorkspace=output_name, StoreInADS=False
+    )
 
     if rebin_params is not None:
-        tof_data = Rebin(InputWorkspace=tof_data,
-                         OutputWorkspace=output_name,
-                         Params=rebin_params,
-                         StoreInADS=False)
+        tof_data = Rebin(InputWorkspace=tof_data, OutputWorkspace=output_name, Params=rebin_params, StoreInADS=False)
 
     return tof_data
 
@@ -168,7 +165,7 @@ class FitSingleSpectrumNoBackgroundTest(systemtesting.MantidSystemTest):
     def runTest(self):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
-        flags['spectra'] = '135'
+        flags["spectra"] = "135"
         self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
@@ -176,8 +173,9 @@ class FitSingleSpectrumNoBackgroundTest(systemtesting.MantidSystemTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_wsg = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup),
-                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_wsg)) + "'.")
+        self.assertTrue(
+            isinstance(fitted_wsg, WorkspaceGroup), "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_wsg)) + "'."
+        )
         self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
@@ -202,8 +200,7 @@ class FitSingleSpectrumNoBackgroundTest(systemtesting.MantidSystemTest):
         self.assertEqual(14, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, np.ndarray),
-                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
+        self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(1, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -225,14 +222,14 @@ class FitSingleSpectrumBivariateGaussianTiesTest(systemtesting.MantidSystemTest)
 
     def runTest(self):
         flags = _create_test_flags(background=False, multivariate=True)
-        flags['spectra'] = '135'
-        flags['masses'][0]['ties'] = 'SigmaX=SigmaY'
+        flags["spectra"] = "135"
+        flags["masses"][0]["ties"] = "SigmaX=SigmaY"
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
         # Get fit workspace
-        fit_params = mtd['15039-15045_params_iteration_1']
+        fit_params = mtd["15039-15045_params_iteration_1"]
         f0_sigma_x = fit_params.readY(2)[0]
         f0_sigma_y = fit_params.readY(3)[0]
         self.assertAlmostEqual(f0_sigma_x, f0_sigma_y)
@@ -246,7 +243,7 @@ class SingleSpectrumBackground(systemtesting.MantidSystemTest):
 
     def runTest(self):
         flags = _create_test_flags(background=True)
-        flags['spectra'] = '135'
+        flags["spectra"] = "135"
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
@@ -255,8 +252,9 @@ class SingleSpectrumBackground(systemtesting.MantidSystemTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_wsg = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup),
-                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_wsg)) + "'.")
+        self.assertTrue(
+            isinstance(fitted_wsg, WorkspaceGroup), "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_wsg)) + "'."
+        )
         self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
@@ -283,8 +281,7 @@ class SingleSpectrumBackground(systemtesting.MantidSystemTest):
         self.assertEqual(18, fitted_params.getNumberHistograms())
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, np.ndarray),
-                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
+        self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(1, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -299,8 +296,8 @@ class BankByBankForwardSpectraNoBackground(systemtesting.MantidSystemTest):
 
     def runTest(self):
         flags = _create_test_flags(background=False)
-        flags['fit_mode'] = 'bank'
-        flags['spectra'] = 'forward'
+        flags["fit_mode"] = "bank"
+        flags["spectra"] = "forward"
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
@@ -309,8 +306,9 @@ class BankByBankForwardSpectraNoBackground(systemtesting.MantidSystemTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup),
-                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_banks)) + "'.")
+        self.assertTrue(
+            isinstance(fitted_banks, WorkspaceGroup), "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_banks)) + "'."
+        )
         self.assertEqual(8, len(fitted_banks))
 
         bank1 = fitted_banks[0]
@@ -332,8 +330,7 @@ class BankByBankForwardSpectraNoBackground(systemtesting.MantidSystemTest):
         _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, np.ndarray),
-                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
+        self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(8, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -348,8 +345,8 @@ class SpectraBySpectraForwardSpectraNoBackground(systemtesting.MantidSystemTest)
 
     def runTest(self):
         flags = _create_test_flags(background=False)
-        flags['fit_mode'] = 'spectra'
-        flags['spectra'] = '143-144'
+        flags["fit_mode"] = "spectra"
+        flags["spectra"] = "143-144"
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
@@ -358,8 +355,9 @@ class SpectraBySpectraForwardSpectraNoBackground(systemtesting.MantidSystemTest)
         self.assertEqual(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup),
-                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_spec)) + "'.")
+        self.assertTrue(
+            isinstance(fitted_spec, WorkspaceGroup), "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_spec)) + "'."
+        )
         self.assertEqual(2, len(fitted_spec))
 
         spec143 = fitted_spec[0]
@@ -381,8 +379,7 @@ class SpectraBySpectraForwardSpectraNoBackground(systemtesting.MantidSystemTest)
         _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, np.ndarray),
-                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
+        self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(2, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -397,7 +394,7 @@ class PassPreLoadedWorkspaceToFitTOF(systemtesting.MantidSystemTest):
 
     def runTest(self):
         flags = _create_test_flags(background=False)
-        runs_ws = load_and_crop_data('15039-15045', '143-144', flags['ip_file'])
+        runs_ws = load_and_crop_data("15039-15045", "143-144", flags["ip_file"])
         self._fit_results = fit_tof(runs_ws, flags)
 
     def validate(self):
@@ -405,8 +402,9 @@ class PassPreLoadedWorkspaceToFitTOF(systemtesting.MantidSystemTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_spec = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_spec, WorkspaceGroup),
-                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_spec)) + "'.")
+        self.assertTrue(
+            isinstance(fitted_spec, WorkspaceGroup), "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_spec)) + "'."
+        )
         self.assertEqual(2, len(fitted_spec))
 
         spec143 = fitted_spec[0]
@@ -428,8 +426,7 @@ class PassPreLoadedWorkspaceToFitTOF(systemtesting.MantidSystemTest):
         _equal_within_tolerance(self, 4.7479831769e-05, spec144.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, np.ndarray),
-                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
+        self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(2, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
@@ -444,10 +441,10 @@ class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
 
     def runTest(self):
         flags = _create_test_flags(background=False)
-        flags['fit_mode'] = 'bank'
-        flags['spectra'] = 'forward'
-        flags['calculate_caad'] = True
-        flags['load_log_files'] = False
+        flags["fit_mode"] = "bank"
+        flags["spectra"] = "forward"
+        flags["calculate_caad"] = True
+        flags["load_log_files"] = False
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
@@ -456,8 +453,9 @@ class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
         self.assertEqual(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup),
-                        "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_banks)) + "'.")
+        self.assertTrue(
+            isinstance(fitted_banks, WorkspaceGroup), "Expected fit result to be a WorkspaceGroup, is '" + str(type(fitted_banks)) + "'."
+        )
         self.assertEqual(8, len(fitted_banks))
 
         bank1 = fitted_banks[0]
@@ -479,14 +477,12 @@ class CalculateCumulativeAngleAveragedData(systemtesting.MantidSystemTest):
         _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
-        self.assertTrue(isinstance(chisq_values, np.ndarray),
-                        msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
+        self.assertTrue(isinstance(chisq_values, np.ndarray), msg="Chi-sq values is not a numpy array. Found {}".format(type(chisq_values)))
         self.assertEqual(8, len(chisq_values))
 
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
 
-        functions = ['GramCharlierComptonProfile', 'GaussianComptonProfile',
-                     'GaussianComptonProfile', 'GaussianComptonProfile']
-        _test_caad_workspace(self, '15039-15045_CAAD_normalised_iteration_' + str(exit_iteration), functions)
-        _test_caad_workspace(self, '15039-15045_CAAD_sum_iteration_' + str(exit_iteration), functions)
+        functions = ["GramCharlierComptonProfile", "GaussianComptonProfile", "GaussianComptonProfile", "GaussianComptonProfile"]
+        _test_caad_workspace(self, "15039-15045_CAAD_normalised_iteration_" + str(exit_iteration), functions)
+        _test_caad_workspace(self, "15039-15045_CAAD_sum_iteration_" + str(exit_iteration), functions)

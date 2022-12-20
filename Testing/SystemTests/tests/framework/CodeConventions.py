@@ -4,21 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 import systemtesting
 import re
 import mantid
 from mantid.simpleapi import *
-MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 
-SPECIAL = ["InputWorkspace", "OutputWorkspace", "Workspace",
-           "ReductionProperties"]
+MAX_ALG_LEN = 40  # TODO convention says 20 is the maximum
+
+SPECIAL = ["InputWorkspace", "OutputWorkspace", "Workspace", "ReductionProperties"]
 SPECIAL_UPPER = [specialname.upper for specialname in SPECIAL]
 
 # TODO this list should be empty
 ALG_BAD_PARAMS = {
     "Bin2DPowderDiffraction(v1)": ("dSpaceBinning", "dPerpendicularBinning"),
-    "PowderReduceP2D(v1)": ("dSpaceBinning","dPerpendicularBinning"),
+    "PowderReduceP2D(v1)": ("dSpaceBinning", "dPerpendicularBinning"),
     "CalculateUMatrix(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "ConvertToMD(v1)": ("dEAnalysisMode"),
     "ConvertToMDMinMaxLocal(v1)": ("dEAnalysisMode"),
@@ -39,9 +39,22 @@ ALG_BAD_PARAMS = {
     "PoldiProjectRun(v1)": ("wlenmin", "wlenmax"),
     "PoldiRemoveDeadWires(v1)": ("nbExcludedWires", "nbAuteDeadWires"),
     "SaveIsawQvector(v1)": ("Qx_vector", "Qy_vector", "Qz_vector"),
-    "SCDCalibratePanels(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "useL0", "usetimeOffset",
-                               "usePanelWidth", "usePanelHeight", "usePanelPosition",
-                               "usePanelOrientation", "tolerance", "MaxPositionChange_meters"),
+    "SCDCalibratePanels(v1)": (
+        "a",
+        "b",
+        "c",
+        "alpha",
+        "beta",
+        "gamma",
+        "useL0",
+        "usetimeOffset",
+        "usePanelWidth",
+        "usePanelHeight",
+        "usePanelPosition",
+        "usePanelOrientation",
+        "tolerance",
+        "MaxPositionChange_meters",
+    ),
     "SCDCalibratePanels(v2)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "SetSampleMaterial(v1)": ("bAverage", "bSquaredAverage"),
     "SetUB(v1)": ("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
@@ -49,49 +62,77 @@ ALG_BAD_PARAMS = {
     "ViewBOA(v1)": ("CD-Distance"),
     "PoldiCreatePeaksFromCell(v1)": ("a", "b", "c", "alpha", "beta", "gamma"),
     "CreateMD(v1)": ("u", "v"),
-    "AccumulateMD(v1)": ("u", "v")
+    "AccumulateMD(v1)": ("u", "v"),
 }
 
 
 # TODO this list should be empty
-FUNC_BAD_NAME = ("Muon_ExpDecayOscTest")
+FUNC_BAD_NAME = "Muon_ExpDecayOscTest"
 
 # TODO this list should be empty
 FUNC_BAD_PARAMS = {
-    "Bk2BkExpConvPV":("TOF_h"),
-    "CubicSpline":("y0", "y1", "y2"),
-    "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre",
-                             "f1.Intensity", "f1.Radius", "f1.Decay", "f1.Shift"),
-    "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre",
-                  "f1.Intensity", "f1.Radius", "f1.Diffusion", "f1.Shift"),
-    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre",
-                  "f1.Height", "f1.Radius", "f1.Tau", "f1.Centre"),
-    "LatticeErrors":("p0", "p1", "p2", "p3", "p4", "p5"),
-    "Muon_ExpDecayOscTest":("lambda", "frequency", "phi"),
-    "SCDPanelErrors":("f0_detWidthScale", "f0_detHeightScale",
-                      "f0_Xoffset", "f0_Yoffset", "f0_Zoffset",
-                      "f0_Xrot", "f0_Yrot", "f0_Zrot",
-                      "l0", "t0"),
-    "StretchedExpFT":("height", "tau", "beta"),
-    "PawleyParameterFunction":("a","b","c"),
-    "PawleyFunction":("f0.a","f0.b","f0.c", "f0.Alpha", "f0.Beta", "f0.Gamma", "f0.ZeroShift"),
-    "LatticeFunction":("a","b","c"),
-    "CrystalFieldSpectrum":("f0.Amplitude","f0.PeakCentre","f0.FWHM","f1.Amplitude","f1.PeakCentre","f1.FWHM",
-                            "f2.Amplitude","f2.PeakCentre","f2.FWHM","f3.Amplitude","f3.PeakCentre","f3.FWHM",
-                            "f4.Amplitude","f4.PeakCentre","f4.FWHM","f5.Amplitude","f5.PeakCentre","f5.FWHM"),
-    "CrystalFieldMultiSpectrum":("f0.f0.A0","f0.f1.Amplitude","f0.f1.PeakCentre","f0.f1.FWHM",
-                                 "f0.f2.Amplitude","f0.f2.PeakCentre","f0.f2.FWHM")
+    "Bk2BkExpConvPV": ("TOF_h"),
+    "CubicSpline": ("y0", "y1", "y2"),
+    "DiffRotDiscreteCircle": ("f0.Height", "f0.Radius", "f0.Centre", "f1.Intensity", "f1.Radius", "f1.Decay", "f1.Shift"),
+    "DiffSphere": ("f0.Height", "f0.Radius", "f0.Centre", "f1.Intensity", "f1.Radius", "f1.Diffusion", "f1.Shift"),
+    "IsoRotDiff": ("f0.Height", "f0.Radius", "f0.Centre", "f1.Height", "f1.Radius", "f1.Tau", "f1.Centre"),
+    "LatticeErrors": ("p0", "p1", "p2", "p3", "p4", "p5"),
+    "Muon_ExpDecayOscTest": ("lambda", "frequency", "phi"),
+    "SCDPanelErrors": (
+        "f0_detWidthScale",
+        "f0_detHeightScale",
+        "f0_Xoffset",
+        "f0_Yoffset",
+        "f0_Zoffset",
+        "f0_Xrot",
+        "f0_Yrot",
+        "f0_Zrot",
+        "l0",
+        "t0",
+    ),
+    "StretchedExpFT": ("height", "tau", "beta"),
+    "PawleyParameterFunction": ("a", "b", "c"),
+    "PawleyFunction": ("f0.a", "f0.b", "f0.c", "f0.Alpha", "f0.Beta", "f0.Gamma", "f0.ZeroShift"),
+    "LatticeFunction": ("a", "b", "c"),
+    "CrystalFieldSpectrum": (
+        "f0.Amplitude",
+        "f0.PeakCentre",
+        "f0.FWHM",
+        "f1.Amplitude",
+        "f1.PeakCentre",
+        "f1.FWHM",
+        "f2.Amplitude",
+        "f2.PeakCentre",
+        "f2.FWHM",
+        "f3.Amplitude",
+        "f3.PeakCentre",
+        "f3.FWHM",
+        "f4.Amplitude",
+        "f4.PeakCentre",
+        "f4.FWHM",
+        "f5.Amplitude",
+        "f5.PeakCentre",
+        "f5.FWHM",
+    ),
+    "CrystalFieldMultiSpectrum": (
+        "f0.f0.A0",
+        "f0.f1.Amplitude",
+        "f0.f1.PeakCentre",
+        "f0.f1.FWHM",
+        "f0.f2.Amplitude",
+        "f0.f2.PeakCentre",
+        "f0.f2.FWHM",
+    ),
 }
 
 
 class Algorithms(systemtesting.MantidSystemTest):
-
     def __init__(self):
         super(Algorithms, self).__init__()
         self.__ranOk = 0
-        self.algRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
-        self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
-        self.categoryRegExp = re.compile(r'^([A-Z][a-zA-Z]+\\?)+$')
+        self.algRegExp = re.compile(r"^[A-Z][a-zA-Z0-9]+$")
+        self.paramRegExp = re.compile(r"^[A-Z][a-zA-Z0-9]*$")
+        self.categoryRegExp = re.compile(r"^([A-Z][a-zA-Z]+\\?)+$")
 
     def verifyAlgName(self, name):
         if not self.algRegExp.match(name):
@@ -99,8 +140,7 @@ class Algorithms(systemtesting.MantidSystemTest):
             return False
 
         if bool(len(name) > MAX_ALG_LEN):
-            print("%s has a name that is longer than " % name,
-                  "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN))
+            print("%s has a name that is longer than " % name, "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN))
             return False
 
         # passed all of the checks
@@ -121,19 +161,18 @@ class Algorithms(systemtesting.MantidSystemTest):
         if alg_descr not in ALG_BAD_PARAMS.keys():
             return False
 
-        return name in  ALG_BAD_PARAMS[alg_descr]
+        return name in ALG_BAD_PARAMS[alg_descr]
 
     def verifyProperty(self, alg_descr, name):
         upper = name.upper()
         if (upper in SPECIAL_UPPER) and (name not in SPECIAL):
             index = SPECIAL_UPPER.index(upper)
-            print(alg_descr + " property (" + name + ") has special name "
-                  + "with wrong case: " + name + " should be " + SPECIAL[index])
+            print(alg_descr + " property (" + name + ") has special name " + "with wrong case: " + name + " should be " + SPECIAL[index])
             return False
 
         if not self.paramRegExp.match(name):
             if not self.checkAllowed(alg_descr, name):
-                print(alg_descr + " property (" + name +") violates conventions")
+                print(alg_descr + " property (" + name + ") violates conventions")
                 return False
 
         # passed all of the checks
@@ -163,8 +202,7 @@ class Algorithms(systemtesting.MantidSystemTest):
 
     def validate(self):
         if self.__ranOk > 0:
-            print("Found %d errors. Coding conventions found at" % self.__ranOk,
-                  "http://www.mantidproject.org/Mantid_Standards")
+            print("Found %d errors. Coding conventions found at" % self.__ranOk, "http://www.mantidproject.org/Mantid_Standards")
             return False
 
         return True
@@ -174,9 +212,9 @@ class FitFunctions(systemtesting.MantidSystemTest):
     def __init__(self):
         super(FitFunctions, self).__init__()
         self.__ranOk = 0
-        self.funcRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
-        self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
-        self.categoryRegExp = re.compile(r'^([A-Z][a-zA-Z]+\\?)+$')
+        self.funcRegExp = re.compile(r"^[A-Z][a-zA-Z0-9]+$")
+        self.paramRegExp = re.compile(r"^[A-Z][a-zA-Z0-9]*$")
+        self.categoryRegExp = re.compile(r"^([A-Z][a-zA-Z]+\\?)+$")
 
     def verifyFuncName(self, name):
         if name in FUNC_BAD_NAME:
@@ -187,8 +225,7 @@ class FitFunctions(systemtesting.MantidSystemTest):
             return False
 
         if bool(len(name) > MAX_ALG_LEN):
-            print("%s has a name that is longer than " % name,
-                  "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN))
+            print("%s has a name that is longer than " % name, "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN))
             return False
 
         # passed all of the checks
@@ -213,13 +250,13 @@ class FitFunctions(systemtesting.MantidSystemTest):
         if func not in FUNC_BAD_PARAMS.keys():
             return False
 
-        return name in  FUNC_BAD_PARAMS[func]
+        return name in FUNC_BAD_PARAMS[func]
 
     def verifyParameter(self, alg_descr, name):
 
         if not self.paramRegExp.match(name):
             if not self.checkAllowed(alg_descr, name):
-                print(alg_descr + " property (" + name +") violates conventions")
+                print(alg_descr + " property (" + name + ") violates conventions")
                 return False
 
         # passed all of the checks
@@ -243,8 +280,7 @@ class FitFunctions(systemtesting.MantidSystemTest):
 
     def validate(self):
         if self.__ranOk > 0:
-            print("Found %d errors. Coding conventions found at" % self.__ranOk,
-                  "http://www.mantidproject.org/Mantid_Standards")
+            print("Found %d errors. Coding conventions found at" % self.__ranOk, "http://www.mantidproject.org/Mantid_Standards")
             return False
 
         return True
