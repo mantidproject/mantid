@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (SANSFacility, SampleShape)
+from sans.common.enums import SANSFacility, SampleShape
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateScale import get_scale_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -48,5 +48,5 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         self.assertEqual(state.height, 5.8)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

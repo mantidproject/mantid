@@ -26,7 +26,7 @@ class CASTEPLoader(AbInitioLoader):
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         # Regex pattern for a floating point number
-        self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
+        self._float_regex = r"\-?(?:\d+\.?\d*|\d*\.?\d+)"
         self._sum_rule = None
         self._ab_initio_program = "CASTEP"
 
@@ -66,15 +66,15 @@ class CASTEPLoader(AbInitioLoader):
             if not line:
                 raise IOError("Could not find any header information.")
 
-            if 'Number of ions' in line:
+            if "Number of ions" in line:
                 self._num_atoms = int(line.strip().split()[-1])
-            elif 'Number of branches' in line:
+            elif "Number of branches" in line:
                 self._num_phonons = int(line.strip().split()[-1])
-            elif 'Number of wavevectors' in line:
+            elif "Number of wavevectors" in line:
                 self._num_k = int(line.strip().split()[-1])
-            elif 'Unit cell vectors' in line:
-                file_data['unit_cell'] = self._parse_phonon_unit_cell_vectors(f_handle)
-            elif 'Fractional Co-ordinates' in line:
+            elif "Unit cell vectors" in line:
+                file_data["unit_cell"] = self._parse_phonon_unit_cell_vectors(f_handle)
+            elif "Fractional Co-ordinates" in line:
                 if self._num_atoms is None:
                     raise IOError("Failed to parse file. Invalid file header.")
 
@@ -94,18 +94,22 @@ class CASTEPLoader(AbInitioLoader):
                         # H:D2
                         symbol = "H"
                     masses_from_file.append(float(line_data[5]))
-                    ion = {"symbol": symbol,
-                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0]
-                                             + float(line_data[2]) * file_data['unit_cell'][1]
-                                             + float(line_data[3]) * file_data['unit_cell'][2]),
-                           # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
-                           "sort": indx,
-                           "mass": Atom(symbol=symbol).mass}
+                    ion = {
+                        "symbol": symbol,
+                        "coord": np.array(
+                            float(line_data[1]) * file_data["unit_cell"][0]
+                            + float(line_data[2]) * file_data["unit_cell"][1]
+                            + float(line_data[3]) * file_data["unit_cell"][2]
+                        ),
+                        # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
+                        "sort": indx,
+                        "mass": Atom(symbol=symbol).mass,
+                    }
                     file_data["atoms"].update({"atom_%s" % indx: ion})
 
             self.check_isotopes_substitution(atoms=file_data["atoms"], masses=masses_from_file)
 
-            if 'END header' in line:
+            if "END header" in line:
                 if self._num_atoms is None or self._num_phonons is None:
                     raise IOError("Failed to parse file. Invalid file header.")
                 return file_data
@@ -163,8 +167,7 @@ class CASTEPLoader(AbInitioLoader):
                 vector_components = line_data[2:]
                 # we have dimension 3, eigenvectors are complex, 3 * 2 = 6  number of all fields to parse
                 for n in range(dim):
-                    vectors[atom, freq, n] = complex(float(vector_components[2 * n]),
-                                                     float(vector_components[2 * n + 1]))
+                    vectors[atom, freq, n] = complex(float(vector_components[2 * n]), float(vector_components[2 * n + 1]))
 
         return np.asarray(vectors)
 
@@ -173,8 +176,7 @@ class CASTEPLoader(AbInitioLoader):
         Checks if acoustic sum correction has been applied during calculations.
         :returns: True is correction has been applied, otherwise False.
         """
-        header_str_sum = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
-                         r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
+        header_str_sum = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " r"(%(s)s) + (%(s)s) + (%(s)s)" % {"s": self._float_regex}
         header_sum = re.compile(header_str_sum)
 
         with open(self._clerk.get_input_filename(), "r") as f:
@@ -197,9 +199,8 @@ class CASTEPLoader(AbInitioLoader):
 
         # Header regex. Looks for lines in the following format:
         #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-        sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " \
-                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
-        no_sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + " r"(%(s)s) + (%(s)s) + (%(s)s)" % {"s": self._float_regex}
+        no_sum_rule_header = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {"s": self._float_regex}
 
         if self._check_acoustic_sum():
             header_regex_str = sum_rule_header
@@ -255,15 +256,18 @@ class CASTEPLoader(AbInitioLoader):
         # dim: dimension (atoms vibrate in 3D so dim=3)
         # [num_k, num_atom, num_freq, dim] -> [num_k, num_atom, num_freq, dim, dim] -> [num_k, num_atom, num_freq]
         # -> [num_k, num_freq]
-        norm = np.sum(np.trace(np.einsum('lkin, lkim->lkinm', disp, disp.conjugate()), axis1=3, axis2=4), axis=1)
+        norm = np.sum(np.trace(np.einsum("lkin, lkim->lkinm", disp, disp.conjugate()), axis1=3, axis2=4), axis=1)
         factor = 1.0 / np.sqrt(norm)
-        disp = np.einsum('ijkl, ik-> ijkl', disp, factor)
+        disp = np.einsum("ijkl, ik-> ijkl", disp, factor)
 
-        file_data.update({"frequencies": np.asarray(frequencies),
-                          "weights": np.asarray(weights),
-                          "k_vectors": np.asarray(k_vectors),
-                          "atomic_displacements": disp
-                          })
+        file_data.update(
+            {
+                "frequencies": np.asarray(frequencies),
+                "weights": np.asarray(weights),
+                "k_vectors": np.asarray(k_vectors),
+                "atomic_displacements": disp,
+            }
+        )
 
         # save stuff to hdf file
         data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]

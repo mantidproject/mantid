@@ -27,23 +27,20 @@ class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
     def test_singlepoint_input(self):
         filename = abins.test_helpers.find_file("ethane_singlepoint.xml")
         bad_vasp_reader = VASPLoader(input_ab_initio_filename=filename)
-        with self.assertRaisesRegexp(ValueError,
-                                     "Could not find a 'calculation' block containing a "
-                                     "'dynmat' block in VASP XML file\\."):
+        with self.assertRaisesRegexp(ValueError, "Could not find a 'calculation' block containing a " "'dynmat' block in VASP XML file\\."):
             bad_vasp_reader.read_vibrational_or_phonon_data()
 
     # IBRION=8 from optimised structure
     def test_xml_dfpt(self):
-        self.check(name='ethane_LoadVASP', loader=VASPLoader)
+        self.check(name="ethane_LoadVASP", loader=VASPLoader)
 
     def test_outcar_dfpt(self):
-        self.check(name='ethane_LoadVASP_outcar', loader=VASPLoader,
-                   extension='OUTCAR')
+        self.check(name="ethane_LoadVASP_outcar", loader=VASPLoader, extension="OUTCAR")
 
     # IBRION=6 including optimisation steps
     def test_xml_finitedisplacement(self):
-        self.check(name='ozone_LoadVASP', loader=VASPLoader)
+        self.check(name="ozone_LoadVASP", loader=VASPLoader)
 
     # IBRION=5 including frozen atoms
     def test_xml_frozenatoms(self):
-        self.check(name='methane_surface_LoadVASP', loader=VASPLoader)
+        self.check(name="methane_surface_LoadVASP", loader=VASPLoader)

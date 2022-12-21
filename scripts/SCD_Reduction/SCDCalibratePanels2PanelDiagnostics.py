@@ -59,22 +59,22 @@ def bank_boxplot(
     box_eng = ax_qs.boxplot(chi2qs_eng, positions=bn_num_eng, notch=True, showfliers=False)
     for _, lines in box_eng.items():
         for line in lines:
-            line.set_color('b')
+            line.set_color("b")
             line.set_linestyle(":")
     #
     box_cal = ax_qs.boxplot(chi2qs_cal, positions=bn_num_cal, notch=True, showfliers=False)
     for _, lines in box_cal.items():
         for line in lines:
-            line.set_color('r')
+            line.set_color("r")
     #
-    ax_qs.set_ylabel(r'$\chi^2(Q)$')
-    ax_qs.set_title(r'Goodness of fit')
+    ax_qs.set_ylabel(r"$\chi^2(Q)$")
+    ax_qs.set_title(r"Goodness of fit")
     if use_logscale:
         ax_qs.set_yscale("log")
     ax_qs.legend(
         [box_eng["boxes"][0], box_cal["boxes"][0]],
         ["engineering", "calibration"],
-        loc='lower right',
+        loc="lower right",
     )
     # --------
     # dspacing
@@ -83,20 +83,20 @@ def bank_boxplot(
     box_eng = ax_ds.boxplot(chi2ds_eng, positions=bn_num_eng, notch=True, showfliers=False)
     for _, lines in box_eng.items():
         for line in lines:
-            line.set_color('b')
+            line.set_color("b")
             line.set_linestyle(":")
     box_cal = ax_ds.boxplot(chi2ds_cal, positions=bn_num_cal, notch=True, showfliers=False)
     for _, lines in box_cal.items():
         for line in lines:
-            line.set_color('r')
-    ax_ds.set_xlabel(r'[bank no.]')
-    ax_ds.set_ylabel(r'$\chi^2(d)$')
+            line.set_color("r")
+    ax_ds.set_xlabel(r"[bank no.]")
+    ax_ds.set_ylabel(r"$\chi^2(d)$")
     if use_logscale:
         ax_ds.set_yscale("log")
     ax_ds.legend(
         [box_eng["boxes"][0], box_cal["boxes"][0]],
         ["engineering", "calibration"],
-        loc='lower right',
+        loc="lower right",
     )
 
     # save figure
@@ -194,13 +194,15 @@ def bank_overlay(
         if use_logscale:
             view_eng = ax_eng.scatter(col_eng, row_eng, c=chi2qs_eng, vmin=chi2qs_min, vmax=chi2qs_max, norm=LogNorm())
             _ = ax_cal.scatter(col_cal, row_cal, c=chi2qs_cal, vmin=chi2qs_min, vmax=chi2qs_max, norm=LogNorm())
-            view_delta = ax_delta.scatter(col_delta,
-                                          row_delta,
-                                          c=chi2qs_delta,
-                                          vmin=-delta_range,
-                                          vmax=delta_range,
-                                          norm=SymLogNorm(linthresh=abs(chi2qs_delta.min()) / 10),
-                                          cmap="bwr")
+            view_delta = ax_delta.scatter(
+                col_delta,
+                row_delta,
+                c=chi2qs_delta,
+                vmin=-delta_range,
+                vmax=delta_range,
+                norm=SymLogNorm(linthresh=abs(chi2qs_delta.min()) / 10),
+                cmap="bwr",
+            )
         else:
             view_eng = ax_eng.scatter(col_eng, row_eng, c=chi2qs_eng, vmin=chi2qs_min, vmax=chi2qs_max)
             _ = ax_cal.scatter(col_cal, row_cal, c=chi2qs_cal, vmin=chi2qs_min, vmax=chi2qs_max)
@@ -275,16 +277,17 @@ def get_plot_data(
     # compute chi2_qsample
     qsample = [pws.getPeak(i).getQSampleFrame() for i in range(pws.getNumberPeaks()) if pws.row(i)["BankName"] in banknames]
     qsample_ideal = [
-        np.array(oriented_lattice.qFromHKL(pws.getPeak(i).getIntHKL())) for i in range(pws.getNumberPeaks())
+        np.array(oriented_lattice.qFromHKL(pws.getPeak(i).getIntHKL()))
+        for i in range(pws.getNumberPeaks())
         if pws.row(i)["BankName"] in banknames
     ]
-    pltdata["chi2_qsample"] = np.array([((qs - qs0)**2 / np.linalg.norm(qs0)**2).sum() for qs, qs0 in zip(qsample, qsample_ideal)])
+    pltdata["chi2_qsample"] = np.array([((qs - qs0) ** 2 / np.linalg.norm(qs0) ** 2).sum() for qs, qs0 in zip(qsample, qsample_ideal)])
     # compute chi2_dspacing
     dspacing = [pws.getPeak(i).getDSpacing() for i in range(pws.getNumberPeaks()) if pws.row(i)["BankName"] in banknames]
     dspacing_ideal = [
         oriented_lattice.d(pws.getPeak(i).getIntHKL()) for i in range(pws.getNumberPeaks()) if pws.row(i)["BankName"] in banknames
     ]
-    pltdata["chi2_dspacing"] = np.array([(d / d0 - 1)**2 for d, d0 in zip(dspacing, dspacing_ideal)])
+    pltdata["chi2_dspacing"] = np.array([(d / d0 - 1) ** 2 for d, d0 in zip(dspacing, dspacing_ideal)])
     return pltdata
 
 
@@ -371,7 +374,7 @@ def SCDCalibratePanels2PanelDiagnosticsPlot(
     elif mode.lower() == "overlay":
         if generate_report:
             logging.warning("Requested report, use PDF as output format.")
-            config['type'] = 'pdf'
+            config["type"] = "pdf"
         logging.info("Mode -> overlay chi2 on bank")
         bank_overlay(
             pltdata_eng=pltdata_eng,

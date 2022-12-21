@@ -14,9 +14,17 @@ from typing import List, Optional, Union
 # imports from Mantid
 from mantid.api import AnalysisDataService, mtd, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace,
-                              Integration, LoadEventNexus, LoadNexusProcessed, RenameWorkspace,
-                              UnGroupWorkspace)
+from mantid.simpleapi import (
+    ApplyCalibration,
+    CloneWorkspace,
+    CreateEmptyTableWorkspace,
+    Integration,
+    LoadEventNexus,
+    LoadNexusProcessed,
+    RenameWorkspace,
+    UnGroupWorkspace,
+)
+
 try:
     from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
     from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -26,11 +34,10 @@ from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
 # Functions exposed to the general user (public) API
-__all__ = ['apply_calibration', 'preprocess_banks', 'load_banks', 'calibrate_tube']
+__all__ = ["apply_calibration", "preprocess_banks", "load_banks", "calibrate_tube"]
 
 # Type aliases
-InputTable = Union[
-    str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
+InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 WorkspaceGroupTypes = Union[str, WorkspaceGroup]
 
@@ -41,7 +48,7 @@ WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
 WIRE_GAP_IN_PIXELS = 15  # in pixels, distance between wire shadows along the tube direction (y_lab)
 
 
-def wire_positions(units: str = 'pixels') -> np.ndarray:
+def wire_positions(units: str = "pixels") -> np.ndarray:
     r"""
     Vertical positions of the standar set of 16 wires. It's assumed that the center of the 16 wires
     coincides with the center of a tube.
@@ -51,12 +58,12 @@ def wire_positions(units: str = 'pixels') -> np.ndarray:
 
     :raises: AssertionError when incorrect units are passed
     """
-    units_valid = ('meters', 'pixels')
-    assert units in units_valid, f'units {units} must be one of {units_valid}'
+    units_valid = ("meters", "pixels")
+    assert units in units_valid, f"units {units} must be one of {units_valid}"
     wire_gap = (2 * 25.4 + 2) / 1000  # gap along the Y-coordinate between consecutive wire centers
     # the center of the 16 wires is aligned with the center of the tube, set to Y == 0
     wire_meters_positions = np.arange(-7.5 * wire_gap, 8.5 * wire_gap, wire_gap)
-    if units == 'meters':
+    if units == "meters":
         return wire_meters_positions
     wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_meters_positions + PIXELS_PER_TUBE / 2
     return wire_pixel_positions
@@ -69,10 +76,10 @@ def bank_numbers(bank_selection: str) -> List[str]:
     :param bank_selection: selection string, such as '10,12-15,17-21'
     """
     banks = list()  # list of bank numbers, as string
-    ranges = [r.strip() for r in bank_selection.split(',')]  # split by comma
+    ranges = [r.strip() for r in bank_selection.split(",")]  # split by comma
     for r in ranges:
-        if '-' in r:
-            start, end = [int(n.strip()) for n in r.split('-')]
+        if "-" in r:
+            start, end = [int(n.strip()) for n in r.split("-")]
             banks.extend(list(range(start, end + 1)))
         else:
             banks.append(int(r))
@@ -117,8 +124,8 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
         if len(_idx) > 0:
             # This is mostly bypassing the non-realistic testing workspace
             # which has zero values in most tubes
-            _sig_tmp[:_idx[0]] = 1
-            _sig_tmp[_idx[-1]:] = 1
+            _sig_tmp[: _idx[0]] = 1
+            _sig_tmp[_idx[-1] :] = 1
         _base = np.average(gaussian_filter(signal1D, int(pixels_per_tube / 2)))
         return _base - _sig_tmp
 
@@ -144,19 +151,18 @@ def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str)
     """
     # Resolve the input run
     if isinstance(run, int):
-        file_descriptor = f'CORELLI_{run}'
+        file_descriptor = f"CORELLI_{run}"
     else:  # a run number given as a string, or the path to a file
         try:
-            file_descriptor = f'CORELLI_{str(int(run))}'
+            file_descriptor = f"CORELLI_{str(int(run))}"
         except ValueError:  # run is path to a file
             filename = run
-            assert path.exists(filename), f'File {filename} does not exist'
+            assert path.exists(filename), f"File {filename} does not exist"
             file_descriptor = filename
 
-    bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
+    bank_names = ",".join(["bank" + b for b in bank_numbers(bank_selection)])
     try:
-        LoadEventNexus(Filename=file_descriptor, OutputWorkspace=output_workspace,
-                       BankName=bank_names, LoadMonitors=False, LoadLogs=True)
+        LoadEventNexus(Filename=file_descriptor, OutputWorkspace=output_workspace, BankName=bank_names, LoadMonitors=False, LoadLogs=True)
     except (RuntimeError, ValueError):
         LoadNexusProcessed(Filename=file_descriptor, OutputWorkspace=output_workspace)
     Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
@@ -182,8 +188,8 @@ def trim_calibration_table(input_workspace: InputTable, output_workspace: Option
 
     # create the (empty) trimmed table
     table_trimmed = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
-    table_trimmed.addColumn(type='int', name='Detector ID')
-    table_trimmed.addColumn(type='double', name='Detector Y Coordinate')
+    table_trimmed.addColumn(type="int", name="Detector ID")
+    table_trimmed.addColumn(type="double", name="Detector Y Coordinate")
 
     # fill the rows of the trimmed table
     for detector_id, y_coordinate in zip(detector_ids, y_coordinates):
@@ -192,9 +198,9 @@ def trim_calibration_table(input_workspace: InputTable, output_workspace: Option
     return table_trimmed
 
 
-def calculate_peak_y_table(peak_table: InputTable,
-                           parameters_table_group: WorkspaceGroupTypes,
-                           output_workspace: str = 'PeakYTable') -> TableWorkspace:
+def calculate_peak_y_table(
+    peak_table: InputTable, parameters_table_group: WorkspaceGroupTypes, output_workspace: str = "PeakYTable"
+) -> TableWorkspace:
     r"""
     Evaluate the Y-coordinate of each wire shadow given the estimated pixel positions of the
     shadows and the polynomial function translating pixel positions to y-coordinate
@@ -214,7 +220,7 @@ def calculate_peak_y_table(peak_table: InputTable,
     #   Append row to PeakYTable, see tube_calib.getCalibration
     # Return the handle to PeakYTable
     peak_workspace, parameters_workspace = mtd[str(peak_table)], mtd[str(parameters_table_group)]
-    error_message = 'number of rows in peak_table different than number of tables in parameters_table_group'
+    error_message = "number of rows in peak_table different than number of tables in parameters_table_group"
     assert peak_workspace.rowCount() == parameters_workspace.getNumberOfEntries(), error_message
 
     # Create empty peak_y_table with same column names as those of peak_table
@@ -233,14 +239,16 @@ def calculate_peak_y_table(peak_table: InputTable,
     return peak_y_workspace
 
 
-def calibrate_tube(workspace: WorkspaceTypes,
-                   tube_name: str,
-                   output_peak_table: str = 'PeakTable',
-                   output_parameters_table: str = 'ParametersTable',
-                   output_peak_y_table: str = 'PeakYTable',
-                   shadow_height: float = 1000,
-                   shadow_width: float = 4,
-                   fit_domain: float = 7) -> TableWorkspace:
+def calibrate_tube(
+    workspace: WorkspaceTypes,
+    tube_name: str,
+    output_peak_table: str = "PeakTable",
+    output_parameters_table: str = "ParametersTable",
+    output_peak_y_table: str = "PeakYTable",
+    shadow_height: float = 1000,
+    shadow_width: float = 4,
+    fit_domain: float = 7,
+) -> TableWorkspace:
     r"""
     Calibration table for one tube of CORELLI
 
@@ -261,41 +269,48 @@ def calibrate_tube(workspace: WorkspaceTypes,
         is about twice the shadow width
     :return: table containing detector ID and position vector
     """
-    message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
+    message = f"Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle"
     assert isinstance(workspace, (str, Workspace2D)), message
-    assert shadow_height > 0, 'shadow height must be positive'
-    for marker in ('bank', 'sixteenpack', 'tube'):
-        assert marker in tube_name, f'{tube_name} does not uniquely specify one tube'
+    assert shadow_height > 0, "shadow height must be positive"
+    for marker in ("bank", "sixteenpack", "tube"):
+        assert marker in tube_name, f"{tube_name} does not uniquely specify one tube"
     peak_height, peak_width = -shadow_height, shadow_width
     # Initial guess for the peak positions, assuming:
     # - the center of the the wire mesh coincides with the center ot the tube_calib_fit_params
     # - wires cast a shadow on a perfectly calibrated tube
     fit_extent = (fit_domain / PIXELS_PER_TUBE) * TUBE_LENGTH  # fit domain in meters
-    assert fit_extent < WIRE_GAP, 'The fit domain cannot be larger than the distance between consecutive wires'
-    wire_pixel_positions = wire_positions(units='pixels')[1: -1]
+    assert fit_extent < WIRE_GAP, "The fit domain cannot be larger than the distance between consecutive wires"
+    wire_pixel_positions = wire_positions(units="pixels")[1:-1]
     fit_par = TubeCalibFitParams(wire_pixel_positions, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
     # Generate the calibration table, the peak table, and the parameters table
     peaks_form = [1] * len(wire_pixel_positions)  # signals we'll be fitting dips (peaks with negative heights)
-    calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions(units='meters')[1: -1], peaks_form,
-                                          fitPar=fit_par, outputPeak=True,
-                                          parameters_table_group='ParametersTableGroup')
+    calibration_table, _ = tube.calibrate(
+        workspace,
+        tube_name,
+        wire_positions(units="meters")[1:-1],
+        peaks_form,
+        fitPar=fit_par,
+        outputPeak=True,
+        parameters_table_group="ParametersTableGroup",
+    )
     calibration_table = trim_calibration_table(calibration_table)  # discard X and Z coordinates
 
     # Additional workspaces
     # Table with shadow positions along the tube, in pixel units
-    if output_peak_table != 'PeakTable':  # 'PeakTable' is output by tube.calibrate
-        RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=output_peak_table)
+    if output_peak_table != "PeakTable":  # 'PeakTable' is output by tube.calibrate
+        RenameWorkspace(InputWorkspace="PeakTable", OutputWorkspace=output_peak_table)
     # Table with shadow positions along the vertical axis
-    calculate_peak_y_table(output_peak_table, 'ParametersTableGroup', output_workspace=output_peak_y_table)
+    calculate_peak_y_table(output_peak_table, "ParametersTableGroup", output_workspace=output_peak_y_table)
     # Table with optimized parameters for the polynomial coefficients A0, A1, A2, and chi-square
-    RenameWorkspace(InputWorkspace=mtd['ParametersTableGroup'].getItem(0), OutputWorkspace=output_parameters_table)
-    UnGroupWorkspace(InputWorkspace='ParametersTableGroup')
+    RenameWorkspace(InputWorkspace=mtd["ParametersTableGroup"].getItem(0), OutputWorkspace=output_parameters_table)
+    UnGroupWorkspace(InputWorkspace="ParametersTableGroup")
     return calibration_table
 
 
-def apply_calibration(workspace: WorkspaceTypes, calibration_table: InputTable,
-                      output_workspace: Optional[str] = None, show_instrument: bool = False) -> Workspace2D:
+def apply_calibration(
+    workspace: WorkspaceTypes, calibration_table: InputTable, output_workspace: Optional[str] = None, show_instrument: bool = False
+) -> Workspace2D:
     r"""
     Calibrate the detector positions with an input table, and open the instrument view if so requested.
 
@@ -308,10 +323,10 @@ def apply_calibration(workspace: WorkspaceTypes, calibration_table: InputTable,
 
     :raises AssertionError: either `workspace` or `calibration_table` are not found
     """
-    assert AnalysisDataService.doesExist(str(workspace)), f'No worksapce {str(workspace)} found'
-    assert AnalysisDataService.doesExist(str(calibration_table)), f'No table {str(calibration_table)} found'
+    assert AnalysisDataService.doesExist(str(workspace)), f"No worksapce {str(workspace)} found"
+    assert AnalysisDataService.doesExist(str(calibration_table)), f"No table {str(calibration_table)} found"
     if output_workspace is None:
-        output_workspace = str(workspace) + '_calibrated'
+        output_workspace = str(workspace) + "_calibrated"
 
     CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=output_workspace)
     ApplyCalibration(Workspace=output_workspace, CalibrationTable=calibration_table)

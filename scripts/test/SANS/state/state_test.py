@@ -6,21 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (SANSInstrument, SANSFacility)
-from sans.state.StateObjects.StateAdjustment import (StateAdjustment)
-from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission)
-from sans.state.StateObjects.StateConvertToQ import (StateConvertToQ)
-from sans.state.StateObjects.StateData import (StateData)
-from sans.state.StateObjects.StateMaskDetectors import (StateMask)
-from sans.state.StateObjects.StateMoveDetectors import (StateMove)
-from sans.state.StateObjects.StateNormalizeToMonitor import (StateNormalizeToMonitor)
-from sans.state.StateObjects.StateReductionMode import (StateReductionMode)
-from sans.state.StateObjects.StateSave import (StateSave)
-from sans.state.StateObjects.StateScale import (StateScale)
-from sans.state.StateObjects.StateSliceEvent import (StateSliceEvent)
-from sans.state.AllStates import (AllStates)
-from sans.state.StateObjects.StateWavelength import (StateWavelength)
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import (StateWavelengthAndPixelAdjustment)
+from sans.common.enums import SANSInstrument, SANSFacility
+from sans.state.StateObjects.StateAdjustment import StateAdjustment
+from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
+from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from sans.state.StateObjects.StateData import StateData
+from sans.state.StateObjects.StateMaskDetectors import StateMask
+from sans.state.StateObjects.StateMoveDetectors import StateMove
+from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
+from sans.state.StateObjects.StateSave import StateSave
+from sans.state.StateObjects.StateScale import StateScale
+from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from sans.state.AllStates import AllStates
+from sans.state.StateObjects.StateWavelength import StateWavelength
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -101,10 +101,18 @@ class StateTest(unittest.TestCase):
     @staticmethod
     def _get_state(entries):
         state = AllStates()
-        default_entries = {"data": MockStateData(), "move": MockStateMove(), "reduction": MockStateReduction(),
-                           "slice": MockStateSliceEvent(), "mask": MockStateMask(), "wavelength": MockStateWavelength(),
-                           "save": MockStateSave(), "scale": MockStateScale(), "adjustment": MockStateAdjustment(),
-                           "convert_to_q": MockStateConvertToQ()}
+        default_entries = {
+            "data": MockStateData(),
+            "move": MockStateMove(),
+            "reduction": MockStateReduction(),
+            "slice": MockStateSliceEvent(),
+            "mask": MockStateMask(),
+            "wavelength": MockStateWavelength(),
+            "save": MockStateSave(),
+            "scale": MockStateScale(),
+            "adjustment": MockStateAdjustment(),
+            "convert_to_q": MockStateConvertToQ(),
+        }
         default_entries["data"].instrument = SANSInstrument.LARMOR
         default_entries["data"].facility = SANSFacility.ISIS
 
@@ -126,5 +134,5 @@ class StateTest(unittest.TestCase):
         self.assertIsNone(state.validate())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

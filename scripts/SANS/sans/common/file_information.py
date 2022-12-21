@@ -11,12 +11,12 @@
 import os
 import h5py as h5
 import re
-from abc import (ABCMeta, abstractmethod)
+from abc import ABCMeta, abstractmethod
 from mantid.api import FileFinder
-from mantid.kernel import (DateAndTime, ConfigService, Logger)
-from mantid.api import (AlgorithmManager, ExperimentInfo)
-from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
+from mantid.kernel import DateAndTime, ConfigService, Logger
+from mantid.api import AlgorithmManager, ExperimentInfo
+from sans.common.enums import SANSInstrument, FileType, SampleShape
+from sans.common.general_functions import get_instrument, instrument_name_correction, get_facility
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
@@ -48,7 +48,7 @@ VALUE = "value"
 WORKSPACE_NAME = "workspace_name"
 END_TIME = "r_endtime"
 END_DATE = "r_enddate"
-MANTID_WORKSPACE_PREFIX = 'mantid_workspace_'
+MANTID_WORKSPACE_PREFIX = "mantid_workspace_"
 EVENT_WORKSPACE = "event_workspace"
 
 # Other
@@ -60,18 +60,18 @@ SAMPLE = "sample"
 WIDTH = "width"
 HEIGHT = "height"
 THICKNESS = "thickness"
-SHAPE = 'shape'
+SHAPE = "shape"
 CYLINDER = "CYLINDER"
 FLAT_PLATE = "FLAT PLATE"
 DISC = "DISC"
-GEOM_HEIGHT = 'geom_height'
-GEOM_WIDTH = 'geom_width'
-GEOM_THICKNESS = 'geom_thickness'
-GEOM_ID = 'geom_id'
-E_HEIGHT = 'e_height'
-E_WIDTH = 'e_width'
-E_THICK = 'e_thick'
-E_GEOM = 'e_geom'
+GEOM_HEIGHT = "geom_height"
+GEOM_WIDTH = "geom_width"
+GEOM_THICKNESS = "geom_thickness"
+GEOM_ID = "geom_id"
+E_HEIGHT = "e_height"
+E_WIDTH = "e_width"
+E_THICK = "e_thick"
+E_GEOM = "e_geom"
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -97,8 +97,8 @@ def find_sans_file(file_name):
     :return: the full path.
     """
     full_path = find_full_file_path(file_name)
-    if not full_path and not file_name.endswith('.nxs'):
-        full_path = find_full_file_path(file_name + '.nxs')
+    if not full_path and not file_name.endswith(".nxs"):
+        full_path = find_full_file_path(file_name + ".nxs")
     if not full_path:
         # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
         #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
@@ -108,8 +108,10 @@ def find_sans_file(file_name):
             full_path = runs[0]
 
     if not full_path:
-        error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
-                        "the relevant paths are added and the correct instrument is selected."
+        error_message = (
+            "Trying to find the SANS file {0}, but cannot find it. Make sure that "
+            "the relevant paths are added and the correct instrument is selected."
+        )
         raise RuntimeError(error_message.format(file_name))
     return full_path
 
@@ -126,8 +128,7 @@ def get_extension_for_file_type(file_info):
     elif file_info.get_type() is FileType.ISIS_RAW:
         extension = RAW_EXTENSION
     else:
-        raise RuntimeError("The file extension type for a file of type {0} is unknown"
-                           "".format(str(file_info.get_type())))
+        raise RuntimeError("The file extension type for a file of type {0} is unknown" "".format(str(file_info.get_type())))
     return extension
 
 
@@ -243,8 +244,7 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     idf_path = os.path.normpath(idf_path)
 
     if not os.path.exists(idf_path):
-        raise RuntimeError("SANSFileInformation: The instrument definition file {0} does not seem to "
-                           "exist.".format(str(idf_path)))
+        raise RuntimeError("SANSFileInformation: The instrument definition file {0} does not seem to " "exist.".format(str(idf_path)))
 
     # Get the ipf path. This is slightly more complicated. See the Mantid documentation for the naming rules. Currently
     # they are:
@@ -263,8 +263,10 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
     if ipf_rule2:
         return idf_path, ipf_rule2
 
-    raise RuntimeError("SANSFileInformation: There does not seem to be a corresponding instrument parameter file "
-                       "available for {0}".format(str(idf_path)))
+    raise RuntimeError(
+        "SANSFileInformation: There does not seem to be a corresponding instrument parameter file "
+        "available for {0}".format(str(idf_path))
+    )
 
 
 def convert_to_shape(shape_flag):
@@ -296,7 +298,7 @@ def get_isis_nexus_info(file_name):
     :return: if the file was a Nexus file and the number of periods.
     """
     try:
-        with h5.File(file_name, 'r') as h5_file:
+        with h5.File(file_name, "r") as h5_file:
             keys = list(h5_file.keys())
             is_isis_nexus = RAW_DATA_1 in keys
             if is_isis_nexus:
@@ -332,7 +334,7 @@ def get_instrument_name_for_isis_nexus(file_name):
                                         |--instrument|
                                                      |--name
     """
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
@@ -353,7 +355,7 @@ def get_top_level_nexus_entry(file_name, entry_name):
     :param entry_name: the entry name
     :return:
     """
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
@@ -375,7 +377,7 @@ def is_raw_nexus_event_mode(file_name):
                                     |--some_group|
                                                  |--Attribute: NX_class = NXevent_data
     """
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
@@ -395,7 +397,7 @@ def get_geometry_information_isis_nexus(file_name):
     :param file_name:
     :return: height, width, thickness, shape
     """
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
@@ -440,11 +442,11 @@ def check_nexus_information(file_name):
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
         for key in key_collection:
-            if key.startswith('mantid_workspace_'):
+            if key.startswith("mantid_workspace_"):
                 top_level_key_collection.append(key)
         return sorted(top_level_key_collection)
 
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Get all mantid_workspace_X keys
         keys = list(h5_file.keys())
         top_level_keys = get_all_keys_for_top_level(keys)
@@ -489,8 +491,7 @@ def check_nexus_information(file_name):
         #    monitor data entry needs to have a "ADD_MONITORS_ADDED_EVENT_DATA" in the workspace name.
         # 3. Every data entry has matching monitor entry, e.g. random_name-add_added_event_data_4 needs
         #    random_name-add_monitors_added_event_data_4.s
-        if (has_same_number_of_entries(workspace_names, monitor_workspace_names)
-                and entries_match(workspace_names, monitor_workspace_names)):
+        if has_same_number_of_entries(workspace_names, monitor_workspace_names) and entries_match(workspace_names, monitor_workspace_names):
             is_added_file_event = True
             num_periods = len(workspace_names)
         else:
@@ -516,7 +517,7 @@ def check_nexus_information(file_name):
         number_of_periods = 1
         return nexus_added_tag_present, number_of_periods, is_event
 
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Get all mantid_workspace_X keys
         # Check if entries are added event data, if we don't have a hit, then it can always be
         # added histogram data
@@ -564,7 +565,7 @@ def get_geometry_information_isis_added_nexus(file_name):
     :param file_name: the file name
     :return: height, width, thickness, shape
     """
-    with h5.File(file_name, 'r') as h5_file:
+    with h5.File(file_name, "r") as h5_file:
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
@@ -638,9 +639,20 @@ def get_number_of_periods_for_raw(file_name):
 
 def get_date_for_raw(file_name):
     def get_month(month_string):
-        month_conversion = {"JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
-                            "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
-                            "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12"}
+        month_conversion = {
+            "JAN": "01",
+            "FEB": "02",
+            "MAR": "03",
+            "APR": "04",
+            "MAY": "05",
+            "JUN": "06",
+            "JUL": "07",
+            "AUG": "08",
+            "SEP": "09",
+            "OCT": "10",
+            "NOV": "11",
+            "DEC": "12",
+        }
         month_upper = month_string.upper()
         if month_upper in month_conversion:
             return month_conversion[month_upper]
@@ -648,7 +660,7 @@ def get_date_for_raw(file_name):
             raise RuntimeError("Cannot get measurement time. Invalid month in Raw file: " + month_upper)
 
     def get_raw_measurement_time(date_input, time_input):
-        year = date_input[7:(7 + 4)]
+        year = date_input[7 : (7 + 4)]
         day = date_input[0:2]
         month_string = date_input[3:6]
         month = get_month(month_string)
@@ -800,8 +812,8 @@ class SANSFileInformation(metaclass=ABCMeta):
         if not run_number:
             run_number = self._get_run_number_from_file(self._full_file_name)
             self.logger.warning(
-                "Could not parse run number from filename, using the run number direct set in the file which is {0}"
-                .format(run_number))
+                "Could not parse run number from filename, using the run number direct set in the file which is {0}".format(run_number)
+            )
 
         return int(run_number)
 
@@ -892,9 +904,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
         # Get geometry details
         height, width, thickness, shape = get_geometry_information_isis_nexus(self._full_file_name)
-        self._height = height if height is not None else 1.
-        self._width = width if width is not None else 1.
-        self._thickness = thickness if thickness is not None else 1.
+        self._height = height if height is not None else 1.0
+        self._width = width if width is not None else 1.0
+        self._thickness = thickness if thickness is not None else 1.0
         self._shape = shape if shape is not None else SampleShape.DISC
 
     def get_file_name(self):
@@ -953,9 +965,9 @@ class SANSFileInformationISISAdded(SANSFileInformation):
 
         # Get geometry details
         height, width, thickness, shape = get_geometry_information_isis_added_nexus(self._full_file_name)
-        self._height = height if height is not None else 1.
-        self._width = width if width is not None else 1.
-        self._thickness = thickness if thickness is not None else 1.
+        self._height = height if height is not None else 1.0
+        self._width = width if width is not None else 1.0
+        self._thickness = thickness if thickness is not None else 1.0
         self._shape = shape if shape is not None else SampleShape.DISC
 
     def get_file_name(self):
@@ -1000,7 +1012,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
 
     @staticmethod
     def _get_date_and_run_number_added_nexus(file_name):
-        with h5.File(file_name, 'r') as h5_file:
+        with h5.File(file_name, "r") as h5_file:
             keys = list(h5_file.keys())
             first_entry = h5_file[keys[0]]
             logs = first_entry["logs"]
@@ -1032,9 +1044,9 @@ class SANSFileInformationRaw(SANSFileInformation):
         # Set geometry
         # Raw files don't have the sample information, so set to default
         height, width, thickness, shape = get_geometry_information_raw(self._full_file_name)
-        self._height = height if height is not None else 1.
-        self._width = width if width is not None else 1.
-        self._thickness = thickness if thickness is not None else 1.
+        self._height = height if height is not None else 1.0
+        self._width = width if width is not None else 1.0
+        self._thickness = thickness if thickness is not None else 1.0
         self._shape = shape if shape is not None else SampleShape.DISC
 
     def get_file_name(self):

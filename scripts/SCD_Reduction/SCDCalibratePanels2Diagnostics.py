@@ -48,7 +48,7 @@ def plot_bank_modern(
     hist_calculated_col.set_ylabel("npeaks")
     hist_calculated_col.set_title(f"{bankname}: Column")
     scatter_col = fig.add_subplot(gs[1:, 0:6])  # scatter1
-    scatter_col.grid(color='k', linestyle='--', alpha=0.25)
+    scatter_col.grid(color="k", linestyle="--", alpha=0.25)
     scatter_col.set_xlabel("calculated column number")
     scatter_col.set_ylabel("observed column number")
     # -- row combo plot
@@ -60,31 +60,31 @@ def plot_bank_modern(
     hist_calculated_row.set_ylabel("npeaks")
     hist_calculated_row.set_title(f"{bankname}: Row")
     scatter_row = fig.add_subplot(gs[1:, 8:14])  # scatter2
-    scatter_row.grid(color='k', linestyle='--', alpha=0.25)
+    scatter_row.grid(color="k", linestyle="--", alpha=0.25)
     scatter_row.set_xlabel("calculated row number")
     scatter_row.set_ylabel("observed row number")
     # ----- PLOT DATA -----
     # -- plot col
     max_coln = max(colsID_observed.max(), colsID_calculated.max())
     scatter_col.plot([0, max_coln], [0, max_coln], "k:", alpha=0.5)
-    scatter_col.plot(colsID_calculated, colsID_observed, 'r+')
+    scatter_col.plot(colsID_calculated, colsID_observed, "r+")
     scatter_col.set_xlim([-5, colsID_calculated.max() + 5])
     scatter_col.set_ylim([-5, colsID_observed.max() + 5])
     scatter_col.text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=scatter_col.transAxes)
-    hist_calculated_col.hist(colsID_calculated, bins=1 + int(colsID_calculated.max()), color='red')
+    hist_calculated_col.hist(colsID_calculated, bins=1 + int(colsID_calculated.max()), color="red")
     hist_calculated_col.set_xlim([-5, colsID_calculated.max() + 5])
-    hist_observed_col.hist(colsID_observed, bins=1 + int(colsID_observed.max()), color='red', orientation="horizontal")
+    hist_observed_col.hist(colsID_observed, bins=1 + int(colsID_observed.max()), color="red", orientation="horizontal")
     hist_observed_col.set_ylim([-5, colsID_observed.max() + 5])
     # -- plot row
     max_rown = max(rowsID_observed.max(), rowsID_calculated.max())
     scatter_row.plot([0, max_rown], [0, max_rown], "k:", alpha=0.5)
-    scatter_row.plot(rowsID_calculated, rowsID_observed, 'b+')
+    scatter_row.plot(rowsID_calculated, rowsID_observed, "b+")
     scatter_row.set_xlim([-5, rowsID_calculated.max() + 5])
     scatter_row.set_ylim([-5, rowsID_observed.max() + 5])
     scatter_row.text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=scatter_row.transAxes)
-    hist_calculated_row.hist(rowsID_calculated, bins=int(rowsID_calculated.max()), color='blue')
+    hist_calculated_row.hist(rowsID_calculated, bins=int(rowsID_calculated.max()), color="blue")
     hist_calculated_row.set_xlim([-5, rowsID_calculated.max() + 5])
-    hist_observed_row.hist(rowsID_observed, bins=int(rowsID_observed.max()), color='blue', orientation="horizontal")
+    hist_observed_row.hist(rowsID_observed, bins=int(rowsID_observed.max()), color="blue", orientation="horizontal")
     hist_observed_row.set_ylim([-5, rowsID_observed.max() + 5])
 
     return fig
@@ -117,29 +117,29 @@ def plot_bank_legacy(
     max_rown = max(rowsID_observed.max(), rowsID_calculated.max())
     axes[0].plot([0, max_rown], [0, max_rown], "b:", alpha=0.5)
     # -- plot the data
-    axes[0].plot(rowsID_calculated, rowsID_observed, 'r+')
+    axes[0].plot(rowsID_calculated, rowsID_observed, "r+")
     # -- config grid
-    axes[0].grid(color='k', linestyle='--', alpha=0.25)
+    axes[0].grid(color="k", linestyle="--", alpha=0.25)
     # -- config axes
     axes[0].set_xlabel("calculated row number")
     axes[0].set_ylabel("observed row number")
     axes[0].set_title(f"Detector Row Number Comparison, {bankname}")
     axes[0].text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=axes[0].transAxes)
-    axes[0].set_aspect(aspect='equal')
+    axes[0].set_aspect(aspect="equal")
     # plot row cmp
     # -- plot the diagnal helper line
     max_coln = max(colsID_observed.max(), colsID_calculated.max())
     axes[1].plot([0, max_coln], [0, max_coln], "b:", alpha=0.5)
     # -- plot the data
-    axes[1].plot(colsID_calculated, colsID_observed, 'r+')
+    axes[1].plot(colsID_calculated, colsID_observed, "r+")
     # -- config grid
-    axes[1].grid(color='k', linestyle='--', alpha=0.25)
+    axes[1].grid(color="k", linestyle="--", alpha=0.25)
     # -- config axes
     axes[1].set_xlabel("calculated column number")
     axes[1].set_ylabel("observed column number")
     axes[1].set_title(f"Detector Column Number Comparison, {bankname}")
     axes[1].text(0.5, 0.2, f"Number of Peaks = {npeaks}", transform=axes[1].transAxes)
-    axes[1].set_aspect(aspect='equal')
+    axes[1].set_aspect(aspect="equal")
 
     return fig
 
@@ -149,7 +149,7 @@ def SCDCalibratePanels2DiagnosticsPlotBank(
     figname: str,
     savedir: str,
     showPlots: bool,
-    mode: str = 'modern',
+    mode: str = "modern",
 ) -> None:
     """
     Generate correlation plot of observed-calculated col&row ID
@@ -271,9 +271,9 @@ def SCDCalibratePanels2DiagnosticsPlot(
         logging.info(f"--processing bank: {bn}")
         pws_filtered = FilterPeaks(
             InputWorkspace=pws,
-            FilterVariable='h^2+k^2+l^2',
+            FilterVariable="h^2+k^2+l^2",
             FilterValue=0,
-            Operator='>',
+            Operator=">",
             BankName=bn,
         )
         # generate the plot

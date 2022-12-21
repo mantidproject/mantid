@@ -9,7 +9,7 @@
 
 class FloatRange(object):
     start = None  # : float
-    end= None  #: float
+    end = None  #: float
 
     def __init__(self, start, end):
         self.start = start
@@ -18,6 +18,5 @@ class FloatRange(object):
     def __eq__(self, other):
         # Ensures a range_entry != FloatRange
         if isinstance(other, FloatRange):
-            return self.start == other.start and \
-                   self.end == other.end
+            return self.start == other.start and self.end == other.end
         return False

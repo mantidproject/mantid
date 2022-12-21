@@ -91,11 +91,11 @@ class IStateParser(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_state_slice_event(self)  -> StateSliceEvent:
+    def get_state_slice_event(self) -> StateSliceEvent:
         pass
 
     @abstractmethod
-    def get_state_wavelength(self)  -> StateWavelength:
+    def get_state_wavelength(self) -> StateWavelength:
         pass
 
     @abstractmethod

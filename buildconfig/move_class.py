@@ -99,7 +99,12 @@ if __name__ == "__main__":
     parser.add_argument("newproject", metavar="NEWPROJECT", type=str, help="Name of the project to which to move the class.")
     parser.add_argument("newclassname", metavar="NEWCLASSNAME", type=str, help="Name of the new class.")
     parser.add_argument(
-        "--force", dest="force", action="store_const", const=True, default=False, help="Force overwriting existing files. Use with caution!"
+        "--force",
+        dest="force",
+        action="store_const",
+        const=True,
+        default=False,
+        help="Force overwriting existing files. Use with caution!",
     )
     parser.add_argument(
         "--no-vcs",

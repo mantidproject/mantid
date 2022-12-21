@@ -47,7 +47,7 @@ class ReductionOptions(BaseOptions):
 
     # Normalize to beam monitor
     use_beam_monitor = False
-    beam_monitor_reference = ''
+    beam_monitor_reference = ""
 
     def __init__(self):
         super(ReductionOptions, self).__init__()
@@ -77,11 +77,11 @@ class ReductionOptions(BaseOptions):
         self.n_wedges = ReductionOptions.n_wedges
         self.align_log_with_decades = ReductionOptions.align_log_with_decades
         self.use_beam_monitor = False
-        self.beam_monitor_reference = ''
+        self.beam_monitor_reference = ""
 
     def options(self):
         """
-            Set up the reduction options
+        Set up the reduction options
         """
         # Load options
         script = ""
@@ -111,7 +111,7 @@ class ReductionOptions(BaseOptions):
         if self.dark_current_corr:
             script += "  DarkCurrentFile='%s',\n" % self.dark_current_data
 
-        if self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
+        if self.normalization == ReductionOptions.NORMALIZATION_MONITOR:
             if self.use_beam_monitor:
                 script += "  Normalisation='Monitor',\n"
                 script += "  MonitorReferenceFile='%s',\n" % self.beam_monitor_reference
@@ -122,21 +122,21 @@ class ReductionOptions(BaseOptions):
 
     def _normalization_options(self):
         """
-            Generate the normalization portion of the reduction script
+        Generate the normalization portion of the reduction script
         """
-        if self.normalization==ReductionOptions.NORMALIZATION_NONE:
+        if self.normalization == ReductionOptions.NORMALIZATION_NONE:
             return "NoNormalization()\n"
-        elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
+        elif self.normalization == ReductionOptions.NORMALIZATION_MONITOR:
             if self.use_beam_monitor:
-                return "BeamMonitorNormalization(\"%s\")\n" % self.beam_monitor_reference
+                return 'BeamMonitorNormalization("%s")\n' % self.beam_monitor_reference
             else:
                 return "TotalChargeNormalization()\n"
         return ""
 
     def to_script(self):
         """
-            Generate reduction script
-            @param execute: if true, the script will be executed
+        Generate reduction script
+        @param execute: if true, the script will be executed
         """
         script = super(ReductionOptions, self).to_script()
 
@@ -145,7 +145,7 @@ class ReductionOptions(BaseOptions):
             script += "UseConfigTOFTailsCutoff(True)\n"
         else:
             script += "UseConfigTOFTailsCutoff(False)\n"
-            if self.low_TOF_cut>0 or self.high_TOF_cut>0:
+            if self.low_TOF_cut > 0 or self.high_TOF_cut > 0:
                 script += "SetTOFTailsCutoff(%g, %g)\n" % (self.low_TOF_cut, self.high_TOF_cut)
 
         # Use mask defined in configuration file
@@ -165,7 +165,7 @@ class ReductionOptions(BaseOptions):
 
     def to_xml(self):
         """
-            Create XML from the current data.
+        Create XML from the current data.
         """
         xml_out = super(ReductionOptions, self).to_xml()
 
@@ -194,8 +194,8 @@ class ReductionOptions(BaseOptions):
 
     def from_xml(self, xml_str):
         """
-            Read in data from XML
-            @param xml_str: text to read the data from
+        Read in data from XML
+        @param xml_str: text to read the data from
         """
         self.reset()
         super(ReductionOptions, self).from_xml(xml_str)
@@ -203,71 +203,70 @@ class ReductionOptions(BaseOptions):
         dom = xml.dom.minidom.parseString(xml_str)
 
         instrument_dom = dom.getElementsByTagName("Instrument")[0]
-        self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
-                                                                 default=ReductionOptions.default_detector_offset)
+        self.detector_offset = BaseScriptElement.getFloatElement(
+            instrument_dom, "detector_offset", default=ReductionOptions.default_detector_offset
+        )
 
         # TOF cutoff and correction
         element_list = dom.getElementsByTagName("TOFcorr")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             tof_dom = element_list[0]
 
-            self.use_config_cutoff = BaseScriptElement.getBoolElement(tof_dom, "use_config_cutoff",
-                                                                      default = ReductionOptions.use_config_cutoff)
-            self.correct_for_flight_path = BaseScriptElement.getBoolElement(tof_dom, "perform_flight_path_corr",
-                                                                            default = ReductionOptions.correct_for_flight_path)
-            self.low_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "low_tof_cut",
-                                                                 default=ReductionOptions.low_TOF_cut)
-            self.high_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "high_tof_cut",
-                                                                  default=ReductionOptions.high_TOF_cut)
+            self.use_config_cutoff = BaseScriptElement.getBoolElement(
+                tof_dom, "use_config_cutoff", default=ReductionOptions.use_config_cutoff
+            )
+            self.correct_for_flight_path = BaseScriptElement.getBoolElement(
+                tof_dom, "perform_flight_path_corr", default=ReductionOptions.correct_for_flight_path
+            )
+            self.low_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "low_tof_cut", default=ReductionOptions.low_TOF_cut)
+            self.high_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "high_tof_cut", default=ReductionOptions.high_TOF_cut)
 
         # Mask
-        self.use_config_mask = BaseScriptElement.getBoolElement(dom, "UseConfigMask",
-                                                                default = ReductionOptions.use_config_mask)
+        self.use_config_mask = BaseScriptElement.getBoolElement(dom, "UseConfigMask", default=ReductionOptions.use_config_mask)
 
         # Resolution
-        self.compute_resolution = BaseScriptElement.getBoolElement(dom, "ComputeResolution",
-                                                                   default = ReductionOptions.compute_resolution)
-        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",
-                                                                          default = ReductionOptions.sample_aperture_diameter)
+        self.compute_resolution = BaseScriptElement.getBoolElement(dom, "ComputeResolution", default=ReductionOptions.compute_resolution)
+        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(
+            dom, "SampleApertureDiameter", default=ReductionOptions.sample_aperture_diameter
+        )
 
         # TOF correction
-        self.perform_TOF_correction = BaseScriptElement.getBoolElement(dom, "PerformTOFCorrection",
-                                                                       default = ReductionOptions.perform_TOF_correction)
+        self.perform_TOF_correction = BaseScriptElement.getBoolElement(
+            dom, "PerformTOFCorrection", default=ReductionOptions.perform_TOF_correction
+        )
         # Normalization option
-        self.use_beam_monitor = BaseScriptElement.getBoolElement(dom, "UseBeamMonitor",
-                                                                 default = ReductionOptions.use_beam_monitor)
-        self.beam_monitor_reference = BaseScriptElement.getStringElement(dom, "BeamMonitorRef",
-                                                                         default = ReductionOptions.beam_monitor_reference)
+        self.use_beam_monitor = BaseScriptElement.getBoolElement(dom, "UseBeamMonitor", default=ReductionOptions.use_beam_monitor)
+        self.beam_monitor_reference = BaseScriptElement.getStringElement(
+            dom, "BeamMonitorRef", default=ReductionOptions.beam_monitor_reference
+        )
 
     def from_setup_info(self, xml_str):
         """
-            Read in data from XML using the string representation of the setup algorithm used
-            to prepare the reduction properties.
-            @param xml_str: text to read the data from
+        Read in data from XML using the string representation of the setup algorithm used
+        to prepare the reduction properties.
+        @param xml_str: text to read the data from
         """
         self.reset()
         super(ReductionOptions, self).from_setup_info(xml_str)
 
         (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
         self.detector_offset = BaseScriptElement.getPropertyValue(
-            alg, "SampleDetectorDistanceOffset", default=ReductionOptions.default_detector_offset)
-        self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts",
-                                                                    default=ReductionOptions.use_config_cutoff)
-        self.correct_for_flight_path = BaseScriptElement.getPropertyValue(alg, "CorrectForFlightPath",
-                                                                          default=ReductionOptions.correct_for_flight_path)
-        self.low_TOF_cut = BaseScriptElement.getPropertyValue(alg, "LowTOFCut",
-                                                              default=ReductionOptions.low_TOF_cut)
-        self.high_TOF_cut = BaseScriptElement.getPropertyValue(alg, "HighTOFCut",
-                                                               default=ReductionOptions.high_TOF_cut)
-        self.use_config_mask = BaseScriptElement.getPropertyValue(alg, "UseConfigMask",
-                                                                  default=ReductionOptions.use_config_mask)
-        self.compute_resolution = BaseScriptElement.getPropertyValue(alg, "ComputeResolution",
-                                                                     default=ReductionOptions.compute_resolution)
-        self.sample_aperture_diameter = BaseScriptElement.getPropertyValue(alg, "SampleApertureDiameter",
-                                                                           default=ReductionOptions.sample_aperture_diameter)
-        self.perform_TOF_correction = not BaseScriptElement.getPropertyValue(alg, "SkipTOFCorrection",
-                                                                             default=False)
-        norm_option = BaseScriptElement.getPropertyValue(alg, "Normalisation", default = 'Monitor')
-        self.use_beam_monitor = norm_option=='Monitor'
-        self.beam_monitor_reference = BaseScriptElement.getPropertyValue(alg, "MonitorReferenceFile",
-                                                                         default=ReductionOptions.beam_monitor_reference)
+            alg, "SampleDetectorDistanceOffset", default=ReductionOptions.default_detector_offset
+        )
+        self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts", default=ReductionOptions.use_config_cutoff)
+        self.correct_for_flight_path = BaseScriptElement.getPropertyValue(
+            alg, "CorrectForFlightPath", default=ReductionOptions.correct_for_flight_path
+        )
+        self.low_TOF_cut = BaseScriptElement.getPropertyValue(alg, "LowTOFCut", default=ReductionOptions.low_TOF_cut)
+        self.high_TOF_cut = BaseScriptElement.getPropertyValue(alg, "HighTOFCut", default=ReductionOptions.high_TOF_cut)
+        self.use_config_mask = BaseScriptElement.getPropertyValue(alg, "UseConfigMask", default=ReductionOptions.use_config_mask)
+        self.compute_resolution = BaseScriptElement.getPropertyValue(alg, "ComputeResolution", default=ReductionOptions.compute_resolution)
+        self.sample_aperture_diameter = BaseScriptElement.getPropertyValue(
+            alg, "SampleApertureDiameter", default=ReductionOptions.sample_aperture_diameter
+        )
+        self.perform_TOF_correction = not BaseScriptElement.getPropertyValue(alg, "SkipTOFCorrection", default=False)
+        norm_option = BaseScriptElement.getPropertyValue(alg, "Normalisation", default="Monitor")
+        self.use_beam_monitor = norm_option == "Monitor"
+        self.beam_monitor_reference = BaseScriptElement.getPropertyValue(
+            alg, "MonitorReferenceFile", default=ReductionOptions.beam_monitor_reference
+        )

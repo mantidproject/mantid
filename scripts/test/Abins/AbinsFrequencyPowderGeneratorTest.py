@@ -14,24 +14,23 @@ from numpy.testing import assert_array_equal
 
 
 class FrequencyPowderGeneratorTest(unittest.TestCase):
-
     def setUp(self):
         self.simple_freq_generator = abins.FrequencyPowderGenerator
-        self.min_wavenumber = abins.parameters.sampling['min_wavenumber']
-        self.max_wavenumber = abins.parameters.sampling['max_wavenumber']
+        self.min_wavenumber = abins.parameters.sampling["min_wavenumber"]
+        self.max_wavenumber = abins.parameters.sampling["max_wavenumber"]
 
     def tearDown(self):
         # Restore default Parameters to avoid conflict with other tests
-        abins.parameters.sampling['min_wavenumber'] = self.min_wavenumber
-        abins.parameters.sampling['max_wavenumber'] = self.max_wavenumber
+        abins.parameters.sampling["min_wavenumber"] = self.min_wavenumber
+        abins.parameters.sampling["max_wavenumber"] = self.max_wavenumber
 
     def test_construct_freq_combinations(self):
 
         # reduce rebining parameters for this test
         # abins.parameters.bin_width = 1.0  # Doesn't seem to be used any more?
         bin_width = 1.0
-        abins.parameters.sampling['min_wavenumber'] = 0.0
-        abins.parameters.sampling['max_wavenumber'] = 20.0
+        abins.parameters.sampling["min_wavenumber"] = 0.0
+        abins.parameters.sampling["max_wavenumber"] = 20.0
 
         f_array = np.asarray([1, 2])
         f_coeff = np.arange(2, dtype=INT_TYPE)
@@ -40,50 +39,46 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
         # wrong previous array
         with self.assertRaises(ValueError):
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=f_array,
-                                                                   fundamentals_coefficients=f_coeff,
-                                                                   previous_array=[1, 2],
-                                                                   quantum_order=q_order)
+            self.simple_freq_generator.construct_freq_combinations(
+                fundamentals_array=f_array, fundamentals_coefficients=f_coeff, previous_array=[1, 2], quantum_order=q_order
+            )
 
         # wrong FUNDAMENTALS
         with self.assertRaises(ValueError):
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=[1, 2],
-                                                                   fundamentals_coefficients=f_coeff,
-                                                                   previous_array=p_array,
-                                                                   quantum_order=q_order)
+            self.simple_freq_generator.construct_freq_combinations(
+                fundamentals_array=[1, 2], fundamentals_coefficients=f_coeff, previous_array=p_array, quantum_order=q_order
+            )
 
         # wrong fundamentals coefficients
         with self.assertRaises(ValueError):
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=f_array,
-                                                                   fundamentals_coefficients=[0, 1],
-                                                                   previous_array=p_array,
-                                                                   quantum_order=q_order)
+            self.simple_freq_generator.construct_freq_combinations(
+                fundamentals_array=f_array, fundamentals_coefficients=[0, 1], previous_array=p_array, quantum_order=q_order
+            )
 
         # wrong quantum order event
         with self.assertRaises(ValueError):
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=f_array,
-                                                                   fundamentals_coefficients=f_coeff,
-                                                                   previous_array=p_array,
-                                                                   quantum_order=-1)
+            self.simple_freq_generator.construct_freq_combinations(
+                fundamentals_array=f_array, fundamentals_coefficients=f_coeff, previous_array=p_array, quantum_order=-1
+            )
 
         # wrong previous coefficients
         with self.assertRaises(ValueError):
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=f_array,
-                                                                   fundamentals_coefficients=f_coeff,
-                                                                   previous_array=p_array,
-                                                                   previous_coefficients=[0, 1],
-                                                                   quantum_order=FIRST_OVERTONE)
+            self.simple_freq_generator.construct_freq_combinations(
+                fundamentals_array=f_array,
+                fundamentals_coefficients=f_coeff,
+                previous_array=p_array,
+                previous_coefficients=[0, 1],
+                quantum_order=FIRST_OVERTONE,
+            )
 
         # use case: quantum order event 1 (fundamentals)
         array = np.arange(bin_width, 10.0 * bin_width, bin_width)
         array_coeff = np.arange(array.size, dtype=INT_TYPE)
         correct_coefficients = np.arange(array.size, dtype=INT_TYPE)
 
-        generated_array, generated_coefficients = \
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array,
-                                                                   fundamentals_coefficients=array_coeff,
-                                                                   previous_array=array,
-                                                                   quantum_order=FUNDAMENTALS)  # n = 1
+        generated_array, generated_coefficients = self.simple_freq_generator.construct_freq_combinations(
+            fundamentals_array=array, fundamentals_coefficients=array_coeff, previous_array=array, quantum_order=FUNDAMENTALS
+        )  # n = 1
 
         # generated_array = [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.]
         # generated_coefficients =  [0, 1, 2, 3, 4, 5, 6, 7, 8]
@@ -100,12 +95,13 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         # array_1 = [ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.]
         # coefficients_1 = [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
-        generated_array_1, generated_coefficients_1 = \
-            self.simple_freq_generator.construct_freq_combinations(fundamentals_array=array_1,
-                                                                   fundamentals_coefficients=array_1_coeff,
-                                                                   previous_array=array_1,
-                                                                   previous_coefficients=coefficients_1,
-                                                                   quantum_order=FIRST_OVERTONE)  # n = 2
+        generated_array_1, generated_coefficients_1 = self.simple_freq_generator.construct_freq_combinations(
+            fundamentals_array=array_1,
+            fundamentals_coefficients=array_1_coeff,
+            previous_array=array_1,
+            previous_coefficients=coefficients_1,
+            quantum_order=FIRST_OVERTONE,
+        )  # n = 2
 
         correct_array_1 = np.tile(array_1, array_1_size)
         correct_coefficients_1 = np.asarray(list(product(range(array_1_size), range(array_1_size))))
@@ -144,7 +140,7 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         # sums all the frequency combinations and keeps the index combinations,
         # and filters out any entries with too-high combined frequency
 
-        abins.parameters.sampling['max_wavenumber'] = 700.
+        abins.parameters.sampling["max_wavenumber"] = 700.0
         np.random.seed(1)
 
         rand_fundamentals = np.array(np.random.random(50), dtype=FLOAT_TYPE)
@@ -153,39 +149,35 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
 
         # At order one this should just be a pass-through
         # (it also reindexes the coefficients but we might not keep that)
-        fundamentals, fund_coeffs = (
-            abins.FrequencyPowderGenerator.construct_freq_combinations(
-                previous_array=None, previous_coefficients=None,
-                fundamentals_array=rand_fundamentals,
-                fundamentals_coefficients=np.arange(len(rand_fundamentals),
-                                                    dtype=INT_TYPE),
-                quantum_order=1))
+        fundamentals, fund_coeffs = abins.FrequencyPowderGenerator.construct_freq_combinations(
+            previous_array=None,
+            previous_coefficients=None,
+            fundamentals_array=rand_fundamentals,
+            fundamentals_coefficients=np.arange(len(rand_fundamentals), dtype=INT_TYPE),
+            quantum_order=1,
+        )
 
         assert_array_equal(rand_fundamentals, fundamentals)
-        assert_array_equal(fund_coeffs, np.arange(len(rand_fundamentals),
-                                                  dtype=INT_TYPE))
+        assert_array_equal(fund_coeffs, np.arange(len(rand_fundamentals), dtype=INT_TYPE))
 
         # Calcualate some doubles
-        doubles, double_coeffs = (
-            abins.FrequencyPowderGenerator.construct_freq_combinations(
-                previous_array=fundamentals,
-                previous_coefficients=fund_coeffs,
-                fundamentals_array=rand_fundamentals,
-                fundamentals_coefficients=np.arange(len(rand_fundamentals),
-                                                    dtype=INT_TYPE),
-                quantum_order=2))
+        doubles, double_coeffs = abins.FrequencyPowderGenerator.construct_freq_combinations(
+            previous_array=fundamentals,
+            previous_coefficients=fund_coeffs,
+            fundamentals_array=rand_fundamentals,
+            fundamentals_coefficients=np.arange(len(rand_fundamentals), dtype=INT_TYPE),
+            quantum_order=2,
+        )
 
         # Check the doubles have been screened for max frequency
         self.assertEqual(len(doubles), 2104)
-        self.assertLess(max(doubles), abins.parameters.sampling['max_wavenumber'])
+        self.assertLess(max(doubles), abins.parameters.sampling["max_wavenumber"])
 
         # Check doubles are in the right places and the maths is just a sum
         self.assertTrue(np.any(fundamentals[0] * 2 == doubles))
         self.assertTrue(np.any(fundamentals[2] + fundamentals[3] == doubles))
-        self.assertEqual((fundamentals[double_coeffs[20, 0]]
-                          + fundamentals[double_coeffs[20, 1]]),
-                         doubles[20])
+        self.assertEqual((fundamentals[double_coeffs[20, 0]] + fundamentals[double_coeffs[20, 1]]), doubles[20])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

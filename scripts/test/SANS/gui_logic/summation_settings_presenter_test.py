@@ -48,13 +48,13 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.view.bin_settings.assert_called()
 
     def test_updates_model_when_bin_settings_changed(self):
-        new_bin_settings = 'bin settings'
+        new_bin_settings = "bin settings"
         self.view.bin_settings.return_value = new_bin_settings
         self.view.binSettingsChanged.emit()
         self.assertEqual(new_bin_settings, self.summation_settings.bin_settings)
 
     def test_updates_model_when_additional_time_shifts_changed(self):
-        new_additional_time_shifts = '213221.123123'
+        new_additional_time_shifts = "213221.123123"
         self.view.additional_time_shifts.return_value = new_additional_time_shifts
         self.view.additionalTimeShiftsChanged.emit()
         self.assertEqual(new_additional_time_shifts, self.summation_settings.additional_time_shifts)
@@ -79,5 +79,5 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.summation_settings.disable_overlay_event_workspaces.assert_called()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

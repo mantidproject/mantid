@@ -17,6 +17,7 @@ class GAUSSIANLoader(AbInitioLoader):
     """
     Class for loading GAUSSIAN ab initio vibrational data.
     """
+
     def __init__(self, input_ab_initio_filename):
         """
         :param input_ab_initio_filename: name of file with vibrational data (foo.log or foo.LOG)
@@ -36,7 +37,10 @@ class GAUSSIANLoader(AbInitioLoader):
 
         data = {}  # container to store read data
 
-        with io.open(self._clerk.get_input_filename(), "rb", ) as gaussian_file:
+        with io.open(
+            self._clerk.get_input_filename(),
+            "rb",
+        ) as gaussian_file:
 
             # create dummy lattice vectors
             self._generates_lattice_vectors(data=data)
@@ -47,8 +51,7 @@ class GAUSSIANLoader(AbInitioLoader):
             self._read_atomic_coordinates(file_obj=gaussian_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements for a molecule
-            self._parser.find_first(file_obj=gaussian_file,
-                                    msg="Harmonic frequencies (cm**-1), IR intensities (KM/Mole), Raman scattering")
+            self._parser.find_first(file_obj=gaussian_file, msg="Harmonic frequencies (cm**-1), IR intensities (KM/Mole), Raman scattering")
             self._read_modes(file_obj=gaussian_file, data=data)
 
             # save data to hdf file
@@ -85,8 +88,7 @@ class GAUSSIANLoader(AbInitioLoader):
             z_number = int(entries[1])
             atom = Atom(z_number=z_number)
             coord = np.asarray([float(i) for i in entries[3:6]])
-            atoms["atom_{}".format(atom_indx)] = {"symbol": atom.symbol, "mass": atom.mass, "sort": atom_indx,
-                                                  "coord": coord}
+            atoms["atom_{}".format(atom_indx)] = {"symbol": atom.symbol, "mass": atom.mass, "sort": atom_indx, "coord": coord}
 
             atom_indx += 1
         self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file, approximate=True)
