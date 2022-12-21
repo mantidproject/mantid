@@ -53,7 +53,7 @@ pipeline {
     // Store the git commit hash in an environment variable so that we can use
     // the same commit for all stages of the pipeline. This is perfomed by using
     // the following step at the start of each subsequent stage:
-    //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+    //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]], extensions: [[pruneTags: true]]]
     stage('Store git commit') {
       agent { label 'linux-64' }
       steps {
@@ -95,7 +95,7 @@ pipeline {
             agent { label "${PLATFORM}" }
             options { timestamps () }
             steps {
-              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+              checkoutSource("${GIT_SHA}")
               build_and_test("${PLATFORM}")
             }
             post {
@@ -127,7 +127,7 @@ pipeline {
                 retry(3)
             }
             steps {
-              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+              checkoutSource("${GIT_SHA}")
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
                dir('conda-bld') {
@@ -167,7 +167,7 @@ pipeline {
                 retry(3)
             }
             steps {
-              checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+              checkoutSource("${GIT_SHA}")
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
               dir('conda-bld') {
@@ -206,7 +206,7 @@ pipeline {
         GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
       }
       steps {
-        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+        checkoutSource("${GIT_SHA}")
         // Conda first
         sh 'rm -fr ${WORKSPACE}/conda-packages'
         copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
@@ -242,7 +242,7 @@ pipeline {
       options { timestamps () }
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
-        checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]]]
+        checkoutSource("${GIT_SHA}")
         sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
          ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
       }
@@ -262,6 +262,10 @@ def git_branch_name() {
 
 def toUnixStylePath(path) {
   return path.replaceAll("\\\\", "/")
+}
+
+def checkoutSource(sha) {
+  checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [pruneTags(true)]]
 }
 
 def build_and_test(platform) {
