@@ -25,8 +25,12 @@ switch(GIT_BRANCH) {
     break
 }
 
+// conda-build can't copy a local source if the conda-bld directory is
+// also part of the source. Checkout to a subdirectory to avoid this
+CHECKOUT_DIR = 'source'
 pipeline {
   agent none
+  options { checkoutToSubdirectory(CHECKOUT_DIR) }
   parameters {
       // Check these match the PLATFORM matrix values below (without all).
       choice(name: 'BUILD_DEVEL', choices: PLATFORM_CHOICES,
@@ -131,12 +135,12 @@ pipeline {
                 retry(3)
             }
             steps {
-              checkoutSource("${GIT_SHA}")
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
-               dir('conda-bld') {
+              dir('conda-bld') {
                  deleteDir()
-               }
+              }
+              checkoutSource("${GIT_SHA}")
               // Build the base set of packages (ones not required for mantidworkbench)
               // in parallel
               package_conda("${PLATFORM}", "base")
@@ -171,12 +175,12 @@ pipeline {
                 retry(3)
             }
             steps {
-              checkoutSource("${GIT_SHA}")
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
               dir('conda-bld') {
                 deleteDir()
               }
+              checkoutSource("${GIT_SHA}")
               // Copy base packages to build workbench
               copyArtifacts filter: "**/conda-bld/noarch/*.tar.bz2, **/conda-bld/${PLATFORM}/*.tar.bz2",
                 fingerprintArtifacts: true,
@@ -219,7 +223,7 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'conda-packages',
           flatten: true
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-anaconda\
+        sh '${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/publish-to-anaconda\
           ${WORKSPACE} ${ANACONDA_TOKEN} ${ANACONDA_CHANNEL} ${ANACONDA_CHANNEL_LABEL} ${WORKSPACE}/conda-packages/*.tar.bz2'
         // Standalone packages next
         sh 'rm -fr ${WORKSPACE}/standalone-packages'
@@ -229,7 +233,7 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'standalone-packages',
           flatten: true
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/publish-to-github\
+        sh '${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/publish-to-github\
           ${WORKSPACE} ${GITHUB_TOKEN} ${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*'
       }
     }
@@ -247,7 +251,7 @@ pipeline {
       environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
       steps {
         checkoutSource("${GIT_SHA}")
-        sh '${WORKSPACE}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
+        sh '${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/delete-old-packages.sh\
          ${WORKSPACE} ${ANACONDA_TOKEN} --channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench'
       }
     }
@@ -269,19 +273,21 @@ def toUnixStylePath(path) {
 }
 
 def checkoutSource(sha) {
-  checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [pruneTags(true)]]
+  dir(CHECKOUT_DIR) {
+    checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [pruneTags(true)]]
+  }
 }
 
 def build_and_test(platform) {
-  buildscript_path = 'buildconfig/Jenkins/Conda/conda-buildscript'
+  buildscript_path = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/conda-buildscript"
   common_args = '--clean-build --clean-external-projects --enable-systemtests'
   cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-    bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/${buildscript_path}\
+    bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${WORKSPACE}/${buildscript_path} ${WORKSPACE} ${cmake_preset} ${common_args} --enable-doctests"
+    sh "${buildscript_path} ${WORKSPACE} ${cmake_preset} ${common_args} --enable-doctests"
   }
 }
 
@@ -292,13 +298,13 @@ def publish_test_reports() {
 }
 
 def package_conda(platform, base_or_workbench) {
-  packagescript_path = 'buildconfig/Jenkins/Conda/package-conda'
+  packagescript_path = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/package-conda"
   if(platform.startsWith('win')) {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-    bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/${packagescript_path}\
+    bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path}\
       ${workspace_unix_style} ${package_conda_options(platform, base_or_workbench)}\""
   } else {
-    sh "${WORKSPACE}/${packagescript_path}\
+    sh "${packagescript_path}\
       ${WORKSPACE} ${package_conda_options(platform, base_or_workbench)}"
   }
 }
@@ -326,12 +332,13 @@ def generate_git_tag() {
     git_tag = "${GITHUB_RELEASES_TAG}"
   }
   else {
+    versionscript_path = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/generate-version-number"
     if(platform.startsWith('win')) {
       workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-      bat(script: "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/buildconfig/Jenkins/Conda/generate-version-number\"", returnStdout: true).trim()
+      bat(script: "\"${WIN_BASH}\" -ex -c \"${versionscript_path}\"", returnStdout: true).trim()
     } else {
       git_tag = sh(
-        script: "${WORKSPACE}/buildconfig/Jenkins/Conda/generate-version-number", returnStdout: true
+        script: "${versionscript_path}", returnStdout: true
       ).trim()
     }
   }
@@ -339,13 +346,13 @@ def generate_git_tag() {
 }
 
 def package_standalone(platform) {
-  packagescript_path = 'buildconfig/Jenkins/Conda/package-standalone'
+  packagescript_path = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda/package-standalone"
   if(platform.startsWith('win')) {
     workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-    bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/${packagescript_path} ${workspace_unix_style}\
+    bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path} ${workspace_unix_style}\
       ${package_standalone_options(platform)}\""
   } else {
-    sh "${WORKSPACE}/buildconfig/Jenkins/Conda/package-standalone ${WORKSPACE} ${package_standalone_options(platform)}"
+    sh "${packagescript_path} ${WORKSPACE} ${package_standalone_options(platform)}"
   }
 }
 
@@ -395,5 +402,5 @@ def archive_standalone_package(platform) {
 }
 
 def archive_ctest_log(){
-  archiveArtifacts artifacts: 'build/ctest_log/*.log', fingerprint: true
+  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/ctest_log/*.log", fingerprint: true
 }

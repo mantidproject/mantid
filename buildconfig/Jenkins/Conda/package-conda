@@ -12,8 +12,10 @@
 # package-conda $WORKSPACE --build-mantid --build-qt --build-docs --build-workbench
 #
 # Expected args:
-#   1. WORKSPACE: path to the workspace/source code that this should run inside
-#                 (mantid repo). Windows Caveat: Only use / for this argument do
+#   1. WORKSPACE: path to the base of the working space for a build. The source
+#                 must be checked out into a subdirectory and the final conda-bld
+#                 outputs are placed in $WORKSPACE/conda-bld
+#                 Windows Caveat: Only use / for this argument do
 #                 not use \\ or \ in the path.
 #
 # Possible flags:
@@ -26,6 +28,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 
 # Setup expected variables
+REPO_ROOT_DIR=$SCRIPT_DIR/../../
 WORKSPACE=$1
 if [[ -z "$WORKSPACE" ]]; then
     echo "A workspace argument is required"
@@ -44,7 +47,7 @@ if [[ $OSTYPE == "msys"* ]]; then
         exit 1
     fi
 fi
-RECIPES_DIR=$WORKSPACE/conda/recipes/
+RECIPES_DIR=$REPO_ROOT_DIR/conda/recipes/
 
 # Parse flags
 ENABLE_BUILD_MANTID=false
@@ -82,12 +85,19 @@ if [[ -d conda-recipes ]]; then
 fi
 
 # Create a git tag to be used for version information
+cd $REPO_ROOT_DIR
 if [[ -n "$GIT_TAG" ]]; then
+    # If the tag already exists remove it first
+    if [[ -n "$(git tag -l $GIT_TAG)" ]]; then
+        git tag -d $GIT_TAG
+    fi
     git tag -a $GIT_TAG -m "Tagging $GIT_TAG"
 fi
 
 # Run conda build. Use a known path so packages built in other steps can be
-# copied to a known location and reused
+# copied to a known location and reused.
+# Use the workspace root outside of the git tree or conda-build cannot
+# copy the source to a working folder
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
     conda index $CONDA_BLD_PATH

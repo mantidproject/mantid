@@ -20,7 +20,6 @@ shift 2
 
 CHANNEL=mantid
 LABEL=nightly
-
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
@@ -41,8 +40,6 @@ do
   esac
   shift
 done
-
-SCRIPT_DIR=$WORKSPACE/buildconfig/Jenkins/Conda/
 
 ###
 # Delete a single named package from the given channel and label
