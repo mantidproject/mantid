@@ -48,6 +48,10 @@ pipeline {
   }
   environment {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
+    GIT_AUTHOR_NAME = "${GITHUB_USER_NAME}"
+    GIT_AUTHOR_EMAIL = "${GITHUB_USER_EMAIL}"
+    GIT_COMMITTER_NAME = "${GITHUB_USER_NAME}"
+    GIT_COMMITTER_EMAIL = "${GITHUB_USER_EMAIL}"
   }
   stages {
     // Store the git commit hash in an environment variable so that we can use
