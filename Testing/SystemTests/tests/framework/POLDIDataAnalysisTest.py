@@ -12,8 +12,7 @@ import numpy as np
 
 
 class POLDIDataAnalysisTestSi(systemtesting.MantidSystemTest):
-    """Base class that loads/generates data for the tests, which is identical.
-    """
+    """Base class that loads/generates data for the tests, which is identical."""
 
     def runTest(self):
         pass
@@ -22,16 +21,13 @@ class POLDIDataAnalysisTestSi(systemtesting.MantidSystemTest):
         self._loadData()
         self._createSi()
 
-        return 'poldi_data_6904', 'Si'
+        return "poldi_data_6904", "Si"
 
     def _loadData(self):
-        PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace='poldi', MaskBadDetectors=False)
+        PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace="poldi", MaskBadDetectors=False)
 
     def _createSi(self):
-        PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m',
-                                 a=5.431, LatticeSpacingMin=0.7,
-                                 Atoms='Si 0 0 0 1.0 0.01',
-                                 OutputWorkspace='Si')
+        PoldiCreatePeaksFromCell(SpaceGroup="F d -3 m", a=5.431, LatticeSpacingMin=0.7, Atoms="Si 0 0 0 1.0 0.01", OutputWorkspace="Si")
 
 
 class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
@@ -40,25 +36,22 @@ class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
-        output = PoldiDataAnalysis(InputWorkspace=data,
-                                   MaximumPeakNumber=11,
-                                   ExpectedPeaks=expectedPeaks,
-                                   PlotResult=False)
+        output = PoldiDataAnalysis(InputWorkspace=data, MaximumPeakNumber=11, ExpectedPeaks=expectedPeaks, PlotResult=False)
 
         # Make sure that it's a workspace group
         self.assertTrue(isinstance(output, WorkspaceGroup))
 
         # check the refined peaks.
-        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        refinedPeaks = AnalysisDataService.retrieve("poldi_data_6904_peaks_refined_2d")
         self.assertEqual(refinedPeaks.rowCount(), 11)
 
         # make sure there are no unindexed peaks
-        self.assertFalse(AnalysisDataService.doesExist('poldi_data_6904_peaks_refined_1d_unindexed'))
+        self.assertFalse(AnalysisDataService.doesExist("poldi_data_6904_peaks_refined_1d_unindexed"))
 
         # get total spectrum
-        totalSpectrum = AnalysisDataService.retrieve('poldi_data_6904_sum')
+        totalSpectrum = AnalysisDataService.retrieve("poldi_data_6904_sum")
         # get residuals
-        residuals = AnalysisDataService.retrieve('poldi_data_6904_residuals')
+        residuals = AnalysisDataService.retrieve("poldi_data_6904_residuals")
 
         sumData = totalSpectrum.dataY(0)
         residualData = residuals.dataY(0)
@@ -73,33 +66,29 @@ class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
 class POLDIDataAnalysisTestSiIndividualDiscardUnindexed(POLDIDataAnalysisTestSi):
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
-        DeleteTableRows(expectedPeaks, '8-20')
+        DeleteTableRows(expectedPeaks, "8-20")
 
-        output_remove = PoldiDataAnalysis(InputWorkspace=data,
-                                          MaximumPeakNumber=11,
-                                          ExpectedPeaks=expectedPeaks,
-                                          RemoveUnindexedPeaksFor2DFit=True,
-                                          PlotResult=False)
+        output_remove = PoldiDataAnalysis(
+            InputWorkspace=data, MaximumPeakNumber=11, ExpectedPeaks=expectedPeaks, RemoveUnindexedPeaksFor2DFit=True, PlotResult=False
+        )
 
         # Make sure that it's a workspace group
         self.assertTrue(isinstance(output_remove, WorkspaceGroup))
 
         # check that only one set of peaks has been refined
-        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        refinedPeaks = AnalysisDataService.retrieve("poldi_data_6904_peaks_refined_2d")
         self.assertEqual(refinedPeaks.rowCount(), 8)
 
         # Run again with option to keep unindexed peaks.
-        output_keep = PoldiDataAnalysis(InputWorkspace=data,
-                                        MaximumPeakNumber=11,
-                                        ExpectedPeaks=expectedPeaks,
-                                        RemoveUnindexedPeaksFor2DFit=False,
-                                        PlotResult=False)
+        output_keep = PoldiDataAnalysis(
+            InputWorkspace=data, MaximumPeakNumber=11, ExpectedPeaks=expectedPeaks, RemoveUnindexedPeaksFor2DFit=False, PlotResult=False
+        )
 
         # Make sure that it's a workspace group
         self.assertTrue(isinstance(output_keep, WorkspaceGroup))
 
         # check that the output peaks are again a workspace group (Si and unindexed)
-        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        refinedPeaks = AnalysisDataService.retrieve("poldi_data_6904_peaks_refined_2d")
         self.assertTrue(isinstance(refinedPeaks, WorkspaceGroup))
 
 
@@ -109,26 +98,28 @@ class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
-        output = PoldiDataAnalysis(InputWorkspace=data,
-                                   MaximumPeakNumber=11,
-                                   ProfileFunction="PseudoVoigt",
-                                   TieProfileParameters=True,
-                                   ExpectedPeaks=expectedPeaks,
-                                   PlotResult=False,
-                                   OutputRawFitParameters=True)
+        output = PoldiDataAnalysis(
+            InputWorkspace=data,
+            MaximumPeakNumber=11,
+            ProfileFunction="PseudoVoigt",
+            TieProfileParameters=True,
+            ExpectedPeaks=expectedPeaks,
+            PlotResult=False,
+            OutputRawFitParameters=True,
+        )
 
         # Make sure that it's a workspace group
         self.assertTrue(isinstance(output, WorkspaceGroup))
 
         # check the refined peaks.
-        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        refinedPeaks = AnalysisDataService.retrieve("poldi_data_6904_peaks_refined_2d")
         self.assertEqual(refinedPeaks.rowCount(), 10)
 
         # check that raw parameters exist
-        self.assertTrue(AnalysisDataService.doesExist('poldi_data_6904_raw_fit_parameters'))
+        self.assertTrue(AnalysisDataService.doesExist("poldi_data_6904_raw_fit_parameters"))
 
         # check that all parameters that have "Mixing" in the name are the same
-        rawFitParameters = AnalysisDataService.retrieve('poldi_data_6904_raw_fit_parameters')
+        rawFitParameters = AnalysisDataService.retrieve("poldi_data_6904_raw_fit_parameters")
 
         mixingValues = set()
         for i in range(rawFitParameters.rowCount()):
@@ -146,14 +137,17 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
-        PoldiDataAnalysis(InputWorkspace=data,
-                          MaximumPeakNumber=11,
-                          ExpectedPeaks=expectedPeaks,
-                          PawleyFit=True,
-                          PlotResult=False, OutputWorkspace='output')
+        PoldiDataAnalysis(
+            InputWorkspace=data,
+            MaximumPeakNumber=11,
+            ExpectedPeaks=expectedPeaks,
+            PawleyFit=True,
+            PlotResult=False,
+            OutputWorkspace="output",
+        )
 
         # inspect the cell
-        cell = AnalysisDataService.retrieve('poldi_data_6904_cell_refined')
+        cell = AnalysisDataService.retrieve("poldi_data_6904_cell_refined")
 
         # 2 rows for cubic cell
         self.assertTrue(cell.rowCount(), 2)
@@ -171,15 +165,12 @@ class POLDIDataAnalysisEmptyFile(systemtesting.MantidSystemTest):
     def runTest(self):
         empty = PoldiLoadRuns(2015, 977)
 
-        peaks = PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m',
-                                         a=5.431, LatticeSpacingMin=0.7,
-                                         Atoms='Si 0 0 0 1.0 0.01',
-                                         OutputWorkspace='Si')
+        peaks = PoldiCreatePeaksFromCell(
+            SpaceGroup="F d -3 m", a=5.431, LatticeSpacingMin=0.7, Atoms="Si 0 0 0 1.0 0.01", OutputWorkspace="Si"
+        )
         try:
-            PoldiDataAnalysis(InputWorkspace=empty.getItem(0),
-                              MaximumPeakNumber=11,
-                              ExpectedPeaks=peaks,
-                              PlotResult=False, OutputWorkspace='output')
+            PoldiDataAnalysis(
+                InputWorkspace=empty.getItem(0), MaximumPeakNumber=11, ExpectedPeaks=peaks, PlotResult=False, OutputWorkspace="output"
+            )
         except RuntimeError as error:
-            self.assertTrue("Aborting analysis since workspace empty_data_977 does not contain any counts." in str(
-                error))
+            self.assertTrue("Aborting analysis since workspace empty_data_977 does not contain any counts." in str(error))

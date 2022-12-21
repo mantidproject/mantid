@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 """
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
@@ -18,7 +18,7 @@ from abc import ABCMeta, abstractmethod
 
 class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
-    __comparison_out_workspace_name = 'a_integrated'
+    __comparison_out_workspace_name = "a_integrated"
 
     @abstractmethod
     def get_raw_workspace_filename(self):
@@ -52,33 +52,33 @@ class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     def do_check_workspace_shape(self, ws1, ws2):
         self.assertTrue(ws1.getNumberHistograms(), ws2.getNumberHistograms())
-        self.assertEqual(len(ws1.readX(0)),  len(ws2.readX(0)))
-        self.assertEqual(len(ws1.readY(0)),  len(ws2.readY(0)))
+        self.assertEqual(len(ws1.readX(0)), len(ws2.readX(0)))
+        self.assertEqual(len(ws1.readY(0)), len(ws2.readY(0)))
 
     def do_check_instrument_applied(self, ws1, ws2):
         instrument_name = self.get_expected_instrument_name()
-        self.assertEqual(ws1.getInstrument().getName(),  instrument_name)
-        self.assertEqual(ws2.getInstrument().getName(),  instrument_name)
+        self.assertEqual(ws1.getInstrument().getName(), instrument_name)
+        self.assertEqual(ws2.getInstrument().getName(), instrument_name)
 
     def runTest(self):
-        Load(Filename=self.get_nexus_workspace_filename(), OutputWorkspace='nexus')
-        Load(Filename=self.get_raw_workspace_filename(), OutputWorkspace='raw')
+        Load(Filename=self.get_nexus_workspace_filename(), OutputWorkspace="nexus")
+        Load(Filename=self.get_raw_workspace_filename(), OutputWorkspace="raw")
 
-        a = mtd['nexus']
-        b = mtd['raw']
+        a = mtd["nexus"]
+        b = mtd["raw"]
         n_periods = self.get_expected_number_of_periods()
 
         self.assertTrue(isinstance(a, type(b)))
 
-        #raise NotImplementedError()
-        if isinstance(a,mantid.api.WorkspaceGroup):
+        # raise NotImplementedError()
+        if isinstance(a, mantid.api.WorkspaceGroup):
             self.assertEqual(a.size(), b.size())
             self.assertEqual(a.size(), n_periods)
             # Loop through each workspace in the group and apply some simple comaprison checks.
             for i in range(0, a.size()):
                 self.do_check_workspace_shape(a[i], b[i])
             if self.enable_instrument_checking():
-                self.do_check_instrument_applied(a[a.size()-1], b[b.size()-1])
+                self.do_check_instrument_applied(a[a.size() - 1], b[b.size() - 1])
             if self.enable_reference_result_checking():
                 Integration(InputWorkspace=a[0], OutputWorkspace=self.__comparison_out_workspace_name)
         else:
@@ -89,7 +89,7 @@ class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
                 Integration(InputWorkspace=a, OutputWorkspace=self.__comparison_out_workspace_name)
 
     def validate(self):
-        self.disableChecking.append('Instrument')
+        self.disableChecking.append("Instrument")
         if self.enable_reference_result_checking():
             return self.__comparison_out_workspace_name, self.get_integrated_reference_workspace_filename()
         else:
