@@ -320,10 +320,10 @@ def generate_git_tag() {
   else {
     if(platform.startsWith('win')) {
       workspace_unix_style = toUnixStylePath("${WORKSPACE}")
-      bat "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/buildconfig/Jenkins/Conda/generate-version-number\""
+      bat(script: "\"${WIN_BASH}\" -ex -c \"${workspace_unix_style}/buildconfig/Jenkins/Conda/generate-version-number\"", returnStdout: true).trim()
     } else {
-      git_tag = sh (
-        "${WORKSPACE}/buildconfig/Jenkins/Conda/generate-version-number"
+      git_tag = sh(
+        script: "${WORKSPACE}/buildconfig/Jenkins/Conda/generate-version-number", returnStdout: true
       ).trim()
     }
   }
