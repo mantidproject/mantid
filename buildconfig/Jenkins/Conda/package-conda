@@ -83,7 +83,7 @@ fi
 
 # Create a git tag to be used for version information
 if [[ -n "$GIT_TAG" ]]; then
-    git tag -a $GIT_TAG
+    git tag -a $GIT_TAG -m "Tagging $GIT_TAG"
 fi
 
 # Run conda build. Use a known path so packages built in other steps can be
