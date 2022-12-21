@@ -14,7 +14,7 @@ from distutils.version import LooseVersion
 # 3rd party imports
 from matplotlib import colors
 from matplotlib.legend import Legend
-from matplotlib import cm, __version__ as mpl_version_str
+from matplotlib import colormaps, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
 
 # -----------------------------------------------------------------------------
@@ -110,7 +110,7 @@ def find_errorbar_container(line, containers):
 
 
 def get_colormap_names():
-    return sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])
+    return sorted([cmap for cmap in colormaps.keys() if not cmap.endswith('_r')])
 
 
 def get_errorbar_containers(ax):
@@ -253,7 +253,7 @@ def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None,
 
 def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', cmap=None):
     if not cmap:
-        cmap = cm.get_cmap(name=colormap_name)
+        cmap = colormaps[colormap_name]
 
     for i in range(number_colors):
         yield cmap(float(i) / number_colors)

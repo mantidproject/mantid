@@ -20,7 +20,7 @@ dependencies:
   - librdkafka>=1.6.0
   - lib3mf # windows only
   - muparser>=2.3.2
-  - matplotlib=3.5.*
+  - matplotlib=3.6.*
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy<=1.23

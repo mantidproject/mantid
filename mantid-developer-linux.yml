@@ -19,7 +19,7 @@ dependencies:
   - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0
-  - matplotlib=3.5.*
+  - matplotlib=3.6.*
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2
