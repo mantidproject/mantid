@@ -164,6 +164,21 @@ public:
       Poco::File(FullPathFile).remove();
   }
 
+  void test_copyToFile_successfully_copies_open_file_handle() {
+    using Mantid::DataObjects::BoxControllerNeXusIO;
+
+    auto pSaver = createTestBoxController();
+    pSaver->openFile(xxfFileName, "w");
+    const std::string destFilename(xxfFileName + "_copied");
+
+    TS_ASSERT_THROWS_NOTHING(pSaver->copyFileTo(destFilename));
+
+    TSM_ASSERT("File not copied successfully.", Poco::File(destFilename).exists());
+
+    if (Poco::File(destFilename).exists())
+      Poco::File(destFilename).remove();
+  }
+
   //---------------------------------------------------------------------------------------------------------
   // tests to read/write double/vs float events
   template <typename FROM, typename TO>
