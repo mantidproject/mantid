@@ -42,7 +42,7 @@ repos:
     rev: 22.12.0
     hooks:
       - id: black
-        exclude: Framework|qt|scripts|Testing/Tools/cxxtest
+        exclude: Framework|qt|Testing/Tools/cxxtest
 
   - repo: https://github.com/PyCQA/flake8.git
     rev: 6.0.0
