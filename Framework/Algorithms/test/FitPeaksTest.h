@@ -66,7 +66,7 @@ public:
   void test_singlePeaksPartialSpectra() {
     // Generate input workspace
     const std::string data_ws_name("Test1Data");
-    genearteTestDataGaussian(data_ws_name);
+    generateTestDataGaussian(data_ws_name);
 
     // Generate peak and background parameters
     std::vector<string> peakparnames;
@@ -139,10 +139,10 @@ public:
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    createGuassParameters(peakparnames, peakparvalues);
+    createGaussParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    genearteTestDataGaussian(m_inputWorkspaceName);
+    generateTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -238,10 +238,10 @@ public:
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    createGuassParameters(peakparnames, peakparvalues);
+    createGaussParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    genearteTestDataGaussian(m_inputWorkspaceName);
+    generateTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -836,10 +836,10 @@ public:
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
-    createGuassParameters(peakparnames, peakparvalues);
+    createGaussParameters(peakparnames, peakparvalues);
 
     // Generate input workspace
-    genearteTestDataGaussian(m_inputWorkspaceName);
+    generateTestDataGaussian(m_inputWorkspaceName);
 
     // initialize algorithm to test
     FitPeaks fitpeaks;
@@ -909,22 +909,96 @@ public:
     AnalysisDataService::Instance().remove("FitErrorsWS");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test that FitPeaks does not throw an exception when
+   * not enough data points are available for peak fitting
+   * @brief test_notEnoughPeakDataPoints
+   */
+  void test_notEnoughPeakDataPoints() {
+    // Generate an input workspace
+    const std::string data_ws_name("data_nepdp");
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 20 /*data points*/, 1 /*peaks*/, 0.5 /*resolution*/);
+
+    // Generate peak and background parameters
+    std::vector<string> par_names;
+    std::vector<double> par_values;
+    createGaussParameters(par_names, par_values);
+
+    // Create a single value peak-index vector for peak (0) at X=5
+    std::vector<int> peak_index_vec;
+    peak_index_vec.emplace_back(0);
+
+    // Create peak-center and fit-window workspaces
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter_nepdp", 1 /*spectra*/);
+    const std::string fit_window_ws_name =
+        genFitWindowWorkspace(peak_index_vec, "peakwindow_nepdp", 1 /*spectra*/, 1.0 /*fit window halfwidth*/);
+
+    // Initialize FitPeaks
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+    fitpeaks.setProperty("MaxFitIterations", 200);
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // about the parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 1 spectrum
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 1 peak
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 1);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+
+    // clean
+    API::AnalysisDataService::Instance().remove(peak_center_ws_name);
+    API::AnalysisDataService::Instance().remove(fit_window_ws_name);
+
+    return;
+  }
+
   //--------------------------------------------------------------------------------------------------------------
-  /** generate a peak center workspace compatible to the workspace created by
-   * genearteTestDataGaussian(), which will 3 spectra and at most 2 elements for
-   * each sepctrum
+  /** generate a peak-center workspace compatible with the workspace created by
+   * generateTestDataGaussian(), which will have up to 3 spectra up to 2 peaks each
    * @brief genPeakCenterWorkspace
-   * @param peak_index_vec :: a vector of integer as 0 or 1.  0 for peak center
+   * @param peak_index_vec :: a vector of 0 or 1 integers. 0 - for peak center 5; 1 - for peak center 10
    * @param workspace_name
+   * @param num_specs :: number of spectra
    * @return
    */
-  std::string genPeakCenterWorkspace(const std::vector<int> &peak_index_vec, const std::string &workspace_name) {
-    // create the empty workspace containing N X values for N peaks (N <=2)
+  std::string genPeakCenterWorkspace(const std::vector<int> &peak_index_vec, const std::string &workspace_name,
+                                     const size_t num_specs = 3) {
+    int64_t nhist = static_cast<int64_t>(num_specs);
     size_t num_peaks = peak_index_vec.size();
+
+    TS_ASSERT(nhist >= 1 && nhist <= 3);
+    TS_ASSERT(num_peaks >= 1 && num_peaks <= 2);
+
+    // Create an empty workspace containing N X values for N peaks (N <=2)
     int64_t nbins = num_peaks;
-    // fixed to 2 spectrum
-    int64_t nhist = 3;
-    // point data
     bool ishist = false;
     double xval(0), yval(0), eval(0), dxval(1);
     std::set<int64_t> maskedws;
@@ -946,24 +1020,27 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------------------------
-  /** create a fit window workspace compatibel to the workspace created by
-   * genearteTestDataGaussian()
-   * @brief genFitWindowWorkspace :: generate a matrix work for peak fitting
+  /** create a fit window workspace compatible with the workspace created by
+   * generateTestDataGaussian()
+   * @brief genFitWindowWorkspace :: generate a matrix workspace for peak fitting
    * window
    * @param peak_index_vec :: vector for peak indexes
    * @param workspace_name :: name of the output workspace registered to ADS
+   * @param num_specs :: number of spectra
+   * @param halfwidth :: halfwidth of fit window
    */
-  std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec, const std::string &workspace_name) {
-    // create the empty workspace containing 3 spectrum
+  std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec, const std::string &workspace_name,
+                                    const size_t num_specs = 3, const double halfwidth = 2.0) {
+    // create an empty workspace containing up to 3 spectra
     const size_t num_peaks = peak_index_vec.size();
     MatrixWorkspace_sptr center_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace(3, static_cast<int>(num_peaks) * 2));
+        WorkspaceCreationHelper::create2DWorkspace(num_specs, num_peaks * 2));
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < peak_index_vec.size(); ++j) {
         const int peak_index = peak_index_vec[j];
         const double peak_center = peak_index == 0 ? 5.0 : 10.0;
-        center_ws->dataX(i)[j * 2] = peak_center - 2.0;
-        center_ws->dataX(i)[j * 2 + 1] = peak_center + 2.0;
+        center_ws->dataX(i)[j * 2] = peak_center - halfwidth;
+        center_ws->dataX(i)[j * 2 + 1] = peak_center + halfwidth;
       }
     }
 
@@ -973,50 +1050,68 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------------------------
-  /** create basic testing data set having 3 spectra, each containing 2 Gaussian
-   * peaks
-   * The exact location of the peaks are at
+  /** Create a basic testing data set with up to 3 spectra, up to 2 Gaussian peaks each
+   * The exact locations of the peaks are:
    * ws-index = 0: peak 0 @ 5.00; peak 1  @ 10.00
    * ws-index = 1: peak 0 @ 5.01; peak 1  @  9.98
    * ws-index = 2: peak 0 @ 5.03; peak 1  @ 10.02
-   * @brief genearteTestDataGaussian
-   * @param workspacename
+   * @brief generateTestDataGaussian
+   * @param workspacename :: name of workspace to be created
+   * @param num_specs :: number of spectra
+   * @param num_peaks :: number of peaks
+   * @param res :: X-data resolution
    */
-  void genearteTestDataGaussian(const std::string &workspacename) {
-    // ---- Create the simple workspace -------
-    size_t num_spec = 3;
+  void generateTestDataGaussian(const std::string &workspacename, const size_t num_specs = 3,
+                                const size_t num_data_points = 300, const size_t num_peaks = 2,
+                                const double res = 0.05) {
+    TS_ASSERT(num_specs >= 1 && num_specs <= 3);
+    TS_ASSERT(num_peaks >= 1 && num_peaks <= 2);
 
-    MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(static_cast<int>(num_spec), 300);
+    // ---- Create a simple workspace -------
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        static_cast<int>(num_specs), static_cast<int>(num_data_points));
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     // change the resolution of the binning
-    for (size_t i = 0; i < num_spec; ++i)
-      WS->mutableX(i) *= 0.05;
+    for (size_t i = 0; i < num_specs; ++i)
+      WS->mutableX(i) *= res;
 
     // spectrum 1 (ws=0)
     const auto &xvals = WS->points(0);
-    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(), [](const double x) {
-      return exp(-0.5 * pow((x - 10) / 0.1, 2)) + 2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1;
-    });
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        num_peaks == 2
+            ? [](const double
+                     x) { return exp(-0.5 * pow((x - 10) / 0.1, 2)) + 2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1; }
+            : [](const double x) { return 2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2)) + 1; });
     const auto &yvals = WS->histogram(0).y();
     std::transform(yvals.cbegin(), yvals.cend(), WS->mutableE(0).begin(), [](const double y) { return 0.2 * sqrt(y); });
 
-    if (num_spec > 1) {
+    if (num_specs > 1) {
       const auto &xvals1 = WS->points(1);
-      std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(), [](const double x) {
-        return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) + 4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2)) + 1;
-      });
+      std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(), num_peaks == 2 ?
+        [](const double x) {
+          return 2.0 * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) + 4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2)) + 1;
+        } :
+        [](const double x) {
+          return 4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2)) + 1;
+        }
+      );
       const auto &yvals1 = WS->histogram(1).y();
       std::transform(yvals1.cbegin(), yvals1.cend(), WS->mutableE(1).begin(),
                      [](const double y) { return 0.2 * sqrt(y); });
     }
 
-    if (num_spec > 2) {
+    if (num_specs > 2) {
       const auto &xvals2 = WS->points(2);
-      std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(), [](const double x) {
-        return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) + 3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2)) + 1;
-      });
+      std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(), num_peaks == 2 ?
+        [](const double x) {
+          return 10.0 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) + 3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2)) + 1;
+        } :
+        [](const double x) {
+          return 3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2)) + 1;
+        }
+      );
       const auto &yvals2 = WS->histogram(2).y();
       std::transform(yvals2.cbegin(), yvals2.cend(), WS->mutableE(2).begin(),
                      [](const double y) { return 0.2 * sqrt(y); });
@@ -1026,7 +1121,7 @@ public:
     return;
   }
 
-  void createGuassParameters(vector<string> &parnames, vector<double> &parvalues) {
+  void createGaussParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
 
