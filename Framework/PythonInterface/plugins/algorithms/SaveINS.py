@@ -76,6 +76,12 @@ class SaveINS(PythonAlgorithm):
         spgr_sym = self.getProperty("Spacegroup").value
         use_natural_abundances = self.getProperty("UseNaturalIsotopicAbundances").value
 
+        # get wavelength (for CW instruments) if set on workspace otherwise use 1 Ang
+        run = ws.run()
+        if run.hasProperty('wavelength'):
+            wl = run.getPropertyAsSingleValue('wavelength')
+        else:
+            wl = self.DUMMY_WAVELENGTH
         sample = ws.sample()
         cell = sample.getOrientedLattice()
         spgr = SpaceGroupFactory.createSpaceGroup(spgr_sym) if spgr_sym else sample.getCrystalStructure().getSpaceGroup()
@@ -86,7 +92,7 @@ class SaveINS(PythonAlgorithm):
 
             # cell parameters
             alatt = [cell.a(), cell.b(), cell.c(), cell.alpha(), cell.beta(), cell.gamma()]
-            f_handle.write(f"CELL {self.DUMMY_WAVELENGTH:.1f} {' '.join([f'{param:.4f}' for param in alatt])}\n")
+            f_handle.write(f"CELL {wl:.1f} {' '.join([f'{param:.4f}' for param in alatt])}\n")
             # n formula units and cell parameter errors
             nfu = material.numberDensity*cell.volume()
             errors = [cell.errora(), cell.errorb(), cell.errorc(),
@@ -115,11 +121,11 @@ class SaveINS(PythonAlgorithm):
                     b = xs_info['coh_scatt_length']
                     mf = atom.mass
                     if label != 'H':
-                        mu = xs_info['tot_scatt_xs'] + self.DUMMY_WAVELENGTH*xs_info['abs_xs']/1.798
+                        mu = xs_info['tot_scatt_xs'] + wl*xs_info['abs_xs']/1.798
                     else:
                         # use empirical formula from Howard et al. J.Appl.Cryst. (1987). 20, 120 - 122
                         # https: // doi.org / 10.1107 / S0021889887087028
-                        mu = 20.6 + self.DUMMY_WAVELENGTH*19.2
+                        mu = 20.6 + wl*19.2
                     f_handle.write(f"SFAC {label} 0 0 0 0 0 0 0 0 {b:.4f} 0 0 {mu:.4f} 1.0 {mf:.4f}\n")
             f_handle.write(f"UNIT {' '.join([f'{nfu*natom:.0f}' for natom in natoms])}\n")  # total num in unit cell
             # Neutron TOF flags

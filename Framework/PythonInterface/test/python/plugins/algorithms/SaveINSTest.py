@@ -103,6 +103,22 @@ class SaveINSTest(unittest.TestCase):
 
         self._assert_file_contents(output_file, expected_lines)
 
+    def test_save_ins_constant_wavelength(self):
+        output_file = path.join(self._tmp_directory, "test4.ins")
+        wl = 2.5
+        self.ws.run().addProperty('wavelength', wl, True)
+
+        SaveINS(InputWorkspace=self.ws, Filename=output_file, Spacegroup='P 1 21/n 1')
+
+        expected_lines = [*self.file_start[0:2],
+                          f'CELL {wl:.1f} 7.6508 13.2431 11.6243 90.0000 104.1183 90.0000\n',
+                          *self.file_start[3:],
+                          'SFAC C H N O S\n',
+                          *self.file_end]
+
+
+        self._assert_file_contents(output_file, expected_lines)
+
     def _assert_file_contents(self, filepath, expected_lines):
         with open(filepath, 'r') as f:
             lines = f.readlines()
